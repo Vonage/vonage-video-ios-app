@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Cache derived data
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcodeproj') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+    
+    - name: Install swift-format
+      run: brew install swift-format
+    
+    - name: Check Swift formatting
+      run: |
+        FORMAT_ISSUES=""
+        while IFS= read -r -d '' file; do
+          if [ -f "$file" ]; then
+            if ! swift-format format --configuration .swift-format "$file" | diff -q "$file" - > /dev/null 2>&1; then
+              FORMAT_ISSUES="$FORMAT_ISSUES$file needs formatting\n"
+            fi
+          fi
+        done < <(find ./VERA -name "*.swift" \
+          -not -path "./build/*" \
+          -not -path "./.build/*" \
+          -not -path "./DerivedData/*" \
+          -not -path "./Pods/*" \
+          -not -path "./Carthage/*" \
+          -not -path "./vendor/*" -print0)
+        
+        if [ -n "$FORMAT_ISSUES" ]; then
+          echo "❌ Format issues found:"
+          echo -e "$FORMAT_ISSUES"
+          exit 1
+        fi
+    
+    - name: Build and Test
+      run: |
+        xcodebuild test \
+          -scheme VERA \
+          -project VERA/VERA.xcodeproj \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+          -enableCodeCoverage YES \
+          -derivedDataPath DerivedData \
+          -quiet
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          DerivedData/Build/Products/Debug-iphonesimulator/
+          DerivedData/Logs/Test/
+    
+    - name: Upload coverage reports
+      if: success()
+      run: |
+        # Generate coverage report
+        xcrun xccov view --report --json DerivedData/Build/ProfileData/*/Coverage.profdata > coverage.json
+        echo "Coverage report generated"
+      continue-on-error: true
