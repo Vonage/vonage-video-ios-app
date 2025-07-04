@@ -61,7 +61,7 @@ echo -e "${YELLOW}🧪 Running tests...${NC}"
 xcodebuild test \
     -scheme VERA \
     -project VERA/VERA.xcodeproj \
-    -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+    -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
     -enableCodeCoverage YES \
     -derivedDataPath ./DerivedData \
     -quiet
