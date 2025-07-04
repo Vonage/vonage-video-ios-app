@@ -52,6 +52,9 @@ jobs:
           exit 1
         fi
     
+    - name: List available simulators
+      run: xcrun simctl list devices available
+    
     - name: Build and Test
       run: |
         xcodebuild test \
