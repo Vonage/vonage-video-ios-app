@@ -1,0 +1,47 @@
+#!/bin/bash
+
+echo "🔍 Running swift-format before push..."
+
+# Check if swift-format is installed
+if ! command -v swift-format &> /dev/null; then
+    echo "❌ swift-format is not installed. Please install it first:"
+    echo "   brew install swift-format"
+    exit 1
+fi
+
+# Find all Swift files in the project
+SWIFT_FILES=$(find . -name "*.swift" \
+    -not -path "./build/*" \
+    -not -path "./.build/*" \
+    -not -path "./DerivedData/*" \
+    -not -path "./Pods/*" \
+    -not -path "./Carthage/*" \
+    -not -path "./vendor/*")
+
+if [ -z "$SWIFT_FILES" ]; then
+    echo "✅ No Swift files found to format"
+    exit 0
+fi
+
+# Run swift-format in verification mode
+echo "Checking format for files:"
+echo "$SWIFT_FILES" | while read file; do
+    echo "  📄 $file"
+done
+
+# Check format (does not modify files)
+FORMAT_ISSUES=$(echo "$SWIFT_FILES" | xargs swift-format --mode diff)
+
+if [ -n "$FORMAT_ISSUES" ]; then
+    echo "❌ Format issues found:"
+    echo "$FORMAT_ISSUES"
+    echo ""
+    echo "💡 To fix formatting issues, run:"
+    echo "   find . -name '*.swift' -not -path './build/*' -not -path './.build/*' | xargs swift-format --in-place"
+    echo ""
+    echo "🚫 Push rejected due to formatting issues"
+    exit 1
+fi
+
+echo "✅ All Swift files are properly formatted!"
+exit 0
