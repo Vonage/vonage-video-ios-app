@@ -56,17 +56,38 @@ echo -e "${GREEN}✅ Code formatting is correct${NC}"
 echo -e "${YELLOW}🧹 Cleaning build folder...${NC}"
 rm -rf ./DerivedData
 
-# Run tests
+# Run tests with fallback strategy
 echo -e "${YELLOW}🧪 Running tests...${NC}"
-xcodebuild test \
+if xcodebuild test \
     -scheme VERA \
     -project VERA/VERA.xcodeproj \
-    -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+    -destination 'platform=iOS Simulator,name=iPhone 16' \
     -enableCodeCoverage YES \
     -derivedDataPath ./DerivedData \
-    -quiet
-
-echo -e "${GREEN}✅ All tests passed!${NC}"
+    -quiet 2>/dev/null; then
+    echo -e "${GREEN}✅ Tests completed successfully with iPhone 16${NC}"
+elif xcodebuild test \
+    -scheme VERA \
+    -project VERA/VERA.xcodeproj \
+    -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+    -enableCodeCoverage YES \
+    -derivedDataPath ./DerivedData \
+    -quiet 2>/dev/null; then
+    echo -e "${GREEN}✅ Tests completed successfully with iPhone 16 Pro${NC}"
+elif xcodebuild test \
+    -scheme VERA \
+    -project VERA/VERA.xcodeproj \
+    -destination 'generic/platform=iOS Simulator' \
+    -enableCodeCoverage YES \
+    -derivedDataPath ./DerivedData \
+    -quiet 2>/dev/null; then
+    echo -e "${GREEN}✅ Tests completed successfully with generic simulator${NC}"
+else
+    echo -e "${RED}❌ Tests failed or could not run${NC}"
+    echo -e "${YELLOW}Available destinations:${NC}"
+    xcodebuild -project VERA/VERA.xcodeproj -scheme VERA -showdestinations | grep "iOS Simulator" | head -5
+    exit 1
+fi
 
 # Generate simple coverage report
 if [ -d "./DerivedData/Build/ProfileData" ]; then
