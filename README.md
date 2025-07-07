@@ -82,6 +82,12 @@ This project integrates with **SonarCloud** for code quality analysis and covera
 # Run tests with coverage
 ./scripts/test.sh -coverage
 
+# Generate coverage from existing test results
+./scripts/generate-coverage.sh
+
+# Simulate CI environment locally
+./scripts/simulate-ci.sh
+
 # Upload to SonarCloud (requires token)
 export SONAR_TOKEN=your_sonar_token
 ./scripts/upload-sonarcloud.sh
@@ -93,3 +99,32 @@ export SONAR_TOKEN=your_sonar_token
 3. Get your project token from Account → Security
 4. Add `SONAR_TOKEN` to your GitHub repository secrets
 5. Configure the project key in `sonar-project.properties`
+
+### **Troubleshooting SonarCloud**
+
+#### **Coverage Issues**
+```bash
+# If coverage generation fails, try:
+./scripts/simulate-ci.sh  # Full CI simulation
+
+# Manual cleanup and regeneration:
+rm -rf DerivedData coverage-reports
+./scripts/test-core.sh -coverage
+```
+
+#### **CI/CD Issues**
+- **Missing SONAR_TOKEN**: Add token to GitHub repository secrets
+- **No test results**: Check that VERACore scheme is configured for testing
+- **Coverage report empty**: Verify tests are actually running and generating coverage
+
+#### **Local Development**
+```bash
+# Check if coverage data exists
+ls -la coverage-reports/
+
+# Verify coverage JSON format
+cat coverage-reports/coverage.json | python3 -m json.tool
+
+# Debug test execution
+./scripts/test-core.sh -coverage --verbose
+```

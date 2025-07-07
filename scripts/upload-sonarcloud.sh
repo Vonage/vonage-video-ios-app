@@ -48,14 +48,23 @@ fi
 COVERAGE_DIR="$PROJECT_ROOT/coverage-reports"
 if [ ! -d "$COVERAGE_DIR" ]; then
     echo -e "${YELLOW}⚠️  No coverage reports found. Generating them first...${NC}"
-    "$SCRIPT_DIR/generate-coverage.sh"
+    if ! "$SCRIPT_DIR/generate-coverage.sh"; then
+        echo -e "${YELLOW}⚠️  Coverage generation failed, creating minimal report...${NC}"
+        mkdir -p "$COVERAGE_DIR"
+        echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
+    fi
 fi
 
-# Run tests if no recent results found
+# Ensure we have a coverage file
 if [ ! -f "$COVERAGE_DIR/coverage.json" ]; then
-    echo -e "${YELLOW}⚠️  No coverage data found. Running tests first...${NC}"
-    "$SCRIPT_DIR/test-core.sh"
-    "$SCRIPT_DIR/generate-coverage.sh"
+    echo -e "${YELLOW}⚠️  No coverage data found. Trying to run tests...${NC}"
+    if "$SCRIPT_DIR/test-core.sh" && "$SCRIPT_DIR/generate-coverage.sh"; then
+        echo -e "${GREEN}✅ Coverage generated successfully${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Test execution failed, creating minimal coverage report...${NC}"
+        mkdir -p "$COVERAGE_DIR"
+        echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
+    fi
 fi
 
 echo -e "${BLUE}📊 Found coverage reports:${NC}"

@@ -213,18 +213,12 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-products
-        path: DerivedData/Build/Products/
-    
     - name: Configure VERACore for Testing
       run: |
         echo "🔧 Configuring VERACore scheme for testing..."
         ./scripts/configure-veracore-testing.sh
     
-    - name: Run tests with coverage
+    - name: Run tests with coverage for SonarCloud
       run: |
         echo "🧪 Running tests with coverage for SonarCloud..."
         xcodebuild test \
@@ -236,12 +230,17 @@ jobs:
           -resultBundlePath DerivedData/TestResults.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO || echo "Tests completed with issues"
+          CODE_SIGNING_ALLOWED=NO \
+          -quiet || echo "Tests completed with issues"
     
     - name: Generate coverage reports
       run: |
         echo "📊 Generating coverage reports..."
-        ./scripts/generate-coverage.sh
+        ./scripts/generate-coverage.sh || {
+          echo "⚠️ Coverage generation failed, creating minimal report"
+          mkdir -p coverage-reports
+          echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > coverage-reports/coverage.json
+        }
     
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
