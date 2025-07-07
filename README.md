@@ -241,3 +241,38 @@ func testVideoCallButton() throws {
     )
 }
 ```
+
+## 📸 **Snapshot Testing & Git LFS**
+
+This project uses **Git LFS** (Large File Storage) to efficiently manage snapshot test images.
+
+### **Git LFS Setup**
+```bash
+# Install Git LFS (if not already installed)
+brew install git-lfs
+
+# Initialize LFS in your local repository
+git lfs install
+```
+
+### **Working with Snapshot Images**
+- **PNG files are automatically tracked** by Git LFS
+- **Faster clones** - Images are downloaded on-demand
+- **Better collaboration** - Reduces repository size for all developers
+
+```bash
+# Run snapshot tests (generates reference images)
+./scripts/test-snapshots.sh
+
+# Re-record snapshots when UI changes
+./scripts/test-snapshots.sh -r
+
+# Check LFS status
+git lfs ls-files
+git lfs status
+```
+
+### **Important Notes**
+- **First-time setup**: Run `git lfs pull` after cloning to download images
+- **CI/CD**: GitHub Actions automatically handles LFS files
+- **File types tracked**: `*.png`, `*.jpg`, `*.jpeg`

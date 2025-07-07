@@ -127,7 +127,38 @@ else
     echo -e "${YELLOW}⚠️  VERACoreSnapshotTests not configured (UI tests only)${NC}"
 fi
 
-# Check 7: Swift Format Linter
+# Check 7: Git LFS for Snapshot Images
+echo -e "${BLUE}📦 Checking Git LFS for Snapshot Images...${NC}"
+
+# Check if git-lfs is installed
+if ! command -v git-lfs >/dev/null 2>&1; then
+    echo -e "${RED}❌ git-lfs not installed${NC}"
+    echo -e "${YELLOW}   Install with: brew install git-lfs${NC}"
+    ((ERRORS++))
+else
+    echo -e "${GREEN}✅ git-lfs installed${NC}"
+    
+    # Check if .gitattributes exists and has LFS configuration
+    if [ -f "$PROJECT_ROOT/.gitattributes" ]; then
+        if grep -q "filter=lfs" "$PROJECT_ROOT/.gitattributes"; then
+            echo -e "${GREEN}✅ Git LFS configured for image files${NC}"
+            
+            # Check if snapshot images are tracked by LFS
+            if git lfs ls-files | grep -q "\.png"; then
+                echo -e "${GREEN}✅ Snapshot images are tracked by Git LFS${NC}"
+            else
+                echo -e "${YELLOW}⚠️  No PNG files tracked by Git LFS yet${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️  .gitattributes exists but no LFS configuration found${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  .gitattributes not found (Git LFS not configured)${NC}"
+        echo -e "${YELLOW}   Run: git lfs track '*.png'${NC}"
+    fi
+fi
+
+# Check 8: Swift Format Linter
 echo -e "${BLUE}🎨 Checking Swift Format Linter...${NC}"
 
 # Check if swift-format is installed
