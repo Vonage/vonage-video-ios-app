@@ -82,7 +82,7 @@ sonar-scanner \
     -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
     -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
     -Dsonar.host.url=https://sonarcloud.io \
-    -Dsonar.login=$SONAR_TOKEN \
+    -Dsonar.token=$SONAR_TOKEN \
     -Dsonar.verbose=false
 
 echo -e "${GREEN}✅ SonarCloud analysis completed!${NC}"

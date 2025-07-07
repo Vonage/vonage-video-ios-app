@@ -30,6 +30,7 @@ REQUIRED_SCRIPTS=(
     "scripts/upload-sonarcloud.sh"
     "scripts/configure-veracore-testing.sh"
     "scripts/simulate-ci.sh"
+    "scripts/test-sonar-config.sh"
 )
 
 for script in "${REQUIRED_SCRIPTS[@]}"; do

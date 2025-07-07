@@ -242,13 +242,23 @@ jobs:
           echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > coverage-reports/coverage.json
         }
     
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@v2.3.0
+    - name: Install SonarCloud Scanner
+      run: |
+        echo "📥 Installing SonarCloud Scanner..."
+        brew install sonar-scanner
+    
+    - name: SonarCloud Analysis
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=vonage-video-ios-app
-          -Dsonar.organization=vonage
-          -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json
+      run: |
+        echo "☁️ Running SonarCloud analysis..."
+        sonar-scanner \
+          -Dsonar.projectKey=vonage-video-ios-app \
+          -Dsonar.organization=vonage \
+          -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
+          -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
+          -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.token=$SONAR_TOKEN \
+          -Dsonar.verbose=false
