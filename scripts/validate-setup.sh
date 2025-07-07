@@ -126,6 +126,52 @@ else
     echo -e "${YELLOW}⚠️  VERACoreSnapshotTests not configured (UI tests only)${NC}"
 fi
 
+# Check 7: Swift Format Linter
+echo -e "${BLUE}🎨 Checking Swift Format Linter...${NC}"
+
+# Check if swift-format is installed
+if ! command -v swift-format >/dev/null 2>&1; then
+    echo -e "${RED}❌ swift-format not installed${NC}"
+    echo -e "${YELLOW}   Install with: brew install swift-format${NC}"
+    ((ERRORS++))
+else
+    echo -e "${GREEN}✅ swift-format installed${NC}"
+    
+    # Check if configuration file exists
+    if [ -f "$PROJECT_ROOT/.swift-format" ]; then
+        echo -e "${GREEN}✅ .swift-format configuration file exists${NC}"
+        
+        # Test linter on a sample of Swift files from all projects
+        echo -e "${YELLOW}   Testing linter on workspace files...${NC}"
+        LINTER_ERRORS=0
+        TESTED_FILES=0
+        
+        # Find all Swift files in the workspace, excluding build artifacts
+        while IFS= read -r -d '' file; do
+            if [ $TESTED_FILES -ge 10 ]; then  # Limit to 10 files for validation
+                break
+            fi
+            
+            # Test if file needs formatting
+            if ! swift-format format --configuration "$PROJECT_ROOT/.swift-format" "$file" | diff -q "$file" - >/dev/null 2>&1; then
+                echo -e "${RED}     ❌ $(basename "$file") needs formatting${NC}"
+                ((LINTER_ERRORS++))
+            fi
+            ((TESTED_FILES++))
+        done < <(find "$PROJECT_ROOT/VERA" -name "*.swift" -not -path "*/DerivedData/*" -not -path "*/.build/*" -print0)
+        
+        if [ $LINTER_ERRORS -eq 0 ]; then
+            echo -e "${GREEN}✅ All tested Swift files ($TESTED_FILES) are properly formatted${NC}"
+        else
+            echo -e "${YELLOW}⚠️  $LINTER_ERRORS of $TESTED_FILES files need formatting${NC}"
+            echo -e "${YELLOW}   Fix with: find ./VERA -name '*.swift' | xargs swift-format format --in-place --configuration .swift-format${NC}"
+        fi
+    else
+        echo -e "${RED}❌ .swift-format configuration file missing${NC}"
+        ((ERRORS++))
+    fi
+fi
+
 # Summary
 echo -e "${BLUE}📊 Validation Summary${NC}"
 echo -e "${BLUE}====================${NC}"

@@ -8,9 +8,9 @@ import Testing
 
 // MARK: - iOS Snapshot Testing Helpers
 
-/// Helper for testing SwiftUI views 
+/// Helper for testing SwiftUI views
 enum SnapshotTestHelper {
-    
+
     /// Test a SwiftUI view with size that fits
     static func assertViewSnapshot<V: View>(
         _ view: V,
@@ -30,7 +30,7 @@ enum SnapshotTestHelper {
             line: line
         )
     }
-    
+
     /// Test a SwiftUI view with fixed size
     static func assertViewSnapshot<V: View>(
         _ view: V,
@@ -52,7 +52,7 @@ enum SnapshotTestHelper {
             line: line
         )
     }
-    
+
     /// Test a view with light and dark mode variants
     static func assertViewSnapshotsWithColorSchemes<V: View>(
         _ view: V,
