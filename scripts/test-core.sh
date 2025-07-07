@@ -2,6 +2,21 @@
 
 set -e
 
+# Parse command line arguments
+GENERATE_COVERAGE=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -coverage|--coverage)
+      GENERATE_COVERAGE=true
+      shift
+      ;;
+    *)
+      # Ignore unknown arguments for compatibility
+      shift
+      ;;
+  esac
+done
+
 echo "⚡ Running Fast VERACore Tests..."
 
 # Colors for output
@@ -106,8 +121,12 @@ else
     exit 1
 fi
 
-# Generate simple coverage report
-if [ -d "./DerivedData/Build/ProfileData" ]; then
+# Generate coverage report if requested
+if [ "$GENERATE_COVERAGE" = true ]; then
+    echo -e "${YELLOW}📊 Generating detailed coverage reports...${NC}"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    "$SCRIPT_DIR/generate-coverage.sh"
+elif [ -d "./DerivedData/Build/ProfileData" ]; then
     echo -e "${YELLOW}📊 Generating coverage report...${NC}"
     xcrun xccov view --report --json ./DerivedData/Build/ProfileData/*/Coverage.profdata > coverage.json 2>/dev/null || true
     echo -e "${GREEN}✅ Coverage report generated in coverage.json${NC}"
@@ -115,4 +134,9 @@ fi
 
 echo -e "${GREEN}⚡ Fast tests completed successfully!${NC}"
 echo -e "${GREEN}🎉 VERACore tests ran natively on macOS (no simulators needed)${NC}"
+if [ "$GENERATE_COVERAGE" = true ]; then
+    echo -e "${YELLOW}💡 Coverage reports generated. To upload to SonarCloud: export SONAR_TOKEN=token && ./scripts/upload-sonarcloud.sh${NC}"
+else
+    echo -e "${YELLOW}💡 To run with coverage: ./scripts/test-core.sh -coverage${NC}"
+fi
 echo -e "${YELLOW}💡 To run full tests including UI tests, use: ./scripts/test.sh -ui${NC}"

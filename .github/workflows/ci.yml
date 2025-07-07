@@ -195,3 +195,61 @@ jobs:
           echo "❌ UI Tests could not run on any available simulator"
           exit 1
         fi
+
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: macos-latest
+    needs: [build, core-tests]
+    # Only run on main branch and pull requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+    
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-products
+        path: DerivedData/Build/Products/
+    
+    - name: Configure VERACore for Testing
+      run: |
+        echo "🔧 Configuring VERACore scheme for testing..."
+        ./scripts/configure-veracore-testing.sh
+    
+    - name: Run tests with coverage
+      run: |
+        echo "🧪 Running tests with coverage for SonarCloud..."
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACore \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/TestResults.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO || echo "Tests completed with issues"
+    
+    - name: Generate coverage reports
+      run: |
+        echo "📊 Generating coverage reports..."
+        ./scripts/generate-coverage.sh
+    
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=vonage-video-ios-app
+          -Dsonar.organization=vonage
+          -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json
