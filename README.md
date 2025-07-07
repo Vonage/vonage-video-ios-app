@@ -128,3 +128,116 @@ cat coverage-reports/coverage.json | python3 -m json.tool
 # Debug test execution
 ./scripts/test-core.sh -coverage --verbose
 ```
+
+## 📸 Snapshot Testing
+
+VERACore includes comprehensive snapshot testing for iOS UI components using [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing).
+
+### Architecture
+
+**📦 Test Separation Strategy:**
+
+- **`VERACoreTests`**: Universal tests (macOS, iOS) for core functionality
+  - ✅ Fast execution (< 5 seconds)
+  - ✅ No simulators required  
+  - ✅ Logic, algorithms, data processing
+  - ✅ Runs automatically in CI
+
+- **`VERACoreSnapshotTests`**: iOS-specific snapshot tests for UI components
+  - ⚠️ Slow execution (30+ seconds)
+  - ⚠️ Requires iOS simulator
+  - 🎯 UI component visual validation
+  - 🎯 **Manual execution only** - not part of regular test suite
+
+### Setup Snapshot Testing
+
+✅ **Snapshot testing is now configured and ready to use!**
+
+The project includes:
+- **`VERACoreTests`**: Universal tests (macOS, iOS) for core functionality  
+- **`VERACoreSnapshotTests`**: iOS-specific snapshot tests for UI components
+- **Reference images**: Committed snapshots for iPhone 16 simulator
+
+### Running Tests
+
+**🚀 Core/Logic Tests (Fast - Recommended for development):**
+```bash
+# Run core tests (universal - macOS, no UI)
+./scripts/test-core.sh
+
+# Run core tests with coverage
+./scripts/test-core.sh -coverage
+```
+
+**🎮 Platform/UI Tests (Slow - For integration testing):**
+```bash
+# Run all platform tests including UI
+./scripts/test.sh -ui
+
+# Run with coverage 
+./scripts/test.sh -ui -coverage
+```
+
+**📸 Snapshot Tests (Separate - Only for UI component validation):**
+```bash
+# Run iOS snapshot tests (independent from other tests)
+./scripts/test-snapshots.sh
+
+# Record new reference snapshots
+./scripts/test-snapshots.sh -r
+
+# Test on specific device
+./scripts/test-snapshots.sh -d "iPhone 16 Pro"
+```
+
+### Snapshot Testing Features
+
+- **📱 Multi-device testing**: iPhone, iPad, different screen sizes
+- **🌓 Light/Dark mode**: Automatic testing of both themes
+- **♿️ Accessibility**: Tests with different Dynamic Type sizes
+- **🔄 Orientation**: Portrait and landscape testing
+- **🎯 Precision control**: Configurable pixel tolerance
+- **📁 Organized output**: Snapshots stored in `__Snapshots__` folders
+
+### Best Practices
+
+1. **Separate concerns**: Use universal tests for logic, iOS tests for UI
+2. **Development workflow**: Use `./scripts/test-core.sh` for fast feedback
+3. **UI changes**: Run `./scripts/test-snapshots.sh` when modifying UI components
+4. **Record snapshots** when creating new UI components
+5. **Review changes** carefully when snapshots fail
+6. **Commit reference images** to version control
+7. **Use descriptive names** for your snapshot tests
+8. **Test edge cases** like empty states, errors, loading
+
+### When to Use Snapshot Tests
+
+**✅ Use snapshot tests for:**
+- New UI components or views
+- Visual regression testing
+- Before releasing UI changes
+- Validating design consistency
+
+**❌ Don't use snapshot tests for:**
+- Regular development (too slow)
+- Logic testing (use core tests)
+- Automated CI runs (unless specific UI validation needed)
+
+### Example Snapshot Test
+
+```swift
+func testVideoCallButton() throws {
+    let button = VideoCallButton(
+        title: "Join Call",
+        isEnabled: true,
+        action: { }
+    )
+    
+    // Test with size that fits
+    assertSnapshot(
+        of: button, 
+        as: .image(layout: .sizeThatFits), 
+        record: SnapshotTestConfig.isRecording
+    )
+}
+```

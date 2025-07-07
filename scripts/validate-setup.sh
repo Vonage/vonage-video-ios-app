@@ -25,6 +25,7 @@ echo -e "${BLUE}📄 Checking required scripts...${NC}"
 REQUIRED_SCRIPTS=(
     "scripts/test-core.sh"
     "scripts/test.sh" 
+    "scripts/test-snapshots.sh"
     "scripts/generate-coverage.sh"
     "scripts/upload-sonarcloud.sh"
     "scripts/configure-veracore-testing.sh"
@@ -62,6 +63,7 @@ PROJECT_DIRS=(
     "VERA/VERA"
     "VERA/VERACore"
     "VERA/VERACore/VERACoreTests"
+    "VERA/VERACore/VERACoreSnapshotTests"
 )
 
 for dir in "${PROJECT_DIRS[@]}"; do
@@ -102,6 +104,28 @@ else
     ((ERRORS++))
 fi
 
+# Check 6: UI Snapshot Testing (optional)
+echo -e "${BLUE}📸 Checking UI Snapshot Testing setup...${NC}"
+if [ -d "$PROJECT_ROOT/VERA/VERACore/VERACoreSnapshotTests" ]; then
+    echo -e "${GREEN}✅ VERACoreSnapshotTests target exists${NC}"
+    
+    # Check if snapshot script works
+    if "$SCRIPT_DIR/test-snapshots.sh" --help >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ Snapshot testing script functional${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Snapshot testing script has issues${NC}"
+    fi
+    
+    # Check for reference snapshots
+    if find "$PROJECT_ROOT/VERA/VERACore/VERACoreSnapshotTests" -name "*.png" -type f | grep -q .; then
+        echo -e "${GREEN}✅ Reference snapshots exist${NC}"
+    else
+        echo -e "${YELLOW}⚠️  No reference snapshots found (run with -r to record)${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  VERACoreSnapshotTests not configured (UI tests only)${NC}"
+fi
+
 # Summary
 echo -e "${BLUE}📊 Validation Summary${NC}"
 echo -e "${BLUE}====================${NC}"
@@ -112,7 +136,12 @@ if [ $ERRORS -eq 0 ]; then
     echo "   1. Set up your SonarCloud project at https://sonarcloud.io"
     echo "   2. Add SONAR_TOKEN to your GitHub repository secrets"
     echo "   3. Adjust project key in sonar-project.properties if needed"
-    echo "   4. Test with: ./scripts/test.sh -coverage"
+    echo ""
+    echo -e "${BLUE}🧪 Test Commands:${NC}"
+    echo "   • Core/Logic tests:  ./scripts/test-core.sh"
+    echo "   • All platform tests: ./scripts/test.sh"
+    echo "   • UI Snapshot tests: ./scripts/test-snapshots.sh"
+    echo "   • With coverage:     ./scripts/test.sh -coverage"
 else
     echo -e "${RED}❌ $ERRORS errors found. Please fix them before proceeding.${NC}"
     exit 1
