@@ -44,7 +44,8 @@ while IFS= read -r -d '' file; do
 done < <(find ./VERA/VERACore -name "*.swift" \
     -not -path "./build/*" \
     -not -path "./.build/*" \
-    -not -path "./DerivedData/*" -print0 2>/dev/null)
+    -not -path "./DerivedData/*" \
+    -not -path "./VERA/VERACore/VERACoreSnapshotTests/*" -print0 2>/dev/null)
 
 if [ -n "$FORMAT_ISSUES" ]; then
     echo -e "${RED}❌ Format issues found in VERACore:${NC}"

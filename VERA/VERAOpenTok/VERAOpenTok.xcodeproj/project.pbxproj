@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6FD1B4272E1BBA1A00BD9F3D /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */; };
+		6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,6 +108,7 @@
 			);
 			name = VERAOpenTok;
 			packageProductDependencies = (
+				6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */,
 			);
 			productName = VERAOpenTok;
 			productReference = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */;
@@ -161,6 +164,9 @@
 			);
 			mainGroup = 6FD1B4112E1BBA1A00BD9F3D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B41C2E1BBA1A00BD9F3D /* Products */;
 			projectDirPath = "";
@@ -475,6 +481,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/opentok/vonage-client-sdk-video.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.30.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */;
+			productName = VonageClientSDKVideo;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6FD1B4122E1BBA1A00BD9F3D /* Project object */;
 }

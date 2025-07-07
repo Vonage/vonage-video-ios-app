@@ -65,3 +65,9 @@ fastlane/test_output
 coverage-reports/
 coverage.json
 *.xcresult
+
+# Snapshot Testing
+# Include reference images in version control
+# but exclude failure artifacts
+**/__Snapshots__/**/Failure_*
+**/__Snapshots__/**/Failed_*
