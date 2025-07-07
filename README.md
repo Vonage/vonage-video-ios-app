@@ -13,7 +13,7 @@ Vonage Video API Swift iOS reference application
 ### **Fast CI Pipeline** (Default - runs on every PR/push)
 - ✅ **Code formatting** check with swift-format
 - ✅ **Build** verification for iOS Simulator
-- ✅ **VERACore tests** on macOS (native, super fast, ~5-10 seconds)
+- ✅ **VERACore tests** on macOS (native, super fast, ~1 second)
 - ❌ **UI tests disabled** by default (too slow for regular CI)
 
 ### **UI Tests Pipeline** (On demand only)
@@ -35,8 +35,10 @@ Vonage Video API Swift iOS reference application
 ```
 
 ### **Why This Strategy?**
-- **Fast feedback**: Core tests run in ~30 seconds vs ~5+ minutes for UI tests
-- **Better DX**: Developers get quick feedback on logic changes
+- **Ultra-fast feedback**: Core tests run natively on macOS in ~1 second
+- **No simulator overhead**: VERACore tests run directly on macOS
+- **CI-friendly**: Works without code signing certificates
+- **Better DX**: Developers get instant feedback on logic changes
 - **Resource efficient**: UI tests run only when needed
 - **Flexible**: Easy to enable UI tests when required
 

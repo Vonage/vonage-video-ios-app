@@ -55,6 +55,9 @@ if [ -d "./VERA/VERACore" ]; then
         -destination 'platform=macOS' \
         -enableCodeCoverage YES \
         -derivedDataPath ./DerivedData \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO \
         -quiet 2>/dev/null; then
         echo -e "${GREEN}✅ VERACore tests completed successfully on macOS (workspace)${NC}"
     else
@@ -68,6 +71,9 @@ if [ -d "./VERA/VERACore" ]; then
             -scheme VERACore \
             -destination 'platform=macOS' \
             -enableCodeCoverage YES \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
             -quiet 2>/dev/null; then
             echo -e "${GREEN}✅ VERACore tests completed successfully on macOS (project)${NC}"
             cd ../..

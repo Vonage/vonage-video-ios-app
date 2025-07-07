@@ -111,6 +111,9 @@ jobs:
           -scheme VERACore \
           -destination "platform=macOS" \
           -derivedDataPath DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
           -quiet; then
           echo "✅ VERACore tests completed successfully on macOS (native)"
         else
