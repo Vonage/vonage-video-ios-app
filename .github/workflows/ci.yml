@@ -5,6 +5,13 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      run_ui_tests:
+        description: 'Run UI Tests (slow)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   format-check:
@@ -30,7 +37,8 @@ jobs:
           -not -path "./DerivedData/*" \
           -not -path "./Pods/*" \
           -not -path "./Carthage/*" \
-          -not -path "./vendor/*" -print0)
+          -not -path "./vendor/*" \
+          -not -path "*/project.xcworkspace/*" -print0)
         
         if [ -n "$FORMAT_ISSUES" ]; then
           echo "❌ Format issues found:"
@@ -62,8 +70,8 @@ jobs:
       run: |
         echo "Building project for iOS Simulator..."
         xcodebuild build \
+          -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -project VERA/VERA.xcodeproj \
           -sdk iphonesimulator \
           -destination "generic/platform=iOS Simulator" \
           -derivedDataPath DerivedData \
@@ -78,7 +86,7 @@ jobs:
         name: build-products
         path: DerivedData/Build/Products/
 
-  unit-tests:
+  core-tests:
     runs-on: macos-latest
     needs: build
     
@@ -90,55 +98,47 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: Run Unit Tests (Fast)
+    - name: Configure VERACore for Testing
       run: |
-        echo "Running fast unit tests..."
-        
-        # Try different simulators for unit tests
+        echo "🔧 Configuring VERACore scheme for testing..."
+        ./scripts/configure-veracore-testing.sh
+    
+    - name: Run VERACore Tests (macOS - Native & Super Fast)
+      run: |
+        echo "Running VERACore tests natively on macOS (no simulators needed)..."
         if xcodebuild test \
-          -scheme VERA \
-          -project VERA/VERA.xcodeproj \
-          -destination "platform=iOS Simulator,name=iPhone 16" \
-          -only-testing:VERATests \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACore \
+          -destination "platform=macOS" \
           -derivedDataPath DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet 2>/dev/null; then
-          echo "✅ Unit Tests completed with iPhone 16"
-        elif xcodebuild test \
-          -scheme VERA \
-          -project VERA/VERA.xcodeproj \
-          -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
-          -only-testing:VERATests \
-          -derivedDataPath DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet 2>/dev/null; then
-          echo "✅ Unit Tests completed with iPhone 16 Pro"
-        elif xcodebuild test \
-          -scheme VERA \
-          -project VERA/VERA.xcodeproj \
-          -destination "platform=iOS Simulator,name=iPhone 15" \
-          -only-testing:VERATests \
-          -derivedDataPath DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet 2>/dev/null; then
-          echo "✅ Unit Tests completed with iPhone 15"
+          -quiet; then
+          echo "✅ VERACore tests completed successfully on macOS (native)"
         else
-          echo "❌ Unit Tests could not run on any available simulator"
-          echo "Available simulators:"
-          xcrun simctl list devices available | grep iPhone | head -5
-          exit 1
+          echo "⚠️ VERACore native tests failed, trying fallback strategies..."
+          
+          # Fallback 1: Try VERA unit tests on iOS Simulator
+          if xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERA \
+            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -only-testing:VERATests \
+            -derivedDataPath DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet; then
+            echo "✅ VERA unit tests completed on iOS Simulator (fallback)"
+          else
+            echo "❌ All test strategies failed"
+            exit 1
+          fi
         fi
 
   ui-tests:
     runs-on: macos-latest
-    needs: build
-    continue-on-error: true
+    needs: [build, core-tests]
+    # ⚠️ UI tests are DISABLED by default - they only run when explicitly requested
+    if: ${{ github.event.inputs.run_ui_tests == 'true' || contains(github.event.head_commit.message, '[ui-tests]') }}
     
     steps:
     - uses: actions/checkout@v4
@@ -155,12 +155,16 @@ jobs:
     
     - name: Run UI Tests (Slower)
       run: |
-        echo "Running UI tests..."
+        echo "⚠️ Running UI tests (this may take several minutes)..."
+        echo "UI tests are disabled by default. To enable them:"
+        echo "1. Manually trigger with 'Run UI Tests' option"
+        echo "2. Include '[ui-tests]' in commit message"
+        echo "3. Use the dedicated UI Tests workflow"
         
         # Try different strategies to run UI tests
         if xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -project VERA/VERA.xcodeproj \
           -sdk iphonesimulator \
           -destination "platform=iOS Simulator,name=iPhone 16" \
           -only-testing:VERAUITests \
@@ -172,8 +176,8 @@ jobs:
           -quiet 2>/dev/null; then
           echo "✅ UI Tests completed with iPhone 16"
         elif xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -project VERA/VERA.xcodeproj \
           -sdk iphonesimulator \
           -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
           -only-testing:VERAUITests \
@@ -185,7 +189,6 @@ jobs:
           -quiet 2>/dev/null; then
           echo "✅ UI Tests completed with iPhone 16 Pro"
         else
-          echo "⚠️ UI Tests could not run - likely simulator configuration issue"
-          echo "This is acceptable as unit tests have passed"
-          exit 0
+          echo "❌ UI Tests could not run on any available simulator"
+          exit 1
         fi

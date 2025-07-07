@@ -6,223 +6,181 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6FD1B4272E1BBA1A00BD9F3D /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
-		6F6A00A62E17F89200127A10 /* PBXContainerItemProxy */ = {
+		6FD1B4282E1BBA1A00BD9F3D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 6F6A00902E17F89100127A10 /* Project object */;
+			containerPortal = 6FD1B4122E1BBA1A00BD9F3D /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 6F6A00972E17F89100127A10;
-			remoteInfo = VERA;
-		};
-		6F6A00B02E17F89200127A10 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 6F6A00902E17F89100127A10 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 6F6A00972E17F89100127A10;
-			remoteInfo = VERA;
+			remoteGlobalIDString = 6FD1B41A2E1BBA1A00BD9F3D;
+			remoteInfo = VERAOpenTok;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		6F6A00982E17F89100127A10 /* VERA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERA.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6F6A00A52E17F89200127A10 /* VERATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FD1B4262E1BBA1A00BD9F3D /* VERAOpenTokTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAOpenTokTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		6F6A009A2E17F89100127A10 /* VERA */ = {
+		6FD1B41D2E1BBA1A00BD9F3D /* VERAOpenTok */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VERA;
+			path = VERAOpenTok;
 			sourceTree = "<group>";
 		};
-		6F6A00A82E17F89200127A10 /* VERATests */ = {
+		6FD1B42A2E1BBA1A00BD9F3D /* VERAOpenTokTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VERATests;
-			sourceTree = "<group>";
-		};
-		6F6A00B22E17F89200127A10 /* VERAUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VERAUITests;
+			path = VERAOpenTokTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6F6A00952E17F89100127A10 /* Frameworks */ = {
+		6FD1B4182E1BBA1A00BD9F3D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6F6A00A22E17F89200127A10 /* Frameworks */ = {
+		6FD1B4232E1BBA1A00BD9F3D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6F6A00AC2E17F89200127A10 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				6FD1B4272E1BBA1A00BD9F3D /* VERAOpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6F6A008F2E17F89100127A10 = {
+		6FD1B4112E1BBA1A00BD9F3D = {
 			isa = PBXGroup;
 			children = (
-				6F6A009A2E17F89100127A10 /* VERA */,
-				6F6A00A82E17F89200127A10 /* VERATests */,
-				6F6A00B22E17F89200127A10 /* VERAUITests */,
-				6F6A00992E17F89100127A10 /* Products */,
+				6FD1B41D2E1BBA1A00BD9F3D /* VERAOpenTok */,
+				6FD1B42A2E1BBA1A00BD9F3D /* VERAOpenTokTests */,
+				6FD1B41C2E1BBA1A00BD9F3D /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		6F6A00992E17F89100127A10 /* Products */ = {
+		6FD1B41C2E1BBA1A00BD9F3D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6F6A00982E17F89100127A10 /* VERA.app */,
-				6F6A00A52E17F89200127A10 /* VERATests.xctest */,
-				6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */,
+				6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */,
+				6FD1B4262E1BBA1A00BD9F3D /* VERAOpenTokTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		6FD1B4162E1BBA1A00BD9F3D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		6F6A00972E17F89100127A10 /* VERA */ = {
+		6FD1B41A2E1BBA1A00BD9F3D /* VERAOpenTok */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6F6A00B92E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERA" */;
+			buildConfigurationList = 6FD1B42F2E1BBA1A00BD9F3D /* Build configuration list for PBXNativeTarget "VERAOpenTok" */;
 			buildPhases = (
-				6F6A00942E17F89100127A10 /* Sources */,
-				6F6A00952E17F89100127A10 /* Frameworks */,
-				6F6A00962E17F89100127A10 /* Resources */,
+				6FD1B4162E1BBA1A00BD9F3D /* Headers */,
+				6FD1B4172E1BBA1A00BD9F3D /* Sources */,
+				6FD1B4182E1BBA1A00BD9F3D /* Frameworks */,
+				6FD1B4192E1BBA1A00BD9F3D /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				6F6A009A2E17F89100127A10 /* VERA */,
+				6FD1B41D2E1BBA1A00BD9F3D /* VERAOpenTok */,
 			);
-			name = VERA;
+			name = VERAOpenTok;
 			packageProductDependencies = (
 			);
-			productName = VERA;
-			productReference = 6F6A00982E17F89100127A10 /* VERA.app */;
-			productType = "com.apple.product-type.application";
+			productName = VERAOpenTok;
+			productReference = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */;
+			productType = "com.apple.product-type.framework";
 		};
-		6F6A00A42E17F89200127A10 /* VERATests */ = {
+		6FD1B4252E1BBA1A00BD9F3D /* VERAOpenTokTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6F6A00BC2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERATests" */;
+			buildConfigurationList = 6FD1B4322E1BBA1A00BD9F3D /* Build configuration list for PBXNativeTarget "VERAOpenTokTests" */;
 			buildPhases = (
-				6F6A00A12E17F89200127A10 /* Sources */,
-				6F6A00A22E17F89200127A10 /* Frameworks */,
-				6F6A00A32E17F89200127A10 /* Resources */,
+				6FD1B4222E1BBA1A00BD9F3D /* Sources */,
+				6FD1B4232E1BBA1A00BD9F3D /* Frameworks */,
+				6FD1B4242E1BBA1A00BD9F3D /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				6F6A00A72E17F89200127A10 /* PBXTargetDependency */,
+				6FD1B4292E1BBA1A00BD9F3D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				6F6A00A82E17F89200127A10 /* VERATests */,
+				6FD1B42A2E1BBA1A00BD9F3D /* VERAOpenTokTests */,
 			);
-			name = VERATests;
+			name = VERAOpenTokTests;
 			packageProductDependencies = (
 			);
-			productName = VERATests;
-			productReference = 6F6A00A52E17F89200127A10 /* VERATests.xctest */;
+			productName = VERAOpenTokTests;
+			productReference = 6FD1B4262E1BBA1A00BD9F3D /* VERAOpenTokTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		6F6A00AE2E17F89200127A10 /* VERAUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 6F6A00BF2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERAUITests" */;
-			buildPhases = (
-				6F6A00AB2E17F89200127A10 /* Sources */,
-				6F6A00AC2E17F89200127A10 /* Frameworks */,
-				6F6A00AD2E17F89200127A10 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				6F6A00B12E17F89200127A10 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				6F6A00B22E17F89200127A10 /* VERAUITests */,
-			);
-			name = VERAUITests;
-			packageProductDependencies = (
-			);
-			productName = VERAUITests;
-			productReference = 6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		6F6A00902E17F89100127A10 /* Project object */ = {
+		6FD1B4122E1BBA1A00BD9F3D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
-					6F6A00972E17F89100127A10 = {
+					6FD1B41A2E1BBA1A00BD9F3D = {
 						CreatedOnToolsVersion = 16.4;
 					};
-					6F6A00A42E17F89200127A10 = {
+					6FD1B4252E1BBA1A00BD9F3D = {
 						CreatedOnToolsVersion = 16.4;
-						TestTargetID = 6F6A00972E17F89100127A10;
-					};
-					6F6A00AE2E17F89200127A10 = {
-						CreatedOnToolsVersion = 16.4;
-						TestTargetID = 6F6A00972E17F89100127A10;
 					};
 				};
 			};
-			buildConfigurationList = 6F6A00932E17F89100127A10 /* Build configuration list for PBXProject "VERA" */;
+			buildConfigurationList = 6FD1B4152E1BBA1A00BD9F3D /* Build configuration list for PBXProject "VERAOpenTok" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 6F6A008F2E17F89100127A10;
+			mainGroup = 6FD1B4112E1BBA1A00BD9F3D;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6F6A00992E17F89100127A10 /* Products */;
+			productRefGroup = 6FD1B41C2E1BBA1A00BD9F3D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6F6A00972E17F89100127A10 /* VERA */,
-				6F6A00A42E17F89200127A10 /* VERATests */,
-				6F6A00AE2E17F89200127A10 /* VERAUITests */,
+				6FD1B41A2E1BBA1A00BD9F3D /* VERAOpenTok */,
+				6FD1B4252E1BBA1A00BD9F3D /* VERAOpenTokTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		6F6A00962E17F89100127A10 /* Resources */ = {
+		6FD1B4192E1BBA1A00BD9F3D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6F6A00A32E17F89200127A10 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6F6A00AD2E17F89200127A10 /* Resources */ = {
+		6FD1B4242E1BBA1A00BD9F3D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,21 +190,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		6F6A00942E17F89100127A10 /* Sources */ = {
+		6FD1B4172E1BBA1A00BD9F3D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6F6A00A12E17F89200127A10 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6F6A00AB2E17F89200127A10 /* Sources */ = {
+		6FD1B4222E1BBA1A00BD9F3D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,20 +207,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		6F6A00A72E17F89200127A10 /* PBXTargetDependency */ = {
+		6FD1B4292E1BBA1A00BD9F3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 6F6A00972E17F89100127A10 /* VERA */;
-			targetProxy = 6F6A00A62E17F89200127A10 /* PBXContainerItemProxy */;
-		};
-		6F6A00B12E17F89200127A10 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 6F6A00972E17F89100127A10 /* VERA */;
-			targetProxy = 6F6A00B02E17F89200127A10 /* PBXContainerItemProxy */;
+			target = 6FD1B41A2E1BBA1A00BD9F3D /* VERAOpenTok */;
+			targetProxy = 6FD1B4282E1BBA1A00BD9F3D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		6F6A00B72E17F89200127A10 /* Debug */ = {
+		6FD1B42D2E1BBA1A00BD9F3D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -303,6 +249,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -322,7 +269,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -330,10 +277,12 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
-		6F6A00B82E17F89200127A10 /* Release */ = {
+		6FD1B42E2E1BBA1A00BD9F3D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -367,6 +316,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -380,113 +330,104 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
-		6F6A00BA2E17F89200127A10 /* Debug */ = {
+		6FD1B4302E1BBA1A00BD9F3D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
-				ENABLE_PREVIEWS = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERA;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTok;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		6F6A00BB2E17F89200127A10 /* Release */ = {
+		6FD1B4312E1BBA1A00BD9F3D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
-				ENABLE_PREVIEWS = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERA;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTok;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		6F6A00BD2E17F89200127A10 /* Debug */ = {
+		6FD1B4332E1BBA1A00BD9F3D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERATests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VERA.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VERA";
 			};
 			name = Debug;
 		};
-		6F6A00BE2E17F89200127A10 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PR6C39UQ38;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERATests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VERA.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VERA";
-			};
-			name = Release;
-		};
-		6F6A00C02E17F89200127A10 /* Debug */ = {
+		6FD1B4342E1BBA1A00BD9F3D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -495,73 +436,45 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = VERA;
-			};
-			name = Debug;
-		};
-		6F6A00C12E17F89200127A10 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PR6C39UQ38;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = VERA;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6F6A00932E17F89100127A10 /* Build configuration list for PBXProject "VERA" */ = {
+		6FD1B4152E1BBA1A00BD9F3D /* Build configuration list for PBXProject "VERAOpenTok" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6F6A00B72E17F89200127A10 /* Debug */,
-				6F6A00B82E17F89200127A10 /* Release */,
+				6FD1B42D2E1BBA1A00BD9F3D /* Debug */,
+				6FD1B42E2E1BBA1A00BD9F3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6F6A00B92E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERA" */ = {
+		6FD1B42F2E1BBA1A00BD9F3D /* Build configuration list for PBXNativeTarget "VERAOpenTok" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6F6A00BA2E17F89200127A10 /* Debug */,
-				6F6A00BB2E17F89200127A10 /* Release */,
+				6FD1B4302E1BBA1A00BD9F3D /* Debug */,
+				6FD1B4312E1BBA1A00BD9F3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6F6A00BC2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERATests" */ = {
+		6FD1B4322E1BBA1A00BD9F3D /* Build configuration list for PBXNativeTarget "VERAOpenTokTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6F6A00BD2E17F89200127A10 /* Debug */,
-				6F6A00BE2E17F89200127A10 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		6F6A00BF2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERAUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				6F6A00C02E17F89200127A10 /* Debug */,
-				6F6A00C12E17F89200127A10 /* Release */,
+				6FD1B4332E1BBA1A00BD9F3D /* Debug */,
+				6FD1B4342E1BBA1A00BD9F3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 6F6A00902E17F89100127A10 /* Project object */;
+	rootObject = 6FD1B4122E1BBA1A00BD9F3D /* Project object */;
 }

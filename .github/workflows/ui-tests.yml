@@ -1,0 +1,115 @@
+name: UI Tests
+
+on:
+  # Solo se ejecuta manualmente
+  workflow_dispatch:
+    inputs:
+      test_device:
+        description: 'Device to test on'
+        required: false
+        default: 'iPhone 16'
+        type: choice
+        options:
+        - 'iPhone 16'
+        - 'iPhone 16 Pro'
+        - 'iPhone 15'
+        - 'iPad (A16)'
+  
+  # O en schedules (ej: nightly)
+  schedule:
+    - cron: '0 2 * * *' # 2 AM UTC daily
+
+jobs:
+  ui-tests:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Cache derived data
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcodeproj') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+    
+    - name: Build for iOS Simulator
+      run: |
+        echo "Building project for UI tests..."
+        xcodebuild build \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -sdk iphonesimulator \
+          -destination "generic/platform=iOS Simulator" \
+          -derivedDataPath DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          ONLY_ACTIVE_ARCH=NO
+    
+    - name: List available simulators
+      run: |
+        echo "=== Available iOS Simulators ==="
+        xcrun simctl list devices available | grep iPhone | head -10
+        echo ""
+        echo "=== Selected device: ${{ github.event.inputs.test_device || 'iPhone 16' }} ==="
+    
+    - name: Run UI Tests
+      run: |
+        DEVICE="${{ github.event.inputs.test_device || 'iPhone 16' }}"
+        echo "Running UI tests on $DEVICE..."
+        
+        # Run UI tests on specified device
+        if xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -sdk iphonesimulator \
+          -destination "platform=iOS Simulator,name=$DEVICE" \
+          -only-testing:VERAUITests \
+          -derivedDataPath DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          -parallel-testing-enabled NO; then
+          echo "✅ UI Tests completed successfully on $DEVICE"
+        else
+          echo "❌ UI Tests failed on $DEVICE"
+          echo "Trying fallback devices..."
+          
+          # Fallback strategy
+          for fallback_device in "iPhone 16" "iPhone 16 Pro" "iPhone 15"; do
+            if [ "$fallback_device" != "$DEVICE" ]; then
+              echo "Trying $fallback_device..."
+              if xcodebuild test \
+                -workspace VERA/VERA.xcworkspace \
+                -scheme VERA \
+                -sdk iphonesimulator \
+                -destination "platform=iOS Simulator,name=$fallback_device" \
+                -only-testing:VERAUITests \
+                -derivedDataPath DerivedData \
+                CODE_SIGN_IDENTITY="" \
+                CODE_SIGNING_REQUIRED=NO \
+                CODE_SIGNING_ALLOWED=NO \
+                -parallel-testing-enabled NO 2>/dev/null; then
+                echo "✅ UI Tests completed successfully on $fallback_device (fallback)"
+                exit 0
+              fi
+            fi
+          done
+          
+          echo "❌ UI Tests failed on all available devices"
+          exit 1
+        fi
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ui-test-results
+        path: DerivedData/Logs/Test/
