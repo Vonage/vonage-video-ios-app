@@ -33,6 +33,28 @@ if ! command -v sonar-scanner &> /dev/null; then
     exit 1
 fi
 
+# Check if slather is installed
+SLATHER_CMD=""
+if command -v slather &> /dev/null; then
+    SLATHER_CMD="slather"
+elif [ -f "Gemfile" ] && command -v bundle &> /dev/null && bundle exec slather version &> /dev/null; then
+    SLATHER_CMD="bundle exec slather"
+fi
+
+if [ -z "$SLATHER_CMD" ]; then
+    echo -e "${RED}❌ slather not found. Please install it first:${NC}"
+    echo ""
+    echo "   # Using gem (recommended)"
+    echo "   gem install slather"
+    echo ""
+    echo "   # Using bundler (if you have Gemfile)"
+    echo "   bundle install --path vendor/bundle"
+    echo ""
+    echo "   # Manual installation"
+    echo "   https://github.com/SlatherOrg/slather"
+    exit 1
+fi
+
 # Check if SONAR_TOKEN is set
 if [ -z "$SONAR_TOKEN" ]; then
     echo -e "${RED}❌ SONAR_TOKEN environment variable not set${NC}"
@@ -44,28 +66,57 @@ if [ -z "$SONAR_TOKEN" ]; then
     exit 1
 fi
 
-# Check if coverage reports exist
+# Check if coverage reports exist and generate with Slather
 COVERAGE_DIR="$PROJECT_ROOT/coverage-reports"
-if [ ! -d "$COVERAGE_DIR" ]; then
-    echo -e "${YELLOW}⚠️  No coverage reports found. Generating them first...${NC}"
-    if ! "$SCRIPT_DIR/generate-coverage.sh"; then
-        echo -e "${YELLOW}⚠️  Coverage generation failed, creating minimal report...${NC}"
-        mkdir -p "$COVERAGE_DIR"
-        echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
+DERIVED_DATA_PATH="$PROJECT_ROOT/DerivedData"
+
+echo -e "${BLUE}📊 Generating SonarCloud-compatible coverage reports...${NC}"
+
+# Create coverage directory if it doesn't exist
+mkdir -p "$COVERAGE_DIR"
+
+# Look for coverage data in DerivedData
+COVERAGE_DATA_FOUND=false
+if [ -d "$DERIVED_DATA_PATH" ]; then
+    XCRESULT_FILES=$(find "$DERIVED_DATA_PATH" -name "*.xcresult" 2>/dev/null || true)
+    if [ -n "$XCRESULT_FILES" ]; then
+        echo -e "${GREEN}✅ Found xcresult files for coverage analysis${NC}"
+        COVERAGE_DATA_FOUND=true
     fi
 fi
 
-# Ensure we have a coverage file
-if [ ! -f "$COVERAGE_DIR/coverage.json" ]; then
-    echo -e "${YELLOW}⚠️  No coverage data found. Trying to run tests...${NC}"
-    if "$SCRIPT_DIR/test-core.sh" && "$SCRIPT_DIR/generate-coverage.sh"; then
-        echo -e "${GREEN}✅ Coverage generated successfully${NC}"
-    else
-        echo -e "${YELLOW}⚠️  Test execution failed, creating minimal coverage report...${NC}"
-        mkdir -p "$COVERAGE_DIR"
-        echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
+# If no coverage data found, try to generate it
+if [ "$COVERAGE_DATA_FOUND" = false ]; then
+    echo -e "${YELLOW}⚠️  No coverage data found. Running tests to generate coverage...${NC}"
+    if ! "$SCRIPT_DIR/test-core.sh"; then
+        echo -e "${RED}❌ Test execution failed${NC}"
+        exit 1
     fi
 fi
+
+# Generate SonarCloud-compatible coverage reports using Slather
+cd "$PROJECT_ROOT"
+echo -e "${BLUE}🔄 Converting coverage data with Slather...${NC}"
+
+# Generate SonarQube XML format
+$SLATHER_CMD coverage \
+    --sonarqube-xml \
+    --output-directory "$COVERAGE_DIR" \
+    --workspace VERA/VERA.xcworkspace \
+    --scheme VERA \
+    --binary-basename VERA \
+    --source-directory . \
+    VERA/VERA.xcodeproj
+
+# Also generate cobertura format as backup
+$SLATHER_CMD coverage \
+    --cobertura-xml \
+    --output-directory "$COVERAGE_DIR" \
+    --workspace VERA/VERA.xcworkspace \
+    --scheme VERA \
+    --binary-basename VERA \
+    --source-directory . \
+    VERA/VERA.xcodeproj
 
 echo -e "${BLUE}📊 Found coverage reports:${NC}"
 ls -la "$COVERAGE_DIR/" 2>/dev/null || echo "No coverage files found"
@@ -76,11 +127,11 @@ cd "$PROJECT_ROOT"
 # Run SonarCloud analysis
 echo -e "${BLUE}☁️  Running SonarCloud analysis...${NC}"
 sonar-scanner \
-    -Dsonar.projectKey=Dsonar.projectKey=Vonage_vonage-video-ios-app \
+    -Dsonar.projectKey=Vonage_vonage-video-ios-app \
     -Dsonar.organization=vonage \
     -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
     -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
-    -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
+    -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.token=$SONAR_TOKEN \
     -Dsonar.verbose=false

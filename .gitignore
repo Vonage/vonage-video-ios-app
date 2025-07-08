@@ -60,3 +60,15 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Ruby/Bundler (for Slather and other gems)
+vendor/bundle/
+.bundle/
+Gemfile.lock
+
+# Slather coverage reports
+coverage-reports/
+slather-report/
+
+# SonarCloud temporary files
+.scannerwork/

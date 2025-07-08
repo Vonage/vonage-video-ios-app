@@ -72,13 +72,15 @@ This project integrates with **SonarCloud** for code quality analysis and covera
 ### **Coverage Reports**
 - Generated from native macOS VERACore tests
 - Supports both local and CI environments
-- Compatible with SonarCloud format
+- **Slather integration** for SonarCloud-compatible formats (XML)
+- **Fallback to xccov** for basic JSON coverage
 
 ### **SonarCloud Integration**
 - **Automatic analysis** on main branch and pull requests
-- **Coverage tracking** for Swift code
+- **Coverage tracking** for Swift code with proper XML format support
 - **Quality gate** enforcement
 - **Security hotspot** detection
+- **Slather-powered** coverage reports for accurate analysis
 
 ### **Local Quality Analysis**
 ```bash
@@ -152,6 +154,21 @@ chmod +x .git/hooks/pre-push
 3. Get your project token from Account → Security
 4. Add `SONAR_TOKEN` to your GitHub repository secrets
 5. Configure the project key in `sonar-project.properties`
+6. **Install Slather** for optimal coverage analysis:
+   ```bash
+   # Option 1: Using gem (system-wide)
+   gem install slather
+   
+   # Option 2: Using bundler (project-specific)
+   bundle install
+   ```
+
+### **Coverage Analysis Tools**
+This project supports multiple coverage analysis approaches:
+
+- **Slather** (recommended): Generates SonarCloud-compatible XML formats
+- **xccov** (fallback): Apple's native coverage tool with JSON output
+- **Automatic detection**: Scripts choose the best available tool
 
 ### **Troubleshooting SonarCloud**
 
@@ -163,6 +180,24 @@ chmod +x .git/hooks/pre-push
 # Manual cleanup and regeneration:
 rm -rf DerivedData coverage-reports
 ./scripts/test-core.sh -coverage
+
+# Check if Slather is working:
+slather version  # Should show version number
+```
+
+#### **Slather Installation Issues**
+```bash
+# If gem install fails, try:
+sudo gem install slather
+
+# For Ruby version issues:
+rbenv install 3.0.0  # or latest Ruby version
+rbenv global 3.0.0
+gem install slather
+
+# Using bundler (recommended for team consistency):
+bundle install
+bundle exec slather version
 ```
 
 #### **CI/CD Issues**
