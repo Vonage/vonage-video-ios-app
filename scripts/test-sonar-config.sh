@@ -22,13 +22,22 @@ echo -e "${BLUE}===================================${NC}"
 if command -v sonar-scanner &> /dev/null; then
     echo -e "${GREEN}✅ sonar-scanner is available${NC}"
     
+    # Read SonarCloud configuration from properties
+    SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" "$PROJECT_ROOT/sonar-project.properties" | cut -d'=' -f2 | xargs)
+    SONAR_ORGANIZATION=$(grep "^sonar.organization=" "$PROJECT_ROOT/sonar-project.properties" | cut -d'=' -f2 | xargs)
+    
+    if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+        echo -e "${RED}❌ Missing project configuration in sonar-project.properties${NC}"
+        exit 1
+    fi
+    
     # Test configuration validation
     echo -e "${YELLOW}   Testing configuration validation...${NC}"
     cd "$PROJECT_ROOT"
     
     # This will validate the configuration without actually running the scan
-    if sonar-scanner -Dsonar.projectKey=Vonage_vonage-video-ios-app \
-        -Dsonar.organization=vonage \
+    if sonar-scanner -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+        -Dsonar.organization="$SONAR_ORGANIZATION" \
         -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
         -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
         -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
@@ -72,14 +81,16 @@ if [ -f "$PROJECT_ROOT/sonar-project.properties" ]; then
     echo -e "${GREEN}✅ sonar-project.properties exists${NC}"
     
     # Check for required properties
-    if grep -q "sonar.projectKey=vonage-video-ios-app" "$PROJECT_ROOT/sonar-project.properties"; then
-        echo -e "${GREEN}✅ Project key is set${NC}"
+    if grep -q "^sonar.projectKey=" "$PROJECT_ROOT/sonar-project.properties"; then
+        FOUND_PROJECT_KEY=$(grep "^sonar.projectKey=" "$PROJECT_ROOT/sonar-project.properties" | cut -d'=' -f2 | xargs)
+        echo -e "${GREEN}✅ Project key is set: $FOUND_PROJECT_KEY${NC}"
     else
         echo -e "${RED}❌ Project key not found${NC}"
     fi
     
-    if grep -q "sonar.organization=vonage" "$PROJECT_ROOT/sonar-project.properties"; then
-        echo -e "${GREEN}✅ Organization is set${NC}"
+    if grep -q "^sonar.organization=" "$PROJECT_ROOT/sonar-project.properties"; then
+        FOUND_ORGANIZATION=$(grep "^sonar.organization=" "$PROJECT_ROOT/sonar-project.properties" | cut -d'=' -f2 | xargs)
+        echo -e "${GREEN}✅ Organization is set: $FOUND_ORGANIZATION${NC}"
     else
         echo -e "${RED}❌ Organization not found${NC}"
     fi

@@ -270,6 +270,23 @@ jobs:
       run: |
         echo "☁️ Running SonarCloud analysis..."
         
+        # Read SonarCloud configuration from sonar-project.properties
+        SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d'=' -f2 | xargs)
+        SONAR_ORGANIZATION=$(grep "^sonar.organization=" sonar-project.properties | cut -d'=' -f2 | xargs)
+        
+        if [ -z "$SONAR_PROJECT_KEY" ]; then
+          echo "❌ sonar.projectKey not found in sonar-project.properties"
+          exit 1
+        fi
+        
+        if [ -z "$SONAR_ORGANIZATION" ]; then
+          echo "❌ sonar.organization not found in sonar-project.properties"
+          exit 1
+        fi
+        
+        echo "📊 Project Key: $SONAR_PROJECT_KEY"
+        echo "🏢 Organization: $SONAR_ORGANIZATION"
+        
         # Determine which coverage format to use
         COVERAGE_PARAM=""
         if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
@@ -283,8 +300,8 @@ jobs:
         fi
         
         sonar-scanner \
-          -Dsonar.projectKey=Vonage_vonage-video-ios-app \
-          -Dsonar.organization=vonage \
+          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+          -Dsonar.organization="$SONAR_ORGANIZATION" \
           -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
           -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
           $COVERAGE_PARAM \

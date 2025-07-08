@@ -65,8 +65,20 @@ fi
 
 # Step 5: Simulate SonarCloud parameters
 echo -e "${BLUE}☁️  Step 5: SonarCloud parameters that would be used:${NC}"
-echo "   -Dsonar.projectKey=Vonage_vonage-video-ios-app"
-echo "   -Dsonar.organization=vonage"
+
+# Read from sonar-project.properties
+if [ -f "sonar-project.properties" ]; then
+    SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d'=' -f2 | xargs)
+    SONAR_ORGANIZATION=$(grep "^sonar.organization=" sonar-project.properties | cut -d'=' -f2 | xargs)
+    
+    echo "   -Dsonar.projectKey=$SONAR_PROJECT_KEY"
+    echo "   -Dsonar.organization=$SONAR_ORGANIZATION"
+else
+    echo -e "${YELLOW}⚠️  sonar-project.properties not found${NC}"
+    echo "   -Dsonar.projectKey=<from-properties-file>"
+    echo "   -Dsonar.organization=<from-properties-file>"
+fi
+
 echo "   -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
 echo "   -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok"
 echo "   -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests"
