@@ -194,12 +194,16 @@ chmod +x .git/hooks/pre-push
 <details>
 <summary><b>⚙️ SonarCloud Setup</b></summary>
 
-### **🛠️ Configuration Steps**
+### **⚙️ SonarCloud Setup**
 1. **🌐 Go to** [SonarCloud.io](https://sonarcloud.io)
 2. **📥 Import** your GitHub repository  
 3. **🔑 Get token** from Account → Security
 4. **🔐 Add** `SONAR_TOKEN` to GitHub repository secrets
-5. **⚙️ Configure** project key in `sonar-project.properties`
+5. **⚙️ Configure** project in `sonar-project.properties` (single source of truth):
+   ```properties
+   sonar.projectKey=your_project_key
+   sonar.organization=your_organization
+   ```
 6. **💎 Install Slather** for optimal coverage:
    ```bash
    # System-wide (recommended)
@@ -208,6 +212,8 @@ chmod +x .git/hooks/pre-push
    # Project-specific
    bundle install
    ```
+
+> **💡 Centralized Configuration**: All scripts and workflows read from `sonar-project.properties` to avoid configuration drift and duplication.
 
 ### **🩺 Troubleshooting**
 ```bash

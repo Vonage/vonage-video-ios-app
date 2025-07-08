@@ -33,6 +33,36 @@ if ! command -v sonar-scanner &> /dev/null; then
     exit 1
 fi
 
+# Get project configuration from sonar-project.properties
+get_sonar_property() {
+    local property_name="$1"
+    local properties_file="$PROJECT_ROOT/sonar-project.properties"
+    
+    if [ -f "$properties_file" ]; then
+        grep "^$property_name=" "$properties_file" | cut -d'=' -f2 | xargs
+    else
+        echo ""
+    fi
+}
+
+# Get SonarCloud configuration
+SONAR_PROJECT_KEY=$(get_sonar_property "sonar.projectKey")
+SONAR_ORGANIZATION=$(get_sonar_property "sonar.organization")
+
+if [ -z "$SONAR_PROJECT_KEY" ]; then
+    echo -e "${RED}❌ sonar.projectKey not found in sonar-project.properties${NC}"
+    echo "Please ensure sonar-project.properties contains:"
+    echo "  sonar.projectKey=your_project_key"
+    exit 1
+fi
+
+if [ -z "$SONAR_ORGANIZATION" ]; then
+    echo -e "${RED}❌ sonar.organization not found in sonar-project.properties${NC}"
+    echo "Please ensure sonar-project.properties contains:"
+    echo "  sonar.organization=your_organization"
+    exit 1
+fi
+
 # Check if slather is installed
 SLATHER_CMD=""
 SLATHER_AVAILABLE=false
@@ -155,8 +185,8 @@ else
 fi
 
 sonar-scanner \
-    -Dsonar.projectKey=Vonage_vonage-video-ios-app \
-    -Dsonar.organization=vonage \
+    -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+    -Dsonar.organization="$SONAR_ORGANIZATION" \
     -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
     -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
     $COVERAGE_PARAM \
@@ -165,4 +195,4 @@ sonar-scanner \
     -Dsonar.verbose=false
 
 echo -e "${GREEN}✅ SonarCloud analysis completed!${NC}"
-echo -e "${BLUE}📊 View results at: https://sonarcloud.io/project/overview?id=vonage-video-ios-app${NC}"
+echo -e "${BLUE}📊 View results at: https://sonarcloud.io/project/overview?id=$SONAR_PROJECT_KEY${NC}"
