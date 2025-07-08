@@ -1,5 +1,11 @@
 name: UI Tests
 
+# Explicit permissions following principle of least privilege
+permissions:
+  contents: read       # Read repository contents
+  pull-requests: write # Comment on PRs with test results
+  actions: read        # Read workflow run information
+
 on:
   # Run on pull requests to main branch
   pull_request:
