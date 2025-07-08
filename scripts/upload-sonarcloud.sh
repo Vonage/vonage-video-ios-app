@@ -132,12 +132,25 @@ cd "$PROJECT_ROOT"
 
 # Run SonarCloud analysis
 echo -e "${BLUE}☁️  Running SonarCloud analysis...${NC}"
+
+# Determine which coverage format to use based on available files
+COVERAGE_PARAM=""
+if [ -f "$COVERAGE_DIR/sonarqube-generic-coverage.xml" ]; then
+    COVERAGE_PARAM="-Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml"
+    echo -e "${GREEN}✅ Using SonarQube XML coverage format${NC}"
+elif [ -f "$COVERAGE_DIR/coverage.json" ]; then
+    COVERAGE_PARAM="-Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
+    echo -e "${YELLOW}⚠️  Using fallback JSON coverage format${NC}"
+else
+    echo -e "${YELLOW}⚠️  No coverage reports found, running analysis without coverage${NC}"
+fi
+
 sonar-scanner \
     -Dsonar.projectKey=Vonage_vonage-video-ios-app \
     -Dsonar.organization=vonage \
     -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
     -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
-    -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
+    $COVERAGE_PARAM \
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.token=$SONAR_TOKEN \
     -Dsonar.verbose=false
