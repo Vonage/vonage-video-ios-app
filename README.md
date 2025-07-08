@@ -1,178 +1,234 @@
-# vonage-video-ios-app
+<div align="center">
+
+# 📹 Vonage Video iOS App
+
+*Modern Swift iOS reference application for Vonage Video API*
 
 [![CI](https://github.com/Vonage/vonage-video-ios-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Vonage/vonage-video-ios-app/actions/workflows/ci.yml)
 [![UI Tests](https://github.com/Vonage/vonage-video-ios-app/actions/workflows/ui-tests.yml/badge.svg)](https://github.com/Vonage/vonage-video-ios-app/actions/workflows/ui-tests.yml)
-[![Swift](https://img.shields.io/badge/Swift-5.5+-orange.svg)](https://swift.org)
-[![iOS](https://img.shields.io/badge/iOS-15.0+-blue.svg)](https://developer.apple.com/ios/)
-[![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)](https://developer.apple.com/xcode/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Vonage_vonage-video-ios-app&metric=alert_status&token=6e3d4158efec942908cf73c93e62e52402876973)](https://sonarcloud.io/summary/new_code?id=Vonage_vonage-video-ios-app)
 
-Vonage Video API Swift iOS reference application
+[![Swift](https://img.shields.io/badge/Swift-5.5+-FA7343?style=for-the-badge&logo=swift&logoColor=white)](https://swift.org)
+[![iOS](https://img.shields.io/badge/iOS-15.0+-007AFF?style=for-the-badge&logo=apple&logoColor=white)](https://developer.apple.com/ios/)
+[![Xcode](https://img.shields.io/badge/Xcode-15.0+-147EFB?style=for-the-badge&logo=xcode&logoColor=white)](https://developer.apple.com/xcode/)
 
-## 🚀 CI/CD Strategy
+---
 
-### **Fast CI Pipeline** (Default - runs on every PR/push)
-- ✅ **Code formatting** check with swift-format
-- ✅ **Build** verification for iOS Simulator
-- ✅ **VERACore tests** on macOS (native, super fast, ~1 second)
-- ✅ **UI tests enabled** on Pull Requests (with smart detection)
+### 🚀 **Quick Start** | 🧪 **Testing** | 📊 **Quality** | 📱 **Architecture**
 
-### **UI Tests Pipeline** (Automatic on PRs)
-- **Triggered on**: Pull Requests to main branch with UI-relevant changes
-- **Smart detection**: Only runs when Swift/UI files change (single macOS job)
-- **Automatic feedback**: Comments on PR with test results
-- 🎯 **Manual trigger**: Use GitHub Actions "Run workflow" button
-- 🔧 **Device selection**: Choose iPhone 16, iPhone 16 Pro, iPhone 15, or iPad
+</div>
 
-### **Local Development**
+## 🚀 Quick Start
+
+<details open>
+<summary><b>🆕 New Developer Setup</b></summary>
+
+### **One-Command Setup** ⚡
 ```bash
-# Fast tests only (recommended for development)
-./scripts/test-core.sh
+# Clone and setup everything automatically
+git clone https://github.com/vonage/vonage-video-ios-app.git
+cd vonage-video-ios-app
+./scripts/setup-project.sh
+```
 
-# Core tests + UI tests (slow)
-./scripts/test.sh -ui
+**What this does:**
+- ✅ Validates system requirements (macOS, Xcode)
+- ✅ Installs development tools (Git LFS, swift-format)
+- ✅ Configures Git LFS for snapshot images
+- ✅ Tests initial build
+- ✅ Shows next steps
 
-# Core tests + coverage reports
+### **Manual Setup** (if needed)
+```bash
+brew install git-lfs swift-format
+git lfs install && git lfs pull
+./scripts/validate-setup.sh
+```
+
+</details>
+
+## 🧪 Smart CI/CD Strategy
+
+<div align="center">
+
+| Pipeline | Speed | Triggers | Purpose |
+|----------|-------|----------|---------|
+| **🚀 Fast CI** | ~30s | Every PR/Push | Build + Core Tests |
+| **🎮 UI Tests** | ~5min | PR w/ UI changes | UI Validation |
+| **� Quality** | ~1min | Main branch | SonarCloud Analysis |
+
+</div>
+
+### **🚀 Fast CI Pipeline** (Default)
+```bash
+# What runs on every PR/push:
+✅ Code formatting check (swift-format)
+✅ Build verification (iOS Simulator)  
+✅ VERACore tests (macOS native - 1 second!)
+✅ SonarCloud quality analysis
+```
+
+### **🎮 UI Tests Pipeline** (Smart Detection)
+```bash
+# Automatically triggered when:
+📱 Swift/UI files change in PRs
+🎯 Manual trigger via GitHub Actions
+🔧 Device selection: iPhone 16/Pro, iPhone 15, iPad
+💬 Automatic PR comments with results
+```
+
+### **⚡ Local Development**
+```bash
+# Lightning fast development cycle
+./scripts/test-core.sh              # ⚡ Core tests (~1s)
+./scripts/test.sh -coverage         # 📊 With coverage
+./scripts/test-ui.sh                # 🎮 UI tests (slow)
+./scripts/generate-coverage.sh      # 📈 Coverage only
+```
+
+> **💡 Why This Strategy?**  
+> Ultra-fast feedback with VERACore tests running natively on macOS (no simulator overhead), intelligent UI test triggering, and instant PR feedback.
+
+## 📱 Project Architecture
+
+<div align="center">
+
+```mermaid
+graph TD
+    A[📱 VERA App] --> B[🧠 VERACore]
+    A --> C[📹 VERAOpenTok]
+    B --> D[🧪 VERACoreTests]
+    B --> E[📸 VERACoreSnapshotTests]
+    A --> F[🎮 VERAUITests]
+    
+    style A fill:#007AFF,color:#fff
+    style B fill:#34C759,color:#fff
+    style C fill:#FF9500,color:#fff
+    style D fill:#5AC8FA,color:#fff
+    style E fill:#AF52DE,color:#fff
+    style F fill:#FF2D92,color:#fff
+```
+
+</div>
+
+### **🎯 Target Breakdown**
+- **📱 VERA**: iOS app with UI and E2E tests
+- **🧠 VERACore**: Universal business logic (testable on macOS)
+- **📹 VERAOpenTok**: OpenTok wrapper implementing domain interfaces
+
+## 📊 Code Quality & Coverage
+
+<div align="center">
+
+**🎯 SonarCloud Integration** • **📈 Coverage Analysis** • **🔍 Quality Gates**
+
+</div>
+
+<details open>
+<summary><b>🌟 Quality Analysis</b></summary>
+
+### **🚀 SonarCloud Integration**
+- **🔄 Automatic analysis** on main branch and pull requests
+- **📊 Coverage tracking** with XML format support (Slather + xccov fallback)
+- **🛡️ Quality gate** enforcement with security hotspot detection
+- **🎯 Smart coverage** - Dynamic format selection (XML preferred, JSON fallback)
+
+### **📈 Coverage Reports**
+```bash
+# Generate coverage from tests
 ./scripts/test.sh -coverage
 
-# Core tests + UI tests + coverage reports
-./scripts/test.sh -ui -coverage
-
-# UI tests only (very slow)
-./scripts/test-ui.sh
-
-# Generate coverage reports from existing test results
+# Generate from existing test results  
 ./scripts/generate-coverage.sh
 
-# Upload to SonarCloud (requires SONAR_TOKEN)
-export SONAR_TOKEN=your_token_here
+# Upload to SonarCloud
+export SONAR_TOKEN=your_token
 ./scripts/upload-sonarcloud.sh
 ```
 
-### **Why This Strategy?**
-- **Ultra-fast feedback**: Core tests run natively on macOS in ~1 second
-- **No simulator overhead**: VERACore tests run directly on macOS
-- **CI-friendly**: Works without code signing certificates
-- **Better DX**: Developers get instant feedback on logic changes
-- **Intelligent automation**: UI tests run automatically on PRs with relevant changes
-- **Resource efficient**: Smart detection prevents unnecessary test runs
-- **Immediate feedback**: PR comments show test results instantly
+**Coverage Tools:**
+- **🥇 Slather** (preferred): SonarCloud-compatible XML
+- **🥈 xccov** (fallback): Apple's native JSON format
+- **🤖 Auto-detection**: Scripts choose the best available
 
-## 📱 Project Structure
+</details>
 
-This project uses a workspace with three targets:
-- **VERA** (iOS app with UI and E2E tests)
-- **VERACore** (Universal business logic, testable on macOS)
-- **VERAOpenTok** (OpenTok wrapper implementing domain interfaces)
+<details>
+<summary><b>🔧 Code Quality Tools</b></summary>
 
-## 📊 Code Coverage & Quality
+<div align="center">
 
-This project integrates with **SonarCloud** for code quality analysis and coverage reporting.
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **swift-format** | Code formatting & style | `./scripts/code-quality.sh --format-only` |
+| **SwiftLint** | Best practices & linting | `./scripts/code-quality.sh --lint-only` |
+| **Both** | Complete quality check | `./scripts/code-quality.sh` |
 
-### **Coverage Reports**
-- Generated from native macOS VERACore tests
-- Supports both local and CI environments
-- **Slather integration** for SonarCloud-compatible formats (XML)
-- **Fallback to xccov** for basic JSON coverage
+</div>
 
-### **SonarCloud Integration**
-- **Automatic analysis** on main branch and pull requests
-- **Coverage tracking** for Swift code with proper XML format support
-- **Quality gate** enforcement
-- **Security hotspot** detection
-- **Slather-powered** coverage reports for accurate analysis
-
-### **Local Quality Analysis**
+### **⚡ Quick Commands**
 ```bash
-# Run tests with coverage
-./scripts/test.sh -coverage
-
-# Generate coverage from existing test results
-./scripts/generate-coverage.sh
-
-# Run code quality checks (swift-format + SwiftLint)
+# Run all quality checks
 ./scripts/code-quality.sh
 
-# Run only swift-format
-./scripts/code-quality.sh --format-only
+# Auto-fix issues
+./scripts/code-quality.sh --fix
 
-# Run only SwiftLint
-./scripts/code-quality.sh --lint-only
+# Simulate CI locally
+./scripts/simulate-ci.sh
+```
+
+### **🪝 Git Hooks**
+**Pre-push automation** runs SwiftLint automatically:
+```bash
+# Runs automatically on git push
+scripts/git-hooks/pre-push
+
+# Manual hook installation (if needed)
+cp scripts/git-hooks/pre-push .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+</details>
+
+<details>
+<summary><b>⚙️ SonarCloud Setup</b></summary>
+
+### **🛠️ Configuration Steps**
+1. **🌐 Go to** [SonarCloud.io](https://sonarcloud.io)
+2. **📥 Import** your GitHub repository  
+3. **🔑 Get token** from Account → Security
+4. **🔐 Add** `SONAR_TOKEN` to GitHub repository secrets
+5. **⚙️ Configure** project key in `sonar-project.properties`
+6. **💎 Install Slather** for optimal coverage:
+   ```bash
+   # System-wide (recommended)
+   gem install slather
+   
+   # Project-specific
+   bundle install
+   ```
+
+### **🩺 Troubleshooting**
+```bash
+# Coverage issues
+./scripts/simulate-ci.sh
+rm -rf DerivedData coverage-reports && ./scripts/test-core.sh -coverage
+
+# Slather problems  
+slather version && bundle exec slather version
+
+# Debug coverage
+ls -la coverage-reports/ && cat coverage-reports/coverage.json | python3 -m json.tool
+```
+
+</details>
 ./scripts/lint-swift.sh
 
 # Auto-fix code quality issues
 ./scripts/code-quality.sh --fix
 
-# Simulate CI environment locally
-./scripts/simulate-ci.sh
 
-# Upload to SonarCloud (requires token)
-export SONAR_TOKEN=your_sonar_token
-./scripts/upload-sonarcloud.sh
-```
-
-### **Code Quality Tools**
-This project uses two complementary tools for code quality:
-
-- **swift-format**: Handles code formatting and style consistency
-- **SwiftLint**: Enforces Swift best practices and detects potential issues
-
-Both tools are configured to work on all Swift files in the workspace and can be run individually or together.
-
-### **Git Hooks**
-This project includes a pre-push git hook that automatically runs SwiftLint before allowing a push:
-
-- **Automatic enforcement**: Runs SwiftLint on every push
-- **Prevents quality issues**: Blocks push if code doesn't meet standards
-- **Fast execution**: Only runs essential code quality checks
-- **Helpful feedback**: Shows exactly what needs to be fixed
-
-```bash
-# Git hook runs automatically on push, but you can test it manually:
-scripts/git-hooks/pre-push
-
-# If quality checks fail, fix them with:
-swiftlint --fix
-scripts/lint-swift.sh --fix
-scripts/code-quality.sh --fix  # For both swift-format + SwiftLint
-```
-
-The git hook is installed automatically during project setup. If you need to reinstall it manually:
-```bash
-cp scripts/git-hooks/pre-push .git/hooks/pre-push
-chmod +x .git/hooks/pre-push
-```
-
-**Why only SwiftLint in the pre-push hook?**
-- **Faster execution**: Only essential quality checks before push
-- **Less disruptive**: Developers can format code locally with their IDE
-- **Focus on quality**: Pre-push should prevent real issues, not minor formatting
-
-### **Setting up SonarCloud**
-1. Go to [SonarCloud.io](https://sonarcloud.io)
-2. Import your GitHub repository
-3. Get your project token from Account → Security
-4. Add `SONAR_TOKEN` to your GitHub repository secrets
-5. Configure the project key in `sonar-project.properties`
-6. **Install Slather** for optimal coverage analysis:
-   ```bash
-   # Option 1: Using gem (system-wide)
-   gem install slather
-   
-   # Option 2: Using bundler (project-specific)
-   bundle install
-   ```
-
-### **Coverage Analysis Tools**
-This project supports multiple coverage analysis approaches:
-
-- **Slather** (recommended): Generates SonarCloud-compatible XML formats
-- **xccov** (fallback): Apple's native coverage tool with JSON output
-- **Automatic detection**: Scripts choose the best available tool
-
-### **Troubleshooting SonarCloud**
-
-#### **Coverage Issues**
 ```bash
 # If coverage generation fails, try:
 ./scripts/simulate-ci.sh  # Full CI simulation
@@ -219,100 +275,86 @@ cat coverage-reports/coverage.json | python3 -m json.tool
 
 ## 📸 Snapshot Testing
 
-VERACore includes comprehensive snapshot testing for iOS UI components using [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing).
+<div align="center">
 
-### Architecture
+**Visual Regression Testing** • **Multi-Device Support** • **Dark/Light Mode**
 
-**📦 Test Separation Strategy:**
+</div>
 
-- **`VERACoreTests`**: Universal tests (macOS, iOS) for core functionality
-  - ✅ Fast execution (< 5 seconds)
-  - ✅ No simulators required  
-  - ✅ Logic, algorithms, data processing
-  - ✅ Runs automatically in CI
+<details open>
+<summary><b>🎯 Testing Strategy</b></summary>
 
-- **`VERACoreSnapshotTests`**: iOS-specific snapshot tests for UI components
-  - ⚠️ Slow execution (30+ seconds)
-  - ⚠️ Requires iOS simulator
-  - 🎯 UI component visual validation
-  - 🎯 **Manual execution only** - not part of regular test suite
+<div align="center">
 
-### Setup Snapshot Testing
+| Test Type | Speed | Environment | Purpose |
+|-----------|-------|-------------|---------|
+| **🧠 VERACoreTests** | ⚡ ~1s | macOS Universal | Logic & Business Rules |
+| **📸 SnapshotTests** | 🐌 ~30s | iOS Simulator | UI Component Validation |
+| **🎮 UITests** | 🐌 ~5min | iOS Simulator | E2E User Flows |
 
-✅ **Snapshot testing is now configured and ready to use!**
+</div>
 
-The project includes:
-- **`VERACoreTests`**: Universal tests (macOS, iOS) for core functionality  
-- **`VERACoreSnapshotTests`**: iOS-specific snapshot tests for UI components
-- **Reference images**: Committed snapshots for iPhone 16 simulator
-
-### Running Tests
-
-**🚀 Core/Logic Tests (Fast - Recommended for development):**
+### **🚀 Core Tests** (Recommended for development)
 ```bash
-# Run core tests (universal - macOS, no UI)
-./scripts/test-core.sh
-
-# Run core tests with coverage
-./scripts/test-core.sh -coverage
+./scripts/test-core.sh              # ⚡ Lightning fast
+./scripts/test-core.sh -coverage    # 📊 With coverage
 ```
 
-**🎮 Platform/UI Tests (Slow - For integration testing):**
+### **📸 Snapshot Tests** (UI validation)
 ```bash
-# Run all platform tests including UI
-./scripts/test.sh -ui
-
-# Run with coverage 
-./scripts/test.sh -ui -coverage
+./scripts/test-snapshots.sh         # 🖼️ Visual tests
+./scripts/test-snapshots.sh -r      # 📝 Record new snapshots
+./scripts/test-snapshots.sh -d "iPhone 16 Pro"  # 📱 Specific device
 ```
 
-**📸 Snapshot Tests (Separate - Only for UI component validation):**
+### **🎮 Full Integration** (Complete testing)
 ```bash
-# Run iOS snapshot tests (independent from other tests)
-./scripts/test-snapshots.sh
-
-# Record new reference snapshots
-./scripts/test-snapshots.sh -r
-
-# Test on specific device
-./scripts/test-snapshots.sh -d "iPhone 16 Pro"
+./scripts/test.sh -ui               # 🎮 All tests
+./scripts/test.sh -ui -coverage     # 📊 Full suite + coverage
 ```
 
-### Snapshot Testing Features
+</details>
+
+<details>
+<summary><b>✨ Snapshot Features</b></summary>
 
 - **📱 Multi-device testing**: iPhone, iPad, different screen sizes
-- **🌓 Light/Dark mode**: Automatic testing of both themes
-- **♿️ Accessibility**: Tests with different Dynamic Type sizes
-- **🔄 Orientation**: Portrait and landscape testing
+- **🌓 Theme testing**: Automatic light/dark mode validation  
+- **♿️ Accessibility**: Dynamic Type size testing
+- **🔄 Orientation**: Portrait and landscape support
 - **🎯 Precision control**: Configurable pixel tolerance
-- **📁 Organized output**: Snapshots stored in `__Snapshots__` folders
+- **📁 Organized storage**: Clean `__Snapshots__` folder structure
 
-### Best Practices
+### **🖼️ Git LFS Integration**
+```bash
+# Setup (one-time)
+brew install git-lfs && git lfs install
 
-1. **Separate concerns**: Use universal tests for logic, iOS tests for UI
-2. **Development workflow**: Use `./scripts/test-core.sh` for fast feedback
-3. **UI changes**: Run `./scripts/test-snapshots.sh` when modifying UI components
-4. **Record snapshots** when creating new UI components
-5. **Review changes** carefully when snapshots fail
-6. **Commit reference images** to version control
-7. **Use descriptive names** for your snapshot tests
-8. **Test edge cases** like empty states, errors, loading
+# Work with snapshots
+git lfs ls-files    # 📋 List tracked images
+git lfs status      # 📊 Check LFS status
+git lfs pull        # 📥 Download images
+```
 
-### When to Use Snapshot Tests
+**Tracked files**: `*.png`, `*.jpg`, `*.jpeg` automatically managed by Git LFS
 
-**✅ Use snapshot tests for:**
-- New UI components or views
-- Visual regression testing
-- Before releasing UI changes
-- Validating design consistency
+</details>
 
-**❌ Don't use snapshot tests for:**
-- Regular development (too slow)
-- Logic testing (use core tests)
-- Automated CI runs (unless specific UI validation needed)
+<details>
+<summary><b>💡 Best Practices</b></summary>
 
-### Example Snapshot Test
+### **✅ When to Use Snapshot Tests**
+- 🆕 New UI components or views
+- 🔄 Visual regression testing  
+- 🚀 Before releasing UI changes
+- 🎨 Design consistency validation
 
+### **❌ When NOT to Use**
+- 🏃‍♂️ Regular development (too slow)
+- 🧠 Logic testing (use core tests)
+- 🤖 Every CI run (unless specific UI validation needed)
+
+### **📝 Example Test**
 ```swift
 func testVideoCallButton() throws {
     let button = VideoCallButton(
@@ -321,7 +363,6 @@ func testVideoCallButton() throws {
         action: { }
     )
     
-    // Test with size that fits
     assertSnapshot(
         of: button, 
         as: .image(layout: .sizeThatFits), 
@@ -330,82 +371,175 @@ func testVideoCallButton() throws {
 }
 ```
 
-## 📸 **Snapshot Testing & Git LFS**
+</details>
 
-This project uses **Git LFS** (Large File Storage) to efficiently manage snapshot test images.
+## 🔄 Development Workflow
 
-### **Git LFS Setup**
+<details open>
+<summary><b>⚡ Recommended Daily Workflow</b></summary>
+
+### **🏃‍♂️ Fast Development Cycle**
 ```bash
-# Install Git LFS (if not already installed)
-brew install git-lfs
+# 1. Pull latest changes
+git pull origin main
 
-# Initialize LFS in your local repository
-git lfs install
-```
-
-### **Working with Snapshot Images**
-- **PNG files are automatically tracked** by Git LFS
-- **Faster clones** - Images are downloaded on-demand
-- **Better collaboration** - Reduces repository size for all developers
-
-```bash
-# Run snapshot tests (generates reference images)
-./scripts/test-snapshots.sh
-
-# Re-record snapshots when UI changes
-./scripts/test-snapshots.sh -r
-
-# Check LFS status
-git lfs ls-files
-git lfs status
-```
-
-### **Important Notes**
-- **First-time setup**: Run `git lfs pull` after cloning to download images
-- **CI/CD**: GitHub Actions automatically handles LFS files
-- **File types tracked**: `*.png`, `*.jpg`, `*.jpeg`
-
-## 🆕 **Quick Start for New Developers**
-
-### **Automated Setup (Recommended)**
-```bash
-# Clone the repository
-git clone https://github.com/vonage/vonage-video-ios-app.git
-cd vonage-video-ios-app
-
-# Run the automated setup script
-./scripts/setup-project.sh
-```
-
-The setup script will:
-- ✅ Check system requirements (macOS, Xcode)
-- ✅ Install development tools (Homebrew, Git LFS, swift-format)
-- ✅ Configure Git LFS and download snapshot images
-- ✅ Validate project configuration
-- ✅ Test initial build
-- ✅ Show you next steps and useful commands
-
-### **Manual Setup (if needed)**
-```bash
-# Install dependencies
-brew install git-lfs swift-format
-
-# Initialize Git LFS
-git lfs install
-git lfs pull
-
-# Verify setup
-./scripts/validate-setup.sh
-```
-
-### **First Steps After Setup**
-```bash
-# Run core tests (fast)
+# 2. Quick validation (⚡ ~1s)
 ./scripts/test-core.sh
 
-# Run all tests with coverage
-./scripts/test.sh -coverage
+# 3. Make your changes...
 
-# Try snapshot testing
-./scripts/test-snapshots.sh
+# 4. Quick check before commit (⚡ ~5s)
+./scripts/test-core.sh
+./scripts/code-quality.sh --fix
+
+# 5. Commit & push (pre-push hook runs automatically)
+git add . && git commit -m "Your changes"
+git push origin feature-branch
 ```
+
+### **🔍 Before PR / Release**
+```bash
+# Full validation suite
+./scripts/test.sh -ui -coverage     # 🎮 Complete testing
+./scripts/test-snapshots.sh         # 📸 Visual validation
+./scripts/simulate-ci.sh            # 🤖 CI simulation
+```
+
+</details>
+
+<details>
+<summary><b>🛠️ Common Development Tasks</b></summary>
+
+<div align="center">
+
+| Task | Command | Speed |
+|------|---------|-------|
+| **Quick test** | `./scripts/test-core.sh` | ⚡ 1s |
+| **Format code** | `./scripts/code-quality.sh --fix` | ⚡ 3s |
+| **UI changes** | `./scripts/test-snapshots.sh -r` | 🐌 30s |
+| **Full check** | `./scripts/simulate-ci.sh` | 🐌 60s |
+| **Coverage** | `./scripts/test.sh -coverage` | ⚡ 10s |
+
+</div>
+
+### **📝 Script Reference**
+```bash
+# Testing
+./scripts/test-core.sh              # ⚡ Core logic tests
+./scripts/test-ui.sh                # 🎮 UI tests only  
+./scripts/test-snapshots.sh         # 📸 Snapshot tests
+./scripts/test.sh -ui -coverage     # 🎯 Full test suite
+
+# Quality & Coverage
+./scripts/code-quality.sh           # 🔍 Format + Lint
+./scripts/generate-coverage.sh      # 📊 Coverage reports
+./scripts/upload-sonarcloud.sh      # ☁️ SonarCloud upload
+
+# Utilities
+./scripts/setup-project.sh          # 🚀 Initial setup
+./scripts/validate-setup.sh         # ✅ Verify config
+./scripts/simulate-ci.sh            # 🤖 Local CI simulation
+```
+
+</details>
+
+## 🆘 Troubleshooting
+
+<details>
+<summary><b>🔧 Common Issues & Solutions</b></summary>
+
+### **🚫 Build Issues**
+```bash
+# Clean everything
+rm -rf DerivedData .build coverage-reports
+xcodebuild clean
+
+# Reset simulators
+xcrun simctl erase all
+
+# Verify Xcode setup
+xcode-select --print-path
+sudo xcode-select --reset
+```
+
+### **📦 Dependency Issues**
+```bash
+# Git LFS problems
+git lfs install && git lfs pull
+
+# Slather issues
+gem install slather
+# or
+bundle install && bundle exec slather version
+
+# Swift tools
+brew reinstall swift-format swiftlint
+```
+
+### **🧪 Test Issues**
+```bash
+# No test results
+./scripts/validate-setup.sh
+
+# Coverage not generating
+rm -rf DerivedData && ./scripts/test-core.sh -coverage
+
+# Snapshot test failures
+./scripts/test-snapshots.sh -r      # Re-record snapshots
+```
+
+### **☁️ SonarCloud Issues**
+```bash
+# Missing token
+export SONAR_TOKEN=your_token_here
+
+# Coverage format issues - check both formats
+ls -la coverage-reports/
+cat coverage-reports/coverage.json | python3 -m json.tool
+
+# Upload failures
+./scripts/simulate-ci.sh
+```
+
+</details>
+
+<details>
+<summary><b>🔍 Debug Information</b></summary>
+
+### **System Requirements Check**
+```bash
+# Verify everything is properly installed
+./scripts/validate-setup.sh
+
+# Manual checks
+xcodebuild -version
+swift --version
+git lfs version
+slather version
+```
+
+### **Project Health Check**
+```bash
+# Check file structure
+find . -name "*.xcodeproj" -o -name "*.xcworkspace"
+
+# Verify Git LFS
+git lfs ls-files | head -5
+
+# Test core functionality
+./scripts/test-core.sh --verbose
+```
+
+</details>
+
+---
+
+<div align="center">
+
+### 🎉 **Ready to Build Amazing Video Experiences!**
+
+**📚 [Documentation](./docs/)** • **🐛 [Report Issues](https://github.com/vonage/vonage-video-ios-app/issues)** • **💬 [Discussions](https://github.com/vonage/vonage-video-ios-app/discussions)**
+
+*Made with ❤️ by the Vonage Team*
+
+</div>
