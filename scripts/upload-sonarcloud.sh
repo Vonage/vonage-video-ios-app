@@ -35,30 +35,29 @@ fi
 
 # Check if slather is installed
 SLATHER_CMD=""
+SLATHER_AVAILABLE=false
+
 if command -v slather &> /dev/null; then
     SLATHER_CMD="slather"
+    SLATHER_AVAILABLE=true
 elif [ -f "Gemfile" ] && command -v bundle &> /dev/null; then
     # Test if bundle exec slather works
     if bundle exec slather version &> /dev/null; then
         SLATHER_CMD="bundle exec slather"
+        SLATHER_AVAILABLE=true
     else
         echo -e "${YELLOW}⚠️  Slather via bundler has issues (nokogiri dependency).${NC}"
         SLATHER_CMD=""
+        SLATHER_AVAILABLE=false
     fi
 fi
 
-if [ -z "$SLATHER_CMD" ]; then
-    echo -e "${RED}❌ slather not found or not working. Please install it first:${NC}"
-    echo ""
-    echo "   # Using system gem (recommended)"
+if [ "$SLATHER_AVAILABLE" = false ]; then
+    echo -e "${YELLOW}⚠️  Slather not available, will use existing coverage reports or skip coverage${NC}"
+    echo -e "${BLUE}💡 To enable XML coverage reports, install Slather:${NC}"
     echo "   sudo gem install slather"
     echo ""
-    echo "   # Using Homebrew if available"
-    echo "   brew install --cask slather || echo 'Not available via brew'"
-    echo ""
-    echo "   # Manual installation"
-    echo "   https://github.com/SlatherOrg/slather"
-    exit 1
+    echo "Continuing with available coverage reports..."
 fi
 
 # Check if SONAR_TOKEN is set
@@ -100,29 +99,39 @@ if [ "$COVERAGE_DATA_FOUND" = false ]; then
     fi
 fi
 
-# Generate SonarCloud-compatible coverage reports using Slather
+# Generate SonarCloud-compatible coverage reports
 cd "$PROJECT_ROOT"
-echo -e "${BLUE}🔄 Converting coverage data with Slather...${NC}"
 
-# Generate SonarQube XML format
-$SLATHER_CMD coverage \
-    --sonarqube-xml \
-    --output-directory "$COVERAGE_DIR" \
-    --workspace VERA/VERA.xcworkspace \
-    --scheme VERA \
-    --binary-basename VERA \
-    --source-directory . \
-    VERA/VERA.xcodeproj
-
-# Also generate cobertura format as backup
-$SLATHER_CMD coverage \
-    --cobertura-xml \
-    --output-directory "$COVERAGE_DIR" \
-    --workspace VERA/VERA.xcworkspace \
-    --scheme VERA \
-    --binary-basename VERA \
-    --source-directory . \
-    VERA/VERA.xcodeproj
+if [ "$SLATHER_AVAILABLE" = true ]; then
+    echo -e "${BLUE}🔄 Converting coverage data with Slather...${NC}"
+    
+    # Generate SonarQube XML format
+    $SLATHER_CMD coverage \
+        --sonarqube-xml \
+        --output-directory "$COVERAGE_DIR" \
+        --workspace VERA/VERA.xcworkspace \
+        --scheme VERA \
+        --binary-basename VERA \
+        --source-directory . \
+        VERA/VERA.xcodeproj
+    
+    # Also generate cobertura format as backup
+    $SLATHER_CMD coverage \
+        --cobertura-xml \
+        --output-directory "$COVERAGE_DIR" \
+        --workspace VERA/VERA.xcworkspace \
+        --scheme VERA \
+        --binary-basename VERA \
+        --source-directory . \
+        VERA/VERA.xcodeproj
+else
+    echo -e "${YELLOW}⚠️  Slather not available, using existing coverage reports${NC}"
+    # Check if we need to generate coverage with xccov as fallback
+    if [ ! -f "$COVERAGE_DIR/coverage.json" ]; then
+        echo -e "${BLUE}📊 Generating coverage with xccov fallback...${NC}"
+        "$SCRIPT_DIR/generate-coverage.sh"
+    fi
+fi
 
 echo -e "${BLUE}📊 Found coverage reports:${NC}"
 ls -la "$COVERAGE_DIR/" 2>/dev/null || echo "No coverage files found"
