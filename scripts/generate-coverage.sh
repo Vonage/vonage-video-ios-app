@@ -22,9 +22,15 @@ SLATHER_CMD=""
 if command -v slather &> /dev/null; then
     SLATHER_CMD="slather"
     USE_SLATHER=true
-elif [ -f "Gemfile" ] && command -v bundle &> /dev/null && bundle exec slather version &> /dev/null 2>&1; then
-    SLATHER_CMD="bundle exec slather"
-    USE_SLATHER=true
+elif [ -f "Gemfile" ] && command -v bundle &> /dev/null; then
+    # Test if bundle exec slather works
+    if bundle exec slather version &> /dev/null; then
+        SLATHER_CMD="bundle exec slather"
+        USE_SLATHER=true
+    else
+        echo -e "${YELLOW}⚠️  Slather via bundler has issues (nokogiri dependency). Falling back to xccov...${NC}"
+        USE_SLATHER=false
+    fi
 else
     echo -e "${YELLOW}⚠️  slather not found. Falling back to xccov...${NC}"
     USE_SLATHER=false
@@ -102,9 +108,6 @@ if [ "$USE_SLATHER" = true ]; then
         USE_SLATHER=false
     fi
 fi
-
-# Fallback to xccov if Slather failed or is not available
-if [ "$USE_SLATHER" = false ]; then
 
 # Fallback to xccov if Slather failed or is not available
 if [ "$USE_SLATHER" = false ]; then
