@@ -98,25 +98,25 @@ if [ "$LINT_ONLY" = false ]; then
         OVERALL_SUCCESS=false
     else
         # Build swift-format command
-        FORMAT_CMD="find ./VERA -name '*.swift' -not -path '*/DerivedData/*' -not -path '*/.build/*'"
-        
         if [ "$AUTO_FIX" = true ]; then
-            FORMAT_CMD="$FORMAT_CMD | xargs swift-format format --in-place --configuration .swift-format"
             echo -e "${YELLOW}🔧 Auto-fixing format violations...${NC}"
-        else
-            FORMAT_CMD="$FORMAT_CMD | xargs swift-format format --configuration .swift-format | diff -q - /dev/null"
-        fi
-        
-        if [ "$VERBOSE" = true ]; then
-            echo -e "${BLUE}Running: $FORMAT_CMD${NC}"
-        fi
-        
-        # Run swift-format
-        if eval "$FORMAT_CMD" >/dev/null 2>&1; then
-            echo -e "${GREEN}✅ swift-format completed successfully${NC}"
-        else
-            if [ "$AUTO_FIX" = true ]; then
+            if find ./VERA -name '*.swift' -not -path '*/DerivedData/*' -not -path '*/.build/*' | xargs swift-format format --in-place --configuration .swift-format; then
                 echo -e "${GREEN}✅ swift-format auto-fixed violations${NC}"
+            else
+                echo -e "${RED}❌ swift-format failed to auto-fix${NC}"
+                OVERALL_SUCCESS=false
+            fi
+        else
+            # Check if files need formatting
+            FORMAT_VIOLATIONS=0
+            while IFS= read -r -d '' file; do
+                if ! swift-format format --configuration .swift-format "$file" | diff -q "$file" - >/dev/null 2>&1; then
+                    ((FORMAT_VIOLATIONS++))
+                fi
+            done < <(find ./VERA -name '*.swift' -not -path '*/DerivedData/*' -not -path '*/.build/*' -print0)
+            
+            if [ $FORMAT_VIOLATIONS -eq 0 ]; then
+                echo -e "${GREEN}✅ swift-format completed successfully${NC}"
             else
                 echo -e "${RED}❌ swift-format found violations${NC}"
                 echo -e "${YELLOW}   Fix with: find ./VERA -name '*.swift' | xargs swift-format format --in-place --configuration .swift-format${NC}"
