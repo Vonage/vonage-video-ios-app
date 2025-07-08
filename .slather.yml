@@ -1,0 +1,35 @@
+# Slather configuration for SonarCloud integration
+# https://github.com/SlatherOrg/slather
+
+# Project configuration
+workspace: VERA/VERA.xcworkspace
+xcodeproj: VERA/VERA.xcodeproj
+scheme: VERA
+source_directory: .
+output_directory: coverage-reports
+binary_basename: VERA
+
+# Coverage settings
+coverage_service: false  # We'll manually upload to SonarCloud
+coverage_access_token: false
+
+# File patterns to ignore
+ignore:
+  - "VERA/VERATests/*"
+  - "VERA/VERAUITests/*"
+  - "VERA/VERACore/VERACoreTests/*"
+  - "VERA/VERAOpenTok/VERAOpenTokTests/*"
+  - "VERA/VERACore/VERACoreSnapshotTests/*"
+  - "*/Tests/*"
+  - "*Tests.swift"
+  - "*/Pods/*"
+  - "*/DerivedData/*"
+  - "*/Build/*"
+
+# Source files to include
+source_files: false  # Include all Swift files by default
+
+# Output formats
+sonarqube_xml: true
+cobertura_xml: true
+html: false

@@ -1,5 +1,11 @@
 name: UI Tests
 
+# Explicit permissions following principle of least privilege
+permissions:
+  contents: read       # Read repository contents
+  pull-requests: write # Comment on PRs with test results
+  actions: read        # Read workflow run information
+
 on:
   # Run on pull requests to main branch
   pull_request:
@@ -8,20 +14,6 @@ on:
       - 'VERA/**'
       - 'scripts/**'
       - '.github/workflows/**'
-  
-  # Manual execution for debugging
-  workflow_dispatch:
-    inputs:
-      test_device:
-        description: 'Device to test on'
-        required: false
-        default: 'iPhone 16'
-        type: choice
-        options:
-        - 'iPhone 16'
-        - 'iPhone 16 Pro'
-        - 'iPhone 15'
-        - 'iPad (A16)'
 
 jobs:
   ui-tests:
@@ -36,20 +28,15 @@ jobs:
     - name: Check for UI-relevant changes
       id: changes
       run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "Manual trigger - running UI tests"
+        # Check if there are changes that could affect UI
+        if git diff --name-only HEAD^ HEAD | grep -E "(VERA/.*\.(swift|storyboard|xib)|\.github/workflows/ui-tests\.yml|scripts/test-ui\.sh)" > /dev/null; then
+          echo "ui-relevant=true" >> $GITHUB_OUTPUT
           echo "should-run=true" >> $GITHUB_OUTPUT
+          echo "UI-relevant changes detected, will run UI tests"
         else
-          # Check if there are changes that could affect UI
-          if git diff --name-only HEAD^ HEAD | grep -E "(VERA/.*\.(swift|storyboard|xib)|\.github/workflows/ui-tests\.yml|scripts/test-ui\.sh)" > /dev/null; then
-            echo "ui-relevant=true" >> $GITHUB_OUTPUT
-            echo "should-run=true" >> $GITHUB_OUTPUT
-            echo "UI-relevant changes detected, will run UI tests"
-          else
-            echo "ui-relevant=false" >> $GITHUB_OUTPUT
-            echo "should-run=false" >> $GITHUB_OUTPUT
-            echo "No UI-relevant changes detected, skipping UI tests"
-          fi
+          echo "ui-relevant=false" >> $GITHUB_OUTPUT
+          echo "should-run=false" >> $GITHUB_OUTPUT
+          echo "No UI-relevant changes detected, skipping UI tests"
         fi
     
     - name: Skip UI tests if no relevant changes
@@ -99,11 +86,11 @@ jobs:
         echo "=== Available iOS Simulators ==="
         xcrun simctl list devices available | grep iPhone | head -10
         echo ""
-        echo "=== Selected device: ${{ github.event.inputs.test_device || 'iPhone 16' }} ==="
+        echo "=== Selected device: iPhone 16 ==="
     
     - name: Run UI Tests
       run: |
-        DEVICE="${{ github.event.inputs.test_device || 'iPhone 16' }}"
+        DEVICE="iPhone 16"
         echo "Running UI tests on $DEVICE..."
         
         # Run UI tests on specified device
@@ -146,6 +133,7 @@ jobs:
           
           echo "❌ UI Tests failed on all available devices"
           exit 1
+        fi
     
     - name: Comment on PR (Success)
       if: success() && github.event_name == 'pull_request'
