@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 Running code quality checks before push..."
+echo "🔍 Running SwiftLint before push..."
 
 # Get the root directory of the git repository
 GIT_ROOT=$(git rev-parse --show-toplevel)
@@ -14,33 +14,38 @@ fi
 # Change to the git root directory
 cd "$GIT_ROOT"
 
-# Check if our code quality script exists
-if [ ! -f "scripts/code-quality.sh" ]; then
-    echo "❌ scripts/code-quality.sh not found"
-    echo "   Make sure you're in the project root and the script exists"
+# Check if SwiftLint is installed
+if ! command -v swiftlint >/dev/null 2>&1; then
+    echo "❌ SwiftLint not installed"
+    echo "   Install with: brew install swiftlint"
     exit 1
 fi
 
-# Run code quality checks (swift-format + SwiftLint)
-echo "📊 Running swift-format and SwiftLint..."
+# Check if SwiftLint configuration exists
+if [ ! -f ".swiftlint.yml" ]; then
+    echo "❌ .swiftlint.yml configuration not found"
+    echo "   Make sure you're in the project root"
+    exit 1
+fi
+
+# Run SwiftLint
+echo "📊 Running SwiftLint on workspace..."
 echo ""
 
-if scripts/code-quality.sh; then
+if swiftlint; then
     echo ""
-    echo "✅ All code quality checks passed!"
-    echo "� Push allowed"
+    echo "✅ SwiftLint checks passed!"
+    echo "🚀 Push allowed"
     exit 0
 else
     echo ""
-    echo "❌ Code quality checks failed"
+    echo "❌ SwiftLint found violations"
     echo ""
-    echo "💡 To fix issues automatically, run:"
-    echo "   scripts/code-quality.sh --fix"
+    echo "�� To fix issues:"
+    echo "   swiftlint --fix              # Auto-fix where possible"
+    echo "   scripts/lint-swift.sh --fix  # Using project script"
+    echo "   scripts/code-quality.sh      # Full code quality check"
     echo ""
-    echo "� Or fix issues individually:"
-    echo "   scripts/code-quality.sh --format-only  # Only swift-format"
-    echo "   scripts/code-quality.sh --lint-only    # Only SwiftLint"
-    echo ""
-    echo "🚫 Push rejected due to code quality issues"
+    echo "🚫 Push rejected due to SwiftLint violations"
     exit 1
 fi

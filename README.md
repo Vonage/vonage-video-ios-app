@@ -115,10 +115,11 @@ This project uses two complementary tools for code quality:
 Both tools are configured to work on all Swift files in the workspace and can be run individually or together.
 
 ### **Git Hooks**
-This project includes a pre-push git hook that automatically runs code quality checks before allowing a push:
+This project includes a pre-push git hook that automatically runs SwiftLint before allowing a push:
 
-- **Automatic enforcement**: Runs swift-format + SwiftLint on every push
+- **Automatic enforcement**: Runs SwiftLint on every push
 - **Prevents quality issues**: Blocks push if code doesn't meet standards
+- **Fast execution**: Only runs essential code quality checks
 - **Helpful feedback**: Shows exactly what needs to be fixed
 
 ```bash
@@ -126,7 +127,9 @@ This project includes a pre-push git hook that automatically runs code quality c
 scripts/git-hooks/pre-push
 
 # If quality checks fail, fix them with:
-scripts/code-quality.sh --fix
+swiftlint --fix
+scripts/lint-swift.sh --fix
+scripts/code-quality.sh --fix  # For both swift-format + SwiftLint
 ```
 
 The git hook is installed automatically during project setup. If you need to reinstall it manually:
@@ -134,6 +137,11 @@ The git hook is installed automatically during project setup. If you need to rei
 cp scripts/git-hooks/pre-push .git/hooks/pre-push
 chmod +x .git/hooks/pre-push
 ```
+
+**Why only SwiftLint in the pre-push hook?**
+- **Faster execution**: Only essential quality checks before push
+- **Less disruptive**: Developers can format code locally with their IDE
+- **Focus on quality**: Pre-push should prevent real issues, not minor formatting
 
 ### **Setting up SonarCloud**
 1. Go to [SonarCloud.io](https://sonarcloud.io)

@@ -251,9 +251,9 @@ if [ -f ".git/hooks/pre-push" ]; then
     if [ -x ".git/hooks/pre-push" ]; then
         echo -e "${GREEN}✅ Pre-push git hook is installed and executable${NC}"
         
-        # Check if it's our custom hook (contains our script)
-        if grep -q "scripts/code-quality.sh" ".git/hooks/pre-push" 2>/dev/null; then
-            echo -e "${GREEN}✅ Pre-push hook is using code quality checks${NC}"
+        # Check if it's our custom hook (contains SwiftLint)
+        if grep -q "swiftlint" ".git/hooks/pre-push" 2>/dev/null; then
+            echo -e "${GREEN}✅ Pre-push hook is using SwiftLint checks${NC}"
         else
             echo -e "${YELLOW}⚠️  Pre-push hook exists but may not be our custom version${NC}"
         fi
