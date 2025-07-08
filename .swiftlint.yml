@@ -1,0 +1,126 @@
+# SwiftLint Configuration for VERA iOS App
+# This configuration enforces Swift best practices and coding standards
+
+# Paths to include in linting
+included:
+  - VERA/
+
+# Paths to exclude from linting
+excluded:
+  - VERA/VERA.xcodeproj
+  - VERA/VERACore/VERACore.xcodeproj
+  - "**/DerivedData"
+  - "**/.build"
+  - "**/Pods"
+  - "**/Package.swift"
+
+# Rules to disable
+disabled_rules:
+  - trailing_whitespace # Handled by swift-format
+  - static_over_final_class # Interferes with XCTestCase overrides
+
+# Rules to enable (opt-in rules)
+opt_in_rules:
+  - array_init
+  - closure_spacing
+  - collection_alignment
+  - conditional_returns_on_newline
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - empty_count
+  - empty_string
+  - first_where
+  - force_unwrapping
+  - joined_default_parameter
+  - last_where
+  - literal_expression_end_indentation
+  - multiline_arguments
+  - multiline_function_chains
+  - multiline_literal_brackets
+  - multiline_parameters
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prefer_self_type_over_type_of_self
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - single_test_class
+  - sorted_first_last
+  - toggle_bool
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+  - yoda_condition
+
+# Rules to enable for analyzer
+analyzer_rules:
+  - unused_import
+
+# Configuration for specific rules
+line_length:
+  warning: 120
+  error: 140
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_comments: true
+
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 200
+  error: 300
+
+file_length:
+  warning: 400
+  error: 500
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - url
+    - uri
+    - x
+    - y
+    - z
+
+type_name:
+  min_length:
+    warning: 3
+    error: 3
+  max_length:
+    warning: 40
+    error: 50
+
+nesting:
+  type_level:
+    warning: 3
+    error: 5
+
+# Custom rules
+custom_rules:
+  no_print:
+    name: "No Print Statements"
+    regex: "print\\("
+    message: "Use proper logging instead of print statements"
+    severity: warning
+
+  no_force_cast:
+    name: "No Force Cast"
+    regex: "as!"
+    message: "Use safe casting with 'as?' instead of force casting"
+    severity: error
+
+# Reporter type
+reporter: "xcode"
