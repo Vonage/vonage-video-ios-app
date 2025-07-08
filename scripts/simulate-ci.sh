@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Simulate CI environment for testing SonarCloud integration
+# Simulate CI environment f# Step 2: Generate coverage report
+echo -e "${BLUE}📊 Step 2: Generating coverage reports...${NC}" testing SonarCloud integration
 # This script mimics what happens in GitHub Actions
 
 set -e
@@ -23,12 +24,8 @@ echo -e "${YELLOW}🧹 Cleaning environment...${NC}"
 rm -rf "$PROJECT_ROOT/DerivedData"
 rm -rf "$PROJECT_ROOT/coverage-reports"
 
-# Step 1: Configure VERACore
-echo -e "${BLUE}🔧 Step 1: Configuring VERACore scheme...${NC}"
-"$SCRIPT_DIR/configure-veracore-testing.sh"
-
-# Step 2: Run tests with coverage (like CI does)
-echo -e "${BLUE}🧪 Step 2: Running tests with coverage...${NC}"
+# Step 1: Run tests with coverage (like CI does)
+echo -e "${BLUE}🧪 Step 1: Running tests with coverage...${NC}"
 cd "$PROJECT_ROOT"
 xcodebuild test \
   -workspace VERA/VERA.xcworkspace \

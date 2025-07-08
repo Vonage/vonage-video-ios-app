@@ -28,7 +28,6 @@ REQUIRED_SCRIPTS=(
     "scripts/test-snapshots.sh"
     "scripts/generate-coverage.sh"
     "scripts/upload-sonarcloud.sh"
-    "scripts/configure-veracore-testing.sh"
     "scripts/simulate-ci.sh"
     "scripts/test-sonar-config.sh"
     "scripts/setup-project.sh"
