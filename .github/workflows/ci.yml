@@ -10,13 +10,6 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  workflow_dispatch:
-    inputs:
-      run_ui_tests:
-        description: 'Run UI Tests (slow)'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   format-check:
@@ -140,8 +133,8 @@ jobs:
   ui-tests:
     runs-on: macos-latest
     needs: [build, core-tests]
-    # ⚠️ UI tests are DISABLED by default - they only run when explicitly requested
-    if: ${{ github.event.inputs.run_ui_tests == 'true' || contains(github.event.head_commit.message, '[ui-tests]') }}
+    # ⚠️ UI tests are DISABLED by default - they only run when explicitly requested via commit message
+    if: ${{ contains(github.event.head_commit.message, '[ui-tests]') }}
     
     steps:
     - uses: actions/checkout@v4
