@@ -151,8 +151,30 @@ fi
 
 echo ""
 
-# Step 5: Build Test
-echo -e "${BLUE}🏗️  Step 5: Initial Build Test${NC}"
+# Step 5: Git Hooks Setup
+echo -e "${BLUE}🔗 Step 5: Git Hooks Setup${NC}"
+echo "=========================="
+
+# Install pre-push hook
+if [ -f "scripts/git-hooks/pre-push" ]; then
+    if [ -d ".git/hooks" ]; then
+        echo -e "${YELLOW}   Installing pre-push git hook...${NC}"
+        cp scripts/git-hooks/pre-push .git/hooks/pre-push
+        chmod +x .git/hooks/pre-push
+        echo -e "${GREEN}✅ Pre-push hook installed successfully!${NC}"
+        echo -e "${YELLOW}   This hook will run code quality checks before every push${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Not in a git repository, skipping git hooks setup${NC}"
+    fi
+else
+    echo -e "${RED}❌ Git hook script not found${NC}"
+    ((ERRORS++))
+fi
+
+echo ""
+
+# Step 6: Initial Build Test
+echo -e "${BLUE}🏗️  Step 6: Initial Build Test${NC}"
 echo "============================"
 
 echo -e "${YELLOW}   Testing project build...${NC}"
@@ -176,7 +198,7 @@ fi
 
 echo ""
 
-# Step 6: Setup Summary
+# Step 7: Setup Summary
 echo -e "${BLUE}📊 Setup Summary${NC}"
 echo "================"
 

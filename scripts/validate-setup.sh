@@ -243,6 +243,30 @@ else
     fi
 fi
 
+# Check 10: Git Hooks
+echo -e "${BLUE}🔗 Checking Git Hooks...${NC}"
+
+# Check if pre-push hook exists and is executable
+if [ -f ".git/hooks/pre-push" ]; then
+    if [ -x ".git/hooks/pre-push" ]; then
+        echo -e "${GREEN}✅ Pre-push git hook is installed and executable${NC}"
+        
+        # Check if it's our custom hook (contains our script)
+        if grep -q "scripts/code-quality.sh" ".git/hooks/pre-push" 2>/dev/null; then
+            echo -e "${GREEN}✅ Pre-push hook is using code quality checks${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Pre-push hook exists but may not be our custom version${NC}"
+        fi
+    else
+        echo -e "${RED}❌ Pre-push hook exists but is not executable${NC}"
+        echo -e "${YELLOW}   Fix with: chmod +x .git/hooks/pre-push${NC}"
+        ((ERRORS++))
+    fi
+else
+    echo -e "${YELLOW}⚠️  Pre-push git hook not installed${NC}"
+    echo -e "${YELLOW}   Install with: cp scripts/git-hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push${NC}"
+fi
+
 # Summary
 echo -e "${BLUE}📊 Validation Summary${NC}"
 echo -e "${BLUE}====================${NC}"

@@ -1,84 +1,46 @@
 #!/bin/bash
 
-echo "🔍 Running swift-format before push..."
+echo "🔍 Running code quality checks before push..."
 
 # Get the root directory of the git repository
 GIT_ROOT=$(git rev-parse --show-toplevel)
-SWIFT_FORMAT_CONFIG="$GIT_ROOT/.swift-format"
 
-# Check if swift-format is installed
-if ! command -v swift-format &> /dev/null; then
-    echo "❌ swift-format is not installed. Please install it first:"
-    echo "   brew install swift-format"
+# Check if we're in a git repository
+if [ ! -d "$GIT_ROOT/.git" ]; then
+    echo "❌ Not in a git repository"
     exit 1
 fi
 
-# Check if .swift-format config exists
-if [ ! -f "$SWIFT_FORMAT_CONFIG" ]; then
-    echo "⚠️  .swift-format config not found at $SWIFT_FORMAT_CONFIG"
-    echo "   Using default swift-format configuration"
-    SWIFT_FORMAT_CONFIG=""
+# Change to the git root directory
+cd "$GIT_ROOT"
+
+# Check if our code quality script exists
+if [ ! -f "scripts/code-quality.sh" ]; then
+    echo "❌ scripts/code-quality.sh not found"
+    echo "   Make sure you're in the project root and the script exists"
+    exit 1
 fi
 
-# Find all Swift files in the project
-SWIFT_FILES=$(find . -name "*.swift" \
-    -not -path "./build/*" \
-    -not -path "./.build/*" \
-    -not -path "./DerivedData/*" \
-    -not -path "./Pods/*" \
-    -not -path "./Carthage/*" \
-    -not -path "./vendor/*")
+# Run code quality checks (swift-format + SwiftLint)
+echo "📊 Running swift-format and SwiftLint..."
+echo ""
 
-if [ -z "$SWIFT_FILES" ]; then
-    echo "✅ No Swift files found to format"
+if scripts/code-quality.sh; then
+    echo ""
+    echo "✅ All code quality checks passed!"
+    echo "� Push allowed"
     exit 0
-fi
-
-# Run swift-format in verification mode
-echo "Checking format for files:"
-echo "$SWIFT_FILES" | while read file; do
-    echo "  📄 $file"
-done
-
-# Check format (does not modify files)
-FORMAT_ISSUES=""
-FORMAT_DETAILS=""
-while IFS= read -r file; do
-    if [ -f "$file" ]; then
-        # Check if the file would be changed by swift-format
-        if [ -n "$SWIFT_FORMAT_CONFIG" ]; then
-            DIFF_OUTPUT=$(swift-format format --configuration "$SWIFT_FORMAT_CONFIG" "$file" | diff -u "$file" - 2>/dev/null)
-            if [ $? -ne 0 ]; then
-                FORMAT_ISSUES="$FORMAT_ISSUES$file needs formatting\n"
-                FORMAT_DETAILS="$FORMAT_DETAILS\n📄 $file:\n$DIFF_OUTPUT\n"
-            fi
-        else
-            DIFF_OUTPUT=$(swift-format format "$file" | diff -u "$file" - 2>/dev/null)
-            if [ $? -ne 0 ]; then
-                FORMAT_ISSUES="$FORMAT_ISSUES$file needs formatting\n"
-                FORMAT_DETAILS="$FORMAT_DETAILS\n📄 $file:\n$DIFF_OUTPUT\n"
-            fi
-        fi
-    fi
-done <<< "$SWIFT_FILES"
-
-if [ -n "$FORMAT_ISSUES" ]; then
-    echo "❌ Format issues found:"
-    echo -e "$FORMAT_ISSUES"
+else
     echo ""
-    echo "🔍 Detailed differences:"
-    echo -e "$FORMAT_DETAILS"
+    echo "❌ Code quality checks failed"
     echo ""
-    echo "💡 To fix formatting issues, run:"
-    if [ -n "$SWIFT_FORMAT_CONFIG" ]; then
-        echo "   find . -name '*.swift' -not -path './build/*' -not -path './.build/*' | xargs swift-format format --in-place --configuration \"$SWIFT_FORMAT_CONFIG\""
-    else
-        echo "   find . -name '*.swift' -not -path './build/*' -not -path './.build/*' | xargs swift-format format --in-place"
-    fi
+    echo "💡 To fix issues automatically, run:"
+    echo "   scripts/code-quality.sh --fix"
     echo ""
-    echo "🚫 Push rejected due to formatting issues"
+    echo "� Or fix issues individually:"
+    echo "   scripts/code-quality.sh --format-only  # Only swift-format"
+    echo "   scripts/code-quality.sh --lint-only    # Only SwiftLint"
+    echo ""
+    echo "🚫 Push rejected due to code quality issues"
     exit 1
 fi
-
-echo "✅ All Swift files are properly formatted!"
-exit 0
