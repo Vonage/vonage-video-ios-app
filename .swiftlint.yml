@@ -17,6 +17,7 @@ excluded:
 # Rules to disable
 disabled_rules:
   - trailing_whitespace # Handled by swift-format
+  - static_over_final_class # Interferes with XCTestCase overrides
 
 # Rules to enable (opt-in rules)
 opt_in_rules:
