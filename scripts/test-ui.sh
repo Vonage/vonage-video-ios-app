@@ -33,63 +33,6 @@ fi
 echo -e "${YELLOW}🧹 Cleaning build folder...${NC}"
 rm -rf ./DerivedData
 
-# Run UI tests with fallback strategy
-echo -e "${YELLOW}🧪 Running UI tests...${NC}"
-if xcodebuild test \
-    -workspace VERA/VERA.xcworkspace \
-    -scheme VERA \
-    -destination 'platform=iOS Simulator,name=iPhone 16' \
-    -only-testing:VERAUITests \
-    -derivedDataPath ./DerivedData \
-    CODE_SIGN_IDENTITY="" \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    -parallel-testing-enabled NO \
-    -quiet 2>/dev/null; then
-    echo -e "${GREEN}✅ UI Tests completed successfully with iPhone 16${NC}"
-elif xcodebuild test \
-    -workspace VERA/VERA.xcworkspace \
-    -scheme VERA \
-    -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-    -only-testing:VERAUITests \
-    -derivedDataPath ./DerivedData \
-    CODE_SIGN_IDENTITY="" \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    -parallel-testing-enabled NO \
-    -quiet 2>/dev/null; then
-    echo -e "${GREEN}✅ UI Tests completed successfully with iPhone 16 Pro${NC}"
-elif xcodebuild test \
-    -workspace VERA/VERA.xcworkspace \
-    -scheme VERA \
-    -destination 'platform=iOS Simulator,name=iPhone 15' \
-    -only-testing:VERAUITests \
-    -derivedDataPath ./DerivedData \
-    CODE_SIGN_IDENTITY="" \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGNING_ALLOWED=NO \
-    -parallel-testing-enabled NO \
-    -quiet 2>/dev/null; then
-    echo -e "${GREEN}✅ UI Tests completed successfully with iPhone 15${NC}"
-else
-    echo -e "${RED}❌ UI Tests failed or could not run${NC}"
-    echo -e "${YELLOW}Available destinations:${NC}"
-    xcodebuild -workspace VERA/VERA.xcworkspace -scheme VERA -showdestinations | grep "iOS Simulator" | head -5
-    exit 1
-fi
-
-echo -e "${GREEN}🎉 UI Tests completed successfully!${NC}"
-    echo -e "$FORMAT_ISSUES"
-    echo -e "${YELLOW}💡 Fix with: find ./VERA -name '*.swift' | xargs swift-format format --in-place --configuration .swift-format${NC}"
-    exit 0
-fi
-
-echo -e "${GREEN}✅ Code formatting is correct${NC}"
-
-# Clean build folder
-echo -e "${YELLOW}🧹 Cleaning build folder...${NC}"
-rm -rf ./DerivedData
-
 # Build first
 echo -e "${YELLOW}🔨 Building project...${NC}"
 xcodebuild build \
@@ -104,7 +47,7 @@ xcodebuild build \
 
 echo -e "${GREEN}✅ Build completed${NC}"
 
-# Run UI tests only
+# Run UI tests with fallback strategy
 echo -e "${YELLOW}🧪 Running UI tests (this will take several minutes)...${NC}"
 echo -e "${YELLOW}☕ Good time for a coffee break!${NC}"
 
@@ -132,6 +75,18 @@ elif xcodebuild test \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO; then
     echo -e "${GREEN}✅ UI tests completed successfully with iPhone 16 Pro${NC}"
+elif xcodebuild test \
+    -workspace VERA/VERA.xcworkspace \
+    -scheme VERA \
+    -destination 'platform=iOS Simulator,name=iPhone 15' \
+    -only-testing:VERAUITests \
+    -parallel-testing-enabled NO \
+    -enableCodeCoverage YES \
+    -derivedDataPath ./DerivedData \
+    CODE_SIGN_IDENTITY="" \
+    CODE_SIGNING_REQUIRED=NO \
+    CODE_SIGNING_ALLOWED=NO; then
+    echo -e "${GREEN}✅ UI tests completed successfully with iPhone 15${NC}"
 else
     echo -e "${RED}❌ UI tests failed${NC}"
     echo -e "${YELLOW}Available destinations:${NC}"
