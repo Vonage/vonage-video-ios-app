@@ -29,6 +29,7 @@ check_cmd() {
 check_cmd "xcodebuild" "Xcode"
 check_cmd "git-lfs" "Git LFS"
 check_cmd "swift-format" "Swift Format"
+check_cmd "swiftlint" "SwiftLint"
 
 # Check Git LFS files
 if [ -d "VERA/VERACore/VERACoreSnapshotTests/__Snapshots__" ]; then

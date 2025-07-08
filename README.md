@@ -85,6 +85,19 @@ This project integrates with **SonarCloud** for code quality analysis and covera
 # Generate coverage from existing test results
 ./scripts/generate-coverage.sh
 
+# Run code quality checks (swift-format + SwiftLint)
+./scripts/code-quality.sh
+
+# Run only swift-format
+./scripts/code-quality.sh --format-only
+
+# Run only SwiftLint
+./scripts/code-quality.sh --lint-only
+./scripts/lint-swift.sh
+
+# Auto-fix code quality issues
+./scripts/code-quality.sh --fix
+
 # Simulate CI environment locally
 ./scripts/simulate-ci.sh
 
@@ -92,6 +105,14 @@ This project integrates with **SonarCloud** for code quality analysis and covera
 export SONAR_TOKEN=your_sonar_token
 ./scripts/upload-sonarcloud.sh
 ```
+
+### **Code Quality Tools**
+This project uses two complementary tools for code quality:
+
+- **swift-format**: Handles code formatting and style consistency
+- **SwiftLint**: Enforces Swift best practices and detects potential issues
+
+Both tools are configured to work on all Swift files in the workspace and can be run individually or together.
 
 ### **Setting up SonarCloud**
 1. Go to [SonarCloud.io](https://sonarcloud.io)

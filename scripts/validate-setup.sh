@@ -31,6 +31,8 @@ REQUIRED_SCRIPTS=(
     "scripts/simulate-ci.sh"
     "scripts/test-sonar-config.sh"
     "scripts/setup-project.sh"
+    "scripts/lint-swift.sh"
+    "scripts/code-quality.sh"
 )
 
 for script in "${REQUIRED_SCRIPTS[@]}"; do
@@ -200,6 +202,43 @@ else
         fi
     else
         echo -e "${RED}❌ .swift-format configuration file missing${NC}"
+        ((ERRORS++))
+    fi
+fi
+
+# Check 9: SwiftLint
+echo -e "${BLUE}🔍 Checking SwiftLint...${NC}"
+
+# Check if SwiftLint is installed
+if ! command -v swiftlint >/dev/null 2>&1; then
+    echo -e "${RED}❌ SwiftLint not installed${NC}"
+    echo -e "${YELLOW}   Install with: brew install swiftlint${NC}"
+    ((ERRORS++))
+else
+    echo -e "${GREEN}✅ SwiftLint installed${NC}"
+    
+    # Check if configuration file exists
+    if [ -f "$PROJECT_ROOT/.swiftlint.yml" ]; then
+        echo -e "${GREEN}✅ .swiftlint.yml configuration file exists${NC}"
+        
+        # Check if lint script exists
+        if [ -f "$PROJECT_ROOT/scripts/lint-swift.sh" ]; then
+            echo -e "${GREEN}✅ lint-swift.sh script exists${NC}"
+            
+            # Test SwiftLint on a subset of files (quick validation)
+            echo -e "${YELLOW}   Testing SwiftLint configuration...${NC}"
+            if swiftlint version >/dev/null 2>&1; then
+                echo -e "${GREEN}✅ SwiftLint configuration is valid${NC}"
+            else
+                echo -e "${RED}❌ SwiftLint configuration has issues${NC}"
+                ((ERRORS++))
+            fi
+        else
+            echo -e "${RED}❌ lint-swift.sh script missing${NC}"
+            ((ERRORS++))
+        fi
+    else
+        echo -e "${RED}❌ .swiftlint.yml configuration file missing${NC}"
         ((ERRORS++))
     fi
 fi

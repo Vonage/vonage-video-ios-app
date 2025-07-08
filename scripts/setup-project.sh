@@ -94,6 +94,9 @@ check_dependency "git-lfs" "Git LFS" "brew install git-lfs"
 # Check swift-format
 check_dependency "swift-format" "Swift Format" "brew install swift-format"
 
+# Check SwiftLint
+check_dependency "swiftlint" "SwiftLint" "brew install swiftlint"
+
 # Check sonar-scanner (optional)
 if command -v sonar-scanner >/dev/null 2>&1; then
     echo -e "${GREEN}✅ SonarCloud Scanner is installed${NC}"
