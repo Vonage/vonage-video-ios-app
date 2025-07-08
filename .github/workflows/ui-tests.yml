@@ -146,6 +146,7 @@ jobs:
           
           echo "❌ UI Tests failed on all available devices"
           exit 1
+        fi
     
     - name: Comment on PR (Success)
       if: success() && github.event_name == 'pull_request'
