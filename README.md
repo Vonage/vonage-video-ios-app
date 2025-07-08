@@ -14,12 +14,13 @@ Vonage Video API Swift iOS reference application
 - ✅ **Code formatting** check with swift-format
 - ✅ **Build** verification for iOS Simulator
 - ✅ **VERACore tests** on macOS (native, super fast, ~1 second)
-- ❌ **UI tests disabled** by default (too slow for regular CI)
+- ✅ **UI tests enabled** on Pull Requests (with smart detection)
 
-### **UI Tests Pipeline** (On demand only)
+### **UI Tests Pipeline** (Automatic on PRs)
+- **Triggered on**: Pull Requests to main branch with UI-relevant changes
+- **Smart detection**: Only runs when Swift/UI files change (single macOS job)
+- **Automatic feedback**: Comments on PR with test results
 - 🎯 **Manual trigger**: Use GitHub Actions "Run workflow" button
-- ⏰ **Scheduled**: Runs automatically at 2 AM UTC daily  
-- 📝 **Commit message**: Include `[ui-tests]` in commit message
 - 🔧 **Device selection**: Choose iPhone 16, iPhone 16 Pro, iPhone 15, or iPad
 
 ### **Local Development**
@@ -52,8 +53,9 @@ export SONAR_TOKEN=your_token_here
 - **No simulator overhead**: VERACore tests run directly on macOS
 - **CI-friendly**: Works without code signing certificates
 - **Better DX**: Developers get instant feedback on logic changes
-- **Resource efficient**: UI tests run only when needed
-- **Flexible**: Easy to enable UI tests when required
+- **Intelligent automation**: UI tests run automatically on PRs with relevant changes
+- **Resource efficient**: Smart detection prevents unnecessary test runs
+- **Immediate feedback**: PR comments show test results instantly
 
 ## 📱 Project Structure
 
