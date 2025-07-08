@@ -98,11 +98,6 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: Configure VERACore for Testing
-      run: |
-        echo "🔧 Configuring VERACore scheme for testing..."
-        ./scripts/configure-veracore-testing.sh
-    
     - name: Run VERACore Tests (macOS - Native & Super Fast)
       run: |
         echo "Running VERACore tests natively on macOS (no simulators needed)..."
@@ -212,11 +207,6 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-    
-    - name: Configure VERACore for Testing
-      run: |
-        echo "🔧 Configuring VERACore scheme for testing..."
-        ./scripts/configure-veracore-testing.sh
     
     - name: Run tests with coverage for SonarCloud
       run: |
