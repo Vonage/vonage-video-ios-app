@@ -105,6 +105,17 @@ else
     echo -e "${BLUE}   Install with: brew install sonar-scanner${NC}"
 fi
 
+# Check slather (optional but recommended for SonarCloud)
+if command -v slather >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ Slather is installed${NC}"
+elif [ -f "Gemfile" ] && command -v bundle >/dev/null 2>&1 && bundle exec slather version >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ Slather is available via bundler${NC}"
+else
+    echo -e "${YELLOW}⚠️  Slather not installed (recommended for SonarCloud)${NC}"
+    echo -e "${BLUE}   Install with: gem install slather${NC}"
+    echo -e "${BLUE}   Or use: bundle install --path vendor/bundle${NC}"
+fi
+
 echo ""
 
 # Step 3: Git LFS Setup

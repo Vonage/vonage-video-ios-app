@@ -232,10 +232,36 @@ jobs:
           echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > coverage-reports/coverage.json
         }
     
-    - name: Install SonarCloud Scanner
+    - name: Install SonarCloud Scanner and Slather
       run: |
         echo "📥 Installing SonarCloud Scanner..."
         brew install sonar-scanner
+        echo "📥 Installing Slather for coverage analysis..."
+        sudo gem install slather || gem install slather --user-install
+    
+    - name: Generate SonarCloud-compatible coverage reports
+      run: |
+        echo "📊 Generating SonarCloud-compatible coverage with Slather..."
+        mkdir -p coverage-reports
+        
+        # Try to generate coverage with Slather first
+        if command -v slather >/dev/null 2>&1; then
+          echo "Using Slather for coverage generation..."
+          slather coverage \
+            --sonarqube-xml \
+            --output-directory coverage-reports \
+            --workspace VERA/VERA.xcworkspace \
+            --scheme VERA \
+            --binary-basename VERA \
+            --source-directory . \
+            VERA/VERA.xcodeproj || {
+            echo "⚠️ Slather failed, falling back to xccov..."
+            ./scripts/generate-coverage.sh
+          }
+        else
+          echo "⚠️ Slather not available, using xccov..."
+          ./scripts/generate-coverage.sh
+        fi
     
     - name: SonarCloud Analysis
       env:
@@ -243,12 +269,25 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         echo "☁️ Running SonarCloud analysis..."
+        
+        # Determine which coverage format to use
+        COVERAGE_PARAM=""
+        if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
+          COVERAGE_PARAM="-Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml"
+          echo "Using SonarQube XML coverage format"
+        elif [ -f "coverage-reports/coverage.json" ]; then
+          COVERAGE_PARAM="-Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
+          echo "Using fallback JSON coverage format"
+        else
+          echo "⚠️ No coverage reports found"
+        fi
+        
         sonar-scanner \
           -Dsonar.projectKey=Vonage_vonage-video-ios-app \
           -Dsonar.organization=vonage \
           -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
           -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
-          -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
+          $COVERAGE_PARAM \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.verbose=false
