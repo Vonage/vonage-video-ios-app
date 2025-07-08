@@ -1,0 +1,51 @@
+#!/bin/bash
+
+echo "🔍 Running SwiftLint before push..."
+
+# Get the root directory of the git repository
+GIT_ROOT=$(git rev-parse --show-toplevel)
+
+# Check if we're in a git repository
+if [ ! -d "$GIT_ROOT/.git" ]; then
+    echo "❌ Not in a git repository"
+    exit 1
+fi
+
+# Change to the git root directory
+cd "$GIT_ROOT"
+
+# Check if SwiftLint is installed
+if ! command -v swiftlint >/dev/null 2>&1; then
+    echo "❌ SwiftLint not installed"
+    echo "   Install with: brew install swiftlint"
+    exit 1
+fi
+
+# Check if SwiftLint configuration exists
+if [ ! -f ".swiftlint.yml" ]; then
+    echo "❌ .swiftlint.yml configuration not found"
+    echo "   Make sure you're in the project root"
+    exit 1
+fi
+
+# Run SwiftLint
+echo "📊 Running SwiftLint on workspace..."
+echo ""
+
+if swiftlint; then
+    echo ""
+    echo "✅ SwiftLint checks passed!"
+    echo "🚀 Push allowed"
+    exit 0
+else
+    echo ""
+    echo "❌ SwiftLint found violations"
+    echo ""
+    echo "�� To fix issues:"
+    echo "   swiftlint --fix              # Auto-fix where possible"
+    echo "   scripts/lint-swift.sh --fix  # Using project script"
+    echo "   scripts/code-quality.sh      # Full code quality check"
+    echo ""
+    echo "🚫 Push rejected due to SwiftLint violations"
+    exit 1
+fi

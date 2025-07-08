@@ -1,0 +1,179 @@
+name: UI Tests
+
+on:
+  # Run on pull requests to main branch
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'VERA/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
+  
+  # Manual execution for debugging
+  workflow_dispatch:
+    inputs:
+      test_device:
+        description: 'Device to test on'
+        required: false
+        default: 'iPhone 16'
+        type: choice
+        options:
+        - 'iPhone 16'
+        - 'iPhone 16 Pro'
+        - 'iPhone 15'
+        - 'iPad (A16)'
+
+jobs:
+  ui-tests:
+    runs-on: macos-latest
+    timeout-minutes: 30  # Prevent hanging builds
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check for UI-relevant changes
+      id: changes
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "Manual trigger - running UI tests"
+          echo "should-run=true" >> $GITHUB_OUTPUT
+        else
+          # Check if there are changes that could affect UI
+          if git diff --name-only HEAD^ HEAD | grep -E "(VERA/.*\.(swift|storyboard|xib)|\.github/workflows/ui-tests\.yml|scripts/test-ui\.sh)" > /dev/null; then
+            echo "ui-relevant=true" >> $GITHUB_OUTPUT
+            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "UI-relevant changes detected, will run UI tests"
+          else
+            echo "ui-relevant=false" >> $GITHUB_OUTPUT
+            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "No UI-relevant changes detected, skipping UI tests"
+          fi
+        fi
+    
+    - name: Skip UI tests if no relevant changes
+      if: steps.changes.outputs.should-run == 'false'
+      run: |
+        echo "⏭️ Skipping UI tests - no UI-relevant changes detected"
+        echo "Changed files:"
+        git diff --name-only HEAD^ HEAD || echo "No changes detected"
+    
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Cache derived data
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-ui-${{ hashFiles('VERA/**/*.swift', 'VERA/**/*.xcodeproj') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-ui-
+          ${{ runner.os }}-derived-data-
+    
+    - name: Clean and prepare for UI tests
+      run: |
+        echo "🧹 Cleaning up for UI tests..."
+        rm -rf DerivedData
+        # Kill any hanging simulators
+        pkill -f Simulator || true
+    
+    - name: Build for iOS Simulator
+      run: |
+        echo "🔨 Building project for UI tests..."
+        xcodebuild build \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -sdk iphonesimulator \
+          -destination "generic/platform=iOS Simulator" \
+          -derivedDataPath DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          ONLY_ACTIVE_ARCH=NO
+    
+    - name: List available simulators
+      run: |
+        echo "=== Available iOS Simulators ==="
+        xcrun simctl list devices available | grep iPhone | head -10
+        echo ""
+        echo "=== Selected device: ${{ github.event.inputs.test_device || 'iPhone 16' }} ==="
+    
+    - name: Run UI Tests
+      run: |
+        DEVICE="${{ github.event.inputs.test_device || 'iPhone 16' }}"
+        echo "Running UI tests on $DEVICE..."
+        
+        # Run UI tests on specified device
+        if xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -sdk iphonesimulator \
+          -destination "platform=iOS Simulator,name=$DEVICE" \
+          -only-testing:VERAUITests \
+          -derivedDataPath DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          -parallel-testing-enabled NO; then
+          echo "✅ UI Tests completed successfully on $DEVICE"
+        else
+          echo "❌ UI Tests failed on $DEVICE"
+          echo "Trying fallback devices..."
+          
+          # Fallback strategy
+          for fallback_device in "iPhone 16" "iPhone 16 Pro" "iPhone 15"; do
+            if [ "$fallback_device" != "$DEVICE" ]; then
+              echo "Trying $fallback_device..."
+              if xcodebuild test \
+                -workspace VERA/VERA.xcworkspace \
+                -scheme VERA \
+                -sdk iphonesimulator \
+                -destination "platform=iOS Simulator,name=$fallback_device" \
+                -only-testing:VERAUITests \
+                -derivedDataPath DerivedData \
+                CODE_SIGN_IDENTITY="" \
+                CODE_SIGNING_REQUIRED=NO \
+                CODE_SIGNING_ALLOWED=NO \
+                -parallel-testing-enabled NO 2>/dev/null; then
+                echo "✅ UI Tests completed successfully on $fallback_device (fallback)"
+                exit 0
+              fi
+            fi
+          done
+          
+          echo "❌ UI Tests failed on all available devices"
+          exit 1
+    
+    - name: Comment on PR (Success)
+      if: success() && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '✅ **UI Tests Passed** 🎉\n\nAll UI tests are passing on this PR. Ready for review!'
+          })
+    
+    - name: Comment on PR (Failure)
+      if: failure() && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '❌ **UI Tests Failed** 💥\n\nUI tests are failing on this PR. Please check the workflow logs and fix the issues before merging.\n\n[View logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+          })
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ui-test-results
+        path: DerivedData/Logs/Test/
