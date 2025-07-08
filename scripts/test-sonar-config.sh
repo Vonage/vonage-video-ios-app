@@ -27,7 +27,7 @@ if command -v sonar-scanner &> /dev/null; then
     cd "$PROJECT_ROOT"
     
     # This will validate the configuration without actually running the scan
-    if sonar-scanner -Dsonar.projectKey=vonage-video-ios-app \
+    if sonar-scanner -Dsonar.projectKey=Vonage_vonage-video-ios-app \
         -Dsonar.organization=vonage \
         -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
         -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \

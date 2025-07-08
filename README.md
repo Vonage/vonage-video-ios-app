@@ -5,6 +5,7 @@
 [![Swift](https://img.shields.io/badge/Swift-5.5+-orange.svg)](https://swift.org)
 [![iOS](https://img.shields.io/badge/iOS-15.0+-blue.svg)](https://developer.apple.com/ios/)
 [![Xcode](https://img.shields.io/badge/Xcode-15.0+-blue.svg)](https://developer.apple.com/xcode/)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Vonage_vonage-video-ios-app&metric=alert_status&token=6e3d4158efec942908cf73c93e62e52402876973)](https://sonarcloud.io/summary/new_code?id=Vonage_vonage-video-ios-app)
 
 Vonage Video API Swift iOS reference application
 

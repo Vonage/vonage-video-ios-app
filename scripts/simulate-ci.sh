@@ -65,7 +65,7 @@ fi
 
 # Step 5: Simulate SonarCloud parameters
 echo -e "${BLUE}☁️  Step 5: SonarCloud parameters that would be used:${NC}"
-echo "   -Dsonar.projectKey=vonage-video-ios-app"
+echo "   -Dsonar.projectKey=Vonage_vonage-video-ios-app"
 echo "   -Dsonar.organization=vonage"
 echo "   -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
 echo "   -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok"

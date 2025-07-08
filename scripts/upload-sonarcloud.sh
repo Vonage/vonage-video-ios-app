@@ -76,7 +76,7 @@ cd "$PROJECT_ROOT"
 # Run SonarCloud analysis
 echo -e "${BLUE}☁️  Running SonarCloud analysis...${NC}"
 sonar-scanner \
-    -Dsonar.projectKey=vonage-video-ios-app \
+    -Dsonar.projectKey=Dsonar.projectKey=Vonage_vonage-video-ios-app \
     -Dsonar.organization=vonage \
     -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
     -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
