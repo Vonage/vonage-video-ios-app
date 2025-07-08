@@ -37,18 +37,24 @@ fi
 SLATHER_CMD=""
 if command -v slather &> /dev/null; then
     SLATHER_CMD="slather"
-elif [ -f "Gemfile" ] && command -v bundle &> /dev/null && bundle exec slather version &> /dev/null; then
-    SLATHER_CMD="bundle exec slather"
+elif [ -f "Gemfile" ] && command -v bundle &> /dev/null; then
+    # Test if bundle exec slather works
+    if bundle exec slather version &> /dev/null; then
+        SLATHER_CMD="bundle exec slather"
+    else
+        echo -e "${YELLOW}⚠️  Slather via bundler has issues (nokogiri dependency).${NC}"
+        SLATHER_CMD=""
+    fi
 fi
 
 if [ -z "$SLATHER_CMD" ]; then
-    echo -e "${RED}❌ slather not found. Please install it first:${NC}"
+    echo -e "${RED}❌ slather not found or not working. Please install it first:${NC}"
     echo ""
-    echo "   # Using gem (recommended)"
-    echo "   gem install slather"
+    echo "   # Using system gem (recommended)"
+    echo "   sudo gem install slather"
     echo ""
-    echo "   # Using bundler (if you have Gemfile)"
-    echo "   bundle install --path vendor/bundle"
+    echo "   # Using Homebrew if available"
+    echo "   brew install --cask slather || echo 'Not available via brew'"
     echo ""
     echo "   # Manual installation"
     echo "   https://github.com/SlatherOrg/slather"
