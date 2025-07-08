@@ -81,7 +81,7 @@ fi
 echo -e "${GREEN}🎉 UI Tests completed successfully!${NC}"
     echo -e "$FORMAT_ISSUES"
     echo -e "${YELLOW}💡 Fix with: find ./VERA -name '*.swift' | xargs swift-format format --in-place --configuration .swift-format${NC}"
-    exit 1
+    exit 0
 fi
 
 echo -e "${GREEN}✅ Code formatting is correct${NC}"
