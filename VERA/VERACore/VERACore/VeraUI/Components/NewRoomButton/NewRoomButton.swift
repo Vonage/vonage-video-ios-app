@@ -6,7 +6,7 @@ import SwiftUI
 
 struct NewRoomButton: View {
     
-    let onHandleNewRoom: ()->Void
+    let onHandleNewRoom: () -> Void
     
     var body: some View {
         Button {
@@ -36,7 +36,6 @@ struct NewRoomButtonStyle: ButtonStyle {
     }
 }
 
-
 #Preview {
-    NewRoomButton(onHandleNewRoom: {})
+    NewRoomButton {}
 }

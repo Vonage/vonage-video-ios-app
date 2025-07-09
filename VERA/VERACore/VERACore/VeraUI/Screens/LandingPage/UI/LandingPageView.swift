@@ -10,9 +10,9 @@ public struct LandingPageView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
-    public let onHandleNewRoom: ()->Void
-    public let onJoinRoom: (String)->Void
-    public let onNavigateToWaitingRoom: (String)->Void
+    public let onHandleNewRoom: () -> Void
+    public let onJoinRoom: (String) -> Void
+    public let onNavigateToWaitingRoom: (String) -> Void
     
     public init(onHandleNewRoom: @escaping () -> Void,
          onJoinRoom: @escaping (String) -> Void,
@@ -49,8 +49,8 @@ public struct LandingPageView: View {
 
 public struct HorizontalLandingContentView: View {
     
-    public let onHandleNewRoom: ()->Void
-    public let onJoinRoom: (String)->Void
+    public let onHandleNewRoom: () -> Void
+    public let onJoinRoom: (String) -> Void
     
     public init(onHandleNewRoom: @escaping () -> Void,
          onJoinRoom: @escaping (String) -> Void) {
@@ -74,8 +74,8 @@ public struct HorizontalLandingContentView: View {
 
 public struct VerticalLandingContentView: View {
     
-    public let onHandleNewRoom: ()->Void
-    public let onJoinRoom: (String)->Void
+    public let onHandleNewRoom: () -> Void
+    public let onJoinRoom: (String) -> Void
     
     public init(onHandleNewRoom: @escaping () -> Void,
          onJoinRoom: @escaping (String) -> Void) {
@@ -102,6 +102,6 @@ public struct VerticalLandingContentView: View {
 #Preview {
     LandingPageView(
         onHandleNewRoom: {},
-        onJoinRoom: {_ in},
-        onNavigateToWaitingRoom: {_ in })
+        onJoinRoom: { _ in },
+        onNavigateToWaitingRoom: { _ in })
 }

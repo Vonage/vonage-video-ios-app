@@ -5,8 +5,8 @@
 import SwiftUI
 
 struct RoomJoinContainer: View {
-    let onHandleNewRoom: ()->Void
-    let onJoinRoom: (String)->Void
+    let onHandleNewRoom: () -> Void
+    let onJoinRoom: (String) -> Void
     
     var body: some View {
         VStack(alignment: .center) {
@@ -20,5 +20,5 @@ struct RoomJoinContainer: View {
 }
 
 #Preview {
-    RoomJoinContainer(onHandleNewRoom: {}, onJoinRoom: {_ in })
+    RoomJoinContainer(onHandleNewRoom: {}, onJoinRoom: { _ in })
 }

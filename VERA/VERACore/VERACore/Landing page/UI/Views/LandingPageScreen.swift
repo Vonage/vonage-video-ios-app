@@ -7,11 +7,11 @@ import SwiftUI
 public struct LandingPageScreen: View {
     
     private let viewModel: LandingPageViewModel
-    private let onNavigateToWaitingRoom: (String)->Void
+    private let onNavigateToWaitingRoom: (String) -> Void
     
     public init(
         viewModel: LandingPageViewModel,
-        onNavigateToWaitingRoom: @escaping (String)->Void
+        onNavigateToWaitingRoom: @escaping (String) -> Void
     ) {
         self.viewModel = viewModel
         self.onNavigateToWaitingRoom = onNavigateToWaitingRoom
@@ -22,11 +22,11 @@ public struct LandingPageScreen: View {
             onHandleNewRoom: viewModel.onHandleNewRoom,
             onJoinRoom: viewModel.onJoinRoom,
             onNavigateToWaitingRoom: onNavigateToWaitingRoom)
-        .onReceive(viewModel.$state, perform: { value in
+        .onReceive(viewModel.$state) { value in
             switch value {
             case let .success(roomName): onNavigateToWaitingRoom(roomName)
-                default : break
+                default: break
             }
-        })
+        }
     }
 }

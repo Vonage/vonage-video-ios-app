@@ -15,9 +15,9 @@ struct VERAApp: App {
             NavigationStack(path: $path) {
                 LandingPageFactory().make { roomName in
                     path.append(AppRoute.waitingRoom(roomName))
-                }.fullScreenCover(isPresented: $isSessionActive, content: {
+                }.fullScreenCover(isPresented: $isSessionActive) {
                     
-                })
+                }
                 .navigationDestination(for: AppRoute.self) { destination in
                     switch destination {
                     case .landing: fatalError("Cant happen")

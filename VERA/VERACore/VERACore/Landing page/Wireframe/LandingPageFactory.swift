@@ -9,7 +9,7 @@ public struct LandingPageFactory {
     public init() {}
     
     public func make(
-        onNavigateToWaitingRoom: @escaping (String)->Void
+        onNavigateToWaitingRoom: @escaping (String) -> Void
     ) -> some View {
         LandingPageScreen(
             viewModel: .init(tryJoinRoomUseCase: .init()),

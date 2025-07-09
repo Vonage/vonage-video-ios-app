@@ -52,5 +52,5 @@ struct JoinExistingRoom: View {
 }
 
 #Preview {
-    JoinExistingRoom(onJoinRoom: {_ in })
+    JoinExistingRoom { _ in }
 }

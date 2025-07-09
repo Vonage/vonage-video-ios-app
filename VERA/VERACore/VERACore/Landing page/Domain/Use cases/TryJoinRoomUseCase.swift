@@ -13,7 +13,7 @@ public final class TryJoinRoomUseCase {
     
     public func invoke(_ name: String) async throws {
         
-        if (!name.isValidRoomName) {
+        if !name.isValidRoomName {
             throw Error.invalidRoomName
         }
     }

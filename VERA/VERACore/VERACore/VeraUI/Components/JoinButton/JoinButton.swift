@@ -7,7 +7,7 @@ import SwiftUI
 struct JoinButton: View {
     @Binding var roomName: String
     
-    let onJoinRoom: ()->Void
+    let onJoinRoom: () -> Void
     
     var body: some View {
         Button {
@@ -37,6 +37,6 @@ struct JoinRoomButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    JoinButton(roomName: .constant(""), onJoinRoom: {})
-    JoinButton(roomName: .constant("Test"), onJoinRoom: {})
+    JoinButton(roomName: .constant("")) {}
+    JoinButton(roomName: .constant("Test")) {}
 }

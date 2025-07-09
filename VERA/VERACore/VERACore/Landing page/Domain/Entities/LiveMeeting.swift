@@ -16,18 +16,4 @@ public struct LiveMeeting {
     public let availableAudioDevices: [AudioDevice]
     public let captions: [Caption]
     public let endedAt: Date?
-    
-    init(id: String, roomName: String, participants: [Participant], isActive: Bool, isRecording: Bool, selectedCamera: CameraDevice, selectedAudio: String, availableCameraDevices: [CameraDevice], availableAudioDevices: [AudioDevice], captions: [Caption], endedAt: Date?) {
-        self.id = id
-        self.roomName = roomName
-        self.participants = participants
-        self.isActive = isActive
-        self.isRecording = isRecording
-        self.selectedCamera = selectedCamera
-        self.selectedAudio = selectedAudio
-        self.availableCameraDevices = availableCameraDevices
-        self.availableAudioDevices = availableAudioDevices
-        self.captions = captions
-        self.endedAt = endedAt
-    }
 }
