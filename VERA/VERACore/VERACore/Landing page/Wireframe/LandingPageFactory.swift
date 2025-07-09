@@ -12,7 +12,7 @@ public struct LandingPageFactory {
         onNavigateToWaitingRoom: @escaping (String)->Void
     ) -> some View {
         LandingPageScreen(
-            viewModel: .init(tryJoinRoomUseCase: .init(roomNameValidator: .init())),
+            viewModel: .init(tryJoinRoomUseCase: .init()),
             onNavigateToWaitingRoom: onNavigateToWaitingRoom)
     }
 }

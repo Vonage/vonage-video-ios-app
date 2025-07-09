@@ -29,44 +29,72 @@ public struct LandingPageView: View {
                 .padding(.horizontal, 8)
             Group {
                 if verticalSizeClass == .compact {
-                    // Horizontal layout
-                    HStack(alignment: .center, spacing: 20) {
-                        LandingPageWelcome()
-                            .frame(maxWidth: .infinity)
-                            .padding(.bottom, 40)
-                        
-                        RoomJoinContainer(
-                            onHandleNewRoom: onHandleNewRoom,
-                            onJoinRoom: onJoinRoom)
-                            .frame(maxWidth: .infinity)
-                    }
+                    HorizontalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
                 } else if horizontalSizeClass == .compact {
-                    // Vertical layout
-                    VStack(alignment: .center, spacing: 20) {
-                        LandingPageWelcome()
-                            .frame(maxWidth: .infinity)
-                            .padding(.bottom, 40)
-                        
-                        RoomJoinContainer(
-                            onHandleNewRoom: onHandleNewRoom,
-                            onJoinRoom: onJoinRoom)
-                            .frame(maxWidth: .infinity)
-                    }
+                    VerticalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
                 } else {
-                    // Horizontal layout
-                    HStack(alignment: .center, spacing: 20) {
-                        LandingPageWelcome()
-                            .frame(maxWidth: .infinity)
-                            .padding(.bottom, 40)
-                        
-                        RoomJoinContainer(
-                            onHandleNewRoom: onHandleNewRoom,
-                            onJoinRoom: onJoinRoom)
-                            .frame(maxWidth: .infinity)
-                    }
+                    HorizontalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
                 }
             }
             .frame(maxHeight: .infinity)
+        }
+    }
+}
+
+public struct HorizontalLandingContentView: View {
+    
+    public let onHandleNewRoom: ()->Void
+    public let onJoinRoom: (String)->Void
+    
+    public init(onHandleNewRoom: @escaping () -> Void,
+         onJoinRoom: @escaping (String) -> Void) {
+        self.onHandleNewRoom = onHandleNewRoom
+        self.onJoinRoom = onJoinRoom
+    }
+    
+    public var body: some View {
+        HStack(alignment: .center, spacing: 20) {
+            LandingPageWelcome()
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 40)
+            
+            RoomJoinContainer(
+                onHandleNewRoom: onHandleNewRoom,
+                onJoinRoom: onJoinRoom)
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+public struct VerticalLandingContentView: View {
+    
+    public let onHandleNewRoom: ()->Void
+    public let onJoinRoom: (String)->Void
+    
+    public init(onHandleNewRoom: @escaping () -> Void,
+         onJoinRoom: @escaping (String) -> Void) {
+        self.onHandleNewRoom = onHandleNewRoom
+        self.onJoinRoom = onJoinRoom
+    }
+    
+    public var body: some View {
+        VStack(alignment: .center, spacing: 20) {
+            LandingPageWelcome()
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 40)
+                .padding(.horizontal, 20)
+            
+            RoomJoinContainer(
+                onHandleNewRoom: onHandleNewRoom,
+                onJoinRoom: onJoinRoom)
+                .frame(maxWidth: .infinity)
+            Spacer()
         }
     }
 }

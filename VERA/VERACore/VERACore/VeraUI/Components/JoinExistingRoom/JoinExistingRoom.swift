@@ -26,7 +26,7 @@ struct JoinExistingRoom: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemBackground))
+                    .fill(Color(.uiSystemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(borderColor, lineWidth: 1.5)
@@ -41,7 +41,7 @@ struct JoinExistingRoom: View {
         }
         .onChange(of: roomName) { newValue in
             withAnimation(.easeInOut(duration: 0.2)) {
-                isValidRoom = !newValue.isEmpty
+                isValidRoom = newValue.isValidRoomName
             }
         }
     }
