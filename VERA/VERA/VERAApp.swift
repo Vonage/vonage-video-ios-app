@@ -3,12 +3,30 @@
 //
 
 import SwiftUI
+import VERACore
 
 @main
 struct VERAApp: App {
+    @State private var isSessionActive = false
+    @State private var path = NavigationPath()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack(path: $path) {
+                LandingPageFactory().make { roomName in
+                    path.append(AppRoute.waitingRoom(roomName))
+                }.fullScreenCover(isPresented: $isSessionActive, content: {
+                    
+                })
+                .navigationDestination(for: AppRoute.self) { destination in
+                    switch destination {
+                    case .landing: fatalError("Cant happen")
+                    case let .waitingRoom(roomName): WaitingRoomView()
+                    case let .meetingRoom(roomName): MeetingRoomView()
+                    case .goodbye: GoodByeView()
+                    }
+                }
+            }
         }
     }
 }

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1600"
-   version = "1.7">
+   LastUpgradeVersion = "2600"
+   version = "1.8">
    <BuildAction
       parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES"
-      runPostActionsOnFailure = "NO">
+      buildImplicitDependencies = "YES">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -15,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "VERACore"
+               BlueprintIdentifier = "6FD1B3F02E1BB74700BD9F3D"
                BuildableName = "VERACore.framework"
                BlueprintName = "VERACore"
                ReferencedContainer = "container:VERACore.xcodeproj">
@@ -36,7 +35,7 @@
             testExecutionOrdering = "random">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "VERACoreTests"
+               BlueprintIdentifier = "6FD1B3FB2E1BB74700BD9F3D"
                BuildableName = "VERACoreTests.xctest"
                BlueprintName = "VERACoreTests"
                ReferencedContainer = "container:VERACore.xcodeproj">
