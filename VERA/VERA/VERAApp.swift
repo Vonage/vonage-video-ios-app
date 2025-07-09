@@ -23,8 +23,8 @@ struct VERAApp: App {
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case .landing: fatalError("Cant happen")
-                        case let .waitingRoom(roomName): WaitingRoomView()
-                        case let .meetingRoom(roomName): MeetingRoomView()
+                        case .waitingRoom(_): WaitingRoomView()
+                        case .meetingRoom(_): MeetingRoomView()
                         case .goodbye: GoodByeView()
                         }
                     }
