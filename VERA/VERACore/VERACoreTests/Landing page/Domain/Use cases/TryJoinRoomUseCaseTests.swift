@@ -10,6 +10,6 @@ import VERACore
 struct TryJoinRoomUseCaseTests {
     @Test("zero")
     func zero() {
-        
+
     }
 }

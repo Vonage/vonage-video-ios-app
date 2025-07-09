@@ -5,20 +5,20 @@
 import SwiftUI
 
 struct JoinExistingRoom: View {
-    
+
     @State var roomName: String = ""
     @State private var isValidRoom: Bool = false
-    
+
     let onJoinRoom: (String) -> Void
-    
+
     var body: some View {
-        
+
         HStack {
             HStack(spacing: 12) {
                 Image("keyboard", bundle: .veraCore)
                     .foregroundColor(.vGray3)
                     .frame(width: 20)
-                
+
                 TextField("Enter room name", text: $roomName)
                     .textFieldStyle(PlainTextFieldStyle())
             }
@@ -32,8 +32,8 @@ struct JoinExistingRoom: View {
                             .stroke(borderColor, lineWidth: 1.5)
                     )
                     .animation(.easeInOut(duration: 0.3), value: isValidRoom)
-            )            
-            
+            )
+
             JoinButton(roomName: $roomName) {
                 onJoinRoom(roomName)
             }
@@ -45,7 +45,7 @@ struct JoinExistingRoom: View {
             }
         }
     }
-    
+
     private var borderColor: Color {
         isValidRoom ? .accentBlue : Color(.vGray3)
     }

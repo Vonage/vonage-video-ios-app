@@ -9,23 +9,25 @@ import VERACore
 struct VERAApp: App {
     @State private var isSessionActive = false
     @State private var path = NavigationPath()
-    
+
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $path) {
-                LandingPageFactory().make { roomName in
-                    path.append(AppRoute.waitingRoom(roomName))
-                }.fullScreenCover(isPresented: $isSessionActive) {
-                    
-                }
-                .navigationDestination(for: AppRoute.self) { destination in
-                    switch destination {
-                    case .landing: fatalError("Cant happen")
-                    case let .waitingRoom(roomName): WaitingRoomView()
-                    case let .meetingRoom(roomName): MeetingRoomView()
-                    case .goodbye: GoodByeView()
+                LandingPageFactory()
+                    .make { roomName in
+                        path.append(AppRoute.waitingRoom(roomName))
                     }
-                }
+                    .fullScreenCover(isPresented: $isSessionActive) {
+
+                    }
+                    .navigationDestination(for: AppRoute.self) { destination in
+                        switch destination {
+                        case .landing: fatalError("Cant happen")
+                        case let .waitingRoom(roomName): WaitingRoomView()
+                        case let .meetingRoom(roomName): MeetingRoomView()
+                        case .goodbye: GoodByeView()
+                        }
+                    }
             }
         }
     }

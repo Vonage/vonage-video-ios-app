@@ -6,7 +6,7 @@ import SwiftUI
 
 struct GHRepoButton: View {
     @Environment(\.openURL) private var openURL
-    
+
     var body: some View {
         Button {
             if let url = URL(string: "https://github.com/Vonage/vonage-video-ios-app") {

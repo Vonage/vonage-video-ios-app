@@ -7,13 +7,13 @@ import SwiftUI
 struct RoomJoinContainer: View {
     let onHandleNewRoom: () -> Void
     let onJoinRoom: (String) -> Void
-    
+
     var body: some View {
         VStack(alignment: .center) {
             NewRoomButton(onHandleNewRoom: onHandleNewRoom)
-            
+
             JoinContainerSeparator()
-            
+
             JoinExistingRoom(onJoinRoom: onJoinRoom)
         }.frame(maxWidth: 320)
     }

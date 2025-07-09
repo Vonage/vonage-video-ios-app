@@ -12,7 +12,10 @@ final class NavigationCoordinator: ObservableObject {
         if let route = AppRoute(path: path) {
             self.route = route
         } else {
-            print("Invalid route: \(path)")
+            // Log invalid route attempts for debugging
+            #if DEBUG
+                print("Invalid route: \(path)")  // swiftlint:disable:this no_print
+            #endif
         }
     }
 

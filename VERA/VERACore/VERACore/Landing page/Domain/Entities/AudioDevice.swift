@@ -6,7 +6,7 @@ import Foundation
 
 public struct AudioDevice {
     public let id: String
-    
+
     public init(id: String) {
         self.id = id
     }

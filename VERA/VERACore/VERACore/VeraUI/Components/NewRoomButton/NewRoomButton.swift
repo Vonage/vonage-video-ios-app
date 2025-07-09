@@ -5,9 +5,9 @@
 import SwiftUI
 
 struct NewRoomButton: View {
-    
+
     let onHandleNewRoom: () -> Void
-    
+
     var body: some View {
         Button {
             onHandleNewRoom()
@@ -23,7 +23,7 @@ struct NewRoomButton: View {
 
 struct NewRoomButtonStyle: ButtonStyle {
     var cornerRadius: CGFloat = 4
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(.horizontal, 24)

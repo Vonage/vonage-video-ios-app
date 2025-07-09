@@ -6,9 +6,9 @@ import SwiftUI
 
 struct JoinButton: View {
     @Binding var roomName: String
-    
+
     let onJoinRoom: () -> Void
-    
+
     var body: some View {
         Button {
             onJoinRoom()
@@ -22,15 +22,15 @@ struct JoinButton: View {
 
 struct JoinRoomButtonStyle: ButtonStyle {
     var cornerRadius: CGFloat = 20
-    
+
     let isEnabled: Bool
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(.uiSystemBackground)
-                .opacity(configuration.isPressed ? 0.8 : 1)
+            .opacity(configuration.isPressed ? 0.8 : 1)
             .foregroundStyle(isEnabled ? .accentBlue : .vGray3)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }

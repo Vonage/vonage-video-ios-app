@@ -5,9 +5,9 @@
 import SwiftUI
 
 struct BannerLogo: View {
-    
+
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
+
     var body: some View {
         if horizontalSizeClass == .compact {
             Image("vonage-logo-mobile", bundle: .veraCore)
@@ -20,7 +20,7 @@ struct BannerLogo: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 72)
         }
-        
+
     }
 }
 

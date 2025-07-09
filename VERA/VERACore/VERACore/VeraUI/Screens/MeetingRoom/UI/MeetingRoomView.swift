@@ -5,11 +5,11 @@
 import SwiftUI
 
 public final class JoinRoomUseCase {
-    
+
 }
 
 public struct MeetingRoomView: View {
-    
+
     public init() {}
     public var body: some View {
         Text("Meeting")

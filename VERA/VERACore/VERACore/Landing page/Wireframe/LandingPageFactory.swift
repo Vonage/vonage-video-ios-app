@@ -5,9 +5,9 @@
 import SwiftUI
 
 public struct LandingPageFactory {
-    
+
     public init() {}
-    
+
     public func make(
         onNavigateToWaitingRoom: @escaping (String) -> Void
     ) -> some View {

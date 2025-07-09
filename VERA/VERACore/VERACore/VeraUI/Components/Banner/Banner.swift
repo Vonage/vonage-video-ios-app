@@ -5,9 +5,9 @@
 import SwiftUI
 
 struct Banner: View {
-    
+
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
+
     var body: some View {
         HStack {
             BannerLogo()
