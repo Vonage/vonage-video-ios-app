@@ -20,8 +20,10 @@ public final class LandingPageViewModel {
 
     @Published public var state: LandingPageViewState = .content
 
-    public init(tryJoinRoomUseCase: TryJoinRoomUseCase,
-                tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase) {
+    public init(
+        tryJoinRoomUseCase: TryJoinRoomUseCase,
+        tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
+    ) {
         self.tryJoinRoomUseCase = tryJoinRoomUseCase
         self.tryCreatingANewRoomUseCase = tryCreatingANewRoomUseCase
     }

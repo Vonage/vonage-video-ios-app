@@ -30,8 +30,10 @@ struct RoomNameGeneratorTests {
 
     @Test
     func givenTwoCategoriesThenChooseTwoWords() {
-        let categories: [RoomNameGenerator.Category] = [.init(words: ["aardvark"]),
-                                                        .init(words: ["aardvark"])]
+        let categories: [RoomNameGenerator.Category] = [
+            .init(words: ["aardvark"]),
+            .init(words: ["aardvark"]),
+        ]
         let sut = makeSUT(categories: categories)
 
         let result = sut.generate()
@@ -41,8 +43,10 @@ struct RoomNameGeneratorTests {
 
     @Test
     func givenTwoCategoriesWithMultipleWordsThenChooseTwoRandomWords() {
-        let categories: [RoomNameGenerator.Category] = [.init(words: ["aardvark", "albatross"]),
-                                                        .init(words: ["aardvark", "alpaca"])]
+        let categories: [RoomNameGenerator.Category] = [
+            .init(words: ["aardvark", "albatross"]),
+            .init(words: ["aardvark", "alpaca"]),
+        ]
         let sut = makeSUT(categories: categories)
 
         let result = sut.generate()

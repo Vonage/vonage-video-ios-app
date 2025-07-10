@@ -8,7 +8,7 @@ public struct RoomNameGenerator {
 
     public struct Category {
         public let words: [String]
-        
+
         public init(words: [String]) {
             self.words = words
         }
@@ -16,7 +16,7 @@ public struct RoomNameGenerator {
 
     private let categories: [Category]
 
-    public init (categories: [Category]) {
+    public init(categories: [Category]) {
         self.categories = categories
     }
 
