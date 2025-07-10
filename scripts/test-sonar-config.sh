@@ -39,7 +39,7 @@ if command -v sonar-scanner &> /dev/null; then
     if sonar-scanner -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
         -Dsonar.organization="$SONAR_ORGANIZATION" \
         -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-        -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
+        -Dsonar.tests=VERA/VERAApp/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests \
         -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
         -Dsonar.host.url=https://sonarcloud.io \
         -Dsonar.token=dummy-token \
@@ -66,7 +66,7 @@ done
 
 # Validate test paths exist
 echo -e "${BLUE}🧪 Validating test paths...${NC}"
-TEST_PATHS=("VERA/VERATests" "VERA/VERACore/VERACoreTests" "VERA/VERAOpenTok/VERAOpenTokTests" "VERA/VERAUITests")
+TEST_PATHS=("VERA/VERAApp/VERATests" "VERA/VERACore/VERACoreTests" "VERA/VERAOpenTok/VERAOpenTokTests" "VERA/VERAApp/VERAUITests")
 for path in "${TEST_PATHS[@]}"; do
     if [ -d "$PROJECT_ROOT/$path" ]; then
         echo -e "${GREEN}✅ $path${NC}"
