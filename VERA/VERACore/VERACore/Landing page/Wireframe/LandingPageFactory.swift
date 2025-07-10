@@ -4,7 +4,9 @@
 
 import SwiftUI
 
-public struct LandingPageFactory {
+public class LandingPageFactory {
+
+    lazy var roomNameGeneratorFactory = RoomNameGeneratorFactory()
 
     public init() {}
 
@@ -12,7 +14,9 @@ public struct LandingPageFactory {
         onNavigateToWaitingRoom: @escaping (String) -> Void
     ) -> some View {
         LandingPageScreen(
-            viewModel: .init(tryJoinRoomUseCase: .init()),
+            viewModel: .init(
+                tryJoinRoomUseCase: .init(),
+                tryCreatingANewRoomUseCase: .init(roomNameGenerator: roomNameGeneratorFactory.make())),
             onNavigateToWaitingRoom: onNavigateToWaitingRoom)
     }
 }

@@ -6,6 +6,7 @@ import Foundation
 import Testing
 import VERACore
 
+@Suite("Room name generator tests")
 struct RoomNameGeneratorTests {
 
     @Test

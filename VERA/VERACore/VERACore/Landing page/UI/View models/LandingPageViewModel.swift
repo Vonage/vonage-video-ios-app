@@ -16,15 +16,19 @@ public enum LandingPageViewState: Equatable {
 public final class LandingPageViewModel {
 
     private let tryJoinRoomUseCase: TryJoinRoomUseCase
+    private let tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
 
     @Published public var state: LandingPageViewState = .content
 
-    public init(tryJoinRoomUseCase: TryJoinRoomUseCase) {
+    public init(tryJoinRoomUseCase: TryJoinRoomUseCase,
+                tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase) {
         self.tryJoinRoomUseCase = tryJoinRoomUseCase
+        self.tryCreatingANewRoomUseCase = tryCreatingANewRoomUseCase
     }
 
     public func onHandleNewRoom() {
-
+        let name = tryCreatingANewRoomUseCase.invoke()
+        state = .success(name)
     }
 
     public func onJoinRoom(_ name: String) {

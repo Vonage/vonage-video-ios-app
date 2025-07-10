@@ -9,7 +9,7 @@ import VERACore
 @Suite("Try join room use case tests")
 struct TryJoinRoomUseCaseTests {
 
-    // MARK: - Use Case Behavior Tests (not validation logic)
+    // MARK: - Use Case Behavior Tests
 
     @Test("Should succeed with valid room name")
     func shouldSucceedWithValidRoomName() throws {
