@@ -21,9 +21,7 @@ struct TryCreatingANewRoomUseCaseTests {
     // MARK: - Helper
 
     private func makeSUT() -> TryCreatingANewRoomUseCase {
-        let roomNameGenerator = RoomNameGenerator(
-            categories: [.init(words: ["aardvark"])]
-        )
+        let roomNameGenerator = makeBasicRoomNameGenerator()
         return TryCreatingANewRoomUseCase(roomNameGenerator: roomNameGenerator)
     }
 }
