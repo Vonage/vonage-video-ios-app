@@ -76,6 +76,7 @@ jobs:
           -sdk iphonesimulator \
           -destination "generic/platform=iOS Simulator" \
           -derivedDataPath DerivedData \
+          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -101,6 +102,7 @@ jobs:
           -destination "platform=iOS Simulator,name=$DEVICE" \
           -only-testing:VERAUITests \
           -derivedDataPath DerivedData \
+          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -121,6 +123,7 @@ jobs:
                 -destination "platform=iOS Simulator,name=$fallback_device" \
                 -only-testing:VERAUITests \
                 -derivedDataPath DerivedData \
+                -skipPackagePluginValidation \
                 CODE_SIGN_IDENTITY="" \
                 CODE_SIGNING_REQUIRED=NO \
                 CODE_SIGNING_ALLOWED=NO \

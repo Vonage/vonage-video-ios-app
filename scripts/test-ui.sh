@@ -40,6 +40,7 @@ xcodebuild build \
     -scheme VERA \
     -destination 'platform=iOS Simulator,name=iPhone 16' \
     -derivedDataPath ./DerivedData \
+    -skipPackagePluginValidation \
     CODE_SIGN_IDENTITY="" \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO \
@@ -59,6 +60,7 @@ if xcodebuild test \
     -parallel-testing-enabled NO \
     -enableCodeCoverage YES \
     -derivedDataPath ./DerivedData \
+    -skipPackagePluginValidation \
     CODE_SIGN_IDENTITY="" \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO; then
@@ -71,6 +73,7 @@ elif xcodebuild test \
     -parallel-testing-enabled NO \
     -enableCodeCoverage YES \
     -derivedDataPath ./DerivedData \
+    -skipPackagePluginValidation \
     CODE_SIGN_IDENTITY="" \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO; then
@@ -83,6 +86,7 @@ elif xcodebuild test \
     -parallel-testing-enabled NO \
     -enableCodeCoverage YES \
     -derivedDataPath ./DerivedData \
+    -skipPackagePluginValidation \
     CODE_SIGN_IDENTITY="" \
     CODE_SIGNING_REQUIRED=NO \
     CODE_SIGNING_ALLOWED=NO; then
