@@ -12,54 +12,54 @@ struct TryJoinRoomUseCaseTests {
     // MARK: - Use Case Behavior Tests (not validation logic)
 
     @Test("Should succeed with valid room name")
-    func shouldSucceedWithValidRoomName() async throws {
+    func shouldSucceedWithValidRoomName() throws {
         let sut = makeSUT()
 
         // Test that the use case doesn't throw for a known valid name
-        try await sut.invoke("validroom123")
+        try sut.invoke("validroom123")
     }
 
     @Test("Should throw InvalidRoomName error for invalid room name")
-    func shouldThrowInvalidRoomNameErrorForInvalidInput() async throws {
+    func shouldThrowInvalidRoomNameErrorForInvalidInput() throws {
         let sut = makeSUT()
 
         // Test that the use case throws the correct error type
-        await #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
-            try await sut.invoke("invalid room name")  // Spaces are invalid
+        #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
+            try sut.invoke("invalid room name")  // Spaces are invalid
         }
     }
 
     @Test("Should throw InvalidRoomName error for empty string")
-    func shouldThrowInvalidRoomNameErrorForEmptyString() async throws {
+    func shouldThrowInvalidRoomNameErrorForEmptyString() throws {
         let sut = makeSUT()
 
-        await #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
-            try await sut.invoke("")
+        #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
+            try sut.invoke("")
         }
     }
 
     @Test("Use case should be async compatible")
-    func shouldWorkInAsyncContext() async throws {
+    func shouldWorkInAsyncContext() throws {
         let sut = makeSUT()
 
         // Verify async behavior works correctly
         let validName = "testasyncroomname"
-        try await sut.invoke(validName)
+        try sut.invoke(validName)
 
         // Multiple async calls should work
-        try await sut.invoke("room1")
-        try await sut.invoke("room2")
+        try sut.invoke("room1")
+        try sut.invoke("room2")
     }
 
     @Test("Should validate room names quickly")
-    func shouldValidateRoomNameQuickly() async throws {
+    func shouldValidateRoomNameQuickly() throws {
         let sut = makeSUT()
 
         // Performance test - validation should be fast
         let startTime = CFAbsoluteTimeGetCurrent()
 
         for index in 0..<1000 {
-            try await sut.invoke("quickroom\(index)")
+            try sut.invoke("quickroom\(index)")
         }
 
         let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
@@ -69,11 +69,11 @@ struct TryJoinRoomUseCaseTests {
     // MARK: - Error Type Verification
 
     @Test("Should throw correct error type for invalid room name")
-    func shouldThrowCorrectErrorTypeForInvalidRoomName() async throws {
+    func shouldThrowCorrectErrorTypeForInvalidRoomName() throws {
         let sut = makeSUT()
 
         do {
-            try await sut.invoke("@invalid")
+            try sut.invoke("@invalid")
             #expect(Bool(false), "Should have thrown an error")
         } catch let error as TryJoinRoomUseCase.Error {
             #expect(error == .invalidRoomName)

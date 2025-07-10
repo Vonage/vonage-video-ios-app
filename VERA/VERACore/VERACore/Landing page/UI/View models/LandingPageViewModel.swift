@@ -32,7 +32,7 @@ public final class LandingPageViewModel {
 
         Task {
             do {
-                try await tryJoinRoomUseCase.invoke(name)
+                try tryJoinRoomUseCase.invoke(name)
                 await MainActor.run {
                     state = .success(name)
                 }
