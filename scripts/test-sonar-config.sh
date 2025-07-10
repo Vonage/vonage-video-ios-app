@@ -38,7 +38,7 @@ if command -v sonar-scanner &> /dev/null; then
     # This will validate the configuration without actually running the scan
     if sonar-scanner -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
         -Dsonar.organization="$SONAR_ORGANIZATION" \
-        -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
+        -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
         -Dsonar.tests=VERA/VERAApp/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests \
         -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json \
         -Dsonar.host.url=https://sonarcloud.io \
