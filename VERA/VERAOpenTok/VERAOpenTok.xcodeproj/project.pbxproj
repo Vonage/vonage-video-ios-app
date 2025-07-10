@@ -102,6 +102,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F9152112E1FA6B100985285 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6FD1B41D2E1BBA1A00BD9F3D /* VERAOpenTok */,
@@ -125,6 +126,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F9152132E1FA6B700985285 /* PBXTargetDependency */,
 				6FD1B4292E1BBA1A00BD9F3D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -145,7 +147,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					6FD1B41A2E1BBA1A00BD9F3D = {
 						CreatedOnToolsVersion = 16.4;
@@ -166,6 +168,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */,
+				6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B41C2E1BBA1A00BD9F3D /* Products */;
@@ -213,6 +216,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6F9152112E1FA6B100985285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 6F9152102E1FA6B100985285 /* SwiftLintBuildToolPlugin */;
+		};
+		6F9152132E1FA6B700985285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 6F9152122E1FA6B700985285 /* SwiftLintBuildToolPlugin */;
+		};
 		6FD1B4292E1BBA1A00BD9F3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6FD1B41A2E1BBA1A00BD9F3D /* VERAOpenTok */;
@@ -281,6 +292,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -341,6 +353,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -352,6 +365,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
@@ -386,6 +400,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
@@ -483,6 +498,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.59.1;
+			};
+		};
 		6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/opentok/vonage-client-sdk-video.git";
@@ -494,6 +517,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6F9152102E1FA6B100985285 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		6F9152122E1FA6B700985285 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */;

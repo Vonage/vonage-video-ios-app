@@ -14,7 +14,7 @@ final class NavigationCoordinator: ObservableObject {
         } else {
             // Log invalid route attempts for debugging
             #if DEBUG
-                print("Invalid route: \(path)")  // swiftlint:disable:this no_print
+                print("Invalid route: \(path)")
             #endif
         }
     }

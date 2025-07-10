@@ -14,10 +14,10 @@ struct BannerDateTime: View {
     .autoconnect()
 
     private static let usFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_US_POSIX")
-        df.dateFormat = "h:mm a • EEE, MMM d"
-        return df
+        let dataFormatter = DateFormatter()
+        dataFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dataFormatter.dateFormat = "h:mm a • EEE, MMM d"
+        return dataFormatter
     }()
 
     var body: some View {

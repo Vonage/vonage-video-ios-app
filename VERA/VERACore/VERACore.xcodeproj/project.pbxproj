@@ -126,6 +126,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F91520A2E1FA68B00985285 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6FD1B3F32E1BB74700BD9F3D /* VERACore */,
@@ -148,6 +149,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F91520C2E1FA69200985285 /* PBXTargetDependency */,
 				6FD1B3FF2E1BB74700BD9F3D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -171,6 +173,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F91520E2E1FA69800985285 /* PBXTargetDependency */,
 				6FD1B4852E1BFAB400BD9F3D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -192,7 +195,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					6FD1B3F02E1BB74700BD9F3D = {
 						CreatedOnToolsVersion = 16.4;
@@ -216,6 +219,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6FD1B48B2E1BFADB00BD9F3D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B3F22E1BB74700BD9F3D /* Products */;
@@ -278,6 +282,18 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6F91520A2E1FA68B00985285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 6F9152092E1FA68B00985285 /* SwiftLintBuildToolPlugin */;
+		};
+		6F91520C2E1FA69200985285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 6F91520B2E1FA69200985285 /* SwiftLintBuildToolPlugin */;
+		};
+		6F91520E2E1FA69800985285 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 6F91520D2E1FA69800985285 /* SwiftLintBuildToolPlugin */;
+		};
 		6FD1B3FF2E1BB74700BD9F3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6FD1B3F02E1BB74700BD9F3D /* VERACore */;
@@ -327,6 +343,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -350,6 +367,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -392,6 +410,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -408,6 +427,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -419,8 +439,10 @@
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -461,8 +483,10 @@
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -504,6 +528,7 @@
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
@@ -526,6 +551,7 @@
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
@@ -629,6 +655,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.59.1;
+			};
+		};
 		6FD1B48B2E1BFADB00BD9F3D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
@@ -640,6 +674,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6F9152092E1FA68B00985285 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		6F91520B2E1FA69200985285 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		6F91520D2E1FA69800985285 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
 		6FD1B48C2E1BFADB00BD9F3D /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6FD1B48B2E1BFADB00BD9F3D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;

@@ -8,8 +8,17 @@ import VERACore
 
 @Suite("Try join room use case tests")
 struct TryJoinRoomUseCaseTests {
-    @Test("zero")
-    func zero() {
 
+    @Test
+    func zero() async throws {
+        let sut = makeSUT()
+
+        try await sut.invoke("a room name")
+    }
+
+    // MARK: SUT
+
+    func makeSUT() -> TryJoinRoomUseCase {
+        return TryJoinRoomUseCase()
     }
 }
