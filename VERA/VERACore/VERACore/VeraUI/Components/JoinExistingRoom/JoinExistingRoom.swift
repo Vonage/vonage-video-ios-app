@@ -4,10 +4,14 @@
 
 import SwiftUI
 
+enum RoomNameState {
+    case initial, valid, invalid
+}
+
 struct JoinExistingRoom: View {
 
     @State var roomName: String = ""
-    @State private var isValidRoom: Bool = false
+    @State private var roomState: RoomNameState = RoomNameState.initial
 
     let onJoinRoom: (String) -> Void
 
@@ -31,23 +35,38 @@ struct JoinExistingRoom: View {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(borderColor, lineWidth: 1.5)
                     )
-                    .animation(.easeInOut(duration: 0.3), value: isValidRoom)
+                    .animation(.easeInOut(duration: 0.3), value: roomState)
             )
 
             JoinButton(roomName: $roomName) {
                 onJoinRoom(roomName)
             }
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isValidRoom)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
         }
-        .onChange(of: roomName) { newValue in
+        .onChange(of: roomName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
-                isValidRoom = newValue.isValidRoomName
+                roomState = getRoomState()
             }
         }
     }
 
     private var borderColor: Color {
-        isValidRoom ? .accentBlue : Color(.vGray3)
+        switch getRoomState() {
+        case .initial:
+            return .vGray3
+        case .valid:
+            return .accentBlue
+        case .invalid:
+            return .red
+        }
+    }
+
+    private func getRoomState() -> RoomNameState {
+        if roomName.isEmpty {
+            return .initial
+        } else {
+            return roomName.isValidRoomName ? .valid : .invalid
+        }
     }
 }
 

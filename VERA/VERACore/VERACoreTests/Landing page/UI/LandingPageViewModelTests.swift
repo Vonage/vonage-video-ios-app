@@ -85,7 +85,10 @@ struct LandingPageViewModelTests {
     // MARK: - Join Room Tests
 
     @Test(
-        "Given content state, when join room is called with valid name, then state transitions through loading to success"
+        """
+        Given content state, when join room is called with valid name,
+        then state transitions through loading to success
+        """
     )
     func whenJoinRoomWithValidNameThenStateTransitionsToSuccess() async {
         let sut = makeSUT()
@@ -119,13 +122,13 @@ struct LandingPageViewModelTests {
 
     @Test(
         """
-        Given content state, when join room is called with invalid name, then state transitions 
-        through loading to error
+        Given content state, when join room is called with invalid name, then
+        state transitions through loading to error
         """
     )
     func whenJoinRoomWithInvalidNameThenStateTransitionsToError() async {
         let sut = makeSUT()
-        let invalidRoomName = "INVALID@NAME!"  // Contains invalid characters
+        let invalidRoomName = "INVALID@NAME!"  // Contains invalid @ and ! characters
 
         // Initial state should be content
         #expect(sut.state == .content)
@@ -272,6 +275,61 @@ struct LandingPageViewModelTests {
         #expect(receivedStates.contains(.content))  // Initial state
 
         cancellable.cancel()
+    }
+
+    // MARK: - Debugging Tests
+
+    @Test("Debug exact validation behavior used in LandingPageViewModel")
+    func debugValidationBehaviorUsedInViewModel() async {
+        
+        let testCases = [
+            ("validroom123", true),
+            ("INVALID@NAME!", false),
+            ("", false),
+            ("   ", false),
+            ("TestRoom", false),
+            ("a", true)
+        ]
+        
+        print("\n=== DEBUG: ViewModel Validation Tests ===")
+        
+        for (roomName, expectedValid) in testCases {
+            let sut = makeSUT()  // Create fresh SUT for each test
+            
+            // Test the validation directly
+            let isValid = roomName.isValidRoomName
+            print("Direct validation: '\(roomName)' -> \(isValid) (expected: \(expectedValid))")
+            
+            // Test through the ViewModel
+            sut.onJoinRoom(roomName)
+            
+            // Give time for async operation
+            for _ in 0..<10 {
+                if case .loading = sut.state {
+                    try? await Task.sleep(nanoseconds: 10_000_000)  // 0.01 seconds
+                } else {
+                    break
+                }
+            }
+            
+            let viewModelResult = switch sut.state {
+            case .success: true
+            case .error: false
+            case .loading: false  // Still processing
+            case .content: false  // Shouldn't happen
+            }
+            
+            print("ViewModel result: '\(roomName)' -> \(viewModelResult) (state: \(sut.state))")
+            
+            // Verify the expectations
+            #expect(isValid == expectedValid, "Direct validation failed for '\(roomName)'")
+            
+            if expectedValid {
+                #expect(viewModelResult == true, "ViewModel should succeed for valid room name '\(roomName)'")
+            } else {
+                #expect(viewModelResult == false, "ViewModel should fail for invalid room name '\(roomName)'")
+            }
+        }
     }
 
     // MARK: SUT
