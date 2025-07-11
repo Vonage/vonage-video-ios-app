@@ -229,59 +229,80 @@ jobs:
     
     - name: Run tests with coverage for SonarCloud
       run: |
-        echo "🧪 Running tests with coverage for SonarCloud..."
+        echo "🧪 Running comprehensive tests with coverage for SonarCloud..."
+        
+        # Run VERACore tests (main business logic) with coverage
+        echo "📊 Running VERACore tests with coverage..."
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACore \
           -destination "platform=macOS" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/TestResults.xcresult \
+          -resultBundlePath DerivedData/VERACore-TestResults.xcresult \
           -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          -quiet || echo "Tests completed with issues"
+          -quiet || echo "VERACore tests completed with issues"
+        
+        # Also run VERA app tests if available to get complete coverage
+        echo "📱 Running VERA app tests with coverage..."
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -destination "platform=iOS Simulator,name=iPhone 16" \
+          -only-testing:VERATests \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERA-TestResults.xcresult \
+          -skipPackagePluginValidation \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          -quiet || echo "VERA app tests completed with issues"
     
     - name: Generate coverage reports
       run: |
         echo "📊 Generating coverage reports..."
+        
+        # Generate standard coverage report
         ./scripts/generate-coverage.sh || {
-          echo "⚠️ Coverage generation failed, creating minimal report"
+          echo "⚠️ Standard coverage generation failed, creating minimal report"
           mkdir -p coverage-reports
-          echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > coverage-reports/coverage.json
+          echo '{"coveredLines":0,"executableLines":1,"lineCoverage":0,"targets":[{"name":"VERA","files":[]}]}' > coverage-reports/coverage.json
         }
+        
+        # Convert to SonarQube XML format
+        if [ -f "coverage-reports/coverage.json" ]; then
+          echo "🔄 Converting coverage to SonarQube XML format..."
+          ./scripts/convert-coverage-to-xml.sh || echo "⚠️ XML conversion failed"
+        fi
     
-    - name: Install SonarCloud Scanner and Slather
+    - name: Install SonarCloud Scanner
       run: |
         echo "📥 Installing SonarCloud Scanner..."
         brew install sonar-scanner
-        echo "📥 Installing Slather for coverage analysis..."
-        sudo gem install slather || gem install slather --user-install
     
-    - name: Generate SonarCloud-compatible coverage reports
+    - name: Verify coverage reports
       run: |
-        echo "📊 Generating SonarCloud-compatible coverage with Slather..."
-        mkdir -p coverage-reports
+        echo "� Available coverage files:"
+        ls -la coverage-reports/ || echo "No coverage-reports directory found"
         
-        # Try to generate coverage with Slather first
-        if command -v slather >/dev/null 2>&1; then
-          echo "Using Slather for coverage generation..."
-          slather coverage \
-            --sonarqube-xml \
-            --output-directory coverage-reports \
-            --workspace VERA/VERA.xcworkspace \
-            --scheme VERA \
-            --binary-basename VERA \
-            --source-directory . \
-            VERA/VERA.xcodeproj || {
-            echo "⚠️ Slather failed, falling back to xccov..."
-            ./scripts/generate-coverage.sh
-          }
+        # Verify which coverage format to use
+        if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
+          echo "✅ SonarQube XML coverage available"
+          COVERAGE_PARAM="-Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml"
+        elif [ -f "coverage-reports/coverage.json" ]; then
+          echo "⚠️ Using fallback JSON coverage format"
+          COVERAGE_PARAM="-Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
         else
-          echo "⚠️ Slather not available, using xccov..."
-          ./scripts/generate-coverage.sh
+          echo "❌ No coverage reports found"
+          COVERAGE_PARAM=""
         fi
+        
+        # Save coverage parameter for next step
+        echo "COVERAGE_PARAM=$COVERAGE_PARAM" >> $GITHUB_ENV
     
     - name: SonarCloud Analysis
       env:
@@ -306,18 +327,7 @@ jobs:
         
         echo "📊 Project Key: $SONAR_PROJECT_KEY"
         echo "🏢 Organization: $SONAR_ORGANIZATION"
-        
-        # Determine which coverage format to use
-        COVERAGE_PARAM=""
-        if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
-          COVERAGE_PARAM="-Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml"
-          echo "Using SonarQube XML coverage format"
-        elif [ -f "coverage-reports/coverage.json" ]; then
-          COVERAGE_PARAM="-Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
-          echo "Using fallback JSON coverage format"
-        else
-          echo "⚠️ No coverage reports found"
-        fi
+        echo "📈 Coverage Parameter: $COVERAGE_PARAM"
         
         sonar-scanner \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
