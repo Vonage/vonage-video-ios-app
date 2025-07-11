@@ -7,7 +7,7 @@ import SwiftUI
 struct JoinButton: View {
     @Binding var roomName: String
     @Binding var roomState: RoomNameState
-    
+
     let onJoinRoom: () -> Void
 
     var body: some View {
@@ -19,7 +19,7 @@ struct JoinButton: View {
         .buttonStyle(JoinRoomButtonStyle(isEnabled: !roomName.isEmpty))
         .disabled(roomName.isEmpty)
     }
-    
+
     private var joinColor: Color {
         switch roomState {
         case .initial:

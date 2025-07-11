@@ -60,7 +60,7 @@ struct JoinExistingRoom: View {
             return .red
         }
     }
-    
+
     private func getRoomState() -> RoomNameState {
         if roomName.isEmpty {
             return .initial
