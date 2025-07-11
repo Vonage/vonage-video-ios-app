@@ -38,7 +38,7 @@ struct JoinExistingRoom: View {
                     .animation(.easeInOut(duration: 0.3), value: roomState)
             )
 
-            JoinButton(roomName: $roomName) {
+            JoinButton(roomName: $roomName, roomState: $roomState) {
                 onJoinRoom(roomName)
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
@@ -60,7 +60,7 @@ struct JoinExistingRoom: View {
             return .red
         }
     }
-
+    
     private func getRoomState() -> RoomNameState {
         if roomName.isEmpty {
             return .initial
