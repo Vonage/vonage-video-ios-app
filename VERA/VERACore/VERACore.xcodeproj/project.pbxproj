@@ -35,6 +35,16 @@
 		6FD1B47F2E1BFAB400BD9F3D /* VERACoreSnapshotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERACoreSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6FC895B02E212E2300FA0FF2 /* Exceptions for "VERACoreTests" folder in "VERACoreSnapshotTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Helpers/RoomNameHelpers.swift,
+			);
+			target = 6FD1B47E2E1BFAB400BD9F3D /* VERACoreSnapshotTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6FD1B3F32E1BB74700BD9F3D /* VERACore */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -43,6 +53,9 @@
 		};
 		6FD1B4002E1BB74700BD9F3D /* VERACoreTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6FC895B02E212E2300FA0FF2 /* Exceptions for "VERACoreTests" folder in "VERACoreSnapshotTests" target */,
+			);
 			path = VERACoreTests;
 			sourceTree = "<group>";
 		};

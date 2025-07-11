@@ -47,6 +47,7 @@ public struct LandingPageView: View {
             .frame(maxHeight: .infinity)
             .padding(10)
         }
+        .background(.uiSystemBackground)
     }
 }
 
