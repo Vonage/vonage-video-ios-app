@@ -53,7 +53,7 @@ struct JoinExistingRoom: View {
     private var borderColor: Color {
         switch getRoomState() {
         case .initial:
-            return .vGray3
+            return .uiSecondaryLabel
         case .valid:
             return .accentBlue
         case .invalid:
