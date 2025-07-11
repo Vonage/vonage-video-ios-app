@@ -7,7 +7,7 @@ import SwiftUI
 public struct WaitingRoomView: View {
 
     private let roomName: String
-    
+
     public init(roomName: String) {
         self.roomName = roomName
     }
