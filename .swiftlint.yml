@@ -7,13 +7,33 @@ included:
 
 # Paths to exclude from linting
 excluded:
-  - VERA/VERA.xcodeproj
-  - VERA/VERACore/VERACore.xcodeproj
+  # Xcode project files (all variations)
+  - "**/*.xcodeproj"
+  - "**/*.xcworkspace"
+  - "**/project.xcworkspace"
+  - "**/xcuserdata"
+  - "**/project.pbxproj"
+  
+  # Build and derived data
   - "**/DerivedData"
   - "**/.build"
-  - "**/Pods"
-  - "**/Package.swift"
   - "**/build"
+  - "**/Build"
+  
+  # Dependencies
+  - "**/Pods"
+  - "**/Carthage"
+  - "**/vendor"
+  - "**/Package.swift"
+  
+  # Test artifacts
+  - "**/__Snapshots__"
+  - "**/VERACoreSnapshotTests"
+  - "**/*SnapshotTests"
+  
+  # Other exclusions
+  - "**/.DS_Store"
+  - "**/*.plist"
 
 # Rules explicitly disabled (handled by swift-format or problematic)
 disabled_rules:
