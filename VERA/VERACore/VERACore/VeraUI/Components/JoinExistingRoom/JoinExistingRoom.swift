@@ -25,6 +25,8 @@ struct JoinExistingRoom: View {
 
                 TextField("Enter room name", text: $roomName)
                     .textFieldStyle(PlainTextFieldStyle())
+                    .textInputAutocapitalization(.never)
+                    .textCase(.lowercase)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

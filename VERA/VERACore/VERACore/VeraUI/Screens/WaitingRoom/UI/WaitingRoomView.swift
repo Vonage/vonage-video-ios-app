@@ -6,14 +6,18 @@ import SwiftUI
 
 public struct WaitingRoomView: View {
 
-    public init() {}
+    private let roomName: String
+    
+    public init(roomName: String) {
+        self.roomName = roomName
+    }
 
     public var body: some View {
-        Text("Waiting room")
+        Text(roomName)
             .navigationTitle("Waiting room")
     }
 }
 
 #Preview {
-    WaitingRoomView()
+    WaitingRoomView(roomName: "Room name")
 }
