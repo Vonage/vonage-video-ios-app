@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import os.log
 
 @MainActor
 final class NavigationCoordinator: ObservableObject {
@@ -14,7 +15,7 @@ final class NavigationCoordinator: ObservableObject {
         } else {
             // Log invalid route attempts for debugging
             #if DEBUG
-                print("Invalid route: \(path)")
+                os_log("Invalid route: %@", log: OSLog.default, type: .debug, path)
             #endif
         }
     }

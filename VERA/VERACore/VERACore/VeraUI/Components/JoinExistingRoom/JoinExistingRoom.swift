@@ -11,7 +11,7 @@ enum RoomNameState {
 struct JoinExistingRoom: View {
 
     @State var roomName: String = ""
-    @State private var roomState: RoomNameState = RoomNameState.initial
+    @State private var roomState = RoomNameState.initial
 
     let onJoinRoom: (String) -> Void
 

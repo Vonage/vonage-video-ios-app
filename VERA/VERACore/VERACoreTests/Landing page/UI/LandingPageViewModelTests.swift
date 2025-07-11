@@ -290,15 +290,12 @@ struct LandingPageViewModelTests {
             ("TestRoom", false),
             ("a", true)
         ]
-        
-        print("\n=== DEBUG: ViewModel Validation Tests ===")
-        
+                
         for (roomName, expectedValid) in testCases {
             let sut = makeSUT()  // Create fresh SUT for each test
             
             // Test the validation directly
             let isValid = roomName.isValidRoomName
-            print("Direct validation: '\(roomName)' -> \(isValid) (expected: \(expectedValid))")
             
             // Test through the ViewModel
             sut.onJoinRoom(roomName)
@@ -317,10 +314,10 @@ struct LandingPageViewModelTests {
             case .error: false
             case .loading: false  // Still processing
             case .content: false  // Shouldn't happen
+            @unknown default:
+                fatalError()
             }
-            
-            print("ViewModel result: '\(roomName)' -> \(viewModelResult) (state: \(sut.state))")
-            
+                        
             // Verify the expectations
             #expect(isValid == expectedValid, "Direct validation failed for '\(roomName)'")
             

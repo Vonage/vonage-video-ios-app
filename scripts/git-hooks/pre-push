@@ -28,21 +28,32 @@ if [ ! -f ".swiftlint.yml" ]; then
     exit 1
 fi
 
-# Run SwiftLint
-echo "📊 Running SwiftLint on workspace..."
+# Check if VERA directory exists
+if [ ! -d "VERA" ]; then
+    echo "❌ VERA directory not found"
+    echo "   Make sure you're in the project root"
+    exit 1
+fi
+
+# Count Swift files that will be analyzed
+SWIFT_FILES=$(find VERA -name "*.swift" -not -path "*/DerivedData/*" -not -path "*/Build/*" | wc -l | tr -d ' ')
+echo "🔍 Found $SWIFT_FILES Swift files to analyze in VERA project"
+
+# Run SwiftLint specifically on VERA directory
+echo "📊 Running SwiftLint on VERA project files..."
 echo ""
 
-if swiftlint; then
+if swiftlint lint VERA; then
     echo ""
-    echo "✅ SwiftLint checks passed!"
+    echo "✅ SwiftLint checks passed on $SWIFT_FILES files!"
     echo "🚀 Push allowed"
     exit 0
 else
     echo ""
-    echo "❌ SwiftLint found violations"
+    echo "❌ SwiftLint found violations in VERA project files"
     echo ""
-    echo "�� To fix issues:"
-    echo "   swiftlint --fix              # Auto-fix where possible"
+    echo "💡 To fix issues:"
+    echo "   swiftlint --fix VERA         # Auto-fix where possible"
     echo "   scripts/lint-swift.sh --fix  # Using project script"
     echo "   scripts/code-quality.sh      # Full code quality check"
     echo ""
