@@ -281,25 +281,25 @@ struct LandingPageViewModelTests {
 
     @Test("Debug exact validation behavior used in LandingPageViewModel")
     func debugValidationBehaviorUsedInViewModel() async {
-        
+
         let testCases = [
             ("validroom123", true),
             ("INVALID@NAME!", false),
             ("", false),
             ("   ", false),
             ("TestRoom", false),
-            ("a", true)
+            ("a", true),
         ]
-                
+
         for (roomName, expectedValid) in testCases {
             let sut = makeSUT()  // Create fresh SUT for each test
-            
+
             // Test the validation directly
             let isValid = roomName.isValidRoomName
-            
+
             // Test through the ViewModel
             sut.onJoinRoom(roomName)
-            
+
             // Give time for async operation
             for _ in 0..<10 {
                 if case .loading = sut.state {
@@ -308,19 +308,20 @@ struct LandingPageViewModelTests {
                     break
                 }
             }
-            
-            let viewModelResult = switch sut.state {
-            case .success: true
-            case .error: false
-            case .loading: false  // Still processing
-            case .content: false  // Shouldn't happen
-            @unknown default:
-                fatalError()
-            }
-                        
+
+            let viewModelResult =
+                switch sut.state {
+                case .success: true
+                case .error: false
+                case .loading: false  // Still processing
+                case .content: false  // Shouldn't happen
+                @unknown default:
+                    fatalError()
+                }
+
             // Verify the expectations
             #expect(isValid == expectedValid, "Direct validation failed for '\(roomName)'")
-            
+
             if expectedValid {
                 #expect(viewModelResult == true, "ViewModel should succeed for valid room name '\(roomName)'")
             } else {
