@@ -136,6 +136,7 @@
 			buildConfigurationList = 6F6A00B92E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERA" */;
 			buildPhases = (
 				6F6A00942E17F89100127A10 /* Sources */,
+				6F6DA24E2E20FDBE0023470E /* SwiftLint */,
 				6F6A00952E17F89100127A10 /* Frameworks */,
 				6F6A00962E17F89100127A10 /* Resources */,
 				6F1B8B3D2E1D642A00DE0C57 /* Embed Frameworks */,
@@ -143,7 +144,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				6F9152042E1FA66F00985285 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F6A009A2E17F89100127A10 /* VERA */,
@@ -160,13 +160,13 @@
 			buildConfigurationList = 6F6A00BC2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERATests" */;
 			buildPhases = (
 				6F6A00A12E17F89200127A10 /* Sources */,
+				6F6DA24F2E20FDDE0023470E /* SwiftLint */,
 				6F6A00A22E17F89200127A10 /* Frameworks */,
 				6F6A00A32E17F89200127A10 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				6F9152062E1FA67B00985285 /* PBXTargetDependency */,
 				6F6A00A72E17F89200127A10 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -184,13 +184,13 @@
 			buildConfigurationList = 6F6A00BF2E17F89200127A10 /* Build configuration list for PBXNativeTarget "VERAUITests" */;
 			buildPhases = (
 				6F6A00AB2E17F89200127A10 /* Sources */,
+				6F6DA2502E20FDEC0023470E /* SwiftLint */,
 				6F6A00AC2E17F89200127A10 /* Frameworks */,
 				6F6A00AD2E17F89200127A10 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				6F9152082E1FA68000985285 /* PBXTargetDependency */,
 				6F6A00B12E17F89200127A10 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -274,6 +274,63 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		6F6DA24E2E20FDBE0023470E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\n# SwiftLint Run Script Phase\n# Add this script to your target's Build Phases > Run Script Phase\n# \n# This script ensures SwiftLint uses the configuration file at the project root\n# and provides consistent behavior between Xcode and CLI\n\nset -e\n\n# Configuration\nCONFIG_FILE=\"${SRCROOT}/../../.swiftlint.yml\"\nSWIFTLINT_PATH=\"\"\n\n# Function to find SwiftLint\nfind_swiftlint() {\n    # Check if SwiftLint is installed via Homebrew\n    if command -v /opt/homebrew/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/opt/homebrew/bin/swiftlint\"\n    elif command -v /usr/local/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/usr/local/bin/swiftlint\"\n    # Check if SwiftLint is available in PATH\n    elif command -v swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"swiftlint\"\n    # Check if SwiftLint is installed via Mint\n    elif command -v mint >/dev/null 2>&1 && mint which swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"mint run swiftlint\"\n    else\n        echo \"warning: SwiftLint not found. Install it via Homebrew, Mint, or add it to your PATH.\"\n        echo \"Homebrew: brew install swiftlint\"\n        echo \"Mint: mint install realm/SwiftLint\"\n        exit 0\n    fi\n}\n\n# Function to run SwiftLint\nrun_swiftlint() {\n    echo \"🔍 Running SwiftLint with configuration: ${CONFIG_FILE}\"\n    \n    # Check if config file exists\n    if [ ! -f \"${CONFIG_FILE}\" ]; then\n        echo \"warning: SwiftLint configuration file not found at ${CONFIG_FILE}\"\n        echo \"Creating basic configuration file...\"\n        \n        # Create basic config if it doesn't exist\n        cat > \"${CONFIG_FILE}\" << 'EOF'\n# SwiftLint Configuration\nincluded:\n  - VERA/\n\nexcluded:\n  - \"**/DerivedData\"\n  - \"**/.build\"\n  - \"**/Pods\"\n  - \"**/build\"\n\ndisabled_rules:\n  - trailing_comma\n  - type_body_length\n  - function_body_length\n\nline_length:\n  warning: 120\n  error: 200\n\nreporter: \"xcode\"\nEOF\n        echo \"✅ Created basic SwiftLint configuration at ${CONFIG_FILE}\"\n    fi\n    \n    # Run SwiftLint with explicit config path\n    if [ \"${SWIFTLINT_PATH}\" = \"mint run swiftlint\" ]; then\n        mint run swiftlint lint --config \"${CONFIG_FILE}\"\n    else\n        \"${SWIFTLINT_PATH}\" lint --config \"${CONFIG_FILE}\"\n    fi\n}\n\n# Main execution\necho \"🚀 Starting SwiftLint Run Script Phase\"\necho \"📁 Project root: ${SRCROOT}\"\necho \"📁 Build root: ${BUILD_ROOT}\"\necho \"🎯 Target: ${TARGET_NAME}\"\n\n# Find SwiftLint\nfind_swiftlint\n\nif [ -z \"${SWIFTLINT_PATH}\" ]; then\n    echo \"❌ SwiftLint not found\"\n    exit 0\nfi\n\necho \"✅ Found SwiftLint at: ${SWIFTLINT_PATH}\"\n\n# Run SwiftLint\nrun_swiftlint\n\necho \"🎉 SwiftLint completed successfully\"\n";
+		};
+		6F6DA24F2E20FDDE0023470E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\n# SwiftLint Run Script Phase\n# Add this script to your target's Build Phases > Run Script Phase\n# \n# This script ensures SwiftLint uses the configuration file at the project root\n# and provides consistent behavior between Xcode and CLI\n\nset -e\n\n# Configuration\nCONFIG_FILE=\"${SRCROOT}/../../.swiftlint.yml\"\nSWIFTLINT_PATH=\"\"\n\n# Function to find SwiftLint\nfind_swiftlint() {\n    # Check if SwiftLint is installed via Homebrew\n    if command -v /opt/homebrew/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/opt/homebrew/bin/swiftlint\"\n    elif command -v /usr/local/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/usr/local/bin/swiftlint\"\n    # Check if SwiftLint is available in PATH\n    elif command -v swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"swiftlint\"\n    # Check if SwiftLint is installed via Mint\n    elif command -v mint >/dev/null 2>&1 && mint which swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"mint run swiftlint\"\n    else\n        echo \"warning: SwiftLint not found. Install it via Homebrew, Mint, or add it to your PATH.\"\n        echo \"Homebrew: brew install swiftlint\"\n        echo \"Mint: mint install realm/SwiftLint\"\n        exit 0\n    fi\n}\n\n# Function to run SwiftLint\nrun_swiftlint() {\n    echo \"🔍 Running SwiftLint with configuration: ${CONFIG_FILE}\"\n    \n    # Check if config file exists\n    if [ ! -f \"${CONFIG_FILE}\" ]; then\n        echo \"warning: SwiftLint configuration file not found at ${CONFIG_FILE}\"\n        echo \"Creating basic configuration file...\"\n        \n        # Create basic config if it doesn't exist\n        cat > \"${CONFIG_FILE}\" << 'EOF'\n# SwiftLint Configuration\nincluded:\n  - VERA/\n\nexcluded:\n  - \"**/DerivedData\"\n  - \"**/.build\"\n  - \"**/Pods\"\n  - \"**/build\"\n\ndisabled_rules:\n  - trailing_comma\n  - type_body_length\n  - function_body_length\n\nline_length:\n  warning: 120\n  error: 200\n\nreporter: \"xcode\"\nEOF\n        echo \"✅ Created basic SwiftLint configuration at ${CONFIG_FILE}\"\n    fi\n    \n    # Run SwiftLint with explicit config path\n    if [ \"${SWIFTLINT_PATH}\" = \"mint run swiftlint\" ]; then\n        mint run swiftlint lint --config \"${CONFIG_FILE}\"\n    else\n        \"${SWIFTLINT_PATH}\" lint --config \"${CONFIG_FILE}\"\n    fi\n}\n\n# Main execution\necho \"🚀 Starting SwiftLint Run Script Phase\"\necho \"📁 Project root: ${SRCROOT}\"\necho \"📁 Build root: ${BUILD_ROOT}\"\necho \"🎯 Target: ${TARGET_NAME}\"\n\n# Find SwiftLint\nfind_swiftlint\n\nif [ -z \"${SWIFTLINT_PATH}\" ]; then\n    echo \"❌ SwiftLint not found\"\n    exit 0\nfi\n\necho \"✅ Found SwiftLint at: ${SWIFTLINT_PATH}\"\n\n# Run SwiftLint\nrun_swiftlint\n\necho \"🎉 SwiftLint completed successfully\"\n";
+		};
+		6F6DA2502E20FDEC0023470E /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\n# SwiftLint Run Script Phase\n# Add this script to your target's Build Phases > Run Script Phase\n# \n# This script ensures SwiftLint uses the configuration file at the project root\n# and provides consistent behavior between Xcode and CLI\n\nset -e\n\n# Configuration\nCONFIG_FILE=\"${SRCROOT}/../../.swiftlint.yml\"\nSWIFTLINT_PATH=\"\"\n\n# Function to find SwiftLint\nfind_swiftlint() {\n    # Check if SwiftLint is installed via Homebrew\n    if command -v /opt/homebrew/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/opt/homebrew/bin/swiftlint\"\n    elif command -v /usr/local/bin/swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"/usr/local/bin/swiftlint\"\n    # Check if SwiftLint is available in PATH\n    elif command -v swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"swiftlint\"\n    # Check if SwiftLint is installed via Mint\n    elif command -v mint >/dev/null 2>&1 && mint which swiftlint >/dev/null 2>&1; then\n        SWIFTLINT_PATH=\"mint run swiftlint\"\n    else\n        echo \"warning: SwiftLint not found. Install it via Homebrew, Mint, or add it to your PATH.\"\n        echo \"Homebrew: brew install swiftlint\"\n        echo \"Mint: mint install realm/SwiftLint\"\n        exit 0\n    fi\n}\n\n# Function to run SwiftLint\nrun_swiftlint() {\n    echo \"🔍 Running SwiftLint with configuration: ${CONFIG_FILE}\"\n    \n    # Check if config file exists\n    if [ ! -f \"${CONFIG_FILE}\" ]; then\n        echo \"warning: SwiftLint configuration file not found at ${CONFIG_FILE}\"\n        echo \"Creating basic configuration file...\"\n        \n        # Create basic config if it doesn't exist\n        cat > \"${CONFIG_FILE}\" << 'EOF'\n# SwiftLint Configuration\nincluded:\n  - VERA/\n\nexcluded:\n  - \"**/DerivedData\"\n  - \"**/.build\"\n  - \"**/Pods\"\n  - \"**/build\"\n\ndisabled_rules:\n  - trailing_comma\n  - type_body_length\n  - function_body_length\n\nline_length:\n  warning: 120\n  error: 200\n\nreporter: \"xcode\"\nEOF\n        echo \"✅ Created basic SwiftLint configuration at ${CONFIG_FILE}\"\n    fi\n    \n    # Run SwiftLint with explicit config path\n    if [ \"${SWIFTLINT_PATH}\" = \"mint run swiftlint\" ]; then\n        mint run swiftlint lint --config \"${CONFIG_FILE}\"\n    else\n        \"${SWIFTLINT_PATH}\" lint --config \"${CONFIG_FILE}\"\n    fi\n}\n\n# Main execution\necho \"🚀 Starting SwiftLint Run Script Phase\"\necho \"📁 Project root: ${SRCROOT}\"\necho \"📁 Build root: ${BUILD_ROOT}\"\necho \"🎯 Target: ${TARGET_NAME}\"\n\n# Find SwiftLint\nfind_swiftlint\n\nif [ -z \"${SWIFTLINT_PATH}\" ]; then\n    echo \"❌ SwiftLint not found\"\n    exit 0\nfi\n\necho \"✅ Found SwiftLint at: ${SWIFTLINT_PATH}\"\n\n# Run SwiftLint\nrun_swiftlint\n\necho \"🎉 SwiftLint completed successfully\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6F6A00942E17F89100127A10 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -308,18 +365,6 @@
 			isa = PBXTargetDependency;
 			target = 6F6A00972E17F89100127A10 /* VERA */;
 			targetProxy = 6F6A00B02E17F89200127A10 /* PBXContainerItemProxy */;
-		};
-		6F9152042E1FA66F00985285 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 6F9152032E1FA66F00985285 /* SwiftLintBuildToolPlugin */;
-		};
-		6F9152062E1FA67B00985285 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 6F9152052E1FA67B00985285 /* SwiftLintBuildToolPlugin */;
-		};
-		6F9152082E1FA68000985285 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 6F9152072E1FA68000985285 /* SwiftLintBuildToolPlugin */;
 		};
 /* End PBXTargetDependency section */
 
@@ -634,24 +679,6 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		6F9152032E1FA66F00985285 /* SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6F9152022E1FA66100985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
-		};
-		6F9152052E1FA67B00985285 /* SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6F9152022E1FA66100985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
-		};
-		6F9152072E1FA68000985285 /* SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6F9152022E1FA66100985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6F6A00902E17F89100127A10 /* Project object */;
 }
