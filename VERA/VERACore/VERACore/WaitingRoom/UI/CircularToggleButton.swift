@@ -20,7 +20,7 @@ struct CircularToggleButton: View {
         Button(action: action) {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundStyle(isActive ? .uiSystemBackground : .red)
+                .foregroundStyle(isActive ? .videoBackground : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
@@ -44,5 +44,18 @@ struct CircularToggleButton: View {
         CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(.black)
+    .background(.white)
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        CircularToggleButton(isActive: true, iconName: "video.fill")
+        CircularToggleButton(isActive: false, iconName: "video.fill")
+        
+        CircularToggleButton(isActive: true, iconName: "mic.fill")
+        CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
+    }
+    .padding()
+    .background(.videoBackground)
+    .preferredColorScheme(.dark)
 }

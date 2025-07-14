@@ -7,7 +7,7 @@ import Combine
 
 public typealias WaitingRoomError = String
 
-public enum WaitingRoomViewState: Equatable {    
+public enum WaitingRoomViewState: Equatable {
     case loading
     case error(WaitingRoomError)
     case success(RoomName)
@@ -16,6 +16,10 @@ public enum WaitingRoomViewState: Equatable {
 
 public final class WaitingRoomViewModel {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
+    
+    init(roomName: RoomName) {
+        self.state = .content(WaitingRoomState.default)
+    }
 }
 
 public struct WaitingRoomScreen: View {

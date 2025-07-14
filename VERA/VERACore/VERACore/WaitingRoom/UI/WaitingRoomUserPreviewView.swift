@@ -19,7 +19,7 @@ struct WaitingRoomUserPreviewView: View {
     
     var body: some View {
         ZStack {
-            Color.black
+            Color.videoBackground
                 .ignoresSafeArea()
             
             VStack {
@@ -97,5 +97,75 @@ struct WaitingRoomUserPreviewView: View {
             onMicrophoneToggle: { print("Micrófono toggled") },
             onCameraToggle: { print("Cámara toggled") }
         )
+        
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                initials: "CD",
+                color: .green,
+                isMicrophoneEnabled: false,
+                isCameraEnabled: false,
+                audioDevices: [],
+                cameras: []),
+            onMicrophoneToggle: { print("Micrófono toggled") },
+            onCameraToggle: { print("Cámara toggled") }
+        )
+    }
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                initials: "ZB",
+                color: .yellow,
+                isMicrophoneEnabled: true,
+                isCameraEnabled: true,
+                audioDevices: [],
+                cameras: []),
+            onMicrophoneToggle: { print("Micrófono toggled") },
+            onCameraToggle: { print("Cámara toggled") }
+        )
+        
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                initials: "AB",
+                color: .blue,
+                isMicrophoneEnabled: false,
+                isCameraEnabled: true,
+                audioDevices: [],
+                cameras: []),
+            onMicrophoneToggle: { print("Micrófono toggled") },
+            onCameraToggle: { print("Cámara toggled") }
+        )
+        
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                initials: "CD",
+                color: .green,
+                isMicrophoneEnabled: false,
+                isCameraEnabled: false,
+                audioDevices: [],
+                cameras: []),
+            onMicrophoneToggle: { print("Micrófono toggled") },
+            onCameraToggle: { print("Cámara toggled") }
+        )
+        
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                initials: "CD",
+                color: .green,
+                isMicrophoneEnabled: false,
+                isCameraEnabled: false,
+                audioDevices: [],
+                cameras: []),
+            onMicrophoneToggle: { print("Micrófono toggled") },
+            onCameraToggle: { print("Cámara toggled") }
+        )
+        .preferredColorScheme(.dark)
     }
 }

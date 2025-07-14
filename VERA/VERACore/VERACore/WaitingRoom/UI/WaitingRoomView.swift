@@ -75,9 +75,10 @@ public struct WaitingRoomState: Equatable {
 
 public struct WaitingRoomView: View {
 
-    @State private var userName: String = ""
-    private let state: WaitingRoomState
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
     
+    private let state: WaitingRoomState
     private let onJoinRoom: (String) -> Void
     
     public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
@@ -90,52 +91,130 @@ public struct WaitingRoomView: View {
             Banner()
                 .frame(height: 70)
                 .padding(.horizontal, 8)
-            VStack(spacing: 0) {
-                WaitingRoomUserPreviewView(state: state)
-                .aspectRatio(16/9, contentMode: .fit)
-                
-                HStack {
-                    Menu {
-                        ForEach(state.audioDevices, id: \.id) { device in
-                            Button(device.name, action: { device.onTap?() })
-                        }
-                    } label: {
-                        Label("Microphone", systemImage: "mic")
-                    }
-                    Menu {
-                        ForEach(state.cameras, id: \.id) { device in
-                            Button(device.name, action: { device.onTap?() })
-                        }
-                    } label: {
-                        Label("Camera", systemImage: "video")
-                    }
-                }
-                .tint(.uiSecondaryLabel)
-                .padding()
-                
-                VStack {
-                    Text("Prepare to join:")
-                        .font(.headline)
-                        .foregroundColor(.uiLabel)
-                    
-                    Text(state.roomName)
-                        .font(.subheadline)
-                        .foregroundColor(.uiLabel)
-                }.padding()
-                
-                UsernameInput(userName: $userName)
-                    .frame(width: 300)
-                
-                JoinRoomButton(onJoinRoom: {
-                    onJoinRoom(userName)
-                })
-                Spacer()
+            
+            if verticalSizeClass == .compact {
+                HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
+            }  else if horizontalSizeClass == .compact {
+                VerticalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
+            } else {
+                HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
             }
-            .frame(maxHeight: .infinity)
-            .padding(0)
         }
         .background(.uiSystemBackground)
         .navigationBarHidden(true)
+    }
+}
+
+struct HorizontalWaitingRoomContentView: View {
+    private let state: WaitingRoomState
+    private let onJoinRoom: (String) -> Void
+    
+    public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
+        self.state = state
+        self.onJoinRoom = onJoinRoom
+    }
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 20) {
+            VideoPreviewView(state: state)
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(maxHeight: .infinity)
+        .padding(0)
+    }
+}
+
+struct VerticalWaitingRoomContentView: View {
+    private let state: WaitingRoomState
+    private let onJoinRoom: (String) -> Void
+    
+    public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
+        self.state = state
+        self.onJoinRoom = onJoinRoom
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            VideoPreviewView(state: state)
+            
+            PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
+            
+            Spacer()
+        }
+        .frame(maxHeight: .infinity)
+        .padding(0)
+    }
+}
+
+struct VideoPreviewView: View {
+    private let state: WaitingRoomState
+    
+    init(state: WaitingRoomState) {
+        self.state = state
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            WaitingRoomUserPreviewView(state: state)
+            .aspectRatio(16/9, contentMode: .fit)
+            
+            HStack {
+                Menu {
+                    ForEach(state.audioDevices, id: \.id) { device in
+                        Button(device.name, action: { device.onTap?() })
+                    }
+                } label: {
+                    Label("Microphone", systemImage: "mic")
+                }
+                Menu {
+                    ForEach(state.cameras, id: \.id) { device in
+                        Button(device.name, action: { device.onTap?() })
+                    }
+                } label: {
+                    Label("Camera", systemImage: "video")
+                }
+            }
+            .tint(.uiSecondaryLabel)
+            .padding()
+        }
+    }
+}
+
+struct PrepareToJoinRoom: View {
+    
+    private let state: WaitingRoomState
+    @State private var userName: String = ""
+    private let onJoinRoom: (String) -> Void
+    
+    init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
+        self.state = state
+        self.onJoinRoom = onJoinRoom
+    }
+    
+    var body: some View {
+        VStack {
+            VStack {
+                Text("Prepare to join:")
+                    .font(.headline)
+                    .foregroundColor(.uiLabel)
+                
+                Text(state.roomName)
+                    .font(.subheadline)
+                    .foregroundColor(.uiLabel)
+            }.padding()
+            
+            UsernameInput(userName: $userName)
+                .frame(maxWidth: 300)
+            
+            JoinRoomButton(onJoinRoom: {
+                onJoinRoom(userName)
+            })
+            .padding()
+        }
     }
 }
 

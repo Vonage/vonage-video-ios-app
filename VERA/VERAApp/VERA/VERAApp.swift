@@ -4,35 +4,46 @@
 
 import SwiftUI
 import VERACore
+import Foundation
 
 @main
 struct VERAApp: App {
-    @State private var isSessionActive = false
-
-    private let navigationCoordinator = NavigationCoordinator()
+    @StateObject private var navigationCoordinator = NavigationCoordinator()
+    private let landingPageFactory = LandingPageFactory()
+    private let waitingRoomFactory = WaitingRoomFactory()
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: navigationCoordinator.path) {
-                LandingPageFactory()
+            NavigationStack(path: $navigationCoordinator.path) {
+                landingPageFactory
                     .make { roomName in
-                        navigationCoordinator.navigate(to: AppRoute.waitingRoom(roomName))
-                    }
-                    .fullScreenCover(isPresented: $isSessionActive) {
-
+                        navigationCoordinator.navigateToWaitingRoom(roomName)
                     }
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
-                        case .landing: fatalError("Cant happen")
+                        case .landing: EmptyView()                            
                         case let .waitingRoom(roomName):
-                            WaitingRoomFactory().make { roomName in
-                                navigationCoordinator.navigate(to: AppRoute.meetingRoom(roomName))
-                            }
-                        case .meetingRoom: MeetingRoomView()
-                        case .goodbye: GoodByeView()
+                            waitingRoomFactory
+                                .make(roomName: roomName) { roomName in
+                                    navigationCoordinator.startMeeting(roomName)
+                                }
+                                .navigationBarBackButtonHidden(false)
+                                .navigationBarTitleDisplayMode(.inline)
+                        case .meetingRoom(_): EmptyView()
+                        case .goodbye: EmptyView()
                         }
                     }
             }
+            .fullScreenCover(isPresented: $navigationCoordinator.isInMeeting) {
+                if let currentRoom = navigationCoordinator.currentMeetingRoom {
+                    MeetingRoomView()
+                        .onDisappear {
+                            navigationCoordinator.leaveMeeting()
+                        }
+                        .environmentObject(navigationCoordinator)
+                }
+            }
+            .environmentObject(navigationCoordinator)
         }
     }
 }

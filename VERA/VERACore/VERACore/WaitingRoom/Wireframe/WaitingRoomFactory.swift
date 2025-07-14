@@ -9,8 +9,12 @@ public class WaitingRoomFactory {
     public init() {}
 
     public func make(
+        roomName: RoomName,
         onNavigateToRoom: @escaping (RoomName) -> Void
     ) -> some View {
-        WaitingRoomScreen(viewModel: .init(), onNavigateToRoom: onNavigateToRoom)
+        WaitingRoomScreen(
+            viewModel: .init(roomName: roomName),
+            onNavigateToRoom: onNavigateToRoom
+        )
     }
 }
