@@ -8,14 +8,15 @@ import VERACore
 @main
 struct VERAApp: App {
     @State private var isSessionActive = false
-    @State private var path = NavigationPath()
 
+    private let navigationCoordinator = NavigationCoordinator()
+    
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $path) {
+            NavigationStack(path: navigationCoordinator.path) {
                 LandingPageFactory()
                     .make { roomName in
-                        path.append(AppRoute.waitingRoom(roomName))
+                        navigationCoordinator.navigate(to: AppRoute.waitingRoom(roomName))
                     }
                     .fullScreenCover(isPresented: $isSessionActive) {
 
@@ -23,7 +24,10 @@ struct VERAApp: App {
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case .landing: fatalError("Cant happen")
-                        case let .waitingRoom(roomName): WaitingRoomView(roomName: roomName)
+                        case let .waitingRoom(roomName):
+                            WaitingRoomFactory().make { roomName in
+                                navigationCoordinator.navigate(to: AppRoute.meetingRoom(roomName))
+                            }
                         case .meetingRoom: MeetingRoomView()
                         case .goodbye: GoodByeView()
                         }
