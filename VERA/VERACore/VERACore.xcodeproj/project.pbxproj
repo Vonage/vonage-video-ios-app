@@ -232,7 +232,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6FD1B48B2E1BFADB00BD9F3D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
-				6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B3F22E1BB74700BD9F3D /* Products */;
@@ -722,14 +721,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6F9152012E1FA60600985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.59.1;
-			};
-		};
 		6FD1B48B2E1BFADB00BD9F3D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";

@@ -168,7 +168,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */,
-				6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B41C2E1BBA1A00BD9F3D /* Products */;
@@ -535,14 +534,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6F91520F2E1FA6A900985285 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.59.1;
-			};
-		};
 		6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/opentok/vonage-client-sdk-video.git";

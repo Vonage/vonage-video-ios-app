@@ -71,7 +71,6 @@ if [ -d "./VERA/VERACore" ]; then
         -destination 'platform=macOS' \
         -enableCodeCoverage YES \
         -derivedDataPath ./DerivedData \
-        -skipPackagePluginValidation \
         CODE_SIGN_IDENTITY="" \
         CODE_SIGNING_REQUIRED=NO \
         CODE_SIGNING_ALLOWED=NO \
@@ -88,7 +87,6 @@ if [ -d "./VERA/VERACore" ]; then
             -scheme VERACore \
             -destination 'platform=macOS' \
             -enableCodeCoverage YES \
-            -skipPackagePluginValidation \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -108,7 +106,6 @@ if [ -d "./VERA/VERACore" ]; then
                 -only-testing:VERATests \
                 -enableCodeCoverage YES \
                 -derivedDataPath ./DerivedData \
-                -skipPackagePluginValidation \
                 CODE_SIGN_IDENTITY="" \
                 CODE_SIGNING_REQUIRED=NO \
                 CODE_SIGNING_ALLOWED=NO \

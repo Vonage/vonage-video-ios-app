@@ -89,7 +89,6 @@ jobs:
           -sdk iphonesimulator \
           -destination "generic/platform=iOS Simulator" \
           -derivedDataPath DerivedData \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -121,7 +120,6 @@ jobs:
           -scheme VERACore \
           -destination "platform=macOS" \
           -derivedDataPath DerivedData \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -137,7 +135,6 @@ jobs:
             -destination "platform=iOS Simulator,name=iPhone 16" \
             -only-testing:VERATests \
             -derivedDataPath DerivedData \
-            -skipPackagePluginValidation \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -184,7 +181,6 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 16" \
           -only-testing:VERAUITests \
           -derivedDataPath DerivedData \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -198,7 +194,6 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
           -only-testing:VERAUITests \
           -derivedDataPath DerivedData \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -240,7 +235,6 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACore-TestResults.xcresult \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -256,7 +250,6 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERA-TestResults.xcresult \
-          -skipPackagePluginValidation \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
