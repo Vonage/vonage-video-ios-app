@@ -19,5 +19,5 @@ struct JoinRoomButton: View {
 }
 
 #Preview {
-    JoinRoomButton(onJoinRoom: {})
+    JoinRoomButton {}
 }

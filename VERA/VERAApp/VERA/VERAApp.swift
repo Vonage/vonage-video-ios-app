@@ -29,7 +29,7 @@ struct VERAApp: App {
                                 }
                                 .navigationBarBackButtonHidden(false)
                                 .navigationBarTitleDisplayMode(.inline)
-                        case .meetingRoom(_): EmptyView()
+                        case .meetingRoom: EmptyView()
                         case .goodbye: EmptyView()
                         }
                     }

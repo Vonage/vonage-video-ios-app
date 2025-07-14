@@ -166,14 +166,14 @@ struct VideoPreviewView: View {
             HStack {
                 Menu {
                     ForEach(state.audioDevices, id: \.id) { device in
-                        Button(device.name, action: { device.onTap?() })
+                        Button(device.name) { device.onTap?() }
                     }
                 } label: {
                     Label("Microphone", systemImage: "mic")
                 }
                 Menu {
                     ForEach(state.cameras, id: \.id) { device in
-                        Button(device.name, action: { device.onTap?() })
+                        Button(device.name) { device.onTap?() }
                     }
                 } label: {
                     Label("Camera", systemImage: "video")
@@ -211,9 +211,9 @@ struct PrepareToJoinRoom: View {
             UsernameInput(userName: $userName)
                 .frame(maxWidth: 300)
 
-            JoinRoomButton(onJoinRoom: {
+            JoinRoomButton {
                 onJoinRoom(userName)
-            })
+            }
             .padding()
         }
     }

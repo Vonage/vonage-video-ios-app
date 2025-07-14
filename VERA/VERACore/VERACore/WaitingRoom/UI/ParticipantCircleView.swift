@@ -9,18 +9,6 @@ struct ParticipantCircleState {
     let color: Color
     let isMicrophoneEnabled: Bool
     let isCameraEnabled: Bool
-
-    init(
-        initials: String,
-        color: Color,
-        isMicrophoneEnabled: Bool,
-        isCameraEnabled: Bool
-    ) {
-        self.initials = initials
-        self.color = color
-        self.isMicrophoneEnabled = isMicrophoneEnabled
-        self.isCameraEnabled = isCameraEnabled
-    }
 }
 
 struct ParticipantCircleView: View {

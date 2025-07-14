@@ -37,7 +37,7 @@ public struct WaitingRoomScreen: View {
     public var body: some View {
         switch viewModel.state {
         case let .content(state):
-            WaitingRoomView(state: state) { username in
+            WaitingRoomView(state: state) { _ in
                 onNavigateToRoom(state.roomName)
             }
 
