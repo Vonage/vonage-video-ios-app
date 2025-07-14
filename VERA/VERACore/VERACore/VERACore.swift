@@ -3,3 +3,5 @@
 //
 
 import Foundation
+
+final class VERACore {}

@@ -187,8 +187,8 @@ fi
 sonar-scanner \
     -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
     -Dsonar.organization="$SONAR_ORGANIZATION" \
-    -Dsonar.sources=VERA/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-    -Dsonar.tests=VERA/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAUITests \
+    -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
+    -Dsonar.tests=VERA/VERAApp/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests \
     $COVERAGE_PARAM \
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.token=$SONAR_TOKEN \

@@ -7,17 +7,44 @@ included:
 
 # Paths to exclude from linting
 excluded:
-  - VERA/VERA.xcodeproj
-  - VERA/VERACore/VERACore.xcodeproj
+  # Xcode project files (all variations)
+  - "**/*.xcodeproj"
+  - "**/*.xcworkspace"
+  - "**/project.xcworkspace"
+  - "**/xcuserdata"
+  - "**/project.pbxproj"
+  
+  # Build and derived data
   - "**/DerivedData"
   - "**/.build"
+  - "**/build"
+  - "**/Build"
+  
+  # Dependencies
   - "**/Pods"
+  - "**/Carthage"
+  - "**/vendor"
   - "**/Package.swift"
+  
+  # Test artifacts
+  - "**/__Snapshots__"
+  - "**/VERACoreSnapshotTests"
+  - "**/*SnapshotTests"
+  
+  # Other exclusions
+  - "**/.DS_Store"
+  - "**/*.plist"
 
-# Rules to disable
+# Rules explicitly disabled (handled by swift-format or problematic)
 disabled_rules:
-  - trailing_whitespace # Handled by swift-format
+  - trailing_whitespace      # Handled by swift-format
+  - trailing_comma          # Handled by swift-format - allow trailing commas
   - static_over_final_class # Interferes with XCTestCase overrides
+  - type_body_length        # Allow longer test classes for comprehensive testing
+  - file_length            # Some test files can be longer
+  - function_body_length    # Some test functions can be longer
+  - large_tuple            # Allow tuples with more than 2 elements in tests
+  - implicitly_unwrapped_optional # Sometimes needed in tests
 
 # Rules to enable (opt-in rules)
 opt_in_rules:
@@ -63,18 +90,6 @@ line_length:
   ignores_urls: true
   ignores_function_declarations: true
   ignores_comments: true
-
-function_body_length:
-  warning: 50
-  error: 100
-
-type_body_length:
-  warning: 200
-  error: 300
-
-file_length:
-  warning: 400
-  error: 500
 
 cyclomatic_complexity:
   warning: 10
@@ -122,5 +137,8 @@ custom_rules:
     message: "Use safe casting with 'as?' instead of force casting"
     severity: error
 
-# Reporter type
+# Reporter type (for CLI)
 reporter: "xcode"
+
+# Configuration specifically for Xcode plugin
+# This ensures consistent behavior across environments

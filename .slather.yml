@@ -15,8 +15,8 @@ coverage_access_token: false
 
 # File patterns to ignore
 ignore:
-  - "VERA/VERATests/*"
-  - "VERA/VERAUITests/*"
+  - "VERA/VERAApp/VERATests/*"
+  - "VERA/VERAApp/VERAUITests/*"
   - "VERA/VERACore/VERACoreTests/*"
   - "VERA/VERAOpenTok/VERAOpenTokTests/*"
   - "VERA/VERACore/VERACoreSnapshotTests/*"

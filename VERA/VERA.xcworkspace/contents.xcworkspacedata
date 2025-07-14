@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
-   <FileRef
-      location = "group:VERAOpenTok/VERAOpenTok.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:VERACore/VERACore.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "container:VERA.xcodeproj">
-   </FileRef>
+   <Group
+      location = "container:"
+      name = "Projects">
+      <FileRef
+         location = "group:VERAOpenTok/VERAOpenTok.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERACore/VERACore.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERAApp/VERA.xcodeproj">
+      </FileRef>
+   </Group>
+   <Group
+      location = "container:"
+      name = "Scripts">
+      <FileRef
+         location = "group:../scripts">
+      </FileRef>
+   </Group>
 </Workspace>

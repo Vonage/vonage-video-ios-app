@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 Running SwiftLint before push..."
+echo "🔍 Running code quality checks before push..."
 
 # Get the root directory of the git repository
 GIT_ROOT=$(git rev-parse --show-toplevel)
@@ -14,35 +14,99 @@ fi
 # Change to the git root directory
 cd "$GIT_ROOT"
 
-# Check if SwiftLint is installed
+# Check if tools are installed
 if ! command -v swiftlint >/dev/null 2>&1; then
     echo "❌ SwiftLint not installed"
     echo "   Install with: brew install swiftlint"
     exit 1
 fi
 
-# Check if SwiftLint configuration exists
+if ! command -v swift-format >/dev/null 2>&1; then
+    echo "❌ swift-format not installed"
+    echo "   Install with: brew install swift-format"
+    exit 1
+fi
+
+# Check if configuration files exist
 if [ ! -f ".swiftlint.yml" ]; then
     echo "❌ .swiftlint.yml configuration not found"
     echo "   Make sure you're in the project root"
     exit 1
 fi
 
-# Run SwiftLint
-echo "📊 Running SwiftLint on workspace..."
+if [ ! -f ".swift-format" ]; then
+    echo "❌ .swift-format configuration not found"
+    echo "   Make sure you're in the project root"
+    exit 1
+fi
+
+# Check if VERA directory exists
+if [ ! -d "VERA" ]; then
+    echo "❌ VERA directory not found"
+    echo "   Make sure you're in the project root"
+    exit 1
+fi
+
+# Count Swift files that will be analyzed
+SWIFT_FILES=$(find VERA -name "*.swift" -not -path "*/DerivedData/*" -not -path "*/Build/*" | wc -l | tr -d ' ')
+echo "🔍 Found $SWIFT_FILES Swift files to analyze in VERA project"
 echo ""
 
-if swiftlint; then
+# Step 1: Check Swift formatting
+echo "📝 Step 1/2: Checking Swift format..."
+FORMAT_ISSUES=""
+FORMAT_COUNT=0
+
+while IFS= read -r -d '' file; do
+  if [ -f "$file" ]; then
+    FORMAT_COUNT=$((FORMAT_COUNT + 1))
+    if ! swift-format format --configuration .swift-format "$file" | diff -q "$file" - > /dev/null 2>&1; then
+      FORMAT_ISSUES="$FORMAT_ISSUES$file needs formatting\n"
+    fi
+  fi
+done < <(find ./VERA -name "*.swift" \
+  -not -path "./build/*" \
+  -not -path "./.build/*" \
+  -not -path "./DerivedData/*" \
+  -not -path "./Pods/*" \
+  -not -path "./Carthage/*" \
+  -not -path "./vendor/*" \
+  -not -path "*/project.xcworkspace/*" -print0)
+
+if [ -n "$FORMAT_ISSUES" ]; then
+  echo ""
+  echo "❌ Format issues found in $FORMAT_COUNT files:"
+  echo -e "$FORMAT_ISSUES"
+  echo ""
+  echo "💡 To fix format issues:"
+  echo "   swift-format format --in-place --configuration .swift-format <file>"
+  echo "   scripts/format-swift.sh                    # Format all files"
+  echo "   scripts/check-format.sh                   # Check format only"
+  echo ""
+  echo "� Push rejected due to format violations"
+  exit 1
+else
+  echo "✅ Format check passed on $FORMAT_COUNT files!"
+fi
+
+echo ""
+
+# Step 2: Run SwiftLint
+echo "�📊 Step 2/2: Running SwiftLint on VERA project files..."
+
+if swiftlint lint VERA; then
     echo ""
-    echo "✅ SwiftLint checks passed!"
+    echo "✅ SwiftLint checks passed on $SWIFT_FILES files!"
+    echo ""
+    echo "🎉 All code quality checks passed!"
     echo "🚀 Push allowed"
     exit 0
 else
     echo ""
-    echo "❌ SwiftLint found violations"
+    echo "❌ SwiftLint found violations in VERA project files"
     echo ""
-    echo "�� To fix issues:"
-    echo "   swiftlint --fix              # Auto-fix where possible"
+    echo "💡 To fix issues:"
+    echo "   swiftlint --fix VERA         # Auto-fix where possible"
     echo "   scripts/lint-swift.sh --fix  # Using project script"
     echo "   scripts/code-quality.sh      # Full code quality check"
     echo ""
