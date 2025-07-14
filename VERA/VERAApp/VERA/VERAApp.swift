@@ -2,16 +2,16 @@
 //  Created by Vonage on 4/7/25.
 //
 
+import Foundation
 import SwiftUI
 import VERACore
-import Foundation
 
 @main
 struct VERAApp: App {
     @StateObject private var navigationCoordinator = NavigationCoordinator()
     private let landingPageFactory = LandingPageFactory()
     private let waitingRoomFactory = WaitingRoomFactory()
-    
+
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationCoordinator.path) {
@@ -21,7 +21,7 @@ struct VERAApp: App {
                     }
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
-                        case .landing: EmptyView()                            
+                        case .landing: EmptyView()
                         case let .waitingRoom(roomName):
                             waitingRoomFactory
                                 .make(roomName: roomName) { roomName in

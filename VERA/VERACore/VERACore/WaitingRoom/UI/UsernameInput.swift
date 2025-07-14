@@ -9,10 +9,10 @@ enum UsernameState {
 }
 
 struct UsernameInput: View {
-    
+
     @Binding var userName: String
     @State private var usernameState = UsernameState.initial
-    
+
     var body: some View {
         HStack {
             HStack(spacing: 12) {
@@ -41,7 +41,7 @@ struct UsernameInput: View {
             }
         }
     }
-    
+
     private var borderColor: Color {
         switch getUsernameState() {
         case .initial:
@@ -52,7 +52,7 @@ struct UsernameInput: View {
             return .red
         }
     }
-    
+
     private func getUsernameState() -> UsernameState {
         if userName.isEmpty {
             return .initial

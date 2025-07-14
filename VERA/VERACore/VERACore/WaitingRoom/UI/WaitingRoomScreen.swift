@@ -2,8 +2,8 @@
 //  Created by Vonage on 14/7/25.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 public typealias WaitingRoomError = String
 
@@ -16,7 +16,7 @@ public enum WaitingRoomViewState: Equatable {
 
 public final class WaitingRoomViewModel {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
-    
+
     init(roomName: RoomName) {
         self.state = .content(WaitingRoomState.default)
     }
@@ -33,17 +33,17 @@ public struct WaitingRoomScreen: View {
         self.viewModel = viewModel
         self.onNavigateToRoom = onNavigateToRoom
     }
-    
+
     public var body: some View {
         switch viewModel.state {
         case let .content(state):
             WaitingRoomView(state: state) { username in
                 onNavigateToRoom(state.roomName)
             }
-            
+
         case let .error(error): Text(error)
         case let .success(roomName): Text(roomName)
-        case .loading:  Text("Loading")
+        case .loading: Text("Loading")
         }
     }
 }

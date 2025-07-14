@@ -9,11 +9,13 @@ struct ParticipantCircleState {
     let color: Color
     let isMicrophoneEnabled: Bool
     let isCameraEnabled: Bool
-    
-    init(initials: String,
-         color: Color,
-         isMicrophoneEnabled: Bool,
-         isCameraEnabled: Bool) {
+
+    init(
+        initials: String,
+        color: Color,
+        isMicrophoneEnabled: Bool,
+        isCameraEnabled: Bool
+    ) {
         self.initials = initials
         self.color = color
         self.isMicrophoneEnabled = isMicrophoneEnabled
@@ -22,29 +24,29 @@ struct ParticipantCircleState {
 }
 
 struct ParticipantCircleView: View {
-    
+
     @Environment(\.colorScheme) var colorScheme
-    
+
     private let state: ParticipantCircleState
-    
+
     init(
         state: ParticipantCircleState
     ) {
         self.state = state
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
 
             GeometryReader { geometry in
                 let size = min(geometry.size.width, geometry.size.height)
                 let initialsColor = colorScheme == .dark ? Color.black : Color.white
-                
+
                 ZStack {
                     Circle()
                         .frame(width: size, height: size)
                         .foregroundColor(state.color)
-                    
+
                     Text(state.initials.uppercased())
                         .font(.system(size: size * 0.5))
                         .foregroundColor(initialsColor)
@@ -66,7 +68,7 @@ struct ParticipantCircleView: View {
                 isCameraEnabled: true)
         )
         .frame(width: 150, height: 200)
-        
+
         ParticipantCircleView(
             state: .init(
                 initials: "AB",
@@ -75,7 +77,7 @@ struct ParticipantCircleView: View {
                 isCameraEnabled: true)
         )
         .frame(width: 150, height: 200)
-        
+
         ParticipantCircleView(
             state: .init(
                 initials: "CD",

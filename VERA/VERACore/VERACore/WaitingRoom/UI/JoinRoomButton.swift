@@ -5,9 +5,9 @@
 import SwiftUI
 
 struct JoinRoomButton: View {
-    
+
     let onJoinRoom: () -> Void
-    
+
     var body: some View {
         Button {
             onJoinRoom()

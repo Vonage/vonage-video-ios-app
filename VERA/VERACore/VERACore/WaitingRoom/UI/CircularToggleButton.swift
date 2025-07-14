@@ -5,17 +5,17 @@
 import SwiftUI
 
 struct CircularToggleButton: View {
-    
+
     private let isActive: Bool
     private let iconName: String
     private let action: () -> Void
-    
+
     init(isActive: Bool, iconName: String, action: @escaping () -> Void = {}) {
         self.isActive = isActive
         self.iconName = iconName
         self.action = action
     }
-    
+
     var body: some View {
         Button(action: action) {
             Image(systemName: iconName)
@@ -39,7 +39,7 @@ struct CircularToggleButton: View {
     VStack(spacing: 20) {
         CircularToggleButton(isActive: true, iconName: "video.fill")
         CircularToggleButton(isActive: false, iconName: "video.fill")
-        
+
         CircularToggleButton(isActive: true, iconName: "mic.fill")
         CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
     }
@@ -51,7 +51,7 @@ struct CircularToggleButton: View {
     VStack(spacing: 20) {
         CircularToggleButton(isActive: true, iconName: "video.fill")
         CircularToggleButton(isActive: false, iconName: "video.fill")
-        
+
         CircularToggleButton(isActive: true, iconName: "mic.fill")
         CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
     }

@@ -7,14 +7,14 @@ import SwiftUI
 public struct UIAudioDevice: Identifiable, Equatable {
     public let id: String
     public let name: String
-    
+
     public var onTap: (() -> Void)?
-    
+
     public init(id: String, name: String) {
         self.id = id
         self.name = name
     }
-    
+
     public static func == (lhs: UIAudioDevice, rhs: UIAudioDevice) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name
     }
@@ -23,14 +23,14 @@ public struct UIAudioDevice: Identifiable, Equatable {
 public struct UICameraDevice: Identifiable, Equatable {
     public let id: String
     public let name: String
-    
+
     public var onTap: (() -> Void)?
-    
+
     public init(id: String, name: String) {
         self.id = id
         self.name = name
     }
-    
+
     public static func == (lhs: UICameraDevice, rhs: UICameraDevice) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name
     }
@@ -44,7 +44,7 @@ public struct WaitingRoomState: Equatable {
     public let isCameraEnabled: Bool
     public let audioDevices: [UIAudioDevice]
     public let cameras: [UICameraDevice]
-    
+
     public init(
         roomName: String,
         initials: String,
@@ -52,16 +52,17 @@ public struct WaitingRoomState: Equatable {
         isMicrophoneEnabled: Bool,
         isCameraEnabled: Bool,
         audioDevices: [UIAudioDevice],
-        cameras: [UICameraDevice]) {
-            self.roomName = roomName
-            self.initials = initials
-            self.color = color
-            self.isMicrophoneEnabled = isMicrophoneEnabled
-            self.isCameraEnabled = isCameraEnabled
-            self.audioDevices = audioDevices
-            self.cameras = cameras
+        cameras: [UICameraDevice]
+    ) {
+        self.roomName = roomName
+        self.initials = initials
+        self.color = color
+        self.isMicrophoneEnabled = isMicrophoneEnabled
+        self.isCameraEnabled = isCameraEnabled
+        self.audioDevices = audioDevices
+        self.cameras = cameras
     }
-    
+
     static let `default` = WaitingRoomState(
         roomName: "",
         initials: "",
@@ -77,10 +78,10 @@ public struct WaitingRoomView: View {
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
-    
+
     private let state: WaitingRoomState
     private let onJoinRoom: (String) -> Void
-    
+
     public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
         self.state = state
         self.onJoinRoom = onJoinRoom
@@ -91,10 +92,10 @@ public struct WaitingRoomView: View {
             Banner()
                 .frame(height: 70)
                 .padding(.horizontal, 8)
-            
+
             if verticalSizeClass == .compact {
                 HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
-            }  else if horizontalSizeClass == .compact {
+            } else if horizontalSizeClass == .compact {
                 VerticalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
             } else {
                 HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
@@ -108,18 +109,18 @@ public struct WaitingRoomView: View {
 struct HorizontalWaitingRoomContentView: View {
     private let state: WaitingRoomState
     private let onJoinRoom: (String) -> Void
-    
+
     public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
         self.state = state
         self.onJoinRoom = onJoinRoom
     }
-    
+
     var body: some View {
         HStack(alignment: .center, spacing: 20) {
             VideoPreviewView(state: state)
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -131,18 +132,18 @@ struct HorizontalWaitingRoomContentView: View {
 struct VerticalWaitingRoomContentView: View {
     private let state: WaitingRoomState
     private let onJoinRoom: (String) -> Void
-    
+
     public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
         self.state = state
         self.onJoinRoom = onJoinRoom
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             VideoPreviewView(state: state)
-            
+
             PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
-            
+
             Spacer()
         }
         .frame(maxHeight: .infinity)
@@ -152,16 +153,16 @@ struct VerticalWaitingRoomContentView: View {
 
 struct VideoPreviewView: View {
     private let state: WaitingRoomState
-    
+
     init(state: WaitingRoomState) {
         self.state = state
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             WaitingRoomUserPreviewView(state: state)
-            .aspectRatio(16/9, contentMode: .fit)
-            
+                .aspectRatio(16 / 9, contentMode: .fit)
+
             HStack {
                 Menu {
                     ForEach(state.audioDevices, id: \.id) { device in
@@ -185,31 +186,31 @@ struct VideoPreviewView: View {
 }
 
 struct PrepareToJoinRoom: View {
-    
+
     private let state: WaitingRoomState
     @State private var userName: String = ""
     private let onJoinRoom: (String) -> Void
-    
+
     init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
         self.state = state
         self.onJoinRoom = onJoinRoom
     }
-    
+
     var body: some View {
         VStack {
             VStack {
                 Text("Prepare to join:")
                     .font(.headline)
                     .foregroundColor(.uiLabel)
-                
+
                 Text(state.roomName)
                     .font(.subheadline)
                     .foregroundColor(.uiLabel)
             }.padding()
-            
+
             UsernameInput(userName: $userName)
                 .frame(maxWidth: 300)
-            
+
             JoinRoomButton(onJoinRoom: {
                 onJoinRoom(userName)
             })
@@ -226,12 +227,13 @@ struct PrepareToJoinRoom: View {
             color: .yellow,
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
-        audioDevices: [
-            .init(id: "", name: "Earpiece"),
-            .init(id: "", name: "Speaker")
-        ],
-        cameras: [
-            .init(id: "", name: "Front camera"),
-            .init(id: "", name: "Back camera")
-        ])) {_ in }
+            audioDevices: [
+                .init(id: "", name: "Earpiece"),
+                .init(id: "", name: "Speaker"),
+            ],
+            cameras: [
+                .init(id: "", name: "Front camera"),
+                .init(id: "", name: "Back camera"),
+            ])
+    ) { _ in }
 }
