@@ -20,16 +20,25 @@ struct CircularControlButton: View {
         Button(action: action) {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundStyle(isActive ? .videoBackground : .red)
+                .foregroundStyle(isActive ? .white : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
-                        .fill(isActive ? .red : .clear)
+                        .fill(Material.ultraThinMaterial)
                         .overlay(
                             Circle()
-                                .stroke(isActive ? .clear : .red, lineWidth: 2)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.2
+                                )
                         )
                 )
+                .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
+                .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -20,8 +20,19 @@ public struct WaitingRoomScreen: View {
     public var body: some View {
         switch viewModel.state {
         case let .content(state):
-            WaitingRoomView(state: state, userName: $viewModel.userName) {
+            WaitingRoomView(
+                state: state,
+                userName: $viewModel.userName,
+                publisherVideoView: viewModel.publisherVideoView
+            ) {
                 onNavigateToRoom(state.roomName)
+            } onMicrophoneToggle: {
+                viewModel.onMicToggle()
+            } onCameraToggle: {
+                viewModel.onCameraToggle()
+            }
+            .onAppear {
+                viewModel.loadUI()
             }
         case let .error(error): Text(error)
         case let .success(roomName): Text(roomName)

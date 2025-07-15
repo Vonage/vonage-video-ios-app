@@ -16,7 +16,6 @@ struct UsernameInput: View {
                 placeholder: "What is your name?",
                 text: $userName,
                 state: usernameState
-
             )
         }
         .onChange(of: userName) { _ in
@@ -41,7 +40,7 @@ struct UsernameInput: View {
         if userName.isEmpty {
             return .initial
         } else {
-            return userName.isValidRoomName ? .valid : .invalid
+            return .valid
         }
     }
 }

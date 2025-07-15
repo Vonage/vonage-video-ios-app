@@ -6,14 +6,20 @@ import SwiftUI
 
 public class WaitingRoomFactory {
 
-    public init() {}
+    private let publisherFactory: PublisherFactory
+
+    public init(publisherFactory: PublisherFactory) {
+        self.publisherFactory = publisherFactory
+    }
 
     public func make(
         roomName: RoomName,
         onNavigateToRoom: @escaping (RoomName) -> Void
     ) -> some View {
         WaitingRoomScreen(
-            viewModel: .init(roomName: roomName),
+            viewModel: .init(
+                roomName: roomName,
+                createPublisherUseCase: .init(publisherFactory: publisherFactory)),
             onNavigateToRoom: onNavigateToRoom
         )
     }
