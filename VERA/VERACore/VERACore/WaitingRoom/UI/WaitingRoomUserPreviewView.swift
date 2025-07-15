@@ -29,7 +29,7 @@ struct WaitingRoomUserPreviewView: View {
 
                 GeometryReader { geometry in
                     let size = min(geometry.size.width, geometry.size.height) * 0.8
-                    ParticipantCircleView(
+                    AvatarInitials(
                         state: .init(
                             initials: state.initials,
                             color: state.color,
@@ -43,12 +43,12 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    CircularToggleButton(
+                    CircularControlButton(
                         isActive: state.isMicrophoneEnabled,
                         iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
                         action: onMicrophoneToggle)
 
-                    CircularToggleButton(
+                    CircularControlButton(
                         isActive: state.isCameraEnabled,
                         iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
                         action: onCameraToggle)

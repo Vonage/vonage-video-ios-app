@@ -11,7 +11,7 @@ struct ParticipantCircleState {
     let isCameraEnabled: Bool
 }
 
-struct ParticipantCircleView: View {
+struct AvatarInitials: View {
 
     @Environment(\.colorScheme) var colorScheme
 
@@ -48,7 +48,7 @@ struct ParticipantCircleView: View {
 
 #Preview {
     VStack(spacing: 20) {
-        ParticipantCircleView(
+        AvatarInitials(
             state: .init(
                 initials: "ZB",
                 color: .yellow,
@@ -57,7 +57,7 @@ struct ParticipantCircleView: View {
         )
         .frame(width: 150, height: 200)
 
-        ParticipantCircleView(
+        AvatarInitials(
             state: .init(
                 initials: "AB",
                 color: .blue,
@@ -66,7 +66,7 @@ struct ParticipantCircleView: View {
         )
         .frame(width: 150, height: 200)
 
-        ParticipantCircleView(
+        AvatarInitials(
             state: .init(
                 initials: "CD",
                 color: .green,

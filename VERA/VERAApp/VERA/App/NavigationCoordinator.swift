@@ -30,7 +30,7 @@ final class NavigationCoordinator: ObservableObject {
     }
 
     func returnToLanding() {
-        path.removeLast(path.count)  // Limpia todo el stack
+        path.removeLast(path.count)
         isInMeeting = false
         currentMeetingRoom = nil
         logNavigation("Returned to landing page")

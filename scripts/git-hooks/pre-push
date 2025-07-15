@@ -80,8 +80,8 @@ if [ -n "$FORMAT_ISSUES" ]; then
   echo ""
   echo "💡 To fix format issues:"
   echo "   swift-format format --in-place --configuration .swift-format <file>"
-  echo "   scripts/format-swift.sh                    # Format all files"
-  echo "   scripts/check-format.sh                   # Check format only"
+  echo "   scripts/format.sh --fix                   # Format all files"
+  echo "   scripts/format.sh --check                 # Check format only"
   echo ""
   echo "� Push rejected due to format violations"
   exit 1

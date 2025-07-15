@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-struct CircularToggleButton: View {
+struct CircularControlButton: View {
 
     private let isActive: Bool
     private let iconName: String
@@ -37,11 +37,11 @@ struct CircularToggleButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        CircularToggleButton(isActive: true, iconName: "video.fill")
-        CircularToggleButton(isActive: false, iconName: "video.fill")
+        CircularControlButton(isActive: true, iconName: "video.fill")
+        CircularControlButton(isActive: false, iconName: "video.fill")
 
-        CircularToggleButton(isActive: true, iconName: "mic.fill")
-        CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
+        CircularControlButton(isActive: true, iconName: "mic.fill")
+        CircularControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
     .background(.white)
@@ -49,11 +49,11 @@ struct CircularToggleButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        CircularToggleButton(isActive: true, iconName: "video.fill")
-        CircularToggleButton(isActive: false, iconName: "video.fill")
+        CircularControlButton(isActive: true, iconName: "video.fill")
+        CircularControlButton(isActive: false, iconName: "video.fill")
 
-        CircularToggleButton(isActive: true, iconName: "mic.fill")
-        CircularToggleButton(isActive: false, iconName: "mic.slash.fill")
+        CircularControlButton(isActive: true, iconName: "mic.fill")
+        CircularControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
     .background(.videoBackground)

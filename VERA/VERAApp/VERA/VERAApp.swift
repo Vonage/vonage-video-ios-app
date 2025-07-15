@@ -27,8 +27,6 @@ struct VERAApp: App {
                                 .make(roomName: roomName) { roomName in
                                     navigationCoordinator.startMeeting(roomName)
                                 }
-                                .navigationBarBackButtonHidden(false)
-                                .navigationBarTitleDisplayMode(.inline)
                         case .meetingRoom: EmptyView()
                         case .goodbye: EmptyView()
                         }
