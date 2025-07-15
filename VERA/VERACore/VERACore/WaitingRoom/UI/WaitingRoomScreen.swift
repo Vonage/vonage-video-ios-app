@@ -5,25 +5,8 @@
 import Combine
 import SwiftUI
 
-public typealias WaitingRoomError = String
-
-public enum WaitingRoomViewState: Equatable {
-    case loading
-    case error(WaitingRoomError)
-    case success(RoomName)
-    case content(WaitingRoomState)
-}
-
-public final class WaitingRoomViewModel {
-    @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
-
-    init(roomName: RoomName) {
-        self.state = .content(WaitingRoomState.default)
-    }
-}
-
 public struct WaitingRoomScreen: View {
-    private let viewModel: WaitingRoomViewModel
+    @ObservedObject private var viewModel: WaitingRoomViewModel
     private let onNavigateToRoom: (RoomName) -> Void
 
     public init(
@@ -37,10 +20,9 @@ public struct WaitingRoomScreen: View {
     public var body: some View {
         switch viewModel.state {
         case let .content(state):
-            WaitingRoomView(state: state) { _ in
+            WaitingRoomView(state: state, userName: $viewModel.userName) {
                 onNavigateToRoom(state.roomName)
             }
-
         case let .error(error): Text(error)
         case let .success(roomName): Text(roomName)
         case .loading: Text("Loading")

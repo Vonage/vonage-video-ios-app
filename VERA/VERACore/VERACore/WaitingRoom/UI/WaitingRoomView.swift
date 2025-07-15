@@ -38,7 +38,7 @@ public struct UICameraDevice: Identifiable, Equatable {
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
-    public let initials: String
+    public let userName: String
     public let color: Color
     public let isMicrophoneEnabled: Bool
     public let isCameraEnabled: Bool
@@ -47,7 +47,7 @@ public struct WaitingRoomState: Equatable {
 
     public init(
         roomName: String,
-        initials: String,
+        userName: String,
         color: Color,
         isMicrophoneEnabled: Bool,
         isCameraEnabled: Bool,
@@ -55,7 +55,7 @@ public struct WaitingRoomState: Equatable {
         cameras: [UICameraDevice]
     ) {
         self.roomName = roomName
-        self.initials = initials
+        self.userName = userName
         self.color = color
         self.isMicrophoneEnabled = isMicrophoneEnabled
         self.isCameraEnabled = isCameraEnabled
@@ -65,7 +65,7 @@ public struct WaitingRoomState: Equatable {
 
     static let `default` = WaitingRoomState(
         roomName: "",
-        initials: "",
+        userName: "",
         color: .blue,
         isMicrophoneEnabled: false,
         isCameraEnabled: false,
@@ -79,22 +79,18 @@ public struct WaitingRoomView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
-    private let state: WaitingRoomState
-    private let onJoinRoom: (String) -> Void
-
-    public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
-        self.state = state
-        self.onJoinRoom = onJoinRoom
-    }
+    let state: WaitingRoomState
+    var userName: Binding<String>
+    let onJoinRoom: () -> Void
 
     public var body: some View {
         VStack(spacing: 0) {
             if verticalSizeClass == .compact {
-                HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
+                HorizontalWaitingRoomContentView(state: state, userName: userName, onJoinRoom: onJoinRoom)
             } else if horizontalSizeClass == .compact {
-                VerticalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
+                VerticalWaitingRoomContentView(state: state, userName: userName, onJoinRoom: onJoinRoom)
             } else {
-                HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
+                HorizontalWaitingRoomContentView(state: state, userName: userName, onJoinRoom: onJoinRoom)
             }
         }
         .background(.uiSystemBackground)
@@ -102,21 +98,17 @@ public struct WaitingRoomView: View {
 }
 
 struct HorizontalWaitingRoomContentView: View {
-    private let state: WaitingRoomState
-    private let onJoinRoom: (String) -> Void
-
-    public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
-        self.state = state
-        self.onJoinRoom = onJoinRoom
-    }
+    let state: WaitingRoomState
+    var userName: Binding<String>
+    let onJoinRoom: () -> Void
 
     var body: some View {
         HStack(alignment: .center, spacing: 20) {
-            VideoPreviewView(state: state)
+            VideoPreviewView(state: state, userName: userName)
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
+            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxHeight: .infinity)
@@ -125,19 +117,17 @@ struct HorizontalWaitingRoomContentView: View {
 }
 
 struct VerticalWaitingRoomContentView: View {
-    private let state: WaitingRoomState
-    private let onJoinRoom: (String) -> Void
+    let state: WaitingRoomState
+    let userName: Binding<String>
+    let onJoinRoom: () -> Void
 
-    public init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
-        self.state = state
-        self.onJoinRoom = onJoinRoom
-    }
 
     var body: some View {
         VStack(spacing: 0) {
-            VideoPreviewView(state: state)
+            VideoPreviewView(state: state, userName: userName)
+                .frame(maxWidth: .infinity)
 
-            PrepareToJoinRoom(state: state, onJoinRoom: onJoinRoom)
+            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
 
             Spacer()
         }
@@ -148,14 +138,16 @@ struct VerticalWaitingRoomContentView: View {
 
 struct VideoPreviewView: View {
     private let state: WaitingRoomState
-
-    init(state: WaitingRoomState) {
+    private let userName: Binding<String>
+    
+    init(state: WaitingRoomState, userName: Binding<String>) {
         self.state = state
+        self.userName = userName
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            WaitingRoomUserPreviewView(state: state)
+            WaitingRoomUserPreviewView(state: state, userName: userName)
                 .aspectRatio(16 / 9, contentMode: .fit)
 
             HStack {
@@ -181,15 +173,10 @@ struct VideoPreviewView: View {
 }
 
 struct PrepareToJoinRoom: View {
+    let state: WaitingRoomState
+    var userName: Binding<String>
+    let onJoinRoom: () -> Void
 
-    private let state: WaitingRoomState
-    @State private var userName: String = ""
-    private let onJoinRoom: (String) -> Void
-
-    init(state: WaitingRoomState, onJoinRoom: @escaping (String) -> Void) {
-        self.state = state
-        self.onJoinRoom = onJoinRoom
-    }
 
     var body: some View {
         VStack {
@@ -203,11 +190,11 @@ struct PrepareToJoinRoom: View {
                     .foregroundColor(.uiLabel)
             }.padding()
 
-            UsernameInput(userName: $userName)
+            UsernameInput(userName: userName)
                 .frame(maxWidth: 300)
 
             JoinRoomButton {
-                onJoinRoom(userName)
+                onJoinRoom()
             }
             .padding()
         }
@@ -218,7 +205,7 @@ struct PrepareToJoinRoom: View {
     WaitingRoomView(
         state: .init(
             roomName: "Room name",
-            initials: "ZP",
+            userName: "Zaphod Beeblebrox",
             color: .yellow,
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
@@ -229,6 +216,7 @@ struct PrepareToJoinRoom: View {
             cameras: [
                 .init(id: "", name: "Front camera"),
                 .init(id: "", name: "Back camera"),
-            ])
-    ) { _ in }
+            ]),
+        userName: .constant("Zaphod Beeblebrox")
+    ) {}
 }

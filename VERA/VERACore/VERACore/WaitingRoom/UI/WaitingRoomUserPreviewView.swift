@@ -6,15 +6,18 @@ import SwiftUI
 
 struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState
+    private let userName: Binding<String>
     private let onMicrophoneToggle: () -> Void
     private let onCameraToggle: () -> Void
 
     init(
         state: WaitingRoomState,
+        userName: Binding<String>,
         onMicrophoneToggle: @escaping () -> Void = {},
         onCameraToggle: @escaping () -> Void = {}
     ) {
         self.state = state
+        self.userName = userName
         self.onMicrophoneToggle = onMicrophoneToggle
         self.onCameraToggle = onCameraToggle
     }
@@ -31,8 +34,7 @@ struct WaitingRoomUserPreviewView: View {
                     let size = min(geometry.size.width, geometry.size.height) * 0.8
                     AvatarInitials(
                         state: .init(
-                            initials: state.initials,
-                            color: state.color,
+                            userName: userName.wrappedValue,
                             isMicrophoneEnabled: state.isMicrophoneEnabled,
                             isCameraEnabled: state.isCameraEnabled)
                     )
@@ -65,53 +67,57 @@ struct WaitingRoomUserPreviewView: View {
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "ZB",
+                userName: "Arthur Dent",
                 color: .yellow,
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Arthur Dent"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "AB",
+                userName: "Ford Prefect",
                 color: .blue,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Ford Prefect"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "CD",
+                userName: "Marvin",
                 color: .green,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Marvin"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "CD",
+                userName: "Slartibartfast",
                 color: .green,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Slartibartfast"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
     }
 }
@@ -121,53 +127,57 @@ struct WaitingRoomUserPreviewView: View {
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "ZB",
+                userName: "Arthur Dent",
                 color: .yellow,
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Arthur Dent"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "AB",
+                userName: "Ford Prefect",
                 color: .blue,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Ford Prefect"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "CD",
+                userName: "Marvin",
                 color: .green,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Marvin"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
 
         WaitingRoomUserPreviewView(
             state: .init(
                 roomName: "room name",
-                initials: "CD",
+                userName: "Slartibartfast",
                 color: .green,
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
                 cameras: []),
-            onMicrophoneToggle: { print("Micrófono toggled") },
-            onCameraToggle: { print("Cámara toggled") }
+            userName: .constant("Slartibartfast"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
         .preferredColorScheme(.dark)
     }
