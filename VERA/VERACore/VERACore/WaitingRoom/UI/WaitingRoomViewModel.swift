@@ -2,8 +2,8 @@
 //  Created by Vonage on 15/7/25.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 public typealias WaitingRoomError = String
 
@@ -17,10 +17,10 @@ public enum WaitingRoomViewState: Equatable {
 public final class WaitingRoomViewModel: ObservableObject {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
-    
+
     init(roomName: RoomName) {
         self.state = .content(WaitingRoomState.default)
-        
-        
+
+
     }
 }

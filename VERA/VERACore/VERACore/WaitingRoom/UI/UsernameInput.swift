@@ -16,7 +16,7 @@ struct UsernameInput: View {
                 placeholder: "What is your name?",
                 text: $userName,
                 state: usernameState
-                
+
             )
         }
         .onChange(of: userName) { _ in

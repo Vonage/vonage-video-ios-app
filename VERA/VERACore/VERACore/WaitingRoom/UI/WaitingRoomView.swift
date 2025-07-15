@@ -139,7 +139,7 @@ struct VerticalWaitingRoomContentView: View {
 struct VideoPreviewView: View {
     private let state: WaitingRoomState
     private let userName: Binding<String>
-    
+
     init(state: WaitingRoomState, userName: Binding<String>) {
         self.state = state
         self.userName = userName

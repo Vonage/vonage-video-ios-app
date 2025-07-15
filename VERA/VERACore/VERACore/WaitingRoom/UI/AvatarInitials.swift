@@ -29,7 +29,7 @@ struct AvatarInitials: View {
                 let size = min(geometry.size.width, geometry.size.height)
                 let initialsColor = colorScheme == .dark ? Color.black : Color.white
                 let userColor = state.userName.getParticipantColor()
-                
+
                 ZStack {
                     Circle()
                         .frame(width: size, height: size)
@@ -42,10 +42,11 @@ struct AvatarInitials: View {
                         .minimumScaleFactor(0.5)
                         .animation(.easeInOut(duration: 0.4), value: state.userName.getInitials())
                         .animation(.easeInOut(duration: 0.3), value: initialsColor)
-                        .transition(.asymmetric(
-                            insertion: .scale(scale: 0.8).combined(with: .opacity),
-                            removal: .scale(scale: 1.2).combined(with: .opacity)
-                        ))
+                        .transition(
+                            .asymmetric(
+                                insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                removal: .scale(scale: 1.2).combined(with: .opacity)
+                            ))
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }

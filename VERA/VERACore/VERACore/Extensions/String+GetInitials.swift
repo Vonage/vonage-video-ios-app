@@ -18,7 +18,8 @@ extension String {
         default:
             selected = []
         }
-        return selected
+        return
+            selected
             .prefix(limit)
             .compactMap { $0.first?.uppercased() }
             .joined()

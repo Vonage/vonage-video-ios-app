@@ -56,7 +56,7 @@ struct JoinExistingRoom: View {
             return .uiSecondaryLabel
         }
     }
-    
+
     private func getRoomState() -> VonageTextFieldState {
         if roomName.isEmpty {
             return .initial
