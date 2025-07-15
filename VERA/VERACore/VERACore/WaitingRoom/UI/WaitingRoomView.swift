@@ -89,10 +89,6 @@ public struct WaitingRoomView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            Banner()
-                .frame(height: 70)
-                .padding(.horizontal, 8)
-
             if verticalSizeClass == .compact {
                 HorizontalWaitingRoomContentView(state: state, onJoinRoom: onJoinRoom)
             } else if horizontalSizeClass == .compact {
@@ -102,7 +98,6 @@ public struct WaitingRoomView: View {
             }
         }
         .background(.uiSystemBackground)
-        .navigationBarHidden(true)
     }
 }
 

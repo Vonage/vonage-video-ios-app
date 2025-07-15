@@ -6,7 +6,7 @@ import SwiftUI
 
 struct JoinButton: View {
     @Binding var roomName: String
-    @Binding var roomState: RoomNameState
+    let color: Color
 
     let onJoinRoom: () -> Void
 
@@ -14,21 +14,10 @@ struct JoinButton: View {
         Button {
             onJoinRoom()
         } label: {
-            Text("Join").foregroundStyle(joinColor)
+            Text("Join").foregroundStyle(color)
         }
         .buttonStyle(JoinRoomButtonStyle(isEnabled: !roomName.isEmpty))
         .disabled(roomName.isEmpty)
-    }
-
-    private var joinColor: Color {
-        switch roomState {
-        case .initial:
-            return .uiSecondaryLabel
-        case .valid:
-            return .accentBlue
-        case .invalid:
-            return .uiSecondaryLabel
-        }
     }
 }
 
@@ -48,7 +37,7 @@ struct JoinRoomButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    JoinButton(roomName: .constant(""), roomState: .constant(.initial)) {}
-    JoinButton(roomName: .constant("Test"), roomState: .constant(.valid)) {}
-    JoinButton(roomName: .constant("Test"), roomState: .constant(.invalid)) {}
+    JoinButton(roomName: .constant(""), color: .vGray0) {}
+    JoinButton(roomName: .constant("Test"), color: .accentBlue) {}
+    JoinButton(roomName: .constant("Test"), color: .red) {}
 }
