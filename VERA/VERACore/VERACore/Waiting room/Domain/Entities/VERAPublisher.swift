@@ -1,8 +1,7 @@
 //
-//  Created by Vonage on 15/7/25.
+//  Created by Vonage on 16/7/25.
 //
 
-import Foundation
 import SwiftUI
 
 public enum CameraPosition {
@@ -14,8 +13,4 @@ public protocol VERAPublisher {
     var publishAudio: Bool { get set }
     var publishVideo: Bool { get set }
     var cameraPosition: CameraPosition { get set }
-}
-
-public protocol PublisherFactory {
-    func make() -> VERAPublisher
 }
