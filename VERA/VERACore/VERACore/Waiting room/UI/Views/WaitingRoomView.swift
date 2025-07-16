@@ -25,7 +25,7 @@ public struct WaitingRoomState: Equatable {
         self.cameras = cameras
     }
 
-    static let `default` = WaitingRoomState(
+    public static let `default` = WaitingRoomState(
         roomName: "",
         isMicrophoneEnabled: false,
         isCameraEnabled: false,

@@ -45,8 +45,10 @@ struct VonageTextField: View {
 
             TextField(placeholder, text: text)
                 .textFieldStyle(PlainTextFieldStyle())
-                .textInputAutocapitalization(.never)
-                .textCase(.lowercase)
+                #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .textCase(.lowercase)
+                #endif
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

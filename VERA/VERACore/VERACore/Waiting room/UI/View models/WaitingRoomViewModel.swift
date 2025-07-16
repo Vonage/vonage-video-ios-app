@@ -32,7 +32,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(
+    public init(
         roomName: RoomName,
         publisherRepository: VERAPublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
@@ -44,7 +44,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.cameraDevicesRepository = cameraDevicesRepository
     }
 
-    func loadUI() {
+    public func loadUI() {
         let publisher = publisherRepository.getPublisher()
         self.publisher = publisher
 
@@ -55,7 +55,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         observeCameraDevices()
     }
 
-    func observeAudioDevices() {
+    private func observeAudioDevices() {
         audioDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
         )
@@ -77,7 +77,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
-    func observeCameraDevices() {
+    private func observeCameraDevices() {
         cameraDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
         )
@@ -93,7 +93,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
-    func selectAudioDevice(_ id: String) {
+    public func selectAudioDevice(_ id: String) {
         do {
             try audioDevicesRepository.routeTo(id)
         } catch {
@@ -101,13 +101,13 @@ public final class WaitingRoomViewModel: ObservableObject {
         }
     }
 
-    func onMicToggle() {
+    public func onMicToggle() {
         guard var publisher else { return }
         publisher.publishAudio.toggle()
         buildContentUiState(roomName: roomName, publisher: publisher)
     }
 
-    func onCameraToggle() {
+    public func onCameraToggle() {
         guard var publisher else { return }
         publisher.publishVideo.toggle()
         buildContentUiState(roomName: roomName, publisher: publisher)
