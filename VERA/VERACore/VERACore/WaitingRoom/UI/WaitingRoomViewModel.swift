@@ -23,34 +23,39 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let roomName: RoomName
     var publisher: VERAPublisher?
 
-    private let createPublisherUseCase: CreatePublisherUseCase
+    private let createPublisherUseCase: GetPublisherUseCase
     private let audioDevicesRepository: AudioDevicesRepository
+    private let cameraDevicesRepository: CameraDevicesRepository
+
     private var availableAudioDevices: [UIAudioDevice] = []
+    private var availableCameraDevices: [UICameraDevice] = []
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         roomName: RoomName,
-        createPublisherUseCase: CreatePublisherUseCase,
-        audioDevicesRepository: AudioDevicesRepository
+        createPublisherUseCase: GetPublisherUseCase,
+        audioDevicesRepository: AudioDevicesRepository,
+        cameraDevicesRepository: CameraDevicesRepository
     ) {
         self.roomName = roomName
         self.createPublisherUseCase = createPublisherUseCase
         self.audioDevicesRepository = audioDevicesRepository
+        self.cameraDevicesRepository = cameraDevicesRepository
     }
 
     func loadUI() {
-        do {
-            publisher = try createPublisherUseCase.invoke()
-            if let publisher = publisher {
-                publisherVideoView = PublisherVideoView(videoView: publisher.view)
+        let publisher = createPublisherUseCase.invoke()
+        self.publisher = publisher
 
-                buildContentUiState(roomName: roomName, publisher: publisher)
-            }
-        } catch {
-            print("Error: \(error)")
-        }
+        publisherVideoView = PublisherVideoView(videoView: publisher.view)
+        buildContentUiState(roomName: roomName, publisher: publisher)
 
+        observeAudioDevices()
+        observeCameraDevices()
+    }
+
+    func observeAudioDevices() {
         audioDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
         )
@@ -66,8 +71,24 @@ public final class WaitingRoomViewModel: ObservableObject {
                 return uiDevice
             }
         }.sink(receiveValue: { [weak self] in
-            guard let self else { return }
-            self.handleAudioDevicesChanged($0)
+            self?.availableAudioDevices = $0
+            self?.handleDevicesChanged()
+        })
+        .store(in: &cancellables)
+    }
+
+    func observeCameraDevices() {
+        cameraDevicesRepository.observeAvailableDevices.receive(
+            on: DispatchQueue.main
+        )
+        .map { [weak self] cameraDevices -> [UICameraDevice] in
+            guard let self else { return [] }
+            return cameraDevices.map {
+                self.makeUICameraDevice(device: $0)
+            }
+        }.sink(receiveValue: { [weak self] cameraDevices in
+            self?.availableCameraDevices = cameraDevices
+            self?.handleDevicesChanged()
         })
         .store(in: &cancellables)
     }
@@ -99,17 +120,43 @@ public final class WaitingRoomViewModel: ObservableObject {
                 isMicrophoneEnabled: publisher.publishAudio,
                 isCameraEnabled: publisher.publishVideo,
                 audioDevices: availableAudioDevices,
-                cameras: [
-                    .init(id: "front", name: "Front"),
-                    .init(id: "back", name: "Back"),
-                ]))
+                cameras: availableCameraDevices))
     }
 
-    private func handleAudioDevicesChanged(_ newDevices: [UIAudioDevice]) {
-        availableAudioDevices = newDevices
-
-        if let publisher = publisher {
-            buildContentUiState(roomName: roomName, publisher: publisher)
+    private func makeUICameraDevice(
+        device: CameraDevice
+    ) -> UICameraDevice {
+        if device.id == "Front" {
+            return makeFrontCamera(device)
+        } else {
+            return makeBackCamera(device)
         }
+    }
+
+    private func makeFrontCamera(_ device: CameraDevice) -> UICameraDevice {
+        var device = UICameraDevice(
+            id: device.id,
+            name: device.name,
+            iconName: "person.fill.viewfinder")
+        device.onTap = { [weak self] in
+            self?.cameraDevicesRepository.routeTo(device.id)
+        }
+        return device
+    }
+
+    private func makeBackCamera(_ device: CameraDevice) -> UICameraDevice {
+        var device = UICameraDevice(
+            id: device.id,
+            name: device.name,
+            iconName: "iphone.rear.camera")
+        device.onTap = { [weak self] in
+            self?.cameraDevicesRepository.routeTo(device.id)
+        }
+        return device
+    }
+
+    private func handleDevicesChanged() {
+        guard let publisher = publisher else { return }
+        buildContentUiState(roomName: roomName, publisher: publisher)
     }
 }

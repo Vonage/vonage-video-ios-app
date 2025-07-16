@@ -17,5 +17,5 @@ public protocol VERAPublisher {
 }
 
 public protocol PublisherFactory {
-    func make() throws -> VERAPublisher
+    func make() -> VERAPublisher
 }

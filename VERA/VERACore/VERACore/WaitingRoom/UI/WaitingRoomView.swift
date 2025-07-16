@@ -4,40 +4,6 @@
 
 import SwiftUI
 
-public struct UIAudioDevice: Identifiable, Equatable {
-    public let id: String
-    public let name: String
-    public let iconName: String
-
-    public var onTap: (() -> Void)?
-
-    public init(id: String, name: String, iconName: String) {
-        self.id = id
-        self.name = name
-        self.iconName = iconName
-    }
-
-    public static func == (lhs: UIAudioDevice, rhs: UIAudioDevice) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.iconName == rhs.iconName
-    }
-}
-
-public struct UICameraDevice: Identifiable, Equatable {
-    public let id: String
-    public let name: String
-
-    public var onTap: (() -> Void)?
-
-    public init(id: String, name: String) {
-        self.id = id
-        self.name = name
-    }
-
-    public static func == (lhs: UICameraDevice, rhs: UICameraDevice) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name
-    }
-}
-
 public struct WaitingRoomState: Equatable {
     public let roomName: String
     public let isMicrophoneEnabled: Bool
@@ -211,7 +177,14 @@ struct VideoPreviewView: View {
                 }
                 Menu {
                     ForEach(state.cameras, id: \.id) { device in
-                        Button(device.name) { device.onTap?() }
+                        Button {
+                            device.onTap?()
+                        } label: {
+                            HStack {
+                                Text(device.name)
+                                Image(systemName: device.iconName)
+                            }
+                        }
                     }
                 } label: {
                     Label("Camera", systemImage: "video")
@@ -273,8 +246,8 @@ struct PrepareToJoinRoom: View {
                 .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),
             ],
             cameras: [
-                .init(id: "", name: "Front camera"),
-                .init(id: "", name: "Back camera"),
+                .init(id: "", name: "Front camera", iconName: "person.fill.viewfinder"),
+                .init(id: "", name: "Back camera", iconName: "iphone.rear.camera"),
             ]),
         userName: .constant("Zaphod Beeblebrox"),
         publisherVideoView: .init(videoView: nil),
