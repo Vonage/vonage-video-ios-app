@@ -23,7 +23,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let roomName: RoomName
     var publisher: VERAPublisher?
 
-    private let createPublisherUseCase: GetPublisherUseCase
+    private let publisherRepository: VERAPublisherRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
 
@@ -34,18 +34,18 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     init(
         roomName: RoomName,
-        createPublisherUseCase: GetPublisherUseCase,
+        publisherRepository: VERAPublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository
     ) {
         self.roomName = roomName
-        self.createPublisherUseCase = createPublisherUseCase
+        self.publisherRepository = publisherRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
     }
 
     func loadUI() {
-        let publisher = createPublisherUseCase.invoke()
+        let publisher = publisherRepository.getPublisher()
         self.publisher = publisher
 
         publisherVideoView = PublisherVideoView(videoView: publisher.view)

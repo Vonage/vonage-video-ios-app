@@ -27,7 +27,7 @@ public class WaitingRoomFactory {
         WaitingRoomScreen(
             viewModel: .init(
                 roomName: roomName,
-                createPublisherUseCase: .init(publisherRepository: publisherRepository),
+                publisherRepository: publisherRepository,
                 audioDevicesRepository: audioDevicesRepository,
                 cameraDevicesRepository: cameraDevicesRepository),
             onNavigateToRoom: onNavigateToRoom
