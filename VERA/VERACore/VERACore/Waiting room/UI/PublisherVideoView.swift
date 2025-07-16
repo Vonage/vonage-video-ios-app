@@ -16,7 +16,6 @@ public struct PublisherVideoView: View {
     }
 
     public var body: some View {
-
         ZStack {
             Color.videoBackground
                 .ignoresSafeArea()

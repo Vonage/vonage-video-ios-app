@@ -1,8 +1,5 @@
 //
-//  LandingPageViewUITests.swift
-//  VERACoreSnapshotTests
-//
-//  Created by Vonage on 7/11/25.
+//  Created by Vonage on 16/7/25.
 //
 
 import SnapshotTesting
@@ -11,24 +8,24 @@ import Testing
 
 @testable import VERACore
 
-@Suite("Landing Page View UI Tests")
+@Suite("Waiting room View UI Tests")
 @MainActor
-struct LandingPageViewUITests {
+struct WaitingRoomViewUITests {
 
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
-    private let snapshotPrefix = "LandingPage"
+    private let snapshotPrefix = "WaitingRoom"
 
     // MARK: - Core UI Tests
 
-    @Test("Landing Page View - Basic Layout")
+    @Test("Waiting room View - Basic Layout")
     func basicLayout() throws {
         snapshot(makeSUT(), named: "Default")
     }
 
     @Test(
-        "Landing Page View - Size Classes",
+        "Waiting room View - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
@@ -47,7 +44,7 @@ struct LandingPageViewUITests {
     }
 
     @Test(
-        "Landing Page View - Color Schemes",
+        "Waiting room View - Color Schemes",
         arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
@@ -63,7 +60,7 @@ struct LandingPageViewUITests {
     }
 
     @Test(
-        "Landing Page View - Accessibility",
+        "Waiting room View - Accessibility",
         arguments: [
             ("SmallText", ContentSizeCategory.extraSmall),
             ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
@@ -77,11 +74,14 @@ struct LandingPageViewUITests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT() -> LandingPageView {
-        return LandingPageView(
-            onHandleNewRoom: {},
-            onJoinRoom: { _ in },
-            onNavigateToWaitingRoom: { _ in }
+    private func makeSUT() -> WaitingRoomView {
+        return WaitingRoomView(
+            state: makeWaitingRoomState(),
+            userName: .constant("Trillian"),
+            publisherVideoView: makePublisherVideoView(),
+            onJoinRoom: {},
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
         )
     }
 
@@ -98,12 +98,12 @@ struct LandingPageViewUITests {
 
 // MARK: - Component Tests
 
-@Suite("Landing Page Components")
+@Suite("Waiting room Components")
 @MainActor
-struct LandingPageComponentTests {
+struct WaitingRoomComponentTests {
 
     private let isRecording = false
-    private let snapshotPrefix = "LandingPage"
+    private let snapshotPrefix = "WaitingRoom"
 
     @Test(
         "Layout Components",
@@ -117,11 +117,23 @@ struct LandingPageComponentTests {
         switch layoutName {
         case "Horizontal":
             view = AnyView(
-                HorizontalLandingContentView(onHandleNewRoom: {}, onJoinRoom: { _ in })
+                HorizontalWaitingRoomContentView(
+                    state: makeWaitingRoomState(),
+                    userName: .constant("Trillian"),
+                    publisherVideoView: makePublisherVideoView(),
+                    onJoinRoom: {},
+                    onMicrophoneToggle: {},
+                    onCameraToggle: {})
             )
         case "Vertical":
             view = AnyView(
-                VerticalLandingContentView(onHandleNewRoom: {}, onJoinRoom: { _ in })
+                VerticalWaitingRoomContentView(
+                    state: makeWaitingRoomState(),
+                    userName: .constant("Trillian"),
+                    publisherVideoView: makePublisherVideoView(),
+                    onJoinRoom: {},
+                    onMicrophoneToggle: {},
+                    onCameraToggle: {})
             )
         default:
             return
