@@ -35,7 +35,6 @@ public struct WaitingRoomScreen: View {
                 viewModel.loadUI()
             }
         case let .error(error): Text(error)
-        case let .success(roomName): Text(roomName)
         case .loading: Text("Loading")
         }
     }

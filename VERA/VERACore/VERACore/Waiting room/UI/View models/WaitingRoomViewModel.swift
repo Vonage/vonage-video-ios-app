@@ -10,7 +10,6 @@ public typealias WaitingRoomError = String
 public enum WaitingRoomViewState: Equatable {
     case loading
     case error(WaitingRoomError)
-    case success(RoomName)
     case content(WaitingRoomState)
 }
 
