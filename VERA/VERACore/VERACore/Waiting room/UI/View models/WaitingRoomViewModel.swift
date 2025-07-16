@@ -128,7 +128,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         }
         return uiDevice
     }
-    
+
     private func makeUICameraDevice(
         device: CameraDevice
     ) -> UICameraDevice {
