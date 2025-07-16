@@ -59,16 +59,10 @@ public final class WaitingRoomViewModel: ObservableObject {
         audioDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
         )
-        .map {
-            $0.map { audioDevice in
-                var uiDevice = UIAudioDevice(
-                    id: audioDevice.id,
-                    name: audioDevice.name,
-                    iconName: audioDevice.portDescription)
-                uiDevice.onTap = { [weak self] in
-                    self?.selectAudioDevice(audioDevice.id)
-                }
-                return uiDevice
+        .map { [weak self] audioDevices -> [UIAudioDevice] in
+            guard let self else { return [] }
+            return audioDevices.map {
+                self.makeUIAudioDevice(device: $0)
             }
         }.sink(receiveValue: { [weak self] in
             self?.availableAudioDevices = $0
@@ -123,6 +117,19 @@ public final class WaitingRoomViewModel: ObservableObject {
                 cameras: availableCameraDevices))
     }
 
+    private func makeUIAudioDevice(
+        device: AudioDevice
+    ) -> UIAudioDevice {
+        var uiDevice = UIAudioDevice(
+            id: device.id,
+            name: device.name,
+            iconName: device.portDescription)
+        uiDevice.onTap = { [weak self] in
+            self?.selectAudioDevice(device.id)
+        }
+        return uiDevice
+    }
+    
     private func makeUICameraDevice(
         device: CameraDevice
     ) -> UICameraDevice {
