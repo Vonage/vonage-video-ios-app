@@ -36,10 +36,7 @@ struct WaitingRoomUserPreviewView: View {
                     GeometryReader { geometry in
                         let size = min(geometry.size.width, geometry.size.height) * 0.8
                         AvatarInitials(
-                            state: .init(
-                                userName: userName.wrappedValue,
-                                isMicrophoneEnabled: state.isMicrophoneEnabled,
-                                isCameraEnabled: state.isCameraEnabled)
+                            state: .init(userName: userName.wrappedValue)
                         )
                         .frame(width: size, height: size)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)

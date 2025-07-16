@@ -6,8 +6,6 @@ import SwiftUI
 
 struct ParticipantCircleState {
     let userName: String
-    let isMicrophoneEnabled: Bool
-    let isCameraEnabled: Bool
 }
 
 struct AvatarInitials: View {
@@ -58,25 +56,19 @@ struct AvatarInitials: View {
     VStack(spacing: 20) {
         AvatarInitials(
             state: .init(
-                userName: "Arthur Dent",
-                isMicrophoneEnabled: true,
-                isCameraEnabled: true)
+                userName: "Arthur Dent")
         )
         .frame(width: 150, height: 200)
 
         AvatarInitials(
             state: .init(
-                userName: "Ford Prefect",
-                isMicrophoneEnabled: false,
-                isCameraEnabled: true)
+                userName: "Ford Prefect")
         )
         .frame(width: 150, height: 200)
 
         AvatarInitials(
             state: .init(
-                userName: "Tricia McMillan",
-                isMicrophoneEnabled: false,
-                isCameraEnabled: false)
+                userName: "Tricia McMillan")
         )
         .frame(width: 150, height: 200)
     }
