@@ -11,36 +11,19 @@ enum RoomNameState {
 struct JoinExistingRoom: View {
 
     @State var roomName: String = ""
-    @State private var roomState = RoomNameState.initial
+    @State private var roomState = VonageTextFieldState.initial
 
     let onJoinRoom: (String) -> Void
 
     var body: some View {
-
         HStack {
-            HStack(spacing: 12) {
-                Image("keyboard", bundle: .veraCore)
-                    .foregroundColor(.vGray3)
-                    .frame(width: 20)
+            VonageTextField(
+                iconName: "keyboard",
+                placeholder: "Enter room name",
+                text: $roomName,
+                state: roomState)
 
-                TextField("Enter room name", text: $roomName)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .textInputAutocapitalization(.never)
-                    .textCase(.lowercase)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.uiSystemBackground))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(borderColor, lineWidth: 1.5)
-                    )
-                    .animation(.easeInOut(duration: 0.3), value: roomState)
-            )
-
-            JoinButton(roomName: $roomName, roomState: $roomState) {
+            JoinButton(roomName: $roomName, color: joinColor) {
                 onJoinRoom(roomName)
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
@@ -63,7 +46,18 @@ struct JoinExistingRoom: View {
         }
     }
 
-    private func getRoomState() -> RoomNameState {
+    private var joinColor: Color {
+        switch roomState {
+        case .initial:
+            return .uiSecondaryLabel
+        case .valid:
+            return .accentBlue
+        case .invalid:
+            return .uiSecondaryLabel
+        }
+    }
+
+    private func getRoomState() -> VonageTextFieldState {
         if roomName.isEmpty {
             return .initial
         } else {

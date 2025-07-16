@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F3AF1D72E26735500AD6291 /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F3AF1D62E26735500AD6291 /* VERACore.framework */; };
 		6FD1B4272E1BBA1A00BD9F3D /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */; };
 		6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */; };
 /* End PBXBuildFile section */
@@ -22,6 +23,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6F3AF1D62E26735500AD6291 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FD1B4262E1BBA1A00BD9F3D /* VERAOpenTokTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAOpenTokTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -45,6 +47,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */,
+				6F3AF1D72E26735500AD6291 /* VERACore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,11 +62,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6F3AF1D52E26735500AD6291 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6F3AF1D62E26735500AD6291 /* VERACore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6FD1B4112E1BBA1A00BD9F3D = {
 			isa = PBXGroup;
 			children = (
 				6FD1B41D2E1BBA1A00BD9F3D /* VERAOpenTok */,
 				6FD1B42A2E1BBA1A00BD9F3D /* VERAOpenTokTests */,
+				6F3AF1D52E26735500AD6291 /* Frameworks */,
 				6FD1B41C2E1BBA1A00BD9F3D /* Products */,
 			);
 			sourceTree = "<group>";

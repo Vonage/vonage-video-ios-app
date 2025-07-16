@@ -1,0 +1,53 @@
+//
+//  Created by Vonage on 16/7/25.
+//
+
+import Foundation
+import OpenTok
+import SwiftUI
+import VERACore
+
+public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
+    private var publisher: OTPublisher
+
+    public var view: AnyView {
+        let rendererView = OpenTokRendererView(publisher: publisher)
+        return AnyView(rendererView)
+    }
+
+    public var publishAudio: Bool {
+        get {
+            publisher.publishAudio
+        }
+        set {
+            publisher.publishAudio = newValue
+        }
+    }
+
+    public var publishVideo: Bool {
+        get {
+            publisher.publishVideo
+        }
+        set {
+            publisher.publishVideo = newValue
+        }
+    }
+
+    public var cameraPosition: CameraPosition {
+        get {
+            publisher.cameraPosition == .front ? .front : .back
+        }
+
+        set {
+            publisher.cameraPosition = newValue == .front ? .front : .back
+        }
+    }
+
+    init(publisher: OTPublisher) {
+        self.publisher = publisher
+    }
+
+    public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
+        print(error.localizedDescription)
+    }
+}
