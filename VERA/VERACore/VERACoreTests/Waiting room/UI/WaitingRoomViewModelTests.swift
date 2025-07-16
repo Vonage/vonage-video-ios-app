@@ -113,6 +113,7 @@ struct WaitingRoomViewModelTests {
             roomName: roomName,
             publisherRepository: publisherRepository,
             audioDevicesRepository: audioDevicesRepository,
-            cameraDevicesRepository: cameraDevicesRepository)
+            cameraDevicesRepository: cameraDevicesRepository,
+            selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository))
     }
 }

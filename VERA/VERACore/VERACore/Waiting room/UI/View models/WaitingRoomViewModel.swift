@@ -25,6 +25,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let publisherRepository: VERAPublisherRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
+    private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
 
     private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
@@ -35,12 +36,14 @@ public final class WaitingRoomViewModel: ObservableObject {
         roomName: RoomName,
         publisherRepository: VERAPublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
-        cameraDevicesRepository: CameraDevicesRepository
+        cameraDevicesRepository: CameraDevicesRepository,
+        selectAudioDeviceUseCase: SelectAudioDeviceUseCase
     ) {
         self.roomName = roomName
         self.publisherRepository = publisherRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
+        self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
     }
 
     public func loadUI() {
@@ -86,9 +89,9 @@ public final class WaitingRoomViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
-    public func selectAudioDevice(_ id: String) {
+    public func selectAudioDevice(_ device: AudioDevice) {
         do {
-            try audioDevicesRepository.routeTo(id)
+            try selectAudioDeviceUseCase.invoke(device)
         } catch {
             print("Error selecting audio device: \(error)")
         }
@@ -124,7 +127,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: device.portDescription)
         uiDevice.onTap = { [weak self] in
-            self?.selectAudioDevice(device.id)
+            self?.selectAudioDevice(device)
         }
         return uiDevice
     }
