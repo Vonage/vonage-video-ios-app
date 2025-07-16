@@ -7,16 +7,18 @@ import SwiftUI
 public struct UIAudioDevice: Identifiable, Equatable {
     public let id: String
     public let name: String
+    public let iconName: String
 
     public var onTap: (() -> Void)?
 
-    public init(id: String, name: String) {
+    public init(id: String, name: String, iconName: String) {
         self.id = id
         self.name = name
+        self.iconName = iconName
     }
 
     public static func == (lhs: UIAudioDevice, rhs: UIAudioDevice) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.iconName == rhs.iconName
     }
 }
 
@@ -143,6 +145,7 @@ struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
     let publisherVideoView: PublisherVideoView
+    @FocusState private var isTextFieldFocused: Bool
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -194,7 +197,14 @@ struct VideoPreviewView: View {
             HStack {
                 Menu {
                     ForEach(state.audioDevices, id: \.id) { device in
-                        Button(device.name) { device.onTap?() }
+                        Button {
+                            device.onTap?()
+                        } label: {
+                            HStack {
+                                Text(device.name)
+                                Image(systemName: device.iconName)
+                            }
+                        }
                     }
                 } label: {
                     Label("Microphone", systemImage: "mic")
@@ -259,8 +269,8 @@ struct PrepareToJoinRoom: View {
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
             audioDevices: [
-                .init(id: "", name: "Earpiece"),
-                .init(id: "", name: "Speaker"),
+                .init(id: "", name: "Earpiece", iconName: "iphone"),
+                .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),
             ],
             cameras: [
                 .init(id: "", name: "Front camera"),

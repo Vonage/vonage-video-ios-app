@@ -2,6 +2,7 @@
 //  Created by Vonage on 4/7/25.
 //
 
+import AVFoundation
 import Foundation
 import SwiftUI
 import VERACore
@@ -48,7 +49,9 @@ struct VERAApp: App {
 
     private func makeWaitingRoom(roomName: String) -> some View {
         let publisherFactory: PublisherFactory = OpenTokPublisherFactory()
-        let waitingRoomFactory = WaitingRoomFactory(publisherFactory: publisherFactory)
+        let waitingRoomFactory = WaitingRoomFactory(
+            publisherFactory: publisherFactory,
+            audioDevicesRepository: makeAudioDevicesRepository())
 
         return waitingRoomFactory.make(roomName: roomName) { roomName in
             navigationCoordinator.startMeeting(roomName)
@@ -57,5 +60,11 @@ struct VERAApp: App {
 
     private func makeMeetingRoom() -> some View {
         MeetingRoomView()
+    }
+
+    private func makeAudioDevicesRepository() -> any AudioDevicesRepository {
+        let repository = AVFoundationAudioDevicesRepository(audioSession: AVAudioSession.sharedInstance())
+        repository.loadAudioDevices()
+        return repository
     }
 }

@@ -15,6 +15,8 @@ public enum WaitingRoomViewState: Equatable {
 }
 
 public final class WaitingRoomViewModel: ObservableObject {
+
+
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
     @Published var publisherVideoView: PublisherVideoView = PublisherVideoView(videoView: nil)
@@ -22,11 +24,19 @@ public final class WaitingRoomViewModel: ObservableObject {
     var publisher: VERAPublisher?
 
     private let createPublisherUseCase: CreatePublisherUseCase
+    private let audioDevicesRepository: AudioDevicesRepository
+    private var availableAudioDevices: [UIAudioDevice] = []
 
-    init(roomName: RoomName, createPublisherUseCase: CreatePublisherUseCase) {
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        roomName: RoomName,
+        createPublisherUseCase: CreatePublisherUseCase,
+        audioDevicesRepository: AudioDevicesRepository
+    ) {
         self.roomName = roomName
-        self.state = .content(WaitingRoomState.default)
         self.createPublisherUseCase = createPublisherUseCase
+        self.audioDevicesRepository = audioDevicesRepository
     }
 
     func loadUI() {
@@ -39,6 +49,34 @@ public final class WaitingRoomViewModel: ObservableObject {
             }
         } catch {
             print("Error: \(error)")
+        }
+
+        audioDevicesRepository.observeAvailableDevices.receive(
+            on: DispatchQueue.main
+        )
+        .map {
+            $0.map { audioDevice in
+                var uiDevice = UIAudioDevice(
+                    id: audioDevice.id,
+                    name: audioDevice.name,
+                    iconName: audioDevice.portDescription)
+                uiDevice.onTap = { [weak self] in
+                    self?.selectAudioDevice(audioDevice.id)
+                }
+                return uiDevice
+            }
+        }.sink(receiveValue: { [weak self] in
+            guard let self else { return }
+            self.handleAudioDevicesChanged($0)
+        })
+        .store(in: &cancellables)
+    }
+
+    func selectAudioDevice(_ id: String) {
+        do {
+            try audioDevicesRepository.routeTo(id)
+        } catch {
+            print("Error selecting audio device: \(error)")
         }
     }
 
@@ -60,7 +98,18 @@ public final class WaitingRoomViewModel: ObservableObject {
                 roomName: roomName,
                 isMicrophoneEnabled: publisher.publishAudio,
                 isCameraEnabled: publisher.publishVideo,
-                audioDevices: [],
-                cameras: []))
+                audioDevices: availableAudioDevices,
+                cameras: [
+                    .init(id: "front", name: "Front"),
+                    .init(id: "back", name: "Back"),
+                ]))
+    }
+
+    private func handleAudioDevicesChanged(_ newDevices: [UIAudioDevice]) {
+        availableAudioDevices = newDevices
+
+        if let publisher = publisher {
+            buildContentUiState(roomName: roomName, publisher: publisher)
+        }
     }
 }

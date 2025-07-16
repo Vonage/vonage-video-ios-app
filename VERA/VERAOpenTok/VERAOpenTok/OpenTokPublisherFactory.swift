@@ -64,6 +64,16 @@ public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDele
         }
     }
 
+    public var cameraPosition: CameraPosition {
+        get {
+            publisher.cameraPosition == .front ? .front : .back
+        }
+
+        set {
+            publisher.cameraPosition = newValue == .front ? .front : .back
+        }
+    }
+
     init(publisher: OTPublisher) {
         self.publisher = publisher
     }
