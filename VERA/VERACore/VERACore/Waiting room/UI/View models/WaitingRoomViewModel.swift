@@ -20,13 +20,14 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var userName: String = ""
     @Published var publisherVideoView: PublisherVideoView = PublisherVideoView(videoView: nil)
     private let roomName: RoomName
-    var publisher: VERAPublisher?
+    weak var publisher: VERAPublisher?
 
-    private let publisherRepository: VERAPublisherRepository
+    private let publisherRepository: PublisherRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
-
+    private let userRepository: UserRepository
+    
     private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
 
@@ -34,16 +35,18 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public init(
         roomName: RoomName,
-        publisherRepository: VERAPublisherRepository,
+        publisherRepository: PublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository,
-        selectAudioDeviceUseCase: SelectAudioDeviceUseCase
+        selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
+        userRepository: UserRepository
     ) {
         self.roomName = roomName
         self.publisherRepository = publisherRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
+        self.userRepository = userRepository
     }
 
     public func loadUI() {
@@ -55,8 +58,16 @@ public final class WaitingRoomViewModel: ObservableObject {
 
         observeAudioDevices()
         observeCameraDevices()
+        
+        loadUsername()
+        observeUsername()
     }
 
+    public func unloadUI() {
+        publisher = nil
+        publisherRepository.resetPublisher()
+    }
+    
     private func observeAudioDevices() {
         audioDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
@@ -89,6 +100,24 @@ public final class WaitingRoomViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
+    private func loadUsername() {
+        Task {
+            if let user = try? await userRepository.get() {
+                await MainActor.run {
+                    userName = user.name
+                }
+            }
+        }
+    }
+    
+    private func observeUsername() {
+        $userName.sink { [weak self] username in
+            Task {
+                try? await self?.userRepository.save(User(name: username))
+            }
+        }.store(in: &cancellables)
+    }
+    
     public func selectAudioDevice(_ device: AudioDevice) {
         do {
             try selectAudioDeviceUseCase.invoke(device)
@@ -98,13 +127,13 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func onMicToggle() {
-        guard var publisher else { return }
+        guard let publisher else { return }
         publisher.publishAudio.toggle()
         buildContentUiState(roomName: roomName, publisher: publisher)
     }
 
     public func onCameraToggle() {
-        guard var publisher else { return }
+        guard let publisher else { return }
         publisher.publishVideo.toggle()
         buildContentUiState(roomName: roomName, publisher: publisher)
     }

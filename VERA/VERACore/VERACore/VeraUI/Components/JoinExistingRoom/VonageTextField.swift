@@ -15,19 +15,22 @@ struct VonageTextField: View {
     private let placeholder: String
     private var text: Binding<String>
     private var state: VonageTextFieldState
-
+    private let forceLowercase: Bool
+    
     init(
         iconName: String = "",
         systemIconName: String = "",
         placeholder: String,
         text: Binding<String>,
-        state: VonageTextFieldState
+        state: VonageTextFieldState,
+        forceLowercase: Bool = false
     ) {
         self.iconName = iconName
         self.systemIconName = systemIconName
         self.placeholder = placeholder
         self.text = text
         self.state = state
+        self.forceLowercase = forceLowercase
     }
 
     var body: some View {
@@ -43,12 +46,17 @@ struct VonageTextField: View {
                     .frame(width: 20)
             }
 
-            TextField(placeholder, text: text)
-                .textFieldStyle(PlainTextFieldStyle())
-                #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    .textCase(.lowercase)
-                #endif
+            if forceLowercase {
+                TextField(placeholder, text: text)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .textCase(.lowercase)
+                    #endif
+            } else {
+                TextField(placeholder, text: text)
+                    .textFieldStyle(PlainTextFieldStyle())
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

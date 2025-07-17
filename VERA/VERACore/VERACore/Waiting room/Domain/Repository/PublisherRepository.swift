@@ -4,6 +4,7 @@
 
 import Foundation
 
-public protocol VERAPublisherRepository {
+public protocol PublisherRepository {
     func getPublisher() -> VERAPublisher
+    func resetPublisher()
 }

@@ -49,9 +49,10 @@ struct VERAApp: App {
 
     private func makeWaitingRoom(roomName: String) -> some View {
         let waitingRoomFactory = WaitingRoomFactory(
-            publisherRepository: dependencyContainer.verAPublisherRepository,
+            publisherRepository: dependencyContainer.publisherRepository,
             audioDevicesRepository: dependencyContainer.audioDevicesRepository,
-            cameraDevicesRepository: dependencyContainer.cameraDevicesRepository)
+            cameraDevicesRepository: dependencyContainer.cameraDevicesRepository,
+            userRepository: dependencyContainer.userRepository)
 
         return waitingRoomFactory.make(roomName: roomName) { roomName in
             navigationCoordinator.startMeeting(roomName)

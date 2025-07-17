@@ -105,7 +105,7 @@ struct WaitingRoomViewModelTests {
 
     func makeSUT(
         roomName: RoomName = "heart-of-gold",
-        publisherRepository: VERAPublisherRepository = makeMockVERAPublisherRepository(),
+        publisherRepository: PublisherRepository = makeMockVERAPublisherRepository(),
         audioDevicesRepository: AudioDevicesRepository = makeMockAudioDevicesRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository()
     ) -> WaitingRoomViewModel {

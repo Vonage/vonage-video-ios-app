@@ -5,7 +5,7 @@
 import Foundation
 import VERACore
 
-final class DefaultVERAPublisherRepository: VERAPublisherRepository {
+final class DefaultVERAPublisherRepository: PublisherRepository {
 
     private let publisherFactory: PublisherFactory
     private var publisher: VERACore.VERAPublisher?
@@ -20,5 +20,9 @@ final class DefaultVERAPublisherRepository: VERAPublisherRepository {
         }
         self.publisher = publisherFactory.make()
         return self.publisher!
+    }
+    
+    func resetPublisher() {
+        publisher = nil
     }
 }

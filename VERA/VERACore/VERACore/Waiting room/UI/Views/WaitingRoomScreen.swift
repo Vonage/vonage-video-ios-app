@@ -34,6 +34,9 @@ public struct WaitingRoomScreen: View {
             .onAppear {
                 viewModel.loadUI()
             }
+            .onDisappear {
+                viewModel.unloadUI()
+            }
         case let .error(error): Text(error)
         case .loading: Text("Loading")
         }

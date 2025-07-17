@@ -5,7 +5,7 @@
 import Foundation
 import VERACore
 
-final class MockVERAPublisherRepository: VERAPublisherRepository {
+final class MockVERAPublisherRepository: PublisherRepository {
 
     let publisher: MockVERAPublisher
 

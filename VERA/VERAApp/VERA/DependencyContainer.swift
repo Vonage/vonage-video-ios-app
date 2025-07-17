@@ -21,13 +21,16 @@ final class DependencyContainer {
     }()
 
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
-        let publisher = verAPublisherRepository.getPublisher()
-        let repository = OpenTokCameraDevicesRepository(publisher: publisher as! OpenTokPublisher)
+        let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
         repository.loadCameraDevices()
         return repository
     }()
 
-    lazy var verAPublisherRepository: any VERAPublisherRepository = {
+    lazy var publisherRepository: any PublisherRepository = {
         DefaultVERAPublisherRepository(publisherFactory: publisherFactory)
+    }()
+    
+    lazy var userRepository: any UserRepository = {
+        UserDefaultsUserRepository(userDefaults: .standard)
     }()
 }

@@ -6,18 +6,21 @@ import SwiftUI
 
 public class WaitingRoomFactory {
 
-    private let publisherRepository: VERAPublisherRepository
+    private let publisherRepository: PublisherRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
-
+    private let userRepository: UserRepository
+    
     public init(
-        publisherRepository: VERAPublisherRepository,
+        publisherRepository: PublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
-        cameraDevicesRepository: CameraDevicesRepository
+        cameraDevicesRepository: CameraDevicesRepository,
+        userRepository: UserRepository
     ) {
         self.publisherRepository = publisherRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
+        self.userRepository = userRepository
     }
 
     public func make(
@@ -30,7 +33,8 @@ public class WaitingRoomFactory {
                 publisherRepository: publisherRepository,
                 audioDevicesRepository: audioDevicesRepository,
                 cameraDevicesRepository: cameraDevicesRepository,
-                selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository)),
+                selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
+                userRepository: userRepository),
             onNavigateToRoom: onNavigateToRoom
         )
     }
