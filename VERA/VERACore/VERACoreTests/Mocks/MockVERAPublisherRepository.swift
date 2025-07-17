@@ -16,7 +16,7 @@ final class MockVERAPublisherRepository: PublisherRepository {
     func getPublisher() -> any VERACore.VERAPublisher {
         publisher
     }
-    
+
     func resetPublisher() {
         publisher = nil
     }

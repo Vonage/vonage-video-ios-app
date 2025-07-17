@@ -3,24 +3,24 @@
 //
 
 import Foundation
+import SwiftUI
 import Testing
 import VERA
 import VERACore
-import SwiftUI
 import XCTest
 
 final class DefaultPublisherRepositoryTests: XCTestCase {
-    
+
     func test_resetPublisher_doesNotLeakPublishers() {
         let publisher = MockVERAPublisher()
         let publisherFactory = MockPublisherFactory(mockPublisher: publisher)
         let sut = makeSUT(publisherFactory: publisherFactory)
-        
+
         _ = sut.getPublisher()
-        
+
         sut.resetPublisher()
     }
-    
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -28,14 +28,14 @@ final class DefaultPublisherRepositoryTests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> DefaultPublisherRepository {
-        
+
         let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
         let publisher = repository.getPublisher()
-        
+
         trackForMemoryLeaks(publisher, file: file, line: line)
         trackForMemoryLeaks(publisherFactory, file: file, line: line)
         trackForMemoryLeaks(repository, file: file, line: line)
-        
+
         return repository
     }
 }
