@@ -8,9 +8,13 @@ import VERACore
 import VERAOpenTok
 
 final class DependencyContainer {
-    lazy var publisherFactory: PublisherFactory = {
-        OpenTokPublisherFactory()
-    }()
+    let baseURL = URL(string: "https://meet.vonagenetworks.net/")!
+
+    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+
+    lazy var jsonDecoder = JSONDecoder()
+
+    lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
 
     lazy var audioDevicesRepository: any AudioDevicesRepository = {
         let repository = AVFoundationAudioDevicesRepository(
@@ -32,5 +36,13 @@ final class DependencyContainer {
 
     lazy var userRepository: any UserRepository = {
         UserDefaultsUserRepository(userDefaults: .standard)
+    }()
+
+    lazy var roomCredentialsDataSource: OpenTokRoomCredentialsDataSource = {
+        OpenTokRoomCredentialsDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient,
+            jsonDecoder: jsonDecoder
+        )
     }()
 }

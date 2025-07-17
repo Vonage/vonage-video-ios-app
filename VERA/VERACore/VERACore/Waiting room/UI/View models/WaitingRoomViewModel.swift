@@ -64,7 +64,6 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func unloadUI() {
-        publisher = nil
         publisherRepository.resetPublisher()
     }
 
