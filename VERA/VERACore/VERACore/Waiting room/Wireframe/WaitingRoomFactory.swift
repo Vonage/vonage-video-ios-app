@@ -10,7 +10,7 @@ public class WaitingRoomFactory {
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let userRepository: UserRepository
-    
+
     public init(
         publisherRepository: PublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,

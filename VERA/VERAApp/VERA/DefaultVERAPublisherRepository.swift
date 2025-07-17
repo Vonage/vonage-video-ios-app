@@ -21,7 +21,7 @@ final class DefaultVERAPublisherRepository: PublisherRepository {
         self.publisher = publisherFactory.make()
         return self.publisher!
     }
-    
+
     func resetPublisher() {
         publisher = nil
     }

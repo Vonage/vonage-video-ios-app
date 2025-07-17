@@ -16,7 +16,7 @@ struct VonageTextField: View {
     private var text: Binding<String>
     private var state: VonageTextFieldState
     private let forceLowercase: Bool
-    
+
     init(
         iconName: String = "",
         systemIconName: String = "",

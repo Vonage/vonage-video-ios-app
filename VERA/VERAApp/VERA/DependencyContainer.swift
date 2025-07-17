@@ -29,7 +29,7 @@ final class DependencyContainer {
     lazy var publisherRepository: any PublisherRepository = {
         DefaultVERAPublisherRepository(publisherFactory: publisherFactory)
     }()
-    
+
     lazy var userRepository: any UserRepository = {
         UserDefaultsUserRepository(userDefaults: .standard)
     }()

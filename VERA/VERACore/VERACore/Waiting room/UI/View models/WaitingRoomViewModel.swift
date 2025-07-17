@@ -27,7 +27,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
     private let userRepository: UserRepository
-    
+
     private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
 
@@ -58,7 +58,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
         observeAudioDevices()
         observeCameraDevices()
-        
+
         loadUsername()
         observeUsername()
     }
@@ -67,7 +67,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         publisher = nil
         publisherRepository.resetPublisher()
     }
-    
+
     private func observeAudioDevices() {
         audioDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
@@ -109,7 +109,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func observeUsername() {
         $userName.sink { [weak self] username in
             Task {
@@ -117,7 +117,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             }
         }.store(in: &cancellables)
     }
-    
+
     public func selectAudioDevice(_ device: AudioDevice) {
         do {
             try selectAudioDeviceUseCase.invoke(device)
