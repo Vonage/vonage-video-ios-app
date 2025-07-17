@@ -107,13 +107,15 @@ struct WaitingRoomViewModelTests {
         roomName: RoomName = "heart-of-gold",
         publisherRepository: PublisherRepository = makeMockVERAPublisherRepository(),
         audioDevicesRepository: AudioDevicesRepository = makeMockAudioDevicesRepository(),
-        cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository()
+        cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
+        userRepository: UserRepository = makeMockUserRepository()
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
             publisherRepository: publisherRepository,
             audioDevicesRepository: audioDevicesRepository,
             cameraDevicesRepository: cameraDevicesRepository,
-            selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository))
+            selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
+            userRepository: userRepository)
     }
 }

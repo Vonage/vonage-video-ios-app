@@ -7,7 +7,7 @@ import VERACore
 
 final class MockVERAPublisherRepository: PublisherRepository {
 
-    let publisher: MockVERAPublisher
+    var publisher: MockVERAPublisher!
 
     init(publisher: MockVERAPublisher) {
         self.publisher = publisher
@@ -15,6 +15,10 @@ final class MockVERAPublisherRepository: PublisherRepository {
 
     func getPublisher() -> any VERACore.VERAPublisher {
         publisher
+    }
+    
+    func resetPublisher() {
+        publisher = nil
     }
 }
 

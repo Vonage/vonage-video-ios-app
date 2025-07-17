@@ -27,7 +27,7 @@ final class DependencyContainer {
     }()
 
     lazy var publisherRepository: any PublisherRepository = {
-        DefaultVERAPublisherRepository(publisherFactory: publisherFactory)
+        DefaultPublisherRepository(publisherFactory: publisherFactory)
     }()
 
     lazy var userRepository: any UserRepository = {
