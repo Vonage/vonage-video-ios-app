@@ -13,7 +13,7 @@ final class MockPublisherFactory: PublisherFactory {
         self.mockPublisher = mockPublisher
     }
 
-    func make() -> any VERACore.VERAPublisher {
+    func make(_ settings: PublisherSettings) async -> any VERAPublisher {
         mockPublisher
     }
 }
