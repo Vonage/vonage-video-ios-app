@@ -11,6 +11,7 @@ import VERAOpenTok
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
     let dependencyContainer = DependencyContainer()
+
     @State private var previousPath = NavigationPath()
 
     var body: some Scene {
@@ -20,7 +21,8 @@ struct VERAApp: App {
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case .landing: EmptyView()
-                        case let .waitingRoom(roomName): makeWaitingRoom(roomName: roomName)
+                        case let .waitingRoom(roomName):
+                            makeWaitingRoom(roomName: roomName)
                         case .meetingRoom: makeMeetingRoom()
                         case .goodbye: EmptyView()
                         }
@@ -56,13 +58,9 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        let waitingRoomFactory = WaitingRoomFactory(
-            publisherRepository: dependencyContainer.publisherRepository,
-            audioDevicesRepository: dependencyContainer.audioDevicesRepository,
-            cameraDevicesRepository: dependencyContainer.cameraDevicesRepository,
-            userRepository: dependencyContainer.userRepository)
-
-        return waitingRoomFactory.make(roomName: roomName) { roomName in
+        dependencyContainer.waitingRoomFactory.make(
+            roomName: roomName
+        ) { roomName in
             navigationCoordinator.startMeeting(roomName)
         }
     }

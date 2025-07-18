@@ -45,4 +45,10 @@ final class DependencyContainer {
             jsonDecoder: jsonDecoder
         )
     }()
+
+    lazy var waitingRoomFactory = WaitingRoomFactory(
+        publisherRepository: publisherRepository,
+        audioDevicesRepository: audioDevicesRepository,
+        cameraDevicesRepository: cameraDevicesRepository,
+        userRepository: userRepository)
 }

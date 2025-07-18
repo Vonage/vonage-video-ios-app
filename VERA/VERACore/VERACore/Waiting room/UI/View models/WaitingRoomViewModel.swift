@@ -17,7 +17,6 @@ public enum WaitingRoomViewState: Equatable {
 
 public final class WaitingRoomViewModel: ObservableObject {
 
-
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
     @Published var publisherVideoView: PublisherVideoView = PublisherVideoView(videoView: nil)
@@ -162,8 +161,8 @@ public final class WaitingRoomViewModel: ObservableObject {
             id: device.id,
             name: device.name,
             iconName: "person.fill.viewfinder")
-        device.onTap = {
-            Task { [weak self] in
+        device.onTap = { [weak self] in
+            Task {
                 await self?.cameraDevicesRepository.routeTo(device.id)
             }
         }
@@ -176,7 +175,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "iphone.rear.camera")
         device.onTap = { [weak self] in
-            Task { [weak self] in
+            Task {
                 await self?.cameraDevicesRepository.routeTo(device.id)
             }
         }
@@ -248,5 +247,14 @@ public final class WaitingRoomViewModel: ObservableObject {
 
         publisherVideoView = PublisherVideoView(videoView: publisher.view)
         buildContentUiState(roomName: roomName, publisher: publisher)
+    }
+
+    func startVideoPreviewIfNeeded() {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        if status == .authorized {
+            Task { [weak self] in
+                await self?.startVideoPreview()
+            }
+        }
     }
 }

@@ -27,17 +27,20 @@ public class WaitingRoomFactory {
         roomName: RoomName,
         onNavigateToRoom: @escaping (RoomName) -> Void
     ) -> some View {
-        WaitingRoomScreen(
-            viewModel: .init(
-                roomName: roomName,
-                publisherRepository: publisherRepository,
-                audioDevicesRepository: audioDevicesRepository,
-                cameraDevicesRepository: cameraDevicesRepository,
-                selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
-                joinRoomUseCase: .init(
-                    userRepository: userRepository,
-                    publisherRepository: publisherRepository),
-                userRepository: userRepository),
+        let viewModel = WaitingRoomViewModel(
+            roomName: roomName,
+            publisherRepository: publisherRepository,
+            audioDevicesRepository: audioDevicesRepository,
+            cameraDevicesRepository: cameraDevicesRepository,
+            selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
+            joinRoomUseCase: .init(
+                userRepository: userRepository,
+                publisherRepository: publisherRepository),
+            userRepository: userRepository)
+        viewModel.loadUI()
+        viewModel.startVideoPreviewIfNeeded()
+        return WaitingRoomScreen(
+            viewModel: viewModel,
             onNavigateToRoom: onNavigateToRoom
         )
     }

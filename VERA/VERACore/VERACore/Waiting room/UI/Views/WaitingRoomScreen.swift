@@ -36,9 +36,6 @@ public struct WaitingRoomScreen: View {
             } onCameraToggle: {
                 viewModel.onCameraToggle()
             }
-            .onAppear {
-                viewModel.loadUI()
-            }
             .task {
                 await viewModel.checkPermissions()
             }
