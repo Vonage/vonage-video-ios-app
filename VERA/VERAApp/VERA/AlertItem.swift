@@ -8,7 +8,7 @@ struct AlertItem: Identifiable {
     let id = UUID()
     let title: String
     let message: String
-    
+
     static func roomCredentialsError(_ errorMessage: String) -> AlertItem {
         AlertItem(
             title: "Connection Error",
