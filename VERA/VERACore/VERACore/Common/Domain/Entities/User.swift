@@ -10,4 +10,8 @@ public struct User {
     public init(name: String) {
         self.name = name
     }
+    
+    func updateName(_ newName: String) -> User {
+        return User(name: newName)
+    }
 }

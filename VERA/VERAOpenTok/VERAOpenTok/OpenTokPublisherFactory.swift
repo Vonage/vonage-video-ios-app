@@ -13,13 +13,13 @@ public final class OpenTokPublisherFactory: PublisherFactory {
     public init() {
     }
 
-    public func make() -> VERAPublisher {
-        let settings = OTPublisherSettings()
-        settings.name = "iOS"
-        settings.audioTrack = true
-        settings.videoTrack = true
+    public func make(_ settings: PublisherSettings) -> any VERAPublisher {
+        let publisherSettings = OTPublisherSettings()
+        publisherSettings.name = settings.username
+        publisherSettings.audioTrack = settings.publishAudio
+        publisherSettings.videoTrack = settings.publishVideo
 
-        let otPublisher = OTPublisher(delegate: nil, settings: settings)!
+        let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings)!
         let publisher = OpenTokPublisher(publisher: otPublisher)
         otPublisher.delegate = publisher
         return publisher

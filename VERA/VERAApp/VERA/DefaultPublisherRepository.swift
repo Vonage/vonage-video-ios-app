@@ -18,11 +18,15 @@ public final class DefaultPublisherRepository: PublisherRepository {
         if let publisher = publisher {
             return publisher
         }
-        self.publisher = publisherFactory.make()
+        self.publisher = publisherFactory.make(.init())
         return self.publisher!
     }
 
     public func resetPublisher() {
         publisher = nil
+    }
+    
+    public func recreatePublisher(_ settings: PublisherSettings) {
+        publisher = publisherFactory.make(settings)
     }
 }

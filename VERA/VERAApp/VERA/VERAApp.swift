@@ -11,6 +11,7 @@ import VERAOpenTok
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
     let dependencyContainer = DependencyContainer()
+    @State private var previousPath = NavigationPath()
 
     var body: some Scene {
         WindowGroup {
@@ -33,6 +34,13 @@ struct VERAApp: App {
                         }
                         .environmentObject(navigationCoordinator)
                 }
+            }
+            .onChange(of: navigationCoordinator.path) { newPath in
+                if newPath.count < previousPath.count {
+                    print("Publisher is reset when returning to the landing page")
+                    dependencyContainer.publisherRepository.resetPublisher()
+                }
+                previousPath = newPath
             }
             .environmentObject(navigationCoordinator)
         }

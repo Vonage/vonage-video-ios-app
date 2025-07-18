@@ -25,7 +25,12 @@ public struct WaitingRoomScreen: View {
                 userName: $viewModel.userName,
                 publisherVideoView: viewModel.publisherVideoView
             ) {
-                onNavigateToRoom(state.roomName)
+                Task {
+                    await viewModel.joinRoom()
+                    await MainActor.run {
+                        onNavigateToRoom(state.roomName)
+                    }
+                }
             } onMicrophoneToggle: {
                 viewModel.onMicToggle()
             } onCameraToggle: {
@@ -34,8 +39,8 @@ public struct WaitingRoomScreen: View {
             .onAppear {
                 viewModel.loadUI()
             }
-            .onDisappear {
-                viewModel.unloadUI()
+            .task {
+                await viewModel.checkPermissions()
             }
         case let .error(error): Text(error)
         case .loading: Text("Loading")

@@ -14,7 +14,7 @@ public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDele
         let rendererView = OpenTokRendererView(publisher: publisher)
         return AnyView(rendererView)
     }
-
+    
     public var publishAudio: Bool {
         get {
             publisher.publishAudio

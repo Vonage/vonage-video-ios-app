@@ -4,8 +4,10 @@
 
 import Combine
 import Foundation
+import AVFoundation
 
 public typealias WaitingRoomError = String
+public typealias PermissionGranted = Bool
 
 public enum WaitingRoomViewState: Equatable {
     case loading
@@ -26,6 +28,8 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
+    private let joinRoomUseCase: JoinRoomUseCase
+    
     private let userRepository: UserRepository
 
     private var availableAudioDevices: [UIAudioDevice] = []
@@ -39,6 +43,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
+        joinRoomUseCase: JoinRoomUseCase,
         userRepository: UserRepository
     ) {
         self.roomName = roomName
@@ -46,25 +51,15 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
+        self.joinRoomUseCase = joinRoomUseCase
         self.userRepository = userRepository
     }
 
     public func loadUI() {
-        let publisher = publisherRepository.getPublisher()
-        self.publisher = publisher
-
-        publisherVideoView = PublisherVideoView(videoView: publisher.view)
-        buildContentUiState(roomName: roomName, publisher: publisher)
-
         observeAudioDevices()
         observeCameraDevices()
 
         loadUsername()
-        observeUsername()
-    }
-
-    public func unloadUI() {
-        publisherRepository.resetPublisher()
     }
 
     private func observeAudioDevices() {
@@ -107,14 +102,6 @@ public final class WaitingRoomViewModel: ObservableObject {
                 }
             }
         }
-    }
-
-    private func observeUsername() {
-        $userName.sink { [weak self] username in
-            Task {
-                try? await self?.userRepository.save(User(name: username))
-            }
-        }.store(in: &cancellables)
     }
 
     public func selectAudioDevice(_ device: AudioDevice) {
@@ -195,5 +182,67 @@ public final class WaitingRoomViewModel: ObservableObject {
     private func handleDevicesChanged() {
         guard let publisher = publisher else { return }
         buildContentUiState(roomName: roomName, publisher: publisher)
+    }
+    
+    public func joinRoom() async {
+        do {
+            let request = JoinRoomRequest(roomName: roomName, userName: userName)
+            try await joinRoomUseCase.invoke(request)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    // MARK: Permission requests
+    
+    public func checkPermissions() async {
+        await requestMicrophonePermission()
+
+        let cameraGranted = await requestCameraPermission()
+        guard cameraGranted else { return }
+
+        await startVideoPreview()
+    }
+
+    private func requestMicrophonePermission() async {
+        let status = AVCaptureDevice.authorizationStatus(for: .audio)
+        switch status {
+        case .authorized: break
+        case .notDetermined:
+            await withCheckedContinuation { continuation in
+                AVCaptureDevice.requestAccess(for: .audio) { granted in
+                    continuation.resume()
+                }
+            }
+        case .restricted, .denied: break
+        @unknown default: break
+        }
+    }
+
+    private func requestCameraPermission() async -> Bool {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .authorized: return true
+        case .notDetermined:
+            return await withCheckedContinuation { continuation in
+                AVCaptureDevice.requestAccess(for: .video) { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
+        case .restricted, .denied:
+            return false
+        @unknown default:
+            return false
+        }
+    }
+
+    private func startVideoPreview() async {
+        await MainActor.run {
+            let publisher = publisherRepository.getPublisher()
+            self.publisher = publisher
+
+            publisherVideoView = PublisherVideoView(videoView: publisher.view)
+            buildContentUiState(roomName: roomName, publisher: publisher)
+        }
     }
 }

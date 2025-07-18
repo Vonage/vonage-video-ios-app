@@ -4,10 +4,6 @@
 
 import SwiftUI
 
-public final class JoinRoomUseCase {
-
-}
-
 public struct MeetingRoomView: View {
 
     public init() {}
