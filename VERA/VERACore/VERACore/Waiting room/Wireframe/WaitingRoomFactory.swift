@@ -28,14 +28,16 @@ public class WaitingRoomFactory {
         onNavigateToRoom: @escaping (RoomName) -> Void
     ) -> some View {
         WaitingRoomScreen(
-            viewModel: .init(roomName: roomName,
-                             publisherRepository: publisherRepository,
-                             audioDevicesRepository: audioDevicesRepository,
-                             cameraDevicesRepository: cameraDevicesRepository,
-                             selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
-                             joinRoomUseCase: .init(userRepository: userRepository,
-                                                    publisherRepository: publisherRepository),
-                             userRepository: userRepository),
+            viewModel: .init(
+                roomName: roomName,
+                publisherRepository: publisherRepository,
+                audioDevicesRepository: audioDevicesRepository,
+                cameraDevicesRepository: cameraDevicesRepository,
+                selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
+                joinRoomUseCase: .init(
+                    userRepository: userRepository,
+                    publisherRepository: publisherRepository),
+                userRepository: userRepository),
             onNavigateToRoom: onNavigateToRoom
         )
     }

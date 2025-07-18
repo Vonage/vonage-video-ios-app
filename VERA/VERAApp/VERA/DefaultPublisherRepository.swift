@@ -25,7 +25,7 @@ public final class DefaultPublisherRepository: PublisherRepository {
     public func resetPublisher() {
         publisher = nil
     }
-    
+
     public func recreatePublisher(_ settings: PublisherSettings) {
         publisher = publisherFactory.make(settings)
     }

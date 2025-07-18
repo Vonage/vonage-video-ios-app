@@ -8,10 +8,12 @@ public struct PublisherSettings {
     public let username: String
     public let publishAudio: Bool
     public let publishVideo: Bool
-    
-    public init(username: String = "",
-                publishAudio: Bool = true,
-                publishVideo: Bool = true) {
+
+    public init(
+        username: String = "",
+        publishAudio: Bool = true,
+        publishVideo: Bool = true
+    ) {
         self.username = username
         self.publishAudio = publishAudio
         self.publishVideo = publishVideo

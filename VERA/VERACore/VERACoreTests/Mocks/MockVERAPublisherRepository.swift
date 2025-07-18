@@ -20,7 +20,7 @@ final class MockVERAPublisherRepository: PublisherRepository {
     func resetPublisher() {
         publisher = nil
     }
-    
+
     func recreatePublisher(_ settings: PublisherSettings) {
         // Do nothing
     }

@@ -2,9 +2,9 @@
 //  Created by Vonage on 15/7/25.
 //
 
+import AVFoundation
 import Combine
 import Foundation
-import AVFoundation
 
 public typealias WaitingRoomError = String
 public typealias PermissionGranted = Bool
@@ -29,7 +29,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
     private let joinRoomUseCase: JoinRoomUseCase
-    
+
     private let userRepository: UserRepository
 
     private var availableAudioDevices: [UIAudioDevice] = []
@@ -183,7 +183,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         guard let publisher = publisher else { return }
         buildContentUiState(roomName: roomName, publisher: publisher)
     }
-    
+
     public func joinRoom() async {
         do {
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
@@ -192,9 +192,9 @@ public final class WaitingRoomViewModel: ObservableObject {
             print(error.localizedDescription)
         }
     }
-    
+
     // MARK: Permission requests
-    
+
     public func checkPermissions() async {
         await requestMicrophonePermission()
 
