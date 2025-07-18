@@ -13,6 +13,7 @@ struct VERAApp: App {
     let dependencyContainer = DependencyContainer()
 
     @State private var previousPath = NavigationPath()
+    @State private var alertItem: AlertItem?
 
     var body: some Scene {
         WindowGroup {
@@ -45,6 +46,13 @@ struct VERAApp: App {
                 previousPath = newPath
             }
             .environmentObject(navigationCoordinator)
+            .alert(item: $alertItem) { alertItem in
+                Alert(
+                    title: Text(alertItem.title),
+                    message: Text(alertItem.message),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
@@ -68,7 +76,9 @@ struct VERAApp: App {
                     let credentials = try await roomCredentialsDataSource.getRoomCredentials(request)
                     navigationCoordinator.startMeeting(roomName)
                 } catch {
-
+                    await MainActor.run {
+                        alertItem = AlertItem.roomCredentialsError(error.localizedDescription)
+                    }
                 }
             }
         }
