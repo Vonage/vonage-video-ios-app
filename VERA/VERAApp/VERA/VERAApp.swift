@@ -68,7 +68,7 @@ struct VERAApp: App {
                     let credentials = try await roomCredentialsDataSource.getRoomCredentials(request)
                     navigationCoordinator.startMeeting(roomName)
                 } catch {
-                    
+
                 }
             }
         }
