@@ -14,6 +14,7 @@ struct VERAApp: App {
 
     @State private var previousPath = NavigationPath()
     @State private var alertItem: AlertItem?
+    @State private var isLoading = false
 
     var body: some Scene {
         WindowGroup {
@@ -53,6 +54,9 @@ struct VERAApp: App {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .fullScreenCover(isPresented: $isLoading) {
+                LoaderModalView()
+            }
         }
     }
 
@@ -70,6 +74,7 @@ struct VERAApp: App {
             roomName: roomName
         ) { roomName in
             Task {
+                isLoading = true
                 do {
                     let roomCredentialsDataSource = dependencyContainer.roomCredentialsDataSource
                     let request = RoomCredentialsRequest(roomName: roomName)
@@ -80,6 +85,7 @@ struct VERAApp: App {
                         alertItem = AlertItem.roomCredentialsError(error.localizedDescription)
                     }
                 }
+                isLoading = false
             }
         }
     }
