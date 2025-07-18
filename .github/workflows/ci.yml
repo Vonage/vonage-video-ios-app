@@ -296,3 +296,38 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.verbose=false
+          
+  upload-testflight:
+    name: Upload to TestFlight
+    runs-on: macos-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build .ipa for App Store Connect
+        run: |
+          xcodebuild -workspace VERA/VERA.xcworkspace \
+            -scheme VERA \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $PWD/build/VERA.xcarchive \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath $PWD/build/VERA.xcarchive \
+            -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
+            -exportPath $PWD/build
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: build/VERA.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
