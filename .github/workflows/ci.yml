@@ -317,12 +317,14 @@ jobs:
             -sdk iphoneos \
             -configuration Release \
             -archivePath $PWD/build/VERA.xcarchive \
-            archive
+            archive \
+            -allowProvisioningUpdates
 
           xcodebuild -exportArchive \
             -archivePath $PWD/build/VERA.xcarchive \
             -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
-            -exportPath $PWD/build
+            -exportPath $PWD/build \
+            -allowProvisioningUpdates
 
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v1
