@@ -59,6 +59,11 @@ public final class WaitingRoomViewModel: ObservableObject {
         observeCameraDevices()
 
         loadUsername()
+
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: false,
+            isCameraEnabled: false)
     }
 
     private func observeAudioDevices() {
@@ -86,8 +91,8 @@ public final class WaitingRoomViewModel: ObservableObject {
             return cameraDevices.map {
                 self.makeUICameraDevice(device: $0)
             }
-        }.sink(receiveValue: { [weak self] cameraDevices in
-            self?.availableCameraDevices = cameraDevices
+        }.sink(receiveValue: { [weak self] in
+            self?.availableCameraDevices = $0
             self?.handleDevicesChanged()
         })
         .store(in: &cancellables)
@@ -114,21 +119,27 @@ public final class WaitingRoomViewModel: ObservableObject {
     public func onMicToggle() {
         guard let publisher else { return }
         publisher.publishAudio.toggle()
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
     }
 
     public func onCameraToggle() {
         guard let publisher else { return }
         publisher.publishVideo.toggle()
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
     }
 
-    private func buildContentUiState(roomName: String, publisher: VERAPublisher) {
+    private func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
         state = .content(
             .init(
                 roomName: roomName,
-                isMicrophoneEnabled: publisher.publishAudio,
-                isCameraEnabled: publisher.publishVideo,
+                isMicrophoneEnabled: isMicrophoneEnabled,  // publisher.publishAudio
+                isCameraEnabled: isCameraEnabled,  // publisher.publishVideo
                 audioDevices: availableAudioDevices,
                 cameras: availableCameraDevices))
     }
@@ -183,8 +194,13 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     private func handleDevicesChanged() {
-        guard let publisher = publisher else { return }
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        let publishAudio = publisher?.publishAudio ?? false
+        let publishVideo = publisher?.publishVideo ?? false
+
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publishAudio,
+            isCameraEnabled: publishVideo)
     }
 
     public func joinRoom() async {
@@ -241,12 +257,15 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     @MainActor
-    private func startVideoPreview() async {
+    public func startVideoPreview() async {
         let publisher = await publisherRepository.getPublisher()
         self.publisher = publisher
 
         publisherVideoView = PublisherVideoView(videoView: publisher.view)
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
     }
 
     func startVideoPreviewIfNeeded() {
