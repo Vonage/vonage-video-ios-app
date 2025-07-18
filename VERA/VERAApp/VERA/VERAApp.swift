@@ -61,7 +61,16 @@ struct VERAApp: App {
         dependencyContainer.waitingRoomFactory.make(
             roomName: roomName
         ) { roomName in
-            navigationCoordinator.startMeeting(roomName)
+            Task {
+                do {
+                    let roomCredentialsDataSource = dependencyContainer.roomCredentialsDataSource
+                    let request = RoomCredentialsRequest(roomName: roomName)
+                    let credentials = try await roomCredentialsDataSource.getRoomCredentials(request)
+                    navigationCoordinator.startMeeting(roomName)
+                } catch {
+                    
+                }
+            }
         }
     }
 
