@@ -13,7 +13,8 @@ public final class OpenTokPublisherFactory: PublisherFactory {
     public init() {
     }
 
-    public func make(_ settings: PublisherSettings) -> any VERAPublisher {
+    @MainActor
+    public func make(_ settings: PublisherSettings) async -> any VERAPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
         publisherSettings.audioTrack = settings.publishAudio

@@ -5,7 +5,7 @@
 import Foundation
 
 public protocol PublisherRepository {
-    func getPublisher() -> VERAPublisher
+    func getPublisher() async -> VERAPublisher
     func resetPublisher()
-    func recreatePublisher(_ settings: PublisherSettings)
+    func recreatePublisher(_ settings: PublisherSettings) async
 }

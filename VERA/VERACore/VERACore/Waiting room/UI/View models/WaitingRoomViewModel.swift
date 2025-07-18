@@ -162,8 +162,10 @@ public final class WaitingRoomViewModel: ObservableObject {
             id: device.id,
             name: device.name,
             iconName: "person.fill.viewfinder")
-        device.onTap = { [weak self] in
-            self?.cameraDevicesRepository.routeTo(device.id)
+        device.onTap = {
+            Task { [weak self] in
+                await self?.cameraDevicesRepository.routeTo(device.id)
+            }
         }
         return device
     }
@@ -174,7 +176,9 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "iphone.rear.camera")
         device.onTap = { [weak self] in
-            self?.cameraDevicesRepository.routeTo(device.id)
+            Task { [weak self] in
+                await self?.cameraDevicesRepository.routeTo(device.id)
+            }
         }
         return device
     }
@@ -195,6 +199,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     // MARK: Permission requests
 
+    @MainActor
     public func checkPermissions() async {
         await requestMicrophonePermission()
 
@@ -236,13 +241,12 @@ public final class WaitingRoomViewModel: ObservableObject {
         }
     }
 
+    @MainActor
     private func startVideoPreview() async {
-        await MainActor.run {
-            let publisher = publisherRepository.getPublisher()
-            self.publisher = publisher
+        let publisher = await publisherRepository.getPublisher()
+        self.publisher = publisher
 
-            publisherVideoView = PublisherVideoView(videoView: publisher.view)
-            buildContentUiState(roomName: roomName, publisher: publisher)
-        }
+        publisherVideoView = PublisherVideoView(videoView: publisher.view)
+        buildContentUiState(roomName: roomName, publisher: publisher)
     }
 }

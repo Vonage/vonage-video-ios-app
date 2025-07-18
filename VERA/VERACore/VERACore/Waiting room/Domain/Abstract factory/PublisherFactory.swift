@@ -21,5 +21,5 @@ public struct PublisherSettings {
 }
 
 public protocol PublisherFactory {
-    func make(_ settings: PublisherSettings) -> VERAPublisher
+    func make(_ settings: PublisherSettings) async -> VERAPublisher
 }

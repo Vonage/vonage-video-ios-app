@@ -29,7 +29,7 @@ public final class JoinRoomUseCase {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
 
-        let currentPublisher = publisherRepository.getPublisher()
+        let currentPublisher = await publisherRepository.getPublisher()
 
         let settings = PublisherSettings(
             username: request.userName,
@@ -37,6 +37,6 @@ public final class JoinRoomUseCase {
             publishVideo: currentPublisher.publishVideo
         )
 
-        publisherRepository.recreatePublisher(settings)
+        await publisherRepository.recreatePublisher(settings)
     }
 }
