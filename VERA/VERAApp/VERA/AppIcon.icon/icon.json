@@ -7,41 +7,7 @@
           "blend-mode" : "normal",
           "fill-specializations" : [
             {
-              "value" : {
-                "solid" : "extended-gray:0.00000,1.00000"
-              }
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
-              }
-            },
-            {
-              "appearance" : "tinted",
-              "value" : {
-                "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
-              }
-            }
-          ],
-          "glass" : false,
-          "image-name" : "VonageLogo_Symbol_White.png",
-          "name" : "VonageLogo_Symbol_White",
-          "position" : {
-            "scale" : 0.56,
-            "translation-in-points" : [
-              17.1,
-              52.5
-            ]
-          }
-        },
-        {
-          "blend-mode" : "normal",
-          "fill-specializations" : [
-            {
-              "value" : {
-                "solid" : "srgb:0.00000,0.00000,0.00000,1.00000"
-              }
+              "value" : "automatic"
             },
             {
               "appearance" : "dark",
@@ -57,7 +23,7 @@
             }
           ],
           "glass" : false,
-          "hidden" : true,
+          "hidden" : false,
           "image-name" : "VonageLogo_Symbol_Black.svg",
           "name" : "VonageLogo_Symbol_Black",
           "opacity-specializations" : [
