@@ -25,6 +25,9 @@ jobs:
         chmod +x scripts/format.sh
         ./scripts/format.sh --check
 
+    - name: Pull LFS files
+      run: git lfs pull
+
   build:
     runs-on: macos-latest
     needs: format-check
