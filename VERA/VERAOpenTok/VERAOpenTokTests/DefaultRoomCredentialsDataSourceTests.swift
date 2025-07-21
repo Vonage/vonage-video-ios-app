@@ -9,37 +9,29 @@ import VERAOpenTok
 @Suite("Room credentials data source tests")
 struct DefaultRoomCredentialsDataSourceTests {
 
-    @Test func getRoomCredentialsReturnsCredentials() async throws {
-        let sessionId = "a sessionId"
-        let token = "a token"
-        let apiKey = "an API key"
-        let captionsId = "a captions ID"
-
-        let httpClient = MockHTTPClient()
-
-        let responseData = makeJSONResponse(
-            sessionId: sessionId,
-            token: token,
-            apiKey: apiKey,
-            captionsId: captionsId)
-
-        httpClient.data = responseData
-
-        let sut = makeSUT(httpClient: httpClient)
-
-        let credentials = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
-
-        #expect(credentials.sessionId == sessionId)
-        #expect(credentials.token == token)
-        #expect(credentials.apiKey == apiKey)
-        #expect(credentials.captionsId == captionsId)
-    }
-
-    @Test func getRoomCredentialsWithDifferentDataReturnsCredentials() async throws {
-        let sessionId = "another sessionId"
-        let token = "another token"
-        let apiKey = "another API key"
-        let captionsId = "another captions ID"
+    @Test("Feeding valid data into the HTTP client returns the correct credentials",
+          arguments: [
+            MockRoomCredentials(
+                sessionId: "a sessionId",
+                token: "a token",
+                apiKey: "an API key",
+                captionsId: "a captions ID"),
+            MockRoomCredentials(
+                sessionId: "another sessionId",
+                token: "another token",
+                apiKey: "another API key",
+                captionsId: "another captions ID"),
+            MockRoomCredentials(
+                sessionId: "another sessionId",
+                token: "another token",
+                apiKey: "another API key",
+                captionsId: nil)
+          ])
+    func getRoomCredentialsReturnsCredentials(testCase: MockRoomCredentials) async throws {
+        let sessionId = testCase.sessionId
+        let token = testCase.token
+        let apiKey = testCase.apiKey
+        let captionsId = testCase.captionsId
 
         let httpClient = MockHTTPClient()
 
