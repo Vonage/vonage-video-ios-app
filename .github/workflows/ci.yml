@@ -304,7 +304,11 @@ jobs:
     #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+          xcode-version: latest-stable
     - uses: Apple-Actions/import-codesign-certs@v5.0.2
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
@@ -322,6 +326,8 @@ jobs:
         token: ${{ secrets.github_token }}
     - name: Print new build number
       run: echo "Build number is $BUILD_NUMBER"
+    - name: Clean DerivedData
+      run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
     - run: ./scripts/Build.sh
     - uses: apple-actions/upload-testflight-build@v3
       with:
