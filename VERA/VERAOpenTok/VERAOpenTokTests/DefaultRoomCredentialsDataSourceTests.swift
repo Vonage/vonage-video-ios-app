@@ -63,11 +63,32 @@ struct DefaultRoomCredentialsDataSourceTests {
         do {
             let _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
             #expect(Bool(false))
-        } catch {
+        } catch DecodingError.keyNotFound {
             // Expect to fail
+            print("error")
+        } catch {
+            #expect(Bool(false))
         }
     }
 
+    @Test func givenEmptyFileErrorIsThrown() async throws {
+        let httpClient = MockHTTPClient()
+
+        httpClient.data = "".data(using: .utf8)
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        do {
+            let _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+            #expect(Bool(false))
+        } catch DecodingError.dataCorrupted {
+            // Expect to fail
+            print("error")
+        } catch {
+            #expect(Bool(false))
+        }
+    }
+    
     @Test func givenARoomNameItShouldBeEncodedInHTTPRequest() async throws {
         let httpClient = MockHTTPClient()
 
