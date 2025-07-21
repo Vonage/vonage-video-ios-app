@@ -317,7 +317,7 @@ jobs:
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
     - name: "#️⃣ Generate Build Number"
       id: buildnumber
-      uses: onyxmueller/build-tag-number@v1
+      uses: einaregilsson/build-number@v2
       with:
         token: ${{ secrets.github_token }}
     - name: Print new build number
