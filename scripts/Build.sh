@@ -35,6 +35,7 @@ xcrun xcodebuild \
     -disableAutomaticPackageResolution \
     -derivedDataPath "${DERIVED_DATA_PATH}" \
     -archivePath "${ARCHIVE_PATH}" \
+    -allowProvisioningUpdates \
     -resultBundlePath "${RESULT_BUNDLE_PATH}" \
     CURRENT_PROJECT_VERSION="${CURRENT_PROJECT_VERSION}" \
     archive
@@ -43,6 +44,7 @@ xcrun xcodebuild \
     -exportArchive \
     -exportOptionsPlist "${EXPORT_OPTIONS_FILE}" \
     -archivePath "${ARCHIVE_PATH}" \
+    -allowProvisioningUpdates \
     -exportPath "${ARTIFACT_PATH}/${SCHEME}.ipa"
 
 # Zip up the Xcode Archive into Artifacts folder.
