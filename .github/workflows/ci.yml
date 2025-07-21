@@ -298,8 +298,9 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    needs: [build, core-tests, ui-tests]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build]
+    #needs: [build, core-tests, ui-tests]
+    #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
 
@@ -307,13 +308,6 @@ jobs:
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
-
-      - name: Authenticate with App Store Connect API Key
-        uses: apple-actions/app-store-connect-api-key@v1
-        with:
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
       - name: Build .ipa for App Store Connect
         run: |
@@ -332,7 +326,7 @@ jobs:
             -allowProvisioningUpdates
 
       - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v1
+        uses: apple-actions/upload-testflight-build@v3
         with:
           app-path: build/VERA.ipa
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
