@@ -309,6 +309,15 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: 'Download Provisioning Profiles'
+        uses: apple-actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: 'com.vonage.VERA'
+          profile-type: 'IOS_APP_STORE'
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
       - name: Build .ipa for App Store Connect
         run: |
           xcodebuild -workspace VERA/VERA.xcworkspace \
