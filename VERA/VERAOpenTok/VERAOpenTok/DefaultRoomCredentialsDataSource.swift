@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct OpenTokRoomCredentials: Decodable {
+public struct RoomCredentialsResponse: Decodable {
     public let sessionId: String
     public let token: String
     public let apiKey: String
@@ -19,7 +19,7 @@ public struct RoomCredentialsRequest {
     }
 }
 
-public final class OpenTokRoomCredentialsDataSource {
+public final class DefaultRoomCredentialsDataSource {
 
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
@@ -37,11 +37,11 @@ public final class OpenTokRoomCredentialsDataSource {
 
     public func getRoomCredentials(
         _ request: RoomCredentialsRequest
-    ) async throws -> OpenTokRoomCredentials {
+    ) async throws -> RoomCredentialsResponse {
         let data = try await httpClient.get(
             baseURL
                 .appendingPathComponent("session")
                 .appending(path: request.roomName))
-        return try jsonDecoder.decode(OpenTokRoomCredentials.self, from: data)
+        return try jsonDecoder.decode(RoomCredentialsResponse.self, from: data)
     }
 }

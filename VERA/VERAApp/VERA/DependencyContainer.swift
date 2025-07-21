@@ -38,8 +38,8 @@ final class DependencyContainer {
         UserDefaultsUserRepository(userDefaults: .standard)
     }()
 
-    lazy var roomCredentialsDataSource: OpenTokRoomCredentialsDataSource = {
-        OpenTokRoomCredentialsDataSource(
+    lazy var roomCredentialsDataSource: DefaultRoomCredentialsDataSource = {
+        DefaultRoomCredentialsDataSource(
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder

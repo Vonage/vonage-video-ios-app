@@ -6,8 +6,8 @@ import Foundation
 import Testing
 import VERAOpenTok
 
-@Suite("OpenTok room credentials data source tests")
-struct OpenTokRoomCredentialsDataSourceTests {
+@Suite("Room credentials data source tests")
+struct DefaultRoomCredentialsDataSourceTests {
 
     @Test func getRoomCredentialsReturnsCredentials() async throws {
         let sessionId = "a sessionId"
@@ -96,8 +96,8 @@ struct OpenTokRoomCredentialsDataSourceTests {
         baseURL: URL = URL(string: "https://example.com")!,
         httpClient: MockHTTPClient = .init(),
         jsonDecoder: JSONDecoder = JSONDecoder()
-    ) -> OpenTokRoomCredentialsDataSource {
-        return OpenTokRoomCredentialsDataSource(
+    ) -> DefaultRoomCredentialsDataSource {
+        return DefaultRoomCredentialsDataSource(
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
