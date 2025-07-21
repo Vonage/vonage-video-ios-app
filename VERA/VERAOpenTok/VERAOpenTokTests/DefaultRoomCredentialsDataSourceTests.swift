@@ -9,8 +9,9 @@ import VERAOpenTok
 @Suite("Room credentials data source tests")
 struct DefaultRoomCredentialsDataSourceTests {
 
-    @Test("Feeding valid data into the HTTP client returns the correct credentials",
-          arguments: [
+    @Test(
+        "Feeding valid data into the HTTP client returns the correct credentials",
+        arguments: [
             MockRoomCredentials(
                 sessionId: "a sessionId",
                 token: "a token",
@@ -25,8 +26,8 @@ struct DefaultRoomCredentialsDataSourceTests {
                 sessionId: "another sessionId",
                 token: "another token",
                 apiKey: "another API key",
-                captionsId: nil)
-          ])
+                captionsId: nil),
+        ])
     func getRoomCredentialsReturnsCredentials(testCase: MockRoomCredentials) async throws {
         let sessionId = testCase.sessionId
         let token = testCase.token
@@ -88,7 +89,7 @@ struct DefaultRoomCredentialsDataSourceTests {
             #expect(Bool(false))
         }
     }
-    
+
     @Test func givenARoomNameItShouldBeEncodedInHTTPRequest() async throws {
         let httpClient = MockHTTPClient()
 

@@ -143,6 +143,9 @@ struct WaitingRoomViewModelTests {
             joinRoomUseCase: .init(
                 userRepository: userRepository,
                 publisherRepository: publisherRepository),
+            requestMicrophonePermissionUseCase: .init(),
+            requestCameraPermissionUseCase: .init(),
+            checkCameraAuthorizationStatusUseCase: .init(),
             userRepository: userRepository)
     }
 }

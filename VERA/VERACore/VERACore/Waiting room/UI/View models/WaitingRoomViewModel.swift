@@ -2,7 +2,6 @@
 //  Created by Vonage on 15/7/25.
 //
 
-import AVFoundation
 import Combine
 import Foundation
 
@@ -28,7 +27,9 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
     private let joinRoomUseCase: JoinRoomUseCase
-
+    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let userRepository: UserRepository
 
     private var availableAudioDevices: [UIAudioDevice] = []
@@ -43,6 +44,9 @@ public final class WaitingRoomViewModel: ObservableObject {
         cameraDevicesRepository: CameraDevicesRepository,
         selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
         joinRoomUseCase: JoinRoomUseCase,
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         userRepository: UserRepository
     ) {
         self.roomName = roomName
@@ -51,6 +55,9 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.cameraDevicesRepository = cameraDevicesRepository
         self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
         self.joinRoomUseCase = joinRoomUseCase
+        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
+        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.userRepository = userRepository
     }
 
@@ -216,44 +223,13 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @MainActor
     public func checkPermissions() async {
-        await requestMicrophonePermission()
+        let micGranted = await requestMicrophonePermissionUseCase.invoke()
+        guard micGranted else { return }
 
-        let cameraGranted = await requestCameraPermission()
+        let cameraGranted = await requestCameraPermissionUseCase.invoke()
         guard cameraGranted else { return }
 
         await startVideoPreview()
-    }
-
-    private func requestMicrophonePermission() async {
-        let status = AVCaptureDevice.authorizationStatus(for: .audio)
-        switch status {
-        case .authorized: break
-        case .notDetermined:
-            await withCheckedContinuation { continuation in
-                AVCaptureDevice.requestAccess(for: .audio) { granted in
-                    continuation.resume()
-                }
-            }
-        case .restricted, .denied: break
-        @unknown default: break
-        }
-    }
-
-    private func requestCameraPermission() async -> Bool {
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        switch status {
-        case .authorized: return true
-        case .notDetermined:
-            return await withCheckedContinuation { continuation in
-                AVCaptureDevice.requestAccess(for: .video) { granted in
-                    continuation.resume(returning: granted)
-                }
-            }
-        case .restricted, .denied:
-            return false
-        @unknown default:
-            return false
-        }
     }
 
     @MainActor
@@ -269,8 +245,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     func startVideoPreviewIfNeeded() {
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        if status == .authorized {
+        if checkCameraAuthorizationStatusUseCase.invoke() {
             Task { [weak self] in
                 await self?.startVideoPreview()
             }

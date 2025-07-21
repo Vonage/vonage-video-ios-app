@@ -36,6 +36,9 @@ public class WaitingRoomFactory {
             joinRoomUseCase: .init(
                 userRepository: userRepository,
                 publisherRepository: publisherRepository),
+            requestMicrophonePermissionUseCase: .init(),
+            requestCameraPermissionUseCase: .init(),
+            checkCameraAuthorizationStatusUseCase: .init(),
             userRepository: userRepository)
         viewModel.loadUI()
         viewModel.startVideoPreviewIfNeeded()
