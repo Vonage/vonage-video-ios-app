@@ -8,6 +8,7 @@ struct UsernameInput: View {
 
     @Binding var userName: String
     @State private var usernameState = VonageTextFieldState.initial
+    let forceLowercase: Bool = false
 
     var body: some View {
         HStack {
@@ -15,7 +16,8 @@ struct UsernameInput: View {
                 systemIconName: "person",
                 placeholder: "What is your name?",
                 text: $userName,
-                state: usernameState
+                state: usernameState,
+                forceLowercase: forceLowercase
             )
         }
         .onChange(of: userName) { _ in

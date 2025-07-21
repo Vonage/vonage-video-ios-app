@@ -6,6 +6,7 @@ import Combine
 import Foundation
 
 public typealias WaitingRoomError = String
+public typealias PermissionGranted = Bool
 
 public enum WaitingRoomViewState: Equatable {
     case loading
@@ -15,16 +16,21 @@ public enum WaitingRoomViewState: Equatable {
 
 public final class WaitingRoomViewModel: ObservableObject {
 
-
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
     @Published var publisherVideoView: PublisherVideoView = PublisherVideoView(videoView: nil)
     private let roomName: RoomName
-    var publisher: VERAPublisher?
+    weak var publisher: VERAPublisher?
 
-    private let publisherRepository: VERAPublisherRepository
+    private let publisherRepository: PublisherRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
+    private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
+    private let joinRoomUseCase: JoinRoomUseCase
+    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    private let userRepository: UserRepository
 
     private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
@@ -33,25 +39,38 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public init(
         roomName: RoomName,
-        publisherRepository: VERAPublisherRepository,
+        publisherRepository: PublisherRepository,
         audioDevicesRepository: AudioDevicesRepository,
-        cameraDevicesRepository: CameraDevicesRepository
+        cameraDevicesRepository: CameraDevicesRepository,
+        selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
+        joinRoomUseCase: JoinRoomUseCase,
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        userRepository: UserRepository
     ) {
         self.roomName = roomName
         self.publisherRepository = publisherRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
+        self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
+        self.joinRoomUseCase = joinRoomUseCase
+        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
+        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.userRepository = userRepository
     }
 
     public func loadUI() {
-        let publisher = publisherRepository.getPublisher()
-        self.publisher = publisher
-
-        publisherVideoView = PublisherVideoView(videoView: publisher.view)
-        buildContentUiState(roomName: roomName, publisher: publisher)
-
         observeAudioDevices()
         observeCameraDevices()
+
+        loadUsername()
+
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: false,
+            isCameraEnabled: false)
     }
 
     private func observeAudioDevices() {
@@ -79,39 +98,55 @@ public final class WaitingRoomViewModel: ObservableObject {
             return cameraDevices.map {
                 self.makeUICameraDevice(device: $0)
             }
-        }.sink(receiveValue: { [weak self] cameraDevices in
-            self?.availableCameraDevices = cameraDevices
+        }.sink(receiveValue: { [weak self] in
+            self?.availableCameraDevices = $0
             self?.handleDevicesChanged()
         })
         .store(in: &cancellables)
     }
 
-    public func selectAudioDevice(_ id: String) {
+    private func loadUsername() {
+        Task {
+            if let user = try? await userRepository.get() {
+                await MainActor.run {
+                    userName = user.name
+                }
+            }
+        }
+    }
+
+    public func selectAudioDevice(_ device: AudioDevice) {
         do {
-            try audioDevicesRepository.routeTo(id)
+            try selectAudioDeviceUseCase.invoke(device)
         } catch {
             print("Error selecting audio device: \(error)")
         }
     }
 
     public func onMicToggle() {
-        guard var publisher else { return }
+        guard let publisher else { return }
         publisher.publishAudio.toggle()
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
     }
 
     public func onCameraToggle() {
-        guard var publisher else { return }
+        guard let publisher else { return }
         publisher.publishVideo.toggle()
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
     }
 
-    private func buildContentUiState(roomName: String, publisher: VERAPublisher) {
+    private func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
         state = .content(
             .init(
                 roomName: roomName,
-                isMicrophoneEnabled: publisher.publishAudio,
-                isCameraEnabled: publisher.publishVideo,
+                isMicrophoneEnabled: isMicrophoneEnabled,  // publisher.publishAudio
+                isCameraEnabled: isCameraEnabled,  // publisher.publishVideo
                 audioDevices: availableAudioDevices,
                 cameras: availableCameraDevices))
     }
@@ -124,7 +159,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: device.portDescription)
         uiDevice.onTap = { [weak self] in
-            self?.selectAudioDevice(device.id)
+            self?.selectAudioDevice(device)
         }
         return uiDevice
     }
@@ -145,7 +180,9 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "person.fill.viewfinder")
         device.onTap = { [weak self] in
-            self?.cameraDevicesRepository.routeTo(device.id)
+            Task {
+                await self?.cameraDevicesRepository.routeTo(device.id)
+            }
         }
         return device
     }
@@ -156,13 +193,62 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "iphone.rear.camera")
         device.onTap = { [weak self] in
-            self?.cameraDevicesRepository.routeTo(device.id)
+            Task {
+                await self?.cameraDevicesRepository.routeTo(device.id)
+            }
         }
         return device
     }
 
     private func handleDevicesChanged() {
-        guard let publisher = publisher else { return }
-        buildContentUiState(roomName: roomName, publisher: publisher)
+        let publishAudio = publisher?.publishAudio ?? false
+        let publishVideo = publisher?.publishVideo ?? false
+
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publishAudio,
+            isCameraEnabled: publishVideo)
+    }
+
+    public func joinRoom() async {
+        do {
+            let request = JoinRoomRequest(roomName: roomName, userName: userName)
+            try await joinRoomUseCase.invoke(request)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
+    // MARK: Permission requests
+
+    @MainActor
+    public func checkPermissions() async {
+        let micGranted = await requestMicrophonePermissionUseCase.invoke()
+        guard micGranted else { return }
+
+        let cameraGranted = await requestCameraPermissionUseCase.invoke()
+        guard cameraGranted else { return }
+
+        await startVideoPreview()
+    }
+
+    @MainActor
+    public func startVideoPreview() async {
+        let publisher = await publisherRepository.getPublisher()
+        self.publisher = publisher
+
+        publisherVideoView = PublisherVideoView(videoView: publisher.view)
+        buildContentUiState(
+            roomName: roomName,
+            isMicrophoneEnabled: publisher.publishAudio,
+            isCameraEnabled: publisher.publishVideo)
+    }
+
+    func startVideoPreviewIfNeeded() {
+        if checkCameraAuthorizationStatusUseCase.invoke() {
+            Task { [weak self] in
+                await self?.startVideoPreview()
+            }
+        }
     }
 }

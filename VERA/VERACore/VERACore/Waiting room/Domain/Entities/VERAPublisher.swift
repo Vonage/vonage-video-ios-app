@@ -8,7 +8,7 @@ public enum CameraPosition {
     case front, back
 }
 
-public protocol VERAPublisher {
+public protocol VERAPublisher: AnyObject {
     var view: AnyView { get }
     var publishAudio: Bool { get set }
     var publishVideo: Bool { get set }
