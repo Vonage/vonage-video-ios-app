@@ -2,7 +2,7 @@ name: CI
 
 # Explicit permissions following principle of least privilege
 permissions:
-  contents: read    # Read repository contents
+  contents: write    # Read repository contents
   actions: read     # Read workflow run information
 
 on:
@@ -317,7 +317,7 @@ jobs:
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
     - name: "#️⃣ Generate Build Number"
       id: buildnumber
-      uses: einaregilsson/build-number@v2
+      uses: onyxmueller/build-tag-number@v1
       with:
         token: ${{ secrets.github_token }}
     - name: Print new build number
