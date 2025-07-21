@@ -114,8 +114,6 @@ jobs:
   ui-tests:
     runs-on: macos-latest
     needs: [build, core-tests]
-    # ⚠️ UI tests are DISABLED by default - they only run when explicitly requested via commit message
-    if: ${{ contains(github.event.head_commit.message, '[ui-tests]') }}
     
     steps:
     - uses: actions/checkout@v4
