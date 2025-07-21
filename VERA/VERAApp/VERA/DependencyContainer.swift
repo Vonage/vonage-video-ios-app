@@ -8,9 +8,13 @@ import VERACore
 import VERAOpenTok
 
 final class DependencyContainer {
-    lazy var publisherFactory: PublisherFactory = {
-        OpenTokPublisherFactory()
-    }()
+    let baseURL = URL(string: "https://meet.vonagenetworks.net/")!
+
+    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+
+    lazy var jsonDecoder = JSONDecoder()
+
+    lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
 
     lazy var audioDevicesRepository: any AudioDevicesRepository = {
         let repository = AVFoundationAudioDevicesRepository(
@@ -21,13 +25,30 @@ final class DependencyContainer {
     }()
 
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
-        let publisher = verAPublisherRepository.getPublisher()
-        let repository = OpenTokCameraDevicesRepository(publisher: publisher as! OpenTokPublisher)
+        let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
         repository.loadCameraDevices()
         return repository
     }()
 
-    lazy var verAPublisherRepository: any VERAPublisherRepository = {
-        DefaultVERAPublisherRepository(publisherFactory: publisherFactory)
+    lazy var publisherRepository: any PublisherRepository = {
+        DefaultPublisherRepository(publisherFactory: publisherFactory)
     }()
+
+    lazy var userRepository: any UserRepository = {
+        UserDefaultsUserRepository(userDefaults: .standard)
+    }()
+
+    lazy var roomCredentialsDataSource: DefaultRoomCredentialsDataSource = {
+        DefaultRoomCredentialsDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient,
+            jsonDecoder: jsonDecoder
+        )
+    }()
+
+    lazy var waitingRoomFactory = WaitingRoomFactory(
+        publisherRepository: publisherRepository,
+        audioDevicesRepository: audioDevicesRepository,
+        cameraDevicesRepository: cameraDevicesRepository,
+        userRepository: userRepository)
 }

@@ -7,7 +7,6 @@ import Combine
 public typealias LandingPageError = String
 
 public enum LandingPageViewState: Equatable {
-    case loading
     case error(LandingPageError)
     case success(RoomName)
     case content
@@ -34,8 +33,6 @@ public final class LandingPageViewModel {
     }
 
     public func onJoinRoom(_ name: String) {
-        state = .loading
-
         Task {
             do {
                 try tryJoinRoomUseCase.invoke(name)

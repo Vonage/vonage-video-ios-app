@@ -41,6 +41,7 @@
 			membershipExceptions = (
 				Mocks/MockAudioDevicesRepository.swift,
 				Mocks/MockCameraDevicesRepository.swift,
+				Mocks/MockUserRepository.swift,
 				Mocks/MockVERAPublisher.swift,
 				Mocks/MockVERAPublisherRepository.swift,
 				Mocks/RoomNameHelpers.swift,

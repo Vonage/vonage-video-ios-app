@@ -12,6 +12,10 @@ struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
     let dependencyContainer = DependencyContainer()
 
+    @State private var previousPath = NavigationPath()
+    @State private var alertItem: AlertItem?
+    @State private var isLoading = false
+
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationCoordinator.path) {
@@ -19,7 +23,8 @@ struct VERAApp: App {
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case .landing: EmptyView()
-                        case let .waitingRoom(roomName): makeWaitingRoom(roomName: roomName)
+                        case let .waitingRoom(roomName):
+                            makeWaitingRoom(roomName: roomName)
                         case .meetingRoom: makeMeetingRoom()
                         case .goodbye: EmptyView()
                         }
@@ -34,7 +39,24 @@ struct VERAApp: App {
                         .environmentObject(navigationCoordinator)
                 }
             }
+            .onChange(of: navigationCoordinator.path) { newPath in
+                if newPath.count < previousPath.count {
+                    print("Publisher is reset when returning to the landing page")
+                    dependencyContainer.publisherRepository.resetPublisher()
+                }
+                previousPath = newPath
+            }
             .environmentObject(navigationCoordinator)
+            .alert(item: $alertItem) { alertItem in
+                Alert(
+                    title: Text(alertItem.title),
+                    message: Text(alertItem.message),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .fullScreenCover(isPresented: $isLoading) {
+                LoaderModalView()
+            }
         }
     }
 
@@ -48,13 +70,23 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        let waitingRoomFactory = WaitingRoomFactory(
-            publisherRepository: dependencyContainer.verAPublisherRepository,
-            audioDevicesRepository: dependencyContainer.audioDevicesRepository,
-            cameraDevicesRepository: dependencyContainer.cameraDevicesRepository)
-
-        return waitingRoomFactory.make(roomName: roomName) { roomName in
-            navigationCoordinator.startMeeting(roomName)
+        dependencyContainer.waitingRoomFactory.make(
+            roomName: roomName
+        ) { roomName in
+            Task {
+                isLoading = true
+                do {
+                    let roomCredentialsDataSource = dependencyContainer.roomCredentialsDataSource
+                    let request = RoomCredentialsRequest(roomName: roomName)
+                    let credentials = try await roomCredentialsDataSource.getRoomCredentials(request)
+                    navigationCoordinator.startMeeting(roomName)
+                } catch {
+                    await MainActor.run {
+                        alertItem = AlertItem.roomCredentialsError(error.localizedDescription)
+                    }
+                }
+                isLoading = false
+            }
         }
     }
 

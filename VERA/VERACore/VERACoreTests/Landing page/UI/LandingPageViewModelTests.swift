@@ -69,15 +69,12 @@ struct LandingPageViewModelTests {
         // Call join room
         sut.onJoinRoom(validRoomName)
 
-        // State should immediately change to loading
-        #expect(sut.state == .loading)
-
         // Wait for async operation to complete with a reasonable timeout
         for _ in 0..<50 {  // Up to 0.5 seconds
             if case .success = sut.state {
                 break
             }
-            try? await Task.sleep(nanoseconds: 10_000_000)  // 0.01 seconds
+            await delay()
         }
 
         // State should transition to success with the room name
@@ -105,15 +102,12 @@ struct LandingPageViewModelTests {
         // Call join room with invalid name
         sut.onJoinRoom(invalidRoomName)
 
-        // State should immediately change to loading
-        #expect(sut.state == .loading)
-
         // Wait for async operation to complete with a reasonable timeout
         for _ in 0..<50 {  // Up to 0.5 seconds
             if case .error = sut.state {
                 break
             }
-            try? await Task.sleep(nanoseconds: 10_000_000)  // 0.01 seconds
+            await delay()
         }
 
         // State should transition to error
@@ -125,47 +119,6 @@ struct LandingPageViewModelTests {
         }
     }
 
-    @Test("Given loading state, when join room is called again, then state remains loading initially")
-    func whenJoinRoomIsCalledAgainDuringLoadingThenStateRemainsLoadingInitially() {
-        let sut = makeSUT()
-
-        // Start first join operation
-        sut.onJoinRoom("FirstRoom")
-        #expect(sut.state == .loading)
-
-        // Start second join operation
-        sut.onJoinRoom("SecondRoom")
-        #expect(sut.state == .loading)
-    }
-
-    @Test("Given error state, when join room is called, then state transitions to loading")
-    func whenJoinRoomIsCalledFromErrorStateThenStateTransitionsToLoading() async {
-        let sut = makeSUT()
-
-        // First set state to error by joining with invalid name
-        sut.onJoinRoom("INVALID@NAME!")  // Invalid name
-
-        // Wait for error state to be reached
-        for _ in 0..<50 {  // Up to 0.5 seconds
-            if case .error = sut.state {
-                break
-            }
-            try? await Task.sleep(nanoseconds: 10_000_000)  // 0.01 seconds
-        }
-
-        switch sut.state {
-        case .error:
-            break
-        default:
-            Issue.record("Setup failed - expected error state, got: \(sut.state)")
-            return
-        }
-
-        // Then call join room again
-        sut.onJoinRoom("validroom123")
-        #expect(sut.state == .loading)
-    }
-
     // MARK: - Edge Cases
 
     @Test("Given content state, when join room is called with empty string, then state transitions to error")
@@ -174,15 +127,12 @@ struct LandingPageViewModelTests {
 
         sut.onJoinRoom("")
 
-        // State should immediately change to loading
-        #expect(sut.state == .loading)
-
         // Wait for async operation to complete with a reasonable timeout
         for _ in 0..<50 {  // Up to 0.5 seconds
             if case .error = sut.state {
                 break
             }
-            try? await Task.sleep(nanoseconds: 10_000_000)  // 0.01 seconds
+            await delay()
         }
 
         // State should transition to error
