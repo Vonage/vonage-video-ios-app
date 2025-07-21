@@ -334,7 +334,7 @@ jobs:
 
           xcodebuild -exportArchive \
             -archivePath $PWD/build/VERA.xcarchive \
-            -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
+            -exportOptionsPlist $PWD/VERA/VERAApp/ExportOptions.plist \
             -exportPath $PWD/build \
             -allowProvisioningUpdates
 
