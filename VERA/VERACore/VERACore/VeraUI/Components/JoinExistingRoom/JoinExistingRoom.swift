@@ -21,7 +21,8 @@ struct JoinExistingRoom: View {
                 iconName: "keyboard",
                 placeholder: "Enter room name",
                 text: $roomName,
-                state: roomState)
+                state: roomState,
+                forceLowercase: true)
 
             JoinButton(roomName: $roomName, color: joinColor) {
                 onJoinRoom(roomName)

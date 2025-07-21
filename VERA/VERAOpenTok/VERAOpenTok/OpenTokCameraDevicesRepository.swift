@@ -16,13 +16,15 @@ public final class OpenTokCameraDevicesRepository: CameraDevicesRepository {
     public lazy var observeAvailableDevices: AnyPublisher<[VERACore.CameraDevice], Never> =
         _observeAvailableDevices.eraseToAnyPublisher()
 
-    private let publisher: OpenTokPublisher
+    private let publisherRepository: PublisherRepository
 
-    public init(publisher: OpenTokPublisher) {
-        self.publisher = publisher
+    public init(publisherRepository: PublisherRepository) {
+        self.publisherRepository = publisherRepository
     }
 
-    public func routeTo(_ cameraDeviceID: String) {
+    @MainActor
+    public func routeTo(_ cameraDeviceID: String) async {
+        let publisher = await publisherRepository.getPublisher()
         switch cameraDeviceID {
         case OpenTokCameraDevice.front.rawValue:
             publisher.cameraPosition = .front

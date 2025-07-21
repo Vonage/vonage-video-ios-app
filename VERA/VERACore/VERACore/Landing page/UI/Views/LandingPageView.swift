@@ -6,7 +6,6 @@ import Combine
 import SwiftUI
 
 public struct LandingPageView: View {
-
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
