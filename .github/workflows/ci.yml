@@ -131,7 +131,6 @@ jobs:
     
     - name: Run UI Tests (Slower)
       run: |
-        # Try different strategies to run UI tests
         if xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAUITests \
@@ -147,7 +146,7 @@ jobs:
         elif xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAUITests \
-          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' \
           -only-testing:VERAUITests \
           -enableCodeCoverage YES \
           -derivedDataPath ./DerivedData \
@@ -155,7 +154,7 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           -parallel-testing-enabled NO; then
-          echo "✅ UI Tests completed with iPhone 15 Pro"
+          echo "✅ UI Tests completed with iPhone SE (3rd generation)"
         else
           echo "❌ UI Tests could not run on any available simulator"
           exit 1
