@@ -141,10 +141,11 @@ jobs:
         if xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -sdk iphonesimulator \
-          -destination "platform=iOS Simulator,name=iPhone 15" \
+          -destination 'platform=iOS Simulator,name=iPhone 15' \
           -only-testing:VERAUITests \
-          -derivedDataPath DerivedData \
+          -parallel-testing-enabled NO \
+          -enableCodeCoverage YES \
+          -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
@@ -154,10 +155,11 @@ jobs:
         elif xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -sdk iphonesimulator \
-          -destination "platform=iOS Simulator,name=iPhone 15 Pro" \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -only-testing:VERAUITests \
-          -derivedDataPath DerivedData \
+          -parallel-testing-enabled NO \
+          -enableCodeCoverage YES \
+          -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
