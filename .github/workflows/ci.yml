@@ -318,7 +318,6 @@ jobs:
       uses: Apple-Actions/download-provisioning-profiles@v4
       with:
         profile-type: IOS_APP_STORE
-        create: true
         bundle-id: 'com.vonage.VERA'
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
