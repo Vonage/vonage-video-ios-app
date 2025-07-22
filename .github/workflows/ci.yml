@@ -332,8 +332,24 @@ jobs:
       run: echo "Build number is $BUILD_NUMBER"
     - name: Clean DerivedData
       run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
-    - run: ./scripts/Build.sh
-    - uses: apple-actions/upload-testflight-build@v3
+    #- run: ./scripts/Build.sh
+    - name: Build archive
+      run: |
+        xcodebuild -workspace "VERA/VERA.xcworkspace" \
+          -scheme "VERA" \
+          -configuration Release \
+          -allowProvisioningUpdates \
+          -archivePath "build/VERA.xcarchive" \
+          archive | xcpretty
+    - name: Export IPA
+      run: |
+        xcodebuild -exportArchive \
+          -archivePath "build/VERA.xcarchive" \
+          -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
+          -exportPath "$(dirname "$IPA_PATH")" \
+          -allowProvisioningUpdates | xcpretty
+    - name: Upload to TestFlight
+      uses: apple-actions/upload-testflight-build@v3
       with:
         app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
