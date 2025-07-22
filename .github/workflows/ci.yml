@@ -341,14 +341,14 @@ jobs:
             -configuration Release \
             -archivePath $PWD/build/VERA.xcarchive \
             archive \
-            -allowProvisioningUpdates | xcpretty
+            -allowProvisioningUpdates
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
             -archivePath $PWD/build/VERA.xcarchive \
             -exportOptionsPlist $PWD/VERA/VERAApp/ExportOptions.plist \
             -exportPath $PWD/build \
-            -allowProvisioningUpdates | xcpretty
+            -allowProvisioningUpdates
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
