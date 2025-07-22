@@ -131,19 +131,12 @@ jobs:
     
     - name: Run UI Tests (Slower)
       run: |
-        echo "⚠️ Running UI tests (this may take several minutes)..."
-        echo "UI tests are disabled by default. To enable them:"
-        echo "1. Manually trigger with 'Run UI Tests' option"
-        echo "2. Include '[ui-tests]' in commit message"
-        echo "3. Use the dedicated UI Tests workflow"
-        
         # Try different strategies to run UI tests
         if xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
+          -scheme VERAUITests \
           -destination 'platform=iOS Simulator,name=iPhone 15' \
           -only-testing:VERAUITests \
-          -parallel-testing-enabled NO \
           -enableCodeCoverage YES \
           -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
@@ -153,10 +146,9 @@ jobs:
           echo "✅ UI Tests completed with iPhone 15"
         elif xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
+          -scheme VERAUITests \
           -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
           -only-testing:VERAUITests \
-          -parallel-testing-enabled NO \
           -enableCodeCoverage YES \
           -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
