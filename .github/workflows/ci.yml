@@ -305,6 +305,8 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v4
+    - name: Clean DerivedData
+      run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1.6.0
       with:
@@ -329,8 +331,6 @@ jobs:
         token: ${{ secrets.github_token }}
     - name: Print new build number
       run: echo "Build number is $BUILD_NUMBER"
-    - name: Clean DerivedData
-      run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
     #- run: ./scripts/Build.sh
     - name: Debug profiles
       run: |
