@@ -309,15 +309,19 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
           xcode-version: latest-stable
-    - uses: Apple-Actions/import-codesign-certs@v5.0.2
+    - name: Import certs
+      uses: Apple-Actions/import-codesign-certs@v5.0.2
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
-    - uses: Apple-Actions/download-provisioning-profiles@v4
+    - name: Provisioning profile
+      uses: Apple-Actions/download-provisioning-profiles@v4
       with:
+        profile-type: IOS_APP_STORE
+        create: true
         bundle-id: com.vonage.VERA
-        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
     - name: "#️⃣ Generate Build Number"
       id: buildnumber
@@ -332,6 +336,6 @@ jobs:
     - uses: apple-actions/upload-testflight-build@v3
       with:
         app-path: build/VERA.ipa
-        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}

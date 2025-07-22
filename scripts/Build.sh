@@ -38,14 +38,14 @@ xcrun xcodebuild \
     -allowProvisioningUpdates \
     -resultBundlePath "${RESULT_BUNDLE_PATH}" \
     CURRENT_PROJECT_VERSION="${CURRENT_PROJECT_VERSION}" \
-    archive
+    archive | xcpretty
 
 xcrun xcodebuild \
     -exportArchive \
     -exportOptionsPlist "${EXPORT_OPTIONS_FILE}" \
     -archivePath "${ARCHIVE_PATH}" \
-    -allowProvisioningUpdates \
-    -exportPath "${ARTIFACT_PATH}/${SCHEME}.ipa"
+    -exportPath "${ARTIFACT_PATH}/${SCHEME}.ipa" \
+    -allowProvisioningUpdates | xcpretty
 
 # Zip up the Xcode Archive into Artifacts folder.
 ditto -c -k --sequesterRsrc --keepParent "${ARCHIVE_PATH}" "${ARTIFACT_PATH}/${SCHEME}.xcarchive.zip"
