@@ -128,7 +128,9 @@ jobs:
       run: |
         echo "=== Available iOS Simulators ==="
         xcrun simctl list devices available | grep iPhone | head -10
-    
+    - name: Pull LFS files
+      run: git lfs pull
+
     - name: Run UI Tests (Slower)
       run: |
         if xcodebuild test \
