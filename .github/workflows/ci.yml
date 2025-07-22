@@ -349,14 +349,15 @@ jobs:
             -configuration Release \
             -allowProvisioningUpdates \
             -archivePath $PWD/build/VERA.xcarchive \
-            archive
+            CURRENT_PROJECT_VERSION="${BUILD_NUMBER:-0}" \
+            archive | xcpretty
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
             -archivePath "$PWD/build/VERA.xcarchive" \
             -exportOptionsPlist "$PWD/ExportOptions.plist" \
             -allowProvisioningUpdates \
-            -exportPath "$PWD/build"
+            -exportPath "$PWD/build" | xcpretty
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
