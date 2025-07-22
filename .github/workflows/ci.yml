@@ -172,7 +172,7 @@ jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-latest
-    needs: [build, core-tests]
+    needs: [build, core-tests, ui-tests]
     # Only run on main branch and pull requests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
@@ -344,6 +344,7 @@ jobs:
             -scheme VERA \
             -sdk iphoneos \
             -configuration Release \
+            -allowProvisioningUpdates \
             -archivePath $PWD/build/VERA.xcarchive \
             archive
     - name: Export IPA
@@ -351,6 +352,7 @@ jobs:
         xcodebuild -exportArchive \
             -archivePath "$PWD/build/VERA.xcarchive" \
             -exportOptionsPlist "$PWD/ExportOptions.plist" \
+            -allowProvisioningUpdates \
             -exportPath "$PWD/build"
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3

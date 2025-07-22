@@ -7,7 +7,7 @@
 	<key>method</key>
 	<string>app-store-connect</string>
 	<key>signingStyle</key>
-	<string>manual</string>
+	<string>automatic</string>
 	<key>generateAppStoreInformation</key>
 	<true/>
 	<key>stripSwiftSymbols</key>
@@ -16,10 +16,5 @@
 	<string>PR6C39UQ38</string>
 	<key>uploadSymbols</key>
 	<true/>
-	<key>provisioningProfiles</key>
-    <dict>
-        <key>com.vonage.VERA</key>
-        <string>48BFCD1635C805CD2D1D7B498DF6822EA06B2F4A</string>
-    </dict>
 </dict>
 </plist>
