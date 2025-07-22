@@ -333,14 +333,6 @@ jobs:
         token: ${{ secrets.github_token }}
     - name: Print new build number
       run: echo "Build number is $BUILD_NUMBER"
-    #- run: ./scripts/Build.sh
-    - name: Debug profiles
-      run: |
-        echo "Provisioning Profiles:"
-        ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
-        echo "Certificates:"
-        security find-identity -v -p codesigning
-
     - name: Build archive
       run: |
           xcodebuild -workspace VERA/VERA.xcworkspace \
