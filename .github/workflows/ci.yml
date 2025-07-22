@@ -114,7 +114,7 @@ jobs:
 
   ui-tests:
     runs-on: macos-latest
-    needs: [build, core-tests]
+    needs: [core-tests]
     
     steps:
     - uses: actions/checkout@v4
@@ -299,7 +299,7 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    needs: [build]
+    needs: [ui-tests]
     #needs: [build, core-tests, ui-tests]
     #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
