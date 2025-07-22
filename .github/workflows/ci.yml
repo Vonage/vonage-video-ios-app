@@ -337,7 +337,7 @@ jobs:
       run: |
         xcodebuild -workspace "VERA/VERA.xcworkspace" \
           -scheme "VERA" \
-          -configuration Release \
+          -configuration "Release" \
           -allowProvisioningUpdates \
           -archivePath "build/VERA.xcarchive" \
           archive | xcpretty
@@ -345,8 +345,8 @@ jobs:
       run: |
         xcodebuild -exportArchive \
           -archivePath "build/VERA.xcarchive" \
-          -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
-          -exportPath "$(dirname "$IPA_PATH")" \
+          -exportOptionsPlist "VERA/VERAApp/ExportOptions.plist" \
+          -exportPath "build/VERA.ipa" \
           -allowProvisioningUpdates | xcpretty
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
