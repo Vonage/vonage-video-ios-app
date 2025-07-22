@@ -306,7 +306,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
+      uses: maxim-lobanov/setup-xcode@v1.6.0
       with:
           xcode-version: latest-stable
     - name: Import certs
@@ -319,7 +319,7 @@ jobs:
       with:
         profile-type: IOS_APP_STORE
         create: true
-        bundle-id: com.vonage.VERA
+        bundle-id: 'com.vonage.VERA'
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
@@ -335,23 +335,25 @@ jobs:
     #- run: ./scripts/Build.sh
     - name: Build archive
       run: |
-        xcodebuild -workspace "VERA/VERA.xcworkspace" \
-          -scheme "VERA" \
-          -configuration "Release" \
+        xcodebuild -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -configuration Release \
+          -sdk iphoneos \
           -allowProvisioningUpdates \
-          -archivePath "build/VERA.xcarchive" \
+          -archivePath build/VERA.xcarchive \
+          CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
           archive | xcpretty
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
-          -archivePath "build/VERA.xcarchive" \
-          -exportOptionsPlist "VERA/VERAApp/ExportOptions.plist" \
-          -exportPath "build/VERA.ipa" \
+          -archivePath build/VERA.xcarchive \
+          -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
+          -exportPath build \
           -allowProvisioningUpdates | xcpretty
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
-        app-path: build/VERA.ipa
+        app-path: "$PWD/build/VERA.ipa"
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
