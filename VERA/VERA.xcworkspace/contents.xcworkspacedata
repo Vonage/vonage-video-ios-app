@@ -21,4 +21,7 @@
          location = "group:../scripts">
       </FileRef>
    </Group>
+   <FileRef
+      location = "group:VERAApp/VERA.xctestplan">
+   </FileRef>
 </Workspace>
