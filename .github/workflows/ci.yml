@@ -335,25 +335,24 @@ jobs:
     #- run: ./scripts/Build.sh
     - name: Build archive
       run: |
-        xcodebuild -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
-          -configuration Release \
-          -sdk iphoneos \
-          -allowProvisioningUpdates \
-          -archivePath build/VERA.xcarchive \
-          CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
-          archive | xcpretty
+          xcodebuild -workspace VERA/VERA.xcworkspace \
+            -scheme VERA \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $PWD/build/VERA.xcarchive \
+            archive \
+            -allowProvisioningUpdates | xcpretty
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
-          -archivePath build/VERA.xcarchive \
-          -exportOptionsPlist VERA/VERAApp/ExportOptions.plist \
-          -exportPath build \
-          -allowProvisioningUpdates | xcpretty
+            -archivePath $PWD/build/VERA.xcarchive \
+            -exportOptionsPlist $PWD/VERA/VERAApp/ExportOptions.plist \
+            -exportPath $PWD/build \
+            -allowProvisioningUpdates | xcpretty
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
-        app-path: "$PWD/build/VERA.ipa"
+        app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
