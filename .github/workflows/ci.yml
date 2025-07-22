@@ -98,7 +98,7 @@ jobs:
           if xcodebuild test \
             -workspace VERA/VERA.xcworkspace \
             -scheme VERA \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -destination "platform=iOS Simulator,name=iPhone 15" \
             -only-testing:VERATests \
             -derivedDataPath DerivedData \
             CODE_SIGN_IDENTITY="" \
@@ -142,7 +142,7 @@ jobs:
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
           -sdk iphonesimulator \
-          -destination "platform=iOS Simulator,name=iPhone 16" \
+          -destination "platform=iOS Simulator,name=iPhone 15" \
           -only-testing:VERAUITests \
           -derivedDataPath DerivedData \
           CODE_SIGN_IDENTITY="" \
@@ -150,12 +150,12 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           -parallel-testing-enabled NO \
           -quiet 2>/dev/null; then
-          echo "✅ UI Tests completed with iPhone 16"
+          echo "✅ UI Tests completed with iPhone 15"
         elif xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
           -sdk iphonesimulator \
-          -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
+          -destination "platform=iOS Simulator,name=iPhone 15 Pro" \
           -only-testing:VERAUITests \
           -derivedDataPath DerivedData \
           CODE_SIGN_IDENTITY="" \
@@ -163,7 +163,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO \
           -parallel-testing-enabled NO \
           -quiet 2>/dev/null; then
-          echo "✅ UI Tests completed with iPhone 16 Pro"
+          echo "✅ UI Tests completed with iPhone 15 Pro"
         else
           echo "❌ UI Tests could not run on any available simulator"
           exit 1
@@ -209,7 +209,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
-          -destination "platform=iOS Simulator,name=iPhone 16" \
+          -destination "platform=iOS Simulator,name=iPhone 15" \
           -only-testing:VERATests \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
