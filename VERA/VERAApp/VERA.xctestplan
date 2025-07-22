@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "7EEFB0C8-E9FB-423D-B2FA-50F7BC7F2723",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false,
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:VERA.xcodeproj",
+      "identifier" : "6F6A00972E17F89100127A10",
+      "name" : "VERA"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:VERA.xcodeproj",
+        "identifier" : "6F6A00AE2E17F89200127A10",
+        "name" : "VERAUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:VERA.xcodeproj",
+        "identifier" : "6F6A00A42E17F89200127A10",
+        "name" : "VERATests"
+      }
+    }
+  ],
+  "version" : 1
+}
