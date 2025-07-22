@@ -149,8 +149,7 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          -parallel-testing-enabled NO \
-          -quiet 2>/dev/null; then
+          -parallel-testing-enabled NO; then
           echo "✅ UI Tests completed with iPhone 15"
         elif xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
@@ -163,8 +162,7 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          -parallel-testing-enabled NO \
-          -quiet 2>/dev/null; then
+          -parallel-testing-enabled NO; then
           echo "✅ UI Tests completed with iPhone 15 Pro"
         else
           echo "❌ UI Tests could not run on any available simulator"
