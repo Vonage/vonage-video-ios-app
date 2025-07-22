@@ -332,6 +332,12 @@ jobs:
     - name: Clean DerivedData
       run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
     #- run: ./scripts/Build.sh
+    - name: Debug profiles
+      run: |
+        echo "Provisioning Profiles:"
+        ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+        echo "Certificates:"
+        security find-identity -v -p codesigning
     - name: Build archive
       run: |
           xcodebuild -workspace VERA/VERA.xcworkspace \
