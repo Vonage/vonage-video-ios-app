@@ -345,15 +345,13 @@ jobs:
             -sdk iphoneos \
             -configuration Release \
             -archivePath $PWD/build/VERA.xcarchive \
-            archive \
-            -allowProvisioningUpdates
+            archive
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
-            -archivePath $PWD/build/VERA.xcarchive \
-            -exportOptionsPlist $PWD/VERA/VERAApp/ExportOptions.plist \
-            -exportPath $PWD/build \
-            -allowProvisioningUpdates
+            -archivePath "$PWD/build/VERA.xcarchive" \
+            -exportOptionsPlist "$PWD/ExportOptions.plist" \
+            -exportPath "$PWD/build"
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
