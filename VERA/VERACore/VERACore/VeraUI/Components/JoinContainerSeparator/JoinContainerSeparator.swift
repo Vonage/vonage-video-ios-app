@@ -10,7 +10,7 @@ struct JoinContainerSeparator: View {
             VStack {
                 CustomDivider()
             }
-            Text("or")
+            Text("or", bundle: #bundle)
                 .padding()
             VStack {
                 CustomDivider()

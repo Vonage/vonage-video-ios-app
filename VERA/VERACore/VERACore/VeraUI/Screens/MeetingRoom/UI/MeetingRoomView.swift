@@ -8,7 +8,7 @@ public struct MeetingRoomView: View {
 
     public init() {}
     public var body: some View {
-        Text("Meeting")
+        Text("Meeting", bundle: #bundle)
     }
 }
 

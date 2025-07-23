@@ -14,7 +14,7 @@ struct UsernameInput: View {
         HStack {
             VonageTextField(
                 systemIconName: "person",
-                placeholder: "What is your name?",
+                placeholder: String(localized: "What is your name?", bundle: #bundle),
                 text: $userName,
                 state: usernameState,
                 forceLowercase: forceLowercase
