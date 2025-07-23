@@ -14,7 +14,6 @@ struct VERAApp: App {
 
     @State private var previousPath = NavigationPath()
     @State private var alertItem: AlertItem?
-    @State private var isLoading = false
 
     var body: some Scene {
         WindowGroup {
@@ -25,14 +24,15 @@ struct VERAApp: App {
                         case .landing: EmptyView()
                         case let .waitingRoom(roomName):
                             makeWaitingRoom(roomName: roomName)
-                        case .meetingRoom: makeMeetingRoom()
+                        case let .meetingRoom(roomName):
+                            makeMeetingRoom(roomName: roomName)
                         case .goodbye: EmptyView()
                         }
                     }
             }
             .fullScreenCover(isPresented: $navigationCoordinator.isInMeeting) {
                 if let currentRoom = navigationCoordinator.currentMeetingRoom {
-                    MeetingRoomView()
+                    makeMeetingRoom(roomName: currentRoom)
                         .onDisappear {
                             navigationCoordinator.leaveMeeting()
                         }
@@ -54,9 +54,6 @@ struct VERAApp: App {
                     dismissButton: .default(Text("OK"))
                 )
             }
-            .fullScreenCover(isPresented: $isLoading) {
-                LoaderModalView()
-            }
         }
     }
 
@@ -74,23 +71,12 @@ struct VERAApp: App {
             roomName: roomName
         ) { roomName in
             Task {
-                isLoading = true
-                do {
-                    let roomCredentialsDataSource = dependencyContainer.roomCredentialsDataSource
-                    let request = RoomCredentialsRequest(roomName: roomName)
-                    let credentials = try await roomCredentialsDataSource.getRoomCredentials(request)
-                    navigationCoordinator.startMeeting(roomName)
-                } catch {
-                    await MainActor.run {
-                        alertItem = AlertItem.roomCredentialsError(error.localizedDescription)
-                    }
-                }
-                isLoading = false
+                navigationCoordinator.startMeeting(roomName)
             }
         }
     }
 
-    private func makeMeetingRoom() -> some View {
-        MeetingRoomView()
+    private func makeMeetingRoom(roomName: String) -> some View {
+        dependencyContainer.meetingRoomFactory.make(roomName: roomName)
     }
 }

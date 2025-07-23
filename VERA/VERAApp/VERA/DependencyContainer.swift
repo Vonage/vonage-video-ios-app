@@ -38,17 +38,22 @@ final class DependencyContainer {
         UserDefaultsUserRepository(userDefaults: .standard)
     }()
 
-    lazy var roomCredentialsDataSource: DefaultRoomCredentialsDataSource = {
-        DefaultRoomCredentialsDataSource(
-            baseURL: baseURL,
-            httpClient: httpClient,
-            jsonDecoder: jsonDecoder
-        )
-    }()
-
     lazy var waitingRoomFactory = WaitingRoomFactory(
         publisherRepository: publisherRepository,
         audioDevicesRepository: audioDevicesRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository)
+
+    lazy var meetingRoomFactory = MeetingRoomFactory(
+        baseURL: baseURL,
+        httpClient: httpClient,
+        jsonDecoder: jsonDecoder,
+        currentCallParticipantsRepository: currentCallParticipantsRepository,
+        sessionRepository: sessionRepository)
+
+    lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
+
+    lazy var sessionRepository: SessionRepository = {
+        OpenTokSessionRepository()
+    }()
 }

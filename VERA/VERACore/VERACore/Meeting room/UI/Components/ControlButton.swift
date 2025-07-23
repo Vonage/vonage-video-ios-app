@@ -14,29 +14,17 @@ struct ControlButton: View {
         self.iconName = iconName
         self.action = action
     }
-    
+
     var body: some View {
         Button(action: action) {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundStyle(isActive ? .white : .red)
+                .foregroundStyle(isActive ? .uiSystemBackground : .vGray3)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
-                        .fill(Material.ultraThinMaterial)
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.2
-                                )
-                        )
+                        .fill(isActive ? .vGray4 : .clear)
                 )
-                .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
                 .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())

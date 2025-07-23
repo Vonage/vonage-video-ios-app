@@ -4,10 +4,10 @@
 
 import Foundation
 import Testing
-import VERAOpenTok
+import VERACore
 
 @Suite("Room credentials data source tests")
-struct DefaultRoomCredentialsDataSourceTests {
+struct GetRoomCredentialsUseCaseTests {
 
     @Test(
         "Feeding valid data into the HTTP client returns the correct credentials",
@@ -110,8 +110,8 @@ struct DefaultRoomCredentialsDataSourceTests {
         baseURL: URL = URL(string: "https://example.com")!,
         httpClient: MockHTTPClient = .init(),
         jsonDecoder: JSONDecoder = JSONDecoder()
-    ) -> DefaultRoomCredentialsDataSource {
-        return DefaultRoomCredentialsDataSource(
+    ) -> GetRoomCredentialsUseCase {
+        return GetRoomCredentialsUseCase(
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)

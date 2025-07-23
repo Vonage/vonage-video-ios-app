@@ -1,9 +1,9 @@
 //
-//  Created by Vonage on 17/7/25.
+//  Created by Vonage on 23/7/25.
 //
 
 import Foundation
-import VERAOpenTok
+import VERACore
 
 final class MockHTTPClient: HTTPClient {
     var data: Data!

@@ -5,15 +5,15 @@
 import SwiftUI
 
 struct ParticipantsBadgeButton: View {
-    
+
     private let participantsCount: Int
     private let onToggleParticipants: () -> Void
-    
+
     init(participantsCount: Int, onToggleParticipants: @escaping () -> Void) {
         self.participantsCount = participantsCount
         self.onToggleParticipants = onToggleParticipants
     }
-    
+
     var body: some View {
         ControlButton(
             isActive: true,
