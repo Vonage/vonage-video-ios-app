@@ -14,7 +14,7 @@ import Testing
 @Suite("Landing Page View UI Tests")
 @MainActor
 struct LandingPageViewUITests {
-
+    
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
@@ -24,7 +24,9 @@ struct LandingPageViewUITests {
 
     @Test("Landing Page View - Basic Layout")
     func basicLayout() throws {
-        snapshot(makeSUT(), named: "Default")
+        let sut = makeSUT()
+        
+        snapshot(sut, named: "Default")
     }
 
     @Test(
@@ -85,13 +87,20 @@ struct LandingPageViewUITests {
         )
     }
 
-    private func snapshot(_ view: some View, named: String) {
+    private func snapshot(
+        _ view: some View,
+        named: String,
+        line: UInt = #line,
+        column: UInt = #column
+    ) {
         assertSnapshot(
             of: view,
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: named,
             record: isRecording,
-            testName: "\(snapshotPrefix)_\(named)"
+            testName: "\(snapshotPrefix)_\(named)",
+            line: line,
+            column: column
         )
     }
 }
