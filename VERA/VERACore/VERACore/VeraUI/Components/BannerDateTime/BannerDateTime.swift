@@ -15,8 +15,7 @@ struct BannerDateTime: View {
 
     private static let usFormatter: DateFormatter = {
         let dataFormatter = DateFormatter()
-        dataFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dataFormatter.dateFormat = "h:mm a • EEE, MMM d"
+        dataFormatter.dateFormat = String(localized: "h:mm a • EEE, MMM d", bundle: #bundle)
         return dataFormatter
     }()
 

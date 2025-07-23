@@ -19,7 +19,7 @@ struct JoinExistingRoom: View {
         HStack {
             VonageTextField(
                 iconName: "keyboard",
-                placeholder: "Enter room name",
+                placeholder: String(localized: "Enter room name", bundle: #bundle),
                 text: $roomName,
                 state: roomState,
                 forceLowercase: true)
