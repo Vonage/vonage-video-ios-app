@@ -11,7 +11,7 @@ import Testing
 @Suite("Waiting room View UI Tests")
 @MainActor
 struct WaitingRoomViewUITests {
-    
+
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
@@ -22,7 +22,7 @@ struct WaitingRoomViewUITests {
     @Test("Waiting room View - Basic Layout")
     func basicLayout() throws {
         let sut = makeSUT()
-        
+
         snapshot(sut, named: "Default")
     }
 

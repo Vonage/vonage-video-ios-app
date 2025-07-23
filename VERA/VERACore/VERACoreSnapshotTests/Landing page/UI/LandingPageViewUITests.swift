@@ -14,7 +14,7 @@ import Testing
 @Suite("Landing Page View UI Tests")
 @MainActor
 struct LandingPageViewUITests {
-    
+
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
@@ -25,7 +25,7 @@ struct LandingPageViewUITests {
     @Test("Landing Page View - Basic Layout")
     func basicLayout() throws {
         let sut = makeSUT()
-        
+
         snapshot(sut, named: "Default")
     }
 
