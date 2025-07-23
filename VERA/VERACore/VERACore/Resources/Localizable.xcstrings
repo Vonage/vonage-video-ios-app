@@ -81,6 +81,22 @@
         }
       }
     },
+    "h:mm a • EEE, MMM d" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "h:mm a • EEE, MMM d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HH:mm • EEE, d MMM"
+          }
+        }
+      }
+    },
     "Join" : {
       "localizations" : {
         "en" : {
