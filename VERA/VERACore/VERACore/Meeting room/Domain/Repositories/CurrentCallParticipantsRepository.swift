@@ -7,5 +7,4 @@ import Combine
 public protocol CurrentCallParticipantsRepository {
     func getCurrentCallParticipants() -> AnyPublisher<[Participant], Never>
     func updateParticipants(_ participants: [Participant])
-
 }

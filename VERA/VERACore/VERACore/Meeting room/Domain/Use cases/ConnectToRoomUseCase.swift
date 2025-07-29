@@ -4,12 +4,12 @@
 
 import Foundation
 
-final class ConnectToRoomUseCase {
+public final class ConnectToRoomUseCase {
 
     private let getRoomCredentialsUseCase: GetRoomCredentialsUseCase
     private let sessionRepository: SessionRepository
 
-    init(
+    public init(
         getRoomCredentialsUseCase: GetRoomCredentialsUseCase,
         sessionRepository: SessionRepository
     ) {
@@ -18,7 +18,7 @@ final class ConnectToRoomUseCase {
     }
 
     @BackgroundActor
-    func callAsFunction(roomName: RoomName) async throws -> CallFacade {
+    public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await getRoomCredentialsUseCase.getRoomCredentials(.init(roomName: roomName))
         let call = await sessionRepository.createSession(result.roomCredentials)
         call.connect()

@@ -4,12 +4,12 @@
 
 import Foundation
 
-final class DisconnectRoomUseCase {
+public final class DisconnectRoomUseCase {
 
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
 
-    init(
+    public init(
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository
     ) {
@@ -17,7 +17,7 @@ final class DisconnectRoomUseCase {
         self.publisherRepository = publisherRepository
     }
 
-    func callAsFunction() {
+    public func callAsFunction() {
         sessionRepository.currentCall?.disconnect()
         sessionRepository.clearSession()
         publisherRepository.resetPublisher()

@@ -49,7 +49,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     let roomName: RoomName
 
-    init(
+    public init(
         roomName: RoomName,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
@@ -66,7 +66,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     @MainActor
-    func loadUI() async {
+    public func loadUI() async {
         state = .loading
         observeSessionState()
 
@@ -109,19 +109,19 @@ public final class MeetingRoomViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func onToggleMic() {
+    public func onToggleMic() {
         Task { [weak self] in
             self?.currentCall?.toggleLocalAudio()
         }
     }
 
-    func onToggleCamera() {
+    public func onToggleCamera() {
         Task { [weak self] in
             self?.currentCall?.toggleLocalVideo()
         }
     }
 
-    func endCall() {
+    public func endCall() {
         disconnectRoomUseCase()
     }
 }

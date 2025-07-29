@@ -40,7 +40,12 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Mocks/MockAudioDevicesRepository.swift,
+				Mocks/MockCall.swift,
 				Mocks/MockCameraDevicesRepository.swift,
+				Mocks/MockCurrentCallParticipantsRepository.swift,
+				Mocks/MockParticipant.swift,
+				Mocks/MockSessionRepository.swift,
+				Mocks/MockURL.swift,
 				Mocks/MockUserRepository.swift,
 				Mocks/MockVERAPublisher.swift,
 				Mocks/MockVERAPublisherRepository.swift,
