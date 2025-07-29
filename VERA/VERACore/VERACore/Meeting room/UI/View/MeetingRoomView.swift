@@ -25,10 +25,11 @@ public struct MeetingRoomView: View {
             )
             Spacer()
             BottomBar(
-                isMicEnabled: true,
-                isCameraEnabled: false,
-                participantsCount: 25,
+                isMicEnabled: state.isMicEnabled,
+                isCameraEnabled: state.isCameraEnabled,
+                participantsCount: state.participantsCount,
                 actions: actions)
+            .background(.clear)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black.opacity(0.85))
