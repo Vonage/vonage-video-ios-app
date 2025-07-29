@@ -22,6 +22,7 @@ struct AdaptiveGrid: View {
                     }
                 }
             }
+            .animation(.easeInOut, value: participants)
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .padding()
