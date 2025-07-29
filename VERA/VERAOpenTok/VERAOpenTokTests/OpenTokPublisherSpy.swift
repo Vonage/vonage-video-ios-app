@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import VERAOpenTok
 import OpenTok
+import VERAOpenTok
 
 class OpenTokPublisherSpy: OpenTokPublisher {
     init() {

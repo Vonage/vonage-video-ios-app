@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import VERACore
 import SwiftUI
+import VERACore
 
 func makeMockParticipant(
     id: String = "anId",

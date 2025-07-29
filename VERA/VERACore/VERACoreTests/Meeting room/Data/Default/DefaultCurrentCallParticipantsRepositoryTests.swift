@@ -3,13 +3,13 @@
 //
 
 import Foundation
-import VERACore
-import Testing
 import SwiftUI
+import Testing
+import VERACore
 
 @Suite("DefaultCurrentCallParticipantsRepository tests")
 struct DefaultCurrentCallParticipantsRepositoryTests {
-    
+
     @Test func initialIsEmpty() async throws {
         let sut = makeSUT()
         let publisher = sut.getCurrentCallParticipants()
@@ -48,7 +48,7 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
         }
         #expect(published == [p2])
     }
-    
+
     // MARK: - Test Helpers
 
     private func makeSUT() -> DefaultCurrentCallParticipantsRepository {

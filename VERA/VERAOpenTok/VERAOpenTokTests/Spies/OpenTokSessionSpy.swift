@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import VERAOpenTok
 import OpenTok
+import VERAOpenTok
 
 class OpenTokSessionSpy: OpenTokSession {
     var connectCalled = false
