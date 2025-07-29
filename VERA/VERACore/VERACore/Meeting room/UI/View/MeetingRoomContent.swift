@@ -9,7 +9,6 @@ struct MeetingRoomContent: View {
     let participants: [Participant]
     let showBottomSheet: Bool
 
-
     init(participants: [Participant], showBottomSheet: Bool) {
         self.participants = participants
         self.showBottomSheet = showBottomSheet

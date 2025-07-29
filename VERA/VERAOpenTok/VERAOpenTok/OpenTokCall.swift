@@ -114,7 +114,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func updateParticipants() {
-        _participantsPublisher.value = [publisher.participant] + Array(participantStreams.values)
+        _participantsPublisher.value = [publisher.participant] + participantStreams.values
     }
 
     // MARK: Audio/Video toggles
@@ -123,12 +123,14 @@ public final class OpenTokCall: CallFacade {
         publisher.publishVideo.toggle()
 
         updateMediaState()
+        updateParticipants()
     }
 
     public func toggleLocalAudio() {
         publisher.publishAudio.toggle()
 
         updateMediaState()
+        updateParticipants()
     }
 
     private func updateMediaState() {

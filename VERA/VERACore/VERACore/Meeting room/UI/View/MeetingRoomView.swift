@@ -18,21 +18,22 @@ public struct MeetingRoomView: View {
     }
 
     public var body: some View {
-        VStack {
+        ZStack {
             MeetingRoomContent(
                 participants: state.participants,
                 showBottomSheet: false
             )
-            Spacer()
-            BottomBar(
-                isMicEnabled: state.isMicEnabled,
-                isCameraEnabled: state.isCameraEnabled,
-                participantsCount: state.participantsCount,
-                actions: actions)
-            .background(.clear)
+            VStack {
+                Spacer()
+                BottomBar(
+                    isMicEnabled: state.isMicEnabled,
+                    isCameraEnabled: state.isCameraEnabled,
+                    participantsCount: state.participantsCount,
+                    actions: actions)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.black.opacity(0.85))
+        .background(.black)
     }
 }
 

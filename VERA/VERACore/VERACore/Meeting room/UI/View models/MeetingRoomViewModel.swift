@@ -73,22 +73,18 @@ public final class MeetingRoomViewModel: ObservableObject {
         do {
             let call = try await connectToRoomUseCase(roomName: roomName)
             call.participantsPublisher
-                .receive(on: DispatchQueue.main)
                 .sink { [weak self] participants in
                     self?.participantsPublisher.send(participants)
                 }
                 .store(in: &cancellables)
 
             call.statePublisher
-                .receive(on: DispatchQueue.main)
                 .sink { [weak self] state in
                     self?.sessionStatePublisher.send(state)
                 }
                 .store(in: &cancellables)
 
             self.currentCall = call
-
-            state = .content(.default)
         } catch {
             state = .error(error.localizedDescription)
         }
@@ -96,28 +92,33 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     func observeSessionState() {
         Publishers.CombineLatest(participantsPublisher, sessionStatePublisher)
+            .map { participants, sessionState in
+                MeetingRoomState(
+                    isMicEnabled: sessionState.isPublishingAudio,
+                    isCameraEnabled: sessionState.isPublishingVideo,
+                    participants: participants
+                )
+            }
+            .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] participants, sessionState in
-                guard let self else { return }
+            .sink { [weak self] newState in
                 Task { @MainActor in
-                    self.state = .content(
-                        MeetingRoomState(
-                            isMicEnabled: sessionState.isPublishingAudio,
-                            isCameraEnabled: sessionState.isPublishingVideo,
-                            participants: participants
-                        )
-                    )
+                    self?.state = .content(newState)
                 }
             }
             .store(in: &cancellables)
     }
 
     func onToggleMic() {
-        currentCall?.toggleLocalAudio()
+        Task { [weak self] in
+            self?.currentCall?.toggleLocalAudio()
+        }
     }
 
     func onToggleCamera() {
-        currentCall?.toggleLocalVideo()
+        Task { [weak self] in
+            self?.currentCall?.toggleLocalVideo()
+        }
     }
 
     func endCall() {
