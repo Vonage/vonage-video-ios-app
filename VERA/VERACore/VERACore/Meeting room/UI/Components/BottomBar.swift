@@ -72,7 +72,7 @@ struct BottomBar: View {
             .padding(.vertical, 12)
         }.background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(.black.opacity(0.8))
+                .fill(.vGray4.opacity(0.8))
         ).padding()
     }
 }

@@ -51,7 +51,6 @@ public final class OpenTokCall: CallFacade {
     private func publishToSession() {
         do {
             try session.publish(publisher: publisher)
-            participantStreams[publisher.id] = publisher.participant
             updateParticipants()
         } catch {
             _eventsPublisher.send(.error(error))
@@ -115,7 +114,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func updateParticipants() {
-        _participantsPublisher.value = Array(participantStreams.values)
+        _participantsPublisher.value = [publisher.participant] + Array(participantStreams.values)
     }
 
     // MARK: Audio/Video toggles

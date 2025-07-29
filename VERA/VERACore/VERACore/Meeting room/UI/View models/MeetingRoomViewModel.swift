@@ -42,12 +42,12 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let disconnectRoomUseCase: DisconnectRoomUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .content(MeetingRoomState.default)
-    @Published public var participants: [Participant] = []
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
+    private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
+
     weak var currentCall: CallFacade?
 
     let roomName: RoomName
-
 
     init(
         roomName: RoomName,
@@ -74,7 +74,10 @@ public final class MeetingRoomViewModel: ObservableObject {
             let call = try await connectToRoomUseCase(roomName: roomName)
             call.participantsPublisher
                 .receive(on: DispatchQueue.main)
-                .assign(to: &$participants)
+                .sink { [weak self] participants in
+                    self?.participantsPublisher.send(participants)
+                }
+                .store(in: &cancellables)
 
             call.statePublisher
                 .receive(on: DispatchQueue.main)
@@ -92,7 +95,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     func observeSessionState() {
-        Publishers.CombineLatest($participants, sessionStatePublisher)
+        Publishers.CombineLatest(participantsPublisher, sessionStatePublisher)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] participants, sessionState in
                 guard let self else { return }
