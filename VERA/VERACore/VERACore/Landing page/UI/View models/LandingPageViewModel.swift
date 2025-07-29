@@ -28,14 +28,14 @@ public final class LandingPageViewModel {
     }
 
     public func onHandleNewRoom() {
-        let name = tryCreatingANewRoomUseCase.invoke()
+        let name = tryCreatingANewRoomUseCase()
         state = .success(name)
     }
 
     public func onJoinRoom(_ name: String) {
         Task {
             do {
-                try tryJoinRoomUseCase.invoke(name)
+                try tryJoinRoomUseCase(name)
                 await MainActor.run {
                     state = .success(name)
                 }

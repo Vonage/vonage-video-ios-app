@@ -4,14 +4,29 @@
 
 import SwiftUI
 
-struct MeetingRoomActions {
-    let onShare: (String) -> Void = { _ in }
-    let onRetry: () -> Void = {}
-    let onToggleMic: () -> Void = {}
-    let onToggleCamera: () -> Void = {}
-    let onEndCall: () -> Void = {}
-    let onBack: () -> Void = {}
-    let onToggleParticipants: () -> Void = {}
+public struct MeetingRoomActions {
+    let onShare: (String) -> Void
+    let onRetry: () -> Void
+    let onToggleMic: () -> Void
+    let onToggleCamera: () -> Void
+    let onEndCall: () -> Void
+    let onToggleParticipants: () -> Void
+
+    init(
+        onShare: @escaping (String) -> Void = { _ in },
+        onRetry: @escaping () -> Void = {},
+        onToggleMic: @escaping () -> Void = {},
+        onToggleCamera: @escaping () -> Void = {},
+        onEndCall: @escaping () -> Void = {},
+        onToggleParticipants: @escaping () -> Void = {}
+    ) {
+        self.onShare = onShare
+        self.onRetry = onRetry
+        self.onToggleMic = onToggleMic
+        self.onToggleCamera = onToggleCamera
+        self.onEndCall = onEndCall
+        self.onToggleParticipants = onToggleParticipants
+    }
 }
 
 struct BottomBar: View {

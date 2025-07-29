@@ -6,7 +6,10 @@ import Foundation
 import OpenTok
 import VERACore
 
-final class OpenTokSessionFactory {
+public final class OpenTokSessionFactory {
+
+    public init() {}
+
     func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
         let otSession = OTSession(
             applicationId: sessionCredentials.apiKey,
@@ -16,33 +19,5 @@ final class OpenTokSessionFactory {
         let session = OpenTokSession(session: otSession)
         otSession.delegate = session
         return session
-    }
-}
-
-final class OpenTokSession: NSObject, OTSessionDelegate {
-    private let session: OTSession
-
-    init(session: OTSession) {
-        self.session = session
-    }
-
-    func session(_ session: OTSession, didFailWithError error: OTError) {
-
-    }
-
-    func session(_ session: OTSession, streamCreated stream: OTStream) {
-
-    }
-
-    func session(_ session: OTSession, streamDestroyed stream: OTStream) {
-
-    }
-
-    func sessionDidConnect(_ session: OTSession) {
-
-    }
-
-    func sessionDidDisconnect(_ session: OTSession) {
-
     }
 }

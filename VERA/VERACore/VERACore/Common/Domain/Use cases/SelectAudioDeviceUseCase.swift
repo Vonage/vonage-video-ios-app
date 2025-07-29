@@ -12,7 +12,7 @@ public final class SelectAudioDeviceUseCase {
         self.audioDevicesRepository = audioDevicesRepository
     }
 
-    public func invoke(_ audioDevice: AudioDevice) throws {
+    public func callAsFunction(_ audioDevice: AudioDevice) throws {
         try audioDevicesRepository.routeTo(audioDevice.id)
     }
 }

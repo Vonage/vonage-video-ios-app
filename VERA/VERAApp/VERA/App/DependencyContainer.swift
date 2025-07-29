@@ -49,11 +49,16 @@ final class DependencyContainer {
         httpClient: httpClient,
         jsonDecoder: jsonDecoder,
         currentCallParticipantsRepository: currentCallParticipantsRepository,
-        sessionRepository: sessionRepository)
+        sessionRepository: sessionRepository,
+        publisherRepository: publisherRepository)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
+    lazy var sessionFactory = OpenTokSessionFactory()
+
     lazy var sessionRepository: SessionRepository = {
-        OpenTokSessionRepository()
+        OpenTokSessionRepository(
+            sessionFactory: sessionFactory,
+            publisherRepository: publisherRepository)
     }()
 }

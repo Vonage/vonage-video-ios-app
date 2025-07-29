@@ -11,29 +11,40 @@ public class MeetingRoomFactory {
     private let jsonDecoder: JSONDecoder
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let sessionRepository: SessionRepository
+    private let publisherRepository: PublisherRepository
 
     public init(
         baseURL: URL,
         httpClient: HTTPClient,
         jsonDecoder: JSONDecoder,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
-        sessionRepository: SessionRepository
+        sessionRepository: SessionRepository,
+        publisherRepository: PublisherRepository
     ) {
         self.baseURL = baseURL
         self.httpClient = httpClient
         self.jsonDecoder = jsonDecoder
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
+        self.publisherRepository = publisherRepository
     }
 
-    public func make(roomName: RoomName) -> some View {
-
+    public func make(
+        roomName: RoomName,
+        onBack: @escaping () -> Void
+    ) -> some View {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
             connectToRoomUseCase: .init(
-                getRoomCredentialsUseCase: .init(baseURL: baseURL, httpClient: httpClient, jsonDecoder: jsonDecoder),
+                getRoomCredentialsUseCase: .init(
+                    baseURL: baseURL,
+                    httpClient: httpClient,
+                    jsonDecoder: jsonDecoder),
                 sessionRepository: sessionRepository),
+            disconnectRoomUseCase: .init(
+                sessionRepository: sessionRepository,
+                publisherRepository: publisherRepository),
             currentCallParticipantsRepository: currentCallParticipantsRepository)
-        return MeetingRoomScreen(viewModel: viewModel)
+        return MeetingRoomScreen(viewModel: viewModel, onBack: onBack)
     }
 }

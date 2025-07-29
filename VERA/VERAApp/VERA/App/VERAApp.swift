@@ -77,6 +77,8 @@ struct VERAApp: App {
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
-        dependencyContainer.meetingRoomFactory.make(roomName: roomName)
+        dependencyContainer.meetingRoomFactory.make(roomName: roomName) {
+            navigationCoordinator.leaveMeeting()
+        }
     }
 }

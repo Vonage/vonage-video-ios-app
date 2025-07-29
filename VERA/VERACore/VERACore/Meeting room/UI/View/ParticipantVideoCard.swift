@@ -32,7 +32,7 @@ struct ParticipantVideoCard: View {
             }
             .padding(8)
         }
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.systemBackground)))
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.uiSystemBackground)))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
     }

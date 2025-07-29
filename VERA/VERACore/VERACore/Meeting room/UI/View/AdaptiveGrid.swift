@@ -9,7 +9,7 @@ struct AdaptiveGrid: View {
     let participants: [Participant]
 
     let columns = [
-        GridItem(.adaptive(minimum: 100, maximum: 200), spacing: 16)
+        GridItem(.adaptive(minimum: 300), spacing: 16)
     ]
 
     var body: some View {
@@ -17,6 +17,7 @@ struct AdaptiveGrid: View {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(participants, id: \.self) { participant in
                     ParticipantVideoCard(participant: participant)
+                        .frame(maxWidth: .infinity, minHeight: 200)
                 }
             }
             .padding()

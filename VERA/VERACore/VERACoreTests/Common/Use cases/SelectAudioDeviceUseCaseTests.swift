@@ -14,7 +14,7 @@ struct SelectAudioDeviceUseCaseTests {
         let sut = makeSUT(audioDevicesRepository: audioDevicesRepository)
 
         let audioDevice = AudioDevice(id: "anID", name: "a name", portDescription: "a port")
-        try sut.invoke(audioDevice)
+        try sut(audioDevice)
 
         #expect(
             audioDevicesRepository.routedAudioDevices.contains(where: { deviceID in

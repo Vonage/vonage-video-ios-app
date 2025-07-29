@@ -36,31 +36,54 @@ public struct MeetingRoomState: Equatable {
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
-
+    private var cancellables = Set<AnyCancellable>()
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
+    private let disconnectRoomUseCase: DisconnectRoomUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .content(MeetingRoomState.default)
     @Published public var participants: [Participant] = []
+    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
+    weak var currentCall: CallFacade?
 
     let roomName: RoomName
+
 
     init(
         roomName: RoomName,
         connectToRoomUseCase: ConnectToRoomUseCase,
+        disconnectRoomUseCase: DisconnectRoomUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository
     ) {
         self.roomName = roomName
         self.connectToRoomUseCase = connectToRoomUseCase
+        self.disconnectRoomUseCase = disconnectRoomUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
+
+        Task { [weak self] in
+            await self?.loadUI()
+        }
     }
 
     @MainActor
     func loadUI() async {
         state = .loading
+        observeSessionState()
 
         do {
-            try await connectToRoomUseCase.invoke(roomName: roomName)
+            let call = try await connectToRoomUseCase(roomName: roomName)
+            call.participantsPublisher
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$participants)
+
+            call.statePublisher
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] state in
+                    self?.sessionStatePublisher.send(state)
+                }
+                .store(in: &cancellables)
+
+            self.currentCall = call
 
             state = .content(.default)
         } catch {
@@ -68,23 +91,33 @@ public final class MeetingRoomViewModel: ObservableObject {
         }
     }
 
+    func observeSessionState() {
+        Publishers.CombineLatest($participants, sessionStatePublisher)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] participants, sessionState in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.state = .content(
+                        MeetingRoomState(
+                            isMicEnabled: sessionState.isPublishingAudio,
+                            isCameraEnabled: sessionState.isPublishingVideo,
+                            participants: participants
+                        )
+                    )
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     func onToggleMic() {
-        //call?.togglePublisherAudio()
+        currentCall?.toggleLocalAudio()
     }
 
     func onToggleCamera() {
-        //call?.togglePublisherVideo()
+        currentCall?.toggleLocalVideo()
     }
 
     func endCall() {
-        //call?.endSession()
-    }
-
-    func onPause() {
-        //call?.pauseSession()
-    }
-
-    func onResume() {
-        //call?.resumeSession()
+        disconnectRoomUseCase()
     }
 }

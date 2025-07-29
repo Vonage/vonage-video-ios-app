@@ -13,7 +13,7 @@ struct TryCreatingANewRoomUseCaseTests {
     func createsANewRoom() {
         let sut = makeSUT()
 
-        let roomName = sut.invoke()
+        let roomName = sut()
 
         #expect(!roomName.isEmpty)
     }

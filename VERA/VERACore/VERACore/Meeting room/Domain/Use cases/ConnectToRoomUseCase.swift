@@ -18,9 +18,11 @@ final class ConnectToRoomUseCase {
     }
 
     @BackgroundActor
-    func invoke(roomName: RoomName) async throws {
+    func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await getRoomCredentialsUseCase.getRoomCredentials(.init(roomName: roomName))
-        sessionRepository.createSession(result.roomCredentials)
+        let call = await sessionRepository.createSession(result.roomCredentials)
+        call.connect()
+        return call
     }
 }
 

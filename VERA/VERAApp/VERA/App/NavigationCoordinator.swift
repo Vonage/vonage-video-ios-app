@@ -25,6 +25,7 @@ final class NavigationCoordinator: ObservableObject {
         isInMeeting = false
         currentMeetingRoom = nil
 
+        path.removeLast(path.count)
         path.append(AppRoute.goodbye)
         logNavigation("Left meeting, navigating to goodbye")
     }

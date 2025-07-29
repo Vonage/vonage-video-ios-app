@@ -13,7 +13,7 @@ public final class TryCreatingANewRoomUseCase {
         self.roomNameGenerator = roomNameGenerator
     }
 
-    public func invoke() -> String {
+    public func callAsFunction() -> String {
         return roomNameGenerator.generate()
     }
 }
