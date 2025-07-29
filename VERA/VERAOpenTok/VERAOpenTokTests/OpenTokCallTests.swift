@@ -9,6 +9,7 @@ import VERACore
 import VERAOpenTok
 
 @Suite("OpenTok Call tests")
+@MainActor
 struct OpenTokCallTests {
 
     @Test
@@ -78,58 +79,9 @@ struct OpenTokCallTests {
 
     private func makeSUT(
         token: String = "a token",
-        session: OpenTokSession = OpenTokSessionSpy()
+        session: OpenTokSession = OpenTokSessionSpy(),
+        publisher: OpenTokPublisher = OpenTokPublisherSpy()
     ) -> OpenTokCall {
-        return OpenTokCall(token: token, session: session)
-    }
-}
-
-
-class OpenTokSessionSpy: OpenTokSession {
-    var connectCalled = false
-    var disconnectCalled = false
-
-    var recordedTokens: [String] = []
-
-    init() {
-        super.init(
-            session: OTSession(
-                applicationId: "applicationId",
-                sessionId: "sessionId",
-                delegate: nil)!)
-    }
-
-    public override func connect(with token: String) throws {
-        connectCalled = true
-        recordedTokens.append(token)
-        try super.connect(with: token)
-    }
-
-    public override func disconnect() throws {
-        disconnectCalled = true
-        try super.disconnect()
-    }
-}
-
-class ThrowingOpenTokSession: OpenTokSession {
-
-    enum Error: Swift.Error {
-        case any
-    }
-
-    init() {
-        super.init(
-            session: OTSession(
-                applicationId: "applicationId",
-                sessionId: "sessionId",
-                delegate: nil)!)
-    }
-
-    public override func connect(with token: String) throws {
-        throw Error.any
-    }
-
-    public override func disconnect() throws {
-        throw Error.any
+        return OpenTokCall(token: token, session: session, publisher: publisher)
     }
 }

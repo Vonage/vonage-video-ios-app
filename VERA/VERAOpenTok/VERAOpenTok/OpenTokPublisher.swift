@@ -7,7 +7,7 @@ import OpenTok
 import SwiftUI
 import VERACore
 
-public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
+open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
 
     var id: String { "publisherID" }
@@ -57,7 +57,7 @@ public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDele
         }
     }
 
-    init(publisher: OTPublisher) {
+    public init(publisher: OTPublisher) {
         otPublisher = publisher
     }
 
