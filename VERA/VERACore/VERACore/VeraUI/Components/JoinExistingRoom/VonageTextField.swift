@@ -36,7 +36,7 @@ struct VonageTextField: View {
     var body: some View {
         HStack(spacing: 12) {
             if !iconName.isEmpty {
-                Image(iconName, bundle: .veraCore)
+                Image(iconName, bundle: #bundle)
                     .foregroundColor(.vGray3)
                     .frame(width: 20)
             }

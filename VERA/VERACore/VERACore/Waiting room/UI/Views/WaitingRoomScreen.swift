@@ -40,7 +40,7 @@ public struct WaitingRoomScreen: View {
                 await viewModel.checkPermissions()
             }
         case let .error(error): Text(error)
-        case .loading: Text("Loading")
+        case .loading: Text("Loading", bundle: #bundle)
         }
     }
 }

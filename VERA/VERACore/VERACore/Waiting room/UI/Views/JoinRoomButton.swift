@@ -12,7 +12,7 @@ struct JoinRoomButton: View {
         Button {
             onJoinRoom()
         } label: {
-            Text("Join")
+            Text("Join", bundle: #bundle)
         }
         .buttonStyle(NewRoomButtonStyle())
     }

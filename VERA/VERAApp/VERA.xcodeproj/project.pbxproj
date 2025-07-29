@@ -53,9 +53,22 @@
 		6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6F46E0A02E30E4EC00E4F31D /* Exceptions for "VERA" folder in "VERA" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6F6A00972E17F89100127A10 /* VERA */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6F6A009A2E17F89100127A10 /* VERA */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6F46E0A02E30E4EC00E4F31D /* Exceptions for "VERA" folder in "VERA" target */,
+			);
 			path = VERA;
 			sourceTree = "<group>";
 		};
@@ -232,6 +245,7 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
 			);
 			mainGroup = 6F6A008F2E17F89100127A10;
 			minimizedProjectReferenceProxies = 1;
@@ -438,6 +452,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -496,6 +511,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -511,7 +527,9 @@
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VERA/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VERA;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "VERA needs access to your camera to share your video during video calls and meetings.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VERA needs access to your microphone to share your audio during video calls and meetings.";
@@ -546,7 +564,9 @@
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VERA/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VERA;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "VERA needs access to your camera to share your video during video calls and meetings.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VERA needs access to your microphone to share your audio during video calls and meetings.";
