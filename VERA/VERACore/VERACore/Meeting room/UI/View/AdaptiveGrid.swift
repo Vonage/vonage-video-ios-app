@@ -13,13 +13,18 @@ struct AdaptiveGrid: View {
     ]
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(participants, id: \.id) { participant in
-                ParticipantVideoCard(participant: participant)
-                    .frame(maxWidth: .infinity, minHeight: 200)
+        ScrollView {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
+                GridRow {
+                    ForEach(participants, id: \.id) { participant in
+                        ParticipantVideoCard(participant: participant)
+                            .frame(maxWidth: .infinity, minHeight: 200)
+                    }
+                }
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
