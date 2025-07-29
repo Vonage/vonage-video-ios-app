@@ -19,15 +19,15 @@ public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDele
         Participant(
             id: id,
             name: stream?.name ?? "",
-            isMicEnabled: stream?.hasAudio ?? false,
-            isCameraEnabled: stream?.hasVideo ?? false,
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
             view: view)
     }
 
-    public var view: AnyView {
+    public lazy var view: AnyView = {
         let rendererView = UIViewContainer(view: otPublisher.view!)
         return AnyView(rendererView)
-    }
+    }()
 
     public var publishAudio: Bool {
         get {

@@ -22,10 +22,10 @@ public class OpenTokSuscriber: NSObject {
             view: view)
     }()
 
-    public var view: AnyView {
+    public lazy var view: AnyView = {
         let rendererView = UIViewContainer(view: otSuscriber.view!)
         return AnyView(rendererView)
-    }
+    }()
 
     init(suscriber: OTSubscriber) {
         otSuscriber = suscriber

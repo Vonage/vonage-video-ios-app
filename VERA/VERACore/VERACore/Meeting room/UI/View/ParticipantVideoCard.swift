@@ -13,10 +13,17 @@ struct ParticipantVideoCard: View {
         ZStack(alignment: .center) {
             if participant.isCameraEnabled {
                 participant.view
+                    .id(participant.id + "_view")
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .edgesIgnoringSafeArea(.all)
+                    .background(.vGray4.opacity(0.8))
             } else {
-                AvatarInitials(state: .init(userName: participant.name))
+                VStack {
+                    AvatarInitials(state: .init(userName: participant.name))
+                        .padding(24)
+                }
+                .id(participant.id + "_initials")
+                .background(.vGray4.opacity(0.8))
             }
 
             VStack {
@@ -32,7 +39,10 @@ struct ParticipantVideoCard: View {
             }
             .padding(8)
         }
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.uiSystemBackground)))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(.uiSystemBackground))
+        )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
     }
