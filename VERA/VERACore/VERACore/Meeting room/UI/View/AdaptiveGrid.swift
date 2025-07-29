@@ -13,7 +13,7 @@ struct AdaptiveGrid: View {
     ]
 
     var body: some View {
-        ScrollView {
+        VStack(alignment: .leading, spacing: 0) {
             LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                 GridRow {
                     ForEach(participants, id: \.id) { participant in
@@ -22,6 +22,7 @@ struct AdaptiveGrid: View {
                     }
                 }
             }
+            .frame(maxHeight: .infinity, alignment: .top)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
