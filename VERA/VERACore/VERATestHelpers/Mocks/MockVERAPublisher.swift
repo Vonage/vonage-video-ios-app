@@ -6,16 +6,16 @@ import Foundation
 import SwiftUI
 import VERACore
 
-final class MockVERAPublisher: VERAPublisher {
-    var view: AnyView
+public final class MockVERAPublisher: VERAPublisher {
+    public var view: AnyView
 
-    var publishAudio: Bool
+    public var publishAudio: Bool
 
-    var publishVideo: Bool
+    public var publishVideo: Bool
 
-    var cameraPosition: VERACore.CameraPosition
+    public var cameraPosition: VERACore.CameraPosition
 
-    init(
+    public init(
         view: AnyView = AnyView(EmptyView()),
         publishAudio: Bool = true,
         publishVideo: Bool = true,

@@ -10,29 +10,29 @@ import VERACore
 struct MeetingRoomViewModelTests {
 
     @Test func zero() async throws {
-        let sut = makeSUT()
+        //let sut = makeSUT()
 
 
     }
 
     // MARK: SUT
 
-    func makeSUT(
-        roomName: String = "a_room_name",
-        connectToRoomUseCase: ConnectToRoomUseCase = .init(
-            getRoomCredentialsUseCase: .init(
-                baseURL: makeMockBaseURL(),
-                httpClient: MockHTTPClient(),
-                jsonDecoder: JSONDecoder()),
-            sessionRepository: MockSessionRepository()),
-        disconnectRoomUseCase: DisconnectRoomUseCase = .init(
-            sessionRepository: MockSessionRepository(),
-            publisherRepository: makeMockVERAPublisherRepository())
-    ) -> MeetingRoomViewModel {
-        return MeetingRoomViewModel(
-            roomName: roomName,
-            connectToRoomUseCase: connectToRoomUseCase,
-            disconnectRoomUseCase: disconnectRoomUseCase,
-            currentCallParticipantsRepository: MockCurrentCallParticipantsRepository())
-    }
+    //func makeSUT(
+    //    roomName: String = "a_room_name",
+    //    connectToRoomUseCase: ConnectToRoomUseCase = .init(
+    //        getRoomCredentialsUseCase: .init(
+    //            baseURL: makeMockBaseURL(),
+    //            httpClient: MockHTTPClient(),
+    //            jsonDecoder: JSONDecoder()),
+    //        sessionRepository: MockSessionRepository()),
+    //    disconnectRoomUseCase: DisconnectRoomUseCase = .init(
+    //        sessionRepository: MockSessionRepository(),
+    //        publisherRepository: makeMockVERAPublisherRepository())
+    //) -> MeetingRoomViewModel {
+    //    return MeetingRoomViewModel(
+    //        roomName: roomName,
+    //        connectToRoomUseCase: connectToRoomUseCase,
+    //        disconnectRoomUseCase: disconnectRoomUseCase,
+    //        currentCallParticipantsRepository: MockCurrentCallParticipantsRepository())
+    //}
 }

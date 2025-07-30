@@ -5,7 +5,7 @@
 import Foundation
 import VERACore
 
-func makeBasicRoomNameGenerator() -> RoomNameGenerator {
+public func makeBasicRoomNameGenerator() -> RoomNameGenerator {
     RoomNameGenerator(
         categories: [.init(words: ["aardvark"])]
     )

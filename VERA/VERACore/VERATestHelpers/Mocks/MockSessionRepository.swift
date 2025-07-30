@@ -5,10 +5,10 @@
 import Foundation
 import VERACore
 
-class MockSessionRepository: SessionRepository {
-    var currentCall: (any VERACore.CallFacade)?
+public class MockSessionRepository: SessionRepository {
+    public var currentCall: (any VERACore.CallFacade)?
 
-    func createSession(
+    public func createSession(
         _ credentials: VERACore.RoomCredentials
     ) async -> any VERACore.CallFacade {
         let call = MockCall()
@@ -16,7 +16,7 @@ class MockSessionRepository: SessionRepository {
         return call
     }
 
-    func clearSession() {
+    public func clearSession() {
         self.currentCall = nil
     }
 }

@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERATestHelpers
 
 @Suite("Room credentials data source tests")
 struct GetRoomCredentialsUseCaseTests {

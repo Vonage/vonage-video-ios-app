@@ -5,15 +5,15 @@
 import Foundation
 import VERACore
 
-final class MockPublisherFactory: PublisherFactory {
+public final class MockPublisherFactory: PublisherFactory {
 
     private let mockPublisher: MockVERAPublisher
 
-    init(mockPublisher: MockVERAPublisher) {
+    public init(mockPublisher: MockVERAPublisher) {
         self.mockPublisher = mockPublisher
     }
 
-    func make(_ settings: PublisherSettings) async -> any VERAPublisher {
+    public func make(_ settings: PublisherSettings) async -> any VERAPublisher {
         mockPublisher
     }
 }

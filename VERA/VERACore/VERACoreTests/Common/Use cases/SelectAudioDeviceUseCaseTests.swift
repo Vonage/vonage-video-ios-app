@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERATestHelpers
 
 @Suite("Select audio device tests")
 struct SelectAudioDeviceUseCaseTests {

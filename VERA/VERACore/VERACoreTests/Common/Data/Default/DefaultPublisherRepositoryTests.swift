@@ -5,8 +5,8 @@
 import Foundation
 import SwiftUI
 import Testing
-import VERA
 import VERACore
+import VERATestHelpers
 import XCTest
 
 final class DefaultPublisherRepositoryTests: XCTestCase {

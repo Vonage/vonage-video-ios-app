@@ -5,15 +5,16 @@
 import Foundation
 import VERACore
 
-public final class OpenTokSessionRepository: SessionRepository {
+public final class OpenTokSessionRepository<Factory: SessionFactory>: SessionRepository
+where Factory.Session == OpenTokSession {
 
-    private let sessionFactory: OpenTokSessionFactory
+    private let sessionFactory: Factory
     private let publisherRepository: PublisherRepository
 
     public var currentCall: (any CallFacade)?
 
     public init(
-        sessionFactory: OpenTokSessionFactory,
+        sessionFactory: Factory,
         publisherRepository: PublisherRepository
     ) {
         self.sessionFactory = sessionFactory

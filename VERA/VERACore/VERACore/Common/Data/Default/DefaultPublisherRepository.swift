@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERACore
 
 public final class DefaultPublisherRepository: PublisherRepository {
 

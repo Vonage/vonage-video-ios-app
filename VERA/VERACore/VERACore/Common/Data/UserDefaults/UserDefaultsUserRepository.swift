@@ -3,9 +3,8 @@
 //
 
 import Foundation
-import VERACore
 
-final class UserDefaultsUserRepository: UserRepository {
+public final class UserDefaultsUserRepository: UserRepository {
 
     private let userDefaults: UserDefaults
 
@@ -13,15 +12,15 @@ final class UserDefaultsUserRepository: UserRepository {
         case name
     }
 
-    init(userDefaults: UserDefaults = .standard) {
+    public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
 
-    func save(_ user: VERACore.User) async throws {
+    public func save(_ user: VERACore.User) async throws {
         userDefaults.setValue(user.name, forKey: CodingKeys.name.rawValue)
     }
 
-    func get() async throws -> VERACore.User? {
+    public func get() async throws -> VERACore.User? {
         guard let name = userDefaults.string(forKey: CodingKeys.name.rawValue) else {
             return nil
         }

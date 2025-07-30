@@ -6,11 +6,11 @@ import Foundation
 import OpenTok
 import VERACore
 
-public final class OpenTokSessionFactory {
+public final class OpenTokSessionFactory: SessionFactory {
 
     public init() {}
 
-    func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
+    public func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
         let otSession = OTSession(
             applicationId: sessionCredentials.apiKey,
             sessionId: sessionCredentials.sessionId,

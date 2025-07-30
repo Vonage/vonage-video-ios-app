@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERATestHelpers
 
 @Suite("Try creating a new room use case tests")
 struct TryCreatingANewRoomUseCaseTests {

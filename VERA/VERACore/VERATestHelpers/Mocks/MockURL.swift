@@ -4,6 +4,6 @@
 
 import Foundation
 
-func makeMockBaseURL() -> URL {
+public func makeMockBaseURL() -> URL {
     URL(string: "https://example.com")!
 }

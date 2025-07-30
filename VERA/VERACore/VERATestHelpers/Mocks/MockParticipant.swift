@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import VERACore
 
-func makeMockParticipant(
+public func makeMockParticipant(
     id: String = "anId",
     name: String = "aName",
     isMicEnabled: Bool = true,

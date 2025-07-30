@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct RoomCredentials {
+public struct MockRoomCredentials {
     public let sessionId: String
     public let token: String
     public let apiKey: String
