@@ -20,3 +20,7 @@ public class MockSessionRepository: SessionRepository {
         self.currentCall = nil
     }
 }
+
+public func makeMockSessionRepository() -> MockSessionRepository {
+    return .init()
+}

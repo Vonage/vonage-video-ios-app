@@ -108,11 +108,11 @@ struct GetRoomCredentialsUseCaseTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        baseURL: URL = URL(string: "https://example.com")!,
+        baseURL: URL = makeMockBaseURL(),
         httpClient: MockHTTPClient = .init(),
         jsonDecoder: JSONDecoder = JSONDecoder()
     ) -> GetRoomCredentialsUseCase {
-        return GetRoomCredentialsUseCase(
+        GetRoomCredentialsUseCase(
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
