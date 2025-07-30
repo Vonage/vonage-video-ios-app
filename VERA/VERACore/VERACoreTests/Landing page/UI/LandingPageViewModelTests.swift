@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import Testing
 import VERACore
+import VERATestHelpers
 
 @Suite("Landing page view model tests")
 struct LandingPageViewModelTests {

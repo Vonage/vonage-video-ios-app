@@ -10,12 +10,12 @@ struct BannerLogo: View {
 
     var body: some View {
         if horizontalSizeClass == .compact {
-            Image("vonage-logo-mobile", bundle: #bundle)
+            Image("vonage-logo-mobile", bundle: .veraCore)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 30)
         } else {
-            Image("vonage-logo-desktop", bundle: #bundle)
+            Image("vonage-logo-desktop", bundle: .veraCore)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 72)

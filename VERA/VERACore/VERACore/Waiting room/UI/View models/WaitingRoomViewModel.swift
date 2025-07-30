@@ -117,7 +117,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public func selectAudioDevice(_ device: AudioDevice) {
         do {
-            try selectAudioDeviceUseCase.invoke(device)
+            try selectAudioDeviceUseCase(device)
         } catch {
             print("Error selecting audio device: \(error)")
         }
@@ -213,7 +213,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     public func joinRoom() async {
         do {
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
-            try await joinRoomUseCase.invoke(request)
+            try await joinRoomUseCase(request)
         } catch {
             print(error.localizedDescription)
         }
@@ -223,10 +223,10 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @MainActor
     public func checkPermissions() async {
-        let micGranted = await requestMicrophonePermissionUseCase.invoke()
+        let micGranted = await requestMicrophonePermissionUseCase()
         guard micGranted else { return }
 
-        let cameraGranted = await requestCameraPermissionUseCase.invoke()
+        let cameraGranted = await requestCameraPermissionUseCase()
         guard cameraGranted else { return }
 
         await startVideoPreview()
@@ -245,7 +245,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     func startVideoPreviewIfNeeded() {
-        if checkCameraAuthorizationStatusUseCase.invoke() {
+        if checkCameraAuthorizationStatusUseCase() {
             Task { [weak self] in
                 await self?.startVideoPreview()
             }

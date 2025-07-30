@@ -1,0 +1,93 @@
+//
+//  Created by Vonage on 23/7/25.
+//
+
+import SwiftUI
+
+public struct MeetingRoomActions {
+    let onShare: (String) -> Void
+    let onRetry: () -> Void
+    let onToggleMic: () -> Void
+    let onToggleCamera: () -> Void
+    let onEndCall: () -> Void
+    let onToggleParticipants: () -> Void
+
+    init(
+        onShare: @escaping (String) -> Void = { _ in },
+        onRetry: @escaping () -> Void = {},
+        onToggleMic: @escaping () -> Void = {},
+        onToggleCamera: @escaping () -> Void = {},
+        onEndCall: @escaping () -> Void = {},
+        onToggleParticipants: @escaping () -> Void = {}
+    ) {
+        self.onShare = onShare
+        self.onRetry = onRetry
+        self.onToggleMic = onToggleMic
+        self.onToggleCamera = onToggleCamera
+        self.onEndCall = onEndCall
+        self.onToggleParticipants = onToggleParticipants
+    }
+}
+
+struct BottomBar: View {
+
+    private let isMicEnabled: Bool
+    private let isCameraEnabled: Bool
+    private let participantsCount: Int
+    private let actions: MeetingRoomActions
+
+    init(
+        isMicEnabled: Bool,
+        isCameraEnabled: Bool,
+        participantsCount: Int,
+        actions: MeetingRoomActions
+    ) {
+        self.isMicEnabled = isMicEnabled
+        self.isCameraEnabled = isCameraEnabled
+        self.participantsCount = participantsCount
+        self.actions = actions
+    }
+
+    var body: some View {
+        HStack {
+            HStack(alignment: .center) {
+                ControlButton(
+                    isActive: isMicEnabled,
+                    iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
+                    action: actions.onToggleMic)
+                ControlButton(
+                    isActive: isCameraEnabled,
+                    iconName: isCameraEnabled ? "video.slash.fill" : "video.fill",
+                    action: actions.onToggleCamera)
+                ControlButton(
+                    isActive: false,
+                    iconName: "square.grid.2x2.fill",
+                    action: {})
+                ParticipantsBadgeButton(
+                    participantsCount: participantsCount,
+                    onToggleParticipants: actions.onToggleParticipants)
+                EndCallControlButton(action: actions.onEndCall)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }.background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.vGray4.opacity(0.8))
+        ).padding()
+    }
+}
+
+#Preview {
+    VStack {
+        BottomBar(isMicEnabled: false, isCameraEnabled: true, participantsCount: 25, actions: .init())
+    }
+    .background(Color.black)
+}
+
+#Preview {
+    VStack {
+        BottomBar(isMicEnabled: false, isCameraEnabled: true, participantsCount: 25, actions: .init())
+    }
+    .background(Color.white)
+    .preferredColorScheme(.dark)
+}

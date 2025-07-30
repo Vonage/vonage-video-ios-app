@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERATestHelpers
 
 @Suite("Try creating a new room use case tests")
 struct TryCreatingANewRoomUseCaseTests {
@@ -13,7 +14,7 @@ struct TryCreatingANewRoomUseCaseTests {
     func createsANewRoom() {
         let sut = makeSUT()
 
-        let roomName = sut.invoke()
+        let roomName = sut()
 
         #expect(!roomName.isEmpty)
     }

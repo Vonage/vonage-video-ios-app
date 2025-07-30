@@ -13,7 +13,7 @@ struct GHRepoButton: View {
                 openURL(url)
             }
         } label: {
-            Image("github-mark", bundle: #bundle)
+            Image("github-mark", bundle: .veraCore)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 30)

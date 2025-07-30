@@ -7,47 +7,62 @@ import OpenTok
 import SwiftUI
 import VERACore
 
-public final class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
-    private var publisher: OTPublisher
+open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
+    private(set) var otPublisher: OTPublisher
 
-    public var view: AnyView {
-        let rendererView = OpenTokRendererView(publisher: publisher)
-        return AnyView(rendererView)
+    var id: String { "publisherID" }
+    var stream: OTStream? { otPublisher.stream }
+
+    var onError: ((Error) -> Void)?
+
+    var participant: Participant {
+        Participant(
+            id: id,
+            name: stream?.name ?? "",
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
+            view: view)
     }
+
+    public lazy var view: AnyView = {
+        let rendererView = UIViewContainer(view: otPublisher.view!)
+        return AnyView(rendererView)
+    }()
 
     public var publishAudio: Bool {
         get {
-            publisher.publishAudio
+            otPublisher.publishAudio
         }
         set {
-            publisher.publishAudio = newValue
+            otPublisher.publishAudio = newValue
         }
     }
 
     public var publishVideo: Bool {
         get {
-            publisher.publishVideo
+            otPublisher.publishVideo
         }
         set {
-            publisher.publishVideo = newValue
+            otPublisher.publishVideo = newValue
         }
     }
 
     public var cameraPosition: CameraPosition {
         get {
-            publisher.cameraPosition == .front ? .front : .back
+            otPublisher.cameraPosition == .front ? .front : .back
         }
 
         set {
-            publisher.cameraPosition = newValue == .front ? .front : .back
+            otPublisher.cameraPosition = newValue == .front ? .front : .back
         }
     }
 
-    init(publisher: OTPublisher) {
-        self.publisher = publisher
+    public init(publisher: OTPublisher) {
+        otPublisher = publisher
     }
 
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
         print(error.localizedDescription)
+        onError?(error)
     }
 }

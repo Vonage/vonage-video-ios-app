@@ -15,7 +15,7 @@ struct BannerDateTime: View {
 
     private static let usFormatter: DateFormatter = {
         let dataFormatter = DateFormatter()
-        dataFormatter.dateFormat = String(localized: "h:mm a • EEE, MMM d", bundle: #bundle)
+        dataFormatter.dateFormat = String(localized: "h:mm a • EEE, MMM d", bundle: .veraCore)
         return dataFormatter
     }()
 

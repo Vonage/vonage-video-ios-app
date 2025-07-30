@@ -13,8 +13,8 @@ struct NewRoomButton: View {
             onHandleNewRoom()
         } label: {
             HStack {
-                Image("video_call", bundle: #bundle)
-                Text("Create room", bundle: #bundle)
+                Image("video_call", bundle: .veraCore)
+                Text("Create room", bundle: .veraCore)
             }
         }
         .buttonStyle(NewRoomButtonStyle())

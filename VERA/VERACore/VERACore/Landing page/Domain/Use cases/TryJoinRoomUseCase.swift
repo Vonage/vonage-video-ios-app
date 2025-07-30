@@ -14,7 +14,7 @@ public final class TryJoinRoomUseCase {
     public init() {
     }
 
-    public func invoke(_ name: String) throws {
+    public func callAsFunction(_ name: String) throws {
 
         if !name.isValidRoomName {
             throw Error.invalidRoomName

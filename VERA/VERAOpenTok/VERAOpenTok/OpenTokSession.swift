@@ -1,0 +1,95 @@
+//
+//  Created by Vonage on 28/7/25.
+//
+
+import Foundation
+import OpenTok
+
+open class OpenTokSession: NSObject, OTSessionDelegate {
+    private let session: OTSession
+
+    var onSessionDidConnect: (() -> Void)?
+    var onSessionDidDisconnect: (() -> Void)?
+    var onSessionFailure: ((Error) -> Void)?
+    var onNewStream: ((OTStream) -> Void)?
+    var onStreamDestroyed: ((OTStream) -> Void)?
+
+    public init(session: OTSession) {
+        self.session = session
+    }
+
+    open func connect(with token: String) throws {
+        var error: OTError?
+        session.connect(withToken: token, error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    open func disconnect() throws {
+        var error: OTError?
+        session.disconnect(&error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    public func session(_ session: OTSession, didFailWithError error: OTError) {
+        onSessionFailure?(error)
+    }
+
+    public func session(_ session: OTSession, streamCreated stream: OTStream) {
+        onNewStream?(stream)
+    }
+
+    public func session(_ session: OTSession, streamDestroyed stream: OTStream) {
+        onStreamDestroyed?(stream)
+    }
+
+    public func sessionDidConnect(_ session: OTSession) {
+        onSessionDidConnect?()
+    }
+
+    public func sessionDidDisconnect(_ session: OTSession) {
+        onSessionDidDisconnect?()
+    }
+
+    public func subscribe(subscriber: OpenTokSuscriber) throws {
+        var error: OTError?
+        let _suscriber: OTSubscriberKit = subscriber.otSuscriber
+        session.subscribe(_suscriber, error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    public func unsubscribe(subscriber: OpenTokSuscriber) throws {
+        var error: OTError?
+        session.unsubscribe(subscriber.otSuscriber, error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    public func publish(publisher: OpenTokPublisher) throws {
+        var error: OTError?
+        session.publish(publisher.otPublisher, error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    public func unpublish(publisher: OpenTokPublisher) throws {
+        var error: OTError?
+        session.unpublish(publisher.otPublisher, error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+}

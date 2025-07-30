@@ -9,7 +9,7 @@ public final class CheckCameraAuthorizationStatusUseCase {
 
     public init() {}
 
-    public func invoke() -> Bool {
+    public func callAsFunction() -> Bool {
         AVCaptureDevice.authorizationStatus(for: .video) == .authorized
     }
 }

@@ -16,7 +16,7 @@ struct TryJoinRoomUseCaseTests {
         let sut = makeSUT()
 
         // Test that the use case doesn't throw for a known valid name
-        try sut.invoke("validroom123")
+        try sut("validroom123")
     }
 
     @Test("Should throw InvalidRoomName error for invalid room name")
@@ -25,7 +25,7 @@ struct TryJoinRoomUseCaseTests {
 
         // Test that the use case throws the correct error type
         #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
-            try sut.invoke("invalid room name")  // Spaces are invalid
+            try sut("invalid room name")  // Spaces are invalid
         }
     }
 
@@ -34,7 +34,7 @@ struct TryJoinRoomUseCaseTests {
         let sut = makeSUT()
 
         #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
-            try sut.invoke("")
+            try sut("")
         }
     }
 
@@ -44,11 +44,11 @@ struct TryJoinRoomUseCaseTests {
 
         // Verify async behavior works correctly
         let validName = "testasyncroomname"
-        try sut.invoke(validName)
+        try sut(validName)
 
         // Multiple async calls should work
-        try sut.invoke("room1")
-        try sut.invoke("room2")
+        try sut("room1")
+        try sut("room2")
     }
 
     @Test("Should validate room names quickly")
@@ -59,7 +59,7 @@ struct TryJoinRoomUseCaseTests {
         let startTime = CFAbsoluteTimeGetCurrent()
 
         for index in 0..<1000 {
-            try sut.invoke("quickroom\(index)")
+            try sut("quickroom\(index)")
         }
 
         let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
@@ -73,7 +73,7 @@ struct TryJoinRoomUseCaseTests {
         let sut = makeSUT()
 
         do {
-            try sut.invoke("@invalid")
+            try sut("@invalid")
             #expect(Bool(false), "Should have thrown an error")
         } catch let error as TryJoinRoomUseCase.Error {
             #expect(error == .invalidRoomName)

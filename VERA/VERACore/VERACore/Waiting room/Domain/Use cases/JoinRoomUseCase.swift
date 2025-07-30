@@ -25,7 +25,7 @@ public final class JoinRoomUseCase {
         self.publisherRepository = publisherRepository
     }
 
-    public func invoke(_ request: JoinRoomRequest) async throws {
+    public func callAsFunction(_ request: JoinRoomRequest) async throws {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
 

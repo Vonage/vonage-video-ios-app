@@ -9,7 +9,7 @@ public final class RequestMicrophonePermissionUseCase {
 
     public init() {}
 
-    public func invoke() async -> Bool {
+    public func callAsFunction() async -> Bool {
         let status = AVCaptureDevice.authorizationStatus(for: .audio)
         return switch status {
         case .authorized: true

@@ -7,10 +7,10 @@ import SwiftUI
 struct LandingPageWelcome: View {
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Welcome to the Vonage Video iOS App", bundle: #bundle)
+            Text("Welcome to the Vonage Video iOS App", bundle: .veraCore)
                 .font(.largeTitle.bold())
                 .padding(.bottom, 10)
-            Text("Create a new room or join an existing one.", bundle: #bundle)
+            Text("Create a new room or join an existing one.", bundle: .veraCore)
                 .foregroundStyle(.uiSecondaryLabel)
         }
     }
