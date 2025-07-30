@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "234D2D29-32E4-4A8D-9BE7-D6A0CB311FEB",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:VERACore.xcodeproj",
+        "identifier" : "6FD1B47E2E1BFAB400BD9F3D",
+        "name" : "VERACoreSnapshotTests"
+      }
+    }
+  ],
+  "version" : 1
+}

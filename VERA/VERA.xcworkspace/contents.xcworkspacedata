@@ -24,4 +24,7 @@
    <FileRef
       location = "group:VERAApp/VERA.xctestplan">
    </FileRef>
+   <FileRef
+      location = "group:../VERACoreSnapshotTests.xctestplan">
+   </FileRef>
 </Workspace>
