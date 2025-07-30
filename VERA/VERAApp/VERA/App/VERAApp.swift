@@ -26,7 +26,8 @@ struct VERAApp: App {
                             makeWaitingRoom(roomName: roomName)
                         case let .meetingRoom(roomName):
                             makeMeetingRoom(roomName: roomName)
-                        case .goodbye: EmptyView()
+                        case let .goodbye(roomName):
+                            makeGoodbyePage(roomName: roomName)
                         }
                     }
             }
@@ -79,6 +80,14 @@ struct VERAApp: App {
     private func makeMeetingRoom(roomName: String) -> some View {
         dependencyContainer.meetingRoomFactory.make(roomName: roomName) {
             navigationCoordinator.leaveMeeting()
+        }
+    }
+    
+    private func makeGoodbyePage(roomName: String) -> some View {
+        GoodByePageFactory().make {
+            navigationCoordinator.startMeeting(roomName)
+        } onReturnToLanding: {
+            navigationCoordinator.returnToLanding()
         }
     }
 }

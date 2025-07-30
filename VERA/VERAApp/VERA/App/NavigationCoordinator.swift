@@ -23,10 +23,11 @@ final class NavigationCoordinator: ObservableObject {
 
     func leaveMeeting() {
         isInMeeting = false
+        let lastRoomName = currentMeetingRoom ?? ""
         currentMeetingRoom = nil
 
         path.removeLast(path.count)
-        path.append(AppRoute.goodbye)
+        path.append(AppRoute.goodbye(lastRoomName))
         logNavigation("Left meeting, navigating to goodbye")
     }
 
@@ -59,7 +60,7 @@ enum AppRoute: Hashable {
     case landing
     case waitingRoom(String)
     case meetingRoom(String)
-    case goodbye
+    case goodbye(String)
 
     var description: String {
         switch self {

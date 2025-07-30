@@ -16,15 +16,13 @@ struct JoinButton: View {
         } label: {
             Text("Join", bundle: .veraCore).foregroundStyle(color)
         }
-        .buttonStyle(JoinRoomButtonStyle(isEnabled: !roomName.isEmpty))
+        .buttonStyle(JoinRoomButtonStyle())
         .disabled(roomName.isEmpty)
     }
 }
 
 struct JoinRoomButtonStyle: ButtonStyle {
     var cornerRadius: CGFloat = 20
-
-    let isEnabled: Bool
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
