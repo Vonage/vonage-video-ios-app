@@ -17,17 +17,30 @@ public class MockCall: VERACore.CallFacade {
     public let _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
+    public var recordedActions: [CallActions] = []
+
+    public enum CallActions: String {
+        case connect
+        case disconnect
+        case toggleLocalVideo
+        case toggleLocalAudio
+    }
+
     public init() {}
 
     public func connect() {
+        recordedActions.append(.connect)
     }
 
     public func disconnect() {
+        recordedActions.append(.disconnect)
     }
 
     public func toggleLocalVideo() {
+        recordedActions.append(.toggleLocalVideo)
     }
 
     public func toggleLocalAudio() {
+        recordedActions.append(.toggleLocalAudio)
     }
 }

@@ -37,7 +37,7 @@ struct GetRoomCredentialsUseCaseTests {
 
         let httpClient = MockHTTPClient()
 
-        let responseData = makeJSONResponse(
+        let responseData = makeCredentialsJSONResponse(
             sessionId: sessionId,
             token: token,
             apiKey: apiKey,
@@ -94,7 +94,7 @@ struct GetRoomCredentialsUseCaseTests {
     @Test func givenARoomNameItShouldBeEncodedInHTTPRequest() async throws {
         let httpClient = MockHTTPClient()
 
-        httpClient.data = makeJSONResponse()
+        httpClient.data = makeCredentialsJSONResponse()
 
         let sut = makeSUT(httpClient: httpClient)
 
@@ -122,28 +122,5 @@ struct GetRoomCredentialsUseCaseTests {
         roomName: String = "Magrathea"
     ) -> RoomCredentialsRequest {
         RoomCredentialsRequest(roomName: roomName)
-    }
-
-    struct CredentialsSuccessfullResponse: Codable {
-        let sessionId: String
-        let token: String
-        let apiKey: String
-        let captionsId: String?
-    }
-
-    private func makeJSONResponse(
-        sessionId: String = "sessionId",
-        token: String = "token",
-        apiKey: String = "apiKey",
-        captionsId: String? = "captionsId"
-    ) -> Data {
-        let response = CredentialsSuccessfullResponse(
-            sessionId: sessionId,
-            token: token,
-            apiKey: apiKey,
-            captionsId: captionsId
-        )
-
-        return try! JSONEncoder().encode(response)
     }
 }

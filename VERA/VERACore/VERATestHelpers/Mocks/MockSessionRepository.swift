@@ -11,6 +11,9 @@ public class MockSessionRepository: SessionRepository {
     public func createSession(
         _ credentials: VERACore.RoomCredentials
     ) async -> any VERACore.CallFacade {
+        if let currentCall = currentCall {
+            return currentCall
+        }
         let call = MockCall()
         self.currentCall = call
         return call

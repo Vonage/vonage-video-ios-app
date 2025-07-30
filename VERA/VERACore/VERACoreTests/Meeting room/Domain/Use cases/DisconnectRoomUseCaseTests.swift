@@ -9,7 +9,7 @@ import VERATestHelpers
 
 @Suite("Disconnect room use case tests")
 struct DisconnectRoomUseCaseTests {
-    
+
     @Test
     func disconnectsAndClearsSessionAndPublisher() {
         let sessionRepository = makeMockSessionRepository()
@@ -19,14 +19,14 @@ struct DisconnectRoomUseCaseTests {
             publisherRepository: publisherRepository)
 
         sessionRepository.currentCall = MockCall()
-        
+
         #expect(sessionRepository.currentCall != nil)
-        
+
         sut()
 
         #expect(sessionRepository.currentCall == nil)
     }
-    
+
     // MARK: - Test Helpers
 
     private func makeSUT(

@@ -5,8 +5,8 @@
 import Foundation
 
 public protocol SessionRepository {
-    var currentCall: CallFacade? { get }
+    var currentCall: (any CallFacade)? { get }
 
-    func createSession(_ credentials: RoomCredentials) async -> CallFacade
+    func createSession(_ credentials: RoomCredentials) async -> any CallFacade
     func clearSession()
 }
