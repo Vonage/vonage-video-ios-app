@@ -15,15 +15,15 @@ public enum MeetingRoomViewState: Equatable {
 
 public struct MeetingRoomState: Equatable {
 
-    let isMicEnabled: Bool
-    let isCameraEnabled: Bool
-    let participants: [Participant]
+    public let isMicEnabled: Bool
+    public let isCameraEnabled: Bool
+    public let participants: [Participant]
 
-    var participantsCount: Int {
+    public var participantsCount: Int {
         participants.count
     }
 
-    init(isMicEnabled: Bool, isCameraEnabled: Bool, participants: [Participant]) {
+    public init(isMicEnabled: Bool, isCameraEnabled: Bool, participants: [Participant]) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participants = participants
@@ -41,13 +41,13 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
 
-    @MainActor @Published public var state: MeetingRoomViewState = .content(MeetingRoomState.default)
+    @MainActor @Published public var state: MeetingRoomViewState = .loading
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
     private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
 
-    weak var currentCall: CallFacade?
+    public weak var currentCall: CallFacade?
 
-    let roomName: RoomName
+    public let roomName: RoomName
 
     public init(
         roomName: RoomName,
@@ -59,34 +59,32 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
-
-        Task { [weak self] in
-            await self?.loadUI()
-        }
     }
 
-    @MainActor
-    public func loadUI() async {
-        state = .loading
-        observeSessionState()
+    public func loadUI() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            state = .loading
+            observeSessionState()
 
-        do {
-            let call = try await connectToRoomUseCase(roomName: roomName)
-            call.participantsPublisher
-                .sink { [weak self] participants in
-                    self?.participantsPublisher.send(participants)
-                }
-                .store(in: &cancellables)
+            do {
+                let call = try await connectToRoomUseCase(roomName: roomName)
+                call.participantsPublisher
+                    .sink { [weak self] participants in
+                        self?.participantsPublisher.send(participants)
+                    }
+                    .store(in: &cancellables)
 
-            call.statePublisher
-                .sink { [weak self] state in
-                    self?.sessionStatePublisher.send(state)
-                }
-                .store(in: &cancellables)
+                call.statePublisher
+                    .sink { [weak self] state in
+                        self?.sessionStatePublisher.send(state)
+                    }
+                    .store(in: &cancellables)
 
-            self.currentCall = call
-        } catch {
-            state = .error(error.localizedDescription)
+                self.currentCall = call
+            } catch {
+                state = .error(error.localizedDescription)
+            }
         }
     }
 

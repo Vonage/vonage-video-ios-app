@@ -17,3 +17,7 @@ public class MockCurrentCallParticipantsRepository: CurrentCallParticipantsRepos
         participantsSubject.value = participants
     }
 }
+
+public func makeMockCurrentCallParticipantsRepository() -> MockCurrentCallParticipantsRepository {
+    .init()
+}
