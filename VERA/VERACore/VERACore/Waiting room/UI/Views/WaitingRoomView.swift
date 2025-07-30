@@ -173,7 +173,7 @@ struct VideoPreviewView: View {
                         }
                     }
                 } label: {
-                    Label(String(localized: "Microphone", bundle: #bundle), systemImage: "mic")
+                    Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                 }
                 Menu {
                     ForEach(state.cameras, id: \.id) { device in
@@ -187,7 +187,7 @@ struct VideoPreviewView: View {
                         }
                     }
                 } label: {
-                    Label(String(localized: "Camera", bundle: #bundle), systemImage: "video")
+                    Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                 }
             }
             .tint(.uiSecondaryLabel)
@@ -215,7 +215,7 @@ struct PrepareToJoinRoom: View {
     var body: some View {
         VStack {
             VStack {
-                Text("Prepare to join:", bundle: #bundle)
+                Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
                     .foregroundColor(.uiLabel)
 

@@ -14,7 +14,7 @@ struct JoinButton: View {
         Button {
             onJoinRoom()
         } label: {
-            Text("Join", bundle: #bundle).foregroundStyle(color)
+            Text("Join", bundle: .veraCore).foregroundStyle(color)
         }
         .buttonStyle(JoinRoomButtonStyle(isEnabled: !roomName.isEmpty))
         .disabled(roomName.isEmpty)

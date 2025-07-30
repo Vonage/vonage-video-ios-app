@@ -16,11 +16,11 @@ public final class UserDefaultsUserRepository: UserRepository {
         self.userDefaults = userDefaults
     }
 
-    public func save(_ user: VERACore.User) async throws {
+    public func save(_ user: User) async throws {
         userDefaults.setValue(user.name, forKey: CodingKeys.name.rawValue)
     }
 
-    public func get() async throws -> VERACore.User? {
+    public func get() async throws -> User? {
         guard let name = userDefaults.string(forKey: CodingKeys.name.rawValue) else {
             return nil
         }

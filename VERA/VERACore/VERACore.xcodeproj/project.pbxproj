@@ -10,6 +10,7 @@
 		6F5B5C3D2E3A0B9900AEE3E3 /* VERATestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C202E3A0B1600AEE3E3 /* VERATestHelpers.framework */; };
 		6F5B5C422E3A0BA300AEE3E3 /* VERATestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C202E3A0B1600AEE3E3 /* VERATestHelpers.framework */; };
 		6F5B5C482E3A0BCB00AEE3E3 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C472E3A0BCB00AEE3E3 /* XCTest.framework */; };
+		6F5B5C612E3A28F000AEE3E3 /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B3F12E1BB74700BD9F3D /* VERACore.framework */; };
 		6FD1B3FD2E1BB74700BD9F3D /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B3F12E1BB74700BD9F3D /* VERACore.framework */; };
 		6FD1B4832E1BFAB400BD9F3D /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B3F12E1BB74700BD9F3D /* VERACore.framework */; platformFilter = ios; };
 		6FD1B48D2E1BFADB00BD9F3D /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 6FD1B48C2E1BFADB00BD9F3D /* SnapshotTesting */; };
@@ -29,6 +30,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 6F5B5C1F2E3A0B1600AEE3E3;
 			remoteInfo = VERATestHelpers;
+		};
+		6F5B5C632E3A28F100AEE3E3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FD1B3E82E1BB74700BD9F3D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6FD1B3F02E1BB74700BD9F3D;
+			remoteInfo = VERACore;
 		};
 		6FD1B3FE2E1BB74700BD9F3D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -83,6 +91,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F5B5C482E3A0BCB00AEE3E3 /* XCTest.framework in Frameworks */,
+				6F5B5C612E3A28F000AEE3E3 /* VERACore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +187,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6F5B5C642E3A28F100AEE3E3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F5B5C212E3A0B1600AEE3E3 /* VERATestHelpers */,
@@ -452,6 +462,11 @@
 			isa = PBXTargetDependency;
 			target = 6F5B5C1F2E3A0B1600AEE3E3 /* VERATestHelpers */;
 			targetProxy = 6F5B5C442E3A0BA300AEE3E3 /* PBXContainerItemProxy */;
+		};
+		6F5B5C642E3A28F100AEE3E3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6FD1B3F02E1BB74700BD9F3D /* VERACore */;
+			targetProxy = 6F5B5C632E3A28F100AEE3E3 /* PBXContainerItemProxy */;
 		};
 		6FD1B3FF2E1BB74700BD9F3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -7,13 +7,13 @@ import Foundation
 public final class DefaultPublisherRepository: PublisherRepository {
 
     private let publisherFactory: PublisherFactory
-    private var publisher: VERACore.VERAPublisher?
+    private var publisher: VERAPublisher?
 
     public init(publisherFactory: PublisherFactory) {
         self.publisherFactory = publisherFactory
     }
 
-    public func getPublisher() async -> VERACore.VERAPublisher {
+    public func getPublisher() async -> VERAPublisher {
         if let publisher = publisher {
             return publisher
         }
