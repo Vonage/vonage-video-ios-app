@@ -81,7 +81,7 @@ fi
 
 echo "   -Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
 echo "   -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok"
-echo "   -Dsonar.tests=VERA/VERAApp/VERATests,VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests"
+echo "   -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests"
 
 echo -e "${GREEN}✅ CI simulation completed successfully!${NC}"
 echo -e "${BLUE}💡 To actually run SonarCloud analysis:${NC}"
