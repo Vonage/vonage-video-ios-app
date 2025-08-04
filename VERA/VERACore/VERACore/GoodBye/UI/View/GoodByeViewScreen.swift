@@ -5,7 +5,7 @@
 import SwiftUI
 
 struct GoodByeViewScreen: View {
-    private let viewModel: GoodByeViewModel
+    @ObservedObject var viewModel: GoodByeViewModel
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
@@ -21,6 +21,7 @@ struct GoodByeViewScreen: View {
 
     var body: some View {
         GoodByeView(
+            archives: viewModel.archives,
             onReenter: onReenter,
             onReturnToLanding: onReturnToLanding
         )

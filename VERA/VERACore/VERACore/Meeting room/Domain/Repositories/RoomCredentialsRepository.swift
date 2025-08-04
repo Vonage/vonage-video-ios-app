@@ -9,7 +9,7 @@ public struct RoomCredentialsResponse: Decodable {
     public let token: String
     public let apiKey: String
     public let captionsId: String?
-    
+
     public init(
         sessionId: String,
         token: String,

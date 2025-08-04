@@ -6,13 +6,13 @@ import Foundation
 import VERACore
 
 public class MockRoomCredentialsRepository: RoomCredentialsRepository {
-    
+
     private var response: RoomCredentialsResponse
-    
+
     public init(response: RoomCredentialsResponse) {
         self.response = response
     }
-    
+
     public func getRoomCredentials(
         _ request: VERACore.RoomCredentialsRequest
     ) async throws -> VERACore.RoomCredentialsResponse {

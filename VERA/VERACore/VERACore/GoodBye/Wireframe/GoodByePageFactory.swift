@@ -7,13 +7,16 @@ import SwiftUI
 public class GoodByePageFactory {
     private let joinRoomUseCase: JoinRoomUseCase
     private let userRepository: UserRepository
+    private let archivesRepository: ArchivesRepository
 
     public init(
         joinRoomUseCase: JoinRoomUseCase,
-        userRepository: UserRepository
+        userRepository: UserRepository,
+        archivesRepository: ArchivesRepository
     ) {
         self.joinRoomUseCase = joinRoomUseCase
         self.userRepository = userRepository
+        self.archivesRepository = archivesRepository
     }
 
     public func make(
@@ -24,7 +27,8 @@ public class GoodByePageFactory {
         let viewModel = GoodByeViewModel(
             roomName: roomName,
             joinRoomUseCase: joinRoomUseCase,
-            userRepository: userRepository)
+            userRepository: userRepository,
+            archivesRepository: archivesRepository)
 
         return GoodByeViewScreen(
             viewModel: viewModel,
@@ -34,6 +38,10 @@ public class GoodByePageFactory {
                     onReenter()
                 }
             },
-            onReturnToLanding: onReturnToLanding)
+            onReturnToLanding: onReturnToLanding
+        )
+        .task {
+            await viewModel.setupUI()
+        }
     }
 }

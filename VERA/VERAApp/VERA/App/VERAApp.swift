@@ -86,7 +86,7 @@ struct VERAApp: App {
 
     private func makeGoodbyePage(roomName: String) -> some View {
         goodByePageFactory.make(roomName: roomName) {
-            navigationCoordinator.startMeeting(roomName)
+            navigationCoordinator.navigateToWaitingRoom(roomName)
         } onReturnToLanding: {
             navigationCoordinator.returnToLanding()
         }

@@ -56,7 +56,8 @@ final class DependencyContainer {
         joinRoomUseCase: .init(
             userRepository: userRepository,
             publisherRepository: publisherRepository),
-        userRepository: userRepository)
+        userRepository: userRepository,
+        archivesRepository: archivesRepository)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
@@ -74,5 +75,9 @@ final class DependencyContainer {
             httpClient: httpClient,
             jsonDecoder: jsonDecoder
         )
+    }()
+
+    lazy var archivesRepository: ArchivesRepository = {
+        DefaultArchivesRepository()
     }()
 }

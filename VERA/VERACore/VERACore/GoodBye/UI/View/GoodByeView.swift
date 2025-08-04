@@ -8,13 +8,16 @@ public struct GoodByeView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
+    public let archives: [ArchiveUIData]
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
+        archives: [ArchiveUIData],
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
+        self.archives = archives
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -27,14 +30,17 @@ public struct GoodByeView: View {
             Group {
                 if verticalSizeClass == .compact {
                     HorizontalGoodByeContentView(
+                        archives: archives,
                         onReenter: onReenter,
                         onReturnToLanding: onReturnToLanding)
                 } else if horizontalSizeClass == .compact {
                     VerticalGoodByeContentView(
+                        archives: archives,
                         onReenter: onReenter,
                         onReturnToLanding: onReturnToLanding)
                 } else {
                     HorizontalGoodByeContentView(
+                        archives: archives,
                         onReenter: onReenter,
                         onReturnToLanding: onReturnToLanding)
                 }
@@ -48,13 +54,16 @@ public struct GoodByeView: View {
 
 public struct HorizontalGoodByeContentView: View {
 
+    public let archives: [ArchiveUIData]
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
+        archives: [ArchiveUIData],
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
+        self.archives = archives
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -68,7 +77,7 @@ public struct HorizontalGoodByeContentView: View {
             .frame(maxWidth: .infinity)
             .padding(.bottom, 40)
 
-            ArchiveList()
+            ArchiveList(archives: archives)
                 .frame(maxWidth: .infinity)
         }
     }
@@ -76,13 +85,16 @@ public struct HorizontalGoodByeContentView: View {
 
 public struct VerticalGoodByeContentView: View {
 
+    public let archives: [ArchiveUIData]
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
+        archives: [ArchiveUIData],
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
+        self.archives = archives
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -97,7 +109,7 @@ public struct VerticalGoodByeContentView: View {
             .padding(.bottom, 40)
             .padding(.horizontal, 20)
 
-            ArchiveList()
+            ArchiveList(archives: archives)
                 .frame(maxWidth: .infinity)
             Spacer()
         }
@@ -105,7 +117,7 @@ public struct VerticalGoodByeContentView: View {
 }
 
 #Preview {
-    GoodByeView {
+    GoodByeView(archives: []) {
     } onReturnToLanding: {
     }
 }
