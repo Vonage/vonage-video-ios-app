@@ -15,17 +15,14 @@ struct ConnectToRoomUseCaseTestsTests {
         let httpClient = MockHTTPClient()
         httpClient.data = makeCredentialsJSONResponse()
 
-        let getRoomCredentialsUseCase = GetRoomCredentialsUseCase(
-            baseURL: makeMockBaseURL(),
-            httpClient: httpClient,
-            jsonDecoder: JSONDecoder())
+        let roomCredentialsRepository = makeMockRoomCredentialsRepository()
         let sessionRepository = makeMockSessionRepository()
 
         let mockCall = MockCall()
         sessionRepository.currentCall = mockCall
 
         let sut = makeSUT(
-            getRoomCredentialsUseCase: getRoomCredentialsUseCase,
+            roomCredentialsRepository: roomCredentialsRepository,
             sessionRepository: sessionRepository)
 
         _ = try await sut(roomName: "heart-of-gold")
@@ -38,11 +35,11 @@ struct ConnectToRoomUseCaseTestsTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        getRoomCredentialsUseCase: GetRoomCredentialsUseCase = makeGetRoomCredentialsUseCase(),
+        roomCredentialsRepository: RoomCredentialsRepository = makeMockRoomCredentialsRepository(),
         sessionRepository: SessionRepository = makeMockSessionRepository()
     ) -> ConnectToRoomUseCase {
         return ConnectToRoomUseCase(
-            getRoomCredentialsUseCase: getRoomCredentialsUseCase,
-            sessionRepository: sessionRepository)
+            sessionRepository: sessionRepository,
+            roomCredentialsRepository: roomCredentialsRepository)
     }
 }

@@ -23,18 +23,11 @@ struct MeetingRoomViewModelTests {
         let sut = makeSUT()
         sut.loadUI()
 
-        await delay()
-
+        let contentState = try await awaitContentState(for: sut)
         #expect(sut.currentCall != nil)
-
-        switch sut.state {
-        case .content(let contentState):
-            #expect(contentState.isMicEnabled == false)
-            #expect(contentState.isCameraEnabled == false)
-            #expect(contentState.participantsCount == 0)
-        default:
-            Issue.record("Expected non empty audio devices, got: \(sut.state)")
-        }
+        #expect(contentState.isMicEnabled == false)
+        #expect(contentState.isCameraEnabled == false)
+        #expect(contentState.participantsCount == 0)
     }
 
     @Test
@@ -42,8 +35,8 @@ struct MeetingRoomViewModelTests {
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = ConnectToRoomUseCase(
-            getRoomCredentialsUseCase: makeMockGetRoomCredentialsUseCase(),
-            sessionRepository: sessionRepository)
+            sessionRepository: sessionRepository,
+            roomCredentialsRepository: makeMockRoomCredentialsRepository())
         let disconnectRoomUseCase = DisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())
@@ -54,18 +47,11 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        await delay()
-
+        let contentState = try await awaitContentState(for: sut)
         #expect(sut.currentCall != nil)
-
-        switch sut.state {
-        case .content(let contentState):
-            #expect(contentState.isMicEnabled == false)
-            #expect(contentState.isCameraEnabled == false)
-            #expect(contentState.participantsCount == 0)
-        default:
-            Issue.record("Expected non empty audio devices, got: \(sut.state)")
-        }
+        #expect(contentState.isMicEnabled == false)
+        #expect(contentState.isCameraEnabled == false)
+        #expect(contentState.participantsCount == 0)
 
         sut.endCall()
 
@@ -90,23 +76,44 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository)
     }
+
+    @discardableResult
+    func awaitContentState(
+        for viewModel: MeetingRoomViewModel,
+        timeout: UInt64 = 2_000_000_000  // 2 seconds
+    ) async throws -> MeetingRoomState {
+        let sequence = viewModel.$state.values
+        let task = Task<MeetingRoomState, Error> {
+            for await value in sequence {
+                if case .content(let contentState) = value {
+                    return contentState
+                }
+            }
+            throw NSError(domain: "Timeout", code: 1)
+        }
+        let timeoutTask = Task<MeetingRoomState, Error> {
+            try await Task.sleep(nanoseconds: timeout)
+            throw NSError(domain: "Timeout", code: 2)
+        }
+        let result = try await withThrowingTaskGroup(of: MeetingRoomState.self) { group in
+            group.addTask { try await task.value }
+            group.addTask { try await timeoutTask.value }
+            guard let value = try await group.next() else {
+                throw NSError(domain: "Timeout", code: 3)
+            }
+            group.cancelAll()
+            return value
+        }
+        return result
+    }
 }
 
 // MARK: - Mocks
 
 func makeMockConnectToRoomUseCase() -> ConnectToRoomUseCase {
     .init(
-        getRoomCredentialsUseCase: makeMockGetRoomCredentialsUseCase(),
-        sessionRepository: makeMockSessionRepository())
-}
-
-func makeMockGetRoomCredentialsUseCase() -> GetRoomCredentialsUseCase {
-    let httpClient = MockHTTPClient()
-    httpClient.data = makeCredentialsJSONResponse()
-    return GetRoomCredentialsUseCase(
-        baseURL: makeMockBaseURL(),
-        httpClient: httpClient,
-        jsonDecoder: JSONDecoder())
+        sessionRepository: makeMockSessionRepository(),
+        roomCredentialsRepository: makeMockRoomCredentialsRepository())
 }
 
 func makeMockDisconnectRoomUseCase() -> DisconnectRoomUseCase {

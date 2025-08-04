@@ -1,14 +1,15 @@
 //
-//  Created by Vonage on 17/7/25.
+//  Created by Vonage on 4/8/25.
 //
 
 import Foundation
 import Testing
 import VERACore
+import VERAOpenTok
 import VERATestHelpers
 
-@Suite("Room credentials data source tests")
-struct GetRoomCredentialsUseCaseTests {
+@Suite("Default Room Credentials Repository tests")
+struct DefaultRoomCredentialsRepositoryTests {
 
     @Test(
         "Feeding valid data into the HTTP client returns the correct credentials",
@@ -111,8 +112,8 @@ struct GetRoomCredentialsUseCaseTests {
         baseURL: URL = makeMockBaseURL(),
         httpClient: MockHTTPClient = .init(),
         jsonDecoder: JSONDecoder = JSONDecoder()
-    ) -> GetRoomCredentialsUseCase {
-        GetRoomCredentialsUseCase(
+    ) -> DefaultRoomCredentialsRepository {
+        DefaultRoomCredentialsRepository(
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)

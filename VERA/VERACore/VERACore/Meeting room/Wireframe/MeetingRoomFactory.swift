@@ -5,28 +5,21 @@
 import SwiftUI
 
 public class MeetingRoomFactory {
-
-    private let baseURL: URL
-    private let httpClient: HTTPClient
-    private let jsonDecoder: JSONDecoder
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
+    private let roomCredentialsRepository: RoomCredentialsRepository
 
     public init(
-        baseURL: URL,
-        httpClient: HTTPClient,
-        jsonDecoder: JSONDecoder,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
-        publisherRepository: PublisherRepository
+        publisherRepository: PublisherRepository,
+        roomCredentialsRepository: RoomCredentialsRepository
     ) {
-        self.baseURL = baseURL
-        self.httpClient = httpClient
-        self.jsonDecoder = jsonDecoder
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
+        self.roomCredentialsRepository = roomCredentialsRepository
     }
 
     public func make(
@@ -36,11 +29,8 @@ public class MeetingRoomFactory {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
             connectToRoomUseCase: .init(
-                getRoomCredentialsUseCase: .init(
-                    baseURL: baseURL,
-                    httpClient: httpClient,
-                    jsonDecoder: jsonDecoder),
-                sessionRepository: sessionRepository),
+                sessionRepository: sessionRepository,
+                roomCredentialsRepository: roomCredentialsRepository),
             disconnectRoomUseCase: .init(
                 sessionRepository: sessionRepository,
                 publisherRepository: publisherRepository),
