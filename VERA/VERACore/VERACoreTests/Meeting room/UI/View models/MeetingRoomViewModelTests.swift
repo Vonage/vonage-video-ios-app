@@ -76,11 +76,11 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository)
     }
-    
+
     @discardableResult
     func awaitContentState(
         for viewModel: MeetingRoomViewModel,
-        timeout: UInt64 = 2_000_000_000 // 2 seconds
+        timeout: UInt64 = 2_000_000_000  // 2 seconds
     ) async throws -> MeetingRoomState {
         let sequence = viewModel.$state.values
         let task = Task<MeetingRoomState, Error> {

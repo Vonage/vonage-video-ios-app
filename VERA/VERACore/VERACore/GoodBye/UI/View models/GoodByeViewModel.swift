@@ -15,7 +15,7 @@ public final class GoodByeViewModel: ObservableObject {
 
     @Published public var archives: [ArchiveUIData] = []
     @Published public var error: GoodByeError? = nil
-    
+
     init(
         roomName: RoomName,
         joinRoomUseCase: JoinRoomUseCase,

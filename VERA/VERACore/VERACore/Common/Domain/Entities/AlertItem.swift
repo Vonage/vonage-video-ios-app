@@ -13,7 +13,7 @@ public struct AlertItem: Identifiable {
         self.title = title
         self.message = message
     }
-    
+
     public static func roomCredentialsError(_ errorMessage: String) -> AlertItem {
         AlertItem(
             title: "Connection Error",
