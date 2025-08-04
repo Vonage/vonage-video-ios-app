@@ -21,12 +21,10 @@ struct VERAApp: App {
                 makeLandingPage()
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
-                        case .landing: EmptyView()
                         case let .waitingRoom(roomName):
                             makeWaitingRoom(roomName: roomName)
-                        case let .meetingRoom(roomName):
-                            makeMeetingRoom(roomName: roomName)
-                        case .goodbye: EmptyView()
+                        case let .goodbye(roomName):
+                            makeGoodbyePage(roomName: roomName)
                         }
                     }
             }
@@ -34,7 +32,7 @@ struct VERAApp: App {
                 if let currentRoom = navigationCoordinator.currentMeetingRoom {
                     makeMeetingRoom(roomName: currentRoom)
                         .onDisappear {
-                            navigationCoordinator.leaveMeeting()
+                            dependencyContainer.publisherRepository.resetPublisher()
                         }
                         .environmentObject(navigationCoordinator)
                 }
@@ -59,15 +57,19 @@ struct VERAApp: App {
 
     // MARK: - Factory Methods
 
+    var landingPageFactory: LandingPageFactory { dependencyContainer.landingPageFactory }
+    var waitingRoomFactory: WaitingRoomFactory { dependencyContainer.waitingRoomFactory }
+    var meetingRoomFactory: MeetingRoomFactory { dependencyContainer.meetingRoomFactory }
+    var goodByePageFactory: GoodByePageFactory { dependencyContainer.goodByePageFactory }
+
     private func makeLandingPage() -> some View {
-        let factory = LandingPageFactory()
-        return factory.make { roomName in
+        landingPageFactory.make { roomName in
             navigationCoordinator.navigateToWaitingRoom(roomName)
         }
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        dependencyContainer.waitingRoomFactory.make(
+        waitingRoomFactory.make(
             roomName: roomName
         ) { roomName in
             Task {
@@ -77,8 +79,17 @@ struct VERAApp: App {
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
-        dependencyContainer.meetingRoomFactory.make(roomName: roomName) {
+        meetingRoomFactory.make(roomName: roomName) {
             navigationCoordinator.leaveMeeting()
         }
+    }
+
+    private func makeGoodbyePage(roomName: String) -> some View {
+        goodByePageFactory.make(roomName: roomName) {
+            navigationCoordinator.navigateToWaitingRoom(roomName)
+        } onReturnToLanding: {
+            navigationCoordinator.returnToLanding()
+        }
+        .navigationBarHidden(true)
     }
 }

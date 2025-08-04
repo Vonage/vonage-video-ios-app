@@ -1,16 +1,17 @@
 //
-//  Created by Vonage on 30/7/25.
+//  Created by Vonage on 4/8/25.
 //
 
 import Foundation
-import VERACore
+import VERAOpenTok
+import VERATestHelpers
 
-public func makeGetRoomCredentialsUseCase(
+public func makeMockDefaultRoomCredentialsRepository(
     baseURL: URL = makeMockBaseURL(),
     httpClient: MockHTTPClient = .init(),
     jsonDecoder: JSONDecoder = JSONDecoder()
-) -> GetRoomCredentialsUseCase {
-    GetRoomCredentialsUseCase(
+) -> DefaultRoomCredentialsRepository {
+    DefaultRoomCredentialsRepository(
         baseURL: baseURL,
         httpClient: httpClient,
         jsonDecoder: jsonDecoder)
