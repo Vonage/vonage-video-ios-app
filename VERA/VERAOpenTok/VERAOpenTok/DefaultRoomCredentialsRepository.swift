@@ -5,7 +5,7 @@
 import Foundation
 import VERACore
 
-public final class DefaultRoomCredentialsRepository: RoomCredentialsRepository {
+public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
     private let baseURL: URL
