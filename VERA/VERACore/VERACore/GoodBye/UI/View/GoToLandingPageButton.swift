@@ -33,7 +33,10 @@ struct GoToLandingPageButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    GoToLandingPageButton() {}
-    GoToLandingPageButton() {}
-    GoToLandingPageButton() {}
+    GoToLandingPageButton {}
+}
+
+#Preview {
+    GoToLandingPageButton {}
+        .preferredColorScheme(.dark)
 }

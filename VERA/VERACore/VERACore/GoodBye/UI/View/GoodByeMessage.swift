@@ -7,7 +7,7 @@ import SwiftUI
 struct GoodByeMessage: View {
     let onReenter: () -> Void
     let onReturnToLanding: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("You left the room", bundle: .veraCore)
@@ -27,4 +27,11 @@ struct GoodByeMessage: View {
     GoodByeMessage {
     } onReturnToLanding: {
     }
+}
+
+#Preview {
+    GoodByeMessage {
+    } onReturnToLanding: {
+    }
+    .preferredColorScheme(.dark)
 }

@@ -18,7 +18,7 @@ struct ReenterRoomButton: View {
 }
 
 struct ReenterRoomButtonStyle: ButtonStyle {
-    var cornerRadius: CGFloat = 20
+    var cornerRadius: CGFloat = 5
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -37,7 +37,7 @@ struct ReenterRoomButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    ReenterRoomButton() {}
-    ReenterRoomButton() {}
-    ReenterRoomButton() {}
+    ReenterRoomButton {}
+    ReenterRoomButton {}
+    ReenterRoomButton {}
 }

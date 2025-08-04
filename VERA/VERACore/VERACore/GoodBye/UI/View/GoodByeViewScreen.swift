@@ -18,11 +18,11 @@ struct GoodByeViewScreen: View {
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
-    
+
     var body: some View {
         GoodByeView(
             onReenter: onReenter,
-            onReturnToLanding: onReturnToLanding)
-        .navigationBarHidden(true)
+            onReturnToLanding: onReturnToLanding
+        )
     }
 }

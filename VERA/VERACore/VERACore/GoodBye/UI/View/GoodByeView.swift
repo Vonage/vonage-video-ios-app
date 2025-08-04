@@ -63,12 +63,13 @@ public struct HorizontalGoodByeContentView: View {
         HStack(alignment: .center, spacing: 20) {
             GoodByeMessage(
                 onReenter: onReenter,
-                onReturnToLanding: onReturnToLanding)
+                onReturnToLanding: onReturnToLanding
+            )
             .frame(maxWidth: .infinity)
             .padding(.bottom, 40)
 
             ArchiveList()
-            .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity)
         }
     }
 }
@@ -90,13 +91,14 @@ public struct VerticalGoodByeContentView: View {
         VStack(alignment: .center, spacing: 20) {
             GoodByeMessage(
                 onReenter: onReenter,
-                onReturnToLanding: onReturnToLanding)
+                onReturnToLanding: onReturnToLanding
+            )
             .frame(maxWidth: .infinity)
             .padding(.bottom, 40)
             .padding(.horizontal, 20)
 
             ArchiveList()
-            .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity)
             Spacer()
         }
     }

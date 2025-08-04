@@ -42,8 +42,8 @@ struct MeetingRoomViewModelTests {
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = ConnectToRoomUseCase(
-            getRoomCredentialsUseCase: makeMockGetRoomCredentialsUseCase(),
-            sessionRepository: sessionRepository)
+            sessionRepository: sessionRepository,
+            roomCredentialsRepository: makeMockRoomCredentialsRepository())
         let disconnectRoomUseCase = DisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())
@@ -96,17 +96,8 @@ struct MeetingRoomViewModelTests {
 
 func makeMockConnectToRoomUseCase() -> ConnectToRoomUseCase {
     .init(
-        getRoomCredentialsUseCase: makeMockGetRoomCredentialsUseCase(),
-        sessionRepository: makeMockSessionRepository())
-}
-
-func makeMockGetRoomCredentialsUseCase() -> GetRoomCredentialsUseCase {
-    let httpClient = MockHTTPClient()
-    httpClient.data = makeCredentialsJSONResponse()
-    return GetRoomCredentialsUseCase(
-        baseURL: makeMockBaseURL(),
-        httpClient: httpClient,
-        jsonDecoder: JSONDecoder())
+        sessionRepository: makeMockSessionRepository(),
+        roomCredentialsRepository: makeMockRoomCredentialsRepository())
 }
 
 func makeMockDisconnectRoomUseCase() -> DisconnectRoomUseCase {

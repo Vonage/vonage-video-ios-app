@@ -6,20 +6,20 @@ import Foundation
 
 public final class ConnectToRoomUseCase {
 
-    private let getRoomCredentialsUseCase: GetRoomCredentialsUseCase
     private let sessionRepository: SessionRepository
+    private let roomCredentialsRepository: RoomCredentialsRepository
 
     public init(
-        getRoomCredentialsUseCase: GetRoomCredentialsUseCase,
-        sessionRepository: SessionRepository
+        sessionRepository: SessionRepository,
+        roomCredentialsRepository: RoomCredentialsRepository
     ) {
-        self.getRoomCredentialsUseCase = getRoomCredentialsUseCase
         self.sessionRepository = sessionRepository
+        self.roomCredentialsRepository = roomCredentialsRepository
     }
 
     @BackgroundActor
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
-        let result = try await getRoomCredentialsUseCase.getRoomCredentials(.init(roomName: roomName))
+        let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
         let call = await sessionRepository.createSession(result.roomCredentials)
         call.connect()
         return call

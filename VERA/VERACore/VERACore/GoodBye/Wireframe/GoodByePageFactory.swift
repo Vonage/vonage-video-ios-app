@@ -5,16 +5,35 @@
 import SwiftUI
 
 public class GoodByePageFactory {
-    
-    public init() {}
-    
+    private let joinRoomUseCase: JoinRoomUseCase
+    private let userRepository: UserRepository
+
+    public init(
+        joinRoomUseCase: JoinRoomUseCase,
+        userRepository: UserRepository
+    ) {
+        self.joinRoomUseCase = joinRoomUseCase
+        self.userRepository = userRepository
+    }
+
     public func make(
+        roomName: RoomName,
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) -> some View {
-        GoodByeViewScreen(
-            viewModel: .init(),
-            onReenter: onReenter,
+        let viewModel = GoodByeViewModel(
+            roomName: roomName,
+            joinRoomUseCase: joinRoomUseCase,
+            userRepository: userRepository)
+
+        return GoodByeViewScreen(
+            viewModel: viewModel,
+            onReenter: {
+                Task { @MainActor in
+                    await viewModel.joinRoom()
+                    onReenter()
+                }
+            },
             onReturnToLanding: onReturnToLanding)
     }
 }
