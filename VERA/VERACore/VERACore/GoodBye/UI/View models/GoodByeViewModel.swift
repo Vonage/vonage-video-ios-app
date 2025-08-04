@@ -5,6 +5,8 @@
 import Combine
 import Foundation
 
+public typealias GoodByeError = String
+
 public final class GoodByeViewModel: ObservableObject {
     private let roomName: RoomName
     private let joinRoomUseCase: JoinRoomUseCase
@@ -12,7 +14,8 @@ public final class GoodByeViewModel: ObservableObject {
     private let archivesRepository: ArchivesRepository
 
     @Published public var archives: [ArchiveUIData] = []
-
+    @Published public var error: GoodByeError? = nil
+    
     init(
         roomName: RoomName,
         joinRoomUseCase: JoinRoomUseCase,
@@ -42,7 +45,7 @@ public final class GoodByeViewModel: ObservableObject {
             let request = JoinRoomRequest(roomName: roomName, userName: username)
             try await joinRoomUseCase(request)
         } catch {
-            print(error.localizedDescription)
+            self.error = error.localizedDescription
         }
     }
 }
