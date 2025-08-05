@@ -20,14 +20,14 @@ public struct AlertItem: Identifiable {
             message: errorMessage
         )
     }
-    
+
     public static func roomCredentialsError(_ errorMessage: String) -> AlertItem {
         AlertItem(
             title: "Connection Error",
             message: "Failed to get room credentials: \(errorMessage)"
         )
     }
-    
+
     public static func goodbyeError(_ errorMessage: String) -> AlertItem {
         AlertItem(
             title: "Error",

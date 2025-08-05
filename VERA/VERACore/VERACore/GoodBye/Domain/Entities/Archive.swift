@@ -17,7 +17,7 @@ public enum ArchiveStatus: String {
             return nil
         }
     }
-    
+
     public init(value: String) {
         switch value {
         case "stopped":

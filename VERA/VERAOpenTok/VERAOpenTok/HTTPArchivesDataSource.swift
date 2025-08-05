@@ -27,7 +27,7 @@ public final class HTTPArchivesDataSource: ArchivesDataSource {
             baseURL
             .appendingPathComponent("session")
             .appending(path: roomName)
-            .appending(path: "startArchive")
+            .appending(path: "archives")
 
         let response = try await httpClient.get(url)
         let archivesResponse = try jsonDecoder.decode(RemoteArchivesResponse.self, from: response)
