@@ -81,12 +81,6 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         return archives.allSatisfy { $0.status == .available }
     }
 
-    private func allArchivesAvailable(_ archives: [VERACore.Archive]) -> Bool {
-        guard !archives.isEmpty else { return true }
-        return archives.allSatisfy { $0.status == .available }
-    }
-
-
     private func getPublisher(
         roomName: VERACore.RoomName
     ) -> CurrentValueSubject<[VERACore.Archive], Error> {
@@ -111,7 +105,7 @@ public struct RemoteArchive: Decodable {
     public let reason: String?
     public let sessionId: String
     public let applicationId: String
-    public let createdAt: Int
+    public let createdAt: TimeInterval
     public let size: Int
     public let duration: Int
     public let outputMode: String
@@ -121,18 +115,21 @@ public struct RemoteArchive: Decodable {
     public let hasTranscription: Bool
     public let sha256sum: String
     public let password: String
-    public let updatedAt: Int
+    public let updatedAt: TimeInterval
     public let multiArchiveTag: String
     public let event: String
     public let resolution: String
     public let url: String?
 
-    var toDomain: VERACore.Archive {
-        .init(
-            id: UUID(uuidString: id) ?? UUID(),
+    var toDomain: VERACore.Archive? {
+        guard let uuid = UUID(uuidString: id) else {
+            return nil
+        }
+        return .init(
+            id: uuid,
             name: name,
-            createdAt: Date(),
-            status: ArchiveStatus(rawValue: status),
+            createdAt: Date(timeIntervalSince1970: createdAt),
+            status: ArchiveStatus(value: status),
             url: url?.toURL)
     }
 }

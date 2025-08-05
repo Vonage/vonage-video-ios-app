@@ -32,6 +32,6 @@ public final class HTTPArchivesDataSource: ArchivesDataSource {
         let response = try await httpClient.get(url)
         let archivesResponse = try jsonDecoder.decode(RemoteArchivesResponse.self, from: response)
 
-        return archivesResponse.archives.map { $0.toDomain }
+        return archivesResponse.archives.compactMap { $0.toDomain }
     }
 }
