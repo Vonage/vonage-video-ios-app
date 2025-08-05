@@ -71,16 +71,16 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
     private func shouldStopPolling(_ archives: [VERACore.Archive]) -> Bool {
         guard !archives.isEmpty else { return true }
-        
+
         // Stop if any archive failed (they won't become available)
         if archives.contains(where: { $0.status == .failed }) {
             return true
         }
-        
+
         // Stop if all archives are available for download
         return archives.allSatisfy { $0.status == .available }
     }
-    
+
     private func allArchivesAvailable(_ archives: [VERACore.Archive]) -> Bool {
         guard !archives.isEmpty else { return true }
         return archives.allSatisfy { $0.status == .available }

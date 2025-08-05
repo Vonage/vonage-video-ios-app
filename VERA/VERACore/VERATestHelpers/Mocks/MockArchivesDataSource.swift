@@ -10,7 +10,7 @@ public final class MockArchivesDataSource: ArchivesDataSource {
     public var responses: [[Archive]] = []
     public var shouldThrowError = false
     public var callCount = 0
-    
+
     public init(
         archivesToReturn: [Archive] = [],
         responses: [[Archive]] = [],
@@ -22,19 +22,19 @@ public final class MockArchivesDataSource: ArchivesDataSource {
         self.shouldThrowError = shouldThrowError
         self.callCount = callCount
     }
-    
+
     public func getArchives(roomName: VERACore.RoomName) async throws -> [VERACore.Archive] {
         callCount += 1
-        
+
         if shouldThrowError {
             throw MockArchivesDataSourceError()
         }
-        
+
         if !responses.isEmpty {
             let responseIndex = min(callCount - 1, responses.count - 1)
             return responses[responseIndex]
         }
-        
+
         return archivesToReturn
     }
 }
