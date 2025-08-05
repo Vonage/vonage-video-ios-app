@@ -13,10 +13,10 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     private let pollingInterval: TimeInterval
 
     public init(
-        pollingInterval: TimeInterval = 5.0,
+        pollingIntervalSeconds: TimeInterval = 5.0,
         archivesDataSource: ArchivesDataSource
     ) {
-        self.pollingInterval = pollingInterval
+        self.pollingInterval = pollingIntervalSeconds
         self.archivesDataSource = archivesDataSource
     }
 

@@ -224,7 +224,7 @@ struct DefaultArchivesRepositoryTests {
         archivesDataSource: ArchivesDataSource = MockArchivesDataSource()
     ) -> DefaultArchivesRepository {
         DefaultArchivesRepository(
-            pollingInterval: 0.1,  // 100ms for faster tests
+            pollingIntervalSeconds: 0.1,  // 100ms for faster tests
             archivesDataSource: archivesDataSource
         )
     }
