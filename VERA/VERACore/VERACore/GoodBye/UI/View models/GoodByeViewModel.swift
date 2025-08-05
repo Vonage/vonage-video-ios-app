@@ -15,7 +15,7 @@ public final class GoodByeViewModel: ObservableObject {
     private let archivesRepository: ArchivesRepository
 
     @Published public var archives: [ArchiveUIData] = []
-    @Published public var error: GoodByeError? = nil
+    @Published public var error: AlertItem? = nil
 
     init(
         roomName: RoomName,
@@ -39,7 +39,7 @@ public final class GoodByeViewModel: ObservableObject {
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        self?.error = error.localizedDescription
+                        self?.error = AlertItem.goodbyeError(error.localizedDescription)
                     }
                 },
                 receiveValue: { [weak self] archives in
@@ -56,7 +56,7 @@ public final class GoodByeViewModel: ObservableObject {
             let request = JoinRoomRequest(roomName: roomName, userName: username)
             try await joinRoomUseCase(request)
         } catch {
-            self.error = error.localizedDescription
+            self.error = AlertItem.genericError(error.localizedDescription)
         }
     }
 }
