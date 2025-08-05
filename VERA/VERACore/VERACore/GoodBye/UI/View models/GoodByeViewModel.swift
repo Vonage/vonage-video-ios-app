@@ -8,6 +8,7 @@ import Foundation
 public typealias GoodByeError = String
 
 public final class GoodByeViewModel: ObservableObject {
+    private var cancellables = Set<AnyCancellable>()
     private let roomName: RoomName
     private let joinRoomUseCase: JoinRoomUseCase
     private let userRepository: UserRepository
@@ -29,13 +30,23 @@ public final class GoodByeViewModel: ObservableObject {
     }
 
     @BackgroundActor
-    public func setupUI() {
-        archivesRepository.getArchives(roomName: roomName)
+    public func setupUI() async {
+        await archivesRepository.getArchives(roomName: roomName)
             .map { archives in
                 archives.map { $0.toUIArchive }
             }
             .receive(on: DispatchQueue.main)
-            .assign(to: &$archives)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    if case .failure(let error) = completion {
+                        self?.error = error.localizedDescription
+                    }
+                },
+                receiveValue: { [weak self] archives in
+                    self?.archives = archives
+                }
+            )
+            .store(in: &cancellables)
     }
 
     @BackgroundActor

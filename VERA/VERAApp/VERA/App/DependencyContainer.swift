@@ -78,6 +78,11 @@ final class DependencyContainer {
     }()
 
     lazy var archivesRepository: ArchivesRepository = {
-        DefaultArchivesRepository()
+        DefaultArchivesRepository(archivesDataSource: archivesDataSource)
     }()
+    
+    lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
+        baseURL: baseURL,
+        httpClient: httpClient,
+        jsonDecoder: jsonDecoder)
 }
