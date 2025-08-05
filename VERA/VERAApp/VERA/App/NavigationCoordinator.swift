@@ -18,7 +18,7 @@ final class NavigationCoordinator: ObservableObject {
     func startMeeting(_ roomName: String) {
         currentMeetingRoom = roomName
         isInMeeting = true
-        
+
         // Ensure we navigate away from the waiting room before starting the meeting.
         // Having two views referencing the same publisher or subscriber video view
         // can cause video loss or rendering issues, especially when rotating the device.

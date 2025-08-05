@@ -9,29 +9,70 @@ import VERACore
 public final class DefaultArchivesRepository: ArchivesRepository {
     private let archivesDataSource: ArchivesDataSource
     private var cache: [String: CurrentValueSubject<[VERACore.Archive], Error>] = [:]
+    private var pollingTasks: [String: Task<Void, Never>] = [:]
+    private let pollingInterval: TimeInterval = 5
 
     public init(
         archivesDataSource: ArchivesDataSource
     ) {
         self.archivesDataSource = archivesDataSource
     }
-    
+
     public func getArchives(
         roomName: VERACore.RoomName
-    ) async -> AnyPublisher<[VERACore.Archive], Error> {
+    ) -> AnyPublisher<[VERACore.Archive], Error> {
         let publisher = getPublisher(roomName: roomName)
-        
-        do {
-            let archives = try await archivesDataSource.getArchives(roomName: roomName)
-            publisher.value = archives
-        } catch {
-            publisher.send(completion: .failure(error))
-        }
-        
+
+        // Start polling
+        startPolling(for: roomName, publisher: publisher)
+
         return publisher.eraseToAnyPublisher()
     }
-    
-    
+
+    private func startPolling(
+        for roomName: VERACore.RoomName,
+        publisher: CurrentValueSubject<[VERACore.Archive], Error>
+    ) {
+        // Cancel any existing polling task for this room
+        pollingTasks[roomName]?.cancel()
+
+        let task = Task {
+            repeat {
+                do {
+                    let archives = try await archivesDataSource.getArchives(roomName: roomName)
+
+                    // Check if task was cancelled
+                    guard !Task.isCancelled else { return }
+
+                    publisher.value = archives
+
+                    // Stop polling if all archives are available
+                    if allArchivesAvailable(archives) {
+                        pollingTasks[roomName] = nil
+                        return
+                    }
+
+                    // Wait before next poll
+                    try await Task.sleep(nanoseconds: 5_000_000_000)  // 5 seconds
+
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    publisher.send(completion: .failure(error))
+                    pollingTasks[roomName] = nil
+                    return
+                }
+            } while !Task.isCancelled
+        }
+
+        pollingTasks[roomName] = task
+    }
+
+    private func allArchivesAvailable(_ archives: [VERACore.Archive]) -> Bool {
+        guard !archives.isEmpty else { return true }
+        return archives.allSatisfy { $0.status == .available }
+    }
+
+
     private func getPublisher(
         roomName: VERACore.RoomName
     ) -> CurrentValueSubject<[VERACore.Archive], Error> {
@@ -71,13 +112,14 @@ public struct RemoteArchive: Decodable {
     public let event: String
     public let resolution: String
     public let url: String?
-    
+
     var toDomain: VERACore.Archive {
-        .init(id: UUID(uuidString: id) ?? UUID(),
-              name: name,
-              createdAt: Date(),
-              status: ArchiveStatus(rawValue: status),
-              url: url?.toURL)
+        .init(
+            id: UUID(uuidString: id) ?? UUID(),
+            name: name,
+            createdAt: Date(),
+            status: ArchiveStatus(rawValue: status),
+            url: url?.toURL)
     }
 }
 

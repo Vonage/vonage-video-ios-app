@@ -6,7 +6,7 @@ import Foundation
 
 public enum ArchiveStatus: String {
     case stopped, available, failed
- 
+
     public init(rawValue: String) {
         switch rawValue {
         case "stopped":
