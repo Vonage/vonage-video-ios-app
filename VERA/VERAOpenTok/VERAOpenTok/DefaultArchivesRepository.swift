@@ -10,11 +10,13 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     private let archivesDataSource: ArchivesDataSource
     private var cache: [String: CurrentValueSubject<[VERACore.Archive], Error>] = [:]
     private var pollingTasks: [String: Task<Void, Never>] = [:]
-    private let pollingInterval: TimeInterval = 5
+    private let pollingInterval: TimeInterval
 
     public init(
+        pollingInterval: TimeInterval = 5.0,
         archivesDataSource: ArchivesDataSource
     ) {
+        self.pollingInterval = pollingInterval
         self.archivesDataSource = archivesDataSource
     }
 
@@ -46,14 +48,14 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                     publisher.value = archives
 
-                    // Stop polling if all archives are available
-                    if allArchivesAvailable(archives) {
+                    // Stop polling if all archives are available or if any failed
+                    if shouldStopPolling(archives) {
                         pollingTasks[roomName] = nil
                         return
                     }
 
                     // Wait before next poll
-                    try await Task.sleep(nanoseconds: 5_000_000_000)  // 5 seconds
+                    try await Task.sleep(nanoseconds: UInt64(pollingInterval * 1_000_000_000))
 
                 } catch {
                     guard !Task.isCancelled else { return }
@@ -67,6 +69,18 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         pollingTasks[roomName] = task
     }
 
+    private func shouldStopPolling(_ archives: [VERACore.Archive]) -> Bool {
+        guard !archives.isEmpty else { return true }
+        
+        // Stop if any archive failed (they won't become available)
+        if archives.contains(where: { $0.status == .failed }) {
+            return true
+        }
+        
+        // Stop if all archives are available for download
+        return archives.allSatisfy { $0.status == .available }
+    }
+    
     private func allArchivesAvailable(_ archives: [VERACore.Archive]) -> Bool {
         guard !archives.isEmpty else { return true }
         return archives.allSatisfy { $0.status == .available }
