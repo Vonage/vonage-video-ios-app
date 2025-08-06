@@ -9,30 +9,45 @@ public typealias MeetingRoomError = String
 
 public enum MeetingRoomViewState: Equatable {
     case loading
-    case error(MeetingRoomError)
     case content(MeetingRoomState)
+}
+
+public enum MeetingRoomLayout {
+    case activeSpeaker, grid
 }
 
 public struct MeetingRoomState: Equatable {
 
+    public let roomName: RoomName
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
     public let participants: [Participant]
-
+    public let layout: MeetingRoomLayout
+    
     public var participantsCount: Int {
         participants.count
     }
 
-    public init(isMicEnabled: Bool, isCameraEnabled: Bool, participants: [Participant]) {
+    public init(
+        roomName: RoomName,
+        isMicEnabled: Bool,
+        isCameraEnabled: Bool,
+        participants: [Participant],
+        layout: MeetingRoomLayout
+    ) {
+        self.roomName = roomName
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participants = participants
+        self.layout = layout
     }
 
     public static let `default` = MeetingRoomState(
+        roomName: "",
         isMicEnabled: false,
         isCameraEnabled: false,
-        participants: [])
+        participants: [],
+        layout: .activeSpeaker)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -42,6 +57,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let disconnectRoomUseCase: DisconnectRoomUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
+    @MainActor @Published public var error: AlertItem? = nil
+    private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
     private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
 
@@ -83,19 +100,23 @@ public final class MeetingRoomViewModel: ObservableObject {
 
                 self.currentCall = call
             } catch {
-                state = .error(error.localizedDescription)
+                Task { @MainActor [weak self] in
+                    self?.error = AlertItem.genericError(error.localizedDescription)
+                }
             }
         }
     }
 
     func observeSessionState() {
-        Publishers.CombineLatest(participantsPublisher, sessionStatePublisher)
-            .map { participants, sessionState in
-                MeetingRoomState(
+        Publishers.CombineLatest3(participantsPublisher, sessionStatePublisher, layoutPublisher)
+            .map { [weak self] participants, sessionState, layout in
+                guard let self else { return MeetingRoomState.default }
+                return MeetingRoomState(
+                    roomName: self.roomName,
                     isMicEnabled: sessionState.isPublishingAudio,
                     isCameraEnabled: sessionState.isPublishingVideo,
-                    participants: participants
-                )
+                    participants: participants,
+                    layout: layout)
             }
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
@@ -115,7 +136,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public func onToggleCamera() {
         Task { [weak self] in
-            self?.currentCall?.toggleLocalVideo()
+            self?.currentCall?.toggleLocalCamera()
         }
     }
 

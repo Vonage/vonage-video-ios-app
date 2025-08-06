@@ -119,6 +119,10 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Audio/Video toggles
 
+    public func toggleLocalCamera() {
+        publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
+    }
+    
     public func toggleLocalVideo() {
         publisher.publishVideo.toggle()
 

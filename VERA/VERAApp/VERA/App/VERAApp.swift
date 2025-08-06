@@ -68,7 +68,9 @@ struct VERAApp: App {
                 navigationCoordinator.startMeeting(roomName)
             }
         }.onDisappear {
-            dependencyContainer.publisherRepository.resetPublisher()
+            if !navigationCoordinator.isInMeeting {
+                dependencyContainer.publisherRepository.resetPublisher()
+            }
         }
     }
 

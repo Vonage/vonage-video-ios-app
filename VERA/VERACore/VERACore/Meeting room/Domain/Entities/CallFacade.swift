@@ -24,6 +24,7 @@ public protocol CallConnectable: AnyObject {
 
 public protocol MediaToggleable: AnyObject {
     func toggleLocalVideo()
+    func toggleLocalCamera()
     func toggleLocalAudio()
 }
 

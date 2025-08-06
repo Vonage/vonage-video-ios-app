@@ -18,22 +18,53 @@ public struct MeetingRoomView: View {
     }
 
     public var body: some View {
-        ZStack {
-            MeetingRoomContent(
-                participants: state.participants,
-                showBottomSheet: false
-            )
-            VStack {
-                Spacer()
-                BottomBar(
-                    isMicEnabled: state.isMicEnabled,
-                    isCameraEnabled: state.isCameraEnabled,
-                    participantsCount: state.participantsCount,
-                    actions: actions)
+        NavigationView {
+            ZStack {
+                MeetingRoomContent(
+                    participants: state.participants,
+                    showBottomSheet: false
+                )
+                VStack {
+                    Spacer()
+                    BottomBar(
+                        isMicEnabled: state.isMicEnabled,
+                        isCameraEnabled: state.isCameraEnabled,
+                        participantsCount: state.participantsCount,
+                        actions: actions)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.black)
+            .navigationTitle(state.roomName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        actions.onEndCall()
+                    } label: {
+                        Image(systemName: "arrow.left")
+                    }
+                }
+                
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        actions.onToggleCamera()
+                    } label: {
+                        Image(systemName: "arrow.triangle.2.circlepath.camera")
+                    }
+                    Button {
+                        actions.onToggleMic()
+                    } label: {
+                        Image(systemName: "speaker.wave.2")
+                    }
+                    Button {
+                        actions.onShare(state.roomName)
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.black)
     }
 }
 
