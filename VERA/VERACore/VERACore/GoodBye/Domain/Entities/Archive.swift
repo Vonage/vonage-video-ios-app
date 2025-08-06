@@ -4,11 +4,33 @@
 
 import Foundation
 
-public enum ArchiveStatus {
-    case stopped, available
+public enum ArchiveStatus: String {
+    case stopped, available, failed
+
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "stopped":
+            self = .stopped
+        case "available":
+            self = .available
+        default:
+            return nil
+        }
+    }
+
+    public init(value: String) {
+        switch value {
+        case "stopped":
+            self = .stopped
+        case "available":
+            self = .available
+        default:
+            self = .failed
+        }
+    }
 }
 
-public struct Archive {
+public struct Archive: Equatable {
     public let id: UUID
     public let name: String
     public let createdAt: Date

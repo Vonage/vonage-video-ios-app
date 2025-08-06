@@ -34,15 +34,7 @@ struct VERAApp: App {
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                         }
-                        .environmentObject(navigationCoordinator)
                 }
-            }
-            .onChange(of: navigationCoordinator.path) { newPath in
-                if newPath.count < previousPath.count {
-                    print("Publisher is reset when returning to the landing page")
-                    dependencyContainer.publisherRepository.resetPublisher()
-                }
-                previousPath = newPath
             }
             .environmentObject(navigationCoordinator)
             .alert(item: $alertItem) { alertItem in
@@ -75,6 +67,8 @@ struct VERAApp: App {
             Task {
                 navigationCoordinator.startMeeting(roomName)
             }
+        }.onDisappear {
+            dependencyContainer.publisherRepository.resetPublisher()
         }
     }
 
@@ -89,6 +83,8 @@ struct VERAApp: App {
             navigationCoordinator.navigateToWaitingRoom(roomName)
         } onReturnToLanding: {
             navigationCoordinator.returnToLanding()
+        } onPlay: { _ in
+
         }
         .navigationBarHidden(true)
     }

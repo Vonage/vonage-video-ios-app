@@ -6,5 +6,5 @@ import Combine
 import Foundation
 
 public protocol ArchivesRepository {
-    func getArchives(roomName: RoomName) -> AnyPublisher<[Archive], Never>
+    func getArchives(roomName: RoomName) async -> AnyPublisher<[Archive], Error>
 }

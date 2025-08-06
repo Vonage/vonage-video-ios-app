@@ -14,10 +14,31 @@ public struct AlertItem: Identifiable {
         self.message = message
     }
 
+    public static func genericError(_ errorMessage: String) -> AlertItem {
+        AlertItem(
+            title: "Error",
+            message: errorMessage
+        )
+    }
+
     public static func roomCredentialsError(_ errorMessage: String) -> AlertItem {
         AlertItem(
             title: "Connection Error",
             message: "Failed to get room credentials: \(errorMessage)"
+        )
+    }
+
+    public static func goodbyeError(_ errorMessage: String) -> AlertItem {
+        AlertItem(
+            title: "Error",
+            message: "Failed to get room archives: \(errorMessage)"
+        )
+    }
+
+    public static func downloadError(_ errorMessage: String) -> AlertItem {
+        AlertItem(
+            title: "Error",
+            message: "Failed to download recording: \(errorMessage)"
         )
     }
 }

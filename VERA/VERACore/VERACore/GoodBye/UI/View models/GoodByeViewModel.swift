@@ -8,34 +8,72 @@ import Foundation
 public typealias GoodByeError = String
 
 public final class GoodByeViewModel: ObservableObject {
+    private var cancellables = Set<AnyCancellable>()
     private let roomName: RoomName
     private let joinRoomUseCase: JoinRoomUseCase
     private let userRepository: UserRepository
     private let archivesRepository: ArchivesRepository
+    private let playRecordingUseCase: PlayRecordingUseCase
 
-    @Published public var archives: [ArchiveUIData] = []
-    @Published public var error: GoodByeError? = nil
+    @MainActor @Published public var archives: [ArchiveUIData] = []
+    @MainActor @Published public var error: AlertItem? = nil
 
     init(
         roomName: RoomName,
         joinRoomUseCase: JoinRoomUseCase,
         userRepository: UserRepository,
-        archivesRepository: ArchivesRepository
+        archivesRepository: ArchivesRepository,
+        playRecordingUseCase: PlayRecordingUseCase
     ) {
         self.roomName = roomName
         self.joinRoomUseCase = joinRoomUseCase
         self.userRepository = userRepository
         self.archivesRepository = archivesRepository
+        self.playRecordingUseCase = playRecordingUseCase
     }
 
     @BackgroundActor
-    public func setupUI() {
-        archivesRepository.getArchives(roomName: roomName)
-            .map { archives in
-                archives.map { $0.toUIArchive }
+    public func setupUI() async {
+        await archivesRepository.getArchives(roomName: roomName)
+            .map { [weak self] archives in
+                guard let self else { return [] }
+                return archives.map { self.mapToUIArchive($0) }
             }
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$archives)
+            .sink(
+                receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        Task { @MainActor [weak self] in
+                            self?.error = AlertItem.goodbyeError(error.localizedDescription)
+                        }
+                    }
+                },
+                receiveValue: { archives in
+                    Task { @MainActor [weak self] in
+                        self?.archives = archives
+                    }
+                }
+            )
+            .store(in: &cancellables)
+    }
+
+    public func mapToUIArchive(_ archive: Archive) -> ArchiveUIData {
+        var uiArchive = archive.toUIArchive
+        uiArchive.onDownload = { [weak self] in
+            self?.downloadArchive(archive)
+        }
+        return uiArchive
+    }
+
+    public func downloadArchive(_ archive: Archive) {
+        Task {
+            do {
+                try await playRecordingUseCase(archive)
+            } catch {
+                Task { @MainActor [weak self] in
+                    self?.error = AlertItem.downloadError(error.localizedDescription)
+                }
+            }
+        }
     }
 
     @BackgroundActor
@@ -45,7 +83,9 @@ public final class GoodByeViewModel: ObservableObject {
             let request = JoinRoomRequest(roomName: roomName, userName: username)
             try await joinRoomUseCase(request)
         } catch {
-            self.error = error.localizedDescription
+            Task { @MainActor [weak self] in
+                self?.error = AlertItem.genericError(error.localizedDescription)
+            }
         }
     }
 }

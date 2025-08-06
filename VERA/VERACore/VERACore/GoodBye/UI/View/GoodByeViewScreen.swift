@@ -24,6 +24,12 @@ struct GoodByeViewScreen: View {
             archives: viewModel.archives,
             onReenter: onReenter,
             onReturnToLanding: onReturnToLanding
-        )
+        ).alert(item: $viewModel.error) { alertItem in
+            Alert(
+                title: Text(alertItem.title),
+                message: Text(alertItem.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
 }
