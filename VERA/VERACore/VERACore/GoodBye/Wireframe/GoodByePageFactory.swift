@@ -9,7 +9,7 @@ public class GoodByePageFactory {
     private let userRepository: UserRepository
     private let archivesRepository: ArchivesRepository
     private let archiveRecordingsRepository: ArchiveRecordingsRepository
-    
+
     public init(
         joinRoomUseCase: JoinRoomUseCase,
         userRepository: UserRepository,

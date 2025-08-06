@@ -6,7 +6,7 @@ import Foundation
 
 public struct ArchiveRecording {
     public let url: URL
-    
+
     public init(url: URL) {
         self.url = url
     }

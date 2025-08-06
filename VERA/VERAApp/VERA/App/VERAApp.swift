@@ -84,7 +84,7 @@ struct VERAApp: App {
         } onReturnToLanding: {
             navigationCoordinator.returnToLanding()
         } onPlay: { _ in
-            
+
         }
         .navigationBarHidden(true)
     }

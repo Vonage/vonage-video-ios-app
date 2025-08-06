@@ -86,7 +86,7 @@ final class DependencyContainer {
         baseURL: baseURL,
         httpClient: httpClient,
         jsonDecoder: jsonDecoder)
-    
+
     lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
         httpClient: httpClient)
 }

@@ -14,7 +14,7 @@ public final class GoodByeViewModel: ObservableObject {
     private let userRepository: UserRepository
     private let archivesRepository: ArchivesRepository
     private let playRecordingUseCase: PlayRecordingUseCase
-    
+
     @MainActor @Published public var archives: [ArchiveUIData] = []
     @MainActor @Published public var error: AlertItem? = nil
 
@@ -63,7 +63,7 @@ public final class GoodByeViewModel: ObservableObject {
         }
         return uiArchive
     }
-    
+
     public func downloadArchive(_ archive: Archive) {
         Task {
             do {
@@ -75,7 +75,7 @@ public final class GoodByeViewModel: ObservableObject {
             }
         }
     }
-    
+
     @BackgroundActor
     public func joinRoom() async {
         do {
