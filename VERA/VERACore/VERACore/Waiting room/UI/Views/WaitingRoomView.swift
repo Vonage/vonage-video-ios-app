@@ -155,7 +155,7 @@ struct VideoPreviewView: View {
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
-            .aspectRatio(16 / 9, contentMode: .fit)
+            .aspectRatio(16/9, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
             .animation(.easeInOut, value: cornerRadius)
@@ -251,6 +251,28 @@ struct PrepareToJoinRoom: View {
             ]),
         userName: .constant("Zaphod Beeblebrox"),
         publisherVideoView: .init(videoView: nil),
+        onJoinRoom: {},
+        onMicrophoneToggle: {},
+        onCameraToggle: {}
+    )
+}
+
+#Preview {
+    WaitingRoomView(
+        state: .init(
+            roomName: "Room name",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            audioDevices: [
+                .init(id: "", name: "Earpiece", iconName: "iphone"),
+                .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),
+            ],
+            cameras: [
+                .init(id: "", name: "Front camera", iconName: "person.fill.viewfinder"),
+                .init(id: "", name: "Back camera", iconName: "iphone.rear.camera"),
+            ]),
+        userName: .constant("Zaphod Beeblebrox"),
+        publisherVideoView: .init(videoView: AnyView(Color.red)),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

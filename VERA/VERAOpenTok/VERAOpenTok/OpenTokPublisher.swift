@@ -24,11 +24,14 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             view: view)
     }
 
-    public lazy var view: AnyView = {
+    public var view: AnyView {
         let rendererView = UIViewContainer(view: otPublisher.view!)
-        return AnyView(rendererView)
-    }()
-
+        otPublisher.viewScaleBehavior = .fit
+        return AnyView(
+            rendererView.aspectRatio(stream?.videoDimensions.aspectRatio ?? 4/3, contentMode: .fit)
+        )
+    }
+    
     public var publishAudio: Bool {
         get {
             otPublisher.publishAudio

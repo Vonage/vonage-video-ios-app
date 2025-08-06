@@ -8,17 +8,30 @@ struct MeetingRoomContent: View {
 
     let participants: [Participant]
     let showBottomSheet: Bool
-
-    init(participants: [Participant], showBottomSheet: Bool) {
+    let layout: MeetingRoomLayout
+    
+    init(
+        participants: [Participant],
+        showBottomSheet: Bool,
+        layout: MeetingRoomLayout
+    ) {
         self.participants = participants
         self.showBottomSheet = showBottomSheet
+        self.layout = layout
     }
 
     var body: some View {
-        AdaptiveGrid(participants: participants)
+        if layout == .grid {
+            GridLayout(participants: participants)
+        } else {
+            ActiveSpeakerLayout(participants: participants)
+        }
     }
 }
 
 #Preview {
-    MeetingRoomContent(participants: [], showBottomSheet: false)
+    MeetingRoomContent(
+        participants: [],
+        showBottomSheet: false,
+        layout: .grid)
 }

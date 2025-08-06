@@ -9,6 +9,7 @@ public struct MeetingRoomActions {
     let onRetry: () -> Void
     let onToggleMic: () -> Void
     let onToggleCamera: () -> Void
+    let onCameraSwitch: () -> Void
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
 
@@ -17,6 +18,7 @@ public struct MeetingRoomActions {
         onRetry: @escaping () -> Void = {},
         onToggleMic: @escaping () -> Void = {},
         onToggleCamera: @escaping () -> Void = {},
+        onCameraSwitch: @escaping () -> Void = {},
         onEndCall: @escaping () -> Void = {},
         onToggleParticipants: @escaping () -> Void = {}
     ) {
@@ -24,6 +26,7 @@ public struct MeetingRoomActions {
         self.onRetry = onRetry
         self.onToggleMic = onToggleMic
         self.onToggleCamera = onToggleCamera
+        self.onCameraSwitch = onCameraSwitch
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
     }
@@ -68,25 +71,33 @@ struct BottomBar: View {
                     onToggleParticipants: actions.onToggleParticipants)
                 EndCallControlButton(action: actions.onEndCall)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-        }.background(
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+
+        }
+        .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.vGray4.opacity(0.8))
-        ).padding()
+        ) 
     }
 }
 
 #Preview {
     VStack {
-        BottomBar(isMicEnabled: false, isCameraEnabled: true, participantsCount: 25, actions: .init())
+        BottomBar(isMicEnabled: false,
+                  isCameraEnabled: true,
+                  participantsCount: 25,
+                  actions: .init())
     }
     .background(Color.black)
 }
 
 #Preview {
     VStack {
-        BottomBar(isMicEnabled: false, isCameraEnabled: true, participantsCount: 25, actions: .init())
+        BottomBar(isMicEnabled: false,
+                  isCameraEnabled: true,
+                  participantsCount: 25,
+                  actions: .init())
     }
     .background(Color.white)
     .preferredColorScheme(.dark)

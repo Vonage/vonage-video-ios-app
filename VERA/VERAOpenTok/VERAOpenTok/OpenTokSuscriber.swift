@@ -22,10 +22,13 @@ public class OpenTokSuscriber: NSObject {
             view: view)
     }()
 
-    public lazy var view: AnyView = {
+    public var view: AnyView {
         let rendererView = UIViewContainer(view: otSuscriber.view!)
-        return AnyView(rendererView)
-    }()
+        otSuscriber.viewScaleBehavior = .fit
+        return AnyView(
+            rendererView.aspectRatio(stream.videoDimensions.aspectRatio, contentMode: .fit)
+        )
+    }
 
     init(suscriber: OTSubscriber) {
         otSuscriber = suscriber
@@ -57,5 +60,11 @@ extension OpenTokSuscriber: OTSubscriberKitCaptionsDelegate {
 
     public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {
 
+    }
+}
+
+extension CGSize {
+    var aspectRatio: CGFloat {
+        width / height
     }
 }

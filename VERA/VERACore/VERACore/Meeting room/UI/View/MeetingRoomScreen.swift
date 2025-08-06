@@ -26,6 +26,7 @@ public struct MeetingRoomScreen: View {
                         onRetry: {},
                         onToggleMic: viewModel.onToggleMic,
                         onToggleCamera: viewModel.onToggleCamera,
+                        onCameraSwitch: viewModel.onCameraSwitch,
                         onEndCall: {
                             viewModel.endCall()
                             onBack()

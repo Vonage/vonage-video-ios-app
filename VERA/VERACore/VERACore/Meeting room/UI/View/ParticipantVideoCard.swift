@@ -13,17 +13,11 @@ struct ParticipantVideoCard: View {
         ZStack(alignment: .center) {
             if participant.isCameraEnabled {
                 participant.view
-                    .id(participant.id + "_view")
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .edgesIgnoringSafeArea(.all)
-                    .background(.vGray4.opacity(0.8))
             } else {
                 VStack {
                     AvatarInitials(state: .init(userName: participant.name))
                         .padding(24)
                 }
-                .id(participant.id + "_initials")
-                .background(.vGray4.opacity(0.8))
             }
 
             VStack {
@@ -39,10 +33,7 @@ struct ParticipantVideoCard: View {
             }
             .padding(8)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.uiSystemBackground))
-        )
+        .background(.vGray4.opacity(0.8))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
     }
@@ -56,8 +47,6 @@ struct NameLabel: View {
             .foregroundColor(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.black.opacity(0.6))
-            .cornerRadius(8)
             .lineLimit(1)
             .truncationMode(.tail)
     }
@@ -82,6 +71,17 @@ struct MicIndicator: View {
             name: "name",
             isMicEnabled: true,
             isCameraEnabled: true,
+            view: AnyView(EmptyView()))
+    )
+}
+
+#Preview {
+    ParticipantVideoCard(
+        participant: Participant(
+            id: "",
+            name: "name",
+            isMicEnabled: true,
+            isCameraEnabled: false,
             view: AnyView(EmptyView()))
     )
 }

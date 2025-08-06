@@ -18,25 +18,26 @@ public struct MeetingRoomView: View {
     }
 
     public var body: some View {
-        NavigationView {
-            ZStack {
+        NavigationStack {
+            VStack(spacing: 0) {
                 MeetingRoomContent(
                     participants: state.participants,
-                    showBottomSheet: false
-                )
-                VStack {
-                    Spacer()
-                    BottomBar(
-                        isMicEnabled: state.isMicEnabled,
-                        isCameraEnabled: state.isCameraEnabled,
-                        participantsCount: state.participantsCount,
-                        actions: actions)
-                }
+                    showBottomSheet: false,
+                    layout: state.layout)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                BottomBar(
+                    isMicEnabled: state.isMicEnabled,
+                    isCameraEnabled: state.isCameraEnabled,
+                    participantsCount: state.participantsCount,
+                    actions: actions)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
             .navigationTitle(state.roomName)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(.black, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
@@ -48,7 +49,7 @@ public struct MeetingRoomView: View {
                 
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
-                        actions.onToggleCamera()
+                        actions.onCameraSwitch()
                     } label: {
                         Image(systemName: "arrow.triangle.2.circlepath.camera")
                     }
@@ -65,9 +66,18 @@ public struct MeetingRoomView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .tint(.white)
+        .navigationBarHidden(false)
     }
 }
 
 #Preview {
-    MeetingRoomView(state: .default, actions: .init())
+    MeetingRoomView(
+        state: .init(roomName: "heart-of-gold",
+                     isMicEnabled: true,
+                     isCameraEnabled: true,
+                     participants: [],
+                     layout: .activeSpeaker),
+        actions: .init())
 }

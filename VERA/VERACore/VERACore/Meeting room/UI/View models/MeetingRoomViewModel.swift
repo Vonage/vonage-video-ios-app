@@ -136,6 +136,12 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public func onToggleCamera() {
         Task { [weak self] in
+            self?.currentCall?.toggleLocalVideo()
+        }
+    }
+    
+    public func onCameraSwitch() {
+        Task { [weak self] in
             self?.currentCall?.toggleLocalCamera()
         }
     }
