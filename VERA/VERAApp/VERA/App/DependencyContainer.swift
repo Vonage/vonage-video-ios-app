@@ -57,7 +57,8 @@ final class DependencyContainer {
             userRepository: userRepository,
             publisherRepository: publisherRepository),
         userRepository: userRepository,
-        archivesRepository: archivesRepository)
+        archivesRepository: archivesRepository,
+        archiveRecordingsRepository: archiveRecordingsRepository)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
@@ -85,4 +86,7 @@ final class DependencyContainer {
         baseURL: baseURL,
         httpClient: httpClient,
         jsonDecoder: jsonDecoder)
+    
+    lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
+        httpClient: httpClient)
 }

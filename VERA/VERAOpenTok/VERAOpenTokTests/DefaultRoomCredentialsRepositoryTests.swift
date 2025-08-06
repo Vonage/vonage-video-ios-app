@@ -59,7 +59,7 @@ struct DefaultRoomCredentialsRepositoryTests {
     @Test func givenEmptyJSONFileErrorIsThrown() async throws {
         let httpClient = MockHTTPClient()
 
-        httpClient.data = "{}".data(using: .utf8)
+        httpClient.data = "{}".data(using: .utf8)!
 
         let sut = makeSUT(httpClient: httpClient)
 
@@ -77,7 +77,7 @@ struct DefaultRoomCredentialsRepositoryTests {
     @Test func givenEmptyFileErrorIsThrown() async throws {
         let httpClient = MockHTTPClient()
 
-        httpClient.data = "".data(using: .utf8)
+        httpClient.data = "".data(using: .utf8)!
 
         let sut = makeSUT(httpClient: httpClient)
 

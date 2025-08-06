@@ -34,4 +34,11 @@ public struct AlertItem: Identifiable {
             message: "Failed to get room archives: \(errorMessage)"
         )
     }
+    
+    public static func downloadError(_ errorMessage: String) -> AlertItem {
+        AlertItem(
+            title: "Error",
+            message: "Failed to download recording: \(errorMessage)"
+        )
+    }
 }

@@ -83,6 +83,8 @@ struct VERAApp: App {
             navigationCoordinator.navigateToWaitingRoom(roomName)
         } onReturnToLanding: {
             navigationCoordinator.returnToLanding()
+        } onPlay: { _ in
+            
         }
         .navigationBarHidden(true)
     }
