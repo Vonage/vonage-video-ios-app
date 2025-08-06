@@ -155,7 +155,7 @@ struct VideoPreviewView: View {
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
-            .aspectRatio(16/9, contentMode: .fit)
+            .aspectRatio(16 / 9, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
             .animation(.easeInOut, value: cornerRadius)

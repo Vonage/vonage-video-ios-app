@@ -23,8 +23,9 @@ public struct MeetingRoomView: View {
                 MeetingRoomContent(
                     participants: state.participants,
                     showBottomSheet: false,
-                    layout: state.layout)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    layout: state.layout
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 BottomBar(
                     isMicEnabled: state.isMicEnabled,
                     isCameraEnabled: state.isCameraEnabled,
@@ -46,7 +47,7 @@ public struct MeetingRoomView: View {
                         Image(systemName: "arrow.left")
                     }
                 }
-                
+
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
                         actions.onCameraSwitch()
@@ -74,10 +75,11 @@ public struct MeetingRoomView: View {
 
 #Preview {
     MeetingRoomView(
-        state: .init(roomName: "heart-of-gold",
-                     isMicEnabled: true,
-                     isCameraEnabled: true,
-                     participants: [],
-                     layout: .activeSpeaker),
+        state: .init(
+            roomName: "heart-of-gold",
+            isMicEnabled: true,
+            isCameraEnabled: true,
+            participants: [],
+            layout: .activeSpeaker),
         actions: .init())
 }

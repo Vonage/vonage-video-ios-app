@@ -23,7 +23,7 @@ public struct MeetingRoomState: Equatable {
     public let isCameraEnabled: Bool
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
-    
+
     public var participantsCount: Int {
         participants.count
     }
@@ -139,7 +139,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             self?.currentCall?.toggleLocalVideo()
         }
     }
-    
+
     public func onCameraSwitch() {
         Task { [weak self] in
             self?.currentCall?.toggleLocalCamera()

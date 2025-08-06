@@ -9,7 +9,7 @@ struct MeetingRoomContent: View {
     let participants: [Participant]
     let showBottomSheet: Bool
     let layout: MeetingRoomLayout
-    
+
     init(
         participants: [Participant],
         showBottomSheet: Bool,

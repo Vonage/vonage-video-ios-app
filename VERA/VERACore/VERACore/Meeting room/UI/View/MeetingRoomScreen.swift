@@ -7,7 +7,7 @@ import SwiftUI
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
     private let onBack: () -> Void
-    
+
     public init(
         viewModel: MeetingRoomViewModel,
         onBack: @escaping () -> Void
@@ -22,7 +22,7 @@ public struct MeetingRoomScreen: View {
                 MeetingRoomView(
                     state: state,
                     actions: .init(
-                        onShare: {_ in },
+                        onShare: { _ in },
                         onRetry: {},
                         onToggleMic: viewModel.onToggleMic,
                         onToggleCamera: viewModel.onToggleCamera,

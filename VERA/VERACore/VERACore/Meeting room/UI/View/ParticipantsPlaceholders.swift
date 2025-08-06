@@ -8,7 +8,7 @@ struct ParticipantsPlaceholders: View {
     let participantNames: [String]
     let maxVisiblePlaceholders: Int
     let spacedBy: CGFloat
-    
+
     init(
         participantNames: [String],
         maxVisiblePlaceholders: Int = 2,
@@ -18,11 +18,11 @@ struct ParticipantsPlaceholders: View {
         self.maxVisiblePlaceholders = maxVisiblePlaceholders
         self.spacedBy = spacedBy
     }
-    
+
     var body: some View {
         let visiblePlaceholders = Array(participantNames.prefix(maxVisiblePlaceholders))
         let additionalCount = participantNames.count - maxVisiblePlaceholders
-        
+
         ZStack(alignment: .center) {
             HStack(spacing: spacedBy) {
                 ForEach(Array(visiblePlaceholders.enumerated()), id: \.offset) { index, participant in
@@ -33,7 +33,7 @@ struct ParticipantsPlaceholders: View {
                                 .stroke(Color.primary, lineWidth: 2)
                         )
                 }
-                
+
                 if additionalCount > 0 {
                     AdditionalParticipantsAvatar(count: additionalCount)
                         .zIndex(0)
@@ -48,19 +48,19 @@ struct ParticipantsPlaceholders: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
-        .aspectRatio(4/3, contentMode: .fit)
+        .aspectRatio(4 / 3, contentMode: .fit)
     }
 }
 
 struct AdditionalParticipantsAvatar: View {
     let count: Int
     let size: CGFloat
-    
+
     init(count: Int, size: CGFloat = 96) {
         self.count = count
         self.size = size
     }
-    
+
     var body: some View {
         Circle()
             .fill(Color.gray)
@@ -85,7 +85,8 @@ struct ParticipantsPlaceholders_Previews: PreviewProvider {
                 "Arthur Dent",
                 "Ford Prefect",
                 "Zaphod Beeblebrox",
-                "Marvin"]
+                "Marvin",
+            ]
         )
         .previewLayout(.sizeThatFits)
         .padding()

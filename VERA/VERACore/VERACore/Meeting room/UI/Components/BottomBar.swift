@@ -78,26 +78,28 @@ struct BottomBar: View {
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.vGray4.opacity(0.8))
-        ) 
+        )
     }
 }
 
 #Preview {
     VStack {
-        BottomBar(isMicEnabled: false,
-                  isCameraEnabled: true,
-                  participantsCount: 25,
-                  actions: .init())
+        BottomBar(
+            isMicEnabled: false,
+            isCameraEnabled: true,
+            participantsCount: 25,
+            actions: .init())
     }
     .background(Color.black)
 }
 
 #Preview {
     VStack {
-        BottomBar(isMicEnabled: false,
-                  isCameraEnabled: true,
-                  participantsCount: 25,
-                  actions: .init())
+        BottomBar(
+            isMicEnabled: false,
+            isCameraEnabled: true,
+            participantsCount: 25,
+            actions: .init())
     }
     .background(Color.white)
     .preferredColorScheme(.dark)

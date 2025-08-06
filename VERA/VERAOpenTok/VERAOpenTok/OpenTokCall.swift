@@ -122,7 +122,7 @@ public final class OpenTokCall: CallFacade {
     public func toggleLocalCamera() {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
     }
-    
+
     public func toggleLocalVideo() {
         publisher.publishVideo.toggle()
 
