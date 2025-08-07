@@ -47,6 +47,11 @@ public class Participant: AnyObject, Identifiable, Hashable {
               dimensions.width > 0 && dimensions.height > 0 else {
             return 640.0 / 480.0
         }
-        return Double(dimensions.width / dimensions.height)
+        
+        var ratio = Double(dimensions.width / dimensions.height)
+        if ratio < 1 {
+            ratio = 1.33
+        }
+        return ratio
     }
 }

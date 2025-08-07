@@ -12,22 +12,12 @@ struct ParticipantVideoCard: View {
         Group {
             if participant.isCameraEnabled {
                 participant.view
-                    .aspectRatio(participant.aspectRatio, contentMode: .fit) // ✅ Usa aspect ratio del stream
-                    .clipped() // Asegura que no se desborde
+                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                    .clipped()
                     .overlay(
-                        // Overlay que no afecta el tamaño
-                        VStack {
-                            HStack {
-                                Spacer()
-                                MicIndicator(isMicEnabled: participant.isMicEnabled)
-                            }
-                            Spacer()
-                            HStack {
-                                NameLabel(name: participant.name)
-                                Spacer()
-                            }
-                        }
-                        .padding(8)
+                        ParticipantVideoCardOverlays(
+                            isMicEnabled: participant.isMicEnabled,
+                            name: participant.name)
                     )
             } else {
                 ZStack {
@@ -35,44 +25,40 @@ struct ParticipantVideoCard: View {
                         AvatarInitials(state: .init(userName: participant.name))
                             .padding(24)
                     }
-                    .frame(minWidth: 160, minHeight: 120) // Tamaño mínimo para avatar
-                    .aspectRatio(participant.aspectRatio, contentMode: .fit) // ✅ Consistencia visual
+                    .frame(minWidth: 160, minHeight: 120)
+                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
                     .background(.vGray4.opacity(0.8))
                     
-                    VStack {
-                        HStack {
-                            Spacer()
-                            MicIndicator(isMicEnabled: participant.isMicEnabled)
-                        }
-                        Spacer()
-                        HStack {
-                            NameLabel(name: participant.name)
-                            Spacer()
-                        }
-                    }
-                    .padding(8)
+                    ParticipantVideoCardOverlays(
+                        isMicEnabled: participant.isMicEnabled,
+                        name: participant.name)
                 }
             }
         }
         .background(.vGray4.opacity(0.8))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
-        // 🔍 Debug overlay temporal
-        .overlay(
-            VStack(alignment: .leading, spacing: 2) {
-                if let dimensions = participant.videoDimensions {
-                    Text("📐 \(Int(dimensions.width))×\(Int(dimensions.height))")
-                    Text("📏 \(String(format: "%.2f", participant.aspectRatio))")
-                } else {
-                    Text("📐 No dimensions")
-                }
+    }
+}
+
+struct ParticipantVideoCardOverlays: View {
+    
+    let isMicEnabled: Bool
+    let name: String
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Spacer()
+                MicIndicator(isMicEnabled: isMicEnabled)
             }
-            .font(.system(size: 8))
-            .foregroundColor(.white)
-            .background(Color.black.opacity(0.7))
-            .padding(2),
-            alignment: .topTrailing
-        )
+            Spacer()
+            HStack {
+                NameLabel(name: name)
+                Spacer()
+            }
+        }
+        .padding(8)
     }
 }
 

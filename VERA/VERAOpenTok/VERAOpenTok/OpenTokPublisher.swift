@@ -16,14 +16,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     var onError: ((Error) -> Void)?
 
     public var videoDimensions: CGSize? { stream?.videoDimensions }
-
-    public var aspectRatio: Double {
-        guard let dimensions = videoDimensions,
-              dimensions.width > 0 && dimensions.height > 0 else {
-            return 640.0 / 480.0
-        }
-        return Double(dimensions.width / dimensions.height)
-    }
     
     var participant: Participant {
         Participant(
@@ -38,13 +30,8 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     public var view: AnyView {
         let view = otPublisher.view!
         let rendererView = UIViewContainer(view: view)
-        otPublisher.viewScaleBehavior = .fit
-        
-        return AnyView(
-            rendererView
-                .aspectRatio(aspectRatio, contentMode: .fit)
-                .clipped()
-        )
+        otPublisher.viewScaleBehavior = .fill
+        return AnyView(rendererView)
     }
 
     public var publishAudio: Bool {
