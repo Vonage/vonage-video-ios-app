@@ -13,20 +13,35 @@ public class OpenTokSuscriber: NSObject {
     var id: String { stream.streamId }
     var stream: OTStream { otSuscriber.stream! }
 
-    lazy var participant: Participant = {
+    public var videoDimensions: CGSize? { stream.videoDimensions }
+
+    public var aspectRatio: Double {
+        guard let dimensions = videoDimensions,
+              dimensions.width > 0 && dimensions.height > 0 else {
+            return 640.0 / 480.0
+        }
+        return Double(dimensions.width / dimensions.height)
+    }
+    
+    var participant: Participant {
         Participant(
             id: stream.streamId,
             name: stream.name ?? "",
             isMicEnabled: stream.hasAudio,
             isCameraEnabled: stream.hasVideo,
+            videoDimensions: videoDimensions,
             view: view)
-    }()
+    }
 
     public var view: AnyView {
-        let rendererView = UIViewContainer(view: otSuscriber.view!)
+        let view = otSuscriber.view!
+        let rendererView = UIViewContainer(view: view)
         otSuscriber.viewScaleBehavior = .fit
+        
         return AnyView(
-            rendererView.aspectRatio(stream.videoDimensions.aspectRatio, contentMode: .fit)
+            rendererView
+                .aspectRatio(aspectRatio, contentMode: .fit)
+                .clipped()
         )
     }
 
