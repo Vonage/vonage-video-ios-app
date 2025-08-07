@@ -14,7 +14,17 @@ public class OpenTokSuscriber: NSObject {
     var stream: OTStream { otSuscriber.stream! }
 
     public var videoDimensions: CGSize? { stream.videoDimensions }
-    
+
+    public var aspectRatio: Double {
+        guard let dimensions = videoDimensions,
+            dimensions.width > 0 && dimensions.height > 0
+        else {
+            return 640.0 / 480.0
+        }
+
+        return Double(dimensions.width / dimensions.height)
+    }
+
     var participant: Participant {
         Participant(
             id: stream.streamId,
@@ -28,7 +38,13 @@ public class OpenTokSuscriber: NSObject {
     public var view: AnyView {
         let view = otSuscriber.view!
         let rendererView = UIViewContainer(view: view)
-        otSuscriber.viewScaleBehavior = .fill
+
+        if aspectRatio >= 1 {
+            otSuscriber.viewScaleBehavior = .fill
+        } else {
+            otSuscriber.viewScaleBehavior = .fit
+        }
+
         return AnyView(rendererView)
     }
 

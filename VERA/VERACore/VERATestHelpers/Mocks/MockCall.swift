@@ -24,6 +24,7 @@ public class MockCall: VERACore.CallFacade {
         case disconnect
         case toggleLocalVideo
         case toggleLocalAudio
+        case toggleLocalCamera
     }
 
     public init() {}
@@ -42,5 +43,9 @@ public class MockCall: VERACore.CallFacade {
 
     public func toggleLocalAudio() {
         recordedActions.append(.toggleLocalAudio)
+    }
+
+    public func toggleLocalCamera() {
+        recordedActions.append(.toggleLocalCamera)
     }
 }

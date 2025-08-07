@@ -12,6 +12,7 @@ struct ParticipantVideoCard: View {
         Group {
             if participant.isCameraEnabled {
                 participant.view
+                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
                     .aspectRatio(participant.aspectRatio, contentMode: .fit)
                     .clipped()
                     .overlay(
@@ -28,7 +29,7 @@ struct ParticipantVideoCard: View {
                     .frame(minWidth: 160, minHeight: 120)
                     .aspectRatio(participant.aspectRatio, contentMode: .fit)
                     .background(.vGray4.opacity(0.8))
-                    
+
                     ParticipantVideoCardOverlays(
                         isMicEnabled: participant.isMicEnabled,
                         name: participant.name)
@@ -42,10 +43,10 @@ struct ParticipantVideoCard: View {
 }
 
 struct ParticipantVideoCardOverlays: View {
-    
+
     let isMicEnabled: Bool
     let name: String
-    
+
     var body: some View {
         VStack {
             HStack {

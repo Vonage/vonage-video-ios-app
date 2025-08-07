@@ -11,13 +11,15 @@ public class Participant: AnyObject, Identifiable, Hashable {
     public let isCameraEnabled: Bool
     public let view: AnyView
     public let videoDimensions: CGSize?
-    
+    public let isRemote: Bool
+
     public init(
         id: String,
         name: String,
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         videoDimensions: CGSize?,
+        isRemote: Bool = true,
         view: AnyView
     ) {
         self.id = id
@@ -25,12 +27,13 @@ public class Participant: AnyObject, Identifiable, Hashable {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.videoDimensions = videoDimensions
+        self.isRemote = isRemote
         self.view = view
     }
 
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
-        && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
+            && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -40,14 +43,16 @@ public class Participant: AnyObject, Identifiable, Hashable {
         hasher.combine(isCameraEnabled)
         hasher.combine(videoDimensions?.width ?? 0)
         hasher.combine(videoDimensions?.height ?? 0)
+        hasher.combine(isRemote)
     }
-    
+
     public var aspectRatio: Double {
         guard let dimensions = videoDimensions,
-              dimensions.width > 0 && dimensions.height > 0 else {
+            dimensions.width > 0 && dimensions.height > 0
+        else {
             return 640.0 / 480.0
         }
-        
+
         var ratio = Double(dimensions.width / dimensions.height)
         if ratio < 1 {
             ratio = 1.33

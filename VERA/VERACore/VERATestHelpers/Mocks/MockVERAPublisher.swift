@@ -16,7 +16,7 @@ public final class MockVERAPublisher: VERAPublisher {
     public var cameraPosition: VERACore.CameraPosition
 
     public init(
-        view: AnyView = AnyView(EmptyView()),
+        view: AnyView = AnyView(Color.red),
         publishAudio: Bool = true,
         publishVideo: Bool = true,
         cameraPosition: VERACore.CameraPosition = .front

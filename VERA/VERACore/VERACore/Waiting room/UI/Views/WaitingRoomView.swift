@@ -10,19 +10,22 @@ public struct WaitingRoomState: Equatable {
     public let isCameraEnabled: Bool
     public let audioDevices: [UIAudioDevice]
     public let cameras: [UICameraDevice]
+    public weak var publisher: VERAPublisher?
 
     public init(
         roomName: String,
         isMicrophoneEnabled: Bool,
         isCameraEnabled: Bool,
         audioDevices: [UIAudioDevice],
-        cameras: [UICameraDevice]
+        cameras: [UICameraDevice],
+        publisher: VERAPublisher?
     ) {
         self.roomName = roomName
         self.isMicrophoneEnabled = isMicrophoneEnabled
         self.isCameraEnabled = isCameraEnabled
         self.audioDevices = audioDevices
         self.cameras = cameras
+        self.publisher = publisher
     }
 
     public static let `default` = WaitingRoomState(
@@ -30,8 +33,15 @@ public struct WaitingRoomState: Equatable {
         isMicrophoneEnabled: false,
         isCameraEnabled: false,
         audioDevices: [],
-        cameras: []
+        cameras: [],
+        publisher: nil
     )
+
+    public static func == (lhs: WaitingRoomState, rhs: WaitingRoomState) -> Bool {
+        lhs.roomName == rhs.roomName && lhs.isMicrophoneEnabled == rhs.isMicrophoneEnabled
+            && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.audioDevices.count == rhs.audioDevices.count
+            && lhs.cameras.count == rhs.cameras.count
+    }
 }
 
 public struct WaitingRoomView: View {
@@ -41,7 +51,6 @@ public struct WaitingRoomView: View {
 
     let state: WaitingRoomState
     var userName: Binding<String>
-    let publisherVideoView: PublisherVideoView
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -52,7 +61,6 @@ public struct WaitingRoomView: View {
                 HorizontalWaitingRoomContentView(
                     state: state,
                     userName: userName,
-                    publisherVideoView: publisherVideoView,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -60,7 +68,6 @@ public struct WaitingRoomView: View {
                 VerticalWaitingRoomContentView(
                     state: state,
                     userName: userName,
-                    publisherVideoView: publisherVideoView,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -68,7 +75,6 @@ public struct WaitingRoomView: View {
                 HorizontalWaitingRoomContentView(
                     state: state,
                     userName: userName,
-                    publisherVideoView: publisherVideoView,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -81,7 +87,6 @@ public struct WaitingRoomView: View {
 struct HorizontalWaitingRoomContentView: View {
     let state: WaitingRoomState
     var userName: Binding<String>
-    let publisherVideoView: PublisherVideoView
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -91,7 +96,6 @@ struct HorizontalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
-                publisherVideoView: publisherVideoView,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -110,7 +114,6 @@ struct HorizontalWaitingRoomContentView: View {
 struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
-    let publisherVideoView: PublisherVideoView
     @FocusState private var isTextFieldFocused: Bool
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
@@ -121,7 +124,6 @@ struct VerticalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
-                publisherVideoView: publisherVideoView,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -139,7 +141,6 @@ struct VerticalWaitingRoomContentView: View {
 struct VideoPreviewView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
-    let publisherVideoView: PublisherVideoView
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
 
@@ -151,7 +152,6 @@ struct VideoPreviewView: View {
             WaitingRoomUserPreviewView(
                 state: state,
                 userName: userName,
-                publisherVideoView: publisherVideoView,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -248,9 +248,9 @@ struct PrepareToJoinRoom: View {
             cameras: [
                 .init(id: "", name: "Front camera", iconName: "person.fill.viewfinder"),
                 .init(id: "", name: "Back camera", iconName: "iphone.rear.camera"),
-            ]),
+            ],
+            publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
-        publisherVideoView: .init(videoView: nil),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}
@@ -270,9 +270,9 @@ struct PrepareToJoinRoom: View {
             cameras: [
                 .init(id: "", name: "Front camera", iconName: "person.fill.viewfinder"),
                 .init(id: "", name: "Back camera", iconName: "iphone.rear.camera"),
-            ]),
+            ],
+            publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
-        publisherVideoView: .init(videoView: AnyView(Color.red)),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

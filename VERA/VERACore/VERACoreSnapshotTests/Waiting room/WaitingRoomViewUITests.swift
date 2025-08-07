@@ -5,17 +5,27 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
+import VERATestHelpers
 
 @testable import VERACore
 
 @Suite("Waiting room View UI Tests")
 @MainActor
-struct WaitingRoomViewUITests {
+class WaitingRoomViewUITests {
 
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
     private let snapshotPrefix = "WaitingRoom"
+    private var publisher: VERAPublisher?
+
+    init() {
+        publisher = MockVERAPublisher()
+    }
+
+    deinit {
+        publisher = nil
+    }
 
     // MARK: - Core UI Tests
 
@@ -77,10 +87,9 @@ struct WaitingRoomViewUITests {
     // MARK: - Test Helpers
 
     private func makeSUT() -> WaitingRoomView {
-        return WaitingRoomView(
-            state: makeWaitingRoomState(),
+        WaitingRoomView(
+            state: makeWaitingRoomState(publisher: publisher),
             userName: .constant("Trillian"),
-            publisherVideoView: makePublisherVideoView(),
             onJoinRoom: {},
             onMicrophoneToggle: {},
             onCameraToggle: {}
@@ -109,10 +118,19 @@ struct WaitingRoomViewUITests {
 
 @Suite("Waiting room Components")
 @MainActor
-struct WaitingRoomComponentTests {
+class WaitingRoomComponentTests {
 
     private let isRecording = false
     private let snapshotPrefix = "WaitingRoom"
+    private var publisher: VERAPublisher?
+
+    init() {
+        publisher = MockVERAPublisher()
+    }
+
+    deinit {
+        publisher = nil
+    }
 
     @Test(
         "Layout Components",
@@ -127,9 +145,8 @@ struct WaitingRoomComponentTests {
         case "Horizontal":
             view = AnyView(
                 HorizontalWaitingRoomContentView(
-                    state: makeWaitingRoomState(),
+                    state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
-                    publisherVideoView: makePublisherVideoView(),
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})
@@ -137,9 +154,8 @@ struct WaitingRoomComponentTests {
         case "Vertical":
             view = AnyView(
                 VerticalWaitingRoomContentView(
-                    state: makeWaitingRoomState(),
+                    state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
-                    publisherVideoView: makePublisherVideoView(),
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})

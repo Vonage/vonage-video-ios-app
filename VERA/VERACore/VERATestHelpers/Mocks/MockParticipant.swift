@@ -11,6 +11,7 @@ public func makeMockParticipant(
     name: String = "aName",
     isMicEnabled: Bool = true,
     isCameraEnabled: Bool = true,
+    videoDimensions: CGSize? = .init(width: 640, height: 480),
     view: AnyView = .init(EmptyView())
 ) -> Participant {
     .init(
@@ -18,6 +19,7 @@ public func makeMockParticipant(
         name: name,
         isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,
+        videoDimensions: videoDimensions,
         view: view
     )
 }

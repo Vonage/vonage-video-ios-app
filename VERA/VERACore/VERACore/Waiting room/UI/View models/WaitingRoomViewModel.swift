@@ -18,7 +18,6 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
-    @Published var publisherVideoView: PublisherVideoView = PublisherVideoView(videoView: nil)
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
 
@@ -148,7 +147,8 @@ public final class WaitingRoomViewModel: ObservableObject {
                 isMicrophoneEnabled: isMicrophoneEnabled,  // publisher.publishAudio
                 isCameraEnabled: isCameraEnabled,  // publisher.publishVideo
                 audioDevices: availableAudioDevices,
-                cameras: availableCameraDevices))
+                cameras: availableCameraDevices,
+                publisher: publisher))
     }
 
     private func makeUIAudioDevice(
@@ -237,7 +237,6 @@ public final class WaitingRoomViewModel: ObservableObject {
         let publisher = await publisherRepository.getPublisher()
         self.publisher = publisher
 
-        publisherVideoView = PublisherVideoView(videoView: publisher.view)
         buildContentUiState(
             roomName: roomName,
             isMicrophoneEnabled: publisher.publishAudio,

@@ -35,41 +35,43 @@ public struct MeetingRoomView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
             .navigationTitle(state.roomName)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(.black, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        actions.onEndCall()
-                    } label: {
-                        Image(systemName: "arrow.left")
-                    }
-                }
+            #if !os(macOS)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarBackground(.black, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
 
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        actions.onCameraSwitch()
-                    } label: {
-                        Image(systemName: "arrow.triangle.2.circlepath.camera")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            actions.onEndCall()
+                        } label: {
+                            Image(systemName: "arrow.left")
+                        }
                     }
-                    Button {
-                        actions.onToggleMic()
-                    } label: {
-                        Image(systemName: "speaker.wave.2")
-                    }
-                    Button {
-                        actions.onShare(state.roomName)
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
+
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Button {
+                            actions.onCameraSwitch()
+                        } label: {
+                            Image(systemName: "arrow.triangle.2.circlepath.camera")
+                        }
+                        Button {
+                            actions.onToggleMic()
+                        } label: {
+                            Image(systemName: "speaker.wave.2")
+                        }
+                        Button {
+                            actions.onShare(state.roomName)
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
                     }
                 }
-            }
+            #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .tint(.white)
-        .navigationBarHidden(false)
     }
 }
 
