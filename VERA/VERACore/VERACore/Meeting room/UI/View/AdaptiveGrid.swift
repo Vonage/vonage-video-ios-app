@@ -39,8 +39,9 @@ struct AdaptiveGrid: View {
                                 .frame(maxWidth: .infinity, minHeight: 200)
                         }
                         if participants.count > takeCount {
-                            ParticipantsPlaceholders(
-                                participantNames: participants.suffix(participants.count - takeCount)
+                            HiddenParticipantsTile(
+                                participantNames: participants
+                                    .suffix(participants.count - takeCount)
                                     .map { $0.name })
                         }
                     }
@@ -56,69 +57,5 @@ struct AdaptiveGrid: View {
 }
 
 #Preview {
-    AdaptiveGrid(participants: [
-        .init(
-            id: "1",
-            name: "Arthur Dent",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "2",
-            name: "Ford Prefect",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "3",
-            name: "Zaphod Beeblebrox",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "4",
-            name: "Trillian",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "5",
-            name: "Marvin",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "6",
-            name: "Slartibartfast",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "7",
-            name: "Eddie",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "8",
-            name: "Humma Kavula",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-        .init(
-            id: "9",
-            name: "Fenchurch",
-            isMicEnabled: true,
-            isCameraEnabled: true,
-            videoDimensions: .zero,
-            view: AnyView(EmptyView())),
-    ])
+    AdaptiveGrid(participants: PreviewData.manyParticipants)
 }

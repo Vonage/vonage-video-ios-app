@@ -96,6 +96,7 @@ struct MicIndicator: View {
             isMicEnabled: true,
             isCameraEnabled: true,
             videoDimensions: .zero,
+            creationTime: Date(),
             view: AnyView(EmptyView()))
     )
 }
@@ -108,6 +109,7 @@ struct MicIndicator: View {
             isMicEnabled: true,
             isCameraEnabled: false,
             videoDimensions: .zero,
+            creationTime: Date(),
             view: AnyView(EmptyView()))
     )
 }

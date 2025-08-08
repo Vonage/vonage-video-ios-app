@@ -6,37 +6,23 @@ import Foundation
 import OpenTok
 import SwiftUI
 import VERACore
+import Combine
 
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
-
-    var id: String { "publisherID" }
+    var cancellables = Set<AnyCancellable>()
+    
+    let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
+    let date = Date()
+    
+    @Published public private(set) var audioLevel: Float = 0.0
+    @Published public private(set) var videoDimensions = VideoDimensions.default
+    @Published public private(set) var participant: Participant
+    
+    public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     var onError: ((Error) -> Void)?
-
-    public var videoDimensions: CGSize? { stream?.videoDimensions }
-
-    public var aspectRatio: Double {
-        guard let dimensions = videoDimensions,
-            dimensions.width > 0 && dimensions.height > 0
-        else {
-            return 640.0 / 480.0
-        }
-
-        return Double(dimensions.width / dimensions.height)
-    }
-
-    var participant: Participant {
-        Participant(
-            id: id,
-            name: stream?.name ?? "",
-            isMicEnabled: otPublisher.publishAudio,
-            isCameraEnabled: otPublisher.publishVideo,
-            videoDimensions: videoDimensions,
-            isRemote: false,
-            view: view)
-    }
 
     public var view: AnyView {
         let view = otPublisher.view!
@@ -81,8 +67,49 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     public init(publisher: OTPublisher) {
         otPublisher = publisher
+        participant = Participant(
+            id: id,
+            name: publisher.stream?.name ?? "",
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
+            videoDimensions: VideoDimensions.default,
+            isRemote: false,
+            creationTime: date,
+            view: AnyView(EmptyView()))
+        super.init()
     }
 
+    func setup() {
+        stream?
+            .publisher(for: \.videoDimensions)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.videoDimensions = newSize
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+        
+        $audioLevel
+            .sink { [weak self] _ in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+        
+        updateParticipant()
+    }
+    
+    private func updateParticipant() {
+        participant = Participant(
+            id: id,
+            name: stream?.name ?? "",
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
+            videoDimensions: videoDimensions,
+            creationTime: date,
+            view: view
+        )
+    }
+    
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
         print(error.localizedDescription)
         onError?(error)

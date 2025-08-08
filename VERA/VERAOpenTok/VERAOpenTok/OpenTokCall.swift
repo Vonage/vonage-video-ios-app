@@ -68,7 +68,7 @@ public final class OpenTokCall: CallFacade {
             suscriber.captionsDelegate = openTokSuscriber
 
             try session.subscribe(subscriber: openTokSuscriber)
-
+            
             subscriberStreams[openTokSuscriber.id] = openTokSuscriber
             participantStreams[openTokSuscriber.id] = openTokSuscriber.participant
 
@@ -116,7 +116,7 @@ public final class OpenTokCall: CallFacade {
     private func updateParticipants() {
         _participantsPublisher.value = [publisher.participant] + participantStreams.values
     }
-
+    
     // MARK: Audio/Video toggles
 
     public func toggleLocalCamera() {

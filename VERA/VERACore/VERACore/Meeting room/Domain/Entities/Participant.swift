@@ -12,7 +12,8 @@ public class Participant: AnyObject, Identifiable, Hashable {
     public let view: AnyView
     public let videoDimensions: CGSize?
     public let isRemote: Bool
-
+    public let creationTime: Date
+    
     public init(
         id: String,
         name: String,
@@ -20,6 +21,7 @@ public class Participant: AnyObject, Identifiable, Hashable {
         isCameraEnabled: Bool,
         videoDimensions: CGSize?,
         isRemote: Bool = true,
+        creationTime: Date,
         view: AnyView
     ) {
         self.id = id
@@ -28,12 +30,14 @@ public class Participant: AnyObject, Identifiable, Hashable {
         self.isCameraEnabled = isCameraEnabled
         self.videoDimensions = videoDimensions
         self.isRemote = isRemote
+        self.creationTime = creationTime
         self.view = view
     }
 
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
+        && lhs.creationTime == rhs.creationTime
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -44,6 +48,7 @@ public class Participant: AnyObject, Identifiable, Hashable {
         hasher.combine(videoDimensions?.width ?? 0)
         hasher.combine(videoDimensions?.height ?? 0)
         hasher.combine(isRemote)
+        hasher.combine(creationTime)
     }
 
     public var aspectRatio: Double {
