@@ -61,23 +61,24 @@ public struct HorizontalActiveSpeakerLayoutView: View {
             HStack(spacing: 8) {
                 ParticipantVideoCard(participant: activeParticipant)
                     .frame(width: outerGeometry.size.width * 0.70)
-                
+
                 GeometryReader { geometry in
                     let availableWidth = geometry.size.width
                     let availableHeight = geometry.size.height
-                    
+
                     let cellWidth = availableWidth - spacing
                     let cellHeight = cellWidth / aspectRatio
-                    
+
 
                     let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
-                    
+
                     let maxVisibleItems = rowsVisible
-                    
-                    let takeCount = maxVisibleItems >= restOfParticipants.count
+
+                    let takeCount =
+                        maxVisibleItems >= restOfParticipants.count
                         ? restOfParticipants.count
                         : max(1, maxVisibleItems - 1)
-                    
+
                     let visibleItems = Array(restOfParticipants.prefix(takeCount))
                     let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
 
@@ -86,7 +87,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                             ParticipantVideoCard(participant: participant)
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                         }
-                        
+
                         if !hiddenItems.isEmpty {
                             HiddenParticipantsTile(
                                 participantNames: hiddenItems.map { $0.name }
