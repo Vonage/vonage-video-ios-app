@@ -2,24 +2,24 @@
 //  Created by Vonage on 16/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import SwiftUI
 import VERACore
-import Combine
 
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
     var cancellables = Set<AnyCancellable>()
-    
+
     let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
-    
+
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
-    
+
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     var onError: ((Error) -> Void)?
@@ -88,16 +88,16 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
-        
+
         $audioLevel
             .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
-        
+
         updateParticipant()
     }
-    
+
     private func updateParticipant() {
         participant = Participant(
             id: id,
@@ -109,7 +109,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             view: view
         )
     }
-    
+
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
         print(error.localizedDescription)
         onError?(error)

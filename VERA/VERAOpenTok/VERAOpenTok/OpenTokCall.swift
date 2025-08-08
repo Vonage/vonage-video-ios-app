@@ -18,7 +18,7 @@ public final class OpenTokCall: CallFacade {
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
-    private var subscriberStreams: [String: OpenTokSuscriber] = [:]
+    private var subscriberStreams: [String: OpenTokSubscriber] = [:]
     private var participantStreams: [String: Participant] = [:]
 
     public let token: String
@@ -26,7 +26,7 @@ public final class OpenTokCall: CallFacade {
     public let publisher: OpenTokPublisher
 
     enum Error: Swift.Error {
-        case failedToCreateSuscriber
+        case failedToCreateSubscriber
     }
 
     public init(
@@ -59,18 +59,18 @@ public final class OpenTokCall: CallFacade {
 
     private func addSubscriber(_ stream: OTStream) {
         do {
-            guard let suscriber = OTSubscriber(stream: stream, delegate: nil) else {
-                throw Error.failedToCreateSuscriber
+            guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
+                throw Error.failedToCreateSubscriber
             }
-            let openTokSuscriber = OpenTokSuscriber(suscriber: suscriber)
-            suscriber.delegate = openTokSuscriber
-            suscriber.audioLevelDelegate = openTokSuscriber
-            suscriber.captionsDelegate = openTokSuscriber
+            let openTokSubscriber = OpenTokSubscriber(subscriber: subscriber)
+            subscriber.delegate = openTokSubscriber
+            subscriber.audioLevelDelegate = openTokSubscriber
+            subscriber.captionsDelegate = openTokSubscriber
 
-            try session.subscribe(subscriber: openTokSuscriber)
-            
-            subscriberStreams[openTokSuscriber.id] = openTokSuscriber
-            participantStreams[openTokSuscriber.id] = openTokSuscriber.participant
+            try session.subscribe(subscriber: openTokSubscriber)
+
+            subscriberStreams[openTokSubscriber.id] = openTokSubscriber
+            participantStreams[openTokSubscriber.id] = openTokSubscriber.participant
 
             updateParticipants()
         } catch {
@@ -116,7 +116,7 @@ public final class OpenTokCall: CallFacade {
     private func updateParticipants() {
         _participantsPublisher.value = [publisher.participant] + participantStreams.values
     }
-    
+
     // MARK: Audio/Video toggles
 
     public func toggleLocalCamera() {

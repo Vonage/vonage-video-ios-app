@@ -2,52 +2,52 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import SwiftUI
 import VERACore
-import Combine
 
-public class OpenTokSuscriber: NSObject {
-    let otSuscriber: OTSubscriber
+public class OpenTokSubscriber: NSObject {
+    let otSubscriber: OTSubscriber
     var cancellables = Set<AnyCancellable>()
-    
+
     var id: String { stream.streamId }
-    var stream: OTStream { otSuscriber.stream! }
+    var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
-    
+
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
-    
+
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     public var view: AnyView {
-        let view = otSuscriber.view!
+        let view = otSubscriber.view!
         let rendererView = UIViewContainer(view: view)
 
         if aspectRatio >= 1 {
-            otSuscriber.viewScaleBehavior = .fill
+            otSubscriber.viewScaleBehavior = .fill
         } else {
-            otSuscriber.viewScaleBehavior = .fit
+            otSubscriber.viewScaleBehavior = .fit
         }
 
         return AnyView(rendererView)
     }
 
-    init(suscriber: OTSubscriber) {
-        otSuscriber = suscriber
+    init(subscriber: OTSubscriber) {
+        otSubscriber = subscriber
         participant = Participant(
-            id: suscriber.stream!.streamId,
-            name: suscriber.stream!.name ?? "",
-            isMicEnabled: suscriber.stream!.hasAudio,
-            isCameraEnabled: suscriber.stream!.hasVideo,
+            id: subscriber.stream!.streamId,
+            name: subscriber.stream!.name ?? "",
+            isMicEnabled: subscriber.stream!.hasAudio,
+            isCameraEnabled: subscriber.stream!.hasVideo,
             videoDimensions: VideoDimensions.default,
-            creationTime: suscriber.stream!.creationTime,
+            creationTime: subscriber.stream!.creationTime,
             view: AnyView(EmptyView()))
         super.init()
     }
-    
+
     func setup() {
         stream
             .publisher(for: \.videoDimensions)
@@ -57,16 +57,16 @@ public class OpenTokSuscriber: NSObject {
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
-        
+
         $audioLevel
             .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
-        
+
         updateParticipant()
     }
-    
+
     private func updateParticipant() {
         participant = Participant(
             id: id,
@@ -80,8 +80,8 @@ public class OpenTokSuscriber: NSObject {
     }
 }
 
-extension OpenTokSuscriber: OTSubscriberDelegate {
-    // MARK: - Suscriber delegate
+extension OpenTokSubscriber: OTSubscriberDelegate {
+    // MARK: - Subscriber delegate
 
     public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
 
@@ -92,7 +92,7 @@ extension OpenTokSuscriber: OTSubscriberDelegate {
     }
 }
 
-extension OpenTokSuscriber: OTSubscriberKitAudioLevelDelegate {
+extension OpenTokSubscriber: OTSubscriberKitAudioLevelDelegate {
     // MARK: Audio levels delegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
@@ -100,7 +100,7 @@ extension OpenTokSuscriber: OTSubscriberKitAudioLevelDelegate {
     }
 }
 
-extension OpenTokSuscriber: OTSubscriberKitCaptionsDelegate {
+extension OpenTokSubscriber: OTSubscriberKitCaptionsDelegate {
     // MARK: Audio levels delegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {

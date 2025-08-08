@@ -21,19 +21,19 @@ struct HiddenParticipantsTile: View {
             ZStack(alignment: .center) {
                 Rectangle()
                     .fill(.vGray4.opacity(0.8))
-                
+
                 HStack(spacing: spacedBy) {
                     AvatarGroup(
                         users: participantNames.map {
                             AvatarGroupUser(name: $0)
-                    },
+                        },
                         maxVisible: 3,
                         size: min(geometry.size.width, geometry.size.height) * 0.10)
                 }
                 .padding(8)
                 .background(.vGray4.opacity(0.8))
             }
-            .aspectRatio(4/3, contentMode: .fit)
+            .aspectRatio(4 / 3, contentMode: .fit)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.vGray4.opacity(0.8))

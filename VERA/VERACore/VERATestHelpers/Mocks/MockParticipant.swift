@@ -12,7 +12,7 @@ public func makeMockParticipant(
     isMicEnabled: Bool = true,
     isCameraEnabled: Bool = true,
     videoDimensions: CGSize? = .init(width: 640, height: 480),
-    creationTime: Date = Date(timeIntervalSince1970: 1754638879),
+    creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
     view: AnyView = .init(EmptyView())
 ) -> Participant {
     .init(

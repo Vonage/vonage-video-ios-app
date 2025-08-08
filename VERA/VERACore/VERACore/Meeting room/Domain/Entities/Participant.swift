@@ -13,7 +13,7 @@ public class Participant: AnyObject, Identifiable, Hashable {
     public let videoDimensions: CGSize?
     public let isRemote: Bool
     public let creationTime: Date
-    
+
     public init(
         id: String,
         name: String,
@@ -37,7 +37,7 @@ public class Participant: AnyObject, Identifiable, Hashable {
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
-        && lhs.creationTime == rhs.creationTime
+            && lhs.creationTime == rhs.creationTime
     }
 
     public func hash(into hasher: inout Hasher) {

@@ -2,8 +2,8 @@
 //  Created by Vonage on 7/8/25.
 //
 
-import SwiftUI
 import Foundation
+import SwiftUI
 
 struct PreviewData {
     static let participants: [Participant] = [
@@ -78,13 +78,13 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
-            view: AnyView(Color.pink))
+            view: AnyView(Color.pink)),
     ]
-    
+
     static let singleParticipant = Array(participants.prefix(1))
     static let twoParticipants = Array(participants.prefix(2))
     static let manyParticipants = participants
-    
+
     static let mixedStates: [Participant] = [
         .init(
             id: "cam_off",
@@ -101,6 +101,6 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
-            view: AnyView(Color.red))
+            view: AnyView(Color.red)),
     ]
 }

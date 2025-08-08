@@ -40,7 +40,8 @@ struct AdaptiveGrid: View {
                         }
                         if participants.count > takeCount {
                             HiddenParticipantsTile(
-                                participantNames: participants
+                                participantNames:
+                                    participants
                                     .suffix(participants.count - takeCount)
                                     .map { $0.name })
                         }

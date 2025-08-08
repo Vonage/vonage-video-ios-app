@@ -9,7 +9,7 @@ struct AvatarGroup: View {
     let maxVisible: Int
     let size: CGFloat
     let spacing: CGFloat
-    
+
     init(
         users: [AvatarGroupUser],
         maxVisible: Int = 4,
@@ -21,15 +21,15 @@ struct AvatarGroup: View {
         self.size = size
         self.spacing = spacing
     }
-    
+
     private var visibleUsers: [AvatarGroupUser] {
         Array(users.prefix(maxVisible))
     }
-    
+
     private var hiddenCount: Int {
         max(0, users.count - maxVisible)
     }
-    
+
     var body: some View {
         HStack(spacing: spacing) {
             ForEach(Array(visibleUsers.enumerated()), id: \.element.id) { index, user in
@@ -39,7 +39,7 @@ struct AvatarGroup: View {
                 )
                 .zIndex(Double(visibleUsers.count - index))
             }
-            
+
             if hiddenCount > 0 {
                 OverflowCountAvatar(
                     count: hiddenCount,
@@ -55,7 +55,7 @@ struct AvatarGroup: View {
 struct AvatarView: View {
     let user: AvatarGroupUser
     let size: CGFloat
-    
+
     private var initials: String {
         let names = user.name.split(separator: " ")
         if names.count >= 2 {
@@ -64,13 +64,13 @@ struct AvatarView: View {
             return String(user.name.prefix(2)).uppercased()
         }
     }
-    
+
     var body: some View {
         ZStack {
             Circle()
                 .fill(user.backgroundColor)
                 .frame(width: size, height: size)
-            
+
             Text(initials)
                 .font(.system(size: size * 0.4, weight: .medium))
                 .foregroundColor(user.textColor)
@@ -86,13 +86,13 @@ struct AvatarView: View {
 struct OverflowCountAvatar: View {
     let count: Int
     let size: CGFloat
-    
+
     var body: some View {
         ZStack {
             Circle()
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: size, height: size)
-            
+
             Text("+\(count)")
                 .font(.system(size: size * 0.35, weight: .medium))
                 .foregroundColor(.white)
@@ -109,7 +109,7 @@ struct AvatarGroupUser: Identifiable {
     let name: String
     let backgroundColor: Color
     let textColor: Color
-    
+
     init(
         id: String = UUID().uuidString,
         name: String,
@@ -130,7 +130,7 @@ struct AdvancedAvatarGroup: View {
     let showBorder: Bool
     let onTap: ((AvatarGroupUser) -> Void)?
     let onOverflowTap: (([AvatarGroupUser]) -> Void)?
-    
+
     init(
         users: [AvatarGroupUser],
         maxVisible: Int = 4,
@@ -148,19 +148,19 @@ struct AdvancedAvatarGroup: View {
         self.onTap = onTap
         self.onOverflowTap = onOverflowTap
     }
-    
+
     private var visibleUsers: [AvatarGroupUser] {
         Array(users.prefix(maxVisible))
     }
-    
+
     private var hiddenUsers: [AvatarGroupUser] {
         Array(users.dropFirst(maxVisible))
     }
-    
+
     private var hiddenCount: Int {
         hiddenUsers.count
     }
-    
+
     var body: some View {
         HStack(spacing: spacing) {
             ForEach(Array(visibleUsers.enumerated()), id: \.element.id) { index, user in
@@ -173,7 +173,7 @@ struct AdvancedAvatarGroup: View {
                     onTap?(user)
                 }
             }
-            
+
             if hiddenCount > 0 {
                 OverflowCountAvatar(
                     count: hiddenCount,
@@ -190,30 +190,30 @@ struct AdvancedAvatarGroup: View {
 }
 
 #if DEBUG
-extension PreviewData {
-    static let users: [AvatarGroupUser] = [
-        AvatarGroupUser(name: "Arthur Dent"),
-        AvatarGroupUser(name: "Ford Prefect"),
-        AvatarGroupUser(name: "Zaphod Beeblebrox"),
-        AvatarGroupUser(name: "Trillian"),
-        AvatarGroupUser(name: "Marvin"),
-        AvatarGroupUser(name: "Slartibartfast"),
-        AvatarGroupUser(name: "Eddie"),
-        AvatarGroupUser(name: "Deep Thought")
-    ]
-}
+    extension PreviewData {
+        static let users: [AvatarGroupUser] = [
+            AvatarGroupUser(name: "Arthur Dent"),
+            AvatarGroupUser(name: "Ford Prefect"),
+            AvatarGroupUser(name: "Zaphod Beeblebrox"),
+            AvatarGroupUser(name: "Trillian"),
+            AvatarGroupUser(name: "Marvin"),
+            AvatarGroupUser(name: "Slartibartfast"),
+            AvatarGroupUser(name: "Eddie"),
+            AvatarGroupUser(name: "Deep Thought"),
+        ]
+    }
 #endif
 
 #Preview("Avatar Group - Few Users") {
     VStack(spacing: 20) {
         AvatarGroup(users: Array(PreviewData.users.prefix(3)))
-        
+
         AvatarGroup(
             users: PreviewData.users,
             maxVisible: 3,
             size: 50
         )
-        
+
         AvatarGroup(
             users: PreviewData.users,
             maxVisible: 5,
