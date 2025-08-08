@@ -17,30 +17,22 @@ struct HiddenParticipantsTile: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .center) {
-                Rectangle()
-                    .fill(.vGray4.opacity(0.8))
-
-                HStack(spacing: spacedBy) {
+        ZStack(alignment: .center) {
+            Rectangle()
+                .fill(.vGray4.opacity(0.8))
+                .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                .overlay(
                     AvatarGroup(
                         users: participantNames.map {
                             AvatarGroupUser(name: $0)
                         },
                         maxVisible: 3,
-                        size: min(geometry.size.width, geometry.size.height) * 0.10)
-                }
-                .padding(8)
-                .background(.vGray4.opacity(0.8))
-            }
-            .aspectRatio(4 / 3, contentMode: .fit)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.vGray4.opacity(0.8))
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .shadow(radius: 2)
+                        size: 42
+                    )
+                )
         }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(radius: 2)
     }
 }
 

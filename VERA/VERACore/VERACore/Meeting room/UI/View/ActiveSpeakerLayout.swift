@@ -122,38 +122,21 @@ public struct VerticalActiveSpeakerLayoutView: View {
     ]
 
     public var body: some View {
-        GeometryReader { outerGeometry in
-            VStack(spacing: 8) {
-                ParticipantVideoCard(participant: activeParticipant)
-                GeometryReader { geometry in
-
-                    let availableWidth = geometry.size.width - spacing
-                    let itemsPerRow = max(1, Int((availableWidth + spacing) / (minItemWidth + spacing)))
-                    let availableHeight = geometry.size.height - spacing
-                    let rowsVisible = max(1, Int((availableHeight + spacing) / (itemHeight + spacing)))
-
-                    let maxVisibleItems = itemsPerRow * rowsVisible
-                    let takeCount =
-                        maxVisibleItems >= restOfParticipants.count
-                        ? maxVisibleItems
-                        : max(1, maxVisibleItems - 1)
-                    let visibleItems = Array(restOfParticipants.prefix(takeCount))
-                    let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
-
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
-                        GridRow {
-                            ForEach(visibleItems, id: \.id) { participant in
-                                ParticipantVideoCard(participant: participant)
-
-                            }
-                            if !hiddenItems.isEmpty {
-                                HiddenParticipantsTile(
-                                    participantNames: hiddenItems.map { $0.name })
-                            }
-                        }
-                    }
-                    .animation(.easeInOut, value: participants)
-                    .frame(maxHeight: .infinity, alignment: .top)
+        VStack(spacing: 8) {
+            ParticipantVideoCard(participant: activeParticipant)
+            if restOfParticipants.count == 1 {
+                ParticipantVideoCard(participant: restOfParticipants[0])
+            } else if restOfParticipants.count == 2 {
+                HStack() {
+                    ParticipantVideoCard(participant: restOfParticipants[0])
+                    ParticipantVideoCard(participant: restOfParticipants[1])
+                }
+            } else if restOfParticipants.count >= 3 {
+                HStack() {
+                    ParticipantVideoCard(participant: restOfParticipants[0])
+                    HiddenParticipantsTile(
+                        participantNames: Array(restOfParticipants.dropFirst())
+                            .map { $0.name })
                 }
             }
         }
@@ -162,5 +145,15 @@ public struct VerticalActiveSpeakerLayoutView: View {
 }
 
 #Preview {
+    ActiveSpeakerLayout(participants: [PreviewData.singleParticipant])
+}
+
+#Preview {
+    ActiveSpeakerLayout(participants: PreviewData.twoParticipants)
+}
+
+#Preview {
     ActiveSpeakerLayout(participants: PreviewData.manyParticipants)
 }
+
+

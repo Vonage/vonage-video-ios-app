@@ -15,7 +15,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
-    var lastAudioLevelUpdate = Date(timeIntervalSince1970: 0)
+    var lastAudioLevelUpdate = Date.distantPast
 
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false

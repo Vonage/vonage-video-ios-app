@@ -15,7 +15,7 @@ public class OpenTokSubscriber: NSObject {
     var id: String { stream.streamId }
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
-    var lastAudioLevelUpdate = Date(timeIntervalSince1970: 0)
+    var lastAudioLevelUpdate = Date.distantPast
 
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false

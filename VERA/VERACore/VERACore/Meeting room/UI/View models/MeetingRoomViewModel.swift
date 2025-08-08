@@ -61,7 +61,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
     private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
-
+    private let activeSpeakerTracker = ActiveSpeakerTracker()
+    
     public weak var currentCall: CallFacade?
 
     public let roomName: RoomName
@@ -89,6 +90,7 @@ public final class MeetingRoomViewModel: ObservableObject {
                 call.participantsPublisher
                     .removeDuplicates()
                     .sink { [weak self] participants in
+                        self?.activeSpeakerTracker.calculateActiveSpeaker(from: participants)
                         self?.participantsPublisher.send(participants)
                     }
                     .store(in: &cancellables)
@@ -109,24 +111,36 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     func observeSessionState() {
-        Publishers.CombineLatest3(participantsPublisher, sessionStatePublisher, layoutPublisher)
-            .map { [weak self] participants, sessionState, layout in
-                guard let self else { return MeetingRoomState.default }
-                return MeetingRoomState(
-                    roomName: self.roomName,
-                    isMicEnabled: sessionState.isPublishingAudio,
-                    isCameraEnabled: sessionState.isPublishingVideo,
-                    participants: participants,
-                    layout: layout)
+        Publishers.CombineLatest4(
+            participantsPublisher,
+            sessionStatePublisher,
+            layoutPublisher,
+            activeSpeakerTracker.$activeSpeaker
+        )
+        .map { [weak self] participants, sessionState, layout, activeSpeaker in
+            guard let self else { return MeetingRoomState.default }
+            var sortedPaticipants = participants
+                
+            if layout == .activeSpeaker {
+                sortedPaticipants = participants.sortedByDisplayPriority(
+                    activeSpeakerId: activeSpeaker.participantId)
             }
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newState in
-                Task { @MainActor in
-                    self?.state = .content(newState)
-                }
+                
+            return MeetingRoomState(
+                roomName: self.roomName,
+                isMicEnabled: sessionState.isPublishingAudio,
+                isCameraEnabled: sessionState.isPublishingVideo,
+                participants: sortedPaticipants,
+                layout: layout)
+        }
+        .removeDuplicates()
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] newState in
+            Task { @MainActor in
+                self?.state = .content(newState)
             }
-            .store(in: &cancellables)
+        }
+        .store(in: &cancellables)
     }
 
     public func onToggleMic() {
