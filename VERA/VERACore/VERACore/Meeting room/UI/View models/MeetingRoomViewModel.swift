@@ -62,7 +62,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
     private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
     private let activeSpeakerTracker = ActiveSpeakerTracker()
-    
+
     public weak var currentCall: CallFacade?
 
     public let roomName: RoomName
@@ -120,12 +120,12 @@ public final class MeetingRoomViewModel: ObservableObject {
         .map { [weak self] participants, sessionState, layout, activeSpeaker in
             guard let self else { return MeetingRoomState.default }
             var sortedPaticipants = participants
-                
+
             if layout == .activeSpeaker {
                 sortedPaticipants = participants.sortedByDisplayPriority(
                     activeSpeakerId: activeSpeaker.participantId)
             }
-                
+
             return MeetingRoomState(
                 roomName: self.roomName,
                 isMicEnabled: sessionState.isPublishingAudio,

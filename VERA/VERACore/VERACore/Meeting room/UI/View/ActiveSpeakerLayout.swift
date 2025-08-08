@@ -127,12 +127,12 @@ public struct VerticalActiveSpeakerLayoutView: View {
             if restOfParticipants.count == 1 {
                 ParticipantVideoCard(participant: restOfParticipants[0])
             } else if restOfParticipants.count == 2 {
-                HStack() {
+                HStack {
                     ParticipantVideoCard(participant: restOfParticipants[0])
                     ParticipantVideoCard(participant: restOfParticipants[1])
                 }
             } else if restOfParticipants.count >= 3 {
-                HStack() {
+                HStack {
                     ParticipantVideoCard(participant: restOfParticipants[0])
                     HiddenParticipantsTile(
                         participantNames: Array(restOfParticipants.dropFirst())
@@ -155,5 +155,3 @@ public struct VerticalActiveSpeakerLayoutView: View {
 #Preview {
     ActiveSpeakerLayout(participants: PreviewData.manyParticipants)
 }
-
-
