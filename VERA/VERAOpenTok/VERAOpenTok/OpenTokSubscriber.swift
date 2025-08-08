@@ -25,13 +25,7 @@ public class OpenTokSubscriber: NSObject {
     public var view: AnyView {
         let view = otSubscriber.view!
         let rendererView = UIViewContainer(view: view)
-
-        if aspectRatio >= 1 {
-            otSubscriber.viewScaleBehavior = .fill
-        } else {
-            otSubscriber.viewScaleBehavior = .fit
-        }
-
+        otSubscriber.viewScaleBehavior = .fill
         return AnyView(rendererView)
     }
 

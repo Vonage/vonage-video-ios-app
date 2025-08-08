@@ -57,12 +57,16 @@ public struct Participant: Identifiable, Hashable, Equatable {
         hasher.combine(audioLevel)
     }
 
-    public var aspectRatio: Double {
+    public var containerAspectRatio: Double {
         let dimensions = videoDimensions
         var ratio = Double(dimensions.width / dimensions.height)
         if ratio < 1 {
             ratio = 1.33
         }
         return ratio
+    }
+    
+    public var aspectRatio: Double {
+        Double(videoDimensions.width / videoDimensions.height)
     }
 }

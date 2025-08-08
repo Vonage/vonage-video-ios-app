@@ -7,36 +7,47 @@ import SwiftUI
 
 struct ParticipantVideoCard: View {
     let participant: Participant
-
+    
+    private let containerAspectRatio: Double = 16.0 / 9.0
+    
     var body: some View {
         Group {
             if participant.isCameraEnabled {
-                participant.view
-                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
-                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                    .clipped()
-                    .overlay(
-                        ParticipantVideoCardOverlays(
-                            isMicEnabled: participant.isMicEnabled,
-                            name: participant.name)
-                    )
+                ZStack {
+                    Rectangle()
+                        .fill(.vGray4.opacity(0.8))
+                        .aspectRatio(containerAspectRatio, contentMode: .fit)
+                        .overlay(
+                            ZStack {
+                                participant.view
+                                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
+                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                    .clipped()
+
+                                ParticipantVideoCardOverlays(
+                                    isMicEnabled: participant.isMicEnabled,
+                                    name: participant.name
+                                )
+                            }
+                        )
+                }
             } else {
                 ZStack {
-                    VStack {
-                        AvatarInitials(state: .init(userName: participant.name))
-                            .padding(24)
-                    }
-                    .frame(minWidth: 160, minHeight: 120)
-                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                    .background(.vGray4.opacity(0.8))
+                    Rectangle()
+                        .fill(.vGray4.opacity(0.8))
+                        .aspectRatio(containerAspectRatio, contentMode: .fit)
+                        .overlay(
+                            AvatarInitials(state: .init(userName: participant.name))
+                                .padding(24)
+                        )
 
                     ParticipantVideoCardOverlays(
                         isMicEnabled: participant.isMicEnabled,
-                        name: participant.name)
+                        name: participant.name
+                    )
                 }
             }
         }
-        .background(.vGray4.opacity(0.8))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
     }

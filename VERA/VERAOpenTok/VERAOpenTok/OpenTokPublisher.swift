@@ -27,13 +27,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     public var view: AnyView {
         let view = otPublisher.view!
         let rendererView = UIViewContainer(view: view)
-
-        if aspectRatio >= 1 {
-            otPublisher.viewScaleBehavior = .fill
-        } else {
-            otPublisher.viewScaleBehavior = .fit
-        }
-
+        otPublisher.viewScaleBehavior = .fill
         return AnyView(rendererView)
     }
 
@@ -90,6 +84,22 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             }
             .store(in: &cancellables)
 
+        stream?
+            .publisher(for: \.hasAudio)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        stream?
+            .publisher(for: \.hasVideo)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+        
         $audioLevel
             .removeDuplicates()
             .sink { [weak self] _ in
