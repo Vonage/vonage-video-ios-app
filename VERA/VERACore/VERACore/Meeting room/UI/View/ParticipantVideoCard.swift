@@ -97,6 +97,7 @@ struct MicIndicator: View {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0,
             view: AnyView(EmptyView()))
     )
 }
@@ -107,9 +108,24 @@ struct MicIndicator: View {
             id: "",
             name: "name",
             isMicEnabled: true,
+            isCameraEnabled: true,
+            videoDimensions: .zero,
+            creationTime: Date(),
+            audioLevel: 0,
+            view: AnyView(EmptyView()))
+    )
+}
+
+#Preview {
+    ParticipantVideoCard(
+        participant: Participant(
+            id: "",
+            name: "name",
+            isMicEnabled: false,
             isCameraEnabled: false,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0,
             view: AnyView(EmptyView()))
     )
 }

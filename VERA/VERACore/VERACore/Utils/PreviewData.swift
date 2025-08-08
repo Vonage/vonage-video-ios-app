@@ -14,6 +14,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.red)),
         .init(
             id: "2",
@@ -22,6 +23,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.green)),
         .init(
             id: "3",
@@ -30,6 +32,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.blue)),
         .init(
             id: "4",
@@ -38,6 +41,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.yellow)),
         .init(
             id: "5",
@@ -46,6 +50,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.purple)),
         .init(
             id: "6",
@@ -54,6 +59,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.orange)),
         .init(
             id: "7",
@@ -62,6 +68,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.cyan)),
         .init(
             id: "8",
@@ -70,6 +77,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.mint)),
         .init(
             id: "9",
@@ -78,10 +86,11 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.pink)),
     ]
 
-    static let singleParticipant = Array(participants.prefix(1))
+    static let singleParticipant = participants[0]
     static let twoParticipants = Array(participants.prefix(2))
     static let manyParticipants = participants
 
@@ -93,6 +102,7 @@ struct PreviewData {
             isCameraEnabled: false,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(EmptyView())),
         .init(
             id: "mic_off",
@@ -101,6 +111,7 @@ struct PreviewData {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
+            audioLevel: 0.0,
             view: AnyView(Color.red)),
     ]
 }

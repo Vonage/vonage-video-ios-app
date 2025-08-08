@@ -75,6 +75,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             videoDimensions: VideoDimensions.default,
             isRemote: false,
             creationTime: date,
+            audioLevel: 0,
             view: AnyView(EmptyView()))
         super.init()
     }
@@ -90,6 +91,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             .store(in: &cancellables)
 
         $audioLevel
+            .removeDuplicates()
             .sink { [weak self] _ in
                 self?.updateParticipant()
             }
@@ -106,6 +108,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isCameraEnabled: otPublisher.publishVideo,
             videoDimensions: videoDimensions,
             creationTime: date,
+            audioLevel: audioLevel,
             view: view
         )
     }

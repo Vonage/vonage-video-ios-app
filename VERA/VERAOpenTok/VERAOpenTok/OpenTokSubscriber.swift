@@ -44,6 +44,7 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: subscriber.stream!.hasVideo,
             videoDimensions: VideoDimensions.default,
             creationTime: subscriber.stream!.creationTime,
+            audioLevel: 0,
             view: AnyView(EmptyView()))
         super.init()
     }
@@ -58,7 +59,24 @@ public class OpenTokSubscriber: NSObject {
             }
             .store(in: &cancellables)
 
+        stream
+            .publisher(for: \.hasAudio)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        stream
+            .publisher(for: \.hasVideo)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
         $audioLevel
+            .removeDuplicates()
             .sink { [weak self] _ in
                 self?.updateParticipant()
             }
@@ -75,7 +93,8 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: videoDimensions,
             creationTime: date,
-            view: view
+            audioLevel: audioLevel,
+            view: view,
         )
     }
 }

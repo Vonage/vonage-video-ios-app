@@ -87,6 +87,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             do {
                 let call = try await connectToRoomUseCase(roomName: roomName)
                 call.participantsPublisher
+                    .removeDuplicates()
                     .sink { [weak self] participants in
                         self?.participantsPublisher.send(participants)
                     }
