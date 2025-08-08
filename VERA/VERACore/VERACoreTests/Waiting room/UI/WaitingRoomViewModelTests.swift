@@ -131,18 +131,20 @@ struct WaitingRoomViewModelTests {
     func makeSUT(
         roomName: RoomName = "heart-of-gold",
         publisherRepository: PublisherRepository = makeMockVERAPublisherRepository(),
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
         audioDevicesRepository: AudioDevicesRepository = makeMockAudioDevicesRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
         userRepository: UserRepository = makeMockUserRepository()
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
-            publisherRepository: publisherRepository,
+            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             audioDevicesRepository: audioDevicesRepository,
             cameraDevicesRepository: cameraDevicesRepository,
             selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
             joinRoomUseCase: .init(
                 userRepository: userRepository,
+                cameraPreviewProviderRepository: cameraPreviewProviderRepository,
                 publisherRepository: publisherRepository),
             requestMicrophonePermissionUseCase: .init(),
             requestCameraPermissionUseCase: .init(),

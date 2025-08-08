@@ -7,17 +7,20 @@ import SwiftUI
 public class WaitingRoomFactory {
 
     private let publisherRepository: PublisherRepository
+    private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let userRepository: UserRepository
 
     public init(
         publisherRepository: PublisherRepository,
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         userRepository: UserRepository
     ) {
         self.publisherRepository = publisherRepository
+        self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.userRepository = userRepository
@@ -29,12 +32,13 @@ public class WaitingRoomFactory {
     ) -> some View {
         let viewModel = WaitingRoomViewModel(
             roomName: roomName,
-            publisherRepository: publisherRepository,
+            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             audioDevicesRepository: audioDevicesRepository,
             cameraDevicesRepository: cameraDevicesRepository,
             selectAudioDeviceUseCase: .init(audioDevicesRepository: audioDevicesRepository),
             joinRoomUseCase: .init(
                 userRepository: userRepository,
+                cameraPreviewProviderRepository: cameraPreviewProviderRepository,
                 publisherRepository: publisherRepository),
             requestMicrophonePermissionUseCase: .init(),
             requestCameraPermissionUseCase: .init(),

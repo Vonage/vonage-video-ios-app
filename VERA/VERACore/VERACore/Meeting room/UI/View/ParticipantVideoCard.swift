@@ -7,9 +7,9 @@ import SwiftUI
 
 struct ParticipantVideoCard: View {
     let participant: Participant
-    
+
     private let containerAspectRatio: Double = 16.0 / 9.0
-    
+
     var body: some View {
         Group {
             if participant.isCameraEnabled {

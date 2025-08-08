@@ -25,6 +25,7 @@ public final class OpenTokCall: CallFacade {
     public let token: String
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
+    public var publisherParticipant: Participant?
 
     enum Error: Swift.Error {
         case failedToCreateSubscriber
@@ -53,6 +54,7 @@ public final class OpenTokCall: CallFacade {
     private func publishToSession() {
         do {
             try session.publish(publisher: publisher)
+            publisherParticipant = publisher.participant
             publisher.setup()
             setupPublisherObservation(publisher)
             updateParticipants()
@@ -63,7 +65,8 @@ public final class OpenTokCall: CallFacade {
 
     private func setupPublisherObservation(_ publisher: OpenTokPublisher) {
         publisher.$participant
-            .sink { [weak self] _ in
+            .sink { [weak self] participant in
+                self?.publisherParticipant = participant
                 self?.updateParticipants()
             }
             .store(in: &cancellables)
@@ -140,7 +143,11 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func updateParticipants() {
-        _participantsPublisher.value = [publisher.participant] + participantStreams.values
+        if let publisherParticipant = publisherParticipant {
+            _participantsPublisher.value = [publisherParticipant] + participantStreams.values
+        } else {
+            _participantsPublisher.value = Array(participantStreams.values)
+        }
     }
 
     // MARK: Audio/Video toggles

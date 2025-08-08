@@ -27,7 +27,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     public var view: AnyView {
         let view = otPublisher.view!
         let rendererView = UIViewContainer(view: view)
-        otPublisher.viewScaleBehavior = .fill
         return AnyView(rendererView)
     }
 
@@ -99,7 +98,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
-        
+
         $audioLevel
             .removeDuplicates()
             .sink { [weak self] _ in

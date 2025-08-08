@@ -68,9 +68,8 @@ struct VERAApp: App {
                 navigationCoordinator.startMeeting(roomName)
             }
         }.onDisappear {
-            if !navigationCoordinator.isInMeeting {
-                dependencyContainer.publisherRepository.resetPublisher()
-            }
+            // Required if the user goes back to the landing page
+            dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
         }
     }
 

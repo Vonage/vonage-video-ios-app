@@ -21,7 +21,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
 
-    private let publisherRepository: PublisherRepository
+    private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
     private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
@@ -38,7 +38,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public init(
         roomName: RoomName,
-        publisherRepository: PublisherRepository,
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
@@ -49,7 +49,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         userRepository: UserRepository
     ) {
         self.roomName = roomName
-        self.publisherRepository = publisherRepository
+        self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
@@ -144,8 +144,8 @@ public final class WaitingRoomViewModel: ObservableObject {
         state = .content(
             .init(
                 roomName: roomName,
-                isMicrophoneEnabled: isMicrophoneEnabled,  // publisher.publishAudio
-                isCameraEnabled: isCameraEnabled,  // publisher.publishVideo
+                isMicrophoneEnabled: isMicrophoneEnabled,
+                isCameraEnabled: isCameraEnabled,
                 audioDevices: availableAudioDevices,
                 cameras: availableCameraDevices,
                 publisher: publisher))
@@ -234,7 +234,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @MainActor
     public func startVideoPreview() async {
-        let publisher = await publisherRepository.getPublisher()
+        let publisher = await cameraPreviewProviderRepository.getPublisher()
         self.publisher = publisher
 
         buildContentUiState(

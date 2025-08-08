@@ -65,7 +65,7 @@ public struct Participant: Identifiable, Hashable, Equatable {
         }
         return ratio
     }
-    
+
     public var aspectRatio: Double {
         Double(videoDimensions.width / videoDimensions.height)
     }
