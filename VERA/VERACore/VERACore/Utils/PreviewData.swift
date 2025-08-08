@@ -15,6 +15,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.red)),
         .init(
             id: "2",
@@ -24,6 +27,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.green)),
         .init(
             id: "3",
@@ -33,6 +39,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.blue)),
         .init(
             id: "4",
@@ -42,6 +51,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.yellow)),
         .init(
             id: "5",
@@ -51,6 +63,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.purple)),
         .init(
             id: "6",
@@ -60,6 +75,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.orange)),
         .init(
             id: "7",
@@ -69,6 +87,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.cyan)),
         .init(
             id: "8",
@@ -78,6 +99,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.mint)),
         .init(
             id: "9",
@@ -87,6 +111,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.pink)),
     ]
 
@@ -103,6 +130,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView())),
         .init(
             id: "mic_off",
@@ -112,6 +142,9 @@ struct PreviewData {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0.0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(Color.red)),
     ]
 }

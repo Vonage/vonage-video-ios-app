@@ -14,6 +14,9 @@ public struct Participant: Identifiable, Hashable, Equatable {
     public let isRemote: Bool
     public let creationTime: Date
     public let audioLevel: Float
+    public let lastAudioLevelUpdate: Date
+    public let isScreenshare: Bool
+    public let isPinned: Bool
 
     public init(
         id: String,
@@ -24,6 +27,9 @@ public struct Participant: Identifiable, Hashable, Equatable {
         isRemote: Bool = true,
         creationTime: Date,
         audioLevel: Float,
+        lastAudioLevelUpdate: Date,
+        isScreenshare: Bool,
+        isPinned: Bool,
         view: AnyView
     ) {
         self.id = id
@@ -34,6 +40,9 @@ public struct Participant: Identifiable, Hashable, Equatable {
         self.isRemote = isRemote
         self.creationTime = creationTime
         self.audioLevel = audioLevel
+        self.lastAudioLevelUpdate = lastAudioLevelUpdate
+        self.isScreenshare = isScreenshare
+        self.isPinned = isPinned
         self.view = view
     }
 
@@ -43,6 +52,9 @@ public struct Participant: Identifiable, Hashable, Equatable {
             && lhs.isRemote == rhs.isRemote
             && lhs.creationTime == rhs.creationTime
             && lhs.audioLevel == rhs.audioLevel
+            && lhs.lastAudioLevelUpdate == rhs.lastAudioLevelUpdate
+            && lhs.isScreenshare == rhs.isScreenshare
+            && lhs.isPinned == rhs.isPinned
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -55,6 +67,9 @@ public struct Participant: Identifiable, Hashable, Equatable {
         hasher.combine(isRemote)
         hasher.combine(creationTime)
         hasher.combine(audioLevel)
+        hasher.combine(lastAudioLevelUpdate)
+        hasher.combine(isScreenshare)
+        hasher.combine(isPinned)
     }
 
     public var containerAspectRatio: Double {

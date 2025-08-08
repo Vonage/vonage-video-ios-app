@@ -15,7 +15,10 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
+    var lastAudioLevelUpdate = Date(timeIntervalSince1970: 0)
 
+    @Published public private(set) var isScreenshare: Bool = false
+    @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
@@ -69,6 +72,9 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isRemote: false,
             creationTime: date,
             audioLevel: 0,
+            lastAudioLevelUpdate: lastAudioLevelUpdate,
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView()))
         super.init()
     }
@@ -118,6 +124,9 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             videoDimensions: videoDimensions,
             creationTime: date,
             audioLevel: audioLevel,
+            lastAudioLevelUpdate: lastAudioLevelUpdate,
+            isScreenshare: isScreenshare,
+            isPinned: isPinned,
             view: view
         )
     }

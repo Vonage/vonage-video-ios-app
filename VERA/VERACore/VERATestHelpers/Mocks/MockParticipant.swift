@@ -14,6 +14,9 @@ public func makeMockParticipant(
     videoDimensions: CGSize = .init(width: 640, height: 480),
     creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
     audioLevel: Float = 0,
+    lastAudioLevelUpdate: Date = Date(timeIntervalSince1970: 1_754_638_879),
+    isScreenshare: Bool = false,
+    isPinned: Bool = false,
     view: AnyView = .init(EmptyView())
 ) -> Participant {
     .init(
@@ -24,6 +27,9 @@ public func makeMockParticipant(
         videoDimensions: videoDimensions,
         creationTime: creationTime,
         audioLevel: audioLevel,
+        lastAudioLevelUpdate: lastAudioLevelUpdate,
+        isScreenshare: isScreenshare,
+        isPinned: isPinned,
         view: view
     )
 }

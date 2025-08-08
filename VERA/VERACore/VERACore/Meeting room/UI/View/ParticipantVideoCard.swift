@@ -109,6 +109,9 @@ struct MicIndicator: View {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView()))
     )
 }
@@ -123,6 +126,9 @@ struct MicIndicator: View {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView()))
     )
 }
@@ -137,6 +143,9 @@ struct MicIndicator: View {
             videoDimensions: .zero,
             creationTime: Date(),
             audioLevel: 0,
+            lastAudioLevelUpdate: Date(),
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView()))
     )
 }

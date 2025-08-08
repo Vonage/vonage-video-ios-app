@@ -15,7 +15,10 @@ public class OpenTokSubscriber: NSObject {
     var id: String { stream.streamId }
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
+    var lastAudioLevelUpdate = Date(timeIntervalSince1970: 0)
 
+    @Published public private(set) var isScreenshare: Bool = false
+    @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
@@ -39,6 +42,9 @@ public class OpenTokSubscriber: NSObject {
             videoDimensions: VideoDimensions.default,
             creationTime: subscriber.stream!.creationTime,
             audioLevel: 0,
+            lastAudioLevelUpdate: lastAudioLevelUpdate,
+            isScreenshare: false,
+            isPinned: false,
             view: AnyView(EmptyView()))
         super.init()
     }
@@ -88,8 +94,10 @@ public class OpenTokSubscriber: NSObject {
             videoDimensions: videoDimensions,
             creationTime: date,
             audioLevel: audioLevel,
-            view: view,
-        )
+            lastAudioLevelUpdate: lastAudioLevelUpdate,
+            isScreenshare: isScreenshare,
+            isPinned: isPinned,
+            view: view)
     }
 }
 
@@ -109,6 +117,7 @@ extension OpenTokSubscriber: OTSubscriberKitAudioLevelDelegate {
     // MARK: Audio levels delegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
+        self.lastAudioLevelUpdate = Date()
         self.audioLevel = audioLevel
     }
 }
