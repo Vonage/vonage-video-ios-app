@@ -20,12 +20,10 @@ struct ActiveSpeakerLayout: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if participants.isEmpty {
-
-            } else if participants.count == 1 {
+            if participants.count == 1 {
                 ParticipantVideoCard(participant: participants.first!)
                     .frame(maxWidth: .infinity, minHeight: 200)
-            } else {
+            } else if participants.count > 1 {
                 if verticalSizeClass == .compact {
                     HorizontalActiveSpeakerLayoutView(participants: participants)
                 } else if horizontalSizeClass == .compact {
@@ -42,9 +40,8 @@ struct ActiveSpeakerLayout: View {
 }
 
 public struct HorizontalActiveSpeakerLayoutView: View {
-    let itemHeight: Double = 200 * 3 / 4
-    let minItemWidth: Double = 200
-    let spacing: Double = 0
+    let spacing: Double = 8
+    private let aspectRatio: Double = 16.0 / 9.0
 
     var activeParticipant: Participant {
         participants.first!
@@ -56,47 +53,51 @@ public struct HorizontalActiveSpeakerLayoutView: View {
     let participants: [Participant]
 
     let columns = [
-        GridItem(.adaptive(minimum: 300), spacing: 16)
+        GridItem(.flexible(), spacing: 8)
     ]
 
     public var body: some View {
         GeometryReader { outerGeometry in
             HStack(spacing: 8) {
                 ParticipantVideoCard(participant: activeParticipant)
-                    .frame(
-                        width: outerGeometry.size.width * 0.70,
-                    )
+                    .frame(width: outerGeometry.size.width * 0.70)
+                
                 GeometryReader { geometry in
+                    let availableWidth = geometry.size.width
+                    let availableHeight = geometry.size.height
+                    
+                    let cellWidth = availableWidth - spacing
+                    let cellHeight = cellWidth / aspectRatio
+                    
 
-                    let availableWidth = geometry.size.width - spacing
-                    let itemsPerRow = max(1, Int((availableWidth + spacing) / (minItemWidth + spacing)))
-                    let availableHeight = geometry.size.height - spacing
-                    let rowsVisible = max(1, Int((availableHeight + spacing) / (itemHeight + spacing)))
-
-                    let maxVisibleItems = itemsPerRow * rowsVisible
-                    let takeCount =
-                        maxVisibleItems >= restOfParticipants.count
-                        ? maxVisibleItems
+                    let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
+                    
+                    let maxVisibleItems = rowsVisible
+                    
+                    let takeCount = maxVisibleItems >= restOfParticipants.count
+                        ? restOfParticipants.count
                         : max(1, maxVisibleItems - 1)
+                    
                     let visibleItems = Array(restOfParticipants.prefix(takeCount))
                     let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
 
-                    LazyVGrid(columns: columns, alignment: .center, spacing: 8) {
+                    LazyVGrid(columns: columns, alignment: .center, spacing: spacing) {
                         ForEach(visibleItems, id: \.id) { participant in
-                            GridRow {
-                                ParticipantVideoCard(participant: participant)
-                            }
-                            if !hiddenItems.isEmpty {
-                                GridRow {
-                                    HiddenParticipantsTile(
-                                        participantNames: hiddenItems.map { $0.name })
-                                }
-                            }
+                            ParticipantVideoCard(participant: participant)
+                                .aspectRatio(aspectRatio, contentMode: .fit)
+                        }
+                        
+                        if !hiddenItems.isEmpty {
+                            HiddenParticipantsTile(
+                                participantNames: hiddenItems.map { $0.name }
+                            )
+                            .aspectRatio(aspectRatio, contentMode: .fit)
                         }
                     }
-                    .animation(.easeInOut, value: participants)
-                    .frame(maxHeight: .infinity, alignment: .top)
-                }.frame(width: outerGeometry.size.width * 0.30)
+                    .animation(.easeInOut, value: participants.count)
+                    .frame(maxHeight: .infinity, alignment: .center)
+                }
+                .frame(width: outerGeometry.size.width * 0.30)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
