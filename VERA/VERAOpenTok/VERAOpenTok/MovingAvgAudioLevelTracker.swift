@@ -6,10 +6,10 @@ import Foundation
 
 final class MovingAvgAudioLevelTracker {
     private var movingAvg: Float = 0.0
-    private let smoothingFactor = 0.7
-    private let currentWeightFactor = 0.3
-    private let dbmScalingFactor = 1.5
-    private let normalizationOffset = 1.0
+    private let smoothingFactor: Float = 0.7
+    private let currentWeightFactor: Float = 0.3
+    private let dbmScalingFactor: Float = 1.5
+    private let normalizationOffset: Float = 1.0
 
     /// Maps current audio level to a moving average value
     /// - Parameter audioLevel: Current audio level
