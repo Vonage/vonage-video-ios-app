@@ -55,7 +55,7 @@ struct ActiveSpeakerTrackerTests {
             id: "speaker1",
             name: "Arthur Dent",
             isMicEnabled: false,
-            audioLevel: 0.5,  // High audio level but mic disabled
+            audioLevel: 0.5  // High audio level but mic disabled
         )
 
         sut.calculateActiveSpeaker(from: [participant])
@@ -92,7 +92,7 @@ struct ActiveSpeakerTrackerTests {
             id: "speaker1",
             name: "Arthur Dent",
             isMicEnabled: true,
-            audioLevel: 0.3,  // Medium level
+            audioLevel: 0.3  // Medium level
 
         )
 
@@ -104,7 +104,7 @@ struct ActiveSpeakerTrackerTests {
             id: "speaker2",
             name: "Zaphod Beeblebrox",
             isMicEnabled: true,
-            audioLevel: 0.6,  // Higher level
+            audioLevel: 0.6  // Higher level
 
         )
 
@@ -118,12 +118,12 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant1 = makeMockParticipant(
             id: "speaker1",
-            audioLevel: 0.05,  // Background noise level
+            audioLevel: 0.05  // Background noise level
 
         )
         let participant2 = makeMockParticipant(
             id: "speaker2",
-            audioLevel: 0.03,  // Even lower background noise
+            audioLevel: 0.03  // Even lower background noise
 
         )
 
@@ -138,7 +138,7 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant = makeMockParticipant(
             id: "speaker1",
-            audioLevel: 0.3,  // Medium speaking level
+            audioLevel: 0.3  // Medium speaking level
 
         )
 
@@ -155,7 +155,7 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant = makeMockParticipant(
             id: "speaker1",
-            audioLevel: 0.3,  // Medium speaking level
+            audioLevel: 0.3  // Medium speaking level
         )
 
         sut.calculateActiveSpeaker(from: [participant])
@@ -169,12 +169,12 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant1 = makeMockParticipant(
             id: "speaker1",
-            audioLevel: 0.3,  // Medium speaking level
+            audioLevel: 0.3  // Medium speaking level
 
         )
         let participant2 = makeMockParticipant(
             id: "speaker2",
-            audioLevel: 0.5,  // Higher speaking level
+            audioLevel: 0.5  // Higher speaking level
 
         )
 
@@ -197,20 +197,18 @@ struct ActiveSpeakerTrackerTests {
         let micDisabledParticipant = makeMockParticipant(
             id: "mic_disabled",
             isMicEnabled: false,
-            audioLevel: 0.6,  // High level but mic disabled
-
+            audioLevel: 0.6  // High level but mic disabled
         )
         let lowAudioParticipant = makeMockParticipant(
             id: "low_audio",
             isMicEnabled: true,
-            audioLevel: 0.05,  // Below threshold (background noise)
+            audioLevel: 0.05  // Below threshold (background noise)
 
         )
         let validParticipant = makeMockParticipant(
             id: "valid_speaker",
             isMicEnabled: true,
-            audioLevel: 0.3,  // Medium level
-
+            audioLevel: 0.3  // Medium level
         )
 
         sut.calculateActiveSpeaker(from: [micDisabledParticipant, lowAudioParticipant, validParticipant])
@@ -226,7 +224,7 @@ struct ActiveSpeakerTrackerTests {
         let participant = makeMockParticipant(
             id: "threshold_speaker",
             isMicEnabled: true,
-            audioLevel: 0.2,  // Exactly at threshold
+            audioLevel: 0.2  // Exactly at threshold
         )
 
         sut.calculateActiveSpeaker(from: [participant])
@@ -240,7 +238,7 @@ struct ActiveSpeakerTrackerTests {
         let participant = makeMockParticipant(
             id: "below_threshold",
             isMicEnabled: true,
-            audioLevel: 0.19,  // Just below threshold (0.2)
+            audioLevel: 0.19  // Just below threshold (0.2)
         )
 
         sut.calculateActiveSpeaker(from: [participant])
@@ -299,8 +297,7 @@ struct ActiveSpeakerTrackerTests {
                 id: "participant_\(index)",
                 name: "Participant \(index)",
                 isMicEnabled: index % 3 == 0,  // Every 3rd participant has mic enabled
-                audioLevel: 0.2 + (Float(index) / 200.0),  // Audio levels from 0.205 to 0.7
-
+                audioLevel: 0.2 + (Float(index) / 200.0)  // Audio levels from 0.205 to 0.7
             )
         }
 

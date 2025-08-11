@@ -7,6 +7,7 @@ import SwiftUI
 struct GridLayout: View {
 
     let participants: [Participant]
+    let activeSpeakerId: String?
 
     let columns = [
         GridItem(.adaptive(minimum: 300), spacing: 16)
@@ -17,8 +18,11 @@ struct GridLayout: View {
             LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                 GridRow {
                     ForEach(participants, id: \.id) { participant in
-                        ParticipantVideoCard(participant: participant)
-                            .frame(maxWidth: .infinity, minHeight: 200)
+                        ParticipantVideoCard(
+                            participant: participant,
+                            activeSpeakerId: activeSpeakerId
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 200)
                     }
                 }
             }
@@ -31,5 +35,7 @@ struct GridLayout: View {
 }
 
 #Preview {
-    GridLayout(participants: PreviewData.manyParticipants)
+    GridLayout(
+        participants: PreviewData.manyParticipants,
+        activeSpeakerId: nil)
 }

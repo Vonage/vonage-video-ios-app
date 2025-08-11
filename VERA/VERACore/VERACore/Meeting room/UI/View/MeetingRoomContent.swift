@@ -9,22 +9,29 @@ struct MeetingRoomContent: View {
     let participants: [Participant]
     let showBottomSheet: Bool
     let layout: MeetingRoomLayout
+    let activeSpeakerId: String?
 
     init(
         participants: [Participant],
         showBottomSheet: Bool,
-        layout: MeetingRoomLayout
+        layout: MeetingRoomLayout,
+        activeSpeakerId: String?
     ) {
         self.participants = participants
         self.showBottomSheet = showBottomSheet
         self.layout = layout
+        self.activeSpeakerId = activeSpeakerId
     }
 
     var body: some View {
         if layout == .grid {
-            GridLayout(participants: participants)
+            GridLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
         } else {
-            ActiveSpeakerLayout(participants: participants)
+            ActiveSpeakerLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
         }
     }
 }
@@ -33,5 +40,6 @@ struct MeetingRoomContent: View {
     MeetingRoomContent(
         participants: [],
         showBottomSheet: false,
-        layout: .grid)
+        layout: .grid,
+        activeSpeakerId: nil)
 }

@@ -23,7 +23,8 @@ public struct MeetingRoomView: View {
                 MeetingRoomContent(
                     participants: state.participants,
                     showBottomSheet: false,
-                    layout: state.layout
+                    layout: state.layout,
+                    activeSpeakerId: state.activeSpeakerId
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 BottomBar(
@@ -82,6 +83,7 @@ public struct MeetingRoomView: View {
             isMicEnabled: true,
             isCameraEnabled: true,
             participants: [],
-            layout: .activeSpeaker),
+            layout: .activeSpeaker,
+            activeSpeakerId: nil),
         actions: .init())
 }

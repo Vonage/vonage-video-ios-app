@@ -23,6 +23,7 @@ public struct MeetingRoomState: Equatable {
     public let isCameraEnabled: Bool
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
+    public let activeSpeakerId: String?
 
     public var participantsCount: Int {
         participants.count
@@ -33,13 +34,15 @@ public struct MeetingRoomState: Equatable {
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         participants: [Participant],
-        layout: MeetingRoomLayout
+        layout: MeetingRoomLayout,
+        activeSpeakerId: String?
     ) {
         self.roomName = roomName
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participants = participants
         self.layout = layout
+        self.activeSpeakerId = activeSpeakerId
     }
 
     public static let `default` = MeetingRoomState(
@@ -47,7 +50,8 @@ public struct MeetingRoomState: Equatable {
         isMicEnabled: false,
         isCameraEnabled: false,
         participants: [],
-        layout: .activeSpeaker)
+        layout: .activeSpeaker,
+        activeSpeakerId: nil)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -138,7 +142,8 @@ public final class MeetingRoomViewModel: ObservableObject {
                 isMicEnabled: sessionState.isPublishingAudio,
                 isCameraEnabled: sessionState.isPublishingVideo,
                 participants: sortedPaticipants,
-                layout: layout)
+                layout: layout,
+                activeSpeakerId: activeSpeaker.participantId)
         }
         .removeDuplicates()
         .receive(on: DispatchQueue.main)

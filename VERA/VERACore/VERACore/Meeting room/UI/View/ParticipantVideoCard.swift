@@ -7,6 +7,7 @@ import SwiftUI
 
 struct ParticipantVideoCard: View {
     let participant: Participant
+    let activeSpeakerId: String?
 
     private let containerAspectRatio: Double = 16.0 / 9.0
 
@@ -50,7 +51,9 @@ struct ParticipantVideoCard: View {
         }
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.accentBlue.opacity(Double(participant.audioLevel)), lineWidth: 4)
+                .stroke(
+                    Color.accentBlue.opacity(Double(participant.audioLevel)),
+                    lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
@@ -115,7 +118,8 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
     )
 }
 
@@ -131,7 +135,8 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
     )
 }
 
@@ -147,6 +152,7 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
     )
 }

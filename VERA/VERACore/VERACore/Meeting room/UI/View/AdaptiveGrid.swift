@@ -7,6 +7,7 @@ import SwiftUI
 struct AdaptiveGrid: View {
 
     let participants: [Participant]
+    let activeSpeakerId: String?
 
     let columns = [
         GridItem(.adaptive(minimum: 300), spacing: 16)
@@ -35,8 +36,11 @@ struct AdaptiveGrid: View {
                 LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
                     GridRow {
                         ForEach(visibleItems, id: \.id) { participant in
-                            ParticipantVideoCard(participant: participant)
-                                .frame(maxWidth: .infinity, minHeight: 200)
+                            ParticipantVideoCard(
+                                participant: participant,
+                                activeSpeakerId: activeSpeakerId
+                            )
+                            .frame(maxWidth: .infinity, minHeight: 200)
                         }
                         if participants.count > takeCount {
                             HiddenParticipantsTile(
@@ -58,5 +62,5 @@ struct AdaptiveGrid: View {
 }
 
 #Preview {
-    AdaptiveGrid(participants: PreviewData.manyParticipants)
+    AdaptiveGrid(participants: PreviewData.manyParticipants, activeSpeakerId: nil)
 }
