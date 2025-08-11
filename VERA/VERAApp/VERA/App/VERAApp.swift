@@ -22,7 +22,11 @@ struct VERAApp: App {
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case let .waitingRoom(roomName):
-                            makeWaitingRoom(roomName: roomName)
+                            if navigationCoordinator.isInMeeting {
+                                LoaderModalView()
+                            } else {
+                                makeWaitingRoom(roomName: roomName)
+                            }
                         case let .goodbye(roomName):
                             makeGoodbyePage(roomName: roomName)
                         }

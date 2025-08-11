@@ -25,22 +25,23 @@ public class OpenTokSubscriber: NSObject {
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
-    public var view: AnyView {
+    public lazy var view: AnyView = {
         let view = otSubscriber.view!
         let rendererView = UIViewContainer(view: view)
         otSubscriber.viewScaleBehavior = .fill
         return AnyView(rendererView)
-    }
+    }()
 
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
+        let stream = subscriber.stream!
         participant = Participant(
-            id: subscriber.stream!.streamId,
-            name: subscriber.stream!.name ?? "",
-            isMicEnabled: subscriber.stream!.hasAudio,
-            isCameraEnabled: subscriber.stream!.hasVideo,
+            id: stream.streamId,
+            name: stream.name ?? "",
+            isMicEnabled: stream.hasAudio,
+            isCameraEnabled: stream.hasVideo,
             videoDimensions: VideoDimensions.default,
-            creationTime: subscriber.stream!.creationTime,
+            creationTime: stream.creationTime,
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
@@ -116,8 +117,7 @@ extension OpenTokSubscriber: OTSubscriberKitAudioLevelDelegate {
 
     public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
         let result = movingAvgAudioLevelTracker.track(audioLevel: audioLevel)
-        print("subscriber audioLevel: \(result.movingAvg) log: \(result.logMovingAvg)")
-        self.audioLevel = result.logMovingAvg
+        self.audioLevel = round(result.logMovingAvg * 100) / 100
     }
 }
 

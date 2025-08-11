@@ -22,6 +22,7 @@ struct ActiveSpeakerLayout: View {
         VStack(alignment: .leading, spacing: 0) {
             if participants.count == 1 {
                 ParticipantVideoCard(participant: participants.first!)
+                    .id(participants.first!.id + "_main")
                     .frame(maxWidth: .infinity, minHeight: 200)
             } else if participants.count > 1 {
                 if verticalSizeClass == .compact {
@@ -60,6 +61,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
         GeometryReader { outerGeometry in
             HStack(spacing: 8) {
                 ParticipantVideoCard(participant: activeParticipant)
+                    .id(activeParticipant.id + "_main")
                     .frame(width: outerGeometry.size.width * 0.70)
 
                 GeometryReader { geometry in
@@ -85,6 +87,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                     LazyVGrid(columns: columns, alignment: .center, spacing: spacing) {
                         ForEach(visibleItems, id: \.id) { participant in
                             ParticipantVideoCard(participant: participant)
+                                .id(participant.id + "_other")
                                 .aspectRatio(aspectRatio, contentMode: .fit)
                         }
 
@@ -92,6 +95,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                             HiddenParticipantsTile(
                                 participantNames: hiddenItems.map { $0.name }
                             )
+                            .id("hidden_participants")
                             .aspectRatio(aspectRatio, contentMode: .fit)
                         }
                     }
@@ -128,17 +132,22 @@ public struct VerticalActiveSpeakerLayoutView: View {
             ParticipantVideoCard(participant: activeParticipant)
             if restOfParticipants.count == 1 {
                 ParticipantVideoCard(participant: restOfParticipants[0])
+                    .id(activeParticipant.id + "_main")
             } else if restOfParticipants.count == 2 {
                 HStack {
                     ParticipantVideoCard(participant: restOfParticipants[0])
+                        .id(restOfParticipants[0].id + "_other")
                     ParticipantVideoCard(participant: restOfParticipants[1])
+                        .id(restOfParticipants[1].id + "_other")
                 }
             } else if restOfParticipants.count >= 3 {
                 HStack {
                     ParticipantVideoCard(participant: restOfParticipants[0])
+                        .id(restOfParticipants[0].id + "_other")
                     HiddenParticipantsTile(
-                        participantNames: Array(restOfParticipants.dropFirst())
-                            .map { $0.name })
+                        participantNames: Array(restOfParticipants.dropFirst()).map { $0.name }
+                    )
+                    .id("hidden_participants")
                 }
             }
         }

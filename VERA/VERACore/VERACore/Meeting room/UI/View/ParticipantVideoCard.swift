@@ -48,6 +48,10 @@ struct ParticipantVideoCard: View {
                 }
             }
         }
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.accentBlue.opacity(Double(participant.audioLevel)), lineWidth: 4)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
     }

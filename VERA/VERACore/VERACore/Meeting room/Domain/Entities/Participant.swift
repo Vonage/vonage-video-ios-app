@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-public struct Participant: Identifiable, Hashable, Equatable {
+public struct Participant: Identifiable, Hashable, Equatable, CustomStringConvertible {
     public let id: String
     public let name: String
     public let isMicEnabled: Bool
@@ -78,5 +78,21 @@ public struct Participant: Identifiable, Hashable, Equatable {
 
     public var aspectRatio: Double {
         Double(videoDimensions.width / videoDimensions.height)
+    }
+
+    var isSpeaking: Bool {
+        audioLevel > 0.2
+    }
+
+    // MARK: - CustomStringConvertible
+
+    public var description: String {
+        let formattedAudioLevel = String(format: "%.2f", audioLevel)
+        return """
+            Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
+            isCameraEnabled: \(isCameraEnabled), audioLevel: \(formattedAudioLevel), \
+            isSpeaking: \(isSpeaking), isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
+            isPinned: \(isPinned))
+            """
     }
 }

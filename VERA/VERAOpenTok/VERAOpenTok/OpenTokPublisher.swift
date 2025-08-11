@@ -26,11 +26,11 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     var onError: ((Error) -> Void)?
 
-    public var view: AnyView {
+    public lazy var view: AnyView = {
         let view = otPublisher.view!
         let rendererView = UIViewContainer(view: view)
         return AnyView(rendererView)
-    }
+    }()
 
     public var publishAudio: Bool {
         get {

@@ -60,7 +60,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
-    private let participantsPublisher = CurrentValueSubject<[Participant], Never>([])
+    private let participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(.empty)
     private let activeSpeakerTracker = ActiveSpeakerTracker()
 
     public weak var currentCall: CallFacade?
@@ -90,9 +90,9 @@ public final class MeetingRoomViewModel: ObservableObject {
                 call.participantsPublisher
                     .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global())
                     .removeDuplicates()
-                    .sink { [weak self] participants in
-                        self?.activeSpeakerTracker.calculateActiveSpeaker(from: participants)
-                        self?.participantsPublisher.send(participants)
+                    .sink { [weak self] participantsState in
+                        self?.activeSpeakerTracker.calculateActiveSpeaker(from: participantsState.participants)
+                        self?.participantsPublisher.send(participantsState)
                     }
                     .store(in: &cancellables)
 
@@ -118,12 +118,19 @@ public final class MeetingRoomViewModel: ObservableObject {
             layoutPublisher,
             activeSpeakerTracker.$activeSpeaker
         )
-        .map { [weak self] participants, sessionState, layout, activeSpeaker in
+        .map { [weak self] participantsState, sessionState, layout, activeSpeaker in
             guard let self else { return MeetingRoomState.default }
-            var sortedPaticipants = participants
+            var sortedPaticipants = participantsState.participants
             if layout == .activeSpeaker {
-                sortedPaticipants = participants.sortedByDisplayPriority(
+                sortedPaticipants = sortedPaticipants.sortedByDisplayPriority(
                     activeSpeakerId: activeSpeaker.participantId)
+                if let localParticipant = participantsState.localParticipant {
+                    if sortedPaticipants.isEmpty {
+                        sortedPaticipants.append(localParticipant)
+                    } else {
+                        sortedPaticipants.insert(localParticipant, at: 1)
+                    }
+                }
             }
 
             return MeetingRoomState(

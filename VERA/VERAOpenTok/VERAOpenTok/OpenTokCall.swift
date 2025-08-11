@@ -9,8 +9,8 @@ import VERACore
 
 public final class OpenTokCall: CallFacade {
     private var cancellables = Set<AnyCancellable>()
-    private let _participantsPublisher = CurrentValueSubject<[Participant], Never>([])
-    public lazy var participantsPublisher: AnyPublisher<[Participant], Never> =
+    private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
+    public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
     private var _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(SessionEvent.idle)
@@ -143,11 +143,9 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func updateParticipants() {
-        if let publisherParticipant = publisherParticipant {
-            _participantsPublisher.value = [publisherParticipant] + participantStreams.values
-        } else {
-            _participantsPublisher.value = Array(participantStreams.values)
-        }
+        _participantsPublisher.value = .init(
+            localParticipant: publisherParticipant,
+            participants: Array(participantStreams.values))
     }
 
     // MARK: Audio/Video toggles
