@@ -17,7 +17,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.red)),
+            viewBuilder: { AnyView(Color.red) }),
         .init(
             id: "2",
             name: "Ford Prefect",
@@ -28,7 +28,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.green)),
+            viewBuilder: { AnyView(Color.green) }),
         .init(
             id: "3",
             name: "Zaphod Beeblebrox",
@@ -39,7 +39,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.blue)),
+            viewBuilder: { AnyView(Color.blue) }),
         .init(
             id: "4",
             name: "Trillian",
@@ -50,7 +50,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.yellow)),
+            viewBuilder: { AnyView(Color.yellow) }),
         .init(
             id: "5",
             name: "Marvin",
@@ -61,7 +61,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.purple)),
+            viewBuilder: { AnyView(Color.purple) }),
         .init(
             id: "6",
             name: "Slartibartfast",
@@ -72,7 +72,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.orange)),
+            viewBuilder: { AnyView(Color.orange) }),
         .init(
             id: "7",
             name: "Eddie",
@@ -83,7 +83,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.cyan)),
+            viewBuilder: { AnyView(Color.cyan) }),
         .init(
             id: "8",
             name: "Humma Kavula",
@@ -94,7 +94,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.mint)),
+            viewBuilder: { AnyView(Color.mint) }),
         .init(
             id: "9",
             name: "Fenchurch",
@@ -105,7 +105,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.pink)),
+            viewBuilder: { AnyView(Color.pink) }),
     ]
 
     static let singleParticipant = participants[0]
@@ -123,7 +123,7 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(EmptyView())),
+            viewBuilder: { AnyView(Color.red) }),
         .init(
             id: "mic_off",
             name: "Mic Off",
@@ -134,6 +134,6 @@ struct PreviewData {
             audioLevel: 0.0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(Color.red)),
+            viewBuilder: { AnyView(Color.blue) }),
     ]
 }

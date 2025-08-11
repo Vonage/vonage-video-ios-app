@@ -45,7 +45,7 @@ public class OpenTokSubscriber: NSObject {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(EmptyView()))
+            viewBuilder: { AnyView(EmptyView()) })
         super.init()
     }
 
@@ -96,7 +96,10 @@ public class OpenTokSubscriber: NSObject {
             audioLevel: audioLevel,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            view: view)
+            viewBuilder: { [weak self] in
+                guard let self else { return AnyView(EmptyView()) }
+                return AnyView(self.view)
+            })
     }
 }
 

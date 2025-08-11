@@ -16,7 +16,7 @@ public func makeMockParticipant(
     audioLevel: Float = 0,
     isScreenshare: Bool = false,
     isPinned: Bool = false,
-    view: AnyView = .init(EmptyView())
+    viewBuilder: @escaping () -> AnyView = { AnyView(EmptyView()) }
 ) -> Participant {
     .init(
         id: id,
@@ -28,6 +28,6 @@ public func makeMockParticipant(
         audioLevel: audioLevel,
         isScreenshare: isScreenshare,
         isPinned: isPinned,
-        view: view
+        viewBuilder: viewBuilder
     )
 }

@@ -10,8 +10,8 @@ public class MockCall: VERACore.CallFacade {
     public let _eventsPublisher = CurrentValueSubject<VERACore.SessionEvent, Never>(.idle)
     public lazy var eventsPublisher: AnyPublisher<VERACore.SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
-    public let _participantsPublisher = CurrentValueSubject<[VERACore.Participant], Never>([])
-    public lazy var participantsPublisher: AnyPublisher<[VERACore.Participant], Never> =
+    public let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
+    public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
     public let _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)

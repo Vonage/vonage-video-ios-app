@@ -19,7 +19,7 @@ struct ParticipantVideoCard: View {
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
-                                participant.view
+                                participant.viewBuilder()
                                     .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
                                     .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                     .clipped()
@@ -115,7 +115,7 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(EmptyView()))
+            viewBuilder: { AnyView(EmptyView()) })
     )
 }
 
@@ -131,7 +131,7 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(EmptyView()))
+            viewBuilder: { AnyView(EmptyView()) })
     )
 }
 
@@ -147,6 +147,6 @@ struct MicIndicator: View {
             audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
-            view: AnyView(EmptyView()))
+            viewBuilder: { AnyView(EmptyView()) })
     )
 }

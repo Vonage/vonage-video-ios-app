@@ -9,7 +9,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let name: String
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
-    public let view: AnyView
+    public let viewBuilder: () -> AnyView
     public let videoDimensions: CGSize
     public let isRemote: Bool
     public let creationTime: Date
@@ -28,7 +28,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         audioLevel: Float,
         isScreenshare: Bool,
         isPinned: Bool,
-        view: AnyView
+        viewBuilder: @escaping () -> AnyView
     ) {
         self.id = id
         self.name = name
@@ -40,7 +40,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.audioLevel = audioLevel
         self.isScreenshare = isScreenshare
         self.isPinned = isPinned
-        self.view = view
+        self.viewBuilder = viewBuilder
     }
 
     public static func == (lhs: Participant, rhs: Participant) -> Bool {

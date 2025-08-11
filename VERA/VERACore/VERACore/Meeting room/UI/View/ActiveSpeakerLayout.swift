@@ -62,10 +62,11 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                 ParticipantVideoCard(participant: activeParticipant)
                     .id(activeParticipant.id + "_main")
                     .frame(width: outerGeometry.size.width * 0.70)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transition(
+                        .asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
 
                 GeometryReader { geometry in
                     let availableWidth = geometry.size.width
@@ -91,10 +92,11 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                             ParticipantVideoCard(participant: participant)
                                 .id("\(participant.id)_\(index)_\(visibleItems.count)")
                                 .aspectRatio(aspectRatio, contentMode: .fit)
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .trailing).combined(with: .opacity)
-                                ))
+                                .transition(
+                                    .asymmetric(
+                                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .trailing).combined(with: .opacity)
+                                    ))
                         }
 
                         if !hiddenItems.isEmpty {
@@ -134,43 +136,48 @@ public struct VerticalActiveSpeakerLayoutView: View {
     public var body: some View {
         VStack(spacing: 8) {
             ParticipantVideoCard(participant: activeParticipant)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
-            
+                .transition(
+                    .asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+
             Group {
                 if restOfParticipants.count == 1 {
                     ParticipantVideoCard(participant: restOfParticipants[0])
                         .id(restOfParticipants[0].id + "_other")
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .bottom).combined(with: .opacity),
-                            removal: .move(edge: .bottom).combined(with: .opacity)
-                        ))
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .bottom).combined(with: .opacity)
+                            ))
                 } else if restOfParticipants.count == 2 {
                     HStack {
                         ParticipantVideoCard(participant: restOfParticipants[0])
                             .id(restOfParticipants[0].id + "_other")
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .leading).combined(with: .opacity),
-                                removal: .move(edge: .leading).combined(with: .opacity)
-                            ))
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .leading).combined(with: .opacity),
+                                    removal: .move(edge: .leading).combined(with: .opacity)
+                                ))
                         ParticipantVideoCard(participant: restOfParticipants[1])
                             .id(restOfParticipants[1].id + "_other")
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .trailing).combined(with: .opacity),
-                                removal: .move(edge: .trailing).combined(with: .opacity)
-                            ))
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .move(edge: .trailing).combined(with: .opacity)
+                                ))
                     }
                     .transition(.slide)
                 } else if restOfParticipants.count >= 3 {
                     HStack {
                         ParticipantVideoCard(participant: restOfParticipants[0])
                             .id(restOfParticipants[0].id + "_other")
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .leading).combined(with: .opacity),
-                                removal: .move(edge: .leading).combined(with: .opacity)
-                            ))
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .leading).combined(with: .opacity),
+                                    removal: .move(edge: .leading).combined(with: .opacity)
+                                ))
                         HiddenParticipantsTile(
                             participantNames: Array(restOfParticipants.dropFirst()).map { $0.name }
                         )
