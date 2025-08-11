@@ -28,7 +28,7 @@ public final class OpenTokCall: CallFacade {
     public var publisherParticipant: Participant?
 
     enum Error: Swift.Error {
-        case failedToCreateSubscriber
+        case subscriberCreationFailed
     }
 
     public init(
@@ -76,7 +76,7 @@ public final class OpenTokCall: CallFacade {
     private func addSubscriber(_ stream: OTStream) {
         do {
             guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
-                throw Error.failedToCreateSubscriber
+                throw Error.subscriberCreationFailed
             }
             let openTokSubscriber = OpenTokSubscriber(subscriber: subscriber)
             openTokSubscriber.setup()
