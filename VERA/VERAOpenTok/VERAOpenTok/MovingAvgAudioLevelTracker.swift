@@ -8,6 +8,8 @@ final class MovingAvgAudioLevelTracker {
     private var movingAvg: Float = 0.0
     private let smoothingFactor = 0.7
     private let currentWeightFactor = 0.3
+    private let dbmScalingFactor = 1.5
+    private let normalizationOffset = 1.0
 
     /// Maps current audio level to a moving average value
     /// - Parameter audioLevel: Current audio level
@@ -20,8 +22,8 @@ final class MovingAvgAudioLevelTracker {
         }
 
         // 1.5 scaling to map the -30 - 0 dBm range to [0,1]
-        let logLevel = log(movingAvg) / log(10.0) / 1.5 + 1.0
-        let normalizedLogLevel = min(max(logLevel, 0.0), 1.0)
+        let logLevel = log(movingAvg) / log(10.0) / dbmScalingFactor + normalizationOffset
+        let normalizedLogLevel = min(max(logLevel, 0.0), normalizationOffset)
 
         return (movingAvg: movingAvg, logMovingAvg: normalizedLogLevel)
     }
