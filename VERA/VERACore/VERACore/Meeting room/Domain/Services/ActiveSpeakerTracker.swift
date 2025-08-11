@@ -19,13 +19,15 @@ public struct ActiveSpeakerInfo: Equatable {
 }
 
 public final class ActiveSpeakerTracker: ObservableObject {
-    private static let MINIMUM_AUDIO_LEVEL_THRESHOLD: Float = 0.2
+    private let minimumAudioLevelThreshold: Float
 
     @Published public private(set) var activeSpeaker: ActiveSpeakerInfo = .none
 
     private var cancellables = Set<AnyCancellable>()
 
-    public init() {}
+    public init(minimumAudioLevelThreshold: Float = 0.2) {
+        self.minimumAudioLevelThreshold = minimumAudioLevelThreshold
+    }
 
     // MARK: - Public Methods
 
@@ -33,7 +35,7 @@ public final class ActiveSpeakerTracker: ObservableObject {
         let eligibleParticipants = participants.filter { participant in
             guard participant.isMicEnabled else { return false }
 
-            guard participant.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD else { return false }
+            guard participant.audioLevel >= minimumAudioLevelThreshold else { return false }
 
             return true
         }
@@ -50,12 +52,12 @@ public final class ActiveSpeakerTracker: ObservableObject {
         }
 
         if newActiveSpeaker.participantId != activeSpeaker.participantId
-            && newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD
+            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold
         {
             // New participant becomes active speaker
             activeSpeaker = newActiveSpeaker
         } else if newActiveSpeaker.participantId == activeSpeaker.participantId
-            && newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD
+            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold
         {
             // Same participant but update audio level
             activeSpeaker = newActiveSpeaker
