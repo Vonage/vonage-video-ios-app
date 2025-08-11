@@ -10,10 +10,6 @@ struct ActiveSpeakerLayout: View {
 
     let participants: [Participant]
 
-    let columns = [
-        GridItem(.adaptive(minimum: 300), spacing: 16)
-    ]
-
     let itemHeight: Double = 225
     let minItemWidth: Double = 300
     let spacing: Double = 8
@@ -24,19 +20,26 @@ struct ActiveSpeakerLayout: View {
                 ParticipantVideoCard(participant: participants.first!)
                     .id(participants.first!.id + "_main")
                     .frame(maxWidth: .infinity, minHeight: 200)
+                    .transition(.opacity)
             } else if participants.count > 1 {
-                if verticalSizeClass == .compact {
-                    HorizontalActiveSpeakerLayoutView(participants: participants)
-                } else if horizontalSizeClass == .compact {
-                    VerticalActiveSpeakerLayoutView(participants: participants)
-                } else {
-                    HorizontalActiveSpeakerLayoutView(participants: participants)
+                Group {
+                    if verticalSizeClass == .compact {
+                        HorizontalActiveSpeakerLayoutView(participants: participants)
+                    } else if horizontalSizeClass == .compact {
+                        VerticalActiveSpeakerLayoutView(participants: participants)
+                    } else {
+                        HorizontalActiveSpeakerLayoutView(participants: participants)
+                    }
                 }
+                .transition(.identity)
             }
         }
         .padding(.bottom, 4)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(.easeInOut(duration: 0.4), value: participants.count)
+        .animation(.easeInOut(duration: 0.3), value: horizontalSizeClass)
+        .animation(.easeInOut(duration: 0.3), value: verticalSizeClass)
     }
 }
 
@@ -53,16 +56,16 @@ public struct HorizontalActiveSpeakerLayoutView: View {
 
     let participants: [Participant]
 
-    let columns = [
-        GridItem(.flexible(), spacing: 8)
-    ]
-
     public var body: some View {
         GeometryReader { outerGeometry in
             HStack(spacing: 8) {
                 ParticipantVideoCard(participant: activeParticipant)
                     .id(activeParticipant.id + "_main")
                     .frame(width: outerGeometry.size.width * 0.70)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
 
                 GeometryReader { geometry in
                     let availableWidth = geometry.size.width
@@ -70,7 +73,6 @@ public struct HorizontalActiveSpeakerLayoutView: View {
 
                     let cellWidth = availableWidth - spacing
                     let cellHeight = cellWidth / aspectRatio
-
 
                     let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
 
@@ -84,25 +86,31 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                     let visibleItems = Array(restOfParticipants.prefix(takeCount))
                     let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
 
-                    LazyVGrid(columns: columns, alignment: .center, spacing: spacing) {
-                        ForEach(visibleItems, id: \.id) { participant in
+                    VStack(spacing: spacing) {
+                        ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, participant in
                             ParticipantVideoCard(participant: participant)
-                                .id(participant.id + "_other")
+                                .id("\(participant.id)_\(index)_\(visibleItems.count)")
                                 .aspectRatio(aspectRatio, contentMode: .fit)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .move(edge: .trailing).combined(with: .opacity)
+                                ))
                         }
 
                         if !hiddenItems.isEmpty {
                             HiddenParticipantsTile(
                                 participantNames: hiddenItems.map { $0.name }
                             )
-                            .id("hidden_participants")
+                            .id("hidden_\(hiddenItems.count)_\(visibleItems.count)")
                             .aspectRatio(aspectRatio, contentMode: .fit)
+                            .transition(.opacity)
                         }
                     }
-                    .animation(.easeInOut, value: participants.count)
                     .frame(maxHeight: .infinity, alignment: .center)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: participants.map(\.id))
                 }
                 .frame(width: outerGeometry.size.width * 0.30)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -123,35 +131,59 @@ public struct VerticalActiveSpeakerLayoutView: View {
 
     let participants: [Participant]
 
-    let columns = [
-        GridItem(.adaptive(minimum: 300), spacing: 16)
-    ]
-
     public var body: some View {
         VStack(spacing: 8) {
             ParticipantVideoCard(participant: activeParticipant)
-            if restOfParticipants.count == 1 {
-                ParticipantVideoCard(participant: restOfParticipants[0])
-                    .id(activeParticipant.id + "_main")
-            } else if restOfParticipants.count == 2 {
-                HStack {
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top).combined(with: .opacity),
+                    removal: .move(edge: .top).combined(with: .opacity)
+                ))
+            
+            Group {
+                if restOfParticipants.count == 1 {
                     ParticipantVideoCard(participant: restOfParticipants[0])
                         .id(restOfParticipants[0].id + "_other")
-                    ParticipantVideoCard(participant: restOfParticipants[1])
-                        .id(restOfParticipants[1].id + "_other")
-                }
-            } else if restOfParticipants.count >= 3 {
-                HStack {
-                    ParticipantVideoCard(participant: restOfParticipants[0])
-                        .id(restOfParticipants[0].id + "_other")
-                    HiddenParticipantsTile(
-                        participantNames: Array(restOfParticipants.dropFirst()).map { $0.name }
-                    )
-                    .id("hidden_participants")
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity),
+                            removal: .move(edge: .bottom).combined(with: .opacity)
+                        ))
+                } else if restOfParticipants.count == 2 {
+                    HStack {
+                        ParticipantVideoCard(participant: restOfParticipants[0])
+                            .id(restOfParticipants[0].id + "_other")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .leading).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            ))
+                        ParticipantVideoCard(participant: restOfParticipants[1])
+                            .id(restOfParticipants[1].id + "_other")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .move(edge: .trailing).combined(with: .opacity)
+                            ))
+                    }
+                    .transition(.slide)
+                } else if restOfParticipants.count >= 3 {
+                    HStack {
+                        ParticipantVideoCard(participant: restOfParticipants[0])
+                            .id(restOfParticipants[0].id + "_other")
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .leading).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            ))
+                        HiddenParticipantsTile(
+                            participantNames: Array(restOfParticipants.dropFirst()).map { $0.name }
+                        )
+                        .id("hidden_participants")
+                        .transition(.opacity)
+                    }
+                    .transition(.slide)
                 }
             }
+            .animation(.spring(response: 0.6, dampingFraction: 0.75), value: restOfParticipants.count)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(.easeInOut(duration: 0.4), value: participants.map(\.id))
     }
 }
 
