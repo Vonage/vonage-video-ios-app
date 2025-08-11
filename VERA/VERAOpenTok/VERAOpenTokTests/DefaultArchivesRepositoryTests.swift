@@ -247,7 +247,34 @@ struct DefaultArchivesRepositoryTests {
 
     private func awaitFirstValue<T>(from publisher: AnyPublisher<T, Error>) async throws -> T {
         try await withTimeout(seconds: 2.0) {
-            try await publisher.values.first { _ in true }!
+            try await withCheckedThrowingContinuation { continuation in
+                var cancellable: AnyCancellable?
+                var hasResumed = false
+
+                cancellable =
+                    publisher
+                    .sink(
+                        receiveCompletion: { completion in
+                            guard !hasResumed else { return }
+                            hasResumed = true
+                            cancellable?.cancel()
+
+                            switch completion {
+                            case .failure(let error):
+                                continuation.resume(throwing: error)
+                            case .finished:
+                                // This shouldn't happen if we're waiting for first value
+                                break
+                            }
+                        },
+                        receiveValue: { value in
+                            guard !hasResumed else { return }
+                            hasResumed = true
+                            cancellable?.cancel()
+                            continuation.resume(returning: value)
+                        }
+                    )
+            }
         }
     }
 
