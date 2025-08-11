@@ -11,7 +11,7 @@ import VERACore
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
     var cancellables = Set<AnyCancellable>()
-    
+
     let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
     let date = Date()

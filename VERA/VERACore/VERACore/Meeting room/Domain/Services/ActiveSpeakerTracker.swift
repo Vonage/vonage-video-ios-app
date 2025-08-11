@@ -49,12 +49,14 @@ public final class ActiveSpeakerTracker: ObservableObject {
             newActiveSpeaker = .none
         }
 
-        if newActiveSpeaker.participantId != activeSpeaker.participantId &&
-           newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD {
+        if newActiveSpeaker.participantId != activeSpeaker.participantId
+            && newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD
+        {
             // New participant becomes active speaker
             activeSpeaker = newActiveSpeaker
-        } else if newActiveSpeaker.participantId == activeSpeaker.participantId &&
-                  newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD {
+        } else if newActiveSpeaker.participantId == activeSpeaker.participantId
+            && newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD
+        {
             // Same participant but update audio level
             activeSpeaker = newActiveSpeaker
         } else if newActiveSpeaker.participantId == nil && activeSpeaker.participantId != nil {

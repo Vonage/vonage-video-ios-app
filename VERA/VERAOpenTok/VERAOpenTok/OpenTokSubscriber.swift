@@ -12,7 +12,7 @@ public class OpenTokSubscriber: NSObject {
     let otSubscriber: OTSubscriber
     private var cancellables = Set<AnyCancellable>()
     private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
-    
+
     var id: String { stream.streamId }
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
