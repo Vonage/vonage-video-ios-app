@@ -11,11 +11,10 @@ import VERACore
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
     var cancellables = Set<AnyCancellable>()
-
+    
     let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
-    var lastAudioLevelUpdate = Date.distantPast
 
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
@@ -72,7 +71,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isRemote: false,
             creationTime: date,
             audioLevel: 0,
-            lastAudioLevelUpdate: lastAudioLevelUpdate,
             isScreenshare: false,
             isPinned: false,
             view: AnyView(EmptyView()))
@@ -107,7 +105,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
         $audioLevel
             .removeDuplicates()
-            .sink { [weak self] _ in
+            .sink { [weak self] audioLevel in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -124,7 +122,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             videoDimensions: videoDimensions,
             creationTime: date,
             audioLevel: audioLevel,
-            lastAudioLevelUpdate: lastAudioLevelUpdate,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
             view: view

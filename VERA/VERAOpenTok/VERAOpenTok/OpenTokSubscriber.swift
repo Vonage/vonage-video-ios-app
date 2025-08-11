@@ -10,12 +10,12 @@ import VERACore
 
 public class OpenTokSubscriber: NSObject {
     let otSubscriber: OTSubscriber
-    var cancellables = Set<AnyCancellable>()
-
+    private var cancellables = Set<AnyCancellable>()
+    private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
+    
     var id: String { stream.streamId }
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
-    var lastAudioLevelUpdate = Date.distantPast
 
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
@@ -42,7 +42,6 @@ public class OpenTokSubscriber: NSObject {
             videoDimensions: VideoDimensions.default,
             creationTime: subscriber.stream!.creationTime,
             audioLevel: 0,
-            lastAudioLevelUpdate: lastAudioLevelUpdate,
             isScreenshare: false,
             isPinned: false,
             view: AnyView(EmptyView()))
@@ -94,7 +93,6 @@ public class OpenTokSubscriber: NSObject {
             videoDimensions: videoDimensions,
             creationTime: date,
             audioLevel: audioLevel,
-            lastAudioLevelUpdate: lastAudioLevelUpdate,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
             view: view)
@@ -117,8 +115,9 @@ extension OpenTokSubscriber: OTSubscriberKitAudioLevelDelegate {
     // MARK: Audio levels delegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
-        self.lastAudioLevelUpdate = Date()
-        self.audioLevel = audioLevel
+        let result = movingAvgAudioLevelTracker.track(audioLevel: audioLevel)
+        print("subscriber audioLevel: \(result.movingAvg) log: \(result.logMovingAvg)")
+        self.audioLevel = result.logMovingAvg
     }
 }
 

@@ -19,13 +19,10 @@ public struct ActiveSpeakerInfo: Equatable {
 }
 
 public final class ActiveSpeakerTracker: ObservableObject {
-    private static let MINIMUM_AUDIO_LEVEL_THRESHOLD: Float = 0.15
-    private static let AUDIO_LEVEL_TIMEOUT: TimeInterval = 3.0
-    private static let SPEAKER_CHANGE_COOLDOWN: TimeInterval = 1.0
+    private static let MINIMUM_AUDIO_LEVEL_THRESHOLD: Float = 0.2
 
     @Published public private(set) var activeSpeaker: ActiveSpeakerInfo = .none
 
-    private var lastSpeakerChangeTime: Date = Date.distantPast
     private var cancellables = Set<AnyCancellable>()
 
     public init() {}
@@ -33,19 +30,10 @@ public final class ActiveSpeakerTracker: ObservableObject {
     // MARK: - Public Methods
 
     public func calculateActiveSpeaker(from participants: [Participant]) {
-        let now = Date()
-
-        guard now.timeIntervalSince(lastSpeakerChangeTime) >= Self.SPEAKER_CHANGE_COOLDOWN else {
-            return
-        }
-
         let eligibleParticipants = participants.filter { participant in
             guard participant.isMicEnabled else { return false }
 
             guard participant.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD else { return false }
-
-            let timeSinceLastUpdate = now.timeIntervalSince(participant.lastAudioLevelUpdate)
-            guard timeSinceLastUpdate <= Self.AUDIO_LEVEL_TIMEOUT else { return false }
 
             return true
         }
@@ -61,14 +49,21 @@ public final class ActiveSpeakerTracker: ObservableObject {
             newActiveSpeaker = .none
         }
 
-        if newActiveSpeaker != activeSpeaker {
+        if newActiveSpeaker.participantId != activeSpeaker.participantId &&
+           newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD {
+            // New participant becomes active speaker
             activeSpeaker = newActiveSpeaker
-            lastSpeakerChangeTime = now
+        } else if newActiveSpeaker.participantId == activeSpeaker.participantId &&
+                  newActiveSpeaker.audioLevel >= Self.MINIMUM_AUDIO_LEVEL_THRESHOLD {
+            // Same participant but update audio level
+            activeSpeaker = newActiveSpeaker
+        } else if newActiveSpeaker.participantId == nil && activeSpeaker.participantId != nil {
+            // No eligible participants, clear active speaker
+            activeSpeaker = .none
         }
     }
 
     public func reset() {
         activeSpeaker = .none
-        lastSpeakerChangeTime = Date.distantPast
     }
 }

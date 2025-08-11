@@ -88,6 +88,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             do {
                 let call = try await connectToRoomUseCase(roomName: roomName)
                 call.participantsPublisher
+                    .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global())
                     .removeDuplicates()
                     .sink { [weak self] participants in
                         self?.activeSpeakerTracker.calculateActiveSpeaker(from: participants)
@@ -120,7 +121,6 @@ public final class MeetingRoomViewModel: ObservableObject {
         .map { [weak self] participants, sessionState, layout, activeSpeaker in
             guard let self else { return MeetingRoomState.default }
             var sortedPaticipants = participants
-
             if layout == .activeSpeaker {
                 sortedPaticipants = participants.sortedByDisplayPriority(
                     activeSpeakerId: activeSpeaker.participantId)
