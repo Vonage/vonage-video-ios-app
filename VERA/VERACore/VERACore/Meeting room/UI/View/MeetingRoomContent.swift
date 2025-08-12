@@ -25,7 +25,7 @@ struct MeetingRoomContent: View {
 
     var body: some View {
         if layout == .grid {
-            GridLayout(
+            AdaptiveVideoGrid(
                 participants: participants,
                 activeSpeakerId: activeSpeakerId)
         } else {
