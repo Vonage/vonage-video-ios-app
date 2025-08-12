@@ -12,7 +12,8 @@ public struct MeetingRoomActions {
     let onCameraSwitch: () -> Void
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
-
+    let onToggleLayout: () -> Void
+    
     init(
         onShare: @escaping (String) -> Void = { _ in },
         onRetry: @escaping () -> Void = {},
@@ -20,7 +21,8 @@ public struct MeetingRoomActions {
         onToggleCamera: @escaping () -> Void = {},
         onCameraSwitch: @escaping () -> Void = {},
         onEndCall: @escaping () -> Void = {},
-        onToggleParticipants: @escaping () -> Void = {}
+        onToggleParticipants: @escaping () -> Void = {},
+        onToggleLayout: @escaping () -> Void = {}
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
@@ -29,6 +31,7 @@ public struct MeetingRoomActions {
         self.onCameraSwitch = onCameraSwitch
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
+        self.onToggleLayout = onToggleLayout
     }
 }
 
@@ -37,17 +40,20 @@ struct BottomBar: View {
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let participantsCount: Int
+    private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
 
     init(
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         participantsCount: Int,
+        currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions
     ) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participantsCount = participantsCount
+        self.currentLayout = currentLayout
         self.actions = actions
     }
 
@@ -62,10 +68,7 @@ struct BottomBar: View {
                     isActive: isCameraEnabled,
                     iconName: isCameraEnabled ? "video.slash.fill" : "video.fill",
                     action: actions.onToggleCamera)
-                ControlButton(
-                    isActive: false,
-                    iconName: "square.grid.2x2.fill",
-                    action: {})
+                LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
                 ParticipantsBadgeButton(
                     participantsCount: participantsCount,
                     onToggleParticipants: actions.onToggleParticipants)
@@ -88,6 +91,7 @@ struct BottomBar: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
+            currentLayout: .activeSpeaker,
             actions: .init())
     }
     .background(Color.black)
@@ -99,6 +103,7 @@ struct BottomBar: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
+            currentLayout: .grid,
             actions: .init())
     }
     .background(Color.white)

@@ -31,6 +31,7 @@ public struct MeetingRoomView: View {
                     isMicEnabled: state.isMicEnabled,
                     isCameraEnabled: state.isCameraEnabled,
                     participantsCount: state.participantsCount,
+                    currentLayout: state.layout,
                     actions: actions)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
