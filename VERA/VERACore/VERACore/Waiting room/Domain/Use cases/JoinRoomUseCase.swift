@@ -15,13 +15,16 @@ public struct JoinRoomRequest {
 public final class JoinRoomUseCase {
 
     private let userRepository: UserRepository
+    private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
     private let publisherRepository: PublisherRepository
 
     public init(
         userRepository: UserRepository,
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         publisherRepository: PublisherRepository
     ) {
         self.userRepository = userRepository
+        self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.publisherRepository = publisherRepository
     }
 
@@ -29,7 +32,7 @@ public final class JoinRoomUseCase {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
 
-        let currentPublisher = await publisherRepository.getPublisher()
+        let currentPublisher = await cameraPreviewProviderRepository.getPublisher()
 
         let settings = PublisherSettings(
             username: request.userName,
@@ -38,5 +41,6 @@ public final class JoinRoomUseCase {
         )
 
         await publisherRepository.recreatePublisher(settings)
+        cameraPreviewProviderRepository.resetPublisher()
     }
 }

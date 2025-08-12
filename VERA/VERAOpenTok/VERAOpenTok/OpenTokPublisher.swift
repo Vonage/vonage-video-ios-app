@@ -2,6 +2,7 @@
 //  Created by Vonage on 16/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import SwiftUI
@@ -9,23 +10,25 @@ import VERACore
 
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private(set) var otPublisher: OTPublisher
+    var cancellables = Set<AnyCancellable>()
 
-    var id: String { "publisherID" }
+    let id = "publisherID"
     var stream: OTStream? { otPublisher.stream }
+    let date = Date()
+
+    @Published public private(set) var isScreenshare: Bool = false
+    @Published public private(set) var isPinned: Bool = false
+    @Published public private(set) var audioLevel: Float = 0.0
+    @Published public private(set) var videoDimensions = VideoDimensions.default
+    @Published public private(set) var participant: Participant
+
+    public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     var onError: ((Error) -> Void)?
 
-    var participant: Participant {
-        Participant(
-            id: id,
-            name: stream?.name ?? "",
-            isMicEnabled: otPublisher.publishAudio,
-            isCameraEnabled: otPublisher.publishVideo,
-            view: view)
-    }
-
     public lazy var view: AnyView = {
-        let rendererView = UIViewContainer(view: otPublisher.view!)
+        let view = otPublisher.view!
+        let rendererView = UIViewContainer(view: view)
         return AnyView(rendererView)
     }()
 
@@ -59,6 +62,72 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     public init(publisher: OTPublisher) {
         otPublisher = publisher
+        participant = Participant(
+            id: id,
+            name: publisher.stream?.name ?? "",
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
+            videoDimensions: VideoDimensions.default,
+            isRemote: false,
+            creationTime: date,
+            audioLevel: 0,
+            isScreenshare: false,
+            isPinned: false,
+            viewBuilder: { AnyView(EmptyView()) })
+        super.init()
+    }
+
+    func setup() {
+        stream?
+            .publisher(for: \.videoDimensions)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.videoDimensions = newSize
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        stream?
+            .publisher(for: \.hasAudio)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        stream?
+            .publisher(for: \.hasVideo)
+            .removeDuplicates()
+            .sink { [weak self] newSize in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        $audioLevel
+            .removeDuplicates()
+            .sink { [weak self] audioLevel in
+                self?.updateParticipant()
+            }
+            .store(in: &cancellables)
+
+        updateParticipant()
+    }
+
+    private func updateParticipant() {
+        participant = Participant(
+            id: id,
+            name: stream?.name ?? "",
+            isMicEnabled: otPublisher.publishAudio,
+            isCameraEnabled: otPublisher.publishVideo,
+            videoDimensions: videoDimensions,
+            creationTime: date,
+            audioLevel: audioLevel,
+            isScreenshare: isScreenshare,
+            isPinned: isPinned,
+            viewBuilder: { [weak self] in
+                guard let self else { return AnyView(EmptyView()) }
+                return AnyView(self.view)
+            })
     }
 
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {

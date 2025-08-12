@@ -7,32 +7,33 @@ import SwiftUI
 struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState
     private let userName: Binding<String>
-    private let publisherVideoView: PublisherVideoView
     private let onMicrophoneToggle: () -> Void
     private let onCameraToggle: () -> Void
 
     init(
         state: WaitingRoomState,
         userName: Binding<String>,
-        publisherVideoView: PublisherVideoView,
         onMicrophoneToggle: @escaping () -> Void,
         onCameraToggle: @escaping () -> Void
     ) {
         self.state = state
         self.userName = userName
-        self.publisherVideoView = publisherVideoView
         self.onMicrophoneToggle = onMicrophoneToggle
         self.onCameraToggle = onCameraToggle
     }
 
     var body: some View {
         ZStack {
-            publisherVideoView
+            if let publisher = state.publisher {
+                PublisherVideoView(videoView: publisher.view)
+            } else {
+                PublisherVideoView(videoView: nil)
+            }
 
             VStack {
                 Spacer()
 
-                if !state.isCameraEnabled || !publisherVideoView.hasVideo {
+                if !state.isCameraEnabled || state.publisher == nil {
                     GeometryReader { geometry in
                         let size = min(geometry.size.width, geometry.size.height) * 0.8
                         AvatarInitials(state: .init(userName: userName.wrappedValue))
@@ -69,9 +70,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Arthur Dent"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -82,9 +83,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Ford Prefect"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -95,9 +96,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Marvin"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -108,9 +109,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Slartibartfast"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -125,9 +126,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Arthur Dent"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -138,9 +139,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Ford Prefect"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -151,9 +152,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Marvin"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )
@@ -164,9 +165,9 @@ struct WaitingRoomUserPreviewView: View {
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
                 audioDevices: [],
-                cameras: []),
+                cameras: [],
+                publisher: nil),
             userName: .constant("Slartibartfast"),
-            publisherVideoView: .init(videoView: nil),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )

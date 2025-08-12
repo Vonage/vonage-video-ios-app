@@ -56,19 +56,19 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
         onSessionDidDisconnect?()
     }
 
-    public func subscribe(subscriber: OpenTokSuscriber) throws {
+    public func subscribe(subscriber: OpenTokSubscriber) throws {
         var error: OTError?
-        let _suscriber: OTSubscriberKit = subscriber.otSuscriber
-        session.subscribe(_suscriber, error: &error)
+        let _subscriber: OTSubscriberKit = subscriber.otSubscriber
+        session.subscribe(_subscriber, error: &error)
 
         if let error = error {
             throw error
         }
     }
 
-    public func unsubscribe(subscriber: OpenTokSuscriber) throws {
+    public func unsubscribe(subscriber: OpenTokSubscriber) throws {
         var error: OTError?
-        session.unsubscribe(subscriber.otSuscriber, error: &error)
+        session.unsubscribe(subscriber.otSubscriber, error: &error)
 
         if let error = error {
             throw error

@@ -4,30 +4,53 @@
 
 import SwiftUI
 
-public class Participant: AnyObject, Identifiable, Hashable {
+public struct Participant: Identifiable, Hashable, Equatable, CustomStringConvertible {
     public let id: String
     public let name: String
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
-    public let view: AnyView
+    public let viewBuilder: () -> AnyView
+    public let videoDimensions: CGSize
+    public let isRemote: Bool
+    public let creationTime: Date
+    public let audioLevel: Float
+    public let isScreenshare: Bool
+    public let isPinned: Bool
 
     public init(
         id: String,
         name: String,
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
-        view: AnyView
+        videoDimensions: CGSize,
+        isRemote: Bool = true,
+        creationTime: Date,
+        audioLevel: Float,
+        isScreenshare: Bool,
+        isPinned: Bool,
+        viewBuilder: @escaping () -> AnyView
     ) {
         self.id = id
         self.name = name
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
-        self.view = view
+        self.videoDimensions = videoDimensions
+        self.isRemote = isRemote
+        self.creationTime = creationTime
+        self.audioLevel = audioLevel
+        self.isScreenshare = isScreenshare
+        self.isPinned = isPinned
+        self.viewBuilder = viewBuilder
     }
 
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
-            && lhs.isCameraEnabled == rhs.isCameraEnabled
+            && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
+            && lhs.isRemote == rhs.isRemote
+            && lhs.creationTime == rhs.creationTime
+            && lhs.audioLevel == rhs.audioLevel
+            && lhs.isScreenshare == rhs.isScreenshare
+            && lhs.isPinned == rhs.isPinned
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -35,5 +58,39 @@ public class Participant: AnyObject, Identifiable, Hashable {
         hasher.combine(name)
         hasher.combine(isMicEnabled)
         hasher.combine(isCameraEnabled)
+        hasher.combine(videoDimensions.width)
+        hasher.combine(videoDimensions.height)
+        hasher.combine(isRemote)
+        hasher.combine(creationTime)
+        hasher.combine(audioLevel)
+        hasher.combine(isScreenshare)
+        hasher.combine(isPinned)
+    }
+
+    public var containerAspectRatio: Double {
+        let dimensions = videoDimensions
+        guard dimensions.height > 0 else { return 16.0 / 9.0 }
+        var ratio = Double(dimensions.width / dimensions.height)
+        if ratio < 1 {
+            ratio = 1.33
+        }
+        return ratio
+    }
+
+    public var aspectRatio: Double {
+        guard videoDimensions.height > 0 else { return 16.0 / 9.0 }
+        return Double(videoDimensions.width / videoDimensions.height)
+    }
+
+    // MARK: - CustomStringConvertible
+
+    public var description: String {
+        let formattedAudioLevel = String(format: "%.2f", audioLevel)
+        return """
+            Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
+            isCameraEnabled: \(isCameraEnabled), audioLevel: \(formattedAudioLevel), \
+            isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
+            isPinned: \(isPinned))
+            """
     }
 }

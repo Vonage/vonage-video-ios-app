@@ -7,9 +7,6 @@ import VERACore
 
 func makePublisherVideoView() -> PublisherVideoView {
     PublisherVideoView(
-        videoView: AnyView(
-            Rectangle()
-                .fill(Color.red)
-        )
+        videoView: AnyView(Color.red)
     )
 }

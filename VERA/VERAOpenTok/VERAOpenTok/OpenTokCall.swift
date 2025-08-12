@@ -8,8 +8,9 @@ import OpenTok
 import VERACore
 
 public final class OpenTokCall: CallFacade {
-    private let _participantsPublisher = CurrentValueSubject<[Participant], Never>([])
-    public lazy var participantsPublisher: AnyPublisher<[Participant], Never> =
+    private var cancellables = Set<AnyCancellable>()
+    private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
+    public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
     private var _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(SessionEvent.idle)
@@ -18,15 +19,16 @@ public final class OpenTokCall: CallFacade {
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
-    private var subscriberStreams: [String: OpenTokSuscriber] = [:]
+    private var subscriberStreams: [String: OpenTokSubscriber] = [:]
     private var participantStreams: [String: Participant] = [:]
 
     public let token: String
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
+    public var publisherParticipant: Participant?
 
     enum Error: Swift.Error {
-        case failedToCreateSuscriber
+        case subscriberCreationFailed
     }
 
     public init(
@@ -48,34 +50,59 @@ public final class OpenTokCall: CallFacade {
         updateMediaState()
     }
 
+    // MARK: Publisher
     private func publishToSession() {
         do {
             try session.publish(publisher: publisher)
+            publisherParticipant = publisher.participant
+            publisher.setup()
+            setupPublisherObservation(publisher)
             updateParticipants()
         } catch {
             _eventsPublisher.send(.error(error))
         }
     }
 
+    private func setupPublisherObservation(_ publisher: OpenTokPublisher) {
+        publisher.$participant
+            .sink { [weak self] participant in
+                self?.publisherParticipant = participant
+                self?.updateParticipants()
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: Subscriber
     private func addSubscriber(_ stream: OTStream) {
         do {
-            guard let suscriber = OTSubscriber(stream: stream, delegate: nil) else {
-                throw Error.failedToCreateSuscriber
+            guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
+                throw Error.subscriberCreationFailed
             }
-            let openTokSuscriber = OpenTokSuscriber(suscriber: suscriber)
-            suscriber.delegate = openTokSuscriber
-            suscriber.audioLevelDelegate = openTokSuscriber
-            suscriber.captionsDelegate = openTokSuscriber
+            let openTokSubscriber = OpenTokSubscriber(subscriber: subscriber)
+            openTokSubscriber.setup()
+            subscriber.delegate = openTokSubscriber
+            subscriber.audioLevelDelegate = openTokSubscriber
+            subscriber.captionsDelegate = openTokSubscriber
 
-            try session.subscribe(subscriber: openTokSuscriber)
+            try session.subscribe(subscriber: openTokSubscriber)
 
-            subscriberStreams[openTokSuscriber.id] = openTokSuscriber
-            participantStreams[openTokSuscriber.id] = openTokSuscriber.participant
+            subscriberStreams[openTokSubscriber.id] = openTokSubscriber
+            participantStreams[openTokSubscriber.id] = openTokSubscriber.participant
 
+            setupSubscriberObservation(openTokSubscriber)
             updateParticipants()
         } catch {
             _eventsPublisher.send(.error(error))
         }
+    }
+
+    private func setupSubscriberObservation(_ subscriber: OpenTokSubscriber) {
+        subscriber.$participant
+            .sink { [weak self] participant in
+                self?.participantStreams[participant.id] = participant
+                self?.updateParticipants()
+            }
+            .store(in: &cancellables)
     }
 
     private func removeSubscriber(_ stream: OTStream) {
@@ -93,9 +120,7 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
-    private func sessionDidFail(_ error: Swift.Error) {
-        _eventsPublisher.send(.error(error))
-    }
+    // MARK: Session
 
     public func connect() {
         do {
@@ -113,11 +138,21 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
+    private func sessionDidFail(_ error: Swift.Error) {
+        _eventsPublisher.send(.error(error))
+    }
+
     private func updateParticipants() {
-        _participantsPublisher.value = [publisher.participant] + participantStreams.values
+        _participantsPublisher.value = .init(
+            localParticipant: publisherParticipant,
+            participants: Array(participantStreams.values))
     }
 
     // MARK: Audio/Video toggles
+
+    public func toggleLocalCamera() {
+        publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
+    }
 
     public func toggleLocalVideo() {
         publisher.publishVideo.toggle()

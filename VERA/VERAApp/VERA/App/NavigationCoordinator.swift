@@ -19,19 +19,15 @@ final class NavigationCoordinator: ObservableObject {
         currentMeetingRoom = roomName
         isInMeeting = true
 
-        // Ensure we navigate away from the waiting room before starting the meeting.
-        // Having two views referencing the same publisher or subscriber video view
-        // can cause video loss or rendering issues, especially when rotating the device.
         path.removeLast(path.count)
+        path.append(AppRoute.goodbye(roomName))
         logNavigation("Starting meeting: \(roomName)")
     }
 
     func leaveMeeting() {
         isInMeeting = false
-        let lastRoomName = currentMeetingRoom ?? ""
         currentMeetingRoom = nil
 
-        path.append(AppRoute.goodbye(lastRoomName))
         logNavigation("Left meeting, navigating to goodbye")
     }
 
