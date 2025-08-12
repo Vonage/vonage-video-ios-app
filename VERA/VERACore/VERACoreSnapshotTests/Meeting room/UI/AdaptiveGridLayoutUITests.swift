@@ -104,6 +104,45 @@ struct AdaptiveGridLayoutUITests {
     }
 
     @Test(
+        "Adaptive Grid Layout - twenty participants layout",
+        arguments: [
+            ("iPhone", ViewImageConfig.iPhone13),
+            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
+        ])
+    func twentyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
+        let sut = makeSUT(participants: createParticipants(count: 20))
+
+        snapshot(sut, named: "\(deviceName)_TwentyParticipants", config: config)
+    }
+    
+    @Test(
+        "Adaptive Grid Layout - thirty participants layout",
+        arguments: [
+            ("iPhone", ViewImageConfig.iPhone13),
+            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
+        ])
+    func thirtyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
+        let sut = makeSUT(participants: createParticipants(count: 30))
+
+        snapshot(sut, named: "\(deviceName)_ThirtyParticipants", config: config)
+    }
+    
+    @Test(
+        "Adaptive Grid Layout - fifty participants layout",
+        arguments: [
+            ("iPhone", ViewImageConfig.iPhone13),
+            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
+        ])
+    func fiftyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
+        let sut = makeSUT(participants: createParticipants(count: 50))
+
+        snapshot(sut, named: "\(deviceName)_FiftyParticipants", config: config)
+    }
+    
+    @Test(
         "Adaptive Grid Layout - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
@@ -177,5 +216,25 @@ struct AdaptiveGridLayoutUITests {
             line: line,
             column: column
         )
+    }
+    
+    func createParticipants(count: Int) -> [Participant] {
+        var participants: [Participant] = []
+        for index in 1...count {
+            participants.append(
+                Participant(
+                    id: "participant_\(index)",
+                    name: "User \(index)", isMicEnabled: index % 3 != 0,
+                    isCameraEnabled: index % 4 != 0,
+                    videoDimensions: .init(width: 640, height: 480),
+                    isRemote: true,
+                    creationTime: Date().addingTimeInterval(TimeInterval(index)),
+                    audioLevel: 0.0,
+                    isScreenshare: false,
+                    isPinned: false,
+                    viewBuilder: { AnyView(Color.blue) })
+            )
+        }
+        return participants
     }
 }

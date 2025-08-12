@@ -38,14 +38,21 @@ struct ParticipantVideoCard: View {
                         .fill(.vGray4.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
-                            AvatarInitials(state: .init(userName: participant.name))
-                                .padding(24)
-                        )
+                            ZStack {
+                                Rectangle()
+                                    .fill(.vGray4.opacity(0.8))
+                                    .overlay(
+                                        AvatarInitials(state: .init(userName: participant.name))
+                                            .padding(24)
+                                    ).aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                    .clipped()
 
-                    ParticipantVideoCardOverlays(
-                        isMicEnabled: participant.isMicEnabled,
-                        name: participant.name
-                    )
+                                ParticipantVideoCardOverlays(
+                                    isMicEnabled: participant.isMicEnabled,
+                                    name: participant.name
+                                )
+                            }
+                        )
                 }
             }
         }
