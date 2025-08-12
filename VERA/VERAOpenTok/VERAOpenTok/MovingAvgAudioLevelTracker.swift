@@ -4,17 +4,19 @@
 
 import Foundation
 
-final class MovingAvgAudioLevelTracker {
+public final class MovingAvgAudioLevelTracker {
     private var movingAvg: Float = 0.0
     private let smoothingFactor: Float = 0.7
     private let currentWeightFactor: Float = 0.3
     private let dbmScalingFactor: Float = 1.5
     private let normalizationOffset: Float = 1.0
 
+    public init() {}
+
     /// Maps current audio level to a moving average value
     /// - Parameter audioLevel: Current audio level
     /// - Returns: Moving average and log moving average values.
-    func track(audioLevel: Float) -> (movingAvg: Float, logMovingAvg: Float) {
+    public func track(_ audioLevel: Float) -> (movingAvg: Float, logMovingAvg: Float) {
         if movingAvg <= audioLevel {
             movingAvg = audioLevel
         } else {

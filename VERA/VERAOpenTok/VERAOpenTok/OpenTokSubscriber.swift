@@ -119,7 +119,7 @@ extension OpenTokSubscriber: OTSubscriberKitAudioLevelDelegate {
     // MARK: Audio levels delegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
-        let result = movingAvgAudioLevelTracker.track(audioLevel: audioLevel)
+        let result = movingAvgAudioLevelTracker.track(audioLevel)
         self.audioLevel = round(result.logMovingAvg * 100) / 100
     }
 }
