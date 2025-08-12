@@ -82,10 +82,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         return Double(videoDimensions.width / videoDimensions.height)
     }
 
-    var isSpeaking: Bool {
-        audioLevel > 0.2
-    }
-
     // MARK: - CustomStringConvertible
 
     public var description: String {
@@ -93,7 +89,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         return """
             Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
             isCameraEnabled: \(isCameraEnabled), audioLevel: \(formattedAudioLevel), \
-            isSpeaking: \(isSpeaking), isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
+            isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
             isPinned: \(isPinned))
             """
     }
