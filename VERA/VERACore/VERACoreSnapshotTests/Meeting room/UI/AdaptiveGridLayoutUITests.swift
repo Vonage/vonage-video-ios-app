@@ -115,7 +115,7 @@ struct AdaptiveGridLayoutUITests {
 
         snapshot(sut, named: "\(deviceName)_TwentyParticipants", config: config)
     }
-    
+
     @Test(
         "Adaptive Grid Layout - thirty participants layout",
         arguments: [
@@ -128,7 +128,7 @@ struct AdaptiveGridLayoutUITests {
 
         snapshot(sut, named: "\(deviceName)_ThirtyParticipants", config: config)
     }
-    
+
     @Test(
         "Adaptive Grid Layout - fifty participants layout",
         arguments: [
@@ -141,7 +141,7 @@ struct AdaptiveGridLayoutUITests {
 
         snapshot(sut, named: "\(deviceName)_FiftyParticipants", config: config)
     }
-    
+
     @Test(
         "Adaptive Grid Layout - Size Classes",
         arguments: [
@@ -217,7 +217,7 @@ struct AdaptiveGridLayoutUITests {
             column: column
         )
     }
-    
+
     func createParticipants(count: Int) -> [Participant] {
         var participants: [Participant] = []
         for index in 1...count {
