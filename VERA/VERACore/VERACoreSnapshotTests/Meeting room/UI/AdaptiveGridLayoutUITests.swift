@@ -14,7 +14,7 @@ struct AdaptiveGridLayoutUITests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true  // Set to true to record new snapshots
+    private let isRecording = false  // Set to true to record new snapshots
     private let snapshotPrefix = "AdaptiveGridLayout"
 
     // MARK: - Core UI Tests
