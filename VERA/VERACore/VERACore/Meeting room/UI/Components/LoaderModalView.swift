@@ -4,8 +4,9 @@
 
 import SwiftUI
 
-struct LoaderModalView: View {
-    var body: some View {
+public struct LoaderModalView: View {
+    public init() {}
+    public var body: some View {
         ProgressView()
     }
 }

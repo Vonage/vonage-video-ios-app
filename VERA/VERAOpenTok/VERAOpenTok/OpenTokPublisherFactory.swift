@@ -21,8 +21,19 @@ public final class OpenTokPublisherFactory: PublisherFactory {
         publisherSettings.videoTrack = settings.publishVideo
 
         let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings)!
+        otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
         let publisher = OpenTokPublisher(publisher: otPublisher)
         otPublisher.delegate = publisher
         return publisher
+    }
+}
+
+extension VideoScaleBehavior {
+    var otVideoScaleBehavior: OTVideoViewScaleBehavior {
+        switch self {
+        case .fill: return .fill
+        case .fit: return .fit
+        @unknown default: return .fill
+        }
     }
 }

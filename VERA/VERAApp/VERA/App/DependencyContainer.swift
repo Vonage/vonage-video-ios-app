@@ -34,6 +34,10 @@ final class DependencyContainer {
         DefaultPublisherRepository(publisherFactory: publisherFactory)
     }()
 
+    lazy var cameraPreviewProviderRepository: any CameraPreviewProviderRepository = {
+        DefaultCameraPreviewProviderRepository(publisherFactory: publisherFactory)
+    }()
+
     lazy var userRepository: any UserRepository = {
         UserDefaultsUserRepository(userDefaults: .standard)
     }()
@@ -42,6 +46,7 @@ final class DependencyContainer {
 
     lazy var waitingRoomFactory = WaitingRoomFactory(
         publisherRepository: publisherRepository,
+        cameraPreviewProviderRepository: cameraPreviewProviderRepository,
         audioDevicesRepository: audioDevicesRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository)
@@ -55,6 +60,7 @@ final class DependencyContainer {
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
             userRepository: userRepository,
+            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             publisherRepository: publisherRepository),
         userRepository: userRepository,
         archivesRepository: archivesRepository,

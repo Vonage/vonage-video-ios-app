@@ -11,13 +11,23 @@ public func makeMockParticipant(
     name: String = "aName",
     isMicEnabled: Bool = true,
     isCameraEnabled: Bool = true,
-    view: AnyView = .init(EmptyView())
+    videoDimensions: CGSize = .init(width: 640, height: 480),
+    creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
+    audioLevel: Float = 0,
+    isScreenshare: Bool = false,
+    isPinned: Bool = false,
+    viewBuilder: @escaping () -> AnyView = { AnyView(EmptyView()) }
 ) -> Participant {
     .init(
         id: id,
         name: name,
         isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,
-        view: view
+        videoDimensions: videoDimensions,
+        creationTime: creationTime,
+        audioLevel: audioLevel,
+        isScreenshare: isScreenshare,
+        isPinned: isPinned,
+        viewBuilder: viewBuilder
     )
 }

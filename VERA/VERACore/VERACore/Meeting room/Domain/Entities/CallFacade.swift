@@ -5,8 +5,25 @@
 import Combine
 import Foundation
 
+public struct ParticipantsState: Equatable {
+    public let localParticipant: Participant?
+    public let participants: [Participant]
+
+    public static var empty: ParticipantsState {
+        ParticipantsState(localParticipant: nil, participants: [])
+    }
+
+    public init(
+        localParticipant: Participant?,
+        participants: [Participant]
+    ) {
+        self.localParticipant = localParticipant
+        self.participants = participants
+    }
+}
+
 public protocol ParticipantsPublisherProvider: AnyObject {
-    var participantsPublisher: AnyPublisher<[Participant], Never> { get }
+    var participantsPublisher: AnyPublisher<ParticipantsState, Never> { get }
 }
 
 public protocol EventsPublisherProvider: AnyObject {
@@ -24,6 +41,7 @@ public protocol CallConnectable: AnyObject {
 
 public protocol MediaToggleable: AnyObject {
     func toggleLocalVideo()
+    func toggleLocalCamera()
     func toggleLocalAudio()
 }
 

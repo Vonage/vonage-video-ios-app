@@ -6,45 +6,78 @@ import AVKit
 import SwiftUI
 
 struct ParticipantVideoCard: View {
-
     let participant: Participant
+    let activeSpeakerId: String?
+
+    private let containerAspectRatio: Double = 16.0 / 9.0
 
     var body: some View {
-        ZStack(alignment: .center) {
+        Group {
             if participant.isCameraEnabled {
-                participant.view
-                    .id(participant.id + "_view")
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .edgesIgnoringSafeArea(.all)
-                    .background(.vGray4.opacity(0.8))
-            } else {
-                VStack {
-                    AvatarInitials(state: .init(userName: participant.name))
-                        .padding(24)
-                }
-                .id(participant.id + "_initials")
-                .background(.vGray4.opacity(0.8))
-            }
+                ZStack {
+                    Rectangle()
+                        .fill(.vGray4.opacity(0.8))
+                        .aspectRatio(containerAspectRatio, contentMode: .fit)
+                        .overlay(
+                            ZStack {
+                                participant.viewBuilder()
+                                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
+                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                    .clipped()
 
-            VStack {
-                HStack {
-                    Spacer()
-                    MicIndicator(isMicEnabled: participant.isMicEnabled)
+                                ParticipantVideoCardOverlays(
+                                    isMicEnabled: participant.isMicEnabled,
+                                    name: participant.name
+                                )
+                            }
+                        )
                 }
-                Spacer()
-                HStack {
-                    NameLabel(name: participant.name)
-                    Spacer()
+            } else {
+                ZStack {
+                    Rectangle()
+                        .fill(.vGray4.opacity(0.8))
+                        .aspectRatio(containerAspectRatio, contentMode: .fit)
+                        .overlay(
+                            AvatarInitials(state: .init(userName: participant.name))
+                                .padding(24)
+                        )
+
+                    ParticipantVideoCardOverlays(
+                        isMicEnabled: participant.isMicEnabled,
+                        name: participant.name
+                    )
                 }
             }
-            .padding(8)
         }
-        .background(
+        .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.uiSystemBackground))
+                .stroke(
+                    Color.accentBlue.opacity(Double(participant.audioLevel)),
+                    lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
+    }
+}
+
+struct ParticipantVideoCardOverlays: View {
+
+    let isMicEnabled: Bool
+    let name: String
+
+    var body: some View {
+        VStack {
+            HStack {
+                Spacer()
+                MicIndicator(isMicEnabled: isMicEnabled)
+            }
+            Spacer()
+            HStack {
+                NameLabel(name: name)
+                Spacer()
+            }
+        }
+        .padding(8)
     }
 }
 
@@ -56,8 +89,6 @@ struct NameLabel: View {
             .foregroundColor(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.black.opacity(0.6))
-            .cornerRadius(8)
             .lineLimit(1)
             .truncationMode(.tail)
     }
@@ -82,6 +113,46 @@ struct MicIndicator: View {
             name: "name",
             isMicEnabled: true,
             isCameraEnabled: true,
-            view: AnyView(EmptyView()))
+            videoDimensions: .zero,
+            creationTime: Date(),
+            audioLevel: 0,
+            isScreenshare: false,
+            isPinned: false,
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
+    )
+}
+
+#Preview {
+    ParticipantVideoCard(
+        participant: Participant(
+            id: "",
+            name: "name",
+            isMicEnabled: true,
+            isCameraEnabled: true,
+            videoDimensions: .zero,
+            creationTime: Date(),
+            audioLevel: 0,
+            isScreenshare: false,
+            isPinned: false,
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
+    )
+}
+
+#Preview {
+    ParticipantVideoCard(
+        participant: Participant(
+            id: "",
+            name: "name",
+            isMicEnabled: false,
+            isCameraEnabled: false,
+            videoDimensions: .zero,
+            creationTime: Date(),
+            audioLevel: 0,
+            isScreenshare: false,
+            isPinned: false,
+            viewBuilder: { AnyView(EmptyView()) }),
+        activeSpeakerId: ""
     )
 }
