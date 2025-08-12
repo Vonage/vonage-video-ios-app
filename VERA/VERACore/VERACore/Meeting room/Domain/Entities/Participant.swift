@@ -69,6 +69,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
 
     public var containerAspectRatio: Double {
         let dimensions = videoDimensions
+        guard dimensions.height > 0 else { return 16.0 / 9.0 }
         var ratio = Double(dimensions.width / dimensions.height)
         if ratio < 1 {
             ratio = 1.33
@@ -77,7 +78,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     }
 
     public var aspectRatio: Double {
-        Double(videoDimensions.width / videoDimensions.height)
+        guard videoDimensions.height > 0 else { return 16.0 / 9.0 }
+        return Double(videoDimensions.width / videoDimensions.height)
     }
 
     var isSpeaking: Bool {

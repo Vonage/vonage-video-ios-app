@@ -1,9 +1,10 @@
 //
-//  Created by Vonage on 7/8/25.
+//  Created by Vonage on 12/8/25.
 //
 
 import Foundation
 import SwiftUI
+import VERACore
 
 struct PreviewData {
     // MARK: - Individual Participants

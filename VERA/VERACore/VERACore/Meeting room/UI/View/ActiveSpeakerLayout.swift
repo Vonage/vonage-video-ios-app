@@ -69,70 +69,78 @@ public struct HorizontalActiveSpeakerLayoutView: View {
 
     public var body: some View {
         GeometryReader { outerGeometry in
-            HStack(spacing: 8) {
-                ParticipantVideoCard(
-                    participant: activeParticipant,
-                    activeSpeakerId: activeSpeakerId
-                )
-                .id(activeParticipant.id + "_main")
-                .frame(width: outerGeometry.size.width * 0.70)
-                .transition(
-                    .asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+            if outerGeometry.size.width > 0 && outerGeometry.size.height > 0 {
+                HStack(spacing: 8) {
+                    ParticipantVideoCard(
+                        participant: activeParticipant,
+                        activeSpeakerId: activeSpeakerId
+                    )
+                    .id(activeParticipant.id + "_main")
+                    .frame(width: max(1, outerGeometry.size.width * 0.70))
+                    .transition(
+                        .asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
 
-                GeometryReader { geometry in
-                    let availableWidth = geometry.size.width
-                    let availableHeight = geometry.size.height
+                    GeometryReader { geometry in
+                        let availableWidth = max(0, geometry.size.width)
+                        let availableHeight = max(0, geometry.size.height)
 
-                    let cellWidth = availableWidth - spacing
-                    let cellHeight = cellWidth / aspectRatio
+                        // Prevent NaN calculations by ensuring positive values
+                        if availableWidth > 0 && availableHeight > 0 {
+                            let cellWidth = max(1, availableWidth - spacing)
+                            let cellHeight = max(1, cellWidth / aspectRatio)
 
-                    let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
+                            let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
 
-                    let maxVisibleItems = rowsVisible
+                            let maxVisibleItems = rowsVisible
 
-                    let takeCount =
-                        maxVisibleItems >= restOfParticipants.count
-                        ? restOfParticipants.count
-                        : max(1, maxVisibleItems - 1)
+                            let takeCount =
+                                maxVisibleItems >= restOfParticipants.count
+                                ? restOfParticipants.count
+                                : max(1, maxVisibleItems - 1)
 
-                    let visibleItems = Array(restOfParticipants.prefix(takeCount))
-                    let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
+                            let visibleItems = Array(restOfParticipants.prefix(takeCount))
+                            let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
 
-                    VStack(spacing: spacing) {
-                        ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, participant in
-                            ParticipantVideoCard(
-                                participant: participant,
-                                activeSpeakerId: activeSpeakerId
-                            )
-                            .id("\(participant.id)_\(index)_\(visibleItems.count)")
-                            .aspectRatio(aspectRatio, contentMode: .fit)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .trailing).combined(with: .opacity)
-                                ))
-                        }
+                            VStack(spacing: spacing) {
+                                ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, participant in
+                                    ParticipantVideoCard(
+                                        participant: participant,
+                                        activeSpeakerId: activeSpeakerId
+                                    )
+                                    .id("\(participant.id)_\(index)_\(visibleItems.count)")
+                                    .aspectRatio(aspectRatio, contentMode: .fit)
+                                    .transition(
+                                        .asymmetric(
+                                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                                            removal: .move(edge: .trailing).combined(with: .opacity)
+                                        ))
+                                }
 
-                        if !hiddenItems.isEmpty {
-                            HiddenParticipantsTile(
-                                participantNames: hiddenItems.map { $0.name }
-                            )
-                            .id("hidden_\(hiddenItems.count)_\(visibleItems.count)")
-                            .aspectRatio(aspectRatio, contentMode: .fit)
-                            .transition(.opacity)
+                                if !hiddenItems.isEmpty {
+                                    HiddenParticipantsTile(
+                                        participantNames: hiddenItems.map { $0.name }
+                                    )
+                                    .id("hidden_\(hiddenItems.count)_\(visibleItems.count)")
+                                    .aspectRatio(aspectRatio, contentMode: .fit)
+                                    .transition(.opacity)
+                                }
+                            }
+                            .frame(maxHeight: .infinity, alignment: .center)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: participants.map(\.id))
+                        } else {
+                            EmptyView()
                         }
                     }
-                    .frame(maxHeight: .infinity, alignment: .center)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: participants.map(\.id))
+                    .frame(width: max(1, outerGeometry.size.width * 0.30))
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
-                .frame(width: outerGeometry.size.width * 0.30)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+            } else {
+                EmptyView()
             }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
