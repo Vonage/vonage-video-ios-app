@@ -29,7 +29,7 @@ struct AdaptiveGridLayout: View {
                     )
 
                     let isLandscape = geometry.size.width > geometry.size.height
-                    if isLandscape && participants.count > 2 {
+                    if isLandscape && participants.count > 3 {
                         LazyHGrid(rows: layout.columns, alignment: .center, spacing: layout.spacing) {
                             ForEach(participants, id: \.id) { participant in
                                 ParticipantVideoCard(
@@ -72,14 +72,12 @@ struct AdaptiveGridLayout: View {
         }
 
         switch participantCount {
-        case 1:
-            return singleParticipantLayout()
-        case 2:
-            return twoParticipantLayout(containerSize: containerSize)
-        default:
-            return multiParticipantLayout(
-                count: participantCount,
-                containerSize: containerSize
+        case 1: return singleParticipantLayout()
+        case 2: return twoParticipantLayout(containerSize: containerSize)
+        case 3: return threeParticipantLayout(containerSize: containerSize)
+        default: return multiParticipantLayout(
+            count: participantCount,
+            containerSize: containerSize
             )
         }
     }
@@ -115,6 +113,30 @@ struct AdaptiveGridLayout: View {
         }
     }
 
+    private func threeParticipantLayout(containerSize: CGSize) -> GridLayout {
+        let isLandscape = containerSize.width > containerSize.height
+
+        if isLandscape {
+            // Side by side
+            return GridLayout(
+                columns: [
+                    GridItem(.flexible(), spacing: 8),
+                    GridItem(.flexible(), spacing: 8),
+                    GridItem(.flexible(), spacing: 8),
+                ],
+                spacing: 8,
+                padding: 16
+            )
+        } else {
+            // Stacked vertically
+            return GridLayout(
+                columns: [GridItem(.flexible())],
+                spacing: 8,
+                padding: 16
+            )
+        }
+    }
+    
     private func multiParticipantLayout(
         count: Int,
         containerSize: CGSize
