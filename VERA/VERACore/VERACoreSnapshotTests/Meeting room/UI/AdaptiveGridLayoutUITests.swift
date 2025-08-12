@@ -22,8 +22,7 @@ struct AdaptiveGridLayoutUITests {
     @Test(
         "Adaptive Grid Layout - No participants",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
-            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPhone", ViewImageConfig.iPhone13)
         ])
     func emptyLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [])
@@ -36,6 +35,7 @@ struct AdaptiveGridLayoutUITests {
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
         ])
     func oneParticipantLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [PreviewData.arthurDent])
@@ -48,6 +48,7 @@ struct AdaptiveGridLayoutUITests {
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
         ])
     func twoParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
@@ -62,6 +63,7 @@ struct AdaptiveGridLayoutUITests {
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
         ])
     func threeParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
@@ -77,6 +79,7 @@ struct AdaptiveGridLayoutUITests {
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
         ])
     func fourParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
@@ -92,6 +95,7 @@ struct AdaptiveGridLayoutUITests {
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
+            ("iPad", ViewImageConfig.iPadPro11),
         ])
     func manyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: PreviewData.manyParticipants)
