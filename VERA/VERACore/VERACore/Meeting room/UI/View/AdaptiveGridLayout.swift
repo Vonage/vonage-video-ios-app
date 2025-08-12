@@ -28,28 +28,30 @@ struct AdaptiveGridLayout: View {
                         containerSize: geometry.size
                     )
 
-                    let isLandscape = geometry.size.width > geometry.size.height
-                    if isLandscape && participants.count > 3 {
-                        LazyHGrid(rows: layout.columns, alignment: .center, spacing: layout.spacing) {
-                            ForEach(participants, id: \.id) { participant in
-                                ParticipantVideoCard(
-                                    participant: participant,
-                                    activeSpeakerId: activeSpeakerId
-                                )
+                    Group {
+                        let isLandscape = geometry.size.width > geometry.size.height
+                        if isLandscape && participants.count > 3 {
+                            LazyHGrid(rows: layout.columns, alignment: .center, spacing: layout.spacing) {
+                                ForEach(participants, id: \.id) { participant in
+                                    ParticipantVideoCard(
+                                        participant: participant,
+                                        activeSpeakerId: activeSpeakerId
+                                    )
+                                }
+                            }
+                            
+                        } else {
+                            LazyVGrid(columns: layout.columns, spacing: layout.spacing) {
+                                ForEach(participants, id: \.id) { participant in
+                                    ParticipantVideoCard(
+                                        participant: participant,
+                                        activeSpeakerId: activeSpeakerId
+                                    )
+                                }
                             }
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    } else {
-                        LazyVGrid(columns: layout.columns, spacing: layout.spacing) {
-                            ForEach(participants, id: \.id) { participant in
-                                ParticipantVideoCard(
-                                    participant: participant,
-                                    activeSpeakerId: activeSpeakerId
-                                )
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
         }
@@ -141,15 +143,80 @@ struct AdaptiveGridLayout: View {
         count: Int,
         containerSize: CGSize
     ) -> GridLayout {
-        let bestGrid = getOptimalGridForContainerAndCount(count, containerSize: containerSize)
+        let optimalGrid = getOptimalGridForContainerAndCount(count, containerSize: containerSize)
+        
+        // Validate if the optimal grid fits in the container
+        let aspectRatio: Double = 16.0 / 9.0
+        let padding: Double = 16
+        let spacing: Double = 8
+        
+        let cellWidth = (containerSize.width - padding * 2 - Double(optimalGrid.columns - 1) * spacing) / Double(optimalGrid.columns)
+        let cellHeight = cellWidth / aspectRatio
+        let totalHeight = Double(optimalGrid.rows) * cellHeight + Double(optimalGrid.rows - 1) * spacing + padding * 2
+        
+        // If optimal grid doesn't fit in height, try to make cells narrower first
+        if totalHeight > containerSize.height && optimalGrid.columns == 1 {
+            let availableHeight = containerSize.height - padding * 2 - Double(optimalGrid.rows - 1) * spacing
+            let maxCellHeight = availableHeight / Double(optimalGrid.rows)
+            
+            // Calculate narrower width to fit the height constraint
+            let adjustedCellWidth = maxCellHeight * aspectRatio
+            let minCellWidth: Double = 120 // Minimum usable width
+            
+            if adjustedCellWidth >= minCellWidth {
+                // Create custom grid items with fixed width to make them narrower
+                let customWidth = min(adjustedCellWidth, cellWidth)
+                let columns = [GridItem(.fixed(customWidth))]
+                
+                return GridLayout(
+                    columns: columns,
+                    spacing: spacing,
+                    padding: padding
+                )
+            } else {
+                // If still too narrow, fallback to a more compact grid
+                let finalGrid = getFallbackGrid(count: count, containerSize: containerSize)
+                let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: finalGrid.columns)
+                
+                return GridLayout(
+                    columns: columns,
+                    spacing: spacing,
+                    padding: padding
+                )
+            }
+        }
 
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: bestGrid.columns)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: optimalGrid.columns)
 
         return GridLayout(
             columns: columns,
             spacing: 8,
             padding: 16
         )
+    }
+    
+    private func getFallbackGrid(count: Int, containerSize: CGSize) -> (rows: Int, columns: Int) {
+        let containerAspectRatio = containerSize.width / containerSize.height
+        let isPortrait = containerAspectRatio < 1.0
+        
+        // More aggressive fallbacks for limited height scenarios
+        switch count {
+        case 1: return (1, 1)
+        case 2: return (1, 2) // Always horizontal for 2
+        case 3: return isPortrait ? (2, 2) : (2, 2) // 2x2 with one empty
+        case 4: return (2, 2) // Force 2x2 for 4 participants instead of 4x1
+        case 5: return isPortrait ? (3, 2) : (2, 3)
+        case 6: return (2, 3)
+        case 7...9: return (3, 3)
+        case 10...12: return (3, 4)
+        case 13...16: return (4, 4)
+        default:
+            // For larger numbers, calculate more balanced grid
+            let sqrt = Int(ceil(sqrt(Double(count))))
+            let cols = sqrt
+            let rows = Int(ceil(Double(count) / Double(cols)))
+            return (rows, cols)
+        }
     }
 
     private func getOptimalGridForContainerAndCount(
@@ -215,21 +282,16 @@ struct GridLayout {
 
 #Preview {
     AdaptiveGridLayout(
-        participants: PreviewData.manyParticipants,
-        activeSpeakerId: PreviewData.arthurDent.id
+        participants: [],
+        activeSpeakerId: String?.none
     )
     .frame(height: 400)
 }
 
 #Preview {
     AdaptiveGridLayout(
-        participants: [
-            PreviewData.arthurDent,
-            PreviewData.eddie,
-            PreviewData.hummaKavula,
-            PreviewData.marvin,
-        ],
-        activeSpeakerId: PreviewData.arthurDent.id
+        participants: [],
+        activeSpeakerId: String?.none
     )
     .frame(height: 400)
 }
