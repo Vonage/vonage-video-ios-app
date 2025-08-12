@@ -203,23 +203,23 @@ struct AdvancedAvatarGroup: View {
         ]
     }
 
-#Preview("Avatar Group - Few Users") {
-    VStack(spacing: 20) {
-        AvatarGroup(users: Array(PreviewData.users.prefix(3)))
+    #Preview("Avatar Group - Few Users") {
+        VStack(spacing: 20) {
+            AvatarGroup(users: Array(PreviewData.users.prefix(3)))
 
-        AvatarGroup(
-            users: PreviewData.users,
-            maxVisible: 3,
-            size: 50
-        )
+            AvatarGroup(
+                users: PreviewData.users,
+                maxVisible: 3,
+                size: 50
+            )
 
-        AvatarGroup(
-            users: PreviewData.users,
-            maxVisible: 5,
-            size: 60,
-            spacing: -12
-        )
+            AvatarGroup(
+                users: PreviewData.users,
+                maxVisible: 5,
+                size: 60,
+                spacing: -12
+            )
+        }
+        .padding()
     }
-    .padding()
-}
 #endif

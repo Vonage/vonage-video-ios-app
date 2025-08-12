@@ -135,6 +135,15 @@ public final class MeetingRoomViewModel: ObservableObject {
                         sortedPaticipants.insert(localParticipant, at: 1)
                     }
                 }
+            } else {
+                sortedPaticipants = sortedPaticipants.sortedByCreationDate()
+                if let localParticipant = participantsState.localParticipant {
+                    if sortedPaticipants.isEmpty {
+                        sortedPaticipants.append(localParticipant)
+                    } else {
+                        sortedPaticipants.insert(localParticipant, at: 0)
+                    }
+                }
             }
 
             return MeetingRoomState(
@@ -176,14 +185,15 @@ public final class MeetingRoomViewModel: ObservableObject {
     public func onToggleLayout() {
         Task { [weak self] in
             guard let self else { return }
-            let newLayout: MeetingRoomLayout = switch layoutPublisher.value {
-            case .grid: .activeSpeaker
-            case .activeSpeaker: .grid
-            }
+            let newLayout: MeetingRoomLayout =
+                switch layoutPublisher.value {
+                case .grid: .activeSpeaker
+                case .activeSpeaker: .grid
+                }
             layoutPublisher.value = newLayout
         }
     }
-    
+
     public func endCall() {
         disconnectRoomUseCase()
     }

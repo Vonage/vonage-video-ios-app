@@ -13,7 +13,7 @@ public struct MeetingRoomActions {
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
     let onToggleLayout: () -> Void
-    
+
     init(
         onShare: @escaping (String) -> Void = { _ in },
         onRetry: @escaping () -> Void = {},

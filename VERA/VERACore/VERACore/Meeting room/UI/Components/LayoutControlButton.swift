@@ -27,22 +27,26 @@ struct LayoutControlButton: View {
 
 struct LayoutImage: View {
     let layout: MeetingRoomLayout
-    
+
     var body: some View {
         ZStack {
             if layout == .activeSpeaker {
-                Image("inset.filled.leadinghalf.toptrailing.bottomtrailing.rectangle",
-                      bundle: .veraCore)
-                    .transition(.asymmetric(
+                Image(
+                    "inset.filled.leadinghalf.toptrailing.bottomtrailing.rectangle",
+                    bundle: .veraCore
+                )
+                .transition(
+                    .asymmetric(
                         insertion: .opacity.combined(with: .scale(scale: 0.8)),
                         removal: .opacity.combined(with: .scale(scale: 1.2))
                     ))
             } else {
                 Image(systemName: "square.grid.2x2.fill")
-                    .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 0.8)),
-                        removal: .opacity.combined(with: .scale(scale: 1.2))
-                    ))
+                    .transition(
+                        .asymmetric(
+                            insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                            removal: .opacity.combined(with: .scale(scale: 1.2))
+                        ))
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: layout)
