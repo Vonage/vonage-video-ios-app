@@ -13,12 +13,12 @@ struct AdaptiveGridLayout: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if participants.count == 1 {
+            if participants.count == 1, let participant = participants.first {
                 ParticipantVideoCard(
-                    participant: participants.first!,
+                    participant: participant,
                     activeSpeakerId: activeSpeakerId
                 )
-                .id(participants.first!.id + "_main")
+                .id(participant.id + "_main")
                 .frame(maxWidth: .infinity, minHeight: 200)
                 .transition(.opacity)
             } else if participants.count > 1 {
