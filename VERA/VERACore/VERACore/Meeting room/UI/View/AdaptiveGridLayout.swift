@@ -224,9 +224,9 @@ struct AdaptiveGridLayout: View {
 
         return best
     }
-    
+
     // MARK: - Grid Score Calculation Helpers
-    
+
     private func calculateGridScore(
         videoContentEfficiency: Double,
         efficiency: Double,
@@ -235,16 +235,23 @@ struct AdaptiveGridLayout: View {
     ) -> Double {
         return videoContentEfficiency * 0.8 + efficiency * 0.2 + aspectRatioBalance + utilizationBonus
     }
-    
+
     private func calculateExistingGridScore(
-        bestGrid: (rows: Int, columns: Int, cellWidth: Double, cellHeight: Double, spacing: Double, padding: Double, efficiency: Double),
+        bestGrid: (
+            rows: Int, columns: Int, cellWidth: Double, cellHeight: Double, spacing: Double, padding: Double,
+            efficiency: Double
+        ),
         containerSize: CGSize,
         participantCount: Int
     ) -> Double {
-        let videoContentEfficiency = (Double(bestGrid.columns) * bestGrid.cellWidth * Double(bestGrid.rows) * bestGrid.cellHeight) / (containerSize.width * containerSize.height)
+        let videoContentEfficiency =
+            (Double(bestGrid.columns) * bestGrid.cellWidth * Double(bestGrid.rows) * bestGrid.cellHeight)
+            / (containerSize.width * containerSize.height)
         let aspectRatioBalance = (1.0 - abs(log2(bestGrid.cellWidth / bestGrid.cellHeight)) / 3.0) * 0.1
-        let utilizationBonus = (1.0 - Double((bestGrid.rows * bestGrid.columns - participantCount)) / Double(bestGrid.rows * bestGrid.columns)) * 0.05
-        
+        let utilizationBonus =
+            (1.0 - Double((bestGrid.rows * bestGrid.columns - participantCount))
+                / Double(bestGrid.rows * bestGrid.columns)) * 0.05
+
         return calculateGridScore(
             videoContentEfficiency: videoContentEfficiency,
             efficiency: bestGrid.efficiency,
