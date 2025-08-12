@@ -202,7 +202,6 @@ struct AdvancedAvatarGroup: View {
             AvatarGroupUser(name: "Deep Thought"),
         ]
     }
-#endif
 
 #Preview("Avatar Group - Few Users") {
     VStack(spacing: 20) {
@@ -223,3 +222,4 @@ struct AdvancedAvatarGroup: View {
     }
     .padding()
 }
+#endif
