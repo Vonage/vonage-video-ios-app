@@ -47,10 +47,17 @@ struct VERAApp: App {
                     message: Text(alertItem.message),
                     dismissButton: .default(Text("OK"))
                 )
+            }.onOpenURL { url in
+                handleUniversalLink(url)
             }
         }
     }
 
+    private func handleUniversalLink(_ url: URL) {
+        guard let roomName = url.getRoomName(from: dependencyContainer.baseURL) else { return }
+        navigationCoordinator.navigateToWaitingRoom(roomName)
+    }
+    
     // MARK: - Factory Methods
 
     var landingPageFactory: LandingPageFactory { dependencyContainer.landingPageFactory }
