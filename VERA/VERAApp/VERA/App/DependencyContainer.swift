@@ -52,6 +52,7 @@ final class DependencyContainer {
         userRepository: userRepository)
 
     lazy var meetingRoomFactory = MeetingRoomFactory(
+        baseURL: baseURL,
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,

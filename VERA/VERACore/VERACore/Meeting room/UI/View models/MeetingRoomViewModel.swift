@@ -19,6 +19,7 @@ public enum MeetingRoomLayout {
 public struct MeetingRoomState: Equatable {
 
     public let roomName: RoomName
+    public let roomURL: URL?
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
     public let participants: [Participant]
@@ -31,6 +32,7 @@ public struct MeetingRoomState: Equatable {
 
     public init(
         roomName: RoomName,
+        roomURL: URL?,
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         participants: [Participant],
@@ -38,6 +40,7 @@ public struct MeetingRoomState: Equatable {
         activeSpeakerId: String?
     ) {
         self.roomName = roomName
+        self.roomURL = roomURL
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participants = participants
@@ -47,6 +50,7 @@ public struct MeetingRoomState: Equatable {
 
     public static let `default` = MeetingRoomState(
         roomName: "",
+        roomURL: nil,
         isMicEnabled: false,
         isCameraEnabled: false,
         participants: [],
@@ -70,14 +74,17 @@ public final class MeetingRoomViewModel: ObservableObject {
     public weak var currentCall: CallFacade?
 
     public let roomName: RoomName
+    public let baseURL: URL
 
     public init(
         roomName: RoomName,
+        baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository
     ) {
         self.roomName = roomName
+        self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
@@ -148,6 +155,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
             return MeetingRoomState(
                 roomName: self.roomName,
+                roomURL: baseURL.appendingPathComponent(roomName),
                 isMicEnabled: sessionState.isPublishingAudio,
                 isCameraEnabled: sessionState.isPublishingVideo,
                 participants: sortedPaticipants,

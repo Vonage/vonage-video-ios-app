@@ -94,11 +94,10 @@ public struct MeetingRoomView: View {
                         } label: {
                             Image(systemName: "speaker.wave.2")
                         }
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onShare(state.roomName)
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
+                        if let roomURL = state.roomURL {
+                            ShareLink(item: roomURL) {
+                                Image(systemName: "square.and.arrow.up")
+                            }
                         }
                     }
                 }
@@ -180,6 +179,7 @@ public struct MeetingRoomView: View {
     MeetingRoomView(
         state: .init(
             roomName: "heart-of-gold",
+            roomURL: .init(string: "http://example.com"),
             isMicEnabled: true,
             isCameraEnabled: true,
             participants: [],
