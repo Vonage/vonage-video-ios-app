@@ -31,6 +31,8 @@ public struct MeetingRoomView: View {
                     activeSpeakerId: state.activeSpeakerId
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .offset(y: isNavigationBarVisible ? 0 : -22)
+                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isNavigationBarVisible)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     showBottomBarAndResetTimer()
@@ -56,7 +58,7 @@ public struct MeetingRoomView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
             .navigationTitle(state.roomName)
-            .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
+
             .onAppear {
                 startHideTimer()
             }
@@ -64,11 +66,11 @@ public struct MeetingRoomView: View {
                 cancelHideTimer()
             }
             #if !os(macOS)
+                .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(.visible, for: .navigationBar)
                 .toolbarBackground(.black, for: .navigationBar)
                 .toolbarColorScheme(.dark, for: .navigationBar)
-
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button {
@@ -111,7 +113,7 @@ public struct MeetingRoomView: View {
     private func startHideTimer() {
         cancelHideTimer()
         hideTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: 0.6)) {
                 isBottomBarVisible = false
                 isNavigationBarVisible = false
             }
@@ -125,8 +127,10 @@ public struct MeetingRoomView: View {
 
     private func showBottomBarAndResetTimer() {
         cancelHideTimer()
-        isBottomBarVisible = true
-        isNavigationBarVisible = true
+        withAnimation(.easeInOut(duration: 0.4)) {
+            isBottomBarVisible = true
+            isNavigationBarVisible = true
+        }
         startHideTimer()
     }
 
