@@ -10,7 +10,7 @@ public struct ParticipantsListView: View {
     let meetingURL: URL?
     let onCopyToClipboard: (String) -> Void
     let onDismiss: () -> Void
-    
+
     @State private var showCopySuccess = false
 
     public init(
