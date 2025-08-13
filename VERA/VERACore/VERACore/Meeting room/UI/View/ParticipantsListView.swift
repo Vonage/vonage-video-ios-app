@@ -10,7 +10,7 @@ public struct ParticipantsListView: View {
     let meetingURL: URL?
     let onCopyToClipboard: (String) -> Void
     let onDismiss: () -> Void
-
+    
     @State private var showCopySuccess = false
 
     public init(
@@ -144,7 +144,7 @@ public struct ParticipantsListView: View {
             showCopySuccess = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + ToastDuration) {
             withAnimation {
                 showCopySuccess = false
             }

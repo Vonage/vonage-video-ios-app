@@ -37,18 +37,18 @@ struct ParticipantsBadgeButton: View {
                     Circle()
                         .fill(.vGray3)
                 )
-                .scaleEffect(participantsCount > 99 ? 0.9 : 1.0)
+                .scaleEffect(participantsCount > MaxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)
                 .animation(.easeInOut(duration: 0.2), value: participantsCount)
         }
     }
 
     private var badgeText: String {
-        participantsCount > 99 ? "99+" : "\(participantsCount)"
+        participantsCount > MaxBadgeCount ? "\(MaxBadgeCount)+" : "\(participantsCount)"
     }
 
     private var badgeSize: CGFloat {
-        participantsCount > 99 ? 24 : 20
+        participantsCount > MaxBadgeCount ? 24 : 20
     }
 }
 
