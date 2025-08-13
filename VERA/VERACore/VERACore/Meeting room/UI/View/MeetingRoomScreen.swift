@@ -6,13 +6,16 @@ import SwiftUI
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
+    private let onCopyToClipboard: (String) -> Void
     private let onBack: () -> Void
 
     public init(
         viewModel: MeetingRoomViewModel,
+        onCopyToClipboard: @escaping (String) -> Void,
         onBack: @escaping () -> Void
     ) {
         self.viewModel = viewModel
+        self.onCopyToClipboard = onCopyToClipboard
         self.onBack = onBack
     }
 
@@ -32,7 +35,8 @@ public struct MeetingRoomScreen: View {
                             onBack()
                         },
                         onToggleParticipants: {},
-                        onToggleLayout: viewModel.onToggleLayout)
+                        onToggleLayout: viewModel.onToggleLayout,
+                        onCopyToClipboard: onCopyToClipboard)
                 )
             }
 

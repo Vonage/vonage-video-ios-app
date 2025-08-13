@@ -10,19 +10,22 @@ public class MeetingRoomFactory {
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
+    private let clipboard: Clipboard
 
     public init(
         baseURL: URL,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
-        roomCredentialsRepository: RoomCredentialsRepository
+        roomCredentialsRepository: RoomCredentialsRepository,
+        clipboard: Clipboard
     ) {
         self.baseURL = baseURL
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
         self.roomCredentialsRepository = roomCredentialsRepository
+        self.clipboard = clipboard
     }
 
     public func make(
@@ -42,6 +45,7 @@ public class MeetingRoomFactory {
         viewModel.loadUI()
         return MeetingRoomScreen(
             viewModel: viewModel,
+            onCopyToClipboard: clipboard.copy,
             onBack: onBack)
     }
 }
