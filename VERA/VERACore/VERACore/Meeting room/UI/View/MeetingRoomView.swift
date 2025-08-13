@@ -61,7 +61,7 @@ public struct MeetingRoomView: View {
             .navigationTitle(state.roomName)
             .sheet(isPresented: $showParticipantsList) {
                 ParticipantsListView(
-                    participants: state.participants,
+                    participants: state.participants.sortedByName(),
                     roomName: state.roomName,
                     meetingURL: state.roomURL,
                     onCopyToClipboard: actions.onCopyToClipboard,

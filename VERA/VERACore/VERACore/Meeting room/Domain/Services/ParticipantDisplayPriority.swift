@@ -92,6 +92,18 @@ public struct ParticipantDisplayPriority {
             participantA.creationTime <= participantB.creationTime
         }
     }
+
+    /**
+     * Sorts participants by their name
+     * @returns Sorted array of participants
+     */
+    public static func sortByName(
+        participants: [Participant]
+    ) -> [Participant] {
+        return participants.sorted { participantA, participantB in
+            participantA.name.localizedStandardCompare(participantB.name) == .orderedAscending
+        }
+    }
 }
 
 // MARK: - Convenience Extensions
@@ -116,5 +128,13 @@ extension Array where Element == Participant {
      */
     public func sortedByCreationDate() -> [Participant] {
         return ParticipantDisplayPriority.sortByDate(participants: self)
+    }
+
+    /**
+     * Convenience method to sort participants by name
+     * @returns New sorted array of participants
+     */
+    public func sortedByName() -> [Participant] {
+        return ParticipantDisplayPriority.sortByName(participants: self)
     }
 }
