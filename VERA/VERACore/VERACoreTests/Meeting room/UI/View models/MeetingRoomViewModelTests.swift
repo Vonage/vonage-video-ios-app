@@ -65,6 +65,7 @@ struct MeetingRoomViewModelTests {
 
     func makeSUT(
         roomName: String = "a_room_name",
+        baseURL: URL = .init(string: "https://example.com")!,
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
@@ -72,6 +73,7 @@ struct MeetingRoomViewModelTests {
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
             roomName: roomName,
+            baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository)

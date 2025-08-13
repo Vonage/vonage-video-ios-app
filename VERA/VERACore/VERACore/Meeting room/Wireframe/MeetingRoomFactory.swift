@@ -5,17 +5,20 @@
 import SwiftUI
 
 public class MeetingRoomFactory {
+    private let baseURL: URL
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
-
+    
     public init(
+        baseURL: URL,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
         roomCredentialsRepository: RoomCredentialsRepository
     ) {
+        self.baseURL = baseURL
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
@@ -28,6 +31,7 @@ public class MeetingRoomFactory {
     ) -> some View {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
+            baseURL: baseURL,
             connectToRoomUseCase: .init(
                 sessionRepository: sessionRepository,
                 roomCredentialsRepository: roomCredentialsRepository),
