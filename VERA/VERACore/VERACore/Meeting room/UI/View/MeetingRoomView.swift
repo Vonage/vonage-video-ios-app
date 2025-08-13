@@ -19,7 +19,7 @@ public struct MeetingRoomView: View {
 
     public var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            ZStack {
                 MeetingRoomContent(
                     participants: state.participants,
                     showBottomSheet: false,
@@ -27,12 +27,16 @@ public struct MeetingRoomView: View {
                     activeSpeakerId: state.activeSpeakerId
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                BottomBar(
-                    isMicEnabled: state.isMicEnabled,
-                    isCameraEnabled: state.isCameraEnabled,
-                    participantsCount: state.participantsCount,
-                    currentLayout: state.layout,
-                    actions: actions)
+                VStack(alignment: .center) {
+                    Spacer()
+                    BottomBar(
+                        isMicEnabled: state.isMicEnabled,
+                        isCameraEnabled: state.isCameraEnabled,
+                        participantsCount: state.participantsCount,
+                        currentLayout: state.layout,
+                        actions: actions)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
