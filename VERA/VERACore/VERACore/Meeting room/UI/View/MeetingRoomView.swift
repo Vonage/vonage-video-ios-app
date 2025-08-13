@@ -8,8 +8,9 @@ public struct MeetingRoomView: View {
 
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
-    
+
     @State private var isBottomBarVisible = true
+    @State private var isNavigationBarVisible = true
     @State private var hideTimer: Timer?
 
     public init(
@@ -34,7 +35,7 @@ public struct MeetingRoomView: View {
                 .onTapGesture {
                     showBottomBarAndResetTimer()
                 }
-                
+
                 VStack(alignment: .center) {
                     Spacer()
                     BottomBar(
@@ -42,7 +43,8 @@ public struct MeetingRoomView: View {
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
                         currentLayout: state.layout,
-                        actions: wrappedActions)
+                        actions: wrappedActions
+                    )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
                     .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
                     .onTapGesture {
@@ -54,6 +56,7 @@ public struct MeetingRoomView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
             .navigationTitle(state.roomName)
+            .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
             .onAppear {
                 startHideTimer()
             }
@@ -69,6 +72,7 @@ public struct MeetingRoomView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button {
+                            onBottomBarInteraction()
                             actions.onEndCall()
                         } label: {
                             Image(systemName: "arrow.left")
@@ -77,16 +81,19 @@ public struct MeetingRoomView: View {
 
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Button {
+                            onBottomBarInteraction()
                             actions.onCameraSwitch()
                         } label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera")
                         }
                         Button {
+                            onBottomBarInteraction()
                             actions.onToggleMic()
                         } label: {
                             Image(systemName: "speaker.wave.2")
                         }
                         Button {
+                            onBottomBarInteraction()
                             actions.onShare(state.roomName)
                         } label: {
                             Image(systemName: "square.and.arrow.up")
@@ -98,33 +105,35 @@ public struct MeetingRoomView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .tint(.white)
     }
-    
+
     // MARK: - Auto-hide Controls Functions
-    
+
     private func startHideTimer() {
         cancelHideTimer()
         hideTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 isBottomBarVisible = false
+                isNavigationBarVisible = false
             }
         }
     }
-    
+
     private func cancelHideTimer() {
         hideTimer?.invalidate()
         hideTimer = nil
     }
-    
+
     private func showBottomBarAndResetTimer() {
         cancelHideTimer()
         isBottomBarVisible = true
+        isNavigationBarVisible = true
         startHideTimer()
     }
-    
+
     private func onBottomBarInteraction() {
         showBottomBarAndResetTimer()
     }
-    
+
     private var wrappedActions: MeetingRoomActions {
         MeetingRoomActions(
             onShare: { url in
