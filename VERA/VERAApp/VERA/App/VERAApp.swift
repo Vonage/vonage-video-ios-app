@@ -57,7 +57,7 @@ struct VERAApp: App {
         guard let roomName = url.getRoomName(from: dependencyContainer.baseURL) else { return }
         navigationCoordinator.navigateToWaitingRoom(roomName)
     }
-    
+
     // MARK: - Factory Methods
 
     var landingPageFactory: LandingPageFactory { dependencyContainer.landingPageFactory }

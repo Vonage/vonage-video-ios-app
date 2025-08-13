@@ -10,7 +10,7 @@ public class MeetingRoomFactory {
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
-    
+
     public init(
         baseURL: URL,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,

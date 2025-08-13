@@ -75,7 +75,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public let roomName: RoomName
     public let baseURL: URL
-    
+
     public init(
         roomName: RoomName,
         baseURL: URL,
