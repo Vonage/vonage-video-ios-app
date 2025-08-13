@@ -80,6 +80,18 @@ public struct ParticipantDisplayPriority {
         // Priority 4: If no higher priority applies, maintain current order
         return 0
     }
+
+    /**
+     * Sorts participants by their creation date
+     * @returns Sorted array of participants
+     */
+    public static func sortByDate(
+        participants: [Participant]
+    ) -> [Participant] {
+        return participants.sorted { participantA, participantB in
+            participantA.creationTime <= participantB.creationTime
+        }
+    }
 }
 
 // MARK: - Convenience Extensions
@@ -96,5 +108,13 @@ extension Array where Element == Participant {
             participants: self,
             activeSpeakerId: activeSpeakerId
         )
+    }
+
+    /**
+     * Convenience method to sort participants by creation date
+     * @returns New sorted array of participants
+     */
+    public func sortedByCreationDate() -> [Participant] {
+        return ParticipantDisplayPriority.sortByDate(participants: self)
     }
 }

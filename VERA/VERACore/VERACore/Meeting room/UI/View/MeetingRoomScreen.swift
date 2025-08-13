@@ -31,7 +31,8 @@ public struct MeetingRoomScreen: View {
                             viewModel.endCall()
                             onBack()
                         },
-                        onToggleParticipants: {})
+                        onToggleParticipants: {},
+                        onToggleLayout: viewModel.onToggleLayout)
                 )
             }
 
