@@ -24,7 +24,7 @@ public struct MeetingRoomActions {
         onEndCall: @escaping () -> Void = {},
         onToggleParticipants: @escaping () -> Void = {},
         onToggleLayout: @escaping () -> Void = {},
-        onCopyToClipboard: @escaping (String) -> Void = { _ in },
+        onCopyToClipboard: @escaping (String) -> Void = { _ in }
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
