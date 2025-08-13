@@ -137,7 +137,8 @@ public struct ParticipantsListView: View {
     // MARK: - Actions
 
     private func copyMeetingURL() {
-        onCopyToClipboard(meetingURL?.absoluteString ?? "")
+        guard let meetingURL = meetingURL else { return }
+        onCopyToClipboard(meetingURL.absoluteString)
 
         withAnimation {
             showCopySuccess = true
