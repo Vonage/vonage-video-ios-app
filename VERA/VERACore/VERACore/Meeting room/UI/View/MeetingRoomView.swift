@@ -98,9 +98,6 @@ public struct MeetingRoomView: View {
                             ShareLink(item: roomURL) {
                                 Image(systemName: "square.and.arrow.up")
                             }
-                            .onTapGesture {
-                                onBottomBarInteraction()
-                            }
                         }
                     }
                 }
