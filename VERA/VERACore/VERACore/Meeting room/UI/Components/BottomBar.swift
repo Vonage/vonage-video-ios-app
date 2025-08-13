@@ -13,6 +13,7 @@ public struct MeetingRoomActions {
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
     let onToggleLayout: () -> Void
+    let onCopyToClipboard: (String) -> Void
 
     init(
         onShare: @escaping (String) -> Void = { _ in },
@@ -22,7 +23,8 @@ public struct MeetingRoomActions {
         onCameraSwitch: @escaping () -> Void = {},
         onEndCall: @escaping () -> Void = {},
         onToggleParticipants: @escaping () -> Void = {},
-        onToggleLayout: @escaping () -> Void = {}
+        onToggleLayout: @escaping () -> Void = {},
+        onCopyToClipboard: @escaping (String) -> Void = { _ in },
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
@@ -32,6 +34,7 @@ public struct MeetingRoomActions {
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
         self.onToggleLayout = onToggleLayout
+        self.onCopyToClipboard = onCopyToClipboard
     }
 }
 
