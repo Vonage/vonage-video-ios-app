@@ -11,6 +11,7 @@ public struct MeetingRoomView: View {
 
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
+    @State private var showParticipantsList = false
     @State private var hideTimer: Timer?
 
     public init(
@@ -58,7 +59,16 @@ public struct MeetingRoomView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.black)
             .navigationTitle(state.roomName)
-
+            .sheet(isPresented: $showParticipantsList) {
+                ParticipantsListView(
+                    participants: state.participants.sortedByName(),
+                    roomName: state.roomName,
+                    meetingURL: state.roomURL,
+                    onDismiss: {
+                        showParticipantsList = false
+                    }
+                )
+            }
             .onAppear {
                 startHideTimer()
             }
@@ -104,7 +114,6 @@ public struct MeetingRoomView: View {
             #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .tint(.white)
     }
 
     // MARK: - Auto-hide Controls Functions
@@ -165,7 +174,7 @@ public struct MeetingRoomView: View {
             },
             onToggleParticipants: {
                 onBottomBarInteraction()
-                actions.onToggleParticipants()
+                showParticipantsList.toggle()
             },
             onToggleLayout: {
                 onBottomBarInteraction()
