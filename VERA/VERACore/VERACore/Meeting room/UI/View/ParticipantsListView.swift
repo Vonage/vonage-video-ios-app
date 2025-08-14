@@ -39,13 +39,9 @@ public struct ParticipantsListView: View {
             .toolbar {
                 #if os(iOS)
                     ToolbarItem(placement: .cancellationAction) {
-                        if #available(iOS 26.0, *) {
-                            Button(role: .close, action: onDismiss)
-                        } else {
-                            Button(action: onDismiss) {
-                                Image(systemName: "xmark")
-                            }.tint(.uiLabel)
-                        }
+                        Button(action: onDismiss) {
+                            Image(systemName: "xmark")
+                        }.tint(.uiLabel)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {
