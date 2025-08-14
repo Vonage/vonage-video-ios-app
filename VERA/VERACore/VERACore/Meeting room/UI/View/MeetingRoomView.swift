@@ -64,7 +64,6 @@ public struct MeetingRoomView: View {
                     participants: state.participants.sortedByName(),
                     roomName: state.roomName,
                     meetingURL: state.roomURL,
-                    onCopyToClipboard: actions.onCopyToClipboard,
                     onDismiss: {
                         showParticipantsList = false
                     }
@@ -115,7 +114,6 @@ public struct MeetingRoomView: View {
             #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .tint(.white)
     }
 
     // MARK: - Auto-hide Controls Functions

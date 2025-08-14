@@ -80,10 +80,8 @@ struct ParticipantsListViewUITests {
         ParticipantsListView(
             participants: PreviewData.manyParticipants,
             roomName: "heart-of-gold",
-            meetingURL: .init(string: "https://meet.vonagenetworks.net/heart-of-gold")
-        ) { _ in
-        } onDismiss: {
-        }
+            meetingURL: .init(string: "https://meet.vonagenetworks.net/heart-of-gold"),
+            onDismiss: {})
     }
 
     private func snapshot(

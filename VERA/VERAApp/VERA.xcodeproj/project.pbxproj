@@ -11,7 +11,6 @@
 		6F1B8B3C2E1D642A00DE0C57 /* VERACore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1B8B3A2E1D642A00DE0C57 /* VERACore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F1B8B3F2E1D643200DE0C57 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1B8B3E2E1D643200DE0C57 /* VERAOpenTok.framework */; };
 		6F1B8B402E1D643200DE0C57 /* VERAOpenTok.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1B8B3E2E1D643200DE0C57 /* VERAOpenTok.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		6F9472172E4CDE3B00A12FBD /* PasteboardClipboardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9472162E4CDE3B00A12FBD /* PasteboardClipboardTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,7 +51,6 @@
 		6F6A00982E17F89100127A10 /* VERA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F6A00A52E17F89200127A10 /* VERATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6F9472162E4CDE3B00A12FBD /* PasteboardClipboardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardClipboardTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -141,7 +139,6 @@
 		6F9472152E4CDE1F00A12FBD /* VERATests */ = {
 			isa = PBXGroup;
 			children = (
-				6F9472162E4CDE3B00A12FBD /* PasteboardClipboardTests.swift */,
 			);
 			path = VERATests;
 			sourceTree = "<group>";
@@ -368,7 +365,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F9472172E4CDE3B00A12FBD /* PasteboardClipboardTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

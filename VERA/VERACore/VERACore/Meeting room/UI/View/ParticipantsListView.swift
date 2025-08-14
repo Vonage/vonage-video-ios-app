@@ -8,22 +8,17 @@ public struct ParticipantsListView: View {
     let participants: [Participant]
     let roomName: String
     let meetingURL: URL?
-    let onCopyToClipboard: (String) -> Void
     let onDismiss: () -> Void
-
-    @State private var showCopySuccess = false
 
     public init(
         participants: [Participant],
         roomName: String,
         meetingURL: URL?,
-        onCopyToClipboard: @escaping (String) -> Void,
         onDismiss: @escaping () -> Void
     ) {
         self.participants = participants
         self.roomName = roomName
         self.meetingURL = meetingURL
-        self.onCopyToClipboard = onCopyToClipboard
         self.onDismiss = onDismiss
     }
 
@@ -43,10 +38,13 @@ public struct ParticipantsListView: View {
             #endif
             .toolbar {
                 #if os(iOS)
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: onDismiss) {
-                            Image(systemName: "xmark")
-                                .font(.body.weight(.medium))
+                    ToolbarItem(placement: .cancellationAction) {
+                        if #available(iOS 26.0, *) {
+                            Button(role: .close, action: onDismiss)
+                        } else {
+                            Button(action: onDismiss) {
+                                Image(systemName: "xmark")
+                            }.tint(.uiLabel)
                         }
                     }
                 #else
@@ -60,11 +58,6 @@ public struct ParticipantsListView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-        .overlay {
-            if showCopySuccess {
-                copySuccessToast
-            }
-        }
     }
 
     // MARK: - Meeting URL Section
@@ -81,8 +74,8 @@ public struct ParticipantsListView: View {
 
                     Spacer()
 
-                    Button(action: copyMeetingURL) {
-                        Image(systemName: "doc.on.doc")
+                    ShareLink(item: meetingURL) {
+                        Image(systemName: "square.and.arrow.up")
                             .foregroundColor(.uiLabel)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -111,44 +104,6 @@ public struct ParticipantsListView: View {
         }
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
-    }
-
-    // MARK: - Copy Success Toast
-
-    private var copySuccessToast: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("Meeting link copied!")
-                    .font(.body)
-                    .foregroundColor(.primary)
-            }
-            .padding()
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
-            .padding(.horizontal)
-            .padding(.bottom, 50)
-        }
-        .transition(.move(edge: .bottom).combined(with: .opacity))
-        .animation(.easeInOut(duration: 0.3), value: showCopySuccess)
-    }
-
-    // MARK: - Actions
-
-    private func copyMeetingURL() {
-        guard let meetingURL = meetingURL else { return }
-        onCopyToClipboard(meetingURL.absoluteString)
-
-        withAnimation {
-            showCopySuccess = true
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + ToastDuration) {
-            withAnimation {
-                showCopySuccess = false
-            }
-        }
     }
 }
 
@@ -198,7 +153,6 @@ struct ParticipantAvatarView: View {
         participants: PreviewData.manyParticipants,
         roomName: "heart-of-gold",
         meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold"),
-        onCopyToClipboard: { _ in },
         onDismiss: {}
     )
 }

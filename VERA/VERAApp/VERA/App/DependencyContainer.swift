@@ -56,8 +56,7 @@ final class DependencyContainer {
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository,
-        clipboard: clipboard)
+        roomCredentialsRepository: roomCredentialsRepository)
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
@@ -97,6 +96,4 @@ final class DependencyContainer {
 
     lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
         httpClient: httpClient)
-
-    lazy var clipboard: Clipboard = PasteboardClipboard()
 }
