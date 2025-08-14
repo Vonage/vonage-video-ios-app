@@ -118,6 +118,7 @@
 		6F6A008F2E17F89100127A10 = {
 			isa = PBXGroup;
 			children = (
+				6F9472152E4CDE1F00A12FBD /* VERATests */,
 				6F6A009A2E17F89100127A10 /* VERA */,
 				6F6A00B22E17F89200127A10 /* VERAUITests */,
 				6F1B8B392E1D642A00DE0C57 /* Frameworks */,
@@ -133,6 +134,13 @@
 				6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6F9472152E4CDE1F00A12FBD /* VERATests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = VERATests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -222,6 +230,7 @@
 					};
 					6F6A00A42E17F89200127A10 = {
 						CreatedOnToolsVersion = 16.4;
+						LastSwiftMigration = 2600;
 						TestTargetID = 6F6A00972E17F89100127A10;
 					};
 					6F6A00AE2E17F89200127A10 = {
@@ -587,6 +596,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
@@ -596,6 +606,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERATests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VERA.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VERA";
@@ -606,6 +617,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;

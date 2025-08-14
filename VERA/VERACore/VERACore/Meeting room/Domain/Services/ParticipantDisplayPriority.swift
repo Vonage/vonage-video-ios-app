@@ -10,7 +10,7 @@ import Foundation
 /// 1. Screenshare participants
 /// 2. Pinned participants
 /// 3. Active speaker participant
-/// 4. Other participants (maintains current order)
+/// 4. Other participants (sorted by creation date with name as tiebreaker)
 public struct ParticipantDisplayPriority {
 
     /**
@@ -77,8 +77,12 @@ public struct ParticipantDisplayPriority {
             return 1
         }
 
-        // Priority 4: If no higher priority applies, maintain current order
-        return 0
+        // Priority 4: If no higher priority applies, sort by creation date with name as tiebreaker
+        if participantA.creationTime == participantB.creationTime {
+            let nameComparison = participantA.name.localizedStandardCompare(participantB.name)
+            return nameComparison == .orderedAscending ? -1 : (nameComparison == .orderedDescending ? 1 : 0)
+        }
+        return participantA.creationTime <= participantB.creationTime ? -1 : 1
     }
 
     /**
@@ -90,6 +94,18 @@ public struct ParticipantDisplayPriority {
     ) -> [Participant] {
         return participants.sorted { participantA, participantB in
             participantA.creationTime <= participantB.creationTime
+        }
+    }
+
+    /**
+     * Sorts participants by their name
+     * @returns Sorted array of participants
+     */
+    public static func sortByName(
+        participants: [Participant]
+    ) -> [Participant] {
+        return participants.sorted { participantA, participantB in
+            participantA.name <= participantB.name
         }
     }
 }
@@ -108,13 +124,5 @@ extension Array where Element == Participant {
             participants: self,
             activeSpeakerId: activeSpeakerId
         )
-    }
-
-    /**
-     * Convenience method to sort participants by creation date
-     * @returns New sorted array of participants
-     */
-    public func sortedByCreationDate() -> [Participant] {
-        return ParticipantDisplayPriority.sortByDate(participants: self)
     }
 }
