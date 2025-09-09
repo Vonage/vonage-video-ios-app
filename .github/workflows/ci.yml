@@ -452,11 +452,15 @@ jobs:
           DEVELOPMENT_TEAM="PR6C39UQ38" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
-        # Export IPA
+        # Export IPA with API key authentication
         xcodebuild -exportArchive \
           -archivePath build/VERA.xcarchive \
           -exportPath build \
-          -exportOptionsPlist ExportOptions.plist
+          -exportOptionsPlist ExportOptions.plist \
+          -allowProvisioningUpdates \
+          -authenticationKeyPath "$API_KEY_PATH" \
+          -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
+          -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }}
     
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
