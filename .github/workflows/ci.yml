@@ -298,34 +298,48 @@ jobs:
         echo "🔧 API Key ID: ${{ vars.APPSTORE_API_KEY_ID }}"
         echo "🔧 Issuer ID: ${{ vars.APPSTORE_ISSUER_ID }}"
         
-        # Create the API key file from secret
+                # Create the API key file from secret
         echo "🔑 Creating API key file..."
         API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
         echo "📁 Target path: $API_KEY_PATH"
         
-        # Write the secret to file and clean it (remove any whitespace/newlines)
-        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | tr -d '[:space:]' > /tmp/api_key_base64_clean.txt
+        # First, let's check what type of content we have
+        SECRET_CONTENT="${{ secrets.APPSTORE_API_PRIVATE_KEY }}"
         
-        echo "🔍 Base64 content length: $(wc -c < /tmp/api_key_base64_clean.txt)"
-        echo "🔍 Base64 content preview (first 50 chars): $(head -c 50 /tmp/api_key_base64_clean.txt)"
-        
-        # Decode the base64 content using correct syntax
-        if base64 -d -i /tmp/api_key_base64_clean.txt -o "$API_KEY_PATH"; then
-          echo "✅ Base64 decode successful"
+        # Check if the secret starts with PEM header (already decoded)
+        if echo "$SECRET_CONTENT" | head -1 | grep -q "BEGIN PRIVATE KEY"; then
+          echo "🔍 Secret appears to be already in PEM format (not base64 encoded)"
+          # Write directly to file
+          echo "$SECRET_CONTENT" > "$API_KEY_PATH"
+          echo "✅ PEM content written directly"
         else
-          echo "❌ Base64 decode failed"
-          echo "🔍 Trying alternative method..."
-          # Alternative method using pipe
-          if cat /tmp/api_key_base64_clean.txt | base64 -d > "$API_KEY_PATH"; then
-            echo "✅ Alternative base64 decode successful"
+          echo "🔍 Secret appears to be base64 encoded, attempting to decode..."
+          
+          # Write the secret to file and clean it (remove any whitespace/newlines)
+          echo "$SECRET_CONTENT" | tr -d '[:space:]' > /tmp/api_key_base64_clean.txt
+          
+          echo "🔍 Base64 content length: $(wc -c < /tmp/api_key_base64_clean.txt)"
+          echo "🔍 Base64 content preview (first 50 chars): $(head -c 50 /tmp/api_key_base64_clean.txt)"
+          
+          # Decode the base64 content using correct syntax
+          if base64 -d -i /tmp/api_key_base64_clean.txt -o "$API_KEY_PATH"; then
+            echo "✅ Base64 decode successful"
           else
-            echo "❌ Both decode methods failed"
-            exit 1
+            echo "❌ Base64 decode failed"
+            echo "🔍 Trying alternative method..."
+            # Alternative method using pipe
+            if cat /tmp/api_key_base64_clean.txt | base64 -d > "$API_KEY_PATH"; then
+              echo "✅ Alternative base64 decode successful"
+            else
+              echo "❌ Both decode methods failed"
+              echo "🔍 Treating as raw content and writing directly..."
+              echo "$SECRET_CONTENT" > "$API_KEY_PATH"
+            fi
           fi
+          
+          # Clean up temp file
+          rm -f /tmp/api_key_base64_clean.txt
         fi
-        
-        # Clean up temp file
-        rm -f /tmp/api_key_base64_clean.txt
         
         # Verify the file was created and has content
         if [ ! -f "$API_KEY_PATH" ]; then
