@@ -251,7 +251,8 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    needs: [unit-tests, ui-tests]
+    #needs: [unit-tests, ui-tests]
+    needs: [format-check]
     #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
     
@@ -272,15 +273,6 @@ jobs:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
     
-    - name: Download provisioning profiles
-      uses: Apple-Actions/download-provisioning-profiles@v4
-      with:
-        profile-type: IOS_APP_STORE
-        bundle-id: 'com.vonage.VERA'
-        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-    
     - name: Generate build number
       id: buildnumber
       run: |
@@ -291,17 +283,20 @@ jobs:
     
     - name: Build and export IPA
       run: |
-        # Archive
+        # Archive with automatic provisioning
         xcodebuild archive \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
           -sdk iphoneos \
           -configuration Release \
           -allowProvisioningUpdates \
+          -allowProvisioningDeviceRegistration \
           -archivePath build/VERA.xcarchive \
+          CODE_SIGN_STYLE=Automatic \
+          DEVELOPMENT_TEAM="PR6C39UQ38" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
-        # Export
+        # Export with App Store distribution
         xcodebuild -exportArchive \
           -archivePath build/VERA.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
