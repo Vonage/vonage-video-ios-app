@@ -87,7 +87,7 @@ jobs:
         echo "📡 Running VERAOpenTokTests on iOS Simulator"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTok \
+          -scheme VERAOpenTokTests \
           -destination "platform=iOS Simulator,name=iPhone 16" \
           -only-testing:VERAOpenTokTests \
           -derivedDataPath DerivedData \
