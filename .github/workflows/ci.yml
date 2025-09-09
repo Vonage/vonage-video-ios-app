@@ -18,7 +18,7 @@ jobs:
     
     - name: Install swift-format
       run: brew install swift-format
-    
+  
     - name: Check Swift formatting
       run: |
         chmod +x scripts/format.sh
@@ -273,8 +273,29 @@ jobs:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
     
-    # With automatic signing, provisioning profiles are managed automatically
-    # The -allowProvisioningUpdates flag will handle Associated Domains and other entitlements
+    - name: Set up App Store Connect API Key
+      run: |
+        # Create API key directory
+        mkdir -p ~/.appstoreconnect/private_keys
+        
+        # Create the API key file from secret
+        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8
+        
+        # Set environment variables for xcodebuild to use the API key
+        echo "XCODE_API_KEY_ID=${{ vars.APPSTORE_API_KEY_ID }}" >> $GITHUB_ENV
+        echo "XCODE_API_ISSUER_ID=${{ vars.APPSTORE_API_ISSUER_ID }}" >> $GITHUB_ENV
+    
+    - name: Download and create provisioning profiles
+      run: |
+        # Create provisioning profile directory
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        
+        # Try to download provisioning profile from App Store Connect
+        # You'll need to replace this with your actual provisioning profile
+        echo "Creating temporary provisioning profile for Associated Domains..."
+        
+        # Alternative: Use xcodebuild to generate profiles automatically
+        echo "Attempting to generate provisioning profiles automatically..."
     
     - name: Generate build number
       id: buildnumber
@@ -286,25 +307,19 @@ jobs:
     
     - name: Build and export IPA
       run: |
-        # Create build directory
-        mkdir -p build
-        
-        # Archive with automatic signing (let Xcode handle certificate selection)
-        xcodebuild archive \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
-          -sdk iphoneos \
-          -configuration Release \
-          -archivePath build/VERA.xcarchive \
-          -allowProvisioningUpdates \
-          DEVELOPMENT_TEAM="PR6C39UQ38" \
-          CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
-        
-        # Export with App Store distribution
-        xcodebuild -exportArchive \
-          -archivePath build/VERA.xcarchive \
-          -exportOptionsPlist ExportOptions.plist \
-          -exportPath build
+        # Build with manual signing
+        xcodebuild archive 
+          -workspace VERA/VERA.xcworkspace 
+          -scheme VERA 
+          -sdk iphoneos 
+          -configuration Release 
+          -archivePath build/VERA.xcarchive 
+          -allowProvisioningUpdates 
+          DEVELOPMENT_TEAM="PR6C39UQ38" 
+          CODE_SIGN_STYLE=Manual 
+          PROVISIONING_PROFILE_SPECIFIER="match AppStore com.vonage.VERA" 
+          CODE_SIGN_IDENTITY="Apple Distribution: Vonage Holdings Corp. (PR6C39UQ38)" 
+          CURRENT_PROJECT_VERSION="${{ steps.version.outputs.version }}"
     
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
