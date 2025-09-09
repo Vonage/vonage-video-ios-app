@@ -289,7 +289,7 @@ jobs:
         # Create build directory
         mkdir -p build
         
-        # Archive with automatic signing and distribution identity
+        # Archive with automatic signing (let Xcode handle certificate selection)
         xcodebuild archive \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
@@ -297,8 +297,6 @@ jobs:
           -configuration Release \
           -archivePath build/VERA.xcarchive \
           -allowProvisioningUpdates \
-          CODE_SIGN_STYLE=Automatic \
-          CODE_SIGN_IDENTITY="Apple Distribution" \
           DEVELOPMENT_TEAM="PR6C39UQ38" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
