@@ -180,11 +180,53 @@ jobs:
     - name: Generate comprehensive coverage reports
       run: |
         echo "📊 Generating coverage from all test results..."
-        ./scripts/generate-coverage.sh || {
-          echo "⚠️ Using minimal coverage report"
-          mkdir -p coverage-reports
+        
+        # Install slather for proper XML coverage conversion
+        echo "🔧 Installing slather for SonarCloud XML conversion..."
+        gem install slather
+        
+        # Ensure coverage-reports directory exists
+        mkdir -p coverage-reports
+        
+        # Try to generate coverage reports
+        if ./scripts/generate-coverage.sh; then
+          echo "✅ Coverage reports generated successfully"
+          
+          # Verify the XML file exists and is valid
+          if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
+            echo "✅ SonarQube XML coverage report found"
+            # Basic XML validation
+            if xmllint --noout coverage-reports/sonarqube-generic-coverage.xml 2>/dev/null; then
+              echo "✅ XML coverage report is valid"
+            else
+              echo "⚠️ XML coverage report is malformed, creating minimal report"
+              echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
+            fi
+          else
+            echo "⚠️ XML coverage report not found, creating minimal report"
+            echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
+          fi
+          
+          # Verify JSON file
+          if [ -f "coverage-reports/coverage.json" ]; then
+            if jq empty coverage-reports/coverage.json 2>/dev/null; then
+              echo "✅ JSON coverage report is valid"
+            else
+              echo "⚠️ JSON coverage report is malformed, creating minimal report"
+              echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
+            fi
+          else
+            echo "⚠️ JSON coverage report not found, creating minimal report"
+            echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
+          fi
+        else
+          echo "⚠️ Coverage generation failed, using minimal coverage reports"
           echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
-        }
+          echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
+        fi
+        
+        echo "📁 Coverage reports directory contents:"
+        ls -la coverage-reports/
     
     - name: SonarCloud Analysis
       env:
@@ -201,6 +243,8 @@ jobs:
           -Dsonar.organization="$SONAR_ORGANIZATION" \
           -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
           -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests \
+          -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
+          -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
           -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
           -Dsonar.host.url=https://sonarcloud.io
 
