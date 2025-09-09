@@ -306,8 +306,8 @@ jobs:
         # Write the secret directly to file and then decode
         echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > /tmp/api_key_base64.txt
         
-        # Decode the base64 content
-        if base64 --decode /tmp/api_key_base64.txt > "$API_KEY_PATH"; then
+        # Decode the base64 content using correct syntax
+        if base64 -d -i /tmp/api_key_base64.txt -o "$API_KEY_PATH"; then
           echo "✅ Base64 decode successful"
         else
           echo "❌ Base64 decode failed"
