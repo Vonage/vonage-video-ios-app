@@ -307,19 +307,25 @@ jobs:
     
     - name: Build and export IPA
       run: |
-        # Build with manual signing
-        xcodebuild archive 
-          -workspace VERA/VERA.xcworkspace 
-          -scheme VERA 
-          -sdk iphoneos 
-          -configuration Release 
-          -archivePath build/VERA.xcarchive 
-          -allowProvisioningUpdates 
-          DEVELOPMENT_TEAM="PR6C39UQ38" 
-          CODE_SIGN_STYLE=Manual 
-          PROVISIONING_PROFILE_SPECIFIER="match AppStore com.vonage.VERA" 
-          CODE_SIGN_IDENTITY="Apple Distribution: Vonage Holdings Corp. (PR6C39UQ38)" 
-          CURRENT_PROJECT_VERSION="${{ steps.version.outputs.version }}"
+        # Build with automatic signing and API key authentication
+        xcodebuild archive \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERA \
+          -sdk iphoneos \
+          -configuration Release \
+          -archivePath build/VERA.xcarchive \
+          -allowProvisioningUpdates \
+          -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 \
+          -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
+          -authenticationKeyIssuerID ${{ vars.APPSTORE_API_ISSUER_ID }} \
+          DEVELOPMENT_TEAM="PR6C39UQ38" \
+          CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
+        
+        # Export IPA
+        xcodebuild -exportArchive \
+          -archivePath build/VERA.xcarchive \
+          -exportPath build \
+          -exportOptionsPlist ExportOptions.plist
     
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
