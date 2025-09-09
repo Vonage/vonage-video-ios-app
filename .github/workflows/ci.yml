@@ -296,11 +296,30 @@ jobs:
         
         # Create the API key file from secret
         echo "🔑 Creating API key file..."
-        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8
+        echo "📁 Target path: ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
+        
+        # Create the file and check if decoding works
+        if echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8; then
+          echo "✅ Base64 decode successful"
+        else
+          echo "❌ Base64 decode failed"
+          exit 1
+        fi
         
         # Verify the file was created and has content
         if [ ! -f ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 ]; then
           echo "❌ Failed to create API key file"
+          exit 1
+        fi
+        
+        # Check file size
+        file_size=$(stat -f%z ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8)
+        echo "📏 API key file size: $file_size bytes"
+        
+        if [ "$file_size" -lt 100 ]; then
+          echo "❌ API key file seems too small (less than 100 bytes)"
+          echo "🔍 File content preview:"
+          head -c 100 ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8
           exit 1
         fi
         
