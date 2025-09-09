@@ -450,6 +450,9 @@ jobs:
           -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
           -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }} \
           DEVELOPMENT_TEAM="PR6C39UQ38" \
+          CODE_SIGN_STYLE=Automatic \
+          CODE_SIGN_IDENTITY="Apple Distribution" \
+          PROVISIONING_PROFILE_SPECIFIER="" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
         # Export IPA with API key authentication
