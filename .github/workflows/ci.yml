@@ -303,21 +303,29 @@ jobs:
         API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
         echo "📁 Target path: $API_KEY_PATH"
         
-        # Write the secret directly to file and then decode
-        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > /tmp/api_key_base64.txt
+        # Write the secret to file and clean it (remove any whitespace/newlines)
+        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | tr -d '[:space:]' > /tmp/api_key_base64_clean.txt
+        
+        echo "🔍 Base64 content length: $(wc -c < /tmp/api_key_base64_clean.txt)"
+        echo "🔍 Base64 content preview (first 50 chars): $(head -c 50 /tmp/api_key_base64_clean.txt)"
         
         # Decode the base64 content using correct syntax
-        if base64 -d -i /tmp/api_key_base64.txt -o "$API_KEY_PATH"; then
+        if base64 -d -i /tmp/api_key_base64_clean.txt -o "$API_KEY_PATH"; then
           echo "✅ Base64 decode successful"
         else
           echo "❌ Base64 decode failed"
-          echo "🔍 Base64 content preview (first 100 chars):"
-          head -c 100 /tmp/api_key_base64.txt
-          exit 1
+          echo "🔍 Trying alternative method..."
+          # Alternative method using pipe
+          if cat /tmp/api_key_base64_clean.txt | base64 -d > "$API_KEY_PATH"; then
+            echo "✅ Alternative base64 decode successful"
+          else
+            echo "❌ Both decode methods failed"
+            exit 1
+          fi
         fi
         
         # Clean up temp file
-        rm -f /tmp/api_key_base64.txt
+        rm -f /tmp/api_key_base64_clean.txt
         
         # Verify the file was created and has content
         if [ ! -f "$API_KEY_PATH" ]; then
