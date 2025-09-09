@@ -64,16 +64,15 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
-    
+
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: snapshot-tests
       run: |
-        echo "📸 Running VERACoreSnapshotTests on iOS Simulator..."
+        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERACore \
+          -scheme VERACoreSnapshotTests \
           -destination "platform=iOS Simulator,name=iPhone 16" \
-          -only-testing:VERACoreSnapshotTests \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
@@ -84,7 +83,7 @@ jobs:
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
       run: |
-        echo "📡 Running VERAOpenTokTests on iOS Simulator..."
+        echo "📡 Running VERAOpenTokTests on iOS Simulator"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
