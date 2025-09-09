@@ -294,33 +294,55 @@ jobs:
           exit 1
         fi
         
+        # Print the values (for debugging)
+        echo "🔧 API Key ID: ${{ vars.APPSTORE_API_KEY_ID }}"
+        echo "🔧 Issuer ID: ${{ vars.APPSTORE_ISSUER_ID }}"
+        
         # Create the API key file from secret
         echo "🔑 Creating API key file..."
-        echo "📁 Target path: ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
+        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
+        echo "📁 Target path: $API_KEY_PATH"
         
-        # Create the file and check if decoding works
-        if echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8; then
+        # Write the secret directly to file and then decode
+        echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > /tmp/api_key_base64.txt
+        
+        # Decode the base64 content
+        if base64 --decode /tmp/api_key_base64.txt > "$API_KEY_PATH"; then
           echo "✅ Base64 decode successful"
         else
           echo "❌ Base64 decode failed"
+          echo "🔍 Base64 content preview (first 100 chars):"
+          head -c 100 /tmp/api_key_base64.txt
           exit 1
         fi
         
+        # Clean up temp file
+        rm -f /tmp/api_key_base64.txt
+        
         # Verify the file was created and has content
-        if [ ! -f ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 ]; then
+        if [ ! -f "$API_KEY_PATH" ]; then
           echo "❌ Failed to create API key file"
           exit 1
         fi
         
-        # Check file size
-        file_size=$(stat -f%z ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8)
+        # Check file size and content
+        file_size=$(stat -f%z "$API_KEY_PATH" 2>/dev/null || stat -c%s "$API_KEY_PATH")
         echo "📏 API key file size: $file_size bytes"
         
         if [ "$file_size" -lt 100 ]; then
           echo "❌ API key file seems too small (less than 100 bytes)"
           echo "🔍 File content preview:"
-          head -c 100 ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8
+          head -c 200 "$API_KEY_PATH"
           exit 1
+        fi
+        
+        # Verify it looks like a valid PEM file
+        if head -1 "$API_KEY_PATH" | grep -q "BEGIN PRIVATE KEY"; then
+          echo "✅ API key file appears to be a valid PEM format"
+        else
+          echo "⚠️ API key file doesn't start with PEM header"
+          echo "🔍 First line:"
+          head -1 "$API_KEY_PATH"
         fi
         
         echo "✅ API key file created successfully"
@@ -350,8 +372,50 @@ jobs:
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
         echo "Generated build number: $BUILD_NUMBER"
     
-    - name: Build and export IPA
+    - name: Verify API Key file before build
       run: |
+        echo "🔍 Verifying API key file exists before build..."
+        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
+        
+        if [ -f "$API_KEY_PATH" ]; then
+          echo "✅ API key file found at: $API_KEY_PATH"
+          file_size=$(stat -f%z "$API_KEY_PATH" 2>/dev/null || stat -c%s "$API_KEY_PATH")
+          echo "📏 File size: $file_size bytes"
+          
+          # Check file permissions
+          ls -la "$API_KEY_PATH"
+          
+          # Verify content
+          if head -1 "$API_KEY_PATH" | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ API key file has valid PEM format"
+          else
+            echo "❌ API key file doesn't have valid PEM format"
+            echo "First line: $(head -1 "$API_KEY_PATH")"
+            exit 1
+          fi
+        else
+          echo "❌ API key file NOT found at: $API_KEY_PATH"
+          echo "Directory contents:"
+          ls -la "$HOME/.appstoreconnect/private_keys/" || echo "Directory doesn't exist"
+          exit 1
+        fi
+    
+    - name: Build and export IPA
+      env:
+        API_KEY_PATH: ${{ format('{0}/.appstoreconnect/private_keys/AuthKey_{1}.p8', github.workspace, vars.APPSTORE_API_KEY_ID) }}
+      run: |
+        # Set up API key path using absolute path
+        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
+        
+        echo "🔑 Using API key path: $API_KEY_PATH"
+        
+        # Final verification before build
+        if [ ! -f "$API_KEY_PATH" ]; then
+          echo "❌ API key file missing at build time!"
+          ls -la "$HOME/.appstoreconnect/private_keys/"
+          exit 1
+        fi
+        
         # Build with automatic signing and API key authentication
         xcodebuild archive \
           -workspace VERA/VERA.xcworkspace \
@@ -360,7 +424,7 @@ jobs:
           -configuration Release \
           -archivePath build/VERA.xcarchive \
           -allowProvisioningUpdates \
-          -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 \
+          -authenticationKeyPath "$API_KEY_PATH" \
           -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
           -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }} \
           DEVELOPMENT_TEAM="PR6C39UQ38" \
