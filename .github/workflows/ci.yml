@@ -273,14 +273,8 @@ jobs:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
     
-    - name: Download provisioning profiles
-      uses: Apple-Actions/download-provisioning-profiles@v4
-      with:
-        profile-type: IOS_APP_STORE
-        bundle-id: 'com.vonage.VERA'
-        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+    # With automatic signing, provisioning profiles are managed automatically
+    # The -allowProvisioningUpdates flag will handle Associated Domains and other entitlements
     
     - name: Generate build number
       id: buildnumber
@@ -295,14 +289,15 @@ jobs:
         # Create build directory
         mkdir -p build
         
-        # Archive with manual signing
+        # Archive with automatic signing and distribution identity
         xcodebuild archive \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERA \
           -sdk iphoneos \
           -configuration Release \
           -archivePath build/VERA.xcarchive \
-          CODE_SIGN_STYLE=Manual \
+          -allowProvisioningUpdates \
+          CODE_SIGN_STYLE=Automatic \
           CODE_SIGN_IDENTITY="Apple Distribution" \
           DEVELOPMENT_TEAM="PR6C39UQ38" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
