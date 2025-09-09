@@ -278,12 +278,38 @@ jobs:
         # Create API key directory
         mkdir -p ~/.appstoreconnect/private_keys
         
+        # Debug: Check if the secret exists
+        if [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
+          echo "❌ APPSTORE_API_PRIVATE_KEY secret is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ vars.APPSTORE_API_KEY_ID }}" ]; then
+          echo "❌ APPSTORE_API_KEY_ID variable is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ vars.APPSTORE_ISSUER_ID }}" ]; then
+          echo "❌ APPSTORE_ISSUER_ID variable is not set"
+          exit 1
+        fi
+        
         # Create the API key file from secret
+        echo "🔑 Creating API key file..."
         echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8
+        
+        # Verify the file was created and has content
+        if [ ! -f ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 ]; then
+          echo "❌ Failed to create API key file"
+          exit 1
+        fi
+        
+        echo "✅ API key file created successfully"
+        ls -la ~/.appstoreconnect/private_keys/
         
         # Set environment variables for xcodebuild to use the API key
         echo "XCODE_API_KEY_ID=${{ vars.APPSTORE_API_KEY_ID }}" >> $GITHUB_ENV
-        echo "XCODE_API_ISSUER_ID=${{ vars.APPSTORE_API_ISSUER_ID }}" >> $GITHUB_ENV
+        echo "XCODE_API_ISSUER_ID=${{ vars.APPSTORE_ISSUER_ID }}" >> $GITHUB_ENV
     
     - name: Download and create provisioning profiles
       run: |
@@ -317,7 +343,7 @@ jobs:
           -allowProvisioningUpdates \
           -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8 \
           -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ vars.APPSTORE_API_ISSUER_ID }} \
+          -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }} \
           DEVELOPMENT_TEAM="PR6C39UQ38" \
           CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
