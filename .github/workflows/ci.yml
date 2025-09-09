@@ -239,9 +239,11 @@ jobs:
     
     - name: Generate build number
       id: buildnumber
-      uses: onyxmueller/build-tag-number@v1
-      with:
-        token: ${{ secrets.github_token }}
+      run: |
+        # Generate build number based on run number and commit hash
+        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${GITHUB_SHA:0:7}"
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+        echo "Generated build number: $BUILD_NUMBER"
     
     - name: Build and export IPA
       run: |
@@ -253,7 +255,7 @@ jobs:
           -configuration Release \
           -allowProvisioningUpdates \
           -archivePath build/VERA.xcarchive \
-          CURRENT_PROJECT_VERSION="${BUILD_NUMBER:-0}"
+          CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
         
         # Export
         xcodebuild -exportArchive \
