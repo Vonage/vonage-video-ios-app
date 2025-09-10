@@ -267,124 +267,20 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: Import certificates and profiles
+    - name: Import certs
       uses: Apple-Actions/import-codesign-certs@v5.0.2
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
-    
-    - name: Set up App Store Connect API Key
-      run: |
-        # Create API key directory
-        mkdir -p ~/.appstoreconnect/private_keys
         
-        # Debug: Check if the secret exists
-        if [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
-          echo "❌ APPSTORE_API_PRIVATE_KEY secret is not set"
-          exit 1
-        fi
-        
-        if [ -z "${{ vars.APPSTORE_API_KEY_ID }}" ]; then
-          echo "❌ APPSTORE_API_KEY_ID variable is not set"
-          exit 1
-        fi
-        
-        if [ -z "${{ vars.APPSTORE_ISSUER_ID }}" ]; then
-          echo "❌ APPSTORE_ISSUER_ID variable is not set"
-          exit 1
-        fi
-        
-        # Print the values (for debugging)
-        echo "🔧 API Key ID: ${{ vars.APPSTORE_API_KEY_ID }}"
-        echo "🔧 Issuer ID: ${{ vars.APPSTORE_ISSUER_ID }}"
-        
-                # Create the API key file from secret
-        echo "🔑 Creating API key file..."
-        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
-        echo "📁 Target path: $API_KEY_PATH"
-        
-        # First, let's check what type of content we have
-        SECRET_CONTENT="${{ secrets.APPSTORE_API_PRIVATE_KEY }}"
-        
-        # Check if the secret starts with PEM header (already decoded)
-        if echo "$SECRET_CONTENT" | head -1 | grep -q "BEGIN PRIVATE KEY"; then
-          echo "🔍 Secret appears to be already in PEM format (not base64 encoded)"
-          # Write directly to file
-          echo "$SECRET_CONTENT" > "$API_KEY_PATH"
-          echo "✅ PEM content written directly"
-        else
-          echo "🔍 Secret appears to be base64 encoded, attempting to decode..."
-          
-          # Write the secret to file and clean it (remove any whitespace/newlines)
-          echo "$SECRET_CONTENT" | tr -d '[:space:]' > /tmp/api_key_base64_clean.txt
-          
-          echo "🔍 Base64 content length: $(wc -c < /tmp/api_key_base64_clean.txt)"
-          echo "🔍 Base64 content preview (first 50 chars): $(head -c 50 /tmp/api_key_base64_clean.txt)"
-          
-          # Decode the base64 content using correct syntax
-          if base64 -d -i /tmp/api_key_base64_clean.txt -o "$API_KEY_PATH"; then
-            echo "✅ Base64 decode successful"
-          else
-            echo "❌ Base64 decode failed"
-            echo "🔍 Trying alternative method..."
-            # Alternative method using pipe
-            if cat /tmp/api_key_base64_clean.txt | base64 -d > "$API_KEY_PATH"; then
-              echo "✅ Alternative base64 decode successful"
-            else
-              echo "❌ Both decode methods failed"
-              echo "🔍 Treating as raw content and writing directly..."
-              echo "$SECRET_CONTENT" > "$API_KEY_PATH"
-            fi
-          fi
-          
-          # Clean up temp file
-          rm -f /tmp/api_key_base64_clean.txt
-        fi
-        
-        # Verify the file was created and has content
-        if [ ! -f "$API_KEY_PATH" ]; then
-          echo "❌ Failed to create API key file"
-          exit 1
-        fi
-        
-        # Check file size and content
-        file_size=$(stat -f%z "$API_KEY_PATH" 2>/dev/null || stat -c%s "$API_KEY_PATH")
-        echo "📏 API key file size: $file_size bytes"
-        
-        if [ "$file_size" -lt 100 ]; then
-          echo "❌ API key file seems too small (less than 100 bytes)"
-          echo "🔍 File content preview:"
-          head -c 200 "$API_KEY_PATH"
-          exit 1
-        fi
-        
-        # Verify it looks like a valid PEM file
-        if head -1 "$API_KEY_PATH" | grep -q "BEGIN PRIVATE KEY"; then
-          echo "✅ API key file appears to be a valid PEM format"
-        else
-          echo "⚠️ API key file doesn't start with PEM header"
-          echo "🔍 First line:"
-          head -1 "$API_KEY_PATH"
-        fi
-        
-        echo "✅ API key file created successfully"
-        ls -la ~/.appstoreconnect/private_keys/
-        
-        # Set environment variables for xcodebuild to use the API key
-        echo "XCODE_API_KEY_ID=${{ vars.APPSTORE_API_KEY_ID }}" >> $GITHUB_ENV
-        echo "XCODE_API_ISSUER_ID=${{ vars.APPSTORE_ISSUER_ID }}" >> $GITHUB_ENV
-    
-    - name: Download and create provisioning profiles
-      run: |
-        # Create provisioning profile directory
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        
-        # Try to download provisioning profile from App Store Connect
-        # You'll need to replace this with your actual provisioning profile
-        echo "Creating temporary provisioning profile for Associated Domains..."
-        
-        # Alternative: Use xcodebuild to generate profiles automatically
-        echo "Attempting to generate provisioning profiles automatically..."
+    - name: Provisioning profile
+      uses: Apple-Actions/download-provisioning-profiles@v4
+      with:
+        profile-type: IOS_APP_STORE
+        bundle-id: 'com.vonage.VERA'
+        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
     
     - name: Generate build number
       id: buildnumber
@@ -394,75 +290,25 @@ jobs:
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
         echo "Generated build number: $BUILD_NUMBER"
     
-    - name: Verify API Key file before build
+    - name: Build archive
       run: |
-        echo "🔍 Verifying API key file exists before build..."
-        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
-        
-        if [ -f "$API_KEY_PATH" ]; then
-          echo "✅ API key file found at: $API_KEY_PATH"
-          file_size=$(stat -f%z "$API_KEY_PATH" 2>/dev/null || stat -c%s "$API_KEY_PATH")
-          echo "📏 File size: $file_size bytes"
-          
-          # Check file permissions
-          ls -la "$API_KEY_PATH"
-          
-          # Verify content
-          if head -1 "$API_KEY_PATH" | grep -q "BEGIN PRIVATE KEY"; then
-            echo "✅ API key file has valid PEM format"
-          else
-            echo "❌ API key file doesn't have valid PEM format"
-            echo "First line: $(head -1 "$API_KEY_PATH")"
-            exit 1
-          fi
-        else
-          echo "❌ API key file NOT found at: $API_KEY_PATH"
-          echo "Directory contents:"
-          ls -la "$HOME/.appstoreconnect/private_keys/" || echo "Directory doesn't exist"
-          exit 1
-        fi
-    
-    - name: Build and export IPA
-      env:
-        API_KEY_PATH: ${{ format('{0}/.appstoreconnect/private_keys/AuthKey_{1}.p8', github.workspace, vars.APPSTORE_API_KEY_ID) }}
+          xcodebuild -workspace VERA/VERA.xcworkspace \
+            -scheme VERA \
+            -sdk iphoneos \
+            -configuration Release \
+            -allowProvisioningUpdates \
+            -archivePath $PWD/build/VERA.xcarchive \
+            CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
+            archive | xcpretty
+
+    - name: Export IPA
       run: |
-        # Set up API key path using absolute path
-        API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${{ vars.APPSTORE_API_KEY_ID }}.p8"
-        
-        echo "🔑 Using API key path: $API_KEY_PATH"
-        
-        # Final verification before build
-        if [ ! -f "$API_KEY_PATH" ]; then
-          echo "❌ API key file missing at build time!"
-          ls -la "$HOME/.appstoreconnect/private_keys/"
-          exit 1
-        fi
-        
-        # Build with automatic signing and API key authentication
-        # Let Xcode handle everything automatically - no manual overrides
-        xcodebuild archive \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
-          -sdk iphoneos \
-          -configuration Release \
-          -archivePath build/VERA.xcarchive \
-          -allowProvisioningUpdates \
-          -authenticationKeyPath "$API_KEY_PATH" \
-          -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }} \
-          DEVELOPMENT_TEAM="PR6C39UQ38" \
-          CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
-        
-        # Export IPA with API key authentication
         xcodebuild -exportArchive \
-          -archivePath build/VERA.xcarchive \
-          -exportPath build \
-          -exportOptionsPlist ExportOptions.plist \
-          -allowProvisioningUpdates \
-          -authenticationKeyPath "$API_KEY_PATH" \
-          -authenticationKeyID ${{ vars.APPSTORE_API_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ vars.APPSTORE_ISSUER_ID }}
-    
+            -archivePath "$PWD/build/VERA.xcarchive" \
+            -exportOptionsPlist "$PWD/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -exportPath "$PWD/build" | xcpretty
+
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:
