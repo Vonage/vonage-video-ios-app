@@ -251,9 +251,8 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    #needs: [unit-tests, ui-tests]
-    needs: [format-check]
-    #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [unit-tests, ui-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
     
     steps:
