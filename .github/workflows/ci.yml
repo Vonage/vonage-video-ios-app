@@ -110,7 +110,7 @@ jobs:
 
   ui-tests:
     runs-on: macos-latest
-    needs: [format-check]
+    needs: [unit-tests]
     
     steps:
     - uses: actions/checkout@v4
