@@ -272,7 +272,7 @@ jobs:
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
-        
+
     - name: Provisioning profile
       uses: Apple-Actions/download-provisioning-profiles@v4
       with:
@@ -285,13 +285,16 @@ jobs:
     - name: Generate build number
       id: buildnumber
       run: |
-        # Generate build number based on run number and commit hash
-        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${GITHUB_SHA:0:7}"
+        # Generate build number with only numeric values for App Store compatibility
+        # Use timestamp to ensure uniqueness and avoid conflicts
+        TIMESTAMP=$(date +%s)
+        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
         echo "Generated build number: $BUILD_NUMBER"
     
     - name: Build archive
       run: |
+          echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
           xcodebuild -workspace VERA/VERA.xcworkspace \
             -scheme VERA \
             -sdk iphoneos \
