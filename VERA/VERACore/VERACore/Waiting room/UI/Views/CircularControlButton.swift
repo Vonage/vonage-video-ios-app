@@ -23,24 +23,37 @@ struct CircularControlButton: View {
                 .foregroundStyle(isActive ? .white : .red)
                 .frame(width: 50, height: 50)
                 .background(
-                    Circle()
-                        .fill(Material.ultraThinMaterial)
-                        .overlay(
-                            Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.2
-                                )
-                        )
+                    CircularControlBackground(isActive: isActive)
                 )
                 .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
                 .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct CircularControlBackground: View {
+    let isActive: Bool
+    
+    var body: some View {
+        if #available(iOS 26.0, *) {
+            Circle()
+                .glassEffect()
+        } else {
+            Circle()
+                .fill(Material.ultraThinMaterial)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.2
+                        )
+                )
+        }
     }
 }
 
