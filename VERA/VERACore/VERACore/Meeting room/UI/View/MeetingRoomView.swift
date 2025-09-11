@@ -97,7 +97,7 @@ public struct MeetingRoomView: View {
                             actions.onCameraSwitch()
                         } label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera")
-                        }
+                        }.disabled(!state.isCameraEnabled)
                         Button {
                             onBottomBarInteraction()
                             actions.onToggleMic()

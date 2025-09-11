@@ -19,7 +19,7 @@ struct ControlButton: View {
         Button(action: action) {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundStyle(isActive ? .uiSystemBackground : .vGray3)
+                .foregroundStyle(isActive ? .uiSystemBackground : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
@@ -34,7 +34,7 @@ struct ControlButton: View {
 #Preview {
     VStack(spacing: 20) {
         ControlButton(isActive: true, iconName: "video.fill")
-        ControlButton(isActive: false, iconName: "video.fill")
+        ControlButton(isActive: false, iconName: "video.slash.fill")
 
         ControlButton(isActive: true, iconName: "mic.fill")
         ControlButton(isActive: false, iconName: "mic.slash.fill")
