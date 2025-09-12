@@ -36,7 +36,6 @@ struct CircularControlBackground: View {
     let isActive: Bool
 
     var body: some View {
-
         #if os(macOS)
             Circle()
                 .fill(Material.ultraThinMaterial)
@@ -52,25 +51,32 @@ struct CircularControlBackground: View {
                         )
                 )
         #else
-            if #available(iOS 26.0, *) {
-                Circle()
-                    .glassEffect()
-            } else {
-                Circle()
-                    .fill(Material.ultraThinMaterial)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.2
-                            )
-                    )
+            Group {
+                if #available(iOS 26.0, *) {
+                    glassEffectCircle()
+                } else {
+                    Circle()
+                        .fill(Material.ultraThinMaterial)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.2
+                                )
+                        )
+                }
             }
         #endif
+    }
+
+    @available(iOS 26.0, *)
+    private func glassEffectCircle() -> some View {
+        Circle()
+            .glassEffect()
     }
 }
 
