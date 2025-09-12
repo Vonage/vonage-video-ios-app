@@ -17,6 +17,8 @@ public class OpenTokSubscriber: NSObject {
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
 
+    var onError: (() -> Void)?
+
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
@@ -42,7 +44,6 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: VideoDimensions.default,
             creationTime: stream.creationTime,
-            audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) })
@@ -75,13 +76,6 @@ public class OpenTokSubscriber: NSObject {
             }
             .store(in: &cancellables)
 
-        $audioLevel
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
-            }
-            .store(in: &cancellables)
-
         updateParticipant()
     }
 
@@ -93,7 +87,6 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: videoDimensions,
             creationTime: date,
-            audioLevel: audioLevel,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
             viewBuilder: { [weak self] in
@@ -111,7 +104,8 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
     }
 
     public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-
+        print("Subscriber error \(error.localizedDescription)")
+        onError?()
     }
 }
 

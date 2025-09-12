@@ -13,7 +13,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let videoDimensions: CGSize
     public let isRemote: Bool
     public let creationTime: Date
-    public let audioLevel: Float
     public let isScreenshare: Bool
     public let isPinned: Bool
 
@@ -25,7 +24,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         videoDimensions: CGSize,
         isRemote: Bool = true,
         creationTime: Date,
-        audioLevel: Float,
         isScreenshare: Bool,
         isPinned: Bool,
         viewBuilder: @escaping () -> AnyView
@@ -37,7 +35,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.videoDimensions = videoDimensions
         self.isRemote = isRemote
         self.creationTime = creationTime
-        self.audioLevel = audioLevel
         self.isScreenshare = isScreenshare
         self.isPinned = isPinned
         self.viewBuilder = viewBuilder
@@ -48,7 +45,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
             && lhs.isRemote == rhs.isRemote
             && lhs.creationTime == rhs.creationTime
-            && lhs.audioLevel == rhs.audioLevel
             && lhs.isScreenshare == rhs.isScreenshare
             && lhs.isPinned == rhs.isPinned
     }
@@ -62,7 +58,6 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         hasher.combine(videoDimensions.height)
         hasher.combine(isRemote)
         hasher.combine(creationTime)
-        hasher.combine(audioLevel)
         hasher.combine(isScreenshare)
         hasher.combine(isPinned)
     }
@@ -82,13 +77,16 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         return Double(videoDimensions.width / videoDimensions.height)
     }
 
+    public func getSpeakerInfo(_ audioLevel: Float) -> SpeakerInfo {
+        .init(id: id, audioLevel: audioLevel, isMicEnabled: isMicEnabled)
+    }
+
     // MARK: - CustomStringConvertible
 
     public var description: String {
-        let formattedAudioLevel = String(format: "%.2f", audioLevel)
         return """
             Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
-            isCameraEnabled: \(isCameraEnabled), audioLevel: \(formattedAudioLevel), \
+            isCameraEnabled: \(isCameraEnabled) \
             isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
             isPinned: \(isPinned))
             """

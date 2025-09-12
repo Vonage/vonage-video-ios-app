@@ -18,6 +18,22 @@ public struct ActiveSpeakerInfo: Equatable {
     public static let none = ActiveSpeakerInfo()
 }
 
+public struct SpeakerInfo {
+    public let id: String?
+    public let audioLevel: Float
+    public let isMicEnabled: Bool
+
+    public init(
+        id: String,
+        audioLevel: Float = 0.0,
+        isMicEnabled: Bool
+    ) {
+        self.id = id
+        self.audioLevel = audioLevel
+        self.isMicEnabled = isMicEnabled
+    }
+}
+
 public final class ActiveSpeakerTracker: ObservableObject {
     private let minimumAudioLevelThreshold: Float
 
@@ -31,7 +47,18 @@ public final class ActiveSpeakerTracker: ObservableObject {
 
     // MARK: - Public Methods
 
-    public func calculateActiveSpeaker(from participants: [Participant]) {
+    public func updatedParticipant(_ participant: SpeakerInfo) {
+        guard participant.isMicEnabled, participant.audioLevel >= minimumAudioLevelThreshold else { return }
+
+        if participant.audioLevel > activeSpeaker.audioLevel {
+            activeSpeaker = ActiveSpeakerInfo(
+                participantId: participant.id,
+                audioLevel: participant.audioLevel
+            )
+        }
+    }
+
+    public func calculateActiveSpeaker(from participants: [SpeakerInfo]) {
         let eligibleParticipants = participants.filter { participant in
             guard participant.isMicEnabled else { return false }
 
