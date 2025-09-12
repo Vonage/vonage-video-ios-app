@@ -59,7 +59,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    Color.accentBlue.opacity(Double(participant.audioLevel)),
+                    Color.accentBlue,
                     lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -122,7 +122,6 @@ struct MicIndicator: View {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
-            audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) }),
@@ -139,7 +138,6 @@ struct MicIndicator: View {
             isCameraEnabled: true,
             videoDimensions: .zero,
             creationTime: Date(),
-            audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) }),
@@ -156,7 +154,6 @@ struct MicIndicator: View {
             isCameraEnabled: false,
             videoDimensions: .zero,
             creationTime: Date(),
-            audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) }),

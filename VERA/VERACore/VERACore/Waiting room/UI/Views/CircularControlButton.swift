@@ -34,26 +34,48 @@ struct CircularControlButton: View {
 
 struct CircularControlBackground: View {
     let isActive: Bool
-    
+
     var body: some View {
-        if #available(iOS 26.0, *) {
-            Circle()
-                .glassEffect()
-        } else {
-            Circle()
-                .fill(Material.ultraThinMaterial)
-                .overlay(
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.2
-                        )
-                )
-        }
+
+        #if os(macOS)
+            if #available(macOS 26.0, *) {
+                Circle()
+                    .glassEffect()
+            } else {
+                Circle()
+                    .fill(Material.ultraThinMaterial)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.2
+                            )
+                    )
+            }
+        #else
+            if #available(iOS 26.0, *) {
+                Circle()
+                    .glassEffect()
+            } else {
+                Circle()
+                    .fill(Material.ultraThinMaterial)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.2
+                            )
+                    )
+            }
+        #endif
     }
 }
 

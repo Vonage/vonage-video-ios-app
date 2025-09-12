@@ -69,7 +69,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
     private let participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(.empty)
-    private let activeSpeakerTracker = ActiveSpeakerTracker()
 
     public weak var currentCall: CallFacade?
 
@@ -102,7 +101,6 @@ public final class MeetingRoomViewModel: ObservableObject {
                     .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global())
                     .removeDuplicates()
                     .sink { [weak self] participantsState in
-                        self?.activeSpeakerTracker.calculateActiveSpeaker(from: participantsState.participants)
                         self?.participantsPublisher.send(participantsState)
                     }
                     .store(in: &cancellables)
@@ -123,18 +121,18 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     func observeSessionState() {
-        Publishers.CombineLatest4(
+        Publishers.CombineLatest3(
             participantsPublisher,
             sessionStatePublisher,
-            layoutPublisher,
-            activeSpeakerTracker.$activeSpeaker
+            layoutPublisher
         )
-        .map { [weak self] participantsState, sessionState, layout, activeSpeaker in
+        .map { [weak self] participantsState, sessionState, layout in
             guard let self else { return MeetingRoomState.default }
+
             var sortedPaticipants = participantsState.participants
             if layout == .activeSpeaker {
                 sortedPaticipants = sortedPaticipants.sortedByDisplayPriority(
-                    activeSpeakerId: activeSpeaker.participantId)
+                    activeSpeakerId: participantsState.activeParticipantId)
                 if let localParticipant = participantsState.localParticipant {
                     if sortedPaticipants.isEmpty {
                         sortedPaticipants.append(localParticipant)
@@ -160,7 +158,7 @@ public final class MeetingRoomViewModel: ObservableObject {
                 isCameraEnabled: sessionState.isPublishingVideo,
                 participants: sortedPaticipants,
                 layout: layout,
-                activeSpeakerId: activeSpeaker.participantId)
+                activeSpeakerId: participantsState.activeParticipantId)
         }
         .removeDuplicates()
         .receive(on: DispatchQueue.main)

@@ -52,7 +52,7 @@ struct WaitingRoomUserPreviewView: View {
 
                     CircularControlButton(
                         isActive: state.isCameraEnabled,
-                        iconName: state.isCameraEnabled ? "video.fill": "video.slash.fill" ,
+                        iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
                         action: onCameraToggle)
                 }
                 .padding(.bottom, 20)

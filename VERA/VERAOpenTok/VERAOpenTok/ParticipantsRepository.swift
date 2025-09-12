@@ -3,3 +3,24 @@
 //
 
 import Foundation
+import VERACore
+
+final actor ParticipantsRepository {
+    private var participantStreams: [String: Participant] = [:]
+
+    var all: [Participant] {
+        Array(participantStreams.values)
+    }
+
+    func addParticipant(_ participant: Participant) async {
+        participantStreams[participant.id] = participant
+    }
+
+    func getParticipant(id: String) async -> Participant? {
+        participantStreams[id]
+    }
+
+    func removeParticipant(id: String) async {
+        participantStreams.removeValue(forKey: id)
+    }
+}

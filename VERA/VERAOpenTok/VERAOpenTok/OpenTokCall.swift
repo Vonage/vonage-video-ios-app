@@ -7,42 +7,6 @@ import Foundation
 import OpenTok
 import VERACore
 
-final actor SubscribersRepository {
-    private var subscriberStreams: [String: OpenTokSubscriber] = [:]
-
-    func addSubscriber(_ subscriber: OpenTokSubscriber) async {
-        subscriberStreams[subscriber.id] = subscriber
-    }
-
-    func getSubscriber(id: String) async -> OpenTokSubscriber? {
-        subscriberStreams[id]
-    }
-
-    func removeSubscriber(id: String) async {
-        subscriberStreams.removeValue(forKey: id)
-    }
-}
-
-final actor ParticipantsRepository {
-    private var participantStreams: [String: Participant] = [:]
-
-    var all: [Participant] {
-        Array(participantStreams.values)
-    }
-
-    func addParticipant(_ participant: Participant) async {
-        participantStreams[participant.id] = participant
-    }
-
-    func getParticipant(id: String) async -> Participant? {
-        participantStreams[id]
-    }
-
-    func removeParticipant(id: String) async {
-        participantStreams.removeValue(forKey: id)
-    }
-}
-
 public final class OpenTokCall: CallFacade {
     private var cancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)

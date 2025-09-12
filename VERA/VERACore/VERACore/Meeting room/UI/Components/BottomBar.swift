@@ -84,13 +84,24 @@ struct BottomBar: View {
 
 struct BottomBarBackground: View {
     var body: some View {
-        if #available(iOS 26.0, *) {
-            RoundedRectangle(cornerRadius: 16)
-                .glassEffect(in: .rect(cornerRadius: 16.0))
-        } else {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.vGray4.opacity(0.8))
-        }
+
+        #if os(macOS)
+            if #available(macOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 16)
+                    .glassEffect(in: .rect(cornerRadius: 16.0))
+            } else {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.vGray4.opacity(0.8))
+            }
+        #else
+            if #available(iOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 16)
+                    .glassEffect(in: .rect(cornerRadius: 16.0))
+            } else {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.vGray4.opacity(0.8))
+            }
+        #endif
     }
 }
 

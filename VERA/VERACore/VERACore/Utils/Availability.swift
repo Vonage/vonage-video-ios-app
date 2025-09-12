@@ -6,7 +6,7 @@ import Foundation
 
 func iOS26Available() -> Bool {
     if #available(iOS 26.0, *) {
-       return true
+        return true
     } else {
         return false
     }
@@ -14,7 +14,7 @@ func iOS26Available() -> Bool {
 
 func iOS18Available() -> Bool {
     if #available(iOS 18.0, *) {
-       return true
+        return true
     } else {
         return false
     }
