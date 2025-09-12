@@ -16,6 +16,9 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let isScreenshare: Bool
     public let isPinned: Bool
 
+    public var onAppear: (() -> Void)?
+    public var onDisappear: (() -> Void)?
+
     public init(
         id: String,
         name: String,
