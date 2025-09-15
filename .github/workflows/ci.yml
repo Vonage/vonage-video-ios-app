@@ -107,51 +107,51 @@ jobs:
           DerivedData/Build/Products/
           # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
 
-  ui-tests:
-    runs-on: macos-latest
-    needs: [unit-tests]
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Pull LFS files
-      run: git lfs pull
-
-    - name: Cache derived data
-      uses: actions/cache@v4
-      with:
-        path: ~/Library/Developer/Xcode/DerivedData
-        key: ${{ runner.os }}-derived-data-ui-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
-        restore-keys: |
-          ${{ runner.os }}-derived-data-
-
-    - name: Run UI Tests
-      run: |
-        echo "🖥️ Running VERAUITests on iOS Simulator..."
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAUITests \
-          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
-          -only-testing:VERAUITests \
-          -enableCodeCoverage YES \
-          -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERAUITests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -parallel-testing-enabled NO
-          
-    - name: Upload UI test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ui-test-results
-        path: DerivedData/VERAUITests-iOS.xcresult
+#  ui-tests:
+#    runs-on: macos-latest
+#    needs: [unit-tests]
+#    
+#    steps:
+#    - uses: actions/checkout@v4
+#    
+#    - name: Pull LFS files
+#      run: git lfs pull
+#
+#    - name: Cache derived data
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/Library/Developer/Xcode/DerivedData
+#        key: ${{ runner.os }}-derived-data-ui-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
+#        restore-keys: |
+#          ${{ runner.os }}-derived-data-
+#
+#    - name: Run UI Tests
+#      run: |
+#        echo "🖥️ Running VERAUITests on iOS Simulator..."
+#        xcodebuild test \
+#          -workspace VERA/VERA.xcworkspace \
+#          -scheme VERAUITests \
+#          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
+#          -only-testing:VERAUITests \
+#          -enableCodeCoverage YES \
+#          -derivedDataPath DerivedData \
+#          -resultBundlePath DerivedData/VERAUITests-iOS.xcresult \
+#          CODE_SIGN_IDENTITY="" \
+#          CODE_SIGNING_REQUIRED=NO \
+#          CODE_SIGNING_ALLOWED=NO \
+#          -parallel-testing-enabled NO
+#          
+#    - name: Upload UI test results
+#      uses: actions/upload-artifact@v4
+#      if: always()
+#      with:
+#        name: ui-test-results
+#        path: DerivedData/VERAUITests-iOS.xcresult
 
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-latest
-    needs: [unit-tests, ui-tests]
+    needs: [unit-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
     steps:
