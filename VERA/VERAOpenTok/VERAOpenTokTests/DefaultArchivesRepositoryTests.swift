@@ -168,9 +168,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        await #expect(throws: MockArchivesDataSourceError.self) {
-            _ = try await awaitFirstValue(from: publisher)
-        }
+        let error = try await awaitError(from: publisher)
+        #expect(error is MockArchivesDataSourceError)
     }
 
     @Test("Should cache publishers for same room")
@@ -272,6 +271,35 @@ struct DefaultArchivesRepositoryTests {
                             hasResumed = true
                             cancellable?.cancel()
                             continuation.resume(returning: value)
+                        }
+                    )
+            }
+        }
+    }
+
+    private func awaitError<T>(from publisher: AnyPublisher<T, Error>) async throws -> Error {
+        try await withTimeout(seconds: 2.0) {
+            try await withCheckedThrowingContinuation { continuation in
+                var cancellable: AnyCancellable?
+                var hasResumed = false
+
+                cancellable =
+                    publisher
+                    .sink(
+                        receiveCompletion: { completion in
+                            guard !hasResumed else { return }
+                            hasResumed = true
+                            cancellable?.cancel()
+
+                            switch completion {
+                            case .failure(let error):
+                                continuation.resume(returning: error)
+                            case .finished:
+                                continuation.resume(throwing: TimeoutError())
+                            }
+                        },
+                        receiveValue: { _ in
+                            // Ignore values, we only want errors
                         }
                     )
             }
