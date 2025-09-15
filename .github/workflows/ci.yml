@@ -36,11 +36,6 @@ jobs:
     - name: Pull LFS files
       run: git lfs pull
     
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-    
     - name: Cache derived data
       uses: actions/cache@v4
       with:
@@ -120,11 +115,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-    
     - name: Pull LFS files
       run: git lfs pull
 
@@ -142,7 +132,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAUITests \
-          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' \
+          -destination 'platform=iOS Simulator' \
           -only-testing:VERAUITests \
           -enableCodeCoverage YES \
           -derivedDataPath DerivedData \
@@ -265,11 +255,6 @@ jobs:
     
     - name: Pull LFS files
       run: git lfs pull
-    
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1.6.0
-      with:
-        xcode-version: latest-stable
     
     - name: Import certs
       uses: Apple-Actions/import-codesign-certs@v5.0.2
