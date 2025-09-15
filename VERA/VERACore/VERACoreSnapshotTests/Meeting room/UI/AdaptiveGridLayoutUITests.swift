@@ -229,7 +229,6 @@ struct AdaptiveGridLayoutUITests {
                     videoDimensions: .init(width: 640, height: 480),
                     isRemote: true,
                     creationTime: Date().addingTimeInterval(TimeInterval(index)),
-                    audioLevel: 0.0,
                     isScreenshare: false,
                     isPinned: false,
                     viewBuilder: { AnyView(Color.blue) })

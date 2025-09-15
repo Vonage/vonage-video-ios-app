@@ -12,10 +12,13 @@ public class OpenTokSubscriber: NSObject {
     let otSubscriber: OTSubscriber
     private var cancellables = Set<AnyCancellable>()
     private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
+    private var subscriptionTimer: Timer?
 
     var id: String { stream.streamId }
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
+
+    var onError: (() -> Void)?
 
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
@@ -42,7 +45,6 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: VideoDimensions.default,
             creationTime: stream.creationTime,
-            audioLevel: 0,
             isScreenshare: false,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) })
@@ -50,6 +52,8 @@ public class OpenTokSubscriber: NSObject {
     }
 
     func setup() {
+        otSubscriber.subscribeToVideo = false
+
         stream
             .publisher(for: \.videoDimensions)
             .removeDuplicates()
@@ -75,31 +79,44 @@ public class OpenTokSubscriber: NSObject {
             }
             .store(in: &cancellables)
 
-        $audioLevel
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
-            }
-            .store(in: &cancellables)
-
         updateParticipant()
     }
 
     private func updateParticipant() {
+        let name = stream.name ?? ""
         participant = Participant(
             id: id,
-            name: stream.name ?? "",
+            name: name,
             isMicEnabled: stream.hasAudio,
             isCameraEnabled: stream.hasVideo,
             videoDimensions: videoDimensions,
             creationTime: date,
-            audioLevel: audioLevel,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
             viewBuilder: { [weak self] in
                 guard let self else { return AnyView(EmptyView()) }
                 return AnyView(self.view)
             })
+
+        participant.onAppear = { [weak self] in
+            self?.setVisibility(true)
+        }
+
+        participant.onDisappear = { [weak self] in
+            self?.setVisibility(false)
+        }
+    }
+
+    private func setVisibility(_ visible: Bool) {
+        if visible {
+            subscriptionTimer?.invalidate()
+            subscriptionTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                self.otSubscriber.subscribeToVideo = true
+            }
+        } else {
+            self.otSubscriber.subscribeToVideo = false
+        }
     }
 }
 
@@ -111,7 +128,8 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
     }
 
     public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-
+        print("Subscriber error \(error.localizedDescription)")
+        onError?()
     }
 }
 

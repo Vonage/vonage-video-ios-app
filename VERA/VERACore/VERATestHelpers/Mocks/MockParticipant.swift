@@ -13,7 +13,6 @@ public func makeMockParticipant(
     isCameraEnabled: Bool = true,
     videoDimensions: CGSize = .init(width: 640, height: 480),
     creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
-    audioLevel: Float = 0,
     isScreenshare: Bool = false,
     isPinned: Bool = false,
     viewBuilder: @escaping () -> AnyView = { AnyView(EmptyView()) }
@@ -25,7 +24,6 @@ public func makeMockParticipant(
         isCameraEnabled: isCameraEnabled,
         videoDimensions: videoDimensions,
         creationTime: creationTime,
-        audioLevel: audioLevel,
         isScreenshare: isScreenshare,
         isPinned: isPinned,
         viewBuilder: viewBuilder

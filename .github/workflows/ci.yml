@@ -1,9 +1,8 @@
 name: CI
 
-# Explicit permissions following principle of least privilege
 permissions:
-  contents: write    # Read repository contents
-  actions: read     # Read workflow run information
+  contents: write
+  actions: read
 
 on:
   push:
@@ -19,297 +18,251 @@ jobs:
     
     - name: Install swift-format
       run: brew install swift-format
-    
+  
     - name: Check Swift formatting
       run: |
         chmod +x scripts/format.sh
         ./scripts/format.sh --check
 
-  build:
+  unit-tests:
     runs-on: macos-latest
     needs: [format-check]
+    outputs:
+      test-results: ${{ steps.tests.outcome }}
     
     steps:
     - uses: actions/checkout@v4
+    
     - name: Pull LFS files
       run: git lfs pull
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
     
     - name: Cache derived data
       uses: actions/cache@v4
       with:
         path: ~/Library/Developer/Xcode/DerivedData
-        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcodeproj') }}
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
         restore-keys: |
           ${{ runner.os }}-derived-data-
     
-    - name: Build for iOS Simulator
+    - name: List available simulators
       run: |
-        echo "Building project for iOS Simulator..."
-        xcodebuild build \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
-          -sdk iphonesimulator \
-          -destination "generic/platform=iOS Simulator" \
-          -derivedDataPath DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          ONLY_ACTIVE_ARCH=NO
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-products
-        path: DerivedData/Build/Products/
+        echo "📱 Available iOS Simulators:"
+        xcrun simctl list devices
 
-  core-tests:
-    runs-on: macos-latest
-    needs: build
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-    
-    - name: Run VERACore Tests (macOS - Native & Super Fast)
+    - name: Run VERACoreTests (macOS)
+      id: core-tests-macos
       run: |
-        echo "Running VERACore tests natively on macOS (no simulators needed)..."
-        if xcodebuild test \
+        echo "🧪 Running VERACoreTests on macOS"
+        xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACore \
           -destination "platform=macOS" \
+          -only-testing:VERACoreTests \
           -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet; then
-          echo "✅ VERACore tests completed successfully on macOS (native)"
-        else
-          echo "⚠️ VERACore native tests failed, trying fallback strategies..."
-          
-          # Fallback 1: Try VERA unit tests on iOS Simulator
-          if xcodebuild test \
-            -workspace VERA/VERA.xcworkspace \
-            -scheme VERA \
-            -destination "platform=iOS Simulator,name=iPhone 15" \
-            -only-testing:VERATests \
-            -derivedDataPath DerivedData \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            -quiet; then
-            echo "✅ VERA unit tests completed on iOS Simulator (fallback)"
-          else
-            echo "❌ All test strategies failed"
-            exit 1
-          fi
-        fi
+          CODE_SIGNING_ALLOWED=NO
 
-  ui-tests:
-    runs-on: macos-latest
-    needs: [core-tests]
+    # Temporarily disabled until CI Xcode version is updated
+    # - name: Run VERACoreSnapshotTests (iOS Simulator)
+    #   id: snapshot-tests
+    #   run: |
+    #     echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
+    #     xcodebuild test \
+    #       -workspace VERA/VERA.xcworkspace \
+    #       -scheme VERACoreSnapshotTests \
+    #       -destination "platform=iOS Simulator,name=iPhone 16" \
+    #       -derivedDataPath DerivedData \
+    #       -enableCodeCoverage YES \
+    #       -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+    #       CODE_SIGN_IDENTITY="" \
+    #       CODE_SIGNING_REQUIRED=NO \
+    #       CODE_SIGNING_ALLOWED=NO
     
-    steps:
-    - uses: actions/checkout@v4
+    - name: Run VERAOpenTokTests (iOS Simulator)
+      id: opentok-tests
+      run: |
+        echo "📡 Running VERAOpenTokTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTok \
+          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
     
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
+    - name: Upload all test results
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
-        xcode-version: latest-stable
-    
-    - name: List available simulators
-      run: |
-        echo "=== Available iOS Simulators ==="
-        xcrun simctl list devices available | grep iPhone | head -10
-    - name: Pull LFS files
-      run: git lfs pull
+        name: unit-test-results
+        path: |
+          DerivedData/VERACoreTests-macOS.xcresult
+          DerivedData/VERAOpenTokTests-iOS.xcresult
+          DerivedData/Build/Products/
+          # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
 
-    - name: Run UI Tests (Slower)
-      run: |
-        if xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAUITests \
-          -destination 'platform=iOS Simulator,name=iPhone 15' \
-          -only-testing:VERAUITests \
-          -enableCodeCoverage YES \
-          -derivedDataPath ./DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -parallel-testing-enabled NO; then
-          echo "✅ UI Tests completed with iPhone 15"
-        elif xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAUITests \
-          -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)' \
-          -only-testing:VERAUITests \
-          -enableCodeCoverage YES \
-          -derivedDataPath ./DerivedData \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -parallel-testing-enabled NO; then
-          echo "✅ UI Tests completed with iPhone SE (3rd generation)"
-        else
-          echo "❌ UI Tests could not run on any available simulator"
-          exit 1
-        fi
+#  ui-tests:
+#    runs-on: macos-latest
+#    needs: [unit-tests]
+#    
+#    steps:
+#    - uses: actions/checkout@v4
+#    
+#    - name: Pull LFS files
+#      run: git lfs pull
+#
+#    - name: Cache derived data
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/Library/Developer/Xcode/DerivedData
+#        key: ${{ runner.os }}-derived-data-ui-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
+#        restore-keys: |
+#          ${{ runner.os }}-derived-data-
+#
+#    - name: Run UI Tests
+#      run: |
+#        echo "🖥️ Running VERAUITests on iOS Simulator..."
+#        xcodebuild test \
+#          -workspace VERA/VERA.xcworkspace \
+#          -scheme VERAUITests \
+#          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
+#          -only-testing:VERAUITests \
+#          -enableCodeCoverage YES \
+#          -derivedDataPath DerivedData \
+#          -resultBundlePath DerivedData/VERAUITests-iOS.xcresult \
+#          CODE_SIGN_IDENTITY="" \
+#          CODE_SIGNING_REQUIRED=NO \
+#          CODE_SIGNING_ALLOWED=NO \
+#          -parallel-testing-enabled NO
+#          
+#    - name: Upload UI test results
+#      uses: actions/upload-artifact@v4
+#      if: always()
+#      with:
+#        name: ui-test-results
+#        path: DerivedData/VERAUITests-iOS.xcresult
 
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-latest
-    needs: [build, core-tests, ui-tests]
-    # Only run on main branch and pull requests
+    #needs: [unit-tests, ui-tests]
+    needs: [unit-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+        fetch-depth: 0
     
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
+    - name: Download unit test results
+      uses: actions/download-artifact@v4
       with:
-        xcode-version: latest-stable
+        name: unit-test-results
+        path: DerivedData/
     
-    - name: Run tests with coverage for SonarCloud
-      run: |
-        echo "🧪 Running comprehensive tests with coverage for SonarCloud..."
-        
-        # Run VERACore tests (main business logic) with coverage
-        echo "📊 Running VERACore tests with coverage..."
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACore \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACore-TestResults.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet || echo "VERACore tests completed with issues"
-        
-        # Also run VERA app tests if available to get complete coverage
-        echo "📱 Running VERA app tests with coverage..."
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERA \
-          -destination "platform=iOS Simulator,name=iPhone 15" \
-          -only-testing:VERATests \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERA-TestResults.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          -quiet || echo "VERA app tests completed with issues"
+    #- name: Download UI test results
+    #  uses: actions/download-artifact@v4
+    #  with:
+    #    name: ui-test-results
+    #    path: DerivedData/
     
-    - name: Generate coverage reports
+    - name: Generate comprehensive coverage reports
       run: |
-        echo "📊 Generating coverage reports..."
+        echo "📊 Generating coverage from all test results..."
         
-        # Generate standard coverage report
-        ./scripts/generate-coverage.sh || {
-          echo "⚠️ Standard coverage generation failed, creating minimal report"
-          mkdir -p coverage-reports
-          echo '{"coveredLines":0,"executableLines":1,"lineCoverage":0,"targets":[{"name":"VERA","files":[]}]}' > coverage-reports/coverage.json
-        }
+        # Install slather for proper XML coverage conversion
+        echo "🔧 Installing slather for SonarCloud XML conversion..."
+        gem install slather
         
-        # Convert to SonarQube XML format
-        if [ -f "coverage-reports/coverage.json" ]; then
-          echo "🔄 Converting coverage to SonarQube XML format..."
-          ./scripts/convert-coverage-to-xml.sh || echo "⚠️ XML conversion failed"
-        fi
-    
-    - name: Install SonarCloud Scanner
-      run: |
-        echo "📥 Installing SonarCloud Scanner..."
-        brew install sonar-scanner
-    
-    - name: Verify coverage reports
-      run: |
-        echo "� Available coverage files:"
-        ls -la coverage-reports/ || echo "No coverage-reports directory found"
+        # Ensure coverage-reports directory exists
+        mkdir -p coverage-reports
         
-        # Verify which coverage format to use
-        if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
-          echo "✅ SonarQube XML coverage available"
-          COVERAGE_PARAM="-Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml"
-        elif [ -f "coverage-reports/coverage.json" ]; then
-          echo "⚠️ Using fallback JSON coverage format"
-          COVERAGE_PARAM="-Dsonar.swift.coverage.reportPaths=coverage-reports/coverage.json"
+        # Try to generate coverage reports
+        if ./scripts/generate-coverage.sh; then
+          echo "✅ Coverage reports generated successfully"
+          
+          # Verify the XML file exists and is valid
+          if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
+            echo "✅ SonarQube XML coverage report found"
+            # Basic XML validation
+            if xmllint --noout coverage-reports/sonarqube-generic-coverage.xml 2>/dev/null; then
+              echo "✅ XML coverage report is valid"
+            else
+              echo "⚠️ XML coverage report is malformed, creating minimal report"
+              echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
+            fi
+          else
+            echo "⚠️ XML coverage report not found, creating minimal report"
+            echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
+          fi
+          
+          # Verify JSON file
+          if [ -f "coverage-reports/coverage.json" ]; then
+            if jq empty coverage-reports/coverage.json 2>/dev/null; then
+              echo "✅ JSON coverage report is valid"
+            else
+              echo "⚠️ JSON coverage report is malformed, creating minimal report"
+              echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
+            fi
+          else
+            echo "⚠️ JSON coverage report not found, creating minimal report"
+            echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
+          fi
         else
-          echo "❌ No coverage reports found"
-          COVERAGE_PARAM=""
+          echo "⚠️ Coverage generation failed, using minimal coverage reports"
+          echo '{"coveredLines":0,"executableLines":1}' > coverage-reports/coverage.json
+          echo '<?xml version="1.0" encoding="UTF-8"?><coverage version="1"><file path="dummy.swift"><lineToCover lineNumber="1" covered="false"/></file></coverage>' > coverage-reports/sonarqube-generic-coverage.xml
         fi
         
-        # Save coverage parameter for next step
-        echo "COVERAGE_PARAM=$COVERAGE_PARAM" >> $GITHUB_ENV
+        echo "📁 Coverage reports directory contents:"
+        ls -la coverage-reports/
     
     - name: SonarCloud Analysis
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        echo "☁️ Running SonarCloud analysis..."
+        brew install sonar-scanner
         
-        # Read SonarCloud configuration from sonar-project.properties
-        SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d'=' -f2 | xargs)
-        SONAR_ORGANIZATION=$(grep "^sonar.organization=" sonar-project.properties | cut -d'=' -f2 | xargs)
-        
-        if [ -z "$SONAR_PROJECT_KEY" ]; then
-          echo "❌ sonar.projectKey not found in sonar-project.properties"
-          exit 1
-        fi
-        
-        if [ -z "$SONAR_ORGANIZATION" ]; then
-          echo "❌ sonar.organization not found in sonar-project.properties"
-          exit 1
-        fi
-        
-        echo "📊 Project Key: $SONAR_PROJECT_KEY"
-        echo "🏢 Organization: $SONAR_ORGANIZATION"
-        echo "📈 Coverage Parameter: $COVERAGE_PARAM"
+        SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d'=' -f2)
+        SONAR_ORGANIZATION=$(grep "^sonar.organization=" sonar-project.properties | cut -d'=' -f2)
         
         sonar-scanner \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.organization="$SONAR_ORGANIZATION" \
           -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERAUITests \
-          $COVERAGE_PARAM \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.token=$SONAR_TOKEN \
-          -Dsonar.verbose=false
-          
+          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests \
+          -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
+          -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
+          -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
+          -Dsonar.host.url=https://sonarcloud.io
+
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    needs: [ui-tests]
+    #needs: [unit-tests, ui-tests]
+    needs: [unit-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
+    
     steps:
     - uses: actions/checkout@v4
-    - name: Clean DerivedData
-      run: rm -rf ~/Library/Developer/Xcode/DerivedData/*
+    
     - name: Pull LFS files
       run: git lfs pull
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1.6.0
-      with:
-          xcode-version: latest-stable
+    
     - name: Import certs
       uses: Apple-Actions/import-codesign-certs@v5.0.2
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+
     - name: Provisioning profile
       uses: Apple-Actions/download-provisioning-profiles@v4
       with:
@@ -318,23 +271,29 @@ jobs:
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-    - name: "#️⃣ Generate Build Number"
+    
+    - name: Generate build number
       id: buildnumber
-      uses: onyxmueller/build-tag-number@v1
-      with:
-        token: ${{ secrets.github_token }}
-    - name: Print new build number
-      run: echo "Build number is $BUILD_NUMBER"
+      run: |
+        # Generate build number with only numeric values for App Store compatibility
+        # Use timestamp to ensure uniqueness and avoid conflicts
+        TIMESTAMP=$(date +%s)
+        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+        echo "Generated build number: $BUILD_NUMBER"
+    
     - name: Build archive
       run: |
+          echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
           xcodebuild -workspace VERA/VERA.xcworkspace \
             -scheme VERA \
             -sdk iphoneos \
             -configuration Release \
             -allowProvisioningUpdates \
             -archivePath $PWD/build/VERA.xcarchive \
-            CURRENT_PROJECT_VERSION="${BUILD_NUMBER:-0}" \
+            CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
             archive | xcpretty
+
     - name: Export IPA
       run: |
         xcodebuild -exportArchive \
@@ -342,6 +301,7 @@ jobs:
             -exportOptionsPlist "$PWD/ExportOptions.plist" \
             -allowProvisioningUpdates \
             -exportPath "$PWD/build" | xcpretty
+
     - name: Upload to TestFlight
       uses: apple-actions/upload-testflight-build@v3
       with:

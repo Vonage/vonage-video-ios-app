@@ -25,9 +25,8 @@ struct ActiveSpeakerTrackerTests {
         let participant = makeMockParticipant(
             id: "speaker1",
             name: "Arthur Dent",
-            isMicEnabled: true,
-            audioLevel: 0.5
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.5)
 
         sut.calculateActiveSpeaker(from: [participant])
 
@@ -40,9 +39,8 @@ struct ActiveSpeakerTrackerTests {
         let participant = makeMockParticipant(
             id: "speaker1",
             name: "Arthur Dent",
-            isMicEnabled: true,
-            audioLevel: 0.1  // Below threshold (background noise level)
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.1)  // Below threshold (background noise level)
 
         sut.calculateActiveSpeaker(from: [participant])
 
@@ -54,9 +52,8 @@ struct ActiveSpeakerTrackerTests {
         let participant = makeMockParticipant(
             id: "speaker1",
             name: "Arthur Dent",
-            isMicEnabled: false,
-            audioLevel: 0.5  // High audio level but mic disabled
-        )
+            isMicEnabled: false
+        ).getSpeakerInfo(0.5)  // High audio level but mic disabled
 
         sut.calculateActiveSpeaker(from: [participant])
 
@@ -70,15 +67,13 @@ struct ActiveSpeakerTrackerTests {
         let quietParticipant = makeMockParticipant(
             id: "quiet",
             name: "Arthur Dent",
-            isMicEnabled: true,
-            audioLevel: 0.3  // Medium level
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.3)  // Medium level
         let loudParticipant = makeMockParticipant(
             id: "loud",
             name: "Zaphod Beeblebrox",
-            isMicEnabled: true,
-            audioLevel: 0.5  // High level
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.5)  // High level
 
         sut.calculateActiveSpeaker(from: [quietParticipant, loudParticipant])
 
@@ -91,10 +86,8 @@ struct ActiveSpeakerTrackerTests {
         let participant1 = makeMockParticipant(
             id: "speaker1",
             name: "Arthur Dent",
-            isMicEnabled: true,
-            audioLevel: 0.3  // Medium level
-
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.3)  // Medium level
 
         // First participant becomes active speaker
         sut.calculateActiveSpeaker(from: [participant1])
@@ -103,10 +96,8 @@ struct ActiveSpeakerTrackerTests {
         let participant2 = makeMockParticipant(
             id: "speaker2",
             name: "Zaphod Beeblebrox",
-            isMicEnabled: true,
-            audioLevel: 0.6  // Higher level
-
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.6)  // Higher level
 
         // Second participant should become active speaker immediately
         sut.calculateActiveSpeaker(from: [participant1, participant2])
@@ -117,15 +108,11 @@ struct ActiveSpeakerTrackerTests {
     @Test func noActiveSpeakerWhenAllParticipantsHaveLowAudioLevel() async throws {
         let sut = makeSUT()
         let participant1 = makeMockParticipant(
-            id: "speaker1",
-            audioLevel: 0.05  // Background noise level
-
-        )
+            id: "speaker1"
+        ).getSpeakerInfo(0.05)  // Background noise level
         let participant2 = makeMockParticipant(
-            id: "speaker2",
-            audioLevel: 0.03  // Even lower background noise
-
-        )
+            id: "speaker2"
+        ).getSpeakerInfo(0.03)  // Even lower background noise
 
         sut.calculateActiveSpeaker(from: [participant1, participant2])
 
@@ -137,10 +124,8 @@ struct ActiveSpeakerTrackerTests {
     @Test func emptyParticipantsListResultsInNoActiveSpeaker() async throws {
         let sut = makeSUT()
         let participant = makeMockParticipant(
-            id: "speaker1",
-            audioLevel: 0.3  // Medium speaking level
-
-        )
+            id: "speaker1"
+        ).getSpeakerInfo(0.3)  // Medium speaking level
 
         // First set an active speaker
         sut.calculateActiveSpeaker(from: [participant])
@@ -154,9 +139,8 @@ struct ActiveSpeakerTrackerTests {
     @Test func resetClearsActiveSpeaker() async throws {
         let sut = makeSUT()
         let participant = makeMockParticipant(
-            id: "speaker1",
-            audioLevel: 0.3  // Medium speaking level
-        )
+            id: "speaker1"
+        ).getSpeakerInfo(0.3)  // Medium speaking level
 
         sut.calculateActiveSpeaker(from: [participant])
         #expect(sut.activeSpeaker.participantId == "speaker1")
@@ -168,15 +152,11 @@ struct ActiveSpeakerTrackerTests {
     @Test func resetAllowsImmediateSpeakerChange() async throws {
         let sut = makeSUT()
         let participant1 = makeMockParticipant(
-            id: "speaker1",
-            audioLevel: 0.3  // Medium speaking level
-
-        )
+            id: "speaker1"
+        ).getSpeakerInfo(0.3)  // Medium speaking level
         let participant2 = makeMockParticipant(
-            id: "speaker2",
-            audioLevel: 0.5  // Higher speaking level
-
-        )
+            id: "speaker2"
+        ).getSpeakerInfo(0.5)  // Higher speaking level
 
         // Set first speaker
         sut.calculateActiveSpeaker(from: [participant1])
@@ -196,20 +176,16 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let micDisabledParticipant = makeMockParticipant(
             id: "mic_disabled",
-            isMicEnabled: false,
-            audioLevel: 0.6  // High level but mic disabled
-        )
+            isMicEnabled: false
+        ).getSpeakerInfo(0.6)  // High level but mic disabled
         let lowAudioParticipant = makeMockParticipant(
             id: "low_audio",
-            isMicEnabled: true,
-            audioLevel: 0.05  // Below threshold (background noise)
-
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.05)  // Below threshold (background noise)
         let validParticipant = makeMockParticipant(
             id: "valid_speaker",
-            isMicEnabled: true,
-            audioLevel: 0.3  // Medium level
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.3)  // Medium level
 
         sut.calculateActiveSpeaker(from: [micDisabledParticipant, lowAudioParticipant, validParticipant])
 
@@ -223,9 +199,8 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant = makeMockParticipant(
             id: "threshold_speaker",
-            isMicEnabled: true,
-            audioLevel: 0.2  // Exactly at threshold
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.2)  // Exactly at threshold
 
         sut.calculateActiveSpeaker(from: [participant])
 
@@ -237,9 +212,8 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let participant = makeMockParticipant(
             id: "below_threshold",
-            isMicEnabled: true,
-            audioLevel: 0.19  // Just below threshold (0.2)
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.19)  // Just below threshold (0.2)
 
         sut.calculateActiveSpeaker(from: [participant])
 
@@ -252,9 +226,8 @@ struct ActiveSpeakerTrackerTests {
         let sut = makeSUT()
         let currentSpeaker = makeMockParticipant(
             id: "current_speaker",
-            isMicEnabled: true,
-            audioLevel: 0.3
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.3)
 
         // First participant becomes active speaker
         sut.calculateActiveSpeaker(from: [currentSpeaker])
@@ -266,9 +239,8 @@ struct ActiveSpeakerTrackerTests {
         // Same participant with lower audio level should remain active speaker
         let quieterCurrentSpeaker = makeMockParticipant(
             id: "current_speaker",
-            isMicEnabled: true,
-            audioLevel: 0.25  // Still above threshold but lower than before
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.25)  // Still above threshold but lower than before
 
         sut.calculateActiveSpeaker(from: [quieterCurrentSpeaker])
         #expect(sut.activeSpeaker.participantId == "current_speaker")
@@ -277,9 +249,8 @@ struct ActiveSpeakerTrackerTests {
         // Only a louder participant should replace the current active speaker
         let louderParticipant = makeMockParticipant(
             id: "louder_speaker",
-            isMicEnabled: true,
-            audioLevel: 0.5
-        )
+            isMicEnabled: true
+        ).getSpeakerInfo(0.5)
 
         sut.calculateActiveSpeaker(from: [quieterCurrentSpeaker, louderParticipant])
         #expect(sut.activeSpeaker.participantId == "louder_speaker")
@@ -297,8 +268,7 @@ struct ActiveSpeakerTrackerTests {
                 id: "participant_\(index)",
                 name: "Participant \(index)",
                 isMicEnabled: index % 3 == 0,  // Every 3rd participant has mic enabled
-                audioLevel: 0.2 + (Float(index) / 200.0)  // Audio levels from 0.205 to 0.7
-            )
+            ).getSpeakerInfo(0.2 + (Float(index) / 200.0))  // Audio levels from 0.205 to 0.7
         }
 
         let startTime = Date()
@@ -312,6 +282,169 @@ struct ActiveSpeakerTrackerTests {
         // Participant 99 should be the active speaker (index 99, mic enabled, highest audio level ~0.7)
         #expect(sut.activeSpeaker.participantId == "participant_99")
         #expect(sut.activeSpeaker.audioLevel > 0.6)
+    }
+
+    // MARK: - Updated Participant Tests
+
+    @Test func updatedParticipantWithHighAudioLevelBecomesActiveSpeaker() async throws {
+        let sut = makeSUT()
+        let speakerInfo = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.5,
+            isMicEnabled: true
+        )
+
+        sut.updatedParticipant(speakerInfo)
+
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+        #expect(sut.activeSpeaker.audioLevel == 0.5)
+    }
+
+    @Test func updatedParticipantWithLowAudioLevelDoesNotBecomeActiveSpeaker() async throws {
+        let sut = makeSUT()
+        let speakerInfo = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.1,  // Below threshold
+            isMicEnabled: true
+        )
+
+        sut.updatedParticipant(speakerInfo)
+
+        #expect(sut.activeSpeaker == ActiveSpeakerInfo.none)
+    }
+
+    @Test func updatedParticipantWithMicDisabledDoesNotBecomeActiveSpeaker() async throws {
+        let sut = makeSUT()
+        let speakerInfo = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.5,  // High audio level
+            isMicEnabled: false  // But mic disabled
+        )
+
+        sut.updatedParticipant(speakerInfo)
+
+        #expect(sut.activeSpeaker == ActiveSpeakerInfo.none)
+    }
+
+    @Test func updatedParticipantWithHigherAudioReplacesCurrentActiveSpeaker() async throws {
+        let sut = makeSUT()
+
+        // Set initial active speaker
+        let initialSpeaker = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.3,
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(initialSpeaker)
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+
+        // Update with louder participant
+        let louderSpeaker = SpeakerInfo(
+            id: "speaker2",
+            audioLevel: 0.6,  // Higher than current
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(louderSpeaker)
+
+        #expect(sut.activeSpeaker.participantId == "speaker2")
+        #expect(sut.activeSpeaker.audioLevel == 0.6)
+    }
+
+    @Test func updatedParticipantWithLowerAudioDoesNotReplaceActiveSpeaker() async throws {
+        let sut = makeSUT()
+
+        // Set initial active speaker with high audio
+        let initialSpeaker = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.6,
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(initialSpeaker)
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+
+        // Update with quieter participant
+        let quieterSpeaker = SpeakerInfo(
+            id: "speaker2",
+            audioLevel: 0.4,  // Lower than current
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(quieterSpeaker)
+
+        // Should remain the same
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+        #expect(sut.activeSpeaker.audioLevel == 0.6)
+    }
+
+    @Test func updatedParticipantAtExactThresholdBecomesActiveSpeaker() async throws {
+        let sut = makeSUT()
+        let speakerInfo = SpeakerInfo(
+            id: "threshold_speaker",
+            audioLevel: 0.2,  // Exactly at threshold
+            isMicEnabled: true
+        )
+
+        sut.updatedParticipant(speakerInfo)
+
+        #expect(sut.activeSpeaker.participantId == "threshold_speaker")
+        #expect(sut.activeSpeaker.audioLevel == 0.2)
+    }
+
+    @Test func updatedParticipantJustBelowThresholdDoesNotBecomeActiveSpeaker() async throws {
+        let sut = makeSUT()
+        let speakerInfo = SpeakerInfo(
+            id: "below_threshold",
+            audioLevel: 0.19,  // Just below threshold (0.2)
+            isMicEnabled: true
+        )
+
+        sut.updatedParticipant(speakerInfo)
+
+        #expect(sut.activeSpeaker == ActiveSpeakerInfo.none)
+    }
+
+    @Test func updatedParticipantWithSameIdUpdatesAudioLevelWhenHigher() async throws {
+        let sut = makeSUT()
+
+        // Set initial active speaker
+        let initialSpeaker = SpeakerInfo(
+            id: "speaker1",
+            audioLevel: 0.3,
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(initialSpeaker)
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+        #expect(sut.activeSpeaker.audioLevel == 0.3)
+
+        // Update same participant with higher audio level
+        let updatedSpeaker = SpeakerInfo(
+            id: "speaker1",  // Same ID
+            audioLevel: 0.5,  // Higher level
+            isMicEnabled: true
+        )
+        sut.updatedParticipant(updatedSpeaker)
+
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+        #expect(sut.activeSpeaker.audioLevel == 0.5)
+    }
+
+    @Test func multipleUpdatedParticipantsLoudestBecomesActiveSpeaker() async throws {
+        let sut = makeSUT()
+
+        // Update multiple participants
+        let speaker1 = SpeakerInfo(id: "speaker1", audioLevel: 0.3, isMicEnabled: true)
+        let speaker2 = SpeakerInfo(id: "speaker2", audioLevel: 0.5, isMicEnabled: true)
+        let speaker3 = SpeakerInfo(id: "speaker3", audioLevel: 0.4, isMicEnabled: true)
+
+        sut.updatedParticipant(speaker1)
+        #expect(sut.activeSpeaker.participantId == "speaker1")
+
+        sut.updatedParticipant(speaker2)  // Louder, should become active
+        #expect(sut.activeSpeaker.participantId == "speaker2")
+        #expect(sut.activeSpeaker.audioLevel == 0.5)
+
+        sut.updatedParticipant(speaker3)  // Quieter than current active, should not change
+        #expect(sut.activeSpeaker.participantId == "speaker2")
+        #expect(sut.activeSpeaker.audioLevel == 0.5)
     }
 
     // MARK: - Test Helpers
