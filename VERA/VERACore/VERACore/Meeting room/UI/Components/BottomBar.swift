@@ -99,13 +99,13 @@ struct BottomBarBackground: View {
         #endif
     }
 
-#if !os(macOS)
-    @available(iOS 26.0, *)
-    private func glassEffectBackground() -> some View {
-        RoundedRectangle(cornerRadius: 16)
-            .glassEffect(in: .rect(cornerRadius: 16.0))
-    }
-#endif
+    #if !os(macOS)
+        @available(iOS 26.0, *)
+        private func glassEffectBackground() -> some View {
+            RoundedRectangle(cornerRadius: 16)
+                .glassEffect(in: .rect(cornerRadius: 16.0))
+        }
+    #endif
 }
 
 #Preview {
