@@ -49,6 +49,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-derived-data-
     
+    - name: List available simulators
+      run: |
+        echo "📱 Available iOS Simulators:"
+        xcrun simctl list devices
+
     - name: Run VERACoreTests (macOS)
       id: core-tests-macos
       run: |
