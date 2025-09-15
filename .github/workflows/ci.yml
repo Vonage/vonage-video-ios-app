@@ -166,11 +166,11 @@ jobs:
         name: unit-test-results
         path: DerivedData/
     
-    - name: Download UI test results
-      uses: actions/download-artifact@v4
-      with:
-        name: ui-test-results
-        path: DerivedData/
+    #- name: Download UI test results
+    #  uses: actions/download-artifact@v4
+    #  with:
+    #    name: ui-test-results
+    #    path: DerivedData/
     
     - name: Generate comprehensive coverage reports
       run: |
