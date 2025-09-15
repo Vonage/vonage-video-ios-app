@@ -8,17 +8,23 @@ import Foundation
 public struct ParticipantsState: Equatable {
     public let localParticipant: Participant?
     public let participants: [Participant]
+    public let activeParticipantId: String?
 
     public static var empty: ParticipantsState {
-        ParticipantsState(localParticipant: nil, participants: [])
+        ParticipantsState(
+            localParticipant: nil,
+            participants: [],
+            activeParticipantId: nil)
     }
 
     public init(
         localParticipant: Participant?,
-        participants: [Participant]
+        participants: [Participant],
+        activeParticipantId: String?
     ) {
         self.localParticipant = localParticipant
         self.participants = participants
+        self.activeParticipantId = activeParticipantId
     }
 }
 

@@ -41,7 +41,7 @@ struct OpenTokCallTests {
         case .error(let error):
             #expect(error is ThrowingOpenTokSession.Error)
         default:
-            Issue.record("Expected error event, got: \(event)")
+            Issue.record("Expected error event, got: \(String(describing: event))")
         }
     }
 
@@ -71,7 +71,7 @@ struct OpenTokCallTests {
         case .error(let error):
             #expect(error is ThrowingOpenTokSession.Error)
         default:
-            Issue.record("Expected error event, got: \(event)")
+            Issue.record("Expected error event, got: \(String(describing: event))")
         }
     }
 

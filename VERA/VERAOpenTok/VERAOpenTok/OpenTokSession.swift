@@ -37,14 +37,17 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func session(_ session: OTSession, didFailWithError error: OTError) {
+        print("session didFailWithError \(error.localizedDescription)")
         onSessionFailure?(error)
     }
 
     public func session(_ session: OTSession, streamCreated stream: OTStream) {
+        print("session streamCreated \(stream.streamId)")
         onNewStream?(stream)
     }
 
     public func session(_ session: OTSession, streamDestroyed stream: OTStream) {
+        print("session streamDestroyed \(stream.streamId)")
         onStreamDestroyed?(stream)
     }
 

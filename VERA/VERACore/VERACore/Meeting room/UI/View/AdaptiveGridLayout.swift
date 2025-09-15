@@ -49,7 +49,7 @@ struct AdaptiveGridLayout: View {
         }
         .padding(.bottom, 4)
         .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .animation(.easeInOut(duration: 0.4), value: participants.count)
         .animation(.easeInOut(duration: 0.3), value: horizontalSizeClass)
         .animation(.easeInOut(duration: 0.3), value: verticalSizeClass)

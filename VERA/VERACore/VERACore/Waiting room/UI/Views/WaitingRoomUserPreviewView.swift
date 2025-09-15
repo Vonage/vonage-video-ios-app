@@ -47,12 +47,12 @@ struct WaitingRoomUserPreviewView: View {
                 HStack(spacing: 24) {
                     CircularControlButton(
                         isActive: state.isMicrophoneEnabled,
-                        iconName: state.isMicrophoneEnabled ? "mic.slash.fill" : "mic.fill",
+                        iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
                         action: onMicrophoneToggle)
 
                     CircularControlButton(
                         isActive: state.isCameraEnabled,
-                        iconName: state.isCameraEnabled ? "video.slash.fill" : "video.fill",
+                        iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
                         action: onCameraToggle)
                 }
                 .padding(.bottom, 20)
