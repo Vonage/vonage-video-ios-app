@@ -131,7 +131,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAUITests \
-          -destination 'platform=iOS Simulator' \
+          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
           -only-testing:VERAUITests \
           -enableCodeCoverage YES \
           -derivedDataPath DerivedData \
