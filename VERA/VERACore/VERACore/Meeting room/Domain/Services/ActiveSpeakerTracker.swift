@@ -19,7 +19,7 @@ public struct ActiveSpeakerInfo: Equatable {
 }
 
 public struct SpeakerInfo {
-    public let id: String?
+    public let id: String
     public let audioLevel: Float
     public let isMicEnabled: Bool
 
