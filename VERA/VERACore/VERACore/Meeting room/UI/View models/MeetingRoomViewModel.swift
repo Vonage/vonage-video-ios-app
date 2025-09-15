@@ -68,8 +68,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
-    private let participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(.empty)
-    private let activeSpeakerTracker = ActiveSpeakerTracker()
 
     public weak var currentCall: CallFacade?
 
@@ -94,18 +92,10 @@ public final class MeetingRoomViewModel: ObservableObject {
         Task { @MainActor [weak self] in
             guard let self else { return }
             state = .loading
-            observeSessionState()
 
             do {
                 let call = try await connectToRoomUseCase(roomName: roomName)
-                call.participantsPublisher
-                    .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global())
-                    .removeDuplicates()
-                    .sink { [weak self] participantsState in
-                        self?.activeSpeakerTracker.calculateActiveSpeaker(from: participantsState.participants)
-                        self?.participantsPublisher.send(participantsState)
-                    }
-                    .store(in: &cancellables)
+                observeSessionState(call.participantsPublisher)
 
                 call.statePublisher
                     .sink { [weak self] state in
@@ -122,19 +112,19 @@ public final class MeetingRoomViewModel: ObservableObject {
         }
     }
 
-    func observeSessionState() {
-        Publishers.CombineLatest4(
+    func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
+        Publishers.CombineLatest3(
             participantsPublisher,
             sessionStatePublisher,
-            layoutPublisher,
-            activeSpeakerTracker.$activeSpeaker
+            layoutPublisher
         )
-        .map { [weak self] participantsState, sessionState, layout, activeSpeaker in
+        .map { [weak self] participantsState, sessionState, layout in
             guard let self else { return MeetingRoomState.default }
+
             var sortedPaticipants = participantsState.participants
             if layout == .activeSpeaker {
                 sortedPaticipants = sortedPaticipants.sortedByDisplayPriority(
-                    activeSpeakerId: activeSpeaker.participantId)
+                    activeSpeakerId: participantsState.activeParticipantId)
                 if let localParticipant = participantsState.localParticipant {
                     if sortedPaticipants.isEmpty {
                         sortedPaticipants.append(localParticipant)
@@ -160,7 +150,7 @@ public final class MeetingRoomViewModel: ObservableObject {
                 isCameraEnabled: sessionState.isPublishingVideo,
                 participants: sortedPaticipants,
                 layout: layout,
-                activeSpeakerId: activeSpeaker.participantId)
+                activeSpeakerId: participantsState.activeParticipantId)
         }
         .removeDuplicates()
         .receive(on: DispatchQueue.main)

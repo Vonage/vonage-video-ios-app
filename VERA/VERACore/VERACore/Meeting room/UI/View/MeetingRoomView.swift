@@ -23,7 +23,7 @@ public struct MeetingRoomView: View {
     }
 
     public var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 MeetingRoomContent(
                     participants: state.participants,
@@ -32,7 +32,6 @@ public struct MeetingRoomView: View {
                     activeSpeakerId: state.activeSpeakerId
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .offset(y: isNavigationBarVisible ? 0 : -22)
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isNavigationBarVisible)
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -77,10 +76,21 @@ public struct MeetingRoomView: View {
             }
             #if !os(macOS)
                 .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(.visible, for: .navigationBar)
-                .toolbarBackground(.black, for: .navigationBar)
+                .if(iOS26Available()) { view in
+                    view
+                    .modifier(iOS26ToolbarModifier())
+                }
+                .if(
+                    !iOS26Available(),
+                    transform: { view in
+                        view
+                            .toolbarBackground(.visible, for: .navigationBar)
+                            .toolbarBackground(.black, for: .navigationBar)
+
+                    }
+                )
                 .toolbarColorScheme(.dark, for: .navigationBar)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button {
@@ -92,12 +102,15 @@ public struct MeetingRoomView: View {
                     }
 
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onCameraSwitch()
-                        } label: {
-                            Image(systemName: "arrow.triangle.2.circlepath.camera")
-                        }
+                        #if targetEnvironment(macCatalyst)
+                        #else
+                            Button {
+                                onBottomBarInteraction()
+                                actions.onCameraSwitch()
+                            } label: {
+                                Image(systemName: "arrow.triangle.2.circlepath.camera")
+                            }.disabled(!state.isCameraEnabled)
+                        #endif
                         Button {
                             onBottomBarInteraction()
                             actions.onToggleMic()
@@ -114,6 +127,26 @@ public struct MeetingRoomView: View {
             #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private struct iOS26ToolbarModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            #if os(macOS)
+                content
+            #else
+                if #available(iOS 18.0, *) {
+                    if #available(iOS 26.0, *) {
+                        content
+                            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+                    } else {
+                        content
+                            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+                    }
+                } else {
+                    content
+                }
+            #endif
+        }
     }
 
     // MARK: - Auto-hide Controls Functions

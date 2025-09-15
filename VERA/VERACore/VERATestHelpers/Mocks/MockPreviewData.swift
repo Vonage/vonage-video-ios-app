@@ -15,7 +15,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.red) }
@@ -28,7 +27,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.green) }
@@ -41,7 +39,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.blue) }
@@ -54,7 +51,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.yellow) }
@@ -67,7 +63,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.purple) }
@@ -80,7 +75,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.orange) }
@@ -93,7 +87,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.cyan) }
@@ -106,7 +99,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.mint) }
@@ -119,7 +111,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.pink) }
@@ -133,7 +124,6 @@ struct PreviewData {
         isCameraEnabled: false,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.red) }
@@ -146,7 +136,6 @@ struct PreviewData {
         isCameraEnabled: true,
         videoDimensions: .zero,
         creationTime: Date(),
-        audioLevel: 0.0,
         isScreenshare: false,
         isPinned: false,
         viewBuilder: { AnyView(Color.blue) }

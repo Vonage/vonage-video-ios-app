@@ -66,7 +66,7 @@ struct BottomBar: View {
                     action: actions.onToggleMic)
                 ControlButton(
                     isActive: isCameraEnabled,
-                    iconName: isCameraEnabled ? "video.slash.fill" : "video.fill",
+                    iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
                     action: actions.onToggleCamera)
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
                 ParticipantsBadgeButton(
@@ -76,13 +76,36 @@ struct BottomBar: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
-
         }
-        .background(
+        .background(BottomBarBackground())
+        .padding(.bottom, 2)
+    }
+}
+
+struct BottomBarBackground: View {
+    var body: some View {
+        #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
                 .fill(.vGray4.opacity(0.8))
-        )
+        #else
+            Group {
+                //if #available(iOS 26.0, *) {
+                //    glassEffectBackground()
+                //} else {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.vGray4.opacity(0.8))
+                //}
+            }
+        #endif
     }
+
+    //#if !os(macOS)
+    //    @available(iOS 26.0, *)
+    //    private func glassEffectBackground() -> some View {
+    //        RoundedRectangle(cornerRadius: 16)
+    //            .glassEffect(in: .rect(cornerRadius: 16.0))
+    //    }
+    //#endif
 }
 
 #Preview {
