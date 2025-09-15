@@ -68,7 +68,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
-    private let participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(.empty)
 
     public weak var currentCall: CallFacade?
 
@@ -93,17 +92,10 @@ public final class MeetingRoomViewModel: ObservableObject {
         Task { @MainActor [weak self] in
             guard let self else { return }
             state = .loading
-            observeSessionState()
 
             do {
                 let call = try await connectToRoomUseCase(roomName: roomName)
-                call.participantsPublisher
-                    .debounce(for: .milliseconds(100), scheduler: DispatchQueue.global())
-                    .removeDuplicates()
-                    .sink { [weak self] participantsState in
-                        self?.participantsPublisher.send(participantsState)
-                    }
-                    .store(in: &cancellables)
+                observeSessionState(call.participantsPublisher)
 
                 call.statePublisher
                     .sink { [weak self] state in
@@ -120,7 +112,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         }
     }
 
-    func observeSessionState() {
+    func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         Publishers.CombineLatest3(
             participantsPublisher,
             sessionStatePublisher,
