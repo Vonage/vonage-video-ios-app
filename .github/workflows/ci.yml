@@ -88,7 +88,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "platform=iOS Simulator" \
+          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
