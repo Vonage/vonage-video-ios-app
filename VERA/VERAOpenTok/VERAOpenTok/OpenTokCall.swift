@@ -176,8 +176,6 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func updateParticipants() async {
-        print("updateParticipants")
-
         let participants = await participantsRepository.all
         _participantsPublisher.value = .init(
             localParticipant: publisherParticipant,
