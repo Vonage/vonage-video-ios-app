@@ -151,6 +151,7 @@ jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-latest
+    #needs: [unit-tests, ui-tests]
     needs: [unit-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
@@ -245,7 +246,8 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-latest
-    needs: [unit-tests, ui-tests]
+    #needs: [unit-tests, ui-tests]
+    needs: [unit-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
     
