@@ -73,11 +73,13 @@ struct CircularControlBackground: View {
         #endif
     }
 
+#if !os(macOS)
     @available(iOS 26.0, *)
     private func glassEffectCircle() -> some View {
         Circle()
             .glassEffect()
     }
+#endif
 }
 
 #Preview {
