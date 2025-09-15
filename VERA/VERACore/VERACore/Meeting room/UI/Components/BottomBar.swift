@@ -92,8 +92,8 @@ struct BottomBarBackground: View {
                 //if #available(iOS 26.0, *) {
                 //    glassEffectBackground()
                 //} else {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(.vGray4.opacity(0.8))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.vGray4.opacity(0.8))
                 //}
             }
         #endif
