@@ -114,7 +114,8 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         Publishers.CombineLatest3(
-            participantsPublisher,
+            participantsPublisher
+                .removeDuplicates(),
             sessionStatePublisher,
             layoutPublisher
         )
@@ -153,7 +154,6 @@ public final class MeetingRoomViewModel: ObservableObject {
                 activeSpeakerId: participantsState.activeParticipantId)
         }
         .removeDuplicates()
-        .receive(on: DispatchQueue.main)
         .sink { [weak self] newState in
             Task { @MainActor in
                 self?.state = .content(newState)
@@ -164,13 +164,13 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public func onToggleMic() {
         Task { [weak self] in
-            self?.currentCall?.toggleLocalAudio()
+            await self?.currentCall?.toggleLocalAudio()
         }
     }
 
     public func onToggleCamera() {
         Task { [weak self] in
-            self?.currentCall?.toggleLocalVideo()
+            await self?.currentCall?.toggleLocalVideo()
         }
     }
 
