@@ -12,7 +12,7 @@ final actor ParticipantsRepository {
         Array(participantStreams.values)
     }
 
-    func addParticipant(_ participant: Participant) async {
+    func saveParticipant(_ participant: Participant) async {
         participantStreams[participant.id] = participant
     }
 

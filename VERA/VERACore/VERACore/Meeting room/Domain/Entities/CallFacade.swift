@@ -46,9 +46,9 @@ public protocol CallConnectable: AnyObject {
 }
 
 public protocol MediaToggleable: AnyObject {
-    func toggleLocalVideo()
+    func toggleLocalVideo() async
     func toggleLocalCamera()
-    func toggleLocalAudio()
+    func toggleLocalAudio() async
 }
 
 public typealias CallFacade =

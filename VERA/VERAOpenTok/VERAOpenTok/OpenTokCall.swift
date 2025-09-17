@@ -59,9 +59,6 @@ public final class OpenTokCall: CallFacade {
             publisherParticipant = publisher.participant
             publisher.setup()
             setupPublisherObservation(publisher)
-            Task {
-                await updateParticipants()
-            }
         } catch {
             _eventsPublisher.send(.error(error))
         }
@@ -103,11 +100,9 @@ public final class OpenTokCall: CallFacade {
             try session.subscribe(subscriber: openTokSubscriber)
 
             Task {
-                await subscribersRepository.addSubscriber(openTokSubscriber)
-                await participantsRepository.addParticipant(openTokSubscriber.participant)
-
-
                 setupSubscriberObservation(openTokSubscriber)
+                
+                await subscribersRepository.addSubscriber(openTokSubscriber)
 
                 await recalculateActiveSpeaker()
                 await updateParticipants()
@@ -129,7 +124,7 @@ public final class OpenTokCall: CallFacade {
         subscriber.$participant
             .sink { [weak self] participant in
                 Task {
-                    await self?.participantsRepository.addParticipant(participant)
+                    await self?.participantsRepository.saveParticipant(participant)
                     await self?.updateParticipants()
                 }
             }
@@ -189,22 +184,18 @@ public final class OpenTokCall: CallFacade {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
     }
 
-    public func toggleLocalVideo() {
-        Task {
-            publisher.publishVideo.toggle()
+    public func toggleLocalVideo() async {
+        publisher.publishVideo.toggle()
 
-            updateMediaState()
-            await updateParticipants()
-        }
+        updateMediaState()
+        await updateParticipants()
     }
 
-    public func toggleLocalAudio() {
-        Task {
-            publisher.publishAudio.toggle()
+    public func toggleLocalAudio() async {
+        publisher.publishAudio.toggle()
 
-            updateMediaState()
-            await updateParticipants()
-        }
+        updateMediaState()
+        await updateParticipants()
     }
 
     private func updateMediaState() {
