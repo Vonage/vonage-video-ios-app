@@ -17,10 +17,10 @@ public final class OpenTokPublisherFactory: PublisherFactory {
     public func make(_ settings: PublisherSettings) async -> any VERAPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
-        publisherSettings.audioTrack = settings.publishAudio
-        publisherSettings.videoTrack = settings.publishVideo
 
         let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings)!
+        otPublisher.publishAudio = settings.publishAudio
+        otPublisher.publishVideo = settings.publishVideo
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
         let publisher = OpenTokPublisher(publisher: otPublisher)
         otPublisher.delegate = publisher
