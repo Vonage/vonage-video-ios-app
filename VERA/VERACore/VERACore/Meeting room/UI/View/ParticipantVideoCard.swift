@@ -11,7 +11,7 @@ struct ParticipantVideoCard: View {
 
     private let containerAspectRatio: Double = 16.0 / 9.0
     var shouldFlipHorizontally: Bool { participant.isRemote }
-    
+
     var body: some View {
         Group {
             if participant.isCameraEnabled {
