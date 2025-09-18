@@ -38,6 +38,7 @@ public class OpenTokSubscriber: NSObject {
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
         let stream = subscriber.stream!
+        isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
             name: stream.name ?? "",
@@ -45,7 +46,7 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: VideoDimensions.default,
             creationTime: stream.creationTime,
-            isScreenshare: false,
+            isScreenshare: stream.videoType == .screen,
             isPinned: false,
             viewBuilder: { AnyView(EmptyView()) })
         super.init()

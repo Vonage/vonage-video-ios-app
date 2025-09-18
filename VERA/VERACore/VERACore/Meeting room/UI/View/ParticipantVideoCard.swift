@@ -10,7 +10,8 @@ struct ParticipantVideoCard: View {
     let activeSpeakerId: String?
 
     private let containerAspectRatio: Double = 16.0 / 9.0
-
+    var shouldFlipHorizontally: Bool { participant.isRemote }
+    
     var body: some View {
         Group {
             if participant.isCameraEnabled {
@@ -20,15 +21,26 @@ struct ParticipantVideoCard: View {
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
-                                participant.viewBuilder()
-                                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
-                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                                    .clipped()
+                                if participant.isScreenshare {
+                                    participant.viewBuilder()
+                                        .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                        .clipped()
 
-                                ParticipantVideoCardOverlays(
-                                    isMicEnabled: participant.isMicEnabled,
-                                    name: participant.name
-                                )
+                                    ParticipantVideoCardOverlays(
+                                        isMicEnabled: participant.isMicEnabled,
+                                        name: participant.name
+                                    )
+                                } else {
+                                    participant.viewBuilder()
+                                        .scaleEffect(x: shouldFlipHorizontally ? -1 : 1, y: 1)
+                                        .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                        .clipped()
+
+                                    ParticipantVideoCardOverlays(
+                                        isMicEnabled: participant.isMicEnabled,
+                                        name: participant.name
+                                    )
+                                }
                             }
                         )
                 }
