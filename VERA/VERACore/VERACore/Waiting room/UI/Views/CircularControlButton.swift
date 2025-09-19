@@ -55,19 +55,19 @@ struct CircularControlBackground: View {
                 if #available(iOS 26.0, *) {
                     glassEffectCircle()
                 } else {
-                Circle()
-                    .fill(Material.ultraThinMaterial)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.2
-                            )
-                    )
+                    Circle()
+                        .fill(Material.ultraThinMaterial)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.2
+                                )
+                        )
                 }
             }
         #endif
