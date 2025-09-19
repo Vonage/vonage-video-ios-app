@@ -65,21 +65,20 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    # Temporarily disabled until CI Xcode version is updated
-    # - name: Run VERACoreSnapshotTests (iOS Simulator)
-    #   id: snapshot-tests
-    #   run: |
-    #     echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
-    #     xcodebuild test \
-    #       -workspace VERA/VERA.xcworkspace \
-    #       -scheme VERACoreSnapshotTests \
-    #       -destination "platform=iOS Simulator,name=iPhone 16" \
-    #       -derivedDataPath DerivedData \
-    #       -enableCodeCoverage YES \
-    #       -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-    #       CODE_SIGN_IDENTITY="" \
-    #       CODE_SIGNING_REQUIRED=NO \
-    #       CODE_SIGNING_ALLOWED=NO
+    - name: Run VERACoreSnapshotTests (iOS Simulator)
+      id: snapshot-tests
+      run: |
+        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACoreSnapshotTests \
+          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
     
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
@@ -88,7 +87,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=82CA50FD-D086-47BA-BA43-A771A1892B28" \
+          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -105,7 +104,7 @@ jobs:
           DerivedData/VERACoreTests-macOS.xcresult
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/Build/Products/
-          # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
+          DerivedData/VERACoreSnapshotTests-iOS.xcresult
 
 #  ui-tests:
 #    runs-on: macos-26
@@ -131,7 +130,7 @@ jobs:
 #        xcodebuild test \
 #          -workspace VERA/VERA.xcworkspace \
 #          -scheme VERAUITests \
-#          -destination "id=82CA50FD-D086-47BA-BA43-A771A1892B28" \
+#          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
 #          -only-testing:VERAUITests \
 #          -enableCodeCoverage YES \
 #          -derivedDataPath DerivedData \
