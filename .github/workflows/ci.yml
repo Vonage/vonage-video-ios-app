@@ -12,7 +12,7 @@ on:
 
 jobs:
   format-check:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
     - uses: actions/checkout@v4
 
@@ -25,7 +25,7 @@ jobs:
         ./scripts/format.sh --check
 
   unit-tests:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: [format-check]
     outputs:
       test-results: ${{ steps.tests.outcome }}
@@ -108,7 +108,7 @@ jobs:
           # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
 
 #  ui-tests:
-#    runs-on: macos-latest
+#    runs-on: macos-26
 #    needs: [unit-tests]
 #    
 #    steps:
@@ -150,7 +150,7 @@ jobs:
 
   sonarcloud:
     name: SonarCloud Analysis
-    runs-on: macos-latest
+    runs-on: macos-26
     #needs: [unit-tests, ui-tests]
     needs: [unit-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
@@ -245,7 +245,7 @@ jobs:
 
   upload-testflight:
     name: Upload to TestFlight
-    runs-on: macos-latest
+    runs-on: macos-26
     #needs: [unit-tests, ui-tests]
     needs: [unit-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
