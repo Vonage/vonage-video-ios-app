@@ -17,10 +17,17 @@ public final class ConnectToRoomUseCase {
         self.roomCredentialsRepository = roomCredentialsRepository
     }
 
-    @BackgroundActor
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
-        let call = await sessionRepository.createSession(result.roomCredentials)
+        print("apiKey: \(result.apiKey)")
+        print("sessionId: \(result.sessionId)")
+        print("token: \(result.token)")
+        return await getConnectedCall(result.roomCredentials)
+    }
+    
+    @MainActor
+    private func getConnectedCall(_ credentials: RoomCredentials) async -> CallFacade {
+        let call = await sessionRepository.createSession(credentials)
         call.connect()
         return call
     }

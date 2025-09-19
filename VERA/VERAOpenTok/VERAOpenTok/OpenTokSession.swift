@@ -11,7 +11,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     var onSessionDidConnect: (() -> Void)?
     var onSessionDidDisconnect: (() -> Void)?
     var onSessionFailure: ((Error) -> Void)?
-    var onNewStream: ((OTStream) -> Void)?
+    public var onNewStream: ((OTStream) -> Void)?
     var onStreamDestroyed: ((OTStream) -> Void)?
 
     public init(session: OTSession) {
@@ -19,15 +19,18 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     open func connect(with token: String) throws {
+        assertMainThread()
+        print("Connect to session")
         var error: OTError?
         session.connect(withToken: token, error: &error)
-
+        print("Connected to session error \(error?.localizedDescription ?? "none")")
         if let error = error {
             throw error
         }
     }
 
     open func disconnect() throws {
+        assertMainThread()
         var error: OTError?
         session.disconnect(&error)
 
@@ -60,16 +63,20 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func subscribe(subscriber: OpenTokSubscriber) throws {
+        assertMainThread()
         var error: OTError?
         let _subscriber: OTSubscriberKit = subscriber.otSubscriber
+        print("Subscribing \(subscriber.id)")
         session.subscribe(_subscriber, error: &error)
-
+        print("Subscribed \(subscriber.id) \(error?.localizedDescription ?? "no error")")
+        
         if let error = error {
             throw error
         }
     }
 
     public func unsubscribe(subscriber: OpenTokSubscriber) throws {
+        assertMainThread()
         var error: OTError?
         session.unsubscribe(subscriber.otSubscriber, error: &error)
 
@@ -79,6 +86,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func publish(publisher: OpenTokPublisher) throws {
+        assertMainThread()
         var error: OTError?
         session.publish(publisher.otPublisher, error: &error)
 
@@ -88,6 +96,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func unpublish(publisher: OpenTokPublisher) throws {
+        assertMainThread()
         var error: OTError?
         session.unpublish(publisher.otPublisher, error: &error)
 

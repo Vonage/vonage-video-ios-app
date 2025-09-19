@@ -229,12 +229,12 @@ public final class WaitingRoomViewModel: ObservableObject {
         let cameraGranted = await requestCameraPermissionUseCase()
         guard cameraGranted else { return }
 
-        await startVideoPreview()
+        startVideoPreview()
     }
 
     @MainActor
-    public func startVideoPreview() async {
-        let publisher = await cameraPreviewProviderRepository.getPublisher()
+    public func startVideoPreview() {
+        let publisher = cameraPreviewProviderRepository.getPublisher()
         self.publisher = publisher
 
         buildContentUiState(

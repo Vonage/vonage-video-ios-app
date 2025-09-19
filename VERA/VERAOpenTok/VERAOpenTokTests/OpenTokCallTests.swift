@@ -75,6 +75,22 @@ struct OpenTokCallTests {
         }
     }
 
+    @Test("Add subscriber")
+    func addsASubscriber() async throws {
+        let session = OpenTokSessionSpy()
+        let sut = makeSUT(session: session)
+        
+        sut.setup()
+        
+        let stream = OTStream()
+        //stream.connection = .init()
+        //stream.session = session
+        
+        session.onNewStream?(OTStream())
+        
+        
+    }
+    
     // MARK: - Test Helpers
 
     private func makeSUT(

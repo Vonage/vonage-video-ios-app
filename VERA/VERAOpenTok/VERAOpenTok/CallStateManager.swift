@@ -37,12 +37,9 @@ final actor CallStateManager {
     }
 
     private func getCurrentState() async -> ParticipantsState {
-        let participants = await participantsRepository.all
-        let activeSpeakerId = activeSpeakerTracker.activeSpeaker.participantId
-        return .init(
-            localParticipant: nil,
-            participants: participants,
-            activeParticipantId: activeSpeakerId)
+        .init(localParticipant: nil,
+              participants: await participantsRepository.all,
+              activeParticipantId: activeSpeakerTracker.activeSpeaker.participantId)
     }
 
     private func recalculateActiveSpeaker() async {

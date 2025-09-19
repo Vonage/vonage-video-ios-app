@@ -9,6 +9,7 @@ final actor SubscribersRepository {
 
     func addSubscriber(_ subscriber: OpenTokSubscriber) async {
         subscriberStreams[subscriber.id] = subscriber
+        print("SubscribersRepository addSubscriber \(subscriber.id)")
     }
 
     func getSubscriber(id: String) async -> OpenTokSubscriber? {

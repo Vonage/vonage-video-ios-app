@@ -11,6 +11,7 @@ public final class OpenTokSessionFactory: SessionFactory {
     public init() {}
 
     public func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
+        assertMainThread()
         let otSession = OTSession(
             applicationId: sessionCredentials.apiKey,
             sessionId: sessionCredentials.sessionId,

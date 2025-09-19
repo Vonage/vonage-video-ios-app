@@ -14,7 +14,7 @@ public class OpenTokSubscriber: NSObject {
     private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
     private var subscriptionTimer: Timer?
 
-    var id: String { stream.streamId }
+    let id: String
     var stream: OTStream { otSubscriber.stream! }
     var date: Date { stream.creationTime }
 
@@ -28,16 +28,17 @@ public class OpenTokSubscriber: NSObject {
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
-    public lazy var view: AnyView = {
+    public var view: AnyView {
         let view = otSubscriber.view!
         let rendererView = UIViewContainer(view: view)
         otSubscriber.viewScaleBehavior = .fill
-        return AnyView(rendererView)
-    }()
+        return AnyView(rendererView.id(id))
+    }
 
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
         let stream = subscriber.stream!
+        id = stream.streamId
         isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
@@ -53,7 +54,7 @@ public class OpenTokSubscriber: NSObject {
     }
 
     func setup() {
-        otSubscriber.subscribeToVideo = false
+        otSubscriber.subscribeToVideo = true
 
         stream
             .publisher(for: \.videoDimensions)
@@ -96,15 +97,15 @@ public class OpenTokSubscriber: NSObject {
             isPinned: isPinned,
             viewBuilder: { [weak self] in
                 guard let self else { return AnyView(EmptyView()) }
-                return AnyView(self.view)
+                return self.view
             })
 
         participant.onAppear = { [weak self] in
-            self?.setVisibility(true)
+            //self?.setVisibility(true)
         }
 
         participant.onDisappear = { [weak self] in
-            self?.setVisibility(false)
+            //self?.setVisibility(false)
         }
     }
 

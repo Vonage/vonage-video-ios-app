@@ -23,7 +23,6 @@ public final class OpenTokCall: CallFacade {
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
     public var publisherParticipant: Participant?
-    private let updateTrigger = PassthroughSubject<ParticipantsState, Never>()
 
     private let callStateManager = CallStateManager()
 
@@ -48,24 +47,18 @@ public final class OpenTokCall: CallFacade {
         session.onSessionDidConnect = publishToSession
 
         updateMediaState()
-        setupUpdatePipeline()
     }
 
-    private func setupUpdatePipeline() {
-        updateTrigger
-            .debounce(for: .milliseconds(10), scheduler: DispatchQueue.main)
-            .sink { [weak self] participantsState in
-                guard let self = self else { return }
-
-                self._participantsPublisher.value = .init(
-                    localParticipant: self.publisherParticipant,
-                    participants: participantsState.participants,
-                    activeParticipantId: participantsState.activeParticipantId
-                )
-            }
-            .store(in: &cancellables)
+    func updateParticipantsState(_ state: ParticipantsState) async {
+        print("updateParticipantsState 1 \(Date())")
+        _participantsPublisher.value = .init(
+            localParticipant: publisherParticipant,
+            participants: state.participants,
+            activeParticipantId: state.activeParticipantId
+        )
+        print("updateParticipantsState 2 \(Date())")
     }
-
+    
     // MARK: Publisher
     private func publishToSession() {
         do {
@@ -74,6 +67,7 @@ public final class OpenTokCall: CallFacade {
             publisher.setup()
             setupPublisherObservation(publisher)
         } catch {
+            print("Error: \(error.localizedDescription)")
             _eventsPublisher.send(.error(error))
         }
     }
@@ -91,13 +85,16 @@ public final class OpenTokCall: CallFacade {
                     participants: currentState.participants,
                     activeParticipantId: currentState.activeParticipantId
                 )
-                self.updateTrigger.send(newState)
+                Task { [weak self] in
+                    await self?.updateParticipantsState(newState)
+                }
             }
             .store(in: &cancellables)
     }
 
     // MARK: Subscriber
     private func addSubscriber(_ stream: OTStream) {
+        print("OpenTokCall addSubscriber \(stream.streamId)")
         do {
             guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
                 throw Error.subscriberCreationFailed
@@ -116,26 +113,25 @@ public final class OpenTokCall: CallFacade {
 
             try session.subscribe(subscriber: openTokSubscriber)
 
-            Task {
+            Task { [weak self] in
+                guard let self else { return }
                 let state = await callStateManager.addSubscriber(openTokSubscriber)
-                await MainActor.run {
-                    updateTrigger.send(state)
-                }
+                print("OpenTokCall addSubscriber \(stream.streamId) DONE")
+                await updateParticipantsState(state)
             }
         } catch {
+            print("OpenTokCall error \(error)")
             _eventsPublisher.send(.error(error))
         }
     }
 
     private func setupSubscriberObservation(_ subscriber: OpenTokSubscriber) {
         subscriber.$participant
-            .sink { [weak self] participant in
-                Task {
+            .sink { participant in
+                Task { [weak self] in
                     guard let self = self else { return }
                     let state = await self.callStateManager.updateParticipant(participant)
-                    await MainActor.run {
-                        self.updateTrigger.send(state)
-                    }
+                    await self.updateParticipantsState(state)
                 }
             }
             .store(in: &cancellables)
@@ -151,17 +147,18 @@ public final class OpenTokCall: CallFacade {
                         audioLevel: audioLevel,
                         isMicEnabled: subscriber.participant.isMicEnabled
                     )
+                    print("setupAudioLevelObservation 1")
                     let state = await self.callStateManager.updateActiveSpeaker(speakerInfo)
-                    await MainActor.run {
-                        self.updateTrigger.send(state)
-                    }
+                    print("setupAudioLevelObservation 2")
+                    await self.updateParticipantsState(state)
                 }
             }
             .store(in: &cancellables)
     }
 
     private func removeSubscriber(_ stream: OTStream) {
-        Task {
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
             do {
                 let (subscriber, state) = await callStateManager.removeSubscriber(id: stream.streamId)
 
@@ -169,10 +166,9 @@ public final class OpenTokCall: CallFacade {
                     try session.unsubscribe(subscriber: subscriber)
                 }
 
-                await MainActor.run {
-                    updateTrigger.send(state)
-                }
+                await self.updateParticipantsState(state)
             } catch {
+                print("Error: \(error.localizedDescription)")
                 _eventsPublisher.send(.error(error))
             }
         }
@@ -184,6 +180,7 @@ public final class OpenTokCall: CallFacade {
         do {
             try session.connect(with: token)
         } catch {
+            print("Error: \(error.localizedDescription)")
             _eventsPublisher.value = .error(error)
         }
     }
@@ -196,6 +193,7 @@ public final class OpenTokCall: CallFacade {
             session.onSessionFailure = nil
             session.onSessionDidConnect = nil
         } catch {
+            print("Error: \(error.localizedDescription)")
             _eventsPublisher.value = .error(error)
         }
     }
