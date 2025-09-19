@@ -52,9 +52,9 @@ struct CircularControlBackground: View {
                 )
         #else
             Group {
-                //if #available(iOS 26.0, *) {
-                //    glassEffectCircle()
-                //} else {
+                if #available(iOS 26.0, *) {
+                    glassEffectCircle()
+                } else {
                 Circle()
                     .fill(Material.ultraThinMaterial)
                     .overlay(
@@ -68,18 +68,18 @@ struct CircularControlBackground: View {
                                 lineWidth: 1.2
                             )
                     )
-                //}
+                }
             }
         #endif
     }
 
-    //#if !os(macOS)
-    //    @available(iOS 26.0, *)
-    //    private func glassEffectCircle() -> some View {
-    //        Circle()
-    //            .glassEffect()
-    //    }
-    //#endif
+    #if !os(macOS)
+        @available(iOS 26.0, *)
+        private func glassEffectCircle() -> some View {
+            Circle()
+                .glassEffect()
+        }
+    #endif
 }
 
 #Preview {

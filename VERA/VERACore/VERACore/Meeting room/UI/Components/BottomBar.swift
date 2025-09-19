@@ -89,23 +89,23 @@ struct BottomBarBackground: View {
                 .fill(.vGray4.opacity(0.8))
         #else
             Group {
-                //if #available(iOS 26.0, *) {
-                //    glassEffectBackground()
-                //} else {
+                if #available(iOS 26.0, *) {
+                    glassEffectBackground()
+                } else {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(.vGray4.opacity(0.8))
-                //}
+                }
             }
         #endif
     }
 
-    //#if !os(macOS)
-    //    @available(iOS 26.0, *)
-    //    private func glassEffectBackground() -> some View {
-    //        RoundedRectangle(cornerRadius: 16)
-    //            .glassEffect(in: .rect(cornerRadius: 16.0))
-    //    }
-    //#endif
+    #if !os(macOS)
+        @available(iOS 26.0, *)
+        private func glassEffectBackground() -> some View {
+            RoundedRectangle(cornerRadius: 16)
+                .glassEffect(in: .rect(cornerRadius: 16.0))
+        }
+    #endif
 }
 
 #Preview {
