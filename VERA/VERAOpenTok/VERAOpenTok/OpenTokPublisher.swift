@@ -13,6 +13,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     var cancellables = Set<AnyCancellable>()
 
     let id = "publisherID"
+    public let view: AnyView
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
 
@@ -25,12 +26,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     var onError: ((Error) -> Void)?
-
-    public lazy var view: AnyView = {
-        let view = otPublisher.view!
-        let rendererView = UIViewContainer(view: view)
-        return AnyView(rendererView)
-    }()
 
     public var publishAudio: Bool {
         get {
@@ -62,6 +57,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     public init(publisher: OTPublisher) {
         otPublisher = publisher
+        view = AnyView(UIViewContainer(view: publisher.view!))
         participant = Participant(
             id: id,
             name: publisher.stream?.name ?? "",
@@ -72,7 +68,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            view: view)
         super.init()
     }
 
@@ -122,10 +118,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            viewBuilder: { [weak self] in
-                guard let self else { return AnyView(EmptyView()) }
-                return AnyView(self.view)
-            })
+            view: view)
     }
 
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {

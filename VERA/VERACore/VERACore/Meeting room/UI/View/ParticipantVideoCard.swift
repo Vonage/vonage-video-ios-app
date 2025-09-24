@@ -22,7 +22,7 @@ struct ParticipantVideoCard: View {
                         .overlay(
                             ZStack {
                                 if participant.isScreenshare {
-                                    participant.viewBuilder()
+                                    participant.view
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
 
@@ -31,7 +31,7 @@ struct ParticipantVideoCard: View {
                                         name: participant.name
                                     )
                                 } else {
-                                    participant.viewBuilder()
+                                    participant.view
                                         .scaleEffect(x: shouldFlipHorizontally ? -1 : 1, y: 1)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
@@ -142,7 +142,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }
@@ -158,7 +158,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }
@@ -174,7 +174,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }

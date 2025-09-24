@@ -231,7 +231,7 @@ struct AdaptiveGridLayoutUITests {
                     creationTime: Date().addingTimeInterval(TimeInterval(index)),
                     isScreenshare: false,
                     isPinned: false,
-                    viewBuilder: { AnyView(Color.blue) })
+                    view: AnyView(Color.blue))
             )
         }
         return participants

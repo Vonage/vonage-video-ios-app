@@ -15,9 +15,11 @@ public class OpenTokSubscriber: NSObject {
     private var subscriptionTimer: Timer?
 
     let id: String
-    var stream: OTStream { otSubscriber.stream! }
-    var date: Date { stream.creationTime }
-
+    let view: AnyView
+    private let cachedStream: OTStream // Cache the stream to avoid blocking SDK calls
+    var stream: OTStream { cachedStream } // Use cached value instead of otSubscriber.stream!
+    var date: Date { cachedStream.creationTime }
+    
     var onError: (() -> Void)?
 
     @Published public private(set) var isScreenshare: Bool = false
@@ -28,17 +30,12 @@ public class OpenTokSubscriber: NSObject {
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
-    public var view: AnyView {
-        let view = otSubscriber.view!
-        let rendererView = UIViewContainer(view: view)
-        otSubscriber.viewScaleBehavior = .fill
-        return AnyView(rendererView.id(id))
-    }
-
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
         let stream = subscriber.stream!
+        cachedStream = stream
         id = stream.streamId
+        view = AnyView(UIViewContainer(view: subscriber.view!))
         isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
@@ -49,13 +46,14 @@ public class OpenTokSubscriber: NSObject {
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            view: view)
         super.init()
     }
 
     func setup() {
-        otSubscriber.subscribeToVideo = true
-
+        otSubscriber.subscribeToVideo = false
+        otSubscriber.viewScaleBehavior = .fill
+        
         stream
             .publisher(for: \.videoDimensions)
             .removeDuplicates()
@@ -95,17 +93,14 @@ public class OpenTokSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            viewBuilder: { [weak self] in
-                guard let self else { return AnyView(EmptyView()) }
-                return self.view
-            })
+            view: view)
 
         participant.onAppear = { [weak self] in
-            //self?.setVisibility(true)
+            self?.setVisibility(true)
         }
 
         participant.onDisappear = { [weak self] in
-            //self?.setVisibility(false)
+            self?.setVisibility(false)
         }
     }
 

@@ -24,7 +24,7 @@ public final class OpenTokCameraDevicesRepository: CameraDevicesRepository {
 
     @MainActor
     public func routeTo(_ cameraDeviceID: String) async {
-        let publisher = await publisherRepository.getPublisher()
+        let publisher = publisherRepository.getPublisher()
         switch cameraDeviceID {
         case OpenTokCameraDevice.front.rawValue:
             publisher.cameraPosition = .front
