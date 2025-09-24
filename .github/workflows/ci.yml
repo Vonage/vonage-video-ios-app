@@ -67,6 +67,7 @@ jobs:
 
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: snapshot-tests
+      timeout-minutes: 15
       run: |
         echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
         xcodebuild test \
