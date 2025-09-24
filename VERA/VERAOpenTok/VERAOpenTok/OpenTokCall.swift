@@ -58,7 +58,7 @@ public final class OpenTokCall: CallFacade {
         )
         print("updateParticipantsState 2 \(Date())")
     }
-    
+
     // MARK: Publisher
     private func publishToSession() {
         do {

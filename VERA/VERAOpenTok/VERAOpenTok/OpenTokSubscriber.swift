@@ -16,10 +16,10 @@ public class OpenTokSubscriber: NSObject {
 
     let id: String
     let view: AnyView
-    private let cachedStream: OTStream // Cache the stream to avoid blocking SDK calls
-    var stream: OTStream { cachedStream } // Use cached value instead of otSubscriber.stream!
+    private let cachedStream: OTStream  // Cache the stream to avoid blocking SDK calls
+    var stream: OTStream { cachedStream }  // Use cached value instead of otSubscriber.stream!
     var date: Date { cachedStream.creationTime }
-    
+
     var onError: (() -> Void)?
 
     @Published public private(set) var isScreenshare: Bool = false
@@ -53,7 +53,7 @@ public class OpenTokSubscriber: NSObject {
     func setup() {
         otSubscriber.subscribeToVideo = false
         otSubscriber.viewScaleBehavior = .fill
-        
+
         stream
             .publisher(for: \.videoDimensions)
             .removeDuplicates()

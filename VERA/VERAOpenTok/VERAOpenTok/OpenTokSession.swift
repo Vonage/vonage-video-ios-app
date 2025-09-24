@@ -69,7 +69,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
         print("Subscribing \(subscriber.id)")
         session.subscribe(_subscriber, error: &error)
         print("Subscribed \(subscriber.id) \(error?.localizedDescription ?? "no error")")
-        
+
         if let error = error {
             throw error
         }

@@ -24,7 +24,7 @@ public final class ConnectToRoomUseCase {
         print("token: \(result.token)")
         return await getConnectedCall(result.roomCredentials)
     }
-    
+
     @MainActor
     private func getConnectedCall(_ credentials: RoomCredentials) async -> CallFacade {
         let call = await sessionRepository.createSession(credentials)
