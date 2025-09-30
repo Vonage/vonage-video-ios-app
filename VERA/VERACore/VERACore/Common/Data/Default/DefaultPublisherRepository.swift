@@ -22,10 +22,12 @@ public final class DefaultPublisherRepository: PublisherRepository {
     }
 
     public func resetPublisher() {
+        publisher?.cleanUp()
         publisher = nil
     }
 
     public func recreatePublisher(_ settings: PublisherSettings) {
+        publisher?.cleanUp()
         publisher = publisherFactory.make(settings)
     }
 }

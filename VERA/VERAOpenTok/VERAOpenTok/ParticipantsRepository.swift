@@ -23,4 +23,8 @@ final actor ParticipantsRepository {
     func removeParticipant(id: String) async {
         participantStreams.removeValue(forKey: id)
     }
+
+    func reset() {
+        participantStreams.removeAll()
+    }
 }

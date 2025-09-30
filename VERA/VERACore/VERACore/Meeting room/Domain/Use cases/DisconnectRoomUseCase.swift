@@ -17,8 +17,8 @@ public final class DisconnectRoomUseCase {
         self.publisherRepository = publisherRepository
     }
 
-    public func callAsFunction() {
-        sessionRepository.currentCall?.disconnect()
+    public func callAsFunction() async throws {
+        try await sessionRepository.currentCall?.disconnect()
         sessionRepository.clearSession()
         publisherRepository.resetPublisher()
     }

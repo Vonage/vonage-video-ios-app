@@ -76,12 +76,6 @@ struct ParticipantVideoCard: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
-        .onAppear {
-            participant.onAppear?()
-        }
-        .onDisappear {
-            participant.onDisappear?()
-        }
     }
 }
 

@@ -29,11 +29,12 @@ struct AdaptiveGridLayout: View {
                     )
 
                     LazyVGrid(columns: layout.columns, spacing: layout.spacing) {
-                        ForEach(participants, id: \.id) { participant in
+                        ForEach(Array(participants.enumerated()), id: \.element.id) { index, participant in
                             ParticipantVideoCard(
                                 participant: participant,
                                 activeSpeakerId: activeSpeakerId
                             )
+                            .id("\(participant.id)_\(index)_\(participants.count)")
                             .if(layout.customCellSize != nil) { view in
                                 view.frame(
                                     width: layout.customCellSize!.width,

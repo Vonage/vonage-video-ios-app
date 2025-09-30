@@ -19,9 +19,6 @@ public final class ConnectToRoomUseCase {
 
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
-        print("apiKey: \(result.apiKey)")
-        print("sessionId: \(result.sessionId)")
-        print("token: \(result.token)")
         return await getConnectedCall(result.roomCredentials)
     }
 

@@ -43,6 +43,20 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.view = view
     }
 
+    public var withEmptyView: Participant {
+        Participant(
+            id: id,
+            name: name,
+            isMicEnabled: isMicEnabled,
+            isCameraEnabled: isCameraEnabled,
+            videoDimensions: videoDimensions,
+            isRemote: isRemote,
+            creationTime: creationTime,
+            isScreenshare: isScreenshare,
+            isPinned: isPinned,
+            view: AnyView(EmptyView()))
+    }
+
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions

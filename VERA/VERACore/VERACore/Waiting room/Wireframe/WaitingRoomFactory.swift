@@ -44,8 +44,6 @@ public class WaitingRoomFactory {
             requestCameraPermissionUseCase: .init(),
             checkCameraAuthorizationStatusUseCase: .init(),
             userRepository: userRepository)
-        viewModel.loadUI()
-        viewModel.startVideoPreviewIfNeeded()
         return WaitingRoomScreen(
             viewModel: viewModel,
             onNavigateToRoom: onNavigateToRoom

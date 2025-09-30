@@ -22,7 +22,7 @@ struct ActiveSpeakerLayout: View {
                     participant: participants.first!,
                     activeSpeakerId: activeSpeakerId
                 )
-                .id(participants.first!.id + "_main")
+                .id(participants.first!.id + "_main_active")
                 .frame(maxWidth: .infinity, minHeight: 200)
                 .transition(.opacity)
             } else if participants.count > 1 {
@@ -165,6 +165,7 @@ public struct VerticalActiveSpeakerLayoutView: View {
                 participant: activeParticipant,
                 activeSpeakerId: activeSpeakerId
             )
+            .id(activeParticipant.id + "_main")
             .transition(
                 .asymmetric(
                     insertion: .move(edge: .top).combined(with: .opacity),

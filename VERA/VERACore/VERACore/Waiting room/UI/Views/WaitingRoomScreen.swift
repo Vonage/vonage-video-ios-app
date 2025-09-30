@@ -37,6 +37,8 @@ public struct WaitingRoomScreen: View {
             }
             .task {
                 await viewModel.checkPermissions()
+            }.onAppear {
+                viewModel.loadUI()
             }
         case .error(let error): Text(error)
         case .loading: Text("Loading", bundle: .veraCore)

@@ -8,7 +8,11 @@ import VERACore
 final actor CallStateManager {
     private let subscribersRepository = SubscribersRepository()
     private let participantsRepository = ParticipantsRepository()
-    private let activeSpeakerTracker = ActiveSpeakerTracker()
+    private let activeSpeakerTracker: ActiveSpeakerTracker
+
+    init(activeSpeakerTracker: ActiveSpeakerTracker) {
+        self.activeSpeakerTracker = activeSpeakerTracker
+    }
 
     func addSubscriber(_ subscriber: OpenTokSubscriber) async -> ParticipantsState {
         await subscribersRepository.addSubscriber(subscriber)
@@ -31,12 +35,11 @@ final actor CallStateManager {
         return await getCurrentState()
     }
 
-    func updateActiveSpeaker(_ speakerInfo: SpeakerInfo) async -> ParticipantsState {
+    func updateActiveSpeaker(_ speakerInfo: SpeakerInfo) {
         activeSpeakerTracker.updatedParticipant(speakerInfo)
-        return await getCurrentState()
     }
 
-    private func getCurrentState() async -> ParticipantsState {
+    func getCurrentState() async -> ParticipantsState {
         .init(
             localParticipant: nil,
             participants: await participantsRepository.all,
@@ -49,5 +52,11 @@ final actor CallStateManager {
             from: participants.map {
                 SpeakerInfo(id: $0.id, audioLevel: 0, isMicEnabled: $0.isMicEnabled)
             })
+    }
+
+    func cleanUpParticipants() async {
+        await subscribersRepository.all.forEach { $0.cleanUp() }
+        await subscribersRepository.reset()
+        await participantsRepository.reset()
     }
 }

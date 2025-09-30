@@ -12,14 +12,13 @@ public class OpenTokSubscriber: NSObject {
     let otSubscriber: OTSubscriber
     private var cancellables = Set<AnyCancellable>()
     private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
-    private var subscriptionTimer: Timer?
 
     let id: String
-    let view: AnyView
-    private let cachedStream: OTStream  // Cache the stream to avoid blocking SDK calls
-    var stream: OTStream { cachedStream }  // Use cached value instead of otSubscriber.stream!
-    var date: Date { cachedStream.creationTime }
+    var name: String { otSubscriber.stream?.name ?? "" }
+    private let stream: OTStream
+    var date: Date { stream.creationTime }
 
+    var onSubscriberDidConnect: (() -> Void)?
     var onError: (() -> Void)?
 
     @Published public private(set) var isScreenshare: Bool = false
@@ -33,9 +32,8 @@ public class OpenTokSubscriber: NSObject {
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
         let stream = subscriber.stream!
-        cachedStream = stream
+        self.stream = stream
         id = stream.streamId
-        view = AnyView(UIViewContainer(view: subscriber.view!))
         isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
@@ -46,12 +44,16 @@ public class OpenTokSubscriber: NSObject {
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             isPinned: false,
-            view: view)
+            view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
     }
 
+    deinit {
+        cleanUp()
+    }
+
     func setup() {
-        otSubscriber.subscribeToVideo = false
+        //otSubscriber.subscribeToVideo = false
         otSubscriber.viewScaleBehavior = .fill
 
         stream
@@ -66,7 +68,7 @@ public class OpenTokSubscriber: NSObject {
         stream
             .publisher(for: \.hasAudio)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -74,7 +76,7 @@ public class OpenTokSubscriber: NSObject {
         stream
             .publisher(for: \.hasVideo)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -93,27 +95,31 @@ public class OpenTokSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            view: view)
+            view: AnyView(UIViewContainer(view: otSubscriber.view!)))
 
         participant.onAppear = { [weak self] in
-            self?.setVisibility(true)
+            self?.setActiveSubscription(true)
         }
 
         participant.onDisappear = { [weak self] in
-            self?.setVisibility(false)
+            self?.setActiveSubscription(false)
         }
     }
 
-    private func setVisibility(_ visible: Bool) {
-        if visible {
-            subscriptionTimer?.invalidate()
-            subscriptionTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                self.otSubscriber.subscribeToVideo = true
-            }
-        } else {
-            self.otSubscriber.subscribeToVideo = false
-        }
+    private func setActiveSubscription(_ visible: Bool) {
+        otSubscriber.subscribeToVideo = visible
+    }
+
+    func cleanUp() {
+        participant = participant.withEmptyView
+
+        onSubscriberDidConnect = nil
+        onError = nil
+
+        cancellables.removeAll()
+
+        participant.onAppear = nil
+        participant.onDisappear = nil
     }
 }
 
@@ -121,11 +127,11 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
     // MARK: - Subscriber delegate
 
     public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
-
+        onSubscriberDidConnect?()
+        updateParticipant()
     }
 
     public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-        print("Subscriber error \(error.localizedDescription)")
         onError?()
     }
 }

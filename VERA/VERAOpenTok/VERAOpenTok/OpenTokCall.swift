@@ -8,6 +8,11 @@ import OpenTok
 import VERACore
 
 public final class OpenTokCall: CallFacade {
+
+    enum Error: Swift.Error {
+        case SelfMissingOnDisconnect
+    }
+
     private var cancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
@@ -19,16 +24,16 @@ public final class OpenTokCall: CallFacade {
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
+    public let id: UUID = UUID()
     public let token: String
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
     public var publisherParticipant: Participant?
+    private let subscriberFactory = OpenTokSubscriberFactory()
 
-    private let callStateManager = CallStateManager()
-
-    enum Error: Swift.Error {
-        case subscriberCreationFailed
-    }
+    private let activeSpeakerTracker = ActiveSpeakerTracker()
+    private lazy var callStateManager = CallStateManager(
+        activeSpeakerTracker: activeSpeakerTracker)
 
     public init(
         token: String,
@@ -41,35 +46,56 @@ public final class OpenTokCall: CallFacade {
     }
 
     public func setup() {
-        session.onNewStream = addSubscriber
-        session.onStreamDestroyed = removeSubscriber
-        session.onSessionFailure = sessionDidFail
-        session.onSessionDidConnect = publishToSession
+        session.onNewStream = { [weak self] stream in
+            self?.addSubscriber(stream)
+        }
+        session.onStreamDestroyed = { [weak self] stream in
+            self?.removeSubscriber(stream)
+        }
+        session.onSessionFailure = { [weak self] error in
+            self?.sessionDidFail(error)
+        }
+        session.onSessionDidConnect = { [weak self] in
+            self?.publishToSession()
+        }
 
         updateMediaState()
+
+        setupActiveSpeakerObservation()
     }
 
     func updateParticipantsState(_ state: ParticipantsState) async {
-        print("updateParticipantsState 1 \(Date())")
         _participantsPublisher.value = .init(
             localParticipant: publisherParticipant,
             participants: state.participants,
             activeParticipantId: state.activeParticipantId
         )
-        print("updateParticipantsState 2 \(Date())")
     }
 
     // MARK: Publisher
     private func publishToSession() {
+        guard !publisher.hasSession else { return }
         do {
             try session.publish(publisher: publisher)
             publisherParticipant = publisher.participant
             publisher.setup()
             setupPublisherObservation(publisher)
         } catch {
-            print("Error: \(error.localizedDescription)")
             _eventsPublisher.send(.error(error))
         }
+    }
+
+    private func setupActiveSpeakerObservation() {
+        activeSpeakerTracker.$activeSpeaker
+            .removeDuplicates()
+            .sink { info in
+                Task { [weak self] in
+                    guard let self else { return }
+                    let state = await self.callStateManager.getCurrentState()
+                    await self.updateParticipantsState(state)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func setupPublisherObservation(_ publisher: OpenTokPublisher) {
@@ -93,37 +119,34 @@ public final class OpenTokCall: CallFacade {
     }
 
     // MARK: Subscriber
+
     private func addSubscriber(_ stream: OTStream) {
-        print("OpenTokCall addSubscriber \(stream.streamId)")
+        Task { [weak self] in
+            guard let self else { return }
+            await self.doSubscribe(stream)
+        }
+    }
+
+    @MainActor
+    private func doSubscribe(_ stream: OTStream) async {
         do {
-            guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
-                throw Error.subscriberCreationFailed
-            }
-            let openTokSubscriber = OpenTokSubscriber(subscriber: subscriber)
-            openTokSubscriber.setup()
+            let openTokSubscriber = try subscriberFactory.makeSubscriber(stream)
             openTokSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
             }
-            subscriber.delegate = openTokSubscriber
-            subscriber.audioLevelDelegate = openTokSubscriber
-            subscriber.captionsDelegate = openTokSubscriber
 
             setupSubscriberObservation(openTokSubscriber)
             setupAudioLevelObservation(openTokSubscriber)
 
             try session.subscribe(subscriber: openTokSubscriber)
 
-            Task { [weak self] in
-                guard let self else { return }
-                let state = await callStateManager.addSubscriber(openTokSubscriber)
-                print("OpenTokCall addSubscriber \(stream.streamId) DONE")
-                await updateParticipantsState(state)
-            }
+            let state = await callStateManager.addSubscriber(openTokSubscriber)
+            await updateParticipantsState(state)
         } catch {
-            print("OpenTokCall error \(error)")
             _eventsPublisher.send(.error(error))
         }
     }
+
 
     private func setupSubscriberObservation(_ subscriber: OpenTokSubscriber) {
         subscriber.$participant
@@ -139,18 +162,15 @@ public final class OpenTokCall: CallFacade {
 
     private func setupAudioLevelObservation(_ subscriber: OpenTokSubscriber) {
         subscriber.$audioLevel
-            .sink { [weak self] audioLevel in
-                Task {
+            .sink { audioLevel in
+                Task { [weak self] in
                     guard let self = self else { return }
                     let speakerInfo = SpeakerInfo(
                         id: subscriber.participant.id,
                         audioLevel: audioLevel,
                         isMicEnabled: subscriber.participant.isMicEnabled
                     )
-                    print("setupAudioLevelObservation 1")
-                    let state = await self.callStateManager.updateActiveSpeaker(speakerInfo)
-                    print("setupAudioLevelObservation 2")
-                    await self.updateParticipantsState(state)
+                    await self.callStateManager.updateActiveSpeaker(speakerInfo)
                 }
             }
             .store(in: &cancellables)
@@ -168,7 +188,6 @@ public final class OpenTokCall: CallFacade {
 
                 await self.updateParticipantsState(state)
             } catch {
-                print("Error: \(error.localizedDescription)")
                 _eventsPublisher.send(.error(error))
             }
         }
@@ -180,21 +199,57 @@ public final class OpenTokCall: CallFacade {
         do {
             try session.connect(with: token)
         } catch {
-            print("Error: \(error.localizedDescription)")
             _eventsPublisher.value = .error(error)
         }
     }
 
-    public func disconnect() {
+    var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
+
+    public func disconnect() async throws {
+        try await withCheckedThrowingContinuation { [weak self] continuation in
+            self?.disconnectContinuation = continuation
+            Task { @MainActor [weak self] in
+                guard let self else {
+                    self?.disconnectContinuation?.resume(throwing: Error.SelfMissingOnDisconnect)
+                    self?.disconnectContinuation = nil
+                    return
+                }
+                do {
+                    self.publisher.onStreamDestroyed = { [weak self] in
+                        self?.cleanUp()
+                    }
+
+                    assertMainThread()
+                    try self.session.unpublish(publisher: publisher)
+                } catch {
+                    self.disconnectContinuation?.resume(throwing: error)
+                    self.disconnectContinuation = nil
+                    self.cleanUp()
+                    self._eventsPublisher.value = .error(error)
+                }
+            }
+        }
+    }
+
+    private func cleanUp() {
         do {
+            Task { [weak self] in
+                guard let self else { return }
+                await self.callStateManager.cleanUpParticipants()
+            }
+
+            cancellables.forEach { $0.cancel() }
+            cancellables.removeAll()
             try session.disconnect()
-            session.onNewStream = nil
-            session.onStreamDestroyed = nil
-            session.onSessionFailure = nil
-            session.onSessionDidConnect = nil
+            publisher.cleanUp()
+            session.cleanUp()
+            disconnectContinuation?.resume()
+            disconnectContinuation = nil
         } catch {
-            print("Error: \(error.localizedDescription)")
             _eventsPublisher.value = .error(error)
+
+            disconnectContinuation?.resume(throwing: error)
+            disconnectContinuation = nil
         }
     }
 
@@ -208,13 +263,13 @@ public final class OpenTokCall: CallFacade {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
     }
 
-    public func toggleLocalVideo() async {
+    public func toggleLocalVideo() {
         publisher.publishVideo.toggle()
 
         updateMediaState()
     }
 
-    public func toggleLocalAudio() async {
+    public func toggleLocalAudio() {
         publisher.publishAudio.toggle()
 
         updateMediaState()
