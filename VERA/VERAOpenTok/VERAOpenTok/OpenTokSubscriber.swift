@@ -17,6 +17,7 @@ public class OpenTokSubscriber: NSObject {
     var name: String { otSubscriber.stream?.name ?? "" }
     private let stream: OTStream
     var date: Date { stream.creationTime }
+    @Atomic private var subscriberDidConnect = false
 
     var onSubscriberDidConnect: (() -> Void)?
     var onError: (() -> Void)?
@@ -53,7 +54,6 @@ public class OpenTokSubscriber: NSObject {
     }
 
     func setup() {
-        //otSubscriber.subscribeToVideo = false
         otSubscriber.viewScaleBehavior = .fill
 
         stream
@@ -98,15 +98,29 @@ public class OpenTokSubscriber: NSObject {
             view: AnyView(UIViewContainer(view: otSubscriber.view!)))
 
         participant.onAppear = { [weak self] in
-            self?.setActiveSubscription(true)
+            guard let self else { return }
+            self.setActiveSubscription(true)
+            Task { @MainActor [weak self] in
+                do {
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
+                    guard let self else { return }
+                    self.setActiveSubscription(true)
+                } catch {
+                }
+            }
         }
 
         participant.onDisappear = { [weak self] in
-            self?.setActiveSubscription(false)
+            guard let self else { return }
+            self.setActiveSubscription(false)
         }
     }
 
     private func setActiveSubscription(_ visible: Bool) {
+        // Do not attempt to unsubscribe video before the subscriber did connect
+        // it will result in an inhability to modify the video subscription later
+        guard subscriberDidConnect else { return }
+
         otSubscriber.subscribeToVideo = visible
     }
 
@@ -127,7 +141,9 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
     // MARK: - Subscriber delegate
 
     public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
+        subscriberDidConnect = true
         onSubscriberDidConnect?()
+
         updateParticipant()
     }
 

@@ -4,6 +4,18 @@
 
 import SwiftUI
 
+/// Main layout view for displaying participants in an active speaker format
+///
+/// `ActiveSpeakerLayout` provides an adaptive interface that automatically switches between
+/// horizontal and vertical layouts based on SwiftUI's environment size classes. The layout
+/// intelligently calculates available space to determine how many participants can be displayed,
+/// automatically collapsing excess participants into a summary tile showing their initials.
+///
+/// Uses `onAppear` and `onDisappear` callbacks to activate or deactivate participant video streams.
+/// When a participant becomes visible, `onAppear` enables their video stream.
+/// When a participant is hidden, `onDisappear` disables their video stream to optimize bandwidth.
+/// 
+/// Be careful with animations, it may impact video rendering
 struct ActiveSpeakerLayout: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -24,7 +36,9 @@ struct ActiveSpeakerLayout: View {
                 )
                 .id(participants.first!.id + "_main_active")
                 .frame(maxWidth: .infinity, minHeight: 200)
-                .transition(.opacity)
+                .onAppear {
+                    participants.first?.onAppear?()
+                }
             } else if participants.count > 1 {
                 Group {
                     if verticalSizeClass == .compact {
@@ -47,9 +61,6 @@ struct ActiveSpeakerLayout: View {
         .padding(.bottom, 4)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .animation(.easeInOut(duration: 0.4), value: participants.count)
-        .animation(.easeInOut(duration: 0.3), value: horizontalSizeClass)
-        .animation(.easeInOut(duration: 0.3), value: verticalSizeClass)
     }
 }
 
@@ -77,11 +88,6 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                     )
                     .id(activeParticipant.id + "_main")
                     .frame(width: max(1, outerGeometry.size.width * 0.70))
-                    .transition(
-                        .asymmetric(
-                            insertion: .move(edge: .leading).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        ))
 
                     GeometryReader { geometry in
                         let availableWidth = max(0, geometry.size.width)
@@ -112,11 +118,6 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                                     )
                                     .id("\(participant.id)_\(index)_\(visibleItems.count)")
                                     .aspectRatio(aspectRatio, contentMode: .fit)
-                                    .transition(
-                                        .asymmetric(
-                                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                                            removal: .move(edge: .trailing).combined(with: .opacity)
-                                        ))
                                 }
 
                                 if !hiddenItems.isEmpty {
@@ -125,17 +126,19 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                                     )
                                     .id("hidden_\(hiddenItems.count)_\(visibleItems.count)")
                                     .aspectRatio(aspectRatio, contentMode: .fit)
-                                    .transition(.opacity)
                                 }
                             }
                             .frame(maxHeight: .infinity, alignment: .center)
-                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: participants.map(\.id))
+                            .onAppear {
+                                hiddenItems.forEach { $0.onDisappear?() }
+                                activeParticipant.onAppear?()
+                                visibleItems.forEach { $0.onAppear?() }
+                            }
                         } else {
                             EmptyView()
                         }
                     }
                     .frame(width: max(1, outerGeometry.size.width * 0.30))
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             } else {
                 EmptyView()
@@ -166,11 +169,6 @@ public struct VerticalActiveSpeakerLayoutView: View {
                 activeSpeakerId: activeSpeakerId
             )
             .id(activeParticipant.id + "_main")
-            .transition(
-                .asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .top).combined(with: .opacity)
-                ))
 
             Group {
                 if restOfParticipants.count == 1 {
@@ -179,11 +177,10 @@ public struct VerticalActiveSpeakerLayoutView: View {
                         activeSpeakerId: activeSpeakerId
                     )
                     .id(restOfParticipants[0].id + "_other")
-                    .transition(
-                        .asymmetric(
-                            insertion: .move(edge: .bottom).combined(with: .opacity),
-                            removal: .move(edge: .bottom).combined(with: .opacity)
-                        ))
+                    .onAppear {
+                        activeParticipant.onAppear?()
+                        restOfParticipants[0].onAppear?()
+                    }
                 } else if restOfParticipants.count == 2 {
                     HStack {
                         ParticipantVideoCard(
@@ -191,21 +188,17 @@ public struct VerticalActiveSpeakerLayoutView: View {
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[0].id + "_other")
-                        .transition(
-                            .asymmetric(
-                                insertion: .move(edge: .leading).combined(with: .opacity),
-                                removal: .move(edge: .leading).combined(with: .opacity)
-                            ))
+
                         ParticipantVideoCard(
                             participant: restOfParticipants[1],
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[1].id + "_other")
-                        .transition(
-                            .asymmetric(
-                                insertion: .move(edge: .trailing).combined(with: .opacity),
-                                removal: .move(edge: .trailing).combined(with: .opacity)
-                            ))
+                        .onAppear {
+                            activeParticipant.onAppear?()
+                            restOfParticipants[0].onAppear?()
+                            restOfParticipants[1].onAppear?()
+                        }
                     }
                     .transition(.slide)
                 } else if restOfParticipants.count >= 3 {
@@ -215,24 +208,24 @@ public struct VerticalActiveSpeakerLayoutView: View {
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[0].id + "_other")
-                        .transition(
-                            .asymmetric(
-                                insertion: .move(edge: .leading).combined(with: .opacity),
-                                removal: .move(edge: .leading).combined(with: .opacity)
-                            ))
+
+                        let hiddenParticipants = Array(restOfParticipants.dropFirst())
                         HiddenParticipantsTile(
-                            participantNames: Array(restOfParticipants.dropFirst()).map { $0.name }
+                            participantNames: hiddenParticipants.map { $0.name }
                         )
                         .id("hidden_participants")
                         .transition(.opacity)
+                        .onAppear {
+                            hiddenParticipants.forEach { $0.onDisappear?() }
+                            activeParticipant.onAppear?()
+                            restOfParticipants[0].onAppear?()
+                        }
                     }
                     .transition(.slide)
                 }
             }
-            .animation(.spring(response: 0.6, dampingFraction: 0.75), value: restOfParticipants.count)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(.easeInOut(duration: 0.4), value: participants.map(\.id))
     }
 }
 

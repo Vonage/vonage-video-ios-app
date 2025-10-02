@@ -54,6 +54,9 @@ struct AdaptiveGridLayout: View {
         .animation(.easeInOut(duration: 0.4), value: participants.count)
         .animation(.easeInOut(duration: 0.3), value: horizontalSizeClass)
         .animation(.easeInOut(duration: 0.3), value: verticalSizeClass)
+        .onAppear {
+            participants.forEach { $0.onAppear?() }
+        }
     }
 
     // MARK: - Space Maximization Algorithm
