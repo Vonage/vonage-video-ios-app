@@ -23,6 +23,10 @@ public struct SpeakerInfo {
     public let audioLevel: Float
     public let isMicEnabled: Bool
 
+    var activeSpeakerInfo: ActiveSpeakerInfo {
+        .init(participantId: id, audioLevel: audioLevel)
+    }
+
     public init(
         id: String,
         audioLevel: Float = 0.0,
@@ -48,13 +52,16 @@ public final class ActiveSpeakerTracker: ObservableObject {
     // MARK: - Public Methods
 
     public func updatedParticipant(_ participant: SpeakerInfo) {
+        // We have to update current active participant audio level,
+        // otherwise the participant with highest audio level will remain
+        if activeSpeaker.participantId == participant.id {
+            activeSpeaker = participant.activeSpeakerInfo
+            return
+        }
         guard participant.isMicEnabled, participant.audioLevel >= minimumAudioLevelThreshold else { return }
 
         if participant.audioLevel > activeSpeaker.audioLevel {
-            activeSpeaker = ActiveSpeakerInfo(
-                participantId: participant.id,
-                audioLevel: participant.audioLevel
-            )
+            activeSpeaker = participant.activeSpeakerInfo
         }
     }
 
@@ -70,10 +77,7 @@ public final class ActiveSpeakerTracker: ObservableObject {
         let newActiveSpeaker: ActiveSpeakerInfo
 
         if let loudestParticipant = eligibleParticipants.max(by: { $0.audioLevel < $1.audioLevel }) {
-            newActiveSpeaker = ActiveSpeakerInfo(
-                participantId: loudestParticipant.id,
-                audioLevel: loudestParticipant.audioLevel
-            )
+            newActiveSpeaker = loudestParticipant.activeSpeakerInfo
         } else {
             newActiveSpeaker = .none
         }
