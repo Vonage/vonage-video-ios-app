@@ -6,8 +6,10 @@ import Combine
 import Foundation
 import SwiftUI
 
+/// Information about the current active speaker in a meeting
 public struct ActiveSpeakerInfo: Equatable {
     public let participantId: String?
+    /// The audio level of the active speaker (0.0 - 1.0)
     public let audioLevel: Float
 
     public init(participantId: String? = nil, audioLevel: Float = 0.0) {
@@ -18,6 +20,7 @@ public struct ActiveSpeakerInfo: Equatable {
     public static let none = ActiveSpeakerInfo()
 }
 
+/// Information about a participant's speaking status
 public struct SpeakerInfo {
     public let id: String
     public let audioLevel: Float
@@ -38,6 +41,30 @@ public struct SpeakerInfo {
     }
 }
 
+/// Tracks and determines the active speaker in a meeting based on audio levels
+/// and microphone status.
+/// 
+/// The `ActiveSpeakerTracker` monitors participant audio levels and automatically determines
+/// who should be considered the "active speaker" based on configurable thresholds.
+/// It provides real-time updates through Combine's `@Published` properties.
+///
+/// ## Usage
+/// ```swift
+/// let tracker = ActiveSpeakerTracker(minimumAudioLevelThreshold: 0.3)
+///
+/// // Calculate from all participants
+/// tracker.calculateActiveSpeaker(from: allParticipants)
+/// 
+/// // Update individual participant
+/// let participant = SpeakerInfo(id: "user123", audioLevel: 0.8, isMicEnabled: true)
+/// tracker.updatedParticipant(participant)
+/// ```
+///
+/// ## Active Speaker Logic
+/// - Only participants with enabled microphones are considered
+/// - Audio level must meet the minimum threshold to become active speaker
+/// - The participant with the highest qualifying audio level becomes active speaker
+/// - Current active speaker's audio level is always updated, even if below threshold
 public final class ActiveSpeakerTracker: ObservableObject {
     private let minimumAudioLevelThreshold: Float
 
@@ -51,6 +78,9 @@ public final class ActiveSpeakerTracker: ObservableObject {
 
     // MARK: - Public Methods
 
+    /// When the audio level of a participant is updated is compared against the
+    /// current active participant.
+    /// If the updated participant is the current one the audio level is updated
     public func updatedParticipant(_ participant: SpeakerInfo) {
         // We have to update current active participant audio level,
         // otherwise the participant with highest audio level will remain
@@ -65,6 +95,8 @@ public final class ActiveSpeakerTracker: ObservableObject {
         }
     }
 
+    /// Calculates the active speaker given a list of participant audio
+    /// information
     public func calculateActiveSpeaker(from participants: [SpeakerInfo]) {
         let eligibleParticipants = participants.filter { participant in
             guard participant.isMicEnabled else { return false }
