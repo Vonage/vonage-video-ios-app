@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct RoomCredentials {
+public struct RoomCredentials: CustomStringConvertible {
     public let sessionId: String
     public let token: String
     public let apiKey: String
@@ -20,5 +20,13 @@ public struct RoomCredentials {
         self.token = token
         self.apiKey = apiKey
         self.captionsId = captionsId
+    }
+
+    public var description: String {
+        """
+        ApiKey:    \(apiKey)
+        SessionID: \(sessionId)
+        Token:     \(token)
+        """
     }
 }

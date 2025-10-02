@@ -14,7 +14,7 @@ public final class OpenTokSessionFactory: SessionFactory {
         assertMainThread()
 
         let settings = OTSessionSettings()
-        
+
         // Setting singlePeerConnection to true prevents complex workarounds and issues
         // when joining rooms with many participants by using a single peer connection
         // instead of multiple peer connections which can cause WebRTC limitations

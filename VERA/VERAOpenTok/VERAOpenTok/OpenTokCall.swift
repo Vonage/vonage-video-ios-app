@@ -60,7 +60,6 @@ public final class OpenTokCall: CallFacade {
         }
 
         updateMediaState()
-
         setupActiveSpeakerObservation()
     }
 
@@ -220,7 +219,14 @@ public final class OpenTokCall: CallFacade {
                     }
 
                     assertMainThread()
-                    try self.session.unpublish(publisher: publisher)
+
+                    // If publisher does not have a session, doesn't need
+                    // to be unpublished.
+                    if publisher.hasSession {
+                        try self.session.unpublish(publisher: publisher)
+                    } else {
+                        self.cleanUp()
+                    }
                 } catch {
                     self.disconnectContinuation?.resume(throwing: error)
                     self.disconnectContinuation = nil

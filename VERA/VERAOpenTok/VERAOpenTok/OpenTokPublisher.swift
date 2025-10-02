@@ -140,7 +140,6 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     }
 
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
-        print(error.localizedDescription)
         onError?(error)
     }
 

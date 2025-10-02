@@ -14,7 +14,7 @@ import SwiftUI
 /// Uses `onAppear` and `onDisappear` callbacks to activate or deactivate participant video streams.
 /// When a participant becomes visible, `onAppear` enables their video stream.
 /// When a participant is hidden, `onDisappear` disables their video stream to optimize bandwidth.
-/// 
+///
 /// Be careful with animations, it may impact video rendering
 struct ActiveSpeakerLayout: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
