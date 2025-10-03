@@ -178,17 +178,9 @@ public final class OpenTokCall: CallFacade {
     private func removeSubscriber(_ stream: OTStream) {
         Task { @MainActor [weak self] in
             guard let self = self else { return }
-            do {
-                let (subscriber, state) = await callStateManager.removeSubscriber(id: stream.streamId)
-
-                if let subscriber = subscriber {
-                    try session.unsubscribe(subscriber: subscriber)
-                }
-
-                await self.updateParticipantsState(state)
-            } catch {
-                _eventsPublisher.send(.error(error))
-            }
+            let (_, state) = await callStateManager.removeSubscriber(id: stream.streamId)
+            // There is no need to do a session unsubscribe if the stream has been destroyed
+            await self.updateParticipantsState(state)
         }
     }
 

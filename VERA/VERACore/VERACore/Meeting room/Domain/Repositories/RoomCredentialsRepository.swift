@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct RoomCredentialsResponse: Decodable {
+public struct RoomCredentialsResponse: Decodable, CustomStringConvertible {
     public let sessionId: String
     public let token: String
     public let apiKey: String
@@ -20,6 +20,14 @@ public struct RoomCredentialsResponse: Decodable {
         self.token = token
         self.apiKey = apiKey
         self.captionsId = captionsId
+    }
+
+    public var description: String {
+        """
+        API Key:   \(apiKey)
+        SessionID: \(sessionId)
+        Token:     \(token)
+        """
     }
 }
 

@@ -18,7 +18,7 @@ struct AdaptiveGridLayout: View {
                     participant: participant,
                     activeSpeakerId: activeSpeakerId
                 )
-                .id(participant.id + "_main")
+                .id(participant.id)
                 .frame(maxWidth: .infinity, minHeight: 200)
                 .transition(.opacity)
             } else if participants.count > 1 {
@@ -29,12 +29,12 @@ struct AdaptiveGridLayout: View {
                     )
 
                     LazyVGrid(columns: layout.columns, spacing: layout.spacing) {
-                        ForEach(Array(participants.enumerated()), id: \.element.id) { index, participant in
+                        ForEach(participants, id: \.id) { participant in
                             ParticipantVideoCard(
                                 participant: participant,
                                 activeSpeakerId: activeSpeakerId
                             )
-                            .id("\(participant.id)_\(index)_\(participants.count)")
+                            .id(participant.id)
                             .if(layout.customCellSize != nil) { view in
                                 view.frame(
                                     width: layout.customCellSize!.width,
@@ -51,9 +51,6 @@ struct AdaptiveGridLayout: View {
         .padding(.bottom, 4)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .animation(.easeInOut(duration: 0.4), value: participants.count)
-        .animation(.easeInOut(duration: 0.3), value: horizontalSizeClass)
-        .animation(.easeInOut(duration: 0.3), value: verticalSizeClass)
         .onAppear {
             participants.forEach { $0.onAppear?() }
         }

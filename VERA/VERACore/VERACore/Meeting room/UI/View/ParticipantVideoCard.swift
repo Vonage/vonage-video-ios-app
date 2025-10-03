@@ -10,7 +10,7 @@ struct ParticipantVideoCard: View {
     let activeSpeakerId: String?
 
     private let containerAspectRatio: Double = 16.0 / 9.0
-    var shouldFlipHorizontally: Bool { participant.isRemote }
+    var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
     var body: some View {
         Group {
@@ -32,7 +32,7 @@ struct ParticipantVideoCard: View {
                                     )
                                 } else {
                                     participant.view
-                                        .scaleEffect(x: shouldFlipHorizontally ? -1 : 1, y: 1)
+                                        .horizontallyFlipped(shouldFlipHorizontally)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
 

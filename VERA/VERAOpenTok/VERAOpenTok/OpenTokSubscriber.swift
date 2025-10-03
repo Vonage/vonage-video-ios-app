@@ -19,7 +19,6 @@ public class OpenTokSubscriber: NSObject {
     var date: Date { stream.creationTime }
     @Atomic private var subscriberDidConnect = false
 
-    var onSubscriberDidConnect: (() -> Void)?
     var onError: (() -> Void)?
 
     @Published public private(set) var isScreenshare: Bool = false
@@ -127,7 +126,6 @@ public class OpenTokSubscriber: NSObject {
     func cleanUp() {
         participant = participant.withEmptyView
 
-        onSubscriberDidConnect = nil
         onError = nil
 
         cancellables.removeAll()
@@ -142,7 +140,6 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
 
     public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
         subscriberDidConnect = true
-        onSubscriberDidConnect?()
 
         updateParticipant()
     }

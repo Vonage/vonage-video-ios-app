@@ -123,6 +123,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,
             videoDimensions: videoDimensions,
+            isRemote: false,
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
