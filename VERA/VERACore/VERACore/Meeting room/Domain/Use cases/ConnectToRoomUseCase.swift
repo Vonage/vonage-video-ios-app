@@ -35,7 +35,7 @@ extension RoomCredentialsResponse {
         .init(
             sessionId: sessionId,
             token: token,
-            apiKey: apiKey,
+            applicationId: apiKey,
             captionsId: captionsId)
     }
 }

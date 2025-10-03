@@ -18,7 +18,7 @@ struct OpenTokSessionRepositoryTests {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let sut = makeSUT(sessionFactory: sessionFactory, publisherRepository: publisherRepository)
-        let credentials = RoomCredentials(sessionId: "sessionId", token: "token", apiKey: "apiKey")
+        let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
         #expect(sessionFactory.makeCalled)
@@ -29,7 +29,7 @@ struct OpenTokSessionRepositoryTests {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let sut = makeSUT(sessionFactory: sessionFactory, publisherRepository: publisherRepository)
-        let credentials = RoomCredentials(sessionId: "sessionId", token: "token", apiKey: "apiKey")
+        let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
         #expect(sut.currentCall != nil)

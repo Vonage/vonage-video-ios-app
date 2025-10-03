@@ -21,7 +21,7 @@ public final class OpenTokSessionFactory: SessionFactory {
         settings.singlePeerConnection = true
 
         let otSession = OTSession(
-            applicationId: sessionCredentials.apiKey,
+            applicationId: sessionCredentials.applicationId,
             sessionId: sessionCredentials.sessionId,
             delegate: nil,
             settings: settings)!
