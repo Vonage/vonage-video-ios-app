@@ -23,6 +23,7 @@ class WaitingRoomViewUITests {
         publisher = MockVERAPublisher()
     }
 
+    @MainActor
     deinit {
         publisher = nil
     }
@@ -128,6 +129,7 @@ class WaitingRoomComponentTests {
         publisher = MockVERAPublisher()
     }
 
+    @MainActor
     deinit {
         publisher = nil
     }
