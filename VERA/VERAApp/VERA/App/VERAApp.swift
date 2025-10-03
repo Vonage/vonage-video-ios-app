@@ -21,13 +21,13 @@ struct VERAApp: App {
                 makeLandingPage()
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
-                        case let .waitingRoom(roomName):
+                        case .waitingRoom(let roomName):
                             if navigationCoordinator.isInMeeting {
                                 LoaderModalView()
                             } else {
                                 makeWaitingRoom(roomName: roomName)
                             }
-                        case let .goodbye(roomName):
+                        case .goodbye(let roomName):
                             makeGoodbyePage(roomName: roomName)
                         }
                     }

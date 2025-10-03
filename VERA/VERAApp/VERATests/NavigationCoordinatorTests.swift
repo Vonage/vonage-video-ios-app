@@ -4,14 +4,15 @@
 
 import Foundation
 import Testing
+
 @testable import VERA
 
 @Suite("NavigationCoordinator tests")
 struct NavigationCoordinatorTests {
-    
-    
+
+
     // MARK: SUT
-    
+
     func makeSUT() -> NavigationCoordinator {
         NavigationCoordinator()
     }

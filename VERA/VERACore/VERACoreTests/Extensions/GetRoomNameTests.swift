@@ -10,49 +10,91 @@ struct GetRoomNameTests {
 
     // MARK: - Test Data
 
-    private let vonageBaseURL = URL(string: "https://meet.vonagenetworks.net")!
+    private let vonageBaseURL = URL(string: "https://meet.vonagenetworks.net/")!
     private let otherBaseURL = URL(string: "https://other-domain.com")!
 
     // MARK: - Valid Room Name Tests
 
-    @Test("Extract valid room name from URL")
-    func extractValidRoomName() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/heart-of-gold")!
+    @Test(
+        "Extract valid room name from URL",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/heart-of-gold")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/heart-of-gold")!,
+        ])
+    func extractValidRoomName(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == "heart-of-gold")
     }
 
-    @Test("Extract room name with numbers and dashes")
-    func extractRoomNameWithNumbersAndDashes() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/room-123-test")!
+    @Test(
+        "Extract valid room name from URL with extra path element",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/heart-of-gold/extra")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/heart-of-gold/extra")!,
+        ])
+    func extractRoomNameEvenIfPathHasExtraElements(_ url: URL) async throws {
+        let roomName = url.getRoomName(from: vonageBaseURL)
+        #expect(roomName == "heart-of-gold")
+    }
+
+    @Test(
+        "Extract room name with numbers and dashes",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/room-123-test")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/room-123-test")!,
+        ])
+    func extractRoomNameWithNumbersAndDashes(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == "room-123-test")
     }
 
-    @Test("Extract room name with underscores")
-    func extractRoomNameWithUnderscores() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/my_room_name")!
+    @Test(
+        "Extract room name with underscores",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/my_room_name")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/my_room_name")!,
+        ])
+    func extractRoomNameWithUnderscores(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == "my_room_name")
     }
 
-    @Test("Extract single character room name")
-    func extractSingleCharacterRoomName() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/a")!
+    @Test(
+        "Extract single character room name",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/a")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/a")!,
+        ])
+    func extractSingleCharacterRoomName(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == "a")
     }
 
     // MARK: - Invalid Host Tests
 
-    @Test("Return nil for different host")
-    func returnNilForDifferentHost() async throws {
-        let url = URL(string: "https://other-domain.com/room-name")!
+    @Test(
+        "Return nil for different host",
+        arguments: [
+            URL(string: "https://other-domain.com/room/room-name")!,
+            URL(string: "https://other-domain.com/waiting-room/room-name")!,
+        ])
+    func returnNilForDifferentHost(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == nil)
     }
 
     // MARK: - Invalid Path Tests
+
+    @Test(
+        "Return nil if no room name is specified",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/")!,
+        ])
+    func returnNilForEmptyPath(_ url: URL) async throws {
+        let roomName = url.getRoomName(from: vonageBaseURL)
+        #expect(roomName == nil)
+    }
 
     @Test("Return nil for empty path")
     func returnNilForEmptyPath() async throws {
@@ -68,13 +110,6 @@ struct GetRoomNameTests {
         #expect(roomName == nil)
     }
 
-    @Test("Return nil for sub-paths")
-    func returnNilForSubPaths() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/room/subroom")!
-        let roomName = url.getRoomName(from: vonageBaseURL)
-        #expect(roomName == nil)
-    }
-
     @Test("Return nil for hidden files")
     func returnNilForHiddenFiles() async throws {
         let url = URL(string: "https://meet.vonagenetworks.net/.well-known")!
@@ -84,18 +119,26 @@ struct GetRoomNameTests {
 
     // MARK: - Query Parameters and Fragments Tests
 
-    @Test("Extract room name ignoring query parameters")
-    func extractRoomNameIgnoringQueryParameters() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/test-room?param=value")!
+    @Test(
+        "Extract room name ignoring query parameters",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/heart-of-gold?param=value")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/heart-of-gold?param=value")!,
+        ])
+    func extractRoomNameIgnoringQueryParameters(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
-        #expect(roomName == "test-room")
+        #expect(roomName == "heart-of-gold")
     }
 
-    @Test("Extract room name ignoring fragments")
-    func extractRoomNameIgnoringFragments() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/test-room#section")!
+    @Test(
+        "Extract room name ignoring fragments",
+        arguments: [
+            URL(string: "https://meet.vonagenetworks.net/room/heart-of-gold#section")!,
+            URL(string: "https://meet.vonagenetworks.net/waiting-room/heart-of-gold#section")!,
+        ])
+    func extractRoomNameIgnoringFragments(_ url: URL) async throws {
         let roomName = url.getRoomName(from: vonageBaseURL)
-        #expect(roomName == "test-room")
+        #expect(roomName == "heart-of-gold")
     }
 
     // MARK: - Edge Cases
@@ -105,21 +148,5 @@ struct GetRoomNameTests {
         let url = URL(string: "https://meet.vonagenetworks.net//double-slash")!
         let roomName = url.getRoomName(from: vonageBaseURL)
         #expect(roomName == nil)  // Should fail validation due to empty component
-    }
-
-    // MARK: - Different Base URL Tests
-
-    @Test("Work with different base URL")
-    func workWithDifferentBaseURL() async throws {
-        let url = URL(string: "https://other-domain.com/my-room")!
-        let roomName = url.getRoomName(from: otherBaseURL)
-        #expect(roomName == "my-room")
-    }
-
-    @Test("Return nil when using wrong base URL")
-    func returnNilWhenUsingWrongBaseURL() async throws {
-        let url = URL(string: "https://meet.vonagenetworks.net/my-room")!
-        let roomName = url.getRoomName(from: otherBaseURL)
-        #expect(roomName == nil)
     }
 }
