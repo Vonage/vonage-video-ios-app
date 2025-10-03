@@ -6,7 +6,6 @@ import Combine
 import Foundation
 import SwiftUI
 
-/// Information about the current active speaker in a meeting
 public struct ActiveSpeakerInfo: Equatable {
     public let participantId: String?
     /// The audio level of the active speaker (0.0 - 1.0)
@@ -20,7 +19,6 @@ public struct ActiveSpeakerInfo: Equatable {
     public static let none = ActiveSpeakerInfo()
 }
 
-/// Information about a participant's speaking status
 public struct SpeakerInfo {
     public let id: String
     public let audioLevel: Float
