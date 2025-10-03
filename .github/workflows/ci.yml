@@ -83,6 +83,7 @@ jobs:
     
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
+      timeout-minutes: 15
       run: |
         echo "📡 Running VERAOpenTokTests on iOS Simulator"
         xcodebuild test \
