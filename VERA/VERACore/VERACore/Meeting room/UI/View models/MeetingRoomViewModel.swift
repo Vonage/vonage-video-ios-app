@@ -73,7 +73,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public let roomName: RoomName
     public let baseURL: URL
-    private var initialised: Bool = false
+    private var initialised = false
 
     public init(
         roomName: RoomName,
@@ -108,7 +108,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
                 self.currentCall = call
             } catch {
-                Task { @MainActor [weak self] in
+                await MainActor.run { [weak self] in
                     self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
@@ -194,7 +194,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             do {
                 try await self?.disconnectRoomUseCase()
             } catch {
-                Task { @MainActor [weak self] in
+                await MainActor.run { [weak self] in
                     self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
