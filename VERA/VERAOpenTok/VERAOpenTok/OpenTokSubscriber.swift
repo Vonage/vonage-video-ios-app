@@ -100,12 +100,9 @@ public class OpenTokSubscriber: NSObject {
             guard let self else { return }
             self.setActiveSubscription(true)
             Task { @MainActor [weak self] in
-                do {
-                    try await Task.sleep(nanoseconds: 2_000_000_000)
-                    guard let self else { return }
-                    self.setActiveSubscription(true)
-                } catch {
-                }
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                guard let self, !Task.isCancelled else { return }
+                self.setActiveSubscription(true)
             }
         }
 
