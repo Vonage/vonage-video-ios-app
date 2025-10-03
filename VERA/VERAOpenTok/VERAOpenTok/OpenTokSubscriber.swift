@@ -27,6 +27,8 @@ public class OpenTokSubscriber: NSObject {
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
 
+    private var reinforcementTask: Task<Void, Never>?
+    
     public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     init(subscriber: OTSubscriber) {
@@ -99,7 +101,9 @@ public class OpenTokSubscriber: NSObject {
         participant.onAppear = { [weak self] in
             guard let self else { return }
             self.setActiveSubscription(true)
-            Task { @MainActor [weak self] in
+            self.reinforcementTask?.cancel()
+            
+            self.reinforcementTask = Task { @MainActor [weak self] in
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 guard let self, !Task.isCancelled else { return }
                 self.setActiveSubscription(true)
@@ -114,7 +118,7 @@ public class OpenTokSubscriber: NSObject {
 
     private func setActiveSubscription(_ visible: Bool) {
         // Do not attempt to unsubscribe video before the subscriber did connect
-        // it will result in an inhability to modify the video subscription later
+        // it will result in an inability to modify the video subscription later
         guard subscriberDidConnect else { return }
 
         otSubscriber.subscribeToVideo = visible
@@ -129,6 +133,9 @@ public class OpenTokSubscriber: NSObject {
 
         participant.onAppear = nil
         participant.onDisappear = nil
+        
+        reinforcementTask?.cancel()
+        reinforcementTask = nil
     }
 }
 
