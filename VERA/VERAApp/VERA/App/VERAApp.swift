@@ -12,6 +12,12 @@ struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
     let dependencyContainer = DependencyContainer()
 
+    var handleUniversalLink: HandleUniversalLink {
+        HandleUniversalLink(
+            baseURL: dependencyContainer.baseURL,
+            navigator: navigationCoordinator)
+    }
+
     @State private var previousPath = NavigationPath()
     @State private var alertItem: AlertItem?
 
@@ -29,6 +35,10 @@ struct VERAApp: App {
                             }
                         case .goodbye(let roomName):
                             makeGoodbyePage(roomName: roomName)
+                        case .meetingRoom(_):
+                            fatalError("Should not be able to navigate to meeting room from landing")
+                        case .landing:
+                            fatalError("Should not be able to navigate to landing")
                         }
                     }
             }
@@ -53,11 +63,6 @@ struct VERAApp: App {
         }
     }
 
-    private func handleUniversalLink(_ url: URL) {
-        guard let roomName = url.getRoomName(from: dependencyContainer.baseURL) else { return }
-        navigationCoordinator.navigateToWaitingRoom(roomName)
-    }
-
     // MARK: - Factory Methods
 
     var landingPageFactory: LandingPageFactory { dependencyContainer.landingPageFactory }
@@ -67,7 +72,7 @@ struct VERAApp: App {
 
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
-            navigationCoordinator.navigateToWaitingRoom(roomName)
+            navigationCoordinator.go(to: .waitingRoom(roomName))
         }
     }
 
@@ -76,7 +81,7 @@ struct VERAApp: App {
             roomName: roomName
         ) { roomName in
             Task {
-                navigationCoordinator.startMeeting(roomName)
+                navigationCoordinator.go(to: .meetingRoom(roomName))
             }
         }.onDisappear {
             // Required if the user goes back to the landing page
@@ -86,15 +91,15 @@ struct VERAApp: App {
 
     private func makeMeetingRoom(roomName: String) -> some View {
         meetingRoomFactory.make(roomName: roomName) {
-            navigationCoordinator.leaveMeeting()
+            navigationCoordinator.go(to: .goodbye(roomName))
         }
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
         goodByePageFactory.make(roomName: roomName) {
-            navigationCoordinator.navigateToWaitingRoom(roomName)
+            navigationCoordinator.go(to: .waitingRoom(roomName))
         } onReturnToLanding: {
-            navigationCoordinator.returnToLanding()
+            navigationCoordinator.go(to: .landing)
         } onPlay: { _ in
 
         }
