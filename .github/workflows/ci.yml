@@ -12,10 +12,10 @@ on:
 
 jobs:
   format-check:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install swift-format
       run: brew install swift-format
   
@@ -25,7 +25,7 @@ jobs:
         ./scripts/format.sh --check
 
   unit-tests:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: [format-check]
     outputs:
       test-results: ${{ steps.tests.outcome }}
@@ -35,7 +35,7 @@ jobs:
     
     - name: Pull LFS files
       run: git lfs pull
-    
+
     - name: Cache derived data
       uses: actions/cache@v4
       with:
@@ -83,12 +83,13 @@ jobs:
     
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
+      timeout-minutes: 15
       run: |
         echo "📡 Running VERAOpenTokTests on iOS Simulator"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
+          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -108,7 +109,7 @@ jobs:
           # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
 
 #  ui-tests:
-#    runs-on: macos-latest
+#    runs-on: macos-26
 #    needs: [unit-tests]
 #    
 #    steps:
@@ -131,7 +132,7 @@ jobs:
 #        xcodebuild test \
 #          -workspace VERA/VERA.xcworkspace \
 #          -scheme VERAUITests \
-#          -destination "id=D1CE9A39-FD24-4854-975C-2CA4A6D41565" \
+#          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
 #          -only-testing:VERAUITests \
 #          -enableCodeCoverage YES \
 #          -derivedDataPath DerivedData \
@@ -150,7 +151,7 @@ jobs:
 
   sonarcloud:
     name: SonarCloud Analysis
-    runs-on: macos-latest
+    runs-on: macos-26
     #needs: [unit-tests, ui-tests]
     needs: [unit-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
@@ -245,7 +246,7 @@ jobs:
 
   upload-testflight:
     name: Upload to TestFlight
-    runs-on: macos-latest
+    runs-on: macos-26
     #needs: [unit-tests, ui-tests]
     needs: [unit-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
