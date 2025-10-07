@@ -13,4 +13,7 @@ public protocol VERAPublisher: AnyObject {
     var publishAudio: Bool { get set }
     var publishVideo: Bool { get set }
     var cameraPosition: CameraPosition { get set }
+
+    // Clean up resources
+    func cleanUp()
 }

@@ -46,6 +46,8 @@ public struct MeetingRoomScreen: View {
                 title: Text(alertItem.title),
                 message: Text(alertItem.message),
                 dismissButton: .default(Text("OK")))
+        }.onAppear {
+            viewModel.loadUI()
         }
     }
 }

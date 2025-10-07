@@ -15,7 +15,7 @@ public func makeMockParticipant(
     creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
     isScreenshare: Bool = false,
     isPinned: Bool = false,
-    viewBuilder: @escaping () -> AnyView = { AnyView(EmptyView()) }
+    view: AnyView = AnyView(EmptyView())
 ) -> Participant {
     .init(
         id: id,
@@ -26,6 +26,5 @@ public func makeMockParticipant(
         creationTime: creationTime,
         isScreenshare: isScreenshare,
         isPinned: isPinned,
-        viewBuilder: viewBuilder
-    )
+        view: view)
 }

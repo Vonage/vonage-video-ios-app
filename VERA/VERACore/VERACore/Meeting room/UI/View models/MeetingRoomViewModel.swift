@@ -73,6 +73,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public let roomName: RoomName
     public let baseURL: URL
+    private var initialised = false
 
     public init(
         roomName: RoomName,
@@ -89,6 +90,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func loadUI() {
+        guard !initialised else { return }
+        initialised = true
         Task { @MainActor [weak self] in
             guard let self else { return }
             state = .loading
@@ -105,7 +108,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
                 self.currentCall = call
             } catch {
-                Task { @MainActor [weak self] in
+                await MainActor.run { [weak self] in
                     self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
@@ -114,7 +117,8 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         Publishers.CombineLatest3(
-            participantsPublisher,
+            participantsPublisher
+                .removeDuplicates(),
             sessionStatePublisher,
             layoutPublisher
         )
@@ -153,7 +157,6 @@ public final class MeetingRoomViewModel: ObservableObject {
                 activeSpeakerId: participantsState.activeParticipantId)
         }
         .removeDuplicates()
-        .receive(on: DispatchQueue.main)
         .sink { [weak self] newState in
             Task { @MainActor in
                 self?.state = .content(newState)
@@ -163,25 +166,19 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleMic() {
-        Task { [weak self] in
-            self?.currentCall?.toggleLocalAudio()
-        }
+        currentCall?.toggleLocalAudio()
     }
 
     public func onToggleCamera() {
-        Task { [weak self] in
-            self?.currentCall?.toggleLocalVideo()
-        }
+        currentCall?.toggleLocalVideo()
     }
 
     public func onCameraSwitch() {
-        Task { [weak self] in
-            self?.currentCall?.toggleLocalCamera()
-        }
+        currentCall?.toggleLocalCamera()
     }
 
     public func onToggleLayout() {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             let newLayout: MeetingRoomLayout =
                 switch layoutPublisher.value {
@@ -193,6 +190,14 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func endCall() {
-        disconnectRoomUseCase()
+        Task { [weak self] in
+            do {
+                try await self?.disconnectRoomUseCase()
+            } catch {
+                await MainActor.run { [weak self] in
+                    self?.error = AlertItem.genericError(error.localizedDescription)
+                }
+            }
+        }
     }
 }

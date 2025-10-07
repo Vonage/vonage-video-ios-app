@@ -11,7 +11,7 @@ import VERATestHelpers
 struct DisconnectRoomUseCaseTests {
 
     @Test
-    func disconnectsAndClearsSessionAndPublisher() {
+    func disconnectsAndClearsSessionAndPublisher() async throws {
         let sessionRepository = makeMockSessionRepository()
         let publisherRepository = makeMockVERAPublisherRepository()
         let sut = DisconnectRoomUseCase(
@@ -22,7 +22,7 @@ struct DisconnectRoomUseCaseTests {
 
         #expect(sessionRepository.currentCall != nil)
 
-        sut()
+        try await sut()
 
         #expect(sessionRepository.currentCall == nil)
     }

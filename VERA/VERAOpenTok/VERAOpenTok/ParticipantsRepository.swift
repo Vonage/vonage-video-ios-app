@@ -12,7 +12,7 @@ final actor ParticipantsRepository {
         Array(participantStreams.values)
     }
 
-    func addParticipant(_ participant: Participant) async {
+    func saveParticipant(_ participant: Participant) async {
         participantStreams[participant.id] = participant
     }
 
@@ -22,5 +22,9 @@ final actor ParticipantsRepository {
 
     func removeParticipant(id: String) async {
         participantStreams.removeValue(forKey: id)
+    }
+
+    func reset() {
+        participantStreams.removeAll()
     }
 }

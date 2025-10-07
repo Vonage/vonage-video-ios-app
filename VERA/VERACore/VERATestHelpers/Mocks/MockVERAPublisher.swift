@@ -15,6 +15,8 @@ public final class MockVERAPublisher: VERAPublisher {
 
     public var cameraPosition: VERACore.CameraPosition
 
+    public var didCallCleanUp: Bool = false
+
     public init(
         view: AnyView = AnyView(Color.red),
         publishAudio: Bool = true,
@@ -25,5 +27,9 @@ public final class MockVERAPublisher: VERAPublisher {
         self.publishAudio = publishAudio
         self.publishVideo = publishVideo
         self.cameraPosition = cameraPosition
+    }
+
+    public func cleanUp() {
+        didCallCleanUp = true
     }
 }

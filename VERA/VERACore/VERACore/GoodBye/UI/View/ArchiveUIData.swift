@@ -4,13 +4,13 @@
 
 import Foundation
 
-public struct ArchiveUIData: Identifiable {
+public struct ArchiveUIData: Identifiable, Sendable {
     public let id: UUID
     public let title: String
     public let subtitle: String
     public let isDownloadable: Bool
 
-    var onDownload: (() -> Void)?
+    var onDownload: (@Sendable () -> Void)?
 
     public init(
         id: UUID,
