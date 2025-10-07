@@ -65,21 +65,21 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    # Temporarily disabled until CI Xcode version is updated
-    # - name: Run VERACoreSnapshotTests (iOS Simulator)
-    #   id: snapshot-tests
-    #   run: |
-    #     echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
-    #     xcodebuild test \
-    #       -workspace VERA/VERA.xcworkspace \
-    #       -scheme VERACoreSnapshotTests \
-    #       -destination "platform=iOS Simulator,name=iPhone 16" \
-    #       -derivedDataPath DerivedData \
-    #       -enableCodeCoverage YES \
-    #       -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-    #       CODE_SIGN_IDENTITY="" \
-    #       CODE_SIGNING_REQUIRED=NO \
-    #       CODE_SIGNING_ALLOWED=NO
+    - name: Run VERACoreSnapshotTests (iOS Simulator)
+      id: snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACoreSnapshotTests \
+          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
     
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
@@ -97,6 +97,22 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
     
+    - name: Run VERATests (iOS Simulator)
+      id: opentok-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERATests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERATests \
+          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
     - name: Upload all test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -106,7 +122,8 @@ jobs:
           DerivedData/VERACoreTests-macOS.xcresult
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/Build/Products/
-          # DerivedData/VERACoreSnapshotTests-iOS.xcresult  # Temporarily disabled
+          DerivedData/VERACoreSnapshotTests-iOS.xcresult
+          DerivedData/VERATests-iOS.xcresult
 
 #  ui-tests:
 #    runs-on: macos-26
@@ -238,7 +255,7 @@ jobs:
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.organization="$SONAR_ORGANIZATION" \
           -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests \
+          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERATests \
           -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
           -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
           -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
