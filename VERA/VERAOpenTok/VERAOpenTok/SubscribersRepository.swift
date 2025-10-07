@@ -5,6 +5,11 @@
 import Foundation
 
 final actor SubscribersRepository {
+
+    var all: [OpenTokSubscriber] {
+        Array(subscriberStreams.values)
+    }
+
     private var subscriberStreams: [String: OpenTokSubscriber] = [:]
 
     func addSubscriber(_ subscriber: OpenTokSubscriber) async {
@@ -17,5 +22,9 @@ final actor SubscribersRepository {
 
     func removeSubscriber(id: String) async {
         subscriberStreams.removeValue(forKey: id)
+    }
+
+    func reset() {
+        subscriberStreams.removeAll()
     }
 }

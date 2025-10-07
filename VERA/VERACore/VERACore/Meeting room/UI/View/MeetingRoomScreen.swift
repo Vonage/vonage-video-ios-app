@@ -18,7 +18,7 @@ public struct MeetingRoomScreen: View {
 
     public var body: some View {
         VStack {
-            if case let .content(state) = viewModel.state {
+            if case .content(let state) = viewModel.state {
                 MeetingRoomView(
                     state: state,
                     actions: .init(
@@ -46,6 +46,8 @@ public struct MeetingRoomScreen: View {
                 title: Text(alertItem.title),
                 message: Text(alertItem.message),
                 dismissButton: .default(Text("OK")))
+        }.onAppear {
+            viewModel.loadUI()
         }
     }
 }

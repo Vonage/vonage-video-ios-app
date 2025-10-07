@@ -14,26 +14,26 @@ struct DefaultRoomCredentialsRepositoryTests {
     @Test(
         "Feeding valid data into the HTTP client returns the correct credentials",
         arguments: [
-            MockRoomCredentials(
+            makeMockCredentials(
                 sessionId: "a sessionId",
                 token: "a token",
-                apiKey: "an API key",
+                applicationId: "an application ID",
                 captionsId: "a captions ID"),
-            MockRoomCredentials(
+            makeMockCredentials(
                 sessionId: "another sessionId",
                 token: "another token",
-                apiKey: "another API key",
+                applicationId: "an application ID",
                 captionsId: "another captions ID"),
-            MockRoomCredentials(
+            makeMockCredentials(
                 sessionId: "another sessionId",
                 token: "another token",
-                apiKey: "another API key",
+                applicationId: "an application ID",
                 captionsId: nil),
         ])
-    func getRoomCredentialsReturnsCredentials(testCase: MockRoomCredentials) async throws {
+    func getRoomCredentialsReturnsCredentials(testCase: RoomCredentials) async throws {
         let sessionId = testCase.sessionId
         let token = testCase.token
-        let apiKey = testCase.apiKey
+        let applicationId = testCase.applicationId
         let captionsId = testCase.captionsId
 
         let httpClient = MockHTTPClient()
@@ -41,7 +41,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let responseData = makeCredentialsJSONResponse(
             sessionId: sessionId,
             token: token,
-            apiKey: apiKey,
+            apiKey: applicationId,
             captionsId: captionsId)
 
         httpClient.data = responseData
@@ -52,7 +52,7 @@ struct DefaultRoomCredentialsRepositoryTests {
 
         #expect(credentials.sessionId == sessionId)
         #expect(credentials.token == token)
-        #expect(credentials.apiKey == apiKey)
+        #expect(credentials.apiKey == applicationId)
         #expect(credentials.captionsId == captionsId)
     }
 

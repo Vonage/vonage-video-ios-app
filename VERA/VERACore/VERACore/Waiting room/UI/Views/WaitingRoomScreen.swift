@@ -19,7 +19,7 @@ public struct WaitingRoomScreen: View {
 
     public var body: some View {
         switch viewModel.state {
-        case let .content(state):
+        case .content(let state):
             WaitingRoomView(
                 state: state,
                 userName: $viewModel.userName
@@ -37,8 +37,10 @@ public struct WaitingRoomScreen: View {
             }
             .task {
                 await viewModel.checkPermissions()
+            }.onAppear {
+                viewModel.loadUI()
             }
-        case let .error(error): Text(error)
+        case .error(let error): Text(error)
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

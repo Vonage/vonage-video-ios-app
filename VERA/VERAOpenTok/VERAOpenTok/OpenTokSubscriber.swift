@@ -12,11 +12,12 @@ public class OpenTokSubscriber: NSObject {
     let otSubscriber: OTSubscriber
     private var cancellables = Set<AnyCancellable>()
     private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
-    private var subscriptionTimer: Timer?
 
-    var id: String { stream.streamId }
-    var stream: OTStream { otSubscriber.stream! }
+    let id: String
+    var name: String { otSubscriber.stream?.name ?? "" }
+    private let stream: OTStream
     var date: Date { stream.creationTime }
+    @Atomic private var subscriberDidConnect = false
 
     var onError: (() -> Void)?
 
@@ -26,18 +27,16 @@ public class OpenTokSubscriber: NSObject {
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
 
-    public var aspectRatio: Double { videoDimensions.aspectRatio }
+    private var reinforcementTask: Task<Void, Never>?
 
-    public lazy var view: AnyView = {
-        let view = otSubscriber.view!
-        let rendererView = UIViewContainer(view: view)
-        otSubscriber.viewScaleBehavior = .fill
-        return AnyView(rendererView)
-    }()
+    public var aspectRatio: Double { videoDimensions.aspectRatio }
 
     init(subscriber: OTSubscriber) {
         otSubscriber = subscriber
         let stream = subscriber.stream!
+        self.stream = stream
+        id = stream.streamId
+        isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
             name: stream.name ?? "",
@@ -45,14 +44,18 @@ public class OpenTokSubscriber: NSObject {
             isCameraEnabled: stream.hasVideo,
             videoDimensions: VideoDimensions.default,
             creationTime: stream.creationTime,
-            isScreenshare: false,
+            isScreenshare: stream.videoType == .screen,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
     }
 
+    deinit {
+        cleanUp()
+    }
+
     func setup() {
-        otSubscriber.subscribeToVideo = false
+        otSubscriber.viewScaleBehavior = .fill
 
         stream
             .publisher(for: \.videoDimensions)
@@ -66,7 +69,7 @@ public class OpenTokSubscriber: NSObject {
         stream
             .publisher(for: \.hasAudio)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -74,7 +77,7 @@ public class OpenTokSubscriber: NSObject {
         stream
             .publisher(for: \.hasVideo)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -93,30 +96,46 @@ public class OpenTokSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            viewBuilder: { [weak self] in
-                guard let self else { return AnyView(EmptyView()) }
-                return AnyView(self.view)
-            })
+            view: AnyView(UIViewContainer(view: otSubscriber.view!)))
 
         participant.onAppear = { [weak self] in
-            self?.setVisibility(true)
+            guard let self else { return }
+            self.setActiveSubscription(true)
+            self.reinforcementTask?.cancel()
+
+            self.reinforcementTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                guard let self, !Task.isCancelled else { return }
+                self.setActiveSubscription(true)
+            }
         }
 
         participant.onDisappear = { [weak self] in
-            self?.setVisibility(false)
+            guard let self else { return }
+            self.setActiveSubscription(false)
         }
     }
 
-    private func setVisibility(_ visible: Bool) {
-        if visible {
-            subscriptionTimer?.invalidate()
-            subscriptionTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                self.otSubscriber.subscribeToVideo = true
-            }
-        } else {
-            self.otSubscriber.subscribeToVideo = false
-        }
+    private func setActiveSubscription(_ visible: Bool) {
+        // Do not attempt to unsubscribe video before the subscriber did connect
+        // it will result in an inability to modify the video subscription later
+        guard subscriberDidConnect else { return }
+
+        otSubscriber.subscribeToVideo = visible
+    }
+
+    func cleanUp() {
+        participant = participant.withEmptyView
+
+        onError = nil
+
+        cancellables.removeAll()
+
+        participant.onAppear = nil
+        participant.onDisappear = nil
+
+        reinforcementTask?.cancel()
+        reinforcementTask = nil
     }
 }
 
@@ -124,11 +143,12 @@ extension OpenTokSubscriber: OTSubscriberDelegate {
     // MARK: - Subscriber delegate
 
     public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
+        subscriberDidConnect = true
 
+        updateParticipant()
     }
 
     public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-        print("Subscriber error \(error.localizedDescription)")
         onError?()
     }
 }

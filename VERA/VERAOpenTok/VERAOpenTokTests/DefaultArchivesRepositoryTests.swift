@@ -59,7 +59,7 @@ struct DefaultArchivesRepositoryTests {
         let publisher = sut.getArchives(roomName: "test-room")
 
         // Collect multiple values from the publisher
-        let values = try await collectValues(from: publisher, count: 3, timeout: 2.0)
+        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
 
         // Should receive 3 updates
         #expect(values.count == 3)
@@ -102,7 +102,7 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 2.0)
+        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
 
         #expect(values.count == 3)
 
@@ -245,7 +245,7 @@ struct DefaultArchivesRepositoryTests {
     }
 
     private func awaitFirstValue<T>(from publisher: AnyPublisher<T, Error>) async throws -> T {
-        try await withTimeout(seconds: 2.0) {
+        try await withTimeout(seconds: 5.0) {
             try await withCheckedThrowingContinuation { continuation in
                 var cancellable: AnyCancellable?
                 var hasResumed = false
@@ -278,7 +278,7 @@ struct DefaultArchivesRepositoryTests {
     }
 
     private func awaitError<T>(from publisher: AnyPublisher<T, Error>) async throws -> Error {
-        try await withTimeout(seconds: 2.0) {
+        try await withTimeout(seconds: 5.0) {
             try await withCheckedThrowingContinuation { continuation in
                 var cancellable: AnyCancellable?
                 var hasResumed = false

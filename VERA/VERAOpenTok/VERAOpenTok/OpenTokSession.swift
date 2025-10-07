@@ -11,7 +11,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     var onSessionDidConnect: (() -> Void)?
     var onSessionDidDisconnect: (() -> Void)?
     var onSessionFailure: ((Error) -> Void)?
-    var onNewStream: ((OTStream) -> Void)?
+    public var onNewStream: ((OTStream) -> Void)?
     var onStreamDestroyed: ((OTStream) -> Void)?
 
     public init(session: OTSession) {
@@ -19,15 +19,16 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     open func connect(with token: String) throws {
+        assertMainThread()
         var error: OTError?
         session.connect(withToken: token, error: &error)
-
         if let error = error {
             throw error
         }
     }
 
     open func disconnect() throws {
+        assertMainThread()
         var error: OTError?
         session.disconnect(&error)
 
@@ -37,17 +38,14 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func session(_ session: OTSession, didFailWithError error: OTError) {
-        print("session didFailWithError \(error.localizedDescription)")
         onSessionFailure?(error)
     }
 
     public func session(_ session: OTSession, streamCreated stream: OTStream) {
-        print("session streamCreated \(stream.streamId)")
         onNewStream?(stream)
     }
 
     public func session(_ session: OTSession, streamDestroyed stream: OTStream) {
-        print("session streamDestroyed \(stream.streamId)")
         onStreamDestroyed?(stream)
     }
 
@@ -60,6 +58,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func subscribe(subscriber: OpenTokSubscriber) throws {
+        assertMainThread()
         var error: OTError?
         let _subscriber: OTSubscriberKit = subscriber.otSubscriber
         session.subscribe(_subscriber, error: &error)
@@ -70,6 +69,8 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func unsubscribe(subscriber: OpenTokSubscriber) throws {
+        assertMainThread()
+
         var error: OTError?
         session.unsubscribe(subscriber.otSubscriber, error: &error)
 
@@ -79,6 +80,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func publish(publisher: OpenTokPublisher) throws {
+        assertMainThread()
         var error: OTError?
         session.publish(publisher.otPublisher, error: &error)
 
@@ -88,11 +90,21 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     }
 
     public func unpublish(publisher: OpenTokPublisher) throws {
+        assertMainThread()
+
         var error: OTError?
         session.unpublish(publisher.otPublisher, error: &error)
 
         if let error = error {
             throw error
         }
+    }
+
+    func cleanUp() {
+        onSessionDidConnect = nil
+        onSessionDidDisconnect = nil
+        onSessionFailure = nil
+        onNewStream = nil
+        onStreamDestroyed = nil
     }
 }

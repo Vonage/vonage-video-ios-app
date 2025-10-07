@@ -42,7 +42,7 @@ public protocol SessionStatePublisherProvider: AnyObject {
 
 public protocol CallConnectable: AnyObject {
     func connect()
-    func disconnect()
+    func disconnect() async throws
 }
 
 public protocol MediaToggleable: AnyObject {
