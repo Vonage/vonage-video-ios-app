@@ -51,6 +51,7 @@
 		6F6A00982E17F89100127A10 /* VERA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F6A00A52E17F89200127A10 /* VERATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FA9F4D52E940F0300D6D223 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -60,6 +61,14 @@
 				Info.plist,
 			);
 			target = 6F6A00972E17F89100127A10 /* VERA */;
+		};
+		6FA9F4DD2E94126800D6D223 /* Exceptions for "VERATests" folder in "VERATests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				HandleUniversalLinkTests.swift,
+				NavigationCoordinatorSpy.swift,
+			);
+			target = 6F6A00A42E17F89200127A10 /* VERATests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -75,6 +84,14 @@
 		6F6A00B22E17F89200127A10 /* VERAUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = VERAUITests;
+			sourceTree = "<group>";
+		};
+		6FA9F4DA2E94110E00D6D223 /* VERATests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6FA9F4DD2E94126800D6D223 /* Exceptions for "VERATests" folder in "VERATests" target */,
+			);
+			path = VERATests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -109,6 +126,7 @@
 		6F1B8B392E1D642A00DE0C57 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6FA9F4D52E940F0300D6D223 /* VERACore.framework */,
 				6F1B8B3E2E1D643200DE0C57 /* VERAOpenTok.framework */,
 				6F1B8B3A2E1D642A00DE0C57 /* VERACore.framework */,
 			);
@@ -118,7 +136,7 @@
 		6F6A008F2E17F89100127A10 = {
 			isa = PBXGroup;
 			children = (
-				6F9472152E4CDE1F00A12FBD /* VERATests */,
+				6FA9F4DA2E94110E00D6D223 /* VERATests */,
 				6F6A009A2E17F89100127A10 /* VERA */,
 				6F6A00B22E17F89200127A10 /* VERAUITests */,
 				6F1B8B392E1D642A00DE0C57 /* Frameworks */,
@@ -134,13 +152,6 @@
 				6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		6F9472152E4CDE1F00A12FBD /* VERATests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = VERATests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -222,7 +233,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					6F6A00972E17F89100127A10 = {

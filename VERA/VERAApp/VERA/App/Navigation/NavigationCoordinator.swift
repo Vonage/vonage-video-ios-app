@@ -1,21 +1,31 @@
+import Combine
 import Foundation
 import SwiftUI
 import os.log
 
 @MainActor
-final class NavigationCoordinator: ObservableObject {
+open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
     @Published var currentMeetingRoom: String?
 
+    public func go(to route: AppRoute) {
+        switch route {
+        case .landing: returnToLanding()
+        case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
+        case .meetingRoom(let roomName): startMeeting(roomName)
+        case .goodbye(_): leaveMeeting()
+        }
+    }
+
     // MARK: - Public Navigation Methods
 
-    func navigateToWaitingRoom(_ roomName: String) {
+    private func navigateToWaitingRoom(_ roomName: String) {
         path.append(AppRoute.waitingRoom(roomName))
         logNavigation("Navigating to waiting room: \(roomName)")
     }
 
-    func startMeeting(_ roomName: String) {
+    private func startMeeting(_ roomName: String) {
         currentMeetingRoom = roomName
         isInMeeting = true
 
@@ -24,25 +34,18 @@ final class NavigationCoordinator: ObservableObject {
         logNavigation("Starting meeting: \(roomName)")
     }
 
-    func leaveMeeting() {
+    private func leaveMeeting() {
         isInMeeting = false
         currentMeetingRoom = nil
 
         logNavigation("Left meeting, navigating to goodbye")
     }
 
-    func returnToLanding() {
+    private func returnToLanding() {
         path.removeLast(path.count)
         isInMeeting = false
         currentMeetingRoom = nil
         logNavigation("Returned to landing page")
-    }
-
-    func goBack() {
-        if !path.isEmpty {
-            path.removeLast()
-            logNavigation("Navigated back")
-        }
     }
 
     // MARK: - Private Helpers
@@ -52,20 +55,5 @@ final class NavigationCoordinator: ObservableObject {
             os_log("%@", log: OSLog.default, type: .debug, "🧭 Navigation: \(message)")
             print("🧭 Navigation: \(message)")
         #endif
-    }
-}
-
-// MARK: - App Routes
-enum AppRoute: Hashable {
-    case waitingRoom(String)
-    case goodbye(String)
-
-    var description: String {
-        switch self {
-        case .waitingRoom(let room):
-            return "WaitingRoom(\(room))"
-        case .goodbye:
-            return "Goodbye"
-        }
     }
 }

@@ -36,52 +36,37 @@ else
     USE_SLATHER=false
 fi
 
-# Find the most recent test results
+# Find ALL test results
 DERIVED_DATA_PATH="$PROJECT_ROOT/DerivedData"
-XCRESULT_PATH=""
-
-# Create coverage reports directory first
 COVERAGE_DIR="$PROJECT_ROOT/coverage-reports"
 mkdir -p "$COVERAGE_DIR"
 
-# Look for test results in multiple locations
-if [ -d "$DERIVED_DATA_PATH/Logs/Test" ]; then
-    XCRESULT_PATH=$(find "$DERIVED_DATA_PATH/Logs/Test" -name "*.xcresult" -type d | head -1)
+# ✅ Find ALL .xcresult files
+XCRESULT_FILES=()
+if [ -d "$DERIVED_DATA_PATH" ]; then
+    echo -e "${BLUE}🔍 Searching for all test results...${NC}"
+    while IFS= read -r -d '' file; do
+        XCRESULT_FILES+=("$file")
+        echo -e "${BLUE}   📁 Found: $(basename "$file")${NC}"
+    done < <(find "$DERIVED_DATA_PATH" -name "*.xcresult" -type d -print0 2>/dev/null)
 fi
 
-# Check for TestResults.xcresult (specific from CI)
-if [ -z "$XCRESULT_PATH" ] && [ -d "$DERIVED_DATA_PATH/TestResults.xcresult" ]; then
-    XCRESULT_PATH="$DERIVED_DATA_PATH/TestResults.xcresult"
-fi
-
-# Check for any .xcresult in DerivedData
-if [ -z "$XCRESULT_PATH" ] && [ -d "$DERIVED_DATA_PATH" ]; then
-    XCRESULT_PATH=$(find "$DERIVED_DATA_PATH" -name "*.xcresult" -type d 2>/dev/null | head -1)
-fi
-
-if [ -z "$XCRESULT_PATH" ] || [ ! -d "$XCRESULT_PATH" ]; then
-    echo -e "${YELLOW}⚠️  No test results found in expected locations${NC}"
-    if [ -d "$DERIVED_DATA_PATH" ]; then
-        echo -e "${BLUE}🔍 Available test results:${NC}"
-        find "$DERIVED_DATA_PATH" -name "*.xcresult" -type d 2>/dev/null || echo "   No .xcresult files found"
-    else
-        echo -e "${BLUE}🔍 DerivedData directory does not exist${NC}"
-    fi
-    
+if [ ${#XCRESULT_FILES[@]} -eq 0 ]; then
+    echo -e "${YELLOW}⚠️  No test results found${NC}"
     echo -e "${YELLOW}⚠️  Creating minimal coverage report...${NC}"
     echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
     echo -e "${GREEN}✅ Minimal coverage report created${NC}"
     exit 0
 fi
 
-echo -e "${BLUE}📈 Found test results: $(basename "$XCRESULT_PATH")${NC}"
+echo -e "${GREEN}✅ Found ${#XCRESULT_FILES[@]} test result(s)${NC}"
 
-# Try to generate coverage with Slather first (preferred for SonarCloud)
+# Process coverage with Slather (preferred - can handle multiple targets)
 if [ "$USE_SLATHER" = true ]; then
-    echo -e "${BLUE}🔄 Generating coverage with Slather (SonarCloud-optimized)...${NC}"
+    echo -e "${BLUE}🔄 Generating combined coverage with Slather...${NC}"
     cd "$PROJECT_ROOT"
     
-    # Generate SonarQube XML format
+    # ✅ Slather can process all targets at once from the workspace
     if $SLATHER_CMD coverage \
         --sonarqube-xml \
         --output-directory "$COVERAGE_DIR" \
@@ -109,71 +94,130 @@ if [ "$USE_SLATHER" = true ]; then
     fi
 fi
 
-# Fallback to xccov if Slather failed or is not available
+# ✅ Fallback: Process each .xcresult individually and combine
 if [ "$USE_SLATHER" = false ]; then
     echo -e "${BLUE}📊 Generating coverage with xccov...${NC}"
     
-    # Extract coverage data using xcrun
-    if xcrun xccov view --report --json "$XCRESULT_PATH" > "$COVERAGE_DIR/coverage.json" 2>/dev/null; then
-        echo -e "${GREEN}✅ Generated coverage.json with xccov${NC}"
-    else
-        echo -e "${YELLOW}⚠️  Direct xccov failed, searching for coverage files...${NC}"
+    COMBINED_COVERAGE="$COVERAGE_DIR/combined_coverage.json"
+    echo '{"targets": []}' > "$COMBINED_COVERAGE"
+    
+    for i in "${!XCRESULT_FILES[@]}"; do
+        XCRESULT_PATH="${XCRESULT_FILES[$i]}"
+        echo -e "${BLUE}   📊 Processing $(basename "$XCRESULT_PATH") ($(($i + 1))/${#XCRESULT_FILES[@]})...${NC}"
         
-        # Find .xccovreport files
-        XCCOV_REPORT=$(find "$DERIVED_DATA_PATH" -name "*.xccovreport" -type f | head -1)
-        if [ -n "$XCCOV_REPORT" ]; then
-            echo -e "${BLUE}📊 Found coverage report: $(basename "$XCCOV_REPORT")${NC}"
-            if xcrun xccov view --report --json "$XCCOV_REPORT" > "$COVERAGE_DIR/coverage.json" 2>/dev/null; then
-                echo -e "${GREEN}✅ Generated coverage.json from xccovreport${NC}"
-            else
-                echo -e "${YELLOW}⚠️  Could not extract JSON coverage, creating minimal report${NC}"
-                echo '{"data":[{"files":[]}]}' > "$COVERAGE_DIR/coverage.json"
-            fi
+        INDIVIDUAL_COVERAGE="$COVERAGE_DIR/coverage_$(basename "$XCRESULT_PATH" .xcresult).json"
+        
+        if xcrun xccov view --report --json "$XCRESULT_PATH" > "$INDIVIDUAL_COVERAGE" 2>/dev/null; then
+            echo -e "${GREEN}      ✅ Generated coverage for $(basename "$XCRESULT_PATH")${NC}"
         else
-            echo -e "${YELLOW}⚠️  No coverage files found, creating minimal report${NC}"
-            echo '{"data":[{"files":[]}]}' > "$COVERAGE_DIR/coverage.json"
+            echo -e "${YELLOW}      ⚠️  Failed to extract coverage from $(basename "$XCRESULT_PATH")${NC}"
+        fi
+    done
+    
+    # ✅ Combine all individual coverage files
+    if command -v python3 &> /dev/null; then
+        echo -e "${BLUE}🔄 Combining coverage data...${NC}"
+        python3 -c "
+import json
+import glob
+import os
+
+coverage_dir = '$COVERAGE_DIR'
+combined_data = {'targets': [], 'lineCoverage': 0, 'coveredLines': 0, 'executableLines': 0}
+
+# Process all individual coverage files
+for coverage_file in glob.glob(os.path.join(coverage_dir, 'coverage_*.json')):
+    try:
+        with open(coverage_file, 'r') as f:
+            data = json.load(f)
+            if 'targets' in data:
+                combined_data['targets'].extend(data['targets'])
+            elif 'data' in data:  # Alternative format
+                combined_data['targets'].extend(data['data'])
+        print(f'   ✅ Processed {os.path.basename(coverage_file)}')
+    except Exception as e:
+        print(f'   ⚠️  Failed to process {os.path.basename(coverage_file)}: {e}')
+
+# Calculate totals
+total_executable = 0
+total_covered = 0
+for target in combined_data['targets']:
+    if 'executableLines' in target:
+        total_executable += target['executableLines']
+    if 'coveredLines' in target:
+        total_covered += target['coveredLines']
+
+combined_data['executableLines'] = total_executable
+combined_data['coveredLines'] = total_covered
+combined_data['lineCoverage'] = (total_covered / total_executable) if total_executable > 0 else 0
+
+# Save combined coverage
+with open('$COMBINED_COVERAGE', 'w') as f:
+    json.dump(combined_data, f, indent=2)
+
+print(f'📊 Combined Coverage Summary:')
+print(f'   Targets: {len(combined_data[\"targets\"])}')
+print(f'   Line Coverage: {combined_data[\"lineCoverage\"]:.1%}')
+print(f'   Lines: {total_covered}/{total_executable}')
+"
+        # Copy combined as main coverage
+        cp "$COMBINED_COVERAGE" "$COVERAGE_DIR/coverage.json"
+        echo -e "${GREEN}✅ Combined coverage data from ${#XCRESULT_FILES[@]} test results${NC}"
+    else
+        # Fallback: just use the first valid coverage file
+        FIRST_VALID=$(find "$COVERAGE_DIR" -name "coverage_*.json" | head -1)
+        if [ -n "$FIRST_VALID" ]; then
+            cp "$FIRST_VALID" "$COVERAGE_DIR/coverage.json"
+            echo -e "${YELLOW}⚠️  Python3 not available, using single coverage file${NC}"
         fi
     fi
 fi
 
-# Generate a simple text report for human reading
-if [ -f "$COVERAGE_DIR/coverage.json" ] || [ -f "$COVERAGE_DIR/sonarqube-generic-coverage.xml" ]; then
-    echo -e "${BLUE}📊 Generating text summary...${NC}"
-    
-    # Try to extract basic coverage info
-    if command -v python3 &> /dev/null; then
-        python3 -c "
+# Generate summary
+echo -e "${BLUE}📊 Generating coverage summary...${NC}"
+
+if command -v python3 &> /dev/null && [ -f "$COVERAGE_DIR/coverage.json" ]; then
+    python3 -c "
 import json
-import sys
 import os
 
-coverage_dir = '$COVERAGE_DIR'
-
-# Check for different coverage formats
+coverage_file = '$COVERAGE_DIR/coverage.json'
 formats_found = []
-if os.path.exists(os.path.join(coverage_dir, 'sonarqube-generic-coverage.xml')):
-    formats_found.append('SonarQube XML')
-if os.path.exists(os.path.join(coverage_dir, 'cobertura.xml')):
-    formats_found.append('Cobertura XML')
-if os.path.exists(os.path.join(coverage_dir, 'coverage.json')):
-    formats_found.append('JSON')
 
-print('📊 Coverage Summary Generated')
-print('   Formats: ' + ', '.join(formats_found) if formats_found else 'Basic coverage')
-print('   Location: coverage-reports/')
-" 2>/dev/null || echo -e "${BLUE}📊 Basic coverage report created${NC}"
-    else
-        echo -e "${BLUE}📊 Basic coverage report created${NC}"
-    fi
+if os.path.exists('$COVERAGE_DIR/sonarqube-generic-coverage.xml'):
+    formats_found.append('SonarQube XML')
+if os.path.exists('$COVERAGE_DIR/cobertura.xml'):
+    formats_found.append('Cobertura XML')
+if os.path.exists(coverage_file):
+    formats_found.append('JSON')
+    
+    try:
+        with open(coverage_file, 'r') as f:
+            data = json.load(f)
+        
+        targets = len(data.get('targets', []))
+        coverage = data.get('lineCoverage', 0)
+        covered = data.get('coveredLines', 0)
+        executable = data.get('executableLines', 0)
+        
+        print('📊 Final Coverage Summary:')
+        print(f'   Test Targets Processed: ${#XCRESULT_FILES[@]}')
+        print(f'   Coverage Targets: {targets}')
+        print(f'   Line Coverage: {coverage:.1%}')
+        print(f'   Lines Covered: {covered:,}/{executable:,}')
+        print(f'   Formats: {', '.join(formats_found)}')
+    except Exception as e:
+        print('📊 Coverage files generated (details unavailable)')
+        print(f'   Test Results Processed: ${#XCRESULT_FILES[@]}')
+        print(f'   Formats: {', '.join(formats_found)}')
+" 2>/dev/null || echo -e "${BLUE}📊 Coverage reports generated from ${#XCRESULT_FILES[@]} test results${NC}"
 fi
 
 echo -e "${GREEN}✅ Coverage reports generated in: $COVERAGE_DIR${NC}"
 echo -e "${BLUE}📄 Files created:${NC}"
 ls -la "$COVERAGE_DIR/" 2>/dev/null || echo "Coverage directory created"
 
-echo -e "${BLUE}💡 To upload to SonarCloud, use:${NC}"
-echo "   export SONAR_TOKEN=your_token"
-echo "   ./scripts/upload-sonarcloud.sh"
-echo ""
-echo -e "${BLUE}💡 To install Slather for better SonarCloud integration:${NC}"
-echo "   gem install slather"
+echo -e "${BLUE}💡 Processed test results:${NC}"
+for xcresult in "${XCRESULT_FILES[@]}"; do
+    echo "   • $(basename "$xcresult")"
+done
