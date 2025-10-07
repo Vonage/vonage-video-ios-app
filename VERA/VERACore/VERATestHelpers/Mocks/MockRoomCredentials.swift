@@ -3,22 +3,16 @@
 //
 
 import Foundation
+import VERACore
 
-public struct MockRoomCredentials {
-    public let sessionId: String
-    public let token: String
-    public let apiKey: String
-    public let captionsId: String?
-
-    public init(
-        sessionId: String,
-        token: String,
-        apiKey: String,
-        captionsId: String? = nil
-    ) {
-        self.sessionId = sessionId
-        self.token = token
-        self.apiKey = apiKey
-        self.captionsId = captionsId
-    }
+public func makeMockCredentials(
+    sessionId: String = "sessionId",
+    token: String = "token",
+    applicationId: String = "applicationId",
+    captionsId: String? = "captionsId"
+) -> RoomCredentials {
+    RoomCredentials(
+        sessionId: sessionId,
+        token: token,
+        applicationId: "applicationId")
 }

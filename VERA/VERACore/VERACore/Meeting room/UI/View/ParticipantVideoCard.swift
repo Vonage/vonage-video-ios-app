@@ -10,6 +10,7 @@ struct ParticipantVideoCard: View {
     let activeSpeakerId: String?
 
     private let containerAspectRatio: Double = 16.0 / 9.0
+    var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
     var body: some View {
         Group {
@@ -20,15 +21,26 @@ struct ParticipantVideoCard: View {
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
-                                participant.viewBuilder()
-                                    .scaleEffect(x: participant.isRemote ? -1 : 1, y: 1)
-                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                                    .clipped()
+                                if participant.isScreenshare {
+                                    participant.view
+                                        .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                        .clipped()
 
-                                ParticipantVideoCardOverlays(
-                                    isMicEnabled: participant.isMicEnabled,
-                                    name: participant.name
-                                )
+                                    ParticipantVideoCardOverlays(
+                                        isMicEnabled: participant.isMicEnabled,
+                                        name: participant.name
+                                    )
+                                } else {
+                                    participant.view
+                                        .horizontallyFlipped(shouldFlipHorizontally)
+                                        .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                        .clipped()
+
+                                    ParticipantVideoCardOverlays(
+                                        isMicEnabled: participant.isMicEnabled,
+                                        name: participant.name
+                                    )
+                                }
                             }
                         )
                 }
@@ -64,12 +76,6 @@ struct ParticipantVideoCard: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
-        .onAppear {
-            participant.onAppear?()
-        }
-        .onDisappear {
-            participant.onDisappear?()
-        }
     }
 }
 
@@ -130,7 +136,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }
@@ -146,7 +152,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }
@@ -162,7 +168,7 @@ struct MicIndicator: View {
             creationTime: Date(),
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) }),
+            view: AnyView(EmptyView())),
         activeSpeakerId: ""
     )
 }

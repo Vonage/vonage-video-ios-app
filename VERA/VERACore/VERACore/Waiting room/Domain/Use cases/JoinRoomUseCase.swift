@@ -32,15 +32,17 @@ public final class JoinRoomUseCase {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
 
-        let currentPublisher = await cameraPreviewProviderRepository.getPublisher()
+        await MainActor.run {
+            let currentPublisher = cameraPreviewProviderRepository.getPublisher()
 
-        let settings = PublisherSettings(
-            username: request.userName,
-            publishAudio: currentPublisher.publishAudio,
-            publishVideo: currentPublisher.publishVideo
-        )
+            let settings = PublisherSettings(
+                username: request.userName,
+                publishAudio: currentPublisher.publishAudio,
+                publishVideo: currentPublisher.publishVideo
+            )
 
-        await publisherRepository.recreatePublisher(settings)
-        cameraPreviewProviderRepository.resetPublisher()
+            publisherRepository.recreatePublisher(settings)
+            cameraPreviewProviderRepository.resetPublisher()
+        }
     }
 }

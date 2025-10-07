@@ -9,14 +9,13 @@ import VERAOpenTok
 
 class MockPublisherRepository: PublisherRepository {
 
-    @MainActor
-    func getPublisher() async -> any VERACore.VERAPublisher {
+    func getPublisher() -> any VERACore.VERAPublisher {
         OpenTokPublisher(publisher: OTPublisher(delegate: nil)!)
     }
 
     func resetPublisher() {
     }
 
-    func recreatePublisher(_ settings: VERACore.PublisherSettings) async {
+    func recreatePublisher(_ settings: VERACore.PublisherSettings) {
     }
 }

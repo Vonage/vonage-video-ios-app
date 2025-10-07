@@ -46,12 +46,13 @@ struct OpenTokCallTests {
     }
 
     @Test
-    func disconnectCallsSessionDisconnect() async throws {
+    func connectedSessionDisconnectCallsSessionDisconnect() async throws {
         let session = OpenTokSessionSpy()
         let sut = makeSUT(session: session)
 
+        sut.connect()
         #expect(session.disconnectCalled == false)
-        sut.disconnect()
+        try await sut.disconnect()
         #expect(session.disconnectCalled == true)
     }
 
@@ -60,7 +61,7 @@ struct OpenTokCallTests {
         let session = ThrowingOpenTokSession()
         let sut = makeSUT(session: session)
 
-        sut.disconnect()
+        try? await sut.disconnect()
 
         let event = await sut.eventsPublisher.values.first { event in
             if case .error = event { return true }

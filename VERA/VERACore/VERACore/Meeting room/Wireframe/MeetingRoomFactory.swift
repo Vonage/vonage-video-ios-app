@@ -39,7 +39,6 @@ public class MeetingRoomFactory {
                 sessionRepository: sessionRepository,
                 publisherRepository: publisherRepository),
             currentCallParticipantsRepository: currentCallParticipantsRepository)
-        viewModel.loadUI()
         return MeetingRoomScreen(
             viewModel: viewModel,
             onBack: onBack)

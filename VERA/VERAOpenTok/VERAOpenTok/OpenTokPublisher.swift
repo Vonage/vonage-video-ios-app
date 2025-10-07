@@ -9,10 +9,13 @@ import SwiftUI
 import VERACore
 
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
-    private(set) var otPublisher: OTPublisher
+    let otPublisher: OTPublisher
     var cancellables = Set<AnyCancellable>()
 
     let id = "publisherID"
+    public var view: AnyView {
+        AnyView(UIViewContainer(view: otPublisher.view!))
+    }
     var stream: OTStream? { otPublisher.stream }
     let date = Date()
 
@@ -23,14 +26,11 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var participant: Participant
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
+    public var hasSession: Bool { otPublisher.session != nil }
 
+    var onStreamCreated: (() -> Void)?
+    var onStreamDestroyed: (() -> Void)?
     var onError: ((Error) -> Void)?
-
-    public lazy var view: AnyView = {
-        let view = otPublisher.view!
-        let rendererView = UIViewContainer(view: view)
-        return AnyView(rendererView)
-    }()
 
     public var publishAudio: Bool {
         get {
@@ -72,8 +72,12 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: false,
             isPinned: false,
-            viewBuilder: { AnyView(EmptyView()) })
+            view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
+    }
+
+    deinit {
+        cleanUp()
     }
 
     func setup() {
@@ -119,17 +123,32 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,
             videoDimensions: videoDimensions,
+            isRemote: false,
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
-            viewBuilder: { [weak self] in
-                guard let self else { return AnyView(EmptyView()) }
-                return AnyView(self.view)
-            })
+            view: view)
+    }
+
+    public func cleanUp() {
+        participant = participant.withEmptyView
+
+        cancellables.removeAll()
+
+        onStreamCreated = nil
+        onStreamDestroyed = nil
+        onError = nil
     }
 
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
-        print(error.localizedDescription)
         onError?(error)
+    }
+
+    public func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
+        onStreamCreated?()
+    }
+
+    public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
+        onStreamDestroyed?()
     }
 }

@@ -16,7 +16,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.red) }
+        view: AnyView(Color.red)
     )
 
     static let fordPrefect = Participant(
@@ -28,7 +28,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.green) }
+        view: AnyView(Color.green)
     )
 
     static let zaphodBeeblebrox = Participant(
@@ -40,7 +40,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.blue) }
+        view: AnyView(Color.blue)
     )
 
     static let trillian = Participant(
@@ -52,7 +52,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.yellow) }
+        view: AnyView(Color.yellow)
     )
 
     static let marvin = Participant(
@@ -64,7 +64,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.purple) }
+        view: AnyView(Color.purple)
     )
 
     static let slartibartfast = Participant(
@@ -76,7 +76,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.orange) }
+        view: AnyView(Color.orange)
     )
 
     static let eddie = Participant(
@@ -88,7 +88,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.cyan) }
+        view: AnyView(Color.cyan)
     )
 
     static let hummaKavula = Participant(
@@ -100,7 +100,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.mint) }
+        view: AnyView(Color.mint)
     )
 
     static let fenchurch = Participant(
@@ -112,7 +112,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.pink) }
+        view: AnyView(Color.pink)
     )
 
     // MARK: - Special State Participants
@@ -125,7 +125,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.red) }
+        view: AnyView(Color.red)
     )
 
     static let micOffParticipant = Participant(
@@ -137,7 +137,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
-        viewBuilder: { AnyView(Color.blue) }
+        view: AnyView(Color.blue)
     )
 
     // MARK: - Array Collections

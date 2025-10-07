@@ -8,6 +8,11 @@ import OpenTok
 import VERACore
 
 public final class OpenTokCall: CallFacade {
+
+    enum Error: Swift.Error {
+        case SelfMissingOnDisconnect
+    }
+
     private var cancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
@@ -19,19 +24,16 @@ public final class OpenTokCall: CallFacade {
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
-    private let subscribersRepository = SubscribersRepository()
-    private let participantsRepository = ParticipantsRepository()
-
+    public let id: UUID = UUID()
     public let token: String
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
     public var publisherParticipant: Participant?
+    private let subscriberFactory = OpenTokSubscriberFactory()
 
     private let activeSpeakerTracker = ActiveSpeakerTracker()
-
-    enum Error: Swift.Error {
-        case subscriberCreationFailed
-    }
+    private lazy var callStateManager = CallStateManager(
+        activeSpeakerTracker: activeSpeakerTracker)
 
     public init(
         token: String,
@@ -44,112 +46,141 @@ public final class OpenTokCall: CallFacade {
     }
 
     public func setup() {
-        session.onNewStream = addSubscriber
-        session.onStreamDestroyed = removeSubscriber
-        session.onSessionFailure = sessionDidFail
-        session.onSessionDidConnect = publishToSession
+        session.onNewStream = { [weak self] stream in
+            self?.addSubscriber(stream)
+        }
+        session.onStreamDestroyed = { [weak self] stream in
+            self?.removeSubscriber(stream)
+        }
+        session.onSessionFailure = { [weak self] error in
+            self?.sessionDidFail(error)
+        }
+        session.onSessionDidConnect = { [weak self] in
+            self?.publishToSession()
+        }
 
         updateMediaState()
+        setupActiveSpeakerObservation()
+    }
+
+    func updateParticipantsState(_ state: ParticipantsState) async {
+        _participantsPublisher.value = .init(
+            localParticipant: publisherParticipant,
+            participants: state.participants,
+            activeParticipantId: state.activeParticipantId
+        )
     }
 
     // MARK: Publisher
     private func publishToSession() {
+        guard !publisher.hasSession else { return }
         do {
             try session.publish(publisher: publisher)
             publisherParticipant = publisher.participant
             publisher.setup()
             setupPublisherObservation(publisher)
-            Task {
-                await updateParticipants()
-            }
         } catch {
             _eventsPublisher.send(.error(error))
         }
     }
 
+    private func setupActiveSpeakerObservation() {
+        activeSpeakerTracker.$activeSpeaker
+            .removeDuplicates()
+            .sink { info in
+                Task { [weak self] in
+                    guard let self else { return }
+                    let state = await self.callStateManager.getCurrentState()
+                    await self.updateParticipantsState(state)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     private func setupPublisherObservation(_ publisher: OpenTokPublisher) {
         publisher.$participant
             .sink { [weak self] participant in
-                Task {
-                    self?.publisherParticipant = participant
-                    await self?.updateParticipants()
+                guard let self = self else { return }
+                self.publisherParticipant = participant
+
+                let currentState = self._participantsPublisher.value
+
+                let newState = ParticipantsState(
+                    localParticipant: participant,
+                    participants: currentState.participants,
+                    activeParticipantId: currentState.activeParticipantId
+                )
+                Task { [weak self] in
+                    await self?.updateParticipantsState(newState)
                 }
             }
             .store(in: &cancellables)
     }
 
     // MARK: Subscriber
+
     private func addSubscriber(_ stream: OTStream) {
+        Task { [weak self] in
+            guard let self else { return }
+            await self.doSubscribe(stream)
+        }
+    }
+
+    @MainActor
+    private func doSubscribe(_ stream: OTStream) async {
         do {
-            guard let subscriber = OTSubscriber(stream: stream, delegate: nil) else {
-                throw Error.subscriberCreationFailed
-            }
-            let openTokSubscriber = OpenTokSubscriber(subscriber: subscriber)
-            openTokSubscriber.setup()
+            let openTokSubscriber = try subscriberFactory.makeSubscriber(stream)
             openTokSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
             }
-            subscriber.delegate = openTokSubscriber
-            subscriber.audioLevelDelegate = openTokSubscriber
-            subscriber.captionsDelegate = openTokSubscriber
-            openTokSubscriber.$audioLevel.sink { [weak self] audioLevel in
-                self?.activeSpeakerTracker.updatedParticipant(
-                    .init(
-                        id: openTokSubscriber.participant.id,
-                        audioLevel: audioLevel,
-                        isMicEnabled:
-                            openTokSubscriber.participant.isMicEnabled))
-            }.store(in: &cancellables)
+
+            setupSubscriberObservation(openTokSubscriber)
+            setupAudioLevelObservation(openTokSubscriber)
+
             try session.subscribe(subscriber: openTokSubscriber)
 
-            Task {
-                await subscribersRepository.addSubscriber(openTokSubscriber)
-                await participantsRepository.addParticipant(openTokSubscriber.participant)
-
-
-                setupSubscriberObservation(openTokSubscriber)
-
-                await recalculateActiveSpeaker()
-                await updateParticipants()
-            }
+            let state = await callStateManager.addSubscriber(openTokSubscriber)
+            await updateParticipantsState(state)
         } catch {
             _eventsPublisher.send(.error(error))
         }
     }
 
-    private func recalculateActiveSpeaker() async {
-        let participants = await participantsRepository.all
-        activeSpeakerTracker.calculateActiveSpeaker(
-            from: participants.map {
-                SpeakerInfo(id: $0.id, audioLevel: 0, isMicEnabled: $0.isMicEnabled)
-            })
-    }
 
     private func setupSubscriberObservation(_ subscriber: OpenTokSubscriber) {
         subscriber.$participant
-            .sink { [weak self] participant in
-                Task {
-                    await self?.participantsRepository.addParticipant(participant)
-                    await self?.updateParticipants()
+            .sink { participant in
+                Task { [weak self] in
+                    guard let self = self else { return }
+                    let state = await self.callStateManager.updateParticipant(participant)
+                    await self.updateParticipantsState(state)
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupAudioLevelObservation(_ subscriber: OpenTokSubscriber) {
+        subscriber.$audioLevel
+            .sink { audioLevel in
+                Task { [weak self] in
+                    guard let self = self else { return }
+                    let speakerInfo = SpeakerInfo(
+                        id: subscriber.participant.id,
+                        audioLevel: audioLevel,
+                        isMicEnabled: subscriber.participant.isMicEnabled
+                    )
+                    await self.callStateManager.updateActiveSpeaker(speakerInfo)
                 }
             }
             .store(in: &cancellables)
     }
 
     private func removeSubscriber(_ stream: OTStream) {
-        Task {
-            guard let subscriber = await subscribersRepository.getSubscriber(id: stream.streamId) else { return }
-
-            do {
-                await subscribersRepository.removeSubscriber(id: stream.streamId)
-                await participantsRepository.removeParticipant(id: stream.streamId)
-                await recalculateActiveSpeaker()
-                await updateParticipants()
-
-                try session.unsubscribe(subscriber: subscriber)
-            } catch {
-                _eventsPublisher.send(.error(error))
-            }
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+            let (_, state) = await callStateManager.removeSubscriber(id: stream.streamId)
+            // There is no need to do a session unsubscribe if the stream has been destroyed
+            await self.updateParticipantsState(state)
         }
     }
 
@@ -163,24 +194,65 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
-    public func disconnect() {
+    var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
+
+    public func disconnect() async throws {
+        try await withCheckedThrowingContinuation { [weak self] continuation in
+            self?.disconnectContinuation = continuation
+            Task { @MainActor [weak self] in
+                guard let self else {
+                    self?.disconnectContinuation?.resume(throwing: Error.SelfMissingOnDisconnect)
+                    self?.disconnectContinuation = nil
+                    return
+                }
+                do {
+                    self.publisher.onStreamDestroyed = { [weak self] in
+                        self?.cleanUp()
+                    }
+
+                    assertMainThread()
+
+                    // If publisher does not have a session, doesn't need
+                    // to be unpublished.
+                    if publisher.hasSession {
+                        try self.session.unpublish(publisher: publisher)
+                    } else {
+                        self.cleanUp()
+                    }
+                } catch {
+                    self.disconnectContinuation?.resume(throwing: error)
+                    self.disconnectContinuation = nil
+                    self.cleanUp()
+                    self._eventsPublisher.value = .error(error)
+                }
+            }
+        }
+    }
+
+    private func cleanUp() {
         do {
+            Task { [weak self] in
+                guard let self else { return }
+                await self.callStateManager.cleanUpParticipants()
+            }
+
+            cancellables.forEach { $0.cancel() }
+            cancellables.removeAll()
             try session.disconnect()
+            publisher.cleanUp()
+            session.cleanUp()
+            disconnectContinuation?.resume()
+            disconnectContinuation = nil
         } catch {
             _eventsPublisher.value = .error(error)
+
+            disconnectContinuation?.resume(throwing: error)
+            disconnectContinuation = nil
         }
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
         _eventsPublisher.send(.error(error))
-    }
-
-    private func updateParticipants() async {
-        let participants = await participantsRepository.all
-        _participantsPublisher.value = .init(
-            localParticipant: publisherParticipant,
-            participants: participants,
-            activeParticipantId: activeSpeakerTracker.activeSpeaker.participantId)
     }
 
     // MARK: Audio/Video toggles
@@ -190,21 +262,15 @@ public final class OpenTokCall: CallFacade {
     }
 
     public func toggleLocalVideo() {
-        Task {
-            publisher.publishVideo.toggle()
+        publisher.publishVideo.toggle()
 
-            updateMediaState()
-            await updateParticipants()
-        }
+        updateMediaState()
     }
 
     public func toggleLocalAudio() {
-        Task {
-            publisher.publishAudio.toggle()
+        publisher.publishAudio.toggle()
 
-            updateMediaState()
-            await updateParticipants()
-        }
+        updateMediaState()
     }
 
     private func updateMediaState() {
