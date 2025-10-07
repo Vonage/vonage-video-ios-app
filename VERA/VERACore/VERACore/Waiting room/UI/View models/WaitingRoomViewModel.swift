@@ -15,6 +15,7 @@ public enum WaitingRoomViewState: Equatable {
 }
 
 public final class WaitingRoomViewModel: ObservableObject {
+    private var cancellables = Set<AnyCancellable>()
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
@@ -34,7 +35,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
 
-    private var cancellables = Set<AnyCancellable>()
+    private var initialised: Bool = false
 
     public init(
         roomName: RoomName,
@@ -61,6 +62,9 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func loadUI() {
+        guard !initialised else { return }
+        initialised = true
+
         observeAudioDevices()
         observeCameraDevices()
 
@@ -70,6 +74,8 @@ public final class WaitingRoomViewModel: ObservableObject {
             roomName: roomName,
             isMicrophoneEnabled: false,
             isCameraEnabled: false)
+
+        startVideoPreviewIfNeeded()
     }
 
     private func observeAudioDevices() {
@@ -229,12 +235,12 @@ public final class WaitingRoomViewModel: ObservableObject {
         let cameraGranted = await requestCameraPermissionUseCase()
         guard cameraGranted else { return }
 
-        await startVideoPreview()
+        startVideoPreview()
     }
 
     @MainActor
-    public func startVideoPreview() async {
-        let publisher = await cameraPreviewProviderRepository.getPublisher()
+    public func startVideoPreview() {
+        let publisher = cameraPreviewProviderRepository.getPublisher()
         self.publisher = publisher
 
         buildContentUiState(

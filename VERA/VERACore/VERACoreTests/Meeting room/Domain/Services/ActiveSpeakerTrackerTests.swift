@@ -233,9 +233,6 @@ struct ActiveSpeakerTrackerTests {
         sut.calculateActiveSpeaker(from: [currentSpeaker])
         #expect(sut.activeSpeaker.participantId == "current_speaker")
 
-        // Wait for cooldown to pass
-        try await Task.sleep(for: .seconds(1.6))
-
         // Same participant with lower audio level should remain active speaker
         let quieterCurrentSpeaker = makeMockParticipant(
             id: "current_speaker",
@@ -445,6 +442,27 @@ struct ActiveSpeakerTrackerTests {
         sut.updatedParticipant(speaker3)  // Quieter than current active, should not change
         #expect(sut.activeSpeaker.participantId == "speaker2")
         #expect(sut.activeSpeaker.audioLevel == 0.5)
+    }
+
+    @Test func currentSpeakerLowersAudioLevelThenSecondBecomesActiveSpeaker() async throws {
+        let sut = makeSUT()
+
+        // Multiple participants
+        var speaker1 = SpeakerInfo(id: "speaker1", audioLevel: 0.3, isMicEnabled: true)
+        var speaker2 = SpeakerInfo(id: "speaker2", audioLevel: 0.5, isMicEnabled: true)
+
+        sut.calculateActiveSpeaker(from: [speaker1, speaker2])
+        #expect(sut.activeSpeaker.participantId == "speaker2")
+
+        // Active speaker still active but with lower audio level
+        speaker2 = SpeakerInfo(id: "speaker2", audioLevel: 0.1, isMicEnabled: true)
+        sut.updatedParticipant(speaker2)
+        #expect(sut.activeSpeaker.participantId == "speaker2")
+
+        // Active is replaced by another participant
+        speaker1 = SpeakerInfo(id: "speaker1", audioLevel: 0.9, isMicEnabled: true)
+        sut.updatedParticipant(speaker1)
+        #expect(sut.activeSpeaker.participantId == "speaker1")
     }
 
     // MARK: - Test Helpers

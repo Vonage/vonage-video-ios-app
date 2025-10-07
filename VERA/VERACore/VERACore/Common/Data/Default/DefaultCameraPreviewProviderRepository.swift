@@ -13,12 +13,13 @@ public final class DefaultCameraPreviewProviderRepository: CameraPreviewProvider
         self.publisherFactory = publisherFactory
     }
 
-    public func getPublisher() async -> VERAPublisher {
+    public func getPublisher() -> VERAPublisher {
         if let publisher = publisher {
             return publisher
         }
-        self.publisher = await publisherFactory.make(.init(scaleBehavior: .fit))
-        return self.publisher!
+        let producedPublisher = publisherFactory.make(.init(scaleBehavior: .fit))
+        self.publisher = producedPublisher
+        return producedPublisher
     }
 
     public func resetPublisher() {

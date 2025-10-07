@@ -54,39 +54,17 @@ echo ""
 
 # Step 1: Check Swift formatting
 echo "📝 Step 1/2: Checking Swift format..."
-FORMAT_ISSUES=""
-FORMAT_COUNT=0
-
-while IFS= read -r -d '' file; do
-  if [ -f "$file" ]; then
-    FORMAT_COUNT=$((FORMAT_COUNT + 1))
-    if ! swift-format format --configuration .swift-format "$file" | diff -q "$file" - > /dev/null 2>&1; then
-      FORMAT_ISSUES="$FORMAT_ISSUES$file needs formatting\n"
-    fi
-  fi
-done < <(find ./VERA -name "*.swift" \
-  -not -path "./build/*" \
-  -not -path "./.build/*" \
-  -not -path "./DerivedData/*" \
-  -not -path "./Pods/*" \
-  -not -path "./Carthage/*" \
-  -not -path "./vendor/*" \
-  -not -path "*/project.xcworkspace/*" -print0)
-
-if [ -n "$FORMAT_ISSUES" ]; then
-  echo ""
-  echo "❌ Format issues found in $FORMAT_COUNT files:"
-  echo -e "$FORMAT_ISSUES"
-  echo ""
-  echo "💡 To fix format issues:"
-  echo "   swift-format format --in-place --configuration .swift-format <file>"
-  echo "   scripts/format.sh --fix                   # Format all files"
-  echo "   scripts/format.sh --check                 # Check format only"
-  echo ""
-  echo "� Push rejected due to format violations"
-  exit 1
+if ! chmod +x scripts/format.sh || ! ./scripts/format.sh --check; then
+    echo ""
+    echo "❌ Format issues found"
+    echo ""
+    echo "💡 To fix format issues:"
+    echo "   ./scripts/format.sh --fix    # Format all files"
+    echo ""
+    echo "🚫 Push rejected due to format violations"
+    exit 1
 else
-  echo "✅ Format check passed on $FORMAT_COUNT files!"
+    echo "✅ Format check passed!"
 fi
 
 echo ""

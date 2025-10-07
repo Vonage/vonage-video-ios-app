@@ -25,7 +25,7 @@ public struct LandingPageScreen: View {
         )
         .onReceive(viewModel.$state) { value in
             switch value {
-            case let .success(roomName): onNavigateToWaitingRoom(roomName)
+            case .success(let roomName): onNavigateToWaitingRoom(roomName)
             default: break
             }
         }
