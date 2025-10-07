@@ -73,7 +73,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
-          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
@@ -89,7 +89,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -97,6 +97,22 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
     
+    - name: Run VERATests (iOS Simulator)
+      id: vera-app-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERATests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERATests \
+          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
     - name: Upload all test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -107,6 +123,7 @@ jobs:
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/Build/Products/
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
+          DerivedData/VERATests-iOS.xcresult
 
 #  ui-tests:
 #    runs-on: macos-26
@@ -132,7 +149,7 @@ jobs:
 #        xcodebuild test \
 #          -workspace VERA/VERA.xcworkspace \
 #          -scheme VERAUITests \
-#          -destination "id=80A33455-35A3-4E4E-AE5A-2F222162FB35" \
+#          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
 #          -only-testing:VERAUITests \
 #          -enableCodeCoverage YES \
 #          -derivedDataPath DerivedData \
@@ -238,7 +255,7 @@ jobs:
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.organization="$SONAR_ORGANIZATION" \
           -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests \
+          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERATests \
           -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
           -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
           -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \

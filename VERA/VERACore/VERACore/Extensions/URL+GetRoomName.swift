@@ -9,19 +9,39 @@ extension URL {
     /// - Parameter baseURL: The base domain URL
     /// - Returns: The room name or nil if not valid
     public func getRoomName(from baseURL: URL) -> String? {
-        // Compare hosts (domains)
-        guard self.host == baseURL.host else {
+
+        let selfHost = self.host?.lowercased()
+        let baseHost = baseURL.host?.lowercased()
+
+        // Hosts must match
+        guard let selfHost = selfHost,
+            let baseHost = baseHost,
+            selfHost == baseHost
+        else {
             return nil
         }
 
-        // Extract the path without the initial "/"
-        let roomName = String(self.path.dropFirst())
+        // Get path components
+        let pathComponents = self.pathComponents
 
-        // Validate that it's not empty and doesn't contain invalid characters
+        // Find room or waiting-room in path
+        guard let roomIndex = pathComponents.firstIndex(where: { $0 == "room" || $0 == "waiting-room" }),
+            roomIndex + 1 < pathComponents.count
+        else {
+            return nil
+        }
+
+        let roomName = pathComponents[roomIndex + 1]
+
+        // Validate room name
         guard !roomName.isEmpty,
-            !roomName.contains("/"),  // No sub-paths
-            !roomName.hasPrefix(".")
-        else {  // No hidden files
+            roomName != "/",
+            !roomName.hasPrefix("."),  // No hidden files
+            !roomName.contains("/"),  // No additional slashes
+            !roomName.contains("?"),  // No query params (shouldn't happen with pathComponents)
+            !roomName.contains("#"),  // No fragments (shouldn't happen with pathComponents)
+            roomName.allSatisfy({ $0.isASCII })  // ASCII only
+        else {
             return nil
         }
 
