@@ -98,7 +98,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
     
     - name: Run VERATests (iOS Simulator)
-      id: opentok-tests
+      id: vera-app-tests
       timeout-minutes: 15
       run: |
         echo "📡 Running VERATests on iOS Simulator"
