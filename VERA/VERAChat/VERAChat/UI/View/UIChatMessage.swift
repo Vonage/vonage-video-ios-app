@@ -5,20 +5,26 @@
 import Foundation
 
 // MARK: - UI Chat Message Model
-struct UIChatMessage: Identifiable, Equatable {
-    let id = UUID()
-    let username: String
-    let message: String
-    let date: String
+public struct UIChatMessage: Identifiable, Equatable {
+    public let id = UUID()
+    public let username: String
+    public let message: String
+    public let date: String
 
-    static func == (lhs: UIChatMessage, rhs: UIChatMessage) -> Bool {
+    public init(username: String, message: String, date: String) {
+        self.username = username
+        self.message = message
+        self.date = date
+    }
+
+    public static func == (lhs: UIChatMessage, rhs: UIChatMessage) -> Bool {
         return lhs.id == rhs.id
     }
 }
 
 // MARK: - Sample Data
 extension UIChatMessage {
-    static let sampleMessages: [UIChatMessage] = [
+    public static let sampleMessages: [UIChatMessage] = [
         UIChatMessage(
             username: "Arthur Dent",
             message: "Don't panic! I've got my towel.",

@@ -4,12 +4,19 @@
 
 import SwiftUI
 
-struct ChatPanel: View {
-    let messages: [UIChatMessage]
-    let onCloseChat: () -> Void
-    let onSendMessage: (String) -> Void
+public struct ChatPanel: View {
+    public let messages: [UIChatMessage]
+    public let onSendMessage: (String) -> Void
 
-    var body: some View {
+    public init(
+        messages: [UIChatMessage],
+        onSendMessage: @escaping (String) -> Void
+    ) {
+        self.messages = messages
+        self.onSendMessage = onSendMessage
+    }
+
+    public var body: some View {
         VStack(spacing: 0) {
             ChatPanelMessages(messages: messages)
 
@@ -57,7 +64,6 @@ struct ChatPanelInput: View {
 #Preview("Chat Panel") {
     ChatPanel(
         messages: UIChatMessage.sampleMessages,
-        onCloseChat: { print("Close chat") },
         onSendMessage: { message in print("Send: \(message)") }
     )
 }

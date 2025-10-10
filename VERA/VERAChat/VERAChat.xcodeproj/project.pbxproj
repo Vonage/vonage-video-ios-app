@@ -12,10 +12,19 @@
 		6F55F82A2E9939FF00CBCA2D /* VERACommonUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8282E9939FF00CBCA2D /* VERACommonUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F55F82D2E993A0700CBCA2D /* VERADomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F82C2E993A0700CBCA2D /* VERADomain.framework */; };
 		6F55F82E2E993A0700CBCA2D /* VERADomain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F82C2E993A0700CBCA2D /* VERADomain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6F55F8692E994BE900CBCA2D /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; };
+		6F55F86A2E994BE900CBCA2D /* VERAChat.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		6F55F7B22E99335900CBCA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F7A42E99335800CBCA2D;
+			remoteInfo = VERAChat;
+		};
+		6F55F86B2E994BE900CBCA2D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
 			proxyType = 1;
@@ -37,6 +46,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F55F86D2E994BE900CBCA2D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6F55F86A2E994BE900CBCA2D /* VERAChat.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +64,7 @@
 		6F55F7B02E99335900CBCA2D /* VERAChatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAChatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8282E9939FF00CBCA2D /* VERACommonUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACommonUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F82C2E993A0700CBCA2D /* VERADomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERADomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERAChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -55,6 +76,11 @@
 		6F55F7B42E99335900CBCA2D /* VERAChatTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = VERAChatTests;
+			sourceTree = "<group>";
+		};
+		6F55F8432E994BDE00CBCA2D /* VERAChatApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VERAChatApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -77,6 +103,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F55F83F2E994BDE00CBCA2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F55F8692E994BE900CBCA2D /* VERAChat.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -85,6 +119,7 @@
 			children = (
 				6F55F7A72E99335800CBCA2D /* VERAChat */,
 				6F55F7B42E99335900CBCA2D /* VERAChatTests */,
+				6F55F8432E994BDE00CBCA2D /* VERAChatApp */,
 				6F55F8272E9939FF00CBCA2D /* Frameworks */,
 				6F55F7A62E99335800CBCA2D /* Products */,
 			);
@@ -95,6 +130,7 @@
 			children = (
 				6F55F7A52E99335800CBCA2D /* VERAChat.framework */,
 				6F55F7B02E99335900CBCA2D /* VERAChatTests.xctest */,
+				6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,6 +204,30 @@
 			productReference = 6F55F7B02E99335900CBCA2D /* VERAChatTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		6F55F8412E994BDE00CBCA2D /* VERAChatApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F55F8602E994BDF00CBCA2D /* Build configuration list for PBXNativeTarget "VERAChatApp" */;
+			buildPhases = (
+				6F55F83E2E994BDE00CBCA2D /* Sources */,
+				6F55F83F2E994BDE00CBCA2D /* Frameworks */,
+				6F55F8402E994BDE00CBCA2D /* Resources */,
+				6F55F86D2E994BE900CBCA2D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F55F86C2E994BE900CBCA2D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6F55F8432E994BDE00CBCA2D /* VERAChatApp */,
+			);
+			name = VERAChatApp;
+			packageProductDependencies = (
+			);
+			productName = VERAChatApp;
+			productReference = 6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -182,6 +242,9 @@
 						CreatedOnToolsVersion = 26.0.1;
 					};
 					6F55F7AF2E99335900CBCA2D = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					6F55F8412E994BDE00CBCA2D = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
@@ -202,6 +265,7 @@
 			targets = (
 				6F55F7A42E99335800CBCA2D /* VERAChat */,
 				6F55F7AF2E99335900CBCA2D /* VERAChatTests */,
+				6F55F8412E994BDE00CBCA2D /* VERAChatApp */,
 			);
 		};
 /* End PBXProject section */
@@ -215,6 +279,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6F55F7AE2E99335900CBCA2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F8402E994BDE00CBCA2D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -238,6 +309,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F55F83E2E994BDE00CBCA2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -245,6 +323,11 @@
 			isa = PBXTargetDependency;
 			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
 			targetProxy = 6F55F7B22E99335900CBCA2D /* PBXContainerItemProxy */;
+		};
+		6F55F86C2E994BE900CBCA2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
+			targetProxy = 6F55F86B2E994BE900CBCA2D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -511,6 +594,75 @@
 			};
 			name = Release;
 		};
+		6F55F8612E994BDF00CBCA2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F55F8622E994BDF00CBCA2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -537,6 +689,15 @@
 			buildConfigurations = (
 				6F55F7BD2E99335900CBCA2D /* Debug */,
 				6F55F7BE2E99335900CBCA2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F55F8602E994BDF00CBCA2D /* Build configuration list for PBXNativeTarget "VERAChatApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F55F8612E994BDF00CBCA2D /* Debug */,
+				6F55F8622E994BDF00CBCA2D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
