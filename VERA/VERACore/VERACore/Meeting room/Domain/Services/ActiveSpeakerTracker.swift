@@ -39,6 +39,12 @@ public struct SpeakerInfo {
     }
 }
 
+extension Participant {
+    public func getSpeakerInfo(_ audioLevel: Float) -> SpeakerInfo {
+        .init(id: id, audioLevel: audioLevel, isMicEnabled: isMicEnabled)
+    }
+}
+
 /// Tracks and determines the active speaker in a meeting based on audio levels
 /// and microphone status.
 ///

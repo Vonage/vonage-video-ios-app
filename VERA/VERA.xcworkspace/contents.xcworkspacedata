@@ -5,6 +5,15 @@
       location = "container:"
       name = "Projects">
       <FileRef
+         location = "group:VERADomain/VERADomain.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERACommonUI/VERACommonUI.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERAChat/VERAChat.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:VERAOpenTok/VERAOpenTok.xcodeproj">
       </FileRef>
       <FileRef
