@@ -27,7 +27,7 @@ struct ChatRow: View {
                         .foregroundColor(.secondary)
                 }
                 Text(message.message)
-                    .font(.caption)
+                    .font(.body)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
