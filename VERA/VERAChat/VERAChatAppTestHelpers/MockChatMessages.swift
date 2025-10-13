@@ -1,76 +1,52 @@
 //
-//  Created by Vonage on 10/10/25.
+//  Created by Vonage on 13/10/25.
 //
 
 import Foundation
+import VERAChat
 
-// MARK: - UI Chat Message Model
-public struct UIChatMessage: Identifiable, Equatable {
-    public let id = UUID()
-    public let username: String
-    public let message: String
-    public let date: String
-
-    public init(username: String, message: String, date: String) {
-        self.username = username
-        self.message = message
-        self.date = date
-    }
-
-    public static func == (lhs: UIChatMessage, rhs: UIChatMessage) -> Bool {
-        return lhs.id == rhs.id
-    }
-}
-
-extension UIChatMessage {
-    public static func formattedDate(_ date: Date) -> String {
-        date.formatted(date: .omitted, time: .shortened)
-    }
-}
-
-// MARK: - Sample Data
-extension UIChatMessage {
+extension ChatMessage {
     private static let mockDate: Date = Date(timeIntervalSince1970: 1_760_352_680)
 
-    private static func formattedDateByAdding(_ interval: TimeInterval = 0) -> String {
-        UIChatMessage.formattedDate(mockDate.addingTimeInterval(interval))
+    private static func formattedDateByAdding(_ interval: TimeInterval = 0) -> Date {
+        mockDate.addingTimeInterval(interval)
     }
 
     /**
      * Sorted from oldest to newest
      */
-    public static let sampleMessages: [UIChatMessage] = [
-        UIChatMessage(
+    public static let sampleMessages: [ChatMessage] = [
+        ChatMessage(
             username: "Arthur Dent",
             message: "Don't panic! I've got my towel.",
             date: formattedDateByAdding()
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "Ford Prefect",
             message: "Time is an illusion. Lunchtime doubly so.",
             date: formattedDateByAdding(5)
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "Zaphod Beeblebrox IV",
             message: "Hey guys! Just stole a ship. The Infinite Improbability Drive is absolutely froody!",
             date: formattedDateByAdding(10)
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "Deep Thought",
             message: "The Answer to the Great Question of Life, the Universe and Everything is Forty-two.",
             date: formattedDateByAdding(300)
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "Marvin",
             message: "Life? Don't talk to me about life.",
             date: formattedDateByAdding(500)
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "Trillian",
             message: "So long and thanks for all the fish!",
             date: formattedDateByAdding(600)
         ),
-        UIChatMessage(
+        ChatMessage(
             username: "The Whale",
             message: "Oh no, not again. I wonder if it will be friends with me?",
             date: formattedDateByAdding(9900)

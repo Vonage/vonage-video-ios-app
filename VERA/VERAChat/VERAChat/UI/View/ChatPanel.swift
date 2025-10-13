@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct ChatPanel: View {
     public let messages: [UIChatMessage]
@@ -36,19 +37,21 @@ struct ChatPanelInput: View {
         HStack(alignment: .bottom, spacing: 12) {
             // Text Input
             TextField("Type a message...", text: $messageText, axis: .vertical)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .lineLimit(1...3)
+                .background(.clear)
 
             // Send Button
             Button(action: sendMessage) {
                 Image(systemName: "paperplane.fill")
                     .font(.title2)
                     .foregroundColor(
-                        messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .blue)
+                        messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .accent)
             }
             .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .buttonStyle(PlainButtonStyle())
         }
+        .padding(12)
+        .background(GlassBackground())
     }
 
     private func sendMessage() {
@@ -58,6 +61,33 @@ struct ChatPanelInput: View {
         onSendMessage(trimmedMessage)
         messageText = ""
     }
+}
+
+struct GlassBackground: View {
+    var body: some View {
+        #if os(macOS)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.vGray4.opacity(0.8))
+        #else
+            Group {
+                if #available(iOS 26.0, *) {
+                    RoundedRectangle(cornerRadius: 16)
+                        .glassEffect(in: .rect(cornerRadius: 16.0))
+                } else {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.gray4.opacity(0.8))
+                }
+            }
+        #endif
+    }
+
+    #if !os(macOS)
+        @available(iOS 26.0, *)
+        private func glassEffectBackground() -> some View {
+            RoundedRectangle(cornerRadius: 16)
+                .glassEffect(in: .rect(cornerRadius: 16.0))
+        }
+    #endif
 }
 
 // MARK: - Previews

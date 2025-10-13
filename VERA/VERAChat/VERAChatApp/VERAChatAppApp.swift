@@ -4,28 +4,46 @@
 
 import SwiftUI
 import VERAChat
+import VERAChatAppTestHelpers
 
 @main
 struct VERAChatAppApp: App {
 
-    @State var messages: [UIChatMessage] = UIChatMessage.sampleMessages
+    let repository: ChatMessagesRepository
+    @ObservedObject var viewModel: ChatPanelViewModel
+
+    init() {
+        repository = DefaultChatMessagesRepository(messages: ChatMessage.sampleMessages)
+        viewModel = ChatPanelViewModel(chatMessagesRepository: repository)
+    }
 
     var body: some Scene {
         WindowGroup {
-            ChatPanel(
-                messages: messages,
-                onSendMessage: { message in
-                    addMessage(message)
-                }
-            )
+            switch viewModel.state {
+            case .content(let chatPannelState):
+                ChatPanel(
+                    messages: chatPannelState.messages,
+                    onSendMessage: { message in
+                        addMessage(message)
+                    }
+                )
+            case .error(let string):
+                Text(string)
+            case .loading:
+                ProgressView()
+                    .onAppear {
+                        viewModel.loadData()
+                    }
+            @unknown default: fatalError("Unknown case")
+            }
         }
     }
 
     func addMessage(_ message: String) {
-        messages.insert(
+        repository.addMessage(
             .init(
                 username: "Me",
                 message: message,
-                date: Date().formatted(date: .omitted, time: .shortened)), at: 0)
+                date: Date()))
     }
 }

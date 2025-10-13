@@ -14,6 +14,9 @@
 		6F55F82E2E993A0700CBCA2D /* VERADomain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F82C2E993A0700CBCA2D /* VERADomain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F55F8692E994BE900CBCA2D /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; };
 		6F55F86A2E994BE900CBCA2D /* VERAChat.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6F55F8862E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
+		6F55F8872E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6F55F88B2E9D2BC100CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +33,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 6F55F7A42E99335800CBCA2D;
 			remoteInfo = VERAChat;
+		};
+		6F55F8842E9D28D800CBCA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F87F2E9D28D800CBCA2D;
+			remoteInfo = VERAChatAppTestHelpers;
+		};
+		6F55F88C2E9D2BC100CBCA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F87F2E9D28D800CBCA2D;
+			remoteInfo = VERAChatAppTestHelpers;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -52,6 +69,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				6F55F8872E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Embed Frameworks */,
 				6F55F86A2E994BE900CBCA2D /* VERAChat.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -65,6 +83,7 @@
 		6F55F8282E9939FF00CBCA2D /* VERACommonUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACommonUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F82C2E993A0700CBCA2D /* VERADomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERADomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERAChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAChatAppTestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -81,6 +100,11 @@
 		6F55F8432E994BDE00CBCA2D /* VERAChatApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = VERAChatApp;
+			sourceTree = "<group>";
+		};
+		6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VERAChatAppTestHelpers;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -107,7 +131,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F55F8862E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */,
+				6F55F88B2E9D2BC100CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */,
 				6F55F8692E994BE900CBCA2D /* VERAChat.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F87D2E9D28D800CBCA2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,6 +153,7 @@
 				6F55F7A72E99335800CBCA2D /* VERAChat */,
 				6F55F7B42E99335900CBCA2D /* VERAChatTests */,
 				6F55F8432E994BDE00CBCA2D /* VERAChatApp */,
+				6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
 				6F55F8272E9939FF00CBCA2D /* Frameworks */,
 				6F55F7A62E99335800CBCA2D /* Products */,
 			);
@@ -131,6 +165,7 @@
 				6F55F7A52E99335800CBCA2D /* VERAChat.framework */,
 				6F55F7B02E99335900CBCA2D /* VERAChatTests.xctest */,
 				6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */,
+				6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -148,6 +183,13 @@
 
 /* Begin PBXHeadersBuildPhase section */
 		6F55F7A02E99335800CBCA2D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F87B2E9D28D800CBCA2D /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -217,6 +259,8 @@
 			);
 			dependencies = (
 				6F55F86C2E994BE900CBCA2D /* PBXTargetDependency */,
+				6F55F8852E9D28D800CBCA2D /* PBXTargetDependency */,
+				6F55F88D2E9D2BC100CBCA2D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F55F8432E994BDE00CBCA2D /* VERAChatApp */,
@@ -227,6 +271,29 @@
 			productName = VERAChatApp;
 			productReference = 6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */;
 			productType = "com.apple.product-type.application";
+		};
+		6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F55F8882E9D28D800CBCA2D /* Build configuration list for PBXNativeTarget "VERAChatAppTestHelpers" */;
+			buildPhases = (
+				6F55F87B2E9D28D800CBCA2D /* Headers */,
+				6F55F87C2E9D28D800CBCA2D /* Sources */,
+				6F55F87D2E9D28D800CBCA2D /* Frameworks */,
+				6F55F87E2E9D28D800CBCA2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
+			);
+			name = VERAChatAppTestHelpers;
+			packageProductDependencies = (
+			);
+			productName = VERAChatAppTestHelpers;
+			productReference = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -245,6 +312,9 @@
 						CreatedOnToolsVersion = 26.0.1;
 					};
 					6F55F8412E994BDE00CBCA2D = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					6F55F87F2E9D28D800CBCA2D = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
@@ -266,6 +336,7 @@
 				6F55F7A42E99335800CBCA2D /* VERAChat */,
 				6F55F7AF2E99335900CBCA2D /* VERAChatTests */,
 				6F55F8412E994BDE00CBCA2D /* VERAChatApp */,
+				6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
 			);
 		};
 /* End PBXProject section */
@@ -286,6 +357,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6F55F8402E994BDE00CBCA2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F87E2E9D28D800CBCA2D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -316,6 +394,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6F55F87C2E9D28D800CBCA2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -328,6 +413,16 @@
 			isa = PBXTargetDependency;
 			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
 			targetProxy = 6F55F86B2E994BE900CBCA2D /* PBXContainerItemProxy */;
+		};
+		6F55F8852E9D28D800CBCA2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
+			targetProxy = 6F55F8842E9D28D800CBCA2D /* PBXContainerItemProxy */;
+		};
+		6F55F88D2E9D2BC100CBCA2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
+			targetProxy = 6F55F88C2E9D2BC100CBCA2D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -469,7 +564,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -478,7 +573,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -495,7 +590,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Debug;
 		};
@@ -514,7 +609,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -523,7 +618,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -540,7 +635,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Release;
 		};
@@ -663,6 +758,96 @@
 			};
 			name = Release;
 		};
+		6F55F8892E9D28D800CBCA2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatAppTestHelpers;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		6F55F88A2E9D28D800CBCA2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatAppTestHelpers;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -698,6 +883,15 @@
 			buildConfigurations = (
 				6F55F8612E994BDF00CBCA2D /* Debug */,
 				6F55F8622E994BDF00CBCA2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F55F8882E9D28D800CBCA2D /* Build configuration list for PBXNativeTarget "VERAChatAppTestHelpers" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F55F8892E9D28D800CBCA2D /* Debug */,
+				6F55F88A2E9D28D800CBCA2D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

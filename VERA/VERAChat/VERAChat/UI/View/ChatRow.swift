@@ -18,7 +18,7 @@ struct ChatRow: View {
             ).frame(
                 width: .avatarSize,
                 height: .avatarSize)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(message.username)
                         .font(.caption)
@@ -27,10 +27,11 @@ struct ChatRow: View {
                         .foregroundColor(.secondary)
                 }
                 Text(message.message)
-                    .font(.body)
+                    .font(.caption)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
     }
 }
 
@@ -39,7 +40,7 @@ extension CGFloat {
 }
 
 #Preview("Different Cases") {
-    VStack(spacing: 16) {
+    VStack(spacing: 8) {
         // Normal message
         ChatRow(
             message: .init(
@@ -73,7 +74,7 @@ extension CGFloat {
 }
 
 #Preview("Dark color scheme") {
-    VStack(spacing: 16) {
+    VStack(spacing: 8) {
         ChatRow(
             message: .init(
                 username: "Ford Prefect",

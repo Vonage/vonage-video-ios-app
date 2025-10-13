@@ -7,13 +7,17 @@ import SwiftUI
 struct ChatPanelMessages: View {
     let messages: [UIChatMessage]
 
+    private var lastMessageId: UUID? {
+        messages.last?.id
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             let scrollToBottomAction = {
-                guard let lastMessage = messages.first else { return }
+                guard let messageId = lastMessageId else { return }
 
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    proxy.scrollTo(lastMessage.id)
+                    proxy.scrollTo(messageId, anchor: .bottom)
                 }
             }
 
@@ -22,7 +26,7 @@ struct ChatPanelMessages: View {
                     Spacer(minLength: 0)
 
                     LazyVStack(spacing: 8) {
-                        ForEach(messages.reversed()) { message in
+                        ForEach(messages) { message in
                             ChatRow(message: message)
                         }
                     }
@@ -31,13 +35,24 @@ struct ChatPanelMessages: View {
                     .frame(maxWidth: .infinity, alignment: .bottom)
                 }
             }
-            .defaultScrollAnchor(.bottom)
-            .onAppear {
-                scrollToBottomAction()
+            .modifier(ConditionalScrollAnchor())
+            .onChange(of: lastMessageId) { messageId in
+                guard messageId != nil else { return }
+
+                DispatchQueue.main.async {
+                    scrollToBottomAction()
+                }
             }
-            .onChange(of: messages.count) { _, _ in
-                scrollToBottomAction()
-            }
+        }
+    }
+}
+
+struct ConditionalScrollAnchor: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.defaultScrollAnchor(.bottom)
+        } else {
+            content
         }
     }
 }
