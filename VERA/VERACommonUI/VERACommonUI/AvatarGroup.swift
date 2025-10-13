@@ -4,13 +4,13 @@
 
 import SwiftUI
 
-struct AvatarGroup: View {
+public struct AvatarGroup: View {
     let users: [AvatarGroupUser]
     let maxVisible: Int
     let size: CGFloat
     let spacing: CGFloat
 
-    init(
+    public init(
         users: [AvatarGroupUser],
         maxVisible: Int = 4,
         size: CGFloat = 40,
@@ -30,7 +30,7 @@ struct AvatarGroup: View {
         max(0, users.count - maxVisible)
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(spacing: spacing) {
             ForEach(Array(visibleUsers.enumerated()), id: \.element.id) { index, user in
                 AvatarView(
@@ -82,7 +82,7 @@ struct AvatarView: View {
     }
 }
 
-// MARK: - Avatar contador de overflow
+// MARK: - Avatar overflow counter
 struct OverflowCountAvatar: View {
     let count: Int
     let size: CGFloat
@@ -104,13 +104,13 @@ struct OverflowCountAvatar: View {
     }
 }
 
-struct AvatarGroupUser: Identifiable {
-    let id: String
-    let name: String
-    let backgroundColor: Color
-    let textColor: Color
+public struct AvatarGroupUser: Identifiable {
+    public let id: String
+    public let name: String
+    public let backgroundColor: Color
+    public let textColor: Color
 
-    init(
+    public init(
         id: String = UUID().uuidString,
         name: String,
         textColor: Color = .white

@@ -5,14 +5,14 @@
 import Combine
 import Foundation
 
-public struct ChatPannelState {
+public struct ChatPanelState {
     public let messages: [UIChatMessage]
 
-    public static let `default` = ChatPannelState(messages: [])
+    public static let `default` = ChatPanelState(messages: [])
 }
 
 public enum ChatPannelViewState {
-    case content(ChatPannelState)
+    case content(ChatPanelState)
     case error(String)
     case loading
 }
