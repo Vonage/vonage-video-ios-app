@@ -52,8 +52,6 @@ public struct ChatScreen: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible).onAppear {
-            viewModel.markAsRead()
-        }
+        .presentationDragIndicator(.visible)
     }
 }
