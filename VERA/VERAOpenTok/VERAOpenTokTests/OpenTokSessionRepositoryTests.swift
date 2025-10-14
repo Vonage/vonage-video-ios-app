@@ -17,7 +17,13 @@ struct OpenTokSessionRepositoryTests {
     func createsSessionSuccessfully() async throws {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
-        let sut = makeSUT(sessionFactory: sessionFactory, publisherRepository: publisherRepository)
+        let pluginRegistry = OpenTokPluginRegistry()
+        
+        let sut = makeSUT(
+            sessionFactory: sessionFactory,
+            publisherRepository: publisherRepository,
+            pluginRegistry: pluginRegistry)
+        
         let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
@@ -28,7 +34,13 @@ struct OpenTokSessionRepositoryTests {
     func clearsSessionSuccessfully() async throws {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
-        let sut = makeSUT(sessionFactory: sessionFactory, publisherRepository: publisherRepository)
+        let pluginRegistry = OpenTokPluginRegistry()
+        
+        let sut = makeSUT(
+            sessionFactory: sessionFactory,
+            publisherRepository: publisherRepository,
+            pluginRegistry: pluginRegistry)
+        
         let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
@@ -43,10 +55,12 @@ struct OpenTokSessionRepositoryTests {
 
     private func makeSUT<Factory: SessionFactory>(
         sessionFactory: Factory,
-        publisherRepository: PublisherRepository
+        publisherRepository: PublisherRepository,
+        pluginRegistry: OpenTokPluginRegistry
     ) -> OpenTokSessionRepository<Factory> where Factory.Session == OpenTokSession {
         OpenTokSessionRepository(
             sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository)
+            publisherRepository: publisherRepository,
+            pluginRegistry: pluginRegistry)
     }
 }
