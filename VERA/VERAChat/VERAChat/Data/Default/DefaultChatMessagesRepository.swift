@@ -23,6 +23,6 @@ public final class DefaultChatMessagesRepository: ChatMessagesRepository {
     public func clearMessages() {
         _messages.value = []
     }
-    
+
     public func observeMessages() -> AnyPublisher<[ChatMessage], Never> { messages }
 }

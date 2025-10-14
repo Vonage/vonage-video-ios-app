@@ -80,13 +80,13 @@ final class DependencyContainer {
     }()
 
     lazy var pluginRegistry: OpenTokPluginRegistry = {
-       let registry = OpenTokPluginRegistry()
+        let registry = OpenTokPluginRegistry()
         registry.registerPlugin(plugin: openTokChatPlugin)
         return registry
     }()
-    
+
     lazy var openTokChatPlugin = OpenTokChatPlugin()
-    
+
     lazy var roomCredentialsRepository: RoomCredentialsRepository = {
         DefaultRoomCredentialsRepository(
             baseURL: baseURL,

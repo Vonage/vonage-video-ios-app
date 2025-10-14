@@ -11,7 +11,7 @@ where Factory.Session == OpenTokSession {
     private let sessionFactory: Factory
     private let publisherRepository: PublisherRepository
     private let pluginRegistry: OpenTokPluginRegistry
-    
+
     public var currentCall: (any CallFacade)?
 
     public init(

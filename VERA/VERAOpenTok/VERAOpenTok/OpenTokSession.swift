@@ -14,7 +14,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     public var onNewStream: ((OTStream) -> Void)?
     var onStreamDestroyed: ((OTStream) -> Void)?
     var onSessionSignal: ((OpenTokSignal) -> Void)?
-    
+
     public init(session: OTSession) {
         self.session = session
     }
@@ -57,7 +57,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     public func sessionDidDisconnect(_ session: OTSession) {
         onSessionDidDisconnect?()
     }
-    
+
     public func subscribe(subscriber: OpenTokSubscriber) throws {
         assertMainThread()
         var error: OTError?
@@ -102,7 +102,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     // MARK: Signals
-    
+
     public func session(
         _ session: OTSession,
         receivedSignalType type: String?,
@@ -110,10 +110,10 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
         with string: String?
     ) {
         guard let type = type else { return }
-        
+
         onSessionSignal?(.init(type: type, data: string))
     }
-    
+
     public func emitSignal(_ signal: OutgoingSignal) throws {
         var error: OTError?
         session.signal(
@@ -121,14 +121,14 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
             string: signal.payload,
             connection: nil,
             error: &error)
-        
+
         if let error = error {
             throw error
         }
     }
-    
+
     // MARK: Clean up
-    
+
     func cleanUp() {
         onSessionDidConnect = nil
         onSessionDidDisconnect = nil

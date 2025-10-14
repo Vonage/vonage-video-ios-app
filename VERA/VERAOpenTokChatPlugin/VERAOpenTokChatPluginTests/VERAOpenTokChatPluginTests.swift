@@ -3,6 +3,7 @@
 //
 
 import Testing
+
 @testable import VERAOpenTokChatPlugin
 
 struct VERAOpenTokChatPluginTests {

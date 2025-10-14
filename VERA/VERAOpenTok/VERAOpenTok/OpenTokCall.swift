@@ -36,7 +36,7 @@ public final class OpenTokCall: CallFacade {
         activeSpeakerTracker: activeSpeakerTracker)
 
     public var plugins: [OpenTokPlugin] = []
-    
+
     public init(
         token: String,
         session: OpenTokSession,
@@ -70,7 +70,7 @@ public final class OpenTokCall: CallFacade {
             self?.handleSignal(signal)
         }
     }
-    
+
     func updateParticipantsState(_ state: ParticipantsState) async {
         _participantsPublisher.value = .init(
             localParticipant: publisherParticipant,
@@ -80,7 +80,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     // MARK: Publisher
-    
+
     private func publishToSession() {
         guard !publisher.hasSession else { return }
         do {
@@ -288,21 +288,21 @@ public final class OpenTokCall: CallFacade {
             isPublishingAudio: publisher.publishAudio,
             isPublishingVideo: publisher.publishVideo)
     }
-    
+
     // MARK: Signals
-    
+
     public func registerPlugins(_ plugins: [OpenTokPlugin]) {
         self.plugins = plugins
-        
+
         plugins.forEach { $0.channel = session }
     }
-    
+
     private func clearPluginChannels() {
         plugins.forEach { $0.channel = nil }
-        
+
         plugins.removeAll()
     }
-    
+
     private func handleSignal(_ signal: OpenTokSignal) {
         print(signal.type, signal.data ?? "")
         plugins.forEach { $0.handleSignal(signal) }
