@@ -21,8 +21,6 @@ public struct ChatScreen: View {
                             viewModel.sendMessage(message)
                         }
                     )
-                case .error(let string):
-                    Text(string)
                 case .loading:
                     ProgressView()
                         .onAppear {

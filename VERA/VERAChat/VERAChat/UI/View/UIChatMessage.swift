@@ -6,19 +6,32 @@ import Foundation
 
 // MARK: - UI Chat Message Model
 public struct UIChatMessage: Identifiable, Equatable, Hashable {
-    public let id = UUID()
+    public let id: Int
     public let username: String
     public let message: String
     public let date: String
 
-    public init(username: String, message: String, date: String) {
+    public init(id: Int = 0, username: String, message: String, date: String) {
+        self.id = id
         self.username = username
         self.message = message
         self.date = date
     }
 
     public static func == (lhs: UIChatMessage, rhs: UIChatMessage) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.username == rhs.username && lhs.message == rhs.message && lhs.date == rhs.date
+    }
+}
+
+extension ChatMessage: Hashable {
+    public static func == (lhs: ChatMessage, rhs: ChatMessage) -> Bool {
+        lhs.date == rhs.date && lhs.username == rhs.username && lhs.message == rhs.message
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(username)
+        hasher.combine(message)
+        hasher.combine(date.timeIntervalSince1970)
     }
 }
 

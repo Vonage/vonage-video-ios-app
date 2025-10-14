@@ -5,15 +5,18 @@
 import Combine
 import Foundation
 
-public struct ChatPanelState {
+public struct ChatPanelState: Equatable {
     public let messages: [UIChatMessage]
 
     public static let `default` = ChatPanelState(messages: [])
+
+    public init(messages: [UIChatMessage] = []) {
+        self.messages = messages
+    }
 }
 
-public enum ChatPannelViewState {
+public enum ChatPannelViewState: Equatable {
     case content(ChatPanelState)
-    case error(String)
     case loading
 }
 
@@ -50,8 +53,9 @@ public final class ChatPanelViewModel: ObservableObject {
 }
 
 extension ChatMessage {
-    var toUIChatMessage: UIChatMessage {
+    public var toUIChatMessage: UIChatMessage {
         UIChatMessage(
+            id: hashValue,
             username: username,
             message: message,
             date: UIChatMessage.formattedDate(date))

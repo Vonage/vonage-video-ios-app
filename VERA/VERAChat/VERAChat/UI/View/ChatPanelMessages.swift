@@ -7,7 +7,7 @@ import SwiftUI
 struct ChatPanelMessages: View {
     let messages: [UIChatMessage]
 
-    private var lastMessageId: UUID? {
+    private var lastMessageId: Int? {
         messages.last?.id
     }
 

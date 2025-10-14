@@ -67,7 +67,7 @@ struct GlassBackground: View {
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
-                .fill(.vGray4.opacity(0.8))
+                .fill(.gray4.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
