@@ -76,7 +76,7 @@ struct ChatPanelViewModelTests {
     func makeMessages() -> [ChatMessage] {
         [
             .init(
-                username: "a username",
+                username: "an username",
                 message: "a message",
                 date: Date(timeIntervalSince1970: 1_760_453_194)),
             .init(
