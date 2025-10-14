@@ -18,12 +18,12 @@ struct OpenTokSessionRepositoryTests {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = OpenTokPluginRegistry()
-        
+
         let sut = makeSUT(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry)
-        
+
         let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
@@ -35,12 +35,12 @@ struct OpenTokSessionRepositoryTests {
         let sessionFactory = MockOpenTokSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = OpenTokPluginRegistry()
-        
+
         let sut = makeSUT(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry)
-        
+
         let credentials = makeMockCredentials()
         _ = sut.createSession(credentials)
 
