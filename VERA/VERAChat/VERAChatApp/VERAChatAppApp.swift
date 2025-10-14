@@ -9,41 +9,18 @@ import VERAChatAppTestHelpers
 @main
 struct VERAChatAppApp: App {
 
-    let repository: ChatMessagesRepository
-    @ObservedObject var viewModel: ChatPanelViewModel
+    let chatFactory: ChatFactory
 
     init() {
-        repository = DefaultChatMessagesRepository(messages: ChatMessage.sampleMessages)
-        viewModel = ChatPanelViewModel(chatMessagesRepository: repository)
+        let repository = DefaultChatMessagesRepository(
+            messages: ChatMessage.sampleMessages)
+        chatFactory = ChatFactory(
+            chatMessagesRepository: repository)
     }
 
     var body: some Scene {
         WindowGroup {
-            switch viewModel.state {
-            case .content(let chatPannelState):
-                ChatPanel(
-                    messages: chatPannelState.messages,
-                    onSendMessage: { message in
-                        addMessage(message)
-                    }
-                )
-            case .error(let string):
-                Text(string)
-            case .loading:
-                ProgressView()
-                    .onAppear {
-                        viewModel.loadData()
-                    }
-            @unknown default: fatalError("Unknown case")
-            }
+            chatFactory.make(onDismiss: {})
         }
-    }
-
-    func addMessage(_ message: String) {
-        repository.addMessage(
-            .init(
-                username: "Me",
-                message: message,
-                date: Date()))
     }
 }

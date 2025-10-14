@@ -44,6 +44,7 @@ public struct MeetingRoomView: View {
                         isMicEnabled: state.isMicEnabled,
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
+                        unreadMessagesCount: state.unreadMessagesCount,
                         currentLayout: state.layout,
                         actions: wrappedActions
                     )
@@ -212,6 +213,10 @@ public struct MeetingRoomView: View {
             onToggleLayout: {
                 onBottomBarInteraction()
                 actions.onToggleLayout()
+            },
+            onShowChat: {
+                onBottomBarInteraction()
+                actions.onShowChat()
             }
         )
     }

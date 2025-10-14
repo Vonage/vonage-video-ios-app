@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import VERAChat
 import VERACore
 import VERAOpenTok
 import VERAOpenTokChatPlugin
@@ -68,6 +69,8 @@ final class DependencyContainer {
         archivesRepository: archivesRepository,
         archiveRecordingsRepository: archiveRecordingsRepository)
 
+    lazy var chatFactory = ChatFactory(chatMessagesRepository: chatMessagesRepository)
+
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
     lazy var sessionFactory = OpenTokSessionFactory()
@@ -85,7 +88,9 @@ final class DependencyContainer {
         return registry
     }()
 
-    lazy var openTokChatPlugin = OpenTokChatPlugin()
+    lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
+
+    lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 
     lazy var roomCredentialsRepository: RoomCredentialsRepository = {
         DefaultRoomCredentialsRepository(

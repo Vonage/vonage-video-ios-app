@@ -35,7 +35,7 @@ public final class OpenTokCall: CallFacade {
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
 
-    public var plugins: [OpenTokPlugin] = []
+    public var plugins: [any OpenTokPlugin] = []
 
     public init(
         token: String,
@@ -65,6 +65,7 @@ public final class OpenTokCall: CallFacade {
         }
         session.onSessionDidConnect = { [weak self] in
             self?.publishToSession()
+            self?.notifyCallDidStartToPlugins()
         }
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
@@ -245,7 +246,8 @@ public final class OpenTokCall: CallFacade {
                 await self.callStateManager.cleanUpParticipants()
             }
 
-            clearPluginChannels()
+            notifyCallDidEndToPlugins()
+            unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
             try session.disconnect()
@@ -291,20 +293,27 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Signals
 
-    public func registerPlugins(_ plugins: [OpenTokPlugin]) {
+    public func assignPlugins(_ plugins: [any OpenTokPlugin]) {
         self.plugins = plugins
 
         plugins.forEach { $0.channel = session }
     }
 
-    private func clearPluginChannels() {
+    private func unassignPlugins() {
         plugins.forEach { $0.channel = nil }
 
         plugins.removeAll()
     }
 
+    private func notifyCallDidStartToPlugins() {
+        plugins.forEach { $0.callDidStart() }
+    }
+
+    private func notifyCallDidEndToPlugins() {
+        plugins.forEach { $0.callDidEnd() }
+    }
+
     private func handleSignal(_ signal: OpenTokSignal) {
-        print(signal.type, signal.data ?? "")
         plugins.forEach { $0.handleSignal(signal) }
     }
 }

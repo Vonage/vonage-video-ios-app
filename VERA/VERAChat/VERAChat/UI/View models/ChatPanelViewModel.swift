@@ -43,6 +43,10 @@ public final class ChatPanelViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
+
+    public func addMessage(_ message: String) {
+
+    }
 }
 
 extension ChatMessage {

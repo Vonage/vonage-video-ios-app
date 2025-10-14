@@ -30,6 +30,10 @@ public struct MeetingRoomState: Equatable {
         participants.count
     }
 
+    public var unreadMessagesCount: Int {
+        0
+    }
+
     public init(
         roomName: RoomName,
         roomURL: URL?,
