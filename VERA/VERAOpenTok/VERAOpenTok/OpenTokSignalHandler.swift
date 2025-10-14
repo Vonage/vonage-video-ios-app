@@ -24,7 +24,7 @@ public protocol OpenTokPluginRegistrationEvents {
 
 /// Call based life cycle, didStart/didEnd are called when app connects/disconnects
 public protocol OpenTokPluginCallLifeCycle {
-    func callDidStart()
+    func callDidStart(_ userInfo: [String: Any])
     func callDidEnd()
 }
 

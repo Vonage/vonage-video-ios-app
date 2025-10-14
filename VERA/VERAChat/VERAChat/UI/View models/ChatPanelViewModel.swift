@@ -44,8 +44,8 @@ public final class ChatPanelViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    public func addMessage(_ message: String) {
-
+    public func sendMessage(_ message: String) {
+        chatMessagesRepository.onSendMessage?(message)
     }
 }
 

@@ -5,6 +5,11 @@
 import Foundation
 
 public struct OutgoingSignal {
-    let type: String
-    let payload: String?
+    public let type: String
+    public let payload: String?
+
+    public init(type: String, payload: String?) {
+        self.type = type
+        self.payload = payload
+    }
 }

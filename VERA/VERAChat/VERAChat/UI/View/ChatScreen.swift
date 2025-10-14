@@ -18,7 +18,7 @@ public struct ChatScreen: View {
                     ChatPanel(
                         messages: chatPannelState.messages,
                         onSendMessage: { message in
-                            viewModel.addMessage(message)
+                            viewModel.sendMessage(message)
                         }
                     )
                 case .error(let string):

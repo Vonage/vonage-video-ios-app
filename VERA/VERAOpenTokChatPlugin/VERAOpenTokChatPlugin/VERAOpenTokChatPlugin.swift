@@ -13,8 +13,11 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
     }
 
     public var channel: (any VERAOpenTok.OpenTokSignalChannel)?
-
+    private var username: String = ""
     public let repository: ChatMessagesRepository
+
+    static let jsonEncoder = JSONEncoder()
+    static let jsonDecoder = JSONDecoder()
 
     public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
         self.repository = repository
@@ -35,14 +38,44 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
         }
     }
 
-    public func callDidStart() {
+    public func callDidStart(_ userInfo: [String: Any]) {
+        username = userInfo.username
         repository.clearMessages()
+        repository.onSendMessage = sendMessage
     }
 
-    public func callDidEnd() {}
+    public func callDidEnd() {
+        cleanUp()
+    }
+
+    private func sendMessage(_ message: String) {
+        do {
+            let openTokMessage = OpenTokChatMessage(
+                participantName: username,
+                text: message
+            )
+
+            let signal = OutgoingSignal(
+                type: SignalType.chat.rawValue,
+                payload: try openTokMessage.toJSONString())
+            try channel?.emitSignal(signal)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
+    private func cleanUp() {
+        repository.onSendMessage = nil
+    }
 }
 
-struct OpenTokChatMessage: Decodable {
+extension [String: Any] {
+    fileprivate var username: String {
+        self[OpenTokCallParams.username.rawValue] as? String ?? ""
+    }
+}
+
+struct OpenTokChatMessage: Codable {
     let participantName: String
     let text: String
 }
@@ -55,10 +88,9 @@ extension OpenTokSignal {
         }
 
         let jsonData = Data(signalData.utf8)
-        let decoder = JSONDecoder()
 
         do {
-            let openTokMessage = try decoder.decode(OpenTokChatMessage.self, from: jsonData)
+            let openTokMessage = try OpenTokChatPlugin.jsonDecoder.decode(OpenTokChatMessage.self, from: jsonData)
 
             let username = openTokMessage.participantName
                 .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -106,5 +138,17 @@ private enum ChatMappingError: LocalizedError {
         case .emptyMessage:
             return "Message content is empty"
         }
+    }
+}
+
+extension OpenTokChatMessage {
+    func toJSONString() throws -> String {
+        let jsonData = try OpenTokChatPlugin.jsonEncoder.encode(self)
+
+        guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+            throw ChatMappingError.invalidJSON
+        }
+
+        return jsonString
     }
 }

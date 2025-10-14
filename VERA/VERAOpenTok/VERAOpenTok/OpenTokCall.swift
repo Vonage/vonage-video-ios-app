@@ -293,6 +293,10 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Signals
 
+    private var callParams: [String: String] {
+        [OpenTokCallParams.username.rawValue: publisher.participant.name]
+    }
+
     public func assignPlugins(_ plugins: [any OpenTokPlugin]) {
         self.plugins = plugins
 
@@ -306,7 +310,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func notifyCallDidStartToPlugins() {
-        plugins.forEach { $0.callDidStart() }
+        plugins.forEach { $0.callDidStart(callParams) }
     }
 
     private func notifyCallDidEndToPlugins() {
