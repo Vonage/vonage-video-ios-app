@@ -35,6 +35,8 @@ public final class OpenTokCall: CallFacade {
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
 
+    public var plugins: [OpenTokPlugin] = []
+    
     public init(
         token: String,
         session: OpenTokSession,
@@ -46,6 +48,12 @@ public final class OpenTokCall: CallFacade {
     }
 
     public func setup() {
+        setupSessionHandlers()
+        updateMediaState()
+        setupActiveSpeakerObservation()
+    }
+
+    func setupSessionHandlers() {
         session.onNewStream = { [weak self] stream in
             self?.addSubscriber(stream)
         }
@@ -58,11 +66,11 @@ public final class OpenTokCall: CallFacade {
         session.onSessionDidConnect = { [weak self] in
             self?.publishToSession()
         }
-
-        updateMediaState()
-        setupActiveSpeakerObservation()
+        session.onSessionSignal = { [weak self] signal in
+            self?.handleSignal(signal)
+        }
     }
-
+    
     func updateParticipantsState(_ state: ParticipantsState) async {
         _participantsPublisher.value = .init(
             localParticipant: publisherParticipant,
@@ -72,6 +80,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     // MARK: Publisher
+    
     private func publishToSession() {
         guard !publisher.hasSession else { return }
         do {
@@ -236,6 +245,7 @@ public final class OpenTokCall: CallFacade {
                 await self.callStateManager.cleanUpParticipants()
             }
 
+            clearPluginChannels()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
             try session.disconnect()
@@ -277,5 +287,24 @@ public final class OpenTokCall: CallFacade {
         _statePublisher.value = SessionState(
             isPublishingAudio: publisher.publishAudio,
             isPublishingVideo: publisher.publishVideo)
+    }
+    
+    // MARK: Signals
+    
+    public func registerPlugins(_ plugins: [OpenTokPlugin]) {
+        self.plugins = plugins
+        
+        plugins.forEach { $0.channel = session }
+    }
+    
+    private func clearPluginChannels() {
+        plugins.forEach { $0.channel = nil }
+        
+        plugins.removeAll()
+    }
+    
+    private func handleSignal(_ signal: OpenTokSignal) {
+        print(signal.type, signal.data ?? "")
+        plugins.forEach { $0.handleSignal(signal) }
     }
 }

@@ -6,6 +6,7 @@ import AVFoundation
 import Foundation
 import VERACore
 import VERAOpenTok
+import VERAOpenTokChatPlugin
 
 final class DependencyContainer {
     let baseURL = URL(string: "https://meet.vonagenetworks.net/")!
@@ -74,9 +75,18 @@ final class DependencyContainer {
     lazy var sessionRepository: SessionRepository = {
         OpenTokSessionRepository(
             sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository)
+            publisherRepository: publisherRepository,
+            pluginRegistry: pluginRegistry)
     }()
 
+    lazy var pluginRegistry: OpenTokPluginRegistry = {
+       let registry = OpenTokPluginRegistry()
+        registry.registerPlugin(plugin: openTokChatPlugin)
+        return registry
+    }()
+    
+    lazy var openTokChatPlugin = OpenTokChatPlugin()
+    
     lazy var roomCredentialsRepository: RoomCredentialsRepository = {
         DefaultRoomCredentialsRepository(
             baseURL: baseURL,

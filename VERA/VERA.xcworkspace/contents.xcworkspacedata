@@ -5,6 +5,9 @@
       location = "container:"
       name = "Projects">
       <FileRef
+         location = "group:VERAOpenTokChatPlugin/VERAOpenTokChatPlugin.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:VERADomain/VERADomain.xcodeproj">
       </FileRef>
       <FileRef

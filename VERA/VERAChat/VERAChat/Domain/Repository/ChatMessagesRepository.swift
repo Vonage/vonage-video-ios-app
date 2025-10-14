@@ -5,7 +5,13 @@
 import Combine
 import Foundation
 
-public protocol ChatMessagesRepository {
+public protocol ChatMessagesWriter {
     func addMessage(_ message: ChatMessage)
+    func clearMessages()
+}
+
+public protocol ChatMessagesObserver {
     func observeMessages() -> AnyPublisher<[ChatMessage], Never>
 }
+
+public typealias ChatMessagesRepository = ChatMessagesWriter & ChatMessagesObserver

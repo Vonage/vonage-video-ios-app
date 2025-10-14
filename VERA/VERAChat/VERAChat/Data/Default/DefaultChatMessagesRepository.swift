@@ -20,5 +20,9 @@ public final class DefaultChatMessagesRepository: ChatMessagesRepository {
         _messages.value = storedMessages + [message]
     }
 
+    public func clearMessages() {
+        _messages.value = []
+    }
+    
     public func observeMessages() -> AnyPublisher<[ChatMessage], Never> { messages }
 }
