@@ -14,10 +14,12 @@ public class ChatFactory {
 
     public func make(
         onDismiss: @escaping () -> Void
-    ) -> some View {
-        ChatScreen(
-            viewModel: .init(chatMessagesRepository: chatMessagesRepository),
-            onDismiss: onDismiss
+    ) -> (view: some View, viewModel: ChatPanelViewModel) {
+        let viewModel = ChatPanelViewModel(
+            chatMessagesRepository: chatMessagesRepository)
+        return (
+            ChatScreen(viewModel: viewModel, onDismiss: onDismiss),
+            viewModel
         )
     }
 }

@@ -5,7 +5,7 @@
 import Foundation
 
 // MARK: - UI Chat Message Model
-public struct UIChatMessage: Identifiable, Equatable {
+public struct UIChatMessage: Identifiable, Equatable, Hashable {
     public let id = UUID()
     public let username: String
     public let message: String

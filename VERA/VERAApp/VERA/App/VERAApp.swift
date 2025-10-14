@@ -115,9 +115,10 @@ struct VERAApp: App {
     }
 
     private func makeChatView() -> some View {
-        chatFactory.make(
+        let result = chatFactory.make(
             onDismiss: {
                 showChat = false
             })
+        return result.view
     }
 }

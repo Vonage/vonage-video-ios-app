@@ -16,16 +16,12 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
     private var username: String = ""
     public let repository: ChatMessagesRepository
 
-    static let jsonEncoder = JSONEncoder()
-    static let jsonDecoder = JSONDecoder()
+    fileprivate static let jsonEncoder = JSONEncoder()
+    fileprivate static let jsonDecoder = JSONDecoder()
 
     public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
         self.repository = repository
     }
-
-    public func registered() {}
-
-    public func unregistered() {}
 
     public func handleSignal(_ signal: VERAOpenTok.OpenTokSignal) {
         guard signal.type == SignalType.chat.rawValue else { return }

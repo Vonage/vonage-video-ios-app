@@ -20,7 +20,7 @@ struct VERAChatAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            chatFactory.make(onDismiss: {})
+            chatFactory.make(onDismiss: {}).view
         }
     }
 }
