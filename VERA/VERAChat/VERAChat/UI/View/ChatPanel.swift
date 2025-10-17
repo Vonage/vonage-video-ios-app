@@ -25,7 +25,7 @@ public struct ChatPanel: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
         }
-        .background(Color.primary.colorInvert())
+        .background(.systemBackground)
     }
 }
 
@@ -35,12 +35,14 @@ struct ChatPanelInput: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            // Text Input
-            TextField("Type a message...", text: $messageText, axis: .vertical)
-                .lineLimit(1...3)
-                .background(.clear)
+            TextField(
+                "Type a message...",
+                text: $messageText,
+                prompt: Text("Type a message...").secondaryForeground(),
+                axis: .vertical
+            )
+            .lineLimit(1...3)
 
-            // Send Button
             Button(action: sendMessage) {
                 Image(systemName: "paperplane.fill")
                     .font(.title2)
@@ -60,6 +62,16 @@ struct ChatPanelInput: View {
 
         onSendMessage(trimmedMessage)
         messageText = ""
+    }
+}
+
+extension Text {
+    func secondaryForeground() -> Text {
+        if #available(iOS 17.0, *) {
+            return self.foregroundStyle(.gray)
+        } else {
+            return self.foregroundColor(.gray)
+        }
     }
 }
 

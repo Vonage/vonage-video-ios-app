@@ -17,6 +17,9 @@
 		6F55F8862E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
 		6F55F8872E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F55F88B2E9D2BC100CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
+		6FBED7122EA255630015782E /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; platformFilter = ios; };
+		6FBED71A2EA255AD0015782E /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 6FBED7192EA255AD0015782E /* SnapshotTesting */; };
+		6FBED71B2EA256450015782E /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; platformFilter = ios; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +45,20 @@
 			remoteInfo = VERAChatAppTestHelpers;
 		};
 		6F55F88C2E9D2BC100CBCA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F87F2E9D28D800CBCA2D;
+			remoteInfo = VERAChatAppTestHelpers;
+		};
+		6FBED7132EA255630015782E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F7A42E99335800CBCA2D;
+			remoteInfo = VERAChat;
+		};
+		6FBED71D2EA256450015782E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
 			proxyType = 1;
@@ -84,6 +101,7 @@
 		6F55F82C2E993A0700CBCA2D /* VERADomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERADomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERAChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAChatAppTestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FBED70E2EA255630015782E /* VERAChatSnapshotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAChatSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -105,6 +123,11 @@
 		6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = VERAChatAppTestHelpers;
+			sourceTree = "<group>";
+		};
+		6FBED70F2EA255630015782E /* VERAChatSnapshotTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VERAChatSnapshotTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -144,6 +167,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6FBED70B2EA255630015782E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6FBED7122EA255630015782E /* VERAChat.framework in Frameworks */,
+				6FBED71B2EA256450015782E /* VERAChatAppTestHelpers.framework in Frameworks */,
+				6FBED71A2EA255AD0015782E /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -154,6 +187,7 @@
 				6F55F7B42E99335900CBCA2D /* VERAChatTests */,
 				6F55F8432E994BDE00CBCA2D /* VERAChatApp */,
 				6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
+				6FBED70F2EA255630015782E /* VERAChatSnapshotTests */,
 				6F55F8272E9939FF00CBCA2D /* Frameworks */,
 				6F55F7A62E99335800CBCA2D /* Products */,
 			);
@@ -166,6 +200,7 @@
 				6F55F7B02E99335900CBCA2D /* VERAChatTests.xctest */,
 				6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */,
 				6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */,
+				6FBED70E2EA255630015782E /* VERAChatSnapshotTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -295,6 +330,31 @@
 			productReference = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		6FBED70D2EA255630015782E /* VERAChatSnapshotTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6FBED7152EA255630015782E /* Build configuration list for PBXNativeTarget "VERAChatSnapshotTests" */;
+			buildPhases = (
+				6FBED70A2EA255630015782E /* Sources */,
+				6FBED70B2EA255630015782E /* Frameworks */,
+				6FBED70C2EA255630015782E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6FBED7142EA255630015782E /* PBXTargetDependency */,
+				6FBED71E2EA256450015782E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6FBED70F2EA255630015782E /* VERAChatSnapshotTests */,
+			);
+			name = VERAChatSnapshotTests;
+			packageProductDependencies = (
+				6FBED7192EA255AD0015782E /* SnapshotTesting */,
+			);
+			productName = VERAChatSnapshotTests;
+			productReference = 6FBED70E2EA255630015782E /* VERAChatSnapshotTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -317,6 +377,9 @@
 					6F55F87F2E9D28D800CBCA2D = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
+					6FBED70D2EA255630015782E = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 				};
 			};
 			buildConfigurationList = 6F55F79F2E99335800CBCA2D /* Build configuration list for PBXProject "VERAChat" */;
@@ -328,6 +391,9 @@
 			);
 			mainGroup = 6F55F79B2E99335800CBCA2D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6FBED7182EA255AD0015782E /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6F55F7A62E99335800CBCA2D /* Products */;
 			projectDirPath = "";
@@ -337,6 +403,7 @@
 				6F55F7AF2E99335900CBCA2D /* VERAChatTests */,
 				6F55F8412E994BDE00CBCA2D /* VERAChatApp */,
 				6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
+				6FBED70D2EA255630015782E /* VERAChatSnapshotTests */,
 			);
 		};
 /* End PBXProject section */
@@ -364,6 +431,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6F55F87E2E9D28D800CBCA2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6FBED70C2EA255630015782E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -401,6 +475,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6FBED70A2EA255630015782E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -423,6 +504,18 @@
 			isa = PBXTargetDependency;
 			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
 			targetProxy = 6F55F88C2E9D2BC100CBCA2D /* PBXContainerItemProxy */;
+		};
+		6FBED7142EA255630015782E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
+			targetProxy = 6FBED7132EA255630015782E /* PBXContainerItemProxy */;
+		};
+		6FBED71E2EA256450015782E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
+			targetProxy = 6FBED71D2EA256450015782E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -848,6 +941,49 @@
 			};
 			name = Release;
 		};
+		6FBED7162EA255630015782E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatSnapshotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6FBED7172EA255630015782E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatSnapshotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -896,7 +1032,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		6FBED7152EA255630015782E /* Build configuration list for PBXNativeTarget "VERAChatSnapshotTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6FBED7162EA255630015782E /* Debug */,
+				6FBED7172EA255630015782E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6FBED7182EA255AD0015782E /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6FBED7192EA255AD0015782E /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6FBED7182EA255AD0015782E /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6F55F79C2E99335800CBCA2D /* Project object */;
 }
