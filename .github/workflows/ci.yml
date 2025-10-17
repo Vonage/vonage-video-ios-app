@@ -65,6 +65,22 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
+    - name: Run VERAChatTests (macOS)
+      id: chat-tests-macos
+      run: |
+        echo "🧪 Running VERAChatTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAChat \
+          -destination "platform=macOS" \
+          -only-testing:VERAChatTests \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: snapshot-tests
       timeout-minutes: 15
@@ -80,7 +96,23 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
-    
+
+    - name: Run VERAChatSnapshotTests (iOS Simulator)
+      id: snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAChatSnapshotTests \
+          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
       timeout-minutes: 15
@@ -120,9 +152,11 @@ jobs:
         name: unit-test-results
         path: |
           DerivedData/VERACoreTests-macOS.xcresult
+          DerivedData/VERAChatTests-macOS.xcresult
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/Build/Products/
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
+          DerivedData/VERAChatSnapshotTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
 
 #  ui-tests:
@@ -254,8 +288,8 @@ jobs:
         sonar-scanner \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.organization="$SONAR_ORGANIZATION" \
-          -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAOpenTok/VERAOpenTok \
-          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERATests \
+          -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAChat/VERAChat,VERA/VERAOpenTok/VERAOpenTok \
+          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAChat/VERAChatTests,VERA/VERAChat/VERAChatSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERATests \
           -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
           -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
           -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \

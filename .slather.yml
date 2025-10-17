@@ -18,8 +18,11 @@ ignore:
   - "VERA/VERAApp/VERATests/*"
   - "VERA/VERAApp/VERAUITests/*"
   - "VERA/VERACore/VERACoreTests/*"
+  - "VERA/VERAChat/VERAChatTests/*"
   - "VERA/VERAOpenTok/VERAOpenTokTests/*"
   - "VERA/VERACore/VERACoreSnapshotTests/*"
+  - "VERA/VERAChat/VERAChatSnapshotTests/*"
+  - "VERA/VERAOpenTokChatPlugin/VERAOpenTokChatPluginTests/*"
   - "*/Tests/*"
   - "*Tests.swift"
   - "*/Pods/*"
@@ -33,3 +36,4 @@ source_files: false  # Include all Swift files by default
 sonarqube_xml: true
 cobertura_xml: true
 html: false
+build_directory: DerivedData
