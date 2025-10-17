@@ -82,7 +82,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
 
     - name: Run VERACoreSnapshotTests (iOS Simulator)
-      id: snapshot-tests
+      id: core-snapshot-tests
       timeout-minutes: 15
       run: |
         echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
@@ -98,7 +98,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
-      id: snapshot-tests
+      id: chat-snapshot-tests
       timeout-minutes: 15
       run: |
         echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
