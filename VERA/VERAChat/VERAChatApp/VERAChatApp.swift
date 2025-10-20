@@ -7,7 +7,7 @@ import VERAChat
 import VERAChatAppTestHelpers
 
 @main
-struct VERAChatAppApp: App {
+struct VERAChatApp: App {
 
     let chatFactory: ChatFactory
 
