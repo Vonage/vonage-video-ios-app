@@ -45,6 +45,7 @@ public final class ChatPanelViewModel: ObservableObject {
             .map { messages in
                 messages.map { $0.toUIChatMessage }
             }
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] messages in
                 guard let self else { return }
                 self.state = .content(.init(messages: messages))

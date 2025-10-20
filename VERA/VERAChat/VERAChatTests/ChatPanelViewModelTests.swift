@@ -19,19 +19,28 @@ struct ChatPanelViewModelTests {
         #expect(sut.state == .loading)
     }
 
-    @Test func callToLoadDataChangesStateToContent() {
+    @Test func callToLoadDataChangesStateToContent() async {
         let repository = SpyChatMessagesRepository()
         let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
         let sut = makeSUT(sendChatMessageUseCase: sendMessageUseCase)
 
-        #expect(sut.state == .loading)
+        var value = await sut.$state.values.first { _ in true }
+
+        #expect(value == .loading)
 
         sut.loadData()
 
-        #expect(sut.state == .content(.default))
+        value = await sut.$state.values.first { state in
+            if case .content = state {
+                return true
+            }
+            return false
+        }
+
+        #expect(value == .content(.default))
     }
 
-    @Test func callToLoadDataWithMessagesChangesStateToContent() {
+    @Test func callToLoadDataWithMessagesChangesStateToContent() async {
         let repository = SpyChatMessagesRepository()
         let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
         let inputMessages = makeMessages()
@@ -40,11 +49,20 @@ struct ChatPanelViewModelTests {
             repository: repository,
             sendChatMessageUseCase: sendMessageUseCase)
 
-        #expect(sut.state == .loading)
+        var value = await sut.$state.values.first { _ in true }
+
+        #expect(value == .loading)
 
         sut.loadData()
 
-        guard case .content(let chatState) = sut.state else {
+        value = await sut.$state.values.first { state in
+            if case .content = state {
+                return true
+            }
+            return false
+        }
+
+        guard case .content(let chatState) = value else {
             Issue.record("Expected content state")
             return
         }
