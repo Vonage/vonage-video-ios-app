@@ -20,9 +20,6 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
     private var username: String = ""
     public let repository: ChatMessagesRepository
 
-    fileprivate static let jsonEncoder = JSONEncoder()
-    fileprivate static let jsonDecoder = JSONDecoder()
-
     public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
         self.repository = repository
     }
@@ -92,7 +89,7 @@ extension VERAOpenTok.OpenTokSignal {
         let jsonData = Data(signalData.utf8)
 
         do {
-            let openTokMessage = try OpenTokChatPlugin.jsonDecoder.decode(OpenTokChatMessage.self, from: jsonData)
+            let openTokMessage = try JSONDecoder().decode(OpenTokChatMessage.self, from: jsonData)
 
             let username = openTokMessage.participantName
                 .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -144,7 +141,7 @@ public enum ChatMappingError: LocalizedError {
 
 extension OpenTokChatMessage {
     public func toJSONString() throws -> String {
-        let jsonData = try OpenTokChatPlugin.jsonEncoder.encode(self)
+        let jsonData = try JSONEncoder().encode(self)
 
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
             throw ChatMappingError.invalidJSON
