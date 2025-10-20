@@ -15,7 +15,7 @@ public struct ChatPanelState: Equatable {
     }
 }
 
-public enum ChatPannelViewState: Equatable {
+public enum ChatPanelViewState: Equatable {
     case content(ChatPanelState)
     case loading
 }
@@ -23,7 +23,7 @@ public enum ChatPannelViewState: Equatable {
 public final class ChatPanelViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: ChatPannelViewState = .loading
+    @Published public var state: ChatPanelViewState = .loading
 
     private let chatMessagesRepository: ChatMessagesRepository
     private let sendChatMessageUseCase: SendChatMessageUseCase

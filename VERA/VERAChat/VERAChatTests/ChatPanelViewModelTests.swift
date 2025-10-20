@@ -8,7 +8,7 @@ import Testing
 import VERAChat
 import VERAChatAppTestHelpers
 
-@Suite("Chat pannel view model tests")
+@Suite("Chat panel view model tests")
 struct ChatPanelViewModelTests {
 
     @Test func initialStateIsLoading() {

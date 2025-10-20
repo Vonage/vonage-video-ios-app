@@ -14,9 +14,9 @@ public struct ChatScreen: View {
         NavigationStack {
             Group {
                 switch viewModel.state {
-                case .content(let chatPannelState):
+                case .content(let chatPanelState):
                     ChatPanel(
-                        messages: chatPannelState.messages,
+                        messages: chatPanelState.messages,
                         onSendMessage: { message in
                             viewModel.sendMessage(message)
                         }
