@@ -8,7 +8,7 @@ import VERACore
 
 @Suite("Get initials test suite")
 struct GetInitialsTests {
-    
+
     @Test(
         "Extract initials from usernames",
         arguments: [
@@ -25,7 +25,8 @@ struct GetInitialsTests {
         _ pair: (username: String, expectedValue: String)
     ) throws {
         let initials = pair.username.getInitials()
-        #expect(initials == pair.expectedValue,
-                "\(pair.username) with initials \(initials) is not equal to \(pair.expectedValue)")
+        #expect(
+            initials == pair.expectedValue,
+            "\(pair.username) with initials \(initials) is not equal to \(pair.expectedValue)")
     }
 }

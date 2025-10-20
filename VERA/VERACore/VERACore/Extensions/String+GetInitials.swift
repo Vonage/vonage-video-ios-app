@@ -12,14 +12,14 @@ extension String {
             .map { String($0).uppercased() }
             .joined()
     }
-    
+
     private func splitName() -> [Character?] {
         let names = self.trimmingCharacters(in: .whitespacesAndNewlines)
             .components(separatedBy: .whitespacesAndNewlines)
             .filter { !$0.isEmpty }
             .compactMap { $0.first }
             .filter { $0.isLetter || $0.isNumber }
-        
+
         switch names.count {
         case 1:
             return [names.first]
