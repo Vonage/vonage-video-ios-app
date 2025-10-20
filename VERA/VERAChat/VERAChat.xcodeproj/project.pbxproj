@@ -20,6 +20,13 @@
 		6FBED7122EA255630015782E /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; platformFilter = ios; };
 		6FBED71A2EA255AD0015782E /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 6FBED7192EA255AD0015782E /* SnapshotTesting */; };
 		6FBED71B2EA256450015782E /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; platformFilter = ios; };
+		6FFC747A2EA63BDA00CF4665 /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; };
+		6FFC74832EA63C4600CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
+		6FFC74F02EA6565000CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */; };
+		6FFC74F82EA6687E00CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */; };
+		6FFC74F92EA6687E00CF4665 /* VERAOpenTok.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6FFC74FB2EA668A600CF4665 /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74FA2EA668A600CF4665 /* VERACore.framework */; };
+		6FFC74FC2EA668A600CF4665 /* VERACore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74FA2EA668A600CF4665 /* VERACore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +72,20 @@
 			remoteGlobalIDString = 6F55F87F2E9D28D800CBCA2D;
 			remoteInfo = VERAChatAppTestHelpers;
 		};
+		6FFC747C2EA63BDA00CF4665 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F7A42E99335800CBCA2D;
+			remoteInfo = VERAChat;
+		};
+		6FFC74852EA63C4600CF4665 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F87F2E9D28D800CBCA2D;
+			remoteInfo = VERAChatAppTestHelpers;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -87,7 +108,9 @@
 			dstSubfolderSpec = 10;
 			files = (
 				6F55F8872E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Embed Frameworks */,
+				6FFC74FC2EA668A600CF4665 /* VERACore.framework in Embed Frameworks */,
 				6F55F86A2E994BE900CBCA2D /* VERAChat.framework in Embed Frameworks */,
+				6FFC74F92EA6687E00CF4665 /* VERAOpenTok.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -102,6 +125,10 @@
 		6F55F8422E994BDE00CBCA2D /* VERAChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VERAChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAChatAppTestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FBED70E2EA255630015782E /* VERAChatSnapshotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAChatSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC747F2EA63BE900CF4665 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74FA2EA668A600CF4665 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -146,6 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FFC74832EA63C4600CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */,
 				6F55F7B12E99335900CBCA2D /* VERAChat.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -155,8 +183,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				6F55F8862E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */,
+				6FFC74FB2EA668A600CF4665 /* VERACore.framework in Frameworks */,
 				6F55F88B2E9D2BC100CBCA2D /* VERAChatAppTestHelpers.framework in Frameworks */,
 				6F55F8692E994BE900CBCA2D /* VERAChat.framework in Frameworks */,
+				6FFC74F82EA6687E00CF4665 /* VERAOpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +194,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FFC747A2EA63BDA00CF4665 /* VERAChat.framework in Frameworks */,
+				6FFC74F02EA6565000CF4665 /* VERAOpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,6 +240,10 @@
 		6F55F8272E9939FF00CBCA2D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6FFC74FA2EA668A600CF4665 /* VERACore.framework */,
+				6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */,
+				6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */,
+				6FFC747F2EA63BE900CF4665 /* VERACore.framework */,
 				6F55F82C2E993A0700CBCA2D /* VERADomain.framework */,
 				6F55F8282E9939FF00CBCA2D /* VERACommonUI.framework */,
 			);
@@ -270,6 +306,7 @@
 			);
 			dependencies = (
 				6F55F7B32E99335900CBCA2D /* PBXTargetDependency */,
+				6FFC74862EA63C4600CF4665 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F55F7B42E99335900CBCA2D /* VERAChatTests */,
@@ -319,6 +356,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				6FFC747D2EA63BDA00CF4665 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F55F8812E9D28D800CBCA2D /* VERAChatAppTestHelpers */,
@@ -517,6 +555,16 @@
 			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
 			targetProxy = 6FBED71D2EA256450015782E /* PBXContainerItemProxy */;
 		};
+		6FFC747D2EA63BDA00CF4665 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
+			targetProxy = 6FFC747C2EA63BDA00CF4665 /* PBXContainerItemProxy */;
+		};
+		6FFC74862EA63C4600CF4665 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
+			targetProxy = 6FFC74852EA63C4600CF4665 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -657,7 +705,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -702,7 +750,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -740,8 +788,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -753,7 +801,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Debug;
 		};
@@ -765,8 +813,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -778,7 +826,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Release;
 		};
@@ -797,7 +845,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -831,7 +879,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -866,7 +914,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -875,7 +923,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -892,7 +940,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Debug;
 		};
@@ -911,7 +959,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
@@ -920,7 +968,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -937,7 +985,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 2.6;
 			};
 			name = Release;
 		};
@@ -948,7 +996,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatSnapshotTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -969,7 +1017,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PR6C39UQ38;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAChatSnapshotTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

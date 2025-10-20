@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import Testing
 import VERAChat
+import VERAChatAppTestHelpers
 
 @Suite("Chat pannel view model tests")
 struct ChatPanelViewModelTests {

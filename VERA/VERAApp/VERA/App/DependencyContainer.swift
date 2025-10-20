@@ -69,7 +69,9 @@ final class DependencyContainer {
         archivesRepository: archivesRepository,
         archiveRecordingsRepository: archiveRecordingsRepository)
 
-    lazy var chatFactory = ChatFactory(chatMessagesRepository: chatMessagesRepository)
+    lazy var chatFactory = ChatFactory(
+        chatMessagesRepository: chatMessagesRepository,
+        sendChatMessageUseCase: sendChatMessageUseCase)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
@@ -89,6 +91,8 @@ final class DependencyContainer {
     }()
 
     lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
+
+    lazy var sendChatMessageUseCase = OpenTokSendChatMessageUseCase(openTokChatPlugin: openTokChatPlugin)
 
     lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 

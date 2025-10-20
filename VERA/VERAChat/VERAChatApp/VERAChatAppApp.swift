@@ -14,15 +14,14 @@ struct VERAChatAppApp: App {
     init() {
         let repository = DefaultChatMessagesRepository(
             messages: ChatMessage.sampleMessages)
-
-        repository.onSendMessage = { [weak repository] message in
-            repository?.addMessage(
-                .init(username: "Me", message: message, date: Date())
-            )
-        }
+        let sendMessagesUseCase = MockSendChatMessageUseCase(
+            name: "Me",
+            chatMessagesRepository: repository
+        )
 
         chatFactory = ChatFactory(
-            chatMessagesRepository: repository)
+            chatMessagesRepository: repository,
+            sendChatMessageUseCase: sendMessagesUseCase)
     }
 
     var body: some Scene {

@@ -12,6 +12,10 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
         case chat
     }
 
+    public enum Error: Swift.Error {
+        case missingChannel
+    }
+
     public var channel: (any VERAOpenTok.OpenTokSignalChannel)?
     private var username: String = ""
     public let repository: ChatMessagesRepository
@@ -36,32 +40,29 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
 
     public func callDidStart(_ userInfo: [String: Any]) {
         username = userInfo.username
-        repository.clearMessages()
-        repository.onSendMessage = sendMessage
     }
 
     public func callDidEnd() {
         cleanUp()
     }
 
-    private func sendMessage(_ message: String) {
-        do {
-            let openTokMessage = OpenTokChatMessage(
-                participantName: username,
-                text: message
-            )
-
-            let signal = OutgoingSignal(
-                type: SignalType.chat.rawValue,
-                payload: try openTokMessage.toJSONString())
-            try channel?.emitSignal(signal)
-        } catch {
-            print(error.localizedDescription)
+    func sendMessage(_ message: String) throws {
+        guard let channel = channel else {
+            throw Error.missingChannel
         }
+
+        let openTokMessage = OpenTokChatMessage(
+            participantName: username,
+            text: message)
+
+        let signal = OutgoingSignal(
+            type: SignalType.chat.rawValue,
+            payload: try openTokMessage.toJSONString())
+        try channel.emitSignal(signal)
     }
 
     private func cleanUp() {
-        repository.onSendMessage = nil
+        repository.clearMessages()
     }
 }
 
@@ -71,14 +72,19 @@ extension [String: Any] {
     }
 }
 
-struct OpenTokChatMessage: Codable {
-    let participantName: String
-    let text: String
+public struct OpenTokChatMessage: Codable {
+    public let participantName: String
+    public let text: String
+
+    public init(participantName: String, text: String) {
+        self.participantName = participantName
+        self.text = text
+    }
 }
 
-extension OpenTokSignal {
+extension VERAOpenTok.OpenTokSignal {
 
-    fileprivate func toChatMessage() throws -> ChatMessage {
+    public func toChatMessage(date: Date = Date()) throws -> ChatMessage {
         guard let signalData = data, !signalData.isEmpty else {
             throw ChatMappingError.missingData
         }
@@ -104,8 +110,7 @@ extension OpenTokSignal {
             return ChatMessage(
                 username: username,
                 message: message,
-                date: Date()
-            )
+                date: date)
 
         } catch DecodingError.dataCorrupted(_) {
             throw ChatMappingError.invalidJSON
@@ -117,13 +122,13 @@ extension OpenTokSignal {
     }
 }
 
-private enum ChatMappingError: LocalizedError {
+public enum ChatMappingError: LocalizedError {
     case missingData
     case invalidJSON
     case invalidParticipantName
     case emptyMessage
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .missingData:
             return "Signal data is missing or empty"
@@ -138,7 +143,7 @@ private enum ChatMappingError: LocalizedError {
 }
 
 extension OpenTokChatMessage {
-    func toJSONString() throws -> String {
+    public func toJSONString() throws -> String {
         let jsonData = try OpenTokChatPlugin.jsonEncoder.encode(self)
 
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {

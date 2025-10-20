@@ -12,6 +12,9 @@
 		6F55F8BF2E9D4F6400CBCA2D /* VERAOpenTok.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F55F8C22E9D4F6E00CBCA2D /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */; };
 		6F55F8C32E9D4F6E00CBCA2D /* VERAChat.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6FFC74702EA63B2200CF4665 /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC746F2EA63B2200CF4665 /* VERAChat.framework */; };
+		6FFC74772EA63B8500CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */; };
+		6FFC74E42EA640E700CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +47,9 @@
 		6F55F8AD2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAOpenTokChatPluginTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC746F2EA63B2200CF4665 /* VERAChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChatAppTestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -73,7 +79,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FFC74702EA63B2200CF4665 /* VERAChat.framework in Frameworks */,
+				6FFC74772EA63B8500CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */,
 				6F55F8AE2E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework in Frameworks */,
+				6FFC74E42EA640E700CF4665 /* VERAOpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +111,9 @@
 		6F55F8BC2E9D4F6400CBCA2D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */,
+				6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */,
+				6FFC746F2EA63B2200CF4665 /* VERAChat.framework */,
 				6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */,
 				6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */,
 			);

@@ -6,7 +6,7 @@ import SnapshotTesting
 import SwiftUI
 import Testing
 import VERAChat
-import VERATestHelpers
+import VERAChatAppTestHelpers
 
 @Suite("Chat panel UI Tests")
 @MainActor

@@ -26,10 +26,15 @@ public final class ChatPanelViewModel: ObservableObject {
     @Published public var state: ChatPannelViewState = .loading
 
     private let chatMessagesRepository: ChatMessagesRepository
+    private let sendChatMessageUseCase: SendChatMessageUseCase
     private var isInitialised = false
 
-    public init(chatMessagesRepository: ChatMessagesRepository) {
+    public init(
+        chatMessagesRepository: ChatMessagesRepository,
+        sendChatMessageUseCase: SendChatMessageUseCase
+    ) {
         self.chatMessagesRepository = chatMessagesRepository
+        self.sendChatMessageUseCase = sendChatMessageUseCase
     }
 
     public func loadData() {
@@ -48,7 +53,11 @@ public final class ChatPanelViewModel: ObservableObject {
     }
 
     public func sendMessage(_ message: String) {
-        chatMessagesRepository.onSendMessage?(message)
+        do {
+            try sendChatMessageUseCase(message)
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 }
 

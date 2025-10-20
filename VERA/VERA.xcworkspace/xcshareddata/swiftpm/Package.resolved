@@ -1,5 +1,5 @@
 {
-  "originHash" : "194968549488c89cf96ab28dc5006663b1257e29e676ebfdc0f3d281252522e3",
+  "originHash" : "8976618aa11ad6ece14091b99126e51b5c35bd9984644ae04ae4e8080e25ddf6",
   "pins" : [
     {
       "identity" : "swift-custom-dump",
@@ -29,12 +29,12 @@
       }
     },
     {
-      "identity" : "vonage-client-sdk-video",
+      "identity" : "vonage-video-client-sdk-swift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/opentok/vonage-client-sdk-video.git",
+      "location" : "https://github.com/Vonage/vonage-video-client-sdk-swift",
       "state" : {
-        "revision" : "71420155870bebda7b7458a820b4fa023b34d5c1",
-        "version" : "2.31.0"
+        "branch" : "main",
+        "revision" : "5a53aab09d039cf514526eecdeaf752bd591af77"
       }
     },
     {
