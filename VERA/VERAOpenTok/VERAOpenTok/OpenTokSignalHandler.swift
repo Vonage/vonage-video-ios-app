@@ -12,7 +12,7 @@ public protocol OpenTokSignalChannel {
     func emitSignal(_ signal: OutgoingSignal) throws
 }
 
-public protocol OpenTokSignalEmmiter: AnyObject {
+public protocol OpenTokSignalEmitter: AnyObject {
     var channel: OpenTokSignalChannel? { get set }
 }
 
@@ -28,4 +28,4 @@ public protocol OpenTokPluginCallLifeCycle {
     func callDidEnd()
 }
 
-public typealias OpenTokPlugin = OpenTokSignalHandler & OpenTokSignalEmmiter & OpenTokPluginCallLifeCycle & Identifiable
+public typealias OpenTokPlugin = OpenTokSignalHandler & OpenTokSignalEmitter & OpenTokPluginCallLifeCycle & Identifiable
