@@ -21,12 +21,11 @@
 		6FBED71A2EA255AD0015782E /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 6FBED7192EA255AD0015782E /* SnapshotTesting */; };
 		6FBED71B2EA256450015782E /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; platformFilter = ios; };
 		6FFC747A2EA63BDA00CF4665 /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7A52E99335800CBCA2D /* VERAChat.framework */; };
-		6FFC74832EA63C4600CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
-		6FFC74F02EA6565000CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */; };
 		6FFC74F82EA6687E00CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */; };
 		6FFC74F92EA6687E00CF4665 /* VERAOpenTok.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6FFC74FB2EA668A600CF4665 /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74FA2EA668A600CF4665 /* VERACore.framework */; };
 		6FFC74FC2EA668A600CF4665 /* VERACore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74FA2EA668A600CF4665 /* VERACore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6FFC75052EA68C7100CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8802E9D28D800CBCA2D /* VERAChatAppTestHelpers.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +78,7 @@
 			remoteGlobalIDString = 6F55F7A42E99335800CBCA2D;
 			remoteInfo = VERAChat;
 		};
-		6FFC74852EA63C4600CF4665 /* PBXContainerItemProxy */ = {
+		6FFC75072EA68C7100CF4665 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6F55F79C2E99335800CBCA2D /* Project object */;
 			proxyType = 1;
@@ -129,6 +128,7 @@
 		6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FFC74FA2EA668A600CF4665 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74FF2EA68A3D00CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -173,8 +173,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6FFC74832EA63C4600CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */,
 				6F55F7B12E99335900CBCA2D /* VERAChat.framework in Frameworks */,
+				6FFC75052EA68C7100CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,7 +195,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6FFC747A2EA63BDA00CF4665 /* VERAChat.framework in Frameworks */,
-				6FFC74F02EA6565000CF4665 /* VERAOpenTok.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +239,7 @@
 		6F55F8272E9939FF00CBCA2D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6FFC74FF2EA68A3D00CF4665 /* VERAOpenTok.framework */,
 				6FFC74FA2EA668A600CF4665 /* VERACore.framework */,
 				6FFC74F72EA6687E00CF4665 /* VERAOpenTok.framework */,
 				6FFC74EF2EA6565000CF4665 /* VERAOpenTok.framework */,
@@ -306,7 +306,7 @@
 			);
 			dependencies = (
 				6F55F7B32E99335900CBCA2D /* PBXTargetDependency */,
-				6FFC74862EA63C4600CF4665 /* PBXTargetDependency */,
+				6FFC75082EA68C7100CF4665 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6F55F7B42E99335900CBCA2D /* VERAChatTests */,
@@ -560,10 +560,10 @@
 			target = 6F55F7A42E99335800CBCA2D /* VERAChat */;
 			targetProxy = 6FFC747C2EA63BDA00CF4665 /* PBXContainerItemProxy */;
 		};
-		6FFC74862EA63C4600CF4665 /* PBXTargetDependency */ = {
+		6FFC75082EA68C7100CF4665 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6F55F87F2E9D28D800CBCA2D /* VERAChatAppTestHelpers */;
-			targetProxy = 6FFC74852EA63C4600CF4665 /* PBXContainerItemProxy */;
+			targetProxy = 6FFC75072EA68C7100CF4665 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

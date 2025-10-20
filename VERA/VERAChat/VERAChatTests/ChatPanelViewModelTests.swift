@@ -12,13 +12,17 @@ import VERAChatAppTestHelpers
 struct ChatPanelViewModelTests {
 
     @Test func initialStateIsLoading() {
-        let sut = makeSUT()
+        let repository = SpyChatMessagesRepository()
+        let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
+        let sut = makeSUT(sendChatMessageUseCase: sendMessageUseCase)
 
         #expect(sut.state == .loading)
     }
 
     @Test func callToLoadDataChangesStateToContent() {
-        let sut = makeSUT()
+        let repository = SpyChatMessagesRepository()
+        let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
+        let sut = makeSUT(sendChatMessageUseCase: sendMessageUseCase)
 
         #expect(sut.state == .loading)
 
@@ -29,9 +33,12 @@ struct ChatPanelViewModelTests {
 
     @Test func callToLoadDataWithMessagesChangesStateToContent() {
         let repository = SpyChatMessagesRepository()
+        let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
         let inputMessages = makeMessages()
         repository.subject.value = inputMessages
-        let sut = makeSUT(repository: repository)
+        let sut = makeSUT(
+            repository: repository,
+            sendChatMessageUseCase: sendMessageUseCase)
 
         #expect(sut.state == .loading)
 
@@ -52,26 +59,24 @@ struct ChatPanelViewModelTests {
         #expect(actualMessages == expectedMessages)
     }
 
-    @Test func sendingMessagesNotifiesToTheRepository() async throws {
-        let repository = SpyChatMessagesRepository()
-        let sut = makeSUT(repository: repository)
-
-        var didSend = false
-        repository.onSendMessage = { _ in
-            didSend = true
-        }
-
-        sut.sendMessage("a message")
-
-        #expect(didSend)
-    }
-
     // MARK: SUT
 
     func makeSUT(
-        repository: ChatMessagesRepository = SpyChatMessagesRepository()
+        repository: ChatMessagesRepository = SpyChatMessagesRepository(),
+        sendChatMessageUseCase: SendChatMessageUseCase
     ) -> ChatPanelViewModel {
-        .init(chatMessagesRepository: repository)
+        .init(
+            chatMessagesRepository: repository,
+            sendChatMessageUseCase: sendChatMessageUseCase)
+    }
+
+    func makeSendChatMessageUseCase(
+        name: String = "Me",
+        repository: ChatMessagesRepository
+    ) -> SendChatMessageUseCase {
+        MockSendChatMessageUseCase(
+            name: name,
+            chatMessagesRepository: repository)
     }
 
     func makeMessages() -> [ChatMessage] {

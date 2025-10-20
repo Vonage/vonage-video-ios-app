@@ -13,10 +13,7 @@ public class SpyChatMessagesRepository: ChatMessagesRepository {
         subject.eraseToAnyPublisher()
     }
 
-    public var onSendMessage: ((String) -> Void)?
-
-    public init(onSendMessage: ((String) -> Void)? = nil) {
-        self.onSendMessage = onSendMessage
+    public init() {
     }
 
     public func addMessage(_ message: VERAChat.ChatMessage) {
