@@ -196,19 +196,12 @@ jobs:
       run: |
         echo "📊 Generating coverage from all test results..."
         
-        # Install slather for proper XML coverage conversion
-        echo "🔧 Installing slather for SonarCloud XML conversion..."
-        gem install slather
-        
         # Ensure coverage-reports directory exists
         mkdir -p coverage-reports
         
-        # Try to generate coverage reports
-        if ./scripts/generate-coverage.sh; then
+        # Use simplified coverage generation (no Ruby dependencies)
+        if ./scripts/generate-coverage-simple.sh; then
           echo "✅ Coverage reports generated successfully"
-          
-          echo "Converting the coverage to sonar xml"
-          ./scripts/convert-coverage-to-xml.sh
 
           # Verify the XML file exists and is valid
           if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then

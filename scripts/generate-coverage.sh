@@ -134,12 +134,11 @@ for coverage_file in glob.glob(os.path.join(coverage_dir, 'coverage_*.json')):
                                             line_num = line_info.get('line', 0)
                                             is_covered = line_info.get('executionCount', 0) > 0
                                             
-                                            if line_num > 0:
+                                            if line_num > 0 and line_num not in all_files[file_path]['lines']:
                                                 all_files[file_path]['lines'][line_num] = is_covered
-                                                if line_num not in [l for l in all_files[file_path]['lines'].keys() if l < line_num]:
-                                                    all_files[file_path]['executable_lines'] += 1
-                                                    if is_covered:
-                                                        all_files[file_path]['covered_lines'] += 1
+                                                all_files[file_path]['executable_lines'] += 1
+                                                if is_covered:
+                                                    all_files[file_path]['covered_lines'] += 1
                 
         print(f'   ✅ Processed {os.path.basename(coverage_file)}')
     except Exception as e:
