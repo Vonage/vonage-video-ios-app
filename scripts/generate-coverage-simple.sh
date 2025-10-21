@@ -136,12 +136,20 @@ try:
             if not file_path:
                 continue
             
-            # Make path relative to project root
+            # Make path relative to project root - clean up all path prefixes
             if '/vonage-video-ios-app/' in file_path:
                 # Extract the path after the project root
                 parts = file_path.split('/vonage-video-ios-app/')
                 if len(parts) > 1:
                     file_path = parts[1]
+            
+            # Remove any remaining prefix paths that SonarCloud won't recognize
+            if file_path.startswith('vonage-video-ios-app/'):
+                file_path = file_path.replace('vonage-video-ios-app/', '')
+            
+            # Only include VERA project files for SonarCloud analysis
+            if not file_path.startswith('VERA/'):
+                continue
             
             # Create file element
             file_element = ET.SubElement(root, 'file', path=file_path)
