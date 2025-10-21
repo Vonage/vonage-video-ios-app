@@ -253,18 +253,9 @@ jobs:
       run: |
         brew install sonar-scanner
         
-        SONAR_PROJECT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d'=' -f2)
-        SONAR_ORGANIZATION=$(grep "^sonar.organization=" sonar-project.properties | cut -d'=' -f2)
-        
         sonar-scanner \
-          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.organization="$SONAR_ORGANIZATION" \
-          -Dsonar.sources=VERA/VERAApp/VERA,VERA/VERACore/VERACore,VERA/VERAChat/VERAChat,VERA/VERAOpenTok/VERAOpenTok \
-          -Dsonar.tests=VERA/VERACore/VERACoreTests,VERA/VERACore/VERACoreSnapshotTests,VERA/VERAChat/VERAChatTests,VERA/VERAChat/VERAChatSnapshotTests,VERA/VERAOpenTok/VERAOpenTokTests,VERA/VERAApp/VERATests \
-          -Dsonar.exclusions="**/*.pdf,**/*.xcassets/**,**/DerivedData/**,**/build/**" \
-          -Dsonar.swift.excludedPathsFromCoverage="**/*Tests*/**,**/*Test*/**,**/Mocks/**,**/Preview*/**" \
-          -Dsonar.coverageReportPaths=coverage-reports/sonarqube-generic-coverage.xml \
           -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.verbose=true
 
   upload-testflight:
     name: Upload to TestFlight
