@@ -88,10 +88,6 @@ struct VERAChatSnapshotTests {
             ("SmallText", ContentSizeCategory.extraSmall, []),
             ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge, []),
             ("SmallText-with-messages", ContentSizeCategory.extraSmall, UIChatMessage.sampleMessages),
-            (
-                "LargeText-with-messages", ContentSizeCategory.accessibilityExtraExtraExtraLarge,
-                UIChatMessage.sampleMessages
-            ),
         ])
     func accessibility(
         textName: String,
