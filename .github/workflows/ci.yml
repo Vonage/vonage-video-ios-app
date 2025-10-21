@@ -207,6 +207,9 @@ jobs:
         if ./scripts/generate-coverage.sh; then
           echo "✅ Coverage reports generated successfully"
           
+          echo "Converting the coverage to sonar xml"
+          ./scripts/convert-coverage-to-xml.sh
+
           # Verify the XML file exists and is valid
           if [ -f "coverage-reports/sonarqube-generic-coverage.xml" ]; then
             echo "✅ SonarQube XML coverage report found"
