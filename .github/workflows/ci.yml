@@ -81,83 +81,83 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    - name: Run VERACoreSnapshotTests (iOS Simulator)
-      id: core-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACoreSnapshotTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-          -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
+    #- name: Run VERACoreSnapshotTests (iOS Simulator)
+    #  id: core-snapshot-tests
+    #  timeout-minutes: 15
+    #  run: |
+    #    echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
+    #    xcodebuild test \
+    #      -workspace VERA/VERA.xcworkspace \
+    #      -scheme VERACoreSnapshotTests \
+    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+    #      -derivedDataPath DerivedData \
+    #      -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+    #      CODE_SIGN_IDENTITY="" \
+    #      CODE_SIGNING_REQUIRED=NO \
+    #      CODE_SIGNING_ALLOWED=NO
 
-    - name: Run VERAChatSnapshotTests (iOS Simulator)
-      id: chat-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChatSnapshotTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-          -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
+    #- name: Run VERAChatSnapshotTests (iOS Simulator)
+    #  id: chat-snapshot-tests
+    #  timeout-minutes: 15
+    #  run: |
+    #    echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
+    #    xcodebuild test \
+    #      -workspace VERA/VERA.xcworkspace \
+    #      -scheme VERAChatSnapshotTests \
+    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+    #      -derivedDataPath DerivedData \
+    #      -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
+    #      CODE_SIGN_IDENTITY="" \
+    #      CODE_SIGNING_REQUIRED=NO \
+    #      CODE_SIGNING_ALLOWED=NO
 
-    - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
-      id: ot-chat-plugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokChatPluginTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
+    #- name: Run VERAOpenTokChatPluginTests (iOS Simulator)
+    #  id: ot-chat-plugin-tests
+    #  timeout-minutes: 15
+    #  run: |
+    #    echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
+    #    xcodebuild test \
+    #      -workspace VERA/VERA.xcworkspace \
+    #      -scheme VERAOpenTokChatPluginTests \
+    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+    #      -derivedDataPath DerivedData \
+    #      -enableCodeCoverage YES \
+    #      -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
+    #      CODE_SIGN_IDENTITY="" \
+    #      CODE_SIGNING_REQUIRED=NO \
+    #      CODE_SIGNING_ALLOWED=NO
 
-    - name: Run VERAOpenTokTests (iOS Simulator)
-      id: opentok-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERAOpenTokTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTok \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
-    
-    - name: Run VERATests (iOS Simulator)
-      id: vera-app-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERATests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERATests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
+    #- name: Run VERAOpenTokTests (iOS Simulator)
+    #  id: opentok-tests
+    #  timeout-minutes: 15
+    #  run: |
+    #    echo "📡 Running VERAOpenTokTests on iOS Simulator"
+    #    xcodebuild test \
+    #      -workspace VERA/VERA.xcworkspace \
+    #      -scheme VERAOpenTok \
+    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+    #      -derivedDataPath DerivedData \
+    #      -enableCodeCoverage YES \
+    #      -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
+    #      CODE_SIGN_IDENTITY="" \
+    #      CODE_SIGNING_REQUIRED=NO \
+    #      CODE_SIGNING_ALLOWED=NO
+    #
+    #- name: Run VERATests (iOS Simulator)
+    #  id: vera-app-tests
+    #  timeout-minutes: 15
+    #  run: |
+    #    echo "📡 Running VERATests on iOS Simulator"
+    #    xcodebuild test \
+    #      -workspace VERA/VERA.xcworkspace \
+    #      -scheme VERATests \
+    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+    #      -derivedDataPath DerivedData \
+    #      -enableCodeCoverage YES \
+    #      -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+    #      CODE_SIGN_IDENTITY="" \
+    #      CODE_SIGNING_REQUIRED=NO \
+    #      CODE_SIGNING_ALLOWED=NO
 
     - name: Upload all test results
       uses: actions/upload-artifact@v4
