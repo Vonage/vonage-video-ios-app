@@ -216,6 +216,11 @@ except Exception as e:
     print('Generated fallback XML with minimal data')
 "
 
+# Move JSON files to backup to avoid SonarCloud parsing conflicts
+echo -e "${BLUE}📁 Moving JSON files to backup directory...${NC}"
+mkdir -p "$COVERAGE_DIR/backup"
+mv "$COVERAGE_DIR"/*.json "$COVERAGE_DIR/backup/" 2>/dev/null || true
+
 # Generate summary
 echo -e "${BLUE}📊 Coverage reports generated${NC}"
 
