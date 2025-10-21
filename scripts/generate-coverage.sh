@@ -41,7 +41,7 @@ DERIVED_DATA_PATH="$PROJECT_ROOT/DerivedData"
 COVERAGE_DIR="$PROJECT_ROOT/coverage-reports"
 mkdir -p "$COVERAGE_DIR"
 
-# ✅ Find ALL .xcresult files
+# Find ALL .xcresult files
 XCRESULT_FILES=()
 if [ -d "$DERIVED_DATA_PATH" ]; then
     echo -e "${BLUE}🔍 Searching for all test results...${NC}"
@@ -54,8 +54,19 @@ fi
 if [ ${#XCRESULT_FILES[@]} -eq 0 ]; then
     echo -e "${YELLOW}⚠️  No test results found${NC}"
     echo -e "${YELLOW}⚠️  Creating minimal coverage report...${NC}"
-    echo '{"coveredLines":0,"executableLines":0,"lineCoverage":0,"targets":[]}' > "$COVERAGE_DIR/coverage.json"
-    echo -e "${GREEN}✅ Minimal coverage report created${NC}"
+    
+    # Create valid JSON for SonarCloud (array format)
+    echo '[]' > "$COVERAGE_DIR/coverage.json"
+    
+    # Create valid XML for SonarCloud
+    cat > "$COVERAGE_DIR/sonarqube-generic-coverage.xml" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage version="1">
+  <!-- Empty coverage report -->
+</coverage>
+EOF
+    
+    echo -e "${GREEN}✅ Minimal coverage reports created${NC}"
     exit 0
 fi
 
@@ -66,7 +77,7 @@ if [ "$USE_SLATHER" = true ]; then
     echo -e "${BLUE}🔄 Generating combined coverage with Slather...${NC}"
     cd "$PROJECT_ROOT"
     
-    # ✅ Slather can process all targets at once from the workspace
+    # Slather can process all targets at once from the workspace
     if $SLATHER_CMD coverage \
         --sonarqube-xml \
         --output-directory "$COVERAGE_DIR" \
@@ -94,12 +105,13 @@ if [ "$USE_SLATHER" = true ]; then
     fi
 fi
 
-# ✅ Fallback: Process each .xcresult individually and combine
+# Fallback: Process each .xcresult individually and combine
 if [ "$USE_SLATHER" = false ]; then
     echo -e "${BLUE}📊 Generating coverage with xccov...${NC}"
     
     COMBINED_COVERAGE="$COVERAGE_DIR/combined_coverage.json"
-    echo '{"targets": []}' > "$COMBINED_COVERAGE"
+    # Initialize with empty array for SonarCloud
+    echo '[]' > "$COMBINED_COVERAGE"
     
     for i in "${!XCRESULT_FILES[@]}"; do
         XCRESULT_PATH="${XCRESULT_FILES[$i]}"
@@ -114,7 +126,7 @@ if [ "$USE_SLATHER" = false ]; then
         fi
     done
     
-    # ✅ Combine all individual coverage files
+    # Combine all individual coverage files
     if command -v python3 &> /dev/null; then
         echo -e "${BLUE}🔄 Combining coverage data...${NC}"
         python3 -c "
@@ -123,7 +135,8 @@ import glob
 import os
 
 coverage_dir = '$COVERAGE_DIR'
-combined_data = {'targets': [], 'lineCoverage': 0, 'coveredLines': 0, 'executableLines': 0}
+# Change to array format for SonarCloud
+combined_targets = []
 
 # Process all individual coverage files
 for coverage_file in glob.glob(os.path.join(coverage_dir, 'coverage_*.json')):
@@ -131,33 +144,31 @@ for coverage_file in glob.glob(os.path.join(coverage_dir, 'coverage_*.json')):
         with open(coverage_file, 'r') as f:
             data = json.load(f)
             if 'targets' in data:
-                combined_data['targets'].extend(data['targets'])
+                combined_targets.extend(data['targets'])
             elif 'data' in data:  # Alternative format
-                combined_data['targets'].extend(data['data'])
+                combined_targets.extend(data['data'])
         print(f'   ✅ Processed {os.path.basename(coverage_file)}')
     except Exception as e:
         print(f'   ⚠️  Failed to process {os.path.basename(coverage_file)}: {e}')
 
-# Calculate totals
+# Calculate totals for summary
 total_executable = 0
 total_covered = 0
-for target in combined_data['targets']:
+for target in combined_targets:
     if 'executableLines' in target:
         total_executable += target['executableLines']
     if 'coveredLines' in target:
         total_covered += target['coveredLines']
 
-combined_data['executableLines'] = total_executable
-combined_data['coveredLines'] = total_covered
-combined_data['lineCoverage'] = (total_covered / total_executable) if total_executable > 0 else 0
+line_coverage = (total_covered / total_executable) if total_executable > 0 else 0
 
-# Save combined coverage
+# Save as array format for SonarCloud
 with open('$COMBINED_COVERAGE', 'w') as f:
-    json.dump(combined_data, f, indent=2)
+    json.dump(combined_targets, f, indent=2)
 
 print(f'📊 Combined Coverage Summary:')
-print(f'   Targets: {len(combined_data[\"targets\"])}')
-print(f'   Line Coverage: {combined_data[\"lineCoverage\"]:.1%}')
+print(f'   Targets: {len(combined_targets)}')
+print(f'   Line Coverage: {line_coverage:.1%}')
 print(f'   Lines: {total_covered}/{total_executable}')
 "
         # Copy combined as main coverage
