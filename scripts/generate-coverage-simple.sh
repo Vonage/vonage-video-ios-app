@@ -150,6 +150,15 @@ try:
             # Only include VERA project files for SonarCloud analysis
             if not file_path.startswith('VERA/'):
                 continue
+                
+            # Skip problematic files that are excluded from coverage analysis
+            excluded_files = [
+                'VERA/VERAChat/VERAChat/UI/View/ChatRow.swift',
+                'VERA/VERAChat/VERAChat/UI/View/ChatPanel.swift', 
+                'VERA/VERAChat/VERAChat/UI/View/ChatPanelMessages.swift'
+            ]
+            if file_path in excluded_files:
+                continue
             
             # Create file element
             file_element = ET.SubElement(root, 'file', path=file_path)
@@ -220,6 +229,13 @@ except Exception as e:
 echo -e "${BLUE}📁 Moving JSON files to backup directory...${NC}"
 mkdir -p "$COVERAGE_DIR/backup"
 mv "$COVERAGE_DIR"/*.json "$COVERAGE_DIR/backup/" 2>/dev/null || true
+
+# Verify no JSON files remain in main coverage directory
+if ls "$COVERAGE_DIR"/*.json 1> /dev/null 2>&1; then
+    echo -e "${RED}⚠️  Warning: JSON files still present in coverage directory${NC}"
+    rm -f "$COVERAGE_DIR"/*.json
+    echo -e "${YELLOW}🗑️  Removed remaining JSON files${NC}"
+fi
 
 # Generate summary
 echo -e "${BLUE}📊 Coverage reports generated${NC}"
