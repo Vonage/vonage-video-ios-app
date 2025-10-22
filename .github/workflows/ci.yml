@@ -111,53 +111,53 @@ jobs:
     #      CODE_SIGNING_REQUIRED=NO \
     #      CODE_SIGNING_ALLOWED=NO
 
-    #- name: Run VERAOpenTokChatPluginTests (iOS Simulator)
-    #  id: ot-chat-plugin-tests
-    #  timeout-minutes: 15
-    #  run: |
-    #    echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
-    #    xcodebuild test \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERAOpenTokChatPluginTests \
-    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
-    #      CODE_SIGN_IDENTITY="" \
-    #      CODE_SIGNING_REQUIRED=NO \
-    #      CODE_SIGNING_ALLOWED=NO
+    - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
+      id: ot-chat-plugin-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTokChatPluginTests \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
 
-    #- name: Run VERAOpenTokTests (iOS Simulator)
-    #  id: opentok-tests
-    #  timeout-minutes: 15
-    #  run: |
-    #    echo "📡 Running VERAOpenTokTests on iOS Simulator"
-    #    xcodebuild test \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERAOpenTok \
-    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
-    #      CODE_SIGN_IDENTITY="" \
-    #      CODE_SIGNING_REQUIRED=NO \
-    #      CODE_SIGNING_ALLOWED=NO
-    #
-    #- name: Run VERATests (iOS Simulator)
-    #  id: vera-app-tests
-    #  timeout-minutes: 15
-    #  run: |
-    #    echo "📡 Running VERATests on iOS Simulator"
-    #    xcodebuild test \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERATests \
-    #      -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -resultBundlePath DerivedData/VERATests-iOS.xcresult \
-    #      CODE_SIGN_IDENTITY="" \
-    #      CODE_SIGNING_REQUIRED=NO \
-    #      CODE_SIGNING_ALLOWED=NO
+    - name: Run VERAOpenTokTests (iOS Simulator)
+      id: opentok-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERAOpenTokTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTok \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+    
+    - name: Run VERATests (iOS Simulator)
+      id: vera-app-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERATests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERATests \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
 
     - name: Upload all test results
       uses: actions/upload-artifact@v4
@@ -203,8 +203,20 @@ jobs:
         chmod +x ./scripts/generate-coverage-simple.sh
         ./scripts/generate-coverage-simple.sh
         
+        # Ensure no JSON files remain for SonarCloud to detect
+        echo "🧹 Removing any remaining JSON files to prevent SonarCloud conflicts..."
+        find coverage-reports/ -name "*.json" -type f -delete 2>/dev/null || true
+        
         echo "📁 Coverage reports generated:"
         ls -la coverage-reports/
+        
+        echo "✅ Verifying no JSON files present:"
+        if find coverage-reports/ -name "*.json" -type f | grep -q .; then
+          echo "❌ ERROR: JSON files still present!"
+          exit 1
+        else
+          echo "✅ No JSON files found - SonarCloud should only detect XML"
+        fi
     
     - name: SonarCloud Analysis
       env:
@@ -214,7 +226,7 @@ jobs:
         brew install sonar-scanner
         
         sonar-scanner \
-          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.verbose=true
 
   upload-testflight:
