@@ -53,6 +53,12 @@ jobs:
         echo "📱 Available iOS Simulators:"
         xcrun simctl list devices
 
+    - name: Export build flags
+      run: |
+        {
+          echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO'
+        } >> $GITHUB_ENV
+
     - name: Run VERACoreTests (macOS)
       id: core-tests-macos
       run: |
@@ -65,9 +71,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAChatTests (macOS)
       id: chat-tests-macos
@@ -81,9 +85,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: core-snapshot-tests
@@ -96,9 +98,7 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
       id: chat-snapshot-tests
@@ -111,9 +111,7 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
       id: ot-chat-plugin-tests
@@ -127,9 +125,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
@@ -143,9 +139,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
     
     - name: Run VERACommonUITests (iOS Simulator)
       id: common-ui-tests
@@ -159,9 +153,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERATests (iOS Simulator)
       id: vera-app-tests
@@ -175,9 +167,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Upload all test results
       uses: actions/upload-artifact@v4
