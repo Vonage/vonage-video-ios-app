@@ -27,7 +27,7 @@ jobs:
     - name: Install SwiftLint
       run: |
         brew install swiftlint
-        
+
   unit-tests:
     runs-on: macos-26
     needs: [format-check]
@@ -147,6 +147,22 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
     
+    - name: Run VERACommonUITests (iOS Simulator)
+      id: opentok-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERACommonUITests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACommonUI \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+
     - name: Run VERATests (iOS Simulator)
       id: vera-app-tests
       timeout-minutes: 15

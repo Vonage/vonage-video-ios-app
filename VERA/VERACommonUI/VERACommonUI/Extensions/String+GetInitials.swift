@@ -5,23 +5,28 @@
 import Foundation
 
 extension String {
-    func getInitials(limit: Int = 2) -> String {
+    public func getInitials(limit: Int = 2) -> String {
+        return splitName()
+            .compactMap { $0 }
+            .prefix(limit)
+            .map { String($0).uppercased() }
+            .joined()
+    }
+
+    private func splitName() -> [Character?] {
         let names = self.trimmingCharacters(in: .whitespacesAndNewlines)
-            .components(separatedBy: .whitespaces)
+            .components(separatedBy: .whitespacesAndNewlines)
             .filter { !$0.isEmpty }
-        let selected: [String]
+            .compactMap { $0.first }
+            .filter { $0.isLetter || $0.isNumber }
+
         switch names.count {
         case 1:
-            selected = [names.first!]
+            return [names.first]
         case 2...:
-            selected = [names.first!, names.last!]
+            return [names.first, names.last]
         default:
-            selected = []
+            return [nil]
         }
-        return
-            selected
-            .prefix(limit)
-            .compactMap { $0.first?.uppercased() }
-            .joined()
     }
 }
