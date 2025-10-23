@@ -67,7 +67,7 @@ jobs:
           -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERAChatTests (macOS)
       id: chat-tests-macos
@@ -83,7 +83,7 @@ jobs:
           -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: core-snapshot-tests
@@ -98,7 +98,7 @@ jobs:
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
       id: chat-snapshot-tests
@@ -113,7 +113,7 @@ jobs:
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
       id: ot-chat-plugin-tests
@@ -129,7 +129,7 @@ jobs:
           -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERAOpenTokTests (iOS Simulator)
       id: opentok-tests
@@ -145,7 +145,7 @@ jobs:
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
     
     - name: Run VERACommonUITests (iOS Simulator)
       id: common-ui-tests
@@ -161,7 +161,7 @@ jobs:
           -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Run VERATests (iOS Simulator)
       id: vera-app-tests
@@ -177,7 +177,7 @@ jobs:
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
+          CODE_SIGNING_ALLOWED=NO | xcpretty
 
     - name: Upload all test results
       uses: actions/upload-artifact@v4
