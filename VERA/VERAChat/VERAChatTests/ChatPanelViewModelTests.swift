@@ -77,6 +77,18 @@ struct ChatPanelViewModelTests {
         #expect(actualMessages == expectedMessages)
     }
 
+    @Test func sendMessageCallsToSendMessageUseCase() async {
+        let repository = SpyChatMessagesRepository()
+        let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
+        let sut = makeSUT(repository: repository,
+                          sendChatMessageUseCase: sendMessageUseCase)
+        
+        sut.sendMessage("Don't panic!")
+
+        let messages = await repository.observeMessages().values.first { _ in true }
+        #expect(messages!.first!.message == "Don't panic!")
+    }
+    
     // MARK: SUT
 
     func makeSUT(
