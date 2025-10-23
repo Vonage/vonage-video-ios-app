@@ -148,7 +148,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO | xcpretty --report junit
     
     - name: Run VERACommonUITests (iOS Simulator)
-      id: opentok-tests
+      id: common-ui-tests
       timeout-minutes: 15
       run: |
         echo "📡 Running VERACommonUITests on iOS Simulator"
