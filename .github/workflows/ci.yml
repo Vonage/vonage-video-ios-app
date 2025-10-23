@@ -53,35 +53,57 @@ jobs:
         echo "📱 Available iOS Simulators:"
         xcrun simctl list devices
 
-    # Prepare (create or reuse) an iPhone 17 simulator with iOS runtime >= 26
-    - name: Prepare iPhone 17 simulator (iOS 26+)
+    - name: Prepare iPhone 17 simulator
       id: simulator-id-resolution
       run: |
         set -e
         DEVICE_TYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-17"
-        # Find first available iOS runtime version >= 26
-        TARGET_RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {
-          split($1,a," "); ver=a[2]; gsub("\\.","",ver);
-          if (ver+0 >= 26){print $2; exit}
-        }')
-        if [ -z "$TARGET_RUNTIME" ]; then
-          echo "⚠️ No iOS >=26 runtime found. Falling back to latest available."
-          TARGET_RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {print $2}' | tail -1)
+
+        echo "Searching existing iPhone 17 simulators (26.1 -> 26.0 -> others)..."
+        PREFERRED_VERSIONS=("26.1" "26.0")
+        PICKED_UDID=""
+        PICKED_VERSION=""
+        for ver in "${PREFERRED_VERSIONS[@]}"; do
+          UDID=$(xcrun simctl list devices | awk -v ver="$ver" '
+            $0 ~ "-- iOS " ver " --" {in=1; next}
+            in && /iPhone 17 \(/ {
+              match($0, /\(([0-9A-F-]{36})\)/, a);
+              if (a[1]) {print a[1]; exit}
+            }
+            /^-- / {in=0}
+          ')
+          if [ -n "$UDID" ]; then
+            PICKED_UDID="$UDID"
+            PICKED_VERSION="$ver"
+            echo "Found existing iPhone 17 for iOS $ver: $UDID"
+            break
+          fi
+        done
+
+        if [ -z "$PICKED_UDID" ]; then
+          echo "No preferred version found. Falling back to create with highest available iOS runtime."
+          # Get highest runtime id (e.g. com.apple.CoreSimulator.SimRuntime.iOS-26-1)
+          RUNTIME_ID=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {print $2}' | awk -F'-' '
+            /iOS-/ {
+              major=$5; minor=$6; if(minor==""){minor=0}
+              ver=major "." minor
+              print ver,$0
+            }' | sort -k1,1Vr | head -1 | awk '{print $2}')
+          if [ -z "$RUNTIME_ID" ]; then
+            echo "❌ No iOS runtimes available. Abort."
+            exit 1
+          fi
+          echo "Runtime selected for creation: $RUNTIME_ID"
+          PICKED_UDID=$(xcrun simctl create "CI-iPhone17" "$DEVICE_TYPE" "$RUNTIME_ID")
+          PICKED_VERSION=$(echo "$RUNTIME_ID" | sed -E 's/.*iOS-([0-9]+)-([0-9]+).*/\1.\2/')
         fi
-        echo "Runtime selected: $TARGET_RUNTIME"
-        # Attempt to reuse an existing matching simulator
-        EXISTING=$(xcrun simctl list devices | awk -v dt="$DEVICE_TYPE" -v rt="$TARGET_RUNTIME" -F '[()]' '$0 ~ dt && $0 ~ rt {print $2; exit}')
-        if [ -z "$EXISTING" ]; then
-          echo "Creating new iPhone 17 simulator..."
-          SIM_UDID=$(xcrun simctl create "CI-iPhone17" "$DEVICE_TYPE" "$TARGET_RUNTIME")
-        else
-          echo "Reusing simulator $EXISTING"
-          SIM_UDID="$EXISTING"
-        fi
-        echo "Booting simulator $SIM_UDID"
-        xcrun simctl boot "$SIM_UDID" || true
-        xcrun simctl bootstatus "$SIM_UDID" -b
-        echo "SIMULATOR_UDID=$SIM_UDID" >> $GITHUB_ENV
+
+        echo "Booting simulator $PICKED_UDID (iOS $PICKED_VERSION)"
+        xcrun simctl boot "$PICKED_UDID" || true
+        xcrun simctl bootstatus "$PICKED_UDID" -b
+
+        echo "SIMULATOR_UDID=$PICKED_UDID" >> $GITHUB_ENV
+        echo "IOS_VERSION=$PICKED_VERSION" >> $GITHUB_ENV
 
     - name: Run VERACoreTests (macOS)
       id: core-tests-macos
