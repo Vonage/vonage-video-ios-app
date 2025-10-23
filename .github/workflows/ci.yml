@@ -61,6 +61,7 @@ jobs:
 
     - name: Run VERATestPlan
       id: vera-test-plan
+      timeout-minutes: 30
       run: |
         echo "🧪 Running VERATestPlan on macOS"
         xcodebuild test \
