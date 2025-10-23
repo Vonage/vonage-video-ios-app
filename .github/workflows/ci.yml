@@ -24,10 +24,6 @@ jobs:
         chmod +x scripts/format.sh
         ./scripts/format.sh --check
 
-    - name: Install SwiftLint
-      run: |
-        brew install swiftlint
-
   unit-tests:
     runs-on: macos-26
     needs: [format-check]
@@ -48,6 +44,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-derived-data-
     
+    - name: Install SwiftLint
+      run: |
+        brew install swiftlint
+
     - name: List available simulators
       run: |
         echo "📱 Available iOS Simulators:"
