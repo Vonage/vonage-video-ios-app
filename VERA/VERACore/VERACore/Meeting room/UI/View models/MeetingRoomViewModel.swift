@@ -30,9 +30,7 @@ public struct MeetingRoomState: Equatable {
         participants.count
     }
 
-    public var unreadMessagesCount: Int {
-        0
-    }
+    public let unreadMessagesCount: Int
 
     public init(
         roomName: RoomName,
@@ -41,7 +39,8 @@ public struct MeetingRoomState: Equatable {
         isCameraEnabled: Bool,
         participants: [Participant],
         layout: MeetingRoomLayout,
-        activeSpeakerId: String?
+        activeSpeakerId: String?,
+        unreadMessagesCount: Int = 0
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -50,6 +49,7 @@ public struct MeetingRoomState: Equatable {
         self.participants = participants
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
+        self.unreadMessagesCount = unreadMessagesCount
     }
 
     public static let `default` = MeetingRoomState(
