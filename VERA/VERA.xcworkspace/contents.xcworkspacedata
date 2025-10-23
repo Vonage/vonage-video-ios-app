@@ -39,4 +39,7 @@
    <FileRef
       location = "group:../VERACoreSnapshotTests.xctestplan">
    </FileRef>
+   <FileRef
+      location = "group:VERATestPlan.xctestplan">
+   </FileRef>
 </Workspace>

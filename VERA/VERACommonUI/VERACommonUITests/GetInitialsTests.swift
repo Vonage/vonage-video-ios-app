@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERACommonUI
 
 @Suite("Get initials test suite")
 struct GetInitialsTests {

@@ -15,6 +15,7 @@
 		6F55F8C82E9E422C00CBCA2D /* VERAOpenTokChatPlugin.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C62E9E422C00CBCA2D /* VERAOpenTokChatPlugin.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F55F8CA2E9E424E00CBCA2D /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C92E9E424E00CBCA2D /* VERAChat.framework */; };
 		6F55F8CB2E9E424E00CBCA2D /* VERAChat.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C92E9E424E00CBCA2D /* VERAChat.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6FFC756E2EAAC6A600CF4665 /* VERATestPlan.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 6FFC756D2EAAC6A600CF4665 /* VERATestPlan.xctestplan */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		6F6A00A52E17F89200127A10 /* VERATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F6A00AF2E17F89200127A10 /* VERAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FA9F4D52E940F0300D6D223 /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC756D2EAAC6A600CF4665 /* VERATestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = VERATestPlan.xctestplan; path = ../VERATestPlan.xctestplan; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -148,6 +150,7 @@
 		6F6A008F2E17F89100127A10 = {
 			isa = PBXGroup;
 			children = (
+				6FFC756D2EAAC6A600CF4665 /* VERATestPlan.xctestplan */,
 				6FA9F4DA2E94110E00D6D223 /* VERATests */,
 				6F6A009A2E17F89100127A10 /* VERA */,
 				6F6A00B22E17F89200127A10 /* VERAUITests */,
@@ -291,6 +294,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FFC756E2EAAC6A600CF4665 /* VERATestPlan.xctestplan in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

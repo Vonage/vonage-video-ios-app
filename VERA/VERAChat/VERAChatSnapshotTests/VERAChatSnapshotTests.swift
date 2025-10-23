@@ -32,7 +32,7 @@ struct VERAChatSnapshotTests {
     }
 
     @Test(
-        "GoodBye View - Size Classes",
+        "Chat View - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13, []),
             ("iPad", ViewImageConfig.iPadPro12_9, []),
@@ -58,7 +58,7 @@ struct VERAChatSnapshotTests {
     }
 
     @Test(
-        "GoodBye View - Color Schemes",
+        "Chat View - Color Schemes",
         arguments: [
             ("Light", ColorScheme.light, []),
             ("Dark", ColorScheme.dark, []),
@@ -83,7 +83,7 @@ struct VERAChatSnapshotTests {
     }
 
     @Test(
-        "GoodBye View - Accessibility",
+        "Chat View - Accessibility",
         arguments: [
             ("SmallText", ContentSizeCategory.extraSmall, []),
             ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge, []),

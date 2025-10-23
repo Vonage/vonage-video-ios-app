@@ -59,114 +59,19 @@ jobs:
           echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO'
         } >> $GITHUB_ENV
 
-    - name: Run VERACoreTests (macOS)
-      id: core-tests-macos
+    - name: Run VERATestPlan
+      id: vera-test-plan
       run: |
-        echo "🧪 Running VERACoreTests on macOS"
+        echo "🧪 Running VERATestPlan on macOS"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERACore \
-          -destination "platform=macOS" \
-          -only-testing:VERACoreTests \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERAChatTests (macOS)
-      id: chat-tests-macos
-      run: |
-        echo "🧪 Running VERAChatTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChat \
-          -destination "platform=macOS" \
-          -only-testing:VERAChatTests \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERACoreSnapshotTests (iOS Simulator)
-      id: core-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACoreSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERAChatSnapshotTests (iOS Simulator)
-      id: chat-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChatSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
-      id: ot-chat-plugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokChatPluginTests \
+          -scheme VERA \
+          -testPlan VERATestPlan \
+          -configuration Debug \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERAOpenTokTests (iOS Simulator)
-      id: opentok-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERAOpenTokTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTok \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-    
-    - name: Run VERACommonUITests (iOS Simulator)
-      id: common-ui-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERACommonUITests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACommonUI \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-    - name: Run VERATests (iOS Simulator)
-      id: vera-app-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERATests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERATests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+          -resultBundlePath DerivedData/VERATestPlan.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Upload all test results
@@ -175,14 +80,7 @@ jobs:
       with:
         name: unit-test-results
         path: |
-          DerivedData/VERACoreTests-macOS.xcresult
-          DerivedData/VERAChatTests-macOS.xcresult
-          DerivedData/VERAOpenTokChatPluginTests-macOS.xcresult
-          DerivedData/VERAOpenTokTests-iOS.xcresult
-          DerivedData/Build/Products/
-          DerivedData/VERACoreSnapshotTests-iOS.xcresult
-          DerivedData/VERAChatSnapshotTests-iOS.xcresult
-          DerivedData/VERATests-iOS.xcresult
+          DerivedData/VERATestPlan.xcresult
 
   sonarcloud:
     name: SonarCloud Analysis
