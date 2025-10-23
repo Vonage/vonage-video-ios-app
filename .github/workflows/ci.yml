@@ -53,6 +53,36 @@ jobs:
         echo "📱 Available iOS Simulators:"
         xcrun simctl list devices
 
+    # Prepare (create or reuse) an iPhone 17 simulator with iOS runtime >= 26
+    - name: Prepare iPhone 17 simulator (iOS 26+)
+      id: simulator-id-resolution
+      run: |
+        set -e
+        DEVICE_TYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-17"
+        # Find first available iOS runtime version >= 26
+        TARGET_RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {
+          split($1,a," "); ver=a[2]; gsub("\\.","",ver);
+          if (ver+0 >= 26){print $2; exit}
+        }')
+        if [ -z "$TARGET_RUNTIME" ]; then
+          echo "⚠️ No iOS >=26 runtime found. Falling back to latest available."
+          TARGET_RUNTIME=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {print $2}' | tail -1)
+        fi
+        echo "Runtime selected: $TARGET_RUNTIME"
+        # Attempt to reuse an existing matching simulator
+        EXISTING=$(xcrun simctl list devices | awk -v dt="$DEVICE_TYPE" -v rt="$TARGET_RUNTIME" -F '[()]' '$0 ~ dt && $0 ~ rt {print $2; exit}')
+        if [ -z "$EXISTING" ]; then
+          echo "Creating new iPhone 17 simulator..."
+          SIM_UDID=$(xcrun simctl create "CI-iPhone17" "$DEVICE_TYPE" "$TARGET_RUNTIME")
+        else
+          echo "Reusing simulator $EXISTING"
+          SIM_UDID="$EXISTING"
+        fi
+        echo "Booting simulator $SIM_UDID"
+        xcrun simctl boot "$SIM_UDID" || true
+        xcrun simctl bootstatus "$SIM_UDID" -b
+        echo "SIMULATOR_UDID=$SIM_UDID" >> $GITHUB_ENV
+
     - name: Run VERACoreTests (macOS)
       id: core-tests-macos
       run: |
@@ -93,7 +123,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
@@ -108,7 +138,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAChatSnapshotTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
@@ -123,7 +153,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTokChatPluginTests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
@@ -139,7 +169,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -155,7 +185,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACommonUI \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
@@ -171,7 +201,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERATests \
-          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
+          -destination "id=$SIMULATOR_UDID" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
