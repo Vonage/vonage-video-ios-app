@@ -53,58 +53,6 @@ jobs:
         echo "📱 Available iOS Simulators:"
         xcrun simctl list devices
 
-    - name: Prepare iPhone 17 simulator
-      id: simulator-id-resolution
-      run: |
-        set -e
-        DEVICE_TYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-17"
-
-        echo "Searching existing iPhone 17 simulators (26.1 -> 26.0 -> others)..."
-        PREFERRED_VERSIONS=("26.1" "26.0")
-        PICKED_UDID=""
-        PICKED_VERSION=""
-        for ver in "${PREFERRED_VERSIONS[@]}"; do
-          UDID=$(xcrun simctl list devices | awk -v ver="$ver" '
-            $0 ~ "-- iOS " ver " --" {in=1; next}
-            in && /iPhone 17 \(/ {
-              match($0, /\(([0-9A-F-]{36})\)/, a);
-              if (a[1]) {print a[1]; exit}
-            }
-            /^-- / {in=0}
-          ')
-          if [ -n "$UDID" ]; then
-            PICKED_UDID="$UDID"
-            PICKED_VERSION="$ver"
-            echo "Found existing iPhone 17 for iOS $ver: $UDID"
-            break
-          fi
-        done
-
-        if [ -z "$PICKED_UDID" ]; then
-          echo "No preferred version found. Falling back to create with highest available iOS runtime."
-          # Get highest runtime id (e.g. com.apple.CoreSimulator.SimRuntime.iOS-26-1)
-          RUNTIME_ID=$(xcrun simctl list runtimes | awk -F'[()]' '/iOS .*available/ {print $2}' | awk -F'-' '
-            /iOS-/ {
-              major=$5; minor=$6; if(minor==""){minor=0}
-              ver=major "." minor
-              print ver,$0
-            }' | sort -k1,1Vr | head -1 | awk '{print $2}')
-          if [ -z "$RUNTIME_ID" ]; then
-            echo "❌ No iOS runtimes available. Abort."
-            exit 1
-          fi
-          echo "Runtime selected for creation: $RUNTIME_ID"
-          PICKED_UDID=$(xcrun simctl create "CI-iPhone17" "$DEVICE_TYPE" "$RUNTIME_ID")
-          PICKED_VERSION=$(echo "$RUNTIME_ID" | sed -E 's/.*iOS-([0-9]+)-([0-9]+).*/\1.\2/')
-        fi
-
-        echo "Booting simulator $PICKED_UDID (iOS $PICKED_VERSION)"
-        xcrun simctl boot "$PICKED_UDID" || true
-        xcrun simctl bootstatus "$PICKED_UDID" -b
-
-        echo "SIMULATOR_UDID=$PICKED_UDID" >> $GITHUB_ENV
-        echo "IOS_VERSION=$PICKED_VERSION" >> $GITHUB_ENV
-
     - name: Run VERACoreTests (macOS)
       id: core-tests-macos
       run: |
@@ -145,7 +93,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
@@ -160,7 +108,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAChatSnapshotTests \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
           CODE_SIGN_IDENTITY="" \
@@ -175,7 +123,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTokChatPluginTests \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
@@ -191,7 +139,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -207,7 +155,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACommonUI \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
@@ -223,7 +171,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERATests \
-          -destination "id=$SIMULATOR_UDID" \
+          -destination "platform=iOS Simulator,name=iPhone 17,OS=26" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
