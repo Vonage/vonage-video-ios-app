@@ -4,6 +4,7 @@
 
 import AVKit
 import SwiftUI
+import VERACommonUI
 
 struct ParticipantVideoCard: View {
     let participant: Participant
