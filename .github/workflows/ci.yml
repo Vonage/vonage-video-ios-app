@@ -73,7 +73,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
-          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
@@ -89,7 +89,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTok \
-          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
@@ -105,7 +105,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERATests \
-          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
@@ -149,7 +149,7 @@ jobs:
 #        xcodebuild test \
 #          -workspace VERA/VERA.xcworkspace \
 #          -scheme VERAUITests \
-#          -destination "id=E0311CBD-B1B8-41F5-80E2-7C44C7404EBF" \
+#          -destination "id=35493C3A-9EF1-4C47-8F36-0293075D1F27" \
 #          -only-testing:VERAUITests \
 #          -enableCodeCoverage YES \
 #          -derivedDataPath DerivedData \
