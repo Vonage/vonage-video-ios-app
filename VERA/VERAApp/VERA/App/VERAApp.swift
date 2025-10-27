@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import VERAChat
 import VERACore
 import VERAOpenTok
 
@@ -20,6 +21,7 @@ struct VERAApp: App {
 
     @State private var previousPath = NavigationPath()
     @State private var alertItem: AlertItem?
+    @State private var showChat = false
 
     var body: some Scene {
         WindowGroup {
@@ -48,6 +50,9 @@ struct VERAApp: App {
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                         }
+                        .sheet(isPresented: $showChat) {
+                            makeChatView()
+                        }
                 }
             }
             .environmentObject(navigationCoordinator)
@@ -69,6 +74,7 @@ struct VERAApp: App {
     var waitingRoomFactory: WaitingRoomFactory { dependencyContainer.waitingRoomFactory }
     var meetingRoomFactory: MeetingRoomFactory { dependencyContainer.meetingRoomFactory }
     var goodByePageFactory: GoodByePageFactory { dependencyContainer.goodByePageFactory }
+    var chatFactory: ChatFactory { dependencyContainer.chatFactory }
 
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
@@ -91,6 +97,8 @@ struct VERAApp: App {
 
     private func makeMeetingRoom(roomName: String) -> some View {
         meetingRoomFactory.make(roomName: roomName) {
+            showChat = true
+        } onBack: {
             navigationCoordinator.go(to: .goodbye(roomName))
         }
     }
@@ -104,5 +112,13 @@ struct VERAApp: App {
 
         }
         .navigationBarHidden(true)
+    }
+
+    private func makeChatView() -> some View {
+        let result = chatFactory.make(
+            onDismiss: {
+                showChat = false
+            })
+        return result.view
     }
 }

@@ -27,6 +27,7 @@ public class MeetingRoomFactory {
 
     public func make(
         roomName: RoomName,
+        onShowChat: @escaping () -> Void,
         onBack: @escaping () -> Void
     ) -> some View {
         let viewModel = MeetingRoomViewModel(
@@ -41,6 +42,7 @@ public class MeetingRoomFactory {
             currentCallParticipantsRepository: currentCallParticipantsRepository)
         return MeetingRoomScreen(
             viewModel: viewModel,
+            onShowChat: onShowChat,
             onBack: onBack)
     }
 }

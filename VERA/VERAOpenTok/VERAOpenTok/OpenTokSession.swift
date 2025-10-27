@@ -5,7 +5,7 @@
 import Foundation
 import OpenTok
 
-open class OpenTokSession: NSObject, OTSessionDelegate {
+open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     private let session: OTSession
 
     var onSessionDidConnect: (() -> Void)?
@@ -13,6 +13,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
     var onSessionFailure: ((Error) -> Void)?
     public var onNewStream: ((OTStream) -> Void)?
     var onStreamDestroyed: ((OTStream) -> Void)?
+    var onSessionSignal: ((OpenTokSignal) -> Void)?
 
     public init(session: OTSession) {
         self.session = session
@@ -100,11 +101,40 @@ open class OpenTokSession: NSObject, OTSessionDelegate {
         }
     }
 
+    // MARK: Signals
+
+    public func session(
+        _ session: OTSession,
+        receivedSignalType type: String?,
+        from connection: OTConnection?,
+        with string: String?
+    ) {
+        guard let type = type else { return }
+
+        onSessionSignal?(.init(type: type, data: string))
+    }
+
+    public func emitSignal(_ signal: OutgoingSignal) throws {
+        var error: OTError?
+        session.signal(
+            withType: signal.type,
+            string: signal.payload,
+            connection: nil,
+            error: &error)
+
+        if let error = error {
+            throw error
+        }
+    }
+
+    // MARK: Clean up
+
     func cleanUp() {
         onSessionDidConnect = nil
         onSessionDidDisconnect = nil
         onSessionFailure = nil
         onNewStream = nil
         onStreamDestroyed = nil
+        onSessionSignal = nil
     }
 }

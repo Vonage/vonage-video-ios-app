@@ -5,6 +5,18 @@
       location = "container:"
       name = "Projects">
       <FileRef
+         location = "group:VERAOpenTokChatPlugin/VERAOpenTokChatPlugin.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERADomain/VERADomain.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERACommonUI/VERACommonUI.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:VERAChat/VERAChat.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:VERAOpenTok/VERAOpenTok.xcodeproj">
       </FileRef>
       <FileRef
@@ -26,5 +38,8 @@
    </FileRef>
    <FileRef
       location = "group:../VERACoreSnapshotTests.xctestplan">
+   </FileRef>
+   <FileRef
+      location = "group:VERATestPlan.xctestplan">
    </FileRef>
 </Workspace>
