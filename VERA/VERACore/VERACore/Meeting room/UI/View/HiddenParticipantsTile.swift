@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct HiddenParticipantsTile: View {
     let participantNames: [String]

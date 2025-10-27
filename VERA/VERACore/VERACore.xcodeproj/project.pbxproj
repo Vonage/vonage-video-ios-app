@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6F55F7ED2E99363800CBCA2D /* VERACommonUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7EC2E99363800CBCA2D /* VERACommonUI.framework */; };
+		6F55F7EE2E99363800CBCA2D /* VERACommonUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F7EC2E99363800CBCA2D /* VERACommonUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6F55F81F2E99371C00CBCA2D /* VERADomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F81E2E99371C00CBCA2D /* VERADomain.framework */; };
+		6F55F8202E99371C00CBCA2D /* VERADomain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F81E2E99371C00CBCA2D /* VERADomain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6F5B5C3D2E3A0B9900AEE3E3 /* VERATestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C202E3A0B1600AEE3E3 /* VERATestHelpers.framework */; };
 		6F5B5C422E3A0BA300AEE3E3 /* VERATestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C202E3A0B1600AEE3E3 /* VERATestHelpers.framework */; };
 		6F5B5C482E3A0BCB00AEE3E3 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F5B5C472E3A0BCB00AEE3E3 /* XCTest.framework */; };
@@ -54,7 +58,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		6F55F7EF2E99363800CBCA2D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6F55F8202E99371C00CBCA2D /* VERADomain.framework in Embed Frameworks */,
+				6F55F7EE2E99363800CBCA2D /* VERACommonUI.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		6F55F7EC2E99363800CBCA2D /* VERACommonUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERACommonUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F81E2E99371C00CBCA2D /* VERADomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERADomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F5B5C202E3A0B1600AEE3E3 /* VERATestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERATestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F5B5C472E3A0BCB00AEE3E3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		6FD1B3F12E1BB74700BD9F3D /* VERACore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERACore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,6 +120,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F55F81F2E99371C00CBCA2D /* VERADomain.framework in Frameworks */,
+				6F55F7ED2E99363800CBCA2D /* VERACommonUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,6 +150,8 @@
 		6F5B5C3C2E3A0B9900AEE3E3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6F55F81E2E99371C00CBCA2D /* VERADomain.framework */,
+				6F55F7EC2E99363800CBCA2D /* VERACommonUI.framework */,
 				6F5B5C472E3A0BCB00AEE3E3 /* XCTest.framework */,
 			);
 			name = Frameworks;
@@ -208,6 +233,7 @@
 				6F6DA24D2E20FC8B0023470E /* SwiftLint */,
 				6FD1B3EE2E1BB74700BD9F3D /* Frameworks */,
 				6FD1B3EF2E1BB74700BD9F3D /* Resources */,
+				6F55F7EF2E99363800CBCA2D /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -851,7 +877,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -873,7 +899,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};

@@ -1,0 +1,538 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6F55F8AE2E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8A22E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework */; };
+		6F55F8BE2E9D4F6400CBCA2D /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */; };
+		6F55F8BF2E9D4F6400CBCA2D /* VERAOpenTok.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6F55F8C22E9D4F6E00CBCA2D /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */; };
+		6F55F8C32E9D4F6E00CBCA2D /* VERAChat.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6FFC74702EA63B2200CF4665 /* VERAChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC746F2EA63B2200CF4665 /* VERAChat.framework */; };
+		6FFC74772EA63B8500CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */; };
+		6FFC74E42EA640E700CF4665 /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6F55F8AF2E9D4F2F00CBCA2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6F55F8992E9D4F2F00CBCA2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F55F8A12E9D4F2F00CBCA2D;
+			remoteInfo = VERAOpenTokChatPlugin;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6F55F8C02E9D4F6400CBCA2D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6F55F8C32E9D4F6E00CBCA2D /* VERAChat.framework in Embed Frameworks */,
+				6F55F8BF2E9D4F6400CBCA2D /* VERAOpenTok.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		6F55F8A22E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VERAOpenTokChatPlugin.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F8AD2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VERAOpenTokChatPluginTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC746F2EA63B2200CF4665 /* VERAChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAChatAppTestHelpers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VERAOpenTok.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6F55F8A42E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VERAOpenTokChatPlugin;
+			sourceTree = "<group>";
+		};
+		6F55F8B12E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VERAOpenTokChatPluginTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6F55F89F2E9D4F2F00CBCA2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F55F8C22E9D4F6E00CBCA2D /* VERAChat.framework in Frameworks */,
+				6F55F8BE2E9D4F6400CBCA2D /* VERAOpenTok.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F8AA2E9D4F2F00CBCA2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6FFC74702EA63B2200CF4665 /* VERAChat.framework in Frameworks */,
+				6FFC74772EA63B8500CF4665 /* VERAChatAppTestHelpers.framework in Frameworks */,
+				6F55F8AE2E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework in Frameworks */,
+				6FFC74E42EA640E700CF4665 /* VERAOpenTok.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6F55F8982E9D4F2F00CBCA2D = {
+			isa = PBXGroup;
+			children = (
+				6F55F8A42E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */,
+				6F55F8B12E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests */,
+				6F55F8BC2E9D4F6400CBCA2D /* Frameworks */,
+				6F55F8A32E9D4F2F00CBCA2D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6F55F8A32E9D4F2F00CBCA2D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6F55F8A22E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework */,
+				6F55F8AD2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6F55F8BC2E9D4F6400CBCA2D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6FFC74E32EA640E700CF4665 /* VERAOpenTok.framework */,
+				6FFC74762EA63B8500CF4665 /* VERAChatAppTestHelpers.framework */,
+				6FFC746F2EA63B2200CF4665 /* VERAChat.framework */,
+				6F55F8C12E9D4F6E00CBCA2D /* VERAChat.framework */,
+				6F55F8BD2E9D4F6400CBCA2D /* VERAOpenTok.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		6F55F89D2E9D4F2F00CBCA2D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		6F55F8A12E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F55F8B62E9D4F2F00CBCA2D /* Build configuration list for PBXNativeTarget "VERAOpenTokChatPlugin" */;
+			buildPhases = (
+				6F55F89D2E9D4F2F00CBCA2D /* Headers */,
+				6F55F89E2E9D4F2F00CBCA2D /* Sources */,
+				6F55F89F2E9D4F2F00CBCA2D /* Frameworks */,
+				6F55F8A02E9D4F2F00CBCA2D /* Resources */,
+				6F55F8C02E9D4F6400CBCA2D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6F55F8A42E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */,
+			);
+			name = VERAOpenTokChatPlugin;
+			packageProductDependencies = (
+			);
+			productName = VERAOpenTokChatPlugin;
+			productReference = 6F55F8A22E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		6F55F8AC2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6F55F8B92E9D4F2F00CBCA2D /* Build configuration list for PBXNativeTarget "VERAOpenTokChatPluginTests" */;
+			buildPhases = (
+				6F55F8A92E9D4F2F00CBCA2D /* Sources */,
+				6F55F8AA2E9D4F2F00CBCA2D /* Frameworks */,
+				6F55F8AB2E9D4F2F00CBCA2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F55F8B02E9D4F2F00CBCA2D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6F55F8B12E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests */,
+			);
+			name = VERAOpenTokChatPluginTests;
+			packageProductDependencies = (
+			);
+			productName = VERAOpenTokChatPluginTests;
+			productReference = 6F55F8AD2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6F55F8992E9D4F2F00CBCA2D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					6F55F8A12E9D4F2F00CBCA2D = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					6F55F8AC2E9D4F2F00CBCA2D = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 6F55F89C2E9D4F2F00CBCA2D /* Build configuration list for PBXProject "VERAOpenTokChatPlugin" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6F55F8982E9D4F2F00CBCA2D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6F55F8A32E9D4F2F00CBCA2D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6F55F8A12E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */,
+				6F55F8AC2E9D4F2F00CBCA2D /* VERAOpenTokChatPluginTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6F55F8A02E9D4F2F00CBCA2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F8AB2E9D4F2F00CBCA2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6F55F89E2E9D4F2F00CBCA2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F55F8A92E9D4F2F00CBCA2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6F55F8B02E9D4F2F00CBCA2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F55F8A12E9D4F2F00CBCA2D /* VERAOpenTokChatPlugin */;
+			targetProxy = 6F55F8AF2E9D4F2F00CBCA2D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6F55F8B42E9D4F2F00CBCA2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		6F55F8B52E9D4F2F00CBCA2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		6F55F8B72E9D4F2F00CBCA2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokChatPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F55F8B82E9D4F2F00CBCA2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokChatPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6F55F8BA2E9D4F2F00CBCA2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokChatPluginTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F55F8BB2E9D4F2F00CBCA2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PR6C39UQ38;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vonage.VERAOpenTokChatPluginTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6F55F89C2E9D4F2F00CBCA2D /* Build configuration list for PBXProject "VERAOpenTokChatPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F55F8B42E9D4F2F00CBCA2D /* Debug */,
+				6F55F8B52E9D4F2F00CBCA2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F55F8B62E9D4F2F00CBCA2D /* Build configuration list for PBXNativeTarget "VERAOpenTokChatPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F55F8B72E9D4F2F00CBCA2D /* Debug */,
+				6F55F8B82E9D4F2F00CBCA2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6F55F8B92E9D4F2F00CBCA2D /* Build configuration list for PBXNativeTarget "VERAOpenTokChatPluginTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F55F8BA2E9D4F2F00CBCA2D /* Debug */,
+				6F55F8BB2E9D4F2F00CBCA2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6F55F8992E9D4F2F00CBCA2D /* Project object */;
+}

@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState

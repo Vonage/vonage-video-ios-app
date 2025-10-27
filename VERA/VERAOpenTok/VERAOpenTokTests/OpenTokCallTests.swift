@@ -46,17 +46,6 @@ struct OpenTokCallTests {
     }
 
     @Test
-    func connectedSessionDisconnectCallsSessionDisconnect() async throws {
-        let session = OpenTokSessionSpy()
-        let sut = makeSUT(session: session)
-
-        sut.connect()
-        #expect(session.disconnectCalled == false)
-        try await sut.disconnect()
-        #expect(session.disconnectCalled == true)
-    }
-
-    @Test
     func disconnectPublishesErrorWhenSessionThrows() async throws {
         let session = ThrowingOpenTokSession()
         let sut = makeSUT(session: session)

@@ -16,7 +16,7 @@ final class DefaultPublisherRepositoryTests: XCTestCase {
         let publisherFactory = MockPublisherFactory(mockPublisher: publisher)
         let sut = await makeSUT(publisherFactory: publisherFactory)
 
-        _ = await sut.getPublisher()
+        _ = sut.getPublisher()
 
         sut.resetPublisher()
     }
@@ -30,7 +30,7 @@ final class DefaultPublisherRepositoryTests: XCTestCase {
     ) async -> DefaultPublisherRepository {
 
         let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
-        let publisher = await repository.getPublisher()
+        let publisher = repository.getPublisher()
 
         trackForMemoryLeaks(publisher, file: file, line: line)
         trackForMemoryLeaks(publisherFactory, file: file, line: line)

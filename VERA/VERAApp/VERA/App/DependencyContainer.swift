@@ -4,8 +4,10 @@
 
 import AVFoundation
 import Foundation
+import VERAChat
 import VERACore
 import VERAOpenTok
+import VERAOpenTokChatPlugin
 
 final class DependencyContainer {
     let baseURL = URL(string: "https://video.vonage.com/")!
@@ -67,6 +69,10 @@ final class DependencyContainer {
         archivesRepository: archivesRepository,
         archiveRecordingsRepository: archiveRecordingsRepository)
 
+    lazy var chatFactory = ChatFactory(
+        chatMessagesRepository: chatMessagesRepository,
+        sendChatMessageUseCase: sendChatMessageUseCase)
+
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
     lazy var sessionFactory = OpenTokSessionFactory()
@@ -74,8 +80,21 @@ final class DependencyContainer {
     lazy var sessionRepository: SessionRepository = {
         OpenTokSessionRepository(
             sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository)
+            publisherRepository: publisherRepository,
+            pluginRegistry: pluginRegistry)
     }()
+
+    lazy var pluginRegistry: OpenTokPluginRegistry = {
+        let registry = OpenTokPluginRegistry()
+        registry.registerPlugin(plugin: openTokChatPlugin)
+        return registry
+    }()
+
+    lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
+
+    lazy var sendChatMessageUseCase = OpenTokSendChatMessageUseCase(openTokChatPlugin: openTokChatPlugin)
+
+    lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 
     lazy var roomCredentialsRepository: RoomCredentialsRepository = {
         DefaultRoomCredentialsRepository(

@@ -13,6 +13,7 @@ public struct MeetingRoomActions {
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
     let onToggleLayout: () -> Void
+    let onShowChat: () -> Void
 
     init(
         onShare: @escaping (String) -> Void = { _ in },
@@ -22,7 +23,8 @@ public struct MeetingRoomActions {
         onCameraSwitch: @escaping () -> Void = {},
         onEndCall: @escaping () -> Void = {},
         onToggleParticipants: @escaping () -> Void = {},
-        onToggleLayout: @escaping () -> Void = {}
+        onToggleLayout: @escaping () -> Void = {},
+        onShowChat: @escaping () -> Void = {}
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
@@ -32,6 +34,7 @@ public struct MeetingRoomActions {
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
         self.onToggleLayout = onToggleLayout
+        self.onShowChat = onShowChat
     }
 }
 
@@ -40,6 +43,7 @@ struct BottomBar: View {
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let participantsCount: Int
+    private let unreadMessagesCount: Int
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
 
@@ -47,12 +51,14 @@ struct BottomBar: View {
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         participantsCount: Int,
+        unreadMessagesCount: Int,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions
     ) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participantsCount = participantsCount
+        self.unreadMessagesCount = unreadMessagesCount
         self.currentLayout = currentLayout
         self.actions = actions
     }
@@ -72,6 +78,9 @@ struct BottomBar: View {
                 ParticipantsBadgeButton(
                     participantsCount: participantsCount,
                     onToggleParticipants: actions.onToggleParticipants)
+                ChatBadgeButton(
+                    unreadMessagesCount: unreadMessagesCount,
+                    onShowChat: actions.onShowChat)
                 EndCallControlButton(action: actions.onEndCall)
             }
             .padding(.horizontal, 8)
@@ -114,6 +123,7 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
+            unreadMessagesCount: 5,
             currentLayout: .activeSpeaker,
             actions: .init())
     }
@@ -126,6 +136,7 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
+            unreadMessagesCount: 0,
             currentLayout: .grid,
             actions: .init())
     }

@@ -5,6 +5,7 @@
 import SwiftUI
 import VERACore
 
+@MainActor
 func makePublisherVideoView() -> PublisherVideoView {
     PublisherVideoView(
         videoView: AnyView(Color.red)

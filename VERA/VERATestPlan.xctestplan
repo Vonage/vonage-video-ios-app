@@ -1,0 +1,129 @@
+{
+  "configurations" : [
+    {
+      "id" : "CE8F5C5F-7B4B-4651-84EA-58C52DB698B4",
+      "name" : "macOS",
+      "options" : {
+        "codeCoverage" : true,
+        "parallelizationEnabled" : true
+      },
+      "testTargets" : [
+        {
+          "target" : "VERACoreTests.xctest"
+        },
+        {
+          "target" : "VERAChatTests.xctest"
+        }
+      ]
+    },
+    {
+      "id" : "DEEBEA19-C85E-4B7E-B360-2C313E35BF2E",
+      "name" : "Unit",
+      "options" : {
+        "codeCoverage" : true,
+        "parallelizationEnabled" : true
+      },
+      "testTargets" : [
+        {
+          "target" : "VERATests.xctest"
+        },
+        {
+          "target" : "VERAOpenTokTests.xctest"
+        },
+        {
+          "target" : "VERACommonUITests.xctest"
+        },
+        {
+          "target" : "VERAOpenTokChatPluginTests.xctest"
+        }
+      ]
+    },
+    {
+      "id" : "5B7411E9-E572-4BDC-8300-9AE8BF54DF73",
+      "name" : "Snapshots",
+      "options" : {
+        "codeCoverage" : false,
+        "parallelizationEnabled" : false
+      },
+      "testTargets" : [
+        {
+          "target" : "VERACoreSnapshotTests.xctest"
+        },
+        {
+          "target" : "VERAChatSnapshotTests.xctest"
+        }
+      ]
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERAOpenTokChatPlugin\/VERAOpenTokChatPlugin.xcodeproj",
+        "identifier" : "6F55F8AC2E9D4F2F00CBCA2D",
+        "name" : "VERAOpenTokChatPluginTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERACommonUI\/VERACommonUI.xcodeproj",
+        "identifier" : "6F55F7D82E99356A00CBCA2D",
+        "name" : "VERACommonUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:VERA.xcodeproj",
+        "identifier" : "6F6A00A42E17F89200127A10",
+        "name" : "VERATests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:..\/VERAChat\/VERAChat.xcodeproj",
+        "identifier" : "6FBED70D2EA255630015782E",
+        "name" : "VERAChatSnapshotTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERAChat\/VERAChat.xcodeproj",
+        "identifier" : "6F55F7AF2E99335900CBCA2D",
+        "name" : "VERAChatTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERAOpenTok\/VERAOpenTok.xcodeproj",
+        "identifier" : "6FD1B4252E1BBA1A00BD9F3D",
+        "name" : "VERAOpenTokTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERACore\/VERACore.xcodeproj",
+        "identifier" : "6FD1B3FB2E1BB74700BD9F3D",
+        "name" : "VERACoreTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/VERADomain\/VERADomain.xcodeproj",
+        "identifier" : "6F55F8072E9936ED00CBCA2D",
+        "name" : "VERADomainTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:..\/VERACore\/VERACore.xcodeproj",
+        "identifier" : "6FD1B47E2E1BFAB400BD9F3D",
+        "name" : "VERACoreSnapshotTests"
+      }
+    }
+  ],
+  "version" : 1
+}

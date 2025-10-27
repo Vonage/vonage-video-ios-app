@@ -10,7 +10,7 @@
 		6F1EA0992E42397B00EC7E74 /* VERATestHelpers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F1EA0982E42397B00EC7E74 /* VERATestHelpers.framework */; };
 		6F3AF1D72E26735500AD6291 /* VERACore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F3AF1D62E26735500AD6291 /* VERACore.framework */; };
 		6FD1B4272E1BBA1A00BD9F3D /* VERAOpenTok.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */; };
-		6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */; };
+		6FFC74E22EA6403000CF4665 /* VonageClientSDKVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 6FFC74E12EA6403000CF4665 /* VonageClientSDKVideo */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,7 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6FD1B47A2E1BEEA900BD9F3D /* VonageClientSDKVideo in Frameworks */,
+				6FFC74E22EA6403000CF4665 /* VonageClientSDKVideo in Frameworks */,
 				6F3AF1D72E26735500AD6291 /* VERACore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -127,7 +127,7 @@
 			);
 			name = VERAOpenTok;
 			packageProductDependencies = (
-				6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */,
+				6FFC74E12EA6403000CF4665 /* VonageClientSDKVideo */,
 			);
 			productName = VERAOpenTok;
 			productReference = 6FD1B41B2E1BBA1A00BD9F3D /* VERAOpenTok.framework */;
@@ -185,7 +185,7 @@
 			mainGroup = 6FD1B4112E1BBA1A00BD9F3D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */,
+				6FFC74E02EA6403000CF4665 /* XCRemoteSwiftPackageReference "vonage-video-client-sdk-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6FD1B41C2E1BBA1A00BD9F3D /* Products */;
@@ -552,20 +552,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */ = {
+		6FFC74E02EA6403000CF4665 /* XCRemoteSwiftPackageReference "vonage-video-client-sdk-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/opentok/vonage-client-sdk-video.git";
+			repositoryURL = "https://github.com/Vonage/vonage-video-client-sdk-swift";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.30.1;
+				branch = main;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6FD1B4792E1BEEA900BD9F3D /* VonageClientSDKVideo */ = {
+		6FFC74E12EA6403000CF4665 /* VonageClientSDKVideo */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6FD1B4782E1BEEA900BD9F3D /* XCRemoteSwiftPackageReference "vonage-client-sdk-video" */;
+			package = 6FFC74E02EA6403000CF4665 /* XCRemoteSwiftPackageReference "vonage-video-client-sdk-swift" */;
 			productName = VonageClientSDKVideo;
 		};
 /* End XCSwiftPackageProductDependency section */

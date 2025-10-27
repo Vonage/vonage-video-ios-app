@@ -16,7 +16,7 @@ enum SnapshotTestHelper {
         _ view: V,
         testName: String? = nil,
         record: Bool = false,
-        file: StaticString = #file,
+        filePath: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {
@@ -25,7 +25,7 @@ enum SnapshotTestHelper {
             as: .image(layout: .sizeThatFits),
             named: testName,
             record: record,
-            file: file,
+            file: filePath,
             testName: function,
             line: line
         )
@@ -38,7 +38,7 @@ enum SnapshotTestHelper {
         height: CGFloat,
         testName: String? = nil,
         record: Bool = false,
-        file: StaticString = #file,
+        filePath: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {
@@ -47,7 +47,7 @@ enum SnapshotTestHelper {
             as: .image(layout: .fixed(width: width, height: height)),
             named: testName,
             record: record,
-            file: file,
+            file: filePath,
             testName: function,
             line: line
         )
@@ -58,7 +58,7 @@ enum SnapshotTestHelper {
         _ view: V,
         testName: String? = nil,
         record: Bool = false,
-        file: StaticString = #file,
+        filePath: StaticString = #filePath,
         function: String = #function,
         line: UInt = #line
     ) {
@@ -68,7 +68,7 @@ enum SnapshotTestHelper {
             as: .image(layout: .sizeThatFits),
             named: testName.map { "\($0)_light" } ?? "light",
             record: record,
-            file: file,
+            file: filePath,
             testName: function,
             line: line
         )
@@ -79,7 +79,7 @@ enum SnapshotTestHelper {
             as: .image(layout: .sizeThatFits),
             named: testName.map { "\($0)_dark" } ?? "dark",
             record: record,
-            file: file,
+            file: filePath,
             testName: function,
             line: line
         )
