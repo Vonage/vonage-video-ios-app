@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct LandingPageWelcome: View {
     var body: some View {
@@ -11,7 +12,7 @@ struct LandingPageWelcome: View {
                 .font(.largeTitle.bold())
                 .padding(.bottom, 10)
             Text("Create a new room or join an existing one.", bundle: .veraCore)
-                .foregroundStyle(.uiSecondaryLabel)
+                .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
         }
     }
 }

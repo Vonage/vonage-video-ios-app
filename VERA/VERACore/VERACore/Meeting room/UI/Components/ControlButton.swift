@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct ControlButton: View {
     private let isActive: Bool
@@ -19,11 +20,11 @@ struct ControlButton: View {
         Button(action: action) {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundStyle(isActive ? .uiSystemBackground : .red)
+                .foregroundStyle(isActive ? VERACommonUIAsset.uiSystemBackground.swiftUIColor : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
-                        .fill(isActive ? .vGray4 : .clear)
+                        .fill(isActive ? VERACommonUIAsset.vGray4.swiftUIColor : .clear)
                 )
                 .animation(.easeInOut(duration: 0.2), value: isActive)
         }
@@ -52,6 +53,6 @@ struct ControlButton: View {
         ControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(.videoBackground)
+    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

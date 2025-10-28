@@ -7,6 +7,7 @@ import SwiftUI
 import VERAChat
 import VERACore
 import VERAOpenTok
+import VERACommonUI
 
 @main
 struct VERAApp: App {
@@ -64,7 +65,7 @@ struct VERAApp: App {
                 )
             }.onOpenURL { url in
                 handleUniversalLink(url)
-            }
+            }.tint(VERACommonUIAsset.vAccent.swiftUIColor)
         }
     }
 

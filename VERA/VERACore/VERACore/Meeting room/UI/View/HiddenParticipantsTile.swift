@@ -20,7 +20,7 @@ struct HiddenParticipantsTile: View {
     var body: some View {
         ZStack(alignment: .center) {
             Rectangle()
-                .fill(.vGray4.opacity(0.8))
+                .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                 .aspectRatio(16.0 / 9.0, contentMode: .fit)
                 .overlay(
                     AvatarGroup(
@@ -48,7 +48,7 @@ struct AdditionalParticipantsAvatar: View {
 
     var body: some View {
         Circle()
-            .fill(.vGray4.opacity(0.8))
+            .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
             .frame(width: size, height: size)
             .overlay(
                 Circle()

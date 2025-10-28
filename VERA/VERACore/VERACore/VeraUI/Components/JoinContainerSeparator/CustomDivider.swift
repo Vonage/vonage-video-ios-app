@@ -3,12 +3,13 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct CustomDivider: View {
     let color: Color
     let height: CGFloat
 
-    init(color: Color = .uiSecondaryLabel, height: CGFloat = 1) {
+    init(color: Color = VERACommonUIAsset.uiSecondaryLabel.swiftUIColor, height: CGFloat = 1) {
         self.color = color
         self.height = height
     }

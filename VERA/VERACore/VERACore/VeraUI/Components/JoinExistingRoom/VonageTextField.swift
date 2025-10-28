@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 enum VonageTextFieldState {
     case initial, valid, invalid
@@ -37,12 +38,12 @@ struct VonageTextField: View {
         HStack(spacing: 12) {
             if !iconName.isEmpty {
                 Image(iconName, bundle: .veraCore)
-                    .foregroundColor(.vGray3)
+                    .foregroundColor(VERACommonUIAsset.vGray3.swiftUIColor)
                     .frame(width: 20)
             }
             if !systemIconName.isEmpty {
                 Image(systemName: systemIconName)
-                    .foregroundColor(.vGray3)
+                    .foregroundColor(VERACommonUIAsset.vGray3.swiftUIColor)
                     .frame(width: 20)
             }
 
@@ -74,9 +75,9 @@ struct VonageTextField: View {
     private var borderColor: Color {
         switch state {
         case .initial:
-            return .uiSecondaryLabel
+            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return .accentBlue
+            return VERACommonUIAsset.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }

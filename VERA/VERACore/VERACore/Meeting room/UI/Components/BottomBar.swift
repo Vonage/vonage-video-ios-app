@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct MeetingRoomActions {
     let onShare: (String) -> Void
@@ -102,7 +103,7 @@ struct BottomBarBackground: View {
                     glassEffectBackground()
                 } else {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(.vGray4.opacity(0.8))
+                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                 }
             }
         #endif

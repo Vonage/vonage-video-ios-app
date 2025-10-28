@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
@@ -80,7 +81,7 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
-        .background(.uiSystemBackground)
+        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -190,7 +191,7 @@ struct VideoPreviewView: View {
                     Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                 }
             }
-            .tint(.uiSecondaryLabel)
+            .tint(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
             .padding()
         }
     }
@@ -217,11 +218,11 @@ struct PrepareToJoinRoom: View {
             VStack {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
-                    .foregroundColor(.uiLabel)
+                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
 
                 Text(state.roomName)
                     .font(.subheadline)
-                    .foregroundColor(.uiLabel)
+                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
             }.padding()
 
             UsernameInput(userName: userName)

@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 enum RoomNameState {
     case initial, valid, invalid
@@ -39,9 +40,9 @@ struct JoinExistingRoom: View {
     private var borderColor: Color {
         switch getRoomState() {
         case .initial:
-            return .uiSecondaryLabel
+            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return .accentBlue
+            return VERACommonUIAsset.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }
@@ -50,11 +51,11 @@ struct JoinExistingRoom: View {
     private var joinColor: Color {
         switch roomState {
         case .initial:
-            return .uiSecondaryLabel
+            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return .accentBlue
+            return VERACommonUIAsset.accentBlue.swiftUIColor
         case .invalid:
-            return .uiSecondaryLabel
+            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
         }
     }
 

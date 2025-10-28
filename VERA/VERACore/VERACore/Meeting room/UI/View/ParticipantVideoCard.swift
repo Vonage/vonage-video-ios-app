@@ -18,7 +18,7 @@ struct ParticipantVideoCard: View {
             if participant.isCameraEnabled {
                 ZStack {
                     Rectangle()
-                        .fill(.vGray4.opacity(0.8))
+                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
@@ -48,12 +48,12 @@ struct ParticipantVideoCard: View {
             } else {
                 ZStack {
                     Rectangle()
-                        .fill(.vGray4.opacity(0.8))
+                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
                                 Rectangle()
-                                    .fill(.vGray4.opacity(0.8))
+                                    .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                                     .overlay(
                                         AvatarInitials(state: .init(userName: participant.name))
                                             .padding(24)
@@ -72,7 +72,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    Color.accentBlue,
+                    VERACommonUIAsset.vAccent.swiftUIColor,
                     lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))

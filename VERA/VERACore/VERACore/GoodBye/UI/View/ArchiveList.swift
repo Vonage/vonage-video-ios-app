@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct ArchiveList: View {
 
@@ -20,7 +21,7 @@ struct ArchiveList: View {
                 .padding(.bottom, 10)
             if archives.isEmpty {
                 Text("There are no recordings for this meeting", bundle: .veraCore)
-                    .foregroundStyle(.uiSecondaryLabel)
+                    .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
             } else {
                 ForEach(archives, id: \.id) { archive in
                     HStack {
@@ -28,7 +29,7 @@ struct ArchiveList: View {
                             Text(archive.title)
                                 .font(.title2)
                             Text(archive.subtitle)
-                                .foregroundStyle(.uiSecondaryLabel)
+                                .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
@@ -37,7 +38,7 @@ struct ArchiveList: View {
                                     archive.onDownload?()
                                 } label: {
                                     Image(systemName: "square.and.arrow.down")
-                                        .foregroundStyle(.uiSecondaryLabel)
+                                        .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
                                 }.frame(width: 44, height: 44)
                             } else {
                                 ProgressView()

@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct PublisherVideoView: View {
     let videoView: AnyView?
@@ -17,7 +18,7 @@ public struct PublisherVideoView: View {
 
     public var body: some View {
         ZStack {
-            Color.videoBackground
+            VERACommonUIAsset.videoBackground.swiftUIColor
                 .ignoresSafeArea()
             if let videoView = videoView {
                 videoView.frame(
