@@ -1,5 +1,8 @@
-import ProjectDescription
 import Foundation
+import ProjectDescription
+
+// MARK: - Execute configuration generation
+generateConfiguration()
 
 // MARK: - Configuration Reading
 private func readAppConfig() -> [String: Any] {
@@ -7,7 +10,7 @@ private func readAppConfig() -> [String: Any] {
     guard let configData = FileManager.default.contents(atPath: configPath) else {
         fatalError("Could not read app-config.json")
     }
-    
+
     do {
         let json = try JSONSerialization.jsonObject(with: configData) as! [String: Any]
         return json
@@ -28,16 +31,16 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERACore", path: "VERACore"),
         .project(target: "VERAOpenTok", path: "VERAOpenTok"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
-        .project(target: "VERAConfiguration", path: "VERAConfiguration")
+        .project(target: "VERAConfiguration", path: "VERAConfiguration"),
     ]
-    
+
     if isChatEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAChat", path: "VERAChat"),
-            .project(target: "VERAOpenTokChatPlugin", path: "VERAOpenTokChatPlugin")
+            .project(target: "VERAOpenTokChatPlugin", path: "VERAOpenTokChatPlugin"),
         ])
     }
-    
+
     return dependencies
 }
 
@@ -45,15 +48,15 @@ private func createDependencies() -> [TargetDependency] {
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = [
         "DEVELOPMENT_TEAM": "PR6C39UQ38",
-        "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA"
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA",
     ]
-    
+
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
         //baseSettings.merge([String: SettingValue]().otherSwiftFlags(["CHAT_ENABLED"]))
     }
-    
+
     return .settings(
         base: baseSettings,
         configurations: [
@@ -61,7 +64,7 @@ private func createBuildSettings() -> Settings {
                 name: "Debug",
                 settings: [
                     "CODE_SIGN_STYLE": "Automatic",
-                    "CODE_SIGN_IDENTITY": "iPhone Developer"
+                    "CODE_SIGN_IDENTITY": "iPhone Developer",
                 ]
             ),
             .release(
@@ -69,9 +72,9 @@ private func createBuildSettings() -> Settings {
                 settings: [
                     "CODE_SIGN_STYLE": "Manual",
                     "CODE_SIGN_IDENTITY": "iPhone Distribution",
-                    "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA"
+                    "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA",
                 ]
-            )
+            ),
         ]
     )
 }
@@ -87,23 +90,36 @@ let project = Project(
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             infoPlist: .extendingDefault(with: [
                 "NSCameraUsageDescription": "VERA needs camera access to enable video calls",
-                "NSMicrophoneUsageDescription": "VERA needs microphone access to enable audio during video calls"
+                "NSMicrophoneUsageDescription": "VERA needs microphone access to enable audio during video calls",
             ]),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],
             entitlements: "VERAApp/VERA/VERA.entitlements",
-            scripts: [
-                .pre(
-                    script: """
-                    echo "🔧 Generating app configuration..."
-                    cd "${SRCROOT}"
-                    python3 ./Scripts/generate-app-config.py
-                    """,
-                    name: "Generate App Config"
-                )
-            ],
             dependencies: createDependencies(),
             settings: createBuildSettings()
         )
     ]
 )
+
+// Generate configuration immediately when Project.swift is evaluated
+private func generateConfiguration() {
+    print("🔧 Generating app configuration...")
+
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
+    task.arguments = ["Scripts/generate-app-config.py"]
+    task.currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+
+    do {
+        try task.run()
+        task.waitUntilExit()
+
+        if task.terminationStatus == 0 {
+            print("✅ Configuration generated successfully")
+        } else {
+            print("❌ Configuration generation failed")
+        }
+    } catch {
+        print("❌ Error running configuration script: \(error)")
+    }
+}

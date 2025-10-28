@@ -18,19 +18,19 @@ let project = Project(
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERACore", path: "../VERACore"),
                 .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
-                .project(target: "VERAOpenTokChatPlugin", path: "../VERAOpenTokChatPlugin")
+                .project(target: "VERAOpenTokChatPlugin", path: "../VERAOpenTokChatPlugin"),
             ],
             settings: .settings(
                 base: [
                     "DEVELOPMENT_TEAM": "PR6C39UQ38",
-                    "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA"
+                    "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA",
                 ],
                 configurations: [
                     .debug(
                         name: "Debug",
                         settings: [
                             "CODE_SIGN_STYLE": "Automatic",
-                            "CODE_SIGN_IDENTITY": "iPhone Developer"
+                            "CODE_SIGN_IDENTITY": "iPhone Developer",
                         ]
                     ),
                     .release(
@@ -38,9 +38,9 @@ let project = Project(
                         settings: [
                             "CODE_SIGN_STYLE": "Manual",
                             "CODE_SIGN_IDENTITY": "iPhone Distribution",
-                            "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA"
+                            "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA",
                         ]
-                    )
+                    ),
                 ]
             )
         ),
@@ -63,6 +63,6 @@ let project = Project(
             dependencies: [
                 .target(name: "VERA")
             ]
-        )
+        ),
     ]
 )

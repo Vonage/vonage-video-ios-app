@@ -8,7 +8,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERADomain",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERADomain/**"]
         )
     ]

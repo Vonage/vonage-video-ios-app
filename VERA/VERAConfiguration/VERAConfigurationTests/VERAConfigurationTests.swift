@@ -3,6 +3,7 @@
 //
 
 import Testing
+
 @testable import VERAConfiguration
 
 struct VERAConfigurationTests {
