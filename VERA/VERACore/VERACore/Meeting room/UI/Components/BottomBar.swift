@@ -45,6 +45,7 @@ struct BottomBar: View {
     private let isCameraEnabled: Bool
     private let participantsCount: Int
     private let unreadMessagesCount: Int
+    private let showChatButton: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
 
@@ -53,6 +54,7 @@ struct BottomBar: View {
         isCameraEnabled: Bool,
         participantsCount: Int,
         unreadMessagesCount: Int,
+        showChatButton: Bool,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions
     ) {
@@ -61,6 +63,7 @@ struct BottomBar: View {
         self.participantsCount = participantsCount
         self.unreadMessagesCount = unreadMessagesCount
         self.currentLayout = currentLayout
+        self.showChatButton = showChatButton
         self.actions = actions
     }
 
@@ -79,9 +82,11 @@ struct BottomBar: View {
                 ParticipantsBadgeButton(
                     participantsCount: participantsCount,
                     onToggleParticipants: actions.onToggleParticipants)
-                ChatBadgeButton(
-                    unreadMessagesCount: unreadMessagesCount,
-                    onShowChat: actions.onShowChat)
+                if showChatButton {
+                    ChatBadgeButton(
+                        unreadMessagesCount: unreadMessagesCount,
+                        onShowChat: actions.onShowChat)
+                }
                 EndCallControlButton(action: actions.onEndCall)
             }
             .padding(.horizontal, 8)
@@ -125,6 +130,7 @@ struct BottomBarBackground: View {
             isCameraEnabled: true,
             participantsCount: 25,
             unreadMessagesCount: 5,
+            showChatButton: true,
             currentLayout: .activeSpeaker,
             actions: .init())
     }
@@ -138,6 +144,7 @@ struct BottomBarBackground: View {
             isCameraEnabled: true,
             participantsCount: 25,
             unreadMessagesCount: 0,
+            showChatButton: true,
             currentLayout: .grid,
             actions: .init())
     }

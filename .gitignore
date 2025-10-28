@@ -72,3 +72,6 @@ slather-report/
 
 # SonarCloud temporary files
 .scannerwork/
+
+# Tuist
+**/Derived/

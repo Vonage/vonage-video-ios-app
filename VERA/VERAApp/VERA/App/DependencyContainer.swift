@@ -4,10 +4,12 @@
 
 import AVFoundation
 import Foundation
-import VERAChat
 import VERACore
 import VERAOpenTok
+#if CHAT_ENABLED
+import VERAChat
 import VERAOpenTokChatPlugin
+#endif
 
 final class DependencyContainer {
     let baseURL = URL(string: "https://meet.vonagenetworks.net/")!
@@ -69,10 +71,6 @@ final class DependencyContainer {
         archivesRepository: archivesRepository,
         archiveRecordingsRepository: archiveRecordingsRepository)
 
-    lazy var chatFactory = ChatFactory(
-        chatMessagesRepository: chatMessagesRepository,
-        sendChatMessageUseCase: sendChatMessageUseCase)
-
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
     lazy var sessionFactory = OpenTokSessionFactory()
@@ -86,15 +84,11 @@ final class DependencyContainer {
 
     lazy var pluginRegistry: OpenTokPluginRegistry = {
         let registry = OpenTokPluginRegistry()
+#if CHAT_ENABLED
         registry.registerPlugin(plugin: openTokChatPlugin)
+#endif
         return registry
     }()
-
-    lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
-
-    lazy var sendChatMessageUseCase = OpenTokSendChatMessageUseCase(openTokChatPlugin: openTokChatPlugin)
-
-    lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 
     lazy var roomCredentialsRepository: RoomCredentialsRepository = {
         DefaultRoomCredentialsRepository(
@@ -115,4 +109,18 @@ final class DependencyContainer {
 
     lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
         httpClient: httpClient)
+    
+    // MARK: Chat feature
+    
+#if CHAT_ENABLED
+    lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
+
+    lazy var sendChatMessageUseCase = OpenTokSendChatMessageUseCase(openTokChatPlugin: openTokChatPlugin)
+
+    lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
+    
+    lazy var chatFactory = ChatFactory(
+        chatMessagesRepository: chatMessagesRepository,
+        sendChatMessageUseCase: sendChatMessageUseCase)
+#endif
 }

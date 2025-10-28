@@ -45,6 +45,7 @@ public struct MeetingRoomView: View {
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
                         unreadMessagesCount: state.unreadMessagesCount,
+                        showChatButton: state.showChatButton,
                         currentLayout: state.layout,
                         actions: wrappedActions
                     )
@@ -231,6 +232,7 @@ public struct MeetingRoomView: View {
             isCameraEnabled: true,
             participants: [],
             layout: .activeSpeaker,
-            activeSpeakerId: nil),
+            activeSpeakerId: nil,
+            showChatButton: true),
         actions: .init())
 }

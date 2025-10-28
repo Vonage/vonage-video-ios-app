@@ -1,15 +1,15 @@
 import ProjectDescription
 
 let project = Project(
-    name: "VERADomain",
+    name: "VERAConfiguration",
     targets: [
         .target(
-            name: "VERADomain",
+            name: "VERAConfiguration",
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
-            bundleId: "com.vonage.VERADomain",
+            bundleId: "com.vonage.VERAConfiguration",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
-            sources: ["VERADomain/**"]
+            sources: ["VERAConfiguration/**"]
         )
     ]
 )

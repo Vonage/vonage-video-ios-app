@@ -1,4 +1,80 @@
 import ProjectDescription
+import Foundation
+
+// MARK: - Configuration Reading
+private func readAppConfig() -> [String: Any] {
+    let configPath = "./app-config.json"
+    guard let configData = FileManager.default.contents(atPath: configPath) else {
+        fatalError("Could not read app-config.json")
+    }
+    
+    do {
+        let json = try JSONSerialization.jsonObject(with: configData) as! [String: Any]
+        return json
+    } catch {
+        fatalError("Failed to parse app-config.json: \(error)")
+    }
+}
+
+private func isChatEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowChat"] as! Bool
+}
+
+// MARK: - Dynamic Dependencies
+private func createDependencies() -> [TargetDependency] {
+    var dependencies: [TargetDependency] = [
+        .project(target: "VERACore", path: "VERACore"),
+        .project(target: "VERAOpenTok", path: "VERAOpenTok"),
+        .project(target: "VERACommonUI", path: "VERACommonUI"),
+        .project(target: "VERAConfiguration", path: "VERAConfiguration")
+    ]
+    
+    if isChatEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAChat", path: "VERAChat"),
+            .project(target: "VERAOpenTokChatPlugin", path: "VERAOpenTokChatPlugin")
+        ])
+    }
+    
+    return dependencies
+}
+
+// MARK: - Dynamic Build Settings
+private func createBuildSettings() -> Settings {
+    var baseSettings: [String: SettingValue] = [
+        "DEVELOPMENT_TEAM": "PR6C39UQ38",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA"
+    ]
+    
+    if isChatEnabled() {
+        baseSettings["CHAT_ENABLED"] = "1"
+        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
+        //baseSettings.merge([String: SettingValue]().otherSwiftFlags(["CHAT_ENABLED"]))
+    }
+    
+    return .settings(
+        base: baseSettings,
+        configurations: [
+            .debug(
+                name: "Debug",
+                settings: [
+                    "CODE_SIGN_STYLE": "Automatic",
+                    "CODE_SIGN_IDENTITY": "iPhone Developer"
+                ]
+            ),
+            .release(
+                name: "Release",
+                settings: [
+                    "CODE_SIGN_STYLE": "Manual",
+                    "CODE_SIGN_IDENTITY": "iPhone Distribution",
+                    "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA"
+                ]
+            )
+        ]
+    )
+}
 
 let project = Project(
     name: "VERA",
@@ -16,36 +92,18 @@ let project = Project(
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],
             entitlements: "VERAApp/VERA/VERA.entitlements",
-            dependencies: [
-                .project(target: "VERACore", path: "VERACore"),
-                .project(target: "VERAChat", path: "VERAChat"),
-                .project(target: "VERAOpenTok", path: "VERAOpenTok"),
-                .project(target: "VERAOpenTokChatPlugin", path: "VERAOpenTokChatPlugin"),
-                .project(target: "VERACommonUI", path: "VERACommonUI")
+            scripts: [
+                .pre(
+                    script: """
+                    echo "🔧 Generating app configuration..."
+                    cd "${SRCROOT}"
+                    python3 ./Scripts/generate-app-config.py
+                    """,
+                    name: "Generate App Config"
+                )
             ],
-            settings: .settings(
-                base: [
-                    "DEVELOPMENT_TEAM": "PR6C39UQ38",
-                    "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA"
-                ],
-                configurations: [
-                    .debug(
-                        name: "Debug",
-                        settings: [
-                            "CODE_SIGN_STYLE": "Automatic",
-                            "CODE_SIGN_IDENTITY": "iPhone Developer"
-                        ]
-                    ),
-                    .release(
-                        name: "Release",
-                        settings: [
-                            "CODE_SIGN_STYLE": "Manual",
-                            "CODE_SIGN_IDENTITY": "iPhone Distribution",
-                            "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA"
-                        ]
-                    )
-                ]
-            )
+            dependencies: createDependencies(),
+            settings: createBuildSettings()
         )
     ]
 )

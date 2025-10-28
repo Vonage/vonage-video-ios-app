@@ -5,7 +5,7 @@ let project = Project(
     targets: [
         .target(
             name: "VERACore",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERACore",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
@@ -16,7 +16,8 @@ let project = Project(
             ],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain"),
-                .project(target: "VERACommonUI", path: "../VERACommonUI")
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .project(target: "VERAConfiguration", path: "../VERAConfiguration")
             ]
         )
     ]

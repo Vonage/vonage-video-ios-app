@@ -4,10 +4,13 @@
 
 import Foundation
 import SwiftUI
+#if CHAT_ENABLED
 import VERAChat
+#endif
 import VERACore
 import VERAOpenTok
 import VERACommonUI
+import VERAConfiguration
 
 @main
 struct VERAApp: App {
@@ -51,9 +54,11 @@ struct VERAApp: App {
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                         }
+                        #if CHAT_ENABLED
                         .sheet(isPresented: $showChat) {
                             makeChatView()
                         }
+                        #endif
                 }
             }
             .environmentObject(navigationCoordinator)
@@ -75,7 +80,9 @@ struct VERAApp: App {
     var waitingRoomFactory: WaitingRoomFactory { dependencyContainer.waitingRoomFactory }
     var meetingRoomFactory: MeetingRoomFactory { dependencyContainer.meetingRoomFactory }
     var goodByePageFactory: GoodByePageFactory { dependencyContainer.goodByePageFactory }
+    #if CHAT_ENABLED
     var chatFactory: ChatFactory { dependencyContainer.chatFactory }
+    #endif
 
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
@@ -97,11 +104,21 @@ struct VERAApp: App {
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
+        #if CHAT_ENABLED
         meetingRoomFactory.make(roomName: roomName) {
-            showChat = true
+            if AppConfig.meetingRoomSettings.allowChat {
+                showChat = true
+            }
         } onBack: {
             navigationCoordinator.go(to: .goodbye(roomName))
         }
+        #else
+        meetingRoomFactory.make(roomName: roomName) {
+            // Chat is disabled in configuration
+        } onBack: {
+            navigationCoordinator.go(to: .goodbye(roomName))
+        }
+        #endif
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
@@ -115,6 +132,7 @@ struct VERAApp: App {
         .navigationBarHidden(true)
     }
 
+    #if CHAT_ENABLED
     private func makeChatView() -> some View {
         let result = chatFactory.make(
             onDismiss: {
@@ -122,4 +140,5 @@ struct VERAApp: App {
             })
         return result.view
     }
+    #endif
 }

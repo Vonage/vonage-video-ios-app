@@ -5,7 +5,7 @@ let project = Project(
     targets: [
         .target(
             name: "VERACommonUI",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERACommonUI",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
