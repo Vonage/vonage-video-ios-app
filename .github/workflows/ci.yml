@@ -55,7 +55,8 @@ jobs:
       run: |
         echo "Generate project with Tuist"
         cd VERA
-        tuist generate
+        tuist generate --no-open
+        cd ..
 
     - name: List available simulators
       run: |
