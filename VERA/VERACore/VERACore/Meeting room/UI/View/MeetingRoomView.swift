@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERAConfiguration
 
 public struct MeetingRoomView: View {
 
@@ -106,18 +107,22 @@ public struct MeetingRoomView: View {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         #if targetEnvironment(macCatalyst)
                         #else
+                            if AppConfig.videoSettings.allowCameraControl {
+                                Button {
+                                    onBottomBarInteraction()
+                                    actions.onCameraSwitch()
+                                } label: {
+                                    Image(systemName: "arrow.triangle.2.circlepath.camera")
+                                }.disabled(!state.isCameraEnabled)
+                            }
+                        #endif
+                        if AppConfig.audioSettings.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()
-                                actions.onCameraSwitch()
+                                actions.onToggleMic()
                             } label: {
-                                Image(systemName: "arrow.triangle.2.circlepath.camera")
-                            }.disabled(!state.isCameraEnabled)
-                        #endif
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onToggleMic()
-                        } label: {
-                            Image(systemName: "speaker.wave.2")
+                                Image(systemName: "speaker.wave.2")
+                            }
                         }
                         if let roomURL = state.roomURL {
                             ShareLink(item: roomURL) {

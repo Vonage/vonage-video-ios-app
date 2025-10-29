@@ -1,8 +1,6 @@
 import Foundation
 import ProjectDescription
-
-// MARK: - Execute configuration generation
-generateConfiguration()
+import ProjectDescriptionHelpers
 
 // MARK: - Configuration Reading
 private func readAppConfig() -> [String: Any] {
@@ -54,7 +52,6 @@ private func createBuildSettings() -> Settings {
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
-        //baseSettings.merge([String: SettingValue]().otherSwiftFlags(["CHAT_ENABLED"]))
     }
 
     return .settings(
@@ -88,10 +85,16 @@ let project = Project(
             product: .app,
             bundleId: "com.vonage.VERA",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
-            infoPlist: .extendingDefault(with: [
-                "NSCameraUsageDescription": "VERA needs camera access to enable video calls",
-                "NSMicrophoneUsageDescription": "VERA needs microphone access to enable audio during video calls",
-            ]),
+            infoPlist: .extendingDefault(
+                with: [
+                    "CFBundleName": "VERA",
+                    "CFBundleDisplayName": "VERA",
+                    "LSApplicationCategoryType": "public.app-category.video",
+                    "NSCameraUsageDescription":
+                        "VERA needs access to your camera to share your video during video calls and meetings.",
+                    "NSMicrophoneUsageDescription":
+                        "VERA needs access to your microphone to share your audio during video calls and meetings.",
+                ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],
             entitlements: "VERAApp/VERA/VERA.entitlements",

@@ -1,4 +1,5 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAChat",
@@ -37,6 +38,11 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: "com.vonage.VERAChatApp",
+            infoPlist: .extendingDefault(
+                with: [
+                    "CFBundleName": "VERAChatApp",
+                    "CFBundleDisplayName": "VERAChatApp",
+                ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAChatApp/**"],
             dependencies: [
                 .project(target: "VERAChat", path: "."),

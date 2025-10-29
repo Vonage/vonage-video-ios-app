@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERAConfiguration
 
 public struct MeetingRoomActions {
     let onShare: (String) -> Void
@@ -70,18 +71,24 @@ struct BottomBar: View {
     var body: some View {
         HStack {
             HStack(alignment: .center) {
-                ControlButton(
-                    isActive: isMicEnabled,
-                    iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
-                    action: actions.onToggleMic)
-                ControlButton(
-                    isActive: isCameraEnabled,
-                    iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
-                    action: actions.onToggleCamera)
+                if AppConfig.audioSettings.allowMicrophoneControl {
+                    ControlButton(
+                        isActive: isMicEnabled,
+                        iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
+                        action: actions.onToggleMic)
+                }
+                if AppConfig.videoSettings.allowCameraControl {
+                    ControlButton(
+                        isActive: isCameraEnabled,
+                        iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
+                        action: actions.onToggleCamera)
+                }
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
-                ParticipantsBadgeButton(
-                    participantsCount: participantsCount,
-                    onToggleParticipants: actions.onToggleParticipants)
+                if AppConfig.meetingRoomSettings.showParticipantList {
+                    ParticipantsBadgeButton(
+                        participantsCount: participantsCount,
+                        onToggleParticipants: actions.onToggleParticipants)
+                }
                 if showChatButton {
                     ChatBadgeButton(
                         unreadMessagesCount: unreadMessagesCount,

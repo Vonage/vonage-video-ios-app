@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERAConfiguration
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
@@ -162,33 +163,37 @@ struct VideoPreviewView: View {
             .animation(.easeInOut, value: cornerRadius)
 
             HStack {
-                Menu {
-                    ForEach(state.audioDevices, id: \.id) { device in
-                        Button {
-                            device.onTap?()
-                        } label: {
-                            HStack {
-                                Text(device.name)
-                                Image(systemName: device.iconName)
+                if AppConfig.audioSettings.allowMicrophoneControl {
+                    Menu {
+                        ForEach(state.audioDevices, id: \.id) { device in
+                            Button {
+                                device.onTap?()
+                            } label: {
+                                HStack {
+                                    Text(device.name)
+                                    Image(systemName: device.iconName)
+                                }
                             }
                         }
+                    } label: {
+                        Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                     }
-                } label: {
-                    Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                 }
-                Menu {
-                    ForEach(state.cameras, id: \.id) { device in
-                        Button {
-                            device.onTap?()
-                        } label: {
-                            HStack {
-                                Text(device.name)
-                                Image(systemName: device.iconName)
+                if AppConfig.videoSettings.allowCameraControl {
+                    Menu {
+                        ForEach(state.cameras, id: \.id) { device in
+                            Button {
+                                device.onTap?()
+                            } label: {
+                                HStack {
+                                    Text(device.name)
+                                    Image(systemName: device.iconName)
+                                }
                             }
                         }
+                    } label: {
+                        Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                     }
-                } label: {
-                    Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                 }
             }
             .tint(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)

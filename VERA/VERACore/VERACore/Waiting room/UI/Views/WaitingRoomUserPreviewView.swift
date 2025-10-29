@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERAConfiguration
 
 struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState
@@ -46,15 +47,18 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    CircularControlButton(
-                        isActive: state.isMicrophoneEnabled,
-                        iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
-                        action: onMicrophoneToggle)
-
-                    CircularControlButton(
-                        isActive: state.isCameraEnabled,
-                        iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
-                        action: onCameraToggle)
+                    if AppConfig.audioSettings.allowMicrophoneControl {
+                        CircularControlButton(
+                            isActive: state.isMicrophoneEnabled,
+                            iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
+                            action: onMicrophoneToggle)
+                    }
+                    if AppConfig.videoSettings.allowCameraControl {
+                        CircularControlButton(
+                            isActive: state.isCameraEnabled,
+                            iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
+                            action: onCameraToggle)
+                    }
                 }
                 .padding(.bottom, 20)
             }
