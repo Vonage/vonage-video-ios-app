@@ -107,6 +107,7 @@ jobs:
           -scheme VERACoreSnapshotTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
+          -enableCodeCoverage NO \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
