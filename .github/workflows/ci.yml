@@ -108,7 +108,7 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage NO \
-          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+          -resultBundlePath "" \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
@@ -121,7 +121,8 @@ jobs:
           -scheme VERAChatSnapshotTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
-          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
+          -enableCodeCoverage NO \
+          -resultBundlePath "" \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
@@ -191,8 +192,6 @@ jobs:
           DerivedData/VERAOpenTokChatPluginTests-macOS.xcresult
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/Build/Products/
-          DerivedData/VERACoreSnapshotTests-iOS.xcresult
-          DerivedData/VERAChatSnapshotTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
 
   sonarcloud:
