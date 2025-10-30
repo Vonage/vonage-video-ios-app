@@ -100,6 +100,25 @@ let project = Project(
             entitlements: "VERAApp/VERA/VERA.entitlements",
             dependencies: createDependencies(),
             settings: createBuildSettings()
+        ),
+        .target(
+            name: "VERATests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.vonage.VERATests",
+            sources: ["VERAApp/VERATests/**"],
+            dependencies: [
+                .target(name: "VERA")
+            ]
+        ),
+    ],
+    schemes: [
+        .scheme(
+            name: "VERATests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERATests"]),
+            testAction: .targets(["VERATests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
         )
     ]
 )
