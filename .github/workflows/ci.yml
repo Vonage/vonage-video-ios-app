@@ -105,8 +105,8 @@ jobs:
           -scheme VERACoreSnapshotTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
-          -enableCodeCoverage NO \
-          -resultBundlePath "" \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
@@ -119,8 +119,8 @@ jobs:
           -scheme VERAChatSnapshotTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
-          -enableCodeCoverage NO \
-          -resultBundlePath "" \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
@@ -189,6 +189,8 @@ jobs:
           DerivedData/VERAChatTests-macOS.xcresult
           DerivedData/VERAOpenTokChatPluginTests-macOS.xcresult
           DerivedData/VERAOpenTokTests-iOS.xcresult
+          DerivedData/VERACoreSnapshotTests-iOS.xcresult
+          DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult
           DerivedData/Build/Products/
           DerivedData/VERATests-iOS.xcresult
 
