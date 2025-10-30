@@ -46,7 +46,7 @@ let project = Project(
             sources: ["VERAChatApp/**"],
             dependencies: [
                 .target(name: "VERAChat"),
-                .target(name: "VERAChatAppTestHelpers")
+                .target(name: "VERAChatAppTestHelpers"),
             ]
         ),
         .target(
