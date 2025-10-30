@@ -30,7 +30,7 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAChatAppTestHelpers/**"],
             dependencies: [
-                .project(target: "VERAChat", path: ".")
+                .target(name: "VERAChat")
             ]
         ),
         .target(
@@ -45,8 +45,8 @@ let project = Project(
                 ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAChatApp/**"],
             dependencies: [
-                .project(target: "VERAChat", path: "."),
-                .project(target: "VERAChatAppTestHelpers", path: "."),
+                .target(name: "VERAChat"),
+                .target(name: "VERAChatAppTestHelpers")
             ]
         ),
         .target(

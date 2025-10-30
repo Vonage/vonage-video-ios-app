@@ -75,9 +75,8 @@ jobs:
         echo "🧪 Running VERACoreTests on macOS"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERACore \
+          -scheme VERACoreTests \
           -destination "platform=macOS" \
-          -only-testing:VERACoreTests \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
@@ -89,9 +88,8 @@ jobs:
         echo "🧪 Running VERAChatTests on macOS"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChat \
+          -scheme VERAChatTests \
           -destination "platform=macOS" \
-          -only-testing:VERAChatTests \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
