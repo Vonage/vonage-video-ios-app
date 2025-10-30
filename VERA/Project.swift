@@ -103,26 +103,3 @@ let project = Project(
         )
     ]
 )
-
-// Generate configuration immediately when Project.swift is evaluated
-private func generateConfiguration() {
-    print("🔧 Generating app configuration...")
-
-    let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
-    task.arguments = ["Scripts/generate-app-config.py"]
-    task.currentDirectoryURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-
-    do {
-        try task.run()
-        task.waitUntilExit()
-
-        if task.terminationStatus == 0 {
-            print("✅ Configuration generated successfully")
-        } else {
-            print("❌ Configuration generation failed")
-        }
-    } catch {
-        print("❌ Error running configuration script: \(error)")
-    }
-}
