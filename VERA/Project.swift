@@ -44,10 +44,7 @@ private func createDependencies() -> [TargetDependency] {
 
 // MARK: - Dynamic Build Settings
 private func createBuildSettings() -> Settings {
-    var baseSettings: [String: SettingValue] = [
-        "DEVELOPMENT_TEAM": "PR6C39UQ38",
-        "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA",
-    ]
+    var baseSettings: [String: SettingValue] = [:]
 
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
@@ -62,7 +59,8 @@ private func createBuildSettings() -> Settings {
                 settings: [
                     "CODE_SIGN_STYLE": "Automatic",
                     "CODE_SIGN_IDENTITY": "iPhone Developer",
-                ]
+                ],
+                xcconfig: "Config/Signing.xcconfig"
             ),
             .release(
                 name: "Release",
@@ -70,7 +68,8 @@ private func createBuildSettings() -> Settings {
                     "CODE_SIGN_STYLE": "Manual",
                     "CODE_SIGN_IDENTITY": "iPhone Distribution",
                     "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA",
-                ]
+                ],
+                xcconfig: "Config/Signing.xcconfig"
             ),
         ]
     )

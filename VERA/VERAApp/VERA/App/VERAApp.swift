@@ -5,7 +5,6 @@
 import Foundation
 import SwiftUI
 import VERACommonUI
-import VERAConfiguration
 import VERACore
 import VERAOpenTok
 
@@ -107,9 +106,7 @@ struct VERAApp: App {
     private func makeMeetingRoom(roomName: String) -> some View {
         #if CHAT_ENABLED
             meetingRoomFactory.make(roomName: roomName) {
-                if AppConfig.meetingRoomSettings.allowChat {
-                    showChat = true
-                }
+                showChat = true
             } onBack: {
                 navigationCoordinator.go(to: .goodbye(roomName))
             }
