@@ -4,12 +4,13 @@
 
 import SwiftUI
 import VERACommonUI
-import VERAConfiguration
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
     public let isMicrophoneEnabled: Bool
     public let isCameraEnabled: Bool
+    public let allowMicrophoneControl: Bool
+    public let allowCameraControl: Bool
     public let audioDevices: [UIAudioDevice]
     public let cameras: [UICameraDevice]
     public weak var publisher: VERAPublisher?
@@ -18,6 +19,8 @@ public struct WaitingRoomState: Equatable {
         roomName: String,
         isMicrophoneEnabled: Bool,
         isCameraEnabled: Bool,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
         audioDevices: [UIAudioDevice],
         cameras: [UICameraDevice],
         publisher: VERAPublisher?
@@ -25,6 +28,8 @@ public struct WaitingRoomState: Equatable {
         self.roomName = roomName
         self.isMicrophoneEnabled = isMicrophoneEnabled
         self.isCameraEnabled = isCameraEnabled
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
         self.audioDevices = audioDevices
         self.cameras = cameras
         self.publisher = publisher
@@ -34,6 +39,8 @@ public struct WaitingRoomState: Equatable {
         roomName: "",
         isMicrophoneEnabled: false,
         isCameraEnabled: false,
+        allowMicrophoneControl: true,
+        allowCameraControl: true,
         audioDevices: [],
         cameras: [],
         publisher: nil
@@ -42,7 +49,8 @@ public struct WaitingRoomState: Equatable {
     public static func == (lhs: WaitingRoomState, rhs: WaitingRoomState) -> Bool {
         lhs.roomName == rhs.roomName && lhs.isMicrophoneEnabled == rhs.isMicrophoneEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.audioDevices.count == rhs.audioDevices.count
-            && lhs.cameras.count == rhs.cameras.count
+            && lhs.cameras.count == rhs.cameras.count && lhs.allowMicrophoneControl == rhs.allowMicrophoneControl
+            && lhs.allowCameraControl == rhs.allowCameraControl
     }
 }
 
@@ -163,7 +171,7 @@ struct VideoPreviewView: View {
             .animation(.easeInOut, value: cornerRadius)
 
             HStack {
-                if AppConfig.audioSettings.allowMicrophoneControl {
+                if state.allowMicrophoneControl {
                     Menu {
                         ForEach(state.audioDevices, id: \.id) { device in
                             Button {
@@ -179,7 +187,7 @@ struct VideoPreviewView: View {
                         Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                     }
                 }
-                if AppConfig.videoSettings.allowCameraControl {
+                if state.allowCameraControl {
                     Menu {
                         ForEach(state.cameras, id: \.id) { device in
                             Button {
@@ -247,6 +255,8 @@ struct PrepareToJoinRoom: View {
             roomName: "Room name",
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
             audioDevices: [
                 .init(id: "", name: "Earpiece", iconName: "iphone"),
                 .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),
@@ -269,6 +279,8 @@ struct PrepareToJoinRoom: View {
             roomName: "Room name",
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
             audioDevices: [
                 .init(id: "", name: "Earpiece", iconName: "iphone"),
                 .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),

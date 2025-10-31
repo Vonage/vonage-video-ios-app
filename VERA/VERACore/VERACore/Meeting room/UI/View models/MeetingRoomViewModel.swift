@@ -23,6 +23,9 @@ public struct MeetingRoomState: Equatable {
     public let roomURL: URL?
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
+    public let allowMicrophoneControl: Bool
+    public let allowCameraControl: Bool
+    public let showParticipantList: Bool
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
@@ -43,7 +46,10 @@ public struct MeetingRoomState: Equatable {
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
         showChatButton: Bool,
-        unreadMessagesCount: Int = 0
+        unreadMessagesCount: Int = 0,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
+        showParticipantList: Bool
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -54,6 +60,9 @@ public struct MeetingRoomState: Equatable {
         self.activeSpeakerId = activeSpeakerId
         self.showChatButton = showChatButton
         self.unreadMessagesCount = unreadMessagesCount
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
+        self.showParticipantList = showParticipantList
     }
 
     public static let `default` = MeetingRoomState(
@@ -64,7 +73,10 @@ public struct MeetingRoomState: Equatable {
         participants: [],
         layout: .activeSpeaker,
         activeSpeakerId: nil,
-        showChatButton: AppConfig.meetingRoomSettings.allowChat)
+        showChatButton: AppConfig.meetingRoomSettings.allowChat,
+        allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
+        allowCameraControl: AppConfig.videoSettings.allowCameraControl,
+        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -164,7 +176,10 @@ public final class MeetingRoomViewModel: ObservableObject {
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,
-                showChatButton: AppConfig.meetingRoomSettings.allowChat)
+                showChatButton: AppConfig.meetingRoomSettings.allowChat,
+                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
+                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
         }
         .removeDuplicates()
         .sink { [weak self] newState in

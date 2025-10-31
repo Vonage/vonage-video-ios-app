@@ -4,7 +4,6 @@
 
 import SwiftUI
 import VERACommonUI
-import VERAConfiguration
 
 struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState
@@ -47,13 +46,13 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    if AppConfig.audioSettings.allowMicrophoneControl {
+                    if state.allowMicrophoneControl {
                         CircularControlButton(
                             isActive: state.isMicrophoneEnabled,
                             iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
                             action: onMicrophoneToggle)
                     }
-                    if AppConfig.videoSettings.allowCameraControl {
+                    if state.allowCameraControl {
                         CircularControlButton(
                             isActive: state.isCameraEnabled,
                             iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
@@ -74,6 +73,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -87,6 +88,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -100,6 +103,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -113,6 +118,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -130,6 +137,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -143,6 +152,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -156,6 +167,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -169,6 +182,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),

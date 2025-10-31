@@ -4,7 +4,6 @@
 
 import SwiftUI
 import VERACommonUI
-import VERAConfiguration
 
 public struct MeetingRoomActions {
     let onShare: (String) -> Void
@@ -47,6 +46,9 @@ struct BottomBar: View {
     private let participantsCount: Int
     private let unreadMessagesCount: Int
     private let showChatButton: Bool
+    private let allowMicrophoneControl: Bool
+    private let allowCameraControl: Bool
+    private let showParticipantList: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
 
@@ -56,6 +58,9 @@ struct BottomBar: View {
         participantsCount: Int,
         unreadMessagesCount: Int,
         showChatButton: Bool,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
+        showParticipantList: Bool,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions
     ) {
@@ -65,26 +70,29 @@ struct BottomBar: View {
         self.unreadMessagesCount = unreadMessagesCount
         self.currentLayout = currentLayout
         self.showChatButton = showChatButton
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
+        self.showParticipantList = showParticipantList
         self.actions = actions
     }
 
     var body: some View {
         HStack {
             HStack(alignment: .center) {
-                if AppConfig.audioSettings.allowMicrophoneControl {
+                if allowMicrophoneControl {
                     ControlButton(
                         isActive: isMicEnabled,
                         iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
                         action: actions.onToggleMic)
                 }
-                if AppConfig.videoSettings.allowCameraControl {
+                if allowCameraControl {
                     ControlButton(
                         isActive: isCameraEnabled,
                         iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
                         action: actions.onToggleCamera)
                 }
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
-                if AppConfig.meetingRoomSettings.showParticipantList {
+                if showParticipantList {
                     ParticipantsBadgeButton(
                         participantsCount: participantsCount,
                         onToggleParticipants: actions.onToggleParticipants)
@@ -138,6 +146,9 @@ struct BottomBarBackground: View {
             participantsCount: 25,
             unreadMessagesCount: 5,
             showChatButton: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true,
             currentLayout: .activeSpeaker,
             actions: .init())
     }
@@ -150,9 +161,12 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
-            unreadMessagesCount: 0,
+            unreadMessagesCount: 5,
             showChatButton: true,
-            currentLayout: .grid,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true,
+            currentLayout: .activeSpeaker,
             actions: .init())
     }
     .background(Color.white)

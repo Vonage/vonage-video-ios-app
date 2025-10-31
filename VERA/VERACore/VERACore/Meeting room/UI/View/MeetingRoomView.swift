@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import VERAConfiguration
 
 public struct MeetingRoomView: View {
 
@@ -47,6 +46,9 @@ public struct MeetingRoomView: View {
                         participantsCount: state.participantsCount,
                         unreadMessagesCount: state.unreadMessagesCount,
                         showChatButton: state.showChatButton,
+                        allowMicrophoneControl: state.allowMicrophoneControl,
+                        allowCameraControl: state.allowCameraControl,
+                        showParticipantList: state.showParticipantList,
                         currentLayout: state.layout,
                         actions: wrappedActions
                     )
@@ -107,7 +109,7 @@ public struct MeetingRoomView: View {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         #if targetEnvironment(macCatalyst)
                         #else
-                            if AppConfig.videoSettings.allowCameraControl {
+                            if state.allowCameraControl {
                                 Button {
                                     onBottomBarInteraction()
                                     actions.onCameraSwitch()
@@ -116,7 +118,7 @@ public struct MeetingRoomView: View {
                                 }.disabled(!state.isCameraEnabled)
                             }
                         #endif
-                        if AppConfig.audioSettings.allowMicrophoneControl {
+                        if state.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()
                                 actions.onToggleMic()
@@ -238,6 +240,9 @@ public struct MeetingRoomView: View {
             participants: [],
             layout: .activeSpeaker,
             activeSpeakerId: nil,
-            showChatButton: true),
+            showChatButton: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true),
         actions: .init())
 }
