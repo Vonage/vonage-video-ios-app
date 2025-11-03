@@ -263,15 +263,6 @@ jobs:
     - name: Install Tuist
       run: brew install tuist
 
-    - name: Generate project with Tuist
-      run: |
-        echo "Generate project with Tuist"
-        cd VERA
-        export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-        ./Scripts/regenerateSigningConfig.sh
-        tuist generate --no-open
-        cd ..
-
     - name: Generate build number
       id: buildnumber
       run: |
@@ -281,6 +272,17 @@ jobs:
         BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
         echo "Generated build number: $BUILD_NUMBER"
+
+    - name: Generate project with Tuist
+      run: |
+        echo "Generate project with Tuist"
+        cd VERA
+        export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
+        export MARKETING_VERSION=1.0
+        export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
+        ./Scripts/regenerateSigningConfig.sh
+        tuist generate --no-open
+        cd ..
 
     - name: Build archive
       run: |
