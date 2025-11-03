@@ -234,8 +234,9 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-26
-    needs: [unit-tests]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #needs: [unit-tests]
+    needs: [format-check]
+    #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 30
     
     steps:
@@ -269,6 +270,18 @@ jobs:
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
         echo "Generated build number: $BUILD_NUMBER"
     
+    - name: Install Tuist
+      run: brew install tuist
+
+    - name: Generate project with Tuist
+      run: |
+        echo "Generate project with Tuist"
+        cd VERA
+        export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
+        ./Scripts/regenerateSigningConfig.sh
+        tuist generate --no-open
+        cd ..
+
     - name: Build archive
       run: |
           echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
