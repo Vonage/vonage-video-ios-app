@@ -47,7 +47,7 @@ private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = [:]
 
     baseSettings["MARKETING_VERSION"] = "1.0"
-    
+
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
