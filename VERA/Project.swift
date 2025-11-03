@@ -95,7 +95,7 @@ let project = Project(
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
-                    "ITSAppUsesNonExemptEncryption": false
+                    "ITSAppUsesNonExemptEncryption": false,
                 ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],
