@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct ReenterRoomButton: View {
     let onReenter: () -> Void
@@ -22,7 +23,7 @@ struct ReenterRoomButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .tint(.accentBlue)
+            .tint(VERACommonUIAsset.accentBlue.swiftUIColor)
             .foregroundColor(.blue)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)

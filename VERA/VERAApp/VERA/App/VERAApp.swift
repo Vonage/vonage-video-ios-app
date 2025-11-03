@@ -4,9 +4,13 @@
 
 import Foundation
 import SwiftUI
-import VERAChat
+import VERACommonUI
 import VERACore
 import VERAOpenTok
+
+#if CHAT_ENABLED
+    import VERAChat
+#endif
 
 @main
 struct VERAApp: App {
@@ -50,9 +54,11 @@ struct VERAApp: App {
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                         }
-                        .sheet(isPresented: $showChat) {
-                            makeChatView()
-                        }
+                        #if CHAT_ENABLED
+                            .sheet(isPresented: $showChat) {
+                                makeChatView()
+                            }
+                        #endif
                 }
             }
             .environmentObject(navigationCoordinator)
@@ -64,7 +70,7 @@ struct VERAApp: App {
                 )
             }.onOpenURL { url in
                 handleUniversalLink(url)
-            }
+            }.tint(VERACommonUIAsset.vAccent.swiftUIColor)
         }
     }
 
@@ -74,7 +80,9 @@ struct VERAApp: App {
     var waitingRoomFactory: WaitingRoomFactory { dependencyContainer.waitingRoomFactory }
     var meetingRoomFactory: MeetingRoomFactory { dependencyContainer.meetingRoomFactory }
     var goodByePageFactory: GoodByePageFactory { dependencyContainer.goodByePageFactory }
-    var chatFactory: ChatFactory { dependencyContainer.chatFactory }
+    #if CHAT_ENABLED
+        var chatFactory: ChatFactory { dependencyContainer.chatFactory }
+    #endif
 
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
@@ -96,11 +104,19 @@ struct VERAApp: App {
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
-        meetingRoomFactory.make(roomName: roomName) {
-            showChat = true
-        } onBack: {
-            navigationCoordinator.go(to: .goodbye(roomName))
-        }
+        #if CHAT_ENABLED
+            meetingRoomFactory.make(roomName: roomName) {
+                showChat = true
+            } onBack: {
+                navigationCoordinator.go(to: .goodbye(roomName))
+            }
+        #else
+            meetingRoomFactory.make(roomName: roomName) {
+                // Chat is disabled in configuration
+            } onBack: {
+                navigationCoordinator.go(to: .goodbye(roomName))
+            }
+        #endif
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
@@ -114,11 +130,13 @@ struct VERAApp: App {
         .navigationBarHidden(true)
     }
 
-    private func makeChatView() -> some View {
-        let result = chatFactory.make(
-            onDismiss: {
-                showChat = false
-            })
-        return result.view
-    }
+    #if CHAT_ENABLED
+        private func makeChatView() -> some View {
+            let result = chatFactory.make(
+                onDismiss: {
+                    showChat = false
+                })
+            return result.view
+        }
+    #endif
 }

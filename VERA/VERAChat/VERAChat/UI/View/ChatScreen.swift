@@ -38,7 +38,7 @@ public struct ChatScreen: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(.label)
+                        }.tint(VERACommonUIAsset.uiLabel.swiftUIColor)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {

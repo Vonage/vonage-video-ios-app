@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct UsernameInput: View {
 
@@ -30,9 +31,9 @@ struct UsernameInput: View {
     private var borderColor: Color {
         switch getUsernameState() {
         case .initial:
-            return .uiSecondaryLabel
+            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return .accentBlue
+            return VERACommonUIAsset.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }

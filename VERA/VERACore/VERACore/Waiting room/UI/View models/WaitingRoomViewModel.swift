@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERAConfiguration
 
 public typealias WaitingRoomError = String
 public typealias PermissionGranted = Bool
@@ -152,6 +153,8 @@ public final class WaitingRoomViewModel: ObservableObject {
                 roomName: roomName,
                 isMicrophoneEnabled: isMicrophoneEnabled,
                 isCameraEnabled: isCameraEnabled,
+                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
                 audioDevices: availableAudioDevices,
                 cameras: availableCameraDevices,
                 publisher: publisher))

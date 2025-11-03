@@ -1,0 +1,26 @@
+{
+  "videoSettings": {
+    "allowBackgroundEffects": true,
+    "allowCameraControl": true,
+    "allowVideoOnJoin": true,
+    "defaultResolution": "640x480"
+  },
+  "audioSettings": {
+    "allowAdvancedNoiseSuppression": true,
+    "allowAudioOnJoin": true,
+    "allowMicrophoneControl": true
+  },
+  "waitingRoomSettings": {
+    "allowDeviceSelection": true
+  },
+  "meetingRoomSettings": {
+    "allowArchiving": true,
+    "allowCaptions": true,
+    "allowChat": true,
+    "allowDeviceSelection": true,
+    "allowEmojis": true,
+    "allowScreenShare": true,
+    "defaultLayoutMode": "activespeaker",
+    "showParticipantList": true
+  }
+}

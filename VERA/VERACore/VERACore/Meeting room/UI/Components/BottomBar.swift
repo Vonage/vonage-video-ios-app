@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct MeetingRoomActions {
     let onShare: (String) -> Void
@@ -44,6 +45,10 @@ struct BottomBar: View {
     private let isCameraEnabled: Bool
     private let participantsCount: Int
     private let unreadMessagesCount: Int
+    private let showChatButton: Bool
+    private let allowMicrophoneControl: Bool
+    private let allowCameraControl: Bool
+    private let showParticipantList: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
 
@@ -52,6 +57,10 @@ struct BottomBar: View {
         isCameraEnabled: Bool,
         participantsCount: Int,
         unreadMessagesCount: Int,
+        showChatButton: Bool,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
+        showParticipantList: Bool,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions
     ) {
@@ -60,27 +69,39 @@ struct BottomBar: View {
         self.participantsCount = participantsCount
         self.unreadMessagesCount = unreadMessagesCount
         self.currentLayout = currentLayout
+        self.showChatButton = showChatButton
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
+        self.showParticipantList = showParticipantList
         self.actions = actions
     }
 
     var body: some View {
         HStack {
             HStack(alignment: .center) {
-                ControlButton(
-                    isActive: isMicEnabled,
-                    iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
-                    action: actions.onToggleMic)
-                ControlButton(
-                    isActive: isCameraEnabled,
-                    iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
-                    action: actions.onToggleCamera)
+                if allowMicrophoneControl {
+                    ControlButton(
+                        isActive: isMicEnabled,
+                        iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
+                        action: actions.onToggleMic)
+                }
+                if allowCameraControl {
+                    ControlButton(
+                        isActive: isCameraEnabled,
+                        iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
+                        action: actions.onToggleCamera)
+                }
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
-                ParticipantsBadgeButton(
-                    participantsCount: participantsCount,
-                    onToggleParticipants: actions.onToggleParticipants)
-                ChatBadgeButton(
-                    unreadMessagesCount: unreadMessagesCount,
-                    onShowChat: actions.onShowChat)
+                if showParticipantList {
+                    ParticipantsBadgeButton(
+                        participantsCount: participantsCount,
+                        onToggleParticipants: actions.onToggleParticipants)
+                }
+                if showChatButton {
+                    ChatBadgeButton(
+                        unreadMessagesCount: unreadMessagesCount,
+                        onShowChat: actions.onShowChat)
+                }
                 EndCallControlButton(action: actions.onEndCall)
             }
             .padding(.horizontal, 8)
@@ -95,14 +116,14 @@ struct BottomBarBackground: View {
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
-                .fill(.vGray4.opacity(0.8))
+                .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectBackground()
                 } else {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(.vGray4.opacity(0.8))
+                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                 }
             }
         #endif
@@ -124,6 +145,10 @@ struct BottomBarBackground: View {
             isCameraEnabled: true,
             participantsCount: 25,
             unreadMessagesCount: 5,
+            showChatButton: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true,
             currentLayout: .activeSpeaker,
             actions: .init())
     }
@@ -136,8 +161,12 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
-            unreadMessagesCount: 0,
-            currentLayout: .grid,
+            unreadMessagesCount: 5,
+            showChatButton: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true,
+            currentLayout: .activeSpeaker,
             actions: .init())
     }
     .background(Color.white)

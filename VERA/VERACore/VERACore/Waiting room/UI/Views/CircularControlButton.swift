@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct CircularControlButton: View {
 
@@ -103,6 +104,6 @@ struct CircularControlBackground: View {
         CircularControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(.videoBackground)
+    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

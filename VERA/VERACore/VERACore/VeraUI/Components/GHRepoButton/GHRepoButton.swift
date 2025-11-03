@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct GHRepoButton: View {
     @Environment(\.openURL) private var openURL
@@ -17,7 +18,7 @@ struct GHRepoButton: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 30)
-                .tint(.uiLabel.opacity(0.5))
+                .tint(VERACommonUIAsset.uiLabel.swiftUIColor.opacity(0.5))
         }
     }
 }

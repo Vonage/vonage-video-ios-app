@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct GoodByeView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -48,7 +49,7 @@ public struct GoodByeView: View {
             .frame(maxHeight: .infinity)
             .padding(10)
         }
-        .background(.uiSystemBackground)
+        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
     }
 }
 

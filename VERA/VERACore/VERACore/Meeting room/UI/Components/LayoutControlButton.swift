@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct LayoutControlButton: View {
     private let layout: MeetingRoomLayout
@@ -17,9 +18,9 @@ struct LayoutControlButton: View {
         Button(action: action) {
             LayoutImage(layout: layout)
                 .font(.title2)
-                .foregroundStyle(.uiSystemBackground)
+                .foregroundStyle(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
                 .frame(width: 50, height: 50)
-                .background(Circle().fill(.vGray4))
+                .background(Circle().fill(VERACommonUIAsset.vGray4.swiftUIColor))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -68,6 +69,6 @@ struct LayoutImage: View {
         LayoutControlButton(layout: .grid)
     }
     .padding()
-    .background(.videoBackground)
+    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

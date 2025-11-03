@@ -4,6 +4,7 @@
 
 import Combine
 import SwiftUI
+import VERACommonUI
 
 public struct LandingPageView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -46,7 +47,7 @@ public struct LandingPageView: View {
             .frame(maxHeight: .infinity)
             .padding(10)
         }
-        .background(.uiSystemBackground)
+        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
     }
 }
 

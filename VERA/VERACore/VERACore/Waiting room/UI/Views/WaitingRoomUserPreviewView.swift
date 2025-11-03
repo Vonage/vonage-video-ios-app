@@ -46,15 +46,18 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    CircularControlButton(
-                        isActive: state.isMicrophoneEnabled,
-                        iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
-                        action: onMicrophoneToggle)
-
-                    CircularControlButton(
-                        isActive: state.isCameraEnabled,
-                        iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
-                        action: onCameraToggle)
+                    if state.allowMicrophoneControl {
+                        CircularControlButton(
+                            isActive: state.isMicrophoneEnabled,
+                            iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
+                            action: onMicrophoneToggle)
+                    }
+                    if state.allowCameraControl {
+                        CircularControlButton(
+                            isActive: state.isCameraEnabled,
+                            iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
+                            action: onCameraToggle)
+                    }
                 }
                 .padding(.bottom, 20)
             }
@@ -70,6 +73,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -83,6 +88,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -96,6 +103,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -109,6 +118,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -126,6 +137,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: true,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -139,6 +152,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: true,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -152,6 +167,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),
@@ -165,6 +182,8 @@ struct WaitingRoomUserPreviewView: View {
                 roomName: "room name",
                 isMicrophoneEnabled: false,
                 isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
                 audioDevices: [],
                 cameras: [],
                 publisher: nil),

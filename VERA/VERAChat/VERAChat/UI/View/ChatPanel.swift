@@ -25,7 +25,7 @@ public struct ChatPanel: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
         }
-        .background(.systemBackground)
+        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -47,7 +47,8 @@ struct ChatPanelInput: View {
                 Image(systemName: "paperplane.fill")
                     .font(.title2)
                     .foregroundColor(
-                        messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .gray : .accent)
+                        messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            ? .gray : VERACommonUIAsset.vAccent.swiftUIColor)
             }
             .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .buttonStyle(PlainButtonStyle())
@@ -79,7 +80,7 @@ struct GlassBackground: View {
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
-                .fill(.gray4.opacity(0.8))
+                .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
@@ -87,7 +88,7 @@ struct GlassBackground: View {
                         .glassEffect(in: .rect(cornerRadius: 16.0))
                 } else {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(.gray4.opacity(0.8))
+                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
                 }
             }
         #endif

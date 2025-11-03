@@ -3,11 +3,14 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
     public let isMicrophoneEnabled: Bool
     public let isCameraEnabled: Bool
+    public let allowMicrophoneControl: Bool
+    public let allowCameraControl: Bool
     public let audioDevices: [UIAudioDevice]
     public let cameras: [UICameraDevice]
     public weak var publisher: VERAPublisher?
@@ -16,6 +19,8 @@ public struct WaitingRoomState: Equatable {
         roomName: String,
         isMicrophoneEnabled: Bool,
         isCameraEnabled: Bool,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
         audioDevices: [UIAudioDevice],
         cameras: [UICameraDevice],
         publisher: VERAPublisher?
@@ -23,6 +28,8 @@ public struct WaitingRoomState: Equatable {
         self.roomName = roomName
         self.isMicrophoneEnabled = isMicrophoneEnabled
         self.isCameraEnabled = isCameraEnabled
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
         self.audioDevices = audioDevices
         self.cameras = cameras
         self.publisher = publisher
@@ -32,6 +39,8 @@ public struct WaitingRoomState: Equatable {
         roomName: "",
         isMicrophoneEnabled: false,
         isCameraEnabled: false,
+        allowMicrophoneControl: true,
+        allowCameraControl: true,
         audioDevices: [],
         cameras: [],
         publisher: nil
@@ -40,7 +49,8 @@ public struct WaitingRoomState: Equatable {
     public static func == (lhs: WaitingRoomState, rhs: WaitingRoomState) -> Bool {
         lhs.roomName == rhs.roomName && lhs.isMicrophoneEnabled == rhs.isMicrophoneEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.audioDevices.count == rhs.audioDevices.count
-            && lhs.cameras.count == rhs.cameras.count
+            && lhs.cameras.count == rhs.cameras.count && lhs.allowMicrophoneControl == rhs.allowMicrophoneControl
+            && lhs.allowCameraControl == rhs.allowCameraControl
     }
 }
 
@@ -80,7 +90,7 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
-        .background(.uiSystemBackground)
+        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -161,36 +171,40 @@ struct VideoPreviewView: View {
             .animation(.easeInOut, value: cornerRadius)
 
             HStack {
-                Menu {
-                    ForEach(state.audioDevices, id: \.id) { device in
-                        Button {
-                            device.onTap?()
-                        } label: {
-                            HStack {
-                                Text(device.name)
-                                Image(systemName: device.iconName)
+                if state.allowMicrophoneControl {
+                    Menu {
+                        ForEach(state.audioDevices, id: \.id) { device in
+                            Button {
+                                device.onTap?()
+                            } label: {
+                                HStack {
+                                    Text(device.name)
+                                    Image(systemName: device.iconName)
+                                }
                             }
                         }
+                    } label: {
+                        Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                     }
-                } label: {
-                    Label(String(localized: "Microphone", bundle: .veraCore), systemImage: "mic")
                 }
-                Menu {
-                    ForEach(state.cameras, id: \.id) { device in
-                        Button {
-                            device.onTap?()
-                        } label: {
-                            HStack {
-                                Text(device.name)
-                                Image(systemName: device.iconName)
+                if state.allowCameraControl {
+                    Menu {
+                        ForEach(state.cameras, id: \.id) { device in
+                            Button {
+                                device.onTap?()
+                            } label: {
+                                HStack {
+                                    Text(device.name)
+                                    Image(systemName: device.iconName)
+                                }
                             }
                         }
+                    } label: {
+                        Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                     }
-                } label: {
-                    Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
                 }
             }
-            .tint(.uiSecondaryLabel)
+            .tint(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
             .padding()
         }
     }
@@ -217,11 +231,11 @@ struct PrepareToJoinRoom: View {
             VStack {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
-                    .foregroundColor(.uiLabel)
+                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
 
                 Text(state.roomName)
                     .font(.subheadline)
-                    .foregroundColor(.uiLabel)
+                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
             }.padding()
 
             UsernameInput(userName: userName)
@@ -241,6 +255,8 @@ struct PrepareToJoinRoom: View {
             roomName: "Room name",
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
             audioDevices: [
                 .init(id: "", name: "Earpiece", iconName: "iphone"),
                 .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),
@@ -263,6 +279,8 @@ struct PrepareToJoinRoom: View {
             roomName: "Room name",
             isMicrophoneEnabled: true,
             isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
             audioDevices: [
                 .init(id: "", name: "Earpiece", iconName: "iphone"),
                 .init(id: "", name: "Speaker", iconName: "peaker.wave.3"),

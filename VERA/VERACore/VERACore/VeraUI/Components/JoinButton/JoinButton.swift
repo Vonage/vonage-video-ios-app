@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct JoinButton: View {
     @Binding var roomName: String
@@ -28,14 +29,14 @@ struct JoinRoomButtonStyle: ButtonStyle {
         configuration.label
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(.uiSystemBackground)
+            .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
             .opacity(configuration.isPressed ? 0.8 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
 #Preview {
-    JoinButton(roomName: .constant(""), color: .vGray0) {}
-    JoinButton(roomName: .constant("Test"), color: .accentBlue) {}
+    JoinButton(roomName: .constant(""), color: VERACommonUIAsset.vGray0.swiftUIColor) {}
+    JoinButton(roomName: .constant("Test"), color: VERACommonUIAsset.vAccent.swiftUIColor) {}
     JoinButton(roomName: .constant("Test"), color: .red) {}
 }

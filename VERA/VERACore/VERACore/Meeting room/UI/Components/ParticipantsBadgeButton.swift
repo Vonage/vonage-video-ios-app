@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct ParticipantsBadgeButton: View {
 
@@ -35,7 +36,7 @@ struct ParticipantsBadgeButton: View {
                 .frame(minWidth: badgeSize, minHeight: badgeSize)
                 .background(
                     Circle()
-                        .fill(.vGray3)
+                        .fill(VERACommonUIAsset.vGray3.swiftUIColor)
                 )
                 .scaleEffect(participantsCount > MaxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERAConfiguration
 
 public typealias MeetingRoomError = String
 
@@ -22,6 +23,9 @@ public struct MeetingRoomState: Equatable {
     public let roomURL: URL?
     public let isMicEnabled: Bool
     public let isCameraEnabled: Bool
+    public let allowMicrophoneControl: Bool
+    public let allowCameraControl: Bool
+    public let showParticipantList: Bool
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
@@ -30,6 +34,7 @@ public struct MeetingRoomState: Equatable {
         participants.count
     }
 
+    public let showChatButton: Bool
     public let unreadMessagesCount: Int
 
     public init(
@@ -40,7 +45,11 @@ public struct MeetingRoomState: Equatable {
         participants: [Participant],
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
-        unreadMessagesCount: Int = 0
+        showChatButton: Bool,
+        unreadMessagesCount: Int = 0,
+        allowMicrophoneControl: Bool,
+        allowCameraControl: Bool,
+        showParticipantList: Bool
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -49,7 +58,11 @@ public struct MeetingRoomState: Equatable {
         self.participants = participants
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
+        self.showChatButton = showChatButton
         self.unreadMessagesCount = unreadMessagesCount
+        self.allowMicrophoneControl = allowMicrophoneControl
+        self.allowCameraControl = allowCameraControl
+        self.showParticipantList = showParticipantList
     }
 
     public static let `default` = MeetingRoomState(
@@ -59,7 +72,11 @@ public struct MeetingRoomState: Equatable {
         isCameraEnabled: false,
         participants: [],
         layout: .activeSpeaker,
-        activeSpeakerId: nil)
+        activeSpeakerId: nil,
+        showChatButton: AppConfig.meetingRoomSettings.allowChat,
+        allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
+        allowCameraControl: AppConfig.videoSettings.allowCameraControl,
+        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -158,7 +175,11 @@ public final class MeetingRoomViewModel: ObservableObject {
                 isCameraEnabled: sessionState.isPublishingVideo,
                 participants: sortedPaticipants,
                 layout: layout,
-                activeSpeakerId: participantsState.activeParticipantId)
+                activeSpeakerId: participantsState.activeParticipantId,
+                showChatButton: AppConfig.meetingRoomSettings.allowChat,
+                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
+                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
         }
         .removeDuplicates()
         .sink { [weak self] newState in

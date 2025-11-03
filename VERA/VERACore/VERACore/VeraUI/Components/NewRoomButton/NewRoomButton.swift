@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct NewRoomButton: View {
 
@@ -28,7 +29,7 @@ struct NewRoomButtonStyle: ButtonStyle {
         configuration.label
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(.accentBlue.opacity(configuration.isPressed ? 0.8 : 1))
+            .background(VERACommonUIAsset.vAccent.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1))
             .foregroundColor(.white)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .shadow(radius: 5)

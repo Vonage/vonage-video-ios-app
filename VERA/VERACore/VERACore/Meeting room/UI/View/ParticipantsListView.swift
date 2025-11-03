@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct ParticipantsListView: View {
     let participants: [Participant]
@@ -41,7 +42,7 @@ public struct ParticipantsListView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(.uiLabel)
+                        }.tint(VERACommonUIAsset.uiLabel.swiftUIColor)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {
@@ -72,7 +73,7 @@ public struct ParticipantsListView: View {
 
                     ShareLink(item: meetingURL) {
                         Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.uiLabel)
+                            .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .cornerRadius(6)
@@ -121,7 +122,7 @@ struct ParticipantRowView: View {
 
             Image(systemName: participant.isMicEnabled ? "mic.fill" : "mic.slash.fill")
                 .font(.caption)
-                .foregroundColor(.uiLabel)
+                .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
         }
     }
 }

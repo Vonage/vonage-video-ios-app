@@ -45,6 +45,10 @@ public struct MeetingRoomView: View {
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
                         unreadMessagesCount: state.unreadMessagesCount,
+                        showChatButton: state.showChatButton,
+                        allowMicrophoneControl: state.allowMicrophoneControl,
+                        allowCameraControl: state.allowCameraControl,
+                        showParticipantList: state.showParticipantList,
                         currentLayout: state.layout,
                         actions: wrappedActions
                     )
@@ -105,18 +109,22 @@ public struct MeetingRoomView: View {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         #if targetEnvironment(macCatalyst)
                         #else
+                            if state.allowCameraControl {
+                                Button {
+                                    onBottomBarInteraction()
+                                    actions.onCameraSwitch()
+                                } label: {
+                                    Image(systemName: "arrow.triangle.2.circlepath.camera")
+                                }.disabled(!state.isCameraEnabled)
+                            }
+                        #endif
+                        if state.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()
-                                actions.onCameraSwitch()
+                                actions.onToggleMic()
                             } label: {
-                                Image(systemName: "arrow.triangle.2.circlepath.camera")
-                            }.disabled(!state.isCameraEnabled)
-                        #endif
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onToggleMic()
-                        } label: {
-                            Image(systemName: "speaker.wave.2")
+                                Image(systemName: "speaker.wave.2")
+                            }
                         }
                         if let roomURL = state.roomURL {
                             ShareLink(item: roomURL) {
@@ -231,6 +239,10 @@ public struct MeetingRoomView: View {
             isCameraEnabled: true,
             participants: [],
             layout: .activeSpeaker,
-            activeSpeakerId: nil),
+            activeSpeakerId: nil,
+            showChatButton: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            showParticipantList: true),
         actions: .init())
 }
