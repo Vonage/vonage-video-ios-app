@@ -260,16 +260,6 @@ jobs:
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
     
-    - name: Generate build number
-      id: buildnumber
-      run: |
-        # Generate build number with only numeric values for App Store compatibility
-        # Use timestamp to ensure uniqueness and avoid conflicts
-        TIMESTAMP=$(date +%s)
-        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
-        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-        echo "Generated build number: $BUILD_NUMBER"
-    
     - name: Install Tuist
       run: brew install tuist
 
@@ -281,6 +271,16 @@ jobs:
         ./Scripts/regenerateSigningConfig.sh
         tuist generate --no-open
         cd ..
+
+    - name: Generate build number
+      id: buildnumber
+      run: |
+        # Generate build number with only numeric values for App Store compatibility
+        # Use timestamp to ensure uniqueness and avoid conflicts
+        TIMESTAMP=$(date +%s)
+        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+        echo "Generated build number: $BUILD_NUMBER"
 
     - name: Build archive
       run: |
