@@ -49,7 +49,7 @@ struct RoomNameValidatorTests {
             modernValid == expectedValid,
             """
             Room name '\(roomName)' should be \(expectedValid ? "valid" : "invalid"), \
-            but was \(actualValid ? "valid" : "invalid")
+            but was \(modernValid ? "valid" : "invalid")
             """
         )
 
@@ -57,7 +57,7 @@ struct RoomNameValidatorTests {
             legacyValid == expectedValid,
             """
             Room name '\(roomName)' should be \(expectedValid ? "valid" : "invalid"), \
-            but was \(actualValid ? "valid" : "invalid")
+            but was \(legacyValid ? "valid" : "invalid")
             """
         )
     }
