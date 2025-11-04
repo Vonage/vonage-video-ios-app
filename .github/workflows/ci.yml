@@ -96,8 +96,11 @@ jobs:
           -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Build iOS tests (once)
+    - name: Run VERACoreSnapshotTests (iOS Simulator)
+      id: core-snapshot-tests
+      timeout-minutes: 15
       run: |
+        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
         xcodebuild build-for-testing \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
@@ -105,11 +108,6 @@ jobs:
           -derivedDataPath DerivedData \
           $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERACoreSnapshotTests (iOS Simulator)
-      id: core-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
@@ -117,6 +115,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAChatSnapshotTests (iOS Simulator)
@@ -124,6 +123,13 @@ jobs:
       timeout-minutes: 15
       run: |
         echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAChatSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          $XCODE_COMMON_FLAGS | xcpretty
+
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAChatSnapshotTests \
@@ -131,6 +137,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
@@ -138,6 +145,13 @@ jobs:
       timeout-minutes: 15
       run: |
         echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTokChatPluginTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          $XCODE_COMMON_FLAGS | xcpretty
+
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTokChatPluginTests \
@@ -152,6 +166,13 @@ jobs:
       timeout-minutes: 15
       run: |
         echo "📡 Running VERAOpenTokTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTokTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          $XCODE_COMMON_FLAGS | xcpretty
+
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAOpenTokTests \
@@ -166,6 +187,13 @@ jobs:
       timeout-minutes: 15
       run: |
         echo "📡 Running VERACommonUITests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACommonUITests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          $XCODE_COMMON_FLAGS | xcpretty
+
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACommonUITests \
@@ -180,6 +208,13 @@ jobs:
       timeout-minutes: 15
       run: |
         echo "📡 Running VERATests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERATests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          $XCODE_COMMON_FLAGS | xcpretty
+
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERATests \
