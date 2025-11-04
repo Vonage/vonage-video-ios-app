@@ -23,7 +23,18 @@ struct MeetingRoomViewModelTests {
         let sut = makeSUT()
         sut.loadUI()
 
-        let contentState = try await awaitContentState(for: sut)
+        let state = await sut.$state.values.first { state in
+            if case .content = state {
+                return true
+            }
+            return false
+        }
+
+        guard case .content(let contentState) = state else {
+            Issue.record("State did not become .content")
+            return
+        }
+
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
         #expect(contentState.isCameraEnabled == false)
@@ -47,7 +58,18 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let contentState = try await awaitContentState(for: sut)
+        let state = await sut.$state.values.first { state in
+            if case .content = state {
+                return true
+            }
+            return false
+        }
+
+        guard case .content(let contentState) = state else {
+            Issue.record("State did not become .content")
+            return
+        }
+
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
         #expect(contentState.isCameraEnabled == false)
@@ -77,36 +99,6 @@ struct MeetingRoomViewModelTests {
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository)
-    }
-
-    @discardableResult
-    func awaitContentState(
-        for viewModel: MeetingRoomViewModel,
-        timeout: UInt64 = 2_000_000_000  // 2 seconds
-    ) async throws -> MeetingRoomState {
-        let sequence = viewModel.$state.values
-        let task = Task<MeetingRoomState, Error> {
-            for await value in sequence {
-                if case .content(let contentState) = value {
-                    return contentState
-                }
-            }
-            throw NSError(domain: "Timeout", code: 1)
-        }
-        let timeoutTask = Task<MeetingRoomState, Error> {
-            try await Task.sleep(nanoseconds: timeout)
-            throw NSError(domain: "Timeout", code: 2)
-        }
-        let result = try await withThrowingTaskGroup(of: MeetingRoomState.self) { group in
-            group.addTask { try await task.value }
-            group.addTask { try await timeoutTask.value }
-            guard let value = try await group.next() else {
-                throw NSError(domain: "Timeout", code: 3)
-            }
-            group.cancelAll()
-            return value
-        }
-        return result
     }
 }
 
