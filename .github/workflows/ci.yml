@@ -104,7 +104,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERACoreSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17,OS=26.1" \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
@@ -118,7 +118,7 @@ jobs:
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
           -scheme VERAChatSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17,OS=26.1" \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
