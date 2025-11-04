@@ -1,0 +1,7 @@
+name: install-tuist
+description: Install Tuist
+runs:
+  using: composite
+  steps:
+    - name: Install Tuist
+      run: brew install tuist

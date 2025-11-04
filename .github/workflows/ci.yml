@@ -32,6 +32,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-tuist
     
     - name: Pull LFS files
       run: git lfs pull
@@ -47,9 +48,6 @@ jobs:
     - name: Install SwiftLint
       run: |
         brew install swiftlint
-
-    - name: Install Tuist
-      run: brew install tuist
 
     - name: Generate project with Tuist
       run: |
@@ -95,6 +93,11 @@ jobs:
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
+
+    - name: Preboot iOS Simulator
+      run: |
+        set -euo pipefail
+        xcrun simctl boot "iPhone 17" || true 
 
     - name: Run VERACoreSnapshotTests (iOS Simulator)
       id: core-snapshot-tests
@@ -283,6 +286,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-tuist
     
     - name: Pull LFS files
       run: git lfs pull
@@ -301,9 +305,6 @@ jobs:
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-    
-    - name: Install Tuist
-      run: brew install tuist
 
     - name: Generate build number
       id: buildnumber
