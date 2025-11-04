@@ -16,12 +16,6 @@ public protocol OpenTokSignalEmitter: AnyObject {
     var channel: OpenTokSignalChannel? { get set }
 }
 
-/// App based life cycle, plugin registered should be called when app starts
-public protocol OpenTokPluginRegistrationEvents {
-    func registered()
-    func unregistered()
-}
-
 /// Call based life cycle, didStart/didEnd are called when app connects/disconnects
 public protocol OpenTokPluginCallLifeCycle {
     func callDidStart(_ userInfo: [String: Any])

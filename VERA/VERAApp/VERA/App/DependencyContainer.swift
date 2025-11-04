@@ -6,6 +6,7 @@ import AVFoundation
 import Foundation
 import VERACore
 import VERAOpenTok
+import VERAOpenTokCallKitPlugin
 
 #if CHAT_ENABLED
     import VERAChat
@@ -88,6 +89,7 @@ final class DependencyContainer {
         #if CHAT_ENABLED
             registry.registerPlugin(plugin: openTokChatPlugin)
         #endif
+        registry.registerPlugin(plugin: callKitPlugin)
         return registry
     }()
 
@@ -124,4 +126,12 @@ final class DependencyContainer {
             chatMessagesRepository: chatMessagesRepository,
             sendChatMessageUseCase: sendChatMessageUseCase)
     #endif
+    
+    // MARK: CallKit feature
+    
+    lazy var callKitPlugin: OpenTokCallKitPlugin = {
+        let plugin = OpenTokCallKitPlugin()
+        plugin.setup()
+        return plugin
+    }()
 }

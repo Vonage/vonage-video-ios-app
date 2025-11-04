@@ -30,6 +30,7 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERAOpenTok", path: "VERAOpenTok"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),
+        .project(target: "VERAOpenTokCallKitPlugin", path: "VERAOpenTokCallKitPlugin"),
     ]
 
     if isChatEnabled() {
