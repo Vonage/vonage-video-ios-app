@@ -4,7 +4,8 @@
 
 import Foundation
 import Testing
-import VERACore
+
+@testable import VERACore
 
 @Suite("Room Name Validation")
 struct RoomNameValidatorTests {
@@ -33,9 +34,27 @@ struct RoomNameValidatorTests {
     func validateRoomName(testCase: (String, Bool)) {
         let (roomName, expectedValid) = testCase
         let actualValid = roomName.isValidRoomName
+        let modernValid = roomName.isValidRoomNameModern()
+        let legacyValid = roomName.isValidRoomNameLegacy()
 
         #expect(
             actualValid == expectedValid,
+            """
+            Room name '\(roomName)' should be \(expectedValid ? "valid" : "invalid"), \
+            but was \(actualValid ? "valid" : "invalid")
+            """
+        )
+
+        #expect(
+            modernValid == expectedValid,
+            """
+            Room name '\(roomName)' should be \(expectedValid ? "valid" : "invalid"), \
+            but was \(actualValid ? "valid" : "invalid")
+            """
+        )
+
+        #expect(
+            legacyValid == expectedValid,
             """
             Room name '\(roomName)' should be \(expectedValid ? "valid" : "invalid"), \
             but was \(actualValid ? "valid" : "invalid")
