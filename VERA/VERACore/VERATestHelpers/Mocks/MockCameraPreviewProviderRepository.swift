@@ -7,17 +7,25 @@ import VERACore
 
 public final class MockCameraPreviewProviderRepository: CameraPreviewProviderRepository {
 
+    public enum RecordedActions {
+        case get, reset
+    }
+
     public var publisher: MockVERAPublisher!
+
+    public var actions: [RecordedActions] = []
 
     public init(publisher: MockVERAPublisher) {
         self.publisher = publisher
     }
 
     public func getPublisher() -> any VERACore.VERAPublisher {
-        publisher
+        actions.append(.get)
+        return publisher
     }
 
     public func resetPublisher() {
+        actions.append(.reset)
         publisher = nil
     }
 }
