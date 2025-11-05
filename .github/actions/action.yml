@@ -4,7 +4,6 @@ runs:
   using: composite
   steps:
     - name: Install Tuist
-      shell: bash
       run: |
         if ! command -v tuist >/dev/null 2>&1; then
           brew install tuist
