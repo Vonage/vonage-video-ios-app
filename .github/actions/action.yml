@@ -10,3 +10,4 @@ runs:
         else
           echo "Tuist already installed: $(tuist version)"
         fi
+      shell: bash
