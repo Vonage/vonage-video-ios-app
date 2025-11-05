@@ -1,0 +1,13 @@
+name: install-tuist
+description: Install Tuist
+runs:
+  using: composite
+  steps:
+    - name: Install Tuist
+      shell: bash
+      run: |
+        if ! command -v tuist >/dev/null 2>&1; then
+          brew install tuist
+        else
+          echo "Tuist already installed: $(tuist version)"
+        fi
