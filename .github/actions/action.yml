@@ -1,13 +1,10 @@
-name: install-tuist
-description: Install Tuist
+name: "Install Tuist"
+description: "Install Tuist using Homebrew"
+
 runs:
-  using: composite
+  using: "composite"
   steps:
+
     - name: Install Tuist
-      run: |
-        if ! command -v tuist >/dev/null 2>&1; then
-          brew install tuist
-        else
-          echo "Tuist already installed: $(tuist version)"
-        fi
       shell: bash
+      run: brew install tuist
