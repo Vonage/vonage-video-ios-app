@@ -32,7 +32,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup-tuist
+    - uses: ../actions/setup-tuist
     
     - name: Pull LFS files
       run: git lfs pull
@@ -292,7 +292,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/actions/setup-tuist
+    - uses: ../actions/setup-tuist
     
     - name: Pull LFS files
       run: git lfs pull
