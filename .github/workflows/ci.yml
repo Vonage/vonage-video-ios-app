@@ -32,7 +32,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: .github/actions/install-tuist
     
     - name: Pull LFS files
       run: git lfs pull
@@ -48,6 +47,9 @@ jobs:
     - name: Install SwiftLint
       run: |
         brew install swiftlint
+
+    - name: Install Tuist
+      run: brew install tuist
 
     - name: Generate project with Tuist
       run: |
@@ -292,11 +294,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: .github/actions/install-tuist
     
     - name: Pull LFS files
       run: git lfs pull
     
+    - name: Install Tuist
+      run: brew install tuist
+
     - name: Import certs
       uses: Apple-Actions/import-codesign-certs@v5.0.2
       with:
