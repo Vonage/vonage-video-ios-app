@@ -24,16 +24,13 @@ public final class WaitingRoomViewModel: ObservableObject {
     weak var publisher: VERAPublisher?
 
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
-    private let audioDevicesRepository: AudioDevicesRepository
     private let cameraDevicesRepository: CameraDevicesRepository
-    private let selectAudioDeviceUseCase: SelectAudioDeviceUseCase
     private let joinRoomUseCase: JoinRoomUseCase
     private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
     private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let userRepository: UserRepository
 
-    private var availableAudioDevices: [UIAudioDevice] = []
     private var availableCameraDevices: [UICameraDevice] = []
 
     private var initialised: Bool = false
@@ -41,9 +38,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     public init(
         roomName: RoomName,
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
-        audioDevicesRepository: AudioDevicesRepository,
         cameraDevicesRepository: CameraDevicesRepository,
-        selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
         joinRoomUseCase: JoinRoomUseCase,
         requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
         requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
@@ -52,9 +47,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
-        self.audioDevicesRepository = audioDevicesRepository
         self.cameraDevicesRepository = cameraDevicesRepository
-        self.selectAudioDeviceUseCase = selectAudioDeviceUseCase
         self.joinRoomUseCase = joinRoomUseCase
         self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
         self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
@@ -66,7 +59,6 @@ public final class WaitingRoomViewModel: ObservableObject {
         guard !initialised else { return }
         initialised = true
 
-        observeAudioDevices()
         observeCameraDevices()
 
         loadUsername()
@@ -79,21 +71,6 @@ public final class WaitingRoomViewModel: ObservableObject {
         startVideoPreviewIfNeeded()
     }
 
-    private func observeAudioDevices() {
-        audioDevicesRepository.observeAvailableDevices.receive(
-            on: DispatchQueue.main
-        )
-        .map { [weak self] audioDevices -> [UIAudioDevice] in
-            guard let self else { return [] }
-            return audioDevices.map {
-                self.makeUIAudioDevice(device: $0)
-            }
-        }.sink(receiveValue: { [weak self] in
-            self?.availableAudioDevices = $0
-            self?.handleDevicesChanged()
-        })
-        .store(in: &cancellables)
-    }
 
     private func observeCameraDevices() {
         cameraDevicesRepository.observeAvailableDevices.receive(
@@ -118,14 +95,6 @@ public final class WaitingRoomViewModel: ObservableObject {
                     userName = user.name
                 }
             }
-        }
-    }
-
-    public func selectAudioDevice(_ device: AudioDevice) {
-        do {
-            try selectAudioDeviceUseCase(device)
-        } catch {
-            print("Error selecting audio device: \(error)")
         }
     }
 
@@ -155,22 +124,8 @@ public final class WaitingRoomViewModel: ObservableObject {
                 isCameraEnabled: isCameraEnabled,
                 allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-                audioDevices: availableAudioDevices,
                 cameras: availableCameraDevices,
                 publisher: publisher))
-    }
-
-    private func makeUIAudioDevice(
-        device: AudioDevice
-    ) -> UIAudioDevice {
-        var uiDevice = UIAudioDevice(
-            id: device.id,
-            name: device.name,
-            iconName: device.portDescription)
-        uiDevice.onTap = { [weak self] in
-            self?.selectAudioDevice(device)
-        }
-        return uiDevice
     }
 
     private func makeUICameraDevice(
@@ -190,7 +145,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             iconName: "person.fill.viewfinder")
         device.onTap = { [weak self] in
             Task {
-                await self?.cameraDevicesRepository.routeTo(device.id)
+                await self?.publisher?.routeTo(device.id)
             }
         }
         return device
@@ -203,7 +158,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             iconName: "iphone.rear.camera")
         device.onTap = { [weak self] in
             Task {
-                await self?.cameraDevicesRepository.routeTo(device.id)
+                await self?.publisher?.routeTo(device.id)
             }
         }
         return device

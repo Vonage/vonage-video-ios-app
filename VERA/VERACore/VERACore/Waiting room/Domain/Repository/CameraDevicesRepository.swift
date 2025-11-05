@@ -7,6 +7,4 @@ import Foundation
 
 public protocol CameraDevicesRepository {
     var observeAvailableDevices: AnyPublisher<[CameraDevice], Never> { get }
-
-    func routeTo(_ cameraDeviceID: String) async
 }
