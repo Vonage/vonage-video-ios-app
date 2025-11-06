@@ -15,12 +15,12 @@ extension String {
     }
 
     func isValidRoomNameModern() -> Bool {
-        let regex = /^[a-zA-Z0-9_+\-]+$/
+        let regex = /^[a-z0-9_+\-]+$/
         return self.wholeMatch(of: regex) != nil
     }
 
     func isValidRoomNameLegacy() -> Bool {
-        let regex = "^[a-zA-Z0-9_+\\-]+$"
+        let regex = "^[a-z0-9_+\\-]+$"
         return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: self)
     }
 }
