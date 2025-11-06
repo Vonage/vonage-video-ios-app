@@ -27,7 +27,7 @@ where Factory.Session == OpenTokSession {
     public func createSession(_ credentials: VERACore.RoomCredentials) -> CallFacade {
         let newSession = sessionFactory.make(credentials)
         let publisher = publisherRepository.getPublisher() as! OpenTokPublisher
-        let call = OpenTokCall(token: credentials.token, session: newSession, publisher: publisher)
+        let call = OpenTokCall(credentials: credentials, session: newSession, publisher: publisher)
         call.setup()
         call.assignPlugins(pluginRegistry.plugins)
         currentCall = call

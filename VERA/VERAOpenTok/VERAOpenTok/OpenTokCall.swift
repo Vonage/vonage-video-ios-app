@@ -25,7 +25,7 @@ public final class OpenTokCall: CallFacade {
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     public let id: UUID = UUID()
-    public let token: String
+    public let credentials: RoomCredentials
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
     public var publisherParticipant: Participant?
@@ -38,11 +38,11 @@ public final class OpenTokCall: CallFacade {
     public var plugins: [any OpenTokPlugin] = []
 
     public init(
-        token: String,
+        credentials: RoomCredentials,
         session: OpenTokSession,
         publisher: OpenTokPublisher
     ) {
-        self.token = token
+        self.credentials = credentials
         self.session = session
         self.publisher = publisher
     }
@@ -198,7 +198,7 @@ public final class OpenTokCall: CallFacade {
 
     public func connect() {
         do {
-            try session.connect(with: token)
+            try session.connect(with: credentials.token)
         } catch {
             _eventsPublisher.value = .error(error)
         }
@@ -294,17 +294,31 @@ public final class OpenTokCall: CallFacade {
     // MARK: Signals
 
     private var callParams: [String: String] {
-        [OpenTokCallParams.username.rawValue: publisher.participant.name]
+        [
+            OpenTokCallParams.username.rawValue: publisher.participant.name,
+            OpenTokCallParams.roomName.rawValue: credentials.roomName,
+            OpenTokCallParams.callID.rawValue: id.uuidString,
+        ]
     }
 
     public func assignPlugins(_ plugins: [any OpenTokPlugin]) {
         self.plugins = plugins
 
-        plugins.forEach { $0.channel = session }
+        plugins.forEach {
+            $0.channel = session
+            if var callHolder = $0 as? OpenTokPluginCallHolder {
+                callHolder.call = self
+            }
+        }
     }
 
     private func unassignPlugins() {
-        plugins.forEach { $0.channel = nil }
+        plugins.forEach {
+            $0.channel = nil
+            if var callHolder = $0 as? OpenTokPluginCallHolder {
+                callHolder.call = nil
+            }
+        }
 
         plugins.removeAll()
     }

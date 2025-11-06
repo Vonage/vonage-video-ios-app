@@ -94,6 +94,7 @@ let project = Project(
                         "VERA needs access to your camera to share your video during video calls and meetings.",
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
+                    "UIBackgroundModes": .array(["audio", "voip"]),
                 ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],

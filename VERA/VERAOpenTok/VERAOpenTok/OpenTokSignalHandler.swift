@@ -22,4 +22,8 @@ public protocol OpenTokPluginCallLifeCycle {
     func callDidEnd()
 }
 
+public protocol OpenTokPluginCallHolder {
+    var call: OpenTokCall? { get set }
+}
+
 public typealias OpenTokPlugin = OpenTokSignalHandler & OpenTokSignalEmitter & OpenTokPluginCallLifeCycle & Identifiable

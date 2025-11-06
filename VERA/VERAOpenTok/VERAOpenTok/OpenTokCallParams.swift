@@ -6,4 +6,6 @@ import Foundation
 
 public enum OpenTokCallParams: String {
     case username
+    case roomName
+    case callID
 }

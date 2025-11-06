@@ -126,9 +126,9 @@ final class DependencyContainer {
             chatMessagesRepository: chatMessagesRepository,
             sendChatMessageUseCase: sendChatMessageUseCase)
     #endif
-    
+
     // MARK: CallKit feature
-    
+
     lazy var callKitPlugin: OpenTokCallKitPlugin = {
         let plugin = OpenTokCallKitPlugin()
         plugin.setup()
