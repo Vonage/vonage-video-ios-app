@@ -5,8 +5,7 @@
 import SwiftUI
 
 public struct LandingPageScreen: View {
-
-    private let viewModel: LandingPageViewModel
+    @ObservedObject var viewModel: LandingPageViewModel
     private let onNavigateToWaitingRoom: (String) -> Void
 
     public init(
@@ -22,7 +21,13 @@ public struct LandingPageScreen: View {
             onHandleNewRoom: viewModel.onHandleNewRoom,
             onJoinRoom: viewModel.onJoinRoom,
             onNavigateToWaitingRoom: onNavigateToWaitingRoom
-        )
+        ).alert(item: $viewModel.error) { alertItem in
+            Alert(
+                title: Text(alertItem.title),
+                message: Text(alertItem.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .onReceive(viewModel.$state) { value in
             switch value {
             case .success(let roomName): onNavigateToWaitingRoom(roomName)

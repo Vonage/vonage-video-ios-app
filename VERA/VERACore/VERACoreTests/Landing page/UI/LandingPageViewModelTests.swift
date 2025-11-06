@@ -87,6 +87,7 @@ struct LandingPageViewModelTests {
         }
     }
 
+    @MainActor
     @Test(
         """
         Given content state, when join room is called with invalid name, then
@@ -99,24 +100,17 @@ struct LandingPageViewModelTests {
 
         // Initial state should be content
         #expect(sut.state == .content)
+        #expect(sut.error == nil)
 
         // Call join room with invalid name
         sut.onJoinRoom(invalidRoomName)
 
-        // Wait for async operation to complete with a reasonable timeout
-        for _ in 0..<50 {  // Up to 0.5 seconds
-            if case .error = sut.state {
-                break
-            }
-            await delay()
-        }
+        let value = await sut.$error.values.first { $0 != nil }
 
-        // State should transition to error
-        switch sut.state {
-        case .error(let errorMessage):
-            #expect(!errorMessage.isEmpty)
-        default:
-            Issue.record("Expected error state for invalid room name, got: \(sut.state)")
+        if let value = value as? AlertItem {
+            #expect(value.title == "Error")
+        } else {
+            Issue.record("Expected error state for invalid room name, got: \(sut.error)")
         }
     }
 
@@ -128,20 +122,12 @@ struct LandingPageViewModelTests {
 
         sut.onJoinRoom("")
 
-        // Wait for async operation to complete with a reasonable timeout
-        for _ in 0..<50 {  // Up to 0.5 seconds
-            if case .error = sut.state {
-                break
-            }
-            await delay()
-        }
+        let value = await sut.$error.values.first { $0 != nil }
 
-        // State should transition to error
-        switch sut.state {
-        case .error:
-            break
-        default:
-            Issue.record("Expected error state for empty room name, got: \(sut.state)")
+        if let value = value as? AlertItem {
+            #expect(value.title == "Error")
+        } else {
+            Issue.record("Expected error state for invalid room name, got: \(sut.state)")
         }
     }
 

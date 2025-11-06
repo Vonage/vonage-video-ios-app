@@ -11,7 +11,6 @@ public typealias PermissionGranted = Bool
 
 public enum WaitingRoomViewState: Equatable {
     case loading
-    case error(WaitingRoomError)
     case content(WaitingRoomState)
 }
 
@@ -20,6 +19,8 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
+    @MainActor @Published public var error: AlertItem? = nil
+
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
 
@@ -90,9 +91,15 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     private func loadUsername() {
         Task {
-            if let user = try? await userRepository.get() {
-                await MainActor.run {
-                    userName = user.name
+            do {
+                if let user = try await userRepository.get() {
+                    await MainActor.run {
+                        userName = user.name
+                    }
+                }
+            } catch {
+                Task { @MainActor [weak self] in
+                    self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
         }
@@ -179,7 +186,9 @@ public final class WaitingRoomViewModel: ObservableObject {
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
             try await joinRoomUseCase(request)
         } catch {
-            print(error.localizedDescription)
+            Task { @MainActor [weak self] in
+                self?.error = AlertItem.genericError(error.localizedDescription)
+            }
         }
     }
 

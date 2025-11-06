@@ -7,17 +7,17 @@ import Combine
 public typealias LandingPageError = String
 
 public enum LandingPageViewState: Equatable {
-    case error(LandingPageError)
     case success(RoomName)
     case content
 }
 
-public final class LandingPageViewModel {
+public final class LandingPageViewModel: ObservableObject {
 
     private let tryJoinRoomUseCase: TryJoinRoomUseCase
     private let tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
 
     @Published public var state: LandingPageViewState = .content
+    @MainActor @Published public var error: AlertItem? = nil
 
     public init(
         tryJoinRoomUseCase: TryJoinRoomUseCase,
@@ -36,12 +36,12 @@ public final class LandingPageViewModel {
         Task {
             do {
                 try tryJoinRoomUseCase(name)
-                await MainActor.run {
-                    state = .success(name)
+                await MainActor.run { [weak self] in
+                    self?.state = .success(name)
                 }
             } catch {
-                await MainActor.run {
-                    state = .error(error.localizedDescription)
+                await MainActor.run { [weak self] in
+                    self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
         }
