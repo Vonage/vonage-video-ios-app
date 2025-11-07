@@ -106,13 +106,8 @@ struct LandingPageViewModelTests {
         // Call join room with invalid name
         sut.onJoinRoom(invalidRoomName)
 
-        let value = await sut.$error.values.first { $0 != nil }
-
-        if let value = value as? AlertItem {
-            #expect(value.title == "Error")
-        } else {
-            Issue.record("Expected error state for invalid room name, got: \(sut.error)")
-        }
+        let value = (await sut.$error.values.first { $0 != nil } as? AlertItem)!
+        #expect(value.title == "Error")
     }
 
     // MARK: - Edge Cases
@@ -123,13 +118,8 @@ struct LandingPageViewModelTests {
 
         sut.onJoinRoom("")
 
-        let value = await sut.$error.values.first { $0 != nil }
-
-        if let value = value as? AlertItem {
-            #expect(value.title == "Error")
-        } else {
-            Issue.record("Expected error state for invalid room name, got: \(sut.state)")
-        }
+        let value = (await sut.$error.values.first { $0 != nil } as? AlertItem)!
+        #expect(value.title == "Error")
     }
 
     // MARK: SUT
