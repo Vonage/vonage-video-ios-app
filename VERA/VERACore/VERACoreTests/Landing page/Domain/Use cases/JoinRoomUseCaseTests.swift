@@ -35,8 +35,7 @@ struct JoinRoomUseCaseTests {
     @Test func resetsCameraPreviewPublisher() async throws {
         let cameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository()
 
-        let sut = makeSUT(
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository)
+        let sut = makeSUT(cameraPreviewProviderRepository: cameraPreviewProviderRepository)
         let request = JoinRoomRequest(roomName: "heart-of-gold", userName: "Zaphod")
 
         try await sut(request)
