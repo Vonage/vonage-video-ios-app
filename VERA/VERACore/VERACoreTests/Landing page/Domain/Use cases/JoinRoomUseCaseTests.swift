@@ -18,13 +18,7 @@ struct JoinRoomUseCaseTests {
         try await sut(request)
 
         #expect(publisherRepository.actions.count == 1)
-
-        guard case .recreate(let settings) = publisherRepository.actions[0] else {
-            Issue.record("Expected .recreate action but got \(publisherRepository.actions[0])")
-            return
-        }
-
-        #expect(settings.username == "Zaphod")
+        #expect(publisherRepository.actions.first == .recreate(.init(username: "Zaphod")))
     }
 
     @Test func updatesUsernameInUserRepository() async throws {

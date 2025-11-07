@@ -7,7 +7,7 @@ import VERACore
 
 public class PublisherRepositorySpy: PublisherRepository {
 
-    public enum PublisherAction {
+    public enum PublisherAction: Equatable {
         case get, reset
         case recreate(VERACore.PublisherSettings)
     }
