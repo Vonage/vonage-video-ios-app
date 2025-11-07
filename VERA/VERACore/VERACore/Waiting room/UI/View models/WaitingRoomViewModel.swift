@@ -183,7 +183,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
             try await joinRoomUseCase(request)
         } catch {
-            Task { @MainActor [weak self] in
+            await MainActor.run { [weak self] in
                 self?.error = AlertItem.genericError(error.localizedDescription)
             }
         }
