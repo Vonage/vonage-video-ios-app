@@ -29,6 +29,7 @@ struct JoinRoomUseCaseTests {
 
         try await sut(request)
 
+        #expect(userRepository.actions == [.get, .save(.init(name: "Zaphod"))])
         #expect(userRepository.user?.name == "Zaphod")
     }
 
