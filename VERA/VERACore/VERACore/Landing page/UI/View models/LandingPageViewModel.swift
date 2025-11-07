@@ -11,13 +11,14 @@ public enum LandingPageViewState: Equatable {
     case content
 }
 
+@MainActor
 public final class LandingPageViewModel: ObservableObject {
 
     private let tryJoinRoomUseCase: TryJoinRoomUseCase
     private let tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
 
     @Published public var state: LandingPageViewState = .content
-    @MainActor @Published public var error: AlertItem? = nil
+    @Published public var error: AlertItem? = nil
 
     public init(
         tryJoinRoomUseCase: TryJoinRoomUseCase,

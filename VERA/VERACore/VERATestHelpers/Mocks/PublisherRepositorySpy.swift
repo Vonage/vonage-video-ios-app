@@ -1,8 +1,5 @@
 //
-//  PublisherRepositorySpy.swift
-//  VERACoreTests
-//
-//  Created by Ivan Ornes on 4/11/25.
+//  Created by Vonage on 4/11/25.
 //
 
 import Foundation

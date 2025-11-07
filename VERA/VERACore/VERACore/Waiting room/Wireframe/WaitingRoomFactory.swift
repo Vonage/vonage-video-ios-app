@@ -23,6 +23,7 @@ public class WaitingRoomFactory {
         self.userRepository = userRepository
     }
 
+    @MainActor
     public func make(
         roomName: RoomName,
         onNavigateToRoom: @escaping (RoomName) -> Void

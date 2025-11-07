@@ -10,6 +10,7 @@ import VERATestHelpers
 
 @testable import VERACore
 
+@MainActor
 @Suite("Waiting room view model tests")
 struct WaitingRoomViewModelTests {
 

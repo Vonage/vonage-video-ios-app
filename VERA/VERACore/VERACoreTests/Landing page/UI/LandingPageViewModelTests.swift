@@ -8,6 +8,7 @@ import Testing
 import VERACore
 import VERATestHelpers
 
+@MainActor
 @Suite("Landing page view model tests")
 struct LandingPageViewModelTests {
 

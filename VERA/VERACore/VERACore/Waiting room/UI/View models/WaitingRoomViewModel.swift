@@ -14,12 +14,13 @@ public enum WaitingRoomViewState: Equatable {
     case content(WaitingRoomState)
 }
 
+@MainActor
 public final class WaitingRoomViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
     @Published public var userName: String = ""
-    @MainActor @Published public var error: AlertItem? = nil
+    @Published public var error: AlertItem? = nil
 
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
