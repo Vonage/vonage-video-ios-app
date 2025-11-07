@@ -29,7 +29,7 @@ public final class MockVERAPublisher: VERAPublisher {
         self.cameraPosition = cameraPosition
     }
 
-    public func routeTo(_ cameraDeviceID: String) async {
+    public func switchCamera(to cameraDeviceID: String) {
     }
 
     public func cleanUp() {

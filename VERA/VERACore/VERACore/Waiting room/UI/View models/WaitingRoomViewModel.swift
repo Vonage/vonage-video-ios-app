@@ -98,7 +98,7 @@ public final class WaitingRoomViewModel: ObservableObject {
                     }
                 }
             } catch {
-                Task { @MainActor [weak self] in
+                await MainActor.run { [weak self] in
                     self?.error = AlertItem.genericError(error.localizedDescription)
                 }
             }
@@ -151,9 +151,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "person.fill.viewfinder")
         device.onTap = { [weak self] in
-            Task {
-                await self?.publisher?.routeTo(device.id)
-            }
+            self?.publisher?.switchCamera(to: device.id)
         }
         return device
     }
@@ -164,9 +162,7 @@ public final class WaitingRoomViewModel: ObservableObject {
             name: device.name,
             iconName: "iphone.rear.camera")
         device.onTap = { [weak self] in
-            Task {
-                await self?.publisher?.routeTo(device.id)
-            }
+            self?.publisher?.switchCamera(to: device.id)
         }
         return device
     }

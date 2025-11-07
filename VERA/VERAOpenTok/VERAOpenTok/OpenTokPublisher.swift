@@ -60,8 +60,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         }
     }
 
-    @MainActor
-    public func routeTo(_ cameraDeviceID: String) async {
+    public func switchCamera(to cameraDeviceID: String) {
         switch cameraDeviceID {
         case OpenTokCameraDevice.front.rawValue:
             otPublisher.cameraPosition = .front

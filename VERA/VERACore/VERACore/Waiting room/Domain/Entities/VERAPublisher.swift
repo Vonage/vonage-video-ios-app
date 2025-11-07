@@ -14,7 +14,7 @@ public protocol VERAPublisher: AnyObject {
     var publishVideo: Bool { get set }
     var cameraPosition: CameraPosition { get set }
 
-    func routeTo(_ cameraDeviceID: String) async
+    func switchCamera(to cameraDeviceID: String)
 
     // Clean up resources
     func cleanUp()
