@@ -37,6 +37,9 @@ public final class OpenTokCall: CallFacade {
 
     public var plugins: [any OpenTokPlugin] = []
 
+    private var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
+    public lazy var callState: AnyPublisher<CallState, Never> = _callState.eraseToAnyPublisher()
+
     public init(
         credentials: RoomCredentials,
         session: OpenTokSession,
@@ -64,6 +67,7 @@ public final class OpenTokCall: CallFacade {
             self?.sessionDidFail(error)
         }
         session.onSessionDidConnect = { [weak self] in
+            self?.updateCallState(to: .connected)
             self?.publishToSession()
             self?.notifyCallDidStartToPlugins()
         }
@@ -78,6 +82,10 @@ public final class OpenTokCall: CallFacade {
             participants: state.participants,
             activeParticipantId: state.activeParticipantId
         )
+    }
+
+    private func updateCallState(to newState: CallState) {
+        _callState.value = newState
     }
 
     // MARK: Publisher
@@ -198,6 +206,7 @@ public final class OpenTokCall: CallFacade {
 
     public func connect() {
         do {
+            updateCallState(to: .connecting)
             try session.connect(with: credentials.token)
         } catch {
             _eventsPublisher.value = .error(error)
@@ -207,6 +216,10 @@ public final class OpenTokCall: CallFacade {
     var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
 
     public func disconnect() async throws {
+        guard !(_callState.value == .disconnecting) || !(_callState.value == .disconnected) else {
+            return
+        }
+        _callState.value = .disconnecting
         try await withCheckedThrowingContinuation { [weak self] continuation in
             self?.disconnectContinuation = continuation
             Task { @MainActor [weak self] in
@@ -261,6 +274,7 @@ public final class OpenTokCall: CallFacade {
             disconnectContinuation?.resume(throwing: error)
             disconnectContinuation = nil
         }
+        updateCallState(to: .disconnected)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {

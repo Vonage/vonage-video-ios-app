@@ -22,22 +22,27 @@ public struct MeetingRoomScreen: View {
     public var body: some View {
         VStack {
             if case .content(let state) = viewModel.state {
-                MeetingRoomView(
-                    state: state,
-                    actions: .init(
-                        onShare: { _ in },
-                        onRetry: {},
-                        onToggleMic: viewModel.onToggleMic,
-                        onToggleCamera: viewModel.onToggleCamera,
-                        onCameraSwitch: viewModel.onCameraSwitch,
-                        onEndCall: {
-                            viewModel.endCall()
-                            onBack()
-                        },
-                        onToggleParticipants: {},
-                        onToggleLayout: viewModel.onToggleLayout,
-                        onShowChat: onShowChat)
-                )
+                ZStack {
+                    MeetingRoomView(
+                        state: state,
+                        actions: .init(
+                            onShare: { _ in },
+                            onRetry: {},
+                            onToggleMic: viewModel.onToggleMic,
+                            onToggleCamera: viewModel.onToggleCamera,
+                            onCameraSwitch: viewModel.onCameraSwitch,
+                            onEndCall: {
+                                viewModel.endCall()
+                            },
+                            onToggleParticipants: {},
+                            onToggleLayout: viewModel.onToggleLayout,
+                            onShowChat: onShowChat)
+                    )
+
+                    if state.callState == .disconnecting {
+                        LoaderModalView()
+                    }
+                }
             }
 
             if case .loading = viewModel.state {
@@ -52,6 +57,10 @@ public struct MeetingRoomScreen: View {
                 dismissButton: .default(Text("OK")))
         }.onAppear {
             viewModel.loadUI()
+        }.onChange(of: viewModel.state) { newValue in
+            if case .content(let state) = newValue, state.callState == .disconnected {
+                onBack()
+            }
         }
     }
 }

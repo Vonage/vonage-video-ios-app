@@ -29,6 +29,7 @@ public struct MeetingRoomState: Equatable {
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
+    public let callState: CallState
 
     public var participantsCount: Int {
         participants.count
@@ -49,7 +50,8 @@ public struct MeetingRoomState: Equatable {
         unreadMessagesCount: Int = 0,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
-        showParticipantList: Bool
+        showParticipantList: Bool,
+        callState: CallState
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -63,6 +65,7 @@ public struct MeetingRoomState: Equatable {
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
+        self.callState = callState
     }
 
     public static let `default` = MeetingRoomState(
@@ -76,7 +79,8 @@ public struct MeetingRoomState: Equatable {
         showChatButton: AppConfig.meetingRoomSettings.allowChat,
         allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
+        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
+        callState: .idle)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -89,6 +93,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
+    private let callStatePublisher = CurrentValueSubject<CallState, Never>(CallState.idle)
 
     public weak var currentCall: CallFacade?
 
@@ -127,6 +132,12 @@ public final class MeetingRoomViewModel: ObservableObject {
                     }
                     .store(in: &cancellables)
 
+                call.callState
+                    .sink { [weak self] callState in
+                        self?.callStatePublisher.send(callState)
+                    }
+                    .store(in: &cancellables)
+
                 self.currentCall = call
             } catch {
                 await MainActor.run { [weak self] in
@@ -137,13 +148,14 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
-        Publishers.CombineLatest3(
+        Publishers.CombineLatest4(
             participantsPublisher
                 .removeDuplicates(),
             sessionStatePublisher,
-            layoutPublisher
+            layoutPublisher,
+            callStatePublisher
         )
-        .map { [weak self] participantsState, sessionState, layout in
+        .map { [weak self] participantsState, sessionState, layout, callState in
             guard let self else { return MeetingRoomState.default }
 
             var sortedPaticipants = participantsState.participants
@@ -179,7 +191,8 @@ public final class MeetingRoomViewModel: ObservableObject {
                 showChatButton: AppConfig.meetingRoomSettings.allowChat,
                 allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
+                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
+                callState: callState)
         }
         .removeDuplicates()
         .sink { [weak self] newState in

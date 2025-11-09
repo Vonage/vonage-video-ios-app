@@ -38,8 +38,7 @@ struct MeetingRoomViewModelTests {
             sessionRepository: sessionRepository,
             roomCredentialsRepository: makeMockRoomCredentialsRepository())
         let disconnectRoomUseCase = DisconnectRoomUseCase(
-            sessionRepository: sessionRepository,
-            publisherRepository: makeMockVERAPublisherRepository())
+            sessionRepository: sessionRepository)
 
         let sut = makeSUT(
             connectToRoomUseCase: connectToRoomUseCase,
@@ -119,7 +118,5 @@ func makeMockConnectToRoomUseCase() -> ConnectToRoomUseCase {
 }
 
 func makeMockDisconnectRoomUseCase() -> DisconnectRoomUseCase {
-    .init(
-        sessionRepository: makeMockSessionRepository(),
-        publisherRepository: makeMockVERAPublisherRepository())
+    .init(sessionRepository: makeMockSessionRepository())
 }

@@ -243,6 +243,7 @@ public struct MeetingRoomView: View {
             showChatButton: true,
             allowMicrophoneControl: true,
             allowCameraControl: true,
-            showParticipantList: true),
+            showParticipantList: true,
+            callState: .connected),
         actions: .init())
 }

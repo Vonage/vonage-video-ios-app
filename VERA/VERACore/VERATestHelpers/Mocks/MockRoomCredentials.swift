@@ -9,10 +9,12 @@ public func makeMockCredentials(
     sessionId: String = "sessionId",
     token: String = "token",
     applicationId: String = "applicationId",
-    captionsId: String? = "captionsId"
+    captionsId: String? = "captionsId",
+    roomName: String = "aRoomName"
 ) -> RoomCredentials {
     RoomCredentials(
         sessionId: sessionId,
         token: token,
-        applicationId: "applicationId")
+        applicationId: "applicationId",
+        roomName: roomName)
 }

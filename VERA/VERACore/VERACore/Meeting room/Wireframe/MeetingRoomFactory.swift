@@ -36,9 +36,7 @@ public class MeetingRoomFactory {
             connectToRoomUseCase: .init(
                 sessionRepository: sessionRepository,
                 roomCredentialsRepository: roomCredentialsRepository),
-            disconnectRoomUseCase: .init(
-                sessionRepository: sessionRepository,
-                publisherRepository: publisherRepository),
+            disconnectRoomUseCase: .init(sessionRepository: sessionRepository),
             currentCallParticipantsRepository: currentCallParticipantsRepository)
         return MeetingRoomScreen(
             viewModel: viewModel,

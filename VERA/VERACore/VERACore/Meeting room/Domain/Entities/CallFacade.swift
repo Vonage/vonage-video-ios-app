@@ -28,6 +28,14 @@ public struct ParticipantsState: Equatable {
     }
 }
 
+public enum CallState {
+    case idle
+    case connected
+    case connecting
+    case disconnecting
+    case disconnected
+}
+
 public protocol ParticipantsPublisherProvider: AnyObject {
     var participantsPublisher: AnyPublisher<ParticipantsState, Never> { get }
 }
@@ -38,6 +46,10 @@ public protocol EventsPublisherProvider: AnyObject {
 
 public protocol SessionStatePublisherProvider: AnyObject {
     var statePublisher: AnyPublisher<SessionState, Never> { get }
+}
+
+public protocol CallStatePublisherProvider: AnyObject {
+    var callState: AnyPublisher<CallState, Never> { get }
 }
 
 public protocol CallConnectable: AnyObject {
@@ -53,4 +65,4 @@ public protocol MediaToggleable: AnyObject {
 
 public typealias CallFacade =
     ParticipantsPublisherProvider & EventsPublisherProvider & SessionStatePublisherProvider & CallConnectable
-    & MediaToggleable
+    & MediaToggleable & CallStatePublisherProvider
