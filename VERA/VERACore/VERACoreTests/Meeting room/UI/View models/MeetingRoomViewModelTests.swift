@@ -54,10 +54,11 @@ struct MeetingRoomViewModelTests {
 
         sut.endCall()
 
+        let call = sessionRepository.currentCall as! MockCall
+
         await delay()
 
-        #expect(sessionRepository.currentCall == nil)
-        #expect(sut.currentCall == nil)
+        #expect(call.recordedActions == [.connect, .disconnect])
     }
 
     // MARK: SUT

@@ -15,15 +15,14 @@ struct DisconnectRoomUseCaseTests {
         let sessionRepository = makeMockSessionRepository()
         let sut = DisconnectRoomUseCase(sessionRepository: sessionRepository)
 
-        sessionRepository.currentCall = MockCall()
+        let currentCall = MockCall()
+        sessionRepository.currentCall = currentCall
 
         #expect(sessionRepository.currentCall != nil)
 
         try await sut()
 
-        let state = await sessionRepository.currentCall?.callState.values.first { $0 == .disconnected }
-
-        #expect(sessionRepository.currentCall == nil)
+        #expect(currentCall.recordedActions == [.disconnect])
     }
 
     // MARK: - Test Helpers
