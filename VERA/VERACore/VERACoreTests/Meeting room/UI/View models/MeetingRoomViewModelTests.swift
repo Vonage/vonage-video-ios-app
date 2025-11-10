@@ -23,17 +23,9 @@ struct MeetingRoomViewModelTests {
         let sut = makeSUT()
         sut.loadUI()
 
-        let state = await sut.$state.values.first { state in
-            if case .content = state {
-                return true
-            }
-            return false
-        }
-
-        guard case .content(let contentState) = state else {
-            Issue.record("State did not become .content")
-            return
-        }
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -58,17 +50,9 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let state = await sut.$state.values.first { state in
-            if case .content = state {
-                return true
-            }
-            return false
-        }
-
-        guard case .content(let contentState) = state else {
-            Issue.record("State did not become .content")
-            return
-        }
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -114,4 +98,11 @@ func makeMockDisconnectRoomUseCase() -> DisconnectRoomUseCase {
     .init(
         sessionRepository: makeMockSessionRepository(),
         publisherRepository: makeMockVERAPublisherRepository())
+}
+
+extension MeetingRoomViewState {
+    fileprivate var contentState: MeetingRoomState? {
+        if case .content(let state) = self { return state }
+        return nil
+    }
 }
