@@ -7,15 +7,19 @@ import OpenTok
 import VERACore
 import VERAOpenTok
 
-class MockPublisherRepository: PublisherRepository {
+public class MockPublisherRepository: PublisherRepository {
 
-    func getPublisher() -> any VERACore.VERAPublisher {
+    public func getPublisher() -> any VERACore.VERAPublisher {
         OpenTokPublisher(publisher: OTPublisher(delegate: nil)!)
     }
 
-    func resetPublisher() {
+    public func resetPublisher() {
     }
 
-    func recreatePublisher(_ settings: VERACore.PublisherSettings) {
+    public func recreatePublisher(_ settings: VERACore.PublisherSettings) {
     }
+}
+
+public func makeMockPublisherRepository() -> MockPublisherRepository {
+    .init()
 }

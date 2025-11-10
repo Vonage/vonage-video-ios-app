@@ -39,8 +39,13 @@ public struct WaitingRoomScreen: View {
                 await viewModel.checkPermissions()
             }.onAppear {
                 viewModel.loadUI()
+            }.alert(item: $viewModel.error) { alertItem in
+                Alert(
+                    title: Text(alertItem.title),
+                    message: Text(alertItem.message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
-        case .error(let error): Text(error)
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

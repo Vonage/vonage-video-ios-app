@@ -21,14 +21,6 @@ final class DependencyContainer {
 
     lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
 
-    lazy var audioDevicesRepository: any AudioDevicesRepository = {
-        let repository = AVFoundationAudioDevicesRepository(
-            audioSession: AVAudioSession.sharedInstance()
-        )
-        repository.loadAudioDevices()
-        return repository
-    }()
-
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
         let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
         repository.loadCameraDevices()
@@ -52,7 +44,6 @@ final class DependencyContainer {
     lazy var waitingRoomFactory = WaitingRoomFactory(
         publisherRepository: publisherRepository,
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-        audioDevicesRepository: audioDevicesRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository)
 

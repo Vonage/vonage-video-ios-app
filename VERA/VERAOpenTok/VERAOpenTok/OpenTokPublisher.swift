@@ -60,6 +60,17 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         }
     }
 
+    public func switchCamera(to cameraDeviceID: String) {
+        switch cameraDeviceID {
+        case OpenTokCameraDevice.front.rawValue:
+            otPublisher.cameraPosition = .front
+        case OpenTokCameraDevice.back.rawValue:
+            otPublisher.cameraPosition = .back
+        default:
+            break
+        }
+    }
+
     public init(publisher: OTPublisher) {
         otPublisher = publisher
         participant = Participant(

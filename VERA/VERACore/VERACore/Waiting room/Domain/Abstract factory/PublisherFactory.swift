@@ -9,7 +9,7 @@ public enum VideoScaleBehavior: String, Equatable {
     case fit
 }
 
-public struct PublisherSettings {
+public struct PublisherSettings: Equatable {
     public let username: String
     public let publishAudio: Bool
     public let publishVideo: Bool

@@ -22,19 +22,6 @@ public final class OpenTokCameraDevicesRepository: CameraDevicesRepository {
         self.publisherRepository = publisherRepository
     }
 
-    @MainActor
-    public func routeTo(_ cameraDeviceID: String) async {
-        let publisher = publisherRepository.getPublisher()
-        switch cameraDeviceID {
-        case OpenTokCameraDevice.front.rawValue:
-            publisher.cameraPosition = .front
-        case OpenTokCameraDevice.back.rawValue:
-            publisher.cameraPosition = .back
-        default:
-            break
-        }
-    }
-
     public func loadCameraDevices() {
         _observeAvailableDevices.value = [
             VERACore.CameraDevice(

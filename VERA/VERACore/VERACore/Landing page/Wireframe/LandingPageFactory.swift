@@ -10,6 +10,7 @@ public class LandingPageFactory {
 
     public init() {}
 
+    @MainActor
     public func make(
         onNavigateToWaitingRoom: @escaping (String) -> Void
     ) -> some View {
