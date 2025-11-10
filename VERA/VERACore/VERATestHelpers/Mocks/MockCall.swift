@@ -28,6 +28,8 @@ public class MockCall: VERACore.CallFacade {
         case toggleLocalVideo
         case toggleLocalAudio
         case toggleLocalCamera
+        case muteLocalMedia
+        case setOnHold
     }
 
     public init() {}
@@ -50,5 +52,13 @@ public class MockCall: VERACore.CallFacade {
 
     public func toggleLocalCamera() {
         recordedActions.append(.toggleLocalCamera)
+    }
+
+    public func muteLocalMedia(_ isMuted: Bool) {
+        recordedActions.append(.muteLocalMedia)
+    }
+
+    public func setOnHold(_ isOnHold: Bool) {
+        recordedActions.append(.setOnHold)
     }
 }

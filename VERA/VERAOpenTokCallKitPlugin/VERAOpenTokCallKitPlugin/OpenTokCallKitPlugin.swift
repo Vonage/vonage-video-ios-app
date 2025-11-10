@@ -5,22 +5,21 @@
 import CallKit
 import Foundation
 import OpenTok
+import VERACore
 import VERAOpenTok
 
 public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder {
 
-    public var channel: (any VERAOpenTok.OpenTokSignalChannel)?
-    public var call: OpenTokCall?
+    public weak var call: VERACore.CallFacade?
 
-    lazy var callManager = VERACallManager()
-    lazy var sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
+    var callManager: VERACallManager!
+    var sessionManager: OTAudioSessionManager!
     var providerDelegate: ProviderDelegate?
     var currentCallID: UUID?
 
-    public init() {
-    }
+    public var pluginIdentifier: String { String(describing: type(of: self)) }
 
-    public func handleSignal(_ signal: VERAOpenTok.OpenTokSignal) {}
+    public init() {}
 
     public func callDidStart(_ userInfo: [String: Any]) {
         let roomName = userInfo[OpenTokCallParams.roomName.rawValue] as? String ?? ""
@@ -40,14 +39,18 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
         callManager.end(callID: currentCallID)
     }
 
-    func sendMessage(_ message: String) throws {
-    }
-
     public func setup() {
+        callManager = VERACallManager()
+        sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
         sessionManager?.enableCallingServicesMode()
         providerDelegate = ProviderDelegate(sessionManager: sessionManager)
         providerDelegate?.onEndCall = { [weak self] in
             Task { [weak self] in
+                if self!.call != nil {
+                    print("Call is not nil")
+                } else {
+                    print("Call is nil")
+                }
                 try? await self?.call?.disconnect()
             }
         }
@@ -55,6 +58,12 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
             Task { [weak self] in
                 try? await self?.call?.disconnect()
             }
+        }
+        providerDelegate?.onHold = { [weak self] isOnHold in
+            self?.call?.setOnHold(isOnHold)
+        }
+        providerDelegate?.onMute = { [weak self] isMuted in
+            self?.call?.muteLocalMedia(isMuted)
         }
     }
 }

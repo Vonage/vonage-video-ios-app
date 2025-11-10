@@ -61,8 +61,13 @@ public protocol MediaToggleable: AnyObject {
     func toggleLocalVideo()
     func toggleLocalCamera()
     func toggleLocalAudio()
+    func muteLocalMedia(_ isMuted: Bool)
+}
+
+public protocol HoldeableCall: AnyObject {
+    func setOnHold(_ isOnHold: Bool)
 }
 
 public typealias CallFacade =
     ParticipantsPublisherProvider & EventsPublisherProvider & SessionStatePublisherProvider & CallConnectable
-    & MediaToggleable & CallStatePublisherProvider
+    & MediaToggleable & CallStatePublisherProvider & HoldeableCall

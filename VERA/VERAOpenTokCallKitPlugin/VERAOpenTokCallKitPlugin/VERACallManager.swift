@@ -8,7 +8,7 @@
 import CallKit
 import Foundation
 
-final class VERACallManager {
+open class VERACallManager {
 
     enum Call: String {
         case start = "startCall"
@@ -18,12 +18,14 @@ final class VERACallManager {
 
     let callController = CXCallController()
 
+    public init() {
+    }
+
     // MARK: Actions
 
-    func startCall(handle: String, callID: UUID) {
+    open func startCall(handle: String, callID: UUID) {
         let handle = CXHandle(type: .phoneNumber, value: handle)
         let startCallAction = CXStartCallAction(call: callID, handle: handle)
-
         startCallAction.isVideo = true
 
         let transaction = CXTransaction()
@@ -32,7 +34,7 @@ final class VERACallManager {
         requestTransaction(transaction, action: Call.start.rawValue)
     }
 
-    func end(callID: UUID) {
+    open func end(callID: UUID) {
         let endCallAction = CXEndCallAction(call: callID)
         let transaction = CXTransaction()
         transaction.addAction(endCallAction)
@@ -40,7 +42,7 @@ final class VERACallManager {
         requestTransaction(transaction, action: Call.end.rawValue)
     }
 
-    func setHeld(callID: UUID, onHold: Bool) {
+    open func setHeld(callID: UUID, onHold: Bool) {
         let setHeldCallAction = CXSetHeldCallAction(call: callID, onHold: onHold)
         let transaction = CXTransaction()
         transaction.addAction(setHeldCallAction)

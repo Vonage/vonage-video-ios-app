@@ -66,7 +66,7 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
         // we can't configure the audio session here for the case of launching it from locked screen
         // instead, we have to pre-heat the AVAudioSession by configuring as early as possible, didActivate do not get called otherwise
         // please look for  * pre-heat the AVAudioSession *
-        sessionManager?.preconfigureAudioSessionForCall(withMode: .voiceChat)
+        sessionManager?.preconfigureAudioSessionForCall(withMode: .videoChat)
 
         action.fulfill()
     }

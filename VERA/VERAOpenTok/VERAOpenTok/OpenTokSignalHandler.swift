@@ -3,12 +3,13 @@
 //
 
 import Foundation
+import VERACore
 
 public protocol OpenTokSignalHandler {
     func handleSignal(_ signal: OpenTokSignal)
 }
 
-public protocol OpenTokSignalChannel {
+public protocol OpenTokSignalChannel: AnyObject {
     func emitSignal(_ signal: OutgoingSignal) throws
 }
 
@@ -22,8 +23,12 @@ public protocol OpenTokPluginCallLifeCycle {
     func callDidEnd()
 }
 
-public protocol OpenTokPluginCallHolder {
-    var call: OpenTokCall? { get set }
+public protocol OpenTokPluginCallHolder: AnyObject {
+    var call: VERACore.CallFacade? { get set }
 }
 
-public typealias OpenTokPlugin = OpenTokSignalHandler & OpenTokSignalEmitter & OpenTokPluginCallLifeCycle & Identifiable
+public protocol OpenTokPluginID {
+    var pluginIdentifier: String { get }
+}
+
+public typealias OpenTokPlugin = OpenTokPluginCallLifeCycle & OpenTokPluginID

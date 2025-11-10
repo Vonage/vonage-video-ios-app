@@ -26,6 +26,8 @@ public class OpenTokSubscriber: NSObject {
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
+    @Published public private(set) var wasSubscribedToVideo: Bool = false
+    @Published public private(set) var wasSubscribedToAudio: Bool = false
 
     private var reinforcementTask: Task<Void, Never>?
 
@@ -122,6 +124,18 @@ public class OpenTokSubscriber: NSObject {
         guard subscriberDidConnect else { return }
 
         otSubscriber.subscribeToVideo = visible
+    }
+
+    public func setOnHold(_ isOnHold: Bool) {
+        if isOnHold {
+            wasSubscribedToAudio = otSubscriber.subscribeToAudio
+            wasSubscribedToVideo = otSubscriber.subscribeToVideo
+            otSubscriber.subscribeToAudio = false
+            otSubscriber.subscribeToVideo = false
+        } else {
+            otSubscriber.subscribeToAudio = wasSubscribedToAudio
+            otSubscriber.subscribeToVideo = wasSubscribedToVideo
+        }
     }
 
     func cleanUp() {

@@ -13,7 +13,7 @@ public final class OpenTokPluginRegistry {
     }
 
     public func registerPlugin(plugin: any OpenTokPlugin) {
-        if !plugins.contains(where: { $0.id == plugin.id }) {
+        if !plugins.contains(where: { $0.pluginIdentifier == plugin.pluginIdentifier }) {
             plugins.append(plugin)
         }
     }

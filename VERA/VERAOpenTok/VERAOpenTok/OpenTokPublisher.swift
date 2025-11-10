@@ -24,6 +24,8 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var audioLevel: Float = 0.0
     @Published public private(set) var videoDimensions = VideoDimensions.default
     @Published public private(set) var participant: Participant
+    @Published public private(set) var wasPublishingVideo: Bool = false
+    @Published public private(set) var wasPublishingAudio: Bool = false
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
     public var hasSession: Bool { otPublisher.session != nil }
@@ -128,6 +130,18 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isScreenshare: isScreenshare,
             isPinned: isPinned,
             view: view)
+    }
+
+    public func setOnHold(_ isOnHold: Bool) {
+        if isOnHold {
+            wasPublishingAudio = otPublisher.publishAudio
+            wasPublishingVideo = otPublisher.publishVideo
+            otPublisher.publishAudio = false
+            otPublisher.publishVideo = false
+        } else {
+            otPublisher.publishAudio = wasPublishingAudio
+            otPublisher.publishVideo = wasPublishingVideo
+        }
     }
 
     public func cleanUp() {

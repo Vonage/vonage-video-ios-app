@@ -305,6 +305,22 @@ public final class OpenTokCall: CallFacade {
             isPublishingVideo: publisher.publishVideo)
     }
 
+    public func setOnHold(_ isOnHold: Bool) {
+        Task { [weak self] in
+            guard let self else { return }
+            self.publisher.setOnHold(isOnHold)
+            await self.callStateManager.setOnHold(isOnHold)
+        }
+    }
+
+    public func muteLocalMedia(_ isMuted: Bool) {
+        Task { [weak self] in
+            guard let self else { return }
+            self.publisher.publishAudio = !isMuted
+            self.publisher.publishVideo = !isMuted
+        }
+    }
+
     // MARK: Signals
 
     private var callParams: [String: String] {
@@ -319,8 +335,11 @@ public final class OpenTokCall: CallFacade {
         self.plugins = plugins
 
         plugins.forEach {
-            $0.channel = session
-            if var callHolder = $0 as? OpenTokPluginCallHolder {
+            if let channelHolder = $0 as? OpenTokSignalEmitter {
+                channelHolder.channel = session
+            }
+
+            if let callHolder = $0 as? OpenTokPluginCallHolder {
                 callHolder.call = self
             }
         }
@@ -328,8 +347,11 @@ public final class OpenTokCall: CallFacade {
 
     private func unassignPlugins() {
         plugins.forEach {
-            $0.channel = nil
-            if var callHolder = $0 as? OpenTokPluginCallHolder {
+            if let channelHolder = $0 as? OpenTokSignalEmitter {
+                channelHolder.channel = nil
+            }
+
+            if let callHolder = $0 as? OpenTokPluginCallHolder {
                 callHolder.call = nil
             }
         }
@@ -346,6 +368,10 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func handleSignal(_ signal: OpenTokSignal) {
-        plugins.forEach { $0.handleSignal(signal) }
+        plugins.forEach {
+            if let plugin = $0 as? OpenTokSignalHandler {
+                plugin.handleSignal(signal)
+            }
+        }
     }
 }
