@@ -1,8 +1,5 @@
 //
-//  MockConnectToRoomUseCase.swift
-//  VERATestHelpers
-//
-//  Created by Ivan Ornes on 11/11/25.
+//  Created by Vonage on 11/11/25.
 //
 
 import Foundation
