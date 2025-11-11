@@ -26,6 +26,8 @@ struct MeetingRoomViewModelTests {
             roomName: roomName,
             connectToRoomUseCase: connectToRoomUseCase)
 
+        #expect(sut.state == .loading)
+
         sut.loadUI()
 
         let contentState = await sut.$state.values
@@ -48,6 +50,8 @@ struct MeetingRoomViewModelTests {
         let sut = makeSUT(
             roomName: roomName,
             connectToRoomUseCase: connectToRoomUseCase)
+
+        #expect(sut.state == .loading)
 
         sut.loadUI()
         sut.loadUI()
