@@ -4,7 +4,11 @@
 
 import Foundation
 
-public final class DisconnectRoomUseCase {
+public protocol DisconnectRoomUseCase {
+    func callAsFunction() async throws
+}
+
+public final class DefaultDisconnectRoomUseCase: DisconnectRoomUseCase {
 
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository

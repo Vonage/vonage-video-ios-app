@@ -20,12 +20,43 @@ struct MeetingRoomViewModelTests {
     @Test
     @MainActor
     func loadUI_loadsACall() async throws {
-        let sut = makeSUT()
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let roomName = "heart-of-gold"
+        let sut = makeSUT(
+            roomName: roomName,
+            connectToRoomUseCase: connectToRoomUseCase)
+
         sut.loadUI()
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
             .first(where: { _ in true })!
+
+        #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
+
+        #expect(sut.currentCall != nil)
+        #expect(contentState.isMicEnabled == false)
+        #expect(contentState.isCameraEnabled == false)
+        #expect(contentState.participantsCount == 0)
+    }
+
+    @Test
+    @MainActor
+    func callingLoadUITwiceDoesNotConnectTwoRooms() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let roomName = "heart-of-gold"
+        let sut = makeSUT(
+            roomName: roomName,
+            connectToRoomUseCase: connectToRoomUseCase)
+
+        sut.loadUI()
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -37,10 +68,10 @@ struct MeetingRoomViewModelTests {
     @MainActor
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
-        let connectToRoomUseCase = ConnectToRoomUseCase(
+        let connectToRoomUseCase = DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
             roomCredentialsRepository: makeMockRoomCredentialsRepository())
-        let disconnectRoomUseCase = DisconnectRoomUseCase(
+        let disconnectRoomUseCase = DefaultDisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())
 
@@ -84,20 +115,6 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository)
     }
-}
-
-// MARK: - Mocks
-
-func makeMockConnectToRoomUseCase() -> ConnectToRoomUseCase {
-    .init(
-        sessionRepository: makeMockSessionRepository(),
-        roomCredentialsRepository: makeMockRoomCredentialsRepository())
-}
-
-func makeMockDisconnectRoomUseCase() -> DisconnectRoomUseCase {
-    .init(
-        sessionRepository: makeMockSessionRepository(),
-        publisherRepository: makeMockVERAPublisherRepository())
 }
 
 extension MeetingRoomViewState {

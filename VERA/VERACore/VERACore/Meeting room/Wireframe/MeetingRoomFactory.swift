@@ -33,10 +33,10 @@ public class MeetingRoomFactory {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
             baseURL: baseURL,
-            connectToRoomUseCase: .init(
+            connectToRoomUseCase: DefaultConnectToRoomUseCase(
                 sessionRepository: sessionRepository,
                 roomCredentialsRepository: roomCredentialsRepository),
-            disconnectRoomUseCase: .init(
+            disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
                 sessionRepository: sessionRepository,
                 publisherRepository: publisherRepository),
             currentCallParticipantsRepository: currentCallParticipantsRepository)
