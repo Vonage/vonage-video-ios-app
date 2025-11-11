@@ -24,7 +24,7 @@ struct TryJoinRoomUseCaseTests {
         let sut = makeSUT()
 
         // Test that the use case throws the correct error type
-        #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
+        #expect(throws: DefaultTryJoinRoomUseCase.Error.invalidRoomName) {
             try sut("invalid room name")  // Spaces are invalid
         }
     }
@@ -33,7 +33,7 @@ struct TryJoinRoomUseCaseTests {
     func shouldThrowInvalidRoomNameErrorForEmptyString() throws {
         let sut = makeSUT()
 
-        #expect(throws: TryJoinRoomUseCase.Error.invalidRoomName) {
+        #expect(throws: DefaultTryJoinRoomUseCase.Error.invalidRoomName) {
             try sut("")
         }
     }
@@ -75,7 +75,7 @@ struct TryJoinRoomUseCaseTests {
         do {
             try sut("@invalid")
             #expect(Bool(false), "Should have thrown an error")
-        } catch let error as TryJoinRoomUseCase.Error {
+        } catch let error as DefaultTryJoinRoomUseCase.Error {
             #expect(error == .invalidRoomName)
         } catch {
             #expect(Bool(false), "Should have thrown TryJoinRoomUseCase.Error.invalidRoomName")
@@ -85,6 +85,6 @@ struct TryJoinRoomUseCaseTests {
     // MARK: - Helper
 
     private func makeSUT() -> TryJoinRoomUseCase {
-        TryJoinRoomUseCase()
+        DefaultTryJoinRoomUseCase()
     }
 }
