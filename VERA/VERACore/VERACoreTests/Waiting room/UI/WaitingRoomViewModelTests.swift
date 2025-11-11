@@ -89,6 +89,16 @@ struct WaitingRoomViewModelTests {
         }
     }
 
+    @Test("LoadUI can be called multiple times without side effects")
+    func loadUIIsIdempotent() async {
+        let sut = makeSUT()
+        
+        sut.loadUI()
+        sut.loadUI()
+        
+        #expect(sut.state != .loading)
+    }
+    
     // MARK: SUT
 
     func makeSUT(
