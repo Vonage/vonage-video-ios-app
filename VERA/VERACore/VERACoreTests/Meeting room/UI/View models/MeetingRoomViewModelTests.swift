@@ -118,6 +118,21 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func cameraSwitchNotifiesToCurrentCall() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = connectToRoomUseCase.call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        sut.currentCall = call
+
+        #expect(call.recordedActions == [])
+
+        sut.onCameraSwitch()
+
+        #expect(call.recordedActions == [.toggleLocalCamera])
+    }
+
+    @Test
+    @MainActor
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
