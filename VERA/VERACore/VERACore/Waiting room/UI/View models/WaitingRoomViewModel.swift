@@ -215,9 +215,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     func startVideoPreviewIfNeeded() {
         if checkCameraAuthorizationStatusUseCase() {
-            Task { [weak self] in
-                self?.startVideoPreview()
-            }
+            startVideoPreview()
         }
     }
 }
