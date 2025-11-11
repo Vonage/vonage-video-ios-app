@@ -194,6 +194,23 @@ struct MeetingRoomViewModelTests {
         #expect(sut.currentCall == nil)
     }
 
+    @Test
+    func checkRoomURL() async {
+        let url = URL(string: "https://example.com")!
+        let roomName = "heart-of-gold"
+        let sut = makeSUT(
+            roomName: roomName,
+            baseURL: url)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.roomURL == url.appendingPathComponent(roomName))
+    }
+
     // MARK: SUT
 
     func makeSUT(
