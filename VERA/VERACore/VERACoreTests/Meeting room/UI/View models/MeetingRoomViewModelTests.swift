@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERAConfiguration
 import VERACore
 import VERATestHelpers
 
@@ -211,6 +212,36 @@ struct MeetingRoomViewModelTests {
         #expect(contentState.roomURL == url.appendingPathComponent(roomName))
     }
 
+    @Test
+    func showChatURLIfActivatedInAppConfig() async {
+        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: true))
+
+        let sut = makeSUT(appConfig: appConfig)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.showChatButton == true)
+    }
+
+    @Test
+    func hideChatURLIfDeactivatedInAppConfig() async {
+        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: false))
+
+        let sut = makeSUT(appConfig: appConfig)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.showChatButton == false)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -219,14 +250,16 @@ struct MeetingRoomViewModelTests {
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
-            makeMockCurrentCallParticipantsRepository()
+            makeMockCurrentCallParticipantsRepository(),
+        appConfig: AppConfig = AppConfig()
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
             roomName: roomName,
             baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
-            currentCallParticipantsRepository: currentCallParticipantsRepository)
+            currentCallParticipantsRepository: currentCallParticipantsRepository,
+            appConfig: appConfig)
     }
 }
 

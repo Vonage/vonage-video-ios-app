@@ -27,19 +27,22 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
+    private let appConfig: AppConfig
 
     public init(
         roomName: RoomName,
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
-        currentCallParticipantsRepository: CurrentCallParticipantsRepository
+        currentCallParticipantsRepository: CurrentCallParticipantsRepository,
+        appConfig: AppConfig
     ) {
         self.roomName = roomName
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
+        self.appConfig = appConfig
     }
 
     public func loadUI() {
@@ -108,10 +111,10 @@ public final class MeetingRoomViewModel: ObservableObject {
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,
-                showChatButton: AppConfig.meetingRoomSettings.allowChat,
-                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
+                showChatButton: appConfig.meetingRoomSettings.allowChat,
+                allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: appConfig.videoSettings.allowCameraControl,
+                showParticipantList: appConfig.meetingRoomSettings.showParticipantList)
         }
         .removeDuplicates()
         .sink { [weak self] newState in
