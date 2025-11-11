@@ -88,6 +88,35 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func initialLayoutIsActiveSpeaker() async throws {
+        let sut = makeSUT()
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.layout == .activeSpeaker)
+    }
+
+    @Test
+    @MainActor
+    func layoutToggleSwitchesToGridLayout() async throws {
+        let sut = makeSUT()
+
+        sut.loadUI()
+        sut.onToggleLayout()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.layout == .grid)
+    }
+
+    @Test
+    @MainActor
     func toggleMicNotifiesToCurrentCall() async throws {
         let connectToRoomUseCase = makeMockConnectToRoomUseCase()
         let call = connectToRoomUseCase.call
