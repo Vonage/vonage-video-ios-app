@@ -19,7 +19,7 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public var recordedActions: [Actions] = []
 
-    var call = MockCall()
+    public var call = MockCall()
 
     public func callAsFunction(
         roomName: VERACore.RoomName
