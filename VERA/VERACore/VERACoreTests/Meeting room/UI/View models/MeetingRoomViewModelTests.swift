@@ -216,13 +216,7 @@ struct MeetingRoomViewModelTests {
     func showChatURLIfActivatedInAppConfig() async {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: true))
 
-        let sut = makeSUT(appConfig: appConfig)
-
-        sut.loadUI()
-
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first(where: { _ in true })!
+        let contentState = await when(given: appConfig)
 
         #expect(contentState.showChatButton == true)
     }
@@ -231,15 +225,63 @@ struct MeetingRoomViewModelTests {
     func hideChatURLIfDeactivatedInAppConfig() async {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: false))
 
-        let sut = makeSUT(appConfig: appConfig)
-
-        sut.loadUI()
-
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first(where: { _ in true })!
+        let contentState = await when(given: appConfig)
 
         #expect(contentState.showChatButton == false)
+    }
+
+    @Test
+    func activateMicrophoneControlIfActivatedInAppConfig() async {
+        let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: true))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.allowMicrophoneControl == true)
+    }
+
+    @Test
+    func deactivateMicrophoneControlIfDeactivatedInAppConfig() async {
+        let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: false))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.allowMicrophoneControl == false)
+    }
+
+    @Test
+    func activateCameraControlIfActivatedInAppConfig() async {
+        let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: true))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.allowCameraControl == true)
+    }
+
+    @Test
+    func deactivateCameraControlIfDeactivatedInAppConfig() async {
+        let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: false))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.allowCameraControl == false)
+    }
+
+    @Test
+    func showParticipantListIfActivatedInAppConfig() async {
+        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: true))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.showParticipantList == true)
+    }
+
+    @Test
+    func hideParticipantListIfDeactivatedInAppConfig() async {
+        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: false))
+
+        let contentState = await when(given: appConfig)
+
+        #expect(contentState.showParticipantList == false)
     }
 
     // MARK: SUT
@@ -260,6 +302,20 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
+    }
+
+    // MARK: Helper
+
+    func when(given appConfig: AppConfig) async -> MeetingRoomState {
+        let sut = makeSUT(appConfig: appConfig)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        return contentState
     }
 }
 
