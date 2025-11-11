@@ -58,10 +58,10 @@ struct OpenTokCallKitPluginTests {
         let sut = makeSUT()
         let call = MockCall()
 
-        sut.call = call as! any VERACore.CallFacade
+        sut.call = call
 
         #expect(sut.call != nil)
-
+        
         sut.setup()
 
         sut.providerDelegate?.onEndCall?()
@@ -70,6 +70,7 @@ struct OpenTokCallKitPluginTests {
 
         #expect(call.recordedActions == [.disconnect])
     }
+
 
     // MARK: SUT
 
@@ -103,4 +104,8 @@ class VERACallManagerSpy: VERACallManager {
         recordedActions.append(.end(.init(callID: callID)))
         super.end(callID: callID)
     }
+}
+
+private func delay() async {
+    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 }

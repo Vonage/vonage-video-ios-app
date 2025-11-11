@@ -68,6 +68,11 @@ public protocol HoldeableCall: AnyObject {
     func setOnHold(_ isOnHold: Bool)
 }
 
-public typealias CallFacade =
-    ParticipantsPublisherProvider & EventsPublisherProvider & SessionStatePublisherProvider & CallConnectable
-    & MediaToggleable & CallStatePublisherProvider & HoldeableCall
+public protocol CallFacade: AnyObject,
+                            ParticipantsPublisherProvider,
+                            EventsPublisherProvider,
+                            SessionStatePublisherProvider,
+                            CallConnectable,
+                            MediaToggleable,
+                            CallStatePublisherProvider,
+                            HoldeableCall {}

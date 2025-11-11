@@ -7,6 +7,7 @@ import Foundation
 import VERACore
 
 public class MockCall: VERACore.CallFacade {
+    
     public let _eventsPublisher = CurrentValueSubject<VERACore.SessionEvent, Never>(.idle)
     public lazy var eventsPublisher: AnyPublisher<VERACore.SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
@@ -38,7 +39,7 @@ public class MockCall: VERACore.CallFacade {
         recordedActions.append(.connect)
     }
 
-    public func disconnect() {
+    public func disconnect() async throws {
         recordedActions.append(.disconnect)
     }
 

@@ -10,7 +10,7 @@ import VERAOpenTok
 
 public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder {
 
-    public weak var call: VERACore.CallFacade?
+    public weak var call: (any VERACore.CallFacade)?
 
     var callManager: VERACallManager!
     var sessionManager: OTAudioSessionManager!

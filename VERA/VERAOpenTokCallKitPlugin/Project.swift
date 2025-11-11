@@ -11,7 +11,8 @@ let project = Project(
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAOpenTokCallKitPlugin/**"],
             dependencies: [
-                .project(target: "VERAOpenTok", path: "../VERAOpenTok")
+                .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
+                .project(target: "VERACore", path: "../VERACore"),
             ]
         ),
         .target(
@@ -24,6 +25,8 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
                 .target(name: "VERAOpenTokCallKitPlugin"),
+                .project(target: "VERACore", path: "../VERACore"),
+                .project(target: "VERATestHelpers", path: "../VERACore")
             ]
         ),
     ],
