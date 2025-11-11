@@ -70,6 +70,24 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func callingLoadUICanFailAndShouldShowAnError() async throws {
+        let connectToRoomUseCase = makeFailingMockConnectToRoomUseCase()
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase)
+
+        #expect(sut.state == .loading)
+
+        sut.loadUI()
+
+        let error = await sut.$error.values
+            .first(where: { $0 != nil })!
+
+        #expect(sut.currentCall == nil)
+        #expect(error != nil)
+    }
+
+    @Test
+    @MainActor
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(

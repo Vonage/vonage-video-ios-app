@@ -28,3 +28,19 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
         return call
     }
 }
+
+public func makeFailingMockConnectToRoomUseCase() -> MockFailingConnectToRoomUseCase {
+    MockFailingConnectToRoomUseCase()
+}
+
+public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
+    public enum Error: Swift.Error {
+        case errorMock
+    }
+
+    public func callAsFunction(
+        roomName: VERACore.RoomName
+    ) async throws -> any VERACore.CallFacade {
+        throw Error.errorMock
+    }
+}
