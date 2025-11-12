@@ -21,3 +21,17 @@ public final class MockDisconnectRoomUseCase: DisconnectRoomUseCase {
         recordedActions.append(.disconnect)
     }
 }
+
+public func makeFailingMockDisconnectRoomUseCase() -> MockFailingDisconnectRoomUseCase {
+    MockFailingDisconnectRoomUseCase()
+}
+
+public final class MockFailingDisconnectRoomUseCase: DisconnectRoomUseCase {
+    public enum Error: Swift.Error {
+        case errorMock
+    }
+
+    public func callAsFunction() async throws {
+        throw Error.errorMock
+    }
+}

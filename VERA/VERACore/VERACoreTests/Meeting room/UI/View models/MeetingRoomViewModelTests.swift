@@ -196,6 +196,36 @@ struct MeetingRoomViewModelTests {
     }
 
     @Test
+    @MainActor
+    func endCallShowsErrorIfDisconnectCallFails() async throws {
+        let sessionRepository = makeMockSessionRepository()
+        let connectToRoomUseCase = DefaultConnectToRoomUseCase(
+            sessionRepository: sessionRepository,
+            roomCredentialsRepository: makeMockRoomCredentialsRepository())
+        let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            disconnectRoomUseCase: disconnectRoomUseCase
+        )
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(sut.currentCall != nil)
+
+        sut.endCall()
+
+        let error = await sut.$error.values
+            .first(where: { $0 != nil })!
+
+        #expect(sut.currentCall == nil)
+        #expect(error != nil)
+    }
+    
+    @Test
     func checkRoomURL() async {
         let url = URL(string: "https://example.com")!
         let roomName = "heart-of-gold"
