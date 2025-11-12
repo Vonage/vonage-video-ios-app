@@ -133,7 +133,7 @@ public struct MeetingRoomView: View {
                             }
                         }
                     }
-                }
+                }.tint(.white)
             #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
