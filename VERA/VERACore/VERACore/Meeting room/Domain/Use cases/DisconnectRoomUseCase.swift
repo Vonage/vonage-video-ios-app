@@ -4,7 +4,11 @@
 
 import Foundation
 
-public final class DisconnectRoomUseCase {
+public protocol DisconnectRoomUseCase {
+    func callAsFunction() async throws
+}
+
+public final class DefaultDisconnectRoomUseCase: DisconnectRoomUseCase {
 
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
@@ -18,8 +22,11 @@ public final class DisconnectRoomUseCase {
     }
 
     public func callAsFunction() async throws {
+        defer {
+            sessionRepository.clearSession()
+            publisherRepository.resetPublisher()
+        }
+
         try await sessionRepository.currentCall?.disconnect()
-        sessionRepository.clearSession()
-        publisherRepository.resetPublisher()
     }
 }

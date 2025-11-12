@@ -21,7 +21,7 @@ public final class OpenTokCall: CallFacade {
     private var _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(SessionEvent.idle)
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
-    public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
+    public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     public let id: UUID = UUID()

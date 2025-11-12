@@ -14,7 +14,8 @@ struct DisconnectRoomUseCaseTests {
     func disconnectsAndClearsSessionAndPublisher() async throws {
         let sessionRepository = makeMockSessionRepository()
         let publisherRepository = makeMockVERAPublisherRepository()
-        let sut = DisconnectRoomUseCase(
+
+        let sut = makeSUT(
             sessionRepository: sessionRepository,
             publisherRepository: publisherRepository)
 
@@ -33,7 +34,7 @@ struct DisconnectRoomUseCaseTests {
         sessionRepository: SessionRepository = makeMockSessionRepository(),
         publisherRepository: PublisherRepository = makeMockVERAPublisherRepository()
     ) -> DisconnectRoomUseCase {
-        DisconnectRoomUseCase(
+        DefaultDisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: publisherRepository)
     }

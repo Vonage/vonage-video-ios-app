@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import VERAConfiguration
 import VERACore
 import VERAOpenTok
 
@@ -20,6 +21,8 @@ final class DependencyContainer {
     lazy var jsonDecoder = JSONDecoder()
 
     lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
+
+    lazy var appConfig = AppConfig()
 
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
         let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
@@ -49,6 +52,7 @@ final class DependencyContainer {
 
     lazy var meetingRoomFactory = MeetingRoomFactory(
         baseURL: baseURL,
+        appConfig: appConfig,
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,

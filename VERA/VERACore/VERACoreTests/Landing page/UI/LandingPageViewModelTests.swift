@@ -124,10 +124,11 @@ struct LandingPageViewModelTests {
 
     // MARK: SUT
 
-    func makeSUT() -> LandingPageViewModel {
-        let roomNameGenerator = makeBasicRoomNameGenerator()
-        let tryJoinRoomUseCase = TryJoinRoomUseCase()
-        let tryCreatingANewRoomUseCase = TryCreatingANewRoomUseCase(roomNameGenerator: roomNameGenerator)
+    func makeSUT(
+        roomNameGenerator: RoomNameGenerator = makeBasicRoomNameGenerator(),
+        tryJoinRoomUseCase: TryJoinRoomUseCase = DefaultTryJoinRoomUseCase()
+    ) -> LandingPageViewModel {
+        let tryCreatingANewRoomUseCase = DefaultTryCreatingANewRoomUseCase(roomNameGenerator: roomNameGenerator)
         return LandingPageViewModel(
             tryJoinRoomUseCase: tryJoinRoomUseCase,
             tryCreatingANewRoomUseCase: tryCreatingANewRoomUseCase

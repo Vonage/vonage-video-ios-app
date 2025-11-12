@@ -5,78 +5,11 @@
 import Combine
 import Foundation
 import VERAConfiguration
-
-public typealias MeetingRoomError = String
+import VERADomain
 
 public enum MeetingRoomViewState: Equatable {
     case loading
     case content(MeetingRoomState)
-}
-
-public enum MeetingRoomLayout {
-    case activeSpeaker, grid
-}
-
-public struct MeetingRoomState: Equatable {
-
-    public let roomName: RoomName
-    public let roomURL: URL?
-    public let isMicEnabled: Bool
-    public let isCameraEnabled: Bool
-    public let allowMicrophoneControl: Bool
-    public let allowCameraControl: Bool
-    public let showParticipantList: Bool
-    public let participants: [Participant]
-    public let layout: MeetingRoomLayout
-    public let activeSpeakerId: String?
-
-    public var participantsCount: Int {
-        participants.count
-    }
-
-    public let showChatButton: Bool
-    public let unreadMessagesCount: Int
-
-    public init(
-        roomName: RoomName,
-        roomURL: URL?,
-        isMicEnabled: Bool,
-        isCameraEnabled: Bool,
-        participants: [Participant],
-        layout: MeetingRoomLayout,
-        activeSpeakerId: String?,
-        showChatButton: Bool,
-        unreadMessagesCount: Int = 0,
-        allowMicrophoneControl: Bool,
-        allowCameraControl: Bool,
-        showParticipantList: Bool
-    ) {
-        self.roomName = roomName
-        self.roomURL = roomURL
-        self.isMicEnabled = isMicEnabled
-        self.isCameraEnabled = isCameraEnabled
-        self.participants = participants
-        self.layout = layout
-        self.activeSpeakerId = activeSpeakerId
-        self.showChatButton = showChatButton
-        self.unreadMessagesCount = unreadMessagesCount
-        self.allowMicrophoneControl = allowMicrophoneControl
-        self.allowCameraControl = allowCameraControl
-        self.showParticipantList = showParticipantList
-    }
-
-    public static let `default` = MeetingRoomState(
-        roomName: "",
-        roomURL: nil,
-        isMicEnabled: false,
-        isCameraEnabled: false,
-        participants: [],
-        layout: .activeSpeaker,
-        activeSpeakerId: nil,
-        showChatButton: AppConfig.meetingRoomSettings.allowChat,
-        allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
-        allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
@@ -88,26 +21,29 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
-    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
+    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
 
     public weak var currentCall: CallFacade?
 
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
+    private let appConfig: AppConfig
 
     public init(
         roomName: RoomName,
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
-        currentCallParticipantsRepository: CurrentCallParticipantsRepository
+        currentCallParticipantsRepository: CurrentCallParticipantsRepository,
+        appConfig: AppConfig
     ) {
         self.roomName = roomName
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
+        self.appConfig = appConfig
     }
 
     public func loadUI() {
@@ -144,7 +80,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             layoutPublisher
         )
         .map { [weak self] participantsState, sessionState, layout in
-            guard let self else { return MeetingRoomState.default }
+            guard let self else { return MeetingRoomState.initial }
 
             var sortedPaticipants = participantsState.participants
             if layout == .activeSpeaker {
@@ -176,10 +112,10 @@ public final class MeetingRoomViewModel: ObservableObject {
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,
-                showChatButton: AppConfig.meetingRoomSettings.allowChat,
-                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-                showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
+                showChatButton: appConfig.meetingRoomSettings.allowChat,
+                allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: appConfig.videoSettings.allowCameraControl,
+                showParticipantList: appConfig.meetingRoomSettings.showParticipantList)
         }
         .removeDuplicates()
         .sink { [weak self] newState in
