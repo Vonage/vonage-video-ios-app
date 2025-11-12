@@ -9,7 +9,10 @@ let project = Project(
             product: .framework,
             bundleId: "com.vonage.VERAConfiguration",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            sources: ["VERAConfiguration/**"]
+            sources: ["VERAConfiguration/**"],
+            dependencies: [
+                .project(target: "VERADomain", path: "../VERADomain")
+            ]
         )
     ]
 )

@@ -31,6 +31,14 @@ def generate_app_config():
     def bool_str(val):
         return "true" if val else "false"
 
+    # Helper to convert layout mode string to enum case
+    def layout_mode(val):
+        layout_map = {
+            "activespeaker": ".activeSpeaker",
+            "grid": ".grid"
+        }
+        return layout_map.get(val.lower(), ".activeSpeaker")
+        
     # Generate Swift code
     swift_code = f'''//
 // AppConfig.swift
@@ -38,6 +46,7 @@ def generate_app_config():
 //
 
 import Foundation
+import VERADomain
 
 public struct AppConfig {{
     public struct VideoSettings {{
@@ -90,7 +99,7 @@ public struct AppConfig {{
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowScreenShare: Bool
-        public let defaultLayoutMode: String
+        public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
 
         public init(
@@ -100,7 +109,7 @@ public struct AppConfig {{
             allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
-            defaultLayoutMode: String = "{meeting['defaultLayoutMode']}",
+            defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
             showParticipantList: Bool = {bool_str(meeting['showParticipantList'])}
         ) {{
             self.allowArchiving = allowArchiving
@@ -142,7 +151,7 @@ public struct AppConfig {{
     with open(output_path, 'w') as f:
         f.write(swift_code)
     
-    print(f"✅ Generated AppConfig.swift with chat enabled: {meeting['allowChat']}")
+    print("✅ Generated AppConfig.swift")
 
 if __name__ == "__main__":
     generate_app_config()

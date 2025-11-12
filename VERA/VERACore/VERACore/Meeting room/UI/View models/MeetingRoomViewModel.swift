@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERAConfiguration
+import VERADomain
 
 public enum MeetingRoomViewState: Equatable {
     case loading

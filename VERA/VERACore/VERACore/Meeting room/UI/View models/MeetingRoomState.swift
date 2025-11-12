@@ -4,6 +4,7 @@
 
 import Foundation
 import VERAConfiguration
+import VERADomain
 
 public struct MeetingRoomState: Equatable {
 

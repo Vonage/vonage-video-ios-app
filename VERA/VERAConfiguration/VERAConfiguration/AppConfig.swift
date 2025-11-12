@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public struct AppConfig {
     public struct VideoSettings {
@@ -56,7 +57,7 @@ public struct AppConfig {
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowScreenShare: Bool
-        public let defaultLayoutMode: String
+        public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
 
         public init(
@@ -66,7 +67,7 @@ public struct AppConfig {
             allowDeviceSelection: Bool = true,
             allowEmojis: Bool = true,
             allowScreenShare: Bool = true,
-            defaultLayoutMode: String = "activespeaker",
+            defaultLayoutMode: MeetingRoomLayout = .activeSpeaker,
             showParticipantList: Bool = true
         ) {
             self.allowArchiving = allowArchiving

@@ -6,6 +6,7 @@ import Foundation
 import Testing
 import VERAConfiguration
 import VERACore
+import VERADomain
 import VERATestHelpers
 
 @Suite("MeetingRoomViewModel tests")
