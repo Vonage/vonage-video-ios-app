@@ -181,7 +181,11 @@ struct VideoPreviewView: View {
                             }
                         }
                     } label: {
-                        Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
+                        Label {
+                            Text(String(localized: "Camera", bundle: .veraCore))
+                        } icon: {
+                            VERACommonUIAsset.videoLine.swiftUIImage
+                        }
                     }
                 }
             }

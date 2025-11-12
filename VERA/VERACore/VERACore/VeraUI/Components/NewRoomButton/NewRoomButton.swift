@@ -14,7 +14,7 @@ struct NewRoomButton: View {
             onHandleNewRoom()
         } label: {
             HStack {
-                Image("video_call", bundle: .veraCore)
+                VERACommonUIAsset.faxAddSolid.swiftUIImage
                 Text("Create room", bundle: .veraCore)
             }
         }

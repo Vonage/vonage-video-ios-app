@@ -44,7 +44,7 @@ struct ChatPanelInput: View {
             .lineLimit(1...3)
 
             Button(action: sendMessage) {
-                Image(systemName: "paperplane.fill")
+                VERACommonUIAsset.messageSentSolid.swiftUIImage
                     .font(.title2)
                     .foregroundColor(
                         messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

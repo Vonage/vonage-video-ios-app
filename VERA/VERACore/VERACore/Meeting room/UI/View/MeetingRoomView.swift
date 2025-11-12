@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 public struct MeetingRoomView: View {
 
@@ -102,7 +103,7 @@ public struct MeetingRoomView: View {
                             onBottomBarInteraction()
                             actions.onEndCall()
                         } label: {
-                            Image(systemName: "arrow.left")
+                            VERACommonUIAsset.arrowBoldLeftLine.swiftUIImage
                         }
                     }
 
@@ -114,7 +115,7 @@ public struct MeetingRoomView: View {
                                     onBottomBarInteraction()
                                     actions.onCameraSwitch()
                                 } label: {
-                                    Image(systemName: "arrow.triangle.2.circlepath.camera")
+                                    VERACommonUIAsset.cameraSwitchLine.swiftUIImage
                                 }.disabled(!state.isCameraEnabled)
                             }
                         #endif
@@ -123,12 +124,12 @@ public struct MeetingRoomView: View {
                                 onBottomBarInteraction()
                                 actions.onToggleMic()
                             } label: {
-                                Image(systemName: "speaker.wave.2")
+                                VERACommonUIAsset.audioMidLine.swiftUIImage
                             }
                         }
                         if let roomURL = state.roomURL {
                             ShareLink(item: roomURL) {
-                                Image(systemName: "square.and.arrow.up")
+                                VERACommonUIAsset.shareLine.swiftUIImage
                             }
                         }
                     }

@@ -80,15 +80,18 @@ struct BottomBar: View {
         HStack {
             HStack(alignment: .center) {
                 if allowMicrophoneControl {
-                    ControlButton(
+                    ControlImageButton(
                         isActive: isMicEnabled,
-                        iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
+                        image: isMicEnabled
+                            ? VERACommonUIAsset.microphone2Solid.swiftUIImage
+                            : VERACommonUIAsset.micMuteSolid.swiftUIImage,
                         action: actions.onToggleMic)
                 }
                 if allowCameraControl {
-                    ControlButton(
+                    ControlImageButton(
                         isActive: isCameraEnabled,
-                        iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
+                        image: isCameraEnabled
+                            ? VERACommonUIAsset.videoSolid.swiftUIImage : VERACommonUIAsset.videoOffSolid.swiftUIImage,
                         action: actions.onToggleCamera)
                 }
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)

@@ -16,9 +16,9 @@ struct ChatBadgeButton: View {
     }
 
     var body: some View {
-        ControlButton(
+        ControlImageButton(
             isActive: true,
-            iconName: "message.fill",
+            image: VERACommonUIAsset.chat2Solid.swiftUIImage,
             action: onShowChat
         )
         .overlay(

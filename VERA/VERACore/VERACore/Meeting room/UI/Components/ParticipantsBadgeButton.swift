@@ -16,9 +16,9 @@ struct ParticipantsBadgeButton: View {
     }
 
     var body: some View {
-        ControlButton(
+        ControlImageButton(
             isActive: true,
-            iconName: "person.2.fill",
+            image: VERACommonUIAsset.group2Solid.swiftUIImage,
             action: onToggleParticipants
         )
         .overlay(
