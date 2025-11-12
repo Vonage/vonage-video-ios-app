@@ -23,7 +23,7 @@ jobs:
               - type: "header"
                 text:
                   type: "plain_text"
-                  text: ":tada: Version ${{ github.event.release.name }} of the Vonage Video Reference App Just Released!"
+                  text: ":tada: Version ${{ github.event.release.name }} of the Vonage Native iOS Video Reference App Just Released!"
               - type: "section"
                 text:
                   type: "mrkdwn"
