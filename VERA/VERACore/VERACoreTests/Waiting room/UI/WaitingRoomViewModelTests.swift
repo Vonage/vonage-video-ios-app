@@ -20,7 +20,7 @@ struct WaitingRoomViewModelTests {
     func initialStateShouldBeDefaultContent() {
         let sut = makeSUT()
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
     }
 
     @Test("Given initial room name, the content state should have the same room name")
@@ -44,7 +44,7 @@ struct WaitingRoomViewModelTests {
     func loadUIShouldNotLoadAvailableDevices() {
         let sut = makeSUT()
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
 
         sut.loadUI()
 
@@ -70,7 +70,7 @@ struct WaitingRoomViewModelTests {
             cameraDevicesRepository: cameraDevicesRepository
         )
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
 
         sut.loadUI()
 

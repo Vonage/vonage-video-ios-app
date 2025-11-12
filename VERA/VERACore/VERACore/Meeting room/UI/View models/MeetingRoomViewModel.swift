@@ -20,7 +20,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
-    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.default)
+    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
 
     public weak var currentCall: CallFacade?
 
@@ -79,7 +79,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             layoutPublisher
         )
         .map { [weak self] participantsState, sessionState, layout in
-            guard let self else { return MeetingRoomState.default }
+            guard let self else { return MeetingRoomState.initial }
 
             var sortedPaticipants = participantsState.participants
             if layout == .activeSpeaker {

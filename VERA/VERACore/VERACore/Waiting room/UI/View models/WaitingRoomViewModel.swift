@@ -18,7 +18,7 @@ public enum WaitingRoomViewState: Equatable {
 public final class WaitingRoomViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.default)
+    @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
     @Published public var error: AlertItem? = nil
 

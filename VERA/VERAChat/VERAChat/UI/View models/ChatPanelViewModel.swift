@@ -8,7 +8,7 @@ import Foundation
 public struct ChatPanelState: Equatable {
     public let messages: [UIChatMessage]
 
-    public static let `default` = ChatPanelState(messages: [])
+    public static let initial = ChatPanelState(messages: [])
 
     public init(messages: [UIChatMessage] = []) {
         self.messages = messages

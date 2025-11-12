@@ -53,7 +53,7 @@ public struct MeetingRoomState: Equatable {
         self.showParticipantList = showParticipantList
     }
 
-    public static let `default` = MeetingRoomState(
+    public static let initial = MeetingRoomState(
         roomName: "",
         roomURL: nil,
         isMicEnabled: false,

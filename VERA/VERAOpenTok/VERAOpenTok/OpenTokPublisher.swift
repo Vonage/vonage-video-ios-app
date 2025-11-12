@@ -22,7 +22,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
-    @Published public private(set) var videoDimensions = VideoDimensions.default
+    @Published public private(set) var videoDimensions = VideoDimensions.initial
     @Published public private(set) var participant: Participant
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -78,7 +78,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             name: publisher.stream?.name ?? "",
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,
-            videoDimensions: VideoDimensions.default,
+            videoDimensions: VideoDimensions.initial,
             isRemote: false,
             creationTime: date,
             isScreenshare: false,
