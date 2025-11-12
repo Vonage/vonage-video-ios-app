@@ -22,8 +22,13 @@ public final class MockDisconnectRoomUseCase: DisconnectRoomUseCase {
     }
 }
 
-public func makeFailingMockDisconnectRoomUseCase() -> MockFailingDisconnectRoomUseCase {
-    MockFailingDisconnectRoomUseCase()
+public func makeFailingMockDisconnectRoomUseCase(
+    sessionRepository: SessionRepository,
+    publisherRepository: PublisherRepository
+) -> MockFailingDisconnectRoomUseCase {
+    MockFailingDisconnectRoomUseCase(
+        sessionRepository: sessionRepository,
+        publisherRepository: publisherRepository)
 }
 
 public final class MockFailingDisconnectRoomUseCase: DisconnectRoomUseCase {
@@ -31,7 +36,23 @@ public final class MockFailingDisconnectRoomUseCase: DisconnectRoomUseCase {
         case errorMock
     }
 
+    private let sessionRepository: SessionRepository
+    private let publisherRepository: PublisherRepository
+
+    public init(
+        sessionRepository: SessionRepository,
+        publisherRepository: PublisherRepository
+    ) {
+        self.sessionRepository = sessionRepository
+        self.publisherRepository = publisherRepository
+    }
+
     public func callAsFunction() async throws {
+        defer {
+            sessionRepository.clearSession()
+            publisherRepository.resetPublisher()
+        }
+
         throw Error.errorMock
     }
 }

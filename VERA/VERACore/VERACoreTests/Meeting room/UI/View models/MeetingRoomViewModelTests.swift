@@ -202,7 +202,9 @@ struct MeetingRoomViewModelTests {
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
             roomCredentialsRepository: makeMockRoomCredentialsRepository())
-        let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase()
+        let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase(
+            sessionRepository: sessionRepository,
+            publisherRepository: makeMockVERAPublisherRepository())
 
         let sut = makeSUT(
             connectToRoomUseCase: connectToRoomUseCase,
@@ -210,7 +212,7 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let contentState = await sut.$state.values
+        let _ = await sut.$state.values
             .compactMap(\.contentState)
             .first(where: { _ in true })!
 
@@ -224,7 +226,7 @@ struct MeetingRoomViewModelTests {
         #expect(sut.currentCall == nil)
         #expect(error != nil)
     }
-    
+
     @Test
     func checkRoomURL() async {
         let url = URL(string: "https://example.com")!
