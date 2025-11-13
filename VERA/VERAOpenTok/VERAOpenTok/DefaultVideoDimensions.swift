@@ -5,5 +5,5 @@
 import Foundation
 
 struct VideoDimensions {
-    static let `default` = CGSize.init(width: 640, height: 480)
+    static let initial = CGSize(width: 640, height: 480)
 }

@@ -38,7 +38,7 @@ struct ConnectToRoomUseCaseTestsTests {
         roomCredentialsRepository: RoomCredentialsRepository = makeMockRoomCredentialsRepository(),
         sessionRepository: SessionRepository = makeMockSessionRepository()
     ) -> ConnectToRoomUseCase {
-        return ConnectToRoomUseCase(
+        return DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
             roomCredentialsRepository: roomCredentialsRepository)
     }

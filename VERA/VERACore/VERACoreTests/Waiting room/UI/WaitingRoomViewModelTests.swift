@@ -20,7 +20,7 @@ struct WaitingRoomViewModelTests {
     func initialStateShouldBeDefaultContent() {
         let sut = makeSUT()
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
     }
 
     @Test("Given initial room name, the content state should have the same room name")
@@ -44,7 +44,7 @@ struct WaitingRoomViewModelTests {
     func loadUIShouldNotLoadAvailableDevices() {
         let sut = makeSUT()
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
 
         sut.loadUI()
 
@@ -70,7 +70,7 @@ struct WaitingRoomViewModelTests {
             cameraDevicesRepository: cameraDevicesRepository
         )
 
-        #expect(sut.state == .content(WaitingRoomState.default))
+        #expect(sut.state == .content(WaitingRoomState.initial))
 
         sut.loadUI()
 
@@ -87,6 +87,16 @@ struct WaitingRoomViewModelTests {
         default:
             Issue.record("Expected non empty cameras, got: \(sut.state)")
         }
+    }
+
+    @Test("LoadUI can be called multiple times without side effects")
+    func loadUIIsIdempotent() async {
+        let sut = makeSUT()
+
+        sut.loadUI()
+        sut.loadUI()
+
+        #expect(sut.state != .loading)
     }
 
     // MARK: SUT

@@ -37,7 +37,7 @@ struct ChatPanelViewModelTests {
             return false
         }
 
-        #expect(value == .content(.default))
+        #expect(value == .content(.initial))
     }
 
     @Test func callToLoadDataWithMessagesChangesStateToContent() async {

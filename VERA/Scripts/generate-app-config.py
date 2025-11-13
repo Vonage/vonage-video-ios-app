@@ -27,6 +27,18 @@ def generate_app_config():
     waiting = config['waitingRoomSettings']
     meeting = config['meetingRoomSettings']
 
+    # Helper to convert bool to Swift
+    def bool_str(val):
+        return "true" if val else "false"
+
+    # Helper to convert layout mode string to enum case
+    def layout_mode(val):
+        layout_map = {
+            "activespeaker": ".activeSpeaker",
+            "grid": ".grid"
+        }
+        return layout_map.get(val.lower(), ".activeSpeaker")
+        
     # Generate Swift code
     swift_code = f'''//
 // AppConfig.swift
@@ -34,40 +46,104 @@ def generate_app_config():
 //
 
 import Foundation
+import VERADomain
 
 public struct AppConfig {{
     public struct VideoSettings {{
-        public let allowBackgroundEffects: Bool = {str(video['allowBackgroundEffects']).lower()}
-        public let allowCameraControl: Bool = {str(video['allowCameraControl']).lower()}
-        public let allowVideoOnJoin: Bool = {str(video['allowVideoOnJoin']).lower()}
-        public let defaultResolution: String = "{video['defaultResolution']}"
+        public let allowBackgroundEffects: Bool
+        public let allowCameraControl: Bool
+        public let allowVideoOnJoin: Bool
+        public let defaultResolution: String
+
+        public init(
+            allowBackgroundEffects: Bool = {bool_str(video['allowBackgroundEffects'])},
+            allowCameraControl: Bool = {bool_str(video['allowCameraControl'])},
+            allowVideoOnJoin: Bool = {bool_str(video['allowVideoOnJoin'])},
+            defaultResolution: String = "{video['defaultResolution']}"
+        ) {{
+            self.allowBackgroundEffects = allowBackgroundEffects
+            self.allowCameraControl = allowCameraControl
+            self.allowVideoOnJoin = allowVideoOnJoin
+            self.defaultResolution = defaultResolution
+        }}
     }}
-    
+
     public struct AudioSettings {{
-        public let allowAdvancedNoiseSuppression: Bool = {str(audio['allowAdvancedNoiseSuppression']).lower()}
-        public let allowAudioOnJoin: Bool = {str(audio['allowAudioOnJoin']).lower()}
-        public let allowMicrophoneControl: Bool = {str(audio['allowMicrophoneControl']).lower()}
+        public let allowAdvancedNoiseSuppression: Bool
+        public let allowAudioOnJoin: Bool
+        public let allowMicrophoneControl: Bool
+
+        public init(
+            allowAdvancedNoiseSuppression: Bool = {bool_str(audio['allowAdvancedNoiseSuppression'])},
+            allowAudioOnJoin: Bool = {bool_str(audio['allowAudioOnJoin'])},
+            allowMicrophoneControl: Bool = {bool_str(audio['allowMicrophoneControl'])}
+        ) {{
+            self.allowAdvancedNoiseSuppression = allowAdvancedNoiseSuppression
+            self.allowAudioOnJoin = allowAudioOnJoin
+            self.allowMicrophoneControl = allowMicrophoneControl
+        }}
     }}
-    
+
     public struct WaitingRoomSettings {{
-        public let allowDeviceSelection: Bool = {str(waiting['allowDeviceSelection']).lower()}
+        public let allowDeviceSelection: Bool
+
+        public init(allowDeviceSelection: Bool = {bool_str(waiting['allowDeviceSelection'])}) {{
+            self.allowDeviceSelection = allowDeviceSelection
+        }}
     }}
-    
+
     public struct MeetingRoomSettings {{
-        public let allowArchiving: Bool = {str(meeting['allowArchiving']).lower()}
-        public let allowCaptions: Bool = {str(meeting['allowCaptions']).lower()}
-        public let allowChat: Bool = {str(meeting['allowChat']).lower()}
-        public let allowDeviceSelection: Bool = {str(meeting['allowDeviceSelection']).lower()}
-        public let allowEmojis: Bool = {str(meeting['allowEmojis']).lower()}
-        public let allowScreenShare: Bool = {str(meeting['allowScreenShare']).lower()}
-        public let defaultLayoutMode: String = "{meeting['defaultLayoutMode']}"
-        public let showParticipantList: Bool = {str(meeting['showParticipantList']).lower()}
+        public let allowArchiving: Bool
+        public let allowCaptions: Bool
+        public let allowChat: Bool
+        public let allowDeviceSelection: Bool
+        public let allowEmojis: Bool
+        public let allowScreenShare: Bool
+        public let defaultLayoutMode: MeetingRoomLayout
+        public let showParticipantList: Bool
+
+        public init(
+            allowArchiving: Bool = {bool_str(meeting['allowArchiving'])},
+            allowCaptions: Bool = {bool_str(meeting['allowCaptions'])},
+            allowChat: Bool = {bool_str(meeting['allowChat'])},
+            allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
+            allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
+            allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
+            defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
+            showParticipantList: Bool = {bool_str(meeting['showParticipantList'])}
+        ) {{
+            self.allowArchiving = allowArchiving
+            self.allowCaptions = allowCaptions
+            self.allowChat = allowChat
+            self.allowDeviceSelection = allowDeviceSelection
+            self.allowEmojis = allowEmojis
+            self.allowScreenShare = allowScreenShare
+            self.defaultLayoutMode = defaultLayoutMode
+            self.showParticipantList = showParticipantList
+        }}
     }}
-    
+
     public static let videoSettings = VideoSettings()
     public static let audioSettings = AudioSettings()
     public static let waitingRoomSettings = WaitingRoomSettings()
     public static let meetingRoomSettings = MeetingRoomSettings()
+
+    public let videoSettings: VideoSettings
+    public let audioSettings: AudioSettings
+    public let waitingRoomSettings: WaitingRoomSettings
+    public let meetingRoomSettings: MeetingRoomSettings
+
+    public init(
+        videoSettings: VideoSettings = VideoSettings(),
+        audioSettings: AudioSettings = AudioSettings(),
+        waitingRoomSettings: WaitingRoomSettings = WaitingRoomSettings(),
+        meetingRoomSettings: MeetingRoomSettings = MeetingRoomSettings()
+    ) {{
+        self.audioSettings = audioSettings
+        self.videoSettings = videoSettings
+        self.waitingRoomSettings = waitingRoomSettings
+        self.meetingRoomSettings = meetingRoomSettings
+    }}
 }}
 '''
 
@@ -75,7 +151,7 @@ public struct AppConfig {{
     with open(output_path, 'w') as f:
         f.write(swift_code)
     
-    print(f"✅ Generated AppConfig.swift with chat enabled: {meeting['allowChat']}")
+    print("✅ Generated AppConfig.swift")
 
 if __name__ == "__main__":
     generate_app_config()

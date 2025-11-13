@@ -4,8 +4,12 @@
 
 import Foundation
 
+public protocol TryJoinRoomUseCase {
+    func callAsFunction(_ name: String) throws
+}
+
 // User will enter in existing room
-public final class TryJoinRoomUseCase {
+public final class DefaultTryJoinRoomUseCase: TryJoinRoomUseCase {
 
     public enum Error: Swift.Error {
         case invalidRoomName

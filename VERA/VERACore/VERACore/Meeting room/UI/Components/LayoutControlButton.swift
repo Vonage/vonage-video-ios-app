@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 struct LayoutControlButton: View {
     private let layout: MeetingRoomLayout

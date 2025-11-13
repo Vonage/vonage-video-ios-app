@@ -16,8 +16,9 @@ public class LandingPageFactory {
     ) -> some View {
         LandingPageScreen(
             viewModel: .init(
-                tryJoinRoomUseCase: .init(),
-                tryCreatingANewRoomUseCase: .init(roomNameGenerator: roomNameGeneratorFactory.make())),
+                tryJoinRoomUseCase: DefaultTryJoinRoomUseCase(),
+                tryCreatingANewRoomUseCase: DefaultTryCreatingANewRoomUseCase(
+                    roomNameGenerator: roomNameGeneratorFactory.make())),
             onNavigateToWaitingRoom: onNavigateToWaitingRoom)
     }
 }

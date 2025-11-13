@@ -32,7 +32,7 @@ public struct WaitingRoomState: Equatable {
         self.publisher = publisher
     }
 
-    public static let `default` = WaitingRoomState(
+    public static let initial = WaitingRoomState(
         roomName: "",
         isMicrophoneEnabled: false,
         isCameraEnabled: false,

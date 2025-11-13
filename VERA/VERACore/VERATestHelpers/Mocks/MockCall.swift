@@ -14,7 +14,7 @@ public class MockCall: VERACore.CallFacade {
     public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
-    public let _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.default)
+    public let _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     public var recordedActions: [CallActions] = []

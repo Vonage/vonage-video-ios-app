@@ -4,8 +4,12 @@
 
 import Foundation
 
+public protocol TryCreatingANewRoomUseCase {
+    func callAsFunction() -> String
+}
+
 // User will create a new room
-public final class TryCreatingANewRoomUseCase {
+public final class DefaultTryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase {
 
     private let roomNameGenerator: RoomNameGenerator
 
