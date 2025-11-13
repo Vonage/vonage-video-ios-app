@@ -16,9 +16,9 @@ struct ParticipantsBadgeButton: View {
     }
 
     var body: some View {
-        ControlButton(
+        ControlImageButton(
             isActive: true,
-            iconName: "person.2.fill",
+            image: VERACommonUIAsset.Images.group2Solid.swiftUIImage,
             action: onToggleParticipants
         )
         .overlay(
@@ -36,7 +36,7 @@ struct ParticipantsBadgeButton: View {
                 .frame(minWidth: badgeSize, minHeight: badgeSize)
                 .background(
                     Circle()
-                        .fill(VERACommonUIAsset.vGray3.swiftUIColor)
+                        .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                 )
                 .scaleEffect(participantsCount > MaxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)

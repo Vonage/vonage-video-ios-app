@@ -23,7 +23,7 @@ struct ReenterRoomButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .tint(VERACommonUIAsset.accentBlue.swiftUIColor)
+            .tint(VERACommonUIAsset.Colors.accentBlue.swiftUIColor)
             .foregroundColor(.blue)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)

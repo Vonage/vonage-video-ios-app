@@ -81,15 +81,19 @@ struct BottomBar: View {
         HStack {
             HStack(alignment: .center) {
                 if allowMicrophoneControl {
-                    ControlButton(
+                    ControlImageButton(
                         isActive: isMicEnabled,
-                        iconName: isMicEnabled ? "mic.fill" : "mic.slash.fill",
+                        image: isMicEnabled
+                            ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+                            : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
                         action: actions.onToggleMic)
                 }
                 if allowCameraControl {
-                    ControlButton(
+                    ControlImageButton(
                         isActive: isCameraEnabled,
-                        iconName: isCameraEnabled ? "video.fill" : "video.slash.fill",
+                        image: isCameraEnabled
+                            ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
+                            : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
                         action: actions.onToggleCamera)
                 }
                 LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
@@ -117,14 +121,14 @@ struct BottomBarBackground: View {
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
-                .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectBackground()
                 } else {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                 }
             }
         #endif

@@ -14,9 +14,9 @@ struct EndCallControlButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "phone.down.fill")
+            VERACommonUIAsset.Images.endCallSolid.swiftUIImage
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
@@ -40,6 +40,6 @@ struct EndCallControlButton: View {
         EndCallControlButton()
     }
     .padding()
-    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
+    .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

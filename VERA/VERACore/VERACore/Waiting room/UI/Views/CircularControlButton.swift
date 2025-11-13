@@ -18,8 +18,28 @@ struct CircularControlButton: View {
     }
 
     var body: some View {
+        CircularControlImageButton(
+            isActive: isActive,
+            image: Image(systemName: iconName),
+            action: action)
+    }
+}
+
+struct CircularControlImageButton: View {
+
+    private let isActive: Bool
+    private let image: Image
+    private let action: () -> Void
+
+    init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
+        self.isActive = isActive
+        self.image = image
+        self.action = action
+    }
+
+    var body: some View {
         Button(action: action) {
-            Image(systemName: iconName)
+            image
                 .font(.title2)
                 .foregroundStyle(isActive ? .white : .red)
                 .frame(width: 50, height: 50)
@@ -104,6 +124,6 @@ struct CircularControlBackground: View {
         CircularControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
+    .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

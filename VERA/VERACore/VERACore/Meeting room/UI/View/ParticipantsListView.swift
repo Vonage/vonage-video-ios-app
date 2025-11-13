@@ -42,7 +42,7 @@ public struct ParticipantsListView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(VERACommonUIAsset.uiLabel.swiftUIColor)
+                        }.tint(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {
@@ -72,8 +72,8 @@ public struct ParticipantsListView: View {
                     Spacer()
 
                     ShareLink(item: meetingURL) {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
+                        VERACommonUIAsset.Images.shareLine.swiftUIImage
+                            .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .cornerRadius(6)
@@ -120,9 +120,9 @@ struct ParticipantRowView: View {
 
             Spacer()
 
-            Image(systemName: participant.isMicEnabled ? "mic.fill" : "mic.slash.fill")
+            MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
                 .font(.caption)
-                .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
+                .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
         }
     }
 }

@@ -23,7 +23,7 @@ struct BannerDateTime: View {
     var body: some View {
         Text(Self.usFormatter.string(from: now))
             .font(.title3)
-            .foregroundStyle(VERACommonUIAsset.uiLabel.swiftUIColor.opacity(0.5))
+            .foregroundStyle(VERACommonUIAsset.Colors.uiLabel.swiftUIColor.opacity(0.5))
             .monospacedDigit()
             .multilineTextAlignment(.trailing)
             .onReceive(timer) { now = $0 }

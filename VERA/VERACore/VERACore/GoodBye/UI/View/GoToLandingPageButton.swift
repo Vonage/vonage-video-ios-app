@@ -25,7 +25,7 @@ struct GoToLandingPageButtonStyle: ButtonStyle {
         configuration.label
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(VERACommonUIAsset.accentBlue.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1))
+            .background(VERACommonUIAsset.Colors.accentBlue.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1))
             .foregroundColor(.white)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .shadow(radius: 5)

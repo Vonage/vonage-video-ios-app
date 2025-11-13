@@ -18,7 +18,7 @@ struct GHRepoButton: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 30)
-                .tint(VERACommonUIAsset.uiLabel.swiftUIColor.opacity(0.5))
+                .tint(VERACommonUIAsset.Colors.uiLabel.swiftUIColor.opacity(0.5))
         }
     }
 }

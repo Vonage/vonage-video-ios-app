@@ -87,7 +87,7 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
-        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -181,11 +181,15 @@ struct VideoPreviewView: View {
                             }
                         }
                     } label: {
-                        Label(String(localized: "Camera", bundle: .veraCore), systemImage: "video")
+                        Label {
+                            Text(String(localized: "Camera", bundle: .veraCore))
+                        } icon: {
+                            VERACommonUIAsset.Images.videoLine.swiftUIImage
+                        }
                     }
                 }
             }
-            .tint(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
+            .tint(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
             .padding()
         }
     }
@@ -212,11 +216,11 @@ struct PrepareToJoinRoom: View {
             VStack {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
-                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
 
                 Text(state.roomName)
                     .font(.subheadline)
-                    .foregroundColor(VERACommonUIAsset.uiLabel.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
             }.padding()
 
             UsernameInput(userName: userName)

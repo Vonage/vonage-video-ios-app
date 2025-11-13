@@ -18,7 +18,7 @@ struct ParticipantVideoCard: View {
             if participant.isCameraEnabled {
                 ZStack {
                     Rectangle()
-                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
@@ -48,12 +48,12 @@ struct ParticipantVideoCard: View {
             } else {
                 ZStack {
                     Rectangle()
-                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
                                 Rectangle()
-                                    .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                                     .overlay(
                                         AvatarInitials(state: .init(userName: participant.name))
                                             .padding(24)
@@ -72,7 +72,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    VERACommonUIAsset.vAccent.swiftUIColor,
+                    VERACommonUIAsset.Colors.vAccent.swiftUIColor,
                     lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -117,12 +117,24 @@ struct NameLabel: View {
 struct MicIndicator: View {
     var isMicEnabled: Bool
     var body: some View {
-        Image(systemName: isMicEnabled ? "mic.fill" : "mic.slash.fill")
+        MicIndicatorImage(isMicEnabled: isMicEnabled)
             .foregroundColor(.white)
             .padding(6)
             .background(Color.black.opacity(0.6))
             .clipShape(Circle())
             .frame(width: 28, height: 28)
+    }
+}
+
+struct MicIndicatorImage: View {
+    var isMicEnabled: Bool
+
+    var body: some View {
+        if isMicEnabled {
+            VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+        } else {
+            VERACommonUIAsset.Images.micMuteSolid.swiftUIImage
+        }
     }
 }
 
