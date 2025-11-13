@@ -12,7 +12,7 @@ struct LandingPageWelcome: View {
                 .font(.largeTitle.bold())
                 .padding(.bottom, 10)
             Text("Create a new room or join an existing one.", bundle: .veraCore)
-                .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
         }
     }
 }

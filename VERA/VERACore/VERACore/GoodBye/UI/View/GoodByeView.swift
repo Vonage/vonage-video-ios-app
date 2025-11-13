@@ -49,7 +49,7 @@ public struct GoodByeView: View {
             .frame(maxHeight: .infinity)
             .padding(10)
         }
-        .background(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
     }
 }
 

@@ -70,7 +70,7 @@ struct VERAApp: App {
                 )
             }.onOpenURL { url in
                 handleUniversalLink(url)
-            }.tint(VERACommonUIAsset.vAccent.swiftUIColor)
+            }.tint(VERACommonUIAsset.Colors.vAccent.swiftUIColor)
         }
     }
 

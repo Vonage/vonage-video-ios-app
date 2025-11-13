@@ -103,7 +103,7 @@ public struct MeetingRoomView: View {
                             onBottomBarInteraction()
                             actions.onEndCall()
                         } label: {
-                            VERACommonUIAsset.arrowBoldLeftLine.swiftUIImage
+                            VERACommonUIAsset.Images.arrowBoldLeftLine.swiftUIImage
                         }
                     }
 
@@ -115,7 +115,7 @@ public struct MeetingRoomView: View {
                                     onBottomBarInteraction()
                                     actions.onCameraSwitch()
                                 } label: {
-                                    VERACommonUIAsset.cameraSwitchLine.swiftUIImage
+                                    VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
                                 }.disabled(!state.isCameraEnabled)
                             }
                         #endif
@@ -124,12 +124,12 @@ public struct MeetingRoomView: View {
                                 onBottomBarInteraction()
                                 actions.onToggleMic()
                             } label: {
-                                VERACommonUIAsset.audioMidLine.swiftUIImage
+                                VERACommonUIAsset.Images.audioMidLine.swiftUIImage
                             }
                         }
                         if let roomURL = state.roomURL {
                             ShareLink(item: roomURL) {
-                                VERACommonUIAsset.shareLine.swiftUIImage
+                                VERACommonUIAsset.Images.shareLine.swiftUIImage
                             }
                         }
                     }

@@ -30,9 +30,9 @@ struct UsernameInput: View {
     private var borderColor: Color {
         switch getUsernameState() {
         case .initial:
-            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.accentBlue.swiftUIColor
+            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }

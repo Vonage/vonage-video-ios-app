@@ -18,9 +18,9 @@ struct LayoutControlButton: View {
         Button(action: action) {
             LayoutImage(layout: layout)
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.uiSystemBackground.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
                 .frame(width: 50, height: 50)
-                .background(Circle().fill(VERACommonUIAsset.vGray4.swiftUIColor))
+                .background(Circle().fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -32,14 +32,14 @@ struct LayoutImage: View {
     var body: some View {
         ZStack {
             if layout == .activeSpeaker {
-                VERACommonUIAsset.bringToFrontSolid.swiftUIImage
+                VERACommonUIAsset.Images.bringToFrontSolid.swiftUIImage
                     .transition(
                         .asymmetric(
                             insertion: .opacity.combined(with: .scale(scale: 0.8)),
                             removal: .opacity.combined(with: .scale(scale: 1.2))
                         ))
             } else {
-                VERACommonUIAsset.appsSolid.swiftUIImage
+                VERACommonUIAsset.Images.appsSolid.swiftUIImage
                     .transition(
                         .asymmetric(
                             insertion: .opacity.combined(with: .scale(scale: 0.8)),
@@ -66,6 +66,6 @@ struct LayoutImage: View {
         LayoutControlButton(layout: .grid)
     }
     .padding()
-    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
+    .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

@@ -15,7 +15,7 @@ struct GoodByeMessage: View {
                 .font(.largeTitle.bold())
                 .padding(.bottom, 10)
             Text("We hope you had fun", bundle: .veraCore)
-                .foregroundStyle(VERACommonUIAsset.uiSecondaryLabel.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
             HStack {
                 ReenterRoomButton(onReenter: onReenter)
                 GoToLandingPageButton(onReturnToLanding: onReturnToLanding)

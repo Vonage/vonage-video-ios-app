@@ -39,11 +39,11 @@ struct ControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(isActive ? VERACommonUIAsset.uiSystemBackground.swiftUIColor : .red)
+                .foregroundStyle(isActive ? VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()
-                        .fill(isActive ? VERACommonUIAsset.vGray4.swiftUIColor : .clear)
+                        .fill(isActive ? VERACommonUIAsset.Colors.vGray4.swiftUIColor : .clear)
                 )
                 .animation(.easeInOut(duration: 0.2), value: isActive)
         }
@@ -72,6 +72,6 @@ struct ControlImageButton: View {
         ControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
+    .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

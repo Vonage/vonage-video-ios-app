@@ -18,7 +18,7 @@ struct ParticipantVideoCard: View {
             if participant.isCameraEnabled {
                 ZStack {
                     Rectangle()
-                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
@@ -48,12 +48,12 @@ struct ParticipantVideoCard: View {
             } else {
                 ZStack {
                     Rectangle()
-                        .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                         .aspectRatio(containerAspectRatio, contentMode: .fit)
                         .overlay(
                             ZStack {
                                 Rectangle()
-                                    .fill(VERACommonUIAsset.vGray4.swiftUIColor.opacity(0.8))
+                                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                                     .overlay(
                                         AvatarInitials(state: .init(userName: participant.name))
                                             .padding(24)
@@ -72,7 +72,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    VERACommonUIAsset.vAccent.swiftUIColor,
+                    VERACommonUIAsset.Colors.vAccent.swiftUIColor,
                     lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -131,9 +131,9 @@ struct MicIndicatorImage: View {
 
     var body: some View {
         if isMicEnabled {
-            VERACommonUIAsset.microphone2Solid.swiftUIImage
+            VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
         } else {
-            VERACommonUIAsset.micMuteSolid.swiftUIImage
+            VERACommonUIAsset.Images.micMuteSolid.swiftUIImage
         }
     }
 }

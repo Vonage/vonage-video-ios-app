@@ -18,7 +18,7 @@ public struct PublisherVideoView: View {
 
     public var body: some View {
         ZStack {
-            VERACommonUIAsset.videoBackground.swiftUIColor
+            VERACommonUIAsset.Colors.videoBackground.swiftUIColor
                 .ignoresSafeArea()
             if let videoView = videoView {
                 videoView.frame(

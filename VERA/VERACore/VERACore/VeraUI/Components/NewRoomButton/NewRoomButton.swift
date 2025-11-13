@@ -14,7 +14,7 @@ struct NewRoomButton: View {
             onHandleNewRoom()
         } label: {
             HStack {
-                VERACommonUIAsset.plusLine.swiftUIImage
+                VERACommonUIAsset.Images.plusLine.swiftUIImage
                 Text("Create room", bundle: .veraCore)
             }
         }
@@ -29,7 +29,7 @@ struct NewRoomButtonStyle: ButtonStyle {
         configuration.label
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(VERACommonUIAsset.vAccent.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1))
+            .background(VERACommonUIAsset.Colors.vAccent.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1))
             .foregroundColor(.white)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .shadow(radius: 5)
