@@ -46,14 +46,6 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    if state.allowMicrophoneControl {
-                        CircularControlImageButton(
-                            isActive: state.isMicrophoneEnabled,
-                            image: state.isMicrophoneEnabled
-                                ? VERACommonUIAsset.microphone2Solid.swiftUIImage
-                                : VERACommonUIAsset.micMuteSolid.swiftUIImage,
-                            action: onMicrophoneToggle)
-                    }
                     if state.allowCameraControl {
                         CircularControlImageButton(
                             isActive: state.isCameraEnabled,
@@ -61,6 +53,14 @@ struct WaitingRoomUserPreviewView: View {
                                 ? VERACommonUIAsset.videoSolid.swiftUIImage
                                 : VERACommonUIAsset.videoOffSolid.swiftUIImage,
                             action: onCameraToggle)
+                    }
+                    if state.allowMicrophoneControl {
+                        CircularControlImageButton(
+                            isActive: state.isMicrophoneEnabled,
+                            image: state.isMicrophoneEnabled
+                                ? VERACommonUIAsset.microphone2Solid.swiftUIImage
+                                : VERACommonUIAsset.micMuteSolid.swiftUIImage,
+                            action: onMicrophoneToggle)
                     }
                 }
                 .padding(.bottom, 20)

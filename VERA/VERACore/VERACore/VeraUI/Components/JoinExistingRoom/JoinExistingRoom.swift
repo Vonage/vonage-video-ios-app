@@ -19,7 +19,6 @@ struct JoinExistingRoom: View {
     var body: some View {
         HStack {
             VonageTextField(
-                iconName: "keyboard",
                 placeholder: String(localized: "Enter room name", bundle: .veraCore),
                 text: $roomName,
                 state: roomState,
