@@ -33,6 +33,6 @@ extension View {
     /// - Parameter radius: The border radius style to apply
     /// - Returns: A view with rounded corners
     public func cornerRadius(_ radius: BorderRadius) -> some View {
-        self.cornerRadius(radius.value)
+        clipShape(RoundedRectangle(cornerRadius: radius.value, style: .continuous))
     }
 }
