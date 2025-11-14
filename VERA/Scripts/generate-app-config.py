@@ -4,7 +4,7 @@ import json
 import os
 
 def generate_app_config():
-    config_path = "./app-config.json"
+    config_path = "./Config/app-config.json"
     output_path = "./VERAConfiguration/VERAConfiguration/AppConfig.swift"
     
     # Create directory if it doesn't exist
