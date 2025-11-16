@@ -4,7 +4,7 @@ import json
 import os
 
 def generate_semantic_colors():
-    semantics_path = "./Config/semantics.json"
+    semantics_path = "./Theme/semantics.json"
     output_dir = "./VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets"
     
     # Read semantics file
