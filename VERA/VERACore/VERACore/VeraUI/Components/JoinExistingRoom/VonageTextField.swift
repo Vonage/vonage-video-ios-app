@@ -17,7 +17,7 @@ struct VonageTextField: View {
     private let forceLowercase: Bool
 
     @State private var labelWidth: CGFloat = 0
-    
+
     init(
         placeholder: String,
         text: Binding<String>,
@@ -38,11 +38,11 @@ struct VonageTextField: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                         #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onChange(of: text.wrappedValue) { newValue in
-                            text.wrappedValue = newValue.lowercased()
-                        }
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .onChange(of: text.wrappedValue) { newValue in
+                                text.wrappedValue = newValue.lowercased()
+                            }
                         #endif
                 } else {
                     TextField(placeholder.capitalized, text: text)
@@ -58,7 +58,7 @@ struct VonageTextField: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.clear)
-                
+
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(borderColor, lineWidth: 1)
                     .mask(

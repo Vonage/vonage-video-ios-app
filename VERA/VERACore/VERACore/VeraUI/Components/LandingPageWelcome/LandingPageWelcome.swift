@@ -42,10 +42,10 @@ struct LandingPageWelcomeRegular: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            (Text("Upgrade\n", bundle: .veraCore) +
-             Text("video\n", bundle: .veraCore)
-                .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor) +
-             Text("communication", bundle: .veraCore))
+            (Text("Upgrade\n", bundle: .veraCore)
+                + Text("video\n", bundle: .veraCore)
+                .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                + Text("communication", bundle: .veraCore))
                 .adaptiveFont(.headline)
                 .minimumScaleFactor(0.5)
                 .padding(.bottom, 10)
