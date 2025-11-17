@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 
 // MARK: - Configuration Reading
 private func readAppConfig() -> [String: Any] {
-    let configPath = "./app-config.json"
+    let configPath = "./Config/app-config.json"
     guard let configData = FileManager.default.contents(atPath: configPath) else {
         fatalError("Could not read app-config.json")
     }
