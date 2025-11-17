@@ -56,17 +56,17 @@ struct VonageTextField: View {
         .frame(height: 48)
         .background(
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
                     .fill(Color.clear)
 
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
                     .stroke(borderColor, lineWidth: 1)
                     .mask(
-                        Rectangle()
+                        RoundedRectangle(cornerRadius: BorderRadius.medium.value)
                             .overlay(alignment: .topLeading) {
                                 if !text.wrappedValue.isEmpty {
                                     Rectangle()
-                                        .frame(width: labelWidth + 8, height: 2)
+                                        .frame(width: labelWidth + BorderRadius.medium.value, height: 2)
                                         .offset(x: 12, y: -1)
                                         .blendMode(.destinationOut)
                                 }

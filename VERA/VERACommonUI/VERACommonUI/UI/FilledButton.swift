@@ -37,7 +37,7 @@ public struct FilledButton: View {
 
 
 struct FilledButtonStyle: ButtonStyle {
-    var cornerRadius: CGFloat = 4
+    var cornerRadius: CGFloat = BorderRadius.medium.value
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

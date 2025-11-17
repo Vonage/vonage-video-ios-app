@@ -29,7 +29,7 @@ struct LandingPageWelcomeCompact: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Upgrade video communication", bundle: .veraCore)
+            LandingTitleCompact()
                 .padding(.bottom, 10)
                 .adaptiveFont(.headline)
         }
@@ -42,10 +42,7 @@ struct LandingPageWelcomeRegular: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            (Text("Upgrade\n", bundle: .veraCore)
-                + Text("video\n", bundle: .veraCore)
-                .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-                + Text("communication", bundle: .veraCore))
+            LandingTitleRegular()
                 .adaptiveFont(.headline)
                 .minimumScaleFactor(0.5)
                 .padding(.bottom, 10)
@@ -54,6 +51,24 @@ struct LandingPageWelcomeRegular: View {
                 .adaptiveFont(.heading2)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
         }
+    }
+}
+
+struct LandingTitleRegular: View {
+    var body: some View {
+        (Text("Upgrade\n", bundle: .veraCore)
+            + Text("video\n", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            + Text("communication", bundle: .veraCore))
+    }
+}
+
+struct LandingTitleCompact: View {
+    var body: some View {
+        (Text("Upgrade ", bundle: .veraCore)
+            + Text("video\n", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            + Text("communication", bundle: .veraCore))
     }
 }
 

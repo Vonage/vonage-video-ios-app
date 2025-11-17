@@ -122,9 +122,14 @@ public struct VerticalLandingContentView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 0) {
+                BannerLogo()
+                Spacer()
+            }
+            .padding()
+
             LandingPageWelcome()
-                .padding(.bottom, 40)
 
             RoomJoinContainer(
                 onHandleNewRoom: onHandleNewRoom,
@@ -132,6 +137,12 @@ public struct VerticalLandingContentView: View {
             )
             .frame(maxWidth: .infinity)
             Spacer()
+
+            HStack(spacing: 8) {
+                GHRepoButton()
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
         }
     }
 }
