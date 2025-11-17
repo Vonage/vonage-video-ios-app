@@ -18,7 +18,7 @@ struct BannerLogo: View {
             Image("vonage-logo-desktop", bundle: .veraCore)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 72)
+                .frame(height: 78)
         }
 
     }

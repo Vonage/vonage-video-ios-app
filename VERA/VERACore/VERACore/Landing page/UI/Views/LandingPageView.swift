@@ -25,29 +25,22 @@ public struct LandingPageView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            Banner()
-                .frame(height: 70)
-                .padding(.horizontal, 8)
-            Group {
-                if verticalSizeClass == .compact {
-                    HorizontalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                } else if horizontalSizeClass == .compact {
-                    VerticalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                } else {
-                    HorizontalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                }
+        Group {
+            if verticalSizeClass == .compact {
+                HorizontalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
+            } else if horizontalSizeClass == .compact {
+                VerticalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
+            } else {
+                HorizontalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
             }
-            .frame(maxHeight: .infinity)
-            .padding(10)
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -65,16 +58,52 @@ public struct HorizontalLandingContentView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: 20) {
-            LandingPageWelcome()
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 40)
+        HStack(spacing: 0) {
+            // MARK: - Left Side
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    BannerLogo()
+                    Spacer()
+                }
+                .padding()
 
-            RoomJoinContainer(
-                onHandleNewRoom: onHandleNewRoom,
-                onJoinRoom: onJoinRoom
-            )
-            .frame(maxWidth: .infinity)
+                Spacer()
+                LandingPageWelcome()
+                    .frame(maxWidth: .infinity)
+                Spacer()
+
+                Color.clear
+                    .frame(height: 60)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            // MARK: - Right Side
+            VStack(alignment: .center, spacing: 0) {
+                Color.clear
+                    .frame(height: 60)
+
+                Spacer()
+
+                RoomJoinContainer(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom
+                )
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity)
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    GHRepoButton()
+                    Text("Vonage Video Reference Application")
+                        .adaptiveFont(.bodyBase)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 60)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
         }
     }
 }
@@ -93,11 +122,9 @@ public struct VerticalLandingContentView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .center, spacing: 20) {
+        VStack(alignment: .leading, spacing: 20) {
             LandingPageWelcome()
-                .frame(maxWidth: .infinity)
                 .padding(.bottom, 40)
-                .padding(.horizontal, 20)
 
             RoomJoinContainer(
                 onHandleNewRoom: onHandleNewRoom,

@@ -12,9 +12,6 @@ struct Banner: View {
         HStack {
             BannerLogo()
             Spacer()
-            if horizontalSizeClass == .regular {
-                BannerDateTime()
-            }
             BannerLinks()
         }
     }

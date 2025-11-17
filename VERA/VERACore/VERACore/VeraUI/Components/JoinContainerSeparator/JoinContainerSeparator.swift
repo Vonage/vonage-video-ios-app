@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct JoinContainerSeparator: View {
     var body: some View {
@@ -11,6 +12,7 @@ struct JoinContainerSeparator: View {
                 CustomDivider()
             }
             Text("or", bundle: .veraCore)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                 .padding()
             VStack {
                 CustomDivider()
