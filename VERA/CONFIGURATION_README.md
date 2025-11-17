@@ -4,7 +4,7 @@ This system allows enabling or disabling VERA application features through JSON 
 
 ## Important Files
 
-- `app-config.json`: Main configuration file
+- `./Config/app-config.json`: Main configuration file
 - `Scripts/generate-app-config.py`: Generates Swift code from JSON configuration
 - `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift`: Auto-generated code (do not edit manually)
 
