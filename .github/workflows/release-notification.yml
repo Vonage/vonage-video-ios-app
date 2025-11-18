@@ -1,7 +1,6 @@
 name: Notify Slack on Release
 
-on:
-  workflow_dispatch:
+on: [pull_request, workflow_dispatch]
   #release:
     #types: [published]
 
