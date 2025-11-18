@@ -34,7 +34,7 @@ struct VonageTextField: View {
         ZStack(alignment: .leading) {
             Group {
                 if forceLowercase {
-                    TextField(placeholder.capitalized, text: text)
+                    TextField(placeholder.capitalizingFirstLetter, text: text)
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                         #if os(iOS)
@@ -45,7 +45,7 @@ struct VonageTextField: View {
                             }
                         #endif
                 } else {
-                    TextField(placeholder.capitalized, text: text)
+                    TextField(placeholder.capitalizingFirstLetter, text: text)
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                 }
@@ -77,7 +77,7 @@ struct VonageTextField: View {
         )
         .overlay(alignment: .topLeading) {
             if !text.wrappedValue.isEmpty {
-                Text(placeholder.capitalized)
+                Text(placeholder.capitalizingFirstLetter)
                     .adaptiveFont(.caption)
                     .foregroundColor(borderColor)
                     .padding(.horizontal, 4)
@@ -117,6 +117,13 @@ private struct LabelWidthPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
+    }
+}
+
+extension String {
+    fileprivate var capitalizingFirstLetter: String {
+        guard let first = first else { return self }
+        return String(first).uppercased() + dropFirst()
     }
 }
 

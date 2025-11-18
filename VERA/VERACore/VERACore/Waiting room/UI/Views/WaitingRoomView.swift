@@ -214,14 +214,14 @@ struct PrepareToJoinRoom: View {
     var body: some View {
         VStack(alignment: .center) {
             Spacer()
-            
+
             VStack {
                 UsernameInput(userName: userName)
             }.padding()
-            
-            
+
+
             Divider()
-            
+
             VStack {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)

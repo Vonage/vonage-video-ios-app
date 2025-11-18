@@ -13,7 +13,7 @@ struct RoomJoinContainer: View {
         VStack {
             VStack(alignment: .leading) {
 
-                Text("Start a new video meeting")
+                Text("Start a new video meeting", bundle: .veraCore)
                     .adaptiveFont(.heading4)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
 

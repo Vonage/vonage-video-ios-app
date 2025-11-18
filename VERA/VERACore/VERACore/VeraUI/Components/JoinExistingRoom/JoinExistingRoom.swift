@@ -19,7 +19,7 @@ struct JoinExistingRoom: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Join existing meeting")
+                Text("Join existing meeting", bundle: .veraCore)
                     .adaptiveFont(.heading4)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     .padding(.bottom, 8)
