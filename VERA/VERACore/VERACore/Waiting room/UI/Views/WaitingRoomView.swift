@@ -212,7 +212,16 @@ struct PrepareToJoinRoom: View {
 
 
     var body: some View {
-        VStack {
+        VStack(alignment: .center) {
+            Spacer()
+            
+            VStack {
+                UsernameInput(userName: userName)
+            }.padding()
+            
+            
+            Divider()
+            
             VStack {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
@@ -223,13 +232,11 @@ struct PrepareToJoinRoom: View {
                     .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
             }.padding()
 
-            UsernameInput(userName: userName)
-                .frame(maxWidth: 300)
-
             JoinRoomButton {
                 onJoinRoom()
             }
             .padding()
+            Spacer()
         }
     }
 }
