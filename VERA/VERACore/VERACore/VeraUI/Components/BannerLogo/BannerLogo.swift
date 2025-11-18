@@ -20,7 +20,6 @@ struct BannerLogo: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 78)
         }
-
     }
 }
 

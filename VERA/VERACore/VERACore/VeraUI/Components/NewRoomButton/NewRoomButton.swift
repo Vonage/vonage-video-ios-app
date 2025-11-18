@@ -11,7 +11,7 @@ struct NewRoomButton: View {
 
     var body: some View {
         FilledButton(
-            text: Text("Create room", bundle: .veraCore),
+            text: Text("Create a new room", bundle: .veraCore),
             image: VERACommonUIAsset.Images.plusLine.swiftUIImage,
             onAction: onHandleNewRoom)
     }

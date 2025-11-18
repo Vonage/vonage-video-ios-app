@@ -19,7 +19,6 @@ struct LandingPageWelcome: View {
                 LandingPageWelcomeRegular()
             }
         }
-        .padding()
     }
 }
 

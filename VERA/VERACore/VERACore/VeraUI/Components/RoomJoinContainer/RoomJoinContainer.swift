@@ -10,23 +10,17 @@ struct RoomJoinContainer: View {
     let onJoinRoom: (String) -> Void
 
     var body: some View {
-        VStack {
-            VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
+            Text("Start a new video meeting", bundle: .veraCore)
+                .adaptiveFont(.heading4)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
 
-                Text("Start a new video meeting", bundle: .veraCore)
-                    .adaptiveFont(.heading4)
-                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+            NewRoomButton(onHandleNewRoom: onHandleNewRoom)
 
-                NewRoomButton(onHandleNewRoom: onHandleNewRoom)
+            JoinContainerSeparator()
 
-                JoinContainerSeparator()
-
-                JoinExistingRoom(onJoinRoom: onJoinRoom)
-            }
+            JoinExistingRoom(onJoinRoom: onJoinRoom)
         }
-        .padding()
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-        .cornerRadius(.medium)
     }
 }
 

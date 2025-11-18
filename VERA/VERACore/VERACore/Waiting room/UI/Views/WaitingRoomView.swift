@@ -99,7 +99,7 @@ struct HorizontalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 20) {
+        HorizontalContentView {
             VideoPreviewView(
                 state: state,
                 userName: userName,
@@ -107,14 +107,15 @@ struct HorizontalWaitingRoomContentView: View {
                 onCameraToggle: onCameraToggle
             )
             .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-
-            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } rightSide: {
+            CardView {
+                PrepareToJoinRoom(
+                    state: state,
+                    userName: userName,
+                    onJoinRoom: onJoinRoom)
+            }
+            .padding()
         }
-        .frame(maxHeight: .infinity)
-        .padding(0)
     }
 }
 
@@ -127,21 +128,19 @@ struct VerticalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
+        VerticalContentView {
             VideoPreviewView(
                 state: state,
                 userName: userName,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
-            .frame(maxWidth: .infinity)
-
-            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
-
-            Spacer()
+        } bottomSide: {
+            PrepareToJoinRoom(
+                state: state,
+                userName: userName,
+                onJoinRoom: onJoinRoom)
         }
-        .frame(maxHeight: .infinity)
-        .padding(0)
     }
 }
 
@@ -213,12 +212,12 @@ struct PrepareToJoinRoom: View {
 
     var body: some View {
         VStack(alignment: .center) {
-            Spacer()
 
             VStack {
                 UsernameInput(userName: userName)
-            }.padding()
-
+            }
+            .padding()
+            .padding(.top, 16)
 
             Divider()
 
@@ -236,7 +235,6 @@ struct PrepareToJoinRoom: View {
                 onJoinRoom()
             }
             .padding()
-            Spacer()
         }
     }
 }
