@@ -23,8 +23,6 @@ struct LandingPageWelcome: View {
 }
 
 struct LandingPageWelcomeCompact: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -37,8 +35,6 @@ struct LandingPageWelcomeCompact: View {
 }
 
 struct LandingPageWelcomeRegular: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
