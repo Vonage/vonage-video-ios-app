@@ -7,7 +7,7 @@ import Foundation
 import VERACore
 
 public class MockCall: VERACore.CallFacade {
-    
+
     public let _eventsPublisher = CurrentValueSubject<VERACore.SessionEvent, Never>(.idle)
     public lazy var eventsPublisher: AnyPublisher<VERACore.SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 

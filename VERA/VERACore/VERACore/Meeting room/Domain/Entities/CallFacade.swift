@@ -69,10 +69,11 @@ public protocol HoldeableCall: AnyObject {
 }
 
 public protocol CallFacade: AnyObject,
-                            ParticipantsPublisherProvider,
-                            EventsPublisherProvider,
-                            SessionStatePublisherProvider,
-                            CallConnectable,
-                            MediaToggleable,
-                            CallStatePublisherProvider,
-                            HoldeableCall {}
+    ParticipantsPublisherProvider,
+    EventsPublisherProvider,
+    SessionStatePublisherProvider,
+    CallConnectable,
+    MediaToggleable,
+    CallStatePublisherProvider,
+    HoldeableCall
+{}

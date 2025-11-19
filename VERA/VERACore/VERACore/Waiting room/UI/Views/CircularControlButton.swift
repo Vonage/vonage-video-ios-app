@@ -104,6 +104,6 @@ struct CircularControlBackground: View {
         CircularControlButton(isActive: false, iconName: "mic.slash.fill")
     }
     .padding()
-    .background(VERACommonUIAsset.videoBackground.swiftUIColor)
+    .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)
     .preferredColorScheme(.dark)
 }

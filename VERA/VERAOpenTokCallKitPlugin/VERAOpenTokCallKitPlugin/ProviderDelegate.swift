@@ -8,6 +8,7 @@ import Combine
 import Foundation
 import OpenTok
 import UIKit
+import VERACommonUI
 
 final class ProviderDelegate: NSObject, CXProviderDelegate {
 
@@ -32,6 +33,8 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
     static var providerConfiguration: CXProviderConfiguration {
         let providerConfiguration = CXProviderConfiguration()
 
+        let iconImage = VERACommonUIAsset.Images.callKitIcon.image
+        providerConfiguration.iconTemplateImageData = iconImage.pngData()
         providerConfiguration.supportsVideo = true
         providerConfiguration.maximumCallsPerCallGroup = 1
         providerConfiguration.maximumCallGroups = 1

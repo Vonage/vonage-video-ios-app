@@ -40,9 +40,9 @@ struct JoinExistingRoom: View {
     private var borderColor: Color {
         switch getRoomState() {
         case .initial:
-            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.accentBlue.swiftUIColor
+            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }
@@ -51,11 +51,11 @@ struct JoinExistingRoom: View {
     private var joinColor: Color {
         switch roomState {
         case .initial:
-            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.accentBlue.swiftUIColor
+            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
         case .invalid:
-            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
         }
     }
 

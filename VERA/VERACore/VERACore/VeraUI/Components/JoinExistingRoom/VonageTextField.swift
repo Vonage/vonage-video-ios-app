@@ -38,12 +38,12 @@ struct VonageTextField: View {
         HStack(spacing: 12) {
             if !iconName.isEmpty {
                 Image(iconName, bundle: .veraCore)
-                    .foregroundColor(VERACommonUIAsset.vGray3.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                     .frame(width: 20)
             }
             if !systemIconName.isEmpty {
                 Image(systemName: systemIconName)
-                    .foregroundColor(VERACommonUIAsset.vGray3.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                     .frame(width: 20)
             }
 
@@ -75,9 +75,9 @@ struct VonageTextField: View {
     private var borderColor: Color {
         switch state {
         case .initial:
-            return VERACommonUIAsset.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.accentBlue.swiftUIColor
+            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
         case .invalid:
             return .red
         }

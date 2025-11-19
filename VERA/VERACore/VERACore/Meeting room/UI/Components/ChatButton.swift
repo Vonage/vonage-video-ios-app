@@ -36,7 +36,7 @@ struct ChatBadgeButton: View {
                 .frame(minWidth: badgeSize, minHeight: badgeSize)
                 .background(
                     Circle()
-                        .fill(VERACommonUIAsset.vGray3.swiftUIColor)
+                        .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                 )
                 .scaleEffect(unreadMessagesCount > MaxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)

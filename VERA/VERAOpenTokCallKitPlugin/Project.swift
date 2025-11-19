@@ -13,6 +13,7 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
                 .project(target: "VERACore", path: "../VERACore"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
             ]
         ),
         .target(
@@ -26,7 +27,7 @@ let project = Project(
                 .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
                 .target(name: "VERAOpenTokCallKitPlugin"),
                 .project(target: "VERACore", path: "../VERACore"),
-                .project(target: "VERATestHelpers", path: "../VERACore")
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ]
         ),
     ],
