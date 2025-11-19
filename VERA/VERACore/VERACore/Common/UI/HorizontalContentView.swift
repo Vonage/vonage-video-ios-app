@@ -6,6 +6,7 @@ import SwiftUI
 import VERACommonUI
 
 struct HorizontalContentView<Left: View, Right: View>: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     private let leftSide: () -> Left
     private let rightSide: () -> Right
@@ -29,11 +30,13 @@ struct HorizontalContentView<Left: View, Right: View>: View {
 
                 Spacer()
                 leftSide()
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Spacer()
 
-                Color.clear
-                    .frame(height: 50)
+                if verticalSizeClass == .regular {
+                    Color.clear
+                        .frame(height: 50)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal)
@@ -47,7 +50,7 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                 Spacer()
 
                 rightSide()
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 Spacer()
 

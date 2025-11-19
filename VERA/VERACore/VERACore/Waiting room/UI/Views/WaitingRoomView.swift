@@ -100,13 +100,14 @@ struct HorizontalWaitingRoomContentView: View {
 
     var body: some View {
         HorizontalContentView {
-            VideoPreviewView(
-                state: state,
-                userName: userName,
-                onMicrophoneToggle: onMicrophoneToggle,
-                onCameraToggle: onCameraToggle
-            )
-            .padding()
+            VStack(alignment: .center) {
+                VideoPreviewView(
+                    state: state,
+                    userName: userName,
+                    onMicrophoneToggle: onMicrophoneToggle,
+                    onCameraToggle: onCameraToggle
+                )
+            }
         } rightSide: {
             CardView {
                 PrepareToJoinRoom(
@@ -114,7 +115,6 @@ struct HorizontalWaitingRoomContentView: View {
                     userName: userName,
                     onJoinRoom: onJoinRoom)
             }
-            .padding()
         }
     }
 }
@@ -213,17 +213,16 @@ struct PrepareToJoinRoom: View {
 
 
     var body: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
 
             VStack {
                 UsernameInput(userName: userName)
             }
             .padding()
-            .padding(.top, 16)
 
             Divider()
 
-            VStack {
+            VStack(alignment: .leading) {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
                     .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
@@ -231,12 +230,12 @@ struct PrepareToJoinRoom: View {
                 Text(state.roomName)
                     .font(.subheadline)
                     .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
-            }.padding()
+                    .padding(.bottom, 8)
 
-            JoinRoomButton {
-                onJoinRoom()
-            }
-            .padding()
+                JoinRoomButton {
+                    onJoinRoom()
+                }
+            }.padding()
         }
     }
 }
