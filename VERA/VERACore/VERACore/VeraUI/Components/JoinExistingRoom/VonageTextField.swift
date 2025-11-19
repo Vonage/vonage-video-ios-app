@@ -34,15 +34,12 @@ struct VonageTextField: View {
         ZStack(alignment: .leading) {
             Group {
                 if forceLowercase {
-                    TextField(placeholder.capitalizingFirstLetter, text: text)
+                    TextField(placeholder.capitalizingFirstLetter, text: lowercasedBinding)
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                         #if os(iOS)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                            .onChange(of: text.wrappedValue) { newValue in
-                                text.wrappedValue = newValue.lowercased()
-                            }
                         #endif
                 } else {
                     TextField(placeholder.capitalizingFirstLetter, text: text)
@@ -99,6 +96,13 @@ struct VonageTextField: View {
             self.labelWidth = width
         }
         .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+    }
+
+    private var lowercasedBinding: Binding<String> {
+        Binding(
+            get: { text.wrappedValue },
+            set: { text.wrappedValue = $0.lowercased() }
+        )
     }
 
     private var borderColor: Color {
