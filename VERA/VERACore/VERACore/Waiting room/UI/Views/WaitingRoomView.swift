@@ -234,11 +234,8 @@ struct PrepareToJoinRoom: View {
                 JoinRoomButton {
                     onJoinRoom()
                 }
-            }.if(
-                verticalSizeClass == .regular,
-                transform: { content in
-                    content.padding()
-                })
+            }
+            .padding()
         }
     }
 }

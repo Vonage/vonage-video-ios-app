@@ -20,59 +20,50 @@ struct HorizontalContentView<Left: View, Right: View>: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            HStack(spacing: 0) {
-                // MARK: - Left Side
-                VStack(spacing: 0) {
-                    HStack(spacing: 0) {
-                        BannerLogo()
-                        Spacer()
-                    }
-                    .padding(.top, geometry.safeAreaInsets.top)
-
+        HStack(spacing: 0) {
+            // MARK: - Left Side
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    BannerLogo()
                     Spacer()
-                    leftSide()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    Spacer()
-
-                    if verticalSizeClass == .regular {
-                        Color.clear
-                            .frame(height: 50)
-                    }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.horizontal)
-                .background(
-                    Color.clear
-                        .ignoresSafeArea()
-                )
 
-                // MARK: - Right Side
-                VStack(alignment: .center, spacing: 0) {
-                    Spacer()
-
-                    rightSide()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                    Spacer()
-
-                    HStack(spacing: 8) {
-                        GHRepoButton()
-                        Text("Vonage Video Reference Application", bundle: .veraCore)
-                            .adaptiveFont(.bodyBase)
-                            .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .padding(.bottom, geometry.safeAreaInsets.bottom)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.horizontal)
-                .background(
-                    VERACommonUIAsset.SemanticColors.background.swiftUIColor
-                        .ignoresSafeArea()
-                )
+                Spacer()
+                leftSide()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal)
+            .background(
+                Color.clear
+                    .ignoresSafeArea()
+            )
+
+            // MARK: - Right Side
+            VStack(alignment: .center, spacing: 0) {
+                Spacer()
+
+                rightSide()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                Spacer()
+
+                HStack(spacing: 8) {
+                    GHRepoButton()
+                    Text("Vonage Video Reference Application", bundle: .veraCore)
+                        .adaptiveFont(.bodyBase)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal)
+            .background(
+                VERACommonUIAsset.SemanticColors.background.swiftUIColor
+                    .ignoresSafeArea()
+            )
         }
     }
 }
