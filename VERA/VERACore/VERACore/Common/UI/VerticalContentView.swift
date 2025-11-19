@@ -8,26 +8,30 @@ import VERACommonUI
 struct VerticalContentView<Top: View, Bottom: View>: View {
     private let topSide: () -> Top
     private let bottomSide: () -> Bottom
+    private let showLogo: Bool
 
     init(
+        showLogo: Bool = true,
         @ViewBuilder topSide: @escaping () -> Top,
         @ViewBuilder bottomSide: @escaping () -> Bottom
     ) {
+        self.showLogo = showLogo
         self.topSide = topSide
         self.bottomSide = bottomSide
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 0) {
-                BannerLogo()
-                    .padding(.horizontal)
-                Spacer()
+            if showLogo {
+                HStack(spacing: 0) {
+                    BannerLogo()
+                        .padding(.horizontal)
+                    Spacer()
+                }
+                .padding()
             }
-            .padding()
 
             topSide()
-                .padding(.horizontal)
 
             bottomSide()
                 .frame(maxWidth: .infinity)
@@ -37,18 +41,11 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
 
             HStack(spacing: 8) {
                 GHRepoButton()
-                Text("Vonage Video Reference Application", bundle: .veraCore)
-                    .adaptiveFont(.bodyBase)
-                    .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 50)
             .padding(.horizontal)
         }
-        .background(
-            VERACommonUIAsset.SemanticColors.background.swiftUIColor
-                .ignoresSafeArea()
-        )
     }
 }
 

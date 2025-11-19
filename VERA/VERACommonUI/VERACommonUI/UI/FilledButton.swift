@@ -52,7 +52,6 @@ struct FilledButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(VERACommonUIAsset.SemanticColors.border.swiftUIColor, lineWidth: 1)
             )
-            .shadow(radius: 5)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
             .frame(maxWidth: .infinity)
     }

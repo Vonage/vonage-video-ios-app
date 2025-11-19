@@ -99,8 +99,8 @@ public struct VerticalGoodByeContentView: View {
                 onReenter: onReenter,
                 onReturnToLanding: onReturnToLanding
             )
-            .padding(.bottom, 40)
-            .padding(.horizontal, 20)
+            .padding(.horizontal)
+            .padding()
         } bottomSide: {
             ArchiveList(archives: archives)
                 .padding()

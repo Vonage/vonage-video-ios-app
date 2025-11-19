@@ -88,6 +88,7 @@ public struct VerticalLandingContentView: View {
     public var body: some View {
         VerticalContentView {
             LandingPageWelcome()
+                .padding(.horizontal)
                 .padding()
         } bottomSide: {
             RoomJoinContainer(

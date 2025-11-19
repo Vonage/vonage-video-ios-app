@@ -128,7 +128,7 @@ struct VerticalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        VerticalContentView {
+        VerticalContentView(showLogo: false) {
             VideoPreviewView(
                 state: state,
                 userName: userName,
@@ -162,8 +162,10 @@ struct VideoPreviewView: View {
                 onCameraToggle: onCameraToggle
             )
             .aspectRatio(16 / 9, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: horizontalSizeClass == .compact ? BorderRadius.none.value : BorderRadius.medium.value)
+            )
             .animation(.easeInOut, value: cornerRadius)
 
             HStack {
