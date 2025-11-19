@@ -40,6 +40,7 @@ public struct LandingPageView: View {
                     onJoinRoom: onJoinRoom)
             }
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

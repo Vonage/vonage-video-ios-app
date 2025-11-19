@@ -27,10 +27,11 @@ struct LandingPageWelcomeCompact: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             LandingTitleCompact()
                 .padding(.bottom, 10)
                 .adaptiveFont(.headline)
+                .minimumScaleFactor(0.5)
         }
     }
 }
@@ -40,7 +41,7 @@ struct LandingPageWelcomeRegular: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             LandingTitleRegular()
                 .adaptiveFont(.headline)
                 .minimumScaleFactor(0.5)
@@ -55,19 +56,23 @@ struct LandingPageWelcomeRegular: View {
 
 struct LandingTitleRegular: View {
     var body: some View {
-        (Text("Upgrade\n", bundle: .veraCore)
-            + Text("video\n", bundle: .veraCore)
+        (Text("Upgrade \n", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+            + Text("video \n", bundle: .veraCore)
             .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-            + Text("communication", bundle: .veraCore))
+            + Text("communication", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor))
     }
 }
 
 struct LandingTitleCompact: View {
     var body: some View {
         (Text("Upgrade ", bundle: .veraCore)
-            + Text("video\n", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+            + Text("video \n", bundle: .veraCore)
             .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-            + Text("communication", bundle: .veraCore))
+            + Text("communication", bundle: .veraCore)
+            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor))
     }
 }
 

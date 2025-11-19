@@ -42,7 +42,7 @@ public struct GoodByeView: View {
                     onReturnToLanding: onReturnToLanding)
             }
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 

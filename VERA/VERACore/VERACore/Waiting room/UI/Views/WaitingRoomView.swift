@@ -87,7 +87,6 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -116,6 +115,7 @@ struct HorizontalWaitingRoomContentView: View {
                     onJoinRoom: onJoinRoom)
             }
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -141,6 +141,7 @@ struct VerticalWaitingRoomContentView: View {
                 userName: userName,
                 onJoinRoom: onJoinRoom)
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -163,8 +164,7 @@ struct VideoPreviewView: View {
             )
             .aspectRatio(16 / 9, contentMode: .fit)
             .clipShape(
-                RoundedRectangle(
-                    cornerRadius: horizontalSizeClass == .compact ? BorderRadius.none.value : BorderRadius.medium.value)
+                RoundedRectangle(cornerRadius: cornerRadius)
             )
             .animation(.easeInOut, value: cornerRadius)
 
@@ -197,24 +197,23 @@ struct VideoPreviewView: View {
 
     var cornerRadius: CGFloat {
         if verticalSizeClass == .compact {
-            16
+            BorderRadius.medium.value
         } else if horizontalSizeClass == .compact {
-            0
+            BorderRadius.none.value
         } else {
-            16
+            BorderRadius.medium.value
         }
     }
 }
 
 struct PrepareToJoinRoom: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
     let state: WaitingRoomState
     var userName: Binding<String>
     let onJoinRoom: () -> Void
 
-
     var body: some View {
         VStack(alignment: .leading) {
-
             VStack {
                 UsernameInput(userName: userName)
             }
@@ -235,7 +234,9 @@ struct PrepareToJoinRoom: View {
                 JoinRoomButton {
                     onJoinRoom()
                 }
-            }.padding()
+            }.if(verticalSizeClass == .regular, transform: { content in
+                content.padding()
+            })
         }
     }
 }
