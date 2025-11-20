@@ -18,16 +18,24 @@ struct JoinExistingRoom: View {
 
     var body: some View {
         HStack {
-            VonageTextField(
-                placeholder: String(localized: "Enter room name", bundle: .veraCore),
-                text: $roomName,
-                state: roomState,
-                forceLowercase: true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Join existing meeting", bundle: .veraCore)
+                    .adaptiveFont(.heading4)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                    .padding(.bottom, 8)
 
-            JoinButton(roomName: $roomName, color: joinColor) {
-                onJoinRoom(roomName)
+                VonageTextField(
+                    placeholder: String(localized: "Room name", bundle: .veraCore),
+                    text: $roomName,
+                    state: roomState,
+                    forceLowercase: true)
+
+                JoinButton(roomName: $roomName, color: joinColor) {
+                    onJoinRoom(roomName)
+                }
+                .padding(.vertical, 16)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
             }
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
         }
         .onChange(of: roomName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -39,9 +47,9 @@ struct JoinExistingRoom: View {
     private var borderColor: Color {
         switch getRoomState() {
         case .initial:
-            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
+            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
         case .invalid:
             return .red
         }
@@ -50,11 +58,11 @@ struct JoinExistingRoom: View {
     private var joinColor: Color {
         switch roomState {
         case .initial:
-            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
         case .valid:
-            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
+            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
         case .invalid:
-            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
+            return VERACommonUIAsset.SemanticColors.error.swiftUIColor
         }
     }
 

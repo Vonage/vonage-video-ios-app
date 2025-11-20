@@ -16,12 +16,14 @@ struct ArchiveList: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("Recordings", bundle: .veraCore)
-                .font(.largeTitle.bold())
+                .adaptiveFont(.heading1)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 10)
             if archives.isEmpty {
                 Text("There are no recordings for this meeting", bundle: .veraCore)
-                    .foregroundStyle(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
+                    .adaptiveFont(.heading2)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
             } else {
                 ForEach(archives, id: \.id) { archive in
                     HStack {

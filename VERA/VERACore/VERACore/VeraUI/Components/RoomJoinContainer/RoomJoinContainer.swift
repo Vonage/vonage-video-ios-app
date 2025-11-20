@@ -3,19 +3,24 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct RoomJoinContainer: View {
     let onHandleNewRoom: () -> Void
     let onJoinRoom: (String) -> Void
 
     var body: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
+            Text("Start a new video meeting", bundle: .veraCore)
+                .adaptiveFont(.heading4)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+
             NewRoomButton(onHandleNewRoom: onHandleNewRoom)
 
             JoinContainerSeparator()
 
             JoinExistingRoom(onJoinRoom: onJoinRoom)
-        }.frame(maxWidth: 320)
+        }
     }
 }
 

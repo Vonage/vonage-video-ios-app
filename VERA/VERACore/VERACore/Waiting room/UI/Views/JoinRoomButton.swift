@@ -3,18 +3,16 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct JoinRoomButton: View {
 
     let onJoinRoom: () -> Void
 
     var body: some View {
-        Button {
-            onJoinRoom()
-        } label: {
-            Text("Join", bundle: .veraCore)
-        }
-        .buttonStyle(NewRoomButtonStyle())
+        FilledButton(
+            text: Text("Join meeting", bundle: .veraCore),
+            onAction: onJoinRoom)
     }
 }
 

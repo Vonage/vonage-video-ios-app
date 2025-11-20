@@ -87,7 +87,6 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
     }
 }
 
@@ -99,22 +98,24 @@ struct HorizontalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 20) {
-            VideoPreviewView(
-                state: state,
-                userName: userName,
-                onMicrophoneToggle: onMicrophoneToggle,
-                onCameraToggle: onCameraToggle
-            )
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-
-            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        HorizontalContentView {
+            VStack(alignment: .center) {
+                VideoPreviewView(
+                    state: state,
+                    userName: userName,
+                    onMicrophoneToggle: onMicrophoneToggle,
+                    onCameraToggle: onCameraToggle
+                )
+            }
+        } rightSide: {
+            CardView {
+                PrepareToJoinRoom(
+                    state: state,
+                    userName: userName,
+                    onJoinRoom: onJoinRoom)
+            }
         }
-        .frame(maxHeight: .infinity)
-        .padding(0)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -127,21 +128,20 @@ struct VerticalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
+        VerticalContentView(showLogo: false) {
             VideoPreviewView(
                 state: state,
                 userName: userName,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
-            .frame(maxWidth: .infinity)
-
-            PrepareToJoinRoom(state: state, userName: userName, onJoinRoom: onJoinRoom)
-
-            Spacer()
+        } bottomSide: {
+            PrepareToJoinRoom(
+                state: state,
+                userName: userName,
+                onJoinRoom: onJoinRoom)
         }
-        .frame(maxHeight: .infinity)
-        .padding(0)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -163,8 +163,9 @@ struct VideoPreviewView: View {
                 onCameraToggle: onCameraToggle
             )
             .aspectRatio(16 / 9, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+            .clipShape(
+                RoundedRectangle(cornerRadius: cornerRadius)
+            )
             .animation(.easeInOut, value: cornerRadius)
 
             HStack {
@@ -196,24 +197,31 @@ struct VideoPreviewView: View {
 
     var cornerRadius: CGFloat {
         if verticalSizeClass == .compact {
-            16
+            BorderRadius.medium.value
         } else if horizontalSizeClass == .compact {
-            0
+            BorderRadius.none.value
         } else {
-            16
+            BorderRadius.medium.value
         }
     }
 }
 
 struct PrepareToJoinRoom: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
     let state: WaitingRoomState
     var userName: Binding<String>
     let onJoinRoom: () -> Void
 
-
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             VStack {
+                UsernameInput(userName: userName)
+            }
+            .padding()
+
+            Divider()
+
+            VStack(alignment: .leading) {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
                     .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
@@ -221,13 +229,11 @@ struct PrepareToJoinRoom: View {
                 Text(state.roomName)
                     .font(.subheadline)
                     .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
-            }.padding()
+                    .padding(.bottom, 8)
 
-            UsernameInput(userName: userName)
-                .frame(maxWidth: 300)
-
-            JoinRoomButton {
-                onJoinRoom()
+                JoinRoomButton {
+                    onJoinRoom()
+                }
             }
             .padding()
         }
