@@ -46,6 +46,8 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
             .frame(height: 50)
             .padding(.horizontal)
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .ignoresSafeArea(.keyboard)
     }
 }
 

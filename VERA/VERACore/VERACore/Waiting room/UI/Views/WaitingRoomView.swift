@@ -115,7 +115,6 @@ struct HorizontalWaitingRoomContentView: View {
                     onJoinRoom: onJoinRoom)
             }
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -141,7 +140,6 @@ struct VerticalWaitingRoomContentView: View {
                 userName: userName,
                 onJoinRoom: onJoinRoom)
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 

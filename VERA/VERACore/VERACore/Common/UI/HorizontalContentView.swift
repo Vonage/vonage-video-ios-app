@@ -65,6 +65,8 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                     .ignoresSafeArea()
             )
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .ignoresSafeArea(.keyboard)
     }
 }
 
