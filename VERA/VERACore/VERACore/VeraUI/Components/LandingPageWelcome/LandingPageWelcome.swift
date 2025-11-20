@@ -27,6 +27,7 @@ struct LandingPageWelcomeCompact: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             LandingTitleCompact()
+                .lineLimit(2)
                 .padding(.bottom, 10)
                 .adaptiveFont(.headline)
                 .minimumScaleFactor(0.5)
@@ -40,6 +41,7 @@ struct LandingPageWelcomeRegular: View {
         VStack(alignment: .leading, spacing: 0) {
             LandingTitleRegular()
                 .adaptiveFont(.headline)
+                .lineLimit(3)
                 .minimumScaleFactor(0.5)
                 .padding(.bottom, 10)
 
