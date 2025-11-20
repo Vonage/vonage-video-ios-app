@@ -10,9 +10,16 @@ import OpenTok
 import UIKit
 import VERACommonUI
 
+protocol CXProviderProtocol {
+    func setDelegate(_ delegate: CXProviderDelegate?, queue: DispatchQueue?)
+    func reportCall(with UUID: UUID, updated update: CXCallUpdate)
+}
+
+extension CXProvider: CXProviderProtocol {}
+
 final class ProviderDelegate: NSObject, CXProviderDelegate {
 
-    private let provider: CXProvider
+    private let provider: CXProviderProtocol
     private let sessionManager: OTAudioSessionManager?
 
     var onEndCall: (() -> Void)?
@@ -20,13 +27,16 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
     var onHold: ((Bool) -> Void)?
     var onMute: ((Bool) -> Void)?
 
-    init(sessionManager: OTAudioSessionManager?) {
+    init(
+        provider: CXProviderProtocol? = nil,
+        sessionManager: OTAudioSessionManager? = nil
+    ) {
         self.sessionManager = sessionManager
-        provider = CXProvider(configuration: type(of: self).providerConfiguration)
+        self.provider = provider ?? CXProvider(configuration: type(of: self).providerConfiguration)
 
         super.init()
 
-        provider.setDelegate(self, queue: nil)
+        self.provider.setDelegate(self, queue: nil)
     }
 
     /// The app's provider configuration, representing its CallKit capabilities
