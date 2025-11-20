@@ -6,6 +6,8 @@ import SwiftUI
 import VERACommonUI
 
 struct WaitingRoomUserPreviewView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
     private let state: WaitingRoomState
     private let userName: Binding<String>
     private let onMicrophoneToggle: () -> Void
@@ -66,7 +68,7 @@ struct WaitingRoomUserPreviewView: View {
                 .padding(.bottom, 20)
             }
         }
-        .frame(maxWidth: 480, maxHeight: 320)
+        .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 480, maxHeight: 320)
     }
 }
 

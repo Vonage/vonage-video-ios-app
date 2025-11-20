@@ -25,31 +25,24 @@ public struct GoodByeView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            Banner()
-                .frame(height: 70)
-                .padding(.horizontal, 8)
-            Group {
-                if verticalSizeClass == .compact {
-                    HorizontalGoodByeContentView(
-                        archives: archives,
-                        onReenter: onReenter,
-                        onReturnToLanding: onReturnToLanding)
-                } else if horizontalSizeClass == .compact {
-                    VerticalGoodByeContentView(
-                        archives: archives,
-                        onReenter: onReenter,
-                        onReturnToLanding: onReturnToLanding)
-                } else {
-                    HorizontalGoodByeContentView(
-                        archives: archives,
-                        onReenter: onReenter,
-                        onReturnToLanding: onReturnToLanding)
-                }
+            if verticalSizeClass == .compact {
+                HorizontalGoodByeContentView(
+                    archives: archives,
+                    onReenter: onReenter,
+                    onReturnToLanding: onReturnToLanding)
+            } else if horizontalSizeClass == .compact {
+                VerticalGoodByeContentView(
+                    archives: archives,
+                    onReenter: onReenter,
+                    onReturnToLanding: onReturnToLanding)
+            } else {
+                HorizontalGoodByeContentView(
+                    archives: archives,
+                    onReenter: onReenter,
+                    onReturnToLanding: onReturnToLanding)
             }
-            .frame(maxHeight: .infinity)
-            .padding(10)
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -70,16 +63,16 @@ public struct HorizontalGoodByeContentView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: 20) {
+        HorizontalContentView {
             GoodByeMessage(
                 onReenter: onReenter,
                 onReturnToLanding: onReturnToLanding
             )
-            .frame(maxWidth: .infinity)
             .padding(.bottom, 40)
-
+            .padding(.horizontal, 20)
+        } rightSide: {
             ArchiveList(archives: archives)
-                .frame(maxWidth: .infinity)
+                .padding()
         }
     }
 }
@@ -101,18 +94,16 @@ public struct VerticalGoodByeContentView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .center, spacing: 20) {
+        VerticalContentView {
             GoodByeMessage(
                 onReenter: onReenter,
                 onReturnToLanding: onReturnToLanding
             )
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 40)
-            .padding(.horizontal, 20)
-
+            .padding(.horizontal)
+            .padding()
+        } bottomSide: {
             ArchiveList(archives: archives)
-                .frame(maxWidth: .infinity)
-            Spacer()
+                .padding()
         }
     }
 }
