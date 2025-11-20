@@ -9,6 +9,9 @@ import VERACore
 import VERAOpenTok
 
 public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder {
+    public enum Error: Swift.Error {
+        case invalidCallID
+    }
 
     public weak var call: (any VERACore.CallFacade)?
 
@@ -21,7 +24,7 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
 
     public init() {}
 
-    public func callDidStart(_ userInfo: [String: Any]) {
+    public func callDidStart(_ userInfo: [String: Any]) throws {
         let roomName = userInfo[OpenTokCallParams.roomName.rawValue] as? String ?? ""
         let callID = userInfo[OpenTokCallParams.callID.rawValue] as? String ?? ""
 
@@ -29,7 +32,7 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
             currentCallID = callUUID
             callManager.startCall(handle: roomName, callID: callUUID)
         } else {
-            assertionFailure("callID is not a valid UUID")
+            throw Error.invalidCallID
         }
     }
 

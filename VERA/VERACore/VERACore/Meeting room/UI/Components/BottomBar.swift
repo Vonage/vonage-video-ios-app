@@ -116,7 +116,7 @@ struct BottomBarBackground: View {
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: 16)
-            .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
+                .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {

@@ -23,6 +23,9 @@ public class MockCall: VERACore.CallFacade {
 
     public var recordedActions: [CallActions] = []
 
+    public var isMuted: Bool = false
+    public var isOnHold: Bool = false
+
     public enum CallActions: String {
         case connect
         case disconnect
@@ -56,10 +59,12 @@ public class MockCall: VERACore.CallFacade {
     }
 
     public func muteLocalMedia(_ isMuted: Bool) {
+        self.isMuted = isMuted
         recordedActions.append(.muteLocalMedia)
     }
 
     public func setOnHold(_ isOnHold: Bool) {
+        self.isOnHold = isOnHold
         recordedActions.append(.setOnHold)
     }
 }

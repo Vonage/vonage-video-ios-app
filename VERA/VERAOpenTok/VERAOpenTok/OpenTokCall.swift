@@ -283,6 +283,10 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Audio/Video toggles
 
+    public var isMuted: Bool {
+        !publisher.publishAudio && !publisher.publishVideo
+    }
+
     public func toggleLocalCamera() {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
     }
@@ -304,6 +308,8 @@ public final class OpenTokCall: CallFacade {
             isPublishingAudio: publisher.publishAudio,
             isPublishingVideo: publisher.publishVideo)
     }
+
+    public var isOnHold: Bool { publisher.isOnHold }
 
     public func setOnHold(_ isOnHold: Bool) {
         Task { [weak self] in
@@ -360,7 +366,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func notifyCallDidStartToPlugins() {
-        plugins.forEach { $0.callDidStart(callParams) }
+        plugins.forEach { try? $0.callDidStart(callParams) }
     }
 
     private func notifyCallDidEndToPlugins() {

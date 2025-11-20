@@ -26,6 +26,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var participant: Participant
     @Published public private(set) var wasPublishingVideo: Bool = false
     @Published public private(set) var wasPublishingAudio: Bool = false
+    @Published public private(set) var isOnHold: Bool = false
 
     public var aspectRatio: Double { videoDimensions.aspectRatio }
     public var hasSession: Bool { otPublisher.session != nil }
@@ -142,6 +143,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             otPublisher.publishAudio = wasPublishingAudio
             otPublisher.publishVideo = wasPublishingVideo
         }
+        self.isOnHold = isOnHold
     }
 
     public func cleanUp() {

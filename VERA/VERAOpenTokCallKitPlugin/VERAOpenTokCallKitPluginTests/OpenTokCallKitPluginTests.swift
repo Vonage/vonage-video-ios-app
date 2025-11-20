@@ -20,7 +20,7 @@ struct OpenTokCallKitPluginTests {
         let callManagerSpy = VERACallManagerSpy()
         sut.callManager = callManagerSpy
 
-        sut.callDidStart([
+        try sut.callDidStart([
             OpenTokCallParams.roomName.rawValue: "a-room-name",
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
@@ -36,7 +36,7 @@ struct OpenTokCallKitPluginTests {
         let callManagerSpy = VERACallManagerSpy()
         sut.callManager = callManagerSpy
 
-        sut.callDidStart([
+        try sut.callDidStart([
             OpenTokCallParams.roomName.rawValue: "a-room-name",
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
@@ -68,9 +68,162 @@ struct OpenTokCallKitPluginTests {
 
         await delay()
 
-        #expect(call.recordedActions == [.disconnect])
+        /// It can contain more than one disconnect, due to the end call and provider reset
+        #expect(call.recordedActions.contains(.disconnect))
     }
 
+    @Test func setupInitializesCallManager() async {
+        let sut = makeSUT()
+
+        #expect(sut.callManager == nil)
+
+        sut.setup()
+
+        #expect(sut.callManager != nil)
+    }
+
+    @Test func setupInitializesSessionManager() async {
+        let sut = makeSUT()
+
+        #expect(sut.sessionManager == nil)
+
+        sut.setup()
+
+        #expect(sut.sessionManager != nil)
+    }
+
+    @Test func setupInitializesProviderDelegate() async {
+        let sut = makeSUT()
+
+        #expect(sut.providerDelegate == nil)
+
+        sut.setup()
+
+        #expect(sut.providerDelegate != nil)
+    }
+
+    @Test(arguments: [true, false])
+    func whenProviderDelegateCallsOnHoldShouldSetCallOnHoldState(isOnHold: Bool) async {
+        let sut = makeSUT()
+        let call = MockCall()
+        sut.call = call
+
+        sut.setup()
+
+        sut.providerDelegate?.onHold?(isOnHold)
+
+        #expect(call.isOnHold == isOnHold)
+        #expect(call.recordedActions.contains(.setOnHold))
+    }
+
+    @Test(arguments: [true, false])
+    func whenProviderDelegateCallsOnMuteShouldSetMuteState(isMuted: Bool) async {
+        let sut = makeSUT()
+        let call = MockCall()
+        sut.call = call
+
+        sut.setup()
+
+        sut.providerDelegate?.onMute?(isMuted)
+
+        #expect(call.isMuted == isMuted)
+        #expect(call.recordedActions.contains(.muteLocalMedia))
+    }
+
+    @Test func whenProviderDelegateResetsProviderShouldDisconnect() async {
+        let sut = makeSUT()
+        let call = MockCall()
+        sut.call = call
+
+        sut.setup()
+
+        sut.providerDelegate?.onProviderReset?()
+
+        await delay()
+
+        #expect(call.recordedActions.contains(.disconnect))
+    }
+
+    @Test func callDidStartWithInvalidUUIDShouldNotStartCall() async throws {
+        let sut = makeSUT()
+        let callManagerSpy = VERACallManagerSpy()
+        sut.callManager = callManagerSpy
+
+        do {
+            try sut.callDidStart([
+                OpenTokCallParams.roomName.rawValue: "a-room-name"
+            ])
+            Issue.record("Expected call id error to be thrown")
+        } catch {
+            // Should throw an error
+        }
+    }
+
+    @Test func callDidStartWithMissingRoomNameShouldUseEmptyString() async throws {
+        let sut = makeSUT()
+        let uuid = UUID()
+        let callManagerSpy = VERACallManagerSpy()
+        sut.callManager = callManagerSpy
+
+        try sut.callDidStart([
+            OpenTokCallParams.callID.rawValue: uuid.uuidString
+        ])
+
+        #expect(callManagerSpy.recordedActions == [.startCall(.init(handle: "", callID: uuid))])
+    }
+
+    @Test func callDidEndWithoutCurrentCallIDShouldNotCallEndOnCallManager() async {
+        let sut = makeSUT()
+        let callManagerSpy = VERACallManagerSpy()
+        sut.callManager = callManagerSpy
+
+        sut.callDidEnd()
+
+        #expect(callManagerSpy.recordedActions.isEmpty)
+    }
+
+    @Test func callDidEndClearsCurrentCallID() async throws {
+        let sut = makeSUT()
+        let uuid = UUID()
+        let callManagerSpy = VERACallManagerSpy()
+        sut.callManager = callManagerSpy
+
+        try sut.callDidStart([
+            OpenTokCallParams.roomName.rawValue: "a-room-name",
+            OpenTokCallParams.callID.rawValue: uuid.uuidString,
+        ])
+
+        #expect(sut.currentCallID == uuid)
+
+        sut.callDidEnd()
+
+        #expect(sut.currentCallID == nil)
+    }
+
+    @Test func providerDelegateCallbacksWithNilCallShouldNotCrash() async {
+        let sut = makeSUT()
+
+        #expect(sut.call == nil)
+
+        sut.setup()
+
+        sut.providerDelegate?.onEndCall?()
+        await delay()
+
+        sut.providerDelegate?.onProviderReset?()
+        await delay()
+
+        sut.providerDelegate?.onHold?(true)
+        sut.providerDelegate?.onMute?(true)
+
+        // If reached here, no crash occurred
+    }
+
+    @Test func pluginIdentifierReturnsCorrectValue() async {
+        let sut = makeSUT()
+
+        #expect(sut.pluginIdentifier == "OpenTokCallKitPlugin")
+    }
 
     // MARK: SUT
 

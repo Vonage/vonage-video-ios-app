@@ -58,6 +58,8 @@ public protocol CallConnectable: AnyObject {
 }
 
 public protocol MediaToggleable: AnyObject {
+    var isMuted: Bool { get }
+
     func toggleLocalVideo()
     func toggleLocalCamera()
     func toggleLocalAudio()
@@ -65,6 +67,8 @@ public protocol MediaToggleable: AnyObject {
 }
 
 public protocol HoldeableCall: AnyObject {
+    var isOnHold: Bool { get }
+
     func setOnHold(_ isOnHold: Bool)
 }
 
