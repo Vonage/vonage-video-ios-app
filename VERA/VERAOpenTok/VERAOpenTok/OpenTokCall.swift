@@ -366,11 +366,57 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func notifyCallDidStartToPlugins() {
-        plugins.forEach { try? $0.callDidStart(callParams) }
+        Task {
+            await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+                for plugin in plugins {
+                    group.addTask {
+                        do {
+                            try await plugin.callDidStart(self.callParams)
+                            return (plugin.pluginIdentifier, .success(()))
+                        } catch {
+                            return (plugin.pluginIdentifier, .failure(error))
+                        }
+                    }
+                }
+
+                for await (identifier, result) in group {
+                    switch result {
+                    case .success:
+                        print("✅ Plugin \(identifier) started successfully")
+                    case .failure(let error):
+                        print("❌ Plugin \(identifier) failed to start: \(error)")
+                        self._eventsPublisher.send(.error(error))
+                    }
+                }
+            }
+        }
     }
 
     private func notifyCallDidEndToPlugins() {
-        plugins.forEach { $0.callDidEnd() }
+        Task {
+            await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+                for plugin in plugins {
+                    group.addTask {
+                        do {
+                            try await plugin.callDidEnd()
+                            return (plugin.pluginIdentifier, .success(()))
+                        } catch {
+                            return (plugin.pluginIdentifier, .failure(error))
+                        }
+                    }
+                }
+
+                for await (identifier, result) in group {
+                    switch result {
+                    case .success:
+                        print("✅ Plugin \(identifier) ended successfully")
+                    case .failure(let error):
+                        print("❌ Plugin \(identifier) failed to end: \(error)")
+                        self._eventsPublisher.send(.error(error))
+                    }
+                }
+            }
+        }
     }
 
     private func handleSignal(_ signal: OpenTokSignal) {

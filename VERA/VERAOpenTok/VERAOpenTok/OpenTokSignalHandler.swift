@@ -19,8 +19,8 @@ public protocol OpenTokSignalEmitter: AnyObject {
 
 /// Call based life cycle, didStart/didEnd are called when app connects/disconnects
 public protocol OpenTokPluginCallLifeCycle {
-    func callDidStart(_ userInfo: [String: Any]) throws
-    func callDidEnd()
+    func callDidStart(_ userInfo: [String: Any]) async throws
+    func callDidEnd() async throws
 }
 
 public protocol OpenTokPluginCallHolder: AnyObject {

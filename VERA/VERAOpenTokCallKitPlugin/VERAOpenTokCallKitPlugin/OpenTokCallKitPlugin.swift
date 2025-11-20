@@ -24,22 +24,22 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
 
     public init() {}
 
-    public func callDidStart(_ userInfo: [String: Any]) throws {
+    public func callDidStart(_ userInfo: [String: Any]) async throws {
         let roomName = userInfo[OpenTokCallParams.roomName.rawValue] as? String ?? ""
         let callID = userInfo[OpenTokCallParams.callID.rawValue] as? String ?? ""
 
         if let callUUID = UUID(uuidString: callID) {
             currentCallID = callUUID
-            callManager.startCall(handle: roomName, callID: callUUID)
+            try await callManager.startCall(handle: roomName, callID: callUUID)
         } else {
             throw Error.invalidCallID
         }
     }
 
-    public func callDidEnd() {
+    public func callDidEnd() async throws {
         guard let currentCallID = currentCallID else { return }
         self.currentCallID = nil
-        callManager.end(callID: currentCallID)
+        try await callManager.end(callID: currentCallID)
     }
 
     public func setup() {

@@ -14,42 +14,46 @@ import VERATestHelpers
 struct OpenTokCallKitPluginTests {
 
     @Test func notifiesToCallManagerWhenCallStarts() async throws {
-        let sut = makeSUT()
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
         let uuid = UUID()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
 
-        try sut.callDidStart([
+        try await sut.callDidStart([
             OpenTokCallParams.roomName.rawValue: "a-room-name",
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
 
-        #expect(callManagerSpy.recordedActions == [.startCall(.init(handle: "a-room-name", callID: uuid))])
+        #expect(
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "a-room-name", isVideo: true)
+            ])
         #expect(sut.currentCallID == uuid)
     }
 
     @Test func notifiesToCallManagerWhenCallEnds() async throws {
-        let sut = makeSUT()
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
         let uuid = UUID()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
 
-        try sut.callDidStart([
+        try await sut.callDidStart([
             OpenTokCallParams.roomName.rawValue: "a-room-name",
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
 
-        #expect(callManagerSpy.recordedActions == [.startCall(.init(handle: "a-room-name", callID: uuid))])
+        #expect(
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "a-room-name", isVideo: true)
+            ])
         #expect(sut.currentCallID == uuid)
 
-        sut.callDidEnd()
+        try await sut.callDidEnd()
 
         #expect(
-            callManagerSpy.recordedActions == [
-                .startCall(.init(handle: "a-room-name", callID: uuid)),
-                .end(.init(callID: uuid)),
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "a-room-name", isVideo: true),
+                .endCall(callID: uuid),
             ])
         #expect(sut.currentCallID == nil)
     }
@@ -144,60 +148,110 @@ struct OpenTokCallKitPluginTests {
         #expect(call.recordedActions.contains(.disconnect))
     }
 
-    @Test func callDidStartWithInvalidUUIDShouldNotStartCall() async throws {
-        let sut = makeSUT()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
+    @Test func callDidStartWithInvalidUUIDShouldThrowError() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
-        do {
-            try sut.callDidStart([
+        await #expect(throws: OpenTokCallKitPlugin.Error.invalidCallID) {
+            try await sut.callDidStart([
+                OpenTokCallParams.roomName.rawValue: "a-room-name",
+                OpenTokCallParams.callID.rawValue: "invalid-uuid",
+            ])
+        }
+
+        #expect(mockController.recordedActions.isEmpty)
+    }
+
+    @Test func callDidStartWithMissingCallIDShouldThrowError() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
+
+        await #expect(throws: OpenTokCallKitPlugin.Error.invalidCallID) {
+            try await sut.callDidStart([
                 OpenTokCallParams.roomName.rawValue: "a-room-name"
             ])
-            Issue.record("Expected call id error to be thrown")
-        } catch {
-            // Should throw an error
         }
+
+        #expect(mockController.recordedActions.isEmpty)
     }
 
     @Test func callDidStartWithMissingRoomNameShouldUseEmptyString() async throws {
-        let sut = makeSUT()
-        let uuid = UUID()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
-        try sut.callDidStart([
+        let uuid = UUID()
+
+        try await sut.callDidStart([
             OpenTokCallParams.callID.rawValue: uuid.uuidString
         ])
 
-        #expect(callManagerSpy.recordedActions == [.startCall(.init(handle: "", callID: uuid))])
+        #expect(
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "", isVideo: true)
+            ])
     }
 
-    @Test func callDidEndWithoutCurrentCallIDShouldNotCallEndOnCallManager() async {
-        let sut = makeSUT()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
+    @Test func callDidEndWithoutCurrentCallIDShouldNotCallEndOnCallManager() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
-        sut.callDidEnd()
+        try await sut.callDidEnd()
 
-        #expect(callManagerSpy.recordedActions.isEmpty)
+        #expect(mockController.recordedActions.isEmpty)
     }
 
     @Test func callDidEndClearsCurrentCallID() async throws {
-        let sut = makeSUT()
-        let uuid = UUID()
-        let callManagerSpy = VERACallManagerSpy()
-        sut.callManager = callManagerSpy
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
 
-        try sut.callDidStart([
+        let uuid = UUID()
+
+        try await sut.callDidStart([
             OpenTokCallParams.roomName.rawValue: "a-room-name",
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
 
         #expect(sut.currentCallID == uuid)
 
-        sut.callDidEnd()
+        try await sut.callDidEnd()
 
         #expect(sut.currentCallID == nil)
+    }
+
+    @Test func callDidStartWithCallControllerErrorShouldPropagateError() async throws {
+        let mockController = MockCallController()
+        let expectedError = NSError(domain: "test", code: -1)
+        mockController.errorToReturn = expectedError
+        let sut = makeSUT(callController: mockController)
+
+        let uuid = UUID()
+
+        await #expect(throws: Error.self) {
+            try await sut.callDidStart([
+                OpenTokCallParams.roomName.rawValue: "a-room-name",
+                OpenTokCallParams.callID.rawValue: uuid.uuidString,
+            ])
+        }
+    }
+
+    @Test func callDidEndWithCallControllerErrorShouldPropagateError() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController)
+
+        let uuid = UUID()
+
+        try await sut.callDidStart([
+            OpenTokCallParams.roomName.rawValue: "a-room-name",
+            OpenTokCallParams.callID.rawValue: uuid.uuidString,
+        ])
+
+        // Configura error después del start
+        let expectedError = NSError(domain: "test", code: -1)
+        mockController.errorToReturn = expectedError
+
+        await #expect(throws: Error.self) {
+            try await sut.callDidEnd()
+        }
     }
 
     @Test func providerDelegateCallbacksWithNilCallShouldNotCrash() async {
@@ -227,35 +281,12 @@ struct OpenTokCallKitPluginTests {
 
     // MARK: SUT
 
-    func makeSUT() -> OpenTokCallKitPlugin {
-        OpenTokCallKitPlugin()
-    }
-}
-
-class VERACallManagerSpy: VERACallManager {
-    struct StartCallData: Equatable {
-        let handle: String, callID: UUID
-    }
-
-    struct EndCallData: Equatable {
-        let callID: UUID
-    }
-
-    enum Action: Equatable {
-        case startCall(StartCallData)
-        case end(EndCallData)
-    }
-
-    var recordedActions: [Action] = []
-
-    override func startCall(handle: String, callID: UUID) {
-        recordedActions.append(.startCall(.init(handle: handle, callID: callID)))
-        super.startCall(handle: handle, callID: callID)
-    }
-
-    override func end(callID: UUID) {
-        recordedActions.append(.end(.init(callID: callID)))
-        super.end(callID: callID)
+    func makeSUT(callController: MockCallController? = nil) -> OpenTokCallKitPlugin {
+        let plugin = OpenTokCallKitPlugin()
+        if let callController = callController {
+            plugin.callManager = VERACallManager(callController: callController)
+        }
+        return plugin
     }
 }
 
