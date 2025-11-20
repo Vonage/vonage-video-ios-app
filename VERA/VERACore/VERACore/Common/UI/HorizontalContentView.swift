@@ -26,7 +26,7 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                 HStack(spacing: 0) {
                     BannerLogo()
                     Spacer()
-                }
+                }.padding(.top, 0)
 
                 Spacer()
                 leftSide()
