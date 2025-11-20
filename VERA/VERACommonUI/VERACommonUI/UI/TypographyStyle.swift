@@ -51,7 +51,7 @@ private struct AdaptiveFontModifier: ViewModifier {
 
         case .subtitle:
             return isCompact
-                ? TypographyConfig(fontSize: 18, lineHeight: 24, weight: .medium)
+                ? TypographyConfig(fontSize: 30, lineHeight: 40, weight: .medium)
                 : TypographyConfig(fontSize: 52, lineHeight: 68, weight: .medium)
 
         case .heading1:
