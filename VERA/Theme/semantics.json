@@ -138,8 +138,8 @@
                         "font-weight": 500
                     },
                     "subtitle": {
-                        "font-size": "18px",
-                        "line-height": "24px",
+                        "font-size": "30px",
+                        "line-height": "40px",
                         "font-weight": 500
                     },
                     "heading-1": {

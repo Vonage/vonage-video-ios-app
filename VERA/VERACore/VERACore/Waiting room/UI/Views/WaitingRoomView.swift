@@ -91,6 +91,8 @@ public struct WaitingRoomView: View {
 }
 
 struct HorizontalWaitingRoomContentView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+
     let state: WaitingRoomState
     var userName: Binding<String>
     let onJoinRoom: () -> Void
@@ -98,15 +100,13 @@ struct HorizontalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        HorizontalContentView {
-            VStack(alignment: .center) {
-                VideoPreviewView(
-                    state: state,
-                    userName: userName,
-                    onMicrophoneToggle: onMicrophoneToggle,
-                    onCameraToggle: onCameraToggle
-                )
-            }
+        HorizontalContentView(showHeader: verticalSizeClass == .regular) {
+            VideoPreviewView(
+                state: state,
+                userName: userName,
+                onMicrophoneToggle: onMicrophoneToggle,
+                onCameraToggle: onCameraToggle
+            )
         } rightSide: {
             CardView {
                 PrepareToJoinRoom(
@@ -115,14 +115,12 @@ struct HorizontalWaitingRoomContentView: View {
                     onJoinRoom: onJoinRoom)
             }
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
 struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
-    @FocusState private var isTextFieldFocused: Bool
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -141,7 +139,6 @@ struct VerticalWaitingRoomContentView: View {
                 userName: userName,
                 onJoinRoom: onJoinRoom)
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 

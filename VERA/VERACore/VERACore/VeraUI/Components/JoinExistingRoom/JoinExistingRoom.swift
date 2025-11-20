@@ -29,7 +29,11 @@ struct JoinExistingRoom: View {
                     text: $roomName,
                     state: roomState,
                     forceLowercase: true)
-
+                if !roomName.isEmpty && !roomName.isValidRoomName {
+                    Text("No spaces or special characters allowed", bundle: .veraCore)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                        .adaptiveFont(.caption)
+                }
                 JoinButton(roomName: $roomName, color: joinColor) {
                     onJoinRoom(roomName)
                 }
@@ -56,14 +60,7 @@ struct JoinExistingRoom: View {
     }
 
     private var joinColor: Color {
-        switch roomState {
-        case .initial:
-            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
-        case .valid:
-            return VERACommonUIAsset.SemanticColors.primary.swiftUIColor
-        case .invalid:
-            return VERACommonUIAsset.SemanticColors.error.swiftUIColor
-        }
+        VERACommonUIAsset.SemanticColors.primary.swiftUIColor
     }
 
     private func getRoomState() -> VonageTextFieldState {

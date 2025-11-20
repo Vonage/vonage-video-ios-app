@@ -46,6 +46,7 @@ public struct LandingPageView: View {
 }
 
 public struct HorizontalLandingContentView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     public let onHandleNewRoom: () -> Void
     public let onJoinRoom: (String) -> Void
@@ -59,7 +60,7 @@ public struct HorizontalLandingContentView: View {
     }
 
     public var body: some View {
-        HorizontalContentView {
+        HorizontalContentView(showFooter: verticalSizeClass == .regular) {
             LandingPageWelcome()
         } rightSide: {
             CardView {

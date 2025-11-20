@@ -10,11 +10,17 @@ struct HorizontalContentView<Left: View, Right: View>: View {
 
     private let leftSide: () -> Left
     private let rightSide: () -> Right
+    private let showHeader: Bool
+    private let showFooter: Bool
 
     init(
+        showHeader: Bool = true,
+        showFooter: Bool = true,
         @ViewBuilder leftSide: @escaping () -> Left,
         @ViewBuilder rightSide: @escaping () -> Right
     ) {
+        self.showHeader = showHeader
+        self.showFooter = showFooter
         self.leftSide = leftSide
         self.rightSide = rightSide
     }
@@ -23,14 +29,19 @@ struct HorizontalContentView<Left: View, Right: View>: View {
         HStack(spacing: 0) {
             // MARK: - Left Side
             VStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    BannerLogo()
-                    Spacer()
+                if showHeader {
+                    HStack(spacing: 0) {
+                        BannerLogo()
+                        Spacer()
+                    }
+                    .padding(.top, 20)
                 }
 
                 Spacer()
+
                 leftSide()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .fixedSize(horizontal: false, vertical: true)
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,14 +60,16 @@ struct HorizontalContentView<Left: View, Right: View>: View {
 
                 Spacer()
 
-                HStack(spacing: 8) {
-                    GHRepoButton()
-                    Text("Vonage Video Reference Application", bundle: .veraCore)
-                        .adaptiveFont(.bodyBase)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                if showFooter {
+                    HStack(spacing: 8) {
+                        GHRepoButton()
+                        Text("Vonage Video Reference Application", bundle: .veraCore)
+                            .adaptiveFont(.bodyBase)
+                            .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 40)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal)
@@ -65,6 +78,9 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                     .ignoresSafeArea()
             )
         }
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .ignoresSafeArea(.keyboard)
+        .ignoresSafeArea(edges: .top)
     }
 }
 
