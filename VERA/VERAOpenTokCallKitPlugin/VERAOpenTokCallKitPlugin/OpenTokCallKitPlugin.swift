@@ -49,12 +49,13 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
         providerDelegate = ProviderDelegate(sessionManager: sessionManager)
         providerDelegate?.onEndCall = { [weak self] in
             Task { [weak self] in
-                if self!.call != nil {
+                guard let self else { return }
+                if self.call != nil {
                     print("Call is not nil")
                 } else {
                     print("Call is nil")
                 }
-                try? await self?.call?.disconnect()
+                try? await self.call?.disconnect()
             }
         }
         providerDelegate?.onProviderReset = { [weak self] in
