@@ -14,7 +14,7 @@ struct EndCallControlButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "phone.down.fill")
+            VERACommonUIAsset.Images.endCallSolid.swiftUIImage
                 .font(.title2)
                 .foregroundStyle(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
                 .frame(width: 50, height: 50)

@@ -25,33 +25,28 @@ public struct LandingPageView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            Banner()
-                .frame(height: 70)
-                .padding(.horizontal, 8)
-            Group {
-                if verticalSizeClass == .compact {
-                    HorizontalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                } else if horizontalSizeClass == .compact {
-                    VerticalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                } else {
-                    HorizontalLandingContentView(
-                        onHandleNewRoom: onHandleNewRoom,
-                        onJoinRoom: onJoinRoom)
-                }
+        Group {
+            if verticalSizeClass == .compact {
+                HorizontalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
+            } else if horizontalSizeClass == .compact {
+                VerticalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
+            } else {
+                HorizontalLandingContentView(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom)
             }
-            .frame(maxHeight: .infinity)
-            .padding(10)
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 public struct HorizontalLandingContentView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     public let onHandleNewRoom: () -> Void
     public let onJoinRoom: (String) -> Void
@@ -65,16 +60,16 @@ public struct HorizontalLandingContentView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: 20) {
+        HorizontalContentView(showFooter: verticalSizeClass == .regular) {
             LandingPageWelcome()
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 40)
-
-            RoomJoinContainer(
-                onHandleNewRoom: onHandleNewRoom,
-                onJoinRoom: onJoinRoom
-            )
-            .frame(maxWidth: .infinity)
+        } rightSide: {
+            CardView {
+                RoomJoinContainer(
+                    onHandleNewRoom: onHandleNewRoom,
+                    onJoinRoom: onJoinRoom
+                )
+            }
+            .padding(.horizontal)
         }
     }
 }
@@ -93,18 +88,16 @@ public struct VerticalLandingContentView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .center, spacing: 20) {
+        VerticalContentView {
             LandingPageWelcome()
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 40)
-                .padding(.horizontal, 20)
-
+                .padding(.horizontal)
+                .padding()
+        } bottomSide: {
             RoomJoinContainer(
                 onHandleNewRoom: onHandleNewRoom,
                 onJoinRoom: onJoinRoom
             )
-            .frame(maxWidth: .infinity)
-            Spacer()
+            .padding()
         }
     }
 }

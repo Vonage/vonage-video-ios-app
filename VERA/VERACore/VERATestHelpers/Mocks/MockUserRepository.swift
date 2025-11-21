@@ -7,7 +7,7 @@ import VERACore
 
 public final class MockUserRepository: UserRepository {
 
-    public enum Action {
+    public enum Action: Equatable {
         case save(User)
         case get
     }

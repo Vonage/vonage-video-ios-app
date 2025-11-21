@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERADomain
 
 struct MeetingRoomContent: View {
 

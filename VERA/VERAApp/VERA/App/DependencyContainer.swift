@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import VERAConfiguration
 import VERACore
 import VERAOpenTok
 import VERAOpenTokCallKitPlugin
@@ -22,13 +23,7 @@ final class DependencyContainer {
 
     lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
 
-    lazy var audioDevicesRepository: any AudioDevicesRepository = {
-        let repository = AVFoundationAudioDevicesRepository(
-            audioSession: AVAudioSession.sharedInstance()
-        )
-        repository.loadAudioDevices()
-        return repository
-    }()
+    lazy var appConfig = AppConfig()
 
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
         let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
@@ -53,12 +48,12 @@ final class DependencyContainer {
     lazy var waitingRoomFactory = WaitingRoomFactory(
         publisherRepository: publisherRepository,
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-        audioDevicesRepository: audioDevicesRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository)
 
     lazy var meetingRoomFactory = MeetingRoomFactory(
         baseURL: baseURL,
+        appConfig: appConfig,
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,

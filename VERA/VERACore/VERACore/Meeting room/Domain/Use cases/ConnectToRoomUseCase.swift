@@ -4,7 +4,11 @@
 
 import Foundation
 
-public final class ConnectToRoomUseCase {
+public protocol ConnectToRoomUseCase {
+    func callAsFunction(roomName: RoomName) async throws -> CallFacade
+}
+
+public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
 
     private let sessionRepository: SessionRepository
     private let roomCredentialsRepository: RoomCredentialsRepository

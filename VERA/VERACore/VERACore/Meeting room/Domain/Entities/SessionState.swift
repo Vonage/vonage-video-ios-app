@@ -8,7 +8,7 @@ public struct SessionState {
     public let isPublishingAudio: Bool
     public let isPublishingVideo: Bool
 
-    public static var `default`: SessionState {
+    public static var initial: SessionState {
         .init(
             isPublishingAudio: false,
             isPublishingVideo: false

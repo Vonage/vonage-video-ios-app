@@ -6,6 +6,8 @@ import SwiftUI
 import VERACommonUI
 
 struct WaitingRoomUserPreviewView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
     private let state: WaitingRoomState
     private let userName: Binding<String>
     private let onMicrophoneToggle: () -> Void
@@ -46,23 +48,27 @@ struct WaitingRoomUserPreviewView: View {
                 Spacer()
 
                 HStack(spacing: 24) {
-                    if state.allowMicrophoneControl {
-                        CircularControlButton(
-                            isActive: state.isMicrophoneEnabled,
-                            iconName: state.isMicrophoneEnabled ? "mic.fill" : "mic.slash.fill",
-                            action: onMicrophoneToggle)
-                    }
                     if state.allowCameraControl {
-                        CircularControlButton(
+                        CircularControlImageButton(
                             isActive: state.isCameraEnabled,
-                            iconName: state.isCameraEnabled ? "video.fill" : "video.slash.fill",
+                            image: state.isCameraEnabled
+                                ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
+                                : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
                             action: onCameraToggle)
+                    }
+                    if state.allowMicrophoneControl {
+                        CircularControlImageButton(
+                            isActive: state.isMicrophoneEnabled,
+                            image: state.isMicrophoneEnabled
+                                ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+                                : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
+                            action: onMicrophoneToggle)
                     }
                 }
                 .padding(.bottom, 20)
             }
         }
-        .frame(maxWidth: 480, maxHeight: 320)
+        .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 480, maxHeight: 320)
     }
 }
 
@@ -75,7 +81,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: true,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Arthur Dent"),
@@ -90,7 +95,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: true,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Ford Prefect"),
@@ -105,7 +109,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: false,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Marvin"),
@@ -120,7 +123,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: false,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Slartibartfast"),
@@ -139,7 +141,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: true,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Arthur Dent"),
@@ -154,7 +155,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: true,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Ford Prefect"),
@@ -169,7 +169,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: false,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Marvin"),
@@ -184,7 +183,6 @@ struct WaitingRoomUserPreviewView: View {
                 isCameraEnabled: false,
                 allowMicrophoneControl: true,
                 allowCameraControl: true,
-                audioDevices: [],
                 cameras: [],
                 publisher: nil),
             userName: .constant("Slartibartfast"),

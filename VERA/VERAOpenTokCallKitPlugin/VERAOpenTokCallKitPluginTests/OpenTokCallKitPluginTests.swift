@@ -245,7 +245,7 @@ struct OpenTokCallKitPluginTests {
             OpenTokCallParams.callID.rawValue: uuid.uuidString,
         ])
 
-        // Configura error después del start
+        // Configure error after start
         let expectedError = NSError(domain: "test", code: -1)
         mockController.errorToReturn = expectedError
 

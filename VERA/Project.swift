@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 
 // MARK: - Configuration Reading
 private func readAppConfig() -> [String: Any] {
-    let configPath = "./app-config.json"
+    let configPath = "./Config/app-config.json"
     guard let configData = FileManager.default.contents(atPath: configPath) else {
         fatalError("Could not read app-config.json")
     }
@@ -95,6 +95,9 @@ let project = Project(
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
                     "UIBackgroundModes": .array(["audio", "voip"]),
+                    "CFBundleShortVersionString": "$(MARKETING_VERSION)",
+                    "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
+                    "ITSAppUsesNonExemptEncryption": false,
                 ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],

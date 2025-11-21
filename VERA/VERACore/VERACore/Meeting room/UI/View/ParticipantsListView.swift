@@ -72,7 +72,7 @@ public struct ParticipantsListView: View {
                     Spacer()
 
                     ShareLink(item: meetingURL) {
-                        Image(systemName: "square.and.arrow.up")
+                        VERACommonUIAsset.Images.shareLine.swiftUIImage
                             .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -120,7 +120,7 @@ struct ParticipantRowView: View {
 
             Spacer()
 
-            Image(systemName: participant.isMicEnabled ? "mic.fill" : "mic.slash.fill")
+            MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
                 .font(.caption)
                 .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
         }

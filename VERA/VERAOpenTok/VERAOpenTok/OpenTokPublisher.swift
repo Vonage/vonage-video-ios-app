@@ -22,7 +22,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
-    @Published public private(set) var videoDimensions = VideoDimensions.default
+    @Published public private(set) var videoDimensions = VideoDimensions.initial
     @Published public private(set) var participant: Participant
     @Published public private(set) var wasPublishingVideo: Bool = false
     @Published public private(set) var wasPublishingAudio: Bool = false
@@ -63,6 +63,17 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         }
     }
 
+    public func switchCamera(to cameraDeviceID: String) {
+        switch cameraDeviceID {
+        case OpenTokCameraDevice.front.rawValue:
+            otPublisher.cameraPosition = .front
+        case OpenTokCameraDevice.back.rawValue:
+            otPublisher.cameraPosition = .back
+        default:
+            break
+        }
+    }
+
     public init(publisher: OTPublisher) {
         otPublisher = publisher
         participant = Participant(
@@ -70,7 +81,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             name: publisher.stream?.name ?? "",
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,
-            videoDimensions: VideoDimensions.default,
+            videoDimensions: VideoDimensions.initial,
             isRemote: false,
             creationTime: date,
             isScreenshare: false,

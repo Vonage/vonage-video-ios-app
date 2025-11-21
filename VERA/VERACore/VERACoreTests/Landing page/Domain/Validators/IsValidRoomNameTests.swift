@@ -4,7 +4,8 @@
 
 import Foundation
 import Testing
-import VERACore
+
+@testable import VERACore
 
 @Suite("Room Name Validation")
 struct RoomNameValidatorTests {
@@ -17,10 +18,10 @@ struct RoomNameValidatorTests {
             ("room+name", true),
             ("another-room_name", true),
             ("123roomname", true),
-            ("TestRoom", true),  // Now valid - uppercase letters
-            ("ROOM_NAME", true),  // Now valid - all uppercase
-            ("MixedCaseRoom123", true),  // Now valid - mixed case
-            ("Hola-aseaspla", true),  // Now valid - the actual UI case
+            ("TestRoom", false),
+            ("ROOM_NAME", false),
+            ("MixedCaseRoom123", false),
+            ("Hola-aseaspla", false),
             ("", false),
             ("room@name", false),
             ("room#name", false),

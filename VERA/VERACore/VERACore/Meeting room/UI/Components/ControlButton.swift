@@ -17,8 +17,27 @@ struct ControlButton: View {
     }
 
     var body: some View {
+        ControlImageButton(
+            isActive: isActive,
+            image: Image(systemName: iconName),
+            action: action)
+    }
+}
+
+struct ControlImageButton: View {
+    private let isActive: Bool
+    private let image: Image
+    private let action: () -> Void
+
+    init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
+        self.isActive = isActive
+        self.image = image
+        self.action = action
+    }
+
+    var body: some View {
         Button(action: action) {
-            Image(systemName: iconName)
+            image
                 .font(.title2)
                 .foregroundStyle(isActive ? VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor : .red)
                 .frame(width: 50, height: 50)

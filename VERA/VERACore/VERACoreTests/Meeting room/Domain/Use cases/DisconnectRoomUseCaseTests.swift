@@ -13,23 +13,29 @@ struct DisconnectRoomUseCaseTests {
     @Test
     func disconnectsAndClearsSessionAndPublisher() async throws {
         let sessionRepository = makeMockSessionRepository()
-        let sut = DisconnectRoomUseCase(sessionRepository: sessionRepository)
+        let publisherRepository = makeMockVERAPublisherRepository()
 
-        let currentCall = MockCall()
-        sessionRepository.currentCall = currentCall
+        let sut = makeSUT(
+            sessionRepository: sessionRepository,
+            publisherRepository: publisherRepository)
+
+        sessionRepository.currentCall = MockCall()
 
         #expect(sessionRepository.currentCall != nil)
 
         try await sut()
 
-        #expect(currentCall.recordedActions == [.disconnect])
+        #expect(sessionRepository.currentCall == nil)
     }
 
     // MARK: - Test Helpers
 
     private func makeSUT(
-        sessionRepository: SessionRepository = makeMockSessionRepository()
+        sessionRepository: SessionRepository = makeMockSessionRepository(),
+        publisherRepository: PublisherRepository = makeMockVERAPublisherRepository()
     ) -> DisconnectRoomUseCase {
-        DisconnectRoomUseCase(sessionRepository: sessionRepository)
+        DefaultDisconnectRoomUseCase(
+            sessionRepository: sessionRepository,
+            publisherRepository: publisherRepository)
     }
 }

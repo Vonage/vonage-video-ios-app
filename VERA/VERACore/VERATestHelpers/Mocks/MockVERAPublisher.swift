@@ -29,6 +29,9 @@ public final class MockVERAPublisher: VERAPublisher {
         self.cameraPosition = cameraPosition
     }
 
+    public func switchCamera(to cameraDeviceID: String) {
+    }
+
     public func cleanUp() {
         didCallCleanUp = true
     }

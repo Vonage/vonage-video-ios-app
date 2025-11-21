@@ -10,13 +10,15 @@ public class LandingPageFactory {
 
     public init() {}
 
+    @MainActor
     public func make(
         onNavigateToWaitingRoom: @escaping (String) -> Void
     ) -> some View {
         LandingPageScreen(
             viewModel: .init(
-                tryJoinRoomUseCase: .init(),
-                tryCreatingANewRoomUseCase: .init(roomNameGenerator: roomNameGeneratorFactory.make())),
+                tryJoinRoomUseCase: DefaultTryJoinRoomUseCase(),
+                tryCreatingANewRoomUseCase: DefaultTryCreatingANewRoomUseCase(
+                    roomNameGenerator: roomNameGeneratorFactory.make())),
             onNavigateToWaitingRoom: onNavigateToWaitingRoom)
     }
 }

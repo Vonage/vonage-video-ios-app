@@ -23,6 +23,6 @@ struct TryCreatingANewRoomUseCaseTests {
 
     private func makeSUT() -> TryCreatingANewRoomUseCase {
         let roomNameGenerator = makeBasicRoomNameGenerator()
-        return TryCreatingANewRoomUseCase(roomNameGenerator: roomNameGenerator)
+        return DefaultTryCreatingANewRoomUseCase(roomNameGenerator: roomNameGenerator)
     }
 }

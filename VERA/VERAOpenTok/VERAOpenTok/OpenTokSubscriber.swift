@@ -24,7 +24,7 @@ public class OpenTokSubscriber: NSObject {
     @Published public private(set) var isScreenshare: Bool = false
     @Published public private(set) var isPinned: Bool = false
     @Published public private(set) var audioLevel: Float = 0.0
-    @Published public private(set) var videoDimensions = VideoDimensions.default
+    @Published public private(set) var videoDimensions = VideoDimensions.initial
     @Published public private(set) var participant: Participant
     @Published public private(set) var wasSubscribedToVideo: Bool = false
     @Published public private(set) var wasSubscribedToAudio: Bool = false
@@ -44,7 +44,7 @@ public class OpenTokSubscriber: NSObject {
             name: stream.name ?? "",
             isMicEnabled: stream.hasAudio,
             isCameraEnabled: stream.hasVideo,
-            videoDimensions: VideoDimensions.default,
+            videoDimensions: VideoDimensions.initial,
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             isPinned: false,

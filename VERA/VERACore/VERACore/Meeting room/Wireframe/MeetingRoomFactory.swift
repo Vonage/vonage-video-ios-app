@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERAConfiguration
 
 public class MeetingRoomFactory {
     private let baseURL: URL
@@ -10,15 +11,18 @@ public class MeetingRoomFactory {
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
+    private let appConfig: AppConfig
 
     public init(
         baseURL: URL,
+        appConfig: AppConfig,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
         roomCredentialsRepository: RoomCredentialsRepository
     ) {
         self.baseURL = baseURL
+        self.appConfig = appConfig
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
@@ -33,11 +37,14 @@ public class MeetingRoomFactory {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
             baseURL: baseURL,
-            connectToRoomUseCase: .init(
+            connectToRoomUseCase: DefaultConnectToRoomUseCase(
                 sessionRepository: sessionRepository,
                 roomCredentialsRepository: roomCredentialsRepository),
-            disconnectRoomUseCase: .init(sessionRepository: sessionRepository),
-            currentCallParticipantsRepository: currentCallParticipantsRepository)
+            disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
+                sessionRepository: sessionRepository,
+                publisherRepository: publisherRepository),
+            currentCallParticipantsRepository: currentCallParticipantsRepository,
+            appConfig: appConfig)
         return MeetingRoomScreen(
             viewModel: viewModel,
             onShowChat: onShowChat,
