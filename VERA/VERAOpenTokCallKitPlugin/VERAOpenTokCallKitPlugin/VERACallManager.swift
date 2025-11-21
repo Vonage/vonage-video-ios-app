@@ -54,7 +54,10 @@ open class VERACallManager {
         try await requestTransaction(transaction, action: Call.hold.rawValue)
     }
 
-    private func requestTransaction(_ transaction: CXTransaction, action: String = "") async throws {
+    private func requestTransaction(
+        _ transaction: CXTransaction,
+        action: String = ""
+    ) async throws {
         try await callController.request(transaction)
     }
 }

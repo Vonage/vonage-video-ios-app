@@ -69,7 +69,9 @@ public final class OpenTokCall: CallFacade {
         session.onSessionDidConnect = { [weak self] in
             self?.updateCallState(to: .connected)
             self?.publishToSession()
-            self?.notifyCallDidStartToPlugins()
+            Task { [weak self] in
+                await self?.notifyCallDidStartToPlugins()
+            }
         }
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
@@ -253,13 +255,17 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func cleanUp() {
-        do {
-            Task { [weak self] in
-                guard let self else { return }
-                await self.callStateManager.cleanUpParticipants()
-            }
+        Task { [weak self] in
+            guard let self else { return }
+            await self.cleanUpAsync()
+        }
+    }
 
-            notifyCallDidEndToPlugins()
+    @MainActor
+    private func cleanUpAsync() async {
+        do {
+            await callStateManager.cleanUpParticipants()
+            await notifyCallDidEndToPlugins()
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
@@ -365,55 +371,51 @@ public final class OpenTokCall: CallFacade {
         plugins.removeAll()
     }
 
-    private func notifyCallDidStartToPlugins() {
-        Task {
-            await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
-                for plugin in plugins {
-                    group.addTask {
-                        do {
-                            try await plugin.callDidStart(self.callParams)
-                            return (plugin.pluginIdentifier, .success(()))
-                        } catch {
-                            return (plugin.pluginIdentifier, .failure(error))
-                        }
+    private func notifyCallDidStartToPlugins() async {
+        await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+            for plugin in plugins {
+                group.addTask {
+                    do {
+                        try await plugin.callDidStart(self.callParams)
+                        return (plugin.pluginIdentifier, .success(()))
+                    } catch {
+                        return (plugin.pluginIdentifier, .failure(error))
                     }
                 }
+            }
 
-                for await (identifier, result) in group {
-                    switch result {
-                    case .success:
-                        print("✅ Plugin \(identifier) started successfully")
-                    case .failure(let error):
-                        print("❌ Plugin \(identifier) failed to start: \(error)")
-                        self._eventsPublisher.send(.error(error))
-                    }
+            for await (identifier, result) in group {
+                switch result {
+                case .success:
+                    print("✅ Plugin \(identifier) started successfully")
+                case .failure(let error):
+                    print("❌ Plugin \(identifier) failed to start: \(error)")
+                    self._eventsPublisher.send(.error(error))
                 }
             }
         }
     }
 
-    private func notifyCallDidEndToPlugins() {
-        Task {
-            await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
-                for plugin in plugins {
-                    group.addTask {
-                        do {
-                            try await plugin.callDidEnd()
-                            return (plugin.pluginIdentifier, .success(()))
-                        } catch {
-                            return (plugin.pluginIdentifier, .failure(error))
-                        }
+    private func notifyCallDidEndToPlugins() async {
+        await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+            for plugin in plugins {
+                group.addTask {
+                    do {
+                        try await plugin.callDidEnd()
+                        return (plugin.pluginIdentifier, .success(()))
+                    } catch {
+                        return (plugin.pluginIdentifier, .failure(error))
                     }
                 }
+            }
 
-                for await (identifier, result) in group {
-                    switch result {
-                    case .success:
-                        print("✅ Plugin \(identifier) ended successfully")
-                    case .failure(let error):
-                        print("❌ Plugin \(identifier) failed to end: \(error)")
-                        self._eventsPublisher.send(.error(error))
-                    }
+            for await (identifier, result) in group {
+                switch result {
+                case .success:
+                    print("✅ Plugin \(identifier) ended successfully")
+                case .failure(let error):
+                    print("❌ Plugin \(identifier) failed to end: \(error)")
+                    self._eventsPublisher.send(.error(error))
                 }
             }
         }
