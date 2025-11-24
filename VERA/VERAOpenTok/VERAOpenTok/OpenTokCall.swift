@@ -218,7 +218,7 @@ public final class OpenTokCall: CallFacade {
     var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
 
     public func disconnect() async throws {
-        guard !(_callState.value == .disconnecting) || !(_callState.value == .disconnected) else {
+        guard _callState.value != .disconnecting || _callState.value != .disconnected else {
             return
         }
         _callState.value = .disconnecting
