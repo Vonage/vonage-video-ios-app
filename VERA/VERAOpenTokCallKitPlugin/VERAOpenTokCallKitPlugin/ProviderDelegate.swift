@@ -63,9 +63,9 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
 
     func providerDidReset(_ provider: CXProvider) {
         print("Provider did reset")
-        /*
-            End any ongoing calls if the provider resets, and remove them from the app's list of calls,
-            since they are no longer valid.
+        /**
+         *   End any ongoing calls if the provider resets, and remove them from the app's list of calls,
+         *   since they are no longer valid.
          */
         onProviderReset?()
     }
@@ -73,14 +73,15 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
     func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
         print("Received perform CXStartCallAction \(action.callUUID)")
 
-        /*
-            Configure the audio session, but do not start call audio here, since it must be done once
-            the audio session has been activated by the system after having its priority elevated.
+        /**
+         *   Configure the audio session, but do not start call audio here, since it must be done once
+         *   the audio session has been activated by the system after having its priority elevated.
+         *
+         *   https://forums.developer.apple.com/thread/64544
+         *   We can't configure the audio session here for the case of launching it from locked screen
+         *   instead, we have to pre-heat the AVAudioSession by configuring as early as possible, didActivate do not get called otherwise
+         *   please look for  * pre-heat the AVAudioSession *
          */
-        // https://forums.developer.apple.com/thread/64544
-        // we can't configure the audio session here for the case of launching it from locked screen
-        // instead, we have to pre-heat the AVAudioSession by configuring as early as possible, didActivate do not get called otherwise
-        // please look for  * pre-heat the AVAudioSession *
         sessionManager?.preconfigureAudioSessionForCall(withMode: .videoChat)
 
         action.fulfill()
@@ -92,7 +93,7 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
 
         onEndCall?()
 
-        //// Signal to the system that the action has been successfully performed.
+        /// Signal to the system that the action has been successfully performed.
         action.fulfill()
     }
 
