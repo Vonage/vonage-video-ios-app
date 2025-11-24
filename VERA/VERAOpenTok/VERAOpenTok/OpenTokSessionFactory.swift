@@ -11,8 +11,6 @@ public final class OpenTokSessionFactory: SessionFactory {
     public init() {}
 
     public func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
-        assertMainThread()
-
         let settings = OTSessionSettings()
 
         // Setting singlePeerConnection to true prevents complex workarounds and issues

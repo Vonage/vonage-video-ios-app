@@ -22,11 +22,8 @@ public final class DefaultDisconnectRoomUseCase: DisconnectRoomUseCase {
     }
 
     public func callAsFunction() async throws {
-        defer {
-            sessionRepository.clearSession()
-            publisherRepository.resetPublisher()
-        }
-
         try await sessionRepository.currentCall?.disconnect()
+        sessionRepository.clearSession()
+        publisherRepository.resetPublisher()
     }
 }
