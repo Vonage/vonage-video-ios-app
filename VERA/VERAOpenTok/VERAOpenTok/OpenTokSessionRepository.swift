@@ -2,11 +2,13 @@
 //  Created by Vonage on 23/7/25.
 //
 
+import Combine
 import Foundation
 import VERACore
 
 public final class OpenTokSessionRepository<Factory: SessionFactory>: SessionRepository
 where Factory.Session == OpenTokSession {
+    private var cancellables = Set<AnyCancellable>()
 
     private let sessionFactory: Factory
     private let publisherRepository: PublisherRepository
@@ -27,9 +29,15 @@ where Factory.Session == OpenTokSession {
     public func createSession(_ credentials: VERACore.RoomCredentials) -> CallFacade {
         let newSession = sessionFactory.make(credentials)
         let publisher = publisherRepository.getPublisher() as! OpenTokPublisher
-        let call = OpenTokCall(token: credentials.token, session: newSession, publisher: publisher)
+        let call = OpenTokCall(credentials: credentials, session: newSession, publisher: publisher)
         call.setup()
         call.assignPlugins(pluginRegistry.plugins)
+        call.callState.sink { [weak self] newState in
+            guard let self, newState == .disconnected else { return }
+            self.clearSession()
+            self.publisherRepository.resetPublisher()
+        }.store(in: &cancellables)
+
         currentCall = call
         return call
     }

@@ -239,6 +239,20 @@ jobs:
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAOpenTokCallKitPluginTests (iOS Simulator)
+      id: vera-callkit-tests
+      timeout-minutes: 15
+      run: |
+        echo "📡 Running VERAOpenTokCallKitPluginTests on iOS Simulator"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAOpenTokCallKitPluginTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAOpenTokCallKitPluginTests-iOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Upload all test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -251,9 +265,10 @@ jobs:
           DerivedData/VERAOpenTokTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
           DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult
-          DerivedData/Build/Products/
           DerivedData/VERATests-iOS.xcresult
-
+          DerivedData/VERAOpenTokCallKitPluginTests-iOS.xcresult
+          DerivedData/Build/Products/
+          
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-26

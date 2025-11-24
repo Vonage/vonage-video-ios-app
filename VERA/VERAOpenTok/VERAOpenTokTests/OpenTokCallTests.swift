@@ -7,6 +7,7 @@ import OpenTok
 import Testing
 import VERACore
 import VERAOpenTok
+import VERATestHelpers
 
 @Suite("OpenTok Call tests")
 @MainActor
@@ -16,7 +17,10 @@ struct OpenTokCallTests {
     func connectCallsSessionConnectWithAnSpecificToken() async throws {
         let aToken = "random-token"
         let session = OpenTokSessionSpy()
-        let sut = makeSUT(token: aToken, session: session)
+        let sut = makeSUT(
+            credentials: makeMockCredentials(
+                token: aToken
+            ), session: session)
 
         #expect(session.connectCalled == false)
         #expect(session.recordedTokens.isEmpty)
@@ -68,10 +72,10 @@ struct OpenTokCallTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        token: String = "a token",
+        credentials: RoomCredentials = makeMockCredentials(),
         session: OpenTokSession = OpenTokSessionSpy(),
         publisher: OpenTokPublisher = OpenTokPublisherSpy()
     ) -> OpenTokCall {
-        return OpenTokCall(token: token, session: session, publisher: publisher)
+        OpenTokCall(credentials: credentials, session: session, publisher: publisher)
     }
 }

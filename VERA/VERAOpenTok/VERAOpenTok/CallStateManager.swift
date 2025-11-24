@@ -59,4 +59,8 @@ final actor CallStateManager {
         await subscribersRepository.reset()
         await participantsRepository.reset()
     }
+
+    func setOnHold(_ isOnHold: Bool) async {
+        await subscribersRepository.all.forEach { $0.setOnHold(isOnHold) }
+    }
 }

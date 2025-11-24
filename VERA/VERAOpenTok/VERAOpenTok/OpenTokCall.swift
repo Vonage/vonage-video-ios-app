@@ -25,7 +25,7 @@ public final class OpenTokCall: CallFacade {
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     public let id: UUID = UUID()
-    public let token: String
+    public let credentials: RoomCredentials
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
     public var publisherParticipant: Participant?
@@ -37,12 +37,15 @@ public final class OpenTokCall: CallFacade {
 
     public var plugins: [any OpenTokPlugin] = []
 
+    private var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
+    public lazy var callState: AnyPublisher<CallState, Never> = _callState.eraseToAnyPublisher()
+
     public init(
-        token: String,
+        credentials: RoomCredentials,
         session: OpenTokSession,
         publisher: OpenTokPublisher
     ) {
-        self.token = token
+        self.credentials = credentials
         self.session = session
         self.publisher = publisher
     }
@@ -64,8 +67,11 @@ public final class OpenTokCall: CallFacade {
             self?.sessionDidFail(error)
         }
         session.onSessionDidConnect = { [weak self] in
+            self?.updateCallState(to: .connected)
             self?.publishToSession()
-            self?.notifyCallDidStartToPlugins()
+            Task { [weak self] in
+                await self?.notifyCallDidStartToPlugins()
+            }
         }
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
@@ -78,6 +84,10 @@ public final class OpenTokCall: CallFacade {
             participants: state.participants,
             activeParticipantId: state.activeParticipantId
         )
+    }
+
+    private func updateCallState(to newState: CallState) {
+        _callState.value = newState
     }
 
     // MARK: Publisher
@@ -198,7 +208,8 @@ public final class OpenTokCall: CallFacade {
 
     public func connect() {
         do {
-            try session.connect(with: token)
+            updateCallState(to: .connecting)
+            try session.connect(with: credentials.token)
         } catch {
             _eventsPublisher.value = .error(error)
         }
@@ -207,6 +218,10 @@ public final class OpenTokCall: CallFacade {
     var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
 
     public func disconnect() async throws {
+        guard _callState.value != .disconnecting || _callState.value != .disconnected else {
+            return
+        }
+        _callState.value = .disconnecting
         try await withCheckedThrowingContinuation { [weak self] continuation in
             self?.disconnectContinuation = continuation
             Task { @MainActor [weak self] in
@@ -240,13 +255,17 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func cleanUp() {
-        do {
-            Task { [weak self] in
-                guard let self else { return }
-                await self.callStateManager.cleanUpParticipants()
-            }
+        Task { [weak self] in
+            guard let self else { return }
+            await self.cleanUpAsync()
+        }
+    }
 
-            notifyCallDidEndToPlugins()
+    @MainActor
+    private func cleanUpAsync() async {
+        do {
+            await callStateManager.cleanUpParticipants()
+            await notifyCallDidEndToPlugins()
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
@@ -261,6 +280,7 @@ public final class OpenTokCall: CallFacade {
             disconnectContinuation?.resume(throwing: error)
             disconnectContinuation = nil
         }
+        updateCallState(to: .disconnected)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
@@ -268,6 +288,10 @@ public final class OpenTokCall: CallFacade {
     }
 
     // MARK: Audio/Video toggles
+
+    public var isMuted: Bool {
+        !publisher.publishAudio && !publisher.publishVideo
+    }
 
     public func toggleLocalCamera() {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
@@ -291,33 +315,114 @@ public final class OpenTokCall: CallFacade {
             isPublishingVideo: publisher.publishVideo)
     }
 
+    public var isOnHold: Bool { publisher.isOnHold }
+
+    public func setOnHold(_ isOnHold: Bool) {
+        Task { [weak self] in
+            guard let self else { return }
+            self.publisher.setOnHold(isOnHold)
+            await self.callStateManager.setOnHold(isOnHold)
+        }
+    }
+
+    public func muteLocalMedia(_ isMuted: Bool) {
+        Task { [weak self] in
+            guard let self else { return }
+            self.publisher.publishAudio = !isMuted
+            self.publisher.publishVideo = !isMuted
+        }
+    }
+
     // MARK: Signals
 
     private var callParams: [String: String] {
-        [OpenTokCallParams.username.rawValue: publisher.participant.name]
+        [
+            OpenTokCallParams.username.rawValue: publisher.participant.name,
+            OpenTokCallParams.roomName.rawValue: credentials.roomName,
+            OpenTokCallParams.callID.rawValue: id.uuidString,
+        ]
     }
 
     public func assignPlugins(_ plugins: [any OpenTokPlugin]) {
         self.plugins = plugins
 
-        plugins.forEach { $0.channel = session }
+        plugins.forEach {
+            if let channelHolder = $0 as? OpenTokSignalEmitter {
+                channelHolder.channel = session
+            }
+
+            if let callHolder = $0 as? OpenTokPluginCallHolder {
+                callHolder.call = self
+            }
+        }
     }
 
     private func unassignPlugins() {
-        plugins.forEach { $0.channel = nil }
+        plugins.forEach {
+            if let channelHolder = $0 as? OpenTokSignalEmitter {
+                channelHolder.channel = nil
+            }
+
+            if let callHolder = $0 as? OpenTokPluginCallHolder {
+                callHolder.call = nil
+            }
+        }
 
         plugins.removeAll()
     }
 
-    private func notifyCallDidStartToPlugins() {
-        plugins.forEach { $0.callDidStart(callParams) }
+    private func notifyCallDidStartToPlugins() async {
+        await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+            for plugin in plugins {
+                group.addTask {
+                    do {
+                        try await plugin.callDidStart(self.callParams)
+                        return (plugin.pluginIdentifier, .success(()))
+                    } catch {
+                        return (plugin.pluginIdentifier, .failure(error))
+                    }
+                }
+            }
+
+            for await (identifier, result) in group {
+                switch result {
+                case .success:
+                    print("✅ Plugin \(identifier) started successfully")
+                case .failure(let error):
+                    print("❌ Plugin \(identifier) failed to start: \(error)")
+                    self._eventsPublisher.send(.error(error))
+                }
+            }
+        }
     }
 
-    private func notifyCallDidEndToPlugins() {
-        plugins.forEach { $0.callDidEnd() }
+    private func notifyCallDidEndToPlugins() async {
+        await withTaskGroup(of: (String, Result<Void, Swift.Error>).self) { group in
+            for plugin in plugins {
+                group.addTask {
+                    do {
+                        try await plugin.callDidEnd()
+                        return (plugin.pluginIdentifier, .success(()))
+                    } catch {
+                        return (plugin.pluginIdentifier, .failure(error))
+                    }
+                }
+            }
+
+            for await (identifier, result) in group {
+                switch result {
+                case .success:
+                    print("✅ Plugin \(identifier) ended successfully")
+                case .failure(let error):
+                    print("❌ Plugin \(identifier) failed to end: \(error)")
+                    self._eventsPublisher.send(.error(error))
+                }
+            }
+        }
     }
 
     private func handleSignal(_ signal: OpenTokSignal) {
-        plugins.forEach { $0.handleSignal(signal) }
+        plugins.compactMap { $0 as? OpenTokSignalHandler }
+            .forEach { $0.handleSignal(signal) }
     }
 }

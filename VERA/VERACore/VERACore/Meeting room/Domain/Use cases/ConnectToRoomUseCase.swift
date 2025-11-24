@@ -23,7 +23,7 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
-        return await getConnectedCall(result.roomCredentials)
+        return await getConnectedCall(result.asRoomCredentials(with: roomName))
     }
 
     @MainActor
@@ -35,11 +35,12 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
 }
 
 extension RoomCredentialsResponse {
-    var roomCredentials: RoomCredentials {
+    func asRoomCredentials(with roomName: String) -> RoomCredentials {
         .init(
             sessionId: sessionId,
             token: token,
             applicationId: apiKey,
+            roomName: roomName,
             captionsId: captionsId)
     }
 }

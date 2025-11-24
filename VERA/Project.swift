@@ -30,6 +30,7 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERAOpenTok", path: "VERAOpenTok"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),
+        .project(target: "VERAOpenTokCallKitPlugin", path: "VERAOpenTokCallKitPlugin"),
     ]
 
     if isChatEnabled() {
@@ -93,6 +94,7 @@ let project = Project(
                         "VERA needs access to your camera to share your video during video calls and meetings.",
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
+                    "UIBackgroundModes": .array(["audio", "voip"]),
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,

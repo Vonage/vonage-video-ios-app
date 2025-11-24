@@ -18,6 +18,7 @@ public struct MeetingRoomState: Equatable {
     public let participants: [Participant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
+    public let callState: CallState
 
     public var participantsCount: Int {
         participants.count
@@ -38,7 +39,8 @@ public struct MeetingRoomState: Equatable {
         unreadMessagesCount: Int = 0,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
-        showParticipantList: Bool
+        showParticipantList: Bool,
+        callState: CallState
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -52,6 +54,7 @@ public struct MeetingRoomState: Equatable {
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
+        self.callState = callState
     }
 
     public static let initial = MeetingRoomState(
@@ -65,5 +68,6 @@ public struct MeetingRoomState: Equatable {
         showChatButton: AppConfig.meetingRoomSettings.allowChat,
         allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList)
+        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
+        callState: .idle)
 }

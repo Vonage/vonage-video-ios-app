@@ -6,7 +6,7 @@ import Foundation
 import VERAChat
 import VERAOpenTok
 
-public final class OpenTokChatPlugin: OpenTokPlugin {
+public final class OpenTokChatPlugin: OpenTokPlugin, OpenTokSignalHandler, OpenTokSignalEmitter {
 
     public enum SignalType: String {
         case chat
@@ -16,9 +16,10 @@ public final class OpenTokChatPlugin: OpenTokPlugin {
         case missingChannel
     }
 
-    public var channel: (any VERAOpenTok.OpenTokSignalChannel)?
+    public weak var channel: (any VERAOpenTok.OpenTokSignalChannel)?
     private var username: String = ""
     public let repository: ChatMessagesRepository
+    public var pluginIdentifier: String { String(describing: type(of: self)) }
 
     public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
         self.repository = repository

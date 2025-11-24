@@ -22,6 +22,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem? = nil
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
+    private let callStatePublisher = CurrentValueSubject<CallState, Never>(CallState.idle)
 
     public weak var currentCall: CallFacade?
 
@@ -63,6 +64,12 @@ public final class MeetingRoomViewModel: ObservableObject {
                     }
                     .store(in: &cancellables)
 
+                call.callState
+                    .sink { [weak self] callState in
+                        self?.callStatePublisher.send(callState)
+                    }
+                    .store(in: &cancellables)
+
                 self.currentCall = call
             } catch {
                 await MainActor.run { [weak self] in
@@ -73,13 +80,14 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
-        Publishers.CombineLatest3(
+        Publishers.CombineLatest4(
             participantsPublisher
                 .removeDuplicates(),
             sessionStatePublisher,
-            layoutPublisher
+            layoutPublisher,
+            callStatePublisher
         )
-        .map { [weak self] participantsState, sessionState, layout in
+        .map { [weak self] participantsState, sessionState, layout, callState in
             guard let self else { return MeetingRoomState.initial }
 
             var sortedPaticipants = participantsState.participants
@@ -115,7 +123,8 @@ public final class MeetingRoomViewModel: ObservableObject {
                 showChatButton: appConfig.meetingRoomSettings.allowChat,
                 allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: appConfig.videoSettings.allowCameraControl,
-                showParticipantList: appConfig.meetingRoomSettings.showParticipantList)
+                showParticipantList: appConfig.meetingRoomSettings.showParticipantList,
+                callState: callState)
         }
         .removeDuplicates()
         .sink { [weak self] newState in
