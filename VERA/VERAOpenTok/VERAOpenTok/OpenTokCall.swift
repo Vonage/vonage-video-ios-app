@@ -422,10 +422,7 @@ public final class OpenTokCall: CallFacade {
     }
 
     private func handleSignal(_ signal: OpenTokSignal) {
-        plugins.forEach {
-            if let plugin = $0 as? OpenTokSignalHandler {
-                plugin.handleSignal(signal)
-            }
-        }
+        plugins.compactMap { $0 as? OpenTokSignalHandler }
+            .forEach { $0.handleSignal(signal) }
     }
 }

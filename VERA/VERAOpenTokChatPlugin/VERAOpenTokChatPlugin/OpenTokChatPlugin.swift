@@ -6,7 +6,7 @@ import Foundation
 import VERAChat
 import VERAOpenTok
 
-public final class OpenTokChatPlugin: OpenTokPlugin, OpenTokSignalEmitter {
+public final class OpenTokChatPlugin: OpenTokPlugin, OpenTokSignalHandler, OpenTokSignalEmitter {
 
     public enum SignalType: String {
         case chat
