@@ -31,6 +31,8 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
         if let callUUID = UUID(uuidString: callID) {
             currentCallID = callUUID
             try await callManager.startCall(handle: roomName, callID: callUUID)
+            providerDelegate?.reportConnected(callUUID: callUUID)
+            providerDelegate?.setupHold(to: callUUID)
         } else {
             throw Error.invalidCallID
         }
@@ -50,11 +52,17 @@ public final class OpenTokCallKitPlugin: OpenTokPlugin, OpenTokPluginCallHolder 
         providerDelegate?.onEndCall = { [weak self] in
             Task { [weak self] in
                 guard let self else { return }
-                try? await self.call?.disconnect()
+                if let isOnHold = self.call?.isOnHold, isOnHold {
+                    // Ignore end call event
+                } else {
+                    self.currentCallID = nil
+                    try? await self.call?.disconnect()
+                }
             }
         }
         providerDelegate?.onProviderReset = { [weak self] in
             Task { [weak self] in
+                self?.currentCallID = nil
                 try? await self?.call?.disconnect()
             }
         }

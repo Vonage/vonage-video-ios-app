@@ -13,6 +13,8 @@ import VERACommonUI
 protocol CXProviderProtocol {
     func setDelegate(_ delegate: CXProviderDelegate?, queue: DispatchQueue?)
     func reportCall(with UUID: UUID, updated update: CXCallUpdate)
+    func reportOutgoingCall(with UUID: UUID, startedConnectingAt: Date?)
+    func reportOutgoingCall(with UUID: UUID, connectedAt: Date?)
 }
 
 extension CXProvider: CXProviderProtocol {}
@@ -112,6 +114,8 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
     /// React to the action timeout if necessary, such as showing an error UI.
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
         print("Timed out \(#function)")
+
+        action.fulfill()
     }
 
     func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
@@ -135,5 +139,9 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
         update.supportsHolding = true
         update.hasVideo = true
         provider.reportCall(with: callUUID, updated: update)
+    }
+
+    func reportConnected(callUUID: UUID) {
+        provider.reportOutgoingCall(with: callUUID, connectedAt: Date())
     }
 }
