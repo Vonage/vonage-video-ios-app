@@ -169,9 +169,7 @@ struct MeetingRoomViewModelTests {
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
             roomCredentialsRepository: makeMockRoomCredentialsRepository())
-        let disconnectRoomUseCase = DefaultDisconnectRoomUseCase(
-            sessionRepository: sessionRepository,
-            publisherRepository: makeMockVERAPublisherRepository())
+        let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
 
         let sut = makeSUT(
             connectToRoomUseCase: connectToRoomUseCase,
@@ -192,8 +190,7 @@ struct MeetingRoomViewModelTests {
 
         await delay()
 
-        #expect(sessionRepository.currentCall == nil)
-        #expect(sut.currentCall == nil)
+        #expect(disconnectRoomUseCase.recordedActions == [.disconnect])
     }
 
     @Test

@@ -41,8 +41,7 @@ public class MeetingRoomFactory {
                 sessionRepository: sessionRepository,
                 roomCredentialsRepository: roomCredentialsRepository),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
-                sessionRepository: sessionRepository,
-                publisherRepository: publisherRepository),
+                sessionRepository: sessionRepository),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
         return MeetingRoomScreen(

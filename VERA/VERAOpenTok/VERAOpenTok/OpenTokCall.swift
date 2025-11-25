@@ -218,15 +218,11 @@ public final class OpenTokCall: CallFacade {
 
     public func disconnect() async throws {
         guard _callState.value == .connected else {
+            _eventsPublisher.value = .error(Error.callNotConnected)
             throw Error.callNotConnected
         }
         _callState.value = .disconnecting
 
-        await self.cleanUpAsync()
-    }
-
-    @MainActor
-    private func cleanUpAsync() async {
         do {
             await callStateManager.cleanUpParticipants()
             await notifyCallDidEndToPlugins()
@@ -236,10 +232,14 @@ public final class OpenTokCall: CallFacade {
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
+            updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
+            publisher.cleanUp()
+            session.cleanUp()
+            updateCallState(to: .disconnected)
+            throw error
         }
-        updateCallState(to: .disconnected)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {

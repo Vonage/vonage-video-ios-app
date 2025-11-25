@@ -11,19 +11,14 @@ public protocol DisconnectRoomUseCase {
 public final class DefaultDisconnectRoomUseCase: DisconnectRoomUseCase {
 
     private let sessionRepository: SessionRepository
-    private let publisherRepository: PublisherRepository
 
     public init(
-        sessionRepository: SessionRepository,
-        publisherRepository: PublisherRepository
+        sessionRepository: SessionRepository
     ) {
         self.sessionRepository = sessionRepository
-        self.publisherRepository = publisherRepository
     }
 
     public func callAsFunction() async throws {
         try await sessionRepository.currentCall?.disconnect()
-        sessionRepository.clearSession()
-        publisherRepository.resetPublisher()
     }
 }
