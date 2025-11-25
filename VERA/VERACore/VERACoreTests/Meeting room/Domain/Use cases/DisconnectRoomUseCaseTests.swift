@@ -11,31 +11,27 @@ import VERATestHelpers
 struct DisconnectRoomUseCaseTests {
 
     @Test
-    func disconnectsAndClearsSessionAndPublisher() async throws {
+    func disconnectsCallsCallDisconnect() async throws {
         let sessionRepository = makeMockSessionRepository()
-        let publisherRepository = makeMockVERAPublisherRepository()
 
-        let sut = makeSUT(
-            sessionRepository: sessionRepository,
-            publisherRepository: publisherRepository)
+        let sut = makeSUT(sessionRepository: sessionRepository)
 
-        sessionRepository.currentCall = MockCall()
+        let call = MockCall()
+        sessionRepository.currentCall = call
 
         #expect(sessionRepository.currentCall != nil)
 
         try await sut()
 
-        #expect(sessionRepository.currentCall == nil)
+        #expect(call.recordedActions == [.disconnect])
     }
 
     // MARK: - Test Helpers
 
     private func makeSUT(
-        sessionRepository: SessionRepository = makeMockSessionRepository(),
-        publisherRepository: PublisherRepository = makeMockVERAPublisherRepository()
+        sessionRepository: SessionRepository = makeMockSessionRepository()
     ) -> DisconnectRoomUseCase {
         DefaultDisconnectRoomUseCase(
-            sessionRepository: sessionRepository,
-            publisherRepository: publisherRepository)
+            sessionRepository: sessionRepository)
     }
 }

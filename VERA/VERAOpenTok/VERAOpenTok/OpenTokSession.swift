@@ -20,7 +20,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     open func connect(with token: String) throws {
-        assertMainThread()
         var error: OTError?
         session.connect(withToken: token, error: &error)
         if let error = error {
@@ -29,7 +28,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     open func disconnect() throws {
-        assertMainThread()
         var error: OTError?
         session.disconnect(&error)
 
@@ -59,7 +57,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     public func subscribe(subscriber: OpenTokSubscriber) throws {
-        assertMainThread()
         var error: OTError?
         let _subscriber: OTSubscriberKit = subscriber.otSubscriber
         session.subscribe(_subscriber, error: &error)
@@ -70,8 +67,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     public func unsubscribe(subscriber: OpenTokSubscriber) throws {
-        assertMainThread()
-
         var error: OTError?
         session.unsubscribe(subscriber.otSubscriber, error: &error)
 
@@ -81,7 +76,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     public func publish(publisher: OpenTokPublisher) throws {
-        assertMainThread()
         var error: OTError?
         session.publish(publisher.otPublisher, error: &error)
 
@@ -91,8 +85,6 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
     }
 
     public func unpublish(publisher: OpenTokPublisher) throws {
-        assertMainThread()
-
         var error: OTError?
         session.unpublish(publisher.otPublisher, error: &error)
 
