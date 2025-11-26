@@ -34,25 +34,31 @@ This application provides features for common conferencing use cases, such as:
     <summary>A post-call page to navigate users to the landing page, re-enter the left room, and display archive(s), if any.</summary>
     <img src="docs/assets/Goodbye.png" alt="Screenshot of goodbye page">
   </details>
+
 - A video conferencing “room” supporting up to 25 participants and the following features:
-- <details>
-    <summary>CallKit: Helps iOS to coordinate the calling services with other apps.</summary>
-  </details>
+
 - <details>
     <summary>
       Configurable features: adapt the app to your specific use cases and roles.
-      Configuration is handled through a <em>app-config.json</em> file that can be moved to the <em>VERA/config</em> folder. When calling the <em>generate-app-config.py</em> python script in the <em>VERA/Scripts</em> folder, the parameters specified in the <em>app-config.json</em> file will regenerate the <em>AppConfig.swift</em> file of the <em>VERAConfiguration</em> module.
+      Configuration is handled through a <em>app-config.json</em> file that can be moved to the <em>VERA/config</em> folder. When calling to the <em>generate-app-config.py</em> python script in the <em>VERA/Scripts</em> folder, the parameters specified in the <em>app-config.json</em> file will regenerate the <em>AppConfig.swift</em> file of the <em>VERAConfiguration</em> module.
     </summary>
     <img src="docs/assets/configFile.png" alt="Screenshot of a config.json">
 </details>
-- Active speaker detection.
-- Layout manager with options to display active speaker, or all participants in a grid view.
-- The dynamic display adjusts to show new joiners, hide video tiles to conserve bandwidth, and show the “next” participant when someone previously speaking leaves.
+
 - <details>
     <summary>Call participant list with audio on/off indicator.</summary>
     <img src="docs/assets/ParticipantList.png" alt="Screenshot of participant list">
   </details>
+  
 - ShareLink integration.
+
+- Active speaker detection.
+
+- Layout manager with options to display active speaker, or all participants in a grid view.
+
+- The dynamic display adjusts to show new joiners, hide video tiles to conserve bandwidth, and show the “next” participant when someone previously speaking leaves.
+
+- CallKit: Helps iOS to coordinate the calling services with other apps.
 
 ## Project Architecture
 
