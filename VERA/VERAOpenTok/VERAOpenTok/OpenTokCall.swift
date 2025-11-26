@@ -10,7 +10,8 @@ import VERACore
 public final class OpenTokCall: CallFacade {
 
     enum Error: Swift.Error {
-        case SelfMissingOnDisconnect
+        case selfMissingOnDisconnect
+        case callNotConnected
     }
 
     private var cancellables = Set<AnyCancellable>()
@@ -215,54 +216,13 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
-    var disconnectContinuation: CheckedContinuation<Void, Swift.Error>?
-
     public func disconnect() async throws {
-        guard _callState.value != .disconnecting || _callState.value != .disconnected else {
-            return
+        guard _callState.value == .connected else {
+            _eventsPublisher.value = .error(Error.callNotConnected)
+            throw Error.callNotConnected
         }
         _callState.value = .disconnecting
-        try await withCheckedThrowingContinuation { [weak self] continuation in
-            self?.disconnectContinuation = continuation
-            Task { @MainActor [weak self] in
-                guard let self else {
-                    self?.disconnectContinuation?.resume(throwing: Error.SelfMissingOnDisconnect)
-                    self?.disconnectContinuation = nil
-                    return
-                }
-                do {
-                    self.publisher.onStreamDestroyed = { [weak self] in
-                        self?.cleanUp()
-                    }
 
-                    assertMainThread()
-
-                    // If publisher does not have a session, doesn't need
-                    // to be unpublished.
-                    if publisher.hasSession {
-                        try self.session.unpublish(publisher: publisher)
-                    } else {
-                        self.cleanUp()
-                    }
-                } catch {
-                    self.disconnectContinuation?.resume(throwing: error)
-                    self.disconnectContinuation = nil
-                    self.cleanUp()
-                    self._eventsPublisher.value = .error(error)
-                }
-            }
-        }
-    }
-
-    private func cleanUp() {
-        Task { [weak self] in
-            guard let self else { return }
-            await self.cleanUpAsync()
-        }
-    }
-
-    @MainActor
-    private func cleanUpAsync() async {
         do {
             await callStateManager.cleanUpParticipants()
             await notifyCallDidEndToPlugins()
@@ -272,15 +232,14 @@ public final class OpenTokCall: CallFacade {
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
-            disconnectContinuation?.resume()
-            disconnectContinuation = nil
+            updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
-
-            disconnectContinuation?.resume(throwing: error)
-            disconnectContinuation = nil
+            publisher.cleanUp()
+            session.cleanUp()
+            updateCallState(to: .disconnected)
+            throw error
         }
-        updateCallState(to: .disconnected)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {

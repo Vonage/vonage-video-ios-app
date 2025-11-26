@@ -160,7 +160,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func endCall() {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             do {
                 try await self?.disconnectRoomUseCase()
             } catch {
