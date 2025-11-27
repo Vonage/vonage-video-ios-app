@@ -72,7 +72,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    VERACommonUIAsset.Colors.vAccent.swiftUIColor,
+                    VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
                     lineWidth: participant.id == activeSpeakerId ? 4 : 0)
         )
         .clipShape(RoundedRectangle(cornerRadius: 8))

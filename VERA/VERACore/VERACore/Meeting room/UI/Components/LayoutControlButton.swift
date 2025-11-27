@@ -19,7 +19,7 @@ struct LayoutControlButton: View {
         Button(action: action) {
             LayoutImage(layout: layout)
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
                 .frame(width: 50, height: 50)
                 .background(Circle().fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor))
         }

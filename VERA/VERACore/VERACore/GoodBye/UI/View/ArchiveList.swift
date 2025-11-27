@@ -31,7 +31,7 @@ struct ArchiveList: View {
                             Text(archive.title)
                                 .font(.title2)
                             Text(archive.subtitle)
-                                .foregroundStyle(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
+                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
@@ -40,7 +40,7 @@ struct ArchiveList: View {
                                     archive.onDownload?()
                                 } label: {
                                     Image(systemName: "square.and.arrow.down")
-                                        .foregroundStyle(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
+                                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                                 }.frame(width: 44, height: 44)
                             } else {
                                 ProgressView()

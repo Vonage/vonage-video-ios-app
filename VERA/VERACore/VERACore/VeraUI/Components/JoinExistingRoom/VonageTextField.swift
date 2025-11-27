@@ -17,6 +17,7 @@ struct VonageTextField: View {
     private let forceLowercase: Bool
 
     @State private var labelWidth: CGFloat = 0
+    @FocusState private var isFocused: Bool
 
     init(
         placeholder: String,
@@ -36,7 +37,10 @@ struct VonageTextField: View {
                 if forceLowercase {
                     TextField(placeholder.capitalizingFirstLetter, text: lowercasedBinding)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(textColor)
                         .adaptiveFont(.bodyBase)
+                        .focused($isFocused)
+                        .kerning(0.15)
                         #if os(iOS)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -44,7 +48,10 @@ struct VonageTextField: View {
                 } else {
                     TextField(placeholder.capitalizingFirstLetter, text: text)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(textColor)
                         .adaptiveFont(.bodyBase)
+                        .focused($isFocused)
+                        .kerning(0.15)
                 }
             }
             .padding(.horizontal, 16)
@@ -82,6 +89,7 @@ struct VonageTextField: View {
                     .offset(x: 12, y: -10)
                     .transition(.opacity)
                     .allowsHitTesting(false)
+                    .kerning(0.15)
                     .background(
                         GeometryReader { geo in
                             Color.clear.preference(
@@ -105,14 +113,24 @@ struct VonageTextField: View {
         )
     }
 
+    private var textColor: Color {
+        if text.wrappedValue.isEmpty {
+            VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
+        } else {
+            VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor
+        }
+    }
+
     private var borderColor: Color {
         switch state {
         case .initial:
-            return VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
-        case .valid:
-            return VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
-        case .invalid:
-            return VERACommonUIAsset.SemanticColors.error.swiftUIColor
+            if isFocused {
+                VERACommonUIAsset.SemanticColors.primary.swiftUIColor
+            } else {
+                VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
+            }
+        case .valid: VERACommonUIAsset.SemanticColors.primary.swiftUIColor
+        case .invalid: VERACommonUIAsset.SemanticColors.error.swiftUIColor
         }
     }
 }

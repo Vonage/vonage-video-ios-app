@@ -21,6 +21,6 @@ struct JoinButton: View {
 
 #Preview {
     JoinButton(roomName: .constant(""), color: VERACommonUIAsset.Colors.vGray0.swiftUIColor) {}
-    JoinButton(roomName: .constant("Test"), color: VERACommonUIAsset.Colors.vAccent.swiftUIColor) {}
+    JoinButton(roomName: .constant("Test"), color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor) {}
     JoinButton(roomName: .constant("Test"), color: .red) {}
 }
