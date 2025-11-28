@@ -41,13 +41,10 @@ struct CircularControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(isActive ? .white : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     CircularControlBackground(isActive: isActive)
                 )
-                .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
-                .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -74,7 +71,8 @@ struct CircularControlBackground: View {
         #else
             Group {
                 if #available(iOS 26.0, *) {
-                    glassEffectCircle()
+                    glassEffectCircle(
+                        isActive ? .clear : VERACommonUIAsset.SemanticColors.error.swiftUIColor.opacity(0.7))
                 } else {
                     Circle()
                         .fill(Material.ultraThinMaterial)
@@ -96,9 +94,9 @@ struct CircularControlBackground: View {
 
     #if !os(macOS)
         @available(iOS 26.0, *)
-        private func glassEffectCircle() -> some View {
+        private func glassEffectCircle(_ color: Color) -> some View {
             Circle()
-                .glassEffect()
+                .glassEffect(.regular.tint(color))
         }
     #endif
 }

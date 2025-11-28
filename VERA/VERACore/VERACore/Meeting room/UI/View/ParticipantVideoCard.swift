@@ -118,7 +118,7 @@ struct MicIndicator: View {
     var isMicEnabled: Bool
     var body: some View {
         MicIndicatorImage(isMicEnabled: isMicEnabled)
-            .foregroundColor(.white)
+            .foregroundColor(isMicEnabled ? .white : VERACommonUIAsset.SemanticColors.error.swiftUIColor)
             .padding(6)
             .background(Color.black.opacity(0.6))
             .clipShape(Circle())
@@ -131,9 +131,9 @@ struct MicIndicatorImage: View {
 
     var body: some View {
         if isMicEnabled {
-            VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+            VERACommonUIAsset.Images.microphoneLine.swiftUIImage
         } else {
-            VERACommonUIAsset.Images.micMuteSolid.swiftUIImage
+            VERACommonUIAsset.Images.micMuteLine.swiftUIImage
         }
     }
 }

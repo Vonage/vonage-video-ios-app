@@ -33,7 +33,7 @@ struct LayoutImage: View {
     var body: some View {
         ZStack {
             if layout == .activeSpeaker {
-                VERACommonUIAsset.Images.bringToFrontSolid.swiftUIImage
+                VERACommonUIAsset.Images.layout2Solid.swiftUIImage
                     .transition(
                         .asymmetric(
                             insertion: .opacity.combined(with: .scale(scale: 0.8)),
