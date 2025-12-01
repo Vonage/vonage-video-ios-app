@@ -10,5 +10,5 @@ metadata:
     github.com/project-slug: Vonage/vonage-video-ios-app   # GH repo with the service Helm  
 spec:
   type: service
-  owner: group:orgdata/vid   # helm "owner" orgdata squad id or general orgdata/vid
+  owner: group:orgdata/vdk   # helm "owner" orgdata squad id or general orgdata/vid
   domain: video-api   # Product this service belongs to
