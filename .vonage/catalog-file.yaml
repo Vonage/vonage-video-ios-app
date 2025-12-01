@@ -11,3 +11,18 @@ spec:
   type: service
   owner: group:orgdata/vdk   # helm "owner" orgdata squad id or general orgdata/vid
   domain: video-api   # Product this service belongs to
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: video-ios-ref-app
+  description: Video iOS Reference Application Component
+  annotations:
+    github.com/project-slug: Vonage/vonage-video-ios-app
+spec:
+  type: service
+  owner: group:orgdata/vdk
+  system: video-ios-ref-app
+  lifecycle: production
+  dependsOn:
+    - resource:Vonage/vonage-video-client-sdk-swift
