@@ -25,4 +25,4 @@ spec:
   system: video-ios-ref-app
   lifecycle: production
   dependsOn:
-    - resource:Vonage/vonage-video-client-sdk-swift
+    - library:Vonage/vonage-video-client-sdk-swift
