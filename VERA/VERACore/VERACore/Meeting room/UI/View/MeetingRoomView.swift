@@ -109,17 +109,15 @@ public struct MeetingRoomView: View {
                     }
 
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        #if targetEnvironment(macCatalyst)
-                        #else
-                            if state.allowCameraControl {
-                                Button {
-                                    onBottomBarInteraction()
-                                    actions.onCameraSwitch()
-                                } label: {
-                                    VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
-                                }.disabled(!state.isCameraEnabled)
-                            }
-                        #endif
+                        let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+                        if !isIosAppOnMac && state.allowCameraControl {
+                            Button {
+                                onBottomBarInteraction()
+                                actions.onCameraSwitch()
+                            } label: {
+                                VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
+                            }.disabled(!state.isCameraEnabled)
+                        }
                         if state.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()
