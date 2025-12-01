@@ -1,0 +1,14 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: video-ios-ref-app   # SERVICE NAME field
+  title: Video iOS Reference Application   # Title (human-friendly service name) field
+  description: An open-source video conferencing reference application for the Vonage Video API using the iOS SDK.
+  annotations:
+    vonage.com/jira-id: VPF   # video general projects
+    github.com/project-slug: Vonage/vonage-video-ios-app   # GH repo with the service Helm  
+spec:
+  type: service
+  owner: group:orgdata/vid   # helm "owner" orgdata squad id or general orgdata/vid
+  domain: video-api   # Product this service belongs to
