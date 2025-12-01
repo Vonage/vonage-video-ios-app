@@ -17,6 +17,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
+    private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var error: AlertItem? = nil
@@ -36,6 +38,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         appConfig: AppConfig
     ) {
@@ -43,6 +47,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
+        self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.appConfig = appConfig
     }
@@ -115,8 +121,8 @@ public final class MeetingRoomViewModel: ObservableObject {
             return MeetingRoomState(
                 roomName: self.roomName,
                 roomURL: baseURL.appendingPathComponent(roomName),
-                isMicEnabled: sessionState.isPublishingAudio,
-                isCameraEnabled: sessionState.isPublishingVideo,
+                isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
+                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,

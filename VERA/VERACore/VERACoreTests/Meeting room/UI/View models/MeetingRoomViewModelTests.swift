@@ -314,6 +314,39 @@ struct MeetingRoomViewModelTests {
         #expect(contentState.showParticipantList == false)
     }
 
+    @Test
+    @MainActor
+    func ifThereIsNoCameraPermissionCameraShouldNotBeEnabled() async throws {
+        let checkCameraAuthorizationStatusUseCase = makeMockCheckCameraAuthorizationStatusUseCase(isAuthorized: false)
+        let sut = makeSUT(
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.isCameraEnabled == false)
+    }
+
+    @Test
+    @MainActor
+    func ifThereIsNoMicrophonePermissionMicrophoneShouldNotBeEnabled() async throws {
+        let checkMicrophoneAuthorizationStatusUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(
+            isAuthorized: false)
+        let sut = makeSUT(
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first(where: { _ in true })!
+
+        #expect(contentState.isMicEnabled == false)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -321,6 +354,10 @@ struct MeetingRoomViewModelTests {
         baseURL: URL = .init(string: "https://example.com")!,
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
+            makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
+            makeMockCheckCameraAuthorizationStatusUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig()
@@ -330,6 +367,8 @@ struct MeetingRoomViewModelTests {
             baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
     }
