@@ -116,12 +116,23 @@ struct NameLabel: View {
 
 struct MicIndicator: View {
     var isMicEnabled: Bool
+    var color: Color {
+        isMicEnabled ? .white : VERACommonUIAsset.SemanticColors.error.swiftUIColor
+    }
+
     var body: some View {
         MicIndicatorImage(isMicEnabled: isMicEnabled)
-            .foregroundColor(isMicEnabled ? .white : VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+            .foregroundColor(color)
             .padding(6)
-            .background(Color.black.opacity(0.6))
-            .clipShape(Circle())
+            .background {
+                if #available(iOS 26.0, *) {
+                    Circle()
+                        .glassEffect(.regular)
+                } else {
+                    Circle()
+                        .fill(Color.black.opacity(0.6))
+                }
+            }
             .frame(width: 28, height: 28)
     }
 }

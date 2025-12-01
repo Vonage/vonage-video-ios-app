@@ -42,6 +42,7 @@ struct CircularControlImageButton: View {
             image
                 .font(.title2)
                 .frame(width: 50, height: 50)
+                .foregroundColor(.white)
                 .background(
                     CircularControlBackground(isActive: isActive)
                 )
@@ -74,19 +75,30 @@ struct CircularControlBackground: View {
                     glassEffectCircle(
                         isActive ? .clear : VERACommonUIAsset.SemanticColors.error.swiftUIColor.opacity(0.7))
                 } else {
-                    Circle()
-                        .fill(Material.ultraThinMaterial)
-                        .overlay(
+                    ZStack {
+                        if isActive {
                             Circle()
-                                .stroke(
-                                    LinearGradient(
-                                        colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1.2
-                                )
-                        )
+                                .fill(Material.ultraThinMaterial)
+                        } else {
+                            Circle()
+                                .fill(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                        }
+
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: isActive
+                                        ? [.white.opacity(0.6), .white.opacity(0.1)]
+                                        : [
+                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                                        ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.2
+                            )
+                    }
                 }
             }
         #endif

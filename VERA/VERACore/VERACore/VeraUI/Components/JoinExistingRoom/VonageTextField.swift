@@ -45,7 +45,6 @@ struct VonageTextField: View {
 
     @State private var labelWidth: CGFloat = 0
     @FocusState private var isFocused: Bool
-    @Environment(\.colorScheme) var colorScheme
 
     init(
         placeholder: String,
@@ -117,9 +116,7 @@ struct VonageTextField: View {
     }
 
     private var backgroundColor: Color {
-        colorScheme == .dark
-            ? VERACommonUIAsset.SemanticColors.background.swiftUIColor
-            : VERACommonUIAsset.SemanticColors.surface.swiftUIColor
+        VERACommonUIAsset.SemanticColors.surface.swiftUIColor
     }
 
     private var placeholderColor: Color {
