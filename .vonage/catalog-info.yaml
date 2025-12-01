@@ -24,5 +24,3 @@ spec:
   owner: group:orgdata/vdk
   system: video-ios-ref-app
   lifecycle: production
-  dependsOn:
-    - library:Vonage/vonage-video-client-sdk-swift
