@@ -18,7 +18,7 @@ metadata:
   name: video-ios-ref-app
   description: Video iOS Reference Application Component
   annotations:
-    github.com/project-slug: Vonage/vonage-video-ios-app
+    github.com/project-slug: Vonage/vonage-video-ios-app   # GH repo with the service Helm
 spec:
   type: service
   owner: group:orgdata/vdk
