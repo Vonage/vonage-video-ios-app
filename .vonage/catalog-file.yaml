@@ -7,7 +7,6 @@ metadata:
   description: An open-source video conferencing reference application for the Vonage Video API using the iOS SDK.
   annotations:
     vonage.com/jira-id: VPF   # video general projects
-    github.com/project-slug: Vonage/vonage-video-ios-app   # GH repo with the service Helm  
 spec:
   type: service
   owner: group:orgdata/vdk   # helm "owner" orgdata squad id or general orgdata/vid
