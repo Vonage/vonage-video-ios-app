@@ -18,8 +18,8 @@ public struct ChatScreen: View {
                     ChatPanel(
                         messages: chatPanelState.messages
                     ) { message in
-                            viewModel.sendMessage(message)
-                        }
+                        viewModel.sendMessage(message)
+                    }
                 case .loading:
                     ProgressView()
                         .onAppear {

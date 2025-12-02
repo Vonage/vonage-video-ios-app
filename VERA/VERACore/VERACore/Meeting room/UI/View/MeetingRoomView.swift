@@ -71,8 +71,8 @@ public struct MeetingRoomView: View {
                     roomName: state.roomName,
                     meetingURL: state.roomURL
                 ) {
-                        showParticipantsList = false
-                    }
+                    showParticipantsList = false
+                }
             }
             .onAppear {
                 startHideTimer()
@@ -89,11 +89,11 @@ public struct MeetingRoomView: View {
                 .if(
                     !iOS26Available()
                 ) { view in
-                        view
-                            .toolbarBackground(.visible, for: .navigationBar)
-                            .toolbarBackground(.black, for: .navigationBar)
+                    view
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarBackground(.black, for: .navigationBar)
 
-                    }
+                }
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

@@ -133,8 +133,8 @@ struct VERAApp: App {
     #if CHAT_ENABLED
         private func makeChatView() -> some View {
             let result = chatFactory.make {
-                    showChat = false
-                }
+                showChat = false
+            }
             return result.view
         }
     #endif

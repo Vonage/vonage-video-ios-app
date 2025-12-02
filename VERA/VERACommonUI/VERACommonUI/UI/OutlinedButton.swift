@@ -60,5 +60,6 @@ struct OutlinedButtonStyle: ButtonStyle {
     OutlinedButton(
         text: .init("Hello"),
         color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
-        isDisabled: false) {}
+        isDisabled: false
+    ) {}
 }
