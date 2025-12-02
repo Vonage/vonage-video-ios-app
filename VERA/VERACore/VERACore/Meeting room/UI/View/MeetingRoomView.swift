@@ -68,6 +68,7 @@ public struct MeetingRoomView: View {
             .sheet(isPresented: $showParticipantsList) {
                 ParticipantsListView(
                     participants: state.participants.sortedByName(),
+                    participantsCount: state.participantsCount,
                     roomName: state.roomName,
                     meetingURL: state.roomURL,
                     onDismiss: {

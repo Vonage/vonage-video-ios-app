@@ -7,17 +7,20 @@ import VERACommonUI
 
 public struct ParticipantsListView: View {
     let participants: [Participant]
+    let participantsCount: Int
     let roomName: String
     let meetingURL: URL?
     let onDismiss: () -> Void
 
     public init(
         participants: [Participant],
+        participantsCount: Int,
         roomName: String,
         meetingURL: URL?,
         onDismiss: @escaping () -> Void
     ) {
         self.participants = participants
+        self.participantsCount = participantsCount
         self.roomName = roomName
         self.meetingURL = meetingURL
         self.onDismiss = onDismiss
@@ -33,7 +36,7 @@ public struct ParticipantsListView: View {
 
                 participantsList
             }
-            .navigationTitle("Participants (\(participants.count))")
+            .navigationTitle("Participants (\(participantsCount))")
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -148,6 +151,7 @@ struct ParticipantAvatarView: View {
 #Preview {
     ParticipantsListView(
         participants: PreviewData.manyParticipants,
+        participantsCount: 2,
         roomName: "heart-of-gold",
         meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold"),
         onDismiss: {}
