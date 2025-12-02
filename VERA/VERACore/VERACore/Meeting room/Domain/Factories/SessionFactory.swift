@@ -6,5 +6,5 @@ import Foundation
 
 public protocol SessionFactory {
     associatedtype Session
-    func make(_ credentials: RoomCredentials) -> Session
+    func make(_ credentials: RoomCredentials) throws -> Session
 }
