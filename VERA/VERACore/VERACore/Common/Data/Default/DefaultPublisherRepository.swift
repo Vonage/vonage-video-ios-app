@@ -6,6 +6,10 @@ import Foundation
 
 public final class DefaultPublisherRepository: PublisherRepository {
 
+    public enum Error: Swift.Error {
+        case noPublisher
+    }
+
     private let publisherFactory: PublisherFactory
     private var publisher: VERAPublisher?
 
@@ -13,12 +17,16 @@ public final class DefaultPublisherRepository: PublisherRepository {
         self.publisherFactory = publisherFactory
     }
 
-    public func getPublisher() -> VERAPublisher {
+    public func getPublisher() throws -> VERAPublisher {
         if let publisher = publisher {
             return publisher
         }
-        self.publisher = publisherFactory.make(.init())
-        return self.publisher!
+        self.publisher = try publisherFactory.make(.init())
+        if let selfPublisher = self.publisher {
+            return selfPublisher
+        } else {
+            throw Error.noPublisher
+        }
     }
 
     public func resetPublisher() {
@@ -26,8 +34,8 @@ public final class DefaultPublisherRepository: PublisherRepository {
         publisher = nil
     }
 
-    public func recreatePublisher(_ settings: PublisherSettings) {
+    public func recreatePublisher(_ settings: PublisherSettings) throws {
         publisher?.cleanUp()
-        publisher = publisherFactory.make(settings)
+        publisher = try publisherFactory.make(settings)
     }
 }

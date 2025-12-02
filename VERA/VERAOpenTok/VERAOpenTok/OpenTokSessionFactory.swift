@@ -8,21 +8,30 @@ import VERACore
 
 public final class OpenTokSessionFactory: SessionFactory {
 
+    public enum Error: Swift.Error {
+        case failedSessionInitialization
+    }
+
     public init() {}
 
-    public func make(_ sessionCredentials: RoomCredentials) -> OpenTokSession {
+    public func make(_ sessionCredentials: RoomCredentials) throws -> OpenTokSession {
         let settings = OTSessionSettings()
 
         // Setting singlePeerConnection to true prevents complex workarounds and issues
         // when joining rooms with many participants by using a single peer connection
         // instead of multiple peer connections which can cause WebRTC limitations
         settings.singlePeerConnection = true
+        settings.sessionMigration = true
 
         let otSession = OTSession(
             applicationId: sessionCredentials.applicationId,
             sessionId: sessionCredentials.sessionId,
             delegate: nil,
-            settings: settings)!
+            settings: settings)
+
+        guard let otSession = otSession else {
+            throw Error.failedSessionInitialization
+        }
 
         let session = OpenTokSession(session: otSession)
         otSession.delegate = session
