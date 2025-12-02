@@ -29,12 +29,12 @@ public final class OpenTokSessionFactory: SessionFactory {
             delegate: nil,
             settings: settings)
 
-        guard let otSession = otSession else {
+        guard let unwrappedSession = otSession else {
             throw Error.failedSessionInitialization
         }
 
-        let session = OpenTokSession(session: otSession)
-        otSession.delegate = session
+        let session = OpenTokSession(session: unwrappedSession)
+        unwrappedSession.delegate = session
         return session
     }
 }
