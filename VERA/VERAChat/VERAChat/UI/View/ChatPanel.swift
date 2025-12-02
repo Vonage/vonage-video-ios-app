@@ -107,7 +107,7 @@ struct GlassBackground: View {
 #Preview("Chat Panel") {
     ChatPanel(
         messages: UIChatMessage.sampleMessages
-    )        { message in print("Send: \(message)") }
+    ) { message in print("Send: \(message)") }
 }
 
 #Preview("Chat Input Only") {

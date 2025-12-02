@@ -17,7 +17,7 @@ public struct ChatScreen: View {
                 case .content(let chatPanelState):
                     ChatPanel(
                         messages: chatPanelState.messages
-                    )                        { message in
+                    ) { message in
                             viewModel.sendMessage(message)
                         }
                 case .loading:

@@ -150,5 +150,5 @@ struct ParticipantAvatarView: View {
         participants: PreviewData.manyParticipants,
         roomName: "heart-of-gold",
         meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold")
-    )        {}
+    ) {}
 }

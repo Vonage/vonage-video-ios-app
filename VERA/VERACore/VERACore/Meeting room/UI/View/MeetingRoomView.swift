@@ -70,7 +70,7 @@ public struct MeetingRoomView: View {
                     participants: state.participants.sortedByName(),
                     roomName: state.roomName,
                     meetingURL: state.roomURL
-                )                    {
+                ) {
                         showParticipantsList = false
                     }
             }
@@ -88,7 +88,7 @@ public struct MeetingRoomView: View {
                 }
                 .if(
                     !iOS26Available()
-                )                    { view in
+                ) { view in
                         view
                             .toolbarBackground(.visible, for: .navigationBar)
                             .toolbarBackground(.black, for: .navigationBar)
