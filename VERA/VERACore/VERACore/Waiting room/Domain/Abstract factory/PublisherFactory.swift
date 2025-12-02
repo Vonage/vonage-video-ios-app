@@ -29,5 +29,5 @@ public struct PublisherSettings: Equatable {
 }
 
 public protocol PublisherFactory {
-    func make(_ settings: PublisherSettings) -> VERAPublisher
+    func make(_ settings: PublisherSettings) throws -> VERAPublisher
 }

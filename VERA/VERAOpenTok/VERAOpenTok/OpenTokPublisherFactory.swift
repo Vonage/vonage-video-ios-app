@@ -10,14 +10,20 @@ import VERACore
 
 public final class OpenTokPublisherFactory: PublisherFactory {
 
+    enum Error: Swift.Error {
+        case publisherInitializationFailed
+    }
+
     public init() {
     }
 
-    public func make(_ settings: PublisherSettings) -> any VERAPublisher {
+    public func make(_ settings: PublisherSettings) throws -> any VERAPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
 
-        let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings)!
+        guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
+            throw Error.publisherInitializationFailed
+        }
         otPublisher.publishAudio = settings.publishAudio
         otPublisher.publishVideo = settings.publishVideo
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior

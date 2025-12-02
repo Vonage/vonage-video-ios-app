@@ -23,12 +23,12 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
-        return await getConnectedCall(result.asRoomCredentials(with: roomName))
+        return try await getConnectedCall(result.asRoomCredentials(with: roomName))
     }
 
     @MainActor
-    private func getConnectedCall(_ credentials: RoomCredentials) async -> CallFacade {
-        let call = await sessionRepository.createSession(credentials)
+    private func getConnectedCall(_ credentials: RoomCredentials) async throws -> CallFacade {
+        let call = try await sessionRepository.createSession(credentials)
         call.connect()
         return call
     }

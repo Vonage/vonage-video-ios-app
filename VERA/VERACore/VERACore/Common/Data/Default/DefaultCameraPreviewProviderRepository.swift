@@ -13,11 +13,11 @@ public final class DefaultCameraPreviewProviderRepository: CameraPreviewProvider
         self.publisherFactory = publisherFactory
     }
 
-    public func getPublisher() -> VERAPublisher {
+    public func getPublisher() throws -> VERAPublisher {
         if let publisher = publisher {
             return publisher
         }
-        let producedPublisher = publisherFactory.make(.init(scaleBehavior: .fit))
+        let producedPublisher = try publisherFactory.make(.init(scaleBehavior: .fit))
         self.publisher = producedPublisher
         return producedPublisher
     }

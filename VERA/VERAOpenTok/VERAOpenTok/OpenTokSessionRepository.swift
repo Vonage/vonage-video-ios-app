@@ -8,6 +8,11 @@ import VERACore
 
 public final class OpenTokSessionRepository<Factory: SessionFactory>: SessionRepository
 where Factory.Session == OpenTokSession {
+
+    enum Error: Swift.Error {
+        case publisherCastingError
+    }
+
     private var cancellables = Set<AnyCancellable>()
 
     private let sessionFactory: Factory
@@ -26,9 +31,12 @@ where Factory.Session == OpenTokSession {
         self.pluginRegistry = pluginRegistry
     }
 
-    public func createSession(_ credentials: VERACore.RoomCredentials) -> CallFacade {
-        let newSession = sessionFactory.make(credentials)
-        let publisher = publisherRepository.getPublisher() as! OpenTokPublisher
+    public func createSession(_ credentials: VERACore.RoomCredentials) throws -> CallFacade {
+        let newSession = try sessionFactory.make(credentials)
+        guard let publisher = try publisherRepository.getPublisher() as? OpenTokPublisher else {
+            throw Error.publisherCastingError
+        }
+
         let call = OpenTokCall(credentials: credentials, session: newSession, publisher: publisher)
         call.setup()
         call.assignPlugins(pluginRegistry.plugins)
