@@ -3,7 +3,7 @@ import ProjectDescription
 let project = Project(
     name: "VERAOpenTok",
     packages: [
-        .package(url: "https://github.com/Vonage/vonage-video-client-sdk-swift", .upToNextMinor(from: "2.31.1"))
+        .package(url: "https://github.com/Vonage/vonage-video-client-sdk-swift", .upToNextMinor(from: "2.32.0"))
     ],
     targets: [
         .target(
