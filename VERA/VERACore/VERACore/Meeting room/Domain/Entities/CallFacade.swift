@@ -79,5 +79,4 @@ public protocol CallFacade: AnyObject,
     CallConnectable,
     MediaToggleable,
     CallStatePublisherProvider,
-    HoldeableCall
-{}
+    HoldeableCall {}

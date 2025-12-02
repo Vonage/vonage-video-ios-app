@@ -21,5 +21,5 @@ public func launchScreenPlistValues() -> [String: ProjectDescription.Plist.Value
 }
 
 public func combinedPlistValues() -> [String: ProjectDescription.Plist.Value] {
-    orientationPlistValues().merging(launchScreenPlistValues(), uniquingKeysWith: { _, new in new })
+    orientationPlistValues().merging(launchScreenPlistValues()) { _, new in new }
 }

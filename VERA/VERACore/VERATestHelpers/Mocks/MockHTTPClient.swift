@@ -6,7 +6,7 @@ import Foundation
 import VERACore
 
 public final class MockHTTPClient: HTTPClient {
-    public var data: Data = Data()
+    public var data = Data()
     public var shouldThrowError = false
     public var delaySeconds: TimeInterval = 0
     public var callCount = 0

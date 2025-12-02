@@ -20,7 +20,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
-    @Published public var error: AlertItem? = nil
+    @Published public var error: AlertItem?
 
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
@@ -76,7 +76,6 @@ public final class WaitingRoomViewModel: ObservableObject {
         startVideoPreviewIfNeeded()
     }
 
-
     private func observeCameraDevices() {
         cameraDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
@@ -86,10 +85,10 @@ public final class WaitingRoomViewModel: ObservableObject {
             return cameraDevices.map {
                 self.makeUICameraDevice(device: $0)
             }
-        }.sink(receiveValue: { [weak self] in
+        }.sink { [weak self] in
             self?.availableCameraDevices = $0
             self?.handleDevicesChanged()
-        })
+        }
         .store(in: &cancellables)
     }
 

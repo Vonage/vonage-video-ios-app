@@ -62,7 +62,7 @@ struct OpenTokCallTests {
         }
 
         switch event {
-        case .error(_): break
+        case .error: break
         // Should be an error
         default:
             Issue.record("Expected error event, got: \(String(describing: event))")

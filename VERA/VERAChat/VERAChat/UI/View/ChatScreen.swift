@@ -16,11 +16,10 @@ public struct ChatScreen: View {
                 switch viewModel.state {
                 case .content(let chatPanelState):
                     ChatPanel(
-                        messages: chatPanelState.messages,
-                        onSendMessage: { message in
+                        messages: chatPanelState.messages
+                    )                        { message in
                             viewModel.sendMessage(message)
                         }
-                    )
                 case .loading:
                     ProgressView()
                         .onAppear {

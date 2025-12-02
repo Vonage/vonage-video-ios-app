@@ -23,7 +23,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
-    @MainActor @Published public var error: AlertItem? = nil
+    @MainActor @Published public var error: AlertItem?
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
     private let callStatePublisher = CurrentValueSubject<CallState, Never>(CallState.idle)

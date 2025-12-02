@@ -34,7 +34,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -60,7 +60,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -82,7 +82,7 @@ struct MeetingRoomViewModelTests {
         sut.loadUI()
 
         let error = await sut.$error.values
-            .first(where: { $0 != nil })!
+            .first { $0 != nil }!
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
@@ -97,7 +97,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.layout == .activeSpeaker)
     }
@@ -112,7 +112,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.layout == .grid)
     }
@@ -179,7 +179,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -210,16 +210,16 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let _ = await sut.$state.values
+        _ = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(sut.currentCall != nil)
 
         sut.endCall()
 
         let error = await sut.$error.values
-            .first(where: { $0 != nil })!
+            .first { $0 != nil }!
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
@@ -237,7 +237,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.roomURL == url.appendingPathComponent(roomName))
     }
@@ -325,7 +325,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.isCameraEnabled == false)
     }
@@ -342,7 +342,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.isMicEnabled == false)
     }
@@ -387,7 +387,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         return contentState
     }

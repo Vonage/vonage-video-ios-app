@@ -119,13 +119,11 @@ public final class ActiveSpeakerTracker: ObservableObject {
         }
 
         if newActiveSpeaker.participantId != activeSpeaker.participantId
-            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold
-        {
+            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold {
             // New participant becomes active speaker
             activeSpeaker = newActiveSpeaker
         } else if newActiveSpeaker.participantId == activeSpeaker.participantId
-            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold
-        {
+            && newActiveSpeaker.audioLevel >= minimumAudioLevelThreshold {
             // Same participant but update audio level
             activeSpeaker = newActiveSpeaker
         } else if newActiveSpeaker.participantId == nil && activeSpeaker.participantId != nil {
