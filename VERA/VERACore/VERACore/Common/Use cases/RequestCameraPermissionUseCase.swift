@@ -19,7 +19,7 @@ public final class DefaultRequestCameraPermissionUseCase: RequestCameraPermissio
             true
         } else {
             await withCheckedContinuation { continuation in
-                AVCaptureDevice.requestAccess(for: .audio) { granted in
+                AVCaptureDevice.requestAccess(for: .video) { granted in
                     continuation.resume(returning: granted)
                 }
             }
