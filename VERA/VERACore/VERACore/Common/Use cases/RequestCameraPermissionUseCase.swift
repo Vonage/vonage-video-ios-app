@@ -14,15 +14,6 @@ public final class DefaultRequestCameraPermissionUseCase: RequestCameraPermissio
     public init() {}
 
     public func callAsFunction() async -> Bool {
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        return if status == .authorized {
-            true
-        } else {
-            await withCheckedContinuation { continuation in
-                AVCaptureDevice.requestAccess(for: .video) { granted in
-                    continuation.resume(returning: granted)
-                }
-            }
-        }
+        await AVCaptureDevice.requestAccess(for: .video)
     }
 }
