@@ -19,6 +19,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let disconnectRoomUseCase: DisconnectRoomUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var error: AlertItem? = nil
@@ -40,6 +42,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         disconnectRoomUseCase: DisconnectRoomUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         appConfig: AppConfig
     ) {
@@ -49,6 +53,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
+        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.appConfig = appConfig
     }
@@ -142,10 +148,22 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleMic() {
+        if !checkMicrophoneAuthorizationStatusUseCase() {
+            Task {
+                await requestMicrophonePermissionUseCase()
+            }
+            return
+        }
         currentCall?.toggleLocalAudio()
     }
 
     public func onToggleCamera() {
+        if !checkCameraAuthorizationStatusUseCase() {
+            Task {
+                await requestCameraPermissionUseCase()
+            }
+            return
+        }
         currentCall?.toggleLocalVideo()
     }
 

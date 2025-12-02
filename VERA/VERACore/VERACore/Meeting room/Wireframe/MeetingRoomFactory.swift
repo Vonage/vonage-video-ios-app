@@ -44,6 +44,8 @@ public class MeetingRoomFactory {
                 sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
+            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
+            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
         return MeetingRoomScreen(

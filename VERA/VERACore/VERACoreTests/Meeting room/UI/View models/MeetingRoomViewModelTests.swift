@@ -358,6 +358,9 @@ struct MeetingRoomViewModelTests {
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
             makeMockCheckCameraAuthorizationStatusUseCase(),
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase =
+            makeMockRequestMicrophonePermissionUseCase(),
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase = makeMockRequestCameraPermissionUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig()
@@ -369,6 +372,8 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
+            requestMicrophonePermissionUseCase: requestMicrophonePermissionUseCase,
+            requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
     }

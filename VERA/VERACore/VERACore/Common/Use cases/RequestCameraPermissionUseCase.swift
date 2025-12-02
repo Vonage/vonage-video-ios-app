@@ -5,22 +5,24 @@
 import AVFoundation
 import Foundation
 
-public final class RequestCameraPermissionUseCase {
+public protocol RequestCameraPermissionUseCase {
+    func callAsFunction() async -> Bool
+}
+
+public final class DefaultRequestCameraPermissionUseCase: RequestCameraPermissionUseCase {
 
     public init() {}
 
     public func callAsFunction() async -> Bool {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
-        return switch status {
-        case .authorized: true
-        case .notDetermined:
+        return if status == .authorized {
+            true
+        } else {
             await withCheckedContinuation { continuation in
-                AVCaptureDevice.requestAccess(for: .video) { granted in
+                AVCaptureDevice.requestAccess(for: .audio) { granted in
                     continuation.resume(returning: granted)
                 }
             }
-        case .restricted, .denied: false
-        @unknown default: false
         }
     }
 }

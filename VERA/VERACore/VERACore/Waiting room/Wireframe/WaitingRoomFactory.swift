@@ -36,9 +36,10 @@ public class WaitingRoomFactory {
                 userRepository: userRepository,
                 cameraPreviewProviderRepository: cameraPreviewProviderRepository,
                 publisherRepository: publisherRepository),
-            requestMicrophonePermissionUseCase: .init(),
-            requestCameraPermissionUseCase: .init(),
+            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
+            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
+            checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository)
         return WaitingRoomScreen(
             viewModel: viewModel,
