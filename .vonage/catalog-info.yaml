@@ -1,0 +1,26 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: video-ios-ref-app   # SERVICE NAME field
+  title: Video iOS Reference Application   # Title (human-friendly library name) field
+  description: An open-source video conferencing reference application for the Vonage Video API using the iOS SDK.
+  annotations:
+    vonage.com/jira-id: VPF   # video general projects
+spec:
+  type: library
+  owner: group:orgdata/vdk   # helm "owner" orgdata squad id or general orgdata/vid
+  domain: video-api   # Product this library belongs to
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: video-ios-ref-app
+  description: Video iOS Reference Application Component
+  annotations:
+    github.com/project-slug: Vonage/vonage-video-ios-app   # GH repo
+spec:
+  type: library
+  owner: group:orgdata/vdk
+  system: video-ios-ref-app
+  lifecycle: production

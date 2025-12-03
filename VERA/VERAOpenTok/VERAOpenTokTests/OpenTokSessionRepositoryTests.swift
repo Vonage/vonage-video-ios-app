@@ -25,7 +25,7 @@ struct OpenTokSessionRepositoryTests {
             pluginRegistry: pluginRegistry)
 
         let credentials = makeMockCredentials()
-        _ = sut.createSession(credentials)
+        _ = try sut.createSession(credentials)
 
         #expect(sessionFactory.makeCalled)
     }
@@ -42,7 +42,7 @@ struct OpenTokSessionRepositoryTests {
             pluginRegistry: pluginRegistry)
 
         let credentials = makeMockCredentials()
-        _ = sut.createSession(credentials)
+        _ = try sut.createSession(credentials)
 
         #expect(sut.currentCall != nil)
 

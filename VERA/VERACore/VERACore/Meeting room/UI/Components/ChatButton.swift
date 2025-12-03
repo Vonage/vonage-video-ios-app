@@ -54,5 +54,5 @@ struct ChatBadgeButton: View {
 }
 
 #Preview {
-    ChatBadgeButton(unreadMessagesCount: 25, onShowChat: {})
+    ChatBadgeButton(unreadMessagesCount: 25) {}
 }

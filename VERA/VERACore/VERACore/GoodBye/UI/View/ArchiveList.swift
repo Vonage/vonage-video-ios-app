@@ -15,23 +15,36 @@ struct ArchiveList: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Recordings", bundle: .veraCore)
+            Text("Download recording", bundle: .veraCore)
                 .adaptiveFont(.heading1)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 10)
             if archives.isEmpty {
-                Text("There are no recordings for this meeting", bundle: .veraCore)
-                    .adaptiveFont(.heading2)
-                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack {
+                        VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
+                        Text("The meeting hasn’t been recorded", bundle: .veraCore)
+                            .adaptiveFont(.bodyBase)
+                            .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                    }
+                    Divider()
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
+                        .padding(.top, 8)
+                }
             } else {
                 ForEach(archives, id: \.id) { archive in
                     HStack {
+                        VStack(alignment: .center) {
+                            VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
+                        }
                         VStack(alignment: .leading) {
                             Text(archive.title)
-                                .font(.title2)
-                            Text(archive.subtitle)
+                                .adaptiveFont(.bodyBase)
                                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            Text(archive.subtitle)
+                                .adaptiveFont(.bodyBase)
+                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
@@ -39,9 +52,14 @@ struct ArchiveList: View {
                                 Button {
                                     archive.onDownload?()
                                 } label: {
-                                    Image(systemName: "square.and.arrow.down")
-                                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                                }.frame(width: 44, height: 44)
+                                    HStack(alignment: .center) {
+                                        VERACommonUIAsset.Images.downloadLine.swiftUIImage
+                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                        Text("Download")
+                                            .adaptiveFont(.bodyBase)
+                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                    }
+                                }
                             } else {
                                 ProgressView()
                                     .frame(width: 44, height: 44)
@@ -49,6 +67,7 @@ struct ArchiveList: View {
                         }
                     }
                     .padding(.bottom, 8)
+                    .padding(.leading, 16)
                 }.padding(.horizontal, 8)
             }
         }

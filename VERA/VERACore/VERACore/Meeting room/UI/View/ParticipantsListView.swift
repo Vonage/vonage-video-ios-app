@@ -153,7 +153,6 @@ struct ParticipantAvatarView: View {
         participants: PreviewData.manyParticipants,
         participantsCount: PreviewData.manyParticipants.count,
         roomName: "heart-of-gold",
-        meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold"),
-        onDismiss: {}
-    )
+        meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold")
+    ) {}
 }

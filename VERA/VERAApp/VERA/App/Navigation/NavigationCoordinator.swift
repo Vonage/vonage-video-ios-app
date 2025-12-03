@@ -14,7 +14,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         case .landing: returnToLanding()
         case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
         case .meetingRoom(let roomName): startMeeting(roomName)
-        case .goodbye(_): leaveMeeting()
+        case .goodbye: leaveMeeting()
         }
     }
 

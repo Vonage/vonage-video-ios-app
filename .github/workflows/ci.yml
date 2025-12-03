@@ -17,7 +17,9 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install swift-format
-      run: brew install swift-format
+      run: |
+        brew install swift-format
+        swift-format --version
   
     - name: Check Swift formatting
       run: |

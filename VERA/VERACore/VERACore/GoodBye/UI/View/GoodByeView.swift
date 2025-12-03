@@ -47,6 +47,7 @@ public struct GoodByeView: View {
 }
 
 public struct HorizontalGoodByeContentView: View {
+    @Environment(\.verticalSizeClass) var verticalSizeClass
 
     public let archives: [ArchiveUIData]
     public let onReenter: () -> Void
@@ -63,16 +64,24 @@ public struct HorizontalGoodByeContentView: View {
     }
 
     public var body: some View {
-        HorizontalContentView {
-            GoodByeMessage(
-                onReenter: onReenter,
-                onReturnToLanding: onReturnToLanding
-            )
-            .padding(.bottom, 40)
-            .padding(.horizontal, 20)
+        HorizontalContentView(showFooter: verticalSizeClass == .regular) {
+            GoodByeMessage()
+                .padding(.bottom, 40)
+                .padding(.horizontal, 20)
         } rightSide: {
-            ArchiveList(archives: archives)
-                .padding()
+            VStack(alignment: .center, spacing: 0) {
+                CardView {
+                    VStack(alignment: .leading) {
+                        RejoinTheRoomText()
+                        ReenterRoomButton(onReenter: onReenter)
+                        GoToLandingPageButton(onReturnToLanding: onReturnToLanding)
+                    }
+                }
+                CardView {
+                    ArchiveList(archives: archives)
+                        .padding()
+                }.padding(.top)
+            }
         }
     }
 }
@@ -95,12 +104,19 @@ public struct VerticalGoodByeContentView: View {
 
     public var body: some View {
         VerticalContentView {
-            GoodByeMessage(
-                onReenter: onReenter,
-                onReturnToLanding: onReturnToLanding
-            )
-            .padding(.horizontal)
-            .padding()
+            GoodByeMessage(showSubtitle: false)
+                .padding()
+                .padding(.horizontal)
+            RejoinTheRoomText()
+                .padding(.horizontal)
+                .padding(.top)
+                .padding(.horizontal)
+            ReenterRoomButton(onReenter: onReenter)
+                .padding()
+                .padding(.horizontal)
+            GoToLandingPageButton(onReturnToLanding: onReturnToLanding)
+                .padding(.horizontal)
+                .padding(.horizontal)
         } bottomSide: {
             ArchiveList(archives: archives)
                 .padding()

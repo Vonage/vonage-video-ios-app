@@ -7,17 +7,20 @@ import SwiftUI
 public struct OutlinedButton: View {
     public let text: Text
     public let color: Color
+    public let image: Image?
     public let isDisabled: Bool
     public let onAction: () -> Void
 
     public init(
         text: Text,
         color: Color,
+        image: Image? = nil,
         isDisabled: Bool,
         onAction: @escaping () -> Void
     ) {
         self.text = text
         self.color = color
+        self.image = image
         self.isDisabled = isDisabled
         self.onAction = onAction
     }
@@ -26,9 +29,18 @@ public struct OutlinedButton: View {
         Button {
             onAction()
         } label: {
-            text
-                .foregroundStyle(color)
-                .frame(maxWidth: .infinity)
+            if let image = image {
+                HStack {
+                    image
+                        .foregroundStyle(color)
+                    text
+                        .foregroundStyle(color)
+                }.frame(maxWidth: .infinity)
+            } else {
+                text
+                    .foregroundStyle(color)
+                    .frame(maxWidth: .infinity)
+            }
         }
         .buttonStyle(OutlinedButtonStyle(color: color))
         .disabled(isDisabled)
@@ -60,6 +72,12 @@ struct OutlinedButtonStyle: ButtonStyle {
     OutlinedButton(
         text: .init("Hello"),
         color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
-        isDisabled: false,
-        onAction: {})
+        isDisabled: false
+    ) {}
+    OutlinedButton(
+        text: .init("Hello"),
+        color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
+        image: VERACommonUIAsset.Images.appsSolid.swiftUIImage,
+        isDisabled: false
+    ) {}
 }

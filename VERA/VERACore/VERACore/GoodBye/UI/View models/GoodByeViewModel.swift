@@ -16,7 +16,7 @@ public final class GoodByeViewModel: ObservableObject {
     private let playRecordingUseCase: PlayRecordingUseCase
 
     @MainActor @Published public var archives: [ArchiveUIData] = []
-    @MainActor @Published public var error: AlertItem? = nil
+    @MainActor @Published public var error: AlertItem?
 
     init(
         roomName: RoomName,

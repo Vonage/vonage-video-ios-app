@@ -43,7 +43,7 @@ extension UIChatMessage {
 
 // MARK: - Sample Data
 extension UIChatMessage {
-    private static let mockDate: Date = Date(timeIntervalSince1970: 1_760_352_680)
+    private static let mockDate = Date(timeIntervalSince1970: 1_760_352_680)
 
     private static func formattedDateByAdding(_ interval: TimeInterval = 0) -> String {
         UIChatMessage.formattedDate(mockDate.addingTimeInterval(interval))

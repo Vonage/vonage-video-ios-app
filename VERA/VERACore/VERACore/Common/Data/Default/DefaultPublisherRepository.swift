@@ -1,5 +1,5 @@
 //
-//  Created by Vonage on 16/7/25.
+//  Created by Vonage on 2/12/25.
 //
 
 import Foundation
@@ -13,12 +13,14 @@ public final class DefaultPublisherRepository: PublisherRepository {
         self.publisherFactory = publisherFactory
     }
 
-    public func getPublisher() -> VERAPublisher {
+    public func getPublisher() throws -> VERAPublisher {
         if let publisher = publisher {
             return publisher
         }
-        self.publisher = publisherFactory.make(.init())
-        return self.publisher!
+
+        let newPublisher = try publisherFactory.make(.init())
+        self.publisher = newPublisher
+        return newPublisher
     }
 
     public func resetPublisher() {
@@ -26,8 +28,8 @@ public final class DefaultPublisherRepository: PublisherRepository {
         publisher = nil
     }
 
-    public func recreatePublisher(_ settings: PublisherSettings) {
+    public func recreatePublisher(_ settings: PublisherSettings) throws {
         publisher?.cleanUp()
-        publisher = publisherFactory.make(settings)
+        publisher = try publisherFactory.make(settings)
     }
 }

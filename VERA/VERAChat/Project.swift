@@ -42,7 +42,7 @@ let project = Project(
                 with: [
                     "CFBundleName": "VERAChatApp",
                     "CFBundleDisplayName": "VERAChatApp",
-                ].merging(combinedPlistValues(), uniquingKeysWith: { _, new in new })),
+                ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAChatApp/**"],
             dependencies: [
                 .target(name: "VERAChat"),
