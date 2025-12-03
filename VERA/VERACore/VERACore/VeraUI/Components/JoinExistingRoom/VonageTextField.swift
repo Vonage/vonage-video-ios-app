@@ -74,7 +74,7 @@ struct VonageTextField: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                         .focused($isFocused)
-                        .foregroundColor(textColor)
+                        .foregroundStyle(textColor)
                         .kerning(0.15)
                         #if os(iOS)
                             .textInputAutocapitalization(.never)
@@ -85,7 +85,7 @@ struct VonageTextField: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
                         .focused($isFocused)
-                        .foregroundColor(textColor)
+                        .foregroundStyle(textColor)
                         .kerning(0.15)
                 }
             }
@@ -180,5 +180,7 @@ extension String {
 }
 
 #Preview {
-    VonageTextField(placeholder: "", text: .constant("Hello"), state: .initial)
+    VonageTextField(
+        placeholder: "Hello",
+        text: .constant("Hello"), state: .initial)
 }
