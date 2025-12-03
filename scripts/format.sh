@@ -86,6 +86,7 @@ SWIFT_FILES=$(find ./VERA -name "*.swift" -type f \
     -not -path "*/Pods/*" \
     -not -path "*/Carthage/*" \
     -not -path "*/xcuserdata/*" \
+    -not -path "*/Derived/Sources/*" \
     -not -path "*/project.xcworkspace/*" \
     2>/dev/null | sort)
 
@@ -140,22 +141,30 @@ else
             echo "Checking: $file"
         fi
         
-        # Get formatted version
-        FORMATTED=$(swift-format format $CONFIG_FLAG "$file" 2>/dev/null)
+        # Use a temporary file for comparison (more reliable)
+        TEMP_FILE=$(mktemp)
         
-        if [ $? -ne 0 ]; then
+        if ! swift-format format $CONFIG_FLAG "$file" > "$TEMP_FILE" 2>/dev/null; then
             echo -e "${RED}❌ Error processing: $file${NC}"
+            rm -f "$TEMP_FILE"
             ((ISSUES_FOUND++))
             continue
         fi
         
-        # Compare with original
-        if ! echo "$FORMATTED" | diff -q "$file" - >/dev/null 2>&1; then
+        # Compare with original using cmp (binary comparison, most reliable)
+        if ! cmp -s "$file" "$TEMP_FILE"; then
             echo -e "${RED}❌ Needs formatting: $file${NC}"
             ((ISSUES_FOUND++))
+            
+            if [ "$VERBOSE" = true ]; then
+                echo -e "${YELLOW}Differences:${NC}"
+                diff -u "$file" "$TEMP_FILE" 2>/dev/null | head -20 || true
+            fi
         elif [ "$VERBOSE" = true ]; then
             echo -e "${GREEN}✅ Properly formatted: $file${NC}"
         fi
+        
+        rm -f "$TEMP_FILE"
     done <<< "$SWIFT_FILES"
     
     echo ""

@@ -41,7 +41,7 @@ struct VERAApp: App {
                             }
                         case .goodbye(let roomName):
                             makeGoodbyePage(roomName: roomName)
-                        case .meetingRoom(_):
+                        case .meetingRoom:
                             fatalError("Should not be able to navigate to meeting room from landing")
                         case .landing:
                             fatalError("Should not be able to navigate to landing")
@@ -132,10 +132,9 @@ struct VERAApp: App {
 
     #if CHAT_ENABLED
         private func makeChatView() -> some View {
-            let result = chatFactory.make(
-                onDismiss: {
-                    showChat = false
-                })
+            let result = chatFactory.make {
+                showChat = false
+            }
             return result.view
         }
     #endif

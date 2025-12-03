@@ -25,7 +25,7 @@ public final class OpenTokCall: CallFacade {
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
-    public let id: UUID = UUID()
+    public let id = UUID()
     public let credentials: RoomCredentials
     public let session: OpenTokSession
     public let publisher: OpenTokPublisher
@@ -108,7 +108,7 @@ public final class OpenTokCall: CallFacade {
     private func setupActiveSpeakerObservation() {
         activeSpeakerTracker.$activeSpeaker
             .removeDuplicates()
-            .sink { info in
+            .sink { _ in
                 Task { [weak self] in
                     guard let self else { return }
                     let state = await self.callStateManager.getCurrentState()
@@ -166,7 +166,6 @@ public final class OpenTokCall: CallFacade {
             _eventsPublisher.send(.error(error))
         }
     }
-
 
     private func setupSubscriberObservation(_ subscriber: OpenTokSubscriber) {
         subscriber.$participant

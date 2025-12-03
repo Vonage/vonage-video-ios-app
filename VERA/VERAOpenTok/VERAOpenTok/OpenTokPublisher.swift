@@ -107,7 +107,7 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         stream?
             .publisher(for: \.hasAudio)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
@@ -115,14 +115,14 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         stream?
             .publisher(for: \.hasVideo)
             .removeDuplicates()
-            .sink { [weak self] newSize in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)
 
         $audioLevel
             .removeDuplicates()
-            .sink { [weak self] audioLevel in
+            .sink { [weak self] _ in
                 self?.updateParticipant()
             }
             .store(in: &cancellables)

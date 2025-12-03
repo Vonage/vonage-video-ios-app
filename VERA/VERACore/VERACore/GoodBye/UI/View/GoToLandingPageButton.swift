@@ -9,8 +9,10 @@ struct GoToLandingPageButton: View {
     let onReturnToLanding: () -> Void
 
     var body: some View {
-        FilledButton(
-            text: Text("Return to landing page", bundle: .veraCore),
+        OutlinedButton(
+            text: Text("View Landing Page", bundle: .veraCore),
+            color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
+            isDisabled: false,
             onAction: onReturnToLanding)
     }
 }

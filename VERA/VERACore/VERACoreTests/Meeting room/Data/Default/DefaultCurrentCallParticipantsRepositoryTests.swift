@@ -14,7 +14,7 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
     @Test func initialIsEmpty() async throws {
         let sut = makeSUT()
         let publisher = sut.getCurrentCallParticipants()
-        var initialParticipants: [Participant]? = nil
+        var initialParticipants: [Participant]?
         for await value in publisher.values {
             initialParticipants = value
             break
@@ -27,7 +27,7 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
         let participant = makeMockParticipant(id: "1", name: "Arthur Dent")
         sut.updateParticipants([participant])
         let publisher = sut.getCurrentCallParticipants()
-        var published: [Participant]? = nil
+        var published: [Participant]?
         for await value in publisher.values {
             published = value
             break
@@ -42,7 +42,7 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
         sut.updateParticipants([p1])
         sut.updateParticipants([p2])
         let publisher = sut.getCurrentCallParticipants()
-        var published: [Participant]? = nil
+        var published: [Participant]?
         for await value in publisher.values {
             published = value
             break

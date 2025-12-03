@@ -18,7 +18,7 @@ public final class LandingPageViewModel: ObservableObject {
     private let tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
 
     @Published public var state: LandingPageViewState = .content
-    @Published public var error: AlertItem? = nil
+    @Published public var error: AlertItem?
 
     public init(
         tryJoinRoomUseCase: TryJoinRoomUseCase,

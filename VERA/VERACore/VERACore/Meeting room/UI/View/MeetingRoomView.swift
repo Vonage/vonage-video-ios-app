@@ -70,11 +70,10 @@ public struct MeetingRoomView: View {
                     participants: state.participants.sortedByName(),
                     participantsCount: state.participantsCount,
                     roomName: state.roomName,
-                    meetingURL: state.roomURL,
-                    onDismiss: {
-                        showParticipantsList = false
-                    }
-                )
+                    meetingURL: state.roomURL
+                ) {
+                    showParticipantsList = false
+                }
             }
             .onAppear {
                 startHideTimer()
@@ -89,14 +88,13 @@ public struct MeetingRoomView: View {
                     .modifier(iOS26ToolbarModifier())
                 }
                 .if(
-                    !iOS26Available(),
-                    transform: { view in
-                        view
-                            .toolbarBackground(.visible, for: .navigationBar)
-                            .toolbarBackground(.black, for: .navigationBar)
+                    !iOS26Available()
+                ) { view in
+                    view
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarBackground(.black, for: .navigationBar)
 
-                    }
-                )
+                }
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -110,17 +108,15 @@ public struct MeetingRoomView: View {
                     }
 
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        #if targetEnvironment(macCatalyst)
-                        #else
-                            if state.allowCameraControl {
-                                Button {
-                                    onBottomBarInteraction()
-                                    actions.onCameraSwitch()
-                                } label: {
-                                    VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
-                                }.disabled(!state.isCameraEnabled)
-                            }
-                        #endif
+                        let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+                        if !isIosAppOnMac && state.allowCameraControl {
+                            Button {
+                                onBottomBarInteraction()
+                                actions.onCameraSwitch()
+                            } label: {
+                                VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
+                            }.disabled(!state.isCameraEnabled)
+                        }
                         if state.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()

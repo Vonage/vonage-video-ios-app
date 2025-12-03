@@ -54,5 +54,5 @@ struct ParticipantsBadgeButton: View {
 }
 
 #Preview {
-    ParticipantsBadgeButton(participantsCount: 25, onToggleParticipants: {})
+    ParticipantsBadgeButton(participantsCount: 25) {}
 }
