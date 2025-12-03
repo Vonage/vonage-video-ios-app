@@ -17,7 +17,7 @@ public final class DefaultPublisherRepository: PublisherRepository {
         if let publisher = publisher {
             return publisher
         }
-        
+
         let newPublisher = try publisherFactory.make(.init())
         self.publisher = newPublisher
         return newPublisher
