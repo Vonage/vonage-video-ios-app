@@ -17,9 +17,13 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
+    private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
-    @MainActor @Published public var error: AlertItem? = nil
+    @MainActor @Published public var error: AlertItem?
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
     private let callStatePublisher = CurrentValueSubject<CallState, Never>(CallState.idle)
@@ -36,6 +40,10 @@ public final class MeetingRoomViewModel: ObservableObject {
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         appConfig: AppConfig
     ) {
@@ -43,6 +51,10 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
+        self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
+        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.appConfig = appConfig
     }
@@ -115,8 +127,8 @@ public final class MeetingRoomViewModel: ObservableObject {
             return MeetingRoomState(
                 roomName: self.roomName,
                 roomURL: baseURL.appendingPathComponent(roomName),
-                isMicEnabled: sessionState.isPublishingAudio,
-                isCameraEnabled: sessionState.isPublishingVideo,
+                isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
+                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,
@@ -136,10 +148,22 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleMic() {
+        if !checkMicrophoneAuthorizationStatusUseCase() {
+            Task {
+                await requestMicrophonePermissionUseCase()
+            }
+            return
+        }
         currentCall?.toggleLocalAudio()
     }
 
     public func onToggleCamera() {
+        if !checkCameraAuthorizationStatusUseCase() {
+            Task {
+                await requestCameraPermissionUseCase()
+            }
+            return
+        }
         currentCall?.toggleLocalVideo()
     }
 

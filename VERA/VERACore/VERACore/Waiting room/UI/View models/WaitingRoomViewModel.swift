@@ -20,7 +20,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
-    @Published public var error: AlertItem? = nil
+    @Published public var error: AlertItem?
 
     private let roomName: RoomName
     weak var publisher: VERAPublisher?
@@ -31,6 +31,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
     private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let userRepository: UserRepository
 
     private var availableCameraDevices: [UICameraDevice] = []
@@ -45,6 +46,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
         requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         userRepository: UserRepository
     ) {
         self.roomName = roomName
@@ -54,6 +56,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
         self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.userRepository = userRepository
     }
 
@@ -73,7 +76,6 @@ public final class WaitingRoomViewModel: ObservableObject {
         startVideoPreviewIfNeeded()
     }
 
-
     private func observeCameraDevices() {
         cameraDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
@@ -83,10 +85,10 @@ public final class WaitingRoomViewModel: ObservableObject {
             return cameraDevices.map {
                 self.makeUICameraDevice(device: $0)
             }
-        }.sink(receiveValue: { [weak self] in
+        }.sink { [weak self] in
             self?.availableCameraDevices = $0
             self?.handleDevicesChanged()
-        })
+        }
         .store(in: &cancellables)
     }
 
@@ -107,6 +109,12 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func onMicToggle() {
+        if !checkMicrophoneAuthorizationStatusUseCase() {
+            Task {
+                await requestMicrophonePermissionUseCase()
+            }
+            return
+        }
         guard let publisher else { return }
         publisher.publishAudio.toggle()
         buildContentUiState(
@@ -116,6 +124,12 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func onCameraToggle() {
+        if !checkCameraAuthorizationStatusUseCase() {
+            Task {
+                await requestCameraPermissionUseCase()
+            }
+            return
+        }
         guard let publisher else { return }
         publisher.publishVideo.toggle()
         buildContentUiState(

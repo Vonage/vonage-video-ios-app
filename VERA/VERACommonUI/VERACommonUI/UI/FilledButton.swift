@@ -35,7 +35,6 @@ public struct FilledButton: View {
     }
 }
 
-
 struct FilledButtonStyle: ButtonStyle {
     var cornerRadius: CGFloat = BorderRadius.medium.value
 
@@ -58,5 +57,5 @@ struct FilledButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    FilledButton(text: Text("Hello"), image: .init(systemName: "plus"), onAction: {})
+    FilledButton(text: Text("Hello"), image: .init(systemName: "plus")) {}
 }

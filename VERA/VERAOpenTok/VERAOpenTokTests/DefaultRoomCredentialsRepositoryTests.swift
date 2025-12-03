@@ -64,7 +64,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let sut = makeSUT(httpClient: httpClient)
 
         do {
-            let _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
             #expect(Bool(false))
         } catch DecodingError.keyNotFound {
             // Expect to fail
@@ -82,7 +82,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let sut = makeSUT(httpClient: httpClient)
 
         do {
-            let _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
             #expect(Bool(false))
         } catch DecodingError.dataCorrupted {
             // Expect to fail
@@ -100,11 +100,10 @@ struct DefaultRoomCredentialsRepositoryTests {
         let sut = makeSUT(httpClient: httpClient)
 
         let request = makeRoomCredentialsRequest()
-        let _ = try! await sut.getRoomCredentials(request)
+        _ = try! await sut.getRoomCredentials(request)
 
         #expect(httpClient.recordedURL.lastPathComponent == request.roomName)
     }
-
 
     // MARK: - Test Helpers
 

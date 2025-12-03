@@ -6,7 +6,7 @@ import Foundation
 import VERAChat
 
 extension ChatMessage {
-    private static let mockDate: Date = Date(timeIntervalSince1970: 1_760_352_680)
+    private static let mockDate = Date(timeIntervalSince1970: 1_760_352_680)
 
     private static func formattedDateByAdding(_ interval: TimeInterval = 0) -> Date {
         mockDate.addingTimeInterval(interval)

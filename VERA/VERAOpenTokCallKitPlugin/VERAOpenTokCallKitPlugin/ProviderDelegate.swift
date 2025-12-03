@@ -34,7 +34,7 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
         sessionManager: OTAudioSessionManager? = nil
     ) {
         self.sessionManager = sessionManager
-        self.provider = provider ?? CXProvider(configuration: type(of: self).providerConfiguration)
+        self.provider = provider ?? CXProvider(configuration: Self.providerConfiguration)
 
         super.init()
 
@@ -86,7 +86,6 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
 
         action.fulfill()
     }
-
 
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         print("Received perform CXEndCallAction")
