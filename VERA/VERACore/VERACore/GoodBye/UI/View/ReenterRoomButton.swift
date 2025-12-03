@@ -9,10 +9,9 @@ struct ReenterRoomButton: View {
     let onReenter: () -> Void
 
     var body: some View {
-        OutlinedButton(
-            text: Text("Re-enter", bundle: .veraCore),
-            color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
-            isDisabled: false,
+        FilledButton(
+            text: Text("Go back to meeting", bundle: .veraCore),
+            image: VERACommonUIAsset.Images.enterLine.swiftUIImage,
             onAction: onReenter)
     }
 }
