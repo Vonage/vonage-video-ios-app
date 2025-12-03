@@ -11,12 +11,12 @@ import XCTest
 
 final class DefaultPublisherRepositoryTests: XCTestCase {
 
-    func test_resetPublisher_doesNotLeakPublishers() async {
+    func test_resetPublisher_doesNotLeakPublishers() async throws {
         let publisher = MockVERAPublisher()
         let publisherFactory = MockPublisherFactory(mockPublisher: publisher)
-        let sut = await makeSUT(publisherFactory: publisherFactory)
+        let sut = try await makeSUT(publisherFactory: publisherFactory)
 
-        _ = sut.getPublisher()
+        _ = try sut.getPublisher()
 
         sut.resetPublisher()
     }
@@ -27,10 +27,10 @@ final class DefaultPublisherRepositoryTests: XCTestCase {
         publisherFactory: MockPublisherFactory,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) async -> DefaultPublisherRepository {
+    ) async throws -> DefaultPublisherRepository {
 
         let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
-        let publisher = repository.getPublisher()
+        let publisher = try repository.getPublisher()
 
         trackForMemoryLeaks(publisher, file: file, line: line)
         trackForMemoryLeaks(publisherFactory, file: file, line: line)

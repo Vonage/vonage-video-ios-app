@@ -218,13 +218,17 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @MainActor
     public func startVideoPreview() {
-        let publisher = cameraPreviewProviderRepository.getPublisher()
-        self.publisher = publisher
+        do {
+            let publisher = try cameraPreviewProviderRepository.getPublisher()
+            self.publisher = publisher
 
-        buildContentUiState(
-            roomName: roomName,
-            isMicrophoneEnabled: publisher.publishAudio,
-            isCameraEnabled: publisher.publishVideo)
+            buildContentUiState(
+                roomName: roomName,
+                isMicrophoneEnabled: publisher.publishAudio,
+                isCameraEnabled: publisher.publishVideo)
+        } catch {
+            self.error = AlertItem.genericError(error.localizedDescription)
+        }
     }
 
     func startVideoPreviewIfNeeded() {
