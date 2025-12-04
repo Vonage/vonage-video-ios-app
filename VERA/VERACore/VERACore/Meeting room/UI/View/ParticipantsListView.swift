@@ -7,17 +7,20 @@ import VERACommonUI
 
 public struct ParticipantsListView: View {
     let participants: [Participant]
+    let participantsCount: Int
     let roomName: String
     let meetingURL: URL?
     let onDismiss: () -> Void
 
     public init(
         participants: [Participant],
+        participantsCount: Int,
         roomName: String,
         meetingURL: URL?,
         onDismiss: @escaping () -> Void
     ) {
         self.participants = participants
+        self.participantsCount = participantsCount
         self.roomName = roomName
         self.meetingURL = meetingURL
         self.onDismiss = onDismiss
@@ -33,7 +36,7 @@ public struct ParticipantsListView: View {
 
                 participantsList
             }
-            .navigationTitle("Participants (\(participants.count))")
+            .navigationTitle("Participants (\(participantsCount))")
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -42,7 +45,7 @@ public struct ParticipantsListView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                        }.tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {
@@ -73,7 +76,7 @@ public struct ParticipantsListView: View {
 
                     ShareLink(item: meetingURL) {
                         VERACommonUIAsset.Images.shareLine.swiftUIImage
-                            .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
                             .cornerRadius(6)
@@ -122,7 +125,7 @@ struct ParticipantRowView: View {
 
             MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
                 .font(.caption)
-                .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
         }
     }
 }
@@ -148,6 +151,7 @@ struct ParticipantAvatarView: View {
 #Preview {
     ParticipantsListView(
         participants: PreviewData.manyParticipants,
+        participantsCount: PreviewData.manyParticipants.count,
         roomName: "heart-of-gold",
         meetingURL: .init(string: "https://meet.vonagenetworks.net/room/heart-of-gold")
     ) {}

@@ -77,7 +77,7 @@ struct AvatarView: View {
         }
         .overlay(
             Circle()
-                .stroke(Color(.uiSystemBackground), lineWidth: 2)
+                .stroke(VERACommonUIAsset.SemanticColors.surface.swiftUIColor, lineWidth: 2)
         )
     }
 }
@@ -99,7 +99,7 @@ struct OverflowCountAvatar: View {
         }
         .overlay(
             Circle()
-                .stroke(Color(.uiSystemBackground), lineWidth: 2)
+                .stroke(VERACommonUIAsset.SemanticColors.surface.swiftUIColor, lineWidth: 2)
         )
     }
 }

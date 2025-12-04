@@ -27,17 +27,6 @@ struct UsernameInput: View {
         }
     }
 
-    private var borderColor: Color {
-        switch getUsernameState() {
-        case .initial:
-            return VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor
-        case .valid:
-            return VERACommonUIAsset.Colors.accentBlue.swiftUIColor
-        case .invalid:
-            return .red
-        }
-    }
-
     private func getUsernameState() -> VonageTextFieldState {
         if userName.isEmpty {
             return .initial

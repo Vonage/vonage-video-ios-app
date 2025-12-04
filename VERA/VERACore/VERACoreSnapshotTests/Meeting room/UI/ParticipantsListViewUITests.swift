@@ -79,6 +79,7 @@ struct ParticipantsListViewUITests {
     private func makeSUT() -> ParticipantsListView {
         ParticipantsListView(
             participants: PreviewData.manyParticipants,
+            participantsCount: PreviewData.manyParticipants.count,
             roomName: "heart-of-gold",
             meetingURL: .init(string: "https://meet.vonagenetworks.net/heart-of-gold"),
             onDismiss: {})

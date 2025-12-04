@@ -52,16 +52,16 @@ struct WaitingRoomUserPreviewView: View {
                         CircularControlImageButton(
                             isActive: state.isCameraEnabled,
                             image: state.isCameraEnabled
-                                ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
-                                : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
+                                ? VERACommonUIAsset.Images.videoLine.swiftUIImage
+                                : VERACommonUIAsset.Images.videoOffLine.swiftUIImage,
                             action: onCameraToggle)
                     }
                     if state.allowMicrophoneControl {
                         CircularControlImageButton(
                             isActive: state.isMicrophoneEnabled,
                             image: state.isMicrophoneEnabled
-                                ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
-                                : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
+                                ? VERACommonUIAsset.Images.microphoneLine.swiftUIImage
+                                : VERACommonUIAsset.Images.micMuteLine.swiftUIImage,
                             action: onMicrophoneToggle)
                     }
                 }
