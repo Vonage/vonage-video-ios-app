@@ -13,7 +13,7 @@ struct DefaultArchiveRecordingsRepositoryTests {
 
     @Test("Should return cached recording if file exists locally")
     func returnsCachedRecordingIfFileExistsLocally() async throws {
-        let tempDir = createTempDirectory()
+        let tempDir = try createTempDirectory()
         let archive = makeArchive(url: URL(string: "https://example.com/video.mp4")!)
         let expectedLocalURL = tempDir.appendingPathComponent("\(archive.id.uuidString).mp4")
 
@@ -31,7 +31,7 @@ struct DefaultArchiveRecordingsRepositoryTests {
 
     @Test("Should download and cache recording if not exists locally")
     func downloadsAndCachesRecordingIfNotExistsLocally() async throws {
-        let tempDir = createTempDirectory()
+        let tempDir = try createTempDirectory()
         let archive = makeArchive(url: URL(string: "https://example.com/video.mp4")!)
         let expectedLocalURL = tempDir.appendingPathComponent("\(archive.id.uuidString).mp4")
         let fakeVideoData = "fake video content".data(using: .utf8)!
@@ -54,7 +54,7 @@ struct DefaultArchiveRecordingsRepositoryTests {
 
     @Test("Should return same recording for multiple concurrent requests")
     func returnsSameRecordingForMultipleConcurrentRequests() async throws {
-        let tempDir = createTempDirectory()
+        let tempDir = try createTempDirectory()
         let archive = makeArchive(url: URL(string: "https://example.com/video.mp4")!)
         let fakeVideoData = "fake video content".data(using: .utf8)!
 
@@ -81,7 +81,7 @@ struct DefaultArchiveRecordingsRepositoryTests {
 
     @Test("Should throw error if archive has no download URL")
     func throwsErrorIfArchiveHasNoDownloadURL() async throws {
-        let tempDir = createTempDirectory()
+        let tempDir = try createTempDirectory()
         let archive = makeArchive(url: nil)  // No URL
 
         let mockHTTP = MockHTTPClient()
@@ -94,7 +94,7 @@ struct DefaultArchiveRecordingsRepositoryTests {
 
     @Test("Should throw error if download fails")
     func throwsErrorIfDownloadFails() async throws {
-        let tempDir = createTempDirectory()
+        let tempDir = try createTempDirectory()
         let archive = makeArchive(url: URL(string: "https://example.com/video.mp4")!)
 
         let mockHTTP = MockHTTPClient()
@@ -155,12 +155,12 @@ struct DefaultArchiveRecordingsRepositoryTests {
         )
     }
 
-    private func createTempDirectory() -> URL {
+    private func createTempDirectory() throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("ArchiveRecordingsTests")
             .appendingPathComponent(UUID().uuidString)
 
-        try! FileManager.default.createDirectory(
+        try FileManager.default.createDirectory(
             at: tempDir,
             withIntermediateDirectories: true
         )

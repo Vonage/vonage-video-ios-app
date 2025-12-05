@@ -38,18 +38,18 @@ struct ParticipantsBadgeButton: View {
                     Circle()
                         .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                 )
-                .scaleEffect(participantsCount > MaxBadgeCount ? 0.9 : 1.0)
+                .scaleEffect(participantsCount > maxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)
                 .animation(.easeInOut(duration: 0.2), value: participantsCount)
         }
     }
 
     private var badgeText: String {
-        participantsCount > MaxBadgeCount ? "\(MaxBadgeCount)+" : "\(participantsCount)"
+        participantsCount > maxBadgeCount ? "\(maxBadgeCount)+" : "\(participantsCount)"
     }
 
     private var badgeSize: CGFloat {
-        participantsCount > MaxBadgeCount ? 24 : 20
+        participantsCount > maxBadgeCount ? 24 : 20
     }
 }
 

@@ -16,6 +16,7 @@ excluded:
   
   # Build and derived data
   - "**/DerivedData"
+  - "**/Derived/Sources"
   - "**/.build"
   - "**/build"
   - "**/Build"
@@ -34,6 +35,7 @@ excluded:
   # Other exclusions
   - "**/.DS_Store"
   - "**/*.plist"
+  - "**/Project.swift"
 
 # Rules explicitly disabled (handled by swift-format or problematic)
 disabled_rules:
@@ -45,6 +47,7 @@ disabled_rules:
   - function_body_length    # Some test functions can be longer
   - large_tuple            # Allow tuples with more than 2 elements in tests
   - implicitly_unwrapped_optional # Sometimes needed in tests
+  - identifier_name
 
 # Rules to enable (opt-in rules)
 opt_in_rules:
@@ -78,6 +81,7 @@ opt_in_rules:
   - unneeded_parentheses_in_closure_argument
   - vertical_parameter_alignment_on_call
   - yoda_condition
+  - force_cast
 
 # Rules to enable for analyzer
 analyzer_rules:
@@ -130,12 +134,6 @@ custom_rules:
     regex: "print\\("
     message: "Use proper logging instead of print statements"
     severity: warning
-
-  no_force_cast:
-    name: "No Force Cast"
-    regex: "as!"
-    message: "Use safe casting with 'as?' instead of force casting"
-    severity: error
 
 # Reporter type (for CLI)
 reporter: "xcode"

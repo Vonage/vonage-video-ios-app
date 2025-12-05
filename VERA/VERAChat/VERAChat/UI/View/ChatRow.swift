@@ -60,7 +60,10 @@ extension CGFloat {
             message: .init(
                 username: "Deep Thought",
                 message:
-                    "The Answer to the Great Question of Life, the Universe and Everything is Forty-two. Though I should mention that you're not going to like the question.",
+                    """
+                    The Answer to the Great Question of Life, the Universe and Everything is Forty-two.
+                    Though I should mention that you're not going to like the question.
+                    """,
                 date: "7.5M years ago"))
 
         // Short message
