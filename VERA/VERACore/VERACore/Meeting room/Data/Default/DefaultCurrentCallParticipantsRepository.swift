@@ -3,6 +3,7 @@
 //
 
 import Combine
+import VERADomain
 
 public class DefaultCurrentCallParticipantsRepository: CurrentCallParticipantsRepository {
 

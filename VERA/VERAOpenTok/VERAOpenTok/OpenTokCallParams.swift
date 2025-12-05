@@ -4,8 +4,16 @@
 
 import Foundation
 
+/// Keys used to pass contextual call information to plugins and signal handlers.
+///
+/// `OpenTokCallParams` defines the standard parameter names included in the call
+/// context dictionary (e.g., when notifying plugins via `callDidStart(_:)`).
+/// These values help identify the user, the room, and the specific call instance.
 public enum OpenTokCallParams: String {
+    /// The display name of the local participant.
     case username
+    /// The human-readable name of the room or session.
     case roomName
+    /// A unique identifier for the call instance.
     case callID
 }

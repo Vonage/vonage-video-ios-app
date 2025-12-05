@@ -3,6 +3,12 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 // MARK: - Configuration Reading
+
+/// Reads the app configuration from `Config/app-config.json`.
+///
+/// - Returns: A dictionary with the parsed JSON configuration.
+/// - Important: Crashes with `fatalError` if the file cannot be read or parsed.
+/// - SeeAlso: ``isChatEnabled()``
 private func readAppConfig() -> [String: Any] {
     let configPath = "./Config/app-config.json"
     guard let configData = FileManager.default.contents(atPath: configPath) else {
@@ -17,6 +23,19 @@ private func readAppConfig() -> [String: Any] {
     }
 }
 
+/// Returns whether chat is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowChat": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowChat` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isChatEnabled() -> Bool {
     let config = readAppConfig()
     let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
@@ -24,6 +43,13 @@ private func isChatEnabled() -> Bool {
 }
 
 // MARK: - Dynamic Dependencies
+
+/// Builds target dependencies dynamically based on the chat feature flag.
+///
+/// Always includes core modules (Core, OpenTok, CommonUI, Configuration, CallKit plugin).
+/// When chat is enabled, also includes `VERAChat` and `VERAOpenTokChatPlugin`.
+///
+/// - Returns: The list of `TargetDependency` for the main app target.
 private func createDependencies() -> [TargetDependency] {
     var dependencies: [TargetDependency] = [
         .project(target: "VERACore", path: "VERACore"),
@@ -44,6 +70,21 @@ private func createDependencies() -> [TargetDependency] {
 }
 
 // MARK: - Dynamic Build Settings
+
+/// Creates build settings based on the chat feature flag.
+///
+/// When chat is enabled:
+/// - Sets `CHAT_ENABLED=1`
+/// - Appends `CHAT_ENABLED` to `SWIFT_ACTIVE_COMPILATION_CONDITIONS`
+///
+/// This allows conditional compilation in Swift:
+/// ```swift
+/// #if CHAT_ENABLED
+/// // Chat-related code
+/// #endif
+/// ```
+///
+/// - Returns: A `Settings` object containing base and configuration-specific settings.
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = [:]
 
@@ -76,6 +117,13 @@ private func createBuildSettings() -> Settings {
     )
 }
 
+/// The Tuist project definition for the VERA app and tests.
+///
+/// - Includes the main `VERA` iOS app target with dynamic dependencies and build settings.
+/// - Adds `VERATests` as unit tests targeting the app.
+/// - Merges additional Info.plist values via `combinedPlistValues()` from helpers.
+///
+/// - SeeAlso: ``createDependencies()``, ``createBuildSettings()``, `combinedPlistValues()`
 let project = Project(
     name: "VERA",
     targets: [

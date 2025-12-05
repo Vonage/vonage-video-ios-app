@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 final actor ParticipantsRepository {
     private var participantStreams: [String: Participant] = [:]

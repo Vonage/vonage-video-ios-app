@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import VERADomain
 
 struct PreviewData {
     // MARK: - Individual Participants

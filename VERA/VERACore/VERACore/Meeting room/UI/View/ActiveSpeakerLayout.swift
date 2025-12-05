@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERADomain
 
 /// Main layout view for displaying participants in an active speaker format
 ///
