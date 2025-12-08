@@ -17,7 +17,7 @@ public class SpyChatMessagesRepository: ChatMessagesRepository {
     }
 
     public func addMessage(_ message: VERAChat.ChatMessage) {
-        subject.value = subject.value + [message]
+        subject.value += [message]
     }
 
     public func clearMessages() {

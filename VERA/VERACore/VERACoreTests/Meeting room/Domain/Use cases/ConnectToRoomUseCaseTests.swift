@@ -13,7 +13,7 @@ struct ConnectToRoomUseCaseTestsTests {
     @Test
     func connectToRoomUseCaseCreatesAndCallsToConnect() async throws {
         let httpClient = MockHTTPClient()
-        httpClient.data = makeCredentialsJSONResponse()
+        httpClient.data = try makeCredentialsJSONResponse()
 
         let roomCredentialsRepository = makeMockRoomCredentialsRepository()
         let sessionRepository = makeMockSessionRepository()

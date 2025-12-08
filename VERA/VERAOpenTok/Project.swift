@@ -1,4 +1,5 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAOpenTok",
@@ -13,6 +14,7 @@ let project = Project(
             bundleId: "com.vonage.VERAOpenTok",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAOpenTok/**"],
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERACore", path: "../VERACore"),
                 .package(product: "VonageClientSDKVideo"),

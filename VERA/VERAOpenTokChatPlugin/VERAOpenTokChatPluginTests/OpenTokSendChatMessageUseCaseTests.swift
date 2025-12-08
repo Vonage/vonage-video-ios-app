@@ -23,7 +23,7 @@ struct OpenTokSendChatMessageUseCaseTests {
         try sut("sent text")
 
         let sentSignal = channelSpy.recordedSignals.first!
-        let sentMessage = toChatMessage(sentSignal)
+        let sentMessage = try toChatMessage(sentSignal)
 
         #expect(sentSignal.type == "chat")
         #expect(sentMessage.username == "")
@@ -44,7 +44,7 @@ struct OpenTokSendChatMessageUseCaseTests {
         try sut("sent text")
 
         let sentSignal = channelSpy.recordedSignals.first!
-        let sentMessage = toChatMessage(sentSignal)
+        let sentMessage = try toChatMessage(sentSignal)
 
         #expect(sentSignal.type == "chat")
         #expect(sentMessage.username == username)
@@ -57,11 +57,11 @@ struct OpenTokSendChatMessageUseCaseTests {
         OpenTokSendChatMessageUseCase(openTokChatPlugin: plugin)
     }
 
-    func toChatMessage(_ signal: OutgoingSignal) -> ChatMessage {
+    func toChatMessage(_ signal: OutgoingSignal) throws -> ChatMessage {
         guard let data = signal.payload else { fatalError("No data") }
 
         let decoder = JSONDecoder()
-        let result = try! decoder.decode(
+        let result = try decoder.decode(
             OpenTokChatMessage.self,
             from: data.data(using: .utf8)!)
 

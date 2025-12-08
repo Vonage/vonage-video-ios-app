@@ -24,6 +24,7 @@ let project = Project(
                 "VERA/App/Resources/**"
             ],
             entitlements: "VERA/VERA.entitlements",
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERACore", path: "../VERACore"),
