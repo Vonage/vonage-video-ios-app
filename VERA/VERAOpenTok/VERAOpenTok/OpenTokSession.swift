@@ -58,8 +58,7 @@ open class OpenTokSession: NSObject, OTSessionDelegate, OpenTokSignalChannel {
 
     public func subscribe(subscriber: OpenTokSubscriber) throws {
         var error: OTError?
-        let _subscriber: OTSubscriberKit = subscriber.otSubscriber
-        session.subscribe(_subscriber, error: &error)
+        session.subscribe(subscriber.otSubscriber, error: &error)
 
         if let error = error {
             throw error

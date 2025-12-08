@@ -38,7 +38,7 @@ struct DefaultRoomCredentialsRepositoryTests {
 
         let httpClient = MockHTTPClient()
 
-        let responseData = makeCredentialsJSONResponse(
+        let responseData = try makeCredentialsJSONResponse(
             sessionId: sessionId,
             token: token,
             apiKey: applicationId,
@@ -95,12 +95,12 @@ struct DefaultRoomCredentialsRepositoryTests {
     @Test func givenARoomNameItShouldBeEncodedInHTTPRequest() async throws {
         let httpClient = MockHTTPClient()
 
-        httpClient.data = makeCredentialsJSONResponse()
+        httpClient.data = try makeCredentialsJSONResponse()
 
         let sut = makeSUT(httpClient: httpClient)
 
         let request = makeRoomCredentialsRequest()
-        _ = try! await sut.getRoomCredentials(request)
+        _ = try await sut.getRoomCredentials(request)
 
         #expect(httpClient.recordedURL.lastPathComponent == request.roomName)
     }

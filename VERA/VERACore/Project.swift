@@ -1,4 +1,5 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERACore",
@@ -17,6 +18,7 @@ let project = Project(
                 "VERACore/Resources/**",
                 "VERACore/Resources/**/*.xcassets",
             ],
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),

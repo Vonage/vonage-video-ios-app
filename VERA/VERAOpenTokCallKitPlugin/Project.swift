@@ -1,4 +1,5 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAOpenTokCallKitPlugin",
@@ -10,6 +11,7 @@ let project = Project(
             bundleId: "com.vonage.VERAOpenTokCallKitPlugin",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAOpenTokCallKitPlugin/**"],
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
                 .project(target: "VERACore", path: "../VERACore"),

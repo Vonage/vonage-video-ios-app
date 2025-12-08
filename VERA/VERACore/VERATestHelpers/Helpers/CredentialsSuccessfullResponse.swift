@@ -28,7 +28,7 @@ public func makeCredentialsJSONResponse(
     token: String = "token",
     apiKey: String = "apiKey",
     captionsId: String? = "captionsId"
-) -> Data {
+) throws -> Data {
     let response = CredentialsSuccessfullResponse(
         sessionId: sessionId,
         token: token,
@@ -36,5 +36,5 @@ public func makeCredentialsJSONResponse(
         captionsId: captionsId
     )
 
-    return try! JSONEncoder().encode(response)
+    return try JSONEncoder().encode(response)
 }

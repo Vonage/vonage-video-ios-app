@@ -7,7 +7,7 @@ import VERACommonUI
 
 struct RejoinTheRoomText: View {
     var body: some View {
-        Text("Rejoining the room")
+        Text("Rejoining the room", bundle: .veraCore)
             .adaptiveFont(.heading4)
             .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
     }

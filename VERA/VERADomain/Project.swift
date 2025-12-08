@@ -1,4 +1,5 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERADomain",
@@ -9,7 +10,8 @@ let project = Project(
             product: .framework,
             bundleId: "com.vonage.VERADomain",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            sources: ["VERADomain/**"]
+            sources: ["VERADomain/**"],
+            scripts: [.swiftLint]
         )
     ]
 )

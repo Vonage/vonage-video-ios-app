@@ -17,6 +17,7 @@ let project = Project(
             resources: [
                 "VERAChat/Resources/**"
             ],
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),
@@ -29,6 +30,7 @@ let project = Project(
             bundleId: "com.vonage.VERAChatAppTestHelpers",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAChatAppTestHelpers/**"],
+            scripts: [.swiftLint],
             dependencies: [
                 .target(name: "VERAChat")
             ]
@@ -44,6 +46,7 @@ let project = Project(
                     "CFBundleDisplayName": "VERAChatApp",
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAChatApp/**"],
+            scripts: [.swiftLint],
             dependencies: [
                 .target(name: "VERAChat"),
                 .target(name: "VERAChatAppTestHelpers"),
