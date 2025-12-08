@@ -7,11 +7,13 @@ import VERACommonUI
 
 struct HorizontalContentView<Left: View, Right: View>: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    @State private var headerHeight: CGFloat = 0
 
     private let leftSide: () -> Left
     private let rightSide: () -> Right
     private let showHeader: Bool
     private let showFooter: Bool
+    private let footerHeight: CGFloat = 40  // Altura fija del footer derecho
 
     init(
         showHeader: Bool = true,
@@ -35,6 +37,17 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                         Spacer()
                     }
                     .padding(.top, 20)
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear
+                                .onAppear {
+                                    headerHeight = geo.size.height
+                                }
+                                .onChange(of: geo.size.height) { newHeight in
+                                    headerHeight = newHeight
+                                }
+                        }
+                    )
                 }
 
                 Spacer()
@@ -42,7 +55,13 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                 leftSide()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .fixedSize(horizontal: false, vertical: true)
+
                 Spacer()
+
+                if showHeader {
+                    Color.clear
+                        .frame(height: headerHeight)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal)
@@ -53,6 +72,11 @@ struct HorizontalContentView<Left: View, Right: View>: View {
 
             // MARK: - Right Side
             VStack(alignment: .center, spacing: 0) {
+                if showFooter {
+                    Color.clear
+                        .frame(height: footerHeight)
+                }
+
                 Spacer()
 
                 rightSide()
@@ -68,7 +92,7 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                             .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 40)
+                    .frame(height: footerHeight)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -80,7 +104,9 @@ struct HorizontalContentView<Left: View, Right: View>: View {
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         .ignoresSafeArea(.keyboard)
-        .ignoresSafeArea(edges: .top)
+        .if(iOS26Available()) {
+            $0.ignoresSafeArea(edges: .top)
+        }
     }
 }
 
@@ -90,5 +116,4 @@ struct HorizontalContentView<Left: View, Right: View>: View {
     } rightSide: {
         Color.blue
     }
-
 }
