@@ -7,6 +7,7 @@ import SwiftUI
 import Testing
 import VERACore
 import VERATestHelpers
+import VERADomain
 
 @Suite("DefaultCurrentCallParticipantsRepository tests")
 struct DefaultCurrentCallParticipantsRepositoryTests {

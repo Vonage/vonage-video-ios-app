@@ -7,62 +7,106 @@ import Foundation
 import OpenTok
 import SwiftUI
 import VERACore
+import VERADomain
 
+/// A wrapper around `OTPublisher` that exposes a Swift-friendly API and reactive state.
+///
+/// `OpenTokPublisher` manages the local media stream published into an OpenTok session.
+/// It provides a SwiftUI-compatible `view`, emits reactive updates for media and participant
+/// state, and forwards OpenTok publisher delegate callbacks through closures.
+///
+/// ## Overview
+///
+/// Use this class to:
+/// - Control local audio/video publishing (`publishAudio`, `publishVideo`)
+/// - Switch camera position (`cameraPosition`, ``switchCamera(to:)``)
+/// - Access a SwiftUI view for rendering (`view`)
+/// - Observe stream properties with Combine (video dimensions, participant model)
+/// - Handle publisher lifecycle events and errors
+///
+/// It also maintains a `Participant` representation of the local publisher for consistent
+/// UI and domain integration across the app.
 open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
+    /// The underlying OpenTok publisher.
     let otPublisher: OTPublisher
+
+    /// Internal subscription storage for Combine pipelines.
     var cancellables = Set<AnyCancellable>()
 
+    /// A stable identifier for the local publisher participant.
     let id = "publisherID"
+
+    /// A SwiftUI-compatible view rendering the publisher’s video.
+    ///
+    /// Wraps the underlying `UIView` from `OTPublisher` in a SwiftUI container so that
+    /// publisher video can be embedded in SwiftUI layouts.
     public var view: AnyView {
         AnyView(UIViewContainer(view: otPublisher.view!))
     }
+
+    /// The underlying OpenTok stream once publishing starts, otherwise `nil`.
     var stream: OTStream? { otPublisher.stream }
+
+    /// Creation timestamp of this publisher wrapper.
     let date = Date()
 
+    /// Whether the publisher is currently sharing the screen.
     @Published public private(set) var isScreenshare: Bool = false
+    /// Whether this publisher is pinned in the UI.
     @Published public private(set) var isPinned: Bool = false
+    /// Current audio level [0.0, 1.0]; reactive property for UI bindings.
     @Published public private(set) var audioLevel: Float = 0.0
+    /// Current video dimensions; reactive for layout and aspect ratio updates.
     @Published public private(set) var videoDimensions = VideoDimensions.initial
+    /// The participant model representing the local publisher; kept in sync with stream and settings.
     @Published public private(set) var participant: Participant
+    /// Whether the publisher had video enabled before entering hold state.
     @Published public private(set) var wasPublishingVideo: Bool = false
+    /// Whether the publisher had audio enabled before entering hold state.
     @Published public private(set) var wasPublishingAudio: Bool = false
+    /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
 
+    /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
+
+    /// `true` when the publisher is attached to a session.
     public var hasSession: Bool { otPublisher.session != nil }
 
+    /// Called when the publisher’s stream is created.
     var onStreamCreated: (() -> Void)?
+    /// Called when the publisher’s stream is destroyed.
     var onStreamDestroyed: (() -> Void)?
+    /// Called when the publisher encounters an error.
     var onError: ((Error) -> Void)?
 
+    /// Controls local audio publishing.
+    ///
+    /// - Note: Toggling this affects what remote participants hear.
     public var publishAudio: Bool {
-        get {
-            otPublisher.publishAudio
-        }
-        set {
-            otPublisher.publishAudio = newValue
-        }
+        get { otPublisher.publishAudio }
+        set { otPublisher.publishAudio = newValue }
     }
 
+    /// Controls local video publishing.
+    ///
+    /// - Note: Toggling this affects what remote participants see.
     public var publishVideo: Bool {
-        get {
-            otPublisher.publishVideo
-        }
-        set {
-            otPublisher.publishVideo = newValue
-        }
+        get { otPublisher.publishVideo }
+        set { otPublisher.publishVideo = newValue }
     }
 
+    /// Current camera position (front/back).
+    ///
+    /// Maps OpenTok’s camera position to the app’s `CameraPosition` abstraction.
     public var cameraPosition: CameraPosition {
-        get {
-            otPublisher.cameraPosition == .front ? .front : .back
-        }
-
-        set {
-            otPublisher.cameraPosition = newValue == .front ? .front : .back
-        }
+        get { otPublisher.cameraPosition == .front ? .front : .back }
+        set { otPublisher.cameraPosition = newValue == .front ? .front : .back }
     }
 
+    /// Switches camera to a specific device by ID.
+    ///
+    /// - Parameter cameraDeviceID: One of the known `OpenTokCameraDevice` raw values.
     public func switchCamera(to cameraDeviceID: String) {
         switch cameraDeviceID {
         case OpenTokCameraDevice.front.rawValue:
@@ -74,6 +118,9 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         }
     }
 
+    /// Creates a new publisher wrapper.
+    ///
+    /// - Parameter publisher: The configured `OTPublisher` to wrap.
     public init(publisher: OTPublisher) {
         otPublisher = publisher
         participant = Participant(
@@ -94,6 +141,12 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         cleanUp()
     }
 
+    /// Sets up reactive observation of stream properties and updates the participant model.
+    ///
+    /// Observes `videoDimensions`, `hasAudio`, and `hasVideo` from the underlying stream
+    /// and keeps the `participant` in sync. Also binds `audioLevel` updates to reflect on the model.
+    ///
+    /// - Important: Call after the publisher has a stream to ensure KVO publishers are available.
     func setup() {
         stream?
             .publisher(for: \.videoDimensions)
@@ -130,6 +183,10 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         updateParticipant()
     }
 
+    /// Rebuilds the participant model from current publisher and stream state.
+    ///
+    /// Keeps `participant` synchronized with `publishAudio`, `publishVideo`,
+    /// `videoDimensions`, and the rendered `view`.
     private func updateParticipant() {
         participant = Participant(
             id: id,
@@ -144,6 +201,12 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             view: view)
     }
 
+    /// Sets or clears hold mode on the publisher.
+    ///
+    /// When entering hold, current audio/video states are remembered and disabled.
+    /// When leaving hold, previous states are restored.
+    ///
+    /// - Parameter isOnHold: `true` to enter hold, `false` to resume previous states.
     public func setOnHold(_ isOnHold: Bool) {
         if isOnHold {
             wasPublishingAudio = otPublisher.publishAudio
@@ -157,6 +220,9 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         self.isOnHold = isOnHold
     }
 
+    /// Cleans up Combine subscriptions and clears callbacks.
+    ///
+    /// Also replaces the participant’s `view` with an empty placeholder to release UI resources.
     public func cleanUp() {
         participant = participant.withEmptyView
 
@@ -167,14 +233,25 @@ open class OpenTokPublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         onError = nil
     }
 
+    // MARK: OTPublisherKitDelegate
+
+    /// OpenTok publisher delegate callback for errors.
+    ///
+    /// Forwards the error to ``onError`` for external handling.
     public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
         onError?(error)
     }
 
+    /// OpenTok publisher delegate callback when the stream is created.
+    ///
+    /// Use to trigger post-publish actions, like informing the call façade.
     public func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
         onStreamCreated?()
     }
 
+    /// OpenTok publisher delegate callback when the stream is destroyed.
+    ///
+    /// Use to trigger teardown or UI updates.
     public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         onStreamDestroyed?()
     }

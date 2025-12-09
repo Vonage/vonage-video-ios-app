@@ -4,7 +4,7 @@
 
 import Foundation
 import SwiftUI
-import VERACore
+import VERADomain
 
 public func makeMockParticipant(
     id: String = "anId",

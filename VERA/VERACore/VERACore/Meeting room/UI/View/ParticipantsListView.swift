@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 public struct ParticipantsListView: View {
     let participants: [Participant]
