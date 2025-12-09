@@ -45,6 +45,12 @@ jobs:
     - name: Install Tuist
       run: brew install tuist
 
+    - name: Clean Tuist cache
+      run: |
+        echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+        tuist clean
+        rm -rf ~/.cache/tuist
+
     - name: Generate project with Tuist
       run: |
         cd VERA
