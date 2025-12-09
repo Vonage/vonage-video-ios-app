@@ -38,21 +38,21 @@ struct ChatBadgeButton: View {
                     Circle()
                         .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
                 )
-                .scaleEffect(unreadMessagesCount > MaxBadgeCount ? 0.9 : 1.0)
+                .scaleEffect(unreadMessagesCount > maxBadgeCount ? 0.9 : 1.0)
                 .offset(x: 5, y: -5)
                 .animation(.easeInOut(duration: 0.2), value: unreadMessagesCount)
         }
     }
 
     private var badgeText: String {
-        unreadMessagesCount > MaxBadgeCount ? "\(MaxBadgeCount)+" : "\(unreadMessagesCount)"
+        unreadMessagesCount > maxBadgeCount ? "\(maxBadgeCount)+" : "\(unreadMessagesCount)"
     }
 
     private var badgeSize: CGFloat {
-        unreadMessagesCount > MaxBadgeCount ? 24 : 20
+        unreadMessagesCount > maxBadgeCount ? 24 : 20
     }
 }
 
 #Preview {
-    ChatBadgeButton(unreadMessagesCount: 25, onShowChat: {})
+    ChatBadgeButton(unreadMessagesCount: 25) {}
 }

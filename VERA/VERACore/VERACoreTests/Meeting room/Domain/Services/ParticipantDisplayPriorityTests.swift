@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import Testing
+import VERADomain
 import VERATestHelpers
 
 @testable import VERACore
@@ -54,13 +55,22 @@ struct ParticipantDisplayPriorityTests {
     func testPinnedParticipantsPriority() async throws {
         let participants = [
             makeMockParticipant(
-                id: "1", name: "Regular", creationTime: Date(timeIntervalSince1970: 1000), isScreenshare: false,
+                id: "1",
+                name: "Regular",
+                creationTime: Date(timeIntervalSince1970: 1000),
+                isScreenshare: false,
                 isPinned: false),
             makeMockParticipant(
-                id: "2", name: "Pinned", creationTime: Date(timeIntervalSince1970: 1500), isScreenshare: false,
+                id: "2",
+                name: "Pinned",
+                creationTime: Date(timeIntervalSince1970: 1500),
+                isScreenshare: false,
                 isPinned: true),
             makeMockParticipant(
-                id: "3", name: "Screenshare", creationTime: Date(timeIntervalSince1970: 2000), isScreenshare: true,
+                id: "3",
+                name: "Screenshare",
+                creationTime: Date(timeIntervalSince1970: 2000),
+                isScreenshare: true,
                 isPinned: false),
         ]
 
@@ -124,25 +134,46 @@ struct ParticipantDisplayPriorityTests {
     func testComplexPriorityHierarchy() async throws {
         let participants = [
             makeMockParticipant(
-                id: "1", name: "Regular1", creationTime: Date(timeIntervalSince1970: 2000), isScreenshare: false,
+                id: "1",
+                name: "Regular1",
+                creationTime: Date(timeIntervalSince1970: 2000),
+                isScreenshare: false,
                 isPinned: false),
             makeMockParticipant(
-                id: "2", name: "ActiveSpeaker", creationTime: Date(timeIntervalSince1970: 1500), isScreenshare: false,
+                id: "2",
+                name: "ActiveSpeaker",
+                creationTime: Date(timeIntervalSince1970: 1500),
+                isScreenshare: false,
                 isPinned: false),
             makeMockParticipant(
-                id: "3", name: "Pinned1", creationTime: Date(timeIntervalSince1970: 3000), isScreenshare: false,
+                id: "3",
+                name: "Pinned1",
+                creationTime: Date(timeIntervalSince1970: 3000),
+                isScreenshare: false,
                 isPinned: true),
             makeMockParticipant(
-                id: "4", name: "Screenshare1", creationTime: Date(timeIntervalSince1970: 3500), isScreenshare: true,
+                id: "4",
+                name: "Screenshare1",
+                creationTime: Date(timeIntervalSince1970: 3500),
+                isScreenshare: true,
                 isPinned: false),
             makeMockParticipant(
-                id: "5", name: "ScreensharePinned", creationTime: Date(timeIntervalSince1970: 2500),
-                isScreenshare: true, isPinned: true),
+                id: "5",
+                name: "ScreensharePinned",
+                creationTime: Date(timeIntervalSince1970: 2500),
+                isScreenshare: true,
+                isPinned: true),
             makeMockParticipant(
-                id: "6", name: "Regular2", creationTime: Date(timeIntervalSince1970: 1000), isScreenshare: false,
+                id: "6",
+                name: "Regular2",
+                creationTime: Date(timeIntervalSince1970: 1000),
+                isScreenshare: false,
                 isPinned: false),
             makeMockParticipant(
-                id: "7", name: "Pinned2", creationTime: Date(timeIntervalSince1970: 4000), isScreenshare: false,
+                id: "7",
+                name: "Pinned2",
+                creationTime: Date(timeIntervalSince1970: 4000),
+                isScreenshare: false,
                 isPinned: true),
         ]
 

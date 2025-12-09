@@ -34,7 +34,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -60,7 +60,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -82,7 +82,7 @@ struct MeetingRoomViewModelTests {
         sut.loadUI()
 
         let error = await sut.$error.values
-            .first(where: { $0 != nil })!
+            .first { $0 != nil }!
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
@@ -97,7 +97,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.layout == .activeSpeaker)
     }
@@ -112,7 +112,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.layout == .grid)
     }
@@ -179,7 +179,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -210,16 +210,16 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let _ = await sut.$state.values
+        _ = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(sut.currentCall != nil)
 
         sut.endCall()
 
         let error = await sut.$error.values
-            .first(where: { $0 != nil })!
+            .first { $0 != nil }!
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
@@ -237,7 +237,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         #expect(contentState.roomURL == url.appendingPathComponent(roomName))
     }
@@ -314,6 +314,39 @@ struct MeetingRoomViewModelTests {
         #expect(contentState.showParticipantList == false)
     }
 
+    @Test
+    @MainActor
+    func ifThereIsNoCameraPermissionCameraShouldNotBeEnabled() async throws {
+        let checkCameraAuthorizationStatusUseCase = makeMockCheckCameraAuthorizationStatusUseCase(isAuthorized: false)
+        let sut = makeSUT(
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { _ in true }!
+
+        #expect(contentState.isCameraEnabled == false)
+    }
+
+    @Test
+    @MainActor
+    func ifThereIsNoMicrophonePermissionMicrophoneShouldNotBeEnabled() async throws {
+        let checkMicrophoneAuthorizationStatusUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(
+            isAuthorized: false)
+        let sut = makeSUT(
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase)
+
+        sut.loadUI()
+
+        let contentState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { _ in true }!
+
+        #expect(contentState.isMicEnabled == false)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -321,6 +354,13 @@ struct MeetingRoomViewModelTests {
         baseURL: URL = .init(string: "https://example.com")!,
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
+            makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
+            makeMockCheckCameraAuthorizationStatusUseCase(),
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase =
+            makeMockRequestMicrophonePermissionUseCase(),
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase = makeMockRequestCameraPermissionUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig()
@@ -330,6 +370,10 @@ struct MeetingRoomViewModelTests {
             baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
+            requestMicrophonePermissionUseCase: requestMicrophonePermissionUseCase,
+            requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig)
     }
@@ -343,7 +387,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = await sut.$state.values
             .compactMap(\.contentState)
-            .first(where: { _ in true })!
+            .first { _ in true }!
 
         return contentState
     }

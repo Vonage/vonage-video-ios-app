@@ -116,9 +116,10 @@ struct WaitingRoomViewModelTests {
                 userRepository: userRepository,
                 cameraPreviewProviderRepository: cameraPreviewProviderRepository,
                 publisherRepository: publisherRepository),
-            requestMicrophonePermissionUseCase: .init(),
-            requestCameraPermissionUseCase: .init(),
-            checkCameraAuthorizationStatusUseCase: .init(),
+            requestMicrophonePermissionUseCase: makeMockRequestMicrophonePermissionUseCase(),
+            requestCameraPermissionUseCase: makeMockRequestCameraPermissionUseCase(),
+            checkCameraAuthorizationStatusUseCase: makeMockCheckCameraAuthorizationStatusUseCase(),
+            checkMicrophoneAuthorizationStatusUseCase: makeMockCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository)
     }
 }

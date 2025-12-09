@@ -18,17 +18,18 @@ let project = Project(
                         "VERA needs access to your camera to share your video during video calls and meetings.",
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
-                ].merging(orientationPlistValues(), uniquingKeysWith: { _, new in new })),
+                ].merging(orientationPlistValues()) { _, new in new }),
             sources: ["VERA/App/**"],
             resources: [
                 "VERA/App/Resources/**"
             ],
             entitlements: "VERA/VERA.entitlements",
+            scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERACore", path: "../VERACore"),
-                .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
-                .project(target: "VERAOpenTokChatPlugin", path: "../VERAOpenTokChatPlugin"),
+                .project(target: "VERAVonage", path: "../VERAVonage"),
+                .project(target: "VERAVonageChatPlugin", path: "../VERAVonageChatPlugin"),
             ],
             settings: .settings(
                 base: [

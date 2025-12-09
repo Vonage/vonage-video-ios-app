@@ -21,7 +21,7 @@ public struct MeetingRoomState: Equatable {
     public let callState: CallState
 
     public var participantsCount: Int {
-        participants.count
+        participants.count { !$0.isScreenshare }
     }
 
     public let showChatButton: Bool

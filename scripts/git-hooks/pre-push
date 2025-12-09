@@ -15,12 +15,6 @@ fi
 cd "$GIT_ROOT"
 
 # Check if tools are installed
-if ! command -v swiftlint >/dev/null 2>&1; then
-    echo "❌ SwiftLint not installed"
-    echo "   Install with: brew install swiftlint"
-    exit 1
-fi
-
 if ! command -v swift-format >/dev/null 2>&1; then
     echo "❌ swift-format not installed"
     echo "   Install with: brew install swift-format"
@@ -28,12 +22,6 @@ if ! command -v swift-format >/dev/null 2>&1; then
 fi
 
 # Check if configuration files exist
-if [ ! -f ".swiftlint.yml" ]; then
-    echo "❌ .swiftlint.yml configuration not found"
-    echo "   Make sure you're in the project root"
-    exit 1
-fi
-
 if [ ! -f ".swift-format" ]; then
     echo "❌ .swift-format configuration not found"
     echo "   Make sure you're in the project root"
@@ -52,8 +40,8 @@ SWIFT_FILES=$(find VERA -name "*.swift" -not -path "*/DerivedData/*" -not -path 
 echo "🔍 Found $SWIFT_FILES Swift files to analyze in VERA project"
 echo ""
 
-# Step 1: Check Swift formatting
-echo "📝 Step 1/2: Checking Swift format..."
+# Check Swift formatting
+echo "📝 Checking Swift format..."
 if ! chmod +x scripts/format.sh || ! ./scripts/format.sh --check; then
     echo ""
     echo "❌ Format issues found"
@@ -68,26 +56,6 @@ else
 fi
 
 echo ""
-
-# Step 2: Run SwiftLint
-echo "�📊 Step 2/2: Running SwiftLint on VERA project files..."
-
-if swiftlint lint VERA; then
-    echo ""
-    echo "✅ SwiftLint checks passed on $SWIFT_FILES files!"
-    echo ""
-    echo "🎉 All code quality checks passed!"
-    echo "🚀 Push allowed"
-    exit 0
-else
-    echo ""
-    echo "❌ SwiftLint found violations in VERA project files"
-    echo ""
-    echo "💡 To fix issues:"
-    echo "   swiftlint --fix VERA         # Auto-fix where possible"
-    echo "   scripts/lint-swift.sh --fix  # Using project script"
-    echo "   scripts/code-quality.sh      # Full code quality check"
-    echo ""
-    echo "🚫 Push rejected due to SwiftLint violations"
-    exit 1
-fi
+echo "🎉 All code quality checks passed!"
+echo "🚀 Push allowed"
+exit 0

@@ -1,4 +1,4 @@
-# Vonage Video API Reference App for iOS
+# Vonage Video API Reference App for iOS (Beta)
 
 <img src="https://developer.nexmo.com/assets/images/Vonage_Nexmo.svg" height="48px" alt="Nexmo is now known as Vonage" />
 
@@ -74,12 +74,12 @@ The Vonage iOS reference app is built with a modular architecture. The app is or
 - **VERAApp**: Main application target and composition root
 - **VERACore**: UI and business logic of the main views
 - **VERAChat**: Meeting room chat
-- **VERAOpenTokChatPlugin**: Adapts the chat to the plugin interfaces
-- **VERAOpenTokCallKitPlugin**: CallKit adapter plugin
+- **VERAVonageChatPlugin**: Adapts the chat to the plugin interfaces
+- **VERAVonageCallKitPlugin**: CallKit adapter plugin
 - **VERADomain**: Shared domain models and entities
 - **VERAConfiguration**: Holds the app configuration specification
 - **VERACommonUI**: Shared UI components and resources
-- **VERAOpenTok**: Vonage Video SDK integration
+- **VERAVonage**: Vonage Video SDK integration
 
 ## Platforms supported
 

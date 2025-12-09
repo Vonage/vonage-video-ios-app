@@ -16,7 +16,7 @@ struct EndCallControlButton: View {
         Button(action: action) {
             VERACommonUIAsset.Images.endCallSolid.swiftUIImage
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()

@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 
 @Suite("Participant tests")

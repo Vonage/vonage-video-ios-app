@@ -9,6 +9,33 @@ enum VonageTextFieldState {
     case initial, valid, invalid
 }
 
+struct FloatingLabel: View {
+    let text: String
+    let isFloating: Bool
+    let color: Color
+    let backgroundColor: Color
+
+    var body: some View {
+        Text(text.capitalizingFirstLetter)
+            .adaptiveFont(isFloating ? .caption : .bodyBase)
+            .foregroundColor(color)
+            .kerning(0.15)
+            .padding(.horizontal, isFloating ? 4 : 0)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(backgroundColor)
+                    .opacity(isFloating ? 1 : 0)
+            )
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: LabelWidthPreferenceKey.self, value: geo.size.width)
+                }
+            )
+            .offset(x: isFloating ? 12 : 16, y: isFloating ? -24 : 0)
+            .animation(.easeInOut(duration: 0.2), value: isFloating)
+    }
+}
+
 struct VonageTextField: View {
 
     private let placeholder: String
@@ -17,6 +44,7 @@ struct VonageTextField: View {
     private let forceLowercase: Bool
 
     @State private var labelWidth: CGFloat = 0
+    @FocusState private var isFocused: Bool
 
     init(
         placeholder: String,
@@ -32,19 +60,33 @@ struct VonageTextField: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
+            FloatingLabel(
+                text: placeholder,
+                isFloating: !text.wrappedValue.isEmpty,
+                color: placeholderColor,
+                backgroundColor: backgroundColor
+            )
+            .allowsHitTesting(false)
+
             Group {
                 if forceLowercase {
-                    TextField(placeholder.capitalizingFirstLetter, text: lowercasedBinding)
+                    TextField("", text: lowercasedBinding)
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
+                        .focused($isFocused)
+                        .foregroundStyle(textColor)
+                        .kerning(0.15)
                         #if os(iOS)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                         #endif
                 } else {
-                    TextField(placeholder.capitalizingFirstLetter, text: text)
+                    TextField("", text: text)
                         .textFieldStyle(PlainTextFieldStyle())
                         .adaptiveFont(.bodyBase)
+                        .focused($isFocused)
+                        .foregroundStyle(textColor)
+                        .kerning(0.15)
                 }
             }
             .padding(.horizontal, 16)
@@ -52,50 +94,18 @@ struct VonageTextField: View {
         }
         .frame(height: 48)
         .background(
-            ZStack {
-                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                    .fill(Color.clear)
-
-                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                    .stroke(borderColor, lineWidth: 1)
-                    .mask(
-                        RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                            .overlay(alignment: .topLeading) {
-                                if !text.wrappedValue.isEmpty {
-                                    Rectangle()
-                                        .frame(width: labelWidth + BorderRadius.medium.value, height: 2)
-                                        .offset(x: 12, y: -1)
-                                        .blendMode(.destinationOut)
-                                }
-                            }
-                            .compositingGroup()
-                    )
-            }
+            RoundedRectangle(cornerRadius: BorderRadius.medium.value)
+                .stroke(borderColor, lineWidth: 1)
         )
-        .overlay(alignment: .topLeading) {
-            if !text.wrappedValue.isEmpty {
-                Text(placeholder.capitalizingFirstLetter)
-                    .adaptiveFont(.caption)
-                    .foregroundColor(borderColor)
-                    .padding(.horizontal, 4)
-                    .background(.clear)
-                    .offset(x: 12, y: -10)
-                    .transition(.opacity)
-                    .allowsHitTesting(false)
-                    .background(
-                        GeometryReader { geo in
-                            Color.clear.preference(
-                                key: LabelWidthPreferenceKey.self,
-                                value: geo.size.width
-                            )
-                        }
-                    )
-            }
-        }
+        .background(
+            RoundedRectangle(cornerRadius: BorderRadius.medium.value)
+                .fill(backgroundColor)  // ← Background del textfield
+        )
         .onPreferenceChange(LabelWidthPreferenceKey.self) { width in
             self.labelWidth = width
         }
         .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 
     private var lowercasedBinding: Binding<String> {
@@ -105,14 +115,52 @@ struct VonageTextField: View {
         )
     }
 
+    private var backgroundColor: Color {
+        VERACommonUIAsset.SemanticColors.surface.swiftUIColor
+    }
+
+    private var placeholderColor: Color {
+        if state == .invalid {
+            VERACommonUIAsset.SemanticColors.error.swiftUIColor
+        } else {
+            isFocused
+                ? VERACommonUIAsset.SemanticColors.primary.swiftUIColor
+                : VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
+        }
+    }
+
+    private var textColor: Color {
+        switch (text.wrappedValue.isEmpty, isFocused) {
+        case (true, true):
+            // Empty with focus
+            .clear
+        case (true, false):
+            // Empty without focus
+            VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
+        case (false, true):
+            // With text and focus
+            VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor
+        case (false, false):
+            // With text without focus
+            VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
+        }
+    }
+
     private var borderColor: Color {
         switch state {
         case .initial:
-            return VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
+            if isFocused {
+                VERACommonUIAsset.SemanticColors.primary.swiftUIColor
+            } else {
+                VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
+            }
         case .valid:
-            return VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
-        case .invalid:
-            return VERACommonUIAsset.SemanticColors.error.swiftUIColor
+            if isFocused {
+                VERACommonUIAsset.SemanticColors.primary.swiftUIColor
+            } else {
+                VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
+            }
+        case .invalid: VERACommonUIAsset.SemanticColors.error.swiftUIColor
         }
     }
 }
@@ -132,5 +180,7 @@ extension String {
 }
 
 #Preview {
-    VonageTextField(placeholder: "", text: .constant("Hello"), state: .initial)
+    VonageTextField(
+        placeholder: "Hello",
+        text: .constant("Hello"), state: .initial)
 }

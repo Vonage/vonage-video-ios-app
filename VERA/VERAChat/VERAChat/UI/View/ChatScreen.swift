@@ -16,11 +16,10 @@ public struct ChatScreen: View {
                 switch viewModel.state {
                 case .content(let chatPanelState):
                     ChatPanel(
-                        messages: chatPanelState.messages,
-                        onSendMessage: { message in
-                            viewModel.sendMessage(message)
-                        }
-                    )
+                        messages: chatPanelState.messages
+                    ) { message in
+                        viewModel.sendMessage(message)
+                    }
                 case .loading:
                     ProgressView()
                         .onAppear {
@@ -38,7 +37,7 @@ public struct ChatScreen: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                        }.tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {

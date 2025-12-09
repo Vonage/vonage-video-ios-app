@@ -25,7 +25,7 @@ public struct ChatPanel: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
         }
-        .background(VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor)
+        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 
@@ -48,7 +48,7 @@ struct ChatPanelInput: View {
                     .font(.title2)
                     .foregroundColor(
                         messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            ? .gray : VERACommonUIAsset.Colors.vAccent.swiftUIColor)
+                            ? .gray : VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
             }
             .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .buttonStyle(PlainButtonStyle())
@@ -106,9 +106,8 @@ struct GlassBackground: View {
 // MARK: - Previews
 #Preview("Chat Panel") {
     ChatPanel(
-        messages: UIChatMessage.sampleMessages,
-        onSendMessage: { message in print("Send: \(message)") }
-    )
+        messages: UIChatMessage.sampleMessages
+    ) { message in print("Send: \(message)") }
 }
 
 #Preview("Chat Input Only") {

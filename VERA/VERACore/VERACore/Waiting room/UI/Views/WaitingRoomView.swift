@@ -175,19 +175,21 @@ struct VideoPreviewView: View {
                                 HStack {
                                     Text(device.name)
                                     Image(systemName: device.iconName)
+                                        .adaptiveFont(.bodyBase)
                                 }
                             }
                         }
                     } label: {
                         Label {
                             Text(String(localized: "Camera", bundle: .veraCore))
+                                .adaptiveFont(.bodyBase)
                         } icon: {
                             VERACommonUIAsset.Images.videoLine.swiftUIImage
                         }
                     }
                 }
             }
-            .tint(VERACommonUIAsset.Colors.uiSecondaryLabel.swiftUIColor)
+            .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
             .padding()
         }
     }
@@ -221,11 +223,11 @@ struct PrepareToJoinRoom: View {
             VStack(alignment: .leading) {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
-                    .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
 
                 Text(state.roomName)
                     .font(.subheadline)
-                    .foregroundColor(VERACommonUIAsset.Colors.uiLabel.swiftUIColor)
+                    .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     .padding(.bottom, 8)
 
                 JoinRoomButton {

@@ -39,7 +39,7 @@ struct ControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(isActive ? VERACommonUIAsset.Colors.uiSystemBackground.swiftUIColor : .red)
+                .foregroundStyle(isActive ? VERACommonUIAsset.SemanticColors.surface.swiftUIColor : .red)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()

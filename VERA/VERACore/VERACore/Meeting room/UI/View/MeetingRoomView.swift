@@ -68,12 +68,12 @@ public struct MeetingRoomView: View {
             .sheet(isPresented: $showParticipantsList) {
                 ParticipantsListView(
                     participants: state.participants.sortedByName(),
+                    participantsCount: state.participantsCount,
                     roomName: state.roomName,
-                    meetingURL: state.roomURL,
-                    onDismiss: {
-                        showParticipantsList = false
-                    }
-                )
+                    meetingURL: state.roomURL
+                ) {
+                    showParticipantsList = false
+                }
             }
             .onAppear {
                 startHideTimer()
@@ -85,41 +85,29 @@ public struct MeetingRoomView: View {
                 .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
                 .if(iOS26Available()) { view in
                     view
-                    .modifier(iOS26ToolbarModifier())
+                    .modifier(IOS26ToolbarModifier())
                 }
                 .if(
-                    !iOS26Available(),
-                    transform: { view in
-                        view
-                            .toolbarBackground(.visible, for: .navigationBar)
-                            .toolbarBackground(.black, for: .navigationBar)
+                    !iOS26Available()
+                ) { view in
+                    view
+                    .toolbarBackground(.visible, for: .navigationBar)
+                    .toolbarBackground(.black, for: .navigationBar)
 
-                    }
-                )
+                }
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onEndCall()
-                        } label: {
-                            VERACommonUIAsset.Images.arrowBoldLeftLine.swiftUIImage
-                        }
-                    }
-
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        #if targetEnvironment(macCatalyst)
-                        #else
-                            if state.allowCameraControl {
-                                Button {
-                                    onBottomBarInteraction()
-                                    actions.onCameraSwitch()
-                                } label: {
-                                    VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
-                                }.disabled(!state.isCameraEnabled)
-                            }
-                        #endif
+                        let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
+                        if !isIosAppOnMac && state.allowCameraControl {
+                            Button {
+                                onBottomBarInteraction()
+                                actions.onCameraSwitch()
+                            } label: {
+                                VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
+                            }.disabled(!state.isCameraEnabled)
+                        }
                         if state.allowMicrophoneControl {
                             Button {
                                 onBottomBarInteraction()
@@ -140,7 +128,7 @@ public struct MeetingRoomView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private struct iOS26ToolbarModifier: ViewModifier {
+    private struct IOS26ToolbarModifier: ViewModifier {
         func body(content: Content) -> some View {
             #if os(macOS)
                 content

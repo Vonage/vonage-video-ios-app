@@ -26,7 +26,7 @@ struct VERAChatApp: App {
 
     var body: some Scene {
         WindowGroup {
-            chatFactory.make(onDismiss: {}).view
+            chatFactory.make {}.view
         }
     }
 }

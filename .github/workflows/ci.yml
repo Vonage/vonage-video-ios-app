@@ -17,7 +17,9 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install swift-format
-      run: brew install swift-format
+      run: |
+        brew install swift-format
+        swift-format --version
   
     - name: Check Swift formatting
       run: |
@@ -35,14 +37,6 @@ jobs:
     
     - name: Pull LFS files
       run: git lfs pull
-
-    - name: Cache derived data
-      uses: actions/cache@v4
-      with:
-        path: ~/Library/Developer/Xcode/DerivedData
-        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
-        restore-keys: |
-          ${{ runner.os }}-derived-data-
     
     - name: Install SwiftLint
       run: |
@@ -50,6 +44,12 @@ jobs:
 
     - name: Install Tuist
       run: brew install tuist
+
+    - name: Clean Tuist cache
+      run: |
+        echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+        tuist clean
+        rm -rf ~/.cache/tuist
 
     - name: Generate project with Tuist
       run: |
@@ -151,14 +151,14 @@ jobs:
           -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAOpenTokChatPluginTests (iOS Simulator)
+    - name: Run VERAVonageChatPluginTests (iOS Simulator)
       id: ot-chat-plugin-tests
       timeout-minutes: 15
       run: |
-        echo "📸 Running VERAOpenTokChatPluginTests on iOS Simulator"
+        echo "📸 Running VERAVonageChatPluginTests on iOS Simulator"
         xcodebuild build-for-testing \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokChatPluginTests \
+          -scheme VERAVonageChatPluginTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
@@ -166,21 +166,21 @@ jobs:
 
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokChatPluginTests \
+          -scheme VERAVonageChatPluginTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult \
+          -resultBundlePath DerivedData/VERAVonageChatPluginTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAOpenTokTests (iOS Simulator)
+    - name: Run VERAVonageTests (iOS Simulator)
       id: opentok-tests
       timeout-minutes: 15
       run: |
-        echo "📡 Running VERAOpenTokTests on iOS Simulator"
+        echo "📡 Running VERAVonageTests on iOS Simulator"
         xcodebuild build-for-testing \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokTests \
+          -scheme VERAVonageTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
@@ -188,11 +188,11 @@ jobs:
 
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokTests \
+          -scheme VERAVonageTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokTests-iOS.xcresult \
+          -resultBundlePath DerivedData/VERAVonageTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
     
     - name: Run VERACommonUITests (iOS Simulator)
@@ -239,18 +239,18 @@ jobs:
           -resultBundlePath DerivedData/VERATests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAOpenTokCallKitPluginTests (iOS Simulator)
+    - name: Run VERAVonageCallKitPluginTests (iOS Simulator)
       id: vera-callkit-tests
       timeout-minutes: 15
       run: |
-        echo "📡 Running VERAOpenTokCallKitPluginTests on iOS Simulator"
+        echo "📡 Running VERAVonageCallKitPluginTests on iOS Simulator"
         xcodebuild test \
           -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOpenTokCallKitPluginTests \
+          -scheme VERAVonageCallKitPluginTests \
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOpenTokCallKitPluginTests-iOS.xcresult \
+          -resultBundlePath DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Upload all test results
@@ -261,12 +261,12 @@ jobs:
         path: |
           DerivedData/VERACoreTests-macOS.xcresult
           DerivedData/VERAChatTests-macOS.xcresult
-          DerivedData/VERAOpenTokChatPluginTests-macOS.xcresult
-          DerivedData/VERAOpenTokTests-iOS.xcresult
+          DerivedData/VERAVonageChatPluginTests-macOS.xcresult
+          DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
-          DerivedData/VERAOpenTokChatPluginTests-iOS.xcresult
+          DerivedData/VERAVonageChatPluginTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
-          DerivedData/VERAOpenTokCallKitPluginTests-iOS.xcresult
+          DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
           DerivedData/Build/Products/
           
   sonarcloud:
@@ -370,7 +370,7 @@ jobs:
       run: |
         xcodebuild -exportArchive \
             -archivePath "$PWD/build/VERA.xcarchive" \
-            -exportOptionsPlist "$PWD/ExportOptions.plist" \
+            -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
             -allowProvisioningUpdates \
             -exportPath "$PWD/build" | xcpretty
 

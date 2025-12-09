@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import VERADomain
 
 public struct ActiveSpeakerInfo: Equatable {
     public let participantId: String?
@@ -51,18 +52,6 @@ extension Participant {
 /// The `ActiveSpeakerTracker` monitors participant audio levels and automatically determines
 /// who should be considered the "active speaker" based on configurable thresholds.
 /// It provides real-time updates through Combine's `@Published` properties.
-///
-/// ## Usage
-/// ```swift
-/// let tracker = ActiveSpeakerTracker(minimumAudioLevelThreshold: 0.3)
-///
-/// // Calculate from all participants
-/// tracker.calculateActiveSpeaker(from: allParticipants)
-///
-/// // Update individual participant
-/// let participant = SpeakerInfo(id: "user123", audioLevel: 0.8, isMicEnabled: true)
-/// tracker.updatedParticipant(participant)
-/// ```
 ///
 /// ## Active Speaker Logic
 /// - Only participants with enabled microphones are considered

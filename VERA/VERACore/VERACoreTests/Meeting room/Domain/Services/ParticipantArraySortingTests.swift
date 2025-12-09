@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import Testing
+import VERADomain
 import VERATestHelpers
 
 @testable import VERACore
