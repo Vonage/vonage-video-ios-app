@@ -18,7 +18,7 @@ public enum CameraPosition {
 ///
 /// Conformers expose a SwiftUI-compatible `view` for rendering local video,
 /// and controls for audio/video publishing and camera selection. This protocol
-/// abstracts specific SDK implementations (e.g., OpenTok) behind a stable API.
+/// abstracts specific SDK implementations (e.g., Vonage) behind a stable API.
 ///
 /// ## Responsibilities
 /// - Provide a SwiftUI-compatible video view

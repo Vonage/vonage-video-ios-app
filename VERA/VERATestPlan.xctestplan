@@ -28,13 +28,13 @@
           "target" : "VERATests.xctest"
         },
         {
-          "target" : "VERAOpenTokTests.xctest"
+          "target" : "VERAVonageTests.xctest"
         },
         {
           "target" : "VERACommonUITests.xctest"
         },
         {
-          "target" : "VERAOpenTokChatPluginTests.xctest"
+          "target" : "VERAVonageChatPluginTests.xctest"
         }
       ]
     },
@@ -61,9 +61,9 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:..\/VERAOpenTokChatPlugin\/VERAOpenTokChatPlugin.xcodeproj",
+        "containerPath" : "container:..\/VERAVonageChatPlugin\/VERAVonageChatPlugin.xcodeproj",
         "identifier" : "6F55F8AC2E9D4F2F00CBCA2D",
-        "name" : "VERAOpenTokChatPluginTests"
+        "name" : "VERAVonageChatPluginTests"
       }
     },
     {
@@ -97,9 +97,9 @@
     },
     {
       "target" : {
-        "containerPath" : "container:..\/VERAOpenTok\/VERAOpenTok.xcodeproj",
+        "containerPath" : "container:..\/VERAVonage\/VERAVonage.xcodeproj",
         "identifier" : "6FD1B4252E1BBA1A00BD9F3D",
-        "name" : "VERAOpenTokTests"
+        "name" : "VERAVonageTests"
       }
     },
     {

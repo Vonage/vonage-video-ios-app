@@ -6,7 +6,7 @@ import SwiftUI
 
 /// A value representing a participant in a call, including media state and a renderable view.
 ///
-/// `Participant` is the domain model used across UI and OpenTok wrappers (publisher/subscriber).
+/// `Participant` is the domain model used across UI and Vonage wrappers (publisher/subscriber).
 /// It encapsulates the participant’s identifiers, media flags, sizing information, and a SwiftUI
 /// `view` for rendering. It optionally carries visibility callbacks (`onAppear`/`onDisappear`)
 /// to support bandwidth optimization strategies.
