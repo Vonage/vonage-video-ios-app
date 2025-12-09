@@ -46,23 +46,23 @@ private func isChatEnabled() -> Bool {
 
 /// Builds target dependencies dynamically based on the chat feature flag.
 ///
-/// Always includes core modules (Core, OpenTok, CommonUI, Configuration, CallKit plugin).
-/// When chat is enabled, also includes `VERAChat` and `VERAOpenTokChatPlugin`.
+/// Always includes core modules (Core, Vonage, CommonUI, Configuration, CallKit plugin).
+/// When chat is enabled, also includes `VERAChat` and `VERAVonageChatPlugin`.
 ///
 /// - Returns: The list of `TargetDependency` for the main app target.
 private func createDependencies() -> [TargetDependency] {
     var dependencies: [TargetDependency] = [
         .project(target: "VERACore", path: "VERACore"),
-        .project(target: "VERAOpenTok", path: "VERAOpenTok"),
+        .project(target: "VERAVonage", path: "VERAVonage"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),
-        .project(target: "VERAOpenTokCallKitPlugin", path: "VERAOpenTokCallKitPlugin"),
+        .project(target: "VERAVonageCallKitPlugin", path: "VERAVonageCallKitPlugin"),
     ]
 
     if isChatEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAChat", path: "VERAChat"),
-            .project(target: "VERAOpenTokChatPlugin", path: "VERAOpenTokChatPlugin"),
+            .project(target: "VERAVonageChatPlugin", path: "VERAVonageChatPlugin"),
         ])
     }
 

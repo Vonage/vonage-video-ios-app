@@ -6,12 +6,12 @@ import AVFoundation
 import Foundation
 import VERAConfiguration
 import VERACore
-import VERAOpenTok
-import VERAOpenTokCallKitPlugin
+import VERAVonage
+import VERAVonageCallKitPlugin
 
 #if CHAT_ENABLED
     import VERAChat
-    import VERAOpenTokChatPlugin
+    import VERAVonageChatPlugin
 #endif
 
 final class DependencyContainer {
@@ -21,12 +21,12 @@ final class DependencyContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
-    lazy var publisherFactory: any PublisherFactory = OpenTokPublisherFactory()
+    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory()
 
     lazy var appConfig = AppConfig()
 
     lazy var cameraDevicesRepository: any CameraDevicesRepository = {
-        let repository = OpenTokCameraDevicesRepository(publisherRepository: publisherRepository)
+        let repository = VonageCameraDevicesRepository(publisherRepository: publisherRepository)
         repository.loadCameraDevices()
         return repository
     }()
@@ -70,19 +70,19 @@ final class DependencyContainer {
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
-    lazy var sessionFactory = OpenTokSessionFactory()
+    lazy var sessionFactory = VonageSessionFactory()
 
     lazy var sessionRepository: SessionRepository = {
-        OpenTokSessionRepository(
+        VonageSessionRepository(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry)
     }()
 
-    lazy var pluginRegistry: OpenTokPluginRegistry = {
-        let registry = OpenTokPluginRegistry()
+    lazy var pluginRegistry: VonagePluginRegistry = {
+        let registry = VonagePluginRegistry()
         #if CHAT_ENABLED
-            registry.registerPlugin(plugin: openTokChatPlugin)
+            registry.registerPlugin(plugin: vonageChatPlugin)
         #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
@@ -111,9 +111,9 @@ final class DependencyContainer {
     // MARK: Chat feature
 
     #if CHAT_ENABLED
-        lazy var openTokChatPlugin = OpenTokChatPlugin(repository: chatMessagesRepository)
+        lazy var vonageChatPlugin = VonageChatPlugin(repository: chatMessagesRepository)
 
-        lazy var sendChatMessageUseCase = OpenTokSendChatMessageUseCase(openTokChatPlugin: openTokChatPlugin)
+        lazy var sendChatMessageUseCase = VonageSendChatMessageUseCase(vonageChatPlugin: vonageChatPlugin)
 
         lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 
@@ -124,8 +124,8 @@ final class DependencyContainer {
 
     // MARK: CallKit feature
 
-    lazy var callKitPlugin: OpenTokCallKitPlugin = {
-        let plugin = OpenTokCallKitPlugin()
+    lazy var callKitPlugin: VonageCallKitPlugin = {
+        let plugin = VonageCallKitPlugin()
         plugin.setup()
         return plugin
     }()

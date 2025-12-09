@@ -28,8 +28,8 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERACore", path: "../VERACore"),
-                .project(target: "VERAOpenTok", path: "../VERAOpenTok"),
-                .project(target: "VERAOpenTokChatPlugin", path: "../VERAOpenTokChatPlugin"),
+                .project(target: "VERAVonage", path: "../VERAVonage"),
+                .project(target: "VERAVonageChatPlugin", path: "../VERAVonageChatPlugin"),
             ],
             settings: .settings(
                 base: [

@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import VERACommonUI
 import VERACore
-import VERAOpenTok
+import VERAVonage
 
 #if CHAT_ENABLED
     import VERAChat

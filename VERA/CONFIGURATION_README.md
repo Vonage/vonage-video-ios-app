@@ -56,7 +56,7 @@ tuist generate
 
 ## Effects When Chat Is Disabled
 
-- ❌ `VERAChat` and `VERAOpenTokChatPlugin` are not included as dependencies
+- ❌ `VERAChat` and `VERAVonageChatPlugin` are not included as dependencies
 - ❌ Chat-related code is not compiled
 - ❌ Chat button does not appear in the interface
 - ✅ Application works normally without chat functionality
