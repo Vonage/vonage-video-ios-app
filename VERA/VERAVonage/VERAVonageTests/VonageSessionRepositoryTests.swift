@@ -6,8 +6,8 @@ import Foundation
 import OpenTok
 import Testing
 import VERACore
-import VERAVonage
 import VERATestHelpers
+import VERAVonage
 
 @MainActor
 @Suite("VonageSessionRepository tests")
