@@ -13,7 +13,7 @@ struct HorizontalContentView<Left: View, Right: View>: View {
     private let rightSide: () -> Right
     private let showHeader: Bool
     private let showFooter: Bool
-    private let footerHeight: CGFloat = 40  // Altura fija del footer derecho
+    private let footerHeight: CGFloat = 40
 
     init(
         showHeader: Bool = true,
