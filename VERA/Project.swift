@@ -146,6 +146,7 @@ let project = Project(
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,
+                    "NSCameraReactionEffectGesturesEnabledDefault": false,
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],

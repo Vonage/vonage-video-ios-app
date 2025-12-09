@@ -37,14 +37,6 @@ jobs:
     
     - name: Pull LFS files
       run: git lfs pull
-
-    - name: Cache derived data
-      uses: actions/cache@v4
-      with:
-        path: ~/Library/Developer/Xcode/DerivedData
-        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcworkspace', '**/*.xcodeproj') }}
-        restore-keys: |
-          ${{ runner.os }}-derived-data-
     
     - name: Install SwiftLint
       run: |
@@ -52,6 +44,12 @@ jobs:
 
     - name: Install Tuist
       run: brew install tuist
+
+    - name: Clean Tuist cache
+      run: |
+        echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+        tuist clean
+        rm -rf ~/.cache/tuist
 
     - name: Generate project with Tuist
       run: |

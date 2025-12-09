@@ -98,15 +98,6 @@ public struct MeetingRoomView: View {
                 .toolbarColorScheme(.dark, for: .navigationBar)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            onBottomBarInteraction()
-                            actions.onEndCall()
-                        } label: {
-                            VERACommonUIAsset.Images.arrowBoldLeftLine.swiftUIImage
-                        }
-                    }
-
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
                         if !isIosAppOnMac && state.allowCameraControl {

@@ -14,17 +14,18 @@ struct ArchiveList: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Download recording", bundle: .veraCore)
                 .adaptiveFont(.heading1)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 10)
+
             if archives.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
-                        Text("The meeting hasn’t been recorded", bundle: .veraCore)
+                        Text("The meeting hasn't been recorded", bundle: .veraCore)
                             .adaptiveFont(.bodyBase)
                             .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     }
@@ -33,7 +34,7 @@ struct ArchiveList: View {
                         .padding(.top, 8)
                 }
             } else {
-                ForEach(archives, id: \.id) { archive in
+                List(archives, id: \.id) { archive in
                     HStack {
                         VStack(alignment: .center) {
                             VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
@@ -66,9 +67,11 @@ struct ArchiveList: View {
                             }
                         }
                     }
-                    .padding(.bottom, 8)
-                    .padding(.leading, 16)
-                }.padding(.horizontal, 8)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowSeparator(.hidden)
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
         }
     }
