@@ -4,16 +4,16 @@
 
 import Foundation
 
-/// Domain credentials required to join an OpenTok room/session.
+/// Domain credentials required to join an Vonage room/session.
 ///
 /// `RoomCredentials` bundles the identifiers and token needed to establish a call,
 /// plus metadata like the room name and optional captions stream identifier.
 public struct RoomCredentials: CustomStringConvertible {
-    /// The OpenTok application (API) key associated with the session.
+    /// The Vonage application (API) key associated with the session.
     public let applicationId: String
-    /// The OpenTok session identifier.
+    /// The Vonage session identifier.
     public let sessionId: String
-    /// The OpenTok token used to authenticate and connect.
+    /// The Vonage token used to authenticate and connect.
     public let token: String
     /// The human-readable room name.
     public let roomName: String
@@ -23,9 +23,9 @@ public struct RoomCredentials: CustomStringConvertible {
     /// Creates a new credentials value.
     ///
     /// - Parameters:
-    ///   - sessionId: The OpenTok session identifier.
-    ///   - token: The OpenTok token used for authentication.
-    ///   - applicationId: The OpenTok application (API) key.
+    ///   - sessionId: The Vonage session identifier.
+    ///   - token: The Vonage token used for authentication.
+    ///   - applicationId: The Vonage application (API) key.
     ///   - roomName: A human-readable room name.
     ///   - captionsId: Optional captions stream identifier.
     public init(
