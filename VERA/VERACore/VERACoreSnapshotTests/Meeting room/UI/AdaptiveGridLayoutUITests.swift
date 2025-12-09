@@ -5,6 +5,7 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
+import VERADomain
 
 @testable import VERACore
 

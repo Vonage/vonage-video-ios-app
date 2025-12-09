@@ -6,41 +6,123 @@ import Combine
 import Foundation
 import OpenTok
 import VERACore
+import VERADomain
 
+/// A concrete implementation of ``CallFacade`` that orchestrates OpenTok video calling sessions.
+///
+/// `OpenTokCall` serves as the central coordinator for video call management in the VERA application,
+/// bridging the OpenTok SDK with the application's domain layer. It manages the complete lifecycle
+/// of calls: session connection, local publishing, remote subscriptions, media control, and plugin integration.
+///
+/// ## Overview
+///
+/// This class implements the Facade pattern to provide a unified interface for video calling.
+/// It coordinates:
+/// - Session management through ``OpenTokSession``
+/// - Local media publishing through ``OpenTokPublisher``
+/// - Remote participant subscriptions through `OpenTokSubscriber`
+/// - Reactive state observation via Combine publishers
+/// - Optional extensibility via the plugin system
 public final class OpenTokCall: CallFacade {
 
+    /// Errors that can occur during call operations.
+    ///
+    /// - SeeAlso: ``callState``, ``disconnect()``
     enum Error: Swift.Error {
+        /// The call instance was unexpectedly deallocated during the disconnect process.
         case selfMissingOnDisconnect
+        /// An attempt was made to disconnect a call that is not in the connected state.
+        ///
+        /// Ensure ``callState`` is ``CallState/connected`` before calling ``disconnect()``.
         case callNotConnected
     }
 
     private var cancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
+
+    /// A publisher that emits the current participant state, never fails.
+    ///
+    /// Provides real-time updates about:
+    /// - The local participant (if publishing)
+    /// - The list of remote participants (subscribers)
+    /// - The ID of the active speaker (if any)
+    ///
+    /// - Returns: ``ParticipantsState`` updates suitable for UI consumption.
+    /// - Note: Emitted on the main thread; safe for UI updates.
     public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
     private var _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(SessionEvent.idle)
+
+    /// A publisher that emits session-level events and errors, never fails.
+    ///
+    /// Subscribe to capture connection failures, stream errors, and plugin lifecycle issues.
+    ///
+    /// - Returns: A publisher that emits ``SessionEvent`` values.
+    /// - Important: Always subscribe to handle errors surfaced during call operations.
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
     public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
+
+    /// A publisher for local media publishing state (audio/video), never fails.
+    ///
+    /// Emits when local audio/video publishing toggles change or when muted/unmuted in bulk.
+    ///
+    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
     public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
+    /// A unique identifier for this call instance.
+    ///
+    /// Useful for logging, analytics, and correlating call-related operations.
     public let id = UUID()
+
+    /// The credentials required to connect to the OpenTok session.
+    ///
+    /// Contains the session ID, authentication token, and room name used during connection.
     public let credentials: RoomCredentials
+
+    /// The OpenTok session wrapper managing the connection and signals.
     public let session: OpenTokSession
+
+    /// The publisher for the local participant's audio and video.
     public let publisher: OpenTokPublisher
+
+    /// The participant representation of the local publisher, set after publishing.
     public var publisherParticipant: Participant?
+
     private let subscriberFactory = OpenTokSubscriberFactory()
 
     private let activeSpeakerTracker = ActiveSpeakerTracker()
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
 
+    /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
+    ///
+    /// - SeeAlso: ``assignPlugins(_:)``, `OpenTokSignalEmitter`, `OpenTokPluginCallHolder`, `OpenTokSignalHandler`
     public var plugins: [any OpenTokPlugin] = []
 
     private var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
+
+    /// A publisher that emits the current connection state of the call, never fails.
+    ///
+    /// Possible states:
+    /// - ``CallState/idle``: Not connected
+    /// - ``CallState/connecting``: Attempting to connect
+    /// - ``CallState/connected``: Active call
+    /// - ``CallState/disconnecting``: Tearing down
+    /// - ``CallState/disconnected``: Cleaned up
+    ///
+    /// - Returns: A publisher that emits ``CallState`` values.
+    /// - Note: Use to drive connection-related UI.
     public lazy var callState: AnyPublisher<CallState, Never> = _callState.eraseToAnyPublisher()
 
+    /// Initializes a new OpenTok call instance.
+    ///
+    /// - Parameters:
+    ///   - credentials: Room credentials with session ID, token, and room name.
+    ///   - session: The OpenTok session wrapper managing connectivity and signals.
+    ///   - publisher: Local media publisher for audio/video.
+    /// - Important: Call ``setup()`` before ``connect()`` to configure handlers and observers.
     public init(
         credentials: RoomCredentials,
         session: OpenTokSession,
@@ -51,6 +133,13 @@ public final class OpenTokCall: CallFacade {
         self.publisher = publisher
     }
 
+    /// Sets up the call by configuring session handlers and initializing observers.
+    ///
+    /// Establishes event handling for streams and session events, initializes media state,
+    /// and starts active speaker tracking.
+    ///
+    /// - Important: Call exactly once per instance to avoid duplicate handlers.
+    /// - SeeAlso: ``connect()``
     public func setup() {
         setupSessionHandlers()
         updateMediaState()
@@ -206,6 +295,15 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Session
 
+    /// Initiates the connection to the OpenTok session.
+    ///
+    /// Transitions the call to the connecting state and attempts to establish a connection
+    /// using the provided credentials. On success, the local publisher is added to the session
+    /// and plugins are notified.
+    ///
+    /// - Important: Requires prior call to ``setup()``.
+    /// - Warning: Calling while already connected has no effect.
+    /// - SeeAlso: ``disconnect()``
     public func connect() {
         do {
             updateCallState(to: .connecting)
@@ -215,6 +313,13 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
+    /// Disconnects from the OpenTok session and performs complete cleanup.
+    ///
+    /// Gracefully terminates the call, cleaning up subscribers, publisher, plugins,
+    /// and session resources. Updates the call state to ``CallState/disconnected`` upon completion.
+    ///
+    /// - Throws: ``Error/callNotConnected`` if the call is not currently in ``CallState/connected``.
+    /// - Important: Cancels Combine subscriptions and clears plugin assignments as part of teardown.
     public func disconnect() async throws {
         guard _callState.value == .connected else {
             _eventsPublisher.value = .error(Error.callNotConnected)
@@ -247,23 +352,40 @@ public final class OpenTokCall: CallFacade {
 
     // MARK: Audio/Video toggles
 
+    /// A Boolean value indicating whether both local audio and video publishing are disabled.
+    ///
+    /// Returns `true` if neither audio nor video is currently being published by the local participant.
+    /// - Note: Does not reflect hold state; see ``isOnHold``.
     public var isMuted: Bool {
         !publisher.publishAudio && !publisher.publishVideo
     }
 
+    /// Switches the local camera between front and back positions.
+    ///
+    /// Toggles the camera input source. If currently using the front camera,
+    /// it switches to the back camera, and vice versa.
+    /// - Note: Does not enable video if currently disabled.
     public func toggleLocalCamera() {
         publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
     }
 
+    /// Toggles the local video publishing state.
+    ///
+    /// Enables video publishing if it's currently disabled, or disables it if enabled.
+    /// The updated state is emitted through ``statePublisher``.
+    /// - SeeAlso: ``statePublisher``
     public func toggleLocalVideo() {
         publisher.publishVideo.toggle()
-
         updateMediaState()
     }
 
+    /// Toggles the local audio publishing state.
+    ///
+    /// Enables audio publishing if it's currently disabled, or disables it if enabled.
+    /// The updated state is emitted through ``statePublisher``.
+    /// - SeeAlso: ``statePublisher``
     public func toggleLocalAudio() {
         publisher.publishAudio.toggle()
-
         updateMediaState()
     }
 
@@ -273,8 +395,19 @@ public final class OpenTokCall: CallFacade {
             isPublishingVideo: publisher.publishVideo)
     }
 
+    /// A Boolean value indicating whether the call is currently on hold.
+    ///
+    /// When on hold, local publishing and remote subscriptions are disabled to conserve bandwidth,
+    /// but the session connection remains active.
+    /// - SeeAlso: ``setOnHold(_:)``, ``muteLocalMedia(_:)``
     public var isOnHold: Bool { publisher.isOnHold }
 
+    /// Sets the hold state of the call.
+    ///
+    /// - Parameter isOnHold: `true` to put the call on hold, `false` to resume.
+    ///
+    /// - Important: On hold, no media is sent or received, but the connection remains active.
+    /// - SeeAlso: ``isOnHold``, ``muteLocalMedia(_:)``
     public func setOnHold(_ isOnHold: Bool) {
         Task { [weak self] in
             guard let self else { return }
@@ -283,6 +416,10 @@ public final class OpenTokCall: CallFacade {
         }
     }
 
+    /// Mutes or unmutes both local audio and video simultaneously.
+    ///
+    /// - Parameter isMuted: When `true`, disables both audio and video; when `false`, enables both.
+    /// - Warning: Overrides individual audio/video toggles. Use ``toggleLocalAudio()`` or ``toggleLocalVideo()`` for independent control.
     public func muteLocalMedia(_ isMuted: Bool) {
         Task { [weak self] in
             guard let self else { return }
@@ -301,6 +438,16 @@ public final class OpenTokCall: CallFacade {
         ]
     }
 
+    /// Assigns plugins to extend the call's functionality.
+    ///
+    /// Configures each plugin with necessary dependencies:
+    /// - `OpenTokSignalEmitter`: Receives a signal channel
+    /// - `OpenTokPluginCallHolder`: Receives a call reference
+    /// Plugins are automatically started when the call connects and ended when it disconnects.
+    ///
+    /// - Parameter plugins: Array of plugins conforming to `OpenTokPlugin`.
+    /// - Important: Assign plugins before ``connect()`` to ensure proper initialization.
+    /// - SeeAlso: ``plugins``, `OpenTokSignalEmitter`, `OpenTokPluginCallHolder`, `OpenTokSignalHandler`
     public func assignPlugins(_ plugins: [any OpenTokPlugin]) {
         self.plugins = plugins
 

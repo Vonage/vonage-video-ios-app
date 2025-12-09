@@ -3,22 +3,28 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Utility for sorting participants by their display priority.
 ///
-/// Priority order (highest to lowest):
+/// Display priority (highest → lowest):
 /// 1. Screenshare participants
 /// 2. Pinned participants
 /// 3. Active speaker participant
-/// 4. Other participants (sorted by creation date with name as tiebreaker)
+/// 4. Others (creation date ascending, name as tiebreaker)
+///
+/// Use this to order participants for grid/list views so focus stays on the most relevant tiles.
 public struct ParticipantDisplayPriority {
 
-    /**
-     * Sorts participants by their display priority.
-     * @param participants Array of participants to sort
-     * @param activeSpeakerId The ID of the current active speaker, or nil if none
-     * @returns Sorted array of participants
-     */
+    /// Sorts participants by the display priority rules.
+    ///
+    /// Applies the priority order, then falls back to creation date (oldest first)
+    /// and localized name comparison when needed to ensure stable, user-friendly ordering.
+    ///
+    /// - Parameters:
+    ///   - participants: Array of participants to sort.
+    ///   - activeSpeakerId: The ID of the current active speaker, or `nil` if none.
+    /// - Returns: A new array of participants sorted by display priority.
     public static func sortByDisplayPriority(
         participants: [Participant],
         activeSpeakerId: String?
@@ -32,13 +38,13 @@ public struct ParticipantDisplayPriority {
         }
     }
 
-    /**
-     * Compares two participants for display priority sorting.
-     * @param participantA First participant to compare
-     * @param participantB Second participant to compare
-     * @param activeSpeakerId The ID of the current active speaker, or nil if none
-     * @returns Comparison result: -1 if A has higher priority, 1 if B has higher priority, 0 if equal
-     */
+    /// Compares two participants according to the display priority rules.
+    ///
+    /// - Parameters:
+    ///   - participantA: First participant to compare.
+    ///   - participantB: Second participant to compare.
+    ///   - activeSpeakerId: The ID of the current active speaker, or `nil` if none.
+    /// - Returns: `-1` if A has higher priority, `1` if B has higher priority, `0` if equal.
     private static func compareDisplayPriority(
         participantA: Participant,
         participantB: Participant,
@@ -85,10 +91,10 @@ public struct ParticipantDisplayPriority {
         return participantA.creationTime <= participantB.creationTime ? -1 : 1
     }
 
-    /**
-     * Sorts participants by their creation date
-     * @returns Sorted array of participants
-     */
+    /// Sorts participants by their creation date (oldest first).
+    ///
+    /// - Parameter participants: Array of participants.
+    /// - Returns: A new array sorted by `creationTime` ascending.
     public static func sortByDate(
         participants: [Participant]
     ) -> [Participant] {
@@ -97,10 +103,10 @@ public struct ParticipantDisplayPriority {
         }
     }
 
-    /**
-     * Sorts participants by their name
-     * @returns Sorted array of participants
-     */
+    /// Sorts participants by their name (lexicographic).
+    ///
+    /// - Parameter participants: Array of participants.
+    /// - Returns: A new array sorted by `name` ascending.
     public static func sortByName(
         participants: [Participant]
     ) -> [Participant] {
@@ -112,13 +118,13 @@ public struct ParticipantDisplayPriority {
 
 // MARK: - Convenience Extensions
 
+/// Convenience method on arrays of participants to sort by display priority.
 extension Array where Element == Participant {
 
-    /**
-     * Convenience method to sort participants by display priority
-     * @param activeSpeakerId The ID of the current active speaker, or nil if none
-     * @returns New sorted array of participants
-     */
+    /// Returns participants sorted by display priority.
+    ///
+    /// - Parameter activeSpeakerId: The ID of the current active speaker, or `nil` if none.
+    /// - Returns: A new array sorted by display priority.
     public func sortedByDisplayPriority(activeSpeakerId: String?) -> [Participant] {
         return ParticipantDisplayPriority.sortByDisplayPriority(
             participants: self,

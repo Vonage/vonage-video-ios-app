@@ -4,13 +4,30 @@
 
 import Foundation
 
+/// Domain credentials required to join an OpenTok room/session.
+///
+/// `RoomCredentials` bundles the identifiers and token needed to establish a call,
+/// plus metadata like the room name and optional captions stream identifier.
 public struct RoomCredentials: CustomStringConvertible {
-    public let sessionId: String
-    public let token: String
+    /// The OpenTok application (API) key associated with the session.
     public let applicationId: String
+    /// The OpenTok session identifier.
+    public let sessionId: String
+    /// The OpenTok token used to authenticate and connect.
+    public let token: String
+    /// The human-readable room name.
     public let roomName: String
+    /// Optional captions stream identifier, when captions are enabled.
     public let captionsId: String?
 
+    /// Creates a new credentials value.
+    ///
+    /// - Parameters:
+    ///   - sessionId: The OpenTok session identifier.
+    ///   - token: The OpenTok token used for authentication.
+    ///   - applicationId: The OpenTok application (API) key.
+    ///   - roomName: A human-readable room name.
+    ///   - captionsId: Optional captions stream identifier.
     public init(
         sessionId: String,
         token: String,
@@ -25,6 +42,7 @@ public struct RoomCredentials: CustomStringConvertible {
         self.captionsId = captionsId
     }
 
+    /// A human-readable summary of the credentials for logging and diagnostics.
     public var description: String {
         """
         App ID:    \(applicationId)

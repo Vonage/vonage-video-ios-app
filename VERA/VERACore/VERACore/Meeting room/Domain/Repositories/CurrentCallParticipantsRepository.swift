@@ -3,6 +3,7 @@
 //
 
 import Combine
+import VERADomain
 
 public protocol CurrentCallParticipantsRepository {
     func getCurrentCallParticipants() -> AnyPublisher<[Participant], Never>

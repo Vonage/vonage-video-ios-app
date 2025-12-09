@@ -6,6 +6,7 @@ import Foundation
 import Testing
 import VERACore
 import VERATestHelpers
+import VERADomain
 
 @Suite("Participant tests")
 struct ParticipantTests {
