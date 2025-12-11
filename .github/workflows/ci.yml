@@ -352,6 +352,7 @@ jobs:
         cd VERA
         export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
         export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
+        export BASE_API_URL=${{ secrets.BASE_API_URL }}
         ./Scripts/generateEnvironmentConstants.sh
         ./Scripts/regenerateSigningConfig.sh
         tuist generate --no-open
