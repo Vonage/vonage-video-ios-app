@@ -15,7 +15,7 @@ import VERAVonageCallKitPlugin
 #endif
 
 final class DependencyContainer {
-    let baseURL = URL(string: "https://video.vonage.com/")!
+    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
     lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
 

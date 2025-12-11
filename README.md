@@ -94,12 +94,19 @@ The current minimum deployment target for the reference app iOS 16+. Some of the
 
 First follow the steps to create the Vonage account, application and backend set up and deployment at the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app?tab=readme-ov-file#running-locally) URL.
 
-Create or edit the Signing.xcconfig file in the VERA/Config folder.
+Then you can specify the `DEVELOPMENT_TEAM`, `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the `regenerateSigningConfig.sh` script and execute it to generate the Signing.xcconfig file in the VERA/Config folder.
 
 ```
 DEVELOPMENT_TEAM = YOUR_DEVELOPMENT_TEAM
 MARKETING_VERSION = 1.0
 CURRENT_PROJECT_VERSION = 1
+```
+
+For the `BASE_API_URL` modify the `EnvironmentConstants.swift` and the `VERA.entitlements` files. Or expose it as an environment variable and then execute `generateEnvironmentConstants.sh`.
+
+```
+export BASE_API_URL=https://api.example.com/
+.VERA/Scripts/generateEnvironmentConstants.sh
 ```
 
 Then install [Tuist](https://docs.tuist.dev/en/guides/quick-start/install-tuist), it's required for the project generation.
