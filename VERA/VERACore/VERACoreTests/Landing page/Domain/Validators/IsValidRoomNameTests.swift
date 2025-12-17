@@ -30,6 +30,8 @@ struct RoomNameValidatorTests {
             ("🙈", false),
             ("roomname🙈", false),
             ("roomname 🙈", false),
+            ("roomnameroomnameroomnameroomnameroomnameroomnameroomnameroom", true),
+            ("roomnameroomnameroomnameroomnameroomnameroomnameroomnameroomn", false),
         ])
     func validateRoomName(testCase: (String, Bool)) {
         let (roomName, expectedValid) = testCase
