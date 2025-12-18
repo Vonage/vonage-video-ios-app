@@ -77,3 +77,4 @@ slather-report/
 **/Derived/
 setUpInfoPlist.sh
 EnvironmentConstantss.swift
+VERA.entitlements
