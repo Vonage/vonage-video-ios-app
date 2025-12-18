@@ -48,13 +48,13 @@ disabled_rules:
   - large_tuple            # Allow tuples with more than 2 elements in tests
   - implicitly_unwrapped_optional # Sometimes needed in tests
   - identifier_name
+  - conditional_returns_on_newline
 
 # Rules to enable (opt-in rules)
 opt_in_rules:
   - array_init
   - closure_spacing
   - collection_alignment
-  - conditional_returns_on_newline
   - contains_over_filter_count
   - contains_over_filter_is_empty
   - contains_over_first_not_nil
