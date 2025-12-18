@@ -27,7 +27,7 @@ public class WaitingRoomFactory {
     public func make(
         roomName: RoomName,
         onNavigateToRoom: @escaping (RoomName) -> Void
-    ) -> some View {
+    ) -> (some View, viewModel: WaitingRoomViewModel) {
         let viewModel = WaitingRoomViewModel(
             roomName: roomName,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
@@ -40,10 +40,13 @@ public class WaitingRoomFactory {
             requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
-            userRepository: userRepository)
-        return WaitingRoomScreen(
-            viewModel: viewModel,
-            onNavigateToRoom: onNavigateToRoom
-        )
+            userRepository: userRepository,
+            onNavigateToRoom: onNavigateToRoom)
+        return (WaitingRoomScreen(viewModel: viewModel), viewModel)
+    }
+
+    @MainActor
+    public func make(viewModel: WaitingRoomViewModel) -> some View {
+        WaitingRoomScreen(viewModel: viewModel)
     }
 }

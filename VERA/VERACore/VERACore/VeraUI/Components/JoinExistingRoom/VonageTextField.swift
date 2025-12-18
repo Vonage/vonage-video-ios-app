@@ -130,18 +130,11 @@ struct VonageTextField: View {
     }
 
     private var textColor: Color {
-        switch (text.wrappedValue.isEmpty, isFocused) {
-        case (true, true):
-            // Empty with focus
-            .clear
-        case (true, false):
-            // Empty without focus
+        if text.wrappedValue.isEmpty {
             VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
-        case (false, true):
-            // With text and focus
+        } else if isFocused {
             VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor
-        case (false, false):
-            // With text without focus
+        } else {
             VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
         }
     }

@@ -28,7 +28,7 @@ struct UsernameInput: View {
     }
 
     private func getUsernameState() -> VonageTextFieldState {
-        if userName.isEmpty {
+        if userName.isValidUsername {
             return .initial
         } else {
             return .valid

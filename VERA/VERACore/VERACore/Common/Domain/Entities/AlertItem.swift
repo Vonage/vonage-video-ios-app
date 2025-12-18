@@ -41,4 +41,11 @@ public struct AlertItem: Identifiable {
             message: "Failed to download recording: \(errorMessage)"
         )
     }
+
+    public static func invalidUsername() -> AlertItem {
+        AlertItem(
+            title: String(localized: "Error", bundle: .veraCore),
+            message: String(localized: "Invalid username", bundle: .veraCore)
+        )
+    }
 }

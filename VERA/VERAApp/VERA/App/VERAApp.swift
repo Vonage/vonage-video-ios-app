@@ -68,9 +68,11 @@ struct VERAApp: App {
                     message: Text(alertItem.message),
                     dismissButton: .default(Text("OK"))
                 )
-            }.onOpenURL { url in
+            }
+            .onOpenURL { url in
                 handleUniversalLink(url)
-            }.tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            }
+            .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
         }
     }
 
@@ -91,16 +93,33 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        waitingRoomFactory.make(
-            roomName: roomName
-        ) { roomName in
-            Task {
-                navigationCoordinator.go(to: .meetingRoom(roomName))
+        let viewModel: WaitingRoomViewModel
+
+        if let existingViewModel = navigationCoordinator.waitingRoomViewModel,
+            existingViewModel.roomName == roomName
+        {
+            // Reuse existing view model for the same room
+            viewModel = existingViewModel
+        } else {
+            // Create new view model for different room
+            let (_, newViewModel) = waitingRoomFactory.make(
+                roomName: roomName
+            ) { roomName in
+                Task {
+                    navigationCoordinator.go(to: .meetingRoom(roomName))
+                }
             }
-        }.onDisappear {
-            // Required if the user goes back to the landing page
-            dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
+            viewModel = newViewModel
+            navigationCoordinator.waitingRoomViewModel = newViewModel
         }
+
+        return waitingRoomFactory.make(viewModel: viewModel)
+            .onDisappear {
+                // Required if the user goes back to the landing page
+                dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
+                // Clear view model when leaving the waiting room
+                navigationCoordinator.waitingRoomViewModel = nil
+            }
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
