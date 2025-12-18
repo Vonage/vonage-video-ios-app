@@ -76,5 +76,5 @@ slather-report/
 # Tuist
 **/Derived/
 setUpInfoPlist.sh
-EnvironmentConstantss.swift
 VERA.entitlements
+EnvironmentConstants.swift
