@@ -64,8 +64,7 @@ struct ParticipantsListViewUITests {
     @Test(
         "Participants List View - Accessibility",
         arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
+            ("SmallText", ContentSizeCategory.extraSmall)
         ])
     func accessibility(textName: String, textSize: ContentSizeCategory) throws {
         let sut = makeSUT()

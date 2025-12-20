@@ -7,35 +7,51 @@ import VERACommonUI
 
 struct UsernameInput: View {
 
-    @Binding var userName: String
-    @State private var usernameState = VonageTextFieldState.initial
-    let forceLowercase: Bool = false
+    @Binding var userName: Username
+    @Binding var usernameState: VonageTextFieldState
 
     var body: some View {
         HStack {
             VonageTextField(
                 placeholder: String(localized: "Enter your name", bundle: .veraCore),
                 text: $userName,
-                state: usernameState,
-                forceLowercase: forceLowercase
+                state: usernameState
             )
         }
         .onChange(of: userName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
-                usernameState = getUsernameState()
+                usernameState = userName.getUsernameState()
             }
-        }
-    }
-
-    private func getUsernameState() -> VonageTextFieldState {
-        if userName.isValidUsername {
-            return .initial
-        } else {
-            return .valid
         }
     }
 }
 
+extension Username {
+    func getUsernameState(_ joinPressed: Bool = false) -> VonageTextFieldState {
+        if joinPressed {
+            if isEmpty {
+                return .invalid(InvalidUsername.empty.rawValue)
+            }
+            if isValidUsername {
+                return .initial
+            } else {
+                return .invalid(InvalidUsername.invalidFormat.rawValue)
+            }
+        } else {
+            if isValidUsername {
+                return .initial
+            } else {
+                return .invalid(InvalidUsername.invalidFormat.rawValue)
+            }
+        }
+    }
+}
+
+enum InvalidUsername: String {
+    case empty = "User name cannot be empty"
+    case invalidFormat = "Invalid user name format"
+}
+
 #Preview {
-    UsernameInput(userName: .constant("Zaphod"))
+    UsernameInput(userName: .constant("Zaphod"), usernameState: .constant(.initial))
 }

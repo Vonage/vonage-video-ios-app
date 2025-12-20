@@ -363,7 +363,9 @@ struct MeetingRoomViewModelTests {
         requestCameraPermissionUseCase: RequestCameraPermissionUseCase = makeMockRequestCameraPermissionUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
-        appConfig: AppConfig = AppConfig()
+        appConfig: AppConfig = AppConfig(),
+        onBack: @escaping () -> Void = {},
+        onShowChat: @escaping () -> Void = {}
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
             roomName: roomName,
@@ -375,7 +377,8 @@ struct MeetingRoomViewModelTests {
             requestMicrophonePermissionUseCase: requestMicrophonePermissionUseCase,
             requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
-            appConfig: appConfig)
+            appConfig: appConfig,
+            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat))
     }
 
     // MARK: Helper

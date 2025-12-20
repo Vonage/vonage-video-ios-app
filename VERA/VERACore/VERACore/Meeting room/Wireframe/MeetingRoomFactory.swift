@@ -31,9 +31,9 @@ public class MeetingRoomFactory {
 
     public func make(
         roomName: RoomName,
-        onShowChat: @escaping () -> Void,
-        onBack: @escaping () -> Void
-    ) -> some View {
+        onShowChat: @escaping () -> Void = {},
+        onBack: @escaping () -> Void = {},
+    ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
             baseURL: baseURL,
@@ -47,10 +47,13 @@ public class MeetingRoomFactory {
             requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
             requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
-            appConfig: appConfig)
-        return MeetingRoomScreen(
-            viewModel: viewModel,
-            onShowChat: onShowChat,
-            onBack: onBack)
+            appConfig: appConfig,
+            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat))
+        return (MeetingRoomScreen(viewModel: viewModel), viewModel)
+    }
+
+    @MainActor
+    public func make(viewModel: MeetingRoomViewModel) -> some View {
+        MeetingRoomScreen(viewModel: viewModel)
     }
 }

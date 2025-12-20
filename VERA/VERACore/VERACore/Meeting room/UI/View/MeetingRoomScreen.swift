@@ -6,17 +6,9 @@ import SwiftUI
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
-    private let onShowChat: () -> Void
-    private let onBack: () -> Void
 
-    public init(
-        viewModel: MeetingRoomViewModel,
-        onShowChat: @escaping () -> Void,
-        onBack: @escaping () -> Void
-    ) {
+    public init(viewModel: MeetingRoomViewModel) {
         self.viewModel = viewModel
-        self.onShowChat = onShowChat
-        self.onBack = onBack
     }
 
     public var body: some View {
@@ -31,12 +23,10 @@ public struct MeetingRoomScreen: View {
                             onToggleMic: viewModel.onToggleMic,
                             onToggleCamera: viewModel.onToggleCamera,
                             onCameraSwitch: viewModel.onCameraSwitch,
-                            onEndCall: {
-                                viewModel.endCall()
-                            },
+                            onEndCall: viewModel.endCall,
                             onToggleParticipants: {},
                             onToggleLayout: viewModel.onToggleLayout,
-                            onShowChat: onShowChat)
+                            onShowChat: viewModel.showChat)
                     )
 
                     if state.callState == .disconnecting {
@@ -55,12 +45,9 @@ public struct MeetingRoomScreen: View {
                 title: Text(alertItem.title),
                 message: Text(alertItem.message),
                 dismissButton: .default(Text("OK")))
-        }.onAppear {
+        }
+        .onAppear {
             viewModel.loadUI()
-        }.onChange(of: viewModel.state) { newValue in
-            if case .content(let state) = newValue, state.callState == .disconnected {
-                onBack()
-            }
         }
     }
 }

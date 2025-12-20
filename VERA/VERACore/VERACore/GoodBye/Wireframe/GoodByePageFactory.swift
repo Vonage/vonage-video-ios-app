@@ -27,7 +27,7 @@ public class GoodByePageFactory {
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void,
         onPlay: @escaping (ArchiveRecording) -> Void
-    ) -> some View {
+    ) -> (view: some View, viewModel: GoodByeViewModel) {
         let viewModel = GoodByeViewModel(
             roomName: roomName,
             joinRoomUseCase: joinRoomUseCase,
@@ -35,20 +35,19 @@ public class GoodByePageFactory {
             archivesRepository: archivesRepository,
             playRecordingUseCase: .init(
                 archiveRecordingsRepository: archiveRecordingsRepository,
-                onPlay: onPlay))
-
-        return GoodByeViewScreen(
-            viewModel: viewModel,
-            onReenter: {
-                Task { @MainActor in
-                    await viewModel.joinRoom()
-                    onReenter()
-                }
-            },
-            onReturnToLanding: onReturnToLanding
+                onPlay: onPlay),
+            goodByeNavigation: .init(
+                onReenter: onReenter,
+                onReturnToLanding: onReturnToLanding))
+        return (
+            GoodByeViewScreen(viewModel: viewModel)
+                .task {
+                    await viewModel.setupUI()
+                }, viewModel
         )
-        .task {
-            await viewModel.setupUI()
-        }
+    }
+
+    public func make(viewModel: GoodByeViewModel) -> some View {
+        GoodByeViewScreen(viewModel: viewModel)
     }
 }

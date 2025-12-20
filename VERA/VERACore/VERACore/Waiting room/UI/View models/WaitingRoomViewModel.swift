@@ -199,7 +199,6 @@ public final class WaitingRoomViewModel: ObservableObject {
     public func joinRoom() async {
         do {
             guard userName.isValidUsername else {
-                displayInvalidUsernameAlert()
                 return
             }
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
@@ -212,10 +211,6 @@ public final class WaitingRoomViewModel: ObservableObject {
                 self?.error = AlertItem.genericError(error.localizedDescription)
             }
         }
-    }
-
-    private func displayInvalidUsernameAlert() {
-        error = AlertItem.invalidUsername()
     }
 
     // MARK: Permission requests

@@ -207,6 +207,8 @@ struct VideoPreviewView: View {
 
 struct PrepareToJoinRoom: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    @State var usernameState: VonageTextFieldState = .initial
+
     let state: WaitingRoomState
     var userName: Binding<String>
     let onJoinRoom: () -> Void
@@ -214,7 +216,9 @@ struct PrepareToJoinRoom: View {
     var body: some View {
         VStack(alignment: .leading) {
             VStack {
-                UsernameInput(userName: userName)
+                UsernameInput(
+                    userName: userName,
+                    usernameState: $usernameState)
             }
             .padding()
 
@@ -231,6 +235,7 @@ struct PrepareToJoinRoom: View {
                     .padding(.bottom, 8)
 
                 JoinRoomButton {
+                    usernameState = userName.wrappedValue.getUsernameState(true)
                     onJoinRoom()
                 }
             }

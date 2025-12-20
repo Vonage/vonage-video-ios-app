@@ -12,7 +12,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
+    var meetingRoomViewModel: MeetingRoomViewModel?
+    var goodByeViewModel: GoodByeViewModel?
 
+    @MainActor
     public func go(to route: AppRoute) {
         switch route {
         case .landing: returnToLanding()

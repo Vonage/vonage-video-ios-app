@@ -11,7 +11,7 @@ enum RoomNameState {
 
 struct JoinExistingRoom: View {
 
-    @State var roomName: String = ""
+    @State var roomName: RoomName = ""
     @State private var roomState = VonageTextFieldState.initial
 
     let onJoinRoom: (String) -> Void
@@ -29,12 +29,9 @@ struct JoinExistingRoom: View {
                     text: $roomName,
                     state: roomState,
                     forceLowercase: true)
-                if !roomName.isEmpty && !roomName.isValidRoomName {
-                    Text("No spaces or special characters allowed", bundle: .veraCore)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
-                        .adaptiveFont(.caption)
-                }
-                JoinButton(roomName: $roomName, color: joinColor) {
+
+                JoinButton(color: joinColor) {
+                    roomState = getRoomState(true)
                     onJoinRoom(roomName)
                 }
                 .padding(.vertical, 16)
@@ -63,13 +60,27 @@ struct JoinExistingRoom: View {
         VERACommonUIAsset.SemanticColors.primary.swiftUIColor
     }
 
-    private func getRoomState() -> VonageTextFieldState {
+    private func getRoomState(_ joinPressed: Bool = false) -> VonageTextFieldState {
+        if joinPressed {
+            if roomName.isEmpty {
+                return .invalid(InvalidRoomName.empty.rawValue)
+            } else {
+                return roomName.isValidRoomName
+                    ? .valid : .invalid(InvalidRoomName.containsSpaceOrSpecialCharacter.rawValue)
+            }
+        }
         if roomName.isEmpty {
             return .initial
         } else {
-            return roomName.isValidRoomName ? .valid : .invalid
+            return roomName.isValidRoomName
+                ? .valid : .invalid(InvalidRoomName.containsSpaceOrSpecialCharacter.rawValue)
         }
     }
+}
+
+enum InvalidRoomName: String {
+    case empty = "Room name cannot be empty"
+    case containsSpaceOrSpecialCharacter = "Cannot be empty, contain spaces or special characters"
 }
 
 #Preview {

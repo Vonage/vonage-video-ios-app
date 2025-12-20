@@ -40,6 +40,9 @@ public final class LandingPageViewModel: ObservableObject {
                 await MainActor.run { [weak self] in
                     self?.state = .success(name)
                 }
+            } catch DefaultTryJoinRoomUseCase.Error.invalidRoomName {
+                // Don't show error for invalid room name
+                // Validation is already shown in the TextField
             } catch {
                 await MainActor.run { [weak self] in
                     self?.error = AlertItem.genericError(error.localizedDescription)

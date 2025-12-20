@@ -167,3 +167,13 @@ public protocol CallFacade: AnyObject,
     CallStatePublisherProvider,
     HoldeableCall
 {}
+
+/// Errors that can occur during call operations.
+///
+/// - SeeAlso: ``callState``, ``disconnect()``
+public enum CallError: Swift.Error {
+    /// An attempt was made to disconnect a call that is not in the connected state.
+    ///
+    /// Ensure ``callState`` is ``CallState/connected`` before calling ``disconnect()``.
+    case callNotConnected
+}
