@@ -49,6 +49,7 @@ disabled_rules:
   - implicitly_unwrapped_optional # Sometimes needed in tests
   - identifier_name
   - conditional_returns_on_newline
+  - opening_brace
 
 # Rules to enable (opt-in rules)
 opt_in_rules:
@@ -140,3 +141,8 @@ reporter: "xcode"
 
 # Configuration specifically for Xcode plugin
 # This ensures consistent behavior across environments
+
+force_unwrapping:
+  excluded:
+    - "**/*Tests.swift"
+    - "**/*Test.swift"
