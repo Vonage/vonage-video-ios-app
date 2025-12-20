@@ -16,7 +16,8 @@ let project = Project(
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERACore", path: "../VERACore"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAVonageCallKitPluginTests",
@@ -30,7 +31,8 @@ let project = Project(
                 .target(name: "VERAVonageCallKitPlugin"),
                 .project(target: "VERACore", path: "../VERACore"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

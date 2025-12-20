@@ -18,7 +18,8 @@ let project = Project(
             dependencies: [
                 .project(target: "VERACore", path: "../VERACore"),
                 .package(product: "VonageClientSDKVideo"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAVonageTests",
@@ -30,7 +31,8 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAVonage"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

@@ -21,7 +21,8 @@ let project = Project(
             dependencies: [
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAChatAppTestHelpers",
@@ -33,7 +34,8 @@ let project = Project(
             scripts: [.swiftLint],
             dependencies: [
                 .target(name: "VERAChat")
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAChatApp",
@@ -50,7 +52,8 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAChat"),
                 .target(name: "VERAChatAppTestHelpers"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAChatTests",
@@ -62,7 +65,8 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAChat"),
                 .target(name: "VERAChatAppTestHelpers"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAChatSnapshotTests",
@@ -75,7 +79,8 @@ let project = Project(
                 .target(name: "VERAChat"),
                 .target(name: "VERAChatAppTestHelpers"),
                 .package(product: "SnapshotTesting"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

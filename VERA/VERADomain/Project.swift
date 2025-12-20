@@ -11,7 +11,8 @@ let project = Project(
             bundleId: "com.vonage.VERADomain",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERADomain/**"],
-            scripts: [.swiftLint]
+            scripts: [.swiftLint],
+            settings: createBaseBuildSettings()
         )
     ]
 )
