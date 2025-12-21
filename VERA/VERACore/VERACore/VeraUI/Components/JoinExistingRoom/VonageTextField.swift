@@ -131,7 +131,7 @@ struct VonageTextField: View {
     }
 
     private var placeholderColor: Color {
-        if case .invalid(let error) = state {
+        if case .invalid = state {
             VERACommonUIAsset.SemanticColors.error.swiftUIColor
         } else {
             isFocused

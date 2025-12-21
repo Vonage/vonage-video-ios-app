@@ -131,7 +131,7 @@ struct VERAApp: App {
             viewModel = existingViewModel
         } else {
             let (_, newViewModel) = meetingRoomFactory.make(roomName: roomName) {
-                showChatIfneeded()
+                showChatIfNeeded()
             } onBack: {
                 navigationCoordinator.go(to: .goodbye(roomName))
             }
@@ -146,7 +146,7 @@ struct VERAApp: App {
             }
     }
 
-    private func showChatIfneeded() {
+    private func showChatIfNeeded() {
         #if CHAT_ENABLED
             showChat = true
         #endif
