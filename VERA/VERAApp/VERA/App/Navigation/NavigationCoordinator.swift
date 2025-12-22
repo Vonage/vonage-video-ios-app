@@ -28,6 +28,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     // MARK: - Public Navigation Methods
 
     private func navigateToWaitingRoom(_ roomName: String) {
+        isInMeeting = false
+        currentMeetingRoom = nil
+
+        path.removeLast(path.count)
         path.append(AppRoute.waitingRoom(roomName))
         logNavigation("Navigating to waiting room: \(roomName)")
     }

@@ -15,13 +15,16 @@ public enum MeetingRoomViewState: Equatable {
 public struct MeetingRoomNavigation {
     public let onBack: () -> Void
     public let onShowChat: () -> Void
+    public let onNext: () -> Void
 
     public init(
         onBack: @escaping () -> Void,
-        onShowChat: @escaping () -> Void
+        onShowChat: @escaping () -> Void,
+        onNext: @escaping () -> Void
     ) {
         self.onBack = onBack
         self.onShowChat = onShowChat
+        self.onNext = onNext
     }
 }
 
@@ -103,8 +106,11 @@ public final class MeetingRoomViewModel: ObservableObject {
                 self.currentCall = call
             } catch {
                 await MainActor.run { [weak self] in
-                    self?.error = AlertItem.genericError(error.localizedDescription)
-                    self?.meetingRoomNavigation.onBack()
+                    self?.error = AlertItem.genericError(
+                        error.localizedDescription
+                    ) { [weak self] in
+                        self?.meetingRoomNavigation.onBack()
+                    }
                 }
             }
         }
@@ -113,7 +119,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     func navigateBackIfNeeded(_ callState: CallState) {
         guard callState == .disconnected else { return }
         Task { @MainActor [weak self] in
-            self?.meetingRoomNavigation.onBack()
+            self?.meetingRoomNavigation.onNext()
         }
     }
 

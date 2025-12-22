@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import VERACommonUI
 import VERACore
+import VERADomain
 import VERAVonage
 
 #if CHAT_ENABLED
@@ -62,13 +63,7 @@ struct VERAApp: App {
                 }
             }
             .environmentObject(navigationCoordinator)
-            .alert(item: $alertItem) { alertItem in
-                Alert(
-                    title: Text(alertItem.title),
-                    message: Text(alertItem.message),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+            .alert(item: $alertItem) { $0.view }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }
@@ -133,6 +128,8 @@ struct VERAApp: App {
             let (_, newViewModel) = meetingRoomFactory.make(roomName: roomName) {
                 showChatIfNeeded()
             } onBack: {
+                navigationCoordinator.go(to: .waitingRoom(roomName))
+            } onNext: {
                 navigationCoordinator.go(to: .goodbye(roomName))
             }
             navigationCoordinator.meetingRoomViewModel = newViewModel

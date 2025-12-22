@@ -33,6 +33,7 @@ public class MeetingRoomFactory {
         roomName: RoomName,
         onShowChat: @escaping () -> Void = {},
         onBack: @escaping () -> Void = {},
+        onNext: @escaping () -> Void = {},
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
@@ -48,7 +49,7 @@ public class MeetingRoomFactory {
             requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat))
+            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat, onNext: onNext))
         return (MeetingRoomScreen(viewModel: viewModel), viewModel)
     }
 

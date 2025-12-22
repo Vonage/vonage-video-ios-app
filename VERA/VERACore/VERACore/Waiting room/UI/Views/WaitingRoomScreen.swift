@@ -4,6 +4,8 @@
 
 import Combine
 import SwiftUI
+import VERACommonUI
+import VERADomain
 
 public struct WaitingRoomScreen: View {
     @ObservedObject private var viewModel: WaitingRoomViewModel
@@ -35,13 +37,7 @@ public struct WaitingRoomScreen: View {
             .onAppear {
                 viewModel.loadUI()
             }
-            .alert(item: $viewModel.error) { alertItem in
-                Alert(
-                    title: Text(alertItem.title),
-                    message: Text(alertItem.message),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+            .alert(item: $viewModel.error) { $0.view }
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

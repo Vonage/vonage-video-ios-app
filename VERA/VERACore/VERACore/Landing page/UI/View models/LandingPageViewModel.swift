@@ -3,6 +3,7 @@
 //
 
 import Combine
+import VERADomain
 
 public typealias LandingPageError = String
 

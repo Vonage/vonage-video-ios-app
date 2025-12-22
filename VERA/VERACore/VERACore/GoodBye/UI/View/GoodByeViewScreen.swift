@@ -3,6 +3,8 @@
 //
 
 import SwiftUI
+import VERACommonUI
+import VERADomain
 
 struct GoodByeViewScreen: View {
     @ObservedObject var viewModel: GoodByeViewModel
@@ -16,12 +18,6 @@ struct GoodByeViewScreen: View {
             archives: viewModel.archives,
             onReenter: viewModel.onReenter,
             onReturnToLanding: viewModel.onReturnToLanding
-        ).alert(item: $viewModel.error) { alertItem in
-            Alert(
-                title: Text(alertItem.title),
-                message: Text(alertItem.message),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        ).alert(item: $viewModel.error) { $0.view }
     }
 }

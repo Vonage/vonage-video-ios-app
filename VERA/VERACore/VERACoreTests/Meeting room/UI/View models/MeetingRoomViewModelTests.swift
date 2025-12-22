@@ -12,6 +12,10 @@ import VERATestHelpers
 @Suite("MeetingRoomViewModel tests")
 struct MeetingRoomViewModelTests {
 
+    enum Error: Swift.Error {
+        case nilValue
+    }
+
     @Test
     @MainActor
     func initialStateIsContentIsLoading() async throws {
@@ -32,9 +36,7 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -58,9 +60,7 @@ struct MeetingRoomViewModelTests {
         sut.loadUI()
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
 
@@ -81,11 +81,36 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let error = await sut.$error.values
-            .first { $0 != nil }!
+        let error =
+            try await sut.$error.values
+            .first { $0 != nil } ?? { throw Error.nilValue }()
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
+    }
+
+    @Test
+    @MainActor
+    func callingLoadUICanFailAndShouldNavigateBackAfterConfirmation() async throws {
+        let connectToRoomUseCase = makeFailingMockConnectToRoomUseCase()
+        var navigationTriggered = false
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            onBack: {
+                navigationTriggered = true
+            })
+
+        #expect(sut.state == .loading)
+
+        sut.loadUI()
+
+        let error =
+            try await sut.$error.values
+            .first { $0 != nil } ?? { throw Error.nilValue }()
+        error?.onConfirm?()
+
+        #expect(navigationTriggered == true)
     }
 
     @Test
@@ -95,9 +120,7 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(contentState.layout == .activeSpeaker)
     }
@@ -110,9 +133,7 @@ struct MeetingRoomViewModelTests {
         sut.loadUI()
         sut.onToggleLayout()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(contentState.layout == .grid)
     }
@@ -177,9 +198,7 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(sut.currentCall != nil)
         #expect(contentState.isMicEnabled == false)
@@ -210,24 +229,23 @@ struct MeetingRoomViewModelTests {
         )
         sut.loadUI()
 
-        _ = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        _ = try await getContentState(sut)
 
         #expect(sut.currentCall != nil)
 
         sut.endCall()
 
-        let error = await sut.$error.values
-            .first { $0 != nil }!
+        let error =
+            try await sut.$error.values
+            .first { $0 != nil } ?? { throw Error.nilValue }()
 
         #expect(sut.currentCall == nil)
         #expect(error != nil)
     }
 
     @Test
-    func checkRoomURL() async {
-        let url = URL(string: "https://example.com")!
+    func checkRoomURL() async throws {
+        guard let url = URL(string: "https://example.com") else { throw Error.nilValue }
         let roomName = "heart-of-gold"
         let sut = makeSUT(
             roomName: roomName,
@@ -235,81 +253,79 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(contentState.roomURL == url.appendingPathComponent(roomName))
     }
 
     @Test
-    func showChatURLIfActivatedInAppConfig() async {
+    func showChatURLIfActivatedInAppConfig() async throws {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: true))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.showChatButton == true)
     }
 
     @Test
-    func hideChatURLIfDeactivatedInAppConfig() async {
+    func hideChatURLIfDeactivatedInAppConfig() async throws {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: false))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.showChatButton == false)
     }
 
     @Test
-    func activateMicrophoneControlIfActivatedInAppConfig() async {
+    func activateMicrophoneControlIfActivatedInAppConfig() async throws {
         let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: true))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.allowMicrophoneControl == true)
     }
 
     @Test
-    func deactivateMicrophoneControlIfDeactivatedInAppConfig() async {
+    func deactivateMicrophoneControlIfDeactivatedInAppConfig() async throws {
         let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: false))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.allowMicrophoneControl == false)
     }
 
     @Test
-    func activateCameraControlIfActivatedInAppConfig() async {
+    func activateCameraControlIfActivatedInAppConfig() async throws {
         let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: true))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.allowCameraControl == true)
     }
 
     @Test
-    func deactivateCameraControlIfDeactivatedInAppConfig() async {
+    func deactivateCameraControlIfDeactivatedInAppConfig() async throws {
         let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: false))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.allowCameraControl == false)
     }
 
     @Test
-    func showParticipantListIfActivatedInAppConfig() async {
+    func showParticipantListIfActivatedInAppConfig() async throws {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: true))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.showParticipantList == true)
     }
 
     @Test
-    func hideParticipantListIfDeactivatedInAppConfig() async {
+    func hideParticipantListIfDeactivatedInAppConfig() async throws {
         let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: false))
 
-        let contentState = await when(given: appConfig)
+        let contentState = try await when(given: appConfig)
 
         #expect(contentState.showParticipantList == false)
     }
@@ -323,9 +339,7 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(contentState.isCameraEnabled == false)
     }
@@ -340,9 +354,7 @@ struct MeetingRoomViewModelTests {
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true }!
+        let contentState = try await getContentState(sut)
 
         #expect(contentState.isMicEnabled == false)
     }
@@ -365,7 +377,8 @@ struct MeetingRoomViewModelTests {
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig(),
         onBack: @escaping () -> Void = {},
-        onShowChat: @escaping () -> Void = {}
+        onShowChat: @escaping () -> Void = {},
+        onNext: @escaping () -> Void = {}
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
             roomName: roomName,
@@ -378,19 +391,27 @@ struct MeetingRoomViewModelTests {
             requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat))
+            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat, onNext: onNext))
     }
 
     // MARK: Helper
 
-    func when(given appConfig: AppConfig) async -> MeetingRoomState {
+    func getContentState(_ sut: MeetingRoomViewModel) async throws -> MeetingRoomState {
+        try await sut.$state.values
+            .compactMap(\.contentState)
+            .first { _ in true } ?? { throw Error.nilValue }()
+
+    }
+
+    func when(given appConfig: AppConfig) async throws -> MeetingRoomState {
         let sut = makeSUT(appConfig: appConfig)
 
         sut.loadUI()
 
-        let contentState = await sut.$state.values
+        let contentState =
+            try await sut.$state.values
             .compactMap(\.contentState)
-            .first { _ in true }!
+            .first { _ in true } ?? { throw Error.nilValue }()
 
         return contentState
     }

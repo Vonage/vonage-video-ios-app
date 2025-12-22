@@ -3,6 +3,8 @@
 //
 
 import SwiftUI
+import VERACommonUI
+import VERADomain
 
 public struct LandingPageScreen: View {
     @ObservedObject var viewModel: LandingPageViewModel
@@ -21,13 +23,8 @@ public struct LandingPageScreen: View {
             onHandleNewRoom: viewModel.onHandleNewRoom,
             onJoinRoom: viewModel.onJoinRoom,
             onNavigateToWaitingRoom: onNavigateToWaitingRoom
-        ).alert(item: $viewModel.error) { alertItem in
-            Alert(
-                title: Text(alertItem.title),
-                message: Text(alertItem.message),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        )
+        .alert(item: $viewModel.error) { $0.view }
         .onReceive(viewModel.$state) { value in
             switch value {
             case .success(let roomName): onNavigateToWaitingRoom(roomName)

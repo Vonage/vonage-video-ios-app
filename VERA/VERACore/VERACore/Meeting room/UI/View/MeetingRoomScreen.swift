@@ -3,6 +3,8 @@
 //
 
 import SwiftUI
+import VERACommonUI
+import VERADomain
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
@@ -40,12 +42,7 @@ public struct MeetingRoomScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .alert(item: $viewModel.error) { alertItem in
-            Alert(
-                title: Text(alertItem.title),
-                message: Text(alertItem.message),
-                dismissButton: .default(Text("OK")))
-        }
+        .alert(item: $viewModel.error) { $0.view }
         .onAppear {
             viewModel.loadUI()
         }
