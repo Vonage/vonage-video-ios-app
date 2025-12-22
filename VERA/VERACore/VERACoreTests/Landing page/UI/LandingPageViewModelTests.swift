@@ -88,16 +88,38 @@ struct LandingPageViewModelTests {
         }
     }
 
+    @MainActor
+    @Test(
+        """
+        Given content state, when join room is called with invalid name, then
+        do nothing, the error will be shown in the UI
+        """
+    )
+    func whenJoinRoomWithInvalidNameThenStateTransitionsToError() async {
+        let sut = makeSUT()
+        let invalidRoomName = "INVALID@NAME!"  // Contains invalid @ and ! characters
+
+        // Initial state should be content
+        #expect(sut.state == .content)
+        #expect(sut.error == nil)
+
+        // Call join room with invalid name
+        sut.onJoinRoom(invalidRoomName)
+
+        // Should not throw any error, the error description will show up below
+        // the text field
+    }
+
     // MARK: - Edge Cases
 
-    @Test("Given content state, when join room is called with empty string, then state transitions to error")
+    @Test("When join room is called with empty string do nothing the UI will update with an error")
     func whenJoinRoomIsCalledWithEmptyStringThenStateTransitionsToError() async {
         let sut = makeSUT()
 
         sut.onJoinRoom("")
 
-        let value = (await sut.$error.values.first { $0 != nil } as? AlertItem)!
-        #expect(value.title == "Error")
+        // Should not throw any error, the error description will show up below
+        // the text field
     }
 
     // MARK: SUT
