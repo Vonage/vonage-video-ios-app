@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import VERACore
 import os.log
 
 @MainActor
@@ -9,6 +10,12 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var isInMeeting = false
     @Published var currentMeetingRoom: String?
 
+    // Cache for waiting room view models to prevent recreation
+    var waitingRoomViewModel: WaitingRoomViewModel?
+    var meetingRoomViewModel: MeetingRoomViewModel?
+    var goodByeViewModel: GoodByeViewModel?
+
+    @MainActor
     public func go(to route: AppRoute) {
         switch route {
         case .landing: returnToLanding()
@@ -45,6 +52,8 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         path.removeLast(path.count)
         isInMeeting = false
         currentMeetingRoom = nil
+        // Clear cached view models when returning to landing
+        waitingRoomViewModel = nil
         logNavigation("Returned to landing page")
     }
 

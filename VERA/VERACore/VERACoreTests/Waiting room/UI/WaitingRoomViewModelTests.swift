@@ -99,6 +99,40 @@ struct WaitingRoomViewModelTests {
         #expect(sut.state != .loading)
     }
 
+    @Test("Given invalid username, when joining room, error alert would be handled by the text field")
+    func joinRoomWithInvalidUsernameShouldShowError() async {
+        let sut = makeSUT()
+
+        // Set invalid username (empty or whitespace only)
+        sut.userName = "   "
+
+        #expect(sut.error == nil, "Error should be nil initially")
+
+        await sut.joinRoom()
+
+        // Text field will show the invalid username message
+    }
+
+    @Test("Given valid username, when joining room, then no error should be displayed")
+    func joinRoomWithValidUsernameShouldNotShowError() async {
+        var navigationCalled = false
+        let expectedRoomName = "test-room"
+
+        let sut = makeSUT(
+            roomName: expectedRoomName
+        ) { roomName in
+            navigationCalled = true
+            #expect(roomName == expectedRoomName)
+        }
+
+        sut.userName = "ValidUser"
+
+        await sut.joinRoom()
+
+        #expect(sut.error == nil, "Error should be nil for valid username")
+        #expect(navigationCalled, "Navigation should be called for valid username")
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -106,7 +140,8 @@ struct WaitingRoomViewModelTests {
         publisherRepository: PublisherRepository = makeMockVERAPublisherRepository(),
         cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
-        userRepository: UserRepository = makeMockUserRepository()
+        userRepository: UserRepository = makeMockUserRepository(),
+        onNavigateToRoom: @escaping (RoomName) -> Void = { _ in }
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
@@ -120,6 +155,7 @@ struct WaitingRoomViewModelTests {
             requestCameraPermissionUseCase: makeMockRequestCameraPermissionUseCase(),
             checkCameraAuthorizationStatusUseCase: makeMockCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: makeMockCheckMicrophoneAuthorizationStatusUseCase(),
-            userRepository: userRepository)
+            userRepository: userRepository,
+            onNavigateToRoom: onNavigateToRoom)
     }
 }

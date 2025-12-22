@@ -15,7 +15,7 @@ public struct OutlinedButton: View {
         text: Text,
         color: Color,
         image: Image? = nil,
-        isDisabled: Bool,
+        isDisabled: Bool = false,
         onAction: @escaping () -> Void
     ) {
         self.text = text

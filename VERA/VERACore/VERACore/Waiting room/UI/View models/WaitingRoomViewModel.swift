@@ -22,7 +22,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var userName: String = ""
     @Published public var error: AlertItem?
 
-    private let roomName: RoomName
+    public let roomName: RoomName
     weak var publisher: VERAPublisher?
 
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
@@ -33,6 +33,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let userRepository: UserRepository
+    private let onNavigateToRoom: (RoomName) -> Void
 
     private var availableCameraDevices: [UICameraDevice] = []
 
@@ -47,7 +48,8 @@ public final class WaitingRoomViewModel: ObservableObject {
         requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
-        userRepository: UserRepository
+        userRepository: UserRepository,
+        onNavigateToRoom: @escaping (RoomName) -> Void
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
@@ -58,6 +60,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.userRepository = userRepository
+        self.onNavigateToRoom = onNavigateToRoom
     }
 
     public func loadUI() {
@@ -85,7 +88,8 @@ public final class WaitingRoomViewModel: ObservableObject {
             return cameraDevices.map {
                 self.makeUICameraDevice(device: $0)
             }
-        }.sink { [weak self] in
+        }
+        .sink { [weak self] in
             self?.availableCameraDevices = $0
             self?.handleDevicesChanged()
         }
@@ -194,8 +198,14 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public func joinRoom() async {
         do {
+            guard userName.isValidUsername else {
+                return
+            }
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
             try await joinRoomUseCase(request)
+            await MainActor.run {
+                onNavigateToRoom(roomName)
+            }
         } catch {
             await MainActor.run { [weak self] in
                 self?.error = AlertItem.genericError(error.localizedDescription)

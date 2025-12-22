@@ -68,9 +68,11 @@ struct VERAApp: App {
                     message: Text(alertItem.message),
                     dismissButton: .default(Text("OK"))
                 )
-            }.onOpenURL { url in
+            }
+            .onOpenURL { url in
                 handleUniversalLink(url)
-            }.tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            }
+            .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
         }
     }
 
@@ -91,43 +93,84 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        waitingRoomFactory.make(
-            roomName: roomName
-        ) { roomName in
-            Task {
-                navigationCoordinator.go(to: .meetingRoom(roomName))
+        let viewModel: WaitingRoomViewModel
+
+        if let existingViewModel = navigationCoordinator.waitingRoomViewModel,
+            existingViewModel.roomName == roomName
+        {
+            // Reuse existing view model for the same room
+            viewModel = existingViewModel
+        } else {
+            // Create new view model for different room
+            let (_, newViewModel) = waitingRoomFactory.make(
+                roomName: roomName
+            ) { roomName in
+                Task {
+                    navigationCoordinator.go(to: .meetingRoom(roomName))
+                }
             }
-        }.onDisappear {
-            // Required if the user goes back to the landing page
-            dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
+            viewModel = newViewModel
+            navigationCoordinator.waitingRoomViewModel = newViewModel
         }
+
+        return waitingRoomFactory.make(viewModel: viewModel)
+            .onDisappear {
+                // Required if the user goes back to the landing page
+                dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
+                // Clear view model when leaving the waiting room
+                navigationCoordinator.waitingRoomViewModel = nil
+            }
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
+        let viewModel: MeetingRoomViewModel
+
+        if let existingViewModel = navigationCoordinator.meetingRoomViewModel,
+            existingViewModel.roomName == roomName
+        {
+            viewModel = existingViewModel
+        } else {
+            let (_, newViewModel) = meetingRoomFactory.make(roomName: roomName) {
+                showChatIfNeeded()
+            } onBack: {
+                navigationCoordinator.go(to: .goodbye(roomName))
+            }
+            navigationCoordinator.meetingRoomViewModel = newViewModel
+            viewModel = newViewModel
+        }
+
+        return meetingRoomFactory.make(viewModel: viewModel)
+            .onDisappear {
+                // Clear view model when leaving the meeting room
+                navigationCoordinator.meetingRoomViewModel = nil
+            }
+    }
+
+    private func showChatIfNeeded() {
         #if CHAT_ENABLED
-            meetingRoomFactory.make(roomName: roomName) {
-                showChat = true
-            } onBack: {
-                navigationCoordinator.go(to: .goodbye(roomName))
-            }
-        #else
-            meetingRoomFactory.make(roomName: roomName) {
-                // Chat is disabled in configuration
-            } onBack: {
-                navigationCoordinator.go(to: .goodbye(roomName))
-            }
+            showChat = true
         #endif
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
-        goodByePageFactory.make(roomName: roomName) {
-            navigationCoordinator.go(to: .waitingRoom(roomName))
-        } onReturnToLanding: {
-            navigationCoordinator.go(to: .landing)
-        } onPlay: { _ in
+        let viewModel: GoodByeViewModel
 
+        if let existingViewModel = navigationCoordinator.goodByeViewModel, existingViewModel.roomName == roomName {
+            viewModel = existingViewModel
+        } else {
+            let (_, newViewModel) = goodByePageFactory.make(roomName: roomName) {
+                navigationCoordinator.go(to: .waitingRoom(roomName))
+            } onReturnToLanding: {
+                navigationCoordinator.go(to: .landing)
+            } onPlay: { _ in
+            }
+
+            navigationCoordinator.goodByeViewModel = newViewModel
+            viewModel = newViewModel
         }
-        .navigationBarHidden(true)
+
+        return goodByePageFactory.make(viewModel: viewModel)
+            .navigationBarHidden(true)
     }
 
     #if CHAT_ENABLED

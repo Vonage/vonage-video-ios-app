@@ -7,13 +7,27 @@ import Foundation
 
 public typealias GoodByeError = String
 
+public struct GoodByeNavigation {
+    public let onReenter: () -> Void
+    public let onReturnToLanding: () -> Void
+
+    public init(
+        onReenter: @escaping () -> Void,
+        onReturnToLanding: @escaping () -> Void
+    ) {
+        self.onReenter = onReenter
+        self.onReturnToLanding = onReturnToLanding
+    }
+}
+
 public final class GoodByeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
-    private let roomName: RoomName
+    public let roomName: RoomName
     private let joinRoomUseCase: JoinRoomUseCase
     private let userRepository: UserRepository
     private let archivesRepository: ArchivesRepository
     private let playRecordingUseCase: PlayRecordingUseCase
+    private let goodByeNavigation: GoodByeNavigation
 
     @MainActor @Published public var archives: [ArchiveUIData] = []
     @MainActor @Published public var error: AlertItem?
@@ -23,13 +37,15 @@ public final class GoodByeViewModel: ObservableObject {
         joinRoomUseCase: JoinRoomUseCase,
         userRepository: UserRepository,
         archivesRepository: ArchivesRepository,
-        playRecordingUseCase: PlayRecordingUseCase
+        playRecordingUseCase: PlayRecordingUseCase,
+        goodByeNavigation: GoodByeNavigation
     ) {
         self.roomName = roomName
         self.joinRoomUseCase = joinRoomUseCase
         self.userRepository = userRepository
         self.archivesRepository = archivesRepository
         self.playRecordingUseCase = playRecordingUseCase
+        self.goodByeNavigation = goodByeNavigation
     }
 
     @BackgroundActor
@@ -87,6 +103,20 @@ public final class GoodByeViewModel: ObservableObject {
                 self?.error = AlertItem.genericError(error.localizedDescription)
             }
         }
+    }
+
+    public func onReenter() {
+        Task { [weak self] in
+            guard let self else { return }
+            await joinRoom()
+            await MainActor.run { [weak self] in
+                self?.goodByeNavigation.onReenter()
+            }
+        }
+    }
+
+    public func onReturnToLanding() {
+        goodByeNavigation.onReturnToLanding()
     }
 }
 

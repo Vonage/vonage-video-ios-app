@@ -18,7 +18,8 @@ let project = Project(
             scripts: [.swiftLint],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain")
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERACommonUITests",
@@ -29,7 +30,8 @@ let project = Project(
             sources: ["VERACommonUITests/**"],
             dependencies: [
                 .target(name: "VERACommonUI")
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

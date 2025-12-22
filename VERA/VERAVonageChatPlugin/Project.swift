@@ -15,7 +15,8 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERAVonageChatPluginTests",
@@ -29,7 +30,8 @@ let project = Project(
                 .project(target: "VERAChatAppTestHelpers", path: "../VERAChat"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .target(name: "VERAVonageChatPlugin"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

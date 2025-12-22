@@ -6,7 +6,6 @@ import SwiftUI
 import VERACommonUI
 
 struct JoinButton: View {
-    @Binding var roomName: String
     let color: Color
     let onJoinRoom: () -> Void
 
@@ -14,13 +13,12 @@ struct JoinButton: View {
         OutlinedButton(
             text: Text("Join waiting room", bundle: .veraCore),
             color: color,
-            isDisabled: roomName.isEmpty,
             onAction: onJoinRoom)
     }
 }
 
 #Preview {
-    JoinButton(roomName: .constant(""), color: VERACommonUIAsset.Colors.vGray0.swiftUIColor) {}
-    JoinButton(roomName: .constant("Test"), color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor) {}
-    JoinButton(roomName: .constant("Test"), color: .red) {}
+    JoinButton(color: VERACommonUIAsset.Colors.vGray0.swiftUIColor) {}
+    JoinButton(color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor) {}
+    JoinButton(color: .red) {}
 }

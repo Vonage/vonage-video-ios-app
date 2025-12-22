@@ -23,7 +23,8 @@ let project = Project(
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERAConfiguration", path: "../VERAConfiguration"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERATestHelpers",
@@ -34,7 +35,8 @@ let project = Project(
             sources: ["VERATestHelpers/**"],
             dependencies: [
                 .target(name: "VERACore")
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERACoreTests",
@@ -46,7 +48,8 @@ let project = Project(
             dependencies: [
                 .target(name: "VERACore"),
                 .target(name: "VERATestHelpers"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERACoreSnapshotTests",
@@ -59,7 +62,8 @@ let project = Project(
                 .target(name: "VERACore"),
                 .target(name: "VERATestHelpers"),
                 .package(product: "SnapshotTesting"),
-            ]
+            ],
+            settings: createBaseBuildSettings()
         ),
     ],
     schemes: [

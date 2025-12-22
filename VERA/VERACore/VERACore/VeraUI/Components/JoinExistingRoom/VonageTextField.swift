@@ -5,8 +5,11 @@
 import SwiftUI
 import VERACommonUI
 
-enum VonageTextFieldState {
-    case initial, valid, invalid
+typealias TextFieldError = String
+
+enum VonageTextFieldState: Equatable {
+    case initial, valid
+    case invalid(TextFieldError)
 }
 
 struct FloatingLabel: View {
@@ -59,53 +62,61 @@ struct VonageTextField: View {
     }
 
     var body: some View {
-        ZStack(alignment: .leading) {
-            FloatingLabel(
-                text: placeholder,
-                isFloating: !text.wrappedValue.isEmpty,
-                color: placeholderColor,
-                backgroundColor: backgroundColor
-            )
-            .allowsHitTesting(false)
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .leading) {
+                FloatingLabel(
+                    text: placeholder,
+                    isFloating: !text.wrappedValue.isEmpty,
+                    color: placeholderColor,
+                    backgroundColor: backgroundColor
+                )
+                .allowsHitTesting(false)
 
-            Group {
-                if forceLowercase {
-                    TextField("", text: lowercasedBinding)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .adaptiveFont(.bodyBase)
-                        .focused($isFocused)
-                        .foregroundStyle(textColor)
-                        .kerning(0.15)
-                        #if os(iOS)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                        #endif
-                } else {
-                    TextField("", text: text)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .adaptiveFont(.bodyBase)
-                        .focused($isFocused)
-                        .foregroundStyle(textColor)
-                        .kerning(0.15)
+                Group {
+                    if forceLowercase {
+                        TextField("", text: lowercasedBinding)
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .adaptiveFont(.bodyBase)
+                            .focused($isFocused)
+                            .foregroundStyle(textColor)
+                            .kerning(0.15)
+                            #if os(iOS)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                            #endif
+                    } else {
+                        TextField("", text: text)
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .adaptiveFont(.bodyBase)
+                            .focused($isFocused)
+                            .foregroundStyle(textColor)
+                            .kerning(0.15)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .frame(height: 48)
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
+                    .stroke(borderColor, lineWidth: 1)
+            )
+            .background(
+                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
+                    .fill(backgroundColor)  // ← Background del textfield
+            )
+            .onPreferenceChange(LabelWidthPreferenceKey.self) { width in
+                self.labelWidth = width
+            }
+            .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
+            .animation(.easeInOut(duration: 0.2), value: isFocused)
+
+            if case .invalid(let error) = state {
+                Text(NSLocalizedString(error, bundle: .veraCore, comment: ""))
+                    .foregroundColor(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                    .adaptiveFont(.caption)
+            }
         }
-        .frame(height: 48)
-        .background(
-            RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                .stroke(borderColor, lineWidth: 1)
-        )
-        .background(
-            RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                .fill(backgroundColor)  // ← Background del textfield
-        )
-        .onPreferenceChange(LabelWidthPreferenceKey.self) { width in
-            self.labelWidth = width
-        }
-        .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
-        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 
     private var lowercasedBinding: Binding<String> {
@@ -120,7 +131,7 @@ struct VonageTextField: View {
     }
 
     private var placeholderColor: Color {
-        if state == .invalid {
+        if case .invalid = state {
             VERACommonUIAsset.SemanticColors.error.swiftUIColor
         } else {
             isFocused
@@ -130,18 +141,11 @@ struct VonageTextField: View {
     }
 
     private var textColor: Color {
-        switch (text.wrappedValue.isEmpty, isFocused) {
-        case (true, true):
-            // Empty with focus
-            .clear
-        case (true, false):
-            // Empty without focus
+        if text.wrappedValue.isEmpty {
             VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
-        case (false, true):
-            // With text and focus
+        } else if isFocused {
             VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor
-        case (false, false):
-            // With text without focus
+        } else {
             VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor
         }
     }

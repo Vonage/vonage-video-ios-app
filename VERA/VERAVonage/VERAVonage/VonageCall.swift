@@ -25,18 +25,6 @@ import VERADomain
 /// - Optional extensibility via the plugin system
 public final class VonageCall: CallFacade {
 
-    /// Errors that can occur during call operations.
-    ///
-    /// - SeeAlso: ``callState``, ``disconnect()``
-    enum Error: Swift.Error {
-        /// The call instance was unexpectedly deallocated during the disconnect process.
-        case selfMissingOnDisconnect
-        /// An attempt was made to disconnect a call that is not in the connected state.
-        ///
-        /// Ensure ``callState`` is ``CallState/connected`` before calling ``disconnect()``.
-        case callNotConnected
-    }
-
     private var cancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
 
@@ -322,8 +310,8 @@ public final class VonageCall: CallFacade {
     /// - Important: Cancels Combine subscriptions and clears plugin assignments as part of teardown.
     public func disconnect() async throws {
         guard _callState.value == .connected else {
-            _eventsPublisher.value = .error(Error.callNotConnected)
-            throw Error.callNotConnected
+            _eventsPublisher.value = .error(CallError.callNotConnected)
+            throw CallError.callNotConnected
         }
         _callState.value = .disconnecting
 
