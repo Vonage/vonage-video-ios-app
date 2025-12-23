@@ -35,6 +35,16 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// Use this to clean up state and UI.
     var onSessionDidDisconnect: (() -> Void)?
 
+    /// Called when the session reconnects.
+    ///
+    /// Use this to notify the UI that the connection did became active again.
+    var onSessionDidReconnect: (() -> Void)?
+
+    /// Called when the session temporarily loses the connection and starts reconnecting.
+    ///
+    /// Use this to notify the UI that the connection did drop and stated reconnecting.
+    var onSessionDidBeginReconnecting: (() -> Void)?
+
     /// Called when the session reports a failure.
     ///
     /// - Parameter error: The underlying `OTError` describing the failure.
@@ -131,6 +141,20 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// Forwards to ``onSessionDidDisconnect``.
     public func sessionDidDisconnect(_ session: OTSession) {
         onSessionDidDisconnect?()
+    }
+
+    /// Vonage session delegate method called when the session reconnects.
+    ///
+    /// Forwards to ``onSessionDidReconnect``.
+    public func sessionDidReconnect(_ session: OTSession) {
+        onSessionDidReconnect?()
+    }
+
+    /// Vonage session delegate method called when the session begins reconnecting.
+    ///
+    /// Forwards to ``onSessionDidBeginReconnecting``.
+    public func sessionDidBeginReconnecting(_ session: OTSession) {
+        onSessionDidBeginReconnecting?()
     }
 
     // MARK: Publishing/Subscribing

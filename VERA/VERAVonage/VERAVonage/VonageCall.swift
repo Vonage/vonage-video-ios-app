@@ -144,6 +144,15 @@ public final class VonageCall: CallFacade {
         session.onSessionFailure = { [weak self] error in
             self?.sessionDidFail(error)
         }
+        session.onSessionDidDisconnect = { [weak self] in
+            self?.sessionDidDisconnect()
+        }
+        session.onSessionDidBeginReconnecting = { [weak self] in
+            self?.sessionDidBeginReconnecting()
+        }
+        session.onSessionDidReconnect = { [weak self] in
+            self?.sessionDidReconnect()
+        }
         session.onSessionDidConnect = { [weak self] in
             self?.updateCallState(to: .connected)
             self?.publishToSession()
@@ -335,7 +344,19 @@ public final class VonageCall: CallFacade {
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
-        _eventsPublisher.send(.error(error))
+        _eventsPublisher.send(.sessionFailure(error))
+    }
+
+    private func sessionDidDisconnect() {
+        _eventsPublisher.send(.disconnected)
+    }
+
+    private func sessionDidBeginReconnecting() {
+        _eventsPublisher.send(.didBeginReconnecting)
+    }
+
+    private func sessionDidReconnect() {
+        _eventsPublisher.send(.didReconnect)
     }
 
     // MARK: Audio/Video toggles

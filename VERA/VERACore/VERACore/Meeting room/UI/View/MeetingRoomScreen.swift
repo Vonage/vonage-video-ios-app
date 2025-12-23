@@ -8,43 +8,79 @@ import VERADomain
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
+    @State var showToast = false
 
     public init(viewModel: MeetingRoomViewModel) {
         self.viewModel = viewModel
     }
 
     public var body: some View {
-        VStack {
-            if case .content(let state) = viewModel.state {
-                ZStack {
-                    MeetingRoomView(
-                        state: state,
-                        actions: .init(
-                            onShare: { _ in },
-                            onRetry: {},
-                            onToggleMic: viewModel.onToggleMic,
-                            onToggleCamera: viewModel.onToggleCamera,
-                            onCameraSwitch: viewModel.onCameraSwitch,
-                            onEndCall: viewModel.endCall,
-                            onToggleParticipants: {},
-                            onToggleLayout: viewModel.onToggleLayout,
-                            onShowChat: viewModel.showChat)
-                    )
+        ZStack {
+            VStack {
+                if case .content(let state) = viewModel.state {
+                    ZStack {
+                        MeetingRoomView(
+                            state: state,
+                            actions: .init(
+                                onShare: { _ in },
+                                onRetry: {},
+                                onToggleMic: viewModel.onToggleMic,
+                                onToggleCamera: viewModel.onToggleCamera,
+                                onCameraSwitch: viewModel.onCameraSwitch,
+                                onEndCall: viewModel.endCall,
+                                onToggleParticipants: {},
+                                onToggleLayout: viewModel.onToggleLayout,
+                                onShowChat: viewModel.showChat)
+                        )
 
-                    if state.callState == .disconnecting {
-                        LoaderModalView()
+                        if state.callState == .disconnecting {
+                            LoaderModalView()
+                        }
                     }
+                }
+
+                if case .loading = viewModel.state {
+                    LoaderModalView()
                 }
             }
 
-            if case .loading = viewModel.state {
-                LoaderModalView()
+            VStack {
+                if showToast, let toast = viewModel.toast {
+                    toast.view
+                        .padding(.top, 16)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
+                Spacer()
             }
+            .zIndex(999)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .alert(item: $viewModel.error) { $0.view }
+        .onChange(of: viewModel.toast) { newToast in
+            if newToast != nil {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showToast = true
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        showToast = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        viewModel.toast = nil
+                    }
+                }
+            }
+        }
         .onAppear {
             viewModel.loadUI()
         }
+    }
+}
+
+extension ToastItem {
+    var view: ToastView {
+        ToastView(item: self)
     }
 }
