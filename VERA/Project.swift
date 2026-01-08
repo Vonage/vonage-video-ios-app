@@ -42,6 +42,25 @@ private func isChatEnabled() -> Bool {
     return meetingRoomSettings["allowChat"] as! Bool
 }
 
+/// Returns whether archiving is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowArchiving": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowArchiving` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isArchivingEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowArchiving"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds target dependencies dynamically based on the chat feature flag.
@@ -63,6 +82,12 @@ private func createDependencies() -> [TargetDependency] {
         dependencies.append(contentsOf: [
             .project(target: "VERAChat", path: "VERAChat"),
             .project(target: "VERAVonageChatPlugin", path: "VERAVonageChatPlugin"),
+        ])
+    }
+
+    if isArchivingEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAArchiving", path: "VERAArchiving")
         ])
     }
 
@@ -91,6 +116,11 @@ private func createBuildSettings() -> Settings {
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
+    }
+
+    if isArchivingEnabled() {
+        baseSettings["ARCHIVING_ENABLED"] = "1"
+        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) ARCHIVING_ENABLED"
     }
 
     return .settings(
