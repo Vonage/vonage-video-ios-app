@@ -49,28 +49,21 @@ struct StartArchivingUseCaseTests {
         }
     }
 
+    @Test func startArchivingPassesTheCorrectValues() async throws {
+        let dataSourceMock = MockArchivingDataSource()
+        let sut = makeSUT(archivingDataSource: dataSourceMock)
+
+        let roomName = "heart-of-gold"
+        try await sut(.init(roomName: roomName))
+
+        #expect(dataSourceMock.lastRoomName == roomName)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
         archivingDataSource: any ArchivingDataSource = MockArchivingDataSource()
     ) -> StartArchivingUseCase {
         DefaultStartArchivingUseCase(archivingDataSource: archivingDataSource)
-    }
-}
-
-public final class MockArchivingDataSource: ArchivingDataSource {
-
-    var error: Error?
-
-    public func startArchiving(_ request: ArchivingDataSourceRequest) async throws {
-        if let error = error {
-            throw error
-        }
-    }
-
-    public func stopArchiving(_ request: ArchivingDataSourceRequest) async throws {
-        if let error = error {
-            throw error
-        }
     }
 }

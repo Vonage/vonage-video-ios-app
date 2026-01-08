@@ -9,7 +9,7 @@ public enum ArchivingDataSourceError: Swift.Error {
     case invalidData
 }
 
-public struct ArchivingDataSourceRequest {
+public struct StartArchivingDataSourceRequest {
     public let roomName: String
 
     public init(roomName: String) {
@@ -17,7 +17,17 @@ public struct ArchivingDataSourceRequest {
     }
 }
 
+public struct StopArchivingDataSourceRequest {
+    public let roomName: String
+    public let archiveID: String
+
+    public init(roomName: String, archiveID: String) {
+        self.roomName = roomName
+        self.archiveID = archiveID
+    }
+}
+
 public protocol ArchivingDataSource {
-    func startArchiving(_ request: ArchivingDataSourceRequest) async throws
-    func stopArchiving(_ request: ArchivingDataSourceRequest) async throws
+    func startArchiving(_ request: StartArchivingDataSourceRequest) async throws
+    func stopArchiving(_ request: StopArchivingDataSourceRequest) async throws
 }
