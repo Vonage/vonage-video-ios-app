@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public final class URLSessionHTTPClient: HTTPClient {
     private let session: URLSession

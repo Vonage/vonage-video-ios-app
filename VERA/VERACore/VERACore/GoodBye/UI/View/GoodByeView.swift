@@ -5,20 +5,20 @@
 import SwiftUI
 import VERACommonUI
 
-public struct GoodByeView: View {
+public struct GoodByeView<ContentView: View>: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
-    public let archives: [ArchiveUIData]
+    private let additionalContentView: () -> ContentView
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
-        archives: [ArchiveUIData],
+        @ViewBuilder additionalContentView: @escaping () -> ContentView,
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
-        self.archives = archives
+        self.additionalContentView = additionalContentView
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -27,17 +27,17 @@ public struct GoodByeView: View {
         VStack(spacing: 0) {
             if verticalSizeClass == .compact {
                 HorizontalGoodByeContentView(
-                    archives: archives,
+                    additionalContentView: additionalContentView,
                     onReenter: onReenter,
                     onReturnToLanding: onReturnToLanding)
             } else if horizontalSizeClass == .compact {
                 VerticalGoodByeContentView(
-                    archives: archives,
+                    additionalContentView: additionalContentView,
                     onReenter: onReenter,
                     onReturnToLanding: onReturnToLanding)
             } else {
                 HorizontalGoodByeContentView(
-                    archives: archives,
+                    additionalContentView: additionalContentView,
                     onReenter: onReenter,
                     onReturnToLanding: onReturnToLanding)
             }
@@ -46,19 +46,19 @@ public struct GoodByeView: View {
     }
 }
 
-public struct HorizontalGoodByeContentView: View {
+public struct HorizontalGoodByeContentView<ContentView: View>: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
-    public let archives: [ArchiveUIData]
+    private let additionalContentView: () -> ContentView
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
-        archives: [ArchiveUIData],
+        @ViewBuilder additionalContentView: @escaping () -> ContentView,
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
-        self.archives = archives
+        self.additionalContentView = additionalContentView
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -77,27 +77,25 @@ public struct HorizontalGoodByeContentView: View {
                         GoToLandingPageButton(onReturnToLanding: onReturnToLanding)
                     }
                 }
-                CardView {
-                    ArchiveList(archives: archives)
-                        .padding()
-                }.padding(.top)
+                additionalContentView()
+                    .padding(.top)
             }
         }
     }
 }
 
-public struct VerticalGoodByeContentView: View {
+public struct VerticalGoodByeContentView<ContentView: View>: View {
 
-    public let archives: [ArchiveUIData]
+    private let additionalContentView: () -> ContentView
     public let onReenter: () -> Void
     public let onReturnToLanding: () -> Void
 
     public init(
-        archives: [ArchiveUIData],
+        @ViewBuilder additionalContentView: @escaping () -> ContentView,
         onReenter: @escaping () -> Void,
         onReturnToLanding: @escaping () -> Void
     ) {
-        self.archives = archives
+        self.additionalContentView = additionalContentView
         self.onReenter = onReenter
         self.onReturnToLanding = onReturnToLanding
     }
@@ -118,14 +116,15 @@ public struct VerticalGoodByeContentView: View {
                 .padding(.horizontal)
                 .padding(.horizontal)
         } bottomSide: {
-            ArchiveList(archives: archives)
+            additionalContentView()
                 .padding()
         }
     }
 }
 
 #Preview {
-    GoodByeView(archives: []) {
+    GoodByeView {
+    } onReenter: {
     } onReturnToLanding: {
     }
 }

@@ -159,15 +159,18 @@ struct VERAApp: App {
                 navigationCoordinator.go(to: .waitingRoom(roomName))
             } onReturnToLanding: {
                 navigationCoordinator.go(to: .landing)
-            } onPlay: { _ in
+            } additionalContentView: {
+
             }
 
             navigationCoordinator.goodByeViewModel = newViewModel
             viewModel = newViewModel
         }
 
-        return goodByePageFactory.make(viewModel: viewModel)
-            .navigationBarHidden(true)
+        return goodByePageFactory.make(viewModel: viewModel) {
+
+        }
+        .navigationBarHidden(true)
     }
 
     #if CHAT_ENABLED

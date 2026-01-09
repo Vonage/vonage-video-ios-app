@@ -4,11 +4,11 @@
 
 import Combine
 import Foundation
-import VERACore
+import VERADomain
 
 public final class DefaultArchivesRepository: ArchivesRepository {
     private let archivesDataSource: ArchivesDataSource
-    private var cache: [String: CurrentValueSubject<[VERACore.Archive], Error>] = [:]
+    private var cache: [String: CurrentValueSubject<[Archive], Error>] = [:]
     private var pollingTasks: [String: Task<Void, Never>] = [:]
     private let pollingInterval: TimeInterval
 
@@ -21,8 +21,8 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     }
 
     public func getArchives(
-        roomName: VERACore.RoomName
-    ) -> AnyPublisher<[VERACore.Archive], Error> {
+        roomName: RoomName
+    ) -> AnyPublisher<[Archive], Error> {
         let publisher = getPublisher(roomName: roomName)
 
         // Start polling
@@ -32,8 +32,8 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     }
 
     private func startPolling(
-        for roomName: VERACore.RoomName,
-        publisher: CurrentValueSubject<[VERACore.Archive], Error>
+        for roomName: RoomName,
+        publisher: CurrentValueSubject<[Archive], Error>
     ) {
         // Cancel any existing polling task for this room
         pollingTasks[roomName]?.cancel()
@@ -69,7 +69,7 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         pollingTasks[roomName] = task
     }
 
-    private func shouldStopPolling(_ archives: [VERACore.Archive]) -> Bool {
+    private func shouldStopPolling(_ archives: [Archive]) -> Bool {
         guard !archives.isEmpty else { return true }
 
         // Stop if any archive failed (they won't become available)
@@ -82,12 +82,12 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     }
 
     private func getPublisher(
-        roomName: VERACore.RoomName
-    ) -> CurrentValueSubject<[VERACore.Archive], Error> {
+        roomName: RoomName
+    ) -> CurrentValueSubject<[Archive], Error> {
         if let publisher = cache[roomName] {
             return publisher
         }
-        let publisher = CurrentValueSubject<[VERACore.Archive], Error>([])
+        let publisher = CurrentValueSubject<[Archive], Error>([])
         cache[roomName] = publisher
         return publisher
     }
@@ -121,7 +121,7 @@ public struct RemoteArchive: Decodable {
     public let resolution: String
     public let url: String?
 
-    var toDomain: VERACore.Archive? {
+    public var toDomain: Archive? {
         guard let uuid = UUID(uuidString: id) else {
             return nil
         }

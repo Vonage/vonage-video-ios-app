@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERAConfiguration
+import VERADomain
 
 public class MeetingRoomFactory {
     private let baseURL: URL

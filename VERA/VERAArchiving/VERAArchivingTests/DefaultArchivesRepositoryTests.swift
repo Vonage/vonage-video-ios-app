@@ -5,9 +5,8 @@
 import Combine
 import Foundation
 import Testing
-import VERACore
-import VERATestHelpers
-import VERAVonage
+import VERAArchiving
+import VERADomain
 
 @Suite("Default archives repository tests")
 struct DefaultArchivesRepositoryTests {

@@ -3,7 +3,8 @@
 //
 
 import Foundation
-import VERACore
+import VERAArchiving
+import VERADomain
 
 public final class MockArchivesDataSource: ArchivesDataSource {
     public var archivesToReturn: [Archive] = []
@@ -23,7 +24,7 @@ public final class MockArchivesDataSource: ArchivesDataSource {
         self.callCount = callCount
     }
 
-    public func getArchives(roomName: VERACore.RoomName) async throws -> [VERACore.Archive] {
+    public func getArchives(roomName: RoomName) async throws -> [Archive] {
         callCount += 1
 
         if shouldThrowError {

@@ -3,7 +3,8 @@
 //
 
 import Foundation
-import VERACore
+import VERAArchiving
+import VERADomain
 
 public final class HTTPArchivesDataSource: ArchivesDataSource {
     private let httpClient: HTTPClient
@@ -21,8 +22,8 @@ public final class HTTPArchivesDataSource: ArchivesDataSource {
     }
 
     public func getArchives(
-        roomName: VERACore.RoomName
-    ) async throws -> [VERACore.Archive] {
+        roomName: RoomName
+    ) async throws -> [Archive] {
         let url =
             baseURL
             .appendingPathComponent("session")

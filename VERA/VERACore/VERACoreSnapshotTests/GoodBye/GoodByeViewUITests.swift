@@ -22,11 +22,10 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Basic Layout",
         arguments: [
-            ("without-archives", []),
-            ("with-archives", makeArchives()),
+            ("without-archives")
         ])
-    func basicLayout(variant: String, archives: [ArchiveUIData]) throws {
-        let sut = makeSUT(archives: archives)
+    func basicLayout(variant: String) throws {
+        let sut = makeSUT()
 
         snapshot(sut, named: "Default-\(variant)")
     }
@@ -34,19 +33,15 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13, []),
-            ("iPad", ViewImageConfig.iPadPro12_9, []),
-            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape), []),
-            ("iPhone-with-archives", ViewImageConfig.iPhone13, makeArchives()),
-            ("iPad-with-archives", ViewImageConfig.iPadPro12_9, makeArchives()),
-            ("iPhoneLandscape-with-archives", ViewImageConfig.iPhone13(.landscape), makeArchives()),
+            ("iPhone", ViewImageConfig.iPhone13),
+            ("iPad", ViewImageConfig.iPadPro12_9),
+            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
     func sizeClasses(
         deviceName: String,
-        config: ViewImageConfig,
-        archives: [ArchiveUIData]
+        config: ViewImageConfig
     ) throws {
-        let sut = makeSUT(archives: archives)
+        let sut = makeSUT()
 
         assertSnapshot(
             of: sut,
@@ -60,17 +55,14 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light, []),
-            ("Dark", ColorScheme.dark, []),
-            ("Light-with-archives", ColorScheme.light, makeArchives()),
-            ("Dark-with-archives", ColorScheme.dark, makeArchives()),
+            ("Light", ColorScheme.light),
+            ("Dark", ColorScheme.dark),
         ])
     func colorSchemes(
         schemeName: String,
-        scheme: ColorScheme,
-        archives: [ArchiveUIData]
+        scheme: ColorScheme
     ) throws {
-        let sut = makeSUT(archives: archives)
+        let sut = makeSUT()
             .environment(\.colorScheme, scheme)
 
         assertSnapshot(
@@ -85,17 +77,14 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Accessibility",
         arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall, []),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge, []),
-            ("SmallText-with-archives", ContentSizeCategory.extraSmall, makeArchives()),
-            ("LargeText-with-archives", ContentSizeCategory.accessibilityExtraExtraExtraLarge, makeArchives()),
+            ("SmallText", ContentSizeCategory.extraSmall),
+            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
         ])
     func accessibility(
         textName: String,
-        textSize: ContentSizeCategory,
-        archives: [ArchiveUIData]
+        textSize: ContentSizeCategory
     ) throws {
-        let sut = makeSUT(archives: archives)
+        let sut = makeSUT()
             .environment(\.sizeCategory, textSize)
 
         snapshot(sut, named: textName)
@@ -103,10 +92,10 @@ struct GoodByeViewUITests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT(
-        archives: [ArchiveUIData] = []
-    ) -> GoodByeView {
-        GoodByeView(archives: archives) {
+    private func makeSUT() -> GoodByeView<AnyView> {
+        GoodByeView {
+            AnyView(Color.clear)
+        } onReenter: {
         } onReturnToLanding: {
         }
     }
@@ -127,26 +116,6 @@ struct GoodByeViewUITests {
             column: column
         )
     }
-}
-
-func makeArchives() -> [ArchiveUIData] {
-    [
-        .init(
-            id: .init(),
-            title: "Recording 1",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: true),
-        .init(
-            id: .init(),
-            title: "Recording 2",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: true),
-        .init(
-            id: .init(),
-            title: "Recording 3",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: false),
-    ]
 }
 
 // MARK: - Component Tests
@@ -171,19 +140,15 @@ struct GoodByeViewComponentTests {
         case "Horizontal":
             view = AnyView(
                 HorizontalGoodByeContentView(
-                    archives: [],
-                    onReenter: {
-                    },
-                    onReturnToLanding: {
-                    }))
+                    additionalContentView: {},
+                    onReenter: {},
+                    onReturnToLanding: {}))
         case "Vertical":
             view = AnyView(
                 VerticalGoodByeContentView(
-                    archives: [],
-                    onReenter: {
-                    },
-                    onReturnToLanding: {
-                    }))
+                    additionalContentView: {},
+                    onReenter: {},
+                    onReturnToLanding: {}))
         default:
             return
         }

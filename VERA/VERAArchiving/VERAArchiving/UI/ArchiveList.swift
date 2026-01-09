@@ -15,7 +15,7 @@ struct ArchiveList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Download recording", bundle: .veraCore)
+            Text("Download recording", bundle: .veraArchiving)
                 .adaptiveFont(.heading1)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -25,7 +25,7 @@ struct ArchiveList: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
-                        Text("The meeting hasn't been recorded", bundle: .veraCore)
+                        Text("The meeting hasn't been recorded", bundle: .veraArchiving)
                             .adaptiveFont(.bodyBase)
                             .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     }

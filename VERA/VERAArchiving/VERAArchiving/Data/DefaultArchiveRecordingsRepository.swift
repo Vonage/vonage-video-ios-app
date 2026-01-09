@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import VERACore
+import VERADomain
 
 public actor DefaultArchiveRecordingsRepository: ArchiveRecordingsRepository {
     private let httpClient: HTTPClient

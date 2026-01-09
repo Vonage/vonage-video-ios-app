@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {
     MockConnectToRoomUseCase()
@@ -19,7 +20,7 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
     public var call = MockCall()
 
     public func callAsFunction(
-        roomName: VERACore.RoomName
+        roomName: RoomName
     ) async throws -> any VERACore.CallFacade {
         recordedActions.append(.connect(roomName))
         return call
@@ -36,7 +37,7 @@ public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
     }
 
     public func callAsFunction(
-        roomName: VERACore.RoomName
+        roomName: RoomName
     ) async throws -> any VERACore.CallFacade {
         throw Error.errorMock
     }

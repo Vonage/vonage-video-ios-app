@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERADomain
 
 public protocol ArchivesRepository {
     func getArchives(roomName: RoomName) async -> AnyPublisher<[Archive], Error>

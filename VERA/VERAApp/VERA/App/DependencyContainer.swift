@@ -6,12 +6,18 @@ import AVFoundation
 import Foundation
 import VERAConfiguration
 import VERACore
+import VERADomain
 import VERAVonage
 import VERAVonageCallKitPlugin
 
 #if CHAT_ENABLED
     import VERAChat
     import VERAVonageChatPlugin
+#endif
+
+
+#if ARCHIVING_ENABLED
+    import VERAArchiving
 #endif
 
 final class DependencyContainer {
@@ -64,9 +70,7 @@ final class DependencyContainer {
             userRepository: userRepository,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             publisherRepository: publisherRepository),
-        userRepository: userRepository,
-        archivesRepository: archivesRepository,
-        archiveRecordingsRepository: archiveRecordingsRepository)
+        userRepository: userRepository)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
@@ -96,17 +100,19 @@ final class DependencyContainer {
         )
     }()
 
-    lazy var archivesRepository: ArchivesRepository = {
-        DefaultArchivesRepository(archivesDataSource: archivesDataSource)
-    }()
+    #if ARCHIVING_ENABLED
+        lazy var archivesRepository: ArchivesRepository = {
+            DefaultArchivesRepository(archivesDataSource: archivesDataSource)
+        }()
 
-    lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
-        baseURL: baseURL,
-        httpClient: httpClient,
-        jsonDecoder: jsonDecoder)
+        lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient,
+            jsonDecoder: jsonDecoder)
 
-    lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
-        httpClient: httpClient)
+        lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
+            httpClient: httpClient)
+    #endif
 
     // MARK: Chat feature
 
