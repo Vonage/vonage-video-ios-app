@@ -100,20 +100,6 @@ final class DependencyContainer {
         )
     }()
 
-    #if ARCHIVING_ENABLED
-        lazy var archivesRepository: ArchivesRepository = {
-            DefaultArchivesRepository(archivesDataSource: archivesDataSource)
-        }()
-
-        lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
-            baseURL: baseURL,
-            httpClient: httpClient,
-            jsonDecoder: jsonDecoder)
-
-        lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
-            httpClient: httpClient)
-    #endif
-
     // MARK: Chat feature
 
     #if CHAT_ENABLED
@@ -135,4 +121,26 @@ final class DependencyContainer {
         plugin.setup()
         return plugin
     }()
+
+    // MARK: Archiveing feature
+
+    #if ARCHIVING_ENABLED
+
+        lazy var archivingFactory = ArchivingFactory(
+            archivesRepository: archivesRepository,
+            archiveRecordingsRepository: archiveRecordingsRepository)
+
+        lazy var archivesRepository: ArchivesRepository = {
+            DefaultArchivesRepository(archivesDataSource: archivesDataSource)
+        }()
+
+        lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient,
+            jsonDecoder: jsonDecoder)
+
+        lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
+            httpClient: httpClient)
+
+    #endif
 }
