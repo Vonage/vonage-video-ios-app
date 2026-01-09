@@ -121,7 +121,7 @@ final class DependencyContainer {
         return plugin
     }()
 
-    // MARK: Archiveing feature
+    // MARK: Archiving feature
 
     #if ARCHIVING_ENABLED
 
