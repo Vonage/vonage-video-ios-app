@@ -15,7 +15,6 @@ import VERAVonageCallKitPlugin
     import VERAVonageChatPlugin
 #endif
 
-
 #if ARCHIVING_ENABLED
     import VERAArchiving
 #endif

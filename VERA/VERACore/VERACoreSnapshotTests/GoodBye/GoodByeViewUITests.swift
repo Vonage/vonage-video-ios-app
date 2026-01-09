@@ -22,12 +22,25 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Basic Layout",
         arguments: [
-            ("without-archives")
+            ("empty-content")
         ])
     func basicLayout(variant: String) throws {
         let sut = makeSUT()
 
         snapshot(sut, named: "Default-\(variant)")
+    }
+
+    @Test(
+        "GoodBye View - Basic Layout",
+        arguments: [
+            ("with-content")
+        ])
+    func withContentLayout(variant: String) throws {
+        let sut = makeSUT {
+            Color.red
+        }
+
+        snapshot(sut, named: "Default-with-content-\(variant)")
     }
 
     @Test(
@@ -92,9 +105,11 @@ struct GoodByeViewUITests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT() -> GoodByeView<AnyView> {
+    private func makeSUT(
+        @ViewBuilder content: @escaping () -> some View = { Color.clear }
+    ) -> GoodByeView<AnyView> {
         GoodByeView {
-            AnyView(Color.clear)
+            AnyView(content())
         } onReenter: {
         } onReturnToLanding: {
         }

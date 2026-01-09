@@ -107,14 +107,14 @@ struct GlassBackground: View {
 #Preview("Chat Panel") {
     ChatPanel(
         messages: UIChatMessage.sampleMessages
-    ) { message in print("Send: \(message)") }
+    ) { _ in
+    }
 }
 
 #Preview("Chat Input Only") {
     VStack {
         Spacer()
-        ChatPanelInput { message in
-            print("Sending: \(message)")
+        ChatPanelInput { _ in
         }
         .background(Color.gray.opacity(0.1))
         .padding()
