@@ -14,7 +14,7 @@ let project = Project(
             bundleId: "com.vonage.VERAVonage",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAVonage/**"],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAVonage")],
             dependencies: [
                 .project(target: "VERACore", path: "../VERACore"),
                 .package(product: "VonageClientSDKVideo"),

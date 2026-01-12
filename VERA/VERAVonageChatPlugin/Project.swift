@@ -11,7 +11,7 @@ let project = Project(
             bundleId: "com.vonage.VERAVonageChatPlugin",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAVonageChatPlugin/**"],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAVonageChatPlugin")],
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),

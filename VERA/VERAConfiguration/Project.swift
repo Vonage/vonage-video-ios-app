@@ -11,7 +11,7 @@ let project = Project(
             bundleId: "com.vonage.VERAConfiguration",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAConfiguration/**"],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAConfiguration")],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain")
             ],

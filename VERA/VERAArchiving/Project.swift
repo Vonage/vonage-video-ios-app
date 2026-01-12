@@ -14,7 +14,7 @@ let project = Project(
             resources: [
                 "VERAArchiving/Resources/**"
             ],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAArchiving")],
             dependencies: [
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),

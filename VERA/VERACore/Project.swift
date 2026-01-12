@@ -18,7 +18,7 @@ let project = Project(
                 "VERACore/Resources/**",
                 "VERACore/Resources/**/*.xcassets",
             ],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERACore")],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
