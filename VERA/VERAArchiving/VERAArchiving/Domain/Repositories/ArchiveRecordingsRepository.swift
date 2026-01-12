@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public protocol ArchiveRecordingsRepository {
     func getRecording(_ archive: Archive) async throws -> ArchiveRecording

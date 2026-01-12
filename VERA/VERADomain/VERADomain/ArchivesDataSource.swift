@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERADomain
 
 public protocol ArchivesDataSource {
     func getArchives(roomName: RoomName) async throws -> [Archive]

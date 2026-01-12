@@ -50,7 +50,7 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                     // Stop polling if all archives are available or if any failed
                     if shouldStopPolling(archives) {
-                        pollingTasks[roomName] = nil
+                        pollingTasks.removeValue(forKey: roomName)
                         return
                     }
 
@@ -90,52 +90,5 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         let publisher = CurrentValueSubject<[Archive], Error>([])
         cache[roomName] = publisher
         return publisher
-    }
-}
-
-public struct RemoteArchivesResponse: Decodable {
-    public let archives: [RemoteArchive]
-    public let status: Int
-}
-
-public struct RemoteArchive: Decodable {
-    public let id: String
-    public let status: String
-    public let name: String
-    public let reason: String?
-    public let sessionId: String
-    public let applicationId: String
-    public let createdAt: TimeInterval
-    public let size: Int
-    public let duration: Int
-    public let outputMode: String
-    public let streamMode: String
-    public let hasAudio: Bool
-    public let hasVideo: Bool
-    public let hasTranscription: Bool
-    public let sha256sum: String
-    public let password: String
-    public let updatedAt: TimeInterval
-    public let multiArchiveTag: String
-    public let event: String
-    public let resolution: String
-    public let url: String?
-
-    public var toDomain: Archive? {
-        guard let uuid = UUID(uuidString: id) else {
-            return nil
-        }
-        return .init(
-            id: uuid,
-            name: name,
-            createdAt: Date(timeIntervalSince1970: createdAt),
-            status: ArchiveStatus(value: status),
-            url: url?.toURL)
-    }
-}
-
-extension String {
-    var toURL: URL? {
-        URL(string: self)
     }
 }
