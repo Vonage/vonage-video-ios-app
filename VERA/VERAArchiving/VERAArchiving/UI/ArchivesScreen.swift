@@ -13,6 +13,6 @@ public struct ArchivesScreen: View {
         CardView {
             ArchiveList(archives: viewModel.archives)
                 .padding()
-        }.padding(.top)
+        }
     }
 }

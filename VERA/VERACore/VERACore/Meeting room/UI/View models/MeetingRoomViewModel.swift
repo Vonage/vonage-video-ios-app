@@ -239,15 +239,12 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleLayout() {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            let newLayout: MeetingRoomLayout =
-                switch layoutPublisher.value {
-                case .grid: .activeSpeaker
-                case .activeSpeaker: .grid
-                }
-            layoutPublisher.value = newLayout
-        }
+        let newLayout: MeetingRoomLayout =
+            switch layoutPublisher.value {
+            case .grid: .activeSpeaker
+            case .activeSpeaker: .grid
+            }
+        layoutPublisher.value = newLayout
     }
 
     public func endCall() {
