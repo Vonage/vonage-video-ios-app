@@ -112,15 +112,22 @@ private func createDependencies() -> [TargetDependency] {
 /// - Returns: A `Settings` object containing base and configuration-specific settings.
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = baseBuildSettings()
+    var flags: [String] = []
 
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
-        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
+        flags.append("CHAT_ENABLED")
+        print("Chat feature enabled in build settings.")
     }
 
     if isArchivingEnabled() {
         baseSettings["ARCHIVING_ENABLED"] = "1"
-        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) ARCHIVING_ENABLED"
+        flags.append("ARCHIVING_ENABLED")
+        print("Archiving feature enabled in build settings.")
+    }
+
+    if !flags.isEmpty {
+        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) \(flags.joined(separator: " "))"
     }
 
     return .settings(
