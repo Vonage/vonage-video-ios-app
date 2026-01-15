@@ -26,7 +26,7 @@ public final class ArchivesViewModel: ObservableObject {
     }
 
     @BackgroundActor
-    public func setupUI() async {
+    public func loadData() async {
         await archivesRepository.getArchives(roomName: roomName)
             .map { [weak self] archives in
                 guard let self else { return [] }

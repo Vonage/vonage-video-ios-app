@@ -18,7 +18,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
     var goodByeViewModel: GoodByeViewModel?
-    var archiveButtonViewModel: ArchiveButtonViewModel?
+    #if ARCHIVING_ENABLED
+        var archiveButtonViewModel: ArchiveButtonViewModel?
+        var archivesViewModel: ArchivesViewModel?
+    #endif
 
     @MainActor
     public func go(to route: AppRoute) {
@@ -63,7 +66,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         currentMeetingRoom = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
-        archiveButtonViewModel = nil
+        #if ARCHIVING_ENABLED
+            archiveButtonViewModel = nil
+            archivesViewModel = nil
+        #endif
         logNavigation("Returned to landing page")
     }
 

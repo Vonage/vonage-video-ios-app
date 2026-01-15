@@ -101,6 +101,20 @@ public final class MeetingRoomViewModel: ObservableObject {
                     }
                     .store(in: &cancellables)
 
+                call.archivingState
+                    .dropFirst()
+                    .sink { [weak self] archivingState in
+                        switch archivingState {
+                        case .idle:
+                            self?.toast =
+                                .init(message: "Session recording stopped", mode: .info)
+                        case .recording:
+                            self?.toast =
+                                .init(message: "Session recording started", mode: .info)
+                        }
+                    }
+                    .store(in: &cancellables)
+
                 call.eventsPublisher
                     .sink { [weak self] event in
                         Task { @MainActor in

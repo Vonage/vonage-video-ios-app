@@ -58,6 +58,12 @@ struct VERAApp: App {
                     makeMeetingRoom(roomName: currentRoom)
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
+
+                            #if ARCHIVING_ENABLED
+                                Task {
+                                    await navigationCoordinator.archivesViewModel?.loadData()
+                                }
+                            #endif
                         }
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
@@ -224,7 +230,9 @@ struct VERAApp: App {
 
     func makeGoodbyeAdditionalContentView(roomName: RoomName) -> some View {
         #if ARCHIVING_ENABLED
-            return archiveFactory.make(roomName: roomName).view
+            let (view, viewModel) = archiveFactory.make(roomName: roomName)
+            navigationCoordinator.archivesViewModel = viewModel
+            return view
         #else
             return EmptyView()
         #endif
