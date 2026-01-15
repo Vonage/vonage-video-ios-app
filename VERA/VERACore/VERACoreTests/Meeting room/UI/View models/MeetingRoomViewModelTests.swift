@@ -382,7 +382,6 @@ struct MeetingRoomViewModelTests {
         try await sut.$state.values
             .compactMap(\.contentState)
             .first { _ in true } ?? { throw Error.nilValue }()
-
     }
 
     func when(given appConfig: AppConfig) async throws -> MeetingRoomState {

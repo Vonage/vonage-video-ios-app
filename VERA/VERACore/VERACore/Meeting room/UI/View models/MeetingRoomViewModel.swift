@@ -83,7 +83,6 @@ public final class MeetingRoomViewModel: ObservableObject {
         initialised = true
         Task { @MainActor [weak self] in
             guard let self else { return }
-            state = .loading
 
             do {
                 let call = try await connectToRoomUseCase(roomName: roomName)

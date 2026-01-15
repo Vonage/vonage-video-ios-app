@@ -3,10 +3,18 @@
 //
 
 import Foundation
+import VERADomain
 
 public struct DefaultArchivingDataSource: ArchivingDataSource {
+    private let baseURL: URL
+    private let httpClient: HTTPClient
 
-    public init() {
+    public init(
+        baseURL: URL,
+        httpClient: HTTPClient
+    ) {
+        self.baseURL = baseURL
+        self.httpClient = httpClient
     }
 
     public func startArchiving(
