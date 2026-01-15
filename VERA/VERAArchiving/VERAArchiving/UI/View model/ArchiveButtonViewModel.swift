@@ -36,7 +36,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
     @MainActor
     private func startArchiving() async {
         do {
-            try await startArchivingUseCase(.init(roomName: roomName))
+            archiveID = try await startArchivingUseCase(.init(roomName: roomName))
             state = .init(isArchiving: true)
         } catch {
             state = .init(isArchiving: false)
@@ -48,6 +48,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
         do {
             try await stopArchivingUseCase(.init(roomName: roomName, archiveID: id))
             state = .init(isArchiving: false)
+            archiveID = nil
         } catch {
         }
     }

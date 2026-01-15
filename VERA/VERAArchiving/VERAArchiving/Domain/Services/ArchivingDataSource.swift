@@ -27,7 +27,22 @@ public struct StopArchivingDataSourceRequest {
     }
 }
 
+public typealias ArchiveID = String
+
+public struct StartArchivingDataSourceResponse {
+    public let archiveId: ArchiveID
+}
+
+public struct StopArchivingDataSourceResponse {
+    public let archiveId: ArchiveID
+}
+
 public protocol ArchivingDataSource {
-    func startArchiving(_ request: StartArchivingDataSourceRequest) async throws
-    func stopArchiving(_ request: StopArchivingDataSourceRequest) async throws
+    func startArchiving(
+        _ request: StartArchivingDataSourceRequest
+    ) async throws -> StartArchivingDataSourceResponse
+
+    func stopArchiving(
+        _ request: StopArchivingDataSourceRequest
+    ) async throws -> StopArchivingDataSourceResponse
 }

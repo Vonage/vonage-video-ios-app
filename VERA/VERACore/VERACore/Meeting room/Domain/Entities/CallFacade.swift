@@ -60,6 +60,15 @@ public enum CallState {
     case disconnected
 }
 
+/// The high-level state of a recording call
+///
+/// Represents if the current call is being recording or not.
+/// Use it to drive recording related UI display.
+public enum ArchivingState {
+    case idle
+    case recording
+}
+
 /// Provides a publisher that emits participant state updates.
 ///
 /// Implementers emit ``ParticipantsState`` values as the call’s participant set
@@ -91,6 +100,14 @@ public protocol SessionStatePublisherProvider: AnyObject {
 public protocol CallStatePublisherProvider: AnyObject {
     /// A publisher that emits ``CallState`` values, never fails.
     var callState: AnyPublisher<CallState, Never> { get }
+}
+
+/// Provides a publisher for the call archiving state.
+///
+/// Use to drive recording-related UI operations.
+public protocol CallArchivingPublisherProvider: AnyObject {
+    /// A publisher that emits ``ArchivingState`` values, never fails.
+    var archivingState: AnyPublisher<ArchivingState, Never> { get }
 }
 
 /// Defines the primary connection lifecycle operations for a call.
@@ -165,7 +182,8 @@ public protocol CallFacade: AnyObject,
     CallConnectable,
     MediaToggleable,
     CallStatePublisherProvider,
-    HoldeableCall
+    HoldeableCall,
+    CallArchivingPublisherProvider
 {}
 
 /// Errors that can occur during call operations.
