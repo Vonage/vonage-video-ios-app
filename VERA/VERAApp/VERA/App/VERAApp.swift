@@ -129,34 +129,74 @@ struct VERAApp: App {
     private func makeMeetingRoom(roomName: String) -> some View {
         let viewModel: MeetingRoomViewModel
 
+        var extraButtons: [BottomBarButton] = []
+
+        #if CHAT_ENABLED
+            extraButtons.append(mapToChatBottomBarButton())
+        #endif
+
         if let existingViewModel = navigationCoordinator.meetingRoomViewModel,
             existingViewModel.roomName == roomName
         {
             viewModel = existingViewModel
+            if let archiveButtonViewModel = navigationCoordinator.archiveButtonViewModel {
+                extraButtons.append(mapToArchiveBottomBarButton(archiveButtonViewModel))
+            }
         } else {
-            let (_, newViewModel) = meetingRoomFactory.make(roomName: roomName) {
-                showChatIfNeeded()
-            } onBack: {
+            let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(roomName: roomName)
+            extraButtons.append(mapToArchiveBottomBarButton(archiveButtonViewModel))
+
+
+            let (_, newViewModel) = meetingRoomFactory.make(
+                roomName: roomName, extraButtons: extraButtons
+            ) {
                 navigationCoordinator.go(to: .waitingRoom(roomName))
             } onNext: {
                 navigationCoordinator.go(to: .goodbye(roomName))
             }
+
             navigationCoordinator.meetingRoomViewModel = newViewModel
+            navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
             viewModel = newViewModel
         }
 
-        return meetingRoomFactory.make(viewModel: viewModel)
+        return meetingRoomFactory.make(viewModel: viewModel, extraButtons: extraButtons)
             .onDisappear {
                 // Clear view model when leaving the meeting room
                 navigationCoordinator.meetingRoomViewModel = nil
             }
     }
 
-    private func showChatIfNeeded() {
-        #if CHAT_ENABLED
-            showChat = true
-        #endif
+    private func mapToArchiveBottomBarButton(
+        _ archiveButtonViewModel: ArchiveButtonViewModel
+    ) -> BottomBarButton {
+        let archiveButton = archiveFactory.makeArchivingButton(viewModel: archiveButtonViewModel)
+        return .init(
+            label: "Archive",
+            image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
+            onTap: archiveButtonViewModel.onTap,
+            content: {
+                archiveButton
+            })
     }
+
+    #if CHAT_ENABLED
+        private func mapToChatBottomBarButton() -> BottomBarButton {
+            return .init(
+                label: "Chat",
+                image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,
+                onTap: showChatIfNeeded,
+                content: {
+                    ChatBadgeButton(
+                        unreadMessagesCount: 0,
+                        onShowChat: showChatIfNeeded)
+                })
+        }
+
+        private func showChatIfNeeded() {
+            showChat = true
+        }
+    #endif
 
     private func makeGoodbyePage(roomName: String) -> some View {
         let viewModel: GoodByeViewModel

@@ -7,9 +7,9 @@ import VERACommonUI
 import VERADomain
 
 public struct MeetingRoomView: View {
-
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
+    private let extraButtons: [BottomBarButton]
 
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
@@ -18,10 +18,12 @@ public struct MeetingRoomView: View {
 
     public init(
         state: MeetingRoomState,
-        actions: MeetingRoomActions
+        actions: MeetingRoomActions,
+        extraButtons: [BottomBarButton] = []
     ) {
         self.state = state
         self.actions = actions
+        self.extraButtons = extraButtons
     }
 
     public var body: some View {
@@ -46,13 +48,12 @@ public struct MeetingRoomView: View {
                         isMicEnabled: state.isMicEnabled,
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
-                        unreadMessagesCount: state.unreadMessagesCount,
-                        showChatButton: state.showChatButton,
                         allowMicrophoneControl: state.allowMicrophoneControl,
                         allowCameraControl: state.allowCameraControl,
                         showParticipantList: state.showParticipantList,
                         currentLayout: state.layout,
-                        actions: wrappedActions
+                        actions: wrappedActions,
+                        extraButtons: extraButtons
                     )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
                     .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
@@ -211,10 +212,6 @@ public struct MeetingRoomView: View {
             onToggleLayout: {
                 onBottomBarInteraction()
                 actions.onToggleLayout()
-            },
-            onShowChat: {
-                onBottomBarInteraction()
-                actions.onShowChat()
             }
         )
     }
@@ -230,7 +227,6 @@ public struct MeetingRoomView: View {
             participants: [],
             layout: .activeSpeaker,
             activeSpeakerId: nil,
-            showChatButton: true,
             allowMicrophoneControl: true,
             allowCameraControl: true,
             showParticipantList: true,

@@ -32,7 +32,7 @@ public class MeetingRoomFactory {
 
     public func make(
         roomName: RoomName,
-        onShowChat: @escaping () -> Void = {},
+        extraButtons: [BottomBarButton] = [],
         onBack: @escaping () -> Void = {},
         onNext: @escaping () -> Void = {},
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
@@ -50,12 +50,20 @@ public class MeetingRoomFactory {
             requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat, onNext: onNext))
-        return (MeetingRoomScreen(viewModel: viewModel), viewModel)
+            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext))
+        return (
+            MeetingRoomScreen(
+                viewModel: viewModel,
+                extraButtons: extraButtons
+            ), viewModel
+        )
     }
 
     @MainActor
-    public func make(viewModel: MeetingRoomViewModel) -> some View {
-        MeetingRoomScreen(viewModel: viewModel)
+    public func make(
+        viewModel: MeetingRoomViewModel,
+        extraButtons: [BottomBarButton] = []
+    ) -> some View {
+        MeetingRoomScreen(viewModel: viewModel, extraButtons: extraButtons)
     }
 }

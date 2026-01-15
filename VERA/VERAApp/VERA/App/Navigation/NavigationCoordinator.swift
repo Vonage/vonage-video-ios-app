@@ -4,6 +4,10 @@ import SwiftUI
 import VERACore
 import os.log
 
+#if ARCHIVING_ENABLED
+    import VERAArchiving
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -14,6 +18,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
     var goodByeViewModel: GoodByeViewModel?
+    var archiveButtonViewModel: ArchiveButtonViewModel?
 
     @MainActor
     public func go(to route: AppRoute) {
@@ -58,6 +63,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         currentMeetingRoom = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
+        archiveButtonViewModel = nil
         logNavigation("Returned to landing page")
     }
 

@@ -24,9 +24,6 @@ public struct MeetingRoomState: Equatable {
         participants.count { !$0.isScreenshare }
     }
 
-    public let showChatButton: Bool
-    public let unreadMessagesCount: Int
-
     public init(
         roomName: RoomName,
         roomURL: URL?,
@@ -35,8 +32,6 @@ public struct MeetingRoomState: Equatable {
         participants: [Participant],
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
-        showChatButton: Bool,
-        unreadMessagesCount: Int = 0,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
         showParticipantList: Bool,
@@ -49,8 +44,6 @@ public struct MeetingRoomState: Equatable {
         self.participants = participants
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
-        self.showChatButton = showChatButton
-        self.unreadMessagesCount = unreadMessagesCount
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
@@ -65,7 +58,6 @@ public struct MeetingRoomState: Equatable {
         participants: [],
         layout: .activeSpeaker,
         activeSpeakerId: nil,
-        showChatButton: AppConfig.meetingRoomSettings.allowChat,
         allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
         showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,

@@ -4,4 +4,4 @@
 
 import Foundation
 
-let maxBadgeCount = 99
+public let maxBadgeCount = 99

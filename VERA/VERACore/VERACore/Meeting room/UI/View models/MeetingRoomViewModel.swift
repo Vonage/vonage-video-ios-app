@@ -14,16 +14,13 @@ public enum MeetingRoomViewState: Equatable {
 
 public struct MeetingRoomNavigation {
     public let onBack: () -> Void
-    public let onShowChat: () -> Void
     public let onNext: () -> Void
 
     public init(
         onBack: @escaping () -> Void,
-        onShowChat: @escaping () -> Void,
         onNext: @escaping () -> Void
     ) {
         self.onBack = onBack
-        self.onShowChat = onShowChat
         self.onNext = onNext
     }
 }
@@ -199,7 +196,6 @@ public final class MeetingRoomViewModel: ObservableObject {
                 participants: sortedPaticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId,
-                showChatButton: appConfig.meetingRoomSettings.allowChat,
                 allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: appConfig.videoSettings.allowCameraControl,
                 showParticipantList: appConfig.meetingRoomSettings.showParticipantList,
@@ -259,9 +255,5 @@ public final class MeetingRoomViewModel: ObservableObject {
                 }
             }
         }
-    }
-
-    public func showChat() {
-        meetingRoomNavigation.onShowChat()
     }
 }
