@@ -135,26 +135,16 @@ struct VERAApp: App {
     private func makeMeetingRoom(roomName: String) -> some View {
         let viewModel: MeetingRoomViewModel
 
-        var extraButtons: [BottomBarButton] = []
-
-        #if CHAT_ENABLED
-            extraButtons.append(mapToChatBottomBarButton())
-        #endif
-
         if let existingViewModel = navigationCoordinator.meetingRoomViewModel,
             existingViewModel.roomName == roomName
         {
             viewModel = existingViewModel
-            if let archiveButtonViewModel = navigationCoordinator.archiveButtonViewModel {
-                extraButtons.append(mapToArchiveBottomBarButton(archiveButtonViewModel))
-            }
         } else {
             let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(roomName: roomName)
-            extraButtons.append(mapToArchiveBottomBarButton(archiveButtonViewModel))
-
 
             let (_, newViewModel) = meetingRoomFactory.make(
-                roomName: roomName, extraButtons: extraButtons
+                roomName: roomName,
+                getExternalButtons: getBottomBarButtons
             ) {
                 navigationCoordinator.go(to: .waitingRoom(roomName))
             } onNext: {
@@ -166,19 +156,36 @@ struct VERAApp: App {
             viewModel = newViewModel
         }
 
-        return meetingRoomFactory.make(viewModel: viewModel, extraButtons: extraButtons)
+        return meetingRoomFactory.make(viewModel: viewModel)
             .onDisappear {
                 // Clear view model when leaving the meeting room
                 navigationCoordinator.meetingRoomViewModel = nil
             }
     }
 
+    private func getBottomBarButtons(
+        _ state: MeetingRoomButtonsState
+    ) -> [BottomBarButton] {
+        #if CHAT_ENABLED
+            var extraButtons: [BottomBarButton] = [mapToChatBottomBarButton()]
+        #else
+            var extraButtons: [BottomBarButton] = []
+        #endif
+
+        if let archiveButtonViewModel = navigationCoordinator.archiveButtonViewModel {
+            extraButtons.append(mapToArchiveBottomBarButton(archiveButtonViewModel, state))
+        }
+
+        return extraButtons
+    }
+
     private func mapToArchiveBottomBarButton(
-        _ archiveButtonViewModel: ArchiveButtonViewModel
+        _ archiveButtonViewModel: ArchiveButtonViewModel,
+        _ state: MeetingRoomButtonsState
     ) -> BottomBarButton {
         let archiveButton = archiveFactory.makeArchivingButton(viewModel: archiveButtonViewModel)
         return .init(
-            label: "Archive",
+            label: state.archivingState == .recording ? "Stop Recording" : "Start Recording",
             image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
             onTap: archiveButtonViewModel.onTap,
             content: {

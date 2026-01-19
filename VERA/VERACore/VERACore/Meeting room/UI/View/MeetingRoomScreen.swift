@@ -7,17 +7,13 @@ import VERACommonUI
 import VERADomain
 
 public struct MeetingRoomScreen: View {
-    private let extraButtons: [BottomBarButton]
-
     @ObservedObject var viewModel: MeetingRoomViewModel
     @State var showToast = false
 
     public init(
-        viewModel: MeetingRoomViewModel,
-        extraButtons: [BottomBarButton] = [],
+        viewModel: MeetingRoomViewModel
     ) {
         self.viewModel = viewModel
-        self.extraButtons = extraButtons
     }
 
     public var body: some View {
@@ -36,7 +32,7 @@ public struct MeetingRoomScreen: View {
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
                                 onToggleLayout: viewModel.onToggleLayout),
-                            extraButtons: extraButtons
+                            extraButtons: $viewModel.extraButtons
                         )
 
                         if state.callState == .disconnecting {

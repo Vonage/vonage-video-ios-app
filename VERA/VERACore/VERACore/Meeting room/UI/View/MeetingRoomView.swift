@@ -9,7 +9,7 @@ import VERADomain
 public struct MeetingRoomView: View {
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
-    private let extraButtons: [BottomBarButton]
+    @Binding private var extraButtons: [BottomBarButton]
 
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
@@ -19,11 +19,11 @@ public struct MeetingRoomView: View {
     public init(
         state: MeetingRoomState,
         actions: MeetingRoomActions,
-        extraButtons: [BottomBarButton] = []
+        extraButtons: Binding<[BottomBarButton]> = .constant([])
     ) {
         self.state = state
         self.actions = actions
-        self.extraButtons = extraButtons
+        self._extraButtons = extraButtons
     }
 
     public var body: some View {
@@ -53,7 +53,7 @@ public struct MeetingRoomView: View {
                         showParticipantList: state.showParticipantList,
                         currentLayout: state.layout,
                         actions: wrappedActions,
-                        extraButtons: extraButtons
+                        extraButtons: _extraButtons
                     )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
                     .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
@@ -100,6 +100,18 @@ public struct MeetingRoomView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
+
+                        if state.archivingState == .recording {
+                            VStack(spacing: 0) {
+                                Image(systemName: "record.circle")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundStyle(.red)
+                                .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
+                            }
+                            .frame(width: 30, height: 30, alignment: .center)
+                        }
+
                         let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
                         if !isIosAppOnMac && state.allowCameraControl {
                             Button {
@@ -230,6 +242,7 @@ public struct MeetingRoomView: View {
             allowMicrophoneControl: true,
             allowCameraControl: true,
             showParticipantList: true,
-            callState: .connected),
+            callState: .connected,
+            archivingState: .recording),
         actions: .init())
 }

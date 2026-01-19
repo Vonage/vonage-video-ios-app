@@ -68,7 +68,7 @@ struct BottomBar: View {
     private let showParticipantList: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
-    private let extraButtons: [BottomBarButton]
+    @Binding private var extraButtons: [BottomBarButton]
 
     init(
         isMicEnabled: Bool,
@@ -79,7 +79,7 @@ struct BottomBar: View {
         showParticipantList: Bool,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions,
-        extraButtons: [BottomBarButton] = []
+        extraButtons: Binding<[BottomBarButton]> = .constant([])
     ) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
@@ -89,7 +89,7 @@ struct BottomBar: View {
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.actions = actions
-        self.extraButtons = extraButtons
+        self._extraButtons = extraButtons
     }
 
     var body: some View {

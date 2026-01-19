@@ -6,6 +6,12 @@ import Foundation
 import VERAConfiguration
 import VERADomain
 
+public struct MeetingRoomParticipantsState {
+    public let participants: [Participant]
+    public let layout: MeetingRoomLayout
+    public let activeSpeakerId: String?
+}
+
 public struct MeetingRoomState: Equatable {
 
     public let roomName: RoomName
@@ -19,6 +25,7 @@ public struct MeetingRoomState: Equatable {
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
     public let callState: CallState
+    public let archivingState: ArchivingState
 
     public var participantsCount: Int {
         participants.count { !$0.isScreenshare }
@@ -35,7 +42,8 @@ public struct MeetingRoomState: Equatable {
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
         showParticipantList: Bool,
-        callState: CallState
+        callState: CallState,
+        archivingState: ArchivingState
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -48,6 +56,7 @@ public struct MeetingRoomState: Equatable {
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.callState = callState
+        self.archivingState = archivingState
     }
 
     public static let initial = MeetingRoomState(
@@ -61,5 +70,6 @@ public struct MeetingRoomState: Equatable {
         allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
         showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
-        callState: .idle)
+        callState: .idle,
+        archivingState: .idle)
 }
