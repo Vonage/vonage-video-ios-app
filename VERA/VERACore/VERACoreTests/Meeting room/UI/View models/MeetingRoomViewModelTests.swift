@@ -373,7 +373,8 @@ struct MeetingRoomViewModelTests {
             requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext))
+            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext),
+            getExternalButtons: { _ in [] })
     }
 
     // MARK: Helper

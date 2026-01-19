@@ -2,7 +2,6 @@
 //  Created by Vonage on 13/10/25.
 //
 
-import CallKit
 import Foundation
 import OpenTok
 import VERADomain
@@ -24,7 +23,7 @@ import VERAVonage
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``, ``VonagePluginCallHolder``, ``VonageCallParams``
 /// - Note: The plugin requires a valid `callID` UUID in `userInfo` to drive CallKit.
 ///   If parsing fails, it throws ``VonageCallKitPlugin/Error/invalidCallID``.
-public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
+public final class VonageArchivingPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Errors emitted by the CallKit plugin.
     public enum Error: Swift.Error {
@@ -36,18 +35,12 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// such as `disconnect()`, `setOnHold(_:)`, and `muteLocalMedia(_:)`.
     public weak var call: (any CallFacade)?
 
-    /// Manages CallKit interactions for starting/ending calls.
-    var callManager: VERACallManager!
-    /// Manages the AVAudioSession in Calling Services mode.
-    var sessionManager: OTAudioSessionManager!
-    /// Handles CallKit provider events and reports state.
-    var providerDelegate: ProviderDelegate?
     /// The current CallKit call identifier associated with the session.
     var currentCallID: UUID?
 
     /// A stable identifier for this plugin instance.
     ///
-    /// Defaults to the type name (e.g., `"VonageCallKitPlugin"`).
+    /// Defaults to the type name (e.g., `"VonageArchivingPlugin"`).
     public var pluginIdentifier: String { String(describing: type(of: self)) }
 
     /// Creates a new CallKit plugin instance.
@@ -66,17 +59,13 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// - Parameters:
     ///   - userInfo: A dictionary with contextual info (room name and call ID).
-    /// - Throws: ``VonageCallKitPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
+    /// - Throws: ``VonageArchivingPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
     /// - SeeAlso: ``VonageCallParams``
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        let roomName = userInfo[VonageCallParams.roomName.rawValue] as? String ?? ""
         let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
 
         if let callUUID = UUID(uuidString: callID) {
             currentCallID = callUUID
-            try await callManager.startCall(handle: roomName, callID: callUUID)
-            providerDelegate?.reportConnected(callUUID: callUUID)
-            providerDelegate?.setupHold(to: callUUID)
         } else {
             throw Error.invalidCallID
         }
@@ -92,7 +81,6 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     public func callDidEnd() async throws {
         guard let currentCallID = currentCallID else { return }
         self.currentCallID = nil
-        try await callManager.end(callID: currentCallID)
     }
 
     /// Initializes CallKit and audio session components and wires provider events.
@@ -109,32 +97,5 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Important: Must be called before invoking lifecycle methods or handling events.
     /// - Note: End-call events are ignored while on hold to preserve the paused state.
     public func setup() {
-        callManager = VERACallManager()
-        sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
-        sessionManager?.enableCallingServicesMode()
-        providerDelegate = ProviderDelegate(sessionManager: sessionManager)
-        providerDelegate?.onEndCall = { [weak self] in
-            Task { [weak self] in
-                guard let self else { return }
-                if let isOnHold = self.call?.isOnHold, isOnHold {
-                    // Ignore end call event
-                } else {
-                    self.currentCallID = nil
-                    try? await self.call?.disconnect()
-                }
-            }
-        }
-        providerDelegate?.onProviderReset = { [weak self] in
-            Task { [weak self] in
-                self?.currentCallID = nil
-                try? await self?.call?.disconnect()
-            }
-        }
-        providerDelegate?.onHold = { [weak self] isOnHold in
-            self?.call?.setOnHold(isOnHold)
-        }
-        providerDelegate?.onMute = { [weak self] isMuted in
-            self?.call?.muteLocalMedia(isMuted)
-        }
     }
 }

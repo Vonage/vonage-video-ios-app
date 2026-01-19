@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import VERACore
+import VERADomain
 
 /// Handles incoming Vonage signals.
 ///
@@ -74,7 +74,7 @@ public protocol VonagePluginCallLifeCycle {
 /// - SeeAlso: ``VonagePluginCallLifeCycle``
 public protocol VonagePluginCallHolder: AnyObject {
     /// The active call façade, or `nil` when disconnected.
-    var call: VERACore.CallFacade? { get set }
+    var call: CallFacade? { get set }
 }
 
 /// Identifies a plugin with a stable string identifier.

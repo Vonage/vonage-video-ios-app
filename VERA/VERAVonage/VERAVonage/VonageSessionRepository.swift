@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERACore
+import VERADomain
 
 /// A concrete `SessionRepository` that constructs and manages Vonage call sessions.
 ///

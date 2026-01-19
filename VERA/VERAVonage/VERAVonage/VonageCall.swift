@@ -50,14 +50,14 @@ public final class VonageCall: CallFacade {
     /// - Important: Always subscribe to handle errors surfaced during call operations.
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
-    private var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
+    private var _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
 
     /// A publisher for local media publishing state (audio/video), never fails.
     ///
     /// Emits when local audio/video publishing toggles change or when muted/unmuted in bulk.
     ///
     /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
-    public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+    public lazy var statePublisher: AnyPublisher<SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     private var _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
 

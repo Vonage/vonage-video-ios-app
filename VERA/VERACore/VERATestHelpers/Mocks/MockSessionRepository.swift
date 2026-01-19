@@ -4,13 +4,14 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public class MockSessionRepository: SessionRepository {
-    public var currentCall: (any VERACore.CallFacade)?
+    public var currentCall: (any CallFacade)?
 
     public func createSession(
-        _ credentials: VERACore.RoomCredentials
-    ) async -> any VERACore.CallFacade {
+        _ credentials: RoomCredentials
+    ) async -> any CallFacade {
         if let currentCall = currentCall {
             return currentCall
         }

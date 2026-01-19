@@ -4,22 +4,25 @@
 
 import Combine
 import Foundation
-import VERACore
+import VERADomain
 
-public class MockCall: VERACore.CallFacade {
+public class MockCall: CallFacade {
 
-    public let _eventsPublisher = CurrentValueSubject<VERACore.SessionEvent, Never>(.idle)
-    public lazy var eventsPublisher: AnyPublisher<VERACore.SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
+    public let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
+    public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
     public let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     public lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
 
-    public let _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
-    public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+    public let _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
+    public lazy var statePublisher: AnyPublisher<SessionState, Never> = _statePublisher.eraseToAnyPublisher()
 
     public var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
     public lazy var callState: AnyPublisher<CallState, Never> = _callState.eraseToAnyPublisher()
+
+    public var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
     public var recordedActions: [CallActions] = []
 

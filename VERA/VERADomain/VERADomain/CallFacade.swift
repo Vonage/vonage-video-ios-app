@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import VERADomain
 
 /// A snapshot of the current call participants and active speaker.
 ///

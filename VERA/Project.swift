@@ -87,7 +87,8 @@ private func createDependencies() -> [TargetDependency] {
 
     if isArchivingEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERAArchiving", path: "VERAArchiving")
+            .project(target: "VERAArchiving", path: "VERAArchiving"),
+            .project(target: "VERAVonageArchivingPlugin", path: "VERAVonageArchivingPlugin"),
         ])
     }
 

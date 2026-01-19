@@ -31,10 +31,18 @@ public typealias ArchiveID = String
 
 public struct StartArchivingDataSourceResponse {
     public let archiveId: ArchiveID
+
+    public init(archiveId: ArchiveID) {
+        self.archiveId = archiveId
+    }
 }
 
 public struct StopArchivingDataSourceResponse {
     public let archiveId: ArchiveID
+
+    public init(archiveId: ArchiveID) {
+        self.archiveId = archiveId
+    }
 }
 
 public protocol ArchivingDataSource {
