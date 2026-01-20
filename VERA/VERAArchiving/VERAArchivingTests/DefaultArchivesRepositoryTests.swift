@@ -244,14 +244,18 @@ struct DefaultArchivesRepositoryTests {
         name: String = "Test Archive",
         status: ArchiveStatus,
         createdAt: Date = Date(),
-        url: URL? = nil
+        url: URL? = nil,
+        size: Int = 0,
+        duration: Int = 0
     ) -> Archive {
         Archive(
             id: id,
             name: name,
             createdAt: createdAt,
             status: status,
-            url: url
+            url: url,
+            size: size,
+            duration: duration
         )
     }
 

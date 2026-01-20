@@ -84,7 +84,7 @@ extension Archive {
 
         return .init(
             id: id,
-            title: "Recording \(index)",
+            title: String(localized: "Recording \(index)", bundle: .veraArchiving),
             subtitle: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
             isDownloadable: status == .available)
     }
