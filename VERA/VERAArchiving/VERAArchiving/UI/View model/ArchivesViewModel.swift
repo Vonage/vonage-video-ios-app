@@ -28,6 +28,7 @@ public final class ArchivesViewModel: ObservableObject {
     @BackgroundActor
     public func loadData() async {
         await archivesRepository.getArchives(roomName: roomName)
+            .receive(on: DispatchQueue.main)
             .map { [weak self] archives in
                 guard let self else { return [] }
                 return archives.map { self.mapToUIArchive($0) }

@@ -237,9 +237,13 @@ struct VERAApp: App {
 
     func makeGoodbyeAdditionalContentView(roomName: RoomName) -> some View {
         #if ARCHIVING_ENABLED
-            let (view, viewModel) = archiveFactory.make(roomName: roomName)
-            navigationCoordinator.archivesViewModel = viewModel
-            return view
+            if let viewModel = navigationCoordinator.archivesViewModel {
+                return AnyView(archiveFactory.make(viewModel: viewModel))
+            } else {
+                let (view, viewModel) = archiveFactory.make(roomName: roomName)
+                navigationCoordinator.archivesViewModel = viewModel
+                return AnyView(view)
+            }
         #else
             return EmptyView()
         #endif
