@@ -12,7 +12,6 @@ public struct ArchivesScreen: View {
     public var body: some View {
         CardView {
             ArchiveList(archives: viewModel.archives)
-                .padding()
         }
     }
 }

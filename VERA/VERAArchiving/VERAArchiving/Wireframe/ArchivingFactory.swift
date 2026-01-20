@@ -10,15 +10,18 @@ public final class ArchivingFactory {
     private let archivesRepository: ArchivesRepository
     private let archiveRecordingsRepository: ArchiveRecordingsRepository
     private let archivingDataSource: ArchivingDataSource
+    private let archivingStatusDataSource: ArchivingStatusDataSource
 
     public init(
         archivesRepository: ArchivesRepository,
         archiveRecordingsRepository: ArchiveRecordingsRepository,
-        archivingDataSource: ArchivingDataSource
+        archivingDataSource: ArchivingDataSource,
+        archivingStatusDataSource: ArchivingStatusDataSource
     ) {
         self.archivesRepository = archivesRepository
         self.archiveRecordingsRepository = archiveRecordingsRepository
         self.archivingDataSource = archivingDataSource
+        self.archivingStatusDataSource = archivingStatusDataSource
     }
 
     public func makeArchivingButton(
@@ -26,8 +29,12 @@ public final class ArchivingFactory {
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
         let viewModel = ArchiveButtonViewModel(
             roomName: roomName,
-            startArchivingUseCase: DefaultStartArchivingUseCase(archivingDataSource: archivingDataSource),
-            stopArchivingUseCase: DefaultStopArchivingUseCase(archivingDataSource: archivingDataSource))
+            startArchivingUseCase: DefaultStartArchivingUseCase(
+                archivingDataSource: archivingDataSource),
+            stopArchivingUseCase: DefaultStopArchivingUseCase(
+                archivingDataSource: archivingDataSource),
+            archivingStatusDataSource: archivingStatusDataSource)
+        viewModel.setup()
         return (ArchiveScreenButton(viewModel: viewModel), viewModel)
     }
 

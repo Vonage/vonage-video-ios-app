@@ -12,7 +12,8 @@ public struct ArchiveButtonState {
         self.isArchiving = isArchiving
     }
 
-    public static let initial = ArchiveButtonState(isArchiving: false)
+    public static let idle = ArchiveButtonState(isArchiving: false)
+    public static let archiving = ArchiveButtonState(isArchiving: true)
 }
 
 struct ArchiveButton: View {

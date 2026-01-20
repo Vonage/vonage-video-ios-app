@@ -174,10 +174,12 @@ public final class VonageCall: CallFacade {
         }
         session.onArchiveStarted = { [weak self] _ in
             self?._archivingState.value = .recording
+            self?.handleSignal(.init(type: "archiving", data: "start"))
             print("Recording started")
         }
         session.onArchiveStopped = { [weak self] _ in
             self?._archivingState.value = .idle
+            self?.handleSignal(.init(type: "archiving", data: "stop"))
             print("Recording stoped")
         }
     }

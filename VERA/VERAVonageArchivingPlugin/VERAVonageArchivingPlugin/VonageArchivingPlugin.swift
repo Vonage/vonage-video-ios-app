@@ -3,99 +3,66 @@
 //
 
 import Foundation
-import OpenTok
+import VERAArchiving
 import VERADomain
 import VERAVonage
 
-/// Integrates CallKit with an active Vonage call.
+/// Monitors and manages archiving status for an active Vonage call.
 ///
-/// This plugin bridges CallKit events (start, connect, hold, mute, end) with the
-/// call façade, ensuring system-level telephony UX (lock screen, recent calls, interruptions)
-/// stays in sync with media state and session lifecycle.
+/// This plugin listens to archiving signals from the Vonage session and updates
+/// the archiving status data source, allowing the application to react to when
+/// call recording starts or stops.
 ///
 /// ## Responsibilities
-/// - Starts and ends calls via `VERACallManager`
-/// - Reports connection and configures hold on `ProviderDelegate`
-/// - Syncs CallKit events to the call façade (`hold`, `mute`, `end`)
+/// - Receives archiving signals from Vonage session
+/// - Updates `ArchivingStatusDataSource` with current archiving state
+/// - Resets archiving status when the call ends
 ///
-/// - Important: Call `setup()` before using the plugin to initialize the CallKit
-///   machinery and delegate callbacks.
-/// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``, ``VonagePluginCallHolder``, ``VonageCallParams``
-/// - Note: The plugin requires a valid `callID` UUID in `userInfo` to drive CallKit.
-///   If parsing fails, it throws ``VonageCallKitPlugin/Error/invalidCallID``.
-public final class VonageArchivingPlugin: VonagePlugin, VonagePluginCallHolder {
+/// - Important: The plugin automatically handles archiving signals of type "archiving"
+///   with data values "start" or "stop".
+/// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``,  ``VonageSignalHandler``
+public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
-    /// Errors emitted by the CallKit plugin.
-    public enum Error: Swift.Error {
-        /// The provided call ID is not a valid UUID string.
-        case invalidCallID
+    /// Supported signal types for this plugin.
+    public enum SignalType: String {
+        /// Archiving status signals routed via Vonage signaling.
+        case archiving
     }
 
-    /// The active call façade reference, used to perform actions
-    /// such as `disconnect()`, `setOnHold(_:)`, and `muteLocalMedia(_:)`.
-    public weak var call: (any CallFacade)?
-
-    /// The current CallKit call identifier associated with the session.
-    var currentCallID: UUID?
+    private let archivingStatusDataSource: ArchivingStatusDataSource
 
     /// A stable identifier for this plugin instance.
     ///
     /// Defaults to the type name (e.g., `"VonageArchivingPlugin"`).
     public var pluginIdentifier: String { String(describing: type(of: self)) }
 
-    /// Creates a new CallKit plugin instance.
-    public init() {}
+    /// Creates a new archiving plugin instance.
+    ///
+    /// - Parameter archivingStatusDataSource: The data source that will be updated with archiving status changes.
+    public init(archivingStatusDataSource: ArchivingStatusDataSource) {
+        self.archivingStatusDataSource = archivingStatusDataSource
+    }
 
     /// Lifecycle callback invoked when the call starts and the session is connected.
     ///
-    /// Expects `userInfo` to contain:
-    /// - ``VonageCallParams/roomName``: The display handle for the call
-    /// - ``VonageCallParams/callID``: A UUID string identifying the CallKit call
-    ///
-    /// If the `callID` is a valid UUID, it:
-    /// - Stores the `currentCallID`
-    /// - Starts the CallKit call via `VERACallManager`
-    /// - Reports connected state and configures hold on `ProviderDelegate`
+    /// Currently, this plugin does not require any initialization when the call starts.
+    /// Archiving status will be updated via signal handlers during the call lifecycle.
     ///
     /// - Parameters:
-    ///   - userInfo: A dictionary with contextual info (room name and call ID).
-    /// - Throws: ``VonageArchivingPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
-    /// - SeeAlso: ``VonageCallParams``
+    ///   - userInfo: A dictionary with contextual info (not currently used by this plugin).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
-
-        if let callUUID = UUID(uuidString: callID) {
-            currentCallID = callUUID
-        } else {
-            throw Error.invalidCallID
-        }
     }
 
     /// Lifecycle callback invoked when the call ends and the session is disconnecting.
     ///
-    /// If a `currentCallID` exists, it:
-    /// - Clears `currentCallID`
-    /// - Ends the CallKit call via `VERACallManager`
-    ///
-    /// - Throws: An error if `VERACallManager` fails to end the call.
+    /// Resets the archiving status data source to clear any active archiving state.
     public func callDidEnd() async throws {
-        guard let currentCallID = currentCallID else { return }
-        self.currentCallID = nil
+        archivingStatusDataSource.reset()
     }
 
-    /// Initializes CallKit and audio session components and wires provider events.
-    ///
-    /// Sets up:
-    /// - `VERACallManager` to manage CallKit transactions
-    /// - `OTAudioSessionManager` in Calling Services mode
-    /// - `ProviderDelegate` event handlers to sync with the call façade:
-    ///   - `onEndCall`: Ends the call unless the call is currently on hold
-    ///   - `onProviderReset`: Ends the call on provider reset
-    ///   - `onHold`: Toggles call hold state on the façade
-    ///   - `onMute`: Toggles local media mute on the façade
-    ///
-    /// - Important: Must be called before invoking lifecycle methods or handling events.
-    /// - Note: End-call events are ignored while on hold to preserve the paused state.
-    public func setup() {
+    public func handleSignal(_ signal: VERAVonage.VonageSignal) {
+        guard signal.type == SignalType.archiving.rawValue else { return }
+
+        archivingStatusDataSource.set(archivingStatus: signal.data == "start")
     }
 }

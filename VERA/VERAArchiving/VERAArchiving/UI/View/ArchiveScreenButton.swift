@@ -15,6 +15,7 @@ public struct ArchiveScreenButton: View {
     public var body: some View {
         ArchiveButton(
             state: viewModel.state,
-            action: viewModel.onTap)
+            action: viewModel.onTap
+        )
     }
 }
