@@ -31,9 +31,13 @@ public final class ArchivesViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .map { [weak self] archives in
                 guard let self else { return [] }
-                return archives.enumerated().map { index, archive in
-                    self.mapToUIArchive(archive, index: index)
-                }
+                return
+                    archives
+                    .reversed()
+                    .enumerated()
+                    .map { index, archive in
+                        self.mapToUIArchive(archive, index: archives.count - index)
+                    }
             }
             .sink(
                 receiveCompletion: { completion in
