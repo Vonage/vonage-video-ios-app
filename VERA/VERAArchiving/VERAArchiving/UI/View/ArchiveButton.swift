@@ -5,7 +5,7 @@
 import SwiftUI
 import VERACommonUI
 
-public struct ArchiveButtonState {
+public struct ArchiveButtonState: Equatable {
     public let isArchiving: Bool
 
     public init(isArchiving: Bool) {
