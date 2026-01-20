@@ -136,7 +136,6 @@ final class DependencyContainer {
 
         lazy var archivingFactory = ArchivingFactory(
             archivesRepository: archivesRepository,
-            archiveRecordingsRepository: archiveRecordingsRepository,
             archivingDataSource: archivingDataSource,
             archivingStatusDataSource: archivingStatusDataSource)
 
@@ -152,9 +151,6 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
-
-        lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
-            httpClient: httpClient)
 
     #endif
 }

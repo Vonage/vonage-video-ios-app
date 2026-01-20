@@ -240,7 +240,11 @@ struct VERAApp: App {
             if let viewModel = navigationCoordinator.archivesViewModel {
                 return AnyView(archiveFactory.make(viewModel: viewModel))
             } else {
-                let (view, viewModel) = archiveFactory.make(roomName: roomName)
+                let (view, viewModel) = archiveFactory.make(
+                    roomName: roomName
+                ) { recording in
+                    UIApplication.shared.open(recording.url)
+                }
                 navigationCoordinator.archivesViewModel = viewModel
                 return AnyView(view)
             }

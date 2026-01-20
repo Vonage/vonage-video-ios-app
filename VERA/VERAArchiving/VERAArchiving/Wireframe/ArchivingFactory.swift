@@ -8,18 +8,15 @@ import VERADomain
 public final class ArchivingFactory {
 
     private let archivesRepository: ArchivesRepository
-    private let archiveRecordingsRepository: ArchiveRecordingsRepository
     private let archivingDataSource: ArchivingDataSource
     private let archivingStatusDataSource: ArchivingStatusDataSource
 
     public init(
         archivesRepository: ArchivesRepository,
-        archiveRecordingsRepository: ArchiveRecordingsRepository,
         archivingDataSource: ArchivingDataSource,
         archivingStatusDataSource: ArchivingStatusDataSource
     ) {
         self.archivesRepository = archivesRepository
-        self.archiveRecordingsRepository = archiveRecordingsRepository
         self.archivingDataSource = archivingDataSource
         self.archivingStatusDataSource = archivingStatusDataSource
     }
@@ -45,14 +42,15 @@ public final class ArchivingFactory {
     }
 
     public func make(
-        roomName: RoomName
+        roomName: RoomName,
+        onPlay: @escaping (ArchiveRecording) -> Void
     ) -> (view: some View, viewModel: ArchivesViewModel) {
         let viewModel = ArchivesViewModel(
             roomName: roomName,
             archivesRepository: archivesRepository,
             playRecordingUseCase: .init(
-                archiveRecordingsRepository: archiveRecordingsRepository
-            ) { _ in })
+                onPlay: onPlay
+            ))
         return (ArchivesScreen(viewModel: viewModel), viewModel)
     }
 
