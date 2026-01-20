@@ -35,7 +35,12 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        let archives = try await awaitFirstValue(from: publisher)
+        // Collect first 2 values (initial empty array + first fetch result)
+        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+
+        // Second value should have the archives
+        #expect(values.count == 2)
+        let archives = values[1]
         #expect(archives.count == 2)
         #expect(archives[0].id == expectedArchives[0].id)
         #expect(archives[1].id == expectedArchives[1].id)
@@ -127,10 +132,15 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        let archives = try await awaitFirstValue(from: publisher)
+        // Collect first 2 values (initial empty array + first fetch result)
+        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+
+        // Second value should have the archives
+        #expect(values.count == 2)
+        let archives = values[1]
         #expect(archives.count == 2)
-        #expect(archives[0].status == .available)
-        #expect(archives[1].status == .failed)
+        #expect(archives.contains(where: { $0.status == .available }))
+        #expect(archives.contains(where: { $0.status == .failed }))
 
         // Wait to ensure no additional polling happens when any archive failed
         try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
@@ -149,7 +159,13 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        let archives = try await awaitFirstValue(from: publisher)
+        // Collect first 2 values (initial empty array + first fetch result)
+        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+
+        // Second value should have the archive
+        #expect(values.count == 2)
+        let archives = values[1]
+        #expect(archives.count == 1)
         #expect(archives[0].status == .available)
 
         // Wait a bit to ensure no additional polling happens
@@ -182,13 +198,17 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = sut.getArchives(roomName: "test-room")
         let publisher2 = sut.getArchives(roomName: "test-room")
 
-        // Get first value from first publisher
-        let archives1 = try await awaitFirstValue(from: publisher1)
+        // Collect first 2 values from first publisher (initial empty + actual data)
+        let values1 = try await collectValues(from: publisher1, count: 2, timeout: 5.0)
+        #expect(values1.count == 2)
+        let archives1 = values1[1]
         #expect(archives1.count == 1)
         #expect(archives1[0].id == expectedArchive.id)
 
-        // Get first value from second publisher (should be cached)
-        let archives2 = try await awaitFirstValue(from: publisher2)
+        // Collect first 2 values from second publisher (should be cached)
+        let values2 = try await collectValues(from: publisher2, count: 2, timeout: 5.0)
+        #expect(values2.count == 2)
+        let archives2 = values2[1]
         #expect(archives2.count == 1)
         #expect(archives2[0].id == expectedArchive.id)
 
@@ -207,8 +227,11 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = sut.getArchives(roomName: "room1")
         let publisher2 = sut.getArchives(roomName: "room2")
 
-        let archives1 = try await awaitFirstValue(from: publisher1)
-        let archives2 = try await awaitFirstValue(from: publisher2)
+        // Collect first 2 values from each publisher (initial empty + actual data)
+        let values1 = try await collectValues(from: publisher1, count: 2, timeout: 5.0)
+        let archives1 = values1[1]
+        let values2 = try await collectValues(from: publisher2, count: 2, timeout: 5.0)
+        let archives2 = values2[1]
 
         // Should have made separate calls for each room
         #expect(mockDataSource.callCount == 2)

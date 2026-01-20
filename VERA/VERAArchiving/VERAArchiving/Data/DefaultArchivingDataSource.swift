@@ -5,14 +5,24 @@
 import Foundation
 import VERADomain
 
-public struct StartArchivingResponse: Decodable {
+public struct StartArchivingResponse: Codable {
     public let archiveId: String
     public let status: Int
+
+    public init(archiveId: String, status: Int) {
+        self.archiveId = archiveId
+        self.status = status
+    }
 }
 
-public struct StopArchivingResponse: Decodable {
+public struct StopArchivingResponse: Codable {
     public let archiveId: String
     public let status: Int
+
+    public init(archiveId: String, status: Int) {
+        self.archiveId = archiveId
+        self.status = status
+    }
 }
 
 public struct DefaultArchivingDataSource: ArchivingDataSource {
