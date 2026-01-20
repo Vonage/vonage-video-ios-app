@@ -221,7 +221,7 @@ struct ArchiveButtonViewModelTests {
 
         // Change state to archiving
         dataSource.subject.value = true
-        await sut.$state.values.first { $0.isArchiving }
+        _ = await sut.$state.values.first { $0.isArchiving }
 
         // Now tap to stop (should handle error)
         sut.onTap()

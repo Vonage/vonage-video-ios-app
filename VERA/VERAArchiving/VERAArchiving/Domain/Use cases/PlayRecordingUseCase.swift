@@ -5,7 +5,11 @@
 import Foundation
 import VERADomain
 
-public final class PlayRecordingUseCase {
+public protocol PlayRecordingUseCase {
+    func callAsFunction(_ archive: Archive) async throws
+}
+
+public final class DefaultPlayRecordingUseCase: PlayRecordingUseCase {
 
     public enum Error: Swift.Error {
         case missingURL

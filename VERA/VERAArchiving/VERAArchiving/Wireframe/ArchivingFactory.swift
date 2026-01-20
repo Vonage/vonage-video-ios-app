@@ -48,7 +48,7 @@ public final class ArchivingFactory {
         let viewModel = ArchivesViewModel(
             roomName: roomName,
             archivesRepository: archivesRepository,
-            playRecordingUseCase: .init(
+            playRecordingUseCase: DefaultPlayRecordingUseCase(
                 onPlay: onPlay
             ))
         return (ArchivesScreen(viewModel: viewModel), viewModel)

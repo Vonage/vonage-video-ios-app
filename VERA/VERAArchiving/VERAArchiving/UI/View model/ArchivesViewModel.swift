@@ -15,7 +15,7 @@ public final class ArchivesViewModel: ObservableObject {
     @MainActor @Published public var archives: [ArchiveUIData] = []
     @MainActor @Published public var error: AlertItem?
 
-    init(
+    public init(
         roomName: RoomName,
         archivesRepository: ArchivesRepository,
         playRecordingUseCase: PlayRecordingUseCase,
