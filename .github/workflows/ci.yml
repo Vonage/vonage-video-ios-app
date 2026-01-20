@@ -188,6 +188,28 @@ jobs:
           -resultBundlePath DerivedData/VERAVonageChatPluginTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAVonageArchivingPlugin (iOS Simulator)
+      id: ot-archiving-plugin-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Running VERAVonageArchivingPlugin on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAVonageArchivingPlugin \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAVonageArchivingPlugin \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAVonageArchivingPlugin-iOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Run VERAVonageTests (iOS Simulator)
       id: opentok-tests
       timeout-minutes: 15
@@ -283,6 +305,7 @@ jobs:
           DerivedData/VERAVonageChatPluginTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
           DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
+          DerivedData/VERAVonageArchivingPlugin-iOS.xcresult
           DerivedData/Build/Products/
           
   sonarcloud:
