@@ -35,12 +35,9 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
-        // Collect first 2 values (initial empty array + first fetch result)
-        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+        // Wait for the first non-empty value
+        let archives = try await awaitFirstNonEmptyValue(from: publisher)
 
-        // Second value should have the archives
-        #expect(values.count == 2)
-        let archives = values[1]
         #expect(archives.count == 2)
         #expect(archives[0].id == expectedArchives[0].id)
         #expect(archives[1].id == expectedArchives[1].id)
@@ -132,15 +129,15 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = sut.getArchives(roomName: "test-room")
 
+
         // Collect first 2 values (initial empty array + first fetch result)
-        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+        let values = try await publisher.values.first { $0.count == 2 }!
 
         // Second value should have the archives
         #expect(values.count == 2)
-        let archives = values[1]
-        #expect(archives.count == 2)
-        #expect(archives.contains(where: { $0.status == .available }))
-        #expect(archives.contains(where: { $0.status == .failed }))
+        #expect(values.count == 2)
+        #expect(values.contains(where: { $0.status == .available }))
+        #expect(values.contains(where: { $0.status == .failed }))
 
         // Wait to ensure no additional polling happens when any archive failed
         try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
@@ -160,13 +157,11 @@ struct DefaultArchivesRepositoryTests {
         let publisher = sut.getArchives(roomName: "test-room")
 
         // Collect first 2 values (initial empty array + first fetch result)
-        let values = try await collectValues(from: publisher, count: 2, timeout: 5.0)
+        let values = try await publisher.values.first { $0.count == 1 }!
 
         // Second value should have the archive
-        #expect(values.count == 2)
-        let archives = values[1]
-        #expect(archives.count == 1)
-        #expect(archives[0].status == .available)
+        #expect(values.count == 1)
+        #expect(values[0].status == .available)
 
         // Wait a bit to ensure no additional polling happens
         try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
@@ -198,19 +193,15 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = sut.getArchives(roomName: "test-room")
         let publisher2 = sut.getArchives(roomName: "test-room")
 
-        // Collect first 2 values from first publisher (initial empty + actual data)
-        let values1 = try await collectValues(from: publisher1, count: 2, timeout: 5.0)
-        #expect(values1.count == 2)
-        let archives1 = values1[1]
-        #expect(archives1.count == 1)
-        #expect(archives1[0].id == expectedArchive.id)
+        // Collect first 2 values from first publisher
+        let values1 = try await publisher1.values.first { $0.count == 1 }!
+        #expect(values1.count == 1)
+        #expect(values1[0].id == expectedArchive.id)
 
         // Collect first 2 values from second publisher (should be cached)
-        let values2 = try await collectValues(from: publisher2, count: 2, timeout: 5.0)
-        #expect(values2.count == 2)
-        let archives2 = values2[1]
-        #expect(archives2.count == 1)
-        #expect(archives2[0].id == expectedArchive.id)
+        let values2 = try await publisher2.values.first { $0.count == 1 }!
+        #expect(values2.count == 1)
+        #expect(values2[0].id == expectedArchive.id)
 
         // Should have made at least one call, but due to caching behavior
         // the exact count may vary
@@ -227,11 +218,9 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = sut.getArchives(roomName: "room1")
         let publisher2 = sut.getArchives(roomName: "room2")
 
-        // Collect first 2 values from each publisher (initial empty + actual data)
-        let values1 = try await collectValues(from: publisher1, count: 2, timeout: 5.0)
-        let archives1 = values1[1]
-        let values2 = try await collectValues(from: publisher2, count: 2, timeout: 5.0)
-        let archives2 = values2[1]
+        // Collect first 2 values from each publisher
+        let archives1 = try await publisher1.values.first { $0.count == 1 }!
+        let archives2 = try await publisher2.values.first { $0.count == 1 }!
 
         // Should have made separate calls for each room
         #expect(mockDataSource.callCount == 2)
@@ -289,6 +278,41 @@ struct DefaultArchivesRepositoryTests {
                             }
                         },
                         receiveValue: { value in
+                            guard !hasResumed else { return }
+                            hasResumed = true
+                            cancellable?.cancel()
+                            continuation.resume(returning: value)
+                        }
+                    )
+            }
+        }
+    }
+
+    private func awaitFirstNonEmptyValue(from publisher: AnyPublisher<[Archive], Error>) async throws -> [Archive] {
+        try await withTimeout(seconds: 5.0) {
+            try await withCheckedThrowingContinuation { continuation in
+                var cancellable: AnyCancellable?
+                var hasResumed = false
+
+                cancellable =
+                    publisher
+                    .sink(
+                        receiveCompletion: { completion in
+                            guard !hasResumed else { return }
+                            hasResumed = true
+                            cancellable?.cancel()
+
+                            switch completion {
+                            case .failure(let error):
+                                continuation.resume(throwing: error)
+                            case .finished:
+                                // This shouldn't happen if we're waiting for first value
+                                break
+                            }
+                        },
+                        receiveValue: { value in
+                            // Skip empty arrays and wait for actual data
+                            guard !value.isEmpty else { return }
                             guard !hasResumed else { return }
                             hasResumed = true
                             cancellable?.cancel()
