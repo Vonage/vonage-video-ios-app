@@ -152,6 +152,7 @@ struct BottomBar: View {
                 }
             } label: {
                 ButtonImage(image: Image(systemName: "ellipsis.circle"))
+                    .accessibilityLabel("More options")
             }
         }
     }

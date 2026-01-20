@@ -135,7 +135,6 @@ struct DefaultArchivesRepositoryTests {
 
         // Second value should have the archives
         #expect(values.count == 2)
-        #expect(values.count == 2)
         #expect(values.contains(where: { $0.status == .available }))
         #expect(values.contains(where: { $0.status == .failed }))
 

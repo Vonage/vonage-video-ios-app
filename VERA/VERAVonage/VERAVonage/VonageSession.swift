@@ -65,12 +65,12 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// - Parameter signal: An ``VonageSignal`` containing the signal type and optional payload.
     var onSessionSignal: ((VonageSignal) -> Void)?
 
-    /// Called when a the session recording begins.
+    /// Called when the session recording begins.
     ///
     /// - Parameter Archive ID.
     var onArchiveStarted: ((String) -> Void)?
 
-    /// Called when a the session recording stops.
+    /// Called when the session recording stops.
     ///
     /// - Parameter Archive ID.
     var onArchiveStopped: ((String) -> Void)?
