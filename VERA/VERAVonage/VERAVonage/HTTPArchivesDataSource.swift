@@ -73,7 +73,9 @@ public struct RemoteArchive: Decodable {
             name: name,
             createdAt: Date(timeIntervalSince1970: createdAt),
             status: ArchiveStatus(value: status),
-            url: url?.toURL)
+            url: url?.toURL,
+            size: size,
+            duration: duration)
     }
 }
 

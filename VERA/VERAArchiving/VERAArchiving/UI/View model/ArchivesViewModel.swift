@@ -31,7 +31,9 @@ public final class ArchivesViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .map { [weak self] archives in
                 guard let self else { return [] }
-                return archives.map { self.mapToUIArchive($0) }
+                return archives.enumerated().map { index, archive in
+                    self.mapToUIArchive(archive, index: index)
+                }
             }
             .sink(
                 receiveCompletion: { completion in
@@ -50,8 +52,8 @@ public final class ArchivesViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    public func mapToUIArchive(_ archive: Archive) -> ArchiveUIData {
-        var uiArchive = archive.toUIArchive
+    public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {
+        var uiArchive = archive.toUIArchive(with: index)
         uiArchive.onDownload = { [weak self] in
             self?.downloadArchive(archive)
         }
@@ -72,15 +74,37 @@ public final class ArchivesViewModel: ObservableObject {
 }
 
 extension Archive {
-    var toUIArchive: ArchiveUIData {
+    func toUIArchive(with index: Int) -> ArchiveUIData {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE, MMM d h:mm a"
         let formattedDate = formatter.string(from: createdAt)
 
+        let durationFormatted = formatDuration(duration)
+        let sizeFormatted = formatSize(size)
+
         return .init(
             id: id,
-            title: name,
-            subtitle: "Started at: \(formattedDate)",
+            title: "Recording \(index)",
+            subtitle: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
             isDownloadable: status == .available)
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%d:%02d", minutes, remainingSeconds)
+    }
+
+    private func formatSize(_ bytes: Int) -> String {
+        let megabytes = Double(bytes) / 1_048_576.0  // 1024 * 1024
+
+        if megabytes < 0.1 {
+            let kilobytes = Double(bytes) / 1024.0
+            return String(format: "%.1f KB", kilobytes)
+        } else if megabytes < 10 {
+            return String(format: "%.1f MB", megabytes)
+        } else {
+            return String(format: "%.0f MB", megabytes)
+        }
     }
 }
