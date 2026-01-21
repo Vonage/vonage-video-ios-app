@@ -185,7 +185,8 @@ struct VERAApp: App {
     ) -> BottomBarButton {
         let archiveButton = archiveFactory.makeArchivingButton(viewModel: archiveButtonViewModel)
         return .init(
-            label: state.archivingState == .recording ? "Stop Recording" : "Start Recording",
+            label: state.archivingState == .recording
+                ? String(localized: "Stop Recording") : String(localized: "Start Recording"),
             image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
             onTap: archiveButtonViewModel.onTap,
             content: {

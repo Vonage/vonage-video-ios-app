@@ -89,7 +89,10 @@ extension Archive {
         return .init(
             id: id,
             title: String(localized: "Recording \(index)", bundle: .veraArchiving),
-            subtitle: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
+            subtitle: String(
+                localized: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
+                bundle: .veraArchiving
+            ),
             isDownloadable: status == .available)
     }
 
