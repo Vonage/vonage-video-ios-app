@@ -78,21 +78,29 @@ public final class ArchivesViewModel: ObservableObject {
 }
 
 extension Archive {
-    func toUIArchive(with index: Int) -> ArchiveUIData {
+
+    var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE, MMM d h:mm a"
-        let formattedDate = formatter.string(from: createdAt)
+        return formatter.string(from: createdAt)
+    }
 
+    var subtitle: String {
+        let formattedDate = formattedDate
         let durationFormatted = formatDuration(duration)
         let sizeFormatted = formatSize(size)
 
-        return .init(
+        return String(
+            localized: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
+            bundle: .veraArchiving
+        )
+    }
+
+    func toUIArchive(with index: Int) -> ArchiveUIData {
+        .init(
             id: id,
             title: String(localized: "Recording \(index)", bundle: .veraArchiving),
-            subtitle: String(
-                localized: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
-                bundle: .veraArchiving
-            ),
+            subtitle: subtitle,
             isDownloadable: status == .available)
     }
 

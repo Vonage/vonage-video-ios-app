@@ -141,7 +141,7 @@ struct VERAApp: App {
             viewModel = existingViewModel
         } else {
             let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(roomName: roomName)
-
+            archiveButtonViewModel.setup()
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons

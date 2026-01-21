@@ -31,8 +31,7 @@ public final class ArchivingFactory {
             stopArchivingUseCase: DefaultStopArchivingUseCase(
                 archivingDataSource: archivingDataSource),
             archivingStatusDataSource: archivingStatusDataSource)
-        viewModel.setup()
-        return (ArchiveScreenButton(viewModel: viewModel), viewModel)
+        return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
 
     public func makeArchivingButton(
@@ -51,7 +50,7 @@ public final class ArchivingFactory {
             playRecordingUseCase: DefaultPlayRecordingUseCase(
                 onPlay: onPlay
             ))
-        return (ArchivesScreen(viewModel: viewModel), viewModel)
+        return (make(viewModel: viewModel), viewModel)
     }
 
     public func make(
