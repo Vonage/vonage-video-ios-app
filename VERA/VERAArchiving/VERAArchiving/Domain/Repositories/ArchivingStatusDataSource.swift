@@ -4,9 +4,10 @@
 
 import Combine
 import Foundation
+import VERADomain
 
 public protocol ArchivingStatusDataSource {
-    var archivingStatus: AnyPublisher<Bool, Never> { get }
-    func set(archivingStatus: Bool)
+    var archivingState: AnyPublisher<ArchivingState, Never> { get }
+    func set(archivingState: ArchivingState)
     func reset()
 }

@@ -61,8 +61,37 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
     }
 
     public func handleSignal(_ signal: VERAVonage.VonageSignal) {
-        guard signal.type == SignalType.archiving.rawValue else { return }
+        guard signal.type == SignalType.archiving.rawValue,
+            let data = signal.data
+        else { return }
 
-        archivingStatusDataSource.set(archivingStatus: signal.data == "start")
+        guard let payload = try? decodeArchivingPayload(from: data) else {
+            return
+        }
+
+        switch payload.action {
+        case "start":
+            if let archivingID = payload.archivingID {
+                archivingStatusDataSource.set(archivingState: .archiving(archivingID))
+            }
+        case "stop":
+            archivingStatusDataSource.set(archivingState: .idle)
+        default:
+            break
+        }
+    }
+
+    private func decodeArchivingPayload(
+        from jsonString: String
+    ) throws -> ArchivingPayload {
+        guard let data = jsonString.data(using: .utf8) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "Invalid UTF8"))
+        }
+        return try JSONDecoder().decode(ArchivingPayload.self, from: data)
+    }
+
+    private struct ArchivingPayload: Decodable {
+        let action: String
+        let archivingID: String?
     }
 }

@@ -41,36 +41,38 @@ struct VonageArchivingPluginTests {
     func handlesArchivingStartSignalCorrectly() async throws {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
+        let archiveID = "test-archive-123"
+        let jsonData = "{\"action\":\"start\",\"archivingID\":\"\(archiveID)\"}"
 
-        let signal = VonageSignal(type: "archiving", data: "start")
+        let signal = VonageSignal(type: "archiving", data: jsonData)
         sut.handleSignal(signal)
 
         #expect(dataSource.setCallCount == 1)
-        #expect(dataSource.lastArchivingStatus == true)
+        #expect(dataSource.lastArchivingStatus == .archiving(archiveID))
     }
 
     @Test("Handles archiving stop signal correctly")
     func handlesArchivingStopSignalCorrectly() async throws {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
+        let jsonData = "{\"action\":\"stop\"}"
 
-        let signal = VonageSignal(type: "archiving", data: "stop")
+        let signal = VonageSignal(type: "archiving", data: jsonData)
         sut.handleSignal(signal)
 
         #expect(dataSource.setCallCount == 1)
-        #expect(dataSource.lastArchivingStatus == false)
+        #expect(dataSource.lastArchivingStatus == .idle)
     }
 
-    @Test("Handles archiving signal with any non-start data as false")
-    func handlesArchivingSignalWithAnyNonStartDataAsFalse() async throws {
+    @Test("Handles invalid archiving signal data gracefully")
+    func handlesInvalidArchivingSignalDataGracefully() async throws {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
-        let signal = VonageSignal(type: "archiving", data: "anything-else")
+        let signal = VonageSignal(type: "archiving", data: "invalid-json")
         sut.handleSignal(signal)
 
-        #expect(dataSource.setCallCount == 1)
-        #expect(dataSource.lastArchivingStatus == false)
+        #expect(dataSource.setCallCount == 0)
     }
 
     @Test("Ignores non-archiving signals")
@@ -88,26 +90,31 @@ struct VonageArchivingPluginTests {
     func handlesMultipleArchivingSignalsInSequence() async throws {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
+        let archiveID1 = "archive-1"
+        let archiveID2 = "archive-2"
 
         // Start
-        let startSignal = VonageSignal(type: "archiving", data: "start")
-        sut.handleSignal(startSignal)
+        let startSignal1 = VonageSignal(
+            type: "archiving", data: "{\"action\":\"start\",\"archivingID\":\"\(archiveID1)\"}")
+        sut.handleSignal(startSignal1)
 
         #expect(dataSource.setCallCount == 1)
-        #expect(dataSource.lastArchivingStatus == true)
+        #expect(dataSource.lastArchivingStatus == .archiving(archiveID1))
 
         // Stop
-        let stopSignal = VonageSignal(type: "archiving", data: "stop")
+        let stopSignal = VonageSignal(type: "archiving", data: "{\"action\":\"stop\"}")
         sut.handleSignal(stopSignal)
 
         #expect(dataSource.setCallCount == 2)
-        #expect(dataSource.lastArchivingStatus == false)
+        #expect(dataSource.lastArchivingStatus == .idle)
 
-        // Start again
-        sut.handleSignal(startSignal)
+        // Start again with different ID
+        let startSignal2 = VonageSignal(
+            type: "archiving", data: "{\"action\":\"start\",\"archivingID\":\"\(archiveID2)\"}")
+        sut.handleSignal(startSignal2)
 
         #expect(dataSource.setCallCount == 3)
-        #expect(dataSource.lastArchivingStatus == true)
+        #expect(dataSource.lastArchivingStatus == .archiving(archiveID2))
     }
 
     @Test("Plugin identifier returns correct value")

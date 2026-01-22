@@ -4,24 +4,14 @@
 
 import SwiftUI
 import VERACommonUI
-
-public struct ArchiveButtonState: Equatable {
-    public let isArchiving: Bool
-
-    public init(isArchiving: Bool) {
-        self.isArchiving = isArchiving
-    }
-
-    public static let idle = ArchiveButtonState(isArchiving: false)
-    public static let archiving = ArchiveButtonState(isArchiving: true)
-}
+import VERADomain
 
 struct ArchiveButton: View {
-    private let state: ArchiveButtonState
+    private let state: ArchivingState
     private let action: () -> Void
 
     init(
-        state: ArchiveButtonState,
+        state: ArchivingState,
         action: @escaping () -> Void = {}
     ) {
         self.state = state
@@ -40,8 +30,8 @@ struct ArchiveButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        ArchiveButton(state: .init(isArchiving: true))
-        ArchiveButton(state: .init(isArchiving: false))
+        ArchiveButton(state: .archiving(""))
+        ArchiveButton(state: .idle)
     }
     .padding()
     .background(.white)
@@ -49,8 +39,8 @@ struct ArchiveButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        ArchiveButton(state: .init(isArchiving: true))
-        ArchiveButton(state: .init(isArchiving: false))
+        ArchiveButton(state: .archiving(""))
+        ArchiveButton(state: .idle)
     }
     .padding()
     .background(VERACommonUIAsset.Colors.videoBackground.swiftUIColor)

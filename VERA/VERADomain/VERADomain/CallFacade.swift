@@ -63,10 +63,12 @@ public enum CallState {
 ///
 /// Represents if the current call is being recording or not.
 /// Use it to drive recording related UI display.
-public enum ArchivingState {
+public enum ArchivingState: Equatable {
     case idle
-    case recording
+    case archiving(ArchiveID)
 }
+
+public typealias ArchiveID = String
 
 /// Provides a publisher that emits participant state updates.
 ///

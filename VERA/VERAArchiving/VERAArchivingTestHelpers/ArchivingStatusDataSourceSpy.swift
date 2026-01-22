@@ -5,30 +5,31 @@
 import Combine
 import Foundation
 import VERAArchiving
+import VERADomain
 
 public final class ArchivingStatusDataSourceSpy: ArchivingStatusDataSource {
-    public var _archivingStatus = CurrentValueSubject<Bool, Never>(false)
-    public lazy var archivingStatus: AnyPublisher<Bool, Never> = {
+    public var _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
+    public lazy var archivingState: AnyPublisher<ArchivingState, Never> = {
         archivingStatusCallCount += 1
-        return _archivingStatus.eraseToAnyPublisher()
+        return _archivingState.eraseToAnyPublisher()
     }()
 
     public var archivingStatusCallCount = 0
     public var setCallCount = 0
     public var resetCallCount = 0
-    public var lastArchivingStatus: Bool?
+    public var lastArchivingStatus: ArchivingState?
 
     public init() {
     }
 
-    public func set(archivingStatus: Bool) {
+    public func set(archivingState: ArchivingState) {
         setCallCount += 1
-        lastArchivingStatus = archivingStatus
-        _archivingStatus.value = archivingStatus
+        lastArchivingStatus = archivingState
+        _archivingState.value = archivingState
     }
 
     public func reset() {
         resetCallCount += 1
-        _archivingStatus.value = false
+        _archivingState.value = .idle
     }
 }

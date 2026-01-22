@@ -9,10 +9,9 @@ import VERADomain
 public final class ArchiveButtonViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state = ArchiveButtonState.idle
+    @Published public var state: ArchivingState = .idle
 
     private let roomName: RoomName
-    private var archiveID: String?
     private let startArchivingUseCase: StartArchivingUseCase
     private let stopArchivingUseCase: StopArchivingUseCase
     private let archivingStatusDataSource: ArchivingStatusDataSource
@@ -34,19 +33,20 @@ public final class ArchiveButtonViewModel: ObservableObject {
         guard !initiated else { return }
         initiated = true
 
-        archivingStatusDataSource.archivingStatus
+        archivingStatusDataSource.archivingState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
-                self?.state = status ? .archiving : .idle
+                self?.state = status
             }
             .store(in: &cancellables)
     }
 
     public func onTap() {
         Task { @MainActor in
-            if let archiveID = archiveID, state.isArchiving {
+            switch state {
+            case .archiving(let archiveID):
                 await stopArchiving(withID: archiveID)
-            } else {
+            case .idle:
                 await startArchiving()
             }
         }
@@ -55,7 +55,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
     @MainActor
     private func startArchiving() async {
         do {
-            archiveID = try await startArchivingUseCase(.init(roomName: roomName))
+            _ = try await startArchivingUseCase(.init(roomName: roomName))
         } catch {
         }
     }
@@ -64,7 +64,6 @@ public final class ArchiveButtonViewModel: ObservableObject {
     private func stopArchiving(withID id: String) async {
         do {
             try await stopArchivingUseCase(.init(roomName: roomName, archiveID: id))
-            archiveID = nil
         } catch {
         }
     }
