@@ -299,6 +299,7 @@ struct DefaultArchivesRepositoryTests {
 
                 cancellable =
                     publisher
+                    .filter { !$0.isEmpty }
                     .sink(
                         receiveCompletion: { completion in
                             guard !hasResumed else { return }
@@ -314,8 +315,6 @@ struct DefaultArchivesRepositoryTests {
                             }
                         },
                         receiveValue: { value in
-                            // Skip empty arrays and wait for actual data
-                            guard !value.isEmpty else { return }
                             guard !hasResumed else { return }
                             hasResumed = true
                             cancellable?.cancel()
