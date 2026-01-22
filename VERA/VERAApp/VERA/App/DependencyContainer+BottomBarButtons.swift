@@ -25,7 +25,7 @@ extension DependencyContainer {
             let archiveFactory = archivingFactory
             let archiveButton = archiveFactory.makeArchivingButton(viewModel: archiveButtonViewModel)
             return .init(
-                label: state.archivingState == .recording
+                label: state.archivingState.isArchiving
                     ? String(localized: "Stop Recording") : String(localized: "Start Recording"),
                 image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
                 onTap: archiveButtonViewModel.onTap,
