@@ -7,6 +7,6 @@ import Foundation
 extension URL {
     public func meetingRoomURL(_ roomName: RoomName) -> URL {
         appendingPathComponent("room")
-        .appendingPathComponent(roomName)
+            .appendingPathComponent(roomName)
     }
 }
