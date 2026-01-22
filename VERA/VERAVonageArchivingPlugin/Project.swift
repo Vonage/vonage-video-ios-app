@@ -29,6 +29,7 @@ let project = Project(
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .target(name: "VERAVonageArchivingPlugin"),
                 .project(target: "VERAArchiving", path: "../VERAArchiving"),
+                .project(target: "VERAArchivingTestHelpers", path: "../VERAArchiving"),
             ],
             settings: createBaseBuildSettings()
         ),

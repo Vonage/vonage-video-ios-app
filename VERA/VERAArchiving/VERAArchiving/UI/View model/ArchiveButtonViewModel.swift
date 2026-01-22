@@ -34,7 +34,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
         guard !initiated else { return }
         initiated = true
 
-        archivingStatusDataSource.archivingStatus()
+        archivingStatusDataSource.archivingStatus
             .sink { [weak self] status in
                 Task { @MainActor [weak self] in
                     self?.state = status ? .archiving : .idle

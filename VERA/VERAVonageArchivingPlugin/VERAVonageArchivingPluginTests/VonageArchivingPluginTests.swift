@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import Testing
 import VERAArchiving
+import VERAArchivingTestHelpers
 import VERAVonage
 import VERAVonageArchivingPlugin
 

@@ -6,21 +6,17 @@ import Combine
 import Foundation
 
 public final class DefaultArchivingStatusDataSource: ArchivingStatusDataSource {
-
-    private var isArchiving = CurrentValueSubject<Bool, Never>(false)
+    private var _archivingStatus = CurrentValueSubject<Bool, Never>(false)
+    public lazy var archivingStatus: AnyPublisher<Bool, Never> = _archivingStatus.eraseToAnyPublisher()
 
     public init() {
     }
 
-    public func archivingStatus() -> AnyPublisher<Bool, Never> {
-        isArchiving.eraseToAnyPublisher()
-    }
-
     public func set(archivingStatus: Bool) {
-        isArchiving.value = archivingStatus
+        _archivingStatus.value = archivingStatus
     }
 
     public func reset() {
-        isArchiving.value = false
+        _archivingStatus.value = false
     }
 }

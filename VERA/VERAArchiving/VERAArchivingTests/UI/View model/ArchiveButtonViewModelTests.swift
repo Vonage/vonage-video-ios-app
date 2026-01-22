@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import Testing
 import VERAArchiving
+import VERAArchivingTestHelpers
 import VERADomain
 
 @Suite("Archive button view model tests")
@@ -20,7 +21,7 @@ struct ArchiveButtonViewModelTests {
     }
 
     @Test func setupSubscribesToArchivingStatus() async {
-        let dataSource = SpyArchivingStatusDataSource()
+        let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -32,8 +33,8 @@ struct ArchiveButtonViewModelTests {
     }
 
     @Test func setupChangesStateToArchivingWhenDataSourceReturnsTrue() async {
-        let dataSource = SpyArchivingStatusDataSource()
-        dataSource.subject.value = true
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingStatus.value = true
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -44,8 +45,8 @@ struct ArchiveButtonViewModelTests {
     }
 
     @Test func setupChangesStateToIdleWhenDataSourceReturnsFalse() async {
-        let dataSource = SpyArchivingStatusDataSource()
-        dataSource.subject.value = false
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingStatus.value = false
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -56,7 +57,7 @@ struct ArchiveButtonViewModelTests {
     }
 
     @Test func setupOnlySubscribesOnce() async {
-        let dataSource = SpyArchivingStatusDataSource()
+        let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -82,8 +83,8 @@ struct ArchiveButtonViewModelTests {
         let startUseCase = SpyStartArchivingUseCase()
         startUseCase.archiveID = "archive-123"
         let stopUseCase = SpyStopArchivingUseCase()
-        let dataSource = SpyArchivingStatusDataSource()
-        dataSource.subject.value = false
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingStatus.value = false
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
@@ -97,8 +98,8 @@ struct ArchiveButtonViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         // Change state to archiving
-        dataSource.subject.value = true
-        await sut.$state.values.first { $0.isArchiving }
+        dataSource._archivingStatus.value = true
+        _ = await sut.$state.values.first { $0.isArchiving }
 
         // Now tap to stop
         sut.onTap()
@@ -112,15 +113,15 @@ struct ArchiveButtonViewModelTests {
 
     @Test func onTapDoesNotStopArchivingWhenNoArchiveID() async {
         let stopUseCase = SpyStopArchivingUseCase()
-        let dataSource = SpyArchivingStatusDataSource()
-        dataSource.subject.value = true
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingStatus.value = true
         let sut = makeSUT(
             stopArchivingUseCase: stopUseCase,
             archivingStatusDataSource: dataSource
         )
 
         sut.setup()
-        await sut.$state.values.first { $0.isArchiving }
+        _ = await sut.$state.values.first { $0.isArchiving }
 
         sut.onTap()
 
@@ -133,21 +134,21 @@ struct ArchiveButtonViewModelTests {
         let startUseCase = SpyStartArchivingUseCase()
         startUseCase.archiveID = "new-archive-456"
         let stopUseCase = SpyStopArchivingUseCase()
-        let dataSource = SpyArchivingStatusDataSource()
+        let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
             archivingStatusDataSource: dataSource
         )
 
-        dataSource.subject.value = false
+        dataSource._archivingStatus.value = false
         sut.setup()
 
         sut.onTap()
         try? await Task.sleep(for: .milliseconds(100))
 
-        dataSource.subject.value = true
-        await sut.$state.values.first { $0.isArchiving }
+        dataSource._archivingStatus.value = true
+        _ = await sut.$state.values.first { $0.isArchiving }
 
         sut.onTap()
         try? await Task.sleep(for: .milliseconds(100))
@@ -159,7 +160,7 @@ struct ArchiveButtonViewModelTests {
         let startUseCase = SpyStartArchivingUseCase()
         startUseCase.archiveID = "archive-789"
         let stopUseCase = SpyStopArchivingUseCase()
-        let dataSource = SpyArchivingStatusDataSource()
+        let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
@@ -169,19 +170,19 @@ struct ArchiveButtonViewModelTests {
         sut.setup()
 
         // Start archiving
-        dataSource.subject.value = false
+        dataSource._archivingStatus.value = false
         sut.onTap()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Stop archiving
-        dataSource.subject.value = true
-        await sut.$state.values.first { $0.isArchiving }
+        dataSource._archivingStatus.value = true
+        _ = await sut.$state.values.first { $0.isArchiving }
         sut.onTap()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Try to start again
-        dataSource.subject.value = false
-        await sut.$state.values.first { !$0.isArchiving }
+        dataSource._archivingStatus.value = false
+        _ = await sut.$state.values.first { !$0.isArchiving }
         sut.onTap()
         try? await Task.sleep(for: .milliseconds(100))
 
@@ -205,8 +206,8 @@ struct ArchiveButtonViewModelTests {
         startUseCase.archiveID = "archive-error"
         let stopUseCase = SpyStopArchivingUseCase()
         stopUseCase.shouldThrowError = true
-        let dataSource = SpyArchivingStatusDataSource()
-        dataSource.subject.value = false
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingStatus.value = false
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
@@ -220,7 +221,7 @@ struct ArchiveButtonViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         // Change state to archiving
-        dataSource.subject.value = true
+        dataSource._archivingStatus.value = true
         _ = await sut.$state.values.first { $0.isArchiving }
 
         // Now tap to stop (should handle error)
@@ -236,7 +237,7 @@ struct ArchiveButtonViewModelTests {
         roomName: RoomName = "heart-of-gold",
         startArchivingUseCase: StartArchivingUseCase = SpyStartArchivingUseCase(),
         stopArchivingUseCase: StopArchivingUseCase = SpyStopArchivingUseCase(),
-        archivingStatusDataSource: ArchivingStatusDataSource = SpyArchivingStatusDataSource()
+        archivingStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy()
     ) -> ArchiveButtonViewModel {
         ArchiveButtonViewModel(
             roomName: roomName,
@@ -279,27 +280,5 @@ final class SpyStopArchivingUseCase: StopArchivingUseCase {
         if shouldThrowError {
             throw NSError(domain: "test", code: -1)
         }
-    }
-}
-
-final class SpyArchivingStatusDataSource: ArchivingStatusDataSource {
-    var archivingStatusCallCount = 0
-    var setCallCount = 0
-    var resetCallCount = 0
-    let subject = CurrentValueSubject<Bool, Never>(false)
-
-    func archivingStatus() -> AnyPublisher<Bool, Never> {
-        archivingStatusCallCount += 1
-        return subject.eraseToAnyPublisher()
-    }
-
-    func set(archivingStatus: Bool) {
-        setCallCount += 1
-        subject.value = archivingStatus
-    }
-
-    func reset() {
-        resetCallCount += 1
-        subject.value = false
     }
 }

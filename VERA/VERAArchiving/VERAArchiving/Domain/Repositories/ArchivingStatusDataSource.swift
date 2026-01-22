@@ -6,7 +6,7 @@ import Combine
 import Foundation
 
 public protocol ArchivingStatusDataSource {
-    func archivingStatus() -> AnyPublisher<Bool, Never>
+    var archivingStatus: AnyPublisher<Bool, Never> { get }
     func set(archivingStatus: Bool)
     func reset()
 }

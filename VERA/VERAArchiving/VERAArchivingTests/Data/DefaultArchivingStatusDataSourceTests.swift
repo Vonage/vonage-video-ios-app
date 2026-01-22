@@ -16,7 +16,7 @@ struct DefaultArchivingStatusDataSourceTests {
     func initialArchivingStatusIsFalse() async throws {
         let sut = makeSUT()
 
-        let status = await sut.archivingStatus().nextValue()
+        let status = await sut.archivingStatus.nextValue()
 
         #expect(status == false)
     }
@@ -29,7 +29,7 @@ struct DefaultArchivingStatusDataSourceTests {
 
         sut.set(archivingStatus: true)
 
-        let status = await sut.archivingStatus().nextValue()
+        let status = await sut.archivingStatus.nextValue()
         #expect(status == true)
     }
 
@@ -39,7 +39,7 @@ struct DefaultArchivingStatusDataSourceTests {
 
         sut.set(archivingStatus: false)
 
-        let status = await sut.archivingStatus().nextValue()
+        let status = await sut.archivingStatus.nextValue()
         #expect(status == false)
     }
 
@@ -49,17 +49,17 @@ struct DefaultArchivingStatusDataSourceTests {
 
         // Set to true
         sut.set(archivingStatus: true)
-        var status = await sut.archivingStatus().nextValue()
+        var status = await sut.archivingStatus.nextValue()
         #expect(status == true)
 
         // Set to false
         sut.set(archivingStatus: false)
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == false)
 
         // Set to true again
         sut.set(archivingStatus: true)
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == true)
     }
 
@@ -71,12 +71,12 @@ struct DefaultArchivingStatusDataSourceTests {
 
         // Set to true first
         sut.set(archivingStatus: true)
-        var status = await sut.archivingStatus().nextValue()
+        var status = await sut.archivingStatus.nextValue()
         #expect(status == true)
 
         // Reset
         sut.reset()
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == false)
     }
 
@@ -85,12 +85,12 @@ struct DefaultArchivingStatusDataSourceTests {
         let sut = makeSUT()
 
         // Initial state is already false
-        var status = await sut.archivingStatus().nextValue()
+        var status = await sut.archivingStatus.nextValue()
         #expect(status == false)
 
         // Reset
         sut.reset()
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == false)
     }
 
@@ -102,15 +102,15 @@ struct DefaultArchivingStatusDataSourceTests {
 
         // Multiple resets
         sut.reset()
-        var status = await sut.archivingStatus().nextValue()
+        var status = await sut.archivingStatus.nextValue()
         #expect(status == false)
 
         sut.reset()
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == false)
 
         sut.reset()
-        status = await sut.archivingStatus().nextValue()
+        status = await sut.archivingStatus.nextValue()
         #expect(status == false)
     }
 
