@@ -100,40 +100,7 @@ public struct MeetingRoomView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-
-                        if state.archivingState == .recording {
-                            VStack(spacing: 0) {
-                                Image(systemName: "record.circle")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                                .foregroundStyle(.red)
-                                .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
-                            }
-                            .frame(width: 30, height: 30, alignment: .center)
-                        }
-
-                        let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
-                        if !isIosAppOnMac && state.allowCameraControl {
-                            Button {
-                                onBottomBarInteraction()
-                                actions.onCameraSwitch()
-                            } label: {
-                                VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
-                            }.disabled(!state.isCameraEnabled)
-                        }
-                        if state.allowMicrophoneControl {
-                            Button {
-                                onBottomBarInteraction()
-                                actions.onToggleMic()
-                            } label: {
-                                VERACommonUIAsset.Images.audioMidLine.swiftUIImage
-                            }
-                        }
-                        if let roomURL = state.roomURL {
-                            ShareLink(item: roomURL) {
-                                VERACommonUIAsset.Images.shareLine.swiftUIImage
-                            }
-                        }
+                        toolbarContent
                     }
                 }.tint(.white)
             #endif
@@ -159,6 +126,67 @@ public struct MeetingRoomView: View {
                 }
             #endif
         }
+    }
+
+    // MARK: - Auto-hide Controls Functions
+
+    @ViewBuilder
+    private var toolbarContent: some View {
+        if state.archivingState.isArchiving {
+            recordingIndicator
+        }
+
+        if !isIosAppOnMac && state.allowCameraControl {
+            cameraSwitchButton
+        }
+
+        if state.allowMicrophoneControl {
+            microphoneButton
+        }
+
+        if let roomURL = state.roomURL {
+            shareButton(url: roomURL)
+        }
+    }
+
+    private var recordingIndicator: some View {
+        VStack(spacing: 0) {
+            Image(systemName: "record.circle")
+                .resizable()
+                .frame(width: 20, height: 20)
+                .foregroundStyle(.red)
+                .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
+        }
+        .frame(width: 30, height: 30, alignment: .center)
+    }
+
+    private var cameraSwitchButton: some View {
+        Button {
+            onBottomBarInteraction()
+            actions.onCameraSwitch()
+        } label: {
+            VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
+        }
+        .disabled(!state.isCameraEnabled)
+    }
+
+    private var microphoneButton: some View {
+        Button {
+            onBottomBarInteraction()
+            actions.onToggleMic()
+        } label: {
+            VERACommonUIAsset.Images.audioMidLine.swiftUIImage
+        }
+    }
+
+    private func shareButton(url: URL) -> some View {
+        ShareLink(item: url) {
+            VERACommonUIAsset.Images.shareLine.swiftUIImage
+        }
+    }
+
+    private var isIosAppOnMac: Bool {
+        ProcessInfo.processInfo.isiOSAppOnMac
     }
 
     // MARK: - Auto-hide Controls Functions
@@ -243,6 +271,6 @@ public struct MeetingRoomView: View {
             allowCameraControl: true,
             showParticipantList: true,
             callState: .connected,
-            archivingState: .recording),
+            archivingState: .archiving("")),
         actions: .init())
 }
