@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 import VERACore
+import VERADomain
 import os.log
 
 #if ARCHIVING_ENABLED
@@ -13,6 +14,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
     @Published var currentMeetingRoom: String?
+    @Published var alertItem: AlertItem?
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
@@ -22,6 +24,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         var archiveButtonViewModel: ArchiveButtonViewModel?
         var archivesViewModel: ArchivesViewModel?
     #endif
+
+    func showAlert(_ alert: AlertItem) {
+        alertItem = alert
+    }
 
     @MainActor
     public func go(to route: AppRoute) {

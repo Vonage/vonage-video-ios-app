@@ -113,6 +113,7 @@ private func createDependencies() -> [TargetDependency] {
 /// - Returns: A `Settings` object containing base and configuration-specific settings.
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = baseBuildSettings()
+
     var flags: [String] = []
 
     if isChatEnabled() {

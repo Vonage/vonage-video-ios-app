@@ -29,7 +29,6 @@ struct VERAApp: App {
     }
 
     @State private var previousPath = NavigationPath()
-    @State private var alertItem: AlertItem?
     @State private var showChat = false
 
     var body: some Scene {
@@ -65,6 +64,7 @@ struct VERAApp: App {
                                 }
                             #endif
                         }
+                        .alert(item: $navigationCoordinator.alertItem) { $0.view }
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
@@ -73,7 +73,7 @@ struct VERAApp: App {
                 }
             }
             .environmentObject(navigationCoordinator)
-            .alert(item: $alertItem) { $0.view }
+            .alert(item: $navigationCoordinator.alertItem) { $0.view }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }
@@ -141,7 +141,12 @@ struct VERAApp: App {
             viewModel = existingViewModel
         } else {
             #if ARCHIVING_ENABLED
-                let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(roomName: roomName)
+                let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(
+                    roomName: roomName,
+                    showAlert: { [weak navigationCoordinator] alertItem in
+                        navigationCoordinator?.showAlert(alertItem)
+                    }
+                )
                 archiveButtonViewModel.setup()
             #endif
             let (_, newViewModel) = meetingRoomFactory.make(

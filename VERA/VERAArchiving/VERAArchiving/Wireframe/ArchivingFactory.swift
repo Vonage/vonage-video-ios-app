@@ -22,7 +22,8 @@ public final class ArchivingFactory {
     }
 
     public func makeArchivingButton(
-        roomName: RoomName
+        roomName: RoomName,
+        showAlert: @escaping (AlertItem) -> Void
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
         let viewModel = ArchiveButtonViewModel(
             roomName: roomName,
@@ -30,7 +31,8 @@ public final class ArchivingFactory {
                 archivingDataSource: archivingDataSource),
             stopArchivingUseCase: DefaultStopArchivingUseCase(
                 archivingDataSource: archivingDataSource),
-            archivingStatusDataSource: archivingStatusDataSource)
+            archivingStatusDataSource: archivingStatusDataSource,
+            showAlert: showAlert)
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
 

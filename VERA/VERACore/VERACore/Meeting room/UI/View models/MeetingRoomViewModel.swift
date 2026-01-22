@@ -151,7 +151,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             switch archivingState {
             case .idle:
                 self.toast = .init(message: "Session recording stopped", mode: .info)
-            case .archiving(_):
+            case .archiving:
                 self.toast = .init(message: "Session recording started", mode: .info)
             }
         }

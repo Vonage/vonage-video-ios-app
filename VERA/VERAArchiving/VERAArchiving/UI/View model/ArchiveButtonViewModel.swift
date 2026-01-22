@@ -15,18 +15,21 @@ public final class ArchiveButtonViewModel: ObservableObject {
     private let startArchivingUseCase: StartArchivingUseCase
     private let stopArchivingUseCase: StopArchivingUseCase
     private let archivingStatusDataSource: ArchivingStatusDataSource
+    private let showAlert: (AlertItem) -> Void
     private var initiated = false
 
     public init(
         roomName: RoomName,
         startArchivingUseCase: StartArchivingUseCase,
         stopArchivingUseCase: StopArchivingUseCase,
-        archivingStatusDataSource: ArchivingStatusDataSource
+        archivingStatusDataSource: ArchivingStatusDataSource,
+        showAlert: @escaping (AlertItem) -> Void
     ) {
         self.roomName = roomName
         self.startArchivingUseCase = startArchivingUseCase
         self.stopArchivingUseCase = stopArchivingUseCase
         self.archivingStatusDataSource = archivingStatusDataSource
+        self.showAlert = showAlert
     }
 
     public func setup() {
@@ -42,14 +45,43 @@ public final class ArchiveButtonViewModel: ObservableObject {
     }
 
     public func onTap() {
-        Task { @MainActor in
-            switch state {
-            case .archiving(let archiveID):
-                await stopArchiving(withID: archiveID)
-            case .idle:
-                await startArchiving()
-            }
+        switch state {
+        case .archiving(let archiveID):
+            showStopRecordingConfirmation(archiveID: archiveID)
+        case .idle:
+            showStartRecordingConfirmation()
         }
+    }
+
+    private func showStartRecordingConfirmation() {
+        showAlert(
+            AlertItem(
+                title: String(localized: "Start Recording?", bundle: .veraArchiving),
+                message:
+                    String(
+                        localized: "start.recording.message",
+                        bundle: .veraArchiving),
+                onConfirm: { [weak self] in
+                    Task { @MainActor in
+                        await self?.startArchiving()
+                    }
+                }
+            ))
+    }
+
+    private func showStopRecordingConfirmation(archiveID: String) {
+        showAlert(
+            AlertItem(
+                title:
+                    String(localized: "Stop Recording?", bundle: .veraArchiving),
+                message:
+                    String(localized: "stop.recording.message", bundle: .veraArchiving),
+                onConfirm: { [weak self] in
+                    Task { @MainActor in
+                        await self?.stopArchiving(withID: archiveID)
+                    }
+                }
+            ))
     }
 
     @MainActor
