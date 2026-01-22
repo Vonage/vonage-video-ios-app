@@ -21,11 +21,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         }
         lastRoomName = request.roomName
 
-        if let startResponse = startResponse {
-            return startResponse
-        } else {
-            return .init(archiveId: "123")
-        }
+        return startResponse ?? .init(archiveId: "123")
     }
 
     public func stopArchiving(
@@ -37,11 +33,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         lastRoomName = request.roomName
         lastArchiveID = request.archiveID
 
-        if let stopResponse = stopResponse {
-            return stopResponse
-        } else {
-            return .init(archiveId: "123")
-        }
+        return stopResponse ?? .init(archiveId: "123")
     }
 
 
