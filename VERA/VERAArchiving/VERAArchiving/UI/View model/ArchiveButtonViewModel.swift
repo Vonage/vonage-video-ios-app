@@ -9,7 +9,7 @@ import VERADomain
 public final class ArchiveButtonViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
-    @MainActor @Published public var state = ArchiveButtonState.idle
+    @Published public var state = ArchiveButtonState.idle
 
     private let roomName: RoomName
     private var archiveID: String?
@@ -35,10 +35,9 @@ public final class ArchiveButtonViewModel: ObservableObject {
         initiated = true
 
         archivingStatusDataSource.archivingStatus
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
-                Task { @MainActor [weak self] in
-                    self?.state = status ? .archiving : .idle
-                }
+                self?.state = status ? .archiving : .idle
             }
             .store(in: &cancellables)
     }
