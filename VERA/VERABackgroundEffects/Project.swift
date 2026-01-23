@@ -2,41 +2,41 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(
-    name: "VERABackgroundBlur",
+    name: "VERABackgroundEffects",
     targets: [
         .target(
-            name: "VERABackgroundBlur",
+            name: "VERABackgroundEffects",
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
-            bundleId: "com.vonage.VERABackgroundBlur",
+            bundleId: "com.vonage.VERABackgroundEffects",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            sources: ["VERABackgroundBlur/**"],
+            sources: ["VERABackgroundEffects/**"],
             resources: [
-                "VERABackgroundBlur/Resources/**"
+                "VERABackgroundEffects/Resources/**"
             ],
-            scripts: [.swiftLint(targetName: "VERABackgroundBlur")],
+            scripts: [.swiftLint(targetName: "VERABackgroundEffects")],
             dependencies: [],
             settings: createBaseBuildSettings()
         ),
         .target(
-            name: "VERABackgroundBlurTests",
+            name: "VERABackgroundEffectsTests",
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
-            bundleId: "com.vonage.VERABackgroundBlurTests",
+            bundleId: "com.vonage.VERABackgroundEffectsTests",
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            sources: ["VERABackgroundBlurTests/**"],
+            sources: ["VERABackgroundEffectsTests/**"],
             dependencies: [
-                .target(name: "VERABackgroundBlur")
+                .target(name: "VERABackgroundEffects")
             ],
             settings: createBaseBuildSettings()
         ),
     ],
     schemes: [
         .scheme(
-            name: "VERABackgroundBlurTests",
+            name: "VERABackgroundEffectsTests",
             shared: true,
-            buildAction: .buildAction(targets: ["VERABackgroundBlurTests"]),
-            testAction: .targets(["VERABackgroundBlurTests"], configuration: .debug),
+            buildAction: .buildAction(targets: ["VERABackgroundEffectsTests"]),
+            testAction: .targets(["VERABackgroundEffectsTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
         )
     ]

@@ -112,7 +112,7 @@ private func createDependencies() -> [TargetDependency] {
 
     if areBackgroundEffectsEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERABackgroundBlur", path: "VERABackgroundBlur")
+            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
         ])
     }
     return dependencies
