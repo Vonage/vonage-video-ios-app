@@ -5,25 +5,26 @@
 import Foundation
 import VERADomain
 
-public final class PlayRecordingUseCase {
+public protocol PlayRecordingUseCase {
+    func callAsFunction(_ archive: Archive) async throws
+}
 
-    private let archiveRecordingsRepository: ArchiveRecordingsRepository
+public final class DefaultPlayRecordingUseCase: PlayRecordingUseCase {
+
+    public enum Error: Swift.Error {
+        case missingURL
+    }
+
     private let onPlay: (ArchiveRecording) -> Void
 
-    public init(
-        archiveRecordingsRepository: ArchiveRecordingsRepository,
-        onPlay: @escaping (ArchiveRecording) -> Void
-    ) {
-        self.archiveRecordingsRepository = archiveRecordingsRepository
+    public init(onPlay: @escaping (ArchiveRecording) -> Void) {
         self.onPlay = onPlay
     }
 
-    @BackgroundActor
     public func callAsFunction(_ archive: Archive) async throws {
-        let recording = try await archiveRecordingsRepository.getRecording(archive)
-
-        await MainActor.run {
-            onPlay(recording)
+        guard let url = archive.url else {
+            throw Error.missingURL
         }
+        onPlay(ArchiveRecording(url: url))
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct AlertItem: Identifiable {
+public struct AlertItem: Identifiable, Equatable {
     public let id = UUID()
     public let title: String
     public let message: String
@@ -62,5 +62,9 @@ public struct AlertItem: Identifiable {
             message: "Failed to download recording: \(errorMessage)",
             onConfirm: onConfirm
         )
+    }
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id && lhs.title == rhs.title && lhs.message == rhs.message
     }
 }

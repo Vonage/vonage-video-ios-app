@@ -21,7 +21,7 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public func callAsFunction(
         roomName: RoomName
-    ) async throws -> any VERACore.CallFacade {
+    ) async throws -> any CallFacade {
         recordedActions.append(.connect(roomName))
         return call
     }
@@ -38,7 +38,7 @@ public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public func callAsFunction(
         roomName: RoomName
-    ) async throws -> any VERACore.CallFacade {
+    ) async throws -> any CallFacade {
         throw Error.errorMock
     }
 }

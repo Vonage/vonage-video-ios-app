@@ -4,18 +4,19 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
-struct ChatBadgeButton: View {
+public struct ChatBadgeButton: View {
 
     private let unreadMessagesCount: Int
     private let onShowChat: () -> Void
 
-    init(unreadMessagesCount: Int, onShowChat: @escaping () -> Void) {
+    public init(unreadMessagesCount: Int, onShowChat: @escaping () -> Void) {
         self.unreadMessagesCount = unreadMessagesCount
         self.onShowChat = onShowChat
     }
 
-    var body: some View {
+    public var body: some View {
         ControlImageButton(
             isActive: true,
             image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,

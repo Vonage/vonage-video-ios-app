@@ -37,7 +37,7 @@ public struct ParticipantsListView: View {
 
                 participantsList
             }
-            .navigationTitle("Participants (\(participantsCount))")
+            .navigationTitle(String(localized: "Participants (\(participantsCount))"))
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
             #endif

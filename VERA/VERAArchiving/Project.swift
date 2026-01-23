@@ -29,6 +29,20 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAArchivingTests/**"],
             dependencies: [
+                .target(name: "VERAArchiving"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
+                .project(target: "VERAArchivingTestHelpers", path: "../VERAArchiving"),
+            ],
+            settings: createBaseBuildSettings()
+        ),
+        .target(
+            name: "VERAArchivingTestHelpers",
+            destinations: [.iPhone, .iPad, .mac],
+            product: .framework,
+            bundleId: "com.vonage.VERAArchivingTestHelpers",
+            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            sources: ["VERAArchivingTestHelpers/**"],
+            dependencies: [
                 .target(name: "VERAArchiving")
             ],
             settings: createBaseBuildSettings()

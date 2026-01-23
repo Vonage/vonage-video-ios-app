@@ -5,7 +5,7 @@
 import CallKit
 import Foundation
 import OpenTok
-import VERACore
+import VERADomain
 import VERAVonage
 
 /// Integrates CallKit with an active Vonage call.
@@ -34,7 +34,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// The active call façade reference, used to perform actions
     /// such as `disconnect()`, `setOnHold(_:)`, and `muteLocalMedia(_:)`.
-    public weak var call: (any VERACore.CallFacade)?
+    public weak var call: (any CallFacade)?
 
     /// Manages CallKit interactions for starting/ending calls.
     var callManager: VERACallManager!

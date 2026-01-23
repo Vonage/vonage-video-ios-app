@@ -87,7 +87,8 @@ private func createDependencies() -> [TargetDependency] {
 
     if isArchivingEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERAArchiving", path: "VERAArchiving")
+            .project(target: "VERAArchiving", path: "VERAArchiving"),
+            .project(target: "VERAVonageArchivingPlugin", path: "VERAVonageArchivingPlugin"),
         ])
     }
 
@@ -113,14 +114,22 @@ private func createDependencies() -> [TargetDependency] {
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = baseBuildSettings()
 
+    var flags: [String] = []
+
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
-        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
+        flags.append("CHAT_ENABLED")
+        print("Chat feature enabled in build settings.")
     }
 
     if isArchivingEnabled() {
         baseSettings["ARCHIVING_ENABLED"] = "1"
-        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) ARCHIVING_ENABLED"
+        flags.append("ARCHIVING_ENABLED")
+        print("Archiving feature enabled in build settings.")
+    }
+
+    if !flags.isEmpty {
+        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) \(flags.joined(separator: " "))"
     }
 
     return .settings(
@@ -156,6 +165,10 @@ private func createBuildSettings() -> Settings {
 /// - SeeAlso: ``createDependencies()``, ``createBuildSettings()``, `combinedPlistValues()`
 let project = Project(
     name: "VERA",
+    options: .options(
+        defaultKnownRegions: ["en", "es"],
+        developmentRegion: "en"
+    ),
     targets: [
         .target(
             name: "VERA",
@@ -167,6 +180,8 @@ let project = Project(
                 with: [
                     "CFBundleName": "VERA",
                     "CFBundleDisplayName": "VERA",
+                    "CFBundleDevelopmentRegion": "en",
+                    "CFBundleLocalizations": .array(["en", "es"]),
                     "LSApplicationCategoryType": "public.app-category.video",
                     "NSCameraUsageDescription":
                         "VERA needs access to your camera to share your video during video calls and meetings.",

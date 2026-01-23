@@ -31,6 +31,6 @@ public final class DefaultStopArchivingUseCase: StopArchivingUseCase {
         let newRequest = StopArchivingDataSourceRequest(
             roomName: request.roomName,
             archiveID: request.archiveID)
-        try await archivingDataSource.stopArchiving(newRequest)
+        _ = try await archivingDataSource.stopArchiving(newRequest)
     }
 }

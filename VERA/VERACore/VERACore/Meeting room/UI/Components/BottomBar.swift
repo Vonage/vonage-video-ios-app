@@ -6,6 +6,27 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+public struct BottomBarButton: Identifiable {
+    public let id: String
+    public let label: String
+    public let image: Image
+    public let content: () -> AnyView
+    public let onTap: () -> Void
+
+    public init<Content: View>(
+        label: String,
+        image: Image,
+        onTap: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.id = label
+        self.label = label
+        self.image = image
+        self.onTap = onTap
+        self.content = { AnyView(content()) }
+    }
+}
+
 public struct MeetingRoomActions {
     let onShare: (String) -> Void
     let onRetry: () -> Void
@@ -15,7 +36,6 @@ public struct MeetingRoomActions {
     let onEndCall: () -> Void
     let onToggleParticipants: () -> Void
     let onToggleLayout: () -> Void
-    let onShowChat: () -> Void
 
     init(
         onShare: @escaping (String) -> Void = { _ in },
@@ -26,7 +46,6 @@ public struct MeetingRoomActions {
         onEndCall: @escaping () -> Void = {},
         onToggleParticipants: @escaping () -> Void = {},
         onToggleLayout: @escaping () -> Void = {},
-        onShowChat: @escaping () -> Void = {}
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
@@ -36,7 +55,6 @@ public struct MeetingRoomActions {
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
         self.onToggleLayout = onToggleLayout
-        self.onShowChat = onShowChat
     }
 }
 
@@ -45,36 +63,33 @@ struct BottomBar: View {
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let participantsCount: Int
-    private let unreadMessagesCount: Int
-    private let showChatButton: Bool
     private let allowMicrophoneControl: Bool
     private let allowCameraControl: Bool
     private let showParticipantList: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
+    @Binding private var extraButtons: [BottomBarButton]
 
     init(
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
         participantsCount: Int,
-        unreadMessagesCount: Int,
-        showChatButton: Bool,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
         showParticipantList: Bool,
         currentLayout: MeetingRoomLayout,
-        actions: MeetingRoomActions
+        actions: MeetingRoomActions,
+        extraButtons: Binding<[BottomBarButton]> = .constant([])
     ) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
         self.participantsCount = participantsCount
-        self.unreadMessagesCount = unreadMessagesCount
         self.currentLayout = currentLayout
-        self.showChatButton = showChatButton
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.actions = actions
+        self._extraButtons = extraButtons
     }
 
     var body: some View {
@@ -102,11 +117,7 @@ struct BottomBar: View {
                         participantsCount: participantsCount,
                         onToggleParticipants: actions.onToggleParticipants)
                 }
-                if showChatButton {
-                    ChatBadgeButton(
-                        unreadMessagesCount: unreadMessagesCount,
-                        onShowChat: actions.onShowChat)
-                }
+                buildExtraButtons()
                 EndCallControlButton(action: actions.onEndCall)
             }
             .padding(.horizontal, 8)
@@ -114,6 +125,36 @@ struct BottomBar: View {
         }
         .background(BottomBarBackground())
         .padding(.bottom, 2)
+    }
+
+    @ViewBuilder
+    private func buildExtraButtons() -> some View {
+        switch extraButtons.count {
+        case 0:
+            EmptyView()
+        case 1:
+            if let button = extraButtons.first {
+                button.content()
+            } else {
+                EmptyView()
+            }
+        default:
+            Menu {
+                ForEach(extraButtons) { button in
+                    Button(action: button.onTap) {
+                        HStack {
+                            button.image
+                                .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            Text(button.label)
+                                .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                        }
+                    }
+                }
+            } label: {
+                ButtonImage(image: Image(systemName: "ellipsis.circle"))
+                    .accessibilityLabel("More options")
+            }
+        }
     }
 }
 
@@ -149,8 +190,6 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
-            unreadMessagesCount: 5,
-            showChatButton: true,
             allowMicrophoneControl: true,
             allowCameraControl: true,
             showParticipantList: true,
@@ -166,8 +205,6 @@ struct BottomBarBackground: View {
             isMicEnabled: false,
             isCameraEnabled: true,
             participantsCount: 25,
-            unreadMessagesCount: 5,
-            showChatButton: true,
             allowMicrophoneControl: true,
             allowCameraControl: true,
             showParticipantList: true,

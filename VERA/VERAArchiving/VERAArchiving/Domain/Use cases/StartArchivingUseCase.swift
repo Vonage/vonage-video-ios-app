@@ -13,7 +13,7 @@ public struct StartArchivingRequest {
 }
 
 public protocol StartArchivingUseCase {
-    func callAsFunction(_ request: StartArchivingRequest) async throws
+    func callAsFunction(_ request: StartArchivingRequest) async throws -> ArchiveID
 }
 
 public final class DefaultStartArchivingUseCase: StartArchivingUseCase {
@@ -25,7 +25,9 @@ public final class DefaultStartArchivingUseCase: StartArchivingUseCase {
 
     public func callAsFunction(
         _ request: StartArchivingRequest
-    ) async throws {
-        try await archivingDataSource.startArchiving(.init(roomName: request.roomName))
+    ) async throws -> ArchiveID {
+        let request = StartArchivingDataSourceRequest(roomName: request.roomName)
+        let response = try await archivingDataSource.startArchiving(request)
+        return response.archiveId
     }
 }

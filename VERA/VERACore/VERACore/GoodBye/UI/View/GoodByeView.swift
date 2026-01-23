@@ -117,7 +117,7 @@ public struct VerticalGoodByeContentView<ContentView: View>: View {
                 .padding(.horizontal)
         } bottomSide: {
             additionalContentView()
-                .padding()
+                .padding(.top)
         }
     }
 }

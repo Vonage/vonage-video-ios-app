@@ -50,14 +50,23 @@ public final class VonageCall: CallFacade {
     /// - Important: Always subscribe to handle errors surfaced during call operations.
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
-    public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
+    private var _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
 
     /// A publisher for local media publishing state (audio/video), never fails.
     ///
     /// Emits when local audio/video publishing toggles change or when muted/unmuted in bulk.
     ///
     /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
-    public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+    public lazy var statePublisher: AnyPublisher<SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+
+    private var _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
+
+    /// A publisher for call recording state, never fails.
+    ///
+    /// Emits ArchivingState events whenever the call recording state changes.
+    ///
+    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
     /// A unique identifier for this call instance.
     ///
@@ -162,6 +171,24 @@ public final class VonageCall: CallFacade {
         }
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
+        }
+        session.onArchiveStarted = { [weak self] archiveID in
+            self?._archivingState.value = .archiving(archiveID)
+
+            do {
+                let signal = try VonageSignal.archivingState(archiveID)
+                self?.handleSignal(signal)
+            } catch {
+            }
+        }
+        session.onArchiveStopped = { [weak self] _ in
+            self?._archivingState.value = .idle
+
+            do {
+                let signal = try VonageSignal.idleArchivingState()
+                self?.handleSignal(signal)
+            } catch {
+            }
         }
     }
 

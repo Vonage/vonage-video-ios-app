@@ -1,19 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "OK" : {
-      "extractionState" : "stale",
+    "Start Recording" : {
+      "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Comenzar grabación"
+          }
+        }
+      }
+    },
+    "Stop Recording" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar grabación"
           }
         }
       }

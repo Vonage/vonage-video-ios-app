@@ -17,6 +17,7 @@ import VERAVonageCallKitPlugin
 
 #if ARCHIVING_ENABLED
     import VERAArchiving
+    import VERAVonageArchivingPlugin
 #endif
 
 final class DependencyContainer {
@@ -87,6 +88,9 @@ final class DependencyContainer {
         #if CHAT_ENABLED
             registry.registerPlugin(plugin: vonageChatPlugin)
         #endif
+        #if ARCHIVING_ENABLED
+            registry.registerPlugin(plugin: vonageArchivingPlugin)
+        #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
     }()
@@ -125,9 +129,19 @@ final class DependencyContainer {
 
     #if ARCHIVING_ENABLED
 
+        lazy var vonageArchivingPlugin = VonageArchivingPlugin(
+            archivingStatusDataSource: archivingStatusDataSource)
+
+        lazy var archivingStatusDataSource = DefaultArchivingStatusDataSource()
+
         lazy var archivingFactory = ArchivingFactory(
             archivesRepository: archivesRepository,
-            archiveRecordingsRepository: archiveRecordingsRepository)
+            archivingDataSource: archivingDataSource,
+            archivingStatusDataSource: archivingStatusDataSource)
+
+        lazy var archivingDataSource: ArchivingDataSource = DefaultArchivingDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient)
 
         lazy var archivesRepository: ArchivesRepository = {
             DefaultArchivesRepository(archivesDataSource: archivesDataSource)
@@ -137,9 +151,6 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
-
-        lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
-            httpClient: httpClient)
 
     #endif
 }

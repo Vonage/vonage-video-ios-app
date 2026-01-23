@@ -7,9 +7,9 @@ import VERACommonUI
 import VERADomain
 
 public struct MeetingRoomView: View {
-
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
+    @Binding private var extraButtons: [BottomBarButton]
 
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
@@ -18,10 +18,12 @@ public struct MeetingRoomView: View {
 
     public init(
         state: MeetingRoomState,
-        actions: MeetingRoomActions
+        actions: MeetingRoomActions,
+        extraButtons: Binding<[BottomBarButton]> = .constant([])
     ) {
         self.state = state
         self.actions = actions
+        self._extraButtons = extraButtons
     }
 
     public var body: some View {
@@ -46,13 +48,12 @@ public struct MeetingRoomView: View {
                         isMicEnabled: state.isMicEnabled,
                         isCameraEnabled: state.isCameraEnabled,
                         participantsCount: state.participantsCount,
-                        unreadMessagesCount: state.unreadMessagesCount,
-                        showChatButton: state.showChatButton,
                         allowMicrophoneControl: state.allowMicrophoneControl,
                         allowCameraControl: state.allowCameraControl,
                         showParticipantList: state.showParticipantList,
                         currentLayout: state.layout,
-                        actions: wrappedActions
+                        actions: wrappedActions,
+                        extraButtons: _extraButtons
                     )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
                     .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
@@ -99,28 +100,7 @@ public struct MeetingRoomView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        let isIosAppOnMac = ProcessInfo.processInfo.isiOSAppOnMac
-                        if !isIosAppOnMac && state.allowCameraControl {
-                            Button {
-                                onBottomBarInteraction()
-                                actions.onCameraSwitch()
-                            } label: {
-                                VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
-                            }.disabled(!state.isCameraEnabled)
-                        }
-                        if state.allowMicrophoneControl {
-                            Button {
-                                onBottomBarInteraction()
-                                actions.onToggleMic()
-                            } label: {
-                                VERACommonUIAsset.Images.audioMidLine.swiftUIImage
-                            }
-                        }
-                        if let roomURL = state.roomURL {
-                            ShareLink(item: roomURL) {
-                                VERACommonUIAsset.Images.shareLine.swiftUIImage
-                            }
-                        }
+                        toolbarContent
                     }
                 }.tint(.white)
             #endif
@@ -146,6 +126,67 @@ public struct MeetingRoomView: View {
                 }
             #endif
         }
+    }
+
+    // MARK: - Auto-hide Controls Functions
+
+    @ViewBuilder
+    private var toolbarContent: some View {
+        if state.archivingState.isArchiving {
+            recordingIndicator
+        }
+
+        if !isIosAppOnMac && state.allowCameraControl {
+            cameraSwitchButton
+        }
+
+        if state.allowMicrophoneControl {
+            microphoneButton
+        }
+
+        if let roomURL = state.roomURL {
+            shareButton(url: roomURL)
+        }
+    }
+
+    private var recordingIndicator: some View {
+        VStack(spacing: 0) {
+            Image(systemName: "record.circle")
+                .resizable()
+                .frame(width: 20, height: 20)
+                .foregroundStyle(.red)
+                .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
+        }
+        .frame(width: 30, height: 30, alignment: .center)
+    }
+
+    private var cameraSwitchButton: some View {
+        Button {
+            onBottomBarInteraction()
+            actions.onCameraSwitch()
+        } label: {
+            VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
+        }
+        .disabled(!state.isCameraEnabled)
+    }
+
+    private var microphoneButton: some View {
+        Button {
+            onBottomBarInteraction()
+            actions.onToggleMic()
+        } label: {
+            VERACommonUIAsset.Images.audioMidLine.swiftUIImage
+        }
+    }
+
+    private func shareButton(url: URL) -> some View {
+        ShareLink(item: url) {
+            VERACommonUIAsset.Images.shareLine.swiftUIImage
+        }
+    }
+
+    private var isIosAppOnMac: Bool {
+        ProcessInfo.processInfo.isiOSAppOnMac
     }
 
     // MARK: - Auto-hide Controls Functions
@@ -211,10 +252,6 @@ public struct MeetingRoomView: View {
             onToggleLayout: {
                 onBottomBarInteraction()
                 actions.onToggleLayout()
-            },
-            onShowChat: {
-                onBottomBarInteraction()
-                actions.onShowChat()
             }
         )
     }
@@ -230,10 +267,10 @@ public struct MeetingRoomView: View {
             participants: [],
             layout: .activeSpeaker,
             activeSpeakerId: nil,
-            showChatButton: true,
             allowMicrophoneControl: true,
             allowCameraControl: true,
             showParticipantList: true,
-            callState: .connected),
+            callState: .connected,
+            archivingState: .archiving("")),
         actions: .init())
 }

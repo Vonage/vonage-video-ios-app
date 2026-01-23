@@ -56,7 +56,7 @@ struct ArchiveList: View {
                                     HStack(alignment: .center) {
                                         VERACommonUIAsset.Images.downloadLine.swiftUIImage
                                             .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-                                        Text("Download")
+                                        Text("Download", bundle: .veraArchiving)
                                             .adaptiveFont(.bodyBase)
                                             .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
                                     }

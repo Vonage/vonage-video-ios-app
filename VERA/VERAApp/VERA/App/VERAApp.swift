@@ -29,7 +29,6 @@ struct VERAApp: App {
     }
 
     @State private var previousPath = NavigationPath()
-    @State private var alertItem: AlertItem?
     @State private var showChat = false
 
     var body: some Scene {
@@ -58,7 +57,14 @@ struct VERAApp: App {
                     makeMeetingRoom(roomName: currentRoom)
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
+
+                            #if ARCHIVING_ENABLED
+                                Task {
+                                    await navigationCoordinator.archivesViewModel?.loadData()
+                                }
+                            #endif
                         }
+                        .alert(item: $navigationCoordinator.alertItem) { $0.view }
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
@@ -67,7 +73,7 @@ struct VERAApp: App {
                 }
             }
             .environmentObject(navigationCoordinator)
-            .alert(item: $alertItem) { $0.view }
+            .alert(item: $navigationCoordinator.alertItem) { $0.view }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }
@@ -134,14 +140,28 @@ struct VERAApp: App {
         {
             viewModel = existingViewModel
         } else {
-            let (_, newViewModel) = meetingRoomFactory.make(roomName: roomName) {
-                showChatIfNeeded()
-            } onBack: {
+            #if ARCHIVING_ENABLED
+                let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(
+                    roomName: roomName,
+                    showAlert: { [weak navigationCoordinator] alertItem in
+                        navigationCoordinator?.showAlert(alertItem)
+                    }
+                )
+                archiveButtonViewModel.setup()
+            #endif
+            let (_, newViewModel) = meetingRoomFactory.make(
+                roomName: roomName,
+                getExternalButtons: getBottomBarButtons
+            ) {
                 navigationCoordinator.go(to: .waitingRoom(roomName))
             } onNext: {
                 navigationCoordinator.go(to: .goodbye(roomName))
             }
+
             navigationCoordinator.meetingRoomViewModel = newViewModel
+            #if ARCHIVING_ENABLED
+                navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
+            #endif
             viewModel = newViewModel
         }
 
@@ -152,10 +172,25 @@ struct VERAApp: App {
             }
     }
 
-    private func showChatIfNeeded() {
+    private func getBottomBarButtons(
+        _ state: MeetingRoomButtonsState
+    ) -> [BottomBarButton] {
         #if CHAT_ENABLED
-            showChat = true
+            var extraButtons: [BottomBarButton] = [
+                dependencyContainer.mapToChatBottomBarButton(onShowChat: {
+                    showChat = true
+                })
+            ]
+        #else
+            var extraButtons: [BottomBarButton] = []
         #endif
+
+        #if ARCHIVING_ENABLED
+            if let archiveButtonViewModel = navigationCoordinator.archiveButtonViewModel {
+                extraButtons.append(dependencyContainer.mapToArchiveBottomBarButton(archiveButtonViewModel, state))
+            }
+        #endif
+        return extraButtons
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
@@ -184,7 +219,17 @@ struct VERAApp: App {
 
     func makeGoodbyeAdditionalContentView(roomName: RoomName) -> some View {
         #if ARCHIVING_ENABLED
-            return archiveFactory.make(roomName: roomName).view
+            if let viewModel = navigationCoordinator.archivesViewModel {
+                return AnyView(archiveFactory.make(viewModel: viewModel))
+            } else {
+                let (view, viewModel) = archiveFactory.make(
+                    roomName: roomName
+                ) { recording in
+                    UIApplication.shared.open(recording.url)
+                }
+                navigationCoordinator.archivesViewModel = viewModel
+                return AnyView(view)
+            }
         #else
             return EmptyView()
         #endif

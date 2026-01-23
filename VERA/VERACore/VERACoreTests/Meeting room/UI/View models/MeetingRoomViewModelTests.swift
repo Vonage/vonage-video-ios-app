@@ -259,24 +259,6 @@ struct MeetingRoomViewModelTests {
     }
 
     @Test
-    func showChatURLIfActivatedInAppConfig() async throws {
-        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: true))
-
-        let contentState = try await when(given: appConfig)
-
-        #expect(contentState.showChatButton == true)
-    }
-
-    @Test
-    func hideChatURLIfDeactivatedInAppConfig() async throws {
-        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(allowChat: false))
-
-        let contentState = try await when(given: appConfig)
-
-        #expect(contentState.showChatButton == false)
-    }
-
-    @Test
     func activateMicrophoneControlIfActivatedInAppConfig() async throws {
         let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: true))
 
@@ -391,7 +373,8 @@ struct MeetingRoomViewModelTests {
             requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat, onNext: onNext))
+            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext),
+            getExternalButtons: { _ in [] })
     }
 
     // MARK: Helper
@@ -400,7 +383,6 @@ struct MeetingRoomViewModelTests {
         try await sut.$state.values
             .compactMap(\.contentState)
             .first { _ in true } ?? { throw Error.nilValue }()
-
     }
 
     func when(given appConfig: AppConfig) async throws -> MeetingRoomState {

@@ -36,18 +36,24 @@ public struct Archive: Equatable {
     public let createdAt: Date
     public let status: ArchiveStatus
     public let url: URL?
+    public let size: Int
+    public let duration: Int
 
     public init(
         id: UUID,
         name: String,
         createdAt: Date,
         status: ArchiveStatus,
-        url: URL?
+        url: URL?,
+        size: Int,
+        duration: Int
     ) {
         self.id = id
         self.name = name
         self.createdAt = createdAt
         self.status = status
         self.url = url
+        self.size = size
+        self.duration = duration
     }
 }

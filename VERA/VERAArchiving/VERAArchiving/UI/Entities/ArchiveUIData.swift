@@ -10,7 +10,7 @@ public struct ArchiveUIData: Identifiable, Sendable {
     public let subtitle: String
     public let isDownloadable: Bool
 
-    var onDownload: (@Sendable () -> Void)?
+    public var onDownload: (@Sendable () -> Void)?
 
     public init(
         id: UUID,

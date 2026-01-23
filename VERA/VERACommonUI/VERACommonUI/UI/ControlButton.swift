@@ -3,20 +3,19 @@
 //
 
 import SwiftUI
-import VERACommonUI
 
-struct ControlButton: View {
+public struct ControlButton: View {
     private let isActive: Bool
     private let iconName: String
     private let action: () -> Void
 
-    init(isActive: Bool, iconName: String, action: @escaping () -> Void = {}) {
+    public init(isActive: Bool, iconName: String, action: @escaping () -> Void = {}) {
         self.isActive = isActive
         self.iconName = iconName
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         ControlImageButton(
             isActive: isActive,
             image: Image(systemName: iconName),
@@ -24,18 +23,18 @@ struct ControlButton: View {
     }
 }
 
-struct ControlImageButton: View {
+public struct ControlImageButton: View {
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
 
-    init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
+    public init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
         self.isActive = isActive
         self.image = image
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: action) {
             image
                 .font(.title2)
@@ -48,6 +47,25 @@ struct ControlImageButton: View {
                 .animation(.easeInOut(duration: 0.2), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+public struct ButtonImage: View {
+    private let image: Image
+
+    public init(image: Image) {
+        self.image = image
+    }
+
+    public var body: some View {
+        image
+            .font(.title2)
+            .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+            .frame(width: 50, height: 50)
+            .background(
+                Circle()
+                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor)
+            )
     }
 }
 

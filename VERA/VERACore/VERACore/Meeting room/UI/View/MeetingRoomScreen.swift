@@ -10,7 +10,9 @@ public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
     @State var showToast = false
 
-    public init(viewModel: MeetingRoomViewModel) {
+    public init(
+        viewModel: MeetingRoomViewModel
+    ) {
         self.viewModel = viewModel
     }
 
@@ -29,8 +31,8 @@ public struct MeetingRoomScreen: View {
                                 onCameraSwitch: viewModel.onCameraSwitch,
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
-                                onToggleLayout: viewModel.onToggleLayout,
-                                onShowChat: viewModel.showChat)
+                                onToggleLayout: viewModel.onToggleLayout),
+                            extraButtons: $viewModel.extraButtons
                         )
 
                         if state.callState == .disconnecting {

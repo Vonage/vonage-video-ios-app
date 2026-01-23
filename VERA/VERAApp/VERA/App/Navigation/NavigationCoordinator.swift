@@ -2,18 +2,32 @@ import Combine
 import Foundation
 import SwiftUI
 import VERACore
+import VERADomain
 import os.log
+
+#if ARCHIVING_ENABLED
+    import VERAArchiving
+#endif
 
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
     @Published var currentMeetingRoom: String?
+    @Published var alertItem: AlertItem?
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
     var goodByeViewModel: GoodByeViewModel?
+    #if ARCHIVING_ENABLED
+        var archiveButtonViewModel: ArchiveButtonViewModel?
+        var archivesViewModel: ArchivesViewModel?
+    #endif
+
+    func showAlert(_ alert: AlertItem) {
+        alertItem = alert
+    }
 
     @MainActor
     public func go(to route: AppRoute) {
@@ -58,6 +72,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         currentMeetingRoom = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
+        #if ARCHIVING_ENABLED
+            archiveButtonViewModel = nil
+            archivesViewModel = nil
+        #endif
         logNavigation("Returned to landing page")
     }
 
