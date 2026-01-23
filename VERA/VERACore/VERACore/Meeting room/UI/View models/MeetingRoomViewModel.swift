@@ -193,7 +193,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
             return MeetingRoomState(
                 roomName: self.roomName,
-                roomURL: baseURL.appendingPathComponent(roomName),
+                roomURL: baseURL.meetingRoomURL(roomName),
                 isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
                 isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
                 participants: sortedPaticipants,
