@@ -111,6 +111,19 @@ jobs:
           -resultBundlePath DerivedData/VERAArchivingTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERADomainTests (macOS)
+      id: domain-tests-macos
+      run: |
+        echo "🧪 Running VERADomainTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERADomainTests \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERADomainTests-macOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Preboot iOS Simulator
       run: |
         set -euo pipefail
@@ -299,6 +312,7 @@ jobs:
           DerivedData/VERACoreTests-macOS.xcresult
           DerivedData/VERAChatTests-macOS.xcresult
           DerivedData/VERAArchivingTests-macOS.xcresult
+          DerivedData/VERADomainTests-macOS.xcresult
           DerivedData/VERAVonageChatPluginTests-macOS.xcresult
           DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult

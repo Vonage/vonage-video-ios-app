@@ -231,7 +231,7 @@ public final class MeetingRoomViewModel: ObservableObject {
             guard let self else { return MeetingRoomState.initial }
             return MeetingRoomState(
                 roomName: self.roomName,
-                roomURL: baseURL.appendingPathComponent(roomName),
+                roomURL: baseURL.meetingRoomURL(roomName),
                 isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
                 isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
                 participants: participantsState.participants,
