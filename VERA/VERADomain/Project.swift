@@ -26,5 +26,14 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
+    ],
+    schemes: [
+        .scheme(
+            name: "VERADomainTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERADomainTests"]),
+            testAction: .targets(["VERADomainTests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
+        )
     ]
 )
