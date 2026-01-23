@@ -61,6 +61,24 @@ private func isArchivingEnabled() -> Bool {
     return meetingRoomSettings["allowArchiving"] as! Bool
 }
 
+/// Returns whether background effects are enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "videoSettings": {
+///     "allowBackgroundEffects": true
+///   }
+/// }
+/// ```
+/// - Returns: `true` if `videoSettings.allowBackgroundEffects` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areBackgroundEffectsEnabled() -> Bool {
+    let config = readAppConfig()
+    let videoSettings = config["videoSettings"] as! [String: Any]
+    return videoSettings["allowBackgroundEffects"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds target dependencies dynamically based on the chat feature flag.
@@ -92,6 +110,11 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
+    if areBackgroundEffectsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERABackgroundBlur", path: "VERABackgroundBlur")
+        ])
+    }
     return dependencies
 }
 
@@ -126,6 +149,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["ARCHIVING_ENABLED"] = "1"
         flags.append("ARCHIVING_ENABLED")
         print("Archiving feature enabled in build settings.")
+    }
+
+    if areBackgroundEffectsEnabled() {
+        baseSettings["BACKGROUND_BLUR_ENABLED"] = "1"
+        flags.append("BACKGROUND_BLUR_ENABLED")
+        print("Background effects feature enabled in build settings.")
     }
 
     if !flags.isEmpty {
