@@ -66,6 +66,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var wasPublishingAudio: Bool = false
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
+    /// Holds the current list of video transformers.
+    @Published private(set) var videoTransformers: [VonageVideoTransformer] = []
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -180,6 +182,11 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             }
             .store(in: &cancellables)
 
+        $videoTransformers.sink { [weak self] in
+            self?.otPublisher.videoTransformers = $0
+        }
+        .store(in: &cancellables)
+
         updateParticipant()
     }
 
@@ -254,5 +261,24 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Use to trigger teardown or UI updates.
     public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         onStreamDestroyed?()
+    }
+
+    // MARK: Transformers
+
+    /// Vonage publisher method for adding video transformers
+    ///
+    /// Used to apply video effects to the publishing and rendering.
+    public func addVideoTransformer(_ transformer: VonageVideoTransformer) {
+        var currentTransformers = videoTransformers
+        currentTransformers.removeAll { $0.key == transformer.key }
+        currentTransformers.append(transformer)
+        videoTransformers = currentTransformers
+    }
+
+    /// Vonage publisher method for removing a video transformer
+    ///
+    /// Used to removed a previously added transformer, does nothing if the key doesn't match with any transformer.
+    public func removeTransformer(_ key: String) {
+        videoTransformers.removeAll { $0.key == key }
     }
 }

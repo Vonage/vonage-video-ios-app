@@ -3,27 +3,32 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERABackgroundEffects",
+    packages: [
+        .package(url: "https://github.com/Vonage/vonage-client-sdk-video-transformers", .upToNextMinor(from: "2.32.1"))
+    ],
     targets: [
         .target(
             name: "VERABackgroundEffects",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERABackgroundEffects",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERABackgroundEffects/**"],
             resources: [
                 "VERABackgroundEffects/Resources/**"
             ],
             scripts: [.swiftLint(targetName: "VERABackgroundEffects")],
-            dependencies: [],
+            dependencies: [
+                .project(target: "VERAVonage", path: "../VERAVonage")
+            ],
             settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERABackgroundEffectsTests",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERABackgroundEffectsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERABackgroundEffectsTests/**"],
             dependencies: [
                 .target(name: "VERABackgroundEffects")

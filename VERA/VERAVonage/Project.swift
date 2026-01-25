@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAVonage",
     packages: [
-        .package(url: "https://github.com/Vonage/vonage-video-client-sdk-swift", .upToNextMinor(from: "2.32.0"))
+        .package(url: "https://github.com/Vonage/vonage-video-client-sdk-swift", .upToNextMinor(from: "2.32.1"))
     ],
     targets: [
         .target(
