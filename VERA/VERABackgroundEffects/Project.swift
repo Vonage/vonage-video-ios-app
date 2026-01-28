@@ -19,7 +19,9 @@ let project = Project(
             ],
             scripts: [.swiftLint(targetName: "VERABackgroundEffects")],
             dependencies: [
-                .project(target: "VERAVonage", path: "../VERAVonage")
+                .project(target: "VERAVonage", path: "../VERAVonage"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .package(product: "VonageClientSDKVideoTransformers"),
             ],
             settings: createBaseBuildSettings()
         ),

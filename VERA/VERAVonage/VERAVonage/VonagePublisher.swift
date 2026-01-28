@@ -182,11 +182,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             }
             .store(in: &cancellables)
 
-        $videoTransformers.sink { [weak self] in
-            self?.otPublisher.videoTransformers = $0
-        }
-        .store(in: &cancellables)
-
         updateParticipant()
     }
 
@@ -273,6 +268,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         currentTransformers.removeAll { $0.key == transformer.key }
         currentTransformers.append(transformer)
         videoTransformers = currentTransformers
+
+        updateVideoTransformers()
     }
 
     /// Vonage publisher method for removing a video transformer
@@ -280,5 +277,12 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Used to removed a previously added transformer, does nothing if the key doesn't match with any transformer.
     public func removeTransformer(_ key: String) {
         videoTransformers.removeAll { $0.key == key }
+
+        updateVideoTransformers()
+    }
+
+    private func updateVideoTransformers() {
+        otPublisher.videoTransformers = videoTransformers.map(\.otVideoTransformer)
+        updateParticipant()
     }
 }

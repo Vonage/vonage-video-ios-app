@@ -3,21 +3,20 @@
 //
 
 import SwiftUI
-import VERACommonUI
 
-struct CircularControlButton: View {
+public struct CircularControlButton: View {
 
     private let isActive: Bool
     private let iconName: String
     private let action: () -> Void
 
-    init(isActive: Bool, iconName: String, action: @escaping () -> Void = {}) {
+    public init(isActive: Bool, iconName: String, action: @escaping () -> Void = {}) {
         self.isActive = isActive
         self.iconName = iconName
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         CircularControlImageButton(
             isActive: isActive,
             image: Image(systemName: iconName),
@@ -25,19 +24,19 @@ struct CircularControlButton: View {
     }
 }
 
-struct CircularControlImageButton: View {
+public struct CircularControlImageButton: View {
 
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
 
-    init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
+    public init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
         self.isActive = isActive
         self.image = image
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: action) {
             image
                 .font(.title2)

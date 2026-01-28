@@ -13,6 +13,7 @@ public struct BackgroundBlur {
     public enum Error: Swift.Error {
         case encodingError
         case videoTransformerInitializationError
+        case unexpectedType
     }
 
     public init() {
@@ -38,22 +39,4 @@ public struct Radius: Codable {
 
 public enum BlurLevel: String, Codable {
     case low, high, none
-}
-
-extension VonagePublisher {
-    public func setBackgroundBlur(blurLevel: BlurLevel) throws {
-        let params = try BackgroundBlur().params(blurLevel: blurLevel)
-
-        guard
-            let backgroundBlurTransformer = OTVideoTransformer(
-                name: BackgroundBlur.key,
-                properties: params
-            )
-        else { throw BackgroundBlur.Error.videoTransformerInitializationError }
-
-        let vonageVideoTransformer = VonageVideoTransformer(
-            key: BackgroundBlur.key,
-            otVideoTransformer: backgroundBlurTransformer)
-        addVideoTransformer(vonageVideoTransformer)
-    }
 }

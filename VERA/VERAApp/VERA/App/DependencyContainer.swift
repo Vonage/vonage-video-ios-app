@@ -20,6 +20,10 @@ import VERAVonageCallKitPlugin
     import VERAVonageArchivingPlugin
 #endif
 
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -151,6 +155,14 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
+
+    #endif
+
+    // MARK: Background effects
+
+    #if BACKGROUND_EFFECTS_ENABLED
+
+        lazy var backgroundBlurFactory = BackgroundBlurFactory(publisherRepository: publisherRepository)
 
     #endif
 }

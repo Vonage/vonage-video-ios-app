@@ -7,6 +7,7 @@ import OpenTok
 import SwiftUI
 import UIKit
 import VERACore
+import VERADomain
 
 /// Creates configured `VonagePublisher` instances from `PublisherSettings`.
 ///

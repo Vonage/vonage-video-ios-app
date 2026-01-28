@@ -2,6 +2,8 @@
 //  Created by Vonage on 18/7/25.
 //
 
+import VERADomain
+
 public struct JoinRoomRequest {
     public let roomName: String
     public let userName: String

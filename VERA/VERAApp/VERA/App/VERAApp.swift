@@ -17,6 +17,10 @@ import VERAVonage
     import VERAArchiving
 #endif
 
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -96,6 +100,10 @@ struct VERAApp: App {
         var archiveFactory: ArchivingFactory { dependencyContainer.archivingFactory }
     #endif
 
+    #if BACKGROUND_EFFECTS_ENABLED
+        var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
+    #endif
+
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
             navigationCoordinator.go(to: .waitingRoom(roomName))
@@ -119,6 +127,7 @@ struct VERAApp: App {
                     navigationCoordinator.go(to: .meetingRoom(roomName))
                 }
             }
+            newViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
             viewModel = newViewModel
             navigationCoordinator.waitingRoomViewModel = newViewModel
         }
@@ -130,6 +139,23 @@ struct VERAApp: App {
                 // Clear view model when leaving the waiting room
                 navigationCoordinator.waitingRoomViewModel = nil
             }
+    }
+
+    private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
+        var result = [ViewHolder]()
+
+        #if BACKGROUND_EFFECTS_ENABLED
+
+            result.append(
+                .init(
+                    id: "Blur",
+                    content: {
+                        backgroundBlurFactory.makeBlurButton().view
+                    }))
+
+        #endif
+
+        return result
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
