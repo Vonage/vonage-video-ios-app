@@ -146,12 +146,26 @@ struct VERAApp: App {
 
         #if BACKGROUND_EFFECTS_ENABLED
 
-            result.append(
-                .init(
-                    id: "Blur",
-                    content: {
-                        backgroundBlurFactory.makeBlurButton().view
-                    }))
+            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                let view = backgroundBlurFactory.makeBlurButton(viewModel: backgroundBlurButtonViewModel)
+
+                result.append(
+                    .init(
+                        id: "Blur",
+                        content: {
+                            view
+                        }))
+            } else {
+                let (view, viewModel) = backgroundBlurFactory.makeBlurButton()
+                navigationCoordinator.backgroundBlurButtonViewModel = viewModel
+
+                result.append(
+                    .init(
+                        id: "Blur",
+                        content: {
+                            view
+                        }))
+            }
 
         #endif
 
