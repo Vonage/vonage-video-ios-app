@@ -28,7 +28,7 @@ struct BackgroundBlurTests {
 
         let params = try sut.params(blurLevel: .low)
 
-        #expect(params.contains("\"radius\":\"low\""))
+        #expect(params.contains("\"radius\":\"Low\""))
     }
 
     @Test func paramsGeneratesCorrectJSONForHighBlurLevel() throws {
@@ -36,7 +36,7 @@ struct BackgroundBlurTests {
 
         let params = try sut.params(blurLevel: .high)
 
-        #expect(params.contains("\"radius\":\"high\""))
+        #expect(params.contains("\"radius\":\"High\""))
     }
 
     @Test func paramsGeneratesCorrectJSONForNoneBlurLevel() throws {
@@ -44,7 +44,7 @@ struct BackgroundBlurTests {
 
         let params = try sut.params(blurLevel: .none)
 
-        #expect(params.contains("\"radius\":\"none\""))
+        #expect(params.contains("\"radius\":\"None\""))
     }
 
     @Test func paramsReturnsDecodableJSON() throws {

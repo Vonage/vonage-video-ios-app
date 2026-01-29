@@ -9,14 +9,13 @@ import VERADomain
 
 public final class BackgroundBlurFactory {
 
-    private let publisherRepository: PublisherRepository
-
-    public init(publisherRepository: PublisherRepository) {
-        self.publisherRepository = publisherRepository
+    public init() {
     }
 
-    public func makeBlurButton() -> (view: some View, viewModel: BackgroundBlurButtonViewModel) {
-        let viewModel = BackgroundBlurButtonViewModel(publisherRepository: publisherRepository)
+    public func makeBlurButton(
+        getCurrentPublisher: @escaping () throws -> VERAPublisher
+    ) -> (view: some View, viewModel: BackgroundBlurButtonViewModel) {
+        let viewModel = BackgroundBlurButtonViewModel(getCurrentPublisher: getCurrentPublisher)
         let view = BackgroundBlurScreenButton(viewModel: viewModel)
         return (view, viewModel)
     }

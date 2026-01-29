@@ -162,7 +162,7 @@ final class DependencyContainer {
 
     #if BACKGROUND_EFFECTS_ENABLED
 
-        lazy var backgroundBlurFactory = BackgroundBlurFactory(publisherRepository: publisherRepository)
+        lazy var backgroundBlurFactory = BackgroundBlurFactory()
 
     #endif
 }

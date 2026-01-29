@@ -7,11 +7,11 @@ import VERADomain
 
 public final class BackgroundBlurButtonViewModel: ObservableObject {
 
-    private let publisherRepository: PublisherRepository
+    private let getCurrentPublisher: () throws -> VERAPublisher
     @Published public var currentBlurLevel: BlurLevel = .none
 
-    public init(publisherRepository: PublisherRepository) {
-        self.publisherRepository = publisherRepository
+    public init(getCurrentPublisher: @escaping () throws -> VERAPublisher) {
+        self.getCurrentPublisher = getCurrentPublisher
     }
 
     public func onTap() {
@@ -22,7 +22,7 @@ public final class BackgroundBlurButtonViewModel: ObservableObject {
         }
 
         do {
-            let publisher = try publisherRepository.getPublisher()
+            let publisher = try getCurrentPublisher()
             try publisher.setBackgroundBlur(blurLevel: currentBlurLevel)
         } catch {
 

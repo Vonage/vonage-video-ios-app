@@ -156,7 +156,9 @@ struct VERAApp: App {
                             view
                         }))
             } else {
-                let (view, viewModel) = backgroundBlurFactory.makeBlurButton()
+                let (view, viewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+                )
                 navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
                 result.append(
@@ -238,7 +240,9 @@ struct VERAApp: App {
                         })
                 )
             } else {
-                let (view, viewModel) = backgroundBlurFactory.makeBlurButton()
+                let (view, viewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.publisherRepository.getPublisher
+                )
                 navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
                 extraButtons.append(
