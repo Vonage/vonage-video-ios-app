@@ -255,7 +255,7 @@ struct MeetingRoomViewModelTests {
 
         let contentState = try await getContentState(sut)
 
-        #expect(contentState.roomURL == url.appendingPathComponent(roomName))
+        #expect(contentState.roomURL == url.appendingPathComponent("room").appendingPathComponent(roomName))
     }
 
     @Test

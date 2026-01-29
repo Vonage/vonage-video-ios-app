@@ -5,6 +5,7 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
+import VERADomain
 import VERATestHelpers
 
 @testable import VERACore
@@ -90,6 +91,7 @@ class WaitingRoomViewUITests {
         WaitingRoomView(
             state: makeWaitingRoomState(publisher: publisher),
             userName: .constant("Trillian"),
+            extraTrailingButtons: .constant([]),
             onJoinRoom: {},
             onMicrophoneToggle: {},
             onCameraToggle: {}
@@ -148,6 +150,7 @@ class WaitingRoomComponentTests {
                 HorizontalWaitingRoomContentView(
                     state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
+                    extraTrailingButtons: .constant([]),
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})
@@ -157,6 +160,7 @@ class WaitingRoomComponentTests {
                 VerticalWaitingRoomContentView(
                     state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
+                    extraTrailingButtons: .constant([]),
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})

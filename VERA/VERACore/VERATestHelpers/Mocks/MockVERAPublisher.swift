@@ -4,7 +4,7 @@
 
 import Foundation
 import SwiftUI
-import VERACore
+import VERADomain
 
 public final class MockVERAPublisher: VERAPublisher {
     public var view: AnyView
@@ -13,7 +13,7 @@ public final class MockVERAPublisher: VERAPublisher {
 
     public var publishVideo: Bool
 
-    public var cameraPosition: VERACore.CameraPosition
+    public var cameraPosition: CameraPosition
 
     public var didCallCleanUp: Bool = false
 
@@ -21,7 +21,7 @@ public final class MockVERAPublisher: VERAPublisher {
         view: AnyView = AnyView(Color.red),
         publishAudio: Bool = true,
         publishVideo: Bool = true,
-        cameraPosition: VERACore.CameraPosition = .front
+        cameraPosition: CameraPosition = .front
     ) {
         self.view = view
         self.publishAudio = publishAudio
