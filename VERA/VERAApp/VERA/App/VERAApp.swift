@@ -201,14 +201,45 @@ struct VERAApp: App {
     private func getBottomBarButtons(
         _ state: MeetingRoomButtonsState
     ) -> [BottomBarButton] {
+        var extraButtons: [BottomBarButton] = []
         #if CHAT_ENABLED
-            var extraButtons: [BottomBarButton] = [
+            extraButtons.append(
                 dependencyContainer.mapToChatBottomBarButton(onShowChat: {
                     showChat = true
-                })
-            ]
-        #else
-            var extraButtons: [BottomBarButton] = []
+                }))
+        #endif
+
+        #if BACKGROUND_EFFECTS_ENABLED
+
+            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                extraButtons.append(
+                    .init(
+                        label: "Blur",
+                        image: VERACommonUIAsset.Images.blurLine.swiftUIImage,
+                        onTap: {
+                            backgroundBlurButtonViewModel.onTap()
+                        },
+                        content: {
+                            backgroundBlurFactory.makeBlurButton(viewModel: backgroundBlurButtonViewModel)
+                        })
+                )
+            } else {
+                let (view, viewModel) = backgroundBlurFactory.makeBlurButton()
+                navigationCoordinator.backgroundBlurButtonViewModel = viewModel
+
+                extraButtons.append(
+                    .init(
+                        label: "Blur",
+                        image: VERACommonUIAsset.Images.blurLine.swiftUIImage,
+                        onTap: {
+                            viewModel.onTap()
+                        },
+                        content: {
+                            view
+                        })
+                )
+            }
+
         #endif
 
         #if ARCHIVING_ENABLED
