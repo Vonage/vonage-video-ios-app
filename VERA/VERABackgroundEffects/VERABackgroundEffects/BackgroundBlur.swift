@@ -38,5 +38,7 @@ public struct Radius: Codable {
 }
 
 public enum BlurLevel: String, Codable {
-    case low, high, none
+    case low = "Low"
+    case high = "High"
+    case none = "None"
 }
