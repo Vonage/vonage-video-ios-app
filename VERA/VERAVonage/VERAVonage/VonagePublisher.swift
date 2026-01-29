@@ -67,7 +67,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
     /// Holds the current list of video transformers.
-    @Published private(set) var videoTransformers: [VonageVideoTransformer] = []
+    @Published public private(set) var videoTransformers: [VERAVideoTransformer] = []
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -263,11 +263,20 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Vonage publisher method for adding video transformers
     ///
     /// Used to apply video effects to the publishing and rendering.
-    public func addVideoTransformer(_ transformer: VonageVideoTransformer) {
+    public func addVideoTransformer(_ transformer: VERAVideoTransformer) {
         var currentTransformers = videoTransformers
         currentTransformers.removeAll { $0.key == transformer.key }
         currentTransformers.append(transformer)
         videoTransformers = currentTransformers
+
+        updateVideoTransformers()
+    }
+
+    /// Vonage publisher method for adding video transformers
+    ///
+    /// Used to apply video effects to the publishing and rendering.
+    public func addVideoTransformers(_ transformers: [any VERAVideoTransformer]) {
+        videoTransformers = transformers
 
         updateVideoTransformers()
     }
@@ -282,7 +291,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     }
 
     private func updateVideoTransformers() {
-        otPublisher.videoTransformers = videoTransformers.map(\.otVideoTransformer)
+        otPublisher.videoTransformers = videoTransformers.map(\.transformer)
         updateParticipant()
     }
 }

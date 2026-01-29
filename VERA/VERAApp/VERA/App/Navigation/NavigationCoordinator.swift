@@ -59,10 +59,6 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     }
 
     private func startMeeting(_ roomName: String) {
-        #if BACKGROUND_EFFECTS_ENABLED
-            backgroundBlurButtonViewModel = nil
-        #endif
-
         currentMeetingRoom = roomName
         isInMeeting = true
 

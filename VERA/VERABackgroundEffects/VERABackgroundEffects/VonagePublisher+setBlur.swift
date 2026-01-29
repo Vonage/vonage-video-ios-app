@@ -27,7 +27,7 @@ extension VERAPublisher {
 
             let vonageVideoTransformer = VonageVideoTransformer(
                 key: BackgroundBlur.key,
-                otVideoTransformer: backgroundBlurTransformer)
+                transformer: backgroundBlurTransformer)
 
             self.addVideoTransformer(vonageVideoTransformer)
         }

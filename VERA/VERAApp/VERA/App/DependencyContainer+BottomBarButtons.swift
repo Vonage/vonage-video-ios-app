@@ -16,6 +16,10 @@ import VERACore
     import VERAVonageArchivingPlugin
 #endif
 
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -45,6 +49,24 @@ extension DependencyContainer {
                     ChatBadgeButton(
                         unreadMessagesCount: 0,
                         onShowChat: onShowChat)
+                })
+        }
+    #endif
+
+    #if BACKGROUND_EFFECTS_ENABLED
+
+        func makeBackgroundEffectsButton(
+            _ viewModel: BackgroundBlurButtonViewModel
+        ) -> BottomBarButton {
+            let button = backgroundBlurFactory.makeBlurButton(viewModel: viewModel)
+            return .init(
+                label: String(localized: "Blur"),
+                image: viewModel.currentBlurLevel.image,
+                onTap: {
+                    viewModel.onTap()
+                },
+                content: {
+                    button
                 })
         }
     #endif

@@ -4,13 +4,14 @@
 
 import Foundation
 import OpenTok
+import VERADomain
 
-public class VonageVideoTransformer {
+public class VonageVideoTransformer: VERAVideoTransformer {
     public let key: String
-    public let otVideoTransformer: OTVideoTransformer
+    public let transformer: AnyObject
 
-    public init(key: String, otVideoTransformer: OTVideoTransformer) {
+    public init(key: String, transformer: AnyObject) {
         self.key = key
-        self.otVideoTransformer = otVideoTransformer
+        self.transformer = transformer
     }
 }

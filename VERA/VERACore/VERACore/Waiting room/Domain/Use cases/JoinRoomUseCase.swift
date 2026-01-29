@@ -44,6 +44,11 @@ public final class JoinRoomUseCase {
             )
 
             try publisherRepository.recreatePublisher(settings)
+
+            let transformers = currentPublisher.videoTransformers
+            let newPublisher = try publisherRepository.getPublisher()
+            newPublisher.addVideoTransformers(transformers)
+
             cameraPreviewProviderRepository.resetPublisher()
         }
     }

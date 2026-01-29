@@ -142,36 +142,22 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
-        var result = [ViewHolder]()
-
         #if BACKGROUND_EFFECTS_ENABLED
-
-            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
-                let view = backgroundBlurFactory.makeBlurButton(viewModel: backgroundBlurButtonViewModel)
-
-                result.append(
-                    .init(
-                        id: "Blur",
-                        content: {
-                            view
-                        }))
-            } else {
-                let (view, viewModel) = backgroundBlurFactory.makeBlurButton(
+            if navigationCoordinator.backgroundBlurButtonViewModel == nil {
+                let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
                     getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
                 )
                 navigationCoordinator.backgroundBlurButtonViewModel = viewModel
-
-                result.append(
-                    .init(
-                        id: "Blur",
-                        content: {
-                            view
-                        }))
             }
 
-        #endif
+            let view = backgroundBlurFactory.makeBlurButton(
+                viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
+            )
 
-        return result
+            return [ViewHolder(id: "Blur", content: { view })]
+        #else
+            return []
+        #endif
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
@@ -182,6 +168,22 @@ struct VERAApp: App {
         {
             viewModel = existingViewModel
         } else {
+            #if BACKGROUND_EFFECTS_ENABLED
+
+                // Copy the current blur level from the waiting room
+                // and apply it to the meeting room blur view model
+                // the publisher repositories are different
+                let (_, meetingRoomBlurViewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.publisherRepository.getPublisher
+                )
+
+                if let blurViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                    meetingRoomBlurViewModel.currentBlurLevel = blurViewModel.currentBlurLevel
+                }
+                navigationCoordinator.backgroundBlurButtonViewModel = meetingRoomBlurViewModel
+
+            #endif
+
             #if ARCHIVING_ENABLED
                 let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(
                     roomName: roomName,
@@ -191,6 +193,7 @@ struct VERAApp: App {
                 )
                 archiveButtonViewModel.setup()
             #endif
+
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons
@@ -220,41 +223,17 @@ struct VERAApp: App {
         var extraButtons: [BottomBarButton] = []
         #if CHAT_ENABLED
             extraButtons.append(
-                dependencyContainer.mapToChatBottomBarButton(onShowChat: {
+                dependencyContainer.mapToChatBottomBarButton {
                     showChat = true
-                }))
+                }
+            )
         #endif
 
         #if BACKGROUND_EFFECTS_ENABLED
 
             if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
                 extraButtons.append(
-                    .init(
-                        label: "Blur",
-                        image: VERACommonUIAsset.Images.blurLine.swiftUIImage,
-                        onTap: {
-                            backgroundBlurButtonViewModel.onTap()
-                        },
-                        content: {
-                            backgroundBlurFactory.makeBlurButton(viewModel: backgroundBlurButtonViewModel)
-                        })
-                )
-            } else {
-                let (view, viewModel) = backgroundBlurFactory.makeBlurButton(
-                    getCurrentPublisher: dependencyContainer.publisherRepository.getPublisher
-                )
-                navigationCoordinator.backgroundBlurButtonViewModel = viewModel
-
-                extraButtons.append(
-                    .init(
-                        label: "Blur",
-                        image: VERACommonUIAsset.Images.blurLine.swiftUIImage,
-                        onTap: {
-                            viewModel.onTap()
-                        },
-                        content: {
-                            view
-                        })
+                    dependencyContainer.makeBackgroundEffectsButton(backgroundBlurButtonViewModel)
                 )
             }
 
