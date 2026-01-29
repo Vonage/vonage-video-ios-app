@@ -4,19 +4,19 @@
 
 import Foundation
 import OpenTok
-import VERACore
+import VERADomain
 import VERAVonage
 
 public class MockPublisherRepository: PublisherRepository {
 
-    public func getPublisher() -> any VERACore.VERAPublisher {
+    public func getPublisher() -> any VERAPublisher {
         VonagePublisher(publisher: OTPublisher(delegate: nil)!)
     }
 
     public func resetPublisher() {
     }
 
-    public func recreatePublisher(_ settings: VERACore.PublisherSettings) {
+    public func recreatePublisher(_ settings: PublisherSettings) {
     }
 }
 
