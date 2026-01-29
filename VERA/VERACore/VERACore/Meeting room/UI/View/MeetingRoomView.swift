@@ -140,9 +140,7 @@ public struct MeetingRoomView: View {
             cameraSwitchButton
         }
 
-        if state.allowMicrophoneControl {
-            microphoneButton
-        }
+        speakerButton
 
         if let roomURL = state.roomURL {
             shareButton(url: roomURL)
@@ -170,12 +168,12 @@ public struct MeetingRoomView: View {
         .disabled(!state.isCameraEnabled)
     }
 
-    private var microphoneButton: some View {
-        Button {
-            onBottomBarInteraction()
-            actions.onToggleMic()
-        } label: {
+    private var speakerButton: some View {
+        ZStack {
             VERACommonUIAsset.Images.audioMidLine.swiftUIImage
+            AudioRoutePickerView()
+                .frame(width: 32, height: 32)
+                .opacity(0.1)
         }
     }
 
