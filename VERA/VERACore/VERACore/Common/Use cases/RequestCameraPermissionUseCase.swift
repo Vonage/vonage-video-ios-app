@@ -5,9 +5,7 @@
 import AVFoundation
 import Foundation
 
-public protocol RequestCameraPermissionUseCase {
-    func callAsFunction() async -> Bool
-}
+public protocol RequestCameraPermissionUseCase : RequestPermissionUseCase {}
 
 public final class DefaultRequestCameraPermissionUseCase: RequestCameraPermissionUseCase {
 

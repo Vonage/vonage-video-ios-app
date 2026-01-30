@@ -196,6 +196,16 @@ public final class WaitingRoomViewModel: ObservableObject {
             isMicrophoneEnabled: publishAudio,
             isCameraEnabled: publishVideo)
     }
+     
+    private func checkPermissionsAndJoinRoom() async {
+        let cameraPermissionResult = checkAndRequestPermissionIfneeded(permissionChecker: checkCameraAuthorizationStatusUseCase, permissionRequester: requestCameraPermissionUseCase)
+        
+        let microphonePermissionResult = checkAndRequestPermissionIfneeded(permissionChecker: checkCameraAuthorizationStatusUseCase, permissionRequester: requestCameraPermissionUseCase)
+    
+        if(cameraPermissionResult && microphonePermissionResult) {
+            await joinRoom()
+        }
+    }
 
     public func joinRoom() async {
         do {

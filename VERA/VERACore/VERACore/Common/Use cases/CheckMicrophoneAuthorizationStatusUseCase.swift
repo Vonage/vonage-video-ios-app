@@ -5,9 +5,7 @@
 import AVFoundation
 import Foundation
 
-public protocol CheckMicrophoneAuthorizationStatusUseCase {
-    func callAsFunction() -> Bool
-}
+public protocol CheckMicrophoneAuthorizationStatusUseCase : CheckPermissionUseCase {}
 
 public final class DefaultCheckMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase {
 
