@@ -13,7 +13,6 @@ public struct BackgroundBlur {
     public enum Error: Swift.Error {
         case encodingError
         case videoTransformerInitializationError
-        case unexpectedType
     }
 
     public init() {

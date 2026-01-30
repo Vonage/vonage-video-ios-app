@@ -6,7 +6,7 @@ import Foundation
 import OpenTok
 import VERADomain
 
-public class VonageVideoTransformer: VERAVideoTransformer {
+public class VonageTransformer: VERATransformer {
     public let key: String
     public let transformer: AnyObject
 

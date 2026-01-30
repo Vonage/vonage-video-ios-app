@@ -43,7 +43,9 @@ public protocol VERAPublisher: AnyObject {
     var cameraPosition: CameraPosition { get set }
 
     /// The current array of video transformers
-    var videoTransformers: [VERAVideoTransformer] { get }
+    var videoTransformers: [VERATransformer] { get }
+
+    var transformerFactory: VERATransformerFactory { get }
 
     /// Switches camera to a specific device by ID.
     ///
@@ -56,16 +58,20 @@ public protocol VERAPublisher: AnyObject {
     func cleanUp()
 
     /// Adds a video transformer to the current publisher.
-    func addVideoTransformer(_ transformer: VERAVideoTransformer)
+    func addVideoTransformer(_ transformer: VERATransformer)
 
     /// Adds a list video transformer to the current publisher.
-    func addVideoTransformers(_ transformers: [VERAVideoTransformer])
+    func addVideoTransformers(_ transformers: [VERATransformer])
 
     /// Removes a video transformer from the publisher
     func removeTransformer(_ key: String)
 }
 
-public protocol VERAVideoTransformer {
+public protocol VERATransformerFactory {
+    func makeTransformer(for key: String, params: String) throws -> VERATransformer
+}
+
+public protocol VERATransformer {
     var key: String { get }
     var transformer: AnyObject { get }
 }

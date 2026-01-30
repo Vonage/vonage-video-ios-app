@@ -88,10 +88,7 @@ private func createPackages() -> [Package] {
     var packages: [Package] = []
 
     if areBackgroundEffectsEnabled() {
-        packages.append(
-            .package(
-                url: "https://github.com/Vonage/vonage-client-sdk-video-transformers", .upToNextMinor(from: "2.32.1"))
-        )
+        packages.append(.vonageVideoTransformersSDK)
     }
 
     return packages
@@ -129,7 +126,7 @@ private func createDependencies() -> [TargetDependency] {
     if areBackgroundEffectsEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
-            .package(product: "VonageClientSDKVideoTransformers"),
+            .vonageVideoTransformersSDK,
         ])
     }
     return dependencies

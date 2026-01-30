@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERABackgroundEffects",
     packages: [
-        .package(url: "https://github.com/Vonage/vonage-client-sdk-video-transformers", .upToNextMinor(from: "2.32.1"))
+        .vonageVideoTransformersSDK
     ],
     targets: [
         .target(
@@ -21,7 +21,7 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
-                .package(product: "VonageClientSDKVideoTransformers"),
+                .vonageVideoTransformersSDK,
             ],
             settings: createBaseBuildSettings()
         ),

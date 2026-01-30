@@ -29,6 +29,8 @@ import VERADomain
 open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// The underlying Vonage publisher.
     let otPublisher: OTPublisher
+    /// The class that will create the transformer instances
+    public let transformerFactory: VERATransformerFactory
 
     /// Internal subscription storage for Combine pipelines.
     var cancellables = Set<AnyCancellable>()
@@ -67,7 +69,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
     /// Holds the current list of video transformers.
-    @Published public private(set) var videoTransformers: [VERAVideoTransformer] = []
+    @Published public private(set) var videoTransformers: [VERATransformer] = []
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -123,8 +125,12 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Creates a new publisher wrapper.
     ///
     /// - Parameter publisher: The configured `OTPublisher` to wrap.
-    public init(publisher: OTPublisher) {
+    public init(
+        publisher: OTPublisher,
+        transformerFactory: VERATransformerFactory
+    ) {
         otPublisher = publisher
+        self.transformerFactory = transformerFactory
         participant = Participant(
             id: id,
             name: publisher.stream?.name ?? "",
@@ -263,7 +269,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Vonage publisher method for adding video transformers
     ///
     /// Used to apply video effects to the publishing and rendering.
-    public func addVideoTransformer(_ transformer: VERAVideoTransformer) {
+    public func addVideoTransformer(_ transformer: VERATransformer) {
         var currentTransformers = videoTransformers
         currentTransformers.removeAll { $0.key == transformer.key }
         currentTransformers.append(transformer)
@@ -275,7 +281,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Vonage publisher method for adding video transformers
     ///
     /// Used to apply video effects to the publishing and rendering.
-    public func addVideoTransformers(_ transformers: [any VERAVideoTransformer]) {
+    public func addVideoTransformers(_ transformers: [any VERATransformer]) {
         videoTransformers = transformers
 
         updateVideoTransformers()
