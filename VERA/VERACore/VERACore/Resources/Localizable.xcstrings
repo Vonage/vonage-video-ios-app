@@ -124,30 +124,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maximum length reached"
+            "value" : "Username exceeds maximum length of 60 characters"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamaño máximo sobrepasado"
-          }
-        }
-      }
-    },
-    "Invalid username" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invalid username"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tamaño máximo sobrepasado"
+            "value" : "El nombre de usuario excede la longitud máxima de 60 caracteres"
           }
         }
       }

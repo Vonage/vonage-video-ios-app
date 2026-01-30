@@ -42,7 +42,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
 
     /// Called when the session temporarily loses the connection and starts reconnecting.
     ///
-    /// Use this to notify the UI that the connection did drop and stated reconnecting.
+    /// Use this to notify the UI that the connection did drop and started reconnecting.
     var onSessionDidBeginReconnecting: (() -> Void)?
 
     /// Called when the session reports a failure.
