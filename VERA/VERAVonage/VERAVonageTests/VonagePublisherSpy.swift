@@ -4,10 +4,13 @@
 
 import Foundation
 import OpenTok
+import VERATestHelpers
 import VERAVonage
 
 class VonagePublisherSpy: VonagePublisher {
     init() {
-        super.init(publisher: OTPublisher(delegate: nil)!)
+        super.init(
+            publisher: OTPublisher(delegate: nil)!,
+            transformerFactory: MockTransformerFactory())
     }
 }

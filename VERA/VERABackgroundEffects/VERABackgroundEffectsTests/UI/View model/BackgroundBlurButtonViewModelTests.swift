@@ -7,6 +7,7 @@ import SwiftUI
 import Testing
 import VERABackgroundEffects
 import VERADomain
+import VERATestHelpers
 
 @Suite("BackgroundBlurButtonViewModel tests")
 struct BackgroundBlurButtonViewModelTests {
@@ -208,27 +209,5 @@ final class PublisherSpy: VERAPublisher {
         transformerFactory: VERATransformerFactory = MockTransformerFactory()
     ) {
         self.transformerFactory = transformerFactory
-    }
-}
-
-public final class MockTransformer: VERATransformer {
-    public var key: String
-    public var transformer: AnyObject
-
-    public init(
-        key: String = "anyKey",
-        transformer: AnyObject
-    ) {
-        self.key = key
-        self.transformer = transformer
-    }
-}
-
-public final class MockTransformerFactory: VERATransformerFactory {
-    public func makeTransformer(
-        for key: String,
-        params: String
-    ) throws -> any VERADomain.VERATransformer {
-        MockTransformer(key: key, transformer: NSObject())
     }
 }

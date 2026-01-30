@@ -18,7 +18,6 @@ struct JoinRoomUseCaseTests {
 
         try await sut(request)
 
-        #expect(publisherRepository.actions.count == 1)
         #expect(publisherRepository.actions.first == .recreate(.init(username: "Zaphod")))
     }
 

@@ -33,7 +33,8 @@ let project = Project(
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERABackgroundEffectsTests/**"],
             dependencies: [
-                .target(name: "VERABackgroundEffects")
+                .target(name: "VERABackgroundEffects"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ],
             settings: createBaseBuildSettings()
         ),
