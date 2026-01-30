@@ -58,7 +58,7 @@ extension DependencyContainer {
         func makeBackgroundEffectsButton(
             _ viewModel: BackgroundBlurButtonViewModel
         ) -> BottomBarButton {
-            let button = backgroundBlurFactory.makeBlurButton(viewModel: viewModel)
+            let button = backgroundBlurFactory.makeMeetingBlurButton(viewModel: viewModel)
             return .init(
                 label: String(localized: "Blur"),
                 image: viewModel.currentBlurLevel.image,

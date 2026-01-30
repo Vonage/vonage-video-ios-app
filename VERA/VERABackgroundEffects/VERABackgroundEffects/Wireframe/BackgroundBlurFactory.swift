@@ -24,4 +24,9 @@ public final class BackgroundBlurFactory {
         let view = BackgroundBlurScreenButton(viewModel: viewModel)
         return (view)
     }
+
+    public func makeMeetingBlurButton(viewModel: BackgroundBlurButtonViewModel) -> some View {
+        let view = MeetingBackgroundBlurScreenButton(viewModel: viewModel)
+        return (view)
+    }
 }

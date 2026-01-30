@@ -1,11 +1,12 @@
 //
-//  Created by Vonage on 26/1/26.
+//  Created by Vonage on 30/1/26.
 //
 
+import Foundation
 import SwiftUI
 import VERACommonUI
 
-struct BackgroundBlurButton: View {
+struct MeetingBackgroundBlurButton: View {
 
     private let image: Image
     private let action: () -> Void
@@ -16,15 +17,15 @@ struct BackgroundBlurButton: View {
     }
 
     var body: some View {
-        CircularControlImageButton(
-            isActive: true,
+        OngoingActivityControlImageButton(
+            isActive: false,
             image: image,
             action: action)
     }
 }
 
 #Preview {
-    BackgroundBlurButton(
+    MeetingBackgroundBlurButton(
         image: VERACommonUIAsset.Images.blurLine.swiftUIImage
     ) {}
 }

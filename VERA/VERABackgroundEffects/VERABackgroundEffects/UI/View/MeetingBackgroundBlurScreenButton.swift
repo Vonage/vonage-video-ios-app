@@ -1,11 +1,12 @@
 //
-//  Created by Vonage on 26/1/26.
+//  Created by Vonage on 30/1/26.
 //
 
+import Foundation
 import SwiftUI
 import VERACommonUI
 
-public struct BackgroundBlurScreenButton: View {
+public struct MeetingBackgroundBlurScreenButton: View {
 
     @ObservedObject var viewModel: BackgroundBlurButtonViewModel
 
@@ -14,7 +15,7 @@ public struct BackgroundBlurScreenButton: View {
     }
 
     public var body: some View {
-        BackgroundBlurButton(
+        MeetingBackgroundBlurButton(
             image: viewModel.currentBlurLevel.image,
             action: viewModel.onTap)
     }

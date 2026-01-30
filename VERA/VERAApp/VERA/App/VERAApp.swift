@@ -143,12 +143,10 @@ struct VERAApp: App {
 
     private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
         #if BACKGROUND_EFFECTS_ENABLED
-            if navigationCoordinator.backgroundBlurButtonViewModel == nil {
-                let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
-                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-                )
-                navigationCoordinator.backgroundBlurButtonViewModel = viewModel
-            }
+            let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+            )
+            navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
             let view = backgroundBlurFactory.makeBlurButton(
                 viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
