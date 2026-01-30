@@ -185,7 +185,7 @@ final class PublisherSpy: VERAPublisher {
         addVideoTransformerCallCount += 1
     }
 
-    func addVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
+    func setVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
     }
 
     func removeTransformer(_ key: String) {

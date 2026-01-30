@@ -278,10 +278,10 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         updateVideoTransformers()
     }
 
-    /// Vonage publisher method for adding video transformers
+    /// Vonage publisher method for setting video transformers
     ///
     /// Used to apply video effects to the publishing and rendering.
-    public func addVideoTransformers(_ transformers: [any VERATransformer]) {
+    public func setVideoTransformers(_ transformers: [any VERATransformer]) {
         videoTransformers = transformers
 
         updateVideoTransformers()

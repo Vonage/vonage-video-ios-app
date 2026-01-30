@@ -60,8 +60,8 @@ public protocol VERAPublisher: AnyObject {
     /// Adds a video transformer to the current publisher.
     func addVideoTransformer(_ transformer: VERATransformer)
 
-    /// Adds a list video transformer to the current publisher.
-    func addVideoTransformers(_ transformers: [VERATransformer])
+    /// Sets a list video transformer to the current publisher.
+    func setVideoTransformers(_ transformers: [VERATransformer])
 
     /// Removes a video transformer from the publisher
     func removeTransformer(_ key: String)

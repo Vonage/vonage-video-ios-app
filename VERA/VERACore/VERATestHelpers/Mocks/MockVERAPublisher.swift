@@ -45,7 +45,7 @@ public final class MockVERAPublisher: VERAPublisher {
     public func addVideoTransformer(_ transformer: any VERADomain.VERATransformer) {
     }
 
-    public func addVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
+    public func setVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
     }
 
     public func removeTransformer(_ key: String) {
