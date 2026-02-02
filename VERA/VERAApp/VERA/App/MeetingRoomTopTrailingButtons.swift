@@ -14,10 +14,8 @@ public final class MeetingRoomTopTrailingButtons {
                 id: "Speaker",
                 content: {
                     ZStack {
-                        VERACommonUIAsset.Images.audioMidLine.swiftUIImage
                         AudioRoutePickerView()
-                            .frame(width: 32, height: 32)
-                            .opacity(0.1)
+                            .frame(width: 44, height: 44)
                     }
                 })
         ]
