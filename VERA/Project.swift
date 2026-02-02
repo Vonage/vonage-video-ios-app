@@ -81,6 +81,19 @@ private func areBackgroundEffectsEnabled() -> Bool {
 
 // MARK: - Dynamic Dependencies
 
+/// Builds Swift Package dependencies dynamically based on feature flags.
+///
+/// - Returns: The list of Swift Package dependencies for the project.
+private func createPackages() -> [Package] {
+    var packages: [Package] = []
+
+    if areBackgroundEffectsEnabled() {
+        packages.append(.vonageVideoTransformersSDK)
+    }
+
+    return packages
+}
+
 /// Builds target dependencies dynamically based on the chat feature flag.
 ///
 /// Always includes core modules (Core, Vonage, CommonUI, Configuration, CallKit plugin).
@@ -112,7 +125,8 @@ private func createDependencies() -> [TargetDependency] {
 
     if areBackgroundEffectsEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
+            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
+            .vonageVideoTransformersSDK,
         ])
     }
     return dependencies
@@ -152,8 +166,8 @@ private func createBuildSettings() -> Settings {
     }
 
     if areBackgroundEffectsEnabled() {
-        baseSettings["BACKGROUND_BLUR_ENABLED"] = "1"
-        flags.append("BACKGROUND_BLUR_ENABLED")
+        baseSettings["BACKGROUND_EFFECTS_ENABLED"] = "1"
+        flags.append("BACKGROUND_EFFECTS_ENABLED")
         print("Background effects feature enabled in build settings.")
     }
 
@@ -198,6 +212,7 @@ let project = Project(
         defaultKnownRegions: ["en", "es"],
         developmentRegion: "en"
     ),
+    packages: createPackages(),
     targets: [
         .target(
             name: "VERA",

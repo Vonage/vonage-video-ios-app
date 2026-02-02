@@ -9,6 +9,10 @@ import os.log
     import VERAArchiving
 #endif
 
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -23,6 +27,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     #if ARCHIVING_ENABLED
         var archiveButtonViewModel: ArchiveButtonViewModel?
         var archivesViewModel: ArchivesViewModel?
+    #endif
+
+    #if BACKGROUND_EFFECTS_ENABLED
+        var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
@@ -76,6 +84,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
             archiveButtonViewModel = nil
             archivesViewModel = nil
         #endif
+
+        #if BACKGROUND_EFFECTS_ENABLED
+            backgroundBlurButtonViewModel = nil
+        #endif
+
         logNavigation("Returned to landing page")
     }
 

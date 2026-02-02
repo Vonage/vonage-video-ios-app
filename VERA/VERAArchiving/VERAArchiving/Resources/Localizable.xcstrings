@@ -132,13 +132,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Make sure everyone is ready! You can download the recording from the \\\"Goodbye\\\" page after you leave the room."
+            "value" : "Make sure everyone is ready! You can download the recording from the \"Goodbye\" page after you leave the room."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¡Asegúrate de que todos estén listos! Podrás descargar la grabación desde la página de \\\"Despedida\\\" después de salir de la sala."
+            "value" : "¡Asegúrate de que todos estén listos! Podrás descargar la grabación desde la página de \"Despedida\" después de salir de la sala."
           }
         }
       }
@@ -165,13 +165,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You can download the recording from the \\\"Goodbye\\\" page after you leave the room."
+            "value" : "You can download the recording from the \"Goodbye\" page after you leave the room."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podrás descargar la grabación desde la página de \\\"Despedida\\\" después de salir de la sala."
+            "value" : "Podrás descargar la grabación desde la página de \"Despedida\" después de salir de la sala."
           }
         }
       }

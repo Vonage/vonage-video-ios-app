@@ -6,6 +6,7 @@ import Foundation
 import OpenTok
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 import VERAVonage
 

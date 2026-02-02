@@ -29,6 +29,8 @@ import VERADomain
 open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// The underlying Vonage publisher.
     let otPublisher: OTPublisher
+    /// The class that will create the transformer instances
+    public let transformerFactory: VERATransformerFactory
 
     /// Internal subscription storage for Combine pipelines.
     var cancellables = Set<AnyCancellable>()
@@ -66,6 +68,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var wasPublishingAudio: Bool = false
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
+    /// Holds the current list of video transformers.
+    @Published public private(set) var videoTransformers: [VERATransformer] = []
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -121,8 +125,12 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Creates a new publisher wrapper.
     ///
     /// - Parameter publisher: The configured `OTPublisher` to wrap.
-    public init(publisher: OTPublisher) {
+    public init(
+        publisher: OTPublisher,
+        transformerFactory: VERATransformerFactory
+    ) {
         otPublisher = publisher
+        self.transformerFactory = transformerFactory
         participant = Participant(
             id: id,
             name: publisher.stream?.name ?? "",
@@ -254,5 +262,40 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Use to trigger teardown or UI updates.
     public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         onStreamDestroyed?()
+    }
+
+    // MARK: Transformers
+
+    /// Vonage publisher method for adding video transformers
+    ///
+    /// Used to apply video effects to the publishing and rendering.
+    public func addVideoTransformer(_ transformer: VERATransformer) {
+        videoTransformers.removeAll { $0.key == transformer.key }
+        videoTransformers.append(transformer)
+
+        updateVideoTransformers()
+    }
+
+    /// Vonage publisher method for setting video transformers
+    ///
+    /// Used to apply video effects to the publishing and rendering.
+    public func setVideoTransformers(_ transformers: [any VERATransformer]) {
+        videoTransformers = transformers
+
+        updateVideoTransformers()
+    }
+
+    /// Vonage publisher method for removing a video transformer
+    ///
+    /// Used to removed a previously added transformer, does nothing if the key doesn't match with any transformer.
+    public func removeTransformer(_ key: String) {
+        videoTransformers.removeAll { $0.key == key }
+
+        updateVideoTransformers()
+    }
+
+    private func updateVideoTransformers() {
+        otPublisher.videoTransformers = videoTransformers.map(\.transformer)
+        updateParticipant()
     }
 }

@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public final class MockVERAPublisherRepository: PublisherRepository {
 
@@ -13,7 +14,7 @@ public final class MockVERAPublisherRepository: PublisherRepository {
         self.publisher = publisher
     }
 
-    public func getPublisher() -> any VERACore.VERAPublisher {
+    public func getPublisher() -> any VERAPublisher {
         publisher
     }
 
