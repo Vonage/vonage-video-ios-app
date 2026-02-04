@@ -128,7 +128,7 @@ struct VERAApp: App {
                     navigationCoordinator.showAlert(alertItem)
                 case .navigateToSettings:
                     navigationCoordinator.go(to: .settings)
-                case .navigateToWaitingRoom(let roomName):
+                case .navigateToMeetingRoom(let roomName):
                     Task {
                         navigationCoordinator.go(to: .meetingRoom(roomName))
                     }
@@ -212,6 +212,7 @@ struct VERAApp: App {
                         navigationCoordinator.go(to: .settings)
                     case .navigateToWaitingRoom(let roomName):
                         navigationCoordinator.go(to: .waitingRoom(roomName))
+                    default: break
                     }
                 }
             )

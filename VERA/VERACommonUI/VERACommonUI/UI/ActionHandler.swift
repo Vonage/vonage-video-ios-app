@@ -66,7 +66,23 @@ public enum Action {
     ///
     /// The waiting room allows users to configure their audio/video
     /// settings before entering the meeting.
+    ///
+    /// - Parameter roomName: The name of the room the user intends to join.
     case navigateToWaitingRoom(_ roomName: RoomName)
+
+    /// Navigates the user directly to the meeting room to join an active session.
+    ///
+    /// This action transitions the user from the waiting room or another screen
+    /// into the main meeting experience where video/audio communication occurs.
+    ///
+    /// - Parameter roomName: The name of the meeting room to join.
+    ///
+    /// ## Example
+    /// ```swift
+    /// // After user confirms readiness in waiting room
+    /// actionHandler(.navigateToMeetingRoom(roomName))
+    /// ```
+    case navigateToMeetingRoom(_ roomName: RoomName)
 }
 
 /// A closure type that handles dispatched actions.

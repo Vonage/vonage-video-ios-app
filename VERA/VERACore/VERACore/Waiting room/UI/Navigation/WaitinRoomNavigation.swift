@@ -53,6 +53,6 @@ public struct WaitingRoomNavigation: WaitingRoomDestination {
     }
 
     public func goToMeetingRoom() {
-        actionHandler(.navigateToWaitingRoom(roomName))
+        actionHandler(.navigateToMeetingRoom(roomName))
     }
 }

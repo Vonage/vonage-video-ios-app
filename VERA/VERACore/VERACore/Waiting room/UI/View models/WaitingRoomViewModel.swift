@@ -19,17 +19,6 @@ public enum WaitingRoomViewState: Equatable {
 public final class WaitingRoomViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
-    public enum Error: LocalizedError {
-        case invalidUserName
-
-        public var errorDescription: String? {
-            switch self {
-            case .invalidUserName:
-                return "Invalid User Name"
-            }
-        }
-    }
-
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
     @Published public var extraTrailingButtons: [ViewHolder] = []
@@ -129,7 +118,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     public func joinRoom() async {
         do {
             guard userName.isValidUsername else {
-                throw Error.invalidUserName
+                return
             }
 
             let request = JoinRoomRequest(roomName: roomName, userName: userName)

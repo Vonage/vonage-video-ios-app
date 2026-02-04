@@ -28,7 +28,7 @@ public struct MockWaitingRoomNavigation: WaitingRoomDestination {
     }
 
     public func goToMeetingRoom() {
-        actionHandler?(.navigateToWaitingRoom(roomName))
+        actionHandler?(.navigateToMeetingRoom(roomName))
     }
 
     public func onNext() {

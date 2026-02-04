@@ -101,30 +101,6 @@ struct WaitingRoomViewModelTests {
         #expect(sut.state != .loading)
     }
 
-    @Test("Given invalid username, when joining room, error alert would be handled by the text field")
-    func joinRoomWithInvalidUsernameShouldShowError() async {
-        let roomName = "test-room"
-        var isUserNameError = false
-
-        await confirmation("Alert should be presented") { confirm in
-            let sut = makeSUT(roomName: roomName) { action in
-                switch action {
-                case .presentAlert(let item):
-                    isUserNameError = item.message == "Invalid User Name"
-                    confirm()
-                default: break
-                }
-            }
-
-            // Set invalid username (empty or whitespace only)
-            sut.userName = "   "
-
-            await sut.joinRoom()
-        }
-
-        #expect(isUserNameError, "Error invalid user name")
-    }
-
     @Test("Given valid username, when joining room, then no error should be displayed")
     func joinRoomWithValidUsernameShouldNotShowError() async {
         let roomName = "test-room"
@@ -133,7 +109,7 @@ struct WaitingRoomViewModelTests {
         await confirmation("Should navigate to Meeting room screen") { confirm in
             let sut = makeSUT(roomName: roomName) { action in
                 switch action {
-                case .navigateToWaitingRoom(_):
+                case .navigateToMeetingRoom(_):
                     navigateToMeetingRoom = true
                     confirm()
                 default: break
