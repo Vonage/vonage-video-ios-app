@@ -5,7 +5,7 @@
 import AVFoundation
 import Foundation
 
-public protocol RequestMicrophonePermissionUseCase : RequestPermissionUseCase {
+public protocol RequestMicrophonePermissionUseCase: RequestPermissionUseCase {
 }
 
 public final class DefaultRequestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase {

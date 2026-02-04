@@ -3,8 +3,8 @@
 //
 
 import SwiftUI
-import VERADomain
 import VERACommonUI
+import VERADomain
 
 public class WaitingRoomFactory {
 
@@ -43,7 +43,7 @@ public class WaitingRoomFactory {
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository,
-            waitinRoomNavigation: WaitinRoomNavigation(actionHandler: onActionHandler, roomName: roomName))
+            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName))
         return (make(viewModel: viewModel), viewModel)
     }
 

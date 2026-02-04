@@ -50,18 +50,18 @@ public enum Action {
     /// actionHandler(.presentAlert(alert))
     /// ```
     case presentAlert(_ item: AlertItem)
-    
+
     /// Navigates the user to the goodbye screen after leaving a meeting.
     ///
     /// Typically triggered when a call ends or the user manually disconnects.
     case navigateToGoodbye
-    
+
     /// Navigates the user to the app settings screen.
     ///
     /// Use this action to allow users to configure app preferences,
     /// audio/video settings, or account options.
     case navigateToSettings
-    
+
     /// Navigates the user to the waiting room before joining a meeting.
     ///
     /// The waiting room allows users to configure their audio/video

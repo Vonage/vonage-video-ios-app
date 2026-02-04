@@ -202,7 +202,7 @@ struct VERAApp: App {
 
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
-                getExternalButtons: getBottomBarButtons, 
+                getExternalButtons: getBottomBarButtons,
                 onActionHandler: {
                     switch $0 {
                     case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)

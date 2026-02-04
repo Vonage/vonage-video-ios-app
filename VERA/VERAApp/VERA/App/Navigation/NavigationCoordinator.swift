@@ -92,7 +92,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
         logNavigation("Returned to landing page")
     }
-    
+
     private func navigateToSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)

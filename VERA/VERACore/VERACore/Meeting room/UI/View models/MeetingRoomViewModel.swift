@@ -72,30 +72,28 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
     }
-    
+
     @MainActor
     public func loadUI() async {
         guard !initialised else { return }
         initialised = true
-        
+
         await addObservers()
-                        
+
         updateExtraButtons()
     }
 
     public func onToggleMic() {
-        if !ensurePermissionGranted(permissionChecker: checkMicrophoneAuthorizationStatusUseCase, onDenied: {[weak self] in
-            self?.meetingRoomNavigation.presentMicrophonePermissionAlert()
-        }) {
+        if checkMicrophoneAuthorizationStatusUseCase().isDenied {
+            meetingRoomNavigation.presentMicrophonePermissionAlert()
             return
         }
         currentCall?.toggleLocalAudio()
     }
 
     public func onToggleCamera() {
-        if !ensurePermissionGranted(permissionChecker: checkCameraAuthorizationStatusUseCase, onDenied: {[weak self] in
-            self?.meetingRoomNavigation.presentCameraPermissionAlert()
-        }){
+        if checkCameraAuthorizationStatusUseCase().isDenied {
+            meetingRoomNavigation.presentCameraPermissionAlert()
             return
         }
         currentCall?.toggleLocalVideo()
@@ -129,16 +127,16 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 }
 
-private extension MeetingRoomViewModel {
-    
-    func navigateBackIfNeeded(_ callState: CallState) {
+extension MeetingRoomViewModel {
+
+    fileprivate func navigateBackIfNeeded(_ callState: CallState) {
         guard callState == .disconnected else { return }
         Task { @MainActor [weak self] in
             self?.meetingRoomNavigation.onNext()
         }
     }
 
-    func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
+    fileprivate func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         let sortedParticipantsPublisher = Publishers.CombineLatest(
             participantsPublisher.removeDuplicates(), layoutPublisher
         ).map { participantsState, layout in
@@ -150,7 +148,7 @@ private extension MeetingRoomViewModel {
                     if sortedPaticipants.isEmpty {
                         sortedPaticipants.append(localParticipant)
                     } else {
-                        sortedPaticipants.insert(localParticipant, at: 0)
+                        sortedPaticipants.insert(localParticipant, at: 1)
                     }
                 }
             } else {
@@ -180,8 +178,9 @@ private extension MeetingRoomViewModel {
             return MeetingRoomState(
                 roomName: self.roomName,
                 roomURL: baseURL.meetingRoomURL(roomName),
-                isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
-                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
+                isMicEnabled: sessionState.isPublishingAudio
+                    && checkMicrophoneAuthorizationStatusUseCase().isAuthorized,
+                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase().isAuthorized,
                 participants: participantsState.participants,
                 layout: participantsState.layout,
                 activeSpeakerId: participantsState.activeSpeakerId,
@@ -199,8 +198,8 @@ private extension MeetingRoomViewModel {
         }
         .store(in: &cancellables)
     }
-    
-    func addObservers() async {
+
+    fileprivate func addObservers() async {
         do {
             let call = try await connectToRoomUseCase(roomName: roomName)
             observeSessionState(call.participantsPublisher)
@@ -239,7 +238,7 @@ private extension MeetingRoomViewModel {
         }
     }
 
-    func handleArchivingStateChange(_ archivingState: ArchivingState) {
+    fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {
         Task { @MainActor [weak self] in
             guard let self else { return }
             self.archivingPublisher.value = archivingState
@@ -249,12 +248,12 @@ private extension MeetingRoomViewModel {
             case .archiving:
                 self.toast = .init(message: "Session recording started", mode: .info)
             }
-            
+
             self.updateArchivingButtons()
         }
     }
 
-    func handleEvents(_ event: SessionEvent) {
+    fileprivate func handleEvents(_ event: SessionEvent) {
         Task { @MainActor [weak self] in
             guard let self else { return }
             switch event {
@@ -279,14 +278,14 @@ private extension MeetingRoomViewModel {
             }
         }
     }
-    
+
     @MainActor
-    func updateExtraButtons() {
+    fileprivate func updateExtraButtons() {
         updateArchivingButtons()
     }
-    
+
     @MainActor
-    func updateArchivingButtons() {
+    fileprivate func updateArchivingButtons() {
         let archivingState = self.archivingPublisher.value
         self.extraButtons = self.getExternalButtons(.init(archivingState: archivingState))
     }

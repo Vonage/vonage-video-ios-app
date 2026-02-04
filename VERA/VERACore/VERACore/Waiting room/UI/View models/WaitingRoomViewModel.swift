@@ -18,10 +18,10 @@ public enum WaitingRoomViewState: Equatable {
 @MainActor
 public final class WaitingRoomViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
-    
-    public enum Error: LocalizedError{
+
+    public enum Error: LocalizedError {
         case invalidUserName
-        
+
         public var errorDescription: String? {
             switch self {
             case .invalidUserName:
@@ -45,18 +45,18 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let userRepository: UserRepository
-    private let waitinRoomNavigation: WaitinRoomDestination
+    private let waitingRoomNavigation: WaitingRoomDestination
 
     private var availableCameraDevices: [UICameraDevice] = []
 
     private var initialised: Bool = false
-    
-    private var isMicrophoneEnabled : Bool {
-        checkMicrophoneAuthorizationStatusUseCase() && publisher?.publishAudio ?? false
+
+    private var isMicrophoneEnabled: Bool {
+        checkMicrophoneAuthorizationStatusUseCase().isAuthorized && publisher?.publishAudio ?? false
     }
-    
-    private var isCameraEnable : Bool {
-        checkCameraAuthorizationStatusUseCase() && publisher?.publishVideo ?? false
+
+    private var isCameraEnable: Bool {
+        checkCameraAuthorizationStatusUseCase().isAuthorized && publisher?.publishVideo ?? false
     }
 
     public init(
@@ -69,7 +69,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         userRepository: UserRepository,
-        waitinRoomNavigation: WaitinRoomDestination
+        waitingRoomNavigation: WaitingRoomDestination
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
@@ -80,7 +80,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.userRepository = userRepository
-        self.waitinRoomNavigation = waitinRoomNavigation
+        self.waitingRoomNavigation = waitingRoomNavigation
     }
 
     public func loadUI() {
@@ -90,13 +90,13 @@ public final class WaitingRoomViewModel: ObservableObject {
         observeCameraDevices()
 
         loadUsername()
-        
+
         buildContentUiState(
             roomName: roomName,
             isMicrophoneEnabled: false,
             isCameraEnabled: false
         )
-        
+
         Task {
             await checkPermissions()
         }
@@ -125,29 +125,29 @@ public final class WaitingRoomViewModel: ObservableObject {
             isMicrophoneEnabled: publisher.publishAudio,
             isCameraEnabled: publisher.publishVideo)
     }
-    
+
     public func joinRoom() async {
         do {
             guard userName.isValidUsername else {
                 throw Error.invalidUserName
             }
-            
+
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
             try await joinRoomUseCase(request)
             await MainActor.run {
-                waitinRoomNavigation.goToMeetingRoom()
+                waitingRoomNavigation.goToMeetingRoom()
             }
         } catch {
             await MainActor.run { [weak self] in
-                self?.waitinRoomNavigation.presentAlertError(with: error.localizedDescription)
+                self?.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
             }
         }
     }
 }
 
-private extension WaitingRoomViewModel {
-    
-    func observeCameraDevices() {
+extension WaitingRoomViewModel {
+
+    fileprivate func observeCameraDevices() {
         cameraDevicesRepository.observeAvailableDevices.receive(
             on: DispatchQueue.main
         )
@@ -164,7 +164,7 @@ private extension WaitingRoomViewModel {
         .store(in: &cancellables)
     }
 
-    func loadUsername() {
+    fileprivate func loadUsername() {
         Task {
             do {
                 if let user = try await userRepository.get() {
@@ -174,13 +174,13 @@ private extension WaitingRoomViewModel {
                 }
             } catch {
                 await MainActor.run { [weak self] in
-                    self?.waitinRoomNavigation.presentAlertError(with: error.localizedDescription)
+                    self?.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
                 }
             }
         }
     }
-    
-    func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
+
+    fileprivate func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
         state = .content(
             .init(
                 roomName: roomName,
@@ -192,7 +192,7 @@ private extension WaitingRoomViewModel {
                 publisher: publisher))
     }
 
-    func makeUICameraDevice(
+    fileprivate func makeUICameraDevice(
         device: CameraDevice
     ) -> UICameraDevice {
         if device.id == "Front" {
@@ -202,7 +202,7 @@ private extension WaitingRoomViewModel {
         }
     }
 
-    func makeFrontCamera(_ device: CameraDevice) -> UICameraDevice {
+    fileprivate func makeFrontCamera(_ device: CameraDevice) -> UICameraDevice {
         var device = UICameraDevice(
             id: device.id,
             name: device.name,
@@ -213,7 +213,7 @@ private extension WaitingRoomViewModel {
         return device
     }
 
-    func makeBackCamera(_ device: CameraDevice) -> UICameraDevice {
+    fileprivate func makeBackCamera(_ device: CameraDevice) -> UICameraDevice {
         var device = UICameraDevice(
             id: device.id,
             name: device.name,
@@ -224,50 +224,54 @@ private extension WaitingRoomViewModel {
         return device
     }
 
-    func updateUIState() {
+    fileprivate func updateUIState() {
         buildContentUiState(
             roomName: roomName,
             isMicrophoneEnabled: isMicrophoneEnabled,
             isCameraEnabled: isCameraEnable)
     }
-    
+
     @MainActor
-    func startVideoPreview() {
+    fileprivate func startVideoPreview() {
         do {
             let publisher = try cameraPreviewProviderRepository.getPublisher()
             self.publisher = publisher
-            
+
             updateUIState()
-            
+
         } catch {
-            self.waitinRoomNavigation.presentAlertError(with: error.localizedDescription)
-        }
-    }
-    
-    // MARK: Permission requests
-    
-    func onCameraRequestPermission() -> Bool {
-        ensurePermissionGranted(permissionChecker: checkCameraAuthorizationStatusUseCase) {[weak self] in
-                self?.waitinRoomNavigation.presentCameraPermissionAlert()
-        }
-    }
-    
-    func onMicrophoneRequestPermission() -> Bool {
-        ensurePermissionGranted(permissionChecker: checkMicrophoneAuthorizationStatusUseCase) {[weak self] in
-                self?.waitinRoomNavigation.presentMicrophonePermissionAlert()
+            self.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
         }
     }
 
+    // MARK: Permission requests
+
+    fileprivate func onCameraRequestPermission() -> Bool {
+        let permissionStatus = checkCameraAuthorizationStatusUseCase()
+        if permissionStatus.isDenied {
+            waitingRoomNavigation.presentCameraPermissionAlert()
+        }
+        return permissionStatus.isAuthorized
+    }
+
+    fileprivate func onMicrophoneRequestPermission() -> Bool {
+        let permissionStatus = checkMicrophoneAuthorizationStatusUseCase()
+        if permissionStatus.isDenied {
+            waitingRoomNavigation.presentMicrophonePermissionAlert()
+        }
+        return permissionStatus.isAuthorized
+    }
+
     @MainActor
-    func checkPermissions() async {
-        _ = await requestPermission(permissionChecker: checkMicrophoneAuthorizationStatusUseCase, permissionRequester: requestMicrophonePermissionUseCase){[weak self] in
-            self?.waitinRoomNavigation.presentMicrophonePermissionAlert()
-        }
-        
-        _ = await requestPermission(permissionChecker: checkCameraAuthorizationStatusUseCase, permissionRequester: requestCameraPermissionUseCase) {[weak self] in
-            self?.waitinRoomNavigation.presentCameraPermissionAlert()
-        }
-        
+    fileprivate func checkPermissions() async {
+        _ = await requestPermission(
+            permissionChecker: checkMicrophoneAuthorizationStatusUseCase,
+            permissionRequester: requestMicrophonePermissionUseCase)
+
+        _ = await requestPermission(
+            permissionChecker: checkCameraAuthorizationStatusUseCase,
+            permissionRequester: requestCameraPermissionUseCase)
+
         startVideoPreview()
     }
 }

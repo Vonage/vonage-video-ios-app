@@ -5,7 +5,7 @@
 import AVFoundation
 import Foundation
 
-public protocol RequestCameraPermissionUseCase : RequestPermissionUseCase {}
+public protocol RequestCameraPermissionUseCase: RequestPermissionUseCase {}
 
 public final class DefaultRequestCameraPermissionUseCase: RequestCameraPermissionUseCase {
 

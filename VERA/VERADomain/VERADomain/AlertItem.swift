@@ -23,7 +23,7 @@ public struct AlertItem: Identifiable, Equatable {
         self.okAction = "OK"
         self.cancelAction = nil
     }
-    
+
     public init(
         title: String,
         message: String,
@@ -37,16 +37,16 @@ public struct AlertItem: Identifiable, Equatable {
         self.okAction = okAction
         self.cancelAction = cancelAction
     }
-    
+
     public static func cameraPermissionAlert(onConfirm: @escaping (() -> Void)) -> AlertItem {
         getAlertWithText(message: "Please review camera permissions in settings.", onConfirm: onConfirm)
     }
-    
+
     public static func microphonePermissionAlert(onConfirm: @escaping (() -> Void)) -> AlertItem {
-        getAlertWithText(message: "Please review microhpone permissions in settings.", onConfirm: onConfirm)
+        getAlertWithText(message: "Please review microphone permissions in settings.", onConfirm: onConfirm)
     }
-    
-    public static func getAlertWithText(message: String, onConfirm: @escaping (() -> Void)) -> AlertItem  {
+
+    public static func getAlertWithText(message: String, onConfirm: @escaping (() -> Void)) -> AlertItem {
         AlertItem(
             title: "Check Settings",
             message: message,

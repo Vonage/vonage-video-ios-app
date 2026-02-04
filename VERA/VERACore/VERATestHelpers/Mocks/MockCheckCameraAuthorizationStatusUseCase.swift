@@ -6,26 +6,19 @@ import Foundation
 import VERACore
 
 public func makeMockCheckCameraAuthorizationStatusUseCase(
-    isAuthorized: Bool = true,
-    isDenied: Bool = false
+    permissionStatus: PermissionStatus = .authorized,
 ) -> CheckCameraAuthorizationStatusUseCase {
-    MockCheckCameraAuthorizationStatusUseCase(isAuthorized: isAuthorized, isDenied: isDenied)
+    MockCheckCameraAuthorizationStatusUseCase(permissionStatus: permissionStatus)
 }
 
 public final class MockCheckCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase {
-    public var isAuthorized: Bool = true
-    public var isPermissionDenied: Bool = true
+    public let permissionStatus: PermissionStatus
 
-    public init(isAuthorized: Bool, isDenied: Bool) {
-        self.isAuthorized = isAuthorized
-        self.isPermissionDenied = isDenied
+    public init(permissionStatus: PermissionStatus) {
+        self.permissionStatus = permissionStatus
     }
 
-    public func callAsFunction() -> Bool {
-        isAuthorized
-    }
-    
-    public func isDenied() -> Bool {
-        isPermissionDenied
+    public func callAsFunction() -> PermissionStatus {
+        permissionStatus
     }
 }

@@ -45,12 +45,5 @@ public protocol RequestPermissionUseCase {
 public protocol CheckPermissionUseCase {
     /// Checks whether the permission is currently authorized.
     /// - Returns: `true` if the permission is granted, `false` otherwise.
-    func callAsFunction() -> Bool
-    
-    /// Checks whether the permission has been explicitly denied by the user.
-    /// - Returns: `true` if the permission was denied, `false` if it's in another state
-    ///   (e.g., not determined, authorized, or restricted).
-    func isDenied() -> Bool
+    func callAsFunction() -> PermissionStatus
 }
-
-
