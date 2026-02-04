@@ -33,6 +33,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
     @MainActor @Published public var extraButtons: [BottomBarButton] = []
+    @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
     @MainActor @Published public var isArchiving = false
 
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)

@@ -4,16 +4,20 @@
 
 import Foundation
 import SwiftUI
-import VERACore
+import VERADomain
 
 public final class MockVERAPublisher: VERAPublisher {
+    public var videoTransformers: [any VERADomain.VERATransformer] = []
+
+    public var transformerFactory: any VERADomain.VERATransformerFactory
+
     public var view: AnyView
 
     public var publishAudio: Bool
 
     public var publishVideo: Bool
 
-    public var cameraPosition: VERACore.CameraPosition
+    public var cameraPosition: CameraPosition
 
     public var didCallCleanUp: Bool = false
 
@@ -21,12 +25,14 @@ public final class MockVERAPublisher: VERAPublisher {
         view: AnyView = AnyView(Color.red),
         publishAudio: Bool = true,
         publishVideo: Bool = true,
-        cameraPosition: VERACore.CameraPosition = .front
+        cameraPosition: CameraPosition = .front,
+        transformerFactory: any VERADomain.VERATransformerFactory = MockTransformerFactory()
     ) {
         self.view = view
         self.publishAudio = publishAudio
         self.publishVideo = publishVideo
         self.cameraPosition = cameraPosition
+        self.transformerFactory = transformerFactory
     }
 
     public func switchCamera(to cameraDeviceID: String) {
@@ -34,5 +40,38 @@ public final class MockVERAPublisher: VERAPublisher {
 
     public func cleanUp() {
         didCallCleanUp = true
+    }
+
+    public func addVideoTransformer(_ transformer: any VERADomain.VERATransformer) {
+    }
+
+    public func setVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
+    }
+
+    public func removeTransformer(_ key: String) {
+    }
+}
+
+public final class MockTransformer: VERATransformer {
+    public var key: String
+    public var transformer: AnyObject
+
+    public init(
+        key: String = "anyKey",
+        transformer: AnyObject
+    ) {
+        self.key = key
+        self.transformer = transformer
+    }
+}
+
+public final class MockTransformerFactory: VERATransformerFactory {
+    public init() {}
+
+    public func makeTransformer(
+        for key: String,
+        params: String
+    ) throws -> any VERADomain.VERATransformer {
+        MockTransformer(key: key, transformer: NSObject())
     }
 }

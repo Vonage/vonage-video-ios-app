@@ -32,7 +32,8 @@ public struct MeetingRoomScreen: View {
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
                                 onToggleLayout: viewModel.onToggleLayout),
-                            extraButtons: $viewModel.extraButtons
+                            extraButtons: $viewModel.extraButtons,
+                            extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
                         )
 
                         if state.callState == .disconnecting {

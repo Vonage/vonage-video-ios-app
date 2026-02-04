@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import VERACore
+import VERADomain
 
 public final class MockPublisherFactory: PublisherFactory {
 

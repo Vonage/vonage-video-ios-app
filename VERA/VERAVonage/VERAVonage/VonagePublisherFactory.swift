@@ -7,6 +7,7 @@ import OpenTok
 import SwiftUI
 import UIKit
 import VERACore
+import VERADomain
 
 /// Creates configured `VonagePublisher` instances from `PublisherSettings`.
 ///
@@ -22,11 +23,13 @@ public final class VonagePublisherFactory: PublisherFactory {
         /// The underlying `OTPublisher` failed to initialize.
         case publisherInitializationFailed
     }
-    
-    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
-    
+  
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase  
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
-    
+  
+    /// This factory returns the specific Vonage audio or video transformers
+    lazy var vonageTransformerFactory = VonageTransformerFactory()
+  
     /// Creates a new `VonagePublisherFactory`.
     public init(
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
@@ -60,7 +63,9 @@ public final class VonagePublisherFactory: PublisherFactory {
         otPublisher.publishAudio = settings.publishAudio && checkMicrophoneAuthorizationStatusUseCase()
         otPublisher.publishVideo = settings.publishVideo && checkCameraAuthorizationStatusUseCase()
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
-        let publisher = VonagePublisher(publisher: otPublisher)
+        let publisher = VonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: vonageTransformerFactory)
         otPublisher.delegate = publisher
         return publisher
     }

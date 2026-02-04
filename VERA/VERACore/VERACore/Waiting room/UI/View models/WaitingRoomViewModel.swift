@@ -32,6 +32,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
+    @Published public var extraTrailingButtons: [ViewHolder] = []
 
     public let roomName: RoomName
     weak var publisher: VERAPublisher?

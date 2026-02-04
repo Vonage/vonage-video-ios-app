@@ -17,6 +17,10 @@ import VERAVonage
     import VERAArchiving
 #endif
 
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -98,6 +102,10 @@ struct VERAApp: App {
         var archiveFactory: ArchivingFactory { dependencyContainer.archivingFactory }
     #endif
 
+    #if BACKGROUND_EFFECTS_ENABLED
+        var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
+    #endif
+
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
             navigationCoordinator.go(to: .waitingRoom(roomName))
@@ -127,6 +135,7 @@ struct VERAApp: App {
                 default: break
                 }
             }
+            newViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
             viewModel = newViewModel
             navigationCoordinator.waitingRoomViewModel = newViewModel
         }
@@ -140,6 +149,23 @@ struct VERAApp: App {
             }
     }
 
+    private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
+        #if BACKGROUND_EFFECTS_ENABLED
+            let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+            )
+            navigationCoordinator.backgroundBlurButtonViewModel = viewModel
+
+            let view = backgroundBlurFactory.makeBlurButton(
+                viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
+            )
+
+            return [ViewHolder(id: "Blur", content: { view })]
+        #else
+            return []
+        #endif
+    }
+
     private func makeMeetingRoom(roomName: String) -> some View {
         let viewModel: MeetingRoomViewModel
 
@@ -148,6 +174,22 @@ struct VERAApp: App {
         {
             viewModel = existingViewModel
         } else {
+            #if BACKGROUND_EFFECTS_ENABLED
+
+                // Copy the current blur level from the waiting room
+                // and apply it to the meeting room blur view model
+                // the publisher repositories are different
+                let (_, meetingRoomBlurViewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.publisherRepository.getPublisher
+                )
+
+                if let blurViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                    meetingRoomBlurViewModel.currentBlurLevel = blurViewModel.currentBlurLevel
+                }
+                navigationCoordinator.backgroundBlurButtonViewModel = meetingRoomBlurViewModel
+
+            #endif
+
             #if ARCHIVING_ENABLED
                 let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(
                     roomName: roomName,
@@ -157,10 +199,11 @@ struct VERAApp: App {
                 )
                 archiveButtonViewModel.setup()
             #endif
+
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
-                getExternalButtons: getBottomBarButtons
-                , onActionHandler: {
+                getExternalButtons: getBottomBarButtons, 
+                onActionHandler: {
                     switch $0 {
                     case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
                     case .navigateToGoodbye:
@@ -172,7 +215,7 @@ struct VERAApp: App {
                     }
                 }
             )
-            
+            newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
             navigationCoordinator.meetingRoomViewModel = newViewModel
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
@@ -190,14 +233,23 @@ struct VERAApp: App {
     private func getBottomBarButtons(
         _ state: MeetingRoomButtonsState
     ) -> [BottomBarButton] {
+        var extraButtons: [BottomBarButton] = []
         #if CHAT_ENABLED
-            var extraButtons: [BottomBarButton] = [
-                dependencyContainer.mapToChatBottomBarButton(onShowChat: {
+            extraButtons.append(
+                dependencyContainer.mapToChatBottomBarButton {
                     showChat = true
-                })
-            ]
-        #else
-            var extraButtons: [BottomBarButton] = []
+                }
+            )
+        #endif
+
+        #if BACKGROUND_EFFECTS_ENABLED
+
+            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                extraButtons.append(
+                    dependencyContainer.makeBackgroundEffectsButton(backgroundBlurButtonViewModel)
+                )
+            }
+
         #endif
 
         #if ARCHIVING_ENABLED

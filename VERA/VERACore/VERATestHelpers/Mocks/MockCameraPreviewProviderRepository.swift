@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public final class MockCameraPreviewProviderRepository: CameraPreviewProviderRepository {
 
@@ -19,7 +20,7 @@ public final class MockCameraPreviewProviderRepository: CameraPreviewProviderRep
         self.publisher = publisher
     }
 
-    public func getPublisher() -> any VERACore.VERAPublisher {
+    public func getPublisher() -> any VERAPublisher {
         actions.append(.get)
         return publisher
     }

@@ -3,30 +3,38 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERABackgroundEffects",
+    packages: [
+        .vonageVideoTransformersSDK
+    ],
     targets: [
         .target(
             name: "VERABackgroundEffects",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERABackgroundEffects",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERABackgroundEffects/**"],
             resources: [
                 "VERABackgroundEffects/Resources/**"
             ],
             scripts: [.swiftLint(targetName: "VERABackgroundEffects")],
-            dependencies: [],
+            dependencies: [
+                .project(target: "VERAVonage", path: "../VERAVonage"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .vonageVideoTransformersSDK,
+            ],
             settings: createBaseBuildSettings()
         ),
         .target(
             name: "VERABackgroundEffectsTests",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERABackgroundEffectsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERABackgroundEffectsTests/**"],
             dependencies: [
-                .target(name: "VERABackgroundEffects")
+                .target(name: "VERABackgroundEffects"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ],
             settings: createBaseBuildSettings()
         ),

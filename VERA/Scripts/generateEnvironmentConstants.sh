@@ -8,6 +8,19 @@
 
 set -e  # Exit on error
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERA_DIR="$SCRIPT_DIR/.."
+
+# Validate VERA directory exists
+if [ ! -d "$VERA_DIR/VERAApp" ]; then
+    echo "❌ Error: VERA directory structure not found at $VERA_DIR"
+    echo "   Expected to find VERAApp/ folder"
+    exit 1
+fi
+
+cd "$VERA_DIR"
+
 if [ -z "$BASE_API_URL" ]; then
     echo "❌ Error: BASE_API_URL environment variable is not set"
     echo "Usage: BASE_API_URL=https://api.example.com/ ./generateEnvironmentConstants.sh"
@@ -22,7 +35,14 @@ SWIFT_OUTPUT_DIR="VERAApp/VERA/App/Generated"
 SWIFT_OUTPUT_FILE="$SWIFT_OUTPUT_DIR/EnvironmentConstants.swift"
 ENTITLEMENTS_FILE="VERAApp/VERA/VERA.entitlements"
 
-# Create directory if it doesn't exist
+# Validate target App directory exists
+if [ ! -d "VERAApp/VERA/App" ]; then
+    echo "❌ Error: Target directory VERAApp/VERA/App/ not found"
+    echo "   Please ensure the project structure is correct"
+    exit 1
+fi
+
+# Create Generated directory if it doesn't exist
 mkdir -p "$SWIFT_OUTPUT_DIR"
 
 # Generate the Swift file

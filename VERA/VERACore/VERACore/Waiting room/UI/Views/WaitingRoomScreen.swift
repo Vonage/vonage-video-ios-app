@@ -21,7 +21,8 @@ public struct WaitingRoomScreen: View {
         case .content(let state):
             WaitingRoomView(
                 state: state,
-                userName: $viewModel.userName
+                userName: $viewModel.userName,
+                extraTrailingButtons: $viewModel.extraTrailingButtons,
             ) {
                 Task {
                     await viewModel.joinRoom()

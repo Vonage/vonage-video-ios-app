@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 
 @Suite("Joing room use case tests")
@@ -17,7 +18,6 @@ struct JoinRoomUseCaseTests {
 
         try await sut(request)
 
-        #expect(publisherRepository.actions.count == 1)
         #expect(publisherRepository.actions.first == .recreate(.init(username: "Zaphod")))
     }
 

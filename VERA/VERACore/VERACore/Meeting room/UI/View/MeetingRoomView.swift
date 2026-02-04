@@ -6,10 +6,24 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+public struct ViewGenerator: Identifiable {
+    public let id: String
+    public let content: () -> AnyView
+
+    public init<Content: View>(
+        id: String = UUID().uuidString,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.id = id
+        self.content = { AnyView(content()) }
+    }
+}
+
 public struct MeetingRoomView: View {
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
     @Binding private var extraButtons: [BottomBarButton]
+    @Binding private var extraTopTrailingButtons: [ViewGenerator]
 
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
@@ -19,11 +33,13 @@ public struct MeetingRoomView: View {
     public init(
         state: MeetingRoomState,
         actions: MeetingRoomActions,
-        extraButtons: Binding<[BottomBarButton]> = .constant([])
+        extraButtons: Binding<[BottomBarButton]> = .constant([]),
+        extraTopTrailingButtons: Binding<[ViewGenerator]> = .constant([])
     ) {
         self.state = state
         self.actions = actions
         self._extraButtons = extraButtons
+        self._extraTopTrailingButtons = extraTopTrailingButtons
     }
 
     public var body: some View {
@@ -140,8 +156,8 @@ public struct MeetingRoomView: View {
             cameraSwitchButton
         }
 
-        if state.allowMicrophoneControl {
-            microphoneButton
+        ForEach(extraTopTrailingButtons) { button in
+            button.content()
         }
 
         if let roomURL = state.roomURL {
@@ -168,15 +184,6 @@ public struct MeetingRoomView: View {
             VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
         }
         .disabled(!state.isCameraEnabled)
-    }
-
-    private var microphoneButton: some View {
-        Button {
-            onBottomBarInteraction()
-            actions.onToggleMic()
-        } label: {
-            VERACommonUIAsset.Images.audioMidLine.swiftUIImage
-        }
     }
 
     private func shareButton(url: URL) -> some View {
