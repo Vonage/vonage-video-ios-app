@@ -14,4 +14,8 @@ public final class DefaultCheckMicrophoneAuthorizationStatusUseCase: CheckMicrop
     public func callAsFunction() -> Bool {
         AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     }
+    
+    public func isDenied() -> Bool {
+        AVCaptureDevice.authorizationStatus(for: .audio) == .denied
+    }
 }

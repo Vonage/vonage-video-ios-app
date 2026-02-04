@@ -58,7 +58,6 @@ public struct MeetingRoomScreen: View {
             .zIndex(999)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .alert(item: $viewModel.error) { $0.view }
         .onChange(of: viewModel.toast) { newToast in
             if newToast != nil {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -74,9 +73,8 @@ public struct MeetingRoomScreen: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            viewModel.loadUI()
+        }.task {
+           await viewModel.loadUI()
         }
     }
 }

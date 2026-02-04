@@ -49,6 +49,8 @@ struct VERAApp: App {
                             fatalError("Should not be able to navigate to meeting room from landing")
                         case .landing:
                             fatalError("Should not be able to navigate to landing")
+                        case .settings:
+                            fatalError("Should not be able to navigate to settings")
                         }
                     }
             }
@@ -103,7 +105,7 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        let viewModel: WaitingRoomViewModel
+        var viewModel: WaitingRoomViewModel
 
         if let existingViewModel = navigationCoordinator.waitingRoomViewModel,
             existingViewModel.roomName == roomName
@@ -112,11 +114,17 @@ struct VERAApp: App {
             viewModel = existingViewModel
         } else {
             // Create new view model for different room
-            let (_, newViewModel) = waitingRoomFactory.make(
-                roomName: roomName
-            ) { roomName in
-                Task {
-                    navigationCoordinator.go(to: .meetingRoom(roomName))
+            let (_, newViewModel) = waitingRoomFactory.make(roomName: roomName) {
+                switch $0 {
+                case .presentAlert(let alertItem):
+                    navigationCoordinator.showAlert(alertItem)
+                case .navigateToSettings:
+                    navigationCoordinator.go(to: .settings)
+                case .navigateToWaitingRoom(let roomName):
+                    Task {
+                        navigationCoordinator.go(to: .meetingRoom(roomName))
+                    }
+                default: break
                 }
             }
             viewModel = newViewModel
@@ -152,12 +160,19 @@ struct VERAApp: App {
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons
-            ) {
-                navigationCoordinator.go(to: .waitingRoom(roomName))
-            } onNext: {
-                navigationCoordinator.go(to: .goodbye(roomName))
-            }
-
+                , onActionHandler: {
+                    switch $0 {
+                    case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
+                    case .navigateToGoodbye:
+                        navigationCoordinator.go(to: .goodbye(roomName))
+                    case .navigateToSettings:
+                        navigationCoordinator.go(to: .settings)
+                    case .navigateToWaitingRoom(let roomName):
+                        navigationCoordinator.go(to: .waitingRoom(roomName))
+                    }
+                }
+            )
+            
             navigationCoordinator.meetingRoomViewModel = newViewModel
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel

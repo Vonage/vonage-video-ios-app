@@ -8,6 +8,7 @@ import SwiftUI
 import Testing
 import VERADomain
 import VERATestHelpers
+import VERACommonUI
 
 @testable import VERACore
 
@@ -102,36 +103,140 @@ struct WaitingRoomViewModelTests {
 
     @Test("Given invalid username, when joining room, error alert would be handled by the text field")
     func joinRoomWithInvalidUsernameShouldShowError() async {
-        let sut = makeSUT()
-
-        // Set invalid username (empty or whitespace only)
-        sut.userName = "   "
-
-        #expect(sut.error == nil, "Error should be nil initially")
-
-        await sut.joinRoom()
-
-        // Text field will show the invalid username message
+        let roomName = "test-room"
+        var isUserNameError = false
+        
+        await confirmation("Alert should be presented") { confirm in
+            let sut = makeSUT(roomName: roomName){ action in
+                switch action {
+                case .presentAlert(let item):
+                    isUserNameError = item.message == "Invalid User Name"
+                    confirm()
+                default: break
+                }
+            }
+            
+            // Set invalid username (empty or whitespace only)
+            sut.userName = "   "
+            
+            await sut.joinRoom()
+          }
+        
+        #expect(isUserNameError, "Error invalid user name")
     }
 
     @Test("Given valid username, when joining room, then no error should be displayed")
     func joinRoomWithValidUsernameShouldNotShowError() async {
-        var navigationCalled = false
-        let expectedRoomName = "test-room"
-
-        let sut = makeSUT(
-            roomName: expectedRoomName
-        ) { roomName in
-            navigationCalled = true
-            #expect(roomName == expectedRoomName)
-        }
-
-        sut.userName = "ValidUser"
-
-        await sut.joinRoom()
-
-        #expect(sut.error == nil, "Error should be nil for valid username")
-        #expect(navigationCalled, "Navigation should be called for valid username")
+        let roomName = "test-room"
+        var navigateToMeetingRoom = false
+        
+        await confirmation("Should navigate to Meeting room screen") { confirm in
+            let sut = makeSUT(roomName: roomName){ action in
+                switch action {
+                case .navigateToWaitingRoom(_):
+                    navigateToMeetingRoom = true
+                    confirm()
+                default: break
+                }
+            }
+            
+            sut.userName = "ValidUser"
+            
+            await sut.joinRoom()
+          }
+        
+        #expect(navigateToMeetingRoom, "Navigation should be called for valid username")
+    }
+    
+    @Test("Given toogling the microphone, When the permission was denied, Then should present the Settings Alert")
+    func toogleMicShouldShowSettingsMessage() async {
+        let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(isAuthorized: false, isDenied: true)
+        
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+        
+        await confirmation("Alert should presented for settings") { confirm in
+            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase){ action in
+                switch action {
+                case .presentAlert(let item):
+                    navigateToSettingsAlert = item.title == "Check Settings"
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleMic()
+          }
+        
+        #expect(navigateToSettingsAlert, "Should present Settings Alert")
+    }
+    
+    @Test("Given toggling the microphone presents a settings alert, When the user confirms, Then the app navigates to App Settings")
+    func toogleMicShouldShowSettingsMessageConfirmAndMoveToAppSetting() async {
+        let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(isAuthorized: false, isDenied: true)
+        
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+        
+        await confirmation("App settings should be presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase){ action in
+                switch action {
+                case .presentAlert(let item):
+                    item.onConfirm?()
+                case .navigateToSettings:
+                    navigateToSettingsAlert = true
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleMic()
+          }
+        
+        #expect(navigateToSettingsAlert, "Should present App Settings")
+    }
+    
+    @Test("Given toogling the camera, When the camera permission was denied, Then should present the Settings Alert")
+    func toogleCameraShouldShowSettingsMessage() async {
+        let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(isAuthorized: false, isDenied: true)
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+        
+        await confirmation("Alert Setting sshould presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase){ action in
+                switch action {
+                case .presentAlert(let item):
+                    navigateToSettingsAlert = item.title == "Check Settings"
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleCamera()
+          }
+        
+        #expect(navigateToSettingsAlert, "Should present Settings Alert")
+    }
+    
+    @Test("Given toggling the camera presents the Alert Settings, When the user confirms, Then the app navigates to App Settings")
+    func toogleCameraShouldShowSettingsMessageUserConfirmsAndNavigatesToAppSetting() async {
+        let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(isAuthorized: false, isDenied: true)
+        
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+        
+        await confirmation("App settings should be presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase){ action in
+                switch action {
+                case .presentAlert(let item):
+                    item.onConfirm?()
+                case .navigateToSettings:
+                    navigateToSettingsAlert = true
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleCamera()
+          }
+        
+        #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
     // MARK: SUT
@@ -142,7 +247,9 @@ struct WaitingRoomViewModelTests {
         cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
         userRepository: UserRepository = makeMockUserRepository(),
-        onNavigateToRoom: @escaping (RoomName) -> Void = { _ in }
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =  makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase = makeMockCheckCameraAuthorizationStatusUseCase(),
+        actionHandler: ActionHandler? = nil
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
@@ -154,9 +261,9 @@ struct WaitingRoomViewModelTests {
                 publisherRepository: publisherRepository),
             requestMicrophonePermissionUseCase: makeMockRequestMicrophonePermissionUseCase(),
             requestCameraPermissionUseCase: makeMockRequestCameraPermissionUseCase(),
-            checkCameraAuthorizationStatusUseCase: makeMockCheckCameraAuthorizationStatusUseCase(),
-            checkMicrophoneAuthorizationStatusUseCase: makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             userRepository: userRepository,
-            onNavigateToRoom: onNavigateToRoom)
+            waitinRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName))
     }
 }

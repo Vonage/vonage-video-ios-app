@@ -5,6 +5,7 @@
 import SwiftUI
 import VERAConfiguration
 import VERADomain
+import VERACommonUI
 
 public class MeetingRoomFactory {
     private let baseURL: URL
@@ -30,11 +31,11 @@ public class MeetingRoomFactory {
         self.roomCredentialsRepository = roomCredentialsRepository
     }
 
+    @MainActor
     public func make(
         roomName: RoomName,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
-        onBack: @escaping () -> Void = {},
-        onNext: @escaping () -> Void = {},
+        onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
@@ -46,13 +47,11 @@ public class MeetingRoomFactory {
                 sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
-            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext),
+            meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
             getExternalButtons: getExternalButtons)
-        return (MeetingRoomScreen(viewModel: viewModel), viewModel)
+        return (make(viewModel: viewModel), viewModel)
     }
 
     @MainActor

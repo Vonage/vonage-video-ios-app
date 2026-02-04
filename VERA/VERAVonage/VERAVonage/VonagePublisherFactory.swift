@@ -22,9 +22,19 @@ public final class VonagePublisherFactory: PublisherFactory {
         /// The underlying `OTPublisher` failed to initialize.
         case publisherInitializationFailed
     }
-
+    
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    
+    private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    
     /// Creates a new `VonagePublisherFactory`.
-    public init() {}
+    public init(
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    ) {
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
+    }
 
     /// Builds a `VERAPublisher` backed by `VonagePublisher`.
     ///
@@ -47,8 +57,8 @@ public final class VonagePublisherFactory: PublisherFactory {
         guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
             throw Error.publisherInitializationFailed
         }
-        otPublisher.publishAudio = settings.publishAudio
-        otPublisher.publishVideo = settings.publishVideo
+        otPublisher.publishAudio = settings.publishAudio && checkMicrophoneAuthorizationStatusUseCase()
+        otPublisher.publishVideo = settings.publishVideo && checkCameraAuthorizationStatusUseCase()
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
         let publisher = VonagePublisher(publisher: otPublisher)
         otPublisher.delegate = publisher

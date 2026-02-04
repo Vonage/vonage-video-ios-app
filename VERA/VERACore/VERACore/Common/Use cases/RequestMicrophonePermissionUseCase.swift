@@ -5,8 +5,7 @@
 import AVFoundation
 import Foundation
 
-public protocol RequestMicrophonePermissionUseCase {
-    func callAsFunction() async -> Bool
+public protocol RequestMicrophonePermissionUseCase : RequestPermissionUseCase {
 }
 
 public final class DefaultRequestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase {

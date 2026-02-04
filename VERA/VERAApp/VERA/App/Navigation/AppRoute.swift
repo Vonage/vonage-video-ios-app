@@ -9,6 +9,7 @@ public enum AppRoute: Hashable {
     case waitingRoom(String)
     case meetingRoom(String)
     case goodbye(String)
+    case settings
 
     var description: String {
         switch self {
@@ -16,6 +17,7 @@ public enum AppRoute: Hashable {
         case .waitingRoom(let room): "Waiting room (\(room))"
         case .meetingRoom(let room): "Meeting room (\(room))"
         case .goodbye: "Goodbye"
+        case .settings: "Settings"
         }
     }
 }

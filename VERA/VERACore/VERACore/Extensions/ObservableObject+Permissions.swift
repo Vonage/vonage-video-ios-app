@@ -4,14 +4,36 @@
 
 import Combine
 
+public typealias OnDenied = () -> Void
+
 extension ObservableObject {
-    public func checkAndRequestPermissionIfneeded(
+    public func ensurePermissionGranted(
         permissionChecker: CheckPermissionUseCase,
-        permissionRequester: RequestPermissionUseCase
+        onDenied: OnDenied?
+    ) -> Bool {
+        defer {
+            if permissionChecker.isDenied() {
+                onDenied?()
+            }
+        }
+        return permissionChecker()
+    }
+    
+    @MainActor
+    public func requestPermission(
+        permissionChecker: CheckPermissionUseCase,
+        permissionRequester: RequestPermissionUseCase,
+        onDenied: OnDenied?
     ) async -> Bool {
-        var granted = permissionChecker()
-        if !granted {
-            granted = await permissionRequester()
+        var granted = false
+        let wasPreviouslyDenied = permissionChecker.isDenied()
+        if !wasPreviouslyDenied {
+            granted = permissionChecker()
+            if !granted {
+                granted = await permissionRequester()
+            }
+        } else {
+            onDenied?()
         }
         return granted
     }

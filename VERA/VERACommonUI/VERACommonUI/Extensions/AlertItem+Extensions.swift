@@ -8,12 +8,23 @@ import VERADomain
 
 extension AlertItem {
     public var view: Alert {
-        Alert(
-            title: Text(title),
-            message: Text(message),
-            dismissButton: .default(Text("OK")) {
-                onConfirm?()
-            }
-        )
+        if let cancelAction {
+            Alert(
+                title: Text(title),
+                message: Text(message),
+                primaryButton: .default(Text(okAction ?? "OK")) {
+                    onConfirm?()
+                },
+                secondaryButton: .cancel(Text(cancelAction))
+            )
+        } else {
+            Alert(
+                title: Text(title),
+                message: Text(message),
+                dismissButton: .default(Text("OK")) {
+                    onConfirm?()
+                }
+            )
+        }
     }
 }
