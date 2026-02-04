@@ -47,16 +47,18 @@ public struct MeetingRoomScreen: View {
                 }
             }
 
-            VStack {
-                if showToast, let toast = viewModel.toast {
-                    toast.view
-                        .padding(.top, 16)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+            GeometryReader { geometry in
+                VStack {
+                    if showToast, let toast = viewModel.toast {
+                        toast.view
+                            .padding(.top, geometry.safeAreaInsets.top)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    Spacer()
                 }
-
-                Spacer()
+                .frame(maxWidth: .infinity)
             }
-            .zIndex(999)
+            .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .alert(item: $viewModel.error) { $0.view }
