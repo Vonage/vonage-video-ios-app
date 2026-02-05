@@ -10,12 +10,15 @@ extension ObservableObject {
         permissionChecker: CheckPermissionUseCase,
         permissionRequester: RequestPermissionUseCase
     ) async -> PermissionStatus {
-        let permissionStatus = permissionChecker()
-        if !permissionStatus.isDenied {
-            if !permissionStatus.isAuthorized {
-                _ = await permissionRequester()
-            }
+
+        let currentStatus = permissionChecker()
+
+        guard !currentStatus.isDenied,
+            !currentStatus.isAuthorized
+        else {
+            return currentStatus
         }
-        return permissionStatus
+
+        return await permissionRequester() ? .authorized : .denied
     }
 }

@@ -12,6 +12,6 @@ public final class DefaultCheckMicrophoneAuthorizationStatusUseCase: CheckMicrop
     public init() {}
 
     public func callAsFunction() -> PermissionStatus {
-        AVCaptureDevice.authorizationStatus(for: .audio).toPermissionStatus()
+        AVCaptureDevice.authorizationStatus(for: .audio).permissionStatus
     }
 }

@@ -21,6 +21,9 @@ public struct MeetingRoomButtonsState {
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
+
+    private static let disconnectionTimeoutInSeconds = 6
+
     private var cancellables = Set<AnyCancellable>()
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
@@ -46,7 +49,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private static let disconnectionTimeoutInNanoseconds: UInt64 = 1_000_000_000 * 6
     private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
 
     public init(
@@ -84,7 +86,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleMic() {
-        if checkMicrophoneAuthorizationStatusUseCase().isDenied {
+        guard checkMicrophoneAuthorizationStatusUseCase().isAuthorized else {
             meetingRoomNavigation.presentMicrophonePermissionAlert()
             return
         }
@@ -92,7 +94,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onToggleCamera() {
-        if checkCameraAuthorizationStatusUseCase().isDenied {
+        guard checkCameraAuthorizationStatusUseCase().isAuthorized else {
             meetingRoomNavigation.presentCameraPermissionAlert()
             return
         }
@@ -267,16 +269,17 @@ extension MeetingRoomViewModel {
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
                 self.toast = .init(message: "Session did disconnect", mode: .failure)
-
-                Task { [weak self] in
-                    try? await Task.sleep(
-                        nanoseconds: MeetingRoomViewModel.disconnectionTimeoutInNanoseconds)
-                    try? await self?.disconnectRoomUseCase()
-                }
+                try? await startDisconnectionProcess()
             default:
                 break
             }
         }
+    }
+
+    fileprivate func startDisconnectionProcess() async throws {
+        try await Task.sleep(for: .seconds(MeetingRoomViewModel.disconnectionTimeoutInSeconds))
+
+        try? await disconnectRoomUseCase()
     }
 
     @MainActor

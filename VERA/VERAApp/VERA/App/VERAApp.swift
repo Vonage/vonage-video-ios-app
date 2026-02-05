@@ -113,34 +113,32 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        var viewModel: WaitingRoomViewModel
+        var waitingRoomViewModel: WaitingRoomViewModel
 
         if let existingViewModel = navigationCoordinator.waitingRoomViewModel,
             existingViewModel.roomName == roomName
         {
             // Reuse existing view model for the same room
-            viewModel = existingViewModel
+            waitingRoomViewModel = existingViewModel
         } else {
-            // Create new view model for different room
-            let (_, newViewModel) = waitingRoomFactory.make(roomName: roomName) {
+            // Create a new waiting room view and view model for the specified room
+            let result = waitingRoomFactory.make(roomName: roomName) {
                 switch $0 {
                 case .presentAlert(let alertItem):
                     navigationCoordinator.showAlert(alertItem)
                 case .navigateToSettings:
                     navigationCoordinator.go(to: .settings)
                 case .navigateToMeetingRoom(let roomName):
-                    Task {
-                        navigationCoordinator.go(to: .meetingRoom(roomName))
-                    }
+                    navigationCoordinator.go(to: .meetingRoom(roomName))
                 default: break
                 }
             }
-            newViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
-            viewModel = newViewModel
-            navigationCoordinator.waitingRoomViewModel = newViewModel
+            waitingRoomViewModel = result.viewModel
+            waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
+            navigationCoordinator.waitingRoomViewModel = waitingRoomViewModel
         }
 
-        return waitingRoomFactory.make(viewModel: viewModel)
+        return waitingRoomFactory.make(viewModel: waitingRoomViewModel)
             .onDisappear {
                 // Required if the user goes back to the landing page
                 dependencyContainer.cameraPreviewProviderRepository.resetPublisher()

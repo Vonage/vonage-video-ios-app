@@ -92,10 +92,9 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func onToggleMic() {
-        if !onMicrophoneRequestPermission() {
+        guard onMicrophoneRequestPermission(), let publisher else {
             return
         }
-        guard let publisher else { return }
         publisher.publishAudio.toggle()
         buildContentUiState(
             roomName: roomName,
@@ -104,10 +103,9 @@ public final class WaitingRoomViewModel: ObservableObject {
     }
 
     public func onToggleCamera() {
-        if !onCameraRequestPermission() {
+        guard onCameraRequestPermission(), let publisher else {
             return
         }
-        guard let publisher else { return }
         publisher.publishVideo.toggle()
         buildContentUiState(
             roomName: roomName,

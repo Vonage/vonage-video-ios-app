@@ -13,6 +13,6 @@ public final class DefaultCheckCameraAuthorizationStatusUseCase: CheckCameraAuth
     public init() {}
 
     public func callAsFunction() -> PermissionStatus {
-        AVCaptureDevice.authorizationStatus(for: .video).toPermissionStatus()
+        AVCaptureDevice.authorizationStatus(for: .video).permissionStatus
     }
 }

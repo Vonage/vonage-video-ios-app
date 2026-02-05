@@ -55,15 +55,13 @@ extension PermissionStatus {
 // MARK: - AVAuthorizationStatus Conversion
 
 extension AVAuthorizationStatus {
-
-    /// Converts the system's `AVAuthorizationStatus` to the app's `PermissionStatus` type.
+    /// The app's `PermissionStatus` representation of this `AVAuthorizationStatus` value.
     ///
-    /// This method provides a bridge between Apple's AVFoundation authorization status
-    /// and the application's unified permission status representation.
+    /// This computed property provides a convenient bridge between Apple's AVFoundation
+    /// authorization status and the application's unified permission status representation.
     ///
-    /// - Returns: The corresponding `PermissionStatus` value.
-    ///   Unknown future cases default to `.notDetermined` for forward compatibility.
-    func toPermissionStatus() -> PermissionStatus {
+    /// - Note: Unknown future cases default to `.notDetermined` for forward compatibility.
+    var permissionStatus: PermissionStatus {
         switch self {
         case .notDetermined: return .notDetermined
         case .restricted: return .restricted
