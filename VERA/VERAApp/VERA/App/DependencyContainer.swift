@@ -31,7 +31,10 @@ final class DependencyContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory()
+    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
+        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
+        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
+    )
 
     lazy var appConfig = AppConfig()
 

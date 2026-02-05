@@ -12,19 +12,6 @@ public enum MeetingRoomViewState: Equatable {
     case content(MeetingRoomState)
 }
 
-public struct MeetingRoomNavigation {
-    public let onBack: () -> Void
-    public let onNext: () -> Void
-
-    public init(
-        onBack: @escaping () -> Void,
-        onNext: @escaping () -> Void
-    ) {
-        self.onBack = onBack
-        self.onNext = onNext
-    }
-}
-
 public struct MeetingRoomButtonsState {
     public let archivingState: ArchivingState
 
@@ -34,19 +21,19 @@ public struct MeetingRoomButtonsState {
 }
 
 public final class MeetingRoomViewModel: ObservableObject {
+
+    private static let disconnectionTimeoutInSeconds = 6
+
     private var cancellables = Set<AnyCancellable>()
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
-    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
-    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
     private let appConfig: AppConfig
-    private let meetingRoomNavigation: MeetingRoomNavigation
+    private let meetingRoomNavigation: MeetingRoomDestination
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
-    @MainActor @Published public var error: AlertItem?
     @MainActor @Published public var toast: ToastItem?
     @MainActor @Published public var extraButtons: [BottomBarButton] = []
     @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
@@ -62,7 +49,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private static let disconnectionTimeoutInNanoseconds: UInt64 = 1_000_000_000 * 6
     private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
 
     public init(
@@ -72,11 +58,9 @@ public final class MeetingRoomViewModel: ObservableObject {
         disconnectRoomUseCase: DisconnectRoomUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
-        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
-        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         appConfig: AppConfig,
-        meetingRoomNavigation: MeetingRoomNavigation,
+        meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton]
     ) {
         self.roomName = roomName
@@ -85,113 +69,76 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
-        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
-        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.appConfig = appConfig
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
     }
 
-    public func loadUI() {
+    @MainActor
+    public func loadUI() async {
         guard !initialised else { return }
         initialised = true
-        Task { @MainActor [weak self] in
-            guard let self else { return }
 
-            self.updateExtraButtons()
+        await addObservers()
 
+        updateExtraButtons()
+    }
+
+    public func onToggleMic() {
+        guard checkMicrophoneAuthorizationStatusUseCase().isAuthorized else {
+            meetingRoomNavigation.presentMicrophonePermissionAlert()
+            return
+        }
+        currentCall?.toggleLocalAudio()
+    }
+
+    public func onToggleCamera() {
+        guard checkCameraAuthorizationStatusUseCase().isAuthorized else {
+            meetingRoomNavigation.presentCameraPermissionAlert()
+            return
+        }
+        currentCall?.toggleLocalVideo()
+    }
+
+    public func onCameraSwitch() {
+        currentCall?.toggleLocalCamera()
+    }
+
+    public func onToggleLayout() {
+        let newLayout: MeetingRoomLayout =
+            switch layoutPublisher.value {
+            case .grid: .activeSpeaker
+            case .activeSpeaker: .grid
+            }
+        layoutPublisher.value = newLayout
+    }
+
+    public func endCall() {
+        Task { @MainActor in
             do {
-                let call = try await connectToRoomUseCase(roomName: roomName)
-                observeSessionState(call.participantsPublisher)
-
-                call.statePublisher
-                    .sink { [weak self] state in
-                        self?.sessionStatePublisher.send(state)
-                    }
-                    .store(in: &cancellables)
-
-                call.callState
-                    .sink { [weak self] callState in
-                        self?.callStatePublisher.send(callState)
-                        self?.navigateBackIfNeeded(callState)
-                    }
-                    .store(in: &cancellables)
-
-                call.archivingState
-                    .dropFirst()
-                    .sink { [weak self] archivingState in
-                        self?.handleArchivingStateChange(archivingState)
-                        self?.updateExtraButtons()
-                    }
-                    .store(in: &cancellables)
-
-                call.eventsPublisher
-                    .sink { [weak self] event in
-                        self?.handleEvents(event)
-                    }
-                    .store(in: &cancellables)
-
-                self.currentCall = call
+                try await disconnectRoomUseCase()
+            } catch CallError.callNotConnected {
+                // Wait until the call connects instead of showing an error
             } catch {
                 await MainActor.run { [weak self] in
-                    self?.error = AlertItem.genericError(
-                        error.localizedDescription
-                    ) { [weak self] in
-                        self?.meetingRoomNavigation.onBack()
-                    }
+                    self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: false)
                 }
             }
         }
     }
+}
 
-    private func handleArchivingStateChange(_ archivingState: ArchivingState) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            self.archivingPublisher.value = archivingState
-            switch archivingState {
-            case .idle:
-                self.toast = .init(message: "Session recording stopped", mode: .info)
-            case .archiving:
-                self.toast = .init(message: "Session recording started", mode: .info)
-            }
-        }
-    }
+extension MeetingRoomViewModel {
 
-    private func handleEvents(_ event: SessionEvent) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            switch event {
-            case .didBeginReconnecting:
-                self.toast = .init(message: "Session did drop, started reconnection", mode: .warning)
-            case .didReconnect:
-                self.toast = .init(message: "Session did reconnect", mode: .info)
-            case .error(let error):
-                self.toast = .init(message: error.localizedDescription, mode: .failure)
-            case .sessionFailure(let error):
-                self.toast = .init(message: error.localizedDescription, mode: .failure)
-            case .disconnected:
-                self.toast = .init(message: "Session did disconnect", mode: .failure)
-
-                Task { [weak self] in
-                    try? await Task.sleep(
-                        nanoseconds: MeetingRoomViewModel.disconnectionTimeoutInNanoseconds)
-                    try? await self?.disconnectRoomUseCase()
-                }
-            default:
-                break
-            }
-        }
-    }
-
-    func navigateBackIfNeeded(_ callState: CallState) {
+    fileprivate func navigateBackIfNeeded(_ callState: CallState) {
         guard callState == .disconnected else { return }
         Task { @MainActor [weak self] in
             self?.meetingRoomNavigation.onNext()
         }
     }
 
-    func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
+    fileprivate func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         let sortedParticipantsPublisher = Publishers.CombineLatest(
             participantsPublisher.removeDuplicates(), layoutPublisher
         ).map { participantsState, layout in
@@ -233,8 +180,9 @@ public final class MeetingRoomViewModel: ObservableObject {
             return MeetingRoomState(
                 roomName: self.roomName,
                 roomURL: baseURL.meetingRoomURL(roomName),
-                isMicEnabled: sessionState.isPublishingAudio && checkMicrophoneAuthorizationStatusUseCase(),
-                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase(),
+                isMicEnabled: sessionState.isPublishingAudio
+                    && checkMicrophoneAuthorizationStatusUseCase().isAuthorized,
+                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase().isAuthorized,
                 participants: participantsState.participants,
                 layout: participantsState.layout,
                 activeSpeakerId: participantsState.activeSpeakerId,
@@ -253,58 +201,95 @@ public final class MeetingRoomViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
-    public func onToggleMic() {
-        if !checkMicrophoneAuthorizationStatusUseCase() {
-            Task {
-                await requestMicrophonePermissionUseCase()
-            }
-            return
-        }
-        currentCall?.toggleLocalAudio()
-    }
+    fileprivate func addObservers() async {
+        do {
+            let call = try await connectToRoomUseCase(roomName: roomName)
+            observeSessionState(call.participantsPublisher)
 
-    public func onToggleCamera() {
-        if !checkCameraAuthorizationStatusUseCase() {
-            Task {
-                await requestCameraPermissionUseCase()
-            }
-            return
-        }
-        currentCall?.toggleLocalVideo()
-    }
-
-    public func onCameraSwitch() {
-        currentCall?.toggleLocalCamera()
-    }
-
-    public func onToggleLayout() {
-        let newLayout: MeetingRoomLayout =
-            switch layoutPublisher.value {
-            case .grid: .activeSpeaker
-            case .activeSpeaker: .grid
-            }
-        layoutPublisher.value = newLayout
-    }
-
-    public func endCall() {
-        Task { @MainActor [weak self] in
-            do {
-                try await self?.disconnectRoomUseCase()
-            } catch CallError.callNotConnected {
-                // Wait until the call connects instead of showing an error
-            } catch {
-                await MainActor.run { [weak self] in
-                    self?.error = AlertItem.genericError(error.localizedDescription)
+            call.statePublisher
+                .sink { [weak self] state in
+                    self?.sessionStatePublisher.send(state)
                 }
+                .store(in: &cancellables)
+
+            call.callState
+                .sink { [weak self] callState in
+                    self?.callStatePublisher.send(callState)
+                    self?.navigateBackIfNeeded(callState)
+                }
+                .store(in: &cancellables)
+
+            call.archivingState
+                .dropFirst()
+                .sink { [weak self] archivingState in
+                    self?.handleArchivingStateChange(archivingState)
+                }
+                .store(in: &cancellables)
+
+            call.eventsPublisher
+                .sink { [weak self] event in
+                    self?.handleEvents(event)
+                }
+                .store(in: &cancellables)
+
+            self.currentCall = call
+        } catch {
+            await MainActor.run { [weak self] in
+                self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: true)
             }
         }
     }
 
-    private func updateExtraButtons() {
+    fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            let archivingState = self.archivingPublisher.value
-            self.extraButtons = self.getExternalButtons(.init(archivingState: archivingState))
+            self.archivingPublisher.value = archivingState
+            switch archivingState {
+            case .idle:
+                self.toast = .init(message: "Session recording stopped", mode: .info)
+            case .archiving:
+                self.toast = .init(message: "Session recording started", mode: .info)
+            }
+
+            self.updateArchivingButtons()
         }
+    }
+
+    fileprivate func handleEvents(_ event: SessionEvent) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            switch event {
+            case .didBeginReconnecting:
+                self.toast = .init(message: "Session did drop, started reconnection", mode: .warning)
+            case .didReconnect:
+                self.toast = .init(message: "Session did reconnect", mode: .info)
+            case .error(let error):
+                self.toast = .init(message: error.localizedDescription, mode: .failure)
+            case .sessionFailure(let error):
+                self.toast = .init(message: error.localizedDescription, mode: .failure)
+            case .disconnected:
+                self.toast = .init(message: "Session did disconnect", mode: .failure)
+                try? await startDisconnectionProcess()
+            default:
+                break
+            }
+        }
+    }
+
+    fileprivate func startDisconnectionProcess() async throws {
+        try await Task.sleep(for: .seconds(MeetingRoomViewModel.disconnectionTimeoutInSeconds))
+
+        try? await disconnectRoomUseCase()
+    }
+
+    @MainActor
+    fileprivate func updateExtraButtons() {
+        updateArchivingButtons()
+    }
+
+    @MainActor
+    fileprivate func updateArchivingButtons() {
+        let archivingState = self.archivingPublisher.value
+        self.extraButtons = self.getExternalButtons(.init(archivingState: archivingState))
     }
 }

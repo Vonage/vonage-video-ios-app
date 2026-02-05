@@ -28,17 +28,13 @@ public struct WaitingRoomScreen: View {
                     await viewModel.joinRoom()
                 }
             } onMicrophoneToggle: {
-                viewModel.onMicToggle()
+                viewModel.onToggleMic()
             } onCameraToggle: {
-                viewModel.onCameraToggle()
-            }
-            .task {
-                await viewModel.checkPermissions()
+                viewModel.onToggleCamera()
             }
             .onAppear {
                 viewModel.loadUI()
             }
-            .alert(item: $viewModel.error) { $0.view }
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

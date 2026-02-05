@@ -44,6 +44,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
         case .meetingRoom(let roomName): startMeeting(roomName)
         case .goodbye: leaveMeeting()
+        case .settings: navigateToSettings()
         }
     }
 
@@ -90,6 +91,12 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         #endif
 
         logNavigation("Returned to landing page")
+    }
+
+    private func navigateToSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
 
     // MARK: - Private Helpers

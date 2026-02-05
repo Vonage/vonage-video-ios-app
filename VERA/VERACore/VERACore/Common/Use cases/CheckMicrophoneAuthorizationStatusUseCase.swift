@@ -5,15 +5,13 @@
 import AVFoundation
 import Foundation
 
-public protocol CheckMicrophoneAuthorizationStatusUseCase {
-    func callAsFunction() -> Bool
-}
+public protocol CheckMicrophoneAuthorizationStatusUseCase: CheckPermissionUseCase {}
 
 public final class DefaultCheckMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase {
 
     public init() {}
 
-    public func callAsFunction() -> Bool {
-        AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+    public func callAsFunction() -> PermissionStatus {
+        AVCaptureDevice.authorizationStatus(for: .audio).permissionStatus
     }
 }

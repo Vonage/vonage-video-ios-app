@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 import VERADomain
 
 public class WaitingRoomFactory {
@@ -27,7 +28,7 @@ public class WaitingRoomFactory {
     @MainActor
     public func make(
         roomName: RoomName,
-        onNavigateToRoom: @escaping (RoomName) -> Void
+        onActionHandler: @escaping ActionHandler
     ) -> (some View, viewModel: WaitingRoomViewModel) {
         let viewModel = WaitingRoomViewModel(
             roomName: roomName,
@@ -42,8 +43,8 @@ public class WaitingRoomFactory {
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository,
-            onNavigateToRoom: onNavigateToRoom)
-        return (WaitingRoomScreen(viewModel: viewModel), viewModel)
+            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName))
+        return (make(viewModel: viewModel), viewModel)
     }
 
     @MainActor

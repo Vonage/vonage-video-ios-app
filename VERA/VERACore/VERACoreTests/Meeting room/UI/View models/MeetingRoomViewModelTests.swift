@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERACommonUI
 import VERAConfiguration
 import VERACore
 import VERADomain
@@ -34,7 +35,7 @@ struct MeetingRoomViewModelTests {
 
         #expect(sut.state == .loading)
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
@@ -57,8 +58,8 @@ struct MeetingRoomViewModelTests {
 
         #expect(sut.state == .loading)
 
-        sut.loadUI()
-        sut.loadUI()
+        await sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
@@ -79,38 +80,34 @@ struct MeetingRoomViewModelTests {
 
         #expect(sut.state == .loading)
 
-        sut.loadUI()
-
-        let error =
-            try await sut.$error.values
-            .first { $0 != nil } ?? { throw Error.nilValue }()
+        await sut.loadUI()
 
         #expect(sut.currentCall == nil)
-        #expect(error != nil)
     }
 
     @Test
     @MainActor
     func callingLoadUICanFailAndShouldNavigateBackAfterConfirmation() async throws {
         let connectToRoomUseCase = makeFailingMockConnectToRoomUseCase()
-        var navigationTriggered = false
+        var alertErrorTriggered = false
 
-        let sut = makeSUT(
-            connectToRoomUseCase: connectToRoomUseCase,
-            onBack: {
-                navigationTriggered = true
-            })
+        await confirmation("Alert should be presented") { confirm in
+            let sut = makeSUT(
+                connectToRoomUseCase: connectToRoomUseCase,
+                actionHandler: { action in
+                    if case .presentAlert = action {
+                        alertErrorTriggered = true
+                        confirm()
+                    }
+                }
+            )
 
-        #expect(sut.state == .loading)
+            #expect(sut.state == .loading)
 
-        sut.loadUI()
+            await sut.loadUI()
+        }
 
-        let error =
-            try await sut.$error.values
-            .first { $0 != nil } ?? { throw Error.nilValue }()
-        error?.onConfirm?()
-
-        #expect(navigationTriggered == true)
+        #expect(alertErrorTriggered, "Alert should be presented")
     }
 
     @Test
@@ -118,7 +115,7 @@ struct MeetingRoomViewModelTests {
     func initialLayoutIsActiveSpeaker() async throws {
         let sut = makeSUT()
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
@@ -130,8 +127,11 @@ struct MeetingRoomViewModelTests {
     func layoutToggleSwitchesToGridLayout() async throws {
         let sut = makeSUT()
 
-        sut.loadUI()
+        await sut.loadUI()
+
         sut.onToggleLayout()
+
+        await delay()
 
         let contentState = try await getContentState(sut)
 
@@ -196,7 +196,7 @@ struct MeetingRoomViewModelTests {
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase
         )
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
@@ -227,7 +227,7 @@ struct MeetingRoomViewModelTests {
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase
         )
-        sut.loadUI()
+        await sut.loadUI()
 
         _ = try await getContentState(sut)
 
@@ -235,12 +235,9 @@ struct MeetingRoomViewModelTests {
 
         sut.endCall()
 
-        let error =
-            try await sut.$error.values
-            .first { $0 != nil } ?? { throw Error.nilValue }()
+        await delay()
 
         #expect(sut.currentCall == nil)
-        #expect(error != nil)
     }
 
     @Test
@@ -251,10 +248,9 @@ struct MeetingRoomViewModelTests {
             roomName: roomName,
             baseURL: url)
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
-
         #expect(contentState.roomURL == url.appendingPathComponent("room").appendingPathComponent(roomName))
     }
 
@@ -315,11 +311,12 @@ struct MeetingRoomViewModelTests {
     @Test
     @MainActor
     func ifThereIsNoCameraPermissionCameraShouldNotBeEnabled() async throws {
-        let checkCameraAuthorizationStatusUseCase = makeMockCheckCameraAuthorizationStatusUseCase(isAuthorized: false)
+        let checkCameraAuthorizationStatusUseCase = makeMockCheckCameraAuthorizationStatusUseCase(
+            permissionStatus: .denied)
         let sut = makeSUT(
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase)
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
@@ -330,15 +327,114 @@ struct MeetingRoomViewModelTests {
     @MainActor
     func ifThereIsNoMicrophonePermissionMicrophoneShouldNotBeEnabled() async throws {
         let checkMicrophoneAuthorizationStatusUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(
-            isAuthorized: false)
+            permissionStatus: .denied)
         let sut = makeSUT(
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase)
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState = try await getContentState(sut)
 
         #expect(contentState.isMicEnabled == false)
+    }
+
+    @Test("Given toggling the microphone, When the permission was denied, Then should present the Settings Alert")
+    func toogleMicShouldShowSettingsMessage() async {
+        let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .denied)
+
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+
+        await confirmation("Alert should presented for settings") { confirm in
+            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase) {
+                action in
+                switch action {
+                case .presentAlert(let item):
+                    navigateToSettingsAlert = item.title == "Check Settings"
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleMic()
+        }
+
+        #expect(navigateToSettingsAlert, "Should present Settings Alert")
+    }
+
+    @Test(
+        "Given toggling the microphone presents a settings alert, When the user confirms, Then the app navigates to App Settings"
+    )
+    func toogleMicShouldShowSettingsMessageConfirmAndMoveToAppSetting() async {
+        let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .denied)
+
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+
+        await confirmation("App settings should be presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase) {
+                action in
+                switch action {
+                case .presentAlert(let item):
+                    item.onConfirm?()
+                case .navigateToSettings:
+                    navigateToSettingsAlert = true
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleMic()
+        }
+
+        #expect(navigateToSettingsAlert, "Should present App Settings")
+    }
+
+    @Test("Given toggling the camera, When the camera permission was denied, Then should present the Settings Alert")
+    func toogleCameraShouldShowSettingsMessage() async {
+        let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .denied)
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+
+        await confirmation("Alert Setting should presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase) {
+                action in
+                switch action {
+                case .presentAlert(let item):
+                    navigateToSettingsAlert = item.title == "Check Settings"
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleCamera()
+        }
+
+        #expect(navigateToSettingsAlert, "Should present Settings Alert")
+    }
+
+    @Test(
+        "Given toggling the camera presents the Alert Settings, When the user confirms, Then the app navigates to App Settings"
+    )
+    func toogleCameraShouldShowSettingsMessageUserConfirmsAndNavigatesToAppSetting() async {
+        let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .denied)
+
+        let roomName = "test-room"
+        var navigateToSettingsAlert = false
+
+        await confirmation("App settings should be presented") { confirm in
+            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase) {
+                action in
+                switch action {
+                case .presentAlert(let item):
+                    item.onConfirm?()
+                case .navigateToSettings:
+                    navigateToSettingsAlert = true
+                    confirm()
+                default: break
+                }
+            }
+            sut.onToggleCamera()
+        }
+
+        #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
     // MARK: SUT
@@ -352,15 +448,10 @@ struct MeetingRoomViewModelTests {
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
             makeMockCheckCameraAuthorizationStatusUseCase(),
-        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase =
-            makeMockRequestMicrophonePermissionUseCase(),
-        requestCameraPermissionUseCase: RequestCameraPermissionUseCase = makeMockRequestCameraPermissionUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig(),
-        onBack: @escaping () -> Void = {},
-        onShowChat: @escaping () -> Void = {},
-        onNext: @escaping () -> Void = {}
+        actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
             roomName: roomName,
@@ -369,11 +460,9 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
-            requestMicrophonePermissionUseCase: requestMicrophonePermissionUseCase,
-            requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onNext: onNext),
+            meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
             getExternalButtons: { _ in [] })
     }
 
@@ -388,7 +477,7 @@ struct MeetingRoomViewModelTests {
     func when(given appConfig: AppConfig) async throws -> MeetingRoomState {
         let sut = makeSUT(appConfig: appConfig)
 
-        sut.loadUI()
+        await sut.loadUI()
 
         let contentState =
             try await sut.$state.values

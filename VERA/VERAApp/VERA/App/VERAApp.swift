@@ -53,6 +53,8 @@ struct VERAApp: App {
                             fatalError("Should not be able to navigate to meeting room from landing")
                         case .landing:
                             fatalError("Should not be able to navigate to landing")
+                        case .settings:
+                            fatalError("Should not be able to navigate to settings")
                         }
                     }
             }
@@ -111,28 +113,32 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoom(roomName: String) -> some View {
-        let viewModel: WaitingRoomViewModel
+        var waitingRoomViewModel: WaitingRoomViewModel
 
         if let existingViewModel = navigationCoordinator.waitingRoomViewModel,
             existingViewModel.roomName == roomName
         {
             // Reuse existing view model for the same room
-            viewModel = existingViewModel
+            waitingRoomViewModel = existingViewModel
         } else {
-            // Create new view model for different room
-            let (_, newViewModel) = waitingRoomFactory.make(
-                roomName: roomName
-            ) { roomName in
-                Task {
+            // Create a new waiting room view and view model for the specified room
+            let result = waitingRoomFactory.make(roomName: roomName) {
+                switch $0 {
+                case .presentAlert(let alertItem):
+                    navigationCoordinator.showAlert(alertItem)
+                case .navigateToSettings:
+                    navigationCoordinator.go(to: .settings)
+                case .navigateToMeetingRoom(let roomName):
                     navigationCoordinator.go(to: .meetingRoom(roomName))
+                default: break
                 }
             }
-            newViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
-            viewModel = newViewModel
-            navigationCoordinator.waitingRoomViewModel = newViewModel
+            waitingRoomViewModel = result.viewModel
+            waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
+            navigationCoordinator.waitingRoomViewModel = waitingRoomViewModel
         }
 
-        return waitingRoomFactory.make(viewModel: viewModel)
+        return waitingRoomFactory.make(viewModel: waitingRoomViewModel)
             .onDisappear {
                 // Required if the user goes back to the landing page
                 dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
@@ -194,14 +200,21 @@ struct VERAApp: App {
 
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
-                getExternalButtons: getBottomBarButtons
-            ) {
-                navigationCoordinator.go(to: .waitingRoom(roomName))
-            } onNext: {
-                navigationCoordinator.go(to: .goodbye(roomName))
-            }
+                getExternalButtons: getBottomBarButtons,
+                onActionHandler: {
+                    switch $0 {
+                    case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
+                    case .navigateToGoodbye:
+                        navigationCoordinator.go(to: .goodbye(roomName))
+                    case .navigateToSettings:
+                        navigationCoordinator.go(to: .settings)
+                    case .navigateToWaitingRoom(let roomName):
+                        navigationCoordinator.go(to: .waitingRoom(roomName))
+                    default: break
+                    }
+                }
+            )
             newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
-
             navigationCoordinator.meetingRoomViewModel = newViewModel
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
