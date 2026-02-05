@@ -79,6 +79,25 @@ private func areBackgroundEffectsEnabled() -> Bool {
     return videoSettings["allowBackgroundEffects"] as! Bool
 }
 
+/// Returns whether captions is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowCaptions": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowCaptions` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areCaptionsEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowCaptions"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -129,6 +148,12 @@ private func createDependencies() -> [TargetDependency] {
             .vonageVideoTransformersSDK,
         ])
     }
+
+    if areCaptionsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERACaptions", path: "VERACaptions")
+        ])
+    }
     return dependencies
 }
 
@@ -169,6 +194,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["BACKGROUND_EFFECTS_ENABLED"] = "1"
         flags.append("BACKGROUND_EFFECTS_ENABLED")
         print("Background effects feature enabled in build settings.")
+    }
+
+    if areCaptionsEnabled() {
+        baseSettings["CAPTIONS_ENABLED"] = "1"
+        flags.append("CAPTIONS_ENABLED")
+        print("Captions feature enabled in build settings.")
     }
 
     if !flags.isEmpty {

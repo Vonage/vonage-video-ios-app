@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERACore",
     packages: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", .upToNextMinor(from: "1.18.4"))
+        .swiftSnapshotTesting
     ],
     targets: [
         .target(
@@ -61,7 +61,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERACore"),
                 .target(name: "VERATestHelpers"),
-                .package(product: "SnapshotTesting"),
+                .swiftSnapshotTesting,
             ],
             settings: createBaseBuildSettings()
         ),

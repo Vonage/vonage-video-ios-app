@@ -21,3 +21,14 @@ extension Package {
 extension TargetDependency {
     public static let vonageVideoTransformersSDK = TargetDependency.package(product: "VonageClientSDKVideoTransformers")
 }
+
+extension Package {
+    public static let swiftSnapshotTesting = Package.package(
+        url: "https://github.com/pointfreeco/swift-snapshot-testing",
+        .upToNextMinor(from: "1.18.4")
+    )
+}
+
+extension TargetDependency {
+    public static let swiftSnapshotTesting = TargetDependency.package(product: "SnapshotTesting")
+}

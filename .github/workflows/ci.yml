@@ -179,6 +179,31 @@ jobs:
           -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERACaptionsSnapshotTests (iOS Simulator)
+      id: captions-snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Building VERACaptionsSnapshotTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACaptionsSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+        
+        echo "📸 Running VERACaptionsSnapshotTests on iOS Simulator"
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERACaptionsSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERACaptionsSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Run VERAVonageChatPluginTests (iOS Simulator)
       id: ot-chat-plugin-tests
       timeout-minutes: 15
@@ -316,6 +341,7 @@ jobs:
           DerivedData/VERAVonageChatPluginTests-macOS.xcresult
           DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
+          DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
           DerivedData/VERAVonageChatPluginTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
           DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
