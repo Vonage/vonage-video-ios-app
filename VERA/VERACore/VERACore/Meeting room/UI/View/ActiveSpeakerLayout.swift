@@ -5,6 +5,28 @@
 import SwiftUI
 import VERADomain
 
+// MARK: - Layout Constants
+
+/// Constants used for active speaker layout calculations
+enum ActiveSpeakerLayoutConstants {
+    /// Standard 16:9 video aspect ratio
+    static let aspectRatio: Double = 16.0 / 9.0
+    /// Width ratio for the main/active speaker tile
+    static let mainParticipantWidthRatio: Double = 0.70
+    /// Width ratio for the sidebar containing other participants
+    static let sidebarWidthRatio: Double = 0.30
+    /// Default spacing between participant tiles
+    static let spacing: Double = 8
+    /// Minimum height for a single participant view
+    static let minSingleParticipantHeight: Double = 200
+}
+
+/// Represents the preferred layout orientation based on device size class
+private enum LayoutOrientation {
+    case horizontal
+    case vertical
+}
+
 /// Main layout view for displaying participants in an active speaker format
 ///
 /// `ActiveSpeakerLayout` provides an adaptive interface that automatically switches between
@@ -24,37 +46,36 @@ struct ActiveSpeakerLayout: View {
     let participants: [Participant]
     let activeSpeakerId: String?
 
-    let itemHeight: Double = 225
-    let minItemWidth: Double = 300
-    let spacing: Double = 8
+    /// Determines the preferred layout orientation based on device size classes
+    private var preferredLayoutOrientation: LayoutOrientation {
+        if verticalSizeClass == .compact {
+            return .horizontal
+        } else if horizontalSizeClass == .compact {
+            return .vertical
+        } else {
+            return .horizontal
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if participants.count == 1 {
+            if let singleParticipant = participants.first, participants.count == 1 {
                 ParticipantVideoCard(
-                    participant: participants.first!,
+                    participant: singleParticipant,
                     activeSpeakerId: activeSpeakerId
                 )
-                .id(participants.first!.id + "_main_active")
-                .frame(maxWidth: .infinity, minHeight: 200)
-                .onAppear {
-                    participants.first?.onAppear?()
-                }
-                .onDisappear {
-                    participants.first?.onDisappear?()
-                }
+                .id(singleParticipant.id + "_main_active")
+                .frame(maxWidth: .infinity, minHeight: ActiveSpeakerLayoutConstants.minSingleParticipantHeight)
+                .trackingVisibility(of: singleParticipant)
             } else if participants.count > 1 {
                 Group {
-                    if verticalSizeClass == .compact {
+                    switch preferredLayoutOrientation {
+                    case .horizontal:
                         HorizontalActiveSpeakerLayoutView(
                             participants: participants,
                             activeSpeakerId: activeSpeakerId)
-                    } else if horizontalSizeClass == .compact {
+                    case .vertical:
                         VerticalActiveSpeakerLayoutView(
-                            participants: participants,
-                            activeSpeakerId: activeSpeakerId)
-                    } else {
-                        HorizontalActiveSpeakerLayoutView(
                             participants: participants,
                             activeSpeakerId: activeSpeakerId)
                     }
@@ -68,36 +89,30 @@ struct ActiveSpeakerLayout: View {
     }
 }
 
-public struct HorizontalActiveSpeakerLayoutView: View {
-    let spacing: Double = 8
-    private let aspectRatio: Double = 16.0 / 9.0
-
-    var activeParticipant: Participant {
-        participants.first!
-    }
-    var restOfParticipants: [Participant] {
-        Array(participants.dropFirst())
-    }
-
+struct HorizontalActiveSpeakerLayoutView: View {
     let participants: [Participant]
     let activeSpeakerId: String?
 
-    public var body: some View {
+    private var activeParticipant: Participant? {
+        participants.first
+    }
+
+    private var restOfParticipants: [Participant] {
+        Array(participants.dropFirst())
+    }
+
+    var body: some View {
         GeometryReader { outerGeometry in
-            if outerGeometry.size.width > 0 && outerGeometry.size.height > 0 {
-                HStack(spacing: 8) {
+            if outerGeometry.size.width > 0 && outerGeometry.size.height > 0,
+               let activeParticipant = activeParticipant {
+                HStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
                     ParticipantVideoCard(
                         participant: activeParticipant,
                         activeSpeakerId: activeSpeakerId
                     )
                     .id(activeParticipant.id + "_main")
-                    .frame(width: max(1, outerGeometry.size.width * 0.70))
-                    .onAppear {
-                        activeParticipant.onAppear?()
-                    }
-                    .onDisappear {
-                        activeParticipant.onDisappear?()
-                    }
+                    .frame(width: max(1, outerGeometry.size.width * ActiveSpeakerLayoutConstants.mainParticipantWidthRatio))
+                    .trackingVisibility(of: activeParticipant)
 
                     GeometryReader { geometry in
                         let availableWidth = max(0, geometry.size.width)
@@ -105,10 +120,10 @@ public struct HorizontalActiveSpeakerLayoutView: View {
 
                         // Prevent NaN calculations by ensuring positive values
                         if availableWidth > 0 && availableHeight > 0 {
-                            let cellWidth = max(1, availableWidth - spacing)
-                            let cellHeight = max(1, cellWidth / aspectRatio)
+                            let cellWidth = max(1, availableWidth - ActiveSpeakerLayoutConstants.spacing)
+                            let cellHeight = max(1, cellWidth / ActiveSpeakerLayoutConstants.aspectRatio)
 
-                            let rowsVisible = max(1, Int((availableHeight + spacing) / (cellHeight + spacing)))
+                            let rowsVisible = max(1, Int((availableHeight + ActiveSpeakerLayoutConstants.spacing) / (cellHeight + ActiveSpeakerLayoutConstants.spacing)))
 
                             let maxVisibleItems = rowsVisible
 
@@ -120,20 +135,15 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                             let visibleItems = Array(restOfParticipants.prefix(takeCount))
                             let hiddenItems = Array(restOfParticipants.dropFirst(takeCount))
 
-                            VStack(spacing: spacing) {
+                            VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
                                 ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, participant in
                                     ParticipantVideoCard(
                                         participant: participant,
                                         activeSpeakerId: activeSpeakerId
                                     )
                                     .id("\(participant.id)_\(index)_\(visibleItems.count)")
-                                    .aspectRatio(aspectRatio, contentMode: .fit)
-                                    .onAppear {
-                                        participant.onAppear?()
-                                    }
-                                    .onDisappear {
-                                        participant.onDisappear?()
-                                    }
+                                    .aspectRatio(ActiveSpeakerLayoutConstants.aspectRatio, contentMode: .fit)
+                                    .trackingVisibility(of: participant)
                                 }
 
                                 if !hiddenItems.isEmpty {
@@ -141,7 +151,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                                         participantNames: hiddenItems.map { $0.name }
                                     )
                                     .id("hidden_\(hiddenItems.count)_\(visibleItems.count)")
-                                    .aspectRatio(aspectRatio, contentMode: .fit)
+                                    .aspectRatio(ActiveSpeakerLayoutConstants.aspectRatio, contentMode: .fit)
                                     .onAppear {
                                         hiddenItems.forEach { $0.onDisappear?() }
                                     }
@@ -152,7 +162,7 @@ public struct HorizontalActiveSpeakerLayoutView: View {
                             EmptyView()
                         }
                     }
-                    .frame(width: max(1, outerGeometry.size.width * 0.30))
+                    .frame(width: max(1, outerGeometry.size.width * ActiveSpeakerLayoutConstants.sidebarWidthRatio))
                 }
             } else {
                 EmptyView()
@@ -161,33 +171,27 @@ public struct HorizontalActiveSpeakerLayoutView: View {
     }
 }
 
-public struct VerticalActiveSpeakerLayoutView: View {
-    let itemHeight: Double = 200 * 3 / 4
-    let minItemWidth: Double = 200
-    let spacing: Double = 0
-
-    var activeParticipant: Participant {
-        participants.first!
-    }
-    var restOfParticipants: [Participant] {
-        Array(participants.dropFirst())
-    }
-
+struct VerticalActiveSpeakerLayoutView: View {
     let participants: [Participant]
     let activeSpeakerId: String?
 
-    public var body: some View {
-        VStack(spacing: 8) {
-            ParticipantVideoCard(
-                participant: activeParticipant,
-                activeSpeakerId: activeSpeakerId
-            )
-            .id(activeParticipant.id + "_main")
-            .onAppear {
-                activeParticipant.onAppear?()
-            }
-            .onDisappear {
-                activeParticipant.onDisappear?()
+    private var activeParticipant: Participant? {
+        participants.first
+    }
+
+    private var restOfParticipants: [Participant] {
+        Array(participants.dropFirst())
+    }
+
+    var body: some View {
+        VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
+            if let activeParticipant = activeParticipant {
+                ParticipantVideoCard(
+                    participant: activeParticipant,
+                    activeSpeakerId: activeSpeakerId
+                )
+                .id(activeParticipant.id + "_main")
+                .trackingVisibility(of: activeParticipant)
             }
 
             Group {
@@ -197,12 +201,7 @@ public struct VerticalActiveSpeakerLayoutView: View {
                         activeSpeakerId: activeSpeakerId
                     )
                     .id(restOfParticipants[0].id + "_other")
-                    .onAppear {
-                        restOfParticipants[0].onAppear?()
-                    }
-                    .onDisappear {
-                        restOfParticipants[0].onDisappear?()
-                    }
+                    .trackingVisibility(of: restOfParticipants[0])
                 } else if restOfParticipants.count == 2 {
                     HStack {
                         ParticipantVideoCard(
@@ -210,24 +209,14 @@ public struct VerticalActiveSpeakerLayoutView: View {
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[0].id + "_other")
-                        .onAppear {
-                            restOfParticipants[0].onAppear?()
-                        }
-                        .onDisappear {
-                            restOfParticipants[0].onDisappear?()
-                        }
+                        .trackingVisibility(of: restOfParticipants[0])
 
                         ParticipantVideoCard(
                             participant: restOfParticipants[1],
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[1].id + "_other")
-                        .onAppear {
-                            restOfParticipants[1].onAppear?()
-                        }
-                        .onDisappear {
-                            restOfParticipants[1].onDisappear?()
-                        }
+                        .trackingVisibility(of: restOfParticipants[1])
                     }
                     .transition(.slide)
                 } else if restOfParticipants.count >= 3 {
@@ -237,12 +226,7 @@ public struct VerticalActiveSpeakerLayoutView: View {
                             activeSpeakerId: activeSpeakerId
                         )
                         .id(restOfParticipants[0].id + "_other")
-                        .onAppear {
-                            restOfParticipants[0].onAppear?()
-                        }
-                        .onDisappear {
-                            restOfParticipants[0].onDisappear?()
-                        }
+                        .trackingVisibility(of: restOfParticipants[0])
 
                         let hiddenParticipants = Array(restOfParticipants.dropFirst())
                         HiddenParticipantsTile(
