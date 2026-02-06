@@ -279,9 +279,6 @@ struct SidebarParticipantsView: View {
                 )
                 .id("hidden_\(hiddenParticipants.count)_\(visibleParticipants.count)")
                 .aspectRatio(ActiveSpeakerLayoutConstants.aspectRatio, contentMode: .fit)
-                .onAppear {
-                    hiddenParticipants.forEach { $0.onDisappear?() }
-                }
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
@@ -366,9 +363,6 @@ struct VerticalActiveSpeakerLayoutView: View {
                         )
                         .id("hidden_participants")
                         .transition(.opacity)
-                        .onAppear {
-                            hiddenParticipants.forEach { $0.onDisappear?() }
-                        }
                     }
                     .transition(.slide)
                 }
