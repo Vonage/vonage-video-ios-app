@@ -181,7 +181,6 @@ public struct MeetingRoomView: View {
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                 .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
         }
-        .frame(alignment: .center)
     }
 
     private var cameraSwitchButton: some View {
