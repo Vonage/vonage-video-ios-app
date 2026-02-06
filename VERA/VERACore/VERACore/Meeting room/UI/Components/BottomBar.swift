@@ -6,13 +6,6 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
-struct WidthPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
 private enum BottomBarConstants {
     static let buttonWidth: CGFloat = 50
     static let buttonSpacing: CGFloat = 8
