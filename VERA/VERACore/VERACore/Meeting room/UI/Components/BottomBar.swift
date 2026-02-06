@@ -6,6 +6,22 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+struct WidthPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+private enum BottomBarConstants {
+    static let buttonWidth: CGFloat = 50
+    static let buttonSpacing: CGFloat = 8
+    static let containerPaddingHorizontal: CGFloat = 8
+    static let containerPaddingVertical: CGFloat = 6
+    static let containerPaddingBottom: CGFloat = 2
+    static let cornerRadius: CGFloat = 16
+}
+
 public struct BottomBarButton: Identifiable {
     public let id: String
     public let label: String
@@ -93,66 +109,101 @@ struct BottomBar: View {
     }
 
     var body: some View {
-        HStack {
-            HStack(alignment: .center) {
-                if allowMicrophoneControl {
-                    ControlImageButton(
-                        isActive: isMicEnabled,
-                        image: isMicEnabled
-                            ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
-                            : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
-                        action: actions.onToggleMic)
+        GeometryReader { geometry in
+            HStack {
+                HStack(alignment: .center) {
+                    if allowMicrophoneControl {
+                        ControlImageButton(
+                            isActive: isMicEnabled,
+                            image: isMicEnabled
+                                ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+                                : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
+                            action: actions.onToggleMic)
+                    }
+                    if allowCameraControl {
+                        ControlImageButton(
+                            isActive: isCameraEnabled,
+                            image: isCameraEnabled
+                                ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
+                                : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
+                            action: actions.onToggleCamera)
+                    }
+                    LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
+                    if showParticipantList {
+                        ParticipantsBadgeButton(
+                            participantsCount: participantsCount,
+                            onToggleParticipants: actions.onToggleParticipants)
+                    }
+                    buildExtraButtons(availableWidth: geometry.size.width)
+                    EndCallControlButton(action: actions.onEndCall)
                 }
-                if allowCameraControl {
-                    ControlImageButton(
-                        isActive: isCameraEnabled,
-                        image: isCameraEnabled
-                            ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
-                            : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
-                        action: actions.onToggleCamera)
-                }
-                LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
-                if showParticipantList {
-                    ParticipantsBadgeButton(
-                        participantsCount: participantsCount,
-                        onToggleParticipants: actions.onToggleParticipants)
-                }
-                buildExtraButtons()
-                EndCallControlButton(action: actions.onEndCall)
+                .padding(.horizontal, BottomBarConstants.containerPaddingHorizontal)
+                .padding(.vertical, BottomBarConstants.containerPaddingVertical)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
+            .background(BottomBarBackground())
+            .padding(.bottom, BottomBarConstants.containerPaddingBottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
-        .background(BottomBarBackground())
-        .padding(.bottom, 2)
+    }
+
+    private func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
+        let buttonWidth = BottomBarConstants.buttonWidth
+        let spacing = BottomBarConstants.buttonSpacing
+        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+
+        // Calculate base buttons count
+        var baseButtonsCount = 1  // EndCallControlButton always present
+        if allowMicrophoneControl {
+            baseButtonsCount += 1
+        }
+        if allowCameraControl {
+            baseButtonsCount += 1
+        }
+        baseButtonsCount += 1  // LayoutControlButton always present
+        if showParticipantList {
+            baseButtonsCount += 1
+        }
+
+        // Calculate space needed for base buttons
+        let baseButtonsWidth =
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+
+        // Calculate remaining width for extra buttons
+        let remainingWidth = availableWidth - baseButtonsWidth
+
+        // How many extra buttons can fit?
+        return max(0, Int((remainingWidth + spacing) / (buttonWidth + spacing)))
     }
 
     @ViewBuilder
-    private func buildExtraButtons() -> some View {
-        switch extraButtons.count {
-        case 0:
+    private func buildExtraButtons(availableWidth: CGFloat) -> some View {
+        if extraButtons.isEmpty {
             EmptyView()
-        case 1:
-            if let button = extraButtons.first {
-                button.content()
-            } else {
-                EmptyView()
-            }
-        default:
-            Menu {
+        } else {
+            let maxExtraButtons = calculateMaxExtraButtons(availableWidth: availableWidth)
+
+            if maxExtraButtons >= extraButtons.count {
+                // All buttons fit
                 ForEach(extraButtons) { button in
-                    Button(action: button.onTap) {
-                        HStack {
-                            button.image
-                                .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                            Text(button.label)
-                                .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                    button.content()
+                }
+            } else {
+                // Need to use menu
+                Menu {
+                    ForEach(extraButtons) { button in
+                        Button(action: button.onTap) {
+                            HStack {
+                                button.image
+                                    .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                Text(button.label)
+                                    .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            }
                         }
                     }
+                } label: {
+                    ButtonImage(image: Image(systemName: "ellipsis.circle"))
+                        .accessibilityLabel("More options")
                 }
-            } label: {
-                ButtonImage(image: Image(systemName: "ellipsis.circle"))
-                    .accessibilityLabel("More options")
             }
         }
     }
@@ -161,14 +212,14 @@ struct BottomBar: View {
 struct BottomBarBackground: View {
     var body: some View {
         #if os(macOS)
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: BottomBarConstants.cornerRadius)
                 .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectBackground()
                 } else {
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: BottomBarConstants.cornerRadius)
                         .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
                 }
             }
@@ -178,8 +229,8 @@ struct BottomBarBackground: View {
     #if !os(macOS)
         @available(iOS 26.0, *)
         private func glassEffectBackground() -> some View {
-            RoundedRectangle(cornerRadius: 16)
-                .glassEffect(in: .rect(cornerRadius: 16.0))
+            RoundedRectangle(cornerRadius: BottomBarConstants.cornerRadius)
+                .glassEffect(in: .rect(cornerRadius: BottomBarConstants.cornerRadius))
         }
     #endif
 }
