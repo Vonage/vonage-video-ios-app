@@ -81,13 +81,12 @@ public struct MeetingRoomView: View {
 
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
-                        Spacer()
-                            .frame(width: 16)
                         if state.archivingState.isArchiving {
                             recordingIndicator
                         }
                         Spacer()
                     }
+                    .padding(.leading, 16)
                     Spacer()
                 }
                 .allowsHitTesting(false)
