@@ -70,6 +70,27 @@ public enum ArchivingState: Equatable {
 
 public typealias ArchiveID = String
 
+/// The high-level state of the captions state
+///
+/// Represents if the current call has captions enabled or not.
+/// Use it to drive recording related UI display.
+public enum CaptionsState {
+    case enabled(CaptionsID)
+    case disabled
+}
+
+extension CaptionsState {
+    public var captionsEnabled: Bool {
+        if case .enabled = self {
+            return true
+        }
+        return false
+    }
+}
+
+
+public typealias CaptionsID = String
+
 /// Provides a publisher that emits participant state updates.
 ///
 /// Implementers emit ``ParticipantsState`` values as the call’s participant set
