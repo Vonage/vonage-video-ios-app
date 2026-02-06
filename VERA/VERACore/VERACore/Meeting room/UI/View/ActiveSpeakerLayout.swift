@@ -42,11 +42,6 @@ struct SidebarLayoutInfo {
 
     /// Total number of participants (excluding active speaker)
     let totalCount: Int
-
-    /// Returns `true` if some participants will be collapsed into the overflow tile
-    var hasHiddenParticipants: Bool {
-        visibleCount < totalCount
-    }
 }
 
 /// Layout orientation options based on device size class.
@@ -275,7 +270,7 @@ struct SidebarParticipantsView: View {
 
             if !hiddenParticipants.isEmpty {
                 HiddenParticipantsTile(
-                    participantNames: hiddenParticipants.map { $0.name }
+                    participants: hiddenParticipants
                 )
                 .id("hidden_\(hiddenParticipants.count)_\(visibleParticipants.count)")
                 .aspectRatio(ActiveSpeakerLayoutConstants.aspectRatio, contentMode: .fit)
@@ -359,7 +354,7 @@ struct VerticalActiveSpeakerLayoutView: View {
 
                         let hiddenParticipants = Array(restOfParticipants.dropFirst())
                         HiddenParticipantsTile(
-                            participantNames: hiddenParticipants.map { $0.name }
+                            participants: hiddenParticipants
                         )
                         .id("hidden_participants")
                         .transition(.opacity)

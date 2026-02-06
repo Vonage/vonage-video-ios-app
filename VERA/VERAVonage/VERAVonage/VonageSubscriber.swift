@@ -9,6 +9,19 @@ import SwiftUI
 import VERACore
 import VERADomain
 
+/// Constants used for video subscription management.
+private enum SubscriberConstants {
+    /// Delay before disabling video when a participant becomes hidden.
+    ///
+    /// This debounce interval prevents video flickering during rapid layout transitions
+    /// (e.g., when a participant moves between visible and hidden states).
+    /// The delay allows `onAppear` to cancel the disable task if the participant
+    /// reappears in a different view within this timeframe.
+    ///
+    /// - Note: 500ms balances responsiveness with transition handling.
+    static let videoDisableDebounceNanoseconds = 500
+}
+
 /// A wrapper around `OTSubscriber` that exposes reactive state, a SwiftUI view, and bandwidth controls.
 ///
 /// `VonageSubscriber` represents a single remote participant’s media stream. It provides a SwiftUI-compatible view,
@@ -71,8 +84,13 @@ public class VonageSubscriber: NSObject {
     /// Whether audio was subscribed before entering hold.
     @Published public private(set) var wasSubscribedToAudio: Bool = false
 
-    /// A delayed task that reinforces video subscription after visibility changes.
-    private var reinforcementTask: Task<Void, Never>?
+    /// Tracks the number of views currently displaying this participant.
+    /// Video is enabled when count > 0 and disabled when count reaches 0.
+    @Atomic private var visibilityCount: Int = 0
+
+    /// A delayed task that disables video subscription after visibility changes.
+    /// Uses debouncing to handle rapid layout transitions gracefully.
+    private var disableTask: Task<Void, Never>?
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -157,19 +175,22 @@ public class VonageSubscriber: NSObject {
 
         participant.onAppear = { [weak self] in
             guard let self else { return }
-            self.setActiveSubscription(true)
-            self.reinforcementTask?.cancel()
-
-            self.reinforcementTask = Task { @MainActor [weak self] in
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
-                guard let self, !Task.isCancelled else { return }
+            self.visibilityCount += 1
+            self.disableTask?.cancel()
+            if self.visibilityCount > 0 {
                 self.setActiveSubscription(true)
             }
         }
 
         participant.onDisappear = { [weak self] in
             guard let self else { return }
-            self.setActiveSubscription(false)
+            self.visibilityCount = max(0, self.visibilityCount - 1)
+            self.disableTask?.cancel()
+            self.disableTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(SubscriberConstants.videoDisableDebounceNanoseconds))
+                guard let self, !Task.isCancelled, self.visibilityCount <= 0 else { return }
+                self.setActiveSubscription(false)
+            }
         }
     }
 
@@ -217,8 +238,8 @@ public class VonageSubscriber: NSObject {
         participant.onAppear = nil
         participant.onDisappear = nil
 
-        reinforcementTask?.cancel()
-        reinforcementTask = nil
+        disableTask?.cancel()
+        disableTask = nil
     }
 }
 
