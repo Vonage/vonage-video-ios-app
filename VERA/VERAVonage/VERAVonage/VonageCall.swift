@@ -68,6 +68,15 @@ public final class VonageCall: CallFacade {
     /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
+    private var _captionsEnabled = CurrentValueSubject<Bool, Never>(false)
+
+    /// A publisher for tracking captions state, never fails.
+    ///
+    /// Emits a boolean value whenever the captions have been activated or deactivated.
+    ///
+    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    public lazy var captionsEnabled: AnyPublisher<Bool, Never> = _captionsEnabled.eraseToAnyPublisher()
+
     /// A unique identifier for this call instance.
     ///
     /// Useful for logging, analytics, and correlating call-related operations.
@@ -83,6 +92,9 @@ public final class VonageCall: CallFacade {
 
     /// The publisher for the local participant's audio and video.
     public let publisher: VonagePublisher
+
+    /// The subscriber for the local participant's captions.
+    public var publisherCaptions: VonageSubscriber?
 
     /// The participant representation of the local publisher, set after publishing.
     public var publisherParticipant: Participant?
@@ -565,5 +577,44 @@ public final class VonageCall: CallFacade {
     private func handleSignal(_ signal: VonageSignal) {
         plugins.compactMap { $0 as? VonageSignalHandler }
             .forEach { $0.handleSignal(signal) }
+    }
+
+    // MARK: Captions
+
+    public var areCaptionsEnabled: Bool { _captionsEnabled.value }
+
+    public func enableCaptions() async {
+        await callStateManager.enableCaptions()
+
+        if let stream = publisher.stream, publisherCaptions == nil {
+            subscribeToPublisherCaptions(stream)
+        }
+        publisher.enableCaptions()
+        _captionsEnabled.value = true
+    }
+
+    public func disableCaptions() async {
+        await callStateManager.disableCaptions()
+        publisher.disableCaptions()
+        _captionsEnabled.value = false
+    }
+
+    private func subscribeToPublisherCaptions(_ stream: OTStream) {
+        do {
+            let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
+            vonageSubscriber.onError = { [weak self] in
+                self?.removeSubscriber(stream)
+            }
+
+            try session.subscribe(subscriber: vonageSubscriber)
+
+            vonageSubscriber.onConnected = { [weak vonageSubscriber] in
+                vonageSubscriber?.enableAudioSubscription(false)
+            }
+
+            publisherCaptions = vonageSubscriber
+        } catch {
+            _eventsPublisher.send(.error(error))
+        }
     }
 }

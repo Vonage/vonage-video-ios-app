@@ -298,4 +298,14 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         otPublisher.videoTransformers = videoTransformers.map(\.transformer)
         updateParticipant()
     }
+
+    // MARK: Captions
+
+    func enableCaptions() {
+        otPublisher.publishCaptions = true
+    }
+
+    func disableCaptions() {
+        otPublisher.publishCaptions = false
+    }
 }

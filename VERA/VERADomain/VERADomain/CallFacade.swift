@@ -183,6 +183,20 @@ public protocol HoldeableCall: AnyObject {
     func setOnHold(_ isOnHold: Bool)
 }
 
+/// Controls the captions state
+///
+/// Execute enableCaptions to activate captions or disableCaptions to stop receiving caption updates
+public protocol ToggleableCaptions: AnyObject {
+    /// Returns `true` when the captions are active
+    var areCaptionsEnabled: Bool { get }
+
+    /// Activates the captions
+    func enableCaptions() async
+
+    /// Deactivates the captions
+    func disableCaptions() async
+}
+
 /// A unified façade protocol for managing a video call.
 ///
 /// Conformers expose reactive state via publishers, connection lifecycle operations,
@@ -205,7 +219,8 @@ public protocol CallFacade: AnyObject,
     MediaToggleable,
     CallStatePublisherProvider,
     HoldeableCall,
-    CallArchivingPublisherProvider
+    CallArchivingPublisherProvider,
+    ToggleableCaptions
 {}
 
 /// Errors that can occur during call operations.

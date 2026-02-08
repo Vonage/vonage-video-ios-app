@@ -30,7 +30,7 @@ struct CaptionsButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        CaptionsButton(state: .enabled)
+        CaptionsButton(state: .enabled(""))
         CaptionsButton(state: .disabled)
     }
     .padding()
@@ -39,7 +39,7 @@ struct CaptionsButton: View {
 
 #Preview {
     VStack(spacing: 20) {
-        CaptionsButton(state: .enabled)
+        CaptionsButton(state: .enabled(""))
         CaptionsButton(state: .disabled)
     }
     .padding()

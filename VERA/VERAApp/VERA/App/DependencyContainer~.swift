@@ -24,11 +24,6 @@ import VERAVonageCallKitPlugin
     import VERABackgroundEffects
 #endif
 
-#if CAPTIONS_ENABLED
-    import VERACaptions
-    import VERAVonageCaptionsPlugin
-#endif
-
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -103,9 +98,6 @@ final class DependencyContainer {
         #if ARCHIVING_ENABLED
             registry.registerPlugin(plugin: vonageArchivingPlugin)
         #endif
-        #if CAPTIONS_ENABLED
-            registry.registerPlugin(plugin: captionsPlugin)
-        #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
     }()
@@ -174,19 +166,6 @@ final class DependencyContainer {
     #if BACKGROUND_EFFECTS_ENABLED
 
         lazy var backgroundBlurFactory = BackgroundBlurFactory()
-
-    #endif
-
-    // MARK: Captions
-
-    #if CAPTIONS_ENABLED
-
-        lazy var captionsStatusDataSource: CaptionsStatusDataSource = DefaultCaptionsStatusDataSource()
-
-        lazy var captionsPlugin: VonageCaptionsPlugin = {
-            let plugin = VonageCaptionsPlugin(captionsStatusDataSource: captionsStatusDataSource)
-            return plugin
-        }()
 
     #endif
 }

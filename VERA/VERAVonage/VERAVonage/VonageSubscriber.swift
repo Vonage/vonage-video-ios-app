@@ -69,6 +69,12 @@ public class VonageSubscriber: NSObject {
     /// Called when the subscriber encounters an error.
     var onError: (() -> Void)?
 
+    /// Called when a caption is received
+    var onCaption: ((VonageCaption) -> Void)?
+
+    /// Called when the subscriber connects
+    var onConnected: (() -> Void)? = {}
+
     /// Whether the stream represents a screen share.
     @Published public private(set) var isScreenshare: Bool = false
     /// Whether this subscriber is pinned in the UI.
@@ -207,6 +213,13 @@ public class VonageSubscriber: NSObject {
         otSubscriber.subscribeToVideo = visible
     }
 
+    /// Enables or disables audio subscritpion
+    ///
+    /// - Parameter visible: `true` to subscribe to audio; `false` to unsubscribe.
+    func enableAudioSubscription(_ enabled: Bool) {
+        otSubscriber.subscribeToAudio = enabled
+    }
+
     /// Sets or clears hold mode on the subscriber.
     ///
     /// When entering hold, current audio/video subscription states are remembered and disabled.
@@ -232,6 +245,8 @@ public class VonageSubscriber: NSObject {
         participant = participant.withEmptyView
 
         onError = nil
+        onCaption = nil
+        onConnected = nil
 
         cancellables.removeAll()
 
@@ -240,6 +255,16 @@ public class VonageSubscriber: NSObject {
 
         disableTask?.cancel()
         disableTask = nil
+    }
+
+    // MARK: Captions
+
+    func enableCaptions() {
+        otSubscriber.subscribeToCaptions = true
+    }
+
+    func disableCaptions() {
+        otSubscriber.subscribeToCaptions = false
     }
 }
 
@@ -254,6 +279,8 @@ extension VonageSubscriber: OTSubscriberDelegate {
         subscriberDidConnect = true
 
         updateParticipant()
+
+        onConnected?()
     }
 
     /// Vonage subscriber delegate callback for errors.
@@ -283,6 +310,7 @@ extension VonageSubscriber: OTSubscriberKitCaptionsDelegate {
     ///
     /// Receives live captions; implementation can be extended to publish captions to the UI.
     public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {
-
+        let name = subscriber.stream?.name
+        onCaption?(.init(name: name, text: text, isFinal: isFinal, isRemote: true))
     }
 }

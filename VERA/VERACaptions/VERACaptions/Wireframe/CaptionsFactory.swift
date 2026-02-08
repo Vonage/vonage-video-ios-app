@@ -24,7 +24,8 @@ public final class CaptionsFactory {
         let viewModel = CaptionsButtonViewModel(
             roomName: roomName,
             enableCaptionsUseCase: DefaultEnableCaptionsUseCase(
-                captionsDataSource: captionsDataSource),
+                captionsDataSource: captionsDataSource,
+                captionsStatusDataSource: captionsStatusDataSource),
             disableCaptionsUseCase: DefaultDisableCaptionsUseCase(
                 captionsDataSource: captionsDataSource),
             captionsStatusDataSource: captionsStatusDataSource)
