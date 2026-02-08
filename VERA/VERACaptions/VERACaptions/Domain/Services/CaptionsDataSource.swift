@@ -27,13 +27,13 @@ public struct DisableCaptionsDataSourceRequest {
     }
 }
 
-public typealias ArchiveID = String
+public typealias CaptionsID = String
 
 public struct EnableCaptionsDataSourceResponse {
-    public let archiveId: ArchiveID
+    public let captionsId: CaptionsID
 
-    public init(archiveId: ArchiveID) {
-        self.archiveId = archiveId
+    public init(captionsId: CaptionsID) {
+        self.captionsId = captionsId
     }
 }
 
