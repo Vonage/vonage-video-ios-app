@@ -181,7 +181,14 @@ final class DependencyContainer {
 
     #if CAPTIONS_ENABLED
 
+        lazy var captionsDataSource: CaptionsDataSource = DefaultCaptionsDataSource(
+            baseURL: baseURL, httpClient: httpClient, jsonDecoder: jsonDecoder)
+
         lazy var captionsStatusDataSource: CaptionsStatusDataSource = DefaultCaptionsStatusDataSource()
+
+        lazy var captionsFactory = CaptionsFactory(
+            captionsDataSource: captionsDataSource,
+            captionsStatusDataSource: captionsStatusDataSource)
 
         lazy var captionsPlugin: VonageCaptionsPlugin = {
             let plugin = VonageCaptionsPlugin(captionsStatusDataSource: captionsStatusDataSource)

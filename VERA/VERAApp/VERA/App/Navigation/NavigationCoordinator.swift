@@ -13,6 +13,10 @@ import os.log
     import VERABackgroundEffects
 #endif
 
+#if CAPTIONS_ENABLED
+    import VERACaptions
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -31,6 +35,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     #if BACKGROUND_EFFECTS_ENABLED
         var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
+    #endif
+
+    #if CAPTIONS_ENABLED
+        var captionsButtonViewModel: CaptionsButtonViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {

@@ -74,8 +74,17 @@ public final class VonageCall: CallFacade {
     ///
     /// Emits a boolean value whenever the captions have been activated or deactivated.
     ///
-    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    /// - Returns: ``Bool`` reflecting `captionsEnabled`.
     public lazy var captionsEnabled: AnyPublisher<Bool, Never> = _captionsEnabled.eraseToAnyPublisher()
+
+    private var _captions = CurrentValueSubject<[CaptionItem], Never>([])
+
+    /// A publisher for the captions list
+    ///
+    /// Emits a list of caption items whenever the captions state changes.
+    ///
+    /// - Returns: ``[CaptionItem]`` reflecting `captions` list.
+    public lazy var captions: AnyPublisher<[CaptionItem], Never> = _captions.eraseToAnyPublisher()
 
     /// A unique identifier for this call instance.
     ///
@@ -278,6 +287,9 @@ public final class VonageCall: CallFacade {
             let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
             vonageSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
+            }
+            vonageSubscriber.onCaption = { [weak self] caption in
+                self?.appendCaption(caption)
             }
 
             setupSubscriberObservation(vonageSubscriber)
@@ -583,6 +595,7 @@ public final class VonageCall: CallFacade {
 
     public var areCaptionsEnabled: Bool { _captionsEnabled.value }
 
+    @MainActor
     public func enableCaptions() async {
         await callStateManager.enableCaptions()
 
@@ -609,12 +622,23 @@ public final class VonageCall: CallFacade {
             try session.subscribe(subscriber: vonageSubscriber)
 
             vonageSubscriber.onConnected = { [weak vonageSubscriber] in
+                vonageSubscriber?.enableCaptions()
                 vonageSubscriber?.enableAudioSubscription(false)
+            }
+
+            vonageSubscriber.onCaption = { [weak self] caption in
+                self?.appendCaption(caption)
             }
 
             publisherCaptions = vonageSubscriber
         } catch {
             _eventsPublisher.send(.error(error))
         }
+    }
+
+    private func appendCaption(_ caption: VonageCaption) {
+        var value = _captions.value
+        value.append(.init(speakerName: caption.name ?? "", text: caption.text))
+        _captions.value = value
     }
 }

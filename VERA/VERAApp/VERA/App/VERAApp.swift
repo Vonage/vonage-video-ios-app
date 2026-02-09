@@ -21,6 +21,10 @@ import VERAVonage
     import VERABackgroundEffects
 #endif
 
+#if CAPTIONS_ENABLED
+    import VERACaptions
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -104,6 +108,10 @@ struct VERAApp: App {
 
     #if BACKGROUND_EFFECTS_ENABLED
         var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
+    #endif
+
+    #if CAPTIONS_ENABLED
+        var captionsFactory: CaptionsFactory { dependencyContainer.captionsFactory }
     #endif
 
     private func makeLandingPage() -> some View {
@@ -198,6 +206,12 @@ struct VERAApp: App {
                 archiveButtonViewModel.setup()
             #endif
 
+            #if CAPTIONS_ENABLED
+                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
+                captionsButtonViewModel.setup()
+                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
+            #endif
+
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons,
@@ -256,6 +270,13 @@ struct VERAApp: App {
                 extraButtons.append(dependencyContainer.mapToArchiveBottomBarButton(archiveButtonViewModel, state))
             }
         #endif
+
+        #if CAPTIONS_ENABLED
+            if let captionsButtonViewModel = navigationCoordinator.captionsButtonViewModel {
+                extraButtons.append(dependencyContainer.makeCaptionsButton(captionsButtonViewModel))
+            }
+        #endif
+
         return extraButtons
     }
 

@@ -5,6 +5,7 @@
 import Foundation
 import VERACommonUI
 import VERACore
+import VERADomain
 
 #if CHAT_ENABLED
     import VERAChat
@@ -18,6 +19,10 @@ import VERACore
 
 #if BACKGROUND_EFFECTS_ENABLED
     import VERABackgroundEffects
+#endif
+
+#if CAPTIONS_ENABLED
+    import VERACaptions
 #endif
 
 extension DependencyContainer {
@@ -62,6 +67,25 @@ extension DependencyContainer {
             return .init(
                 label: String(localized: "Blur"),
                 image: viewModel.currentBlurLevel.image,
+                onTap: {
+                    viewModel.onTap()
+                },
+                content: {
+                    button
+                })
+        }
+    #endif
+
+    #if CAPTIONS_ENABLED
+        func makeCaptionsButton(
+            _ viewModel: CaptionsButtonViewModel
+        ) -> BottomBarButton {
+            let button = captionsFactory.makeCaptionsButton(viewModel: viewModel)
+            return .init(
+                label: String(localized: "Captions"),
+                image: viewModel.state.captionsEnabled
+                    ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
+                    : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
                 onTap: {
                     viewModel.onTap()
                 },
