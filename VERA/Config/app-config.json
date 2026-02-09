@@ -19,6 +19,7 @@
     "allowChat": true,
     "allowDeviceSelection": true,
     "allowEmojis": true,
+    "allowReactions": true,
     "allowScreenShare": true,
     "defaultLayoutMode": "activespeaker",
     "showParticipantList": true
