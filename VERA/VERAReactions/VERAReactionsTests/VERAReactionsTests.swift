@@ -2,11 +2,13 @@
 //  Created by Vonage on 2/9/26.
 //
 
-import XCTest
-@testable import VERAReactions
+import Testing
+import VERAReactions
 
-final class VERAReactionsTests: XCTestCase {
-    func testVersion() {
-        XCTAssertEqual(VERAReactions.version, "1.0.0")
+struct VERAReactionsTests {
+
+    @Test
+    func version() {
+        #expect(VERAReactions.version == "1.0.0")
     }
 }

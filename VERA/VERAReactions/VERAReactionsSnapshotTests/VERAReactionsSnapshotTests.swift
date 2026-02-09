@@ -2,10 +2,9 @@
 //  Created by Vonage on 2/9/26.
 //
 
-import XCTest
 import SnapshotTesting
-@testable import VERAReactions
+import Testing
 
-final class VERAReactionsSnapshotTests: XCTestCase {
+struct VERAReactionsSnapshotTests {
     // Add snapshot tests here
 }

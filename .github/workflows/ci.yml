@@ -124,6 +124,19 @@ jobs:
           -resultBundlePath DerivedData/VERADomainTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAReactionsTests (macOS)
+      id: reactions-tests-macos
+      run: |
+        echo "🧪 Running VERAReactionsTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAReactionsTests \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAReactionsTests-macOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Preboot iOS Simulator
       run: |
         set -euo pipefail
@@ -201,6 +214,31 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACaptionsSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+    - name: Run VERAReactionsSnapshotTests (iOS Simulator)
+      id: reactions-snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Building VERAReactionsSnapshotTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAReactionsSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+        
+        echo "📸 Running VERAReactionsSnapshotTests on iOS Simulator"
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAReactionsSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAReactionsSnapshotTests-iOS.xcresult \
           -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
@@ -338,10 +376,12 @@ jobs:
           DerivedData/VERAChatTests-macOS.xcresult
           DerivedData/VERAArchivingTests-macOS.xcresult
           DerivedData/VERADomainTests-macOS.xcresult
+          DerivedData/VERAReactionsTests-macOS.xcresult
           DerivedData/VERAVonageChatPluginTests-macOS.xcresult
           DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
           DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
+          DerivedData/VERAReactionsSnapshotTests-iOS.xcresult
           DerivedData/VERAVonageChatPluginTests-iOS.xcresult
           DerivedData/VERATests-iOS.xcresult
           DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
