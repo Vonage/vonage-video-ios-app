@@ -98,23 +98,23 @@ private func areCaptionsEnabled() -> Bool {
     return meetingRoomSettings["allowCaptions"] as! Bool
 }
 
-/// Returns whether reactions are enabled according to `app-config.json`.
+/// Returns whether emojis/reactions are enabled according to `app-config.json`.
 ///
 /// Expects the JSON shape:
 /// ```json
 /// {
 ///   "meetingRoomSettings": {
-///     "allowReactions": true
+///     "allowEmojis": true
 ///   }
 /// }
 /// ```
 ///
-/// - Returns: `true` if `meetingRoomSettings.allowReactions` is `true`, else `false`.
+/// - Returns: `true` if `meetingRoomSettings.allowEmojis` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func areReactionsEnabled() -> Bool {
+private func areEmojisEnabled() -> Bool {
     let config = readAppConfig()
     let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowReactions"] as! Bool
+    return meetingRoomSettings["allowEmojis"] as! Bool
 }
 
 // MARK: - Dynamic Dependencies
@@ -174,7 +174,7 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
-    if areReactionsEnabled() {
+    if areEmojisEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAReactions", path: "VERAReactions")
         ])
@@ -227,7 +227,7 @@ private func createBuildSettings() -> Settings {
         print("Captions feature enabled in build settings.")
     }
 
-    if areReactionsEnabled() {
+    if areEmojisEnabled() {
         baseSettings["REACTIONS_ENABLED"] = "1"
         flags.append("REACTIONS_ENABLED")
         print("Reactions feature enabled in build settings.")
