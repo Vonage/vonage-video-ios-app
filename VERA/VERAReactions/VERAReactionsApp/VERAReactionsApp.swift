@@ -1,5 +1,5 @@
 //
-//  Created by Vonage on 02/09/2026.
+//  Created by Vonage on 10/2/26.
 //
 
 import SwiftUI
@@ -9,22 +9,56 @@ import VERAReactions
 struct VERAReactionsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DemoEmojiPickerView()
         }
     }
 }
 
-struct ContentView: View {
+struct DemoEmojiPickerView: View {
+    @State private var selectedEmoji: EmojiItem?
+
     var body: some View {
-        VStack {
-            Text("VERAReactions Demo")
-                .font(.title)
-            Text("Version: \(VERAReactions.version)")
-                .foregroundColor(.secondary)
+        ZStack {
+            // Simulated video background
+            LinearGradient(
+                colors: [.blue.opacity(0.6), .purple.opacity(0.6)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // EmojiPickerView overlay
+            emojiPickerContainerView
+
+            // Demo controls
+            VStack {
+                Text("EmojiPickerView Demo")
+                    .font(.title)
+                    .foregroundStyle(.white)
+                    .padding()
+
+                Spacer()
+            }
         }
+    }
+
+    @ViewBuilder
+    private var emojiPickerContainerView: some View {
+        VStack(spacing: 32) {
+            Text(selectedEmoji?.emoji ?? "👆")
+                .font(.system(size: 64))
+
+            Text(selectedEmoji?.name ?? "Tap an emoji")
+                .font(.headline)
+
+            EmojiPickerViewFactory.make(configuration: .default) { emoji in
+                selectedEmoji = emoji
+            }
+        }
+        .padding()
     }
 }
 
 #Preview {
-    ContentView()
+    DemoEmojiPickerView()
 }
