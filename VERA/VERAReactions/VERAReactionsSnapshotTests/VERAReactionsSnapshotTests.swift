@@ -104,6 +104,42 @@ struct EmojiPickerViewUITests {
         snapshot(sut, named: "FewEmojis")
     }
 
+    // MARK: - iOS 16 Layout Tests
+
+    /// Verifies that grid columns are properly spaced and not collapsed on iOS 16.
+    /// This test catches a known iOS 16 bug where LazyVGrid with .flexible() GridItems
+    /// and fixedSize() modifier causes columns to collapse to zero width.
+    @Test("EmojiPickerView - iOS 16 Grid Layout")
+    func iOS16GridLayout() throws {
+        // Test with full grid (12 emojis = 3 rows of 4 columns)
+        let sut = makeSUT()
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
+            named: "iOS16_GridLayout",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_iOS16_GridLayout"
+        )
+    }
+
+    /// Verifies grid layout with single row (4 emojis)
+    @Test("EmojiPickerView - iOS 16 Single Row")
+    func iOS16SingleRow() throws {
+        let config = EmojiPickerConfiguration(
+            emojis: Array(EmojiItem.defaultEmojis.prefix(4))
+        )
+        let sut = makeSUT(configuration: config)
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
+            named: "iOS16_SingleRow",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_iOS16_SingleRow"
+        )
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(

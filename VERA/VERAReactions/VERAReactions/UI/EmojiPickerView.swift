@@ -38,7 +38,7 @@ public enum EmojiPickerConstants {
 /// ## Usage
 /// ```swift
 /// EmojiPickerView(
-///     emojis: EmojiItem.samples,
+///     emojis: EmojiItem.defaultEmojis,
 ///     onEmojiSelected: { emoji in
 ///         print("Selected: \(emoji.emoji)")
 ///     }
@@ -62,11 +62,6 @@ public struct EmojiPickerView: View {
 
     /// Callback triggered when an emoji is selected
     public let onEmojiSelected: (EmojiItem) -> Void
-
-    private let columns = Array(
-        repeating: GridItem(.flexible(), spacing: EmojiPickerConstants.gridSpacing),
-        count: EmojiPickerConstants.columnCount
-    )
 
     /// Creates a new emoji grid view
     /// - Parameters:
@@ -111,7 +106,7 @@ private struct EmojiPickerViewContent: View {
     @State private var highlightCancellable: AnyCancellable?
 
     private let columns = Array(
-        repeating: GridItem(.flexible(), spacing: EmojiPickerConstants.gridSpacing),
+        repeating: GridItem(.fixed(EmojiItemConstants.cellSize), spacing: EmojiPickerConstants.gridSpacing),
         count: EmojiPickerConstants.columnCount
     )
 
