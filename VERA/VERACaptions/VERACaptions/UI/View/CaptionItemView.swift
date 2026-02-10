@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 /// Displays a single caption with speaker name and text
 struct CaptionItemView: View {

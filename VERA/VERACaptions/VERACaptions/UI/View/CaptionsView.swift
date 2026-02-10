@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERADomain
 
 /// Displays a list of captions at the bottom of the screen
 /// Supports multiple simultaneous speakers
