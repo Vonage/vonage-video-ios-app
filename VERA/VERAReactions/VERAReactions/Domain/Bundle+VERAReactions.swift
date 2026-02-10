@@ -1,6 +1,5 @@
 //
-//  Bundle+VERAReactions.swift
-//  VERAReactions
+//  Created by Vonage on 10/2/26.
 //
 
 import Foundation

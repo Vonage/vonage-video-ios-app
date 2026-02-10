@@ -1,5 +1,5 @@
 //
-//  Created by Vonage on 02/09/2026.
+//  Created by Vonage on 10/2/26.
 //
 
 import SwiftUI
@@ -28,7 +28,7 @@ struct DemoEmojiPickerView: View {
             .ignoresSafeArea()
 
             // EmojiPickerView overlay
-            emjoyPickerContainerView
+            emojiPickerContainerView
 
             // Demo controls
             VStack {
@@ -43,7 +43,7 @@ struct DemoEmojiPickerView: View {
     }
 
     @ViewBuilder
-    private var emjoyPickerContainerView: some View {
+    private var emojiPickerContainerView: some View {
         VStack(spacing: 32) {
             Text(selectedEmoji?.emoji ?? "👆")
                 .font(.system(size: 64))

@@ -1,5 +1,5 @@
 //
-//  Created by Vonage on 09/02/2026.
+//  Created by Vonage on 9/2/26.
 //
 
 import SwiftUI
@@ -36,12 +36,15 @@ public enum EmojiItemConstants {
 /// ## Accessibility
 /// The cell uses the emoji's `name` property as its accessibility label,
 /// allowing VoiceOver to announce the emoji's meaning.
-struct EmojItemView: View {
+struct EmojiItemView: View {
     /// The emoji item to display
     let emoji: EmojiItem
 
     /// Whether the cell is currently highlighted
     var isHighlighted: Bool = false
+
+    /// Duration of the highlight animation in seconds
+    var highlightDuration: Double = EmojiItemConstants.highlightDuration
 
     var body: some View {
         Text(emoji.emoji)
@@ -52,7 +55,7 @@ struct EmojItemView: View {
                     .fill(Color.white.opacity(isHighlighted ? EmojiItemConstants.highlightOpacity : 0))
             )
             .accessibilityLabel(emoji.name)
-            .animation(.easeInOut(duration: EmojiItemConstants.highlightDuration), value: isHighlighted)
+            .animation(.easeInOut(duration: highlightDuration), value: isHighlighted)
     }
 }
 
@@ -60,10 +63,10 @@ struct EmojItemView: View {
 
 #Preview("Emoji Cell") {
     HStack(spacing: EmojiPickerConstants.gridSpacing) {
-        EmojItemView(emoji: EmojiItem(emoji: "👍", name: "thumbs up"))
-        EmojItemView(emoji: EmojiItem(emoji: "❤️", name: "heart"))
-        EmojItemView(emoji: EmojiItem(emoji: "🔥", name: "fire"))
-        EmojItemView(emoji: EmojiItem(emoji: "😂", name: "laughing"))
+        EmojiItemView(emoji: EmojiItem(emoji: "👍", name: "thumbs up"))
+        EmojiItemView(emoji: EmojiItem(emoji: "❤️", name: "heart"))
+        EmojiItemView(emoji: EmojiItem(emoji: "🔥", name: "fire"))
+        EmojiItemView(emoji: EmojiItem(emoji: "😂", name: "laughing"))
     }
     .padding()
     .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))

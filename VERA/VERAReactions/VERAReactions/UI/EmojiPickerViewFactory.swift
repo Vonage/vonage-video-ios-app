@@ -1,6 +1,5 @@
 //
-//  EmojiPickerViewFactory.swift
-//  VERAReactions
+//  Created by Vonage on 9/2/26.
 //
 
 import SwiftUI
@@ -95,6 +94,8 @@ public enum EmojiPickerViewFactory {
     ) -> EmojiPickerView {
         EmojiPickerView(
             emojis: configuration.emojis,
+            showsHighlight: configuration.showsHighlight,
+            highlightDuration: configuration.highlightDuration,
             onEmojiSelected: onEmojiSelected
         )
     }

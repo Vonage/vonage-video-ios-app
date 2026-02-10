@@ -1,6 +1,5 @@
 //
-//  EmojiGridView.swift
-//  VERAReactions
+//  Created by Vonage on 9/2/26.
 //
 
 import Combine
@@ -38,7 +37,7 @@ public enum EmojiPickerConstants {
 ///
 /// ## Usage
 /// ```swift
-/// EmojiGridView(
+/// EmojiPickerView(
 ///     emojis: EmojiItem.samples,
 ///     onEmojiSelected: { emoji in
 ///         print("Selected: \(emoji.emoji)")
@@ -55,6 +54,12 @@ public struct EmojiPickerView: View {
     /// The array of emojis to display in the grid
     public let emojis: [EmojiItem]
 
+    /// Whether to show highlight animation on tap
+    public let showsHighlight: Bool
+
+    /// Duration of the highlight animation in seconds
+    public let highlightDuration: Double
+
     /// Callback triggered when an emoji is selected
     public let onEmojiSelected: (EmojiItem) -> Void
 
@@ -66,36 +71,40 @@ public struct EmojiPickerView: View {
     /// Creates a new emoji grid view
     /// - Parameters:
     ///   - emojis: The emojis to display
+    ///   - showsHighlight: Whether to show highlight animation on tap (default: true)
+    ///   - highlightDuration: Duration of highlight animation in seconds (default: 0.15)
     ///   - onEmojiSelected: Callback when an emoji is tapped
     public init(
         emojis: [EmojiItem],
+        showsHighlight: Bool = true,
+        highlightDuration: Double = EmojiItemConstants.highlightDuration,
         onEmojiSelected: @escaping (EmojiItem) -> Void
     ) {
         self.emojis = emojis
+        self.showsHighlight = showsHighlight
+        self.highlightDuration = highlightDuration
         self.onEmojiSelected = onEmojiSelected
     }
 
-    /// Creates a default emoji picker view with the standard set of emojis
-    /// - Parameter onEmojiSelected: Callback when an emoji is tapped
-    /// - Returns: An EmojiPickerView configured with default emojis
-    public static func defaultPickerView(
-        onEmojiSelected: @escaping (EmojiItem) -> Void
-    ) -> EmojiPickerView {
-        EmojiPickerViewFactory.makeDefault(onEmojiSelected: onEmojiSelected)
-    }
-
     public var body: some View {
-        EmojiPickerViewContent(emojis: emojis, onEmojiSelected: onEmojiSelected)
-            .padding(EmojiPickerConstants.contentPadding)
-            .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))
-            .cornerRadius(EmojiPickerConstants.cornerRadius)
-            .fixedSize(horizontal: true, vertical: false)
+        EmojiPickerViewContent(
+            emojis: emojis,
+            showsHighlight: showsHighlight,
+            highlightDuration: highlightDuration,
+            onEmojiSelected: onEmojiSelected
+        )
+        .padding(EmojiPickerConstants.contentPadding)
+        .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))
+        .cornerRadius(EmojiPickerConstants.cornerRadius)
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 
 /// Internal view that handles the emoji grid and highlight state
 private struct EmojiPickerViewContent: View {
     let emojis: [EmojiItem]
+    let showsHighlight: Bool
+    let highlightDuration: Double
     let onEmojiSelected: (EmojiItem) -> Void
 
     @State private var highlightedEmojiId: String?
@@ -106,24 +115,35 @@ private struct EmojiPickerViewContent: View {
         count: EmojiPickerConstants.columnCount
     )
 
+    /// Delay before clearing the highlight (animation in + out)
+    private var highlightClearDelay: Double {
+        highlightDuration * 2
+    }
+
     var body: some View {
         LazyVGrid(columns: columns, spacing: EmojiPickerConstants.gridSpacing) {
             ForEach(emojis) { emoji in
-                EmojItemView(emoji: emoji, isHighlighted: highlightedEmojiId == emoji.id.uuidString)
-                    .onTapGesture {
-                        handleEmojiTap(emoji)
-                    }
+                EmojiItemView(
+                    emoji: emoji,
+                    isHighlighted: showsHighlight && highlightedEmojiId == emoji.id.uuidString,
+                    highlightDuration: highlightDuration
+                )
+                .onTapGesture {
+                    handleEmojiTap(emoji)
+                }
             }
         }
     }
 
     private func handleEmojiTap(_ emoji: EmojiItem) {
-        highlightedEmojiId = emoji.id.uuidString
+        if showsHighlight {
+            highlightedEmojiId = emoji.id.uuidString
+        }
         onEmojiSelected(emoji)
 
         highlightCancellable?.cancel()
         highlightCancellable = Just(())
-            .delay(for: .seconds(EmojiItemConstants.highlightDuration * 2), scheduler: RunLoop.main)
+            .delay(for: .seconds(highlightClearDelay), scheduler: RunLoop.main)
             .sink { _ in
                 if highlightedEmojiId == emoji.id.uuidString {
                     highlightedEmojiId = nil
@@ -155,12 +175,5 @@ private struct EmojiPickerViewContent: View {
         onEmojiSelected: { _ in }
     )
     .frame(width: 250)
-    .padding()
-}
-
-#Preview("Default Picker") {
-    EmojiPickerView.defaultPickerView { emoji in
-        print("Selected: \(emoji.emoji)")
-    }
     .padding()
 }

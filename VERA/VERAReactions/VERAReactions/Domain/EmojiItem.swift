@@ -1,6 +1,5 @@
 //
-//  EmojiItem.swift
-//  VERAReactions
+//  Created by Vonage on 9/2/26.
 //
 
 import Foundation
