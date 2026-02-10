@@ -21,7 +21,7 @@ struct EmojiPickerViewUITests {
     @Test(
         "EmojiPickerView - Basic Layout",
         arguments: [
-            ("default", EmojiPickerConfiguration.default),
+            ("default", EmojiPickerConfiguration.default)
         ])
     func basicLayout(variant: String, configuration: EmojiPickerConfiguration) throws {
         let sut = makeSUT(configuration: configuration)

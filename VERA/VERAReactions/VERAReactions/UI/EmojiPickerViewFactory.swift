@@ -30,13 +30,13 @@ import SwiftUI
 public struct EmojiPickerConfiguration {
     /// The emojis to display in the picker
     public let emojis: [EmojiItem]
-    
+
     /// Whether to show highlight animation on tap
     public let showsHighlight: Bool
-    
+
     /// Duration of the highlight animation in seconds
     public let highlightDuration: Double
-    
+
     /// Creates a new emoji picker configuration
     /// - Parameters:
     ///   - emojis: The emojis to display
@@ -55,9 +55,9 @@ public struct EmojiPickerConfiguration {
 
 // MARK: - Preset Configurations
 
-public extension EmojiPickerConfiguration {
+extension EmojiPickerConfiguration {
     /// Default configuration with standard emoji set and highlight enabled
-    static var `default`: EmojiPickerConfiguration {
+    public static var `default`: EmojiPickerConfiguration {
         EmojiPickerConfiguration(
             emojis: EmojiItem.defaultEmojis,
             showsHighlight: true,
@@ -98,7 +98,7 @@ public enum EmojiPickerViewFactory {
             onEmojiSelected: onEmojiSelected
         )
     }
-    
+
     /// Creates a default EmojiPickerView with standard emoji set
     /// - Parameter onEmojiSelected: Callback triggered when an emoji is selected
     /// - Returns: A default configured EmojiPickerView
@@ -123,10 +123,10 @@ public enum EmojiPickerViewFactory {
         emojis: [
             EmojiItem(emoji: "🎉", name: "party"),
             EmojiItem(emoji: "🔥", name: "fire"),
-            EmojiItem(emoji: "💯", name: "hundred")
+            EmojiItem(emoji: "💯", name: "hundred"),
         ]
     )
-    
+
     EmojiPickerViewFactory.make(configuration: customConfig) { emoji in
         print("Selected: \(emoji.emoji)")
     }

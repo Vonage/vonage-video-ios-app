@@ -8,16 +8,16 @@ import SwiftUI
 public enum EmojiItemConstants {
     /// Size of emoji cell (width and height)
     public static let cellSize: CGFloat = 36
-    
+
     /// Font size for the emoji
     public static let fontSize: CGFloat = 28
-    
+
     /// Highlight animation duration in seconds
     public static let highlightDuration: Double = 0.15
-    
+
     /// Highlight background opacity
     public static let highlightOpacity: Double = 0.4
-    
+
     /// Highlight corner radius
     public static let highlightCornerRadius: CGFloat = 8
 }
@@ -39,10 +39,10 @@ public enum EmojiItemConstants {
 struct EmojItemView: View {
     /// The emoji item to display
     let emoji: EmojiItem
-    
+
     /// Whether the cell is currently highlighted
     var isHighlighted: Bool = false
-    
+
     var body: some View {
         Text(emoji.emoji)
             .font(.system(size: EmojiItemConstants.fontSize))

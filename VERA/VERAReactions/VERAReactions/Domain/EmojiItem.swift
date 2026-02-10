@@ -21,16 +21,16 @@ import Foundation
 public struct EmojiItem: Identifiable, Equatable, Hashable {
     /// Unique identifier for the emoji
     public let id: UUID
-    
+
     /// The emoji character to display
     public let emoji: String
-    
+
     /// Localization key for the emoji name (optional)
     private let nameKey: String?
-    
+
     /// Fallback name if no localization key is provided
     private let fallbackName: String
-    
+
     /// Human-readable name used for accessibility labels (localized)
     public var name: String {
         if let key = nameKey {
@@ -38,7 +38,7 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
         }
         return fallbackName
     }
-    
+
     /// Creates a new emoji item with a localization key
     /// - Parameters:
     ///   - id: Unique identifier (auto-generated if not provided)
@@ -50,7 +50,7 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
         self.nameKey = nameKey
         self.fallbackName = nameKey
     }
-    
+
     /// Creates a new emoji item with a direct name (not localized)
     /// - Parameters:
     ///   - id: Unique identifier (auto-generated if not provided)
@@ -62,13 +62,13 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
         self.nameKey = nil
         self.fallbackName = name
     }
-    
+
     // MARK: - Equatable & Hashable
-    
+
     public static func == (lhs: EmojiItem, rhs: EmojiItem) -> Bool {
         lhs.id == rhs.id && lhs.emoji == rhs.emoji
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(emoji)
@@ -78,7 +78,7 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
 // MARK: - Sample Data
 
 extension EmojiItem {
-    
+
     public static let defaultEmojis: [EmojiItem] = [
         EmojiItem(emoji: "👍", nameKey: "emoji.thumbs_up"),
         EmojiItem(emoji: "👎", nameKey: "emoji.thumbs_down"),
@@ -91,6 +91,6 @@ extension EmojiItem {
         EmojiItem(emoji: "❤️", nameKey: "emoji.heart"),
         EmojiItem(emoji: "😭", nameKey: "emoji.crying"),
         EmojiItem(emoji: "😮", nameKey: "emoji.surprised"),
-        EmojiItem(emoji: "😂", nameKey: "emoji.laughing")
+        EmojiItem(emoji: "😂", nameKey: "emoji.laughing"),
     ]
 }

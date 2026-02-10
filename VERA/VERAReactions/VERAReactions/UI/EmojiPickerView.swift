@@ -10,16 +10,16 @@ import SwiftUI
 public enum EmojiPickerConstants {
     /// Number of columns in the grid
     public static let columnCount: Int = 4
-    
+
     /// Spacing between grid items
     public static let gridSpacing: CGFloat = 8
-    
+
     /// Padding around the grid content
     public static let contentPadding: CGFloat = 12
-    
+
     /// Corner radius of the grid background
     public static let cornerRadius: CGFloat = 12
-    
+
     /// Background opacity
     public static let backgroundOpacity: Double = 0.75
 }
@@ -54,15 +54,15 @@ public enum EmojiPickerConstants {
 public struct EmojiPickerView: View {
     /// The array of emojis to display in the grid
     public let emojis: [EmojiItem]
-    
+
     /// Callback triggered when an emoji is selected
     public let onEmojiSelected: (EmojiItem) -> Void
-    
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: EmojiPickerConstants.gridSpacing),
         count: EmojiPickerConstants.columnCount
     )
-    
+
     /// Creates a new emoji grid view
     /// - Parameters:
     ///   - emojis: The emojis to display
@@ -74,7 +74,7 @@ public struct EmojiPickerView: View {
         self.emojis = emojis
         self.onEmojiSelected = onEmojiSelected
     }
-    
+
     /// Creates a default emoji picker view with the standard set of emojis
     /// - Parameter onEmojiSelected: Callback when an emoji is tapped
     /// - Returns: An EmojiPickerView configured with default emojis
@@ -83,7 +83,7 @@ public struct EmojiPickerView: View {
     ) -> EmojiPickerView {
         EmojiPickerViewFactory.makeDefault(onEmojiSelected: onEmojiSelected)
     }
-    
+
     public var body: some View {
         EmojiPickerViewContent(emojis: emojis, onEmojiSelected: onEmojiSelected)
             .padding(EmojiPickerConstants.contentPadding)
@@ -97,15 +97,15 @@ public struct EmojiPickerView: View {
 private struct EmojiPickerViewContent: View {
     let emojis: [EmojiItem]
     let onEmojiSelected: (EmojiItem) -> Void
-    
+
     @State private var highlightedEmojiId: String?
     @State private var highlightCancellable: AnyCancellable?
-    
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: EmojiPickerConstants.gridSpacing),
         count: EmojiPickerConstants.columnCount
     )
-    
+
     var body: some View {
         LazyVGrid(columns: columns, spacing: EmojiPickerConstants.gridSpacing) {
             ForEach(emojis) { emoji in
@@ -116,11 +116,11 @@ private struct EmojiPickerViewContent: View {
             }
         }
     }
-    
+
     private func handleEmojiTap(_ emoji: EmojiItem) {
         highlightedEmojiId = emoji.id.uuidString
         onEmojiSelected(emoji)
-        
+
         highlightCancellable?.cancel()
         highlightCancellable = Just(())
             .delay(for: .seconds(EmojiItemConstants.highlightDuration * 2), scheduler: RunLoop.main)

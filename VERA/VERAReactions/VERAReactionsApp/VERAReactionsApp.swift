@@ -16,7 +16,7 @@ struct VERAReactionsApp: App {
 
 struct DemoEmojiPickerView: View {
     @State private var selectedEmoji: EmojiItem?
-    
+
     var body: some View {
         ZStack {
             // Simulated video background
@@ -41,16 +41,16 @@ struct DemoEmojiPickerView: View {
             }
         }
     }
-    
+
     @ViewBuilder
-    private var emjoyPickerContainerView : some View  {
+    private var emjoyPickerContainerView: some View {
         VStack(spacing: 32) {
             Text(selectedEmoji?.emoji ?? "👆")
                 .font(.system(size: 64))
-            
+
             Text(selectedEmoji?.name ?? "Tap an emoji")
                 .font(.headline)
-            
+
             EmojiPickerViewFactory.make(configuration: .default) { emoji in
                 selectedEmoji = emoji
             }
