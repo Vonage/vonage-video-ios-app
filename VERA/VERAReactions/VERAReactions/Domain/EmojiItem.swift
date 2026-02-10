@@ -11,13 +11,13 @@ import Foundation
 ///
 /// ## Usage
 /// ```swift
-/// let thumbsUp = EmojiItem(emoji: "👍", name: "thumbs up")
+/// let thumbsUp = EmojiItem(emoji: "👍", nameKey: "emoji.thumbs_up")
 /// ```
 ///
 /// ## Properties
 /// - `id`: Unique identifier (auto-generated UUID)
 /// - `emoji`: The emoji character to display
-/// - `name`: Human-readable name for accessibility
+/// - `name`: Human-readable name for accessibility (localized if using nameKey)
 public struct EmojiItem: Identifiable, Equatable, Hashable {
     /// Unique identifier for the emoji
     public let id: UUID
@@ -25,10 +25,33 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
     /// The emoji character to display
     public let emoji: String
     
-    /// Human-readable name used for accessibility labels
-    public let name: String
+    /// Localization key for the emoji name (optional)
+    private let nameKey: String?
     
-    /// Creates a new emoji item
+    /// Fallback name if no localization key is provided
+    private let fallbackName: String
+    
+    /// Human-readable name used for accessibility labels (localized)
+    public var name: String {
+        if let key = nameKey {
+            return String(localized: String.LocalizationValue(key), bundle: .veraReactions)
+        }
+        return fallbackName
+    }
+    
+    /// Creates a new emoji item with a localization key
+    /// - Parameters:
+    ///   - id: Unique identifier (auto-generated if not provided)
+    ///   - emoji: The emoji character (e.g., "👍")
+    ///   - nameKey: Localization key for the accessible name (e.g., "emoji.thumbs_up")
+    public init(id: UUID = UUID(), emoji: String, nameKey: String) {
+        self.id = id
+        self.emoji = emoji
+        self.nameKey = nameKey
+        self.fallbackName = nameKey
+    }
+    
+    /// Creates a new emoji item with a direct name (not localized)
     /// - Parameters:
     ///   - id: Unique identifier (auto-generated if not provided)
     ///   - emoji: The emoji character (e.g., "👍")
@@ -36,7 +59,19 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
     public init(id: UUID = UUID(), emoji: String, name: String) {
         self.id = id
         self.emoji = emoji
-        self.name = name
+        self.nameKey = nil
+        self.fallbackName = name
+    }
+    
+    // MARK: - Equatable & Hashable
+    
+    public static func == (lhs: EmojiItem, rhs: EmojiItem) -> Bool {
+        lhs.id == rhs.id && lhs.emoji == rhs.emoji
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(emoji)
     }
 }
 
@@ -45,17 +80,17 @@ public struct EmojiItem: Identifiable, Equatable, Hashable {
 extension EmojiItem {
     
     public static let defaultEmojis: [EmojiItem] = [
-        EmojiItem(emoji: "👍", name: "thumbs up"),
-        EmojiItem(emoji: "👎", name: "thumbs down"),
-        EmojiItem(emoji: "👋", name: "wave"),
-        EmojiItem(emoji: "👏", name: "clapping"),
-        EmojiItem(emoji: "🚀", name: "rocket"),
-        EmojiItem(emoji: "🎉", name: "party"),
-        EmojiItem(emoji: "🙏", name: "praying"),
-        EmojiItem(emoji: "💪", name: "strong"),
-        EmojiItem(emoji: "❤️", name: "heart"),
-        EmojiItem(emoji: "😭", name: "crying"),
-        EmojiItem(emoji: "😮", name: "surprised"),
-        EmojiItem(emoji: "😂", name: "laughing")
+        EmojiItem(emoji: "👍", nameKey: "emoji.thumbs_up"),
+        EmojiItem(emoji: "👎", nameKey: "emoji.thumbs_down"),
+        EmojiItem(emoji: "👋", nameKey: "emoji.wave"),
+        EmojiItem(emoji: "👏", nameKey: "emoji.clapping"),
+        EmojiItem(emoji: "🚀", nameKey: "emoji.rocket"),
+        EmojiItem(emoji: "🎉", nameKey: "emoji.party"),
+        EmojiItem(emoji: "🙏", nameKey: "emoji.praying"),
+        EmojiItem(emoji: "💪", nameKey: "emoji.strong"),
+        EmojiItem(emoji: "❤️", nameKey: "emoji.heart"),
+        EmojiItem(emoji: "😭", nameKey: "emoji.crying"),
+        EmojiItem(emoji: "😮", nameKey: "emoji.surprised"),
+        EmojiItem(emoji: "😂", nameKey: "emoji.laughing")
     ]
 }
