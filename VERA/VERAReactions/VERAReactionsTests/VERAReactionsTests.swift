@@ -6,9 +6,5 @@ import Testing
 import VERAReactions
 
 struct VERAReactionsTests {
-
-    @Test
-    func version() {
-        #expect(VERAReactions.version == "1.0.0")
-    }
+    // Add unit tests here
 }

@@ -15,13 +15,21 @@ struct VERAReactionsApp: App {
 }
 
 struct ContentView: View {
+    @State private var selectedEmoji: EmojiItem?
+    
     var body: some View {
-        VStack {
-            Text("VERAReactions Demo")
-                .font(.title)
-            Text("Version: \(VERAReactions.version)")
-                .foregroundColor(.secondary)
+        VStack(spacing: 32) {
+            Text(selectedEmoji?.emoji ?? "👆")
+                .font(.system(size: 64))
+            
+            Text(selectedEmoji?.name ?? "Tap an emoji")
+                .font(.headline)
+            
+            EmojiPickerViewFactory.make(configuration: .default) { emoji in
+                selectedEmoji = emoji
+            }
         }
+        .padding()
     }
 }
 
