@@ -9,15 +9,41 @@ import VERAReactions
 struct VERAReactionsApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DemoEmojiPickerView()
         }
     }
 }
 
-struct ContentView: View {
+struct DemoEmojiPickerView: View {
     @State private var selectedEmoji: EmojiItem?
     
     var body: some View {
+        ZStack {
+            // Simulated video background
+            LinearGradient(
+                colors: [.blue.opacity(0.6), .purple.opacity(0.6)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // EmojiPickerView overlay
+            emjoyPickerContainerView
+
+            // Demo controls
+            VStack {
+                Text("EmojiPickerView Demo")
+                    .font(.title)
+                    .foregroundStyle(.white)
+                    .padding()
+
+                Spacer()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var emjoyPickerContainerView : some View  {
         VStack(spacing: 32) {
             Text(selectedEmoji?.emoji ?? "👆")
                 .font(.system(size: 64))
@@ -34,5 +60,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    DemoEmojiPickerView()
 }
