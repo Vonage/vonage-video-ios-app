@@ -186,9 +186,12 @@ public protocol HoldeableCall: AnyObject {
 /// Controls the captions state
 ///
 /// Execute enableCaptions to activate captions or disableCaptions to stop receiving caption updates
-public protocol ToggleableCaptions: AnyObject {
+public protocol CaptionsProvider: AnyObject {
     /// Returns `true` when the captions are active
     var areCaptionsEnabled: Bool { get }
+
+    /// A publisher that emits ``[CaptionItem]`` values, never fails.
+    var captionsPublisher: AnyPublisher<[CaptionItem], Never> { get }
 
     /// Activates the captions
     func enableCaptions() async
@@ -220,7 +223,7 @@ public protocol CallFacade: AnyObject,
     CallStatePublisherProvider,
     HoldeableCall,
     CallArchivingPublisherProvider,
-    ToggleableCaptions
+    CaptionsProvider
 {}
 
 /// Errors that can occur during call operations.

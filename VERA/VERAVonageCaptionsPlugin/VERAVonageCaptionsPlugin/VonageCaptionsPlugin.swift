@@ -66,7 +66,7 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonageSignalHandler, Vona
     private func proccessNewState(_ state: CaptionsState) {
         Task {
             switch state {
-            case .enabled(let captionsID): await call?.enableCaptions()
+            case .enabled: await call?.enableCaptions()
             case .disabled: await call?.disableCaptions()
             }
         }

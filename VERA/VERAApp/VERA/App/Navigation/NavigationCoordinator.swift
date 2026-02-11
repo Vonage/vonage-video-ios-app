@@ -39,6 +39,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     #if CAPTIONS_ENABLED
         var captionsButtonViewModel: CaptionsButtonViewModel?
+        var captionsViewModel: CaptionsViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
@@ -96,6 +97,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
         #if BACKGROUND_EFFECTS_ENABLED
             backgroundBlurButtonViewModel = nil
+        #endif
+
+        #if CAPTIONS_ENABLED
+            captionsButtonViewModel = nil
+            captionsViewModel = nil
         #endif
 
         logNavigation("Returned to landing page")

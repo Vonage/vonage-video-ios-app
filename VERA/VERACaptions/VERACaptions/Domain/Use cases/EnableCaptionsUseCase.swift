@@ -17,14 +17,14 @@ public protocol EnableCaptionsUseCase {
 }
 
 public final class DefaultEnableCaptionsUseCase: EnableCaptionsUseCase {
-    private let captionsDataSource: any CaptionsDataSource
+    private let captionsActivationDataSource: any CaptionsActivationDataSource
     private let captionsStatusDataSource: CaptionsStatusDataSource
 
     public init(
-        captionsDataSource: any CaptionsDataSource,
+        captionsActivationDataSource: any CaptionsActivationDataSource,
         captionsStatusDataSource: CaptionsStatusDataSource
     ) {
-        self.captionsDataSource = captionsDataSource
+        self.captionsActivationDataSource = captionsActivationDataSource
         self.captionsStatusDataSource = captionsStatusDataSource
     }
 
@@ -34,7 +34,7 @@ public final class DefaultEnableCaptionsUseCase: EnableCaptionsUseCase {
         let newRequest = EnableCaptionsDataSourceRequest(
             roomName: request.roomName
         )
-        let response = try await captionsDataSource.enableCaptions(newRequest)
+        let response = try await captionsActivationDataSource.enableCaptions(newRequest)
         captionsStatusDataSource.set(captionsState: .enabled(response.captionsId))
     }
 }

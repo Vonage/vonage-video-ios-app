@@ -25,7 +25,7 @@ public struct DisableCaptionsResponse: Codable {
     }
 }
 
-public final class DefaultCaptionsDataSource: CaptionsDataSource {
+public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
     private let baseURL: URL
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder

@@ -6,6 +6,7 @@ import SnapshotTesting
 import SwiftUI
 import Testing
 import VERACaptions
+import VERADomain
 
 @Suite("Captions UI Tests")
 @MainActor

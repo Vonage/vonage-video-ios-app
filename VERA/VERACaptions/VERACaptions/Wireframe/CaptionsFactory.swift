@@ -7,14 +7,14 @@ import VERADomain
 
 public final class CaptionsFactory {
 
-    private let captionsDataSource: CaptionsDataSource
+    private let captionsActivationDataSource: CaptionsActivationDataSource
     private let captionsStatusDataSource: CaptionsStatusDataSource
 
     public init(
-        captionsDataSource: CaptionsDataSource,
+        captionsActivationDataSource: CaptionsActivationDataSource,
         captionsStatusDataSource: CaptionsStatusDataSource
     ) {
-        self.captionsDataSource = captionsDataSource
+        self.captionsActivationDataSource = captionsActivationDataSource
         self.captionsStatusDataSource = captionsStatusDataSource
     }
 
@@ -24,10 +24,10 @@ public final class CaptionsFactory {
         let viewModel = CaptionsButtonViewModel(
             roomName: roomName,
             enableCaptionsUseCase: DefaultEnableCaptionsUseCase(
-                captionsDataSource: captionsDataSource,
+                captionsActivationDataSource: captionsActivationDataSource,
                 captionsStatusDataSource: captionsStatusDataSource),
             disableCaptionsUseCase: DefaultDisableCaptionsUseCase(
-                captionsDataSource: captionsDataSource),
+                captionsActivationDataSource: captionsActivationDataSource),
             captionsStatusDataSource: captionsStatusDataSource)
 
         return (makeCaptionsButton(viewModel: viewModel), viewModel)
@@ -37,5 +37,16 @@ public final class CaptionsFactory {
         viewModel: CaptionsButtonViewModel
     ) -> some View {
         CaptionsScreenButton(viewModel: viewModel)
+    }
+
+    public func makeCaptionsView() -> (view: some View, viewModel: CaptionsViewModel) {
+        let viewModel = CaptionsViewModel()
+        return (makeCaptionsView(viewModel: viewModel), viewModel)
+    }
+
+    public func makeCaptionsView(
+        viewModel: CaptionsViewModel
+    ) -> some View {
+        CaptionsScreenView(viewModel: viewModel)
     }
 }

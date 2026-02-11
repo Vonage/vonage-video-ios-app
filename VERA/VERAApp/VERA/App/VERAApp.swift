@@ -206,15 +206,10 @@ struct VERAApp: App {
                 archiveButtonViewModel.setup()
             #endif
 
-            #if CAPTIONS_ENABLED
-                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
-                captionsButtonViewModel.setup()
-                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
-            #endif
-
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons,
+                getExtraOverlays: getExtraOverlays,
                 onActionHandler: {
                     switch $0 {
                     case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
@@ -228,6 +223,16 @@ struct VERAApp: App {
                     }
                 }
             )
+
+            #if CAPTIONS_ENABLED
+                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
+                captionsButtonViewModel.setup()
+                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
+
+                let (_, captionsViewModel) = captionsFactory.makeCaptionsView()
+                navigationCoordinator.captionsViewModel = captionsViewModel
+            #endif
+
             newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
             navigationCoordinator.meetingRoomViewModel = newViewModel
             #if ARCHIVING_ENABLED
@@ -278,6 +283,22 @@ struct VERAApp: App {
         #endif
 
         return extraButtons
+    }
+
+    private func getExtraOverlays(
+        _ state: MeetingRoomOverlayState
+    ) -> [ViewGenerator] {
+        var result = [ViewGenerator]()
+        #if CAPTIONS_ENABLED
+            if let captionsViewModel = navigationCoordinator.captionsViewModel {
+                captionsViewModel.updateCaptions(state.captions)
+                result.append(
+                    ViewGenerator(content: {
+                        captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
+                    }))
+            }
+        #endif
+        return result
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {

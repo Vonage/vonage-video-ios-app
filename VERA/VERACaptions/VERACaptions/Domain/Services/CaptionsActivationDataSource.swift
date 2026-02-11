@@ -37,7 +37,7 @@ public struct EnableCaptionsDataSourceResponse {
     }
 }
 
-public protocol CaptionsDataSource {
+public protocol CaptionsActivationDataSource {
     func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse

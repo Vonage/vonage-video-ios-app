@@ -77,14 +77,17 @@ public final class VonageCall: CallFacade {
     /// - Returns: ``Bool`` reflecting `captionsEnabled`.
     public lazy var captionsEnabled: AnyPublisher<Bool, Never> = _captionsEnabled.eraseToAnyPublisher()
 
-    private var _captions = CurrentValueSubject<[CaptionItem], Never>([])
+    private var _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
 
     /// A publisher for the captions list
     ///
     /// Emits a list of caption items whenever the captions state changes.
     ///
     /// - Returns: ``[CaptionItem]`` reflecting `captions` list.
-    public lazy var captions: AnyPublisher<[CaptionItem], Never> = _captions.eraseToAnyPublisher()
+    public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
+
+    /// Captions cleanup timer to clear captions after a certain period of inactivity.
+    private var captionCleanupTimer: Timer?
 
     /// A unique identifier for this call instance.
     ///
@@ -381,6 +384,8 @@ public final class VonageCall: CallFacade {
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
+            captionCleanupTimer?.invalidate()
+            captionCleanupTimer = nil
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
@@ -604,6 +609,8 @@ public final class VonageCall: CallFacade {
         }
         publisher.enableCaptions()
         _captionsEnabled.value = true
+
+        startCaptionCleanup()
     }
 
     public func disableCaptions() async {
@@ -636,9 +643,32 @@ public final class VonageCall: CallFacade {
         }
     }
 
+    private func startCaptionCleanup() {
+        captionCleanupTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.cleanupOldCaptions()
+        }
+    }
+
+    private func cleanupOldCaptions() {
+        let now = Date()
+        let maxCaptionAge: TimeInterval = 5.0
+
+        let value = _captionsPublisher.value
+        let filtered = value.filter { now.timeIntervalSince($0.timestamp) < maxCaptionAge }
+
+        if filtered.count != value.count {
+            _captionsPublisher.value = filtered
+        }
+    }
+
     private func appendCaption(_ caption: VonageCaption) {
-        var value = _captions.value
+        var value = _captionsPublisher.value
         value.append(.init(speakerName: caption.name ?? "", text: caption.text))
-        _captions.value = value
+
+        if value.count > 5 {
+            value = Array(value.suffix(5))
+        }
+
+        _captionsPublisher.value = value
     }
 }

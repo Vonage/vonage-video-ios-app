@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACaptions
+import VERADomain
 
 @main
 struct VERACaptionsApp: App {

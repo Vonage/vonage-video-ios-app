@@ -463,7 +463,8 @@ struct MeetingRoomViewModelTests {
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: { _ in [] })
+            getExternalButtons: { _ in [] },
+            getExtraOverlays: { _ in [] })
     }
 
     // MARK: Helper

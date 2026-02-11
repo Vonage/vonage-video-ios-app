@@ -23,10 +23,10 @@ public protocol DisableCaptionsUseCase {
 }
 
 public final class DefaultDisableCaptionsUseCase: DisableCaptionsUseCase {
-    private let captionsDataSource: any CaptionsDataSource
+    private let captionsActivationDataSource: any CaptionsActivationDataSource
 
-    public init(captionsDataSource: any CaptionsDataSource) {
-        self.captionsDataSource = captionsDataSource
+    public init(captionsActivationDataSource: any CaptionsActivationDataSource) {
+        self.captionsActivationDataSource = captionsActivationDataSource
     }
 
     public func callAsFunction(
@@ -36,6 +36,6 @@ public final class DefaultDisableCaptionsUseCase: DisableCaptionsUseCase {
             roomName: request.roomName,
             captionsID: request.captionsID
         )
-        _ = try await captionsDataSource.disableCaptions(newRequest)
+        _ = try await captionsActivationDataSource.disableCaptions(newRequest)
     }
 }

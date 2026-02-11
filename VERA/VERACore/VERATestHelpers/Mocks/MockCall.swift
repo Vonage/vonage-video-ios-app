@@ -24,10 +24,14 @@ public class MockCall: CallFacade {
     public var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
+    public var _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
+
     public var recordedActions: [CallActions] = []
 
     public var isMuted: Bool = false
     public var isOnHold: Bool = false
+    public var areCaptionsEnabled = false
 
     public enum CallActions: String {
         case connect
@@ -37,6 +41,8 @@ public class MockCall: CallFacade {
         case toggleLocalCamera
         case muteLocalMedia
         case setOnHold
+        case enableCaptions
+        case disableCaptions
     }
 
     public init() {}
@@ -69,5 +75,15 @@ public class MockCall: CallFacade {
     public func setOnHold(_ isOnHold: Bool) {
         self.isOnHold = isOnHold
         recordedActions.append(.setOnHold)
+    }
+
+    public func enableCaptions() async {
+        areCaptionsEnabled = true
+        recordedActions.append(.enableCaptions)
+    }
+
+    public func disableCaptions() async {
+        areCaptionsEnabled = false
+        recordedActions.append(.disableCaptions)
     }
 }
