@@ -40,6 +40,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let appConfig: AppConfig
     private let meetingRoomNavigation: MeetingRoomDestination
+    private let captionsStatusDataSource: CaptionsStatusDataSource
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -69,6 +70,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
+        captionsStatusDataSource: CaptionsStatusDataSource,
         appConfig: AppConfig,
         meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
@@ -85,6 +87,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
         self.getExtraOverlays = getExtraOverlays
+        self.captionsStatusDataSource = captionsStatusDataSource
     }
 
     @MainActor
@@ -247,6 +250,14 @@ extension MeetingRoomViewModel {
             call.captionsPublisher
                 .sink { [weak self] captions in
                     self?.handleCaptions(captions)
+                }
+                .store(in: &cancellables)
+
+            captionsStatusDataSource.captionsState
+                .sink { state in
+                    Task { @MainActor [weak self] in
+                        self?.updateExtraButtons()
+                    }
                 }
                 .store(in: &cancellables)
 

@@ -6,6 +6,10 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+private enum MeetingRoomScreenConstants {
+    static let overlaysPaddingFromBottom: CGFloat = 64
+}
+
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
     @State var showToast = false
@@ -40,6 +44,7 @@ public struct MeetingRoomScreen: View {
                             overlay.content()
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(.bottom, MeetingRoomScreenConstants.overlaysPaddingFromBottom)
 
                         if state.callState == .disconnecting {
                             LoaderModalView()

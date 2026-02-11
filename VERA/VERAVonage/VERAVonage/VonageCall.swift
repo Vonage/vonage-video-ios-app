@@ -84,7 +84,12 @@ public final class VonageCall: CallFacade {
     /// Emits a list of caption items whenever the captions state changes.
     ///
     /// - Returns: ``[CaptionItem]`` reflecting `captions` list.
-    public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
+    public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> =
+        Publishers.CombineLatest(captionsEnabled, _captionsPublisher)
+        .map { isEnabled, captions in
+            isEnabled ? captions : []
+        }
+        .eraseToAnyPublisher()
 
     /// Captions cleanup timer to clear captions after a certain period of inactivity.
     private var captionCleanupTimer: Timer?
@@ -614,8 +619,8 @@ public final class VonageCall: CallFacade {
     }
 
     public func disableCaptions() async {
-        await callStateManager.disableCaptions()
-        publisher.disableCaptions()
+        //await callStateManager.disableCaptions()
+        //publisher.disableCaptions()
         _captionsEnabled.value = false
     }
 

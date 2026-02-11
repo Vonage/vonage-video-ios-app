@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public struct EnableCaptionsRequest {
     public let roomName: String

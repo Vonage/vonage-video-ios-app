@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import VERADomain
 
 public protocol CaptionsStatusDataSource {
     var captionsState: AnyPublisher<CaptionsState, Never> { get }

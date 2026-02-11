@@ -13,6 +13,7 @@ public class MeetingRoomFactory {
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
+    private let captionsStatusDataSource: CaptionsStatusDataSource
     private let appConfig: AppConfig
 
     public init(
@@ -21,7 +22,8 @@ public class MeetingRoomFactory {
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
-        roomCredentialsRepository: RoomCredentialsRepository
+        roomCredentialsRepository: RoomCredentialsRepository,
+        captionsStatusDataSource: CaptionsStatusDataSource
     ) {
         self.baseURL = baseURL
         self.appConfig = appConfig
@@ -29,6 +31,7 @@ public class MeetingRoomFactory {
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
         self.roomCredentialsRepository = roomCredentialsRepository
+        self.captionsStatusDataSource = captionsStatusDataSource
     }
 
     @MainActor
@@ -49,6 +52,7 @@ public class MeetingRoomFactory {
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
+            captionsStatusDataSource: captionsStatusDataSource,
             appConfig: appConfig,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
             getExternalButtons: getExternalButtons,

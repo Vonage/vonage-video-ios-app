@@ -75,7 +75,8 @@ final class DependencyContainer {
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository)
+        roomCredentialsRepository: roomCredentialsRepository,
+        captionsStatusDataSource: captionsStatusDataSource)
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
@@ -195,5 +196,7 @@ final class DependencyContainer {
             return plugin
         }()
 
+    #else
+        lazy var captionsStatusDataSource: CaptionsStatusDataSource = NullCaptionsStatusDataSource()
     #endif
 }
