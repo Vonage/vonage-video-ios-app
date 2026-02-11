@@ -28,7 +28,7 @@ import SwiftUI
 /// ```
 public struct EmojiPickerConfiguration {
     /// The emojis to display in the picker
-    public let emojis: [EmojiItem]
+    public let emojis: [UIEmojiReaction]
 
     /// Whether to show highlight animation on tap
     public let showsHighlight: Bool
@@ -42,7 +42,7 @@ public struct EmojiPickerConfiguration {
     ///   - showsHighlight: Whether to show highlight animation on tap (default: true)
     ///   - highlightDuration: Duration of highlight animation in seconds (default: 0.15)
     public init(
-        emojis: [EmojiItem],
+        emojis: [UIEmojiReaction],
         showsHighlight: Bool = true,
         highlightDuration: Double = EmojiItemConstants.highlightDuration
     ) {
@@ -52,13 +52,26 @@ public struct EmojiPickerConfiguration {
     }
 }
 
+// MARK: - Equatable
+
+extension EmojiPickerConfiguration: Equatable {
+    public static func == (
+        lhs: EmojiPickerConfiguration,
+        rhs: EmojiPickerConfiguration
+    ) -> Bool {
+        return lhs.showsHighlight == rhs.showsHighlight &&
+               lhs.highlightDuration == rhs.highlightDuration &&
+               lhs.emojis.map { $0.id } == rhs.emojis.map { $0.id }
+    }
+}
+
 // MARK: - Preset Configurations
 
 extension EmojiPickerConfiguration {
     /// Default configuration with standard emoji set and highlight enabled
     public static var `default`: EmojiPickerConfiguration {
         EmojiPickerConfiguration(
-            emojis: EmojiItem.defaultEmojis,
+            emojis: UIEmojiReaction.defaultEmojis,
             showsHighlight: true,
             highlightDuration: EmojiItemConstants.highlightDuration
         )
@@ -90,7 +103,7 @@ public enum EmojiPickerViewFactory {
     /// - Returns: A configured EmojiPickerView
     public static func make(
         configuration: EmojiPickerConfiguration,
-        onEmojiSelected: @escaping (EmojiItem) -> Void
+        onEmojiSelected: @escaping (UIEmojiReaction) -> Void
     ) -> EmojiPickerView {
         EmojiPickerView(
             emojis: configuration.emojis,
@@ -104,7 +117,7 @@ public enum EmojiPickerViewFactory {
     /// - Parameter onEmojiSelected: Callback triggered when an emoji is selected
     /// - Returns: A default configured EmojiPickerView
     public static func makeDefault(
-        onEmojiSelected: @escaping (EmojiItem) -> Void
+        onEmojiSelected: @escaping (UIEmojiReaction) -> Void
     ) -> EmojiPickerView {
         make(configuration: .default, onEmojiSelected: onEmojiSelected)
     }
@@ -122,9 +135,9 @@ public enum EmojiPickerViewFactory {
 #Preview("Factory - Custom Emojis") {
     let customConfig = EmojiPickerConfiguration(
         emojis: [
-            EmojiItem(emoji: "🎉", name: "party"),
-            EmojiItem(emoji: "🔥", name: "fire"),
-            EmojiItem(emoji: "💯", name: "hundred"),
+            UIEmojiReaction(emoji: "🎉", name: "party"),
+            UIEmojiReaction(emoji: "🔥", name: "fire"),
+            UIEmojiReaction(emoji: "💯", name: "hundred"),
         ]
     )
 

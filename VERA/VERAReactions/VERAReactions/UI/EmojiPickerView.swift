@@ -38,7 +38,7 @@ public enum EmojiPickerConstants {
 /// ## Usage
 /// ```swift
 /// EmojiPickerView(
-///     emojis: EmojiItem.defaultEmojis,
+///     emojis: UIEmojiReaction.defaultEmojis,
 ///     onEmojiSelected: { emoji in
 ///         print("Selected: \(emoji.emoji)")
 ///     }
@@ -52,7 +52,7 @@ public enum EmojiPickerConstants {
 /// - Note: Each cell is 36x36 points with 8pt spacing between items.
 public struct EmojiPickerView: View {
     /// The array of emojis to display in the grid
-    public let emojis: [EmojiItem]
+    public let emojis: [UIEmojiReaction]
 
     /// Whether to show highlight animation on tap
     public let showsHighlight: Bool
@@ -61,7 +61,7 @@ public struct EmojiPickerView: View {
     public let highlightDuration: Double
 
     /// Callback triggered when an emoji is selected
-    public let onEmojiSelected: (EmojiItem) -> Void
+    public let onEmojiSelected: (UIEmojiReaction) -> Void
 
     /// Creates a new emoji grid view
     /// - Parameters:
@@ -70,10 +70,10 @@ public struct EmojiPickerView: View {
     ///   - highlightDuration: Duration of highlight animation in seconds (default: 0.15)
     ///   - onEmojiSelected: Callback when an emoji is tapped
     public init(
-        emojis: [EmojiItem],
+        emojis: [UIEmojiReaction],
         showsHighlight: Bool = true,
         highlightDuration: Double = EmojiItemConstants.highlightDuration,
-        onEmojiSelected: @escaping (EmojiItem) -> Void
+        onEmojiSelected: @escaping (UIEmojiReaction) -> Void
     ) {
         self.emojis = emojis
         self.showsHighlight = showsHighlight
@@ -97,10 +97,10 @@ public struct EmojiPickerView: View {
 
 /// Internal view that handles the emoji grid and highlight state
 private struct EmojiPickerViewContent: View {
-    let emojis: [EmojiItem]
+    let emojis: [UIEmojiReaction]
     let showsHighlight: Bool
     let highlightDuration: Double
-    let onEmojiSelected: (EmojiItem) -> Void
+    let onEmojiSelected: (UIEmojiReaction) -> Void
 
     @State private var highlightedEmojiId: String?
     @State private var highlightCancellable: AnyCancellable?
@@ -130,7 +130,7 @@ private struct EmojiPickerViewContent: View {
         }
     }
 
-    private func handleEmojiTap(_ emoji: EmojiItem) {
+    private func handleEmojiTap(_ emoji: UIEmojiReaction) {
         if showsHighlight {
             highlightedEmojiId = emoji.id.uuidString
         }
@@ -149,7 +149,7 @@ private struct EmojiPickerViewContent: View {
 
 #Preview("Dynamic Height") {
     EmojiPickerView(
-        emojis: EmojiItem.defaultEmojis,
+        emojis: UIEmojiReaction.defaultEmojis,
         onEmojiSelected: { emoji in
             print("Selected: \(emoji.emoji)")
         }
@@ -158,7 +158,7 @@ private struct EmojiPickerViewContent: View {
 
 #Preview("Few Emojis") {
     EmojiPickerView(
-        emojis: Array(EmojiItem.defaultEmojis.prefix(5)),
+        emojis: Array(UIEmojiReaction.defaultEmojis.prefix(5)),
         onEmojiSelected: { _ in }
     )
     .padding()
@@ -166,7 +166,7 @@ private struct EmojiPickerViewContent: View {
 
 #Preview("Single Row") {
     EmojiPickerView(
-        emojis: Array(EmojiItem.defaultEmojis.prefix(4)),
+        emojis: Array(UIEmojiReaction.defaultEmojis.prefix(4)),
         onEmojiSelected: { _ in }
     )
     .frame(width: 250)

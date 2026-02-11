@@ -176,7 +176,8 @@ private func createDependencies() -> [TargetDependency] {
 
     if areEmojisEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERAReactions", path: "VERAReactions")
+            .project(target: "VERAReactions", path: "VERAReactions"),
+            .project(target: "VERAVonageReactionsPlugin", path: "VERAVonageReactionsPlugin"),
         ])
     }
     return dependencies

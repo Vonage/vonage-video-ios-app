@@ -84,9 +84,9 @@ struct EmojiPickerViewUITests {
     func customEmojis() throws {
         let customConfig = EmojiPickerConfiguration(
             emojis: [
-                EmojiItem(emoji: "🎉", name: "party"),
-                EmojiItem(emoji: "🔥", name: "fire"),
-                EmojiItem(emoji: "💯", name: "hundred"),
+                UIEmojiReaction(emoji: "🎉", name: "party"),
+                UIEmojiReaction(emoji: "🔥", name: "fire"),
+                UIEmojiReaction(emoji: "💯", name: "hundred"),
             ]
         )
         let sut = makeSUT(configuration: customConfig)
@@ -97,7 +97,7 @@ struct EmojiPickerViewUITests {
     @Test("EmojiPickerView - Few Emojis")
     func fewEmojis() throws {
         let config = EmojiPickerConfiguration(
-            emojis: Array(EmojiItem.defaultEmojis.prefix(5))
+            emojis: Array(UIEmojiReaction.defaultEmojis.prefix(5))
         )
         let sut = makeSUT(configuration: config)
 
@@ -127,7 +127,7 @@ struct EmojiPickerViewUITests {
     @Test("EmojiPickerView - iOS 16 Single Row")
     func iOS16SingleRow() throws {
         let config = EmojiPickerConfiguration(
-            emojis: Array(EmojiItem.defaultEmojis.prefix(4))
+            emojis: Array(UIEmojiReaction.defaultEmojis.prefix(4))
         )
         let sut = makeSUT(configuration: config)
 

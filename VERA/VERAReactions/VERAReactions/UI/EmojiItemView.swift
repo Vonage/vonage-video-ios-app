@@ -29,7 +29,7 @@ public enum EmojiItemConstants {
 ///
 /// ## Usage
 /// ```swift
-/// EmojiCell(emoji: EmojiItem(emoji: "👍", name: "thumbs up"))
+/// EmojiItemView(emoji: UIEmojiReaction(emoji: "👍", name: "thumbs up"))
 ///     .onTapGesture { /* handle tap */ }
 /// ```
 ///
@@ -38,7 +38,7 @@ public enum EmojiItemConstants {
 /// allowing VoiceOver to announce the emoji's meaning.
 struct EmojiItemView: View {
     /// The emoji item to display
-    let emoji: EmojiItem
+    let emoji: UIEmojiReaction
 
     /// Whether the cell is currently highlighted
     var isHighlighted: Bool = false
@@ -63,10 +63,10 @@ struct EmojiItemView: View {
 
 #Preview("Emoji Cell") {
     HStack(spacing: EmojiPickerConstants.gridSpacing) {
-        EmojiItemView(emoji: EmojiItem(emoji: "👍", name: "thumbs up"))
-        EmojiItemView(emoji: EmojiItem(emoji: "❤️", name: "heart"))
-        EmojiItemView(emoji: EmojiItem(emoji: "🔥", name: "fire"))
-        EmojiItemView(emoji: EmojiItem(emoji: "😂", name: "laughing"))
+        EmojiItemView(emoji: UIEmojiReaction(emoji: "👍", name: "thumbs up"))
+        EmojiItemView(emoji: UIEmojiReaction(emoji: "❤️", name: "heart"))
+        EmojiItemView(emoji: UIEmojiReaction(emoji: "🔥", name: "fire"))
+        EmojiItemView(emoji: UIEmojiReaction(emoji: "😂", name: "laughing"))
     }
     .padding()
     .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))
