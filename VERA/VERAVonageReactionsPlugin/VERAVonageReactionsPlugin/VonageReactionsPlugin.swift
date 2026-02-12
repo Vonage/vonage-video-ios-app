@@ -1,6 +1,5 @@
 //
-//  VonageReactionsPlugin.swift
-//  VERAVonageReactionsPlugin
+//  Created by Vonage on 11/2/26.
 //
 
 import Foundation
@@ -9,12 +8,12 @@ import VERAVonage
 
 /// Enables emoji reactions over Vonage signals during video calls.
 ///
-/// `VonageReactionsPlugin` listens for incoming reaction signals, maps them into
+/// `VonageReactionsPlugin` listens for incoming `emoji` signals, maps them into
 /// domain `Reaction`s, and publishes them via `ReactionsRepository`.
 /// It can also emit reactions through the provided signal channel.
 ///
 /// ## Responsibilities
-/// - Handle incoming `reaction` signals and publish to repository
+/// - Handle incoming `emoji` signals and publish to repository
 /// - Emit outgoing emoji reactions with username
 /// - Maintain per-call state (e.g., current username)
 ///
@@ -97,7 +96,7 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     /// Processes an incoming Vonage signal.
     ///
-    /// Accepts only `reaction` signals. Attempts to decode the signal payload
+    /// Accepts only `emoji` signals. Attempts to decode the signal payload
     /// and publishes the reaction to the repository.
     ///
     /// - Parameter signal: The received signal with type and optional data payload.
@@ -117,7 +116,7 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     /// Sends an emoji reaction over the signal channel.
     ///
     /// Builds a `VonageReactionMessage`, encodes it to JSON, and emits an `OutgoingSignal`
-    /// with type `reaction` through the configured channel.
+    /// with type `emoji` through the configured channel.
     ///
     /// - Parameter emoji: The emoji item to send.
     /// - Throws: ``VonageReactionsPlugin/Error/missingChannel`` if `channel` is `nil`,

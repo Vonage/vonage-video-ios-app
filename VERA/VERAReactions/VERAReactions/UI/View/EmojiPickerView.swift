@@ -4,6 +4,7 @@
 
 import Combine
 import SwiftUI
+import VERACommonUI
 
 /// Constants for EmojiPickerView layout and appearance
 public enum EmojiPickerConstants {
@@ -20,7 +21,7 @@ public enum EmojiPickerConstants {
     public static let cornerRadius: CGFloat = 12
 
     /// Background opacity
-    public static let backgroundOpacity: Double = 0.75
+    public static let backgroundOpacity: Double = 0.8
 }
 
 /// A flexible grid view for displaying emoji reactions
@@ -89,7 +90,7 @@ public struct EmojiPickerView: View {
             onEmojiSelected: onEmojiSelected
         )
         .padding(EmojiPickerConstants.contentPadding)
-        .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))
+        .background(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(EmojiPickerConstants.backgroundOpacity))
         .cornerRadius(EmojiPickerConstants.cornerRadius)
         .fixedSize(horizontal: true, vertical: false)
     }

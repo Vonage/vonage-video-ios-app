@@ -62,7 +62,7 @@ struct DemoEmojiPickerView: View {
             Text(selectedEmoji?.name ?? "Tap an emoji")
                 .font(.headline)
 
-            // Use EmojiPickerComponentView with the ViewModel
+            // Use EmojiPickerViewContainer with the ViewModel
             EmojiPickerViewContainer(viewModel: viewModel)
         }
         .padding()

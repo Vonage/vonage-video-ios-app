@@ -30,7 +30,7 @@ struct EmojiButtonContainerViewModelTests {
     func initialStateHasPickerHidden() {
         let sut = makeSUT()
 
-        #expect(sut.isPickerVisible == false)
+        #expect(sut.pickerViewModel.isVisible == false)
     }
 
     @Test("Initial state creates picker ViewModel with configuration")
@@ -49,7 +49,7 @@ struct EmojiButtonContainerViewModelTests {
 
         sut.togglePicker()
 
-        #expect(sut.isPickerVisible == true)
+        #expect(sut.pickerViewModel.isVisible == true)
     }
 
     @Test("Toggle picker hides picker when visible")
@@ -59,18 +59,18 @@ struct EmojiButtonContainerViewModelTests {
         sut.togglePicker()
         sut.togglePicker()
 
-        #expect(sut.isPickerVisible == false)
+        #expect(sut.pickerViewModel.isVisible == false)
     }
 
     @Test("Double toggle returns to initial state")
     func doubleToggleReturnsToInitialState() {
         let sut = makeSUT()
 
-        let initialState = sut.isPickerVisible
+        let initialState = sut.pickerViewModel.isVisible
         sut.togglePicker()
         sut.togglePicker()
 
-        #expect(sut.isPickerVisible == initialState)
+        #expect(sut.pickerViewModel.isVisible == initialState)
     }
 
     // MARK: - Show/Hide Picker Tests
@@ -81,7 +81,7 @@ struct EmojiButtonContainerViewModelTests {
 
         sut.showPicker()
 
-        #expect(sut.isPickerVisible == true)
+        #expect(sut.pickerViewModel.isVisible == true)
     }
 
     @Test("Hide picker sets visibility to false")
@@ -91,7 +91,7 @@ struct EmojiButtonContainerViewModelTests {
         sut.showPicker()
         sut.hidePicker()
 
-        #expect(sut.isPickerVisible == false)
+        #expect(sut.pickerViewModel.isVisible == false)
     }
 
     @Test("Hide picker when already hidden remains false")
@@ -100,7 +100,7 @@ struct EmojiButtonContainerViewModelTests {
 
         sut.hidePicker()
 
-        #expect(sut.isPickerVisible == false)
+        #expect(sut.pickerViewModel.isVisible == false)
     }
 
     // MARK: - Picker ViewModel Integration Tests
@@ -112,7 +112,7 @@ struct EmojiButtonContainerViewModelTests {
         sut.showPicker()
         sut.hidePicker()
 
-        #expect(sut.isPickerVisible == false)
+        #expect(sut.pickerViewModel.isVisible == false)
     }
 
     @Test("Picker ViewModel is reused across toggle cycles")

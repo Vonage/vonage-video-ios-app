@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// A view modifier that displays content as a centered overlay with a dismissable background.
+/// A view modifier that displays content as a centered overlay with a dismissible background.
 ///
 /// When applied, it shows a semi-transparent background that dismisses on tap,
 /// while the content remains centered and blocks tap gestures from passing through.
@@ -70,7 +70,7 @@ public struct CenteredOverlayModifier<OverlayContent: View>: ViewModifier {
 // MARK: - View Extension
 
 extension View {
-    /// Presents content as a centered overlay with a dismissable background.
+    /// Presents content as a centered overlay with a dismissible background.
     /// - Parameters:
     ///   - isPresented: Binding to control visibility.
     ///   - backgroundOpacity: Opacity of the background overlay. Defaults to 0.3.

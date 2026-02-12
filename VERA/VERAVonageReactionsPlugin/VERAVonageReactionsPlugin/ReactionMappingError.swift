@@ -1,6 +1,5 @@
 //
-//  ReactionMappingError.swift
-//  VERAVonageReactionsPlugin
+//  Created by Vonage on 11/2/26.
 //
 
 import Foundation

@@ -14,11 +14,11 @@ struct EmojiPickerViewContainerUITests {
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
-    private let snapshotPrefix = "EmojiPickerComponentView"
+    private let snapshotPrefix = "EmojiPickerViewContainer"
 
     // MARK: - Core UI Tests
 
-    @Test("EmojiPickerComponentView - Default State")
+    @Test("EmojiPickerViewContainer - Default State")
     func defaultState() throws {
         let sut = makeSUT()
 
@@ -26,7 +26,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     @Test(
-        "EmojiPickerComponentView - Color Schemes",
+        "EmojiPickerViewContainer - Color Schemes",
         arguments: [
             ("Light", ColorScheme.light),
             ("Dark", ColorScheme.dark),
@@ -39,7 +39,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     @Test(
-        "EmojiPickerComponentView - Size Classes",
+        "EmojiPickerViewContainer - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
@@ -56,7 +56,7 @@ struct EmojiPickerViewContainerUITests {
         )
     }
 
-    @Test("EmojiPickerComponentView - Custom Emojis")
+    @Test("EmojiPickerViewContainer - Custom Emojis")
     func customEmojis() throws {
         let customEmojis = [
             UIEmojiReaction(emoji: "🎉", name: "party"),
@@ -69,7 +69,7 @@ struct EmojiPickerViewContainerUITests {
         snapshot(sut, named: "CustomEmojis")
     }
 
-    @Test("EmojiPickerComponentView - Few Emojis")
+    @Test("EmojiPickerViewContainer - Few Emojis")
     func fewEmojis() throws {
         let sut = makeSUT(emojis: Array(UIEmojiReaction.defaultEmojis.prefix(5)))
 
@@ -79,7 +79,7 @@ struct EmojiPickerViewContainerUITests {
     // MARK: - iOS 16 Layout Tests
 
     /// Verifies that grid columns are properly spaced and not collapsed on iOS 16.
-    @Test("EmojiPickerComponentView - iOS 16 Grid Layout")
+    @Test("EmojiPickerViewContainer - iOS 16 Grid Layout")
     func iOS16GridLayout() throws {
         let sut = makeSUT()
 
@@ -93,7 +93,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     /// Verifies grid layout with single row (4 emojis)
-    @Test("EmojiPickerComponentView - iOS 16 Single Row")
+    @Test("EmojiPickerViewContainer - iOS 16 Single Row")
     func iOS16SingleRow() throws {
         let sut = makeSUT(emojis: Array(UIEmojiReaction.defaultEmojis.prefix(4)))
 
@@ -107,7 +107,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     /// Verifies grid layout with two rows (8 emojis)
-    @Test("EmojiPickerComponentView - iOS 16 Two Rows")
+    @Test("EmojiPickerViewContainer - iOS 16 Two Rows")
     func iOS16TwoRows() throws {
         let sut = makeSUT(emojis: Array(UIEmojiReaction.defaultEmojis.prefix(8)))
 
@@ -121,7 +121,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     /// Verifies grid layout on iPad for iOS 16 compatibility
-    @Test("EmojiPickerComponentView - iOS 16 iPad Layout")
+    @Test("EmojiPickerViewContainer - iOS 16 iPad Layout")
     func iOS16iPadLayout() throws {
         let sut = makeSUT()
 
@@ -135,7 +135,7 @@ struct EmojiPickerViewContainerUITests {
     }
 
     /// Verifies grid layout in landscape orientation for iOS 16
-    @Test("EmojiPickerComponentView - iOS 16 Landscape")
+    @Test("EmojiPickerViewContainer - iOS 16 Landscape")
     func iOS16Landscape() throws {
         let sut = makeSUT()
 
@@ -151,7 +151,7 @@ struct EmojiPickerViewContainerUITests {
     // MARK: - Accessibility Tests
 
     @Test(
-        "EmojiPickerComponentView - Accessibility",
+        "EmojiPickerViewContainer - Accessibility",
         arguments: [
             ("SmallText", ContentSizeCategory.extraSmall),
             ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),

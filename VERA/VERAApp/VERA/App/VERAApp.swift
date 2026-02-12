@@ -229,6 +229,11 @@ struct VERAApp: App {
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
             #endif
+
+            #if REACTIONS_ENABLED
+                navigationCoordinator.emojiButtonContainerViewModel =
+                    dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
+            #endif
             viewModel = newViewModel
         }
 
@@ -267,11 +272,14 @@ struct VERAApp: App {
         #endif
 
         #if REACTIONS_ENABLED
-            extraButtons.append(
-                dependencyContainer.mapToReactionsBottomBarButton {
-                    showPickerView = true
-                }
-            )
+            if let viewModel = navigationCoordinator.emojiButtonContainerViewModel {
+                extraButtons.append(
+                    dependencyContainer.mapToReactionsBottomBarButton(viewModel) {
+                        showPickerView = true
+                    }
+                )
+            }
+
 
         #endif
 
@@ -332,11 +340,11 @@ struct VERAApp: App {
     #if REACTIONS_ENABLED
         private func makePickerView() -> some View {
             let view: EmojiPickerViewContainer
-            if let viewModel = navigationCoordinator.emojiPickerComponentViewModel {
+            if let viewModel = navigationCoordinator.emojiPickerContainerViewModel {
                 view = EmojiPickerViewContainer(viewModel: viewModel)
             } else {
                 let result = dependencyContainer.reactionsFactory.makeEmojiPickerComponent()
-                navigationCoordinator.emojiPickerComponentViewModel = result.viewModel
+                navigationCoordinator.emojiPickerContainerViewModel = result.viewModel
                 view = result.view
             }
 

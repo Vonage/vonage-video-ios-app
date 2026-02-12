@@ -47,8 +47,8 @@ struct EmojiPickerContainerViewModelTests {
         #expect(mockUseCase.callCount == 1)
     }
 
-    @Test("sendReaction sets isVisible to false after sending")
-    func sendReactionSetsIsVisibleToFalse() {
+    @Test("sendReaction keeps picker visible after sending")
+    func sendReactionKeepsPickerVisible() {
         let sut = makeSUT()
         let emoji = UIEmojiReaction(emoji: "❤️", name: "Heart")
 
@@ -56,7 +56,7 @@ struct EmojiPickerContainerViewModelTests {
 
         sut.sendReaction(emoji)
 
-        #expect(sut.isVisible == false)
+        #expect(sut.isVisible == true)
     }
 
     @Test("sendReaction keeps isVisible true on error")

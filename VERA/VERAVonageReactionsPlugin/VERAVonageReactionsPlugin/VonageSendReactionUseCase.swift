@@ -1,6 +1,5 @@
 //
-//  VonageSendReactionUseCase.swift
-//  VERAVonageReactionsPlugin
+//  Created by Vonage on 11/2/26.
 //
 
 import Foundation
@@ -16,7 +15,7 @@ import VERAReactions
 /// let useCase = VonageSendReactionUseCase(plugin: reactionsPlugin)
 ///
 /// EmojiPickerView(emojis: UIEmojiReaction.defaultEmojis) { emoji in
-///     try? useCase(emoji)
+///     try? useCase(emoji.emoji)
 /// }
 /// ```
 public final class VonageSendReactionUseCase: SendReactionUseCase {

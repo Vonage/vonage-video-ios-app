@@ -4,10 +4,25 @@
 
 import SwiftUI
 
+/// Constants for EmojiButtonContainer layout and animation
+private enum EmojiButtonContainerConstants {
+    /// Padding between picker and button
+    static let pickerBottomPadding: CGFloat = 16
+
+    /// Vertical offset to position picker above button
+    static let pickerVerticalOffset: CGFloat = -44
+
+    /// Scale factor for picker appear/disappear animation
+    static let animationScale: CGFloat = 0.95
+
+    /// Duration of appear/disappear animation
+    static let animationDuration: Double = 0.2
+}
+
 /// A container view that wraps the emoji button with a popover for the emoji picker.
 ///
 /// This is the public-facing view to be used in the meeting room toolbar.
-/// When the button is tapped, it shows a popover with the `EmojiPickerComponentView`.
+/// When the button is tapped, it shows a popover with the `EmojiButtonContainer`.
 public struct EmojiButtonContainer: View {
 
     // MARK: - Properties
@@ -30,26 +45,25 @@ public struct EmojiButtonContainer: View {
             state: viewModel.state,
             action: viewModel.togglePicker
         )
-        .popover(isPresented: $viewModel.isPickerVisible) {
-            pickerContent
-        }
-        .onChange(of: viewModel.isPickerVisible) { isVisible in
-            if !isVisible {
-                viewModel.hidePicker()
+        .overlay(alignment: .bottom) {
+            if viewModel.pickerViewModel.isVisible {
+                pickerContent
             }
         }
+        .animation(
+            .easeInOut(duration: EmojiButtonContainerConstants.animationDuration),
+            value: viewModel.pickerViewModel.isVisible)
     }
 
     // MARK: - Private Views
 
     @ViewBuilder
     private var pickerContent: some View {
-        if #available(iOS 16.4, *) {
-            EmojiPickerViewContainer(viewModel: viewModel.pickerViewModel)
-                .presentationCompactAdaptation(.popover)
-        } else {
-            EmojiPickerViewContainer(viewModel: viewModel.pickerViewModel)
-        }
+        EmojiPickerViewContainer(viewModel: viewModel.pickerViewModel)
+            .padding(.bottom, EmojiButtonContainerConstants.pickerBottomPadding)
+            .offset(y: EmojiButtonContainerConstants.pickerVerticalOffset)
+            .transition(
+                .opacity.combined(with: .scale(scale: EmojiButtonContainerConstants.animationScale, anchor: .bottom)))
     }
 }
 

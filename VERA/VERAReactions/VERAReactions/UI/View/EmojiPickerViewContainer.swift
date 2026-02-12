@@ -6,12 +6,12 @@ import SwiftUI
 
 /// A component view that wraps `EmojiPickerView` with a ViewModel.
 ///
-/// Connects the emoji picker UI to the `EmojiPickerComponentViewModel`,
+/// Connects the emoji picker UI to the `EmojiPickerContainerViewModel`,
 /// which handles sending reactions through the use case layer.
 ///
 /// ## Usage
 /// ```swift
-/// let viewModel = EmojiPickerComponentViewModel(
+/// let viewModel = EmojiPickerContainerViewModel(
 ///     sendReactionUseCase: sendReactionUseCase
 /// )
 ///
@@ -45,7 +45,7 @@ public struct EmojiPickerViewContainer: View {
 // MARK: - Preview
 
 #if DEBUG
-    struct EmojiPickerComponentView_Previews: PreviewProvider {
+    struct EmojiPickerViewContainer_Previews: PreviewProvider {
         static var previews: some View {
             EmojiPickerViewContainer(
                 viewModel: EmojiPickerContainerViewModel(

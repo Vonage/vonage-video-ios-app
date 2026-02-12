@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 /// Constants for EmojItemView layout
 public enum EmojiItemConstants {
@@ -69,6 +70,6 @@ struct EmojiItemView: View {
         EmojiItemView(emoji: UIEmojiReaction(emoji: "😂", name: "laughing"))
     }
     .padding()
-    .background(Color.black.opacity(EmojiPickerConstants.backgroundOpacity))
+    .background(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(EmojiPickerConstants.backgroundOpacity))
     .cornerRadius(EmojiPickerConstants.cornerRadius)
 }

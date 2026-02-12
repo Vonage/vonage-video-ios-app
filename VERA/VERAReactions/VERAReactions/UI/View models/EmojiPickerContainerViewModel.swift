@@ -13,11 +13,11 @@ import Foundation
 ///
 /// ## Usage
 /// ```swift
-/// let viewModel = EmojiPickerComponentViewModel(
+/// let viewModel = EmojiPickerContainerViewModel(
 ///     sendReactionUseCase: sendReactionUseCase
 /// )
 ///
-/// EmojiPickerComponentView(viewModel: viewModel)
+/// EmojiPickerViewContainer(viewModel: viewModel)
 ///     .popover(isPresented: $viewModel.isVisible) { ... }
 /// ```
 public final class EmojiPickerContainerViewModel: ObservableObject {
@@ -58,8 +58,8 @@ public final class EmojiPickerContainerViewModel: ObservableObject {
 
     /// Sends the selected emoji reaction.
     ///
-    /// Invokes the `SendReactionUseCase` with the emoji string and
-    /// calls `onDismiss` after successful sending.
+    /// Invokes the `SendReactionUseCase` with the emoji string.
+    /// The picker remains open after sending to allow multiple reactions.
     ///
     /// - Parameter emoji: The emoji reaction to send.
     public func sendReaction(_ emoji: UIEmojiReaction) {
@@ -68,7 +68,6 @@ public final class EmojiPickerContainerViewModel: ObservableObject {
 
         do {
             try sendReactionUseCase(emoji.emoji)
-            isVisible = false
         } catch {
             lastError = error
         }

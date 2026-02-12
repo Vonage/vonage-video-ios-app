@@ -59,7 +59,6 @@ extension DependencyContainer {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-
         func makeBackgroundEffectsButton(
             _ viewModel: BackgroundBlurButtonViewModel
         ) -> BottomBarButton {
@@ -78,13 +77,16 @@ extension DependencyContainer {
 
     #if REACTIONS_ENABLED
         func mapToReactionsBottomBarButton(
+            _ viewModel: EmojiButtonContainerViewModel,
             onShowPicker: @escaping () -> Void
         ) -> BottomBarButton {
             return .init(
                 label: String(localized: "Reactions"),
                 image: Image(systemName: "face.smiling"),
                 onTap: onShowPicker,
-                content: {}
+                content: {
+                    EmojiButtonContainer(viewModel: viewModel)
+                }
             )
         }
     #endif
