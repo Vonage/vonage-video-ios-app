@@ -1,6 +1,5 @@
 //
-//  DefaultReactionsRepository.swift
-//  VERAReactions
+//  Created by Vonage on 11/2/26.
 //
 
 import Combine

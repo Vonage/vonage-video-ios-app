@@ -1,6 +1,5 @@
 //
-//  EmojiPickerComponentViewModel.swift
-//  VERAReactions
+//  Created by Vonage on 11/2/26.
 //
 
 import Combine
@@ -9,23 +8,27 @@ import Foundation
 /// ViewModel for the emoji picker component.
 ///
 /// Manages emoji selection and delegates sending reactions through the use case.
-/// Follows the MVVM pattern used across the VERA app.
+/// Controls visibility through the `isVisible` property which is set to `false`
+/// after a reaction is sent. Follows the MVVM pattern used across the VERA app.
 ///
 /// ## Usage
 /// ```swift
 /// let viewModel = EmojiPickerComponentViewModel(
-///     sendReactionUseCase: sendReactionUseCase,
-///     onDismiss: { print("Picker dismissed") }
+///     sendReactionUseCase: sendReactionUseCase
 /// )
 ///
 /// EmojiPickerComponentView(viewModel: viewModel)
+///     .popover(isPresented: $viewModel.isVisible) { ... }
 /// ```
-public final class EmojiPickerComponentViewModel: ObservableObject {
+public final class EmojiPickerContainerViewModel: ObservableObject {
 
     // MARK: - Published Properties
 
-    /// The list of emojis available for selection.
-    @Published public private(set) var emojis: [UIEmojiReaction]
+    /// Controls whether the picker is visible.
+    @Published public var isVisible: Bool = false
+
+    /// The picker configuration containing emojis and layout settings.
+    @Published public private(set) var configuration: EmojiPickerConfiguration
 
     /// Indicates if a reaction is currently being sent.
     @Published public private(set) var isSending: Bool = false
@@ -36,23 +39,19 @@ public final class EmojiPickerComponentViewModel: ObservableObject {
     // MARK: - Dependencies
 
     private let sendReactionUseCase: SendReactionUseCase
-    private let onDismiss: (() -> Void)?
 
     // MARK: - Initialization
 
     /// Creates a new emoji picker component view model.
     /// - Parameters:
-    ///   - emojis: The list of emojis to display. Defaults to `UIEmojiReaction.defaultEmojis`.
+    ///   - configuration: The picker configuration
     ///   - sendReactionUseCase: The use case for sending reactions.
-    ///   - onDismiss: Optional callback invoked after a reaction is sent.
     public init(
-        emojis: [UIEmojiReaction] = UIEmojiReaction.defaultEmojis,
-        sendReactionUseCase: SendReactionUseCase,
-        onDismiss: (() -> Void)? = nil
+        configuration: EmojiPickerConfiguration = .default,
+        sendReactionUseCase: SendReactionUseCase
     ) {
-        self.emojis = emojis
+        self.configuration = configuration
         self.sendReactionUseCase = sendReactionUseCase
-        self.onDismiss = onDismiss
     }
 
     // MARK: - Public Methods
@@ -69,7 +68,7 @@ public final class EmojiPickerComponentViewModel: ObservableObject {
 
         do {
             try sendReactionUseCase(emoji.emoji)
-            onDismiss?()
+            isVisible = false
         } catch {
             lastError = error
         }
@@ -79,6 +78,6 @@ public final class EmojiPickerComponentViewModel: ObservableObject {
 
     /// Dismisses the picker without sending a reaction.
     public func dismiss() {
-        onDismiss?()
+        isVisible = false
     }
 }

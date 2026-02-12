@@ -30,16 +30,31 @@ public final class ReactionsFactory {
     /// Use this method when you need access to the view model for testing
     /// or additional control over the picker behavior.
     ///
-    /// - Parameter onDismiss: Optional callback when picker should be dismissed.
     /// - Returns: A tuple containing the configured view and its view model.
-    public func makeEmojiPickerComponent(
-        onDismiss: (() -> Void)? = nil
-    ) -> (view: EmojiPickerComponentView, viewModel: EmojiPickerComponentViewModel) {
-        let viewModel = EmojiPickerComponentViewModel(
-            sendReactionUseCase: sendReactionUseCase,
-            onDismiss: onDismiss
+    public func makeEmojiPickerComponent() -> (view: EmojiPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
+    {
+        let viewModel = EmojiPickerContainerViewModel(
+            sendReactionUseCase: sendReactionUseCase
         )
-        let view = EmojiPickerComponentView(viewModel: viewModel)
+        let view = EmojiPickerViewContainer(viewModel: viewModel)
+        return (view, viewModel)
+    }
+
+    /// Creates an emoji button with its container view model.
+    ///
+    /// The button shows a popover with the emoji picker when tapped.
+    /// Selecting an emoji sends the reaction and dismisses the picker.
+    ///
+    /// - Parameter configuration: The configuration for the emoji picker. Defaults to `.default`.
+    /// - Returns: A tuple containing the configured container view and its view model.
+    public func makeEmojiButton(
+        configuration: EmojiPickerConfiguration = .default
+    ) -> (view: EmojiButtonContainer, viewModel: EmojiButtonContainerViewModel) {
+        let viewModel = EmojiButtonContainerViewModel(
+            sendReactionUseCase: sendReactionUseCase,
+            configuration: configuration
+        )
+        let view = EmojiButtonContainer(viewModel: viewModel)
         return (view, viewModel)
     }
 

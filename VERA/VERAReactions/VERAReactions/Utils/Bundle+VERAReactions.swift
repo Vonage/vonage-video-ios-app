@@ -7,9 +7,9 @@ import Foundation
 /// Marker class used to locate the VERAReactions bundle
 final class VERAReactionsBundle {}
 
-public extension Bundle {
+extension Bundle {
     /// The bundle containing VERAReactions resources
-    static var veraReactions: Bundle {
+    public static var veraReactions: Bundle {
         Bundle(for: VERAReactionsBundle.self)
     }
 }

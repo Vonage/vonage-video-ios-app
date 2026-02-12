@@ -7,6 +7,7 @@ import Combine
 import Testing
 import VERAReactions
 import VERAVonage
+
 @testable import VERAVonageReactionsPlugin
 
 @Suite("VonageReactionsPlugin Tests")
@@ -20,7 +21,7 @@ struct VonageReactionsPluginTests {
         let emoji = UIEmojiReaction(emoji: "👍", name: "thumbs up")
 
         #expect(throws: VonageReactionsPlugin.Error.missingChannel) {
-            try sut.sendReaction(emoji)
+            try sut.sendReaction(emoji.emoji)
         }
     }
 
@@ -33,10 +34,10 @@ struct VonageReactionsPluginTests {
         try await sut.callDidStart([VonageCallParams.username.rawValue: "TestUser"])
 
         let emoji = UIEmojiReaction(emoji: "🎉", name: "party")
-        try sut.sendReaction(emoji)
+        try sut.sendReaction(emoji.emoji)
 
         #expect(mockChannel.emittedSignals.count == 1)
-        #expect(mockChannel.emittedSignals.first?.type == "reaction")
+        #expect(mockChannel.emittedSignals.first?.type == "emoji")
 
         let payload = mockChannel.emittedSignals.first?.payload ?? ""
         #expect(payload.contains("🎉"))
@@ -62,9 +63,9 @@ struct VonageReactionsPluginTests {
         let sut = VonageReactionsPlugin(repository: repository)
 
         let payload = """
-        {"participantName":"Alice","emoji":"👋","timestamp":"2026-02-10T12:00:00Z"}
-        """
-        let signal = VonageSignal(type: "reaction", data: payload)
+            {"participantName":"Alice","emoji":"👋","timestamp":"2026-02-10T12:00:00Z"}
+            """
+        let signal = VonageSignal(type: "emoji", data: payload)
         sut.handleSignal(signal)
 
         #expect(repository.addedReactions.count == 1)
@@ -77,7 +78,7 @@ struct VonageReactionsPluginTests {
         let repository = MockReactionsRepository()
         let sut = VonageReactionsPlugin(repository: repository)
 
-        let signal = VonageSignal(type: "reaction", data: nil)
+        let signal = VonageSignal(type: "emoji", data: nil)
         sut.handleSignal(signal)
 
         #expect(repository.addedReactions.isEmpty)
@@ -88,7 +89,7 @@ struct VonageReactionsPluginTests {
         let repository = MockReactionsRepository()
         let sut = VonageReactionsPlugin(repository: repository)
 
-        let signal = VonageSignal(type: "reaction", data: "not valid json")
+        let signal = VonageSignal(type: "emoji", data: "not valid json")
         sut.handleSignal(signal)
 
         #expect(repository.addedReactions.isEmpty)
@@ -105,7 +106,7 @@ struct VonageReactionsPluginTests {
         try await sut.callDidStart([VonageCallParams.username.rawValue: "JohnDoe"])
 
         let emoji = UIEmojiReaction(emoji: "👍", name: "thumbs up")
-        try sut.sendReaction(emoji)
+        try sut.sendReaction(emoji.emoji)
 
         let payload = mockChannel.emittedSignals.first?.payload ?? ""
         #expect(payload.contains("JohnDoe"))
@@ -148,7 +149,7 @@ struct VonageSendReactionUseCaseTests {
         let sut = VonageSendReactionUseCase(plugin: plugin)
         let emoji = UIEmojiReaction(emoji: "🔥", name: "fire")
 
-        try sut(emoji)
+        try sut(emoji.emoji)
 
         #expect(mockChannel.emittedSignals.count == 1)
         #expect(mockChannel.emittedSignals.first?.type == "reaction")
@@ -161,7 +162,7 @@ struct VonageSendReactionUseCaseTests {
         let emoji = UIEmojiReaction(emoji: "👍", name: "thumbs up")
 
         #expect(throws: VonageReactionsPlugin.Error.missingChannel) {
-            try sut(emoji)
+            try sut(emoji.emoji)
         }
     }
 }

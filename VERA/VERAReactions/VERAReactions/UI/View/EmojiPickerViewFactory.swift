@@ -59,9 +59,8 @@ extension EmojiPickerConfiguration: Equatable {
         lhs: EmojiPickerConfiguration,
         rhs: EmojiPickerConfiguration
     ) -> Bool {
-        return lhs.showsHighlight == rhs.showsHighlight &&
-               lhs.highlightDuration == rhs.highlightDuration &&
-               lhs.emojis.map { $0.id } == rhs.emojis.map { $0.id }
+        return lhs.showsHighlight == rhs.showsHighlight && lhs.highlightDuration == rhs.highlightDuration
+            && lhs.emojis.map { $0.id } == rhs.emojis.map { $0.id }
     }
 }
 

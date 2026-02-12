@@ -18,13 +18,14 @@ struct VERAReactionsApp: App {
 struct DemoEmojiPickerView: View {
     @State private var selectedEmoji: UIEmojiReaction?
     @State private var lastSentEmoji: String?
-    @StateObject private var viewModel: EmojiPickerComponentViewModel
+    @StateObject private var viewModel: EmojiPickerContainerViewModel
 
     init() {
         let useCase = DemoSendReactionUseCase()
-        _viewModel = StateObject(wrappedValue: EmojiPickerComponentViewModel(
-            sendReactionUseCase: useCase
-        ))
+        _viewModel = StateObject(
+            wrappedValue: EmojiPickerContainerViewModel(
+                sendReactionUseCase: useCase
+            ))
     }
 
     var body: some View {
@@ -62,7 +63,7 @@ struct DemoEmojiPickerView: View {
                 .font(.headline)
 
             // Use EmojiPickerComponentView with the ViewModel
-            EmojiPickerComponentView(viewModel: viewModel)
+            EmojiPickerViewContainer(viewModel: viewModel)
         }
         .padding()
     }

@@ -21,6 +21,10 @@ import VERAVonage
     import VERABackgroundEffects
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -34,6 +38,7 @@ struct VERAApp: App {
 
     @State private var previousPath = NavigationPath()
     @State private var showChat = false
+    @State private var showPickerView = false
 
     var body: some Scene {
         WindowGroup {
@@ -74,6 +79,11 @@ struct VERAApp: App {
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
+                            }
+                        #endif
+                        #if REACTIONS_ENABLED
+                            .centeredOverlay(isPresented: $showPickerView) {
+                                makePickerView()
                             }
                         #endif
                 }
@@ -242,7 +252,6 @@ struct VERAApp: App {
         #endif
 
         #if BACKGROUND_EFFECTS_ENABLED
-
             if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
                 extraButtons.append(
                     dependencyContainer.makeBackgroundEffectsButton(backgroundBlurButtonViewModel)
@@ -256,6 +265,16 @@ struct VERAApp: App {
                 extraButtons.append(dependencyContainer.mapToArchiveBottomBarButton(archiveButtonViewModel, state))
             }
         #endif
+
+        #if REACTIONS_ENABLED
+            extraButtons.append(
+                dependencyContainer.mapToReactionsBottomBarButton {
+                    showPickerView = true
+                }
+            )
+
+        #endif
+
         return extraButtons
     }
 
@@ -307,6 +326,21 @@ struct VERAApp: App {
                 showChat = false
             }
             return result.view
+        }
+    #endif
+
+    #if REACTIONS_ENABLED
+        private func makePickerView() -> some View {
+            let view: EmojiPickerViewContainer
+            if let viewModel = navigationCoordinator.emojiPickerComponentViewModel {
+                view = EmojiPickerViewContainer(viewModel: viewModel)
+            } else {
+                let result = dependencyContainer.reactionsFactory.makeEmojiPickerComponent()
+                navigationCoordinator.emojiPickerComponentViewModel = result.viewModel
+                view = result.view
+            }
+
+            return view
         }
     #endif
 }

@@ -17,7 +17,9 @@ let project = Project(
             sources: ["VERAReactions/**"],
             resources: ["VERAReactions/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAReactions")],
-            dependencies: [],
+            dependencies: [
+                .project(target: "VERACommonUI", path: "../VERACommonUI")
+            ],
             settings: createBaseBuildSettings()
         ),
 

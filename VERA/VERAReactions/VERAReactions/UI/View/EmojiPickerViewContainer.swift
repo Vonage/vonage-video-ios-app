@@ -12,55 +12,51 @@ import SwiftUI
 /// ## Usage
 /// ```swift
 /// let viewModel = EmojiPickerComponentViewModel(
-///     sendReactionUseCase: sendReactionUseCase,
-///     onDismiss: { /* dismiss picker */ }
+///     sendReactionUseCase: sendReactionUseCase
 /// )
 ///
-/// EmojiPickerComponentView(viewModel: viewModel)
+/// EmojiPickerViewContainer(viewModel: viewModel)
 /// ```
-public struct EmojiPickerComponentView: View {
-    
+public struct EmojiPickerViewContainer: View {
+
     // MARK: - Properties
-    
-    @ObservedObject private var viewModel: EmojiPickerComponentViewModel
-    
+
+    @ObservedObject private var viewModel: EmojiPickerContainerViewModel
+
     // MARK: - Initialization
-    
+
     /// Creates an emoji picker component view.
     /// - Parameters:
     ///   - viewModel: The view model managing emoji selection and sending.
-    public init(viewModel: EmojiPickerComponentViewModel) {
+    public init(viewModel: EmojiPickerContainerViewModel) {
         self.viewModel = viewModel
     }
-    
+
     // MARK: - Body
-    
+
     public var body: some View {
         EmojiPickerViewFactory.make(configuration: viewModel.configuration) { emoji in
             viewModel.sendReaction(emoji)
         }
         .disabled(viewModel.isSending)
-        .opacity(viewModel.isSending ? 0.6 : 1.0)
     }
 }
 
 // MARK: - Preview
 
 #if DEBUG
-struct EmojiPickerComponentView_Previews: PreviewProvider {
-    static var previews: some View {
-        EmojiPickerComponentView(
-            viewModel: EmojiPickerComponentViewModel(
-                sendReactionUseCase: PreviewSendReactionUseCase()
-            )
-        )
-        .padding()
+    struct EmojiPickerComponentView_Previews: PreviewProvider {
+        static var previews: some View {
+            EmojiPickerViewContainer(
+                viewModel: EmojiPickerContainerViewModel(
+                    sendReactionUseCase: PreviewSendReactionUseCase())
+            ).padding()
+        }
     }
-}
 
-private struct PreviewSendReactionUseCase: SendReactionUseCase {
-    func callAsFunction(_ emoji: String) throws {
-        print("Preview: Sending reaction \(emoji)")
+    private struct PreviewSendReactionUseCase: SendReactionUseCase {
+        func callAsFunction(_ emoji: String) throws {
+            print("Preview: Sending reaction \(emoji)")
+        }
     }
-}
 #endif

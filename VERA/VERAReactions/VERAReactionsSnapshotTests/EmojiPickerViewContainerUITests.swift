@@ -1,6 +1,5 @@
 //
-//  EmojiPickerComponentViewUITests.swift
-//  VERAReactionsSnapshotTests
+//  Created by Vonage on 11/2/26.
 //
 
 import SnapshotTesting
@@ -8,9 +7,9 @@ import SwiftUI
 import Testing
 import VERAReactions
 
-@Suite("EmojiPickerComponentView UI Tests")
+@Suite("EmojiPickerViewContainer UI Tests")
 @MainActor
-struct EmojiPickerComponentViewUITests {
+struct EmojiPickerViewContainerUITests {
 
     // MARK: - Test Configuration
 
@@ -170,8 +169,8 @@ struct EmojiPickerComponentViewUITests {
         emojis: [UIEmojiReaction] = UIEmojiReaction.defaultEmojis
     ) -> some View {
         let configuration = EmojiPickerConfiguration(emojis: emojis)
-    
-        let viewModel = EmojiPickerComponentViewModel(
+
+        let viewModel = EmojiPickerContainerViewModel(
             configuration: configuration,
             sendReactionUseCase: MockSendReactionUseCase()
         )
@@ -180,7 +179,7 @@ struct EmojiPickerComponentViewUITests {
             Color.gray
                 .ignoresSafeArea()
 
-            EmojiPickerComponentView(viewModel: viewModel)
+            EmojiPickerViewContainer(viewModel: viewModel)
         }
     }
 

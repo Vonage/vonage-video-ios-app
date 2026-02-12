@@ -20,6 +20,11 @@ import VERACore
     import VERABackgroundEffects
 #endif
 
+#if REACTIONS_ENABLED
+    import SwiftUI
+    import VERAReactions
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -68,6 +73,19 @@ extension DependencyContainer {
                 content: {
                     button
                 })
+        }
+    #endif
+
+    #if REACTIONS_ENABLED
+        func mapToReactionsBottomBarButton(
+            onShowPicker: @escaping () -> Void
+        ) -> BottomBarButton {
+            return .init(
+                label: String(localized: "Reactions"),
+                image: Image(systemName: "face.smiling"),
+                onTap: onShowPicker,
+                content: {}
+            )
         }
     #endif
 }
