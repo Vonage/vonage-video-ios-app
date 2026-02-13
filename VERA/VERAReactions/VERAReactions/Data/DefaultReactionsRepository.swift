@@ -23,7 +23,9 @@ public actor DefaultReactionsRepository: ReactionsRepository {
     }
 
     public var reactions: [EmojiReaction] {
-        storedReactions
+        get async {
+            storedReactions
+        }
     }
 
     // MARK: - Initialization
@@ -32,12 +34,12 @@ public actor DefaultReactionsRepository: ReactionsRepository {
 
     // MARK: - ReactionsWriter
 
-    public func addReaction(_ reaction: EmojiReaction) {
+    public func addReaction(_ reaction: EmojiReaction) async {
         storedReactions.append(reaction)
         reactionSubject.send(reaction)
     }
 
-    public func clear() {
+    public func clear() async {
         storedReactions.removeAll()
     }
 }
