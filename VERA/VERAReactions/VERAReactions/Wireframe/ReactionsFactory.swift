@@ -24,7 +24,7 @@ public final class ReactionsFactory {
         self.reactionsRepository = reactionsRepository
         self.sendReactionUseCase = sendReactionUseCase
     }
-    
+
     /// Creates an emoji button container view using an existing view model.
     ///
     /// Use this method when the view model is managed externally (e.g., stored

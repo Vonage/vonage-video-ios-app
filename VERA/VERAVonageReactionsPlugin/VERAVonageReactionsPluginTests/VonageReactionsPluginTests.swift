@@ -123,7 +123,7 @@ struct VonageReactionsPluginTests {
 
         // Allow Task in cleanUp to complete
         try await Task.sleep(nanoseconds: 100_000_000)
-        
+
         #expect(repository.clearCalled)
     }
 
