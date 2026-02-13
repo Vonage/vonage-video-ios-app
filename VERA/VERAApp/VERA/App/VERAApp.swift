@@ -25,6 +25,22 @@ import VERAVonage
     import VERAReactions
 #endif
 
+// MARK: - Constants
+
+/// Layout constants for the VERA application.
+///
+/// Contains computed values that depend on other module constants
+/// to ensure consistent spacing and positioning across the app.
+private enum VERAAppConstants {
+    /// Padding for overlays positioned above the bottom bar.
+    ///
+    /// Calculated as the total bottom bar height plus a small gap
+    /// to visually separate overlay content from the bar.
+    static var overlayBottomPadding: CGFloat {
+        BottomBarConstants.totalHeight + 4
+    }
+}
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -82,7 +98,11 @@ struct VERAApp: App {
                             }
                         #endif
                         #if REACTIONS_ENABLED
-                            .centeredOverlay(isPresented: $showPickerView) {
+                            .dismissibleOverlay(
+                                isPresented: $showPickerView,
+                                alignment: .bottom,
+                                edgePadding: VERAAppConstants.overlayBottomPadding
+                            ) {
                                 makePickerView()
                             }
                         #endif
@@ -343,7 +363,7 @@ struct VERAApp: App {
             if let viewModel = navigationCoordinator.emojiPickerContainerViewModel {
                 view = EmojiPickerViewContainer(viewModel: viewModel)
             } else {
-                let result = dependencyContainer.reactionsFactory.makeEmojiPickerComponent()
+                let result = dependencyContainer.reactionsFactory.makeEmojiPickerContainer()
                 navigationCoordinator.emojiPickerContainerViewModel = result.viewModel
                 view = result.view
             }

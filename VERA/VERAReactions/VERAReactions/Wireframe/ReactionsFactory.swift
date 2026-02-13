@@ -24,6 +24,19 @@ public final class ReactionsFactory {
         self.reactionsRepository = reactionsRepository
         self.sendReactionUseCase = sendReactionUseCase
     }
+    
+    /// Creates an emoji button container view using an existing view model.
+    ///
+    /// Use this method when the view model is managed externally (e.g., stored
+    /// in a coordinator) to avoid retain cycles and control the lifecycle.
+    ///
+    /// - Parameter viewModel: The existing view model to use.
+    /// - Returns: A configured EmojiButtonContainer view.
+    public func makeEmojiButtonContainer(
+        viewModel: EmojiButtonContainerViewModel
+    ) -> EmojiButtonContainer {
+        return EmojiButtonContainer(viewModel: viewModel)
+    }
 
     /// Creates an emoji picker component with its view model.
     ///
@@ -31,7 +44,7 @@ public final class ReactionsFactory {
     /// or additional control over the picker behavior.
     ///
     /// - Returns: A tuple containing the configured view and its view model.
-    public func makeEmojiPickerComponent() -> (view: EmojiPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
+    public func makeEmojiPickerContainer() -> (view: EmojiPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
     {
         let viewModel = EmojiPickerContainerViewModel(
             sendReactionUseCase: sendReactionUseCase

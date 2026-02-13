@@ -105,7 +105,9 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
         do {
             let reaction = try mapSignalToReaction(signal)
-            repository.addReaction(reaction)
+            Task {
+                await repository.addReaction(reaction)
+            }
         } catch {
             print("[VonageReactionsPlugin] Failed to parse reaction: \(error.localizedDescription)")
         }
@@ -142,7 +144,9 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     // MARK: - Private
 
     private func cleanUp() {
-        repository.clear()
+        Task {
+            await repository.clear()
+        }
     }
 
     private func mapSignalToReaction(_ signal: VonageSignal) throws -> EmojiReaction {
@@ -161,10 +165,6 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             let emoji = message.emoji
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-
-            guard !participantName.isEmpty else {
-                throw ReactionMappingError.invalidParticipantName
-            }
 
             guard !emoji.isEmpty else {
                 throw ReactionMappingError.invalidEmoji

@@ -80,12 +80,13 @@ extension DependencyContainer {
             _ viewModel: EmojiButtonContainerViewModel,
             onShowPicker: @escaping () -> Void
         ) -> BottomBarButton {
+            let emojiButtonContainer = reactionsFactory.makeEmojiButtonContainer(viewModel: viewModel)
             return .init(
                 label: String(localized: "Reactions"),
                 image: Image(systemName: "face.smiling"),
                 onTap: onShowPicker,
                 content: {
-                    EmojiButtonContainer(viewModel: viewModel)
+                    emojiButtonContainer
                 }
             )
         }

@@ -12,9 +12,6 @@ public enum ReactionMappingError: LocalizedError {
     /// JSON payload is invalid or cannot be decoded.
     case invalidJSON
 
-    /// Participant name is empty or invalid.
-    case invalidParticipantName
-
     /// Emoji is empty or invalid.
     case invalidEmoji
 
@@ -24,8 +21,6 @@ public enum ReactionMappingError: LocalizedError {
             return "Signal data is missing or empty"
         case .invalidJSON:
             return "Invalid JSON format in signal data"
-        case .invalidParticipantName:
-            return "Participant name is empty or invalid"
         case .invalidEmoji:
             return "Emoji is empty or invalid"
         }

@@ -116,11 +116,14 @@ struct VonageReactionsPluginTests {
         let repository = MockReactionsRepository()
         let sut = VonageReactionsPlugin(repository: repository)
 
-        repository.addReaction(EmojiReaction(participantName: "Test", emoji: "👍"))
+        await repository.addReaction(EmojiReaction(participantName: "Test", emoji: "👍"))
         #expect(repository.addedReactions.count == 1)
 
         try await sut.callDidEnd()
 
+        // Allow Task in cleanUp to complete
+        try await Task.sleep(nanoseconds: 100_000_000)
+        
         #expect(repository.clearCalled)
     }
 
@@ -143,7 +146,7 @@ final class MockSignalChannel: VonageSignalChannel {
     }
 }
 
-final class MockReactionsRepository: ReactionsRepository {
+final class MockReactionsRepository: ReactionsRepository, @unchecked Sendable {
     var addedReactions: [EmojiReaction] = []
     var clearCalled = false
 
@@ -153,14 +156,16 @@ final class MockReactionsRepository: ReactionsRepository {
         subject.eraseToAnyPublisher()
     }
 
-    var reactions: [EmojiReaction] { addedReactions }
+    var reactions: [EmojiReaction] {
+        get async { addedReactions }
+    }
 
-    func addReaction(_ reaction: EmojiReaction) {
+    func addReaction(_ reaction: EmojiReaction) async {
         addedReactions.append(reaction)
         subject.send(reaction)
     }
 
-    func clear() {
+    func clear() async {
         clearCalled = true
         addedReactions.removeAll()
     }

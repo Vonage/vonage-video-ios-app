@@ -46,13 +46,13 @@ public struct EmojiButtonContainer: View {
             action: viewModel.togglePicker
         )
         .overlay(alignment: .bottom) {
-            if viewModel.pickerViewModel.isVisible {
+            if viewModel.isPickerVisible {
                 pickerContent
             }
         }
         .animation(
             .easeInOut(duration: EmojiButtonContainerConstants.animationDuration),
-            value: viewModel.pickerViewModel.isVisible)
+            value: viewModel.isPickerVisible)
     }
 
     // MARK: - Private Views
