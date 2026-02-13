@@ -24,6 +24,11 @@ import VERAVonageCallKitPlugin
     import VERABackgroundEffects
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+    import VERAVonageReactionsPlugin
+#endif
+
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -98,6 +103,9 @@ final class DependencyContainer {
         #if ARCHIVING_ENABLED
             registry.registerPlugin(plugin: vonageArchivingPlugin)
         #endif
+        #if REACTIONS_ENABLED
+            registry.registerPlugin(plugin: vonageReactionsPlugin)
+        #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
     }()
@@ -166,6 +174,23 @@ final class DependencyContainer {
     #if BACKGROUND_EFFECTS_ENABLED
 
         lazy var backgroundBlurFactory = BackgroundBlurFactory()
+
+    #endif
+
+    // MARK: Reactions feature
+
+    #if REACTIONS_ENABLED
+
+        lazy var reactionsRepository: ReactionsRepository = DefaultReactionsRepository()
+
+        lazy var vonageReactionsPlugin = VonageReactionsPlugin(repository: reactionsRepository)
+
+        lazy var sendReactionUseCase: SendReactionUseCase = VonageSendReactionUseCase(
+            plugin: vonageReactionsPlugin)
+
+        lazy var reactionsFactory = ReactionsFactory(
+            reactionsRepository: reactionsRepository,
+            sendReactionUseCase: sendReactionUseCase)
 
     #endif
 }

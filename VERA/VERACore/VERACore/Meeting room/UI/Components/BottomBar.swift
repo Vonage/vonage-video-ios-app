@@ -6,13 +6,26 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
-private enum BottomBarConstants {
-    static let buttonWidth: CGFloat = 50
-    static let buttonSpacing: CGFloat = 8
-    static let containerPaddingHorizontal: CGFloat = 8
-    static let containerPaddingVertical: CGFloat = 6
-    static let containerPaddingBottom: CGFloat = 2
-    static let cornerRadius: CGFloat = 16
+public enum BottomBarConstants {
+    public static let buttonHeight: CGFloat = 50
+    public static let buttonSpacing: CGFloat = 8
+    public static let containerPaddingHorizontal: CGFloat = 8
+    public static let containerPaddingVertical: CGFloat = 6
+    public static let containerPaddingBottom: CGFloat = 2
+    public static let cornerRadius: CGFloat = 16
+
+    /// Height of the visible bottom bar (button + internal vertical padding)
+    public static var contentHeight: CGFloat {
+        buttonHeight + (containerPaddingVertical * 2)
+    }
+
+    /// Total height including external bottom padding
+    public static var totalHeight: CGFloat {
+        contentHeight + containerPaddingBottom
+    }
+
+    // Internal alias for backward compatibility
+    static var buttonWidth: CGFloat { buttonHeight }
 }
 
 public struct BottomBarButton: Identifiable {

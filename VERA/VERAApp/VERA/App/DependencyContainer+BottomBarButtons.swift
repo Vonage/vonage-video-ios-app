@@ -20,6 +20,11 @@ import VERACore
     import VERABackgroundEffects
 #endif
 
+#if REACTIONS_ENABLED
+    import SwiftUI
+    import VERAReactions
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -54,7 +59,6 @@ extension DependencyContainer {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-
         func makeBackgroundEffectsButton(
             _ viewModel: BackgroundBlurButtonViewModel
         ) -> BottomBarButton {
@@ -68,6 +72,23 @@ extension DependencyContainer {
                 content: {
                     button
                 })
+        }
+    #endif
+
+    #if REACTIONS_ENABLED
+        func mapToReactionsBottomBarButton(
+            _ viewModel: EmojiButtonContainerViewModel,
+            onShowPicker: @escaping () -> Void
+        ) -> BottomBarButton {
+            let emojiButtonContainer = reactionsFactory.makeEmojiButtonContainer(viewModel: viewModel)
+            return .init(
+                label: String(localized: "Reactions"),
+                image: Image(systemName: "face.smiling"),
+                onTap: onShowPicker,
+                content: {
+                    emojiButtonContainer
+                }
+            )
         }
     #endif
 }

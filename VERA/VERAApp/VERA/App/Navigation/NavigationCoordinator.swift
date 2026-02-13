@@ -13,6 +13,10 @@ import os.log
     import VERABackgroundEffects
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -31,6 +35,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     #if BACKGROUND_EFFECTS_ENABLED
         var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
+    #endif
+
+    #if REACTIONS_ENABLED
+        var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
+        var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
