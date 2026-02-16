@@ -132,5 +132,4 @@ struct EmojiButtonContainerViewModelTests {
     private func makeSUT(configuration: EmojiPickerConfiguration = .default) -> EmojiButtonContainerViewModel {
         return .init(sendReactionUseCase: MockSendReactionUseCase(), configuration: configuration)
     }
-
 }

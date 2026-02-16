@@ -40,6 +40,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     #if REACTIONS_ENABLED
         var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
         var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
+        var floatingEmojisOverlayViewModel: FloatingEmojisOverlayViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {

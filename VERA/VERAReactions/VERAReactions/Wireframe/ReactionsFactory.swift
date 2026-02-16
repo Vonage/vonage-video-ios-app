@@ -71,6 +71,22 @@ public final class ReactionsFactory {
         return (view, viewModel)
     }
 
+    /// Creates a floating emojis overlay with its view model.
+    ///
+    /// The overlay listens to the reactions repository and animates each
+    /// incoming emoji as a floating bubble that rises and fades out.
+    ///
+    /// - Returns: A tuple containing the configured overlay view and its view model.
+    public func makeFloatingEmojisOverlay()
+        -> (view: FloatingEmojisOverlayView, viewModel: FloatingEmojisOverlayViewModel)
+    {
+        let viewModel = FloatingEmojisOverlayViewModel(
+            reactionsRepository: reactionsRepository
+        )
+        let view = FloatingEmojisOverlayView(viewModel: viewModel)
+        return (view, viewModel)
+    }
+
     /// Returns the reactions repository for UI to observe incoming reactions.
     public var repository: any ReactionsRepository {
         reactionsRepository

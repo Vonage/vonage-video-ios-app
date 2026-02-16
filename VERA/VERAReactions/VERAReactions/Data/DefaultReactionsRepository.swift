@@ -14,18 +14,11 @@ public actor DefaultReactionsRepository: ReactionsRepository {
     // MARK: - Private Properties
 
     private nonisolated let reactionSubject = PassthroughSubject<EmojiReaction, Never>()
-    private var storedReactions: [EmojiReaction] = []
 
     // MARK: - ReactionsObserver
 
     public nonisolated var reactionReceived: AnyPublisher<EmojiReaction, Never> {
         reactionSubject.eraseToAnyPublisher()
-    }
-
-    public var reactions: [EmojiReaction] {
-        get async {
-            storedReactions
-        }
     }
 
     // MARK: - Initialization
@@ -35,11 +28,6 @@ public actor DefaultReactionsRepository: ReactionsRepository {
     // MARK: - ReactionsWriter
 
     public func addReaction(_ reaction: EmojiReaction) async {
-        storedReactions.append(reaction)
         reactionSubject.send(reaction)
-    }
-
-    public func clear() async {
-        storedReactions.removeAll()
     }
 }

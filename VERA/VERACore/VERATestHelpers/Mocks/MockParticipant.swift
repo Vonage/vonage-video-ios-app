@@ -8,6 +8,7 @@ import VERADomain
 
 public func makeMockParticipant(
     id: String = "anId",
+    connectionId: String? = nil,
     name: String = "aName",
     isMicEnabled: Bool = true,
     isCameraEnabled: Bool = true,
@@ -19,6 +20,7 @@ public func makeMockParticipant(
 ) -> Participant {
     .init(
         id: id,
+        connectionId: connectionId,
         name: name,
         isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,

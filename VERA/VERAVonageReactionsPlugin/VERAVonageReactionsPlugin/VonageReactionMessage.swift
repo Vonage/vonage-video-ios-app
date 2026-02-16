@@ -9,28 +9,43 @@ import Foundation
 /// Encoded as JSON in the `OutgoingSignal.payload` for sending emoji reactions
 /// between call participants.
 public struct VonageReactionMessage: Codable, Sendable {
-    /// Sender display name.
-    public let participantName: String
-
     /// The emoji character.
     public let emoji: String
 
     /// Timestamp when the reaction was sent.
-    public let timestamp: Date
+    public let time: Date
+
+    private enum CodingKeys: String, CodingKey {
+        case emoji
+        case time
+    }
 
     /// Creates a Vonage reaction payload.
     /// - Parameters:
-    ///   - participantName: Name of the sender.
     ///   - emoji: The emoji character.
-    ///   - timestamp: When the reaction was sent. Defaults to now.
+    ///   - time: When the reaction was sent. Defaults to now.
     public init(
-        participantName: String,
         emoji: String,
-        timestamp: Date = Date()
+        time: Date = Date()
     ) {
-        self.participantName = participantName
         self.emoji = emoji
-        self.timestamp = timestamp
+        self.time = time
+    }
+
+    /// Decodes `time` from a numeric timestamp (milliseconds since epoch).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        emoji = try container.decode(String.self, forKey: .emoji)
+        let timestamp = try container.decode(Double.self, forKey: .time)
+        time = Date(timeIntervalSince1970: timestamp / 1000.0)
+    }
+
+    /// Encodes `time` as a numeric timestamp (milliseconds since epoch).
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(emoji, forKey: .emoji)
+        let timestamp = time.timeIntervalSince1970 * 1000.0
+        try container.encode(timestamp, forKey: .time)
     }
 }
 
@@ -43,7 +58,6 @@ extension VonageReactionMessage {
     /// - Returns: A UTF-8 JSON string representing the reaction.
     public func toJSONString() throws -> String {
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
         let jsonData = try encoder.encode(self)
 
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
