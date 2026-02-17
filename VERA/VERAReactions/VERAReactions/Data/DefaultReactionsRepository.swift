@@ -5,9 +5,10 @@
 import Combine
 import Foundation
 
-/// Default in-memory implementation of ReactionsRepository.
+/// Default implementation of ReactionsRepository.
 ///
-/// Stores reactions in memory and emits them via Combine publishers.
+/// Relays reactions to observers via a Combine PassthroughSubject.
+/// Does not retain history — each reaction is fire-and-forget.
 /// Uses Swift Actor for thread-safe concurrent access.
 public actor DefaultReactionsRepository: ReactionsRepository {
 

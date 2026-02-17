@@ -485,17 +485,20 @@ struct VonageReactionsPluginTests {
 
 /// Accumulator for collecting values emitted by a publisher.
 /// Used as a `let` binding so it can be safely captured in `@Sendable` closures.
-/// Thread-safe in practice: the Combine pipeline delivers on the main queue
-/// via `.receive(on: DispatchQueue.main)`.
+/// Thread-safe via `NSLock`: the upstream Combine pipeline dispatches reactions
+/// through unstructured `Task` blocks that may run concurrently on the
+/// cooperative thread pool.
 final class Accumulator<T>: @unchecked Sendable {
-    private(set) var values: [T] = []
+    private let lock = NSLock()
+    private var _values: [T] = []
 
-    var isEmpty: Bool { values.isEmpty }
-    var count: Int { values.count }
-    var first: T? { values.first }
+    var values: [T] { lock.withLock { _values } }
+    var isEmpty: Bool { lock.withLock { _values.isEmpty } }
+    var count: Int { lock.withLock { _values.count } }
+    var first: T? { lock.withLock { _values.first } }
 
     func append(_ value: T) {
-        values.append(value)
+        lock.withLock { _values.append(value) }
     }
 }
 

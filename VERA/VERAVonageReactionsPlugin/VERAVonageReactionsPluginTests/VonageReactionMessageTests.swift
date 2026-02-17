@@ -14,7 +14,7 @@ struct VonageReactionMessageTests {
 
     @Test("encode produces numeric millisecond timestamp")
     func encodeProducesNumericTimestamp() throws {
-        let date = Date(timeIntervalSince1970: 1_739_188_800)  // 2026-02-10T12:00:00Z
+        let date = Date(timeIntervalSince1970: 1_739_188_800)  // 2025-02-10T12:00:00Z
         let message = VonageReactionMessage(emoji: "👋", time: date)
 
         let jsonString = try message.toJSONString()

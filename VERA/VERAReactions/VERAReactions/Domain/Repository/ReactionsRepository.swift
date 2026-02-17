@@ -21,6 +21,5 @@ public protocol ReactionsObserver: Sendable {
 /// Repository for managing emoji reactions during a call.
 ///
 /// Combines write and observe capabilities for reaction management.
-/// Use `reactionReceived` to display floating emoji animations,
-/// and `reactions` to access the full history if needed.
+/// Use `reactionReceived` to observe and display floating emoji animations.
 public typealias ReactionsRepository = ReactionsWriter & ReactionsObserver

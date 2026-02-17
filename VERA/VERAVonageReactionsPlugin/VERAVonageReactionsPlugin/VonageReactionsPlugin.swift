@@ -108,7 +108,7 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     /// Lifecycle callback when the call ends.
     ///
-    /// Clears in-memory state and repository reactions.
+    /// Cancels signal observation and clears local state.
     public func callDidEnd() async throws {
         cleanUp()
     }

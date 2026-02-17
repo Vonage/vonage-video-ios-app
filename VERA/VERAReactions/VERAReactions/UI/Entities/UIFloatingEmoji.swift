@@ -2,6 +2,7 @@
 //  Created by Vonage on 16/02/2026.
 //
 
+import CoreGraphics
 import Foundation
 
 /// A single floating emoji to be rendered on screen.
@@ -29,7 +30,7 @@ public struct UIFloatingEmoji: Identifiable {
 
     /// Creates a floating emoji from a domain reaction.
     /// - Parameter reaction: The incoming emoji reaction.
-    init(reaction: EmojiReaction) {
+    public init(reaction: EmojiReaction) {
         self.id = reaction.id
         self.participantName = reaction.participantName
         self.isMe = reaction.isMe
