@@ -2,7 +2,9 @@
 //  Created by Vonage on 11/2/26.
 //
 
+import Combine
 import Foundation
+import VERADomain
 import VERAReactions
 import VERAVonage
 
@@ -14,8 +16,8 @@ import VERAVonage
 ///
 /// ## Responsibilities
 /// - Handle incoming `emoji` signals and publish to repository
-/// - Emit outgoing emoji reactions with username
-/// - Maintain per-call state (e.g., current username)
+/// - Emit outgoing emoji reactions
+/// - Resolve participant names from connection IDs via ``CallFacade``
 ///
 /// ## Usage
 /// ```swift
@@ -25,8 +27,9 @@ import VERAVonage
 ///
 /// - Important: Set `channel` before sending reactions; otherwise throws
 ///   ``VonageReactionsPlugin/Error/missingChannel``.
-/// - SeeAlso: ``VonagePlugin``, ``VonageSignalHandler``, ``VonageSignalEmitter``
-public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, VonageSignalEmitter {
+/// - SeeAlso: ``VonagePlugin``, ``VonageSignalHandler``, ``VonageSignalEmitter``, ``VonagePluginCallHolder``
+public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, VonageSignalEmitter, VonagePluginCallHolder
+{
 
     // MARK: - Signal Types
 
@@ -56,8 +59,27 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     /// The channel used to emit signals to peers; injected by the call façade.
     public weak var channel: (any VonageSignalChannel)?
 
-    /// The current username associated with this call.
-    private var username: String = ""
+    /// The active call façade, used to resolve participant names from connection IDs.
+    public weak var call: CallFacade? {
+        didSet {
+            observeParticipants()
+        }
+    }
+
+    /// Connection ID of the local participant, used to determine isMe.
+    private var localConnectionId: String?
+
+    /// Current participants snapshot for resolving connectionId → name.
+    private var participants: [Participant] = []
+
+    /// Subscription for participants publisher.
+    private var participantsCancellable: AnyCancellable?
+
+    /// Incoming signal pipeline serialized onto the main queue.
+    private let signalSubject = PassthroughSubject<VonageSignal, Never>()
+
+    /// Subscription for the signal processing pipeline.
+    private var signalCancellable: AnyCancellable?
 
     /// Repository used to publish and observe reactions.
     public let repository: ReactionsRepository
@@ -78,16 +100,15 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     /// Lifecycle callback when the call starts.
     ///
-    /// Extracts the username from the provided `userInfo` dictionary to tag outgoing reactions.
-    ///
-    /// - Parameter userInfo: Metadata including username.
+    /// - Parameter userInfo: Metadata including call context.
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        username = userInfo[VonageCallParams.username.rawValue] as? String ?? ""
+        // No per-call state needed; participant names resolved via CallFacade.
+        observeSignals()
     }
 
     /// Lifecycle callback when the call ends.
     ///
-    /// Clears in-memory state and repository reactions.
+    /// Cancels signal observation and clears local state.
     public func callDidEnd() async throws {
         cleanUp()
     }
@@ -96,21 +117,14 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     /// Processes an incoming Vonage signal.
     ///
-    /// Accepts only `emoji` signals. Attempts to decode the signal payload
-    /// and publishes the reaction to the repository.
+    /// Accepts only `emoji` signals. The signal is forwarded to a Combine pipeline
+    /// that serializes processing onto the main queue, ensuring thread-safe access
+    /// to `participants` and `localConnectionId`.
     ///
     /// - Parameter signal: The received signal with type and optional data payload.
     public func handleSignal(_ signal: VonageSignal) {
         guard signal.type == SignalType.emoji.rawValue else { return }
-
-        do {
-            let reaction = try mapSignalToReaction(signal)
-            Task {
-                await repository.addReaction(reaction)
-            }
-        } catch {
-            print("[VonageReactionsPlugin] Failed to parse reaction: \(error.localizedDescription)")
-        }
+        signalSubject.send(signal)
     }
 
     // MARK: - Send Reaction
@@ -128,10 +142,7 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
             throw Error.missingChannel
         }
 
-        let message = VonageReactionMessage(
-            participantName: username,
-            emoji: emoji
-        )
+        let message = VonageReactionMessage(emoji: emoji)
 
         let signal = OutgoingSignal(
             type: SignalType.emoji.rawValue,
@@ -144,9 +155,54 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     // MARK: - Private
 
     private func cleanUp() {
-        Task {
-            await repository.clear()
-        }
+        participantsCancellable?.cancel()
+        participantsCancellable = nil
+        signalCancellable?.cancel()
+        signalCancellable = nil
+        participants = []
+        localConnectionId = nil
+    }
+
+    private func observeSignals() {
+        signalCancellable?.cancel()
+        signalCancellable =
+            signalSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] signal in
+                guard let self else { return }
+                do {
+                    let reaction = try self.mapSignalToReaction(signal)
+                    Task {
+                        await self.repository.addReaction(reaction)
+                    }
+                } catch {
+                    print("[VonageReactionsPlugin] Failed to parse reaction: \(error.localizedDescription)")
+                }
+            }
+    }
+
+    private func observeParticipants() {
+        participantsCancellable?.cancel()
+        participantsCancellable = call?.participantsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                var allParticipants = state.participants
+                if let local = state.localParticipant {
+                    allParticipants.append(local)
+                    self?.localConnectionId = local.connectionId
+                }
+                self?.participants = allParticipants
+            }
+    }
+
+    private func resolveParticipantName(for connectionId: String?) -> String {
+        guard let connectionId else { return "" }
+        return participants.first { $0.connectionId == connectionId }?.name ?? ""
+    }
+
+    private func isLocalUser(connectionId: String?) -> Bool {
+        guard let connectionId, let localConnectionId else { return false }
+        return connectionId == localConnectionId
     }
 
     private func mapSignalToReaction(_ signal: VonageSignal) throws -> EmojiReaction {
@@ -156,13 +212,10 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
         let jsonData = Data(signalData.utf8)
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
 
         do {
             let message = try decoder.decode(VonageReactionMessage.self, from: jsonData)
 
-            let participantName = message.participantName
-                .trimmingCharacters(in: .whitespacesAndNewlines)
             let emoji = message.emoji
                 .trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -171,9 +224,10 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
             }
 
             return EmojiReaction(
-                participantName: participantName,
+                participantName: resolveParticipantName(for: signal.connectionId),
                 emoji: emoji,
-                timestamp: message.timestamp
+                time: message.time,
+                isMe: isLocalUser(connectionId: signal.connectionId)
             )
 
         } catch is DecodingError {

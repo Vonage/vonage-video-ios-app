@@ -246,7 +246,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     ) {
         guard let type = type else { return }
 
-        onSessionSignal?(.init(type: type, data: string))
+        onSessionSignal?(.init(type: type, data: string, connectionId: connection?.connectionId))
     }
 
     /// Emits a custom Vonage signal to the session.

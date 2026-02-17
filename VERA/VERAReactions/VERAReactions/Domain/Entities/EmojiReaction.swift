@@ -7,7 +7,7 @@ import Foundation
 /// A reaction received from a participant during a call.
 ///
 /// Represents an emoji reaction sent by a call participant,
-/// including metadata about who sent it and when.
+/// including metadata about when it was sent.
 public struct EmojiReaction: Identifiable, Equatable, Sendable {
     /// Unique identifier for the reaction.
     public let id: UUID
@@ -19,23 +19,27 @@ public struct EmojiReaction: Identifiable, Equatable, Sendable {
     public let emoji: String
 
     /// Timestamp when the reaction was sent.
-    public let timestamp: Date
+    public let time: Date
+
+    /// Whether this reaction was sent by the local user.
+    public let isMe: Bool
 
     /// Creates a new reaction.
     /// - Parameters:
     ///   - id: Unique identifier. Defaults to a new UUID.
-    ///   - participantName: Name of the sender.
     ///   - emoji: The emoji character.
-    ///   - timestamp: When the reaction was sent. Defaults to now.
+    ///   - time: When the reaction was sent. Defaults to now.
     public init(
         id: UUID = UUID(),
         participantName: String,
         emoji: String,
-        timestamp: Date = Date()
+        time: Date = Date(),
+        isMe: Bool = false
     ) {
         self.id = id
         self.participantName = participantName
         self.emoji = emoji
-        self.timestamp = timestamp
+        self.time = time
+        self.isMe = isMe
     }
 }

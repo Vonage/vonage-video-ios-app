@@ -16,7 +16,6 @@ struct VonageSendReactionUseCaseTests {
         let mockChannel = MockSignalChannel()
         let plugin = VonageReactionsPlugin()
         plugin.channel = mockChannel
-        try await plugin.callDidStart([VonageCallParams.username.rawValue: "User"])
 
         let sut = VonageSendReactionUseCase(plugin: plugin)
         let emoji = UIEmojiReaction(emoji: "🔥", name: "fire")

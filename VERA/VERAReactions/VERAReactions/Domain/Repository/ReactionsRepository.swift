@@ -10,23 +10,16 @@ public protocol ReactionsWriter: Sendable {
     /// Adds a new reaction to the repository.
     /// - Parameter reaction: The reaction to add.
     func addReaction(_ reaction: EmojiReaction) async
-
-    /// Clears all stored reactions.
-    func clear() async
 }
 
 /// Observes reactions from the repository.
 public protocol ReactionsObserver: Sendable {
     /// Publisher that emits each new reaction as it arrives.
     var reactionReceived: AnyPublisher<EmojiReaction, Never> { get }
-
-    /// All reactions received during the current session.
-    var reactions: [EmojiReaction] { get async }
 }
 
 /// Repository for managing emoji reactions during a call.
 ///
 /// Combines write and observe capabilities for reaction management.
-/// Use `reactionReceived` to display floating emoji animations,
-/// and `reactions` to access the full history if needed.
+/// Use `reactionReceived` to observe and display floating emoji animations.
 public typealias ReactionsRepository = ReactionsWriter & ReactionsObserver

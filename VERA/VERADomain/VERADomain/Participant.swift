@@ -22,6 +22,8 @@ import SwiftUI
 public struct Participant: Identifiable, Hashable, Equatable, CustomStringConvertible {
     /// Stable identifier for the participant (stream ID, publisher ID, etc.).
     public let id: String
+    /// The connection identifier from the Vonage session, used for signal sender resolution.
+    public let connectionId: String?
     /// Display name shown in UI.
     public let name: String
     /// Whether the participant’s microphone is enabled.
@@ -65,6 +67,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     ///   - view: SwiftUI-compatible video view.
     public init(
         id: String,
+        connectionId: String? = nil,
         name: String,
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
@@ -76,6 +79,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         view: AnyView
     ) {
         self.id = id
+        self.connectionId = connectionId
         self.name = name
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
@@ -93,6 +97,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public var withEmptyView: Participant {
         Participant(
             id: id,
+            connectionId: connectionId,
             name: name,
             isMicEnabled: isMicEnabled,
             isCameraEnabled: isCameraEnabled,
@@ -108,7 +113,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     ///
     /// Excludes visibility callbacks from equality.
     public static func == (lhs: Participant, rhs: Participant) -> Bool {
-        lhs.id == rhs.id && lhs.name == rhs.name && lhs.isMicEnabled == rhs.isMicEnabled
+        lhs.id == rhs.id && lhs.connectionId == rhs.connectionId && lhs.name == rhs.name
+            && lhs.isMicEnabled == rhs.isMicEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
             && lhs.isRemote == rhs.isRemote
             && lhs.creationTime == rhs.creationTime
@@ -121,6 +127,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     /// Excludes visibility callbacks from hashing.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(connectionId)
         hasher.combine(name)
         hasher.combine(isMicEnabled)
         hasher.combine(isCameraEnabled)

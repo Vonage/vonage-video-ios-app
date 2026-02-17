@@ -2,7 +2,6 @@
 //  Created by Vonage on 10/2/26.
 //
 
-import Combine
 import SwiftUI
 import VERAReactions
 
@@ -10,93 +9,108 @@ import VERAReactions
 struct VERAReactionsApp: App {
     var body: some Scene {
         WindowGroup {
-            DemoEmojiPickerView()
+            DemoReactionsView()
         }
     }
 }
 
-struct DemoEmojiPickerView: View {
-    @State private var selectedEmoji: UIEmojiReaction?
-    @State private var lastSentEmoji: String?
-    @StateObject private var viewModel: EmojiPickerContainerViewModel
+// MARK: - Demo View
+
+/// A full-featured demo that wires the emoji button, picker, and floating overlay
+/// together through a shared repository — picking an emoji makes it float on screen.
+struct DemoReactionsView: View {
+
+    @StateObject private var buttonViewModel: EmojiButtonContainerViewModel
+    @StateObject private var overlayViewModel: FloatingEmojisOverlayViewModel
 
     init() {
-        let useCase = DemoSendReactionUseCase()
-        _viewModel = StateObject(
-            wrappedValue: EmojiPickerContainerViewModel(
+        let repository = DefaultReactionsRepository()
+        let useCase = DemoSendReactionUseCase(repository: repository)
+
+        _buttonViewModel = StateObject(
+            wrappedValue: EmojiButtonContainerViewModel(
                 sendReactionUseCase: useCase
-            ))
+            )
+        )
+        _overlayViewModel = StateObject(
+            wrappedValue: FloatingEmojisOverlayViewModel(
+                reactionsRepository: repository
+            )
+        )
     }
 
     var body: some View {
         ZStack {
-            // Simulated video background
-            LinearGradient(
-                colors: [.blue.opacity(0.6), .purple.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            background
 
-            // EmojiPickerView overlay
-            emojiPickerContainerView
+            FloatingEmojisOverlayView(viewModel: overlayViewModel)
 
-            // Demo controls
             VStack {
-                Text("EmojiPickerView Demo")
-                    .font(.title)
-                    .foregroundStyle(.white)
-                    .padding()
-
                 Spacer()
+                bottomBar
             }
         }
     }
 
-    @ViewBuilder
-    private var emojiPickerContainerView: some View {
-        VStack(spacing: 32) {
-            Text(selectedEmoji?.emoji ?? "👆")
-                .font(.system(size: 64))
+    // MARK: - Private Views
 
-            Text(selectedEmoji?.name ?? "Tap an emoji")
-                .font(.headline)
-
-            // Use EmojiPickerViewContainer with the ViewModel
-            EmojiPickerViewContainer(viewModel: viewModel)
+    private var background: some View {
+        LinearGradient(
+            colors: [.blue.opacity(0.6), .purple.opacity(0.6)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+        .overlay(alignment: .top) {
+            Text("Reactions Demo")
+                .font(.title2.bold())
+                .foregroundStyle(.white)
+                .padding(.top, 60)
         }
-        .padding()
+    }
+
+    private var bottomBar: some View {
+        EmojiButtonContainer(viewModel: buttonViewModel)
+            .padding(.bottom, 32)
     }
 }
 
 // MARK: - Demo Implementations
 
-/// Demo implementation of SendReactionUseCase for preview purposes.
+/// Sends a reaction by writing it back to the shared repository,
+/// creating a loopback so the floating overlay displays the emoji.
+/// Cycles through different participant scenarios to demo all use cases.
 private final class DemoSendReactionUseCase: SendReactionUseCase {
+    private let repository: any ReactionsWriter
+    private var callCount = 0
+
+    /// Participant scenarios to cycle through.
+    private let scenarios: [(name: String, isMe: Bool)] = [
+        ("", true),  // Local user, empty name
+        ("", false),  // Remote user, empty name
+        ("Alice", false),  // Remote user with name
+        ("Bob", false),  // Remote user with name
+        ("Test", true),  // Local user with name
+        ("Alexander Hamilton", false),  // Remote user long name
+    ]
+
+    init(repository: any ReactionsWriter) {
+        self.repository = repository
+    }
+
     func callAsFunction(_ emoji: String) throws {
-        print("Demo: Sending reaction \(emoji)")
-    }
-}
+        let scenario = scenarios[callCount % scenarios.count]
+        callCount += 1
 
-/// Demo implementation of ReactionsRepository for factory usage.
-private final class DemoReactionsRepository: ReactionsRepository {
-    private let subject = PassthroughSubject<EmojiReaction, Never>()
-    private(set) var reactions: [EmojiReaction] = []
-
-    var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-        subject.eraseToAnyPublisher()
-    }
-
-    func addReaction(_ reaction: EmojiReaction) {
-        reactions.append(reaction)
-        subject.send(reaction)
-    }
-
-    func clear() {
-        reactions.removeAll()
+        let reaction = EmojiReaction(
+            participantName: scenario.name,
+            emoji: emoji,
+            isMe: scenario.isMe
+        )
+        Task { await repository.addReaction(reaction) }
     }
 }
 
 #Preview {
-    DemoEmojiPickerView()
+    DemoReactionsView()
 }

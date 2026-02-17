@@ -105,6 +105,9 @@ struct VERAApp: App {
                             ) {
                                 makePickerView()
                             }
+                            .overlay {
+                                makeFloatingEmojisOverlay()
+                            }
                         #endif
                 }
             }
@@ -253,6 +256,8 @@ struct VERAApp: App {
             #if REACTIONS_ENABLED
                 navigationCoordinator.emojiButtonContainerViewModel =
                     dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
+                navigationCoordinator.floatingEmojisOverlayViewModel =
+                    dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
             #endif
             viewModel = newViewModel
         }
@@ -369,6 +374,13 @@ struct VERAApp: App {
             }
 
             return view
+        }
+
+        @ViewBuilder
+        private func makeFloatingEmojisOverlay() -> some View {
+            if let viewModel = navigationCoordinator.floatingEmojisOverlayViewModel {
+                FloatingEmojisOverlayView(viewModel: viewModel)
+            }
         }
     #endif
 }
