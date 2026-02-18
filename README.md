@@ -98,8 +98,8 @@ The current minimum deployment target for the reference app is iOS 16+. Some of 
 
 - **Xcode 26**
 - **Tuist**
-- **Swift Lint**
-- **Swift Format**
+- **SwiftLint**
+- **SwiftFormat**
 - **Git LFS**
 
 ## Running Locally
