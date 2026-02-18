@@ -25,6 +25,11 @@ import VERADomain
     import VERACaptions
 #endif
 
+#if REACTIONS_ENABLED
+    import SwiftUI
+    import VERAReactions
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -59,7 +64,6 @@ extension DependencyContainer {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-
         func makeBackgroundEffectsButton(
             _ viewModel: BackgroundBlurButtonViewModel
         ) -> BottomBarButton {
@@ -84,14 +88,31 @@ extension DependencyContainer {
             return .init(
                 label: String(localized: "Captions"),
                 image: viewModel.state.captionsEnabled
-                    ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
-                    : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
+                ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
+                : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
                 onTap: {
                     viewModel.onTap()
                 },
                 content: {
                     button
                 })
+        }
+    #endif
+            
+    #if REACTIONS_ENABLED
+        func mapToReactionsBottomBarButton(
+            _ viewModel: EmojiButtonContainerViewModel,
+            onShowPicker: @escaping () -> Void
+        ) -> BottomBarButton {
+            let emojiButtonContainer = reactionsFactory.makeEmojiButtonContainer(viewModel: viewModel)
+            return .init(
+                label: String(localized: "Reactions"),
+                image: Image(systemName: "face.smiling"),
+                onTap: onShowPicker,
+                content: {
+                    emojiButtonContainer
+                }
+            )
         }
     #endif
 }

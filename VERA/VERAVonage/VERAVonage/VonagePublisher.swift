@@ -198,6 +198,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private func updateParticipant() {
         participant = Participant(
             id: id,
+            connectionId: stream?.connection.connectionId,
             name: stream?.name ?? "",
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,

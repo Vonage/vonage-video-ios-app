@@ -112,6 +112,7 @@ public class VonageSubscriber: NSObject {
         isScreenshare = stream.videoType == .screen
         participant = Participant(
             id: stream.streamId,
+            connectionId: stream.connection.connectionId,
             name: stream.name ?? "",
             isMicEnabled: stream.hasAudio,
             isCameraEnabled: stream.hasVideo,
@@ -170,6 +171,7 @@ public class VonageSubscriber: NSObject {
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
+            connectionId: stream.connection.connectionId,
             name: name,
             isMicEnabled: stream.hasAudio,
             isCameraEnabled: stream.hasVideo,

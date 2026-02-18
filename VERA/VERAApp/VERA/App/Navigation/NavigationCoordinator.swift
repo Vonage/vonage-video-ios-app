@@ -17,6 +17,10 @@ import os.log
     import VERACaptions
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -40,6 +44,12 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     #if CAPTIONS_ENABLED
         var captionsButtonViewModel: CaptionsButtonViewModel?
         var captionsViewModel: CaptionsViewModel?
+    #endif
+    
+    #if REACTIONS_ENABLED
+        var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
+        var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
+        var floatingEmojisOverlayViewModel: FloatingEmojisOverlayViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {

@@ -27,14 +27,48 @@ struct ParticipantTests {
         #expect(speakerInfo.isMicEnabled == testCase.isMicEnabled)
     }
 
+    @Test("Participants with different connectionId are not equal")
+    func participantsWithDifferentConnectionIdAreNotEqual() {
+        let participant1 = makeSUT(connectionId: "connection-1")
+        let participant2 = makeSUT(connectionId: "connection-2")
+
+        #expect(participant1 != participant2)
+    }
+
+    @Test("Participants with same connectionId are equal")
+    func participantsWithSameConnectionIdAreEqual() {
+        let participant1 = makeSUT(connectionId: "connection-1")
+        let participant2 = makeSUT(connectionId: "connection-1")
+
+        #expect(participant1 == participant2)
+    }
+
+    @Test("Participants with nil vs non-nil connectionId are not equal")
+    func participantsWithNilVsNonNilConnectionIdAreNotEqual() {
+        let participant1 = makeSUT(connectionId: nil)
+        let participant2 = makeSUT(connectionId: "connection-1")
+
+        #expect(participant1 != participant2)
+    }
+
+    @Test("Participant hash differs when connectionId differs")
+    func participantHashDiffersWhenConnectionIdDiffers() {
+        let participant1 = makeSUT(connectionId: "connection-1")
+        let participant2 = makeSUT(connectionId: "connection-2")
+
+        #expect(participant1.hashValue != participant2.hashValue)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
         id: String = "an id",
+        connectionId: String? = nil,
         isMicEnabled: Bool = true
     ) -> Participant {
         makeMockParticipant(
             id: id,
+            connectionId: connectionId,
             isMicEnabled: isMicEnabled)
     }
 }

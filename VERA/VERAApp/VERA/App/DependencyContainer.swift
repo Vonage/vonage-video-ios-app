@@ -29,6 +29,11 @@ import VERAVonageCallKitPlugin
     import VERAVonageCaptionsPlugin
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+    import VERAVonageReactionsPlugin
+#endif
+
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -106,6 +111,9 @@ final class DependencyContainer {
         #endif
         #if CAPTIONS_ENABLED
             registry.registerPlugin(plugin: captionsPlugin)
+        #endif
+        #if REACTIONS_ENABLED
+            registry.registerPlugin(plugin: vonageReactionsPlugin)
         #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
@@ -195,8 +203,23 @@ final class DependencyContainer {
             let plugin = VonageCaptionsPlugin(captionsStatusDataSource: captionsStatusDataSource)
             return plugin
         }()
-
     #else
         lazy var captionsStatusDataSource: CaptionsStatusDataSource = NullCaptionsStatusDataSource()
+    #endif
+
+    // MARK: Reactions feature
+
+    #if REACTIONS_ENABLED
+
+        lazy var reactionsRepository: ReactionsRepository = DefaultReactionsRepository()
+
+        lazy var vonageReactionsPlugin = VonageReactionsPlugin(repository: reactionsRepository)
+
+        lazy var sendReactionUseCase: SendReactionUseCase = VonageSendReactionUseCase(
+            plugin: vonageReactionsPlugin)
+
+        lazy var reactionsFactory = ReactionsFactory(
+            reactionsRepository: reactionsRepository,
+            sendReactionUseCase: sendReactionUseCase)
     #endif
 }

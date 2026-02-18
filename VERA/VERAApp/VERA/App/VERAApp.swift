@@ -25,6 +25,26 @@ import VERAVonage
     import VERACaptions
 #endif
 
+#if REACTIONS_ENABLED
+    import VERAReactions
+#endif
+
+// MARK: - Constants
+
+/// Layout constants for the VERA application.
+///
+/// Contains computed values that depend on other module constants
+/// to ensure consistent spacing and positioning across the app.
+private enum VERAAppConstants {
+    /// Padding for overlays positioned above the bottom bar.
+    ///
+    /// Calculated as the total bottom bar height plus a small gap
+    /// to visually separate overlay content from the bar.
+    static var overlayBottomPadding: CGFloat {
+        BottomBarConstants.totalHeight + 4
+    }
+}
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -38,6 +58,7 @@ struct VERAApp: App {
 
     @State private var previousPath = NavigationPath()
     @State private var showChat = false
+    @State private var showPickerView = false
 
     var body: some Scene {
         WindowGroup {
@@ -67,7 +88,6 @@ struct VERAApp: App {
                     makeMeetingRoom(roomName: currentRoom)
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
-
                             #if ARCHIVING_ENABLED
                                 Task {
                                     await navigationCoordinator.archivesViewModel?.loadData()
@@ -78,6 +98,18 @@ struct VERAApp: App {
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
+                            }
+                        #endif
+                        #if REACTIONS_ENABLED
+                            .dismissibleOverlay(
+                                isPresented: $showPickerView,
+                                alignment: .bottom,
+                                edgePadding: VERAAppConstants.overlayBottomPadding
+                            ) {
+                                makePickerView()
+                            }
+                            .overlay {
+                                makeFloatingEmojisOverlay()
                             }
                         #endif
                 }
@@ -181,7 +213,6 @@ struct VERAApp: App {
             viewModel = existingViewModel
         } else {
             #if BACKGROUND_EFFECTS_ENABLED
-
                 // Copy the current blur level from the waiting room
                 // and apply it to the meeting room blur view model
                 // the publisher repositories are different
@@ -238,6 +269,13 @@ struct VERAApp: App {
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
             #endif
+
+            #if REACTIONS_ENABLED
+                navigationCoordinator.emojiButtonContainerViewModel =
+                    dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
+                navigationCoordinator.floatingEmojisOverlayViewModel =
+                    dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
+            #endif
             viewModel = newViewModel
         }
 
@@ -261,7 +299,6 @@ struct VERAApp: App {
         #endif
 
         #if BACKGROUND_EFFECTS_ENABLED
-
             if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
                 extraButtons.append(
                     dependencyContainer.makeBackgroundEffectsButton(backgroundBlurButtonViewModel)
@@ -281,7 +318,16 @@ struct VERAApp: App {
                 extraButtons.append(dependencyContainer.makeCaptionsButton(captionsButtonViewModel))
             }
         #endif
-
+        
+        #if REACTIONS_ENABLED
+            if let viewModel = navigationCoordinator.emojiButtonContainerViewModel {
+                extraButtons.append(
+                    dependencyContainer.mapToReactionsBottomBarButton(viewModel) {
+                        showPickerView = true
+                    }
+                )
+            }
+        #endif
         return extraButtons
     }
 
@@ -349,6 +395,28 @@ struct VERAApp: App {
                 showChat = false
             }
             return result.view
+        }
+    #endif
+
+    #if REACTIONS_ENABLED
+        private func makePickerView() -> some View {
+            let view: EmojiPickerViewContainer
+            if let viewModel = navigationCoordinator.emojiPickerContainerViewModel {
+                view = EmojiPickerViewContainer(viewModel: viewModel)
+            } else {
+                let result = dependencyContainer.reactionsFactory.makeEmojiPickerContainer()
+                navigationCoordinator.emojiPickerContainerViewModel = result.viewModel
+                view = result.view
+            }
+
+            return view
+        }
+
+        @ViewBuilder
+        private func makeFloatingEmojisOverlay() -> some View {
+            if let viewModel = navigationCoordinator.floatingEmojisOverlayViewModel {
+                FloatingEmojisOverlayView(viewModel: viewModel)
+            }
         }
     #endif
 }
