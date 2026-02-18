@@ -106,7 +106,7 @@ The current minimum deployment target for the reference app is iOS 16+. Some of 
 
 First follow the steps to create the Vonage account, application and backend set up and deployment at the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app?tab=readme-ov-file#running-locally) URL.
 
-Make sure you have all the required dependencies installed in your computer, or install them:
+Make sure you have all the required dependencies installed on your computer, or install them:
 
 `brew install swiftlint`
 `brew install swiftformat`
