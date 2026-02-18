@@ -3,7 +3,7 @@ import ProjectDescription
 extension Package {
     public static let vonageVideoSDK = Package.package(
         url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-        .upToNextMinor(from: "2.32.1")
+        .upToNextMinor(from: "2.33")
     )
 }
 
@@ -14,7 +14,7 @@ extension TargetDependency {
 extension Package {
     public static let vonageVideoTransformersSDK = Package.package(
         url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-        .upToNextMinor(from: "2.32.1")
+        .upToNextMinor(from: "2.33")
     )
 }
 
