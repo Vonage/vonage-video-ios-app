@@ -127,7 +127,7 @@ export MARKETING_VERSION=1.0
 export CURRENT_PROJECT_VERSION=1
 ```
 
-then run
+Then run:
 
 ```
 ./Scripts/generateEnvironmentConstants.sh
