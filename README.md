@@ -22,7 +22,7 @@ Looking to build on other platforms? The Vonage Video API Reference App is also 
 These reference apps share the same backend infrastructure and demonstrate consistent best practices across all platforms, making it easy to build unified video experiences for your users.
 
 ## Why use it?
-The Vonage Video API Reference App for iOS provides developers an easy-to-setup way to get started with using our APIs with the iOS SDK.
+The Vonage Video API Reference App for iOS provides developers an easy-to-set-up way to get started with using our APIs with the iOS SDK.
 
 The application is open-source, so you can not only get started quickly, but easily extend it with features needed for your use case. Any features already implemented in the Reference App use best practices for scalability and security.
 
@@ -49,7 +49,7 @@ This application provides features for common conferencing use cases, such as:
 - <details>
     <summary>
       Configurable features: adapt the app to your specific use cases and roles.
-      Configuration is handled through a <em>app-config.json</em> file that can be moved to the <em>VERA/config</em> folder. When calling to the <em>generate-app-config.py</em> python script in the <em>VERA/Scripts</em> folder, the parameters specified in the <em>app-config.json</em> file will regenerate the <em>AppConfig.swift</em> file of the <em>VERAConfiguration</em> module.
+      Configuration is handled through a <em>app-config.json</em> file that can be moved to the <em>VERA/config</em> folder. When calling the <em>generate-app-config.py</em> python script in the <em>VERA/Scripts</em> folder, the parameters specified in the <em>app-config.json</em> file will regenerate the <em>AppConfig.swift</em> file of the <em>VERAConfiguration</em> module.
     </summary>
     <img src="docs/assets/configFile.png" alt="Screenshot of a config.json">
 </details>
@@ -73,7 +73,7 @@ This application provides features for common conferencing use cases, such as:
 
 This reference app requires the user to deploy a backend and then use the backend API URL as the base URL in the <em>DependencyContainer.swift</em> file of the VERAApp module. You can find backend code and deploying instructions in the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app) repository.
 
-The backend communicates with the Vonage video platform using the Vonage Server SDK and is responsible of generating the session IDs and tokens used to connect to the video rooms by the Vonage Client SDK.
+The backend communicates with the Vonage video platform using the Vonage Server SDK and is responsible for generating the session IDs and tokens used to connect to the video rooms by the Vonage Client SDK.
 
 ## Module Overview
 
@@ -92,46 +92,65 @@ The Vonage iOS reference app is built with a modular architecture. The app is or
 
 ## Platforms supported
 
-The current minimum deployment target for the reference app iOS 16+. Some of the mentioned modules are universal, which allows fast testing against macOS targets and platform reusability. For this last point it would be required to adapt the non universal modules to the desired platform.
+The current minimum deployment target for the reference app is iOS 16+. Some of the mentioned modules are universal, which allows fast testing against macOS targets and platform reusability. For this last point it would be required to adapt the non universal modules to the desired platform.
 
 ## Requirements
 
 - **Xcode 26**
 - **Tuist**
+- **Swift Lint**
+- **Swift Format**
+- **Git LFS**
 
 ## Running Locally
 
 First follow the steps to create the Vonage account, application and backend set up and deployment at the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app?tab=readme-ov-file#running-locally) URL.
 
-Then you can specify the `DEVELOPMENT_TEAM`, `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the `regenerateSigningConfig.sh` script and execute it to generate the Signing.xcconfig file in the VERA/Config folder.
+Make sure you have all the required dependencies installed in your computer, or install them:
+
+`brew install swiftlint`
+`brew install swiftformat`
+`brew install --formula tuist`
+`brew install git-lfs`
+
+After cloning the repository pull the large files by executing `git lfs pull` in the command line inside the repository folder.
+
+
+After that specify the `DEVELOPMENT_TEAM`, `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION` and `BASE_API_URL` by exporting the following environment variables and then running `generateEnvironmentConstants.sh` and `regenerateSigningConfig.sh` from within the `{SRC_ROOT}/VERA` folder.
+
+You can find the `DEVELOPMENT_TEAM` ID in the top right corner of the `Certificates, Identifiers & Profiles` page from your Apple developer account.
 
 ```
-DEVELOPMENT_TEAM = YOUR_DEVELOPMENT_TEAM
-MARKETING_VERSION = 1.0
-CURRENT_PROJECT_VERSION = 1
+export BASE_API_URL=https://api.example.net/
+export DEVELOPMENT_TEAM=AB0C12DE34
+export MARKETING_VERSION=1.0
+export CURRENT_PROJECT_VERSION=1
 ```
 
-For the `BASE_API_URL` modify the `EnvironmentConstants.swift` and the `VERA.entitlements` files. Or expose it as an environment variable and then execute `generateEnvironmentConstants.sh`.
+then run
 
 ```
-export BASE_API_URL=https://api.example.com/
-.VERA/Scripts/generateEnvironmentConstants.sh
+./Scripts/generateEnvironmentConstants.sh
+./Scripts/regenerateSigningConfig.sh
 ```
 
-Then install [Tuist](https://docs.tuist.dev/en/guides/quick-start/install-tuist), it's required for the project generation.
-
-Once you have Tuist installed generate a new project by typing the following commands in the command line:
-
-```bash
-cd VERA
-tuist generate
-```
+Once you have [Tuist](https://docs.tuist.dev/en/guides/quick-start/install-tuist) installed, generate a new XCWorkspace by executing `tuist generate` from within the VERA folder.
 
 Tuist will generate and launch a new Xcode workspace based on the <em>Project.swift</em> definitions. Every module has one <em>Project.swift</em> file where all the targets, SPM dependencies and project details are declared using the Tuist DSL. This unlocks dynamic project generation based on configuration files, simplified merging conflict resolution and some other nice features.
 
-Modify the base URL constant in the <em>DependencyContainer.swift</em> file in the <em>VERAApp</em> module.
-
 Run the VERA app target in Xcode.
+
+*If you find that Xcode caches an Xcode workspace you can reset the tuist cache by executing
+
+```bash
+tuist clean
+```
+
+*To edit the Tuist DSL `project.swift` files easily run:
+
+```bash
+tuist edit
+```
 
 ## Feature configuration
 
