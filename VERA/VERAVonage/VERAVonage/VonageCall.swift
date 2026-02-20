@@ -639,7 +639,7 @@ public final class VonageCall: CallFacade {
             }
 
             vonageSubscriber.onCaption = { [weak self] caption in
-                self?.appendCaption(caption)
+                self?.appendCaption(caption, isMe: true)
             }
 
             publisherCaptions = vonageSubscriber
@@ -666,9 +666,11 @@ public final class VonageCall: CallFacade {
         }
     }
 
-    private func appendCaption(_ caption: VonageCaption) {
-        var value = _captionsPublisher.value
-        value.append(.init(speakerName: caption.name ?? "", text: caption.text))
+    private func appendCaption(_ caption: VonageCaption, isMe: Bool = false) {
+        /// Before appending, any existing caption from the **same speaker** is removed.
+        var value = _captionsPublisher.value.filter { $0.id != caption.id ?? "" }
+        value.append(
+            .init(id: caption.id ?? UUID().uuidString, speakerName: caption.name ?? "", text: caption.text, isMe: isMe))
 
         if value.count > 5 {
             value = Array(value.suffix(5))

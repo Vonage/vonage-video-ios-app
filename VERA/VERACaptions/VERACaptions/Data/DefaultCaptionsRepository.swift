@@ -34,7 +34,7 @@ public actor DefaultCaptionsRepository: CaptionsRepository {
 }
 
 /// Null observer that never emits, used for previews and tests.
-public final class EmptyCaptionsObserver: CaptionsObserver, @unchecked Sendable {
+public final class EmptyCaptionsObserver: CaptionsObserver, Sendable {
     public var captionsReceived: AnyPublisher<[CaptionItem], Never> {
         Empty().eraseToAnyPublisher()
     }

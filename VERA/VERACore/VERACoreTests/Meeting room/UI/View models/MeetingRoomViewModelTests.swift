@@ -460,7 +460,8 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
-            currentCallParticipantsRepository: currentCallParticipantsRepository, captionsStatusDataSource: NullCaptionsStatusDataSource(),
+            currentCallParticipantsRepository: currentCallParticipantsRepository,
+            captionsStatusDataSource: NullCaptionsStatusDataSource(),
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
             getExternalButtons: { _ in [] }

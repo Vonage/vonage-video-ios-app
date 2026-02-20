@@ -6,10 +6,10 @@ import Foundation
 import VERADomain
 
 public struct EnableCaptionsResponse: Codable {
-    public let captionsId: String
+    public let captionsId: String?
     public let status: Int
 
-    public init(captionsId: String, status: Int) {
+    public init(captionsId: String?, status: Int) {
         self.captionsId = captionsId
         self.status = status
     }
@@ -32,6 +32,7 @@ public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
 
     enum Error: Swift.Error {
         case invalidResponse
+        case invalidCaptionsId
     }
 
     public init(
@@ -60,24 +61,10 @@ public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
             throw Error.invalidResponse
         }
 
-        return .init(captionsId: response.captionsId)
-    }
-
-    public func disableCaptions(
-        _ request: DisableCaptionsDataSourceRequest
-    ) async throws {
-        let url =
-            baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(request.roomName)
-            .appendingPathComponent(request.captionsID)
-            .appendingPathComponent("disableCaptions")
-
-        let data = try await httpClient.post(url, data: Data())
-        let response = try jsonDecoder.decode(DisableCaptionsResponse.self, from: data)
-
-        if response.status != 200 {
-            throw Error.invalidResponse
+        guard let captionsId = response.captionsId else {
+            throw Error.invalidCaptionsId
         }
+
+        return .init(captionsId: captionsId)
     }
 }

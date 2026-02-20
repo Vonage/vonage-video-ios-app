@@ -8,6 +8,7 @@ import Testing
 import VERACaptions
 import VERADomain
 import VERAVonage
+
 @testable import VERAVonageCaptionsPlugin
 
 @Suite("VonageCaptionsPlugin Tests")
@@ -149,16 +150,44 @@ struct VonageCaptionsPluginTests {
         #expect(mocks.repository.updateCallCount == callCountAfterEnd)
     }
 
-    // MARK: - Handle Signal
+    // MARK: - Edge Cases
 
-    @Test("handleSignal is a no-op")
-    func handleSignalIsNoOp() {
+    @Test("callDidEnd then callDidStart re-establishes subscriptions")
+    func callDidEndThenCallDidStartReestablishesSubscriptions() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        // First cycle
+        try await sut.callDidStart([:])
+        mocks.statusDataSource.set(captionsState: .enabled("id-1"))
+        try await waitUntil { mocks.call.areCaptionsEnabled }
+        try await sut.callDidEnd()
+
+        // After end, enable should not forward
+        mocks.statusDataSource.set(captionsState: .enabled("id-2"))
+        try await Task.sleep(nanoseconds: 50_000_000)
+        #expect(!mocks.call.areCaptionsEnabled)
+
+        // Second cycle — subscriptions should work again
+        mocks.call.recordedActions.removeAll()
+        try await sut.callDidStart([:])
+        mocks.statusDataSource.set(captionsState: .enabled("id-3"))
+        try await waitUntil { mocks.call.recordedActions.contains(.enableCaptions) }
+
+        let captions = [CaptionItem(speakerName: "Alice", text: "Back!")]
+        mocks.call._captionsPublisher.send(captions)
+        try await waitUntil { mocks.repository.lastCaptions == captions }
+    }
+
+    @Test("callDidEnd before callDidStart does not throw")
+    func callDidEndBeforeCallDidStartDoesNotThrow() async throws {
         let (sut, mocks) = makeSUT()
 
-        let signal = VonageSignal(type: "captions", data: "some-data")
-        sut.handleSignal(signal)
+        try await sut.callDidEnd()
 
-        #expect(mocks.repository.updateCallCount == 0)
+        #expect(mocks.statusDataSource.resetCallCount == 1)
+        #expect(mocks.repository.updateCallCount == 1)
+        #expect(mocks.repository.lastCaptions == [])
     }
 
     // MARK: - Helpers
@@ -297,5 +326,3 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
         recordedActions.append(.disableCaptions)
     }
 }
-
-private struct WaitTimeoutError: Error {}

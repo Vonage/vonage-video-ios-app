@@ -3,14 +3,27 @@
 //
 
 import Combine
-import Testing
-@testable import VERACaptions
-import VERADomain
 import Foundation
+import Testing
+import VERADomain
+
+@testable import VERACaptions
 
 @Suite("CaptionsViewModel Tests")
 @MainActor
 struct CaptionsViewModelTests {
+
+    // MARK: - AttributedString Helper
+
+    /// Builds the same `AttributedString` that `UICaptionItem` produces,
+    /// so tests can assert equality on the `text` property.
+    private func expectedText(speaker: String, text: String) -> AttributedString {
+        var bold = AttributedString(speaker + ": ")
+        bold.font = .system(.footnote, design: .default).bold()
+        var regular = AttributedString(text)
+        regular.font = .system(.footnote, design: .default)
+        return bold + regular
+    }
 
     // MARK: - Initial State
 
@@ -34,7 +47,7 @@ struct CaptionsViewModelTests {
         try await waitUntil { sut.captions.count == 1 }
 
         #expect(sut.captions[0].id == caption.id)
-        #expect(sut.captions[0].text == "Alice: Hello!")
+        #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello!"))
         #expect(sut.captions[0].accessibilityLabel == "Alice says: Hello!")
     }
 
@@ -113,7 +126,7 @@ struct CaptionsViewModelTests {
         observer.send(first)
 
         try await waitUntil { sut.captions.count == 1 }
-        #expect(sut.captions[0].text == "Alice: Hello")
+        #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello"))
 
         let second = [
             CaptionItem(speakerName: "Alice", text: "Hello"),
@@ -151,7 +164,7 @@ struct CaptionsViewModelTests {
 
         try await waitUntil { sut.captions.count == 1 }
 
-        #expect(sut.captions[0].text == "Diana: Let's get started!")
+        #expect(sut.captions[0].text == expectedText(speaker: "Diana", text: "Let's get started!"))
         #expect(sut.captions[0].accessibilityLabel == "Diana says: Let's get started!")
         #expect(sut.captions[0].id == caption.id)
         #expect(sut.captions[0].timestamp == caption.timestamp)
@@ -190,7 +203,7 @@ struct CaptionsViewModelTests {
         try await Task.sleep(nanoseconds: 100_000_000)
 
         #expect(sut.captions.count == 1)
-        #expect(sut.captions[0].text == "Alice: Hello")
+        #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello"))
     }
 
     @Test("cancelObservers preserves existing captions")
@@ -204,7 +217,7 @@ struct CaptionsViewModelTests {
         sut.cancelObservers()
 
         #expect(sut.captions.count == 1)
-        #expect(sut.captions[0].text == "Alice: Hello")
+        #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello"))
     }
 
     @Test("Can re-subscribe after cancelObservers by calling initObservers again")
@@ -224,10 +237,53 @@ struct CaptionsViewModelTests {
         sut.initObservers()
 
         observer.send([CaptionItem(speakerName: "Charlie", text: "Back online")])
-        try await waitUntil { sut.captions.count == 1 && sut.captions[0].text == "Charlie: Back online" }
+        try await waitUntil {
+            sut.captions.count == 1 && String(sut.captions[0].text.characters) == "Charlie: Back online"
+        }
 
-        #expect(sut.captions[0].text == "Charlie: Back online")
+        #expect(sut.captions[0].text == expectedText(speaker: "Charlie", text: "Back online"))
         #expect(sut.captions.count == 1)
+    }
+
+    // MARK: - isMe Mapping
+
+    @Test("Maps isMe caption with 'You' as speaker name")
+    func mapsIsMeCaptionWithYouLabel() async throws {
+        let (sut, observer) = makeSUT()
+        sut.initObservers()
+
+        let caption = CaptionItem(speakerName: "Me", text: "My message", isMe: true)
+        observer.send([caption])
+
+        try await waitUntil { sut.captions.count == 1 }
+
+        #expect(sut.captions[0].isMe == true)
+        #expect(sut.captions[0].text == expectedText(speaker: "You", text: "My message"))
+        #expect(sut.captions[0].accessibilityLabel == "Me says: My message")
+    }
+
+    // MARK: - Custom Max Visible Captions
+
+    @Test("Respects custom maxVisibleCaptions value")
+    func customMaxVisibleCaptions() async throws {
+        let observer = MockCaptionsObserver()
+        let sut = CaptionsViewModel(captionsObserver: observer, maxVisibleCaptions: 1)
+        sut.initObservers()
+
+        let captions = (0..<3).map { index in
+            CaptionItem(
+                speakerName: "Speaker\(index)",
+                text: "Message \(index)",
+                timestamp: Date().addingTimeInterval(TimeInterval(-3 + index))
+            )
+        }
+
+        observer.send(captions)
+
+        try await waitUntil { sut.captions.count == 1 }
+
+        #expect(sut.captions.count == 1)
+        #expect(sut.captions[0].id == captions[2].id)
     }
 
     // MARK: - Convenience Init

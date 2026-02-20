@@ -313,6 +313,7 @@ extension VonageSubscriber: OTSubscriberKitCaptionsDelegate {
     /// Receives live captions; implementation can be extended to publish captions to the UI.
     public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {
         let name = subscriber.stream?.name
-        onCaption?(.init(name: name, text: text, isFinal: isFinal, isRemote: true))
+        let id = subscriber.stream?.streamId
+        onCaption?(.init(id: id, name: name, text: text, isFinal: isFinal, isRemote: true))
     }
 }

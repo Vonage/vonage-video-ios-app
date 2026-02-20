@@ -45,7 +45,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         var captionsButtonViewModel: CaptionsButtonViewModel?
         var captionsViewModel: CaptionsViewModel?
     #endif
-    
+
     #if REACTIONS_ENABLED
         var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
         var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?

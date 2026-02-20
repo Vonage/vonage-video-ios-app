@@ -88,8 +88,8 @@ extension DependencyContainer {
             return .init(
                 label: String(localized: "Captions"),
                 image: viewModel.state.captionsEnabled
-                ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
-                : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
+                    ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
+                    : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
                 onTap: {
                     viewModel.onTap()
                 },
@@ -98,7 +98,7 @@ extension DependencyContainer {
                 })
         }
     #endif
-            
+
     #if REACTIONS_ENABLED
         func mapToReactionsBottomBarButton(
             _ viewModel: EmojiButtonContainerViewModel,

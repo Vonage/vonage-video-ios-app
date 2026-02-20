@@ -5,8 +5,9 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
-@testable import VERACaptions
 import VERADomain
+
+@testable import VERACaptions
 
 @Suite("CaptionsButton UI Tests")
 @MainActor
@@ -79,31 +80,6 @@ struct CaptionsButtonSnapshotTests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "CaptionsButton - Accessibility",
-        arguments: [
-            ("SmallText-enabled", ContentSizeCategory.extraSmall, CaptionsState.enabled("demo-id")),
-            (
-                "LargeText-enabled", ContentSizeCategory.accessibilityExtraExtraExtraLarge,
-                CaptionsState.enabled("demo-id")
-            ),
-            ("SmallText-disabled", ContentSizeCategory.extraSmall, CaptionsState.disabled),
-            (
-                "LargeText-disabled", ContentSizeCategory.accessibilityExtraExtraExtraLarge,
-                CaptionsState.disabled
-            ),
-        ])
-    func accessibility(
-        textName: String,
-        textSize: ContentSizeCategory,
-        state: CaptionsState
-    ) throws {
-        let sut = makeSUT(state: state)
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers

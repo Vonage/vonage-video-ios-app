@@ -91,7 +91,7 @@ struct CaptionsDemoView: View {
 /// A mock data source that simulates enabling/disabling captions.
 /// When captions are enabled, it starts a timer that feeds demo captions
 /// into the shared repository, creating a self-contained loopback.
-private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSource {
+private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSource, @unchecked Sendable {
 
     private let statusDataSource: CaptionsStatusDataSource
     private let repository: CaptionsRepository
@@ -131,16 +131,6 @@ private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSour
         let captionsId = "demo-captions-\(UUID().uuidString.prefix(8))"
         startFeedingCaptions()
         return EnableCaptionsDataSourceResponse(captionsId: captionsId)
-    }
-
-    func disableCaptions(
-        _ request: DisableCaptionsDataSourceRequest
-    ) async throws {
-        await MainActor.run {
-            stopFeedingCaptions()
-        }
-        statusDataSource.set(captionsState: .disabled)
-        await repository.updateCaptions([])
     }
 
     // MARK: - Private

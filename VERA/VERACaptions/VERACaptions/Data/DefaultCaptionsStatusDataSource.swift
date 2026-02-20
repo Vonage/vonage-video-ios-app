@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import VERADomain
 
-public final class DefaultCaptionsStatusDataSource: CaptionsStatusDataSource {
+public final class DefaultCaptionsStatusDataSource: CaptionsStatusDataSource, @unchecked Sendable {
     private var _captionsState = CurrentValueSubject<CaptionsState, Never>(.disabled)
     public lazy var captionsState: AnyPublisher<CaptionsState, Never> = _captionsState.eraseToAnyPublisher()
 

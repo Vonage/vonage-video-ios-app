@@ -5,8 +5,9 @@
 import Combine
 import Foundation
 import Testing
-@testable import VERACaptions
 import VERADomain
+
+@testable import VERACaptions
 
 @Suite("CaptionsButtonViewModel Tests")
 @MainActor
@@ -96,17 +97,44 @@ struct CaptionsButtonViewModelTests {
 
     // MARK: - Error Handling
 
-    @Test("Enable error is silently handled and does not crash")
-    func enableErrorSilentlyHandled() async throws {
+    @Test("Enable error sets failure toast")
+    func enableErrorSetsToast() async throws {
         let (sut, mocks) = makeSUT()
         mocks.enableUseCase.shouldThrow = true
         sut.setup()
 
         sut.onTap()
 
-        try await waitUntil { mocks.enableUseCase.callCount > 0 }
+        try await waitUntil { sut.toast != nil }
 
         #expect(mocks.enableUseCase.callCount == 1)
+        #expect(sut.toast?.mode == .failure)
+        #expect(sut.toast?.message.isEmpty == false)
+    }
+
+    @Test("Successful enable does not set toast")
+    func successfulEnableNoToast() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.setup()
+
+        sut.onTap()
+
+        try await waitUntil { mocks.enableUseCase.callCount > 0 }
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Disable does not set toast")
+    func disableNoToast() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.setup()
+
+        mocks.statusDataSource.set(captionsState: .enabled("id-1"))
+        try await waitUntil { sut.state.captionsEnabled }
+
+        sut.onTap()
+
+        #expect(sut.toast == nil)
     }
 
     @Test("Disable tap does not crash")
@@ -120,6 +148,32 @@ struct CaptionsButtonViewModelTests {
         sut.onTap()
 
         #expect(mocks.disableUseCase.callCount == 1)
+    }
+
+    // MARK: - Edge Cases
+
+    @Test("onTap before setup calls enable use case")
+    func tapBeforeSetupCallsEnable() async throws {
+        let (sut, mocks) = makeSUT()
+
+        sut.onTap()
+
+        try await waitUntil { mocks.enableUseCase.callCount > 0 }
+
+        #expect(mocks.enableUseCase.callCount == 1)
+    }
+
+    @Test("State remains disabled immediately after enable tap")
+    func stateRemainsDisabledAfterEnableTap() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.setup()
+
+        sut.onTap()
+
+        // State should still be .disabled — only the data source publisher can change it
+        #expect(sut.state == .disabled)
+
+        try await waitUntil { mocks.enableUseCase.callCount > 0 }
     }
 
     // MARK: - Helpers

@@ -10,7 +10,7 @@ public protocol DisableCaptionsUseCase {
 }
 
 public final class DefaultDisableCaptionsUseCase: DisableCaptionsUseCase {
-    
+
     private let captionsStatusDataSource: CaptionsStatusDataSource
 
     public init(captionsStatusDataSource: CaptionsStatusDataSource) {

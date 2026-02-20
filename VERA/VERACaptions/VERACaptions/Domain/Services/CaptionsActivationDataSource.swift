@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public enum CaptionsDataSourceError: Swift.Error {
     case networkError
@@ -17,18 +18,6 @@ public struct EnableCaptionsDataSourceRequest {
     }
 }
 
-public struct DisableCaptionsDataSourceRequest {
-    public let roomName: String
-    public let captionsID: String
-
-    public init(roomName: String, captionsID: String) {
-        self.roomName = roomName
-        self.captionsID = captionsID
-    }
-}
-
-public typealias CaptionsID = String
-
 public struct EnableCaptionsDataSourceResponse {
     public let captionsId: CaptionsID
 
@@ -41,8 +30,4 @@ public protocol CaptionsActivationDataSource {
     func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse
-
-    func disableCaptions(
-        _ request: DisableCaptionsDataSourceRequest
-    ) async throws
 }

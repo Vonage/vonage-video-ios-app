@@ -57,6 +57,19 @@ struct VERAApp: App {
             navigator: navigationCoordinator)
     }
 
+    #if CAPTIONS_ENABLED
+        private var captionsStatePublisher: AnyPublisher<CaptionsState, Never> {
+            navigationCoordinator.captionsButtonViewModel?.$state
+                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
+        }
+
+        private var captionsToastPublisher: AnyPublisher<ToastItem, Never> {
+            navigationCoordinator.captionsButtonViewModel?.$toast
+                .compactMap { $0 }
+                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
+        }
+    #endif
+
     @State private var previousPath = NavigationPath()
     @State private var showChat = false
     @State private var showPickerView = false
@@ -96,13 +109,13 @@ struct VERAApp: App {
                                 }
                             #endif
                         }
-                    
+
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
                             }
                         #endif
-                    
+
                         #if REACTIONS_ENABLED
                             .dismissibleOverlay(
                                 isPresented: $showPickerView,
@@ -115,13 +128,13 @@ struct VERAApp: App {
                                 makeFloatingEmojisOverlay()
                             }
                         #endif
-                    
+
                         #if CAPTIONS_ENABLED
-                            .onReceive(
-                                navigationCoordinator.captionsButtonViewModel?.$state
-                                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
-                            ) { state in
+                            .onReceive(captionsStatePublisher) { state in
                                 showCaptions = state.captionsEnabled
+                            }
+                            .onReceive(captionsToastPublisher) { toast in
+                                navigationCoordinator.meetingRoomViewModel?.toast = toast
                             }
                             .dismissibleOverlay(
                                 isPresented: $showCaptions,
@@ -285,7 +298,7 @@ struct VERAApp: App {
 
             newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
             navigationCoordinator.meetingRoomViewModel = newViewModel
-            
+
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
             #endif
@@ -296,7 +309,7 @@ struct VERAApp: App {
                 navigationCoordinator.floatingEmojisOverlayViewModel =
                     dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
             #endif
-            
+
             viewModel = newViewModel
         }
 
@@ -339,7 +352,7 @@ struct VERAApp: App {
                 extraButtons.append(dependencyContainer.makeCaptionsButton(captionsButtonViewModel))
             }
         #endif
-        
+
         #if REACTIONS_ENABLED
             if let viewModel = navigationCoordinator.emojiButtonContainerViewModel {
                 extraButtons.append(
@@ -430,7 +443,7 @@ struct VERAApp: App {
             }
         }
     #endif
-    
+
     #if CAPTIONS_ENABLED
         @ViewBuilder
         private func makeCaptionsView() -> some View {
@@ -438,5 +451,5 @@ struct VERAApp: App {
                 captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
             }
         }
-   #endif
+    #endif
 }

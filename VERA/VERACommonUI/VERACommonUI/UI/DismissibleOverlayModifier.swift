@@ -67,7 +67,7 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
                             .ignoresSafeArea()
                             .onTapGesture {
                                 if !allowsHitTesting { return }
-                                
+
                                 if let animation {
                                     withAnimation(animation) {
                                         isPresented = false
