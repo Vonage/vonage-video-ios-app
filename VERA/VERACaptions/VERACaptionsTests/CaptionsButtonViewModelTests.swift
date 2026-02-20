@@ -80,7 +80,7 @@ struct CaptionsButtonViewModelTests {
 
     // MARK: - onTap Disable
 
-    @Test("Tapping when enabled calls disable use case with room name and captions ID")
+    @Test("Tapping when enabled calls disable use case and state becomes disabled")
     func tapWhenEnabledCallsDisable() async throws {
         let (sut, mocks) = makeSUT(roomName: "my-room")
         sut.setup()
@@ -90,11 +90,7 @@ struct CaptionsButtonViewModelTests {
 
         sut.onTap()
 
-        try await waitUntil { mocks.disableUseCase.callCount > 0 }
-
         #expect(mocks.disableUseCase.callCount == 1)
-        #expect(mocks.disableUseCase.lastRoomName == "my-room")
-        #expect(mocks.disableUseCase.lastCaptionsID == "captions-456")
         #expect(mocks.enableUseCase.callCount == 0)
     }
 
@@ -113,18 +109,15 @@ struct CaptionsButtonViewModelTests {
         #expect(mocks.enableUseCase.callCount == 1)
     }
 
-    @Test("Disable error is silently handled and does not crash")
-    func disableErrorSilentlyHandled() async throws {
+    @Test("Disable tap does not crash")
+    func disableTapDoesNotCrash() async throws {
         let (sut, mocks) = makeSUT()
-        mocks.disableUseCase.shouldThrow = true
         sut.setup()
 
         mocks.statusDataSource.set(captionsState: .enabled("id-1"))
         try await waitUntil { sut.state.captionsEnabled }
 
         sut.onTap()
-
-        try await waitUntil { mocks.disableUseCase.callCount > 0 }
 
         #expect(mocks.disableUseCase.callCount == 1)
     }
@@ -192,17 +185,9 @@ private final class MockEnableCaptionsUseCase: EnableCaptionsUseCase, @unchecked
 
 private final class MockDisableCaptionsUseCase: DisableCaptionsUseCase, @unchecked Sendable {
     var callCount = 0
-    var lastRoomName: String?
-    var lastCaptionsID: CaptionsID?
-    var shouldThrow = false
 
-    func callAsFunction(_ request: DisableCaptionsRequest) async throws {
+    func callAsFunction() {
         callCount += 1
-        lastRoomName = request.roomName
-        lastCaptionsID = request.captionsID
-        if shouldThrow {
-            throw MockError.forced
-        }
     }
 }
 

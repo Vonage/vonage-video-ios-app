@@ -8,15 +8,15 @@ import VERADomain
 
 public final class CaptionsButtonViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
-
+    
     @Published public var state: CaptionsState = .disabled
-
+    
     private let roomName: RoomName
     private let enableCaptionsUseCase: EnableCaptionsUseCase
     private let disableCaptionsUseCase: DisableCaptionsUseCase
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private var initiated = false
-
+    
     public init(
         roomName: RoomName,
         enableCaptionsUseCase: EnableCaptionsUseCase,
@@ -28,11 +28,11 @@ public final class CaptionsButtonViewModel: ObservableObject {
         self.disableCaptionsUseCase = disableCaptionsUseCase
         self.captionsStatusDataSource = captionsStatusDataSource
     }
-
+    
     public func setup() {
         guard !initiated else { return }
         initiated = true
-
+        
         captionsStatusDataSource.captionsState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
@@ -40,13 +40,13 @@ public final class CaptionsButtonViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-
+    
     public func onTap() {
-        Task {
-            switch state {
-            case .enabled(let captionsID):
-                try? await disableCaptionsUseCase(.init(roomName: roomName, captionsID: captionsID))
-            case .disabled:
+        switch state {
+        case .enabled(_):
+            disableCaptionsUseCase()
+        case .disabled:
+            Task {
                 try? await enableCaptionsUseCase(.init(roomName: roomName))
             }
         }

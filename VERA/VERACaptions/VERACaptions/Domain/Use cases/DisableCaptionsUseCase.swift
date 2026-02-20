@@ -5,37 +5,19 @@
 import Foundation
 import VERADomain
 
-public struct DisableCaptionsRequest {
-    public let roomName: String
-    public let captionsID: CaptionsID
-
-    public init(
-        roomName: String,
-        captionsID: CaptionsID
-    ) {
-        self.roomName = roomName
-        self.captionsID = captionsID
-    }
-}
-
 public protocol DisableCaptionsUseCase {
-    func callAsFunction(_ request: DisableCaptionsRequest) async throws
+    func callAsFunction()
 }
 
 public final class DefaultDisableCaptionsUseCase: DisableCaptionsUseCase {
-    private let captionsActivationDataSource: any CaptionsActivationDataSource
+    
+    private let captionsStatusDataSource: CaptionsStatusDataSource
 
-    public init(captionsActivationDataSource: any CaptionsActivationDataSource) {
-        self.captionsActivationDataSource = captionsActivationDataSource
+    public init(captionsStatusDataSource: CaptionsStatusDataSource) {
+        self.captionsStatusDataSource = captionsStatusDataSource
     }
 
-    public func callAsFunction(
-        _ request: DisableCaptionsRequest
-    ) async throws {
-        let newRequest = DisableCaptionsDataSourceRequest(
-            roomName: request.roomName,
-            captionsID: request.captionsID
-        )
-        _ = try await captionsActivationDataSource.disableCaptions(newRequest)
+    public func callAsFunction() {
+        captionsStatusDataSource.set(captionsState: .disabled)
     }
 }

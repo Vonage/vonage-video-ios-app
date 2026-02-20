@@ -30,7 +30,7 @@ public final class CaptionsFactory {
                 captionsActivationDataSource: captionsActivationDataSource,
                 captionsStatusDataSource: captionsStatusDataSource),
             disableCaptionsUseCase: DefaultDisableCaptionsUseCase(
-                captionsActivationDataSource: captionsActivationDataSource),
+                captionsStatusDataSource: captionsStatusDataSource),
             captionsStatusDataSource: captionsStatusDataSource)
 
         return (makeCaptionsButton(viewModel: viewModel), viewModel)
