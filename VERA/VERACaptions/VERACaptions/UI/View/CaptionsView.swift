@@ -3,120 +3,119 @@
 //
 
 import SwiftUI
-import VERADomain
+import VERACommonUI
+
+private enum CaptionsViewConstants {
+    static let itemSpacing: CGFloat = 8
+    static let contentPadding: CGFloat = 12
+    static let maxHeight: CGFloat = 92
+    static let maxWidth: CGFloat = 600
+    static let cornerRadius: CGFloat = 12
+    static let backgroundOpacity: Double = 0.75
+    static let horizontalPadding: CGFloat = 16
+    static let scrollAnimationDuration: Double = 0.2
+}
 
 /// Displays a list of captions at the bottom of the screen
 /// Supports multiple simultaneous speakers
 public struct CaptionsView: View {
     /// Array of current captions to display
-    public let captions: [CaptionItem]
-
-    /// Maximum number of captions to display simultaneously
-    private let maxVisibleCaptions = 3
-
-    public init(captions: [CaptionItem]) {
+    public let captions: [UICaptionItem]
+    
+    public init(captions: [UICaptionItem] = []) {
         self.captions = captions
     }
-
+    
     public var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(alignment: .leading, spacing: CaptionsViewConstants.itemSpacing) {
+                    ForEach(captions) { caption in
+                        CaptionItemView(caption: caption)
+                            .id(caption.id)
+                    }
+                }
+                .padding(CaptionsViewConstants.contentPadding)
+            }
+            .frame(maxHeight: CaptionsViewConstants.maxHeight)
+            .frame(maxWidth: CaptionsViewConstants.maxWidth)
+            .background(
+                RoundedRectangle(cornerRadius: CaptionsViewConstants.cornerRadius)
+                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(CaptionsViewConstants.backgroundOpacity))
+            )
+            .padding(.horizontal, CaptionsViewConstants.horizontalPadding)
+            .onChange(of: captions.last?.id) { latestId in
+                guard let latestId else { return }
+                withAnimation(.easeOut(duration: CaptionsViewConstants.scrollAnimationDuration)) {
+                    proxy.scrollTo(latestId, anchor: .bottom)
+                }
+            }.clipped()
+        }
+    }
+}
+
+// MARK: - Previews
+#if DEBUG
+#Preview("1 Caption") {
+    ZStack {
+        Color.gray.ignoresSafeArea()
         VStack {
             Spacer()
-
-            if !visibleCaptions.isEmpty {
-                HStack {
-                    Spacer()
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(visibleCaptions) { caption in
-                            CaptionItemView(caption: caption)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(.black.opacity(0.75))
-                    )
-                    .frame(maxWidth: 600)
-
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
+            CaptionsView(captions: [.previewAlice])
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .allowsHitTesting(false)
-    }
-
-    /// Returns the most recent captions up to the maximum visible limit
-    private var visibleCaptions: [CaptionItem] {
-        Array(
-            captions
-                .sorted { $0.timestamp > $1.timestamp }
-                .prefix(maxVisibleCaptions))
     }
 }
 
-#Preview("Single Caption") {
+#Preview("2 Captions") {
     ZStack {
-        Color.gray
-            .ignoresSafeArea()
-
-        CaptionsView(
-            captions: [
-                CaptionItem(
-                    speakerName: "Alice",
-                    text: "Hello everyone, welcome to the meeting!"
-                )
-            ]
-        )
+        Color.gray.ignoresSafeArea()
+        VStack {
+            Spacer()
+            CaptionsView(captions: [.previewAlice, .previewBob])
+        }
     }
 }
 
-#Preview("Multiple Captions") {
+#Preview("3 Captions") {
     ZStack {
-        Color.gray
-            .ignoresSafeArea()
-
-        CaptionsView(
-            captions: [
-                CaptionItem(
-                    speakerName: "Alice",
-                    text: "I agree with that proposal.",
-                    timestamp: Date().addingTimeInterval(-2)
-                ),
-                CaptionItem(
-                    speakerName: "Bob",
-                    text: "Yes, let's move forward with the implementation.",
-                    timestamp: Date().addingTimeInterval(-1)
-                ),
-                CaptionItem(
-                    speakerName: "Charlie",
-                    text: "Sounds good to me!"
-                ),
-            ]
-        )
+        Color.gray.ignoresSafeArea()
+        VStack {
+            Spacer()
+            CaptionsView(captions: [.previewAlice, .previewBob, .previewCharlie])
+        }
     }
 }
 
-#Preview("Long Caption") {
+#Preview("6 Captions - Scrollable") {
     ZStack {
-        Color.gray
-            .ignoresSafeArea()
-
-        CaptionsView(
-            captions: [
-                CaptionItem(
-                    speakerName: "David",
-                    text:
-                        """
-                        This is a very long caption that demonstrates how the view handles 
-                        text that wraps across multiple lines and maintains good readability.
-                        """
-                )
-            ]
-        )
+        Color.gray.ignoresSafeArea()
+        VStack {
+            Spacer()
+            CaptionsView(captions: [
+                .previewAlice, .previewBob, .previewCharlie,
+                .previewDiana, .previewAlice2, .previewDiana2
+            ])
+        }
     }
 }
+
+#Preview("Long Text") {
+    ZStack {
+        Color.gray.ignoresSafeArea()
+        VStack {
+            Spacer()
+            CaptionsView(captions: [.previewLongText])
+        }
+    }
+}
+
+#Preview("Empty") {
+    ZStack {
+        Color.gray.ignoresSafeArea()
+        VStack {
+            Spacer()
+            CaptionsView(captions: [])
+        }
+    }
+}
+#endif

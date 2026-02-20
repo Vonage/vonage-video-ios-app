@@ -40,12 +40,6 @@ public struct MeetingRoomScreen: View {
                             extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
                         )
 
-                        ForEach(viewModel.extraOverlayViews) { overlay in
-                            overlay.content()
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(.bottom, MeetingRoomScreenConstants.overlaysPaddingFromBottom)
-
                         if state.callState == .disconnecting {
                             LoaderModalView()
                         }

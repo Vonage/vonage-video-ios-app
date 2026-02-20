@@ -195,12 +195,17 @@ final class DependencyContainer {
 
         lazy var captionsStatusDataSource: CaptionsStatusDataSource = DefaultCaptionsStatusDataSource()
 
+        lazy var captionsRepository: CaptionsRepository = DefaultCaptionsRepository()
+
         lazy var captionsFactory = CaptionsFactory(
             captionsActivationDataSource: captionsActivationDataSource,
-            captionsStatusDataSource: captionsStatusDataSource)
+            captionsStatusDataSource: captionsStatusDataSource,
+            captionsRepository: captionsRepository)
 
         lazy var captionsPlugin: VonageCaptionsPlugin = {
-            let plugin = VonageCaptionsPlugin(captionsStatusDataSource: captionsStatusDataSource)
+            let plugin = VonageCaptionsPlugin(
+                captionsStatusDataSource: captionsStatusDataSource,
+                captionsRepository: captionsRepository)
             return plugin
         }()
     #else

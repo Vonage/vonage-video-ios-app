@@ -523,6 +523,7 @@ final class MockReactionsRepository: ReactionsRepository, @unchecked Sendable {
 }
 
 final class MockCallFacade: CallFacade, @unchecked Sendable {
+
     let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
@@ -541,6 +542,10 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     var isMuted: Bool = false
     var isOnHold: Bool = false
+    var areCaptionsEnabled: Bool = false
+
+    let _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
     func connect() {}
     func disconnect() async throws {}
@@ -549,4 +554,6 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func toggleLocalAudio() {}
     func muteLocalMedia(_ isMuted: Bool) { self.isMuted = isMuted }
     func setOnHold(_ isOnHold: Bool) { self.isOnHold = isOnHold }
+    func enableCaptions() async {}
+    func disableCaptions() async {}
 }

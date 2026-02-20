@@ -4,35 +4,46 @@
 
 import SwiftUI
 import VERACommonUI
-import VERADomain
 
 /// Displays a single caption with speaker name and text
 struct CaptionItemView: View {
-    let caption: CaptionItem
+    let caption: UICaptionItem
 
     var body: some View {
-        Text(caption.speakerName + ": " + caption.text)
+        Text(caption.text)
             .adaptiveFont(.bodyBase)
             .foregroundStyle(.white)
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(caption.speakerName) says: \(caption.text)")
+            .accessibilityLabel(caption.accessibilityLabel)
     }
 }
 
-#Preview {
-    VStack {
-        Spacer()
 
-        CaptionItemView(
-            caption: CaptionItem(
-                speakerName: "John Doe",
-                text: "This is a sample caption that demonstrates how the caption view looks with a longer text."
-            )
-        )
+// MARK: - Previews
+
+#if DEBUG
+#Preview("Short Caption") {
+    CaptionItemView(caption: .previewAlice)
         .padding()
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color.gray)
+        .background(Color.black.opacity(0.75))
 }
+
+#Preview("Long Caption") {
+    CaptionItemView(caption: .previewLongText)
+        .padding()
+        .frame(maxWidth: 600)
+        .background(Color.black.opacity(0.75))
+}
+
+#Preview("Multiple Captions") {
+    VStack(alignment: .leading, spacing: 8) {
+        CaptionItemView(caption: .previewAlice)
+        CaptionItemView(caption: .previewBob)
+        CaptionItemView(caption: .previewCharlie)
+    }
+    .padding()
+    .background(Color.black.opacity(0.75))
+}
+#endif

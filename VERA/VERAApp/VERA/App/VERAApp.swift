@@ -2,6 +2,7 @@
 //  Created by Vonage on 4/7/25.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import VERACommonUI
@@ -59,6 +60,7 @@ struct VERAApp: App {
     @State private var previousPath = NavigationPath()
     @State private var showChat = false
     @State private var showPickerView = false
+    @State private var showCaptions = false
 
     var body: some Scene {
         WindowGroup {
@@ -94,12 +96,13 @@ struct VERAApp: App {
                                 }
                             #endif
                         }
-                        .alert(item: $navigationCoordinator.alertItem) { $0.view }
+                    
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
                                 makeChatView()
                             }
                         #endif
+                    
                         #if REACTIONS_ENABLED
                             .dismissibleOverlay(
                                 isPresented: $showPickerView,
@@ -110,6 +113,23 @@ struct VERAApp: App {
                             }
                             .overlay {
                                 makeFloatingEmojisOverlay()
+                            }
+                        #endif
+                    
+                        #if CAPTIONS_ENABLED
+                            .onReceive(
+                                navigationCoordinator.captionsButtonViewModel?.$state
+                                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
+                            ) { state in
+                                showCaptions = state.captionsEnabled
+                            }
+                            .dismissibleOverlay(
+                                isPresented: $showCaptions,
+                                alignment: .bottom,
+                                edgePadding: VERAAppConstants.overlayBottomPadding,
+                                allowsHitTesting: false
+                            ) {
+                                makeCaptionsView()
                             }
                         #endif
                 }
@@ -240,7 +260,6 @@ struct VERAApp: App {
             let (_, newViewModel) = meetingRoomFactory.make(
                 roomName: roomName,
                 getExternalButtons: getBottomBarButtons,
-                getExtraOverlays: getExtraOverlays,
                 onActionHandler: {
                     switch $0 {
                     case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
@@ -266,6 +285,7 @@ struct VERAApp: App {
 
             newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
             navigationCoordinator.meetingRoomViewModel = newViewModel
+            
             #if ARCHIVING_ENABLED
                 navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
             #endif
@@ -276,6 +296,7 @@ struct VERAApp: App {
                 navigationCoordinator.floatingEmojisOverlayViewModel =
                     dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
             #endif
+            
             viewModel = newViewModel
         }
 
@@ -334,17 +355,7 @@ struct VERAApp: App {
     private func getExtraOverlays(
         _ state: MeetingRoomOverlayState
     ) -> [ViewGenerator] {
-        var result = [ViewGenerator]()
-        #if CAPTIONS_ENABLED
-            if let captionsViewModel = navigationCoordinator.captionsViewModel {
-                captionsViewModel.updateCaptions(state.captions)
-                result.append(
-                    ViewGenerator(content: {
-                        captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
-                    }))
-            }
-        #endif
-        return result
+        []
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
@@ -419,4 +430,13 @@ struct VERAApp: App {
             }
         }
     #endif
+    
+    #if CAPTIONS_ENABLED
+        @ViewBuilder
+        private func makeCaptionsView() -> some View {
+            if let captionsViewModel = navigationCoordinator.captionsViewModel {
+                captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
+            }
+        }
+   #endif
 }

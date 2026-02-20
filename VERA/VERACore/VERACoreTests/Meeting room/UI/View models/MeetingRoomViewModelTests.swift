@@ -460,11 +460,11 @@ struct MeetingRoomViewModelTests {
             disconnectRoomUseCase: disconnectRoomUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
-            currentCallParticipantsRepository: currentCallParticipantsRepository,
+            currentCallParticipantsRepository: currentCallParticipantsRepository, captionsStatusDataSource: NullCaptionsStatusDataSource(),
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: { _ in [] },
-            getExtraOverlays: { _ in [] })
+            getExternalButtons: { _ in [] }
+        )
     }
 
     // MARK: Helper

@@ -13,7 +13,7 @@ public final class DefaultCaptionsStatusDataSource: CaptionsStatusDataSource {
     public init() {
     }
 
-    public func set(captionsState: VERADomain.CaptionsState) {
+    public func set(captionsState: CaptionsState) {
         _captionsState.value = captionsState
     }
 

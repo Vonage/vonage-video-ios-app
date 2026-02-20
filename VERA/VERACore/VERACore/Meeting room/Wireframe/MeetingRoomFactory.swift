@@ -38,7 +38,6 @@ public class MeetingRoomFactory {
     public func make(
         roomName: RoomName,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
-        getExtraOverlays: @escaping (MeetingRoomOverlayState) -> [ViewGenerator],
         onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
@@ -55,8 +54,8 @@ public class MeetingRoomFactory {
             captionsStatusDataSource: captionsStatusDataSource,
             appConfig: appConfig,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
-            getExternalButtons: getExternalButtons,
-            getExtraOverlays: getExtraOverlays)
+            getExternalButtons: getExternalButtons
+        )
         return (make(viewModel: viewModel), viewModel)
     }
 

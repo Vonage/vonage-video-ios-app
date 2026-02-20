@@ -30,6 +30,7 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
     let animation: Animation?
     let alignment: Alignment
     let edgePadding: CGFloat
+    let allowsHitTesting: Bool
 
     /// Creates a dismissible overlay modifier.
     /// - Parameters:
@@ -45,6 +46,7 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
         animation: Animation? = .easeInOut(duration: 0.3),
         alignment: Alignment = .center,
         edgePadding: CGFloat = 0,
+        allowsHitTesting: Bool = true,
         @ViewBuilder content: @escaping () -> OverlayContent
     ) {
         self._isPresented = isPresented
@@ -53,6 +55,7 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
         self.alignment = alignment
         self.edgePadding = edgePadding
         self.overlayContent = content
+        self.allowsHitTesting = allowsHitTesting
     }
 
     public func body(content: Content) -> some View {
@@ -63,6 +66,8 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
                         Color.black.opacity(backgroundOpacity)
                             .ignoresSafeArea()
                             .onTapGesture {
+                                if !allowsHitTesting { return }
+                                
                                 if let animation {
                                     withAnimation(animation) {
                                         isPresented = false
@@ -77,6 +82,7 @@ public struct DismissibleOverlayModifier<OverlayContent: View>: ViewModifier {
                             .onTapGesture {}
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(allowsHitTesting)
                 }
             }
             .animation(animation, value: isPresented)
@@ -108,6 +114,7 @@ extension View {
     ///   - edgePadding: Padding applied to the edge based on alignment. Defaults to 0.
     ///   - backgroundOpacity: Opacity of the background overlay. Defaults to 0.3.
     ///   - animation: Animation for show/hide. Defaults to `.easeInOut(duration: 0.3)`.
+    ///   - allowsHitTesting: Allow taps or clicks
     ///   - content: The content to show in the overlay.
     /// - Returns: A view with the dismissible overlay modifier applied.
     public func dismissibleOverlay<Content: View>(
@@ -116,6 +123,7 @@ extension View {
         edgePadding: CGFloat = 0,
         backgroundOpacity: Double = 0.3,
         animation: Animation? = .easeInOut(duration: 0.3),
+        allowsHitTesting: Bool = true,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         modifier(
@@ -125,6 +133,7 @@ extension View {
                 animation: animation,
                 alignment: alignment,
                 edgePadding: edgePadding,
+                allowsHitTesting: allowsHitTesting,
                 content: content
             )
         )

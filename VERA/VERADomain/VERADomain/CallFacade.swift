@@ -74,7 +74,7 @@ public typealias ArchiveID = String
 ///
 /// Represents if the current call has captions enabled or not.
 /// Use it to drive recording related UI display.
-public enum CaptionsState {
+public enum CaptionsState : Equatable {
     case enabled(CaptionsID)
     case disabled
 }

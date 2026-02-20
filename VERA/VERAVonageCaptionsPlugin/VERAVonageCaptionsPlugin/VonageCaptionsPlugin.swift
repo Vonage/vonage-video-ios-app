@@ -25,28 +25,29 @@ import VERAVonage
 public final class VonageCaptionsPlugin: VonagePlugin, VonageSignalHandler, VonagePluginCallHolder {
     private var cancellables = Set<AnyCancellable>()
 
-    /// Supported signal types for this plugin.
-    public enum SignalType: String {
-        /// Archiving status signals routed via Vonage signaling.
-        case archiving
-    }
-
     /// The active call façade reference, used to perform actions
     /// such as `disconnect()`, `setOnHold(_:)`, and `muteLocalMedia(_:)`.
     public weak var call: (any CallFacade)?
 
     private let captionsStatusDataSource: CaptionsStatusDataSource
+    private let captionsRepository: CaptionsWriter
 
     /// A stable identifier for this plugin instance.
     ///
-    /// Defaults to the type name (e.g., `"VonageArchivingPlugin"`).
+    /// Defaults to the type name (e.g., `"VonageCaptionsPlugin"`).
     public var pluginIdentifier: String { String(describing: type(of: self)) }
 
-    /// Creates a new archiving plugin instance.
+    /// Creates a new captions plugin instance.
     ///
-    /// - Parameter archivingStatusDataSource: The data source that will be updated with archiving status changes.
-    public init(captionsStatusDataSource: CaptionsStatusDataSource) {
+    /// - Parameters:
+    ///   - captionsStatusDataSource: The data source for captions activation state.
+    ///   - captionsRepository: The writer to forward caption data to.
+    public init(
+        captionsStatusDataSource: CaptionsStatusDataSource,
+        captionsRepository: CaptionsWriter
+    ) {
         self.captionsStatusDataSource = captionsStatusDataSource
+        self.captionsRepository = captionsRepository
     }
 
     /// Lifecycle callback invoked when the call starts and the session is connected.
@@ -57,10 +58,18 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonageSignalHandler, Vona
     /// - Parameters:
     ///   - userInfo: A dictionary with contextual info (not currently used by this plugin).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        captionsStatusDataSource.captionsState.sink { [weak self] state in
-            self?.proccessNewState(state)
-        }
-        .store(in: &cancellables)
+        captionsStatusDataSource.captionsState
+            .sink { [weak self] state in
+                self?.proccessNewState(state)
+            }
+            .store(in: &cancellables)
+
+        call?.captionsPublisher
+            .sink { [weak self] captions in
+                guard let self else { return }
+                Task { await self.captionsRepository.updateCaptions(captions) }
+            }
+            .store(in: &cancellables)
     }
 
     private func proccessNewState(_ state: CaptionsState) {
@@ -77,6 +86,7 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonageSignalHandler, Vona
     /// Resets the archiving status data source to clear any active archiving state.
     public func callDidEnd() async throws {
         captionsStatusDataSource.reset()
+        await captionsRepository.updateCaptions([])
         cancellables.removeAll()
     }
 

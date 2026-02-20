@@ -46,7 +46,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var toast: ToastItem?
     @MainActor @Published public var extraButtons: [BottomBarButton] = []
     @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
-    @MainActor @Published public var extraOverlayViews: [ViewGenerator] = []
     @MainActor @Published public var isArchiving = false
 
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
@@ -60,7 +59,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let baseURL: URL
     private var initialised = false
     private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
-    private var getExtraOverlays: (MeetingRoomOverlayState) -> [ViewGenerator]
 
     public init(
         roomName: RoomName,
@@ -74,7 +72,6 @@ public final class MeetingRoomViewModel: ObservableObject {
         appConfig: AppConfig,
         meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
-        getExtraOverlays: @escaping (MeetingRoomOverlayState) -> [ViewGenerator]
     ) {
         self.roomName = roomName
         self.baseURL = baseURL
@@ -86,7 +83,6 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.appConfig = appConfig
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
-        self.getExtraOverlays = getExtraOverlays
         self.captionsStatusDataSource = captionsStatusDataSource
     }
 
@@ -247,12 +243,6 @@ extension MeetingRoomViewModel {
                 }
                 .store(in: &cancellables)
 
-            call.captionsPublisher
-                .sink { [weak self] captions in
-                    self?.handleCaptions(captions)
-                }
-                .store(in: &cancellables)
-
             captionsStatusDataSource.captionsState
                 .sink { state in
                     Task { @MainActor [weak self] in
@@ -322,10 +312,4 @@ extension MeetingRoomViewModel {
         extraButtons = getExternalButtons(.init(archivingState: archivingState))
     }
 
-    fileprivate func handleCaptions(_ captions: [CaptionItem]) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            extraOverlayViews = getExtraOverlays(.init(captions: captions))
-        }
-    }
 }
