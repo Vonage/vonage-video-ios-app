@@ -15,16 +15,6 @@ public struct EnableCaptionsResponse: Codable {
     }
 }
 
-public struct DisableCaptionsResponse: Codable {
-    public let disableResponse: String
-    public let status: Int
-
-    public init(disableResponse: String, status: Int) {
-        self.disableResponse = disableResponse
-        self.status = status
-    }
-}
-
 public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
     private let baseURL: URL
     private let httpClient: HTTPClient

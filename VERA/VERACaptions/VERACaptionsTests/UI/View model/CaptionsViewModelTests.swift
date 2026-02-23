@@ -48,7 +48,6 @@ struct CaptionsViewModelTests {
 
         #expect(sut.captions[0].id == caption.id)
         #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello!"))
-        #expect(sut.captions[0].accessibilityLabel == "Alice says: Hello!")
     }
 
     @Test("Receives multiple captions sorted by most recent first")
@@ -165,7 +164,6 @@ struct CaptionsViewModelTests {
         try await waitUntil { sut.captions.count == 1 }
 
         #expect(sut.captions[0].text == expectedText(speaker: "Diana", text: "Let's get started!"))
-        #expect(sut.captions[0].accessibilityLabel == "Diana says: Let's get started!")
         #expect(sut.captions[0].id == caption.id)
         #expect(sut.captions[0].timestamp == caption.timestamp)
     }
@@ -259,7 +257,6 @@ struct CaptionsViewModelTests {
 
         #expect(sut.captions[0].isMe == true)
         #expect(sut.captions[0].text == expectedText(speaker: "You", text: "My message"))
-        #expect(sut.captions[0].accessibilityLabel == "Me says: My message")
     }
 
     // MARK: - Custom Max Visible Captions

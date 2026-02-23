@@ -307,6 +307,10 @@ public final class VonageCall: CallFacade {
 
             let state = await callStateManager.addSubscriber(vonageSubscriber)
             await updateParticipantsState(state)
+
+            if areCaptionsEnabled {
+                vonageSubscriber.enableCaptions()
+            }
         } catch {
             _eventsPublisher.send(.error(error))
         }
@@ -389,8 +393,7 @@ public final class VonageCall: CallFacade {
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
-            captionCleanupTimer?.invalidate()
-            captionCleanupTimer = nil
+            stopCaptionCleanup()
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
@@ -619,9 +622,10 @@ public final class VonageCall: CallFacade {
     }
 
     public func disableCaptions() async {
-        //await callStateManager.disableCaptions()
-        //publisher.disableCaptions()
+        await callStateManager.disableCaptions()
+        publisher.disableCaptions()
         _captionsEnabled.value = false
+        stopCaptionCleanup()
     }
 
     private func subscribeToPublisherCaptions(_ stream: OTStream) {
@@ -649,9 +653,15 @@ public final class VonageCall: CallFacade {
     }
 
     private func startCaptionCleanup() {
+        stopCaptionCleanup()
         captionCleanupTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.cleanupOldCaptions()
         }
+    }
+
+    private func stopCaptionCleanup() {
+        captionCleanupTimer?.invalidate()
+        captionCleanupTimer = nil
     }
 
     private func cleanupOldCaptions() {

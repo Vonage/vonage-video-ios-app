@@ -42,7 +42,7 @@ private enum CaptionsViewConstants {
 ///
 /// ```swift
 /// CaptionsView(captions: [
-///     UICaptionItem(caption: CaptionItem(speakerName: "Alice", text: "Hello!"))
+///     CaptionItem(speakerName: "Alice", text: "Hello!").toUICaptionItem()
 /// ])
 /// ```
 ///

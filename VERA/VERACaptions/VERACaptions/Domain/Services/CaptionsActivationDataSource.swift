@@ -5,11 +5,6 @@
 import Foundation
 import VERADomain
 
-public enum CaptionsDataSourceError: Swift.Error {
-    case networkError
-    case invalidData
-}
-
 public struct EnableCaptionsDataSourceRequest {
     public let roomName: String
 

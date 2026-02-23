@@ -215,9 +215,9 @@ public class VonageSubscriber: NSObject {
         otSubscriber.subscribeToVideo = visible
     }
 
-    /// Enables or disables audio subscritpion
+    /// Enables or disables audio subscription.
     ///
-    /// - Parameter visible: `true` to subscribe to audio; `false` to unsubscribe.
+    /// - Parameter enabled: `true` to subscribe to audio; `false` to unsubscribe.
     func enableAudioSubscription(_ enabled: Bool) {
         otSubscriber.subscribeToAudio = enabled
     }

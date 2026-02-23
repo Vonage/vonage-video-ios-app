@@ -6,7 +6,6 @@ import SnapshotTesting
 import SwiftUI
 import Testing
 import VERACaptions
-import VERADomain
 
 @Suite("CaptionsViewContainer UI Tests")
 @MainActor
@@ -140,61 +139,17 @@ struct CaptionsViewContainerSnapshotTests {
 // MARK: - Sample Data
 
 extension UICaptionItem {
-    static let sampleAlice = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Alice",
-            text: "Hello everyone, welcome to the meeting!"
-        )
-    )
-
-    static let sampleBob = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Bob",
-            text: "Thanks for joining.",
-            timestamp: Date().addingTimeInterval(-1)
-        )
-    )
-
-    static let sampleCharlie = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Charlie",
-            text: "Let's get started!",
-            timestamp: Date().addingTimeInterval(-2)
-        )
-    )
-
-    static let sampleDiana = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Diana",
-            text: "I have a few items to cover.",
-            timestamp: Date().addingTimeInterval(-3)
-        )
-    )
-
-    static let sampleAlice2 = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Alice",
-            text: "Great, Diana please go first.",
-            timestamp: Date().addingTimeInterval(-4)
-        )
-    )
-
-    static let sampleDiana2 = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "Diana",
-            text: "Thanks! The first thing is the new feature release.",
-            timestamp: Date().addingTimeInterval(-5)
-        )
-    )
-
-    static let sampleLongText = UICaptionItem(
-        caption: CaptionItem(
-            speakerName: "David",
-            text: """
-                This is a very long caption that demonstrates how the view handles text \
-                that wraps across multiple lines and maintains good readability even with extended content.
-                """
-        )
+    static let sampleAlice = makeSample(speaker: "Alice", text: "Hello everyone, welcome to the meeting!")
+    static let sampleBob = makeSample(speaker: "Bob", text: "Thanks for joining.", offset: -1)
+    static let sampleCharlie = makeSample(speaker: "Charlie", text: "Let's get started!", offset: -2)
+    static let sampleDiana = makeSample(speaker: "Diana", text: "I have a few items to cover.", offset: -3)
+    static let sampleAlice2 = makeSample(speaker: "Alice", text: "Great, Diana please go first.", offset: -4)
+    static let sampleDiana2 = makeSample(
+        speaker: "Diana", text: "Thanks! The first thing is the new feature release.", offset: -5)
+    static let sampleLongText = makeSample(
+        speaker: "David",
+        text: "This is a very long caption that demonstrates how the view handles text "
+            + "that wraps across multiple lines and maintains good readability even with extended content."
     )
 
     static let sampleMessages: [UICaptionItem] = [
@@ -211,4 +166,18 @@ extension UICaptionItem {
         sampleAlice2,
         sampleDiana2,
     ]
+
+    private static func makeSample(speaker: String, text: String, offset: TimeInterval = 0) -> UICaptionItem {
+        var boldPart = AttributedString(speaker + ": ")
+        boldPart.font = .system(.footnote, design: .default).bold()
+        var regularPart = AttributedString(text)
+        regularPart.font = .system(.footnote, design: .default)
+        return UICaptionItem(
+            id: UUID().uuidString,
+            text: boldPart + regularPart,
+            accessibilityLabel: "\(speaker) says: \(text)",
+            isMe: false,
+            timestamp: Date().addingTimeInterval(offset)
+        )
+    }
 }

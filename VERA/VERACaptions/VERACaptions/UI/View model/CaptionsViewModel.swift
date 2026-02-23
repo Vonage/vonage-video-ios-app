@@ -70,7 +70,7 @@ public final class CaptionsViewModel: ObservableObject {
     /// renders with whatever is assigned to ``captions`` directly.
     public convenience init() {
         self.init(
-            captionsObserver: EmptyCaptionsObserver(),
+            captionsObserver: NullCaptionsObserver(),
             maxVisibleCaptions: CaptionsConstants.maxVisibleCaptions
         )
     }
@@ -104,7 +104,7 @@ public final class CaptionsViewModel: ObservableObject {
             captions
                 .sorted { $0.timestamp > $1.timestamp }
                 .prefix(maxVisibleCaptions)
-                .map(UICaptionItem.init)
+                .map { $0.toUICaptionItem() }
         )
     }
 }

@@ -70,10 +70,10 @@ public enum ArchivingState: Equatable {
 
 public typealias ArchiveID = String
 
-/// The high-level state of the captions state
+/// The high-level state of the captions feature.
 ///
-/// Represents if the current call has captions enabled or not.
-/// Use it to drive recording related UI display.
+/// Represents whether the current call has captions enabled or not.
+/// Use it to drive captions-related UI display.
 public enum CaptionsState: Equatable {
     case enabled(CaptionsID)
     case disabled

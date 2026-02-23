@@ -71,7 +71,7 @@ struct DefaultCaptionsRepositoryTests {
 
     @Test("EmptyCaptionsObserver never emits values")
     func emptyCaptionsObserverCompletes() async throws {
-        let sut = EmptyCaptionsObserver()
+        let sut = NullCaptionsObserver()
 
         var received = [[CaptionItem]]()
         let cancellable = sut.captionsReceived.sink { received.append($0) }

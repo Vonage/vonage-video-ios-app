@@ -21,6 +21,14 @@
     },
     "Captions" : {
       "comment" : "Label for the captions button.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captions"
+          }
+        }
+      }
     },
     "Reactions" : {
       "comment" : "Label for the reactions button in the bottom bar.",

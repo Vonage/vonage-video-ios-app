@@ -365,12 +365,6 @@ struct VERAApp: App {
         return extraButtons
     }
 
-    private func getExtraOverlays(
-        _ state: MeetingRoomOverlayState
-    ) -> [ViewGenerator] {
-        []
-    }
-
     private func makeGoodbyePage(roomName: String) -> some View {
         let viewModel: GoodByeViewModel
 

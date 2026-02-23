@@ -32,10 +32,3 @@ public actor DefaultCaptionsRepository: CaptionsRepository {
         captionsSubject.send(captions)
     }
 }
-
-/// Null observer that never emits, used for previews and tests.
-public final class EmptyCaptionsObserver: CaptionsObserver, Sendable {
-    public var captionsReceived: AnyPublisher<[CaptionItem], Never> {
-        Empty().eraseToAnyPublisher()
-    }
-}
