@@ -117,6 +117,25 @@ private func areEmojisEnabled() -> Bool {
     return meetingRoomSettings["allowEmojis"] as! Bool
 }
 
+/// Returns whether Settings is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowSettings": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowSettings` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areSettingsEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowSettings"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -181,6 +200,12 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAVonageReactionsPlugin", path: "VERAVonageReactionsPlugin"),
         ])
     }
+    if areSettingsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERASettings", path: "VERASettings"),
+            .project(target: "VERAVonageSettingsPlugin", path: "VERAVonageSettingsPlugin"),
+        ])
+    }
     return dependencies
 }
 
@@ -233,6 +258,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["REACTIONS_ENABLED"] = "1"
         flags.append("REACTIONS_ENABLED")
         print("Reactions feature enabled in build settings.")
+    }
+
+    if areSettingsEnabled() {
+        baseSettings["SETTINGS_ENABLED"] = "1"
+        flags.append("SETTINGS_ENABLED")
+        print("Settings feature enabled in build settings.")
     }
 
     if !flags.isEmpty {

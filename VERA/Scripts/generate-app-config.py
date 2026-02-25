@@ -101,6 +101,7 @@ public struct AppConfig {{
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
+        public let allowSettings: Bool
 
         public init(
             allowArchiving: Bool = {bool_str(meeting['allowArchiving'])},
@@ -110,7 +111,8 @@ public struct AppConfig {{
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
             defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
-            showParticipantList: Bool = {bool_str(meeting['showParticipantList'])}
+            showParticipantList: Bool = {bool_str(meeting['showParticipantList'])},
+            allowSettings: Bool = {bool_str(meeting['allowSettings'])}
         ) {{
             self.allowArchiving = allowArchiving
             self.allowCaptions = allowCaptions
@@ -120,6 +122,7 @@ public struct AppConfig {{
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList
+            self.allowSettings = allowSettings
         }}
     }}
 
