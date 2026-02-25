@@ -4,9 +4,9 @@
 
 import Foundation
 
-/// Provides the resource bundle for the VERASettings framework.
+/// Provides the resource bundle for the `VERASettings`  framework.
 extension Bundle {
-    /// The bundle associated with the VERASettings module.
+    /// The bundle associated with the `VERASettings`  module.
     public static var veraSettings: Bundle { Bundle(for: VERASettingsBundleToken.self) }
 }
 

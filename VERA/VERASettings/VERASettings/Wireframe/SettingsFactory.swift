@@ -5,7 +5,7 @@
 import SwiftUI
 
 /// Factory for creating the Settings feature components.
-public class SettingsFactory {
+public final class SettingsFactory {
 
     public func make() -> (view: some View, viewModel: SettingsViewModel) {
         let viewModel = SettingsViewModel(
