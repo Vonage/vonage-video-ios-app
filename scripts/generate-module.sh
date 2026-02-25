@@ -694,7 +694,7 @@ block = '''    - name: Run ${MODULE}Tests (macOS)
           -derivedDataPath DerivedData \\\\
           -enableCodeCoverage YES \\\\
           -resultBundlePath DerivedData/${MODULE}Tests-macOS.xcresult \\\\
-          \\\$XCODE_COMMON_FLAGS | xcpretty
+          \$XCODE_COMMON_FLAGS | xcpretty
 
 '''
 if marker in content:
@@ -727,7 +727,7 @@ block = '''    - name: Run ${MODULE}SnapshotTests (iOS Simulator)
           -derivedDataPath DerivedData \\\\
           -enableCodeCoverage YES \\\\
           -parallel-testing-enabled NO \\\\
-          \\\$XCODE_COMMON_FLAGS | xcpretty
+          \$XCODE_COMMON_FLAGS | xcpretty
         
         echo \"📸 Running ${MODULE}SnapshotTests on iOS Simulator\"
         xcodebuild test-without-building \\\\
@@ -738,7 +738,7 @@ block = '''    - name: Run ${MODULE}SnapshotTests (iOS Simulator)
           -enableCodeCoverage YES \\\\
           -resultBundlePath DerivedData/${MODULE}SnapshotTests-iOS.xcresult \\\\
           -parallel-testing-enabled NO \\\\
-          \\\$XCODE_COMMON_FLAGS | xcpretty
+          \$XCODE_COMMON_FLAGS | xcpretty
 
 '''
 if marker in content:
@@ -770,7 +770,7 @@ block = '''    - name: Run ${PLUGIN}Tests (iOS Simulator)
           -destination \"platform=iOS Simulator,name=iPhone 17\" \\\\
           -derivedDataPath DerivedData \\\\
           -enableCodeCoverage YES \\\\
-          \\\$XCODE_COMMON_FLAGS | xcpretty
+          \$XCODE_COMMON_FLAGS | xcpretty
 
         xcodebuild test-without-building \\\\
           -workspace VERA/VERA.xcworkspace \\\\
@@ -779,7 +779,7 @@ block = '''    - name: Run ${PLUGIN}Tests (iOS Simulator)
           -derivedDataPath DerivedData \\\\
           -enableCodeCoverage YES \\\\
           -resultBundlePath DerivedData/${PLUGIN}Tests-iOS.xcresult \\\\
-          \\\$XCODE_COMMON_FLAGS | xcpretty
+          \$XCODE_COMMON_FLAGS | xcpretty
 
 '''
 if marker in content:
