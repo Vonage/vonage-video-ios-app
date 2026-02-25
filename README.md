@@ -67,15 +67,13 @@ This application provides features for common conferencing use cases, such as:
 
 - Apply a real-time background blur effect to the local video stream during a call.
 
-- Display live captions for enhanced accessibility.
-
 - <details>
+  <summary>Display live captions for enhanced accessibility.</summary>
     <img src="docs/assets/captions.png" alt="Screenshot of live captions feature">
   </details>
 
-- Send and receive emoji reactions during a video session.
-
 - <details>
+  <summary>Send and receive emoji reactions during a video session.</summary>
     <img src="docs/assets/reactions.png" alt="Screenshot of reactions feature">
   </details>
 
@@ -84,6 +82,8 @@ This application provides features for common conferencing use cases, such as:
 - The dynamic display adjusts to show new joiners, hide video tiles to conserve bandwidth, and show the “next” participant when someone previously speaking leaves.
 
 - CallKit: Helps iOS to coordinate the calling services with other apps.
+
+
 
 ## Project Architecture
 
@@ -179,6 +179,24 @@ Once the <em>app-config.json</em> is configured the <em>Tuist generate</em> comm
 ## Theme customization
 
 You can customize the app colors by editing the <em>semantics.json</em> file light and dark color scheme values and then by executing the <em>generate-app-theme.py</em> Script in the VERA/Scripts folder. This will generate the xcasset resources with the specified RGB values in the <em>VERACommonUI</em> module.
+
+## Multi-Language Support
+
+The app is fully prepared for internationalization using Xcode's **String Catalogs** (`.xcstrings`). All user-facing strings are localized through this mechanism, making it straightforward to add support for new languages.
+
+### Adding a new language
+
+1. Open the root `Project.swift` and add the desired locale code to the `defaultKnownRegions` property:
+
+    ```swift
+    defaultKnownRegions: ["en", "es", /* add new locale here */]
+    ```
+
+2. Build the project. Because the `SWIFT_EMIT_LOC_STRINGS` build flag is enabled across all modules, each String Catalog is **automatically updated** during compilation with any new localizable strings.
+
+3. Open the generated `.xcstrings` catalog and provide translations for the new locale.
+
+> **Note:** Since `SWIFT_EMIT_LOC_STRINGS` is active, you don't need to manually register new strings — the build system detects them and keeps the catalogs in sync automatically.
 
 ## Testing
 
