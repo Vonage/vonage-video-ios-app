@@ -5,7 +5,6 @@
 import Foundation
 
 /// View model for SettingsView.
-@MainActor
 public final class SettingsViewModel: ObservableObject {
     public let settingsUseCase: SettingsUseCase
 

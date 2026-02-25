@@ -2,13 +2,11 @@
 //  Created by Vonage on 25/2/26.
 //
 
-import Foundation
 import SwiftUI
 
 /// Factory for creating the Settings feature components.
 public class SettingsFactory {
 
-    @MainActor
     public func make() -> (view: some View, viewModel: SettingsViewModel) {
         let viewModel = SettingsViewModel(
             settingsUseCase: DefaultSettingsUseCase())
