@@ -69,10 +69,13 @@ This application provides features for common conferencing use cases, such as:
 
 - Display live captions for enhanced accessibility.
 
+- <details>
+    <img src="docs/assets/captions.png" alt="Screenshot of live captions feature">
+  </details>
+
 - Send and receive emoji reactions during a video session.
 
 - <details>
-    <summary>Call participant list with audio on/off indicator.</summary>
     <img src="docs/assets/reactions.png" alt="Screenshot of reactions feature">
   </details>
 
