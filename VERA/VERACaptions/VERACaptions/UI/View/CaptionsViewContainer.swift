@@ -46,68 +46,88 @@ public struct CaptionsViewContainer: View {
 }
 
 // MARK: - Previews
-
-#Preview("With 1 Caption") {
-    let viewModel = CaptionsViewModel()
-    viewModel.captions = [.previewAlice]
-
-    return ZStack {
-        Color.gray.ignoresSafeArea()
-        VStack {
-            Spacer()
-            CaptionsViewContainer(viewModel: viewModel)
+#if DEBUG
+    #Preview("With 1 Caption") {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            VStack {
+                Spacer()
+                CaptionsViewContainer(viewModel: .oneCaptionViewModel)
+            }
         }
     }
-}
 
-#Preview("With 2 Captions") {
-    let viewModel = CaptionsViewModel()
-    viewModel.captions = [.previewAlice, .previewBob]
-
-    return ZStack {
-        Color.gray.ignoresSafeArea()
-        VStack {
-            Spacer()
-            CaptionsViewContainer(viewModel: viewModel)
+    #Preview("With 2 Captions") {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            VStack {
+                Spacer()
+                CaptionsViewContainer(viewModel: .twoCaptionViewModel)
+            }
         }
     }
-}
 
-#Preview("With 3 Captions") {
-    let viewModel = CaptionsViewModel()
-    viewModel.captions = [.previewAlice, .previewBob, .previewCharlie]
-
-    return ZStack {
-        Color.gray.ignoresSafeArea()
-        VStack {
-            Spacer()
-            CaptionsViewContainer(viewModel: viewModel)
+    #Preview("With 3 Captions") {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            VStack {
+                Spacer()
+                CaptionsViewContainer(viewModel: .threeCaptionViewModel)
+            }
         }
     }
-}
 
-#Preview("Scrollable - 6 Captions") {
-    let viewModel = CaptionsViewModel()
-    viewModel.captions = [
-        .previewAlice, .previewBob, .previewCharlie,
-        .previewDiana, .previewAlice2, .previewDiana2,
-    ]
-
-    return ZStack {
-        Color.gray.ignoresSafeArea()
-        VStack {
-            Spacer()
-            CaptionsViewContainer(viewModel: viewModel)
+    #Preview("Scrollable - 6 Captions") {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            VStack {
+                Spacer()
+                CaptionsViewContainer(viewModel: .sixCaptionViewModel)
+            }
         }
     }
-}
 
-#Preview("Empty") {
-    ZStack {
-        Color.gray.ignoresSafeArea()
-        VStack {
-            Spacer()
-            CaptionsViewContainer(viewModel: CaptionsViewModel())
+    #Preview("Empty") {
+        ZStack {
+            Color.gray.ignoresSafeArea()
+            VStack {
+                Spacer()
+                CaptionsViewContainer(viewModel: .emptyCaptionViewModel)
+            }
         }
     }
-}
+
+    extension CaptionsViewModel {
+
+        fileprivate static var emptyCaptionViewModel: CaptionsViewModel {
+            return CaptionsViewModel()
+        }
+
+        fileprivate static var oneCaptionViewModel: CaptionsViewModel {
+            let vm = CaptionsViewModel()
+            vm.captions = [.previewAlice]
+            return vm
+        }
+
+        fileprivate static var twoCaptionViewModel: CaptionsViewModel {
+            let vm = CaptionsViewModel()
+            vm.captions = [.previewAlice, .previewBob]
+            return vm
+        }
+
+        fileprivate static var threeCaptionViewModel: CaptionsViewModel {
+            let vm = CaptionsViewModel()
+            vm.captions = [.previewAlice, .previewBob, .previewCharlie]
+            return vm
+        }
+
+        fileprivate static var sixCaptionViewModel: CaptionsViewModel {
+            let vm = CaptionsViewModel()
+            vm.captions = [
+                .previewAlice, .previewBob, .previewCharlie,
+                .previewDiana, .previewAlice2, .previewDiana2,
+            ]
+            return vm
+        }
+    }
+#endif
