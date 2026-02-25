@@ -44,9 +44,14 @@ public struct AppConfig {
 
     public struct WaitingRoomSettings {
         public let allowDeviceSelection: Bool
+        public let allowSettings: Bool
 
-        public init(allowDeviceSelection: Bool = true) {
+        public init(
+            allowDeviceSelection: Bool = true,
+            allowSettings: Bool = true
+        ) {
             self.allowDeviceSelection = allowDeviceSelection
+            self.allowSettings = allowSettings
         }
     }
 

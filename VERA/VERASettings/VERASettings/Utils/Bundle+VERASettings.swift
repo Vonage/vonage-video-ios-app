@@ -7,7 +7,7 @@ import Foundation
 /// Provides the resource bundle for the VERASettings framework.
 extension Bundle {
     /// The bundle associated with the VERASettings module.
-    public static var settings: Bundle { Bundle(for: VERASettingsBundleToken.self) }
+    public static var veraSettings: Bundle { Bundle(for: VERASettingsBundleToken.self) }
 }
 
 private final class VERASettingsBundleToken {}

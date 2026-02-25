@@ -7,7 +7,9 @@ import Foundation
 /// View model for SettingsView.
 @MainActor
 public final class SettingsViewModel: ObservableObject {
-    // TODO: Add published properties and dependencies
+    public let settingsUseCase: SettingsUseCase
 
-    public init() {}
+    public init(settingsUseCase: SettingsUseCase) {
+        self.settingsUseCase = settingsUseCase
+    }
 }

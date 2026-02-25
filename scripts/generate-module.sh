@@ -83,7 +83,7 @@ fi
 PLUGIN_LOWER=$(echo "$PLUGIN_SHORT" | tr '[:upper:]' '[:lower:]')
 NAME_UPPER=$(echo "$NAME" | tr '[:lower:]' '[:upper:]')
 NAME_LOWER=$(echo "$NAME" | tr '[:upper:]' '[:lower:]')
-NAME_CAMEL="$(echo "${NAME:0:1}" | tr '[:upper:]' '[:lower:]')${NAME:1}"
+NAME_CAMEL="vera${NAME}"
 FLAG="${NAME_UPPER}_ENABLED"
 CONFIG_KEY="allow${NAME}"
 FUNC_NAME="are${NAME}Enabled"

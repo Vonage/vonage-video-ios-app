@@ -4,4 +4,24 @@
 
 import Foundation
 
-// TODO: Add use cases
+public struct SettingsRequest {
+    public let param: String
+
+    public init(param: String) {
+        self.param = param
+    }
+}
+
+public protocol SettingsUseCase {
+    func callAsFunction(_ request: SettingsRequest) async throws
+}
+
+public final class DefaultSettingsUseCase: SettingsUseCase {
+    public init() {
+    }
+
+    public func callAsFunction(
+        _ request: SettingsRequest
+    ) async throws {
+    }
+}

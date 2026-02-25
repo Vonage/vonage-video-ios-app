@@ -148,7 +148,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERASettingsTests-macOS.xcresult \
-          \$XCODE_COMMON_FLAGS | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Preboot iOS Simulator
       run: |
@@ -267,7 +267,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -parallel-testing-enabled NO \
-          \$XCODE_COMMON_FLAGS | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
         
         echo "📸 Running VERASettingsSnapshotTests on iOS Simulator"
         xcodebuild test-without-building \
@@ -278,7 +278,7 @@ jobs:
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERASettingsSnapshotTests-iOS.xcresult \
           -parallel-testing-enabled NO \
-          \$XCODE_COMMON_FLAGS | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAVonageChatPluginTests (iOS Simulator)
       id: ot-chat-plugin-tests
@@ -335,7 +335,7 @@ jobs:
           -destination "platform=iOS Simulator,name=iPhone 17" \
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
-          \$XCODE_COMMON_FLAGS | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
         xcodebuild test-without-building \
           -workspace VERA/VERA.xcworkspace \
@@ -344,7 +344,7 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult \
-          \$XCODE_COMMON_FLAGS | xcpretty
+          $XCODE_COMMON_FLAGS | xcpretty
 
     - name: Run VERAVonageTests (iOS Simulator)
       id: opentok-tests

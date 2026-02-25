@@ -86,9 +86,14 @@ public struct AppConfig {{
 
     public struct WaitingRoomSettings {{
         public let allowDeviceSelection: Bool
+        public let allowSettings: Bool
 
-        public init(allowDeviceSelection: Bool = {bool_str(waiting['allowDeviceSelection'])}) {{
+        public init(
+            allowDeviceSelection: Bool = {bool_str(waiting['allowDeviceSelection'])},
+            allowSettings: Bool = {bool_str(waiting['allowSettings'])}
+        ) {{
             self.allowDeviceSelection = allowDeviceSelection
+            self.allowSettings = allowSettings
         }}
     }}
 
