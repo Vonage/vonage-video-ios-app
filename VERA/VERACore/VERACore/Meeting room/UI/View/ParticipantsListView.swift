@@ -106,11 +106,19 @@ public struct ParticipantsListView: View {
                     .listRowBackground(Color.clear)
             }
         }
-        .searchable(
-            text: $searchText,
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Search participant..."
-        )
+        #if os(iOS)
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search participant..."
+            )
+        #else
+            .searchable(
+                text: $searchText,
+                placement: .automatic,
+                prompt: "Search participant..."
+            )
+        #endif
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
     }
