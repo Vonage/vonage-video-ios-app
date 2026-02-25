@@ -63,6 +63,19 @@ This application provides features for common conferencing use cases, such as:
 
 - Active speaker detection.
 
+- Start, stop and download cloud-based session recording directly from the app.
+
+- Apply a real-time background blur effect to the local video stream during a call.
+
+- Display live captions for enhanced accessibility.
+
+- Send and receive emoji reactions during a video session.
+
+- <details>
+    <summary>Call participant list with audio on/off indicator.</summary>
+    <img src="docs/assets/reactions.png" alt="Screenshot of reactions feature">
+  </details>
+
 - Layout manager with options to display active speaker, or all participants in a grid view.
 
 - The dynamic display adjusts to show new joiners, hide video tiles to conserve bandwidth, and show the “next” participant when someone previously speaking leaves.
