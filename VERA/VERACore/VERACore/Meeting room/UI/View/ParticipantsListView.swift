@@ -12,6 +12,8 @@ public struct ParticipantsListView: View {
     let roomName: String
     let meetingURL: URL?
     let onDismiss: () -> Void
+    @State private var searchText: String = ""
+
 
     public init(
         participants: [Participant],
@@ -57,6 +59,7 @@ public struct ParticipantsListView: View {
                 #endif
             }
         }
+        .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
@@ -95,7 +98,7 @@ public struct ParticipantsListView: View {
 
     private var participantsList: some View {
         List {
-            ForEach(participants, id: \.id) { participant in
+            ForEach(filteredParticipants, id: \.id) { participant in
                 ParticipantRowView(participant: participant)
                     #if os(iOS)
                         .listRowSeparator(.hidden)
@@ -103,8 +106,23 @@ public struct ParticipantsListView: View {
                     .listRowBackground(Color.clear)
             }
         }
+        .searchable(
+            text: $searchText,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search participant..."
+        )
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
+    }
+
+    private var filteredParticipants: [Participant] {
+        if searchText.isEmpty {
+            return participants
+        } else {
+            return participants.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
     }
 }
 
