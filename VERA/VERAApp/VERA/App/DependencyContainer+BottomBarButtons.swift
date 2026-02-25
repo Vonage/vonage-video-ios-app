@@ -107,7 +107,7 @@ extension DependencyContainer {
             let emojiButtonContainer = reactionsFactory.makeEmojiButtonContainer(viewModel: viewModel)
             return .init(
                 label: String(localized: "Reactions"),
-                image: Image(systemName: "face.smiling"),
+                image: VERACommonUIAsset.Images.emojiSolid.swiftUIImage,
                 onTap: onShowPicker,
                 content: {
                     emojiButtonContainer

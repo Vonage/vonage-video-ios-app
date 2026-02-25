@@ -48,7 +48,7 @@ struct EmojiButton: View {
     var body: some View {
         OngoingActivityControlImageButton(
             isActive: state.isPickerVisible,
-            image: Image(systemName: "face.smiling"),
+            image: VERACommonUIAsset.Images.emojiSolid.swiftUIImage,
             action: action
         )
         .accessibilityLabel(String(localized: "Reactions", bundle: .veraReactions))
