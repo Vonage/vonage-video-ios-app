@@ -128,9 +128,20 @@ public struct ParticipantsListView: View {
             return participants
         } else {
             return participants.filter {
-                $0.name.localizedCaseInsensitiveContains(searchText)
+                $0.matches(searchText: searchText)
             }
         }
+    }
+}
+
+extension Participant {
+    func matches(searchText: String) -> Bool {
+        name.range(
+            of: searchText,
+            options: [.caseInsensitive, .diacriticInsensitive],
+            range: nil,
+            locale: .current
+        ) != nil
     }
 }
 

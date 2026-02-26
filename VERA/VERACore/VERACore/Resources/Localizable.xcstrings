@@ -335,7 +335,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Participante de búsqueda…"
+            "value" : "Buscar participante..."
           }
         }
       }
