@@ -98,7 +98,7 @@ public struct ParticipantsListView: View {
 
     private var participantsList: some View {
         List {
-            ForEach(filteredParticipants, id: \.id) { participant in
+            ForEach(participants.filtered(by: searchText), id: \.id) { participant in
                 ParticipantRowView(participant: participant)
                     #if os(iOS)
                         .listRowSeparator(.hidden)
@@ -121,27 +121,6 @@ public struct ParticipantsListView: View {
         #endif
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
-    }
-
-    private var filteredParticipants: [Participant] {
-        if searchText.isEmpty {
-            return participants
-        } else {
-            return participants.filter {
-                $0.matches(searchText: searchText)
-            }
-        }
-    }
-}
-
-extension Participant {
-    func matches(searchText: String) -> Bool {
-        name.range(
-            of: searchText,
-            options: [.caseInsensitive, .diacriticInsensitive],
-            range: nil,
-            locale: .current
-        ) != nil
     }
 }
 
