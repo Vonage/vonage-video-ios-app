@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 /// Constants for ``FloatingEmojiView``.
 private enum FloatingEmojiConstants {
@@ -65,10 +66,10 @@ struct FloatingEmojiView: View {
                     .frame(maxWidth: FloatingEmojiConstants.maxDisplayNameWidth)
                     .fixedSize(horizontal: true, vertical: false)
                     .font(.caption2)
-                    .foregroundStyle(.background)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.onAccent.swiftUIColor)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(.primary)
+                    .background(VERACommonUIAsset.SemanticColors.accent.swiftUIColor)
                     .cornerRadius(8)
             }
         }
