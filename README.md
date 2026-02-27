@@ -110,6 +110,12 @@ The Vonage iOS reference app is built with a modular architecture. The app is or
 
 The current minimum deployment target for the reference app is iOS 16+. Some of the mentioned modules are universal, which allows fast testing against macOS targets and platform reusability. For this last point it would be required to adapt the non universal modules to the desired platform.
 
+### Vonage Video SDK Compatibility
+
+This reference app has been tested with **Vonage Video SDK 2.32** and **2.33**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
+
+The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift`) and can be adjusted there if needed.
+
 ## Requirements
 
 - **Xcode 26**
