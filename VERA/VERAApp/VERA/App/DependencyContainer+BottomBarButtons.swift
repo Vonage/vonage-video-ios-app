@@ -30,6 +30,11 @@ import VERADomain
     import VERAReactions
 #endif
 
+#if SCREEN_SHARE_ENABLED
+    import SwiftUI
+    import VERAScreenShare
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -113,6 +118,20 @@ extension DependencyContainer {
                     emojiButtonContainer
                 }
             )
+        }
+    #endif
+
+    #if SCREEN_SHARE_ENABLED
+        @MainActor
+        func makeScreenShareButton() -> BottomBarButton {
+            let button = ScreenShareFactory.make()
+            return .init(
+                label: String(localized: "Share Screen"),
+                image: Image(systemName: "rectangle.on.rectangle"),
+                onTap: {},
+                content: {
+                    button
+                })
         }
     #endif
 }

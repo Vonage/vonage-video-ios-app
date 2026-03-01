@@ -136,6 +136,25 @@ private func areSettingsEnabled() -> Bool {
     return meetingRoomSettings["allowSettings"] as! Bool
 }
 
+/// Returns whether screen share is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowScreenShare": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowScreenShare` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isScreenShareEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowScreenShare"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -206,6 +225,15 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAVonageSettingsPlugin", path: "VERAVonageSettingsPlugin"),
         ])
     }
+
+    if isScreenShareEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAScreenShare", path: "VERAScreenShare"),
+            .project(target: "VERAVonageScreenSharePlugin", path: "VERAVonageScreenSharePlugin"),
+            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin"),
+        ])
+    }
+
     return dependencies
 }
 
@@ -264,6 +292,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["SETTINGS_ENABLED"] = "1"
         flags.append("SETTINGS_ENABLED")
         print("Settings feature enabled in build settings.")
+    }
+
+    if isScreenShareEnabled() {
+        baseSettings["SCREEN_SHARE_ENABLED"] = "1"
+        flags.append("SCREEN_SHARE_ENABLED")
+        print("Screen share feature enabled in build settings.")
     }
 
     if !flags.isEmpty {
