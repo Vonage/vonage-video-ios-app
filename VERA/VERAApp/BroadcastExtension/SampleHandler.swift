@@ -112,22 +112,27 @@ final class SampleHandler: RPBroadcastSampleHandler {
 extension SampleHandler: OTSessionDelegate {
 
     func sessionDidConnect(_ session: OTSession) {
+        videoCapturer.sessionDidConnect()
         let settings = OTPublisherSettings()
         settings.name = "screenshare"
         settings.publisherAudioFallbackEnabled = false
         guard let otPublisher = OTPublisher(delegate: self, settings: settings) else { return }
         otPublisher.videoType = .screen
         otPublisher.videoCapture = videoCapturer
-
+        otPublisher.videoCapture?.videoContentHint = .text
+        
         self.publisher = otPublisher
 
         var error: OTError?
         session.publish(otPublisher, error: &error)
     }
 
-    func sessionDidDisconnect(_ session: OTSession) {}
+    func sessionDidDisconnect(_ session: OTSession) {
+        videoCapturer.sessionDidDisconnect()
+    }
 
     func session(_ session: OTSession, didFailWithError error: OTError) {
+        videoCapturer.sessionDidDisconnect()
         finishBroadcastWithError(error)
     }
 
