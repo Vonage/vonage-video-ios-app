@@ -9,23 +9,23 @@ import Foundation
 /// Builds a pre-configured `ScreenShareView` ready for
 /// embedding in the meeting room controls bar.
 public final class ScreenShareFactory {
-    
+
     public init() {
     }
-    
+
     #if os(iOS)
-    /// Creates the screen share button.
-    ///
-    /// - Parameters:
-    ///   - broadcastExtensionBundleId: Bundle ID of the Broadcast Upload Extension.
-    ///     Defaults to `"com.vonage.VERA.BroadcastExtension"`.
-    /// - Returns: A `ScreenSharingButton`.
-    @MainActor
-    public static func make(
-        broadcastExtensionBundleId: String = "com.vonage.VERA.BroadcastExtension"
-    ) -> ScreenSharingButton {
-        ScreenSharingButton(
-            preferredExtension: broadcastExtensionBundleId)
-    }
+        /// Creates the screen share button.
+        ///
+        /// - Parameters:
+        ///   - broadcastExtensionBundleId: Bundle ID of the Broadcast Upload Extension.
+        ///     Defaults to `"com.vonage.VERA.BroadcastExtension"`.
+        /// - Returns: A `ScreenSharingButton`.
+        @MainActor
+        public static func make(
+            broadcastExtensionBundleId: String = "com.vonage.VERA.BroadcastExtension"
+        ) -> ScreenSharingButton {
+            ScreenSharingButton(
+                preferredExtension: broadcastExtensionBundleId)
+        }
     #endif
 }

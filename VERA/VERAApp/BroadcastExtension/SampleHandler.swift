@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import OSLog
 import OpenTok
 import ReplayKit
 
@@ -16,8 +17,10 @@ import ReplayKit
 ///    `token` into the shared App Group (`group.com.vonage.VERA`) when the call connects.
 /// 2. On `broadcastStarted(withSetupInfo:)` this handler reads those credentials and
 ///    opens its own `OTSession`.
-/// 3. Once the session connects (`sessionDidConnect`), a `OTPublisher` with a
+/// 3. Once the session connects (`sessionDidConnect`), an `OTPublisherKit` with a
 ///    `ScreenShareVideoCapturer` is created and published as a screen-share stream.
+///    `OTPublisherKit` (not `OTPublisher`) is used to avoid initialising default
+///    camera/microphone capture, which is forbidden inside app extensions.
 ///
 /// ## Memory
 /// The extension process has a hard ~50 MB memory ceiling. The custom capturer
@@ -27,14 +30,19 @@ import ReplayKit
 /// - SeeAlso: ``ScreenShareVideoCapturer``, ``ScreenShareCredentialsStore``
 final class SampleHandler: RPBroadcastSampleHandler {
 
+    private let logger = Logger(subsystem: "com.vonage.VERA.BroadcastExtension", category: "SampleHandler")
+
     private var session: OTSession?
-    private var publisher: OTPublisher?
+    private var publisher: OTPublisherKit?
     private let videoCapturer = ScreenShareVideoCapturer()
-    
+
     // MARK: - Broadcast lifecycle
 
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
+        logger.debug("broadcastStarted")
+
         guard let store = ScreenShareCredentialsStore() else {
+            logger.error("App Group is not configured.")
             finishBroadcastWithError(
                 NSError(
                     domain: "VERABroadcastExtension",
@@ -44,24 +52,31 @@ final class SampleHandler: RPBroadcastSampleHandler {
         }
 
         guard let credentials = store.load() else {
+            logger.error("No active VERA call found.")
             finishBroadcastWithError(
                 NSError(
                     domain: "VERABroadcastExtension",
                     code: -1,
-                    userInfo: [NSLocalizedDescriptionKey: "No active VERA call found. Start a call before sharing your screen."]))
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "No active VERA call found. Start a call before sharing your screen."
+                    ]))
             return
         }
 
+        logger.debug("Credentials loaded — sessionId: \(credentials.sessionId, privacy: .public)")
+
         let settings = OTSessionSettings()
         settings.singlePeerConnection = true
-        settings.sessionMigration = true
 
-        guard let otSession = OTSession(
-            applicationId: credentials.applicationId,
-            sessionId: credentials.sessionId,
-            delegate: self,
-            settings: settings
-        ) else {
+        guard
+            let otSession = OTSession(
+                applicationId: credentials.applicationId,
+                sessionId: credentials.sessionId,
+                delegate: self,
+                settings: settings
+            )
+        else {
+            logger.error("Failed to create OTSession.")
             finishBroadcastWithError(
                 NSError(
                     domain: "VERABroadcastExtension",
@@ -76,26 +91,36 @@ final class SampleHandler: RPBroadcastSampleHandler {
         otSession.connect(withToken: credentials.token, error: &connectError)
 
         if let connectError {
+            logger.error("OTSession connect failed: \(connectError.localizedDescription)")
             finishBroadcastWithError(connectError)
         }
     }
 
     override func broadcastPaused() {
+        logger.debug("broadcastPaused")
         publisher?.publishVideo = false
     }
 
     override func broadcastResumed() {
+        logger.debug("broadcastResumed")
         publisher?.publishVideo = true
     }
 
     override func broadcastFinished() {
+        logger.debug("broadcastFinished")
         var error: OTError?
         session?.disconnect(&error)
+        if let error {
+            logger.error("OTSession disconnect error: \(error.localizedDescription)")
+        }
         session = nil
         publisher = nil
     }
 
-    override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
+    override func processSampleBuffer(
+        _ sampleBuffer: CMSampleBuffer,
+        with sampleBufferType: RPSampleBufferType
+    ) {
         switch sampleBufferType {
         case .video:
             videoCapturer.consumeVideoSampleBuffer(sampleBuffer)
@@ -112,41 +137,67 @@ final class SampleHandler: RPBroadcastSampleHandler {
 extension SampleHandler: OTSessionDelegate {
 
     func sessionDidConnect(_ session: OTSession) {
+        logger.debug("sessionDidConnect")
         videoCapturer.sessionDidConnect()
+
         let settings = OTPublisherSettings()
         settings.name = "screenshare"
         settings.publisherAudioFallbackEnabled = false
-        guard let otPublisher = OTPublisher(delegate: self, settings: settings) else { return }
+
+        /// Use an `OTPublisherKit` instead of a `OTPublisher`. `OTPublisher` initializes default
+        /// camera/microphone capture hardware, which is forbidden in broadcast extensions — causing the
+        /// extension to hang and get killed by ReplayKit after a 5-second timeout.
+        guard let otPublisher = OTPublisherKit(delegate: self, settings: settings) else {
+            logger.error("Failed to create OTPublisherKit.")
+            return
+        }
         otPublisher.videoType = .screen
         otPublisher.videoCapture = videoCapturer
         otPublisher.videoCapture?.videoContentHint = .text
-        
+        otPublisher.publishAudio = false
+
         self.publisher = otPublisher
 
         var error: OTError?
         session.publish(otPublisher, error: &error)
+        if let error {
+            logger.error("OTSession publish failed: \(error.localizedDescription)")
+        }
     }
 
     func sessionDidDisconnect(_ session: OTSession) {
+        logger.debug("sessionDidDisconnect")
         videoCapturer.sessionDidDisconnect()
     }
 
     func session(_ session: OTSession, didFailWithError error: OTError) {
+        logger.error("session didFailWithError: \(error.localizedDescription)")
         videoCapturer.sessionDidDisconnect()
         finishBroadcastWithError(error)
     }
 
-    func session(_ session: OTSession, streamCreated stream: OTStream) {}
-    func session(_ session: OTSession, streamDestroyed stream: OTStream) {}
+    func session(_ session: OTSession, streamCreated stream: OTStream) {
+        logger.debug("streamCreated: \(stream.streamId)")
+    }
+
+    func session(_ session: OTSession, streamDestroyed stream: OTStream) {
+        logger.debug("streamDestroyed: \(stream.streamId)")
+    }
 }
 
 // MARK: - OTPublisherDelegate
 
 extension SampleHandler: OTPublisherDelegate {
     func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
+        logger.error("publisher didFailWithError: \(error.localizedDescription)")
         finishBroadcastWithError(error)
     }
 
-    func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {}
-    func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {}
+    func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
+        logger.debug("publisher streamCreated: \(stream.streamId)")
+    }
+
+    func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
+        logger.debug("publisher streamDestroyed: \(stream.streamId)")
+    }
 }

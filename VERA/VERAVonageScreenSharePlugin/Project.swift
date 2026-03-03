@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAVonageScreenSharePlugin",
     packages: [
-        .vonageVideoSDK,
+        .vonageVideoSDK
     ],
     targets: [
         .target(

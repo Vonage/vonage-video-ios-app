@@ -1,4 +1,8 @@
-import Accelerate
+//
+//  Created by Vonage on 26/2/26.
+//
+
+import CoreImage
 import CoreMedia
 import CoreVideo
 import Foundation
@@ -8,10 +12,9 @@ import OpenTok
 ///
 /// Follows the same pattern as the official Vonage `ScreenCapturer` sample:
 /// - An owned `CVPixelBuffer` is created in `checkSize` and reused across frames.
-/// - The BGRA source is converted to ARGB via `vImagePermuteChannels_ARGB8888`,
-///   which correctly handles each buffer's individual stride.
-/// - The owned buffer is locked for the duration of `consumeFrame` (synchronous),
-///   then unlocked immediately after — this avoids `EXC_BAD_ACCESS`.
+/// - A `CGContext` with `premultipliedFirst | byteOrder32Little` writes BGRA bytes
+///   in memory — the layout Vonage reads correctly when told pixelFormat = .ARGB.
+/// - Scaling to the capped destination size is handled by CGContext.draw(_:in:).
 /// - `captureSettings` only sets `pixelFormat`; `bytesPerRow` is populated by
 ///   `checkSize` before the first frame, preventing the `NSRangeException`.
 final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
@@ -29,8 +32,8 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
     // Matches the reference: initialised with (0, 0) so checkSize always fires on
     // the first frame and populates bytesPerRow before consumeFrame is called.
     fileprivate var videoFrame = OTVideoFrame(format: OTVideoFormat(argbWithWidth: 0, height: 0))
-    fileprivate var pixelBuffer: CVPixelBuffer?      // destination buffer (capped size, ARGB)
-    fileprivate var tempPixelBuffer: CVPixelBuffer?  // intermediate buffer (source size, ARGB) — reused every frame when downscaling
+    fileprivate var pixelBuffer: CVPixelBuffer?  // destination buffer (capped size, BGRA)
+    fileprivate let ciContext = CIContext(options: [.useSoftwareRenderer: false])
 
     // MARK: - Session readiness
 
@@ -72,63 +75,39 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
 
     func consumeVideoSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         guard capturing,
-              isSessionReady,
-              let srcBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+            isSessionReady,
+            let srcBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         else { return }
 
         checkSize(forPixelBuffer: srcBuffer)
         guard let dstBuffer = pixelBuffer else { return }
 
-        CVPixelBufferLockBaseAddress(srcBuffer, .readOnly)
         CVPixelBufferLockBaseAddress(dstBuffer, [])
 
-        let srcWidth = CVPixelBufferGetWidth(srcBuffer)
-        let srcHeight = CVPixelBufferGetHeight(srcBuffer)
         let dstWidth = CVPixelBufferGetWidth(dstBuffer)
         let dstHeight = CVPixelBufferGetHeight(dstBuffer)
 
-        // Scale BGRA source into ARGB destination using vImage.
-        // When srcSize == dstSize, vImageScale is a no-op pass-through.
-        // Channel map [3,2,1,0] reorders B0 G1 R2 A3 → A3 R2 G1 B0 = ARGB.
-        if let srcBase = CVPixelBufferGetBaseAddress(srcBuffer),
-           let dstBase = CVPixelBufferGetBaseAddress(dstBuffer) {
-            // Intermediate same-size ARGB buffer to hold the channel-permuted source.
-            var src = vImage_Buffer(
-                data: srcBase,
-                height: vImagePixelCount(srcHeight),
-                width: vImagePixelCount(srcWidth),
-                rowBytes: CVPixelBufferGetBytesPerRow(srcBuffer)
+        // Mirrors the official ScreenCapturer sample exactly:
+        // CGContext with premultipliedFirst | byteOrder32Little writes BGRA bytes in
+        // memory — the layout Vonage reads correctly when told pixelFormat = .ARGB.
+        // draw(_:in:) handles both copy and scale in one step without vImage.
+        let ciImage = CIImage(cvPixelBuffer: srcBuffer)
+        if let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent),
+            let ctx = CGContext(
+                data: CVPixelBufferGetBaseAddress(dstBuffer),
+                width: dstWidth,
+                height: dstHeight,
+                bitsPerComponent: 8,
+                bytesPerRow: CVPixelBufferGetBytesPerRow(dstBuffer),
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+                    | CGBitmapInfo.byteOrder32Little.rawValue
             )
-            var dst = vImage_Buffer(
-                data: dstBase,
-                height: vImagePixelCount(dstHeight),
-                width: vImagePixelCount(dstWidth),
-                rowBytes: CVPixelBufferGetBytesPerRow(dstBuffer)
-            )
-            if srcWidth == dstWidth && srcHeight == dstHeight {
-                // No scaling needed — permute BGRA→ARGB directly into dst.
-                let map: [UInt8] = [3, 2, 1, 0]
-                vImagePermuteChannels_ARGB8888(&src, &dst, map, vImage_Flags(kvImageNoFlags))
-            } else if let tmpBuffer = tempPixelBuffer,
-                      let tmpBase = CVPixelBufferGetBaseAddress(tmpBuffer) {
-                // Permute BGRA→ARGB into the pre-allocated temp buffer, then scale into dst.
-                // tempPixelBuffer is allocated once in checkSize — no per-frame heap alloc.
-                CVPixelBufferLockBaseAddress(tmpBuffer, [])
-                var temp = vImage_Buffer(
-                    data: tmpBase,
-                    height: vImagePixelCount(srcHeight),
-                    width: vImagePixelCount(srcWidth),
-                    rowBytes: CVPixelBufferGetBytesPerRow(tmpBuffer)
-                )
-                let map: [UInt8] = [3, 2, 1, 0]
-                vImagePermuteChannels_ARGB8888(&src, &temp, map, vImage_Flags(kvImageNoFlags))
-                vImageScale_ARGB8888(&temp, &dst, nil, vImage_Flags(kvImageHighQualityResampling))
-                CVPixelBufferUnlockBaseAddress(tmpBuffer, [])
-            }
+        {
+            ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: dstWidth, height: dstHeight))
         }
 
-        // Set frame fields and call consumeFrame while dstBuffer is still locked.
-        // consumeFrame is synchronous — the SDK reads the plane pointer before returning.
+        // consumeFrame is synchronous — keep dstBuffer locked until it returns.
         videoFrame.timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         videoFrame.format?.estimatedCaptureDelay = 100
         videoFrame.orientation = .up
@@ -136,9 +115,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         videoFrame.planes?.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
         videoCaptureConsumer?.consumeFrame(videoFrame)
 
-        // Unlock only after consumeFrame has returned.
         CVPixelBufferUnlockBaseAddress(dstBuffer, [])
-        CVPixelBufferUnlockBaseAddress(srcBuffer, .readOnly)
     }
 }
 
@@ -168,48 +145,34 @@ extension ScreenShareVideoCapturer {
         let srcHeight = Int(CVPixelBufferGetHeight(buffer))
         let (width, height) = outputSize(for: srcWidth, srcHeight)
 
-        guard let frameFormat = videoFrame.format,
-              frameFormat.imageWidth != UInt32(width) || frameFormat.imageHeight != UInt32(height)
+        let currentFormat = videoFrame.format
+        guard
+            currentFormat == nil
+                || currentFormat!.imageWidth != UInt32(width)
+                || currentFormat!.imageHeight != UInt32(height)
         else { return }
 
-        frameFormat.bytesPerRow.removeAllObjects()
-        frameFormat.bytesPerRow.addObjects(from: [width * 4])
-        frameFormat.imageWidth = UInt32(width)
-        frameFormat.imageHeight = UInt32(height)
+        // Recreate OTVideoFrame with a fresh format — mutating the existing format
+        // in-place is unreliable because OTVideoFrame caches internal state at init time.
+        let newFormat = OTVideoFormat(argbWithWidth: UInt32(width), height: UInt32(height))
+        newFormat.bytesPerRow.removeAllObjects()
+        newFormat.bytesPerRow.addObjects(from: [width * 4])
+        videoFrame = OTVideoFrame(format: newFormat)
 
         var newBuffer: CVPixelBuffer?
+        // Use BGRA — the SDK reads BGRA bytes when told pixelFormat = .ARGB on iOS.
         let status = CVPixelBufferCreate(
             kCFAllocatorDefault,
             width,
             height,
-            kCVPixelFormatType_32ARGB,
+            kCVPixelFormatType_32BGRA,
             [
                 kCVPixelBufferCGImageCompatibilityKey: false,
-                kCVPixelBufferCGBitmapContextCompatibilityKey: false
+                kCVPixelBufferCGBitmapContextCompatibilityKey: false,
             ] as CFDictionary,
             &newBuffer
         )
         assert(status == kCVReturnSuccess && newBuffer != nil)
         pixelBuffer = newBuffer
-
-        // Allocate the intermediate buffer at source resolution only when downscaling.
-        // Reused every frame to avoid per-frame heap allocations.
-        if srcWidth != width || srcHeight != height {
-            var newTempBuffer: CVPixelBuffer?
-            CVPixelBufferCreate(
-                kCFAllocatorDefault,
-                srcWidth,
-                srcHeight,
-                kCVPixelFormatType_32ARGB,
-                [
-                    kCVPixelBufferCGImageCompatibilityKey: false,
-                    kCVPixelBufferCGBitmapContextCompatibilityKey: false
-                ] as CFDictionary,
-                &newTempBuffer
-            )
-            tempPixelBuffer = newTempBuffer
-        } else {
-            tempPixelBuffer = nil
-        }
     }
 }

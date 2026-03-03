@@ -27,7 +27,8 @@ public final class AppGroupScreenShareCredentialsRepository: ScreenShareCredenti
     /// - Parameter suiteName: The App Group suite name; defaults to ``veraAppGroupIdentifier``.
     public init(suiteName: String = veraAppGroupIdentifier) {
         guard let defaults = UserDefaults(suiteName: suiteName) else {
-            preconditionFailure("App Group '\(suiteName)' is not configured. Add it to both the app and extension entitlements.")
+            preconditionFailure(
+                "App Group '\(suiteName)' is not configured. Add it to both the app and extension entitlements.")
         }
         self.userDefaults = defaults
     }
