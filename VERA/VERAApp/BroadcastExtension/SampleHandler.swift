@@ -38,6 +38,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private var session: OTSession?
     private var publisher: OTPublisherKit?
     private let videoCapturer = ScreenShareVideoCapturer()
+    private var didTearDown = false
 
     // MARK: - Broadcast lifecycle
 
@@ -114,7 +115,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
     override func broadcastFinished() {
         logger.debug("broadcastFinished")
 
-        cleanup()
+        tearDown()
     }
 
     /// Register observer for stop notification from main app
@@ -137,13 +138,22 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private func stopBroadcastFromNotification() {
         logger.debug("Received stop broadcast notification from main app")
 
-        DispatchQueue.main.async { [weak self] in
-            self?.cleanup()
+        DispatchQueue.main.async { [self] in
+            self.tearDown()
+            self.finishBroadcastWithError(
+                NSError(
+                    domain: "VERABroadcastExtension",
+                    code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "The call has ended."]))
         }
     }
 
-    private func cleanup() {
-        // Remove observer
+    /// Tears down the Vonage session and removes the Darwin notification observer.
+    /// Guarded against reentrancy — safe to call multiple times.
+    private func tearDown() {
+        guard !didTearDown else { return }
+        didTearDown = true
+
         CFNotificationCenterRemoveObserver(
             CFNotificationCenterGetDarwinNotifyCenter(),
             Unmanaged.passUnretained(self).toOpaque(),
@@ -158,12 +168,6 @@ final class SampleHandler: RPBroadcastSampleHandler {
         }
         session = nil
         publisher = nil
-
-        finishBroadcastWithError(
-            NSError(
-                domain: "VERABroadcastExtension",
-                code: -3,
-                userInfo: [NSLocalizedDescriptionKey: "Broadcast clean up"]))
     }
 
     override func processSampleBuffer(
