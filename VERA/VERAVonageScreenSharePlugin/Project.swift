@@ -42,7 +42,7 @@ let project = Project(
             name: "BroadcastExtension",
             destinations: .iOS,
             product: .appExtension,
-            bundleId: "com.vonage.VERA.BroadcastExtension",
+            bundleId: "\(veraAppBundleID).BroadcastExtension",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             infoPlist: .extendingDefault(with: [
                 "CFBundleDisplayName": "VERA Broadcast",
@@ -63,7 +63,7 @@ let project = Project(
             ],
             settings: .settings(
                 base: baseBuildSettings().merging([
-                    "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA.BroadcastExtension",
+                    "PRODUCT_BUNDLE_IDENTIFIER": "\(veraAppBundleID).BroadcastExtension"
                 ]) { _, new in new },
                 configurations: [
                     .debug(

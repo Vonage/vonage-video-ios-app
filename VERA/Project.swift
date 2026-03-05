@@ -347,7 +347,7 @@ let project = Project(
             name: "VERA",
             destinations: .iOS,
             product: .app,
-            bundleId: "com.vonage.VERA",
+            bundleId: veraAppBundleID,
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             infoPlist: .extendingDefault(
                 with: [
@@ -376,7 +376,7 @@ let project = Project(
             name: "VERATests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.vonage.VERATests",
+            bundleId: "\(veraAppBundleID)Tests",
             sources: ["VERAApp/VERATests/**"],
             dependencies: [
                 .target(name: "VERA")

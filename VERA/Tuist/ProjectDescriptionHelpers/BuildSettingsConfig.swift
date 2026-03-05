@@ -1,5 +1,14 @@
 import ProjectDescription
 
+/// The base bundle identifier for the VERA app.
+///
+/// All targets that derive their bundle ID from the main app (e.g. extensions)
+/// should compose their identifier using this constant:
+/// ```swift
+/// bundleId: "\(veraAppBundleID).BroadcastExtension"
+/// ```
+public let veraAppBundleID = "com.vonage.VERA"
+
 public func baseBuildSettings() -> [String: SettingValue] {
     [
         "COMPILATION_CACHE_ENABLE_CACHING": "YES",
