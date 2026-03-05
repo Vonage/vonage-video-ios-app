@@ -63,7 +63,6 @@ let project = Project(
             ],
             settings: .settings(
                 base: baseBuildSettings().merging([
-                    "DEVELOPMENT_TEAM": "PR6C39UQ38",
                     "PRODUCT_BUNDLE_IDENTIFIER": "com.vonage.VERA.BroadcastExtension",
                 ]) { _, new in new },
                 configurations: [
@@ -72,7 +71,8 @@ let project = Project(
                         settings: [
                             "CODE_SIGN_STYLE": "Automatic",
                             "CODE_SIGN_IDENTITY": "iPhone Developer",
-                        ]
+                        ],
+                        xcconfig: "../Config/Signing.xcconfig"
                     ),
                     .release(
                         name: "Release",
@@ -80,7 +80,8 @@ let project = Project(
                             "CODE_SIGN_STYLE": "Manual",
                             "CODE_SIGN_IDENTITY": "iPhone Distribution",
                             "PROVISIONING_PROFILE_SPECIFIER": "BroadcastExtension_App_Store",
-                        ]
+                        ],
+                        xcconfig: "../Config/Signing.xcconfig"
                     ),
                 ]
             )
