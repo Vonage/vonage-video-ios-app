@@ -77,43 +77,6 @@
         }
     }
 
-    /// A minimal `UIViewRepresentable` wrapping `RPSystemBroadcastPickerView` with a zero frame.
-    /// The picker is invisible — it exists only so its internal UIButton can be triggered programmatically.
-    private struct BroadcastPickerRepresentable: UIViewRepresentable {
-        let preferredExtension: String?
-        let actionTrigger: PassthroughSubject<Void, Never>
-
-        func makeCoordinator() -> Coordinator {
-            Coordinator()
-        }
-
-        func makeUIView(context: Context) -> RPSystemBroadcastPickerView {
-            let picker = RPSystemBroadcastPickerView(frame: .zero)
-            picker.preferredExtension = preferredExtension
-            picker.showsMicrophoneButton = false
-
-            DispatchQueue.main.async {
-                if let button = picker.subviews.compactMap({ $0 as? UIButton }).first {
-                    context.coordinator.broadcastButton = button
-                }
-            }
-
-            actionTrigger
-                .sink { context.coordinator.broadcastButton?.sendActions(for: .touchUpInside) }
-                .store(in: &context.coordinator.cancellables)
-
-            return picker
-        }
-
-        func updateUIView(_ uiView: RPSystemBroadcastPickerView, context: Context) {
-        }
-
-        class Coordinator {
-            var broadcastButton: UIButton?
-            var cancellables = Set<AnyCancellable>()
-        }
-    }
-
     // MARK: - Preview
 
     #if DEBUG

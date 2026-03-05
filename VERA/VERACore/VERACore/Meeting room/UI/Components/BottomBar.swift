@@ -33,6 +33,7 @@ public struct BottomBarButton: Identifiable {
     public let label: String
     public let image: Image
     public let content: () -> AnyView
+    public let overlay: (() -> AnyView)?
     public let onTap: () -> Void
 
     public init<Content: View>(
@@ -46,6 +47,22 @@ public struct BottomBarButton: Identifiable {
         self.image = image
         self.onTap = onTap
         self.content = { AnyView(content()) }
+        self.overlay = nil
+    }
+
+    public init<Content: View, Overlay: View>(
+        label: String,
+        image: Image,
+        onTap: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content,
+        @ViewBuilder overlay: @escaping () -> Overlay
+    ) {
+        self.id = label
+        self.label = label
+        self.image = image
+        self.onTap = onTap
+        self.content = { AnyView(content()) }
+        self.overlay = { AnyView(overlay()) }
     }
 }
 
@@ -203,6 +220,10 @@ struct BottomBar: View {
                                     .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                                 Text(button.label)
                                     .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            }.overlay {
+                                if let overlay = button.overlay {
+                                    overlay()
+                                }
                             }
                         }
                     }
