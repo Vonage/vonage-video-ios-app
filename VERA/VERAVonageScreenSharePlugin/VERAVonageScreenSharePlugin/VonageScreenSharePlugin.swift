@@ -6,6 +6,9 @@ import Foundation
 import VERAScreenShare
 import VERAVonage
 
+/// Darwin notification name used to signal the broadcast extension to stop.
+private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
+
 /// Vonage plugin that bridges an active call session to the Broadcast Upload Extension.
 ///
 /// When a call starts, this plugin writes the Vonage session credentials
@@ -55,8 +58,22 @@ public final class VonageScreenSharePlugin: VonagePlugin {
         credentialsRepository.save(credentials)
     }
 
-    /// Clears the stored credentials from the shared App Group.
+    /// Clears the stored credentials from the shared App Group and signals
+    /// the broadcast extension to stop via a Darwin notification.
     public func callDidEnd() async throws {
         credentialsRepository.clear()
+
+        postStopBroadcastNotification()
+    }
+
+    /// Post Darwin notification to signal the broadcast extension to stop
+    private func postStopBroadcastNotification() {
+        CFNotificationCenterPostNotification(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            CFNotificationName(stopBroadcastNotificationName),
+            nil,
+            nil,
+            true
+        )
     }
 }

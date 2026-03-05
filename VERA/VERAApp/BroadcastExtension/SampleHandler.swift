@@ -7,6 +7,9 @@ import OSLog
 import OpenTok
 import ReplayKit
 
+/// Darwin notification name used to signal the broadcast extension to stop.
+private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
+
 /// Broadcast Upload Extension entry point.
 ///
 /// Receives audio/video `CMSampleBuffer` frames from ReplayKit and publishes the
@@ -65,6 +68,8 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
         logger.debug("Credentials loaded — sessionId: \(credentials.sessionId, privacy: .public)")
 
+        registerStopBroadcastNotification()
+
         let settings = OTSessionSettings()
         settings.singlePeerConnection = true
 
@@ -108,6 +113,44 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
     override func broadcastFinished() {
         logger.debug("broadcastFinished")
+
+        cleanup()
+    }
+
+    /// Register observer for stop notification from main app
+    private func registerStopBroadcastNotification() {
+        CFNotificationCenterAddObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            { _, observer, _, _, _ in
+                guard let observer = observer else { return }
+                let handler = Unmanaged<SampleHandler>.fromOpaque(observer).takeUnretainedValue()
+                handler.stopBroadcastFromNotification()
+            },
+            stopBroadcastNotificationName,
+            nil,
+            .deliverImmediately
+        )
+    }
+
+    /// Called when the main app signals the broadcast should stop.
+    private func stopBroadcastFromNotification() {
+        logger.debug("Received stop broadcast notification from main app")
+
+        DispatchQueue.main.async { [weak self] in
+            self?.cleanup()
+        }
+    }
+
+    private func cleanup() {
+        // Remove observer
+        CFNotificationCenterRemoveObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            CFNotificationName(stopBroadcastNotificationName),
+            nil
+        )
+
         var error: OTError?
         session?.disconnect(&error)
         if let error {
@@ -115,6 +158,12 @@ final class SampleHandler: RPBroadcastSampleHandler {
         }
         session = nil
         publisher = nil
+
+        finishBroadcastWithError(
+            NSError(
+                domain: "VERABroadcastExtension",
+                code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "Broadcast clean up"]))
     }
 
     override func processSampleBuffer(
@@ -173,7 +222,6 @@ extension SampleHandler: OTSessionDelegate {
     func session(_ session: OTSession, didFailWithError error: OTError) {
         logger.error("session didFailWithError: \(error.localizedDescription)")
         videoCapturer.sessionDidDisconnect()
-        finishBroadcastWithError(error)
     }
 
     func session(_ session: OTSession, streamCreated stream: OTStream) {
