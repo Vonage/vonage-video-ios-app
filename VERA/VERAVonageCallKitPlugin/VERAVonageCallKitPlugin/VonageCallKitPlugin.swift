@@ -24,6 +24,10 @@ import VERAVonage
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``, ``VonagePluginCallHolder``, ``VonageCallParams``
 /// - Note: The plugin requires a valid `callID` UUID in `userInfo` to drive CallKit.
 ///   If parsing fails, it throws ``VonageCallKitPlugin/Error/invalidCallID``.
+/// - Warning: CallKit is not supported on the iOS Simulator. When the plugin is
+///   active on a Simulator target, `OTPublisher` fails to publish with a connection
+///   timeout. Skip `setup()` or guard with `#if !targetEnvironment(simulator)` when
+///   running on Simulator.
 public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Errors emitted by the CallKit plugin.
@@ -69,6 +73,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Throws: ``VonageCallKitPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
     /// - SeeAlso: ``VonageCallParams``
     public func callDidStart(_ userInfo: [String: Any]) async throws {
+        #if !targetEnvironment(simulator)
         let roomName = userInfo[VonageCallParams.roomName.rawValue] as? String ?? ""
         let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
 
@@ -80,6 +85,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
         } else {
             throw Error.invalidCallID
         }
+        #endif
     }
 
     /// Lifecycle callback invoked when the call ends and the session is disconnecting.
@@ -90,9 +96,11 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// - Throws: An error if `VERACallManager` fails to end the call.
     public func callDidEnd() async throws {
+        #if !targetEnvironment(simulator)
         guard let currentCallID = currentCallID else { return }
         self.currentCallID = nil
         try await callManager.end(callID: currentCallID)
+        #endif
     }
 
     /// Initializes CallKit and audio session components and wires provider events.
@@ -109,6 +117,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Important: Must be called before invoking lifecycle methods or handling events.
     /// - Note: End-call events are ignored while on hold to preserve the paused state.
     public func setup() {
+        #if !targetEnvironment(simulator)
         callManager = VERACallManager()
         sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
         sessionManager?.enableCallingServicesMode()
@@ -136,5 +145,6 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
         providerDelegate?.onMute = { [weak self] isMuted in
             self?.call?.muteLocalMedia(isMuted)
         }
+        #endif
     }
 }
