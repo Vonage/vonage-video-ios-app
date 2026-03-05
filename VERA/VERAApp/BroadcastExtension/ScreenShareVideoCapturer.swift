@@ -111,8 +111,9 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         videoFrame.timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         videoFrame.format?.estimatedCaptureDelay = 100
         videoFrame.orientation = .up
-        videoFrame.clearPlanes()
-        videoFrame.planes?.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
+        let planes = NSPointerArray(options: .opaqueMemory)
+        planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
+        videoFrame.planes = planes
         videoCaptureConsumer?.consumeFrame(videoFrame)
 
         CVPixelBufferUnlockBaseAddress(dstBuffer, [])
