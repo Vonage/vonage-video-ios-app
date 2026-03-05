@@ -86,14 +86,14 @@ struct VonageCallKitPluginTests {
         #expect(sut.callManager != nil)
     }
 
-    @Test func setupInitializesSessionManager() async {
+    @Test func setupDoesNotInitializeSessionManagerOnSimulator() async {
         let sut = makeSUT()
 
         #expect(sut.sessionManager == nil)
 
         sut.setup()
 
-        #expect(sut.sessionManager != nil)
+        #expect(sut.sessionManager == nil)
     }
 
     @Test func setupInitializesProviderDelegate() async {
