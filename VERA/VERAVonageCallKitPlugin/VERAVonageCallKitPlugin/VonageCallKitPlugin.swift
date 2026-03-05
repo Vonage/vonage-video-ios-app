@@ -73,19 +73,17 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Throws: ``VonageCallKitPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
     /// - SeeAlso: ``VonageCallParams``
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        #if !targetEnvironment(simulator)
-            let roomName = userInfo[VonageCallParams.roomName.rawValue] as? String ?? ""
-            let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
+        let roomName = userInfo[VonageCallParams.roomName.rawValue] as? String ?? ""
+        let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
 
-            if let callUUID = UUID(uuidString: callID) {
-                currentCallID = callUUID
-                try await callManager.startCall(handle: roomName, callID: callUUID)
-                providerDelegate?.reportConnected(callUUID: callUUID)
-                providerDelegate?.setupHold(to: callUUID)
-            } else {
-                throw Error.invalidCallID
-            }
-        #endif
+        if let callUUID = UUID(uuidString: callID) {
+            currentCallID = callUUID
+            try await callManager.startCall(handle: roomName, callID: callUUID)
+            providerDelegate?.reportConnected(callUUID: callUUID)
+            providerDelegate?.setupHold(to: callUUID)
+        } else {
+            throw Error.invalidCallID
+        }
     }
 
     /// Lifecycle callback invoked when the call ends and the session is disconnecting.
@@ -96,11 +94,9 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// - Throws: An error if `VERACallManager` fails to end the call.
     public func callDidEnd() async throws {
-        #if !targetEnvironment(simulator)
-            guard let currentCallID = currentCallID else { return }
-            self.currentCallID = nil
-            try await callManager.end(callID: currentCallID)
-        #endif
+        guard let currentCallID = currentCallID else { return }
+        self.currentCallID = nil
+        try await callManager.end(callID: currentCallID)
     }
 
     /// Initializes CallKit and audio session components and wires provider events.
@@ -117,34 +113,36 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Important: Must be called before invoking lifecycle methods or handling events.
     /// - Note: End-call events are ignored while on hold to preserve the paused state.
     public func setup() {
+
+        callManager = VERACallManager()
         #if !targetEnvironment(simulator)
-            callManager = VERACallManager()
             sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
             sessionManager?.enableCallingServicesMode()
-            providerDelegate = ProviderDelegate(sessionManager: sessionManager)
-            providerDelegate?.onEndCall = { [weak self] in
-                Task { [weak self] in
-                    guard let self else { return }
-                    if let isOnHold = self.call?.isOnHold, isOnHold {
-                        // Ignore end call event
-                    } else {
-                        self.currentCallID = nil
-                        try? await self.call?.disconnect()
-                    }
-                }
-            }
-            providerDelegate?.onProviderReset = { [weak self] in
-                Task { [weak self] in
-                    self?.currentCallID = nil
-                    try? await self?.call?.disconnect()
-                }
-            }
-            providerDelegate?.onHold = { [weak self] isOnHold in
-                self?.call?.setOnHold(isOnHold)
-            }
-            providerDelegate?.onMute = { [weak self] isMuted in
-                self?.call?.muteLocalMedia(isMuted)
-            }
         #endif
+        providerDelegate = ProviderDelegate(sessionManager: sessionManager)
+        providerDelegate?.onEndCall = { [weak self] in
+            Task { [weak self] in
+                guard let self else { return }
+                if let isOnHold = self.call?.isOnHold, isOnHold {
+                    // Ignore end call event
+                } else {
+                    self.currentCallID = nil
+                    try? await self.call?.disconnect()
+                }
+            }
+        }
+        providerDelegate?.onProviderReset = { [weak self] in
+            Task { [weak self] in
+                self?.currentCallID = nil
+                try? await self?.call?.disconnect()
+            }
+        }
+        providerDelegate?.onHold = { [weak self] isOnHold in
+            self?.call?.setOnHold(isOnHold)
+        }
+        providerDelegate?.onMute = { [weak self] isMuted in
+            self?.call?.muteLocalMedia(isMuted)
+        }
+
     }
 }
