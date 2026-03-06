@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERASettings",
+    options: defaultProjectOptions(),
     packages: [
         .swiftSnapshotTesting
     ],

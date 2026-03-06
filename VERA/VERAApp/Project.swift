@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAApp",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERA",

@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERACore",
+    options: defaultProjectOptions(),
     packages: [
         .swiftSnapshotTesting
     ],

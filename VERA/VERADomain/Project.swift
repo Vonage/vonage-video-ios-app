@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERADomain",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERADomain",

@@ -16,4 +16,10 @@ public enum VonageCallParams: String {
     case roomName
     /// A unique identifier for the call instance.
     case callID
+    /// The Vonage application (API) key.
+    case applicationId
+    /// The Vonage session identifier.
+    case sessionId
+    /// The Vonage token used to authenticate and connect.
+    case token
 }

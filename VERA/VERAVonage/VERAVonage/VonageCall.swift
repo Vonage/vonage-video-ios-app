@@ -508,6 +508,9 @@ public final class VonageCall: CallFacade {
             VonageCallParams.username.rawValue: publisher.participant.name,
             VonageCallParams.roomName.rawValue: credentials.roomName,
             VonageCallParams.callID.rawValue: id.uuidString,
+            VonageCallParams.applicationId.rawValue: credentials.applicationId,
+            VonageCallParams.sessionId.rawValue: credentials.sessionId,
+            VonageCallParams.token.rawValue: credentials.token,
         ]
     }
 

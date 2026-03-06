@@ -362,6 +362,10 @@ struct VERAApp: App {
                 )
             }
         #endif
+
+        #if SCREEN_SHARE_ENABLED
+            extraButtons.append(dependencyContainer.makeScreenShareButton())
+        #endif
         return extraButtons
     }
 

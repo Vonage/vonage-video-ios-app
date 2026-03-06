@@ -136,6 +136,25 @@ private func areSettingsEnabled() -> Bool {
     return meetingRoomSettings["allowSettings"] as! Bool
 }
 
+/// Returns whether screen share is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowScreenShare": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowScreenShare` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isScreenShareEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowScreenShare"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -206,6 +225,15 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAVonageSettingsPlugin", path: "VERAVonageSettingsPlugin"),
         ])
     }
+
+    if isScreenShareEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAScreenShare", path: "VERAScreenShare"),
+            .project(target: "VERAVonageScreenSharePlugin", path: "VERAVonageScreenSharePlugin"),
+            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin"),
+        ])
+    }
+
     return dependencies
 }
 
@@ -266,6 +294,12 @@ private func createBuildSettings() -> Settings {
         print("Settings feature enabled in build settings.")
     }
 
+    if isScreenShareEnabled() {
+        baseSettings["SCREEN_SHARE_ENABLED"] = "1"
+        flags.append("SCREEN_SHARE_ENABLED")
+        print("Screen share feature enabled in build settings.")
+    }
+
     if !flags.isEmpty {
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) \(flags.joined(separator: " "))"
     }
@@ -303,24 +337,21 @@ private func createBuildSettings() -> Settings {
 /// - SeeAlso: ``createDependencies()``, ``createBuildSettings()``, `combinedPlistValues()`
 let project = Project(
     name: "VERA",
-    options: .options(
-        defaultKnownRegions: ["en", "es"],
-        developmentRegion: "en"
-    ),
+    options: defaultProjectOptions(),
     packages: createPackages(),
     targets: [
         .target(
             name: "VERA",
             destinations: .iOS,
             product: .app,
-            bundleId: "com.vonage.VERA",
+            bundleId: veraAppBundleID,
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERA",
                     "CFBundleDisplayName": "VERA",
-                    "CFBundleDevelopmentRegion": "en",
-                    "CFBundleLocalizations": .array(["en", "es"]),
+                    "CFBundleDevelopmentRegion": .string(developmentLanguage),
+                    "CFBundleLocalizations": .array(supportedLanguages.map { .string($0) }),
                     "LSApplicationCategoryType": "public.app-category.video",
                     "NSCameraUsageDescription":
                         "VERA needs access to your camera to share your video during video calls and meetings.",
@@ -342,7 +373,7 @@ let project = Project(
             name: "VERATests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.vonage.VERATests",
+            bundleId: "\(veraAppBundleID)Tests",
             sources: ["VERAApp/VERATests/**"],
             dependencies: [
                 .target(name: "VERA")

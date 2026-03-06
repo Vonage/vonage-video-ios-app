@@ -34,6 +34,11 @@ import VERAVonageCallKitPlugin
     import VERAVonageReactionsPlugin
 #endif
 
+#if SCREEN_SHARE_ENABLED
+    import VERAScreenShare
+    import VERAVonageScreenSharePlugin
+#endif
+
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -114,6 +119,9 @@ final class DependencyContainer {
         #endif
         #if REACTIONS_ENABLED
             registry.registerPlugin(plugin: vonageReactionsPlugin)
+        #endif
+        #if SCREEN_SHARE_ENABLED
+            registry.registerPlugin(plugin: vonageScreenSharePlugin)
         #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
@@ -226,5 +234,19 @@ final class DependencyContainer {
         lazy var reactionsFactory = ReactionsFactory(
             reactionsRepository: reactionsRepository,
             sendReactionUseCase: sendReactionUseCase)
+    #endif
+
+    // MARK: Screen share feature
+
+    #if SCREEN_SHARE_ENABLED
+
+        lazy var screenShareCredentialsRepository: ScreenShareCredentialsRepository =
+            UserDefaultsScreenShareCredentialsRepository()
+
+        lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
+            credentialsRepository: screenShareCredentialsRepository)
+
+        lazy var screenShareFactory = ScreenShareFactory()
+
     #endif
 }

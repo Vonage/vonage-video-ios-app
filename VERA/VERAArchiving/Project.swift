@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAArchiving",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERAArchiving",

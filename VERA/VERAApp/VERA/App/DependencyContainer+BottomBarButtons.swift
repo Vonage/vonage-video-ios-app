@@ -2,6 +2,7 @@
 //  Created by Vonage on 22/1/26.
 //
 
+import Combine
 import Foundation
 import VERACommonUI
 import VERACore
@@ -28,6 +29,11 @@ import VERADomain
 #if REACTIONS_ENABLED
     import SwiftUI
     import VERAReactions
+#endif
+
+#if SCREEN_SHARE_ENABLED
+    import SwiftUI
+    import VERAScreenShare
 #endif
 
 extension DependencyContainer {
@@ -113,6 +119,35 @@ extension DependencyContainer {
                     emojiButtonContainer
                 }
             )
+        }
+    #endif
+
+    #if SCREEN_SHARE_ENABLED
+        @MainActor
+        func makeScreenShareButton() -> BottomBarButton {
+            let actionTrigger = PassthroughSubject<Void, Never>()
+            let preferredExtension = (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
+            let button = ScreenShareFactory.make(
+                broadcastExtensionBundleId: preferredExtension
+            )
+            return .init(
+                label: String(localized: "Share Screen"),
+                image: VERACommonUIAsset.Images.screenShareSolid.swiftUIImage,
+                onTap: {
+                    actionTrigger.send()
+                },
+                content: {
+                    button
+                }
+            ) {
+                BroadcastPickerRepresentable(
+                    preferredExtension: preferredExtension,
+                    actionTrigger: actionTrigger
+                )
+                .frame(width: 1, height: 1)
+                .opacity(0.01)
+                .allowsHitTesting(false)
+            }
         }
     #endif
 }
