@@ -7,16 +7,19 @@ import CoreMedia
 import CoreVideo
 import Foundation
 import OpenTok
+import ReplayKit
 
 /// Feeds ReplayKit `CMSampleBuffer` frames into the Vonage SDK.
 ///
-/// Follows the same pattern as the official Vonage `ScreenCapturer` sample:
 /// - An owned `CVPixelBuffer` is created in `checkSize` and reused across frames.
-/// - A `CGContext` with `premultipliedFirst | byteOrder32Little` writes BGRA bytes
-///   in memory — the layout Vonage reads correctly when told pixelFormat = .ARGB.
-/// - Scaling to the capped destination size is handled by CGContext.draw(_:in:).
+/// - `CIContext.render(_:to:)` writes scaled BGRA pixels directly into the
+///   destination buffer — the layout Vonage reads correctly when told pixelFormat = .ARGB.
 /// - `captureSettings` only sets `pixelFormat`; `bytesPerRow` is populated by
 ///   `checkSize` before the first frame, preventing the `NSRangeException`.
+/// - The last frame is retransmitted every ~250 ms during static content so
+///   subscribers always have a fresh frame and the SDK can estimate bandwidth.
+/// - Frames with near-identical timestamps (< 2 ms apart) are dropped to avoid
+///   wasting encoder time on duplicate ReplayKit output.
 final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
     var videoContentHint: OTVideoContentHint = .text
     var videoCaptureConsumer: OTVideoCaptureConsumer?
@@ -33,7 +36,22 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
     // the first frame and populates bytesPerRow before consumeFrame is called.
     fileprivate var videoFrame = OTVideoFrame(format: OTVideoFormat(argbWithWidth: 0, height: 0))
     fileprivate var pixelBuffer: CVPixelBuffer?  // destination buffer (capped size, BGRA)
+    // Retain the previous CMSampleBuffer so ReplayKit cannot reuse the underlying
+    // CVPixelBuffer while we are still rendering from it (prevents tearing).
+    fileprivate var lastSampleBuffer: CMSampleBuffer?
     fileprivate let ciContext = CIContext(options: [.useSoftwareRenderer: false])
+
+    // Frame retransmission — resend the last frame every ~250ms during static content
+    // so subscribers always have a fresh frame and the SDK can estimate bandwidth.
+    private static let retransmitIntervalMs = 250
+    private let frameLock = NSLock()
+    private let retransmitQueue = DispatchQueue(label: "com.vonage.VERA.screenshare.retransmit")
+    private var retransmitTimer: DispatchSourceTimer?
+    private var lastOrientation: OTVideoOrientation = .up
+    // Duplicate frame detection — skip frames whose timestamp is within this
+    // threshold of the previous, as they carry identical pixel content.
+    private static let duplicateThresholdSeconds: Double = 0.002
+    private var lastFrameTimestamp: CMTime?
 
     // MARK: - Session readiness
 
@@ -57,6 +75,8 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
 
     func stop() -> Int32 {
         capturing = false
+        retransmitTimer?.cancel()
+        retransmitTimer = nil
         return 0
     }
 
@@ -79,44 +99,120 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
             let srcBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         else { return }
 
-        checkSize(forPixelBuffer: srcBuffer)
+        // Skip duplicate frames — ReplayKit can deliver frames with nearly identical
+        // timestamps when the screen content hasn't changed.
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        if let lastPTS = lastFrameTimestamp {
+            let delta = CMTimeGetSeconds(CMTimeSubtract(pts, lastPTS))
+            if abs(delta) < Self.duplicateThresholdSeconds {
+                return
+            }
+        }
+        lastFrameTimestamp = pts
+
+        let orientation = sampleOrientation(from: sampleBuffer)
+        let ciImage = CIImage(cvPixelBuffer: srcBuffer)
+        let extent = ciImage.extent
+        checkSize(width: Int(extent.width), height: Int(extent.height))
         guard let dstBuffer = pixelBuffer else { return }
+
+        frameLock.lock()
 
         CVPixelBufferLockBaseAddress(dstBuffer, [])
 
         let dstWidth = CVPixelBufferGetWidth(dstBuffer)
         let dstHeight = CVPixelBufferGetHeight(dstBuffer)
 
-        // Mirrors the official ScreenCapturer sample exactly:
-        // CGContext with premultipliedFirst | byteOrder32Little writes BGRA bytes in
-        // memory — the layout Vonage reads correctly when told pixelFormat = .ARGB.
-        // draw(_:in:) handles both copy and scale in one step without vImage.
-        let ciImage = CIImage(cvPixelBuffer: srcBuffer)
-        if let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent),
-            let ctx = CGContext(
-                data: CVPixelBufferGetBaseAddress(dstBuffer),
-                width: dstWidth,
-                height: dstHeight,
-                bitsPerComponent: 8,
-                bytesPerRow: CVPixelBufferGetBytesPerRow(dstBuffer),
-                space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
-                    | CGBitmapInfo.byteOrder32Little.rawValue
-            )
-        {
-            ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: dstWidth, height: dstHeight))
-        }
+        // Scale the source image to fit the destination buffer, then render directly.
+        let scaleX = CGFloat(dstWidth) / extent.width
+        let scaleY = CGFloat(dstHeight) / extent.height
+        let scaledImage = ciImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
+        ciContext.render(scaledImage, to: dstBuffer, bounds: scaledImage.extent, colorSpace: CGColorSpaceCreateDeviceRGB())
 
-        // consumeFrame is synchronous — keep dstBuffer locked until it returns.
+        // Pass the actual orientation so the receiving side can rotate correctly.
         videoFrame.timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         videoFrame.format?.estimatedCaptureDelay = 100
-        videoFrame.orientation = .up
+        videoFrame.orientation = orientation.otOrientation
+        lastOrientation = orientation.otOrientation
         let planes = NSPointerArray(options: .opaqueMemory)
         planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
         videoFrame.planes = planes
         videoCaptureConsumer?.consumeFrame(videoFrame)
 
         CVPixelBufferUnlockBaseAddress(dstBuffer, [])
+
+        frameLock.unlock()
+
+        lastSampleBuffer = sampleBuffer
+        scheduleRetransmission()
+    }
+
+    /// Reads the video orientation from the ReplayKit sample buffer attachment.
+    private func sampleOrientation(
+        from sampleBuffer: CMSampleBuffer
+    ) -> CGImagePropertyOrientation {
+        guard
+            let value = CMGetAttachment(
+                sampleBuffer,
+                key: RPVideoSampleOrientationKey as CFString,
+                attachmentModeOut: nil),
+            let rawValue = (value as? NSNumber)?.uint32Value
+        else {
+            return .up
+        }
+        return CGImagePropertyOrientation(rawValue: rawValue) ?? .up
+    }
+
+    // MARK: - Frame retransmission
+
+    /// Schedules a timer to resend the last frame if no new frame arrives within the interval.
+    private func scheduleRetransmission() {
+        retransmitTimer?.cancel()
+
+        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: retransmitQueue)
+        timer.schedule(
+            deadline: .now() + .milliseconds(Self.retransmitIntervalMs),
+            leeway: .milliseconds(20)
+        )
+        timer.setEventHandler { [weak self] in
+            self?.retransmitLastFrame()
+        }
+        timer.activate()
+        retransmitTimer = timer
+    }
+
+    /// Re-delivers the current destination buffer with an updated timestamp.
+    private func retransmitLastFrame() {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+
+        guard capturing, isSessionReady, let dstBuffer = pixelBuffer else { return }
+
+        CVPixelBufferLockBaseAddress(dstBuffer, .readOnly)
+
+        videoFrame.timestamp = CMClockGetTime(CMClockGetHostTimeClock())
+        videoFrame.format?.estimatedCaptureDelay = 100
+        videoFrame.orientation = lastOrientation
+        let planes = NSPointerArray(options: .opaqueMemory)
+        planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
+        videoFrame.planes = planes
+        videoCaptureConsumer?.consumeFrame(videoFrame)
+
+        CVPixelBufferUnlockBaseAddress(dstBuffer, .readOnly)
+
+        // Reschedule for the next interval.
+        scheduleRetransmission()
+    }
+}
+
+extension CGImagePropertyOrientation {
+    var otOrientation: OTVideoOrientation {
+        switch self {
+        case .up, .upMirrored: .up
+        case .down, .downMirrored: .down
+        case .left, .leftMirrored: .left
+        case .right, .rightMirrored: .right
+        }
     }
 }
 
@@ -141,9 +237,7 @@ extension ScreenShareVideoCapturer {
         return (align(w), align(h))
     }
 
-    fileprivate func checkSize(forPixelBuffer buffer: CVPixelBuffer) {
-        let srcWidth = Int(CVPixelBufferGetWidth(buffer))
-        let srcHeight = Int(CVPixelBufferGetHeight(buffer))
+    fileprivate func checkSize(width srcWidth: Int, height srcHeight: Int) {
         let (width, height) = outputSize(for: srcWidth, srcHeight)
 
         let currentFormat = videoFrame.format
