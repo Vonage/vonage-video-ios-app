@@ -23,7 +23,7 @@ private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as C
 /// registry.registerPlugin(plugin: VonageScreenSharePlugin(credentialsRepository: repo))
 /// ```
 ///
-/// - SeeAlso: ``VonagePlugin``, ``ScreenShareCredentialsRepository``, ``AppGroupScreenShareCredentialsRepository``
+/// - SeeAlso: ``VonagePlugin``, ``ScreenShareCredentialsRepository``, ``UserDefaultsScreenShareCredentialsRepository``
 public final class VonageScreenSharePlugin: VonagePlugin {
 
     private let credentialsRepository: ScreenShareCredentialsRepository
@@ -35,7 +35,7 @@ public final class VonageScreenSharePlugin: VonagePlugin {
     ///
     /// - Parameter credentialsRepository: The repository used to persist session credentials.
     ///   Defaults to the App Group-backed implementation.
-    public init(credentialsRepository: ScreenShareCredentialsRepository = AppGroupScreenShareCredentialsRepository()) {
+    public init(credentialsRepository: ScreenShareCredentialsRepository = UserDefaultsScreenShareCredentialsRepository()) {
         self.credentialsRepository = credentialsRepository
     }
 

@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAScreenShare",
+    options: defaultProjectOptions(),
     packages: [
         .swiftSnapshotTesting
     ],

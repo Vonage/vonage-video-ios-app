@@ -241,7 +241,7 @@ final class DependencyContainer {
     #if SCREEN_SHARE_ENABLED
 
         lazy var screenShareCredentialsRepository: ScreenShareCredentialsRepository =
-            AppGroupScreenShareCredentialsRepository()
+            UserDefaultsScreenShareCredentialsRepository()
 
         lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
             credentialsRepository: screenShareCredentialsRepository)

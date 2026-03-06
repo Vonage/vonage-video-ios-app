@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAVonageSettingsPlugin",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERAVonageSettingsPlugin",

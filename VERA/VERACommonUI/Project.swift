@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERACommonUI",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERACommonUI",

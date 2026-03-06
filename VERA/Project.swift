@@ -337,10 +337,7 @@ private func createBuildSettings() -> Settings {
 /// - SeeAlso: ``createDependencies()``, ``createBuildSettings()``, `combinedPlistValues()`
 let project = Project(
     name: "VERA",
-    options: .options(
-        defaultKnownRegions: ["en", "es"],
-        developmentRegion: "en"
-    ),
+    options: defaultProjectOptions(),
     packages: createPackages(),
     targets: [
         .target(
@@ -353,8 +350,8 @@ let project = Project(
                 with: [
                     "CFBundleName": "VERA",
                     "CFBundleDisplayName": "VERA",
-                    "CFBundleDevelopmentRegion": "en",
-                    "CFBundleLocalizations": .array(["en", "es"]),
+                    "CFBundleDevelopmentRegion": .string(developmentLanguage),
+                    "CFBundleLocalizations": .array(supportedLanguages.map { .string($0) }),
                     "LSApplicationCategoryType": "public.app-category.video",
                     "NSCameraUsageDescription":
                         "VERA needs access to your camera to share your video during video calls and meetings.",

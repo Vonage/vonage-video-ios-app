@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAVonageReactionsPlugin",
+    options: defaultProjectOptions(),
     targets: [
         .target(
             name: "VERAVonageReactionsPlugin",

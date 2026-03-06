@@ -19,7 +19,7 @@ private enum Keys {
 ///
 /// Both the main app (writer) and the Broadcast Upload Extension (reader) use this class
 /// to exchange the Vonage session credentials needed to publish a screen share stream.
-public final class AppGroupScreenShareCredentialsRepository: ScreenShareCredentialsRepository {
+public final class UserDefaultsScreenShareCredentialsRepository: ScreenShareCredentialsRepository {
     private let userDefaults: UserDefaults
 
     /// Creates a repository backed by the VERA App Group.
