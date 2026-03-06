@@ -10,4 +10,22 @@ extension Bundle {
     public static var veraSettings: Bundle { Bundle(for: VERASettingsBundleToken.self) }
 }
 
+/// Private token class used to locate the VERASettings bundle.
 private final class VERASettingsBundleToken {}
+
+// MARK: - String Localization
+
+extension String {
+    /// Returns the localized string from the VERASettings bundle.
+    var localized: String {
+        localized(bundle: .veraSettings)
+    }
+    
+    /// Returns the localized string with format arguments.
+    ///
+    /// - Parameter args: Format arguments to substitute in the localized string.
+    /// - Returns: The formatted localized string.
+    func localized(args: CVarArg... ) -> String {
+        return String(format: localized, args)
+    }
+}

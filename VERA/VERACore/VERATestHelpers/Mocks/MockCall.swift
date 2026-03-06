@@ -7,7 +7,10 @@ import Foundation
 import VERADomain
 
 public class MockCall: CallFacade {
-
+    
+    public let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    public lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> = _networkStatsPublisher.eraseToAnyPublisher()
+    
     public let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
@@ -86,4 +89,10 @@ public class MockCall: CallFacade {
         areCaptionsEnabled = false
         recordedActions.append(.disableCaptions)
     }
+    
+    public func enableNetworkStats() {}
+    
+    public func disableNetworkStats() {}
+    
+    public func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
 }

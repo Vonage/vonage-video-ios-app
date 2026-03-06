@@ -28,7 +28,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// Called when the session successfully connects.
     ///
     /// Use this to kick off post-connection actions like publishing the local stream.
-    var onSessionDidConnect: (() -> Void)?
+    open var onSessionDidConnect: (() -> Void)?
 
     /// Called when the session disconnects.
     ///
@@ -142,7 +142,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// Vonage session delegate method called when the session connects.
     ///
     /// Forwards to ``onSessionDidConnect``.
-    public func sessionDidConnect(_ session: OTSession) {
+    open func sessionDidConnect(_ session: OTSession) {
         onSessionDidConnect?()
     }
 
@@ -208,7 +208,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     ///
     /// ## Implementation Details
     /// Delegates to `OTSession.publish(_:error:)`.
-    public func publish(publisher: VonagePublisher) throws {
+    open func publish(publisher: VonagePublisher) throws {
         var error: OTError?
         session.publish(publisher.otPublisher, error: &error)
 
@@ -224,7 +224,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     ///
     /// ## Implementation Details
     /// Delegates to `OTSession.unpublish(_:error:)`.
-    public func unpublish(publisher: VonagePublisher) throws {
+    open func unpublish(publisher: VonagePublisher) throws {
         var error: OTError?
         session.unpublish(publisher.otPublisher, error: &error)
 

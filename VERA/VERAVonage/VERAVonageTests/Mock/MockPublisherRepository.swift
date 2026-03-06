@@ -10,8 +10,17 @@ import VERAVonage
 
 public class MockPublisherRepository: PublisherRepository {
 
+    // MARK: - Tracking Properties
+
+    public var recreatePublisherCallCount = 0
+    public var recordedSettings: [PublisherSettings] = []
+    public var publisherToReturn: VERAPublisher?
+
     public func getPublisher() -> any VERAPublisher {
-        VonagePublisher(
+        if let publisher = publisherToReturn {
+            return publisher
+        }
+        return VonagePublisher(
             publisher: OTPublisher(delegate: nil)!,
             transformerFactory: MockTransformerFactory()
         )
@@ -21,6 +30,8 @@ public class MockPublisherRepository: PublisherRepository {
     }
 
     public func recreatePublisher(_ settings: PublisherSettings) {
+        recreatePublisherCallCount += 1
+        recordedSettings.append(settings)
     }
 }
 

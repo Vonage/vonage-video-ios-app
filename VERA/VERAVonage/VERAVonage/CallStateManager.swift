@@ -124,4 +124,9 @@ final actor CallStateManager {
     func disableCaptions() async {
         await subscribersRepository.all.forEach { $0.disableCaptions() }
     }
+
+    /// Returns all current subscribers for iteration (e.g., wiring stats delegates).
+    func getAllSubscribers() async -> [VonageSubscriber] {
+        await subscribersRepository.all
+    }
 }
