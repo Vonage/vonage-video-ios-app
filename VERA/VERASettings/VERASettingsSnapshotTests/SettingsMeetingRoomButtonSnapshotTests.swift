@@ -83,7 +83,7 @@ struct SettingsMeetingRoomButtonSnapshotTests {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             VStack {
                 Spacer()
                 SettingsMeetingRoomButton {
@@ -134,7 +134,7 @@ struct SettingsMeetingRoomButtonSnapshotTests {
         let sut = ZStack {
             Color.gray
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 40) {
                 VStack(spacing: 12) {
                     SettingsWaitingRoomButton {
@@ -144,7 +144,7 @@ struct SettingsMeetingRoomButtonSnapshotTests {
                         .font(.caption)
                         .foregroundColor(.primary)
                 }
-                
+
                 VStack(spacing: 12) {
                     SettingsMeetingRoomButton {
                         // Empty action for testing
@@ -174,11 +174,11 @@ struct SettingsMeetingRoomButtonSnapshotTests {
         ZStack {
             Color.gray
                 .ignoresSafeArea()
-            
+
             VStack {
                 Spacer()
                 SettingsMeetingRoomButton()
-                .padding(.bottom, 16)
+                    .padding(.bottom, 16)
             }
         }
         .environment(\.colorScheme, colorScheme)

@@ -18,13 +18,13 @@
 public enum VideoBitratePreset: Int {
     /// Default adaptive bitrate - the SDK optimizes quality automatically.
     case `default` = 0
-    
+
     /// Moderate bandwidth saving while keeping reasonable quality.
     case bwSaver = 1
-    
+
     /// Aggressive bandwidth saving - minimizes data usage.
     case extraBwSaver = 2
-    
+
     /// User-defined maximum video bitrate.
     case customBitrate = 3
 }

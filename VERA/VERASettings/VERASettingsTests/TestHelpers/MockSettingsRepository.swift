@@ -9,11 +9,11 @@ import Combine
 final class MockSettingsRepository: PublisherSettingsRepository {
 
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
-    
+
     nonisolated(unsafe) private(set) var saveCallCount = 0
     nonisolated(unsafe) private(set) var resetCallCount = 0
     nonisolated(unsafe) private(set) var lastSavedPreferences: PublisherSettingsPreferences?
-    
+
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
         subject.eraseToAnyPublisher()
     }
@@ -36,7 +36,7 @@ final class MockSettingsRepository: PublisherSettingsRepository {
         resetCallCount += 1
         subject.send(.default)
     }
-    
+
     /// Helper method for tests to update preferences with a closure
     func updatePreferences(_ update: (inout PublisherSettingsPreferences) -> Void) async {
         var preferences = subject.value

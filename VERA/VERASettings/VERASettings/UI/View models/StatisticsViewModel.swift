@@ -16,10 +16,10 @@ public final class StatisticsViewModel: ObservableObject {
 
     /// The current network media statistics.
     @Published public var stats: NetworkMediaStats = .empty
-    
+
     /// Whether sender statistics are currently enabled.
     @Published public var isStatsEnabled: Bool = false
-    
+
     /// A formatted string of the estimated bandwidth, or `nil` if unavailable.
     public var estimatedBandwidthFormatted: String? {
         SettingsFormatter.formatBandwidth(stats.receivedAudio?.estimatedBandwidth)
@@ -29,10 +29,10 @@ public final class StatisticsViewModel: ObservableObject {
 
     /// Data source providing real-time network statistics.
     private let statsDataSource: StatsDataSource
-    
+
     /// Repository providing settings preferences.
     private let settingsRepository: PublisherSettingsRepository
-    
+
     /// Tracks whether the view model has been initialized.
     private var isInialized: Bool = false
 
@@ -50,7 +50,7 @@ public final class StatisticsViewModel: ObservableObject {
         self.statsDataSource = statsDataSource
         self.settingsRepository = settingsRepository
     }
-    
+
     // MARK: - Public
 
     /// Sets up the observers for stats and settings changes.
@@ -58,7 +58,7 @@ public final class StatisticsViewModel: ObservableObject {
     public func setup() {
         guard !isInialized else { return }
         isInialized = true
-        
+
         settingsRepository.preferencesPublisher
             .map(\.senderStatsEnabled)
             .removeDuplicates()

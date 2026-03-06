@@ -27,7 +27,7 @@ class VonageSessionSpy: VonageSession {
         connectCalled = true
         recordedTokens.append(token)
         try super.connect(with: token)
-        
+
         // Simulate successful connection by triggering the callback
         onSessionDidConnect?()
     }
@@ -41,7 +41,7 @@ class VonageSessionSpy: VonageSession {
         unpublishCalled = true
         unpublishedPublishers.append(publisher)
     }
-    
+
     override func publish(publisher: VonagePublisher) throws {
         publishCalled = true
     }

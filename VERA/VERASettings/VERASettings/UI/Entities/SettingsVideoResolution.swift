@@ -34,13 +34,13 @@ import Foundation
 public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Identifiable {
     /// Low resolution (352x288). Maps to `VideoResolution.low`.
     case low = 0
-    
+
     /// Medium resolution (640x480). Maps to `VideoResolution.mediun`.
     case medium = 1
-    
+
     /// High resolution (1280x720). Maps to `VideoResolution.high`.
     case high = 2
-    
+
     /// High 1080p resolution (1920x1080). Maps to `VideoResolution.high1080p`.
     case high1080p = 3
 
@@ -52,13 +52,13 @@ public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Iden
 
 // MARK: - Display
 
-public extension SettingsVideoResolution {
+extension SettingsVideoResolution {
     /// Human-readable label shown in the Settings UI.
     ///
     /// Combines a localized quality label (Low/Medium/High) with the pixel dimensions.
     ///
     /// - Returns: A formatted string like "Low (352x288)" or "High (1920x1080)".
-     var displayName: String {
+    public var displayName: String {
         let displayName =
             switch self {
             case .low: "Low"

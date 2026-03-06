@@ -273,10 +273,11 @@ private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
 }
 
 private final class MockCallFacade: CallFacade, @unchecked Sendable {
-    
+
     let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
-    lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> = _networkStatsPublisher.eraseToAnyPublisher()
-   
+    lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
+        _networkStatsPublisher.eraseToAnyPublisher()
+
     let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
     lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
@@ -328,7 +329,7 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
         areCaptionsEnabled = false
         recordedActions.append(.disableCaptions)
     }
-    
+
     func enableNetworkStats() {}
     func disableNetworkStats() {}
     func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}

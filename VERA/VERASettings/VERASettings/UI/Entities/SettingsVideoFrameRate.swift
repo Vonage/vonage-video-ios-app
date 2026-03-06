@@ -34,13 +34,13 @@ import Foundation
 public enum SettingsVideoFrameRate: Int, CaseIterable, Codable, Equatable, Identifiable {
     /// 1 frame per second. Maps to `VideoFrameRate.rate1FPS`.
     case fps1 = 1
-    
+
     /// 7 frames per second. Maps to `VideoFrameRate.rate7FPS`.
     case fps7 = 7
-    
+
     /// 15 frames per second. Maps to `VideoFrameRate.rate15FPS`.
     case fps15 = 15
-    
+
     /// 30 frames per second. Maps to `VideoFrameRate.rate30FPS`.
     case fps30 = 30
 
@@ -52,11 +52,11 @@ public enum SettingsVideoFrameRate: Int, CaseIterable, Codable, Equatable, Ident
 
 // MARK: - Display
 
-public extension SettingsVideoFrameRate {
+extension SettingsVideoFrameRate {
     /// Human-readable label shown in the Settings UI.
     ///
     /// Formats the frame rate as "N FPS" where N is the raw value.
     ///
     /// - Returns: The frame rate string (e.g., "1 FPS", "7 FPS", "15 FPS", "30 FPS").
-     var displayName: String { "\(rawValue) FPS" }
+    public var displayName: String { "\(rawValue) FPS" }
 }

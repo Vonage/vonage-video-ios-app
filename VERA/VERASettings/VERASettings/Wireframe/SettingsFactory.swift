@@ -23,7 +23,7 @@ public final class SettingsFactory {
 
     /// Shared repository for reading and writing publisher settings.
     private let repository: PublisherSettingsRepository
-    
+
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 

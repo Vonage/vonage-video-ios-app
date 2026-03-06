@@ -131,10 +131,10 @@ struct VideoSectionView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("Video Section") {
-    Form {
-        VideoSectionView(viewModel: .preview)
+    #Preview("Video Section") {
+        Form {
+            VideoSectionView(viewModel: .preview)
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 #endif

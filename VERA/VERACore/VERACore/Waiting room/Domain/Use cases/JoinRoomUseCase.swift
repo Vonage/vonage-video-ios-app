@@ -37,7 +37,7 @@ public final class JoinRoomUseCase {
     public func callAsFunction(_ request: JoinRoomRequest) async throws {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
-        
+
         let currentPublisher = try cameraPreviewProviderRepository.getPublisher()
 
         let settings = PublisherSettings(

@@ -25,10 +25,10 @@ struct GeneralSectionView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview {
-    Form {
-        GeneralSectionView(viewModel: .preview)
+    #Preview {
+        Form {
+            GeneralSectionView(viewModel: .preview)
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 #endif

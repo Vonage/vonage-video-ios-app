@@ -21,7 +21,7 @@ public typealias OnClick = () -> Void
 /// Unlike ``SettingsWaitingRoomButton``, this button does not manage the sheet presentation
 /// itself. The caller is responsible for presenting the settings view when the closure is invoked.
 public struct SettingsMeetingRoomButton: View {
-    
+
     /// Closure invoked when the gear button is tapped.
     /// The caller should present the settings view in response.
     private let onShowSettings: OnClick?
@@ -37,7 +37,7 @@ public struct SettingsMeetingRoomButton: View {
     public var body: some View {
         OngoingActivityControlImageButton(
             isActive: false,
-            image: Image(systemName: "gearshape.fill"),
+            image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
             action: {
                 onShowSettings?()
             }
@@ -48,11 +48,11 @@ public struct SettingsMeetingRoomButton: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview {
-    SettingsMeetingRoomButton {
-        print("Settings tapped")
+    #Preview {
+        SettingsMeetingRoomButton {
+            print("Settings tapped")
+        }
+        .padding()
+        .preferredColorScheme(.dark)
     }
-    .padding()
-    .preferredColorScheme(.dark)
-}
 #endif

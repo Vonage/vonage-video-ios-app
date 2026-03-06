@@ -20,12 +20,12 @@ extension String {
     var localized: String {
         localized(bundle: .veraSettings)
     }
-    
+
     /// Returns the localized string with format arguments.
     ///
     /// - Parameter args: Format arguments to substitute in the localized string.
     /// - Returns: The formatted localized string.
-    func localized(args: CVarArg... ) -> String {
+    func localized(args: CVarArg...) -> String {
         return String(format: localized, args)
     }
 }

@@ -523,11 +523,11 @@ final class MockReactionsRepository: ReactionsRepository, @unchecked Sendable {
 }
 
 final class MockCallFacade: CallFacade, @unchecked Sendable {
-    
+
     let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
-    _networkStatsPublisher.eraseToAnyPublisher()
-   
+        _networkStatsPublisher.eraseToAnyPublisher()
+
     let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()

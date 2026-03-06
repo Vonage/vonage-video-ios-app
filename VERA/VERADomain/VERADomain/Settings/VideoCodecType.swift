@@ -17,10 +17,10 @@
 public enum VideoCodecType: Int, Equatable {
     /// VP8 codec - Google's widely-supported open video codec.
     case vp8 = 1
-    
+
     /// H.264 codec - Industry-standard with excellent hardware support.
     case h264 = 2
-    
+
     /// VP9 codec - Google's next-generation codec with improved compression.
     case vp9 = 3
 }

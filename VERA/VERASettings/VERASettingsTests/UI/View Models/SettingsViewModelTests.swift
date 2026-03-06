@@ -4,8 +4,8 @@
 
 @preconcurrency import Combine
 import Foundation
-import VERADomain
 import Testing
+import VERADomain
 
 @testable import VERASettings
 
@@ -76,7 +76,7 @@ struct SettingsViewModelTests {
 
         // Save
         viewModel.save()
-        
+
         // Wait for update
         await delay()
 
@@ -100,7 +100,7 @@ struct SettingsViewModelTests {
 
         // Wait for update
         await delay()
-        
+
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .custom)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 5_000_000)
     }
@@ -114,7 +114,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
         viewModel.save()
-        
+
         // Wait for update
         await delay()
 
@@ -131,7 +131,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
 
         viewModel.save()
-        
+
         // Wait for update
         await delay()
 
@@ -160,7 +160,7 @@ struct SettingsViewModelTests {
 
         // Reset to defaults
         viewModel.resetToDefaults()
-        
+
         // Wait for update
         await delay()
 
@@ -212,7 +212,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.maxAudioBitrate = 1_000_000
         let formatted3 = viewModel.maxAudioBitrateFormatted
         #expect(formatted3 == "1.0 Mbps")
-        
+
         // Keep objects alive until end of test
         _ = repository
         _ = viewModel
@@ -234,7 +234,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
         let formatted3 = viewModel.videoBitrateFormatted
         #expect(formatted3 == "5.0 Mbps")
-        
+
         // Keep objects alive until end of test
         _ = repository
         _ = viewModel

@@ -9,7 +9,7 @@ import Foundation
 ///
 /// The composition root creates a concrete implementation (e.g. ``UserDefaultsSettingsRepository``)
 /// and shares it between the Settings UI, the ``JoinRoomUseCase``, and the stats overlay.
-public protocol PublisherSettingsRepository :  Sendable {
+public protocol PublisherSettingsRepository: Sendable {
     /// Current preferences. Always emits the current value on subscribe.
     var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> { get }
 

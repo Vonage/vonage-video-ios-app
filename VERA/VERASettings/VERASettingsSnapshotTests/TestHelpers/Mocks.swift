@@ -9,9 +9,9 @@ import VERASettings
 final class MockStatsSettingsRepository: PublisherSettingsRepository {
 
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
-    
+
     nonisolated(unsafe) private(set) var lastSavedPreferences: PublisherSettingsPreferences?
-    
+
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
         subject.eraseToAnyPublisher()
     }
@@ -37,7 +37,7 @@ final class MockStatsSettingsRepository: PublisherSettingsRepository {
 final class MockStatsDataSource: StatsDataSource {
 
     private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
-    
+
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         subject.eraseToAnyPublisher()
     }
@@ -45,7 +45,7 @@ final class MockStatsDataSource: StatsDataSource {
     init(initialStats: NetworkMediaStats = .empty) {
         self.subject = CurrentValueSubject(initialStats)
     }
-    
+
     func updateStats(_ stats: NetworkMediaStats) async {
         subject.send(stats)
     }
@@ -54,16 +54,16 @@ final class MockStatsDataSource: StatsDataSource {
 final class MockStatsOverlayDataSource: StatsDataSource {
 
     private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
-    
+
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         subject.eraseToAnyPublisher()
     }
-    
+
     func updateStats(_ stats: NetworkMediaStats) async {
         subject.send(stats)
     }
-    
-    func updateStats(_ stats: NetworkMediaStats) {        
+
+    func updateStats(_ stats: NetworkMediaStats) {
         subject.send(stats)
     }
 }

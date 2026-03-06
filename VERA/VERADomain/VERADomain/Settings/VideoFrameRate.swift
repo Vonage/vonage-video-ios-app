@@ -15,13 +15,13 @@
 public enum VideoFrameRate: Int {
     /// 30 frames per second - standard video quality.
     case rate30FPS = 30
-    
+
     /// 15 frames per second - moderate bandwidth saving.
     case rate15FPS = 15
-    
+
     /// 7 frames per second - lower bandwidth usage.
     case rate7FPS = 7
-    
+
     /// 1 frame per second - minimal bandwidth usage.
     case rate1FPS = 1
 }

@@ -52,13 +52,13 @@ import Foundation
 /// and efficient storage.
 ///
 /// - SeeAlso: ``SettingsCodecPreference``, ``SettingsCodecMode``, ``VideoCodecType``
-public enum SettingsVideoCodec : Int, CaseIterable, Codable, Equatable, Identifiable {
+public enum SettingsVideoCodec: Int, CaseIterable, Codable, Equatable, Identifiable {
     /// VP8 codec - Google's widely-supported open video codec.
     case vp8 = 1
-    
+
     /// H.264 codec - Industry-standard with excellent hardware support.
     case h264 = 2
-    
+
     /// VP9 codec - Google's next-generation codec with improved compression.
     case vp9 = 3
 
@@ -70,14 +70,14 @@ public enum SettingsVideoCodec : Int, CaseIterable, Codable, Equatable, Identifi
 
 // MARK: - Display
 
-public extension SettingsVideoCodec {
+extension SettingsVideoCodec {
     /// Human-readable label shown in the Settings UI.
     ///
     /// Provides the standard codec name as displayed to users in settings screens
     /// and debug interfaces.
     ///
     /// - Returns: The codec name string (e.g., "VP8", "H.264", "VP9").
-    var displayName: String {
+    public var displayName: String {
         return switch self {
         case .vp8: "VP8"
         case .h264: "H.264"

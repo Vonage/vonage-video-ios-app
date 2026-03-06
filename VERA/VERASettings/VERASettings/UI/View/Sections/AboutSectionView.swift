@@ -47,10 +47,10 @@ struct AboutSectionView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview {
-    NavigationStack {
-        AboutSectionView()
+    #Preview {
+        NavigationStack {
+            AboutSectionView()
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 #endif

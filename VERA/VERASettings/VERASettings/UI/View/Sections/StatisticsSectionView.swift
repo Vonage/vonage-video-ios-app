@@ -169,33 +169,33 @@ private struct StatsLiveSection: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("Without Stats") {
-    Form {
-        StatisticsSectionView(
-            viewModel: .preview,
-            statisticsViewModel: nil
-        )
+    #Preview("Without Stats") {
+        Form {
+            StatisticsSectionView(
+                viewModel: .preview,
+                statisticsViewModel: nil
+            )
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 
-#Preview("With Stats Enabled") {
-    Form {
-        StatisticsSectionView(
-            viewModel: .previewWithStatsEnabled,
-            statisticsViewModel: .placeholder
-        )
+    #Preview("With Stats Enabled") {
+        Form {
+            StatisticsSectionView(
+                viewModel: .previewWithStatsEnabled,
+                statisticsViewModel: .placeholder
+            )
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 
-#Preview("With Stats Disabled") {
-    Form {
-        StatisticsSectionView(
-            viewModel: .preview,
-            statisticsViewModel: .placeholder
-        )
+    #Preview("With Stats Disabled") {
+        Form {
+            StatisticsSectionView(
+                viewModel: .preview,
+                statisticsViewModel: .placeholder
+            )
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 #endif

@@ -13,7 +13,7 @@ public enum VideoScaleBehavior: String, Equatable {
     /// The video will be scaled to fill the view completely, which may result in
     /// some portions being cropped if the aspect ratios don't match.
     case fill
-    
+
     /// Fit the video within the view, maintaining aspect ratio with letterboxing/pillarboxing.
     /// The entire video will be visible with black bars added as needed to preserve
     /// the original aspect ratio.

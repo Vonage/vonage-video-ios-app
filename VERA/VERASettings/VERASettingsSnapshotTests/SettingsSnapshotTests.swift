@@ -2,11 +2,11 @@
 //  Created by Vonage on 25/2/26.
 //
 
+import Combine
 import SnapshotTesting
 import SwiftUI
 import Testing
 import VERADomain
-import Combine
 
 @testable import VERASettings
 
@@ -189,25 +189,27 @@ struct SettingsSnapshotTests {
         preferences: PublisherSettingsPreferences = .default,
         selectedSection: SettingsSection = .general,
         horizontalSizeClass: UserInterfaceSizeClass = .compact
-    )  -> AnyView {
+    ) -> AnyView {
         var finalPreferences = preferences
-        
+
         // Enable stats in preferences when statistics view is present
         if withStatistics {
             finalPreferences.senderStatsEnabled = true
         }
-        
+
         let repository = MockStatsSettingsRepository(initialPreferences: finalPreferences)
         let viewModel = SettingsViewModel(repository: repository, settingsPreference: finalPreferences)
-        
+
         if withStatistics {
             let statsViewModel = StatisticsViewModel(
                 statsDataSource: MockStatsDataSource(initialStats: sampleStats()),
                 settingsRepository: repository
             )
             return AnyView(
-                SettingsView(viewModel: viewModel, statisticsViewModel: statsViewModel, selectedSection: selectedSection)
-                    .environment(\.horizontalSizeClass, horizontalSizeClass)
+                SettingsView(
+                    viewModel: viewModel, statisticsViewModel: statsViewModel, selectedSection: selectedSection
+                )
+                .environment(\.horizontalSizeClass, horizontalSizeClass)
             )
         } else {
             return AnyView(
@@ -216,12 +218,12 @@ struct SettingsSnapshotTests {
             )
         }
     }
-    
+
     private func contentScrollable(
         _ useScrollableLayout: Bool,
         config: ViewImageConfig
     ) -> Snapshotting<AnyView, UIImage> {
-         useScrollableLayout
+        useScrollableLayout
             ? .image(precision: 0.99, layout: .fixed(width: 390, height: 2250))
             : .image(precision: 0.99, layout: .device(config: config))
     }
@@ -238,14 +240,14 @@ struct SettingsSnapshotTests {
         var prefs = PublisherSettingsPreferences.default
         prefs.videoBitratePreset = .custom
         prefs.maxVideoBitrate = 2_000_000  // 2 Mbps
-        prefs.maxAudioBitrate = 128_000    // 128 kbps
+        prefs.maxAudioBitrate = 128_000  // 128 kbps
         return prefs
     }
 
     private static func makeVP8Preferences() async -> PublisherSettingsPreferences {
         var prefs = PublisherSettingsPreferences.default
         prefs.codecPreference = SettingsCodecPreference(
-            mode: .manual ,
+            mode: .manual,
             orderedCodecs: [.vp8, .h264, .vp9]
         )
         return prefs

@@ -11,28 +11,28 @@ import Foundation
 public struct PublisherSettingsPreferences: Codable, Equatable {
     /// The desired video resolution for the publisher stream.
     public var videoResolution: SettingsVideoResolution
-    
+
     /// The desired video frame rate for the publisher stream.
     public var videoFrameRate: SettingsVideoFrameRate
-    
+
     /// The codec preference configuration (automatic or manual with ordered list).
     public var codecPreference: SettingsCodecPreference
-    
+
     /// The maximum audio bitrate in bits per second.
     public var maxAudioBitrate: Int32
-    
+
     /// The video bitrate preset (default or custom).
     public var videoBitratePreset: SettingsVideoBitratePreset
-    
+
     /// The maximum video bitrate in bits per second (only used when videoBitratePreset is custom).
     public var maxVideoBitrate: Int32
-    
+
     /// Whether audio fallback is enabled for the publisher.
     public var publisherAudioFallbackEnabled: Bool
-    
+
     /// Whether audio fallback is enabled for subscribers.
     public var subscriberAudioFallbackEnabled: Bool
-    
+
     /// Whether sender statistics should be displayed for debugging purposes.
     public var senderStatsEnabled: Bool
 

@@ -3,50 +3,50 @@
 //
 
 #if DEBUG
-@preconcurrency import Combine
-import Foundation
-import VERADomain
+    @preconcurrency import Combine
+    import Foundation
+    import VERADomain
 
-// MARK: - Mock Repository
+    // MARK: - Mock Repository
 
-final class PreviewSettingsRepository: PublisherSettingsRepository {
-    
-    private let subject = CurrentValueSubject<PublisherSettingsPreferences, Never>(.default)
-    
-    var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
-        subject.eraseToAnyPublisher()
-    }
-    
-    func getPreferences() async -> PublisherSettingsPreferences {
-        subject.value
-    }
-    
-    func save(_ preferences: PublisherSettingsPreferences) async {
-        subject.send(preferences)
-    }
-    
-    func reset() async {
-        subject.send(.default)
-    }
-    
-    func saveNoAsync(_ preferences: PublisherSettingsPreferences) {
-        subject.send(preferences)
-    }
-}
+    final class PreviewSettingsRepository: PublisherSettingsRepository {
 
-// MARK: - Preview Instances
+        private let subject = CurrentValueSubject<PublisherSettingsPreferences, Never>(.default)
 
-extension SettingsViewModel {
-    
-    static var preview: SettingsViewModel {
-        SettingsViewModel(repository: PreviewSettingsRepository())
+        var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
+            subject.eraseToAnyPublisher()
+        }
+
+        func getPreferences() async -> PublisherSettingsPreferences {
+            subject.value
+        }
+
+        func save(_ preferences: PublisherSettingsPreferences) async {
+            subject.send(preferences)
+        }
+
+        func reset() async {
+            subject.send(.default)
+        }
+
+        func saveNoAsync(_ preferences: PublisherSettingsPreferences) {
+            subject.send(preferences)
+        }
     }
-    
-    static var previewWithStatsEnabled: SettingsViewModel {
-        let repo = PreviewSettingsRepository()
-        var prefs = PublisherSettingsPreferences.default
-        prefs.senderStatsEnabled = true
-        return SettingsViewModel(repository: repo, settingsPreference: prefs)
+
+    // MARK: - Preview Instances
+
+    extension SettingsViewModel {
+
+        static var preview: SettingsViewModel {
+            SettingsViewModel(repository: PreviewSettingsRepository())
+        }
+
+        static var previewWithStatsEnabled: SettingsViewModel {
+            let repo = PreviewSettingsRepository()
+            var prefs = PublisherSettingsPreferences.default
+            prefs.senderStatsEnabled = true
+            return SettingsViewModel(repository: repo, settingsPreference: prefs)
+        }
     }
-}
 #endif

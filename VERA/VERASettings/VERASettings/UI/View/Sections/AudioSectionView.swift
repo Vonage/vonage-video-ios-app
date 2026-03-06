@@ -57,7 +57,8 @@ struct AudioSectionView: View {
         }
 
         Section {
-            Toggle("Publisher Audio Fallback".localized, isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled)
+            Toggle(
+                "Publisher Audio Fallback".localized, isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled)
         } header: {
             Text("Publisher Fallback".localized)
         } footer: {
@@ -67,7 +68,9 @@ struct AudioSectionView: View {
         }
 
         Section {
-            Toggle("Subscriber Audio Fallback".localized, isOn: $viewModel.settingsPreference.subscriberAudioFallbackEnabled)
+            Toggle(
+                "Subscriber Audio Fallback".localized,
+                isOn: $viewModel.settingsPreference.subscriberAudioFallbackEnabled)
         } header: {
             Text("Subscriber Fallback".localized)
         } footer: {
@@ -81,10 +84,10 @@ struct AudioSectionView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview {
-    Form {
-        AudioSectionView(viewModel: .preview)
+    #Preview {
+        Form {
+            AudioSectionView(viewModel: .preview)
+        }
+        .preferredColorScheme(.dark)
     }
-    .preferredColorScheme(.dark)
-}
 #endif

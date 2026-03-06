@@ -9,7 +9,7 @@ class MockAudioSendStats: OTPublisherKitAudioNetworkStats {
     private let _audioPacketsLost: Int64
     private let _audioBytesSent: Int64
     private let _timestamp: Double
-    
+
     init(packetsSent: Int64, packetsLost: Int64, bytesSent: Int64, timestamp: Double) {
         _audioPacketsSent = packetsSent
         _audioPacketsLost = packetsLost
@@ -17,7 +17,7 @@ class MockAudioSendStats: OTPublisherKitAudioNetworkStats {
         _timestamp = timestamp
         super.init()
     }
-    
+
     override var audioPacketsSent: Int64 { _audioPacketsSent }
     override var audioPacketsLost: Int64 { _audioPacketsLost }
     override var audioBytesSent: Int64 { _audioBytesSent }
@@ -29,7 +29,7 @@ class MockVideoSendStats: OTPublisherKitVideoNetworkStats {
     private let _videoPacketsLost: Int64
     private let _videoBytesSent: Int64
     private let _timestamp: Double
-    
+
     init(packetsSent: Int64, packetsLost: Int64, bytesSent: Int64, timestamp: Double) {
         _videoPacketsSent = packetsSent
         _videoPacketsLost = packetsLost
@@ -37,7 +37,7 @@ class MockVideoSendStats: OTPublisherKitVideoNetworkStats {
         _timestamp = timestamp
         super.init()
     }
-    
+
     override var videoPacketsSent: Int64 { _videoPacketsSent }
     override var videoPacketsLost: Int64 { _videoPacketsLost }
     override var videoBytesSent: Int64 { _videoBytesSent }
@@ -49,7 +49,7 @@ class MockAudioReceiveStats: OTSubscriberKitAudioNetworkStats {
     private let _audioPacketsLost: UInt64
     private let _audioBytesReceived: UInt64
     private let _timestamp: Double
-    
+
     init(packetsReceived: UInt64, packetsLost: UInt64, bytesReceived: UInt64, timestamp: Double) {
         _audioPacketsReceived = packetsReceived
         _audioPacketsLost = packetsLost
@@ -57,7 +57,7 @@ class MockAudioReceiveStats: OTSubscriberKitAudioNetworkStats {
         _timestamp = timestamp
         super.init()
     }
-    
+
     override var audioPacketsReceived: UInt64 { _audioPacketsReceived }
     override var audioPacketsLost: UInt64 { _audioPacketsLost }
     override var audioBytesReceived: UInt64 { _audioBytesReceived }
@@ -69,7 +69,7 @@ class MockVideoReceiveStats: OTSubscriberKitVideoNetworkStats {
     private let _videoPacketsLost: UInt64
     private let _videoBytesReceived: UInt64
     private let _timestamp: Double
-    
+
     init(packetsReceived: UInt64, packetsLost: UInt64, bytesReceived: UInt64, timestamp: Double) {
         _videoPacketsReceived = packetsReceived
         _videoPacketsLost = packetsLost
@@ -77,7 +77,7 @@ class MockVideoReceiveStats: OTSubscriberKitVideoNetworkStats {
         _timestamp = timestamp
         super.init()
     }
-    
+
     override var videoPacketsReceived: UInt64 { _videoPacketsReceived }
     override var videoPacketsLost: UInt64 { _videoPacketsLost }
     override var videoBytesReceived: UInt64 { _videoBytesReceived }
@@ -86,12 +86,12 @@ class MockVideoReceiveStats: OTSubscriberKitVideoNetworkStats {
 
 class MockPublisherRtcStats: OTPublisherRtcStats {
     private var _jsonArrayOfReports: String
-    
+
     init(jsonArrayOfReports: String) {
         _jsonArrayOfReports = jsonArrayOfReports
         super.init()
     }
-    
+
     override var jsonArrayOfReports: String {
         get { _jsonArrayOfReports }
         set { _jsonArrayOfReports = newValue }

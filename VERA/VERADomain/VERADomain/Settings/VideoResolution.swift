@@ -18,13 +18,13 @@
 public enum VideoResolution: Int {
     /// Low resolution (352x288).
     case low = 0
-    
+
     /// Medium resolution (640x480).
     case mediun = 1
-    
+
     /// High resolution (1280x720).
     case high = 2
-    
+
     /// High 1080p resolution (1920x1080).
     case high1080p = 3
 }

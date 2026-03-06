@@ -59,9 +59,9 @@ public enum SettingsVideoBitratePreset: Int, Codable, Equatable, Identifiable, C
 
 // MARK: - Display
 
-public extension SettingsVideoBitratePreset {
+extension SettingsVideoBitratePreset {
     /// Human-readable label shown in the Settings UI.
-     var displayName: String {
+    public var displayName: String {
         return switch self {
         case .default: "Default".localized
         case .bandwidthSaver: "Bandwidth Saver".localized
@@ -71,7 +71,7 @@ public extension SettingsVideoBitratePreset {
     }
 
     /// Footer text that changes based on the selected preset.
-    var footerDescription: String {
+    public var footerDescription: String {
         return switch self {
         case .default:
             "Default adaptive bitrate — the SDK optimises quality automatically.".localized

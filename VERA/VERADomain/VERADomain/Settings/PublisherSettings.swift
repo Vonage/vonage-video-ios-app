@@ -13,16 +13,16 @@
 public struct PublisherSettings: Equatable {
     /// The username to display for this publisher.
     public let username: String
-    
+
     /// Whether to publish audio stream.
     public let publishAudio: Bool
-    
+
     /// Whether to publish video stream.
     public let publishVideo: Bool
-    
+
     /// How video should be scaled in the view.
     public let scaleBehavior: VideoScaleBehavior
-    
+
     /// Optional advanced settings for fine-tuning video/audio configuration.
     public let advancedSettings: PublisherAdvancedSettings?
 

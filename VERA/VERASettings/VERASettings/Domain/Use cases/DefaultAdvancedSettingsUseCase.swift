@@ -13,12 +13,12 @@ import VERADomain
 public final class DefaultAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
 
     // MARK: - Dependencies
-    
+
     /// The repository that persists and retrieves user settings.
     private let publisherSettingsRepository: PublisherSettingsRepository
 
     // MARK: - Init
-    
+
     /// Creates a new advanced settings use case.
     ///
     /// - Parameter publisherSettingsRepository: The repository to read settings from.
@@ -27,7 +27,7 @@ public final class DefaultAdvancedSettingsUseCase: PublisherAdvancedSettingsUseC
     }
 
     // MARK: - PublisherAdvancedSettingsUseCase
-    
+
     /// Retrieves the current publisher advanced settings.
     ///
     /// - Returns: The publisher advanced settings derived from user preferences.

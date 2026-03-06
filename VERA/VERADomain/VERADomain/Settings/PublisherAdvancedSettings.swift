@@ -13,25 +13,25 @@
 public struct PublisherAdvancedSettings: Equatable {
     /// The desired video capture resolution.
     public let videoResolution: VideoResolution?
-    
+
     /// The desired video capture frame rate.
     public let videoFrameRate: VideoFrameRate?
-    
+
     /// Codec selection preference (automatic or manual with ordered list).
     public let preferredVideoCodecs: VideoCodecPreference?
-    
+
     /// Maximum audio bitrate in bits per second.
     public let maxAudioBitrate: Int32?
-    
+
     /// Video bitrate preset (default, bandwidth saver, etc.).
     public let videoBitratePreset: VideoBitratePreset?
-    
+
     /// Maximum video bitrate in bits per second (only used when `videoBitratePreset` is `.customBitrate`).
     public let maxVideoBitrate: Int32?
-    
+
     /// Whether audio fallback is enabled for the publisher.
     public let publisherAudioFallbackEnabled: Bool?
-    
+
     /// Whether audio fallback is enabled for subscribers.
     public let subscriberAudioFallbackEnabled: Bool?
 

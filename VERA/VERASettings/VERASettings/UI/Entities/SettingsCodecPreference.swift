@@ -70,9 +70,9 @@ public enum SettingsCodecMode: String, Codable, Equatable, CaseIterable, Identif
 
 // MARK: - Display
 
-public extension SettingsCodecMode {
+extension SettingsCodecMode {
     /// Human-readable label shown in the Settings UI.
-    var displayName: String {
+    public var displayName: String {
         return switch self {
         case .automatic: "Automatic".localized
         case .manual: "Manual".localized
@@ -80,7 +80,7 @@ public extension SettingsCodecMode {
     }
 
     /// Footer text for the codec section.
-    var footerDescription: String {
+    public var footerDescription: String {
         return switch self {
         case .automatic:
             "The SDK automatically selects the best codec based on network conditions and participant capabilities."

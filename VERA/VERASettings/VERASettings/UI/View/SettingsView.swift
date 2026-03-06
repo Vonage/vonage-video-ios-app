@@ -16,26 +16,26 @@ import SwiftUI
 ///
 /// Sections are defined in ``SettingsSection``.
 public struct SettingsView: View {
-    
+
     /// Environment action to dismiss the current presentation.
     @Environment(\.dismiss) private var dismiss
-    
+
     /// Current horizontal size class for determining layout adaptations.
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    
+
     /// View model managing settings state and user actions.
     @ObservedObject var viewModel: SettingsViewModel
-    
+
     /// View model for real-time statistics (placeholder when not in a meeting).
     @ObservedObject private var statisticsViewModel: StatisticsViewModel
-    
+
     /// Currently selected section in the sidebar (iPad/Mac only).
     @State private var selectedSection: SettingsSection?
 
     /// Whether this view has a real statistics view model (vs. placeholder).
     /// Used to conditionally show live stats in the meeting room.
     private var hasStatisticsViewModel: Bool {
-        statisticsViewModel !== StatisticsViewModel .placeholder
+        statisticsViewModel !== StatisticsViewModel.placeholder
     }
 
     /// Creates a settings view without real-time stats (waiting room).
@@ -55,7 +55,10 @@ public struct SettingsView: View {
     ///   - viewModel: The settings view model managing state and actions.
     ///   - statisticsViewModel: View model providing live network statistics during an active call.
     ///   - selectedSection: The initially selected section for iPad/Mac sidebar. Defaults to `.general`.
-    public init(viewModel: SettingsViewModel, statisticsViewModel: StatisticsViewModel, selectedSection: SettingsSection = .general) {
+    public init(
+        viewModel: SettingsViewModel, statisticsViewModel: StatisticsViewModel,
+        selectedSection: SettingsSection = .general
+    ) {
         self.viewModel = viewModel
         self.statisticsViewModel = statisticsViewModel
         self._selectedSection = State(initialValue: selectedSection)
@@ -70,7 +73,7 @@ public struct SettingsView: View {
             }
         }
         .task {
-           await viewModel.setup()
+            await viewModel.setup()
         }
     }
 
@@ -181,31 +184,31 @@ public struct SettingsView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("iPhone - Waiting Room") {
-    SettingsView(viewModel: .preview)
+    #Preview("iPhone - Waiting Room") {
+        SettingsView(viewModel: .preview)
+            .preferredColorScheme(.dark)
+    }
+
+    #Preview("iPhone - Meeting Room") {
+        SettingsView(
+            viewModel: .preview,
+            statisticsViewModel: .placeholder
+        )
         .preferredColorScheme(.dark)
-}
+    }
 
-#Preview("iPhone - Meeting Room") {
-    SettingsView(
-        viewModel: .preview,
-        statisticsViewModel: .placeholder
-    )
-    .preferredColorScheme(.dark)
-}
+    #Preview("iPad - Waiting Room") {
+        SettingsView(viewModel: .preview)
+            .environment(\.horizontalSizeClass, .regular)
+            .preferredColorScheme(.dark)
+    }
 
-#Preview("iPad - Waiting Room") {
-    SettingsView(viewModel: .preview)
+    #Preview("iPad - Meeting Room") {
+        SettingsView(
+            viewModel: .preview,
+            statisticsViewModel: .placeholder
+        )
         .environment(\.horizontalSizeClass, .regular)
         .preferredColorScheme(.dark)
-}
-
-#Preview("iPad - Meeting Room") {
-    SettingsView(
-        viewModel: .preview,
-        statisticsViewModel: .placeholder
-    )
-    .environment(\.horizontalSizeClass, .regular)
-    .preferredColorScheme(.dark)
-}
+    }
 #endif

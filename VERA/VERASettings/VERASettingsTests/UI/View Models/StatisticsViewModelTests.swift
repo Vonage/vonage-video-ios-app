@@ -28,7 +28,7 @@ struct StatisticsViewModelTests {
 
         #expect(viewModel.stats == NetworkMediaStats.empty)
         #expect(viewModel.isStatsEnabled == false)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -52,7 +52,7 @@ struct StatisticsViewModelTests {
         await delay()
 
         #expect(viewModel.isStatsEnabled == true)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -94,7 +94,7 @@ struct StatisticsViewModelTests {
         await delay()
 
         #expect(viewModel.isStatsEnabled == false)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -145,7 +145,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats.sentAudio?.bytesSent == 50_000)
         #expect(viewModel.stats.sentVideo?.packetsSent == 5000)
         #expect(viewModel.stats.sentVideo?.packetsLost == 25)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -175,7 +175,7 @@ struct StatisticsViewModelTests {
             )
         )
         await dataSource.updateStats(stats1)
-        
+
         // Wait for update
         await delay()
 
@@ -191,12 +191,12 @@ struct StatisticsViewModelTests {
             )
         )
         await dataSource.updateStats(stats2)
-        
+
         await delay()
 
         #expect(viewModel.stats.sentAudio?.packetsSent == 200)
         #expect(viewModel.stats.sentAudio?.bytesSent == 20_000)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -243,7 +243,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.isStatsEnabled == true)
         #expect(viewModel.stats.receivedAudio?.packetsReceived == 3000)
         #expect(viewModel.stats.receivedAudio?.estimatedBandwidth == 512_000)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -267,7 +267,7 @@ struct StatisticsViewModelTests {
 
         // Explicitly send empty stats
         await dataSource.updateStats(NetworkMediaStats.empty)
-        
+
         // Wait for both updates
         await delay()
 
@@ -276,7 +276,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats.sentVideo == nil)
         #expect(viewModel.stats.receivedAudio == nil)
         #expect(viewModel.stats.receivedVideo == nil)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource
@@ -306,7 +306,7 @@ struct StatisticsViewModelTests {
             )
         )
         await dataSource.updateStats(partialStats)
-        
+
         // Wait for both updates
         await delay()
 
@@ -315,7 +315,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats.sentVideo == nil)
         #expect(viewModel.stats.receivedAudio == nil)
         #expect(viewModel.stats.receivedVideo == nil)
-        
+
         // Keep objects alive
         _ = repository
         _ = dataSource

@@ -3,9 +3,9 @@
 //
 import Foundation
 
-public extension String {
-    
-    func localized(bundle:Bundle = .main) -> String {
+extension String {
+
+    public func localized(bundle: Bundle = .main) -> String {
         return NSLocalizedString(
             self,
             tableName: nil,
@@ -14,13 +14,13 @@ public extension String {
             comment: "\(self)_comment"
         )
     }
-    
-    func localized(args: CVarArg... ,bundle:Bundle = .main) -> String {
+
+    public func localized(args: CVarArg..., bundle: Bundle = .main) -> String {
         let format = localized(bundle: bundle)
         return String(format: format, args)
     }
-    
-    func pluralizeIfNeeded(count: Int) -> String {
+
+    public func pluralizeIfNeeded(count: Int) -> String {
         return "^[\(count) \(self)](inflect: true)"
     }
 }

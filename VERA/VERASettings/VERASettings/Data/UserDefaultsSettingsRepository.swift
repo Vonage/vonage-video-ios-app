@@ -21,7 +21,7 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
 
     /// The UserDefaults instance used for persistence.
     private let userDefaults: UserDefaults
-    
+
     /// Subject that holds the current settings and notifies observers of changes.
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
 
@@ -60,7 +60,7 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
     /// - Parameter preferences: The preferences to persist.
     public func save(_ preferences: PublisherSettingsPreferences) async {
         if let data = try? JSONEncoder().encode(preferences) {
-             userDefaults.set(data, forKey: Self.storeKey)
+            userDefaults.set(data, forKey: Self.storeKey)
         }
         subject.send(preferences)
     }

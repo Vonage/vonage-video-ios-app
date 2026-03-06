@@ -334,12 +334,12 @@ public final class VonageCall: CallFacade {
                 vonageSubscriber.otSubscriber.networkStatsDelegate = statsCollector
                 statsCollector.requestRtcStats(from: vonageSubscriber.otSubscriber)
             }
-            
+
             setupSubscriberObservation(vonageSubscriber)
             setupAudioLevelObservation(vonageSubscriber)
 
             try session.subscribe(subscriber: vonageSubscriber)
-            
+
             let state = await callStateManager.addSubscriber(vonageSubscriber)
             await updateParticipantsState(state)
 
@@ -750,7 +750,7 @@ public final class VonageCall: CallFacade {
         await updateParticipantsState(state)
     }
 
-    // MARK: Network Stats 
+    // MARK: Network Stats
 
     /// Starts collecting network statistics from the SDK.
     ///

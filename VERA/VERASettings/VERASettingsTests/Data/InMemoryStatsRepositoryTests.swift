@@ -11,56 +11,56 @@ import VERADomain
 
 @Suite("InMemoryStatsRepository Tests")
 struct InMemoryStatsRepositoryTests {
-    
+
     // MARK: - Initial State Tests
-    
+
     @Test("Repository initializes with empty stats")
     func initializesWithEmptyStats() async {
         let repository = InMemoryStatsRepository()
-        
+
         var receivedStats: NetworkMediaStats?
         let cancellable = repository.statsPublisher
             .sink { stats in
                 receivedStats = stats
             }
-        
+
         await delay()
-        
+
         #expect(receivedStats == NetworkMediaStats.empty)
-        
+
         cancellable.cancel()
     }
-    
+
     @Test("Publisher emits initial empty value immediately")
     func publisherEmitsInitialValue() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var receivedStats: NetworkMediaStats?
         let cancellable = repository.statsPublisher
             .sink { stats in
                 receivedStats = stats
             }
-        
+
         // Wait for emission
         await delay()
-        
+
         #expect(receivedStats == NetworkMediaStats.empty)
-        
+
         cancellable.cancel()
     }
-    
+
     // MARK: - Update Stats Tests
-    
+
     @Test("updateStats updates current value and emits through publisher")
     func updateStatsEmitsThroughPublisher() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var emittedValues: [NetworkMediaStats] = []
-        let cancellable =  repository.statsPublisher
+        let cancellable = repository.statsPublisher
             .sink { stats in
                 emittedValues.append(stats)
             }
-        
+
         // Wait for initial value
         await delay()
 
@@ -75,7 +75,7 @@ struct InMemoryStatsRepositoryTests {
             )
         )
         await repository.updateStats(testStats)
-        
+
         // Wait for update
         await delay()
 
@@ -83,27 +83,27 @@ struct InMemoryStatsRepositoryTests {
         #expect(emittedValues[0] == NetworkMediaStats.empty)
         #expect(emittedValues[1] == testStats)
         #expect(emittedValues.last == testStats)
-        
+
         cancellable.cancel()
     }
-    
+
     @Test("Multiple subscribers receive the same updates")
     func multipleSubscribersReceiveUpdates() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var subscriber1Values: [NetworkMediaStats] = []
         var subscriber2Values: [NetworkMediaStats] = []
-        
+
         let cancellable1 = repository.statsPublisher
             .sink { stats in
                 subscriber1Values.append(stats)
             }
-        
+
         let cancellable2 = repository.statsPublisher
             .sink { stats in
                 subscriber2Values.append(stats)
             }
-        
+
         // Wait for initial emissions
         await delay()
 
@@ -118,7 +118,7 @@ struct InMemoryStatsRepositoryTests {
             )
         )
         await repository.updateStats(testStats)
-        
+
         // Wait for update
         await delay()
 
@@ -126,21 +126,21 @@ struct InMemoryStatsRepositoryTests {
         #expect(subscriber2Values.count == 2)
         #expect(subscriber1Values[1] == testStats)
         #expect(subscriber2Values[1] == testStats)
-        
+
         cancellable1.cancel()
         cancellable2.cancel()
     }
-    
+
     @Test("Multiple updates emit correctly in sequence")
     func multipleUpdatesEmitInSequence() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var emittedValues: [NetworkMediaStats] = []
         let cancellable = repository.statsPublisher
             .sink { stats in
                 emittedValues.append(stats)
             }
-        
+
         // Wait for initial value
         await delay()
 
@@ -172,22 +172,22 @@ struct InMemoryStatsRepositoryTests {
         #expect(emittedValues[0] == NetworkMediaStats.empty)
         #expect(emittedValues[1] == stats1)
         #expect(emittedValues[2] == stats2)
-        
+
         cancellable.cancel()
     }
-    
+
     // MARK: - Clear Stats Tests
-    
+
     @Test("clearStats resets to empty and emits through publisher")
     func clearStatsResetsToEmpty() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var emittedValues: [NetworkMediaStats] = []
         let cancellable = repository.statsPublisher
             .sink { stats in
                 emittedValues.append(stats)
             }
-        
+
         // Wait for initial value
         await delay()
 
@@ -213,22 +213,22 @@ struct InMemoryStatsRepositoryTests {
         #expect(emittedValues[1] == testStats)
         #expect(emittedValues[2] == NetworkMediaStats.empty)
         #expect(emittedValues.last == NetworkMediaStats.empty)
-        
+
         cancellable.cancel()
     }
-    
+
     // MARK: - Thread Safety Tests
-    
+
     @Test("Concurrent updates are handled safely")
     func concurrentUpdatesAreSafe() async throws {
         let repository = InMemoryStatsRepository()
-        
+
         var emittedValues: [NetworkMediaStats] = []
         let cancellable = repository.statsPublisher
             .sink { stats in
                 emittedValues.append(stats)
             }
-        
+
         // Wait for initial value
         await delay()
 
@@ -248,17 +248,17 @@ struct InMemoryStatsRepositoryTests {
                 }
             }
         }
-        
+
         // Wait for all updates to propagate
         await delay()
-        
+
         // Should have initial + 10 updates
         #expect(emittedValues.count == 11)
         #expect(emittedValues[0] == NetworkMediaStats.empty)
-        
+
         // Final state should be one of the updates (actor ensures safe mutations)
         #expect(emittedValues.last != NetworkMediaStats.empty)
-        
+
         cancellable.cancel()
     }
 }

@@ -17,16 +17,16 @@ public enum StatsOverlayUIConstants {
 
     /// Background opacity of the overlay (0.0 - 1.0).
     public static let backgroundOpacity: Double = 0.8
-    
+
     /// Shadow opacity (0.0 - 1.0).
     public static let shadowOpacity: Double = 0.8
-    
+
     /// Shadow blur radius in points.
     public static let shadowRadius: Double = 2
-    
+
     /// Horizontal shadow offset in points.
     public static let shadowX: Double = 0
-    
+
     /// Vertical shadow offset in points (positive = downward).
     public static let shadowY: Double = 2
 
@@ -44,17 +44,17 @@ public enum StatsOverlayUIConstants {
 ///
 /// The overlay is non-interactive (``allowsHitTesting(false)``) so taps pass through to underlying UI.
 public struct StatsOverlayView: View {
-    
+
     /// View model driving the overlay's visibility and stats text.
     @ObservedObject var viewModel: StatsOverlayViewModel
-    
+
     /// Creates a new stats overlay view.
     ///
     /// - Parameter viewModel: The view model providing stats data and visibility state.
     public init(viewModel: StatsOverlayViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         ZStack {
             if viewModel.isActive {
@@ -62,19 +62,25 @@ public struct StatsOverlayView: View {
                     Text("Live Stats".localized)
                         .font(.caption.monospaced().bold())
                         .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(StatsOverlayUIConstants.shadowOpacity),
-                                radius: StatsOverlayUIConstants.shadowRadius, x: StatsOverlayUIConstants.shadowX, y: StatsOverlayUIConstants.shadowY)
-                    
+                        .shadow(
+                            color: .black.opacity(StatsOverlayUIConstants.shadowOpacity),
+                            radius: StatsOverlayUIConstants.shadowRadius, x: StatsOverlayUIConstants.shadowX,
+                            y: StatsOverlayUIConstants.shadowY)
+
                     Text(viewModel.statsText)
                         .font(.caption2.monospaced())
                         .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(StatsOverlayUIConstants.shadowOpacity),
-                                radius: StatsOverlayUIConstants.shadowRadius, x: StatsOverlayUIConstants.shadowX, y: StatsOverlayUIConstants.shadowY)
+                        .shadow(
+                            color: .black.opacity(StatsOverlayUIConstants.shadowOpacity),
+                            radius: StatsOverlayUIConstants.shadowRadius, x: StatsOverlayUIConstants.shadowX,
+                            y: StatsOverlayUIConstants.shadowY)
                 }
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: StatsOverlayUIConstants.cornerRadius)
-                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(StatsOverlayUIConstants.backgroundOpacity))
+                        .fill(
+                            VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(
+                                StatsOverlayUIConstants.backgroundOpacity))
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding()
@@ -94,13 +100,13 @@ public struct StatsOverlayView: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview("Stats Active") {
-    StatsOverlayView(viewModel: .previewActive)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-}
+    #Preview("Stats Active") {
+        StatsOverlayView(viewModel: .previewActive)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 
-#Preview("Stats Inactive") {
-    StatsOverlayView(viewModel: .previewInactive)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-}
+    #Preview("Stats Inactive") {
+        StatsOverlayView(viewModel: .previewInactive)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 #endif

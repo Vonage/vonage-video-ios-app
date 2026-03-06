@@ -23,9 +23,9 @@ public enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
 
 // MARK: - Display
 
-public extension SettingsSection {
+extension SettingsSection {
     /// SF Symbol name for the section icon.
-     var iconName: String {
+    public var iconName: String {
         return switch self {
         case .general: "gear"
         case .video: "video"
@@ -35,5 +35,5 @@ public extension SettingsSection {
     }
 
     /// Human-readable label for the section.
-     var displayName: String { rawValue.localized }
+    public var displayName: String { rawValue.localized }
 }

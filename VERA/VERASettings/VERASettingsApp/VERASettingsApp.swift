@@ -2,10 +2,10 @@
 //  Created by Vonage on 25/2/26.
 //
 
-import SwiftUI
-import VERASettings
-import VERADomain
 import Combine
+import SwiftUI
+import VERADomain
+import VERASettings
 
 @main
 struct VERASettingsDemoApp: App {
@@ -21,7 +21,7 @@ struct VERASettingsDemoApp: App {
 struct DemoMeetingView: View {
     @StateObject private var viewModel = DemoViewModel()
     @State private var showSettings = false
-    
+
     var body: some View {
         ZStack {
             // Simulated video background
@@ -31,10 +31,10 @@ struct DemoMeetingView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             VStack {
                 Spacer()
-                
+
                 // Bottom control bar
                 DemoControlBar(
                     onOpenSettings: {
@@ -43,7 +43,7 @@ struct DemoMeetingView: View {
                 )
                 .padding()
             }
-            
+
             // Stats overlay (controlled by settings)
             StatsOverlayView(viewModel: viewModel.statsOverlayViewModel)
         }
@@ -63,7 +63,7 @@ struct DemoMeetingView: View {
 struct DemoToolbar: View {
     let onClose: () -> Void
     let onSettings: () -> Void
-    
+
     var body: some View {
         HStack {
             Button(action: onClose) {
@@ -73,15 +73,15 @@ struct DemoToolbar: View {
                     .padding(8)
                     .background(.ultraThinMaterial, in: Circle())
             }
-            
+
             Spacer()
-            
+
             Text("Demo Meeting")
                 .font(.headline)
                 .foregroundColor(.white)
-        
+
             Spacer()
-            
+
             Button(action: onSettings) {
                 Image(systemName: "gearshape.fill")
                     .font(.title2)
@@ -97,14 +97,14 @@ struct DemoToolbar: View {
 
 struct DemoControlBar: View {
     let onOpenSettings: () -> Void
-    
+
     var body: some View {
         HStack {
             Spacer()
-            
+
             // Settings button (only control in bottom bar, like VERA App)
             SettingsMeetingRoomButton(onShowSettings: onOpenSettings)
-            
+
             Spacer()
         }
     }
@@ -119,47 +119,47 @@ class DemoViewModel: ObservableObject {
     let settingsViewModel: SettingsViewModel
     let statisticsViewModel: StatisticsViewModel
     let statsOverlayViewModel: StatsOverlayViewModel
-    
+
     init() {
         // Initialize repositories with stats enabled by default
         var initialPrefs = PublisherSettingsPreferences.default
         initialPrefs.senderStatsEnabled = true
-        
+
         self.settingsRepository = DemoSettingsRepository(initialPreferences: initialPrefs)
         self.statsDataSource = DemoStatsDataSource()
-        
+
         // Initialize ViewModels
         self.settingsViewModel = SettingsViewModel(
             repository: settingsRepository,
             settingsPreference: .default
         )
-        
+
         self.statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: settingsRepository
         )
-        
+
         self.statsOverlayViewModel = StatsOverlayViewModel(
             settingsRepository: settingsRepository,
             statsDataSource: statsDataSource
         )
-        
+
         // Setup
         statsOverlayViewModel.setup()
-        
+
         // Start simulating stats
         Task {
             await startSimulatingStats()
         }
     }
-    
+
     private func startSimulatingStats() async {
         while true {
-            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            try? await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second
             await statsDataSource.updateStats(generateRandomStats())
         }
     }
-    
+
     private func generateRandomStats() -> NetworkMediaStats {
         NetworkMediaStats(
             sentAudio: AudioSendStats(
@@ -197,23 +197,23 @@ class DemoViewModel: ObservableObject {
 
 final class DemoSettingsRepository: PublisherSettingsRepository {
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
-    
+
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
         subject.eraseToAnyPublisher()
     }
-    
+
     init(initialPreferences: PublisherSettingsPreferences = .default) {
         self.subject = CurrentValueSubject(initialPreferences)
     }
-    
+
     func getPreferences() async -> PublisherSettingsPreferences {
         subject.value
     }
-    
+
     func save(_ preferences: PublisherSettingsPreferences) async {
         subject.send(preferences)
     }
-    
+
     func reset() async {
         subject.send(.default)
     }
@@ -223,15 +223,15 @@ final class DemoSettingsRepository: PublisherSettingsRepository {
 
 final class DemoStatsDataSource: StatsDataSource {
     private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
-    
+
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         subject.eraseToAnyPublisher()
     }
-    
+
     init(initialStats: NetworkMediaStats = .empty) {
         self.subject = CurrentValueSubject(initialStats)
     }
-    
+
     func updateStats(_ stats: NetworkMediaStats) async {
         subject.send(stats)
     }

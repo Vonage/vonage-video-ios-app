@@ -9,8 +9,8 @@ import VERADomain
 
 final class MockStatsDataSource: StatsDataSource {
 
-    private nonisolated  let subject: CurrentValueSubject<NetworkMediaStats, Never>
-    
+    private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
+
     nonisolated(unsafe) private(set) var startCallCount = 0
     nonisolated(unsafe) private(set) var stopCallCount = 0
 
@@ -18,7 +18,7 @@ final class MockStatsDataSource: StatsDataSource {
         self.subject = CurrentValueSubject(initialStats)
     }
 
-    nonisolated var  statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
+    nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         subject.eraseToAnyPublisher()
     }
 

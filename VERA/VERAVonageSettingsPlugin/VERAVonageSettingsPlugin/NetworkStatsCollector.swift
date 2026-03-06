@@ -267,7 +267,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
                 lastAudioCodec = codecName
             }
         }
-        
+
         // Update existing stats objects with the newly extracted codec info
         if let existing = lastVideoSend {
             lastVideoSend = VideoSendStats(
@@ -278,7 +278,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
                 videoCodec: lastVideoCodec
             )
         }
-        
+
         if let existing = lastAudioSend {
             lastAudioSend = AudioSendStats(
                 packetsSent: existing.packetsSent,

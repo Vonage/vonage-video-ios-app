@@ -17,7 +17,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// Controls whether the stats overlay is currently visible.
     /// Automatically set based on the `senderStatsEnabled` preference.
     @Published public var isActive: Bool = false
-    
+
     /// The formatted text to display in the stats overlay.
     /// Contains real-time network statistics formatted for display.
     @Published public var statsText: String = ""
@@ -26,15 +26,15 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     /// Repository providing settings preferences including the stats toggle.
     private let settingsRepository: PublisherSettingsRepository
-    
+
     /// Data source providing real-time network statistics.
     private let statsDataSource: StatsDataSource
-    
+
     /// Minimum time interval between stats UI updates in seconds.
     /// - `0`: No throttling (immediate updates)
     /// - `> 0`: Updates limited to once per interval
     private let statsUpdateInterval: TimeInterval
-    
+
     /// Set of Combine subscriptions managed by this view model.
     private var cancellables = Set<AnyCancellable>()
 
@@ -56,14 +56,14 @@ public final class StatsOverlayViewModel: ObservableObject {
         self.statsDataSource = statsDataSource
         self.statsUpdateInterval = statsUpdateInterval
     }
-    
+
     /// Sets up the observers for settings and stats changes.
     /// Should be called when the view appears.
     public func setup() {
         observeSettings()
         observeStats()
     }
-    
+
     /// Removes all observers and cleans up subscriptions.
     /// Should be called when the view disappears.
     public func removeObservers() {
@@ -80,9 +80,9 @@ public final class StatsOverlayViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isEnabled in
                 guard let self else { return }
-            
+
                 self.isActive = isEnabled
-                
+
                 if !isEnabled {
                     self.statsText = ""
                 }
@@ -94,16 +94,17 @@ public final class StatsOverlayViewModel: ObservableObject {
     private func observeStats() {
         let publisher = statsDataSource.statsPublisher
             .receive(on: DispatchQueue.main)
-        
+
         let throttledPublisher: AnyPublisher<NetworkMediaStats, Never>
         if statsUpdateInterval > 0 {
-            throttledPublisher = publisher
+            throttledPublisher =
+                publisher
                 .throttle(for: .seconds(statsUpdateInterval), scheduler: DispatchQueue.main, latest: true)
                 .eraseToAnyPublisher()
         } else {
             throttledPublisher = publisher.eraseToAnyPublisher()
         }
-        
+
         throttledPublisher
             .sink { [weak self] stats in
                 guard let self, self.isActive else { return }
@@ -112,12 +113,12 @@ public final class StatsOverlayViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
+
     /// Builds the stats text from the latest statistics snapshot.
     ///
     /// - Parameter stats: The network media statistics to format.
     private func buildStatsText(_ stats: NetworkMediaStats) {
-        Task{ @MainActor in
+        Task { @MainActor in
             let maxAudioBitrate = await settingsRepository.getPreferences().maxAudioBitrate
             self.statsText = await formatStats(stats, maxAudioBitrate: maxAudioBitrate)
         }

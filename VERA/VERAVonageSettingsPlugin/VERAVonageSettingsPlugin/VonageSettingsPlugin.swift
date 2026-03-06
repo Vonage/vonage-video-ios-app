@@ -39,24 +39,24 @@ import VERAVonage
 ///
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``StatsWriter``
 public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
-    
+
     private var cancellables = Set<AnyCancellable>()
     /// Tracks the in-flight publisher-settings Task so it can be cancelled if new
     /// settings arrive before the previous republish cycle finishes.
     private var applySettingsTask: Task<Void, Never>?
-    
+
     /// The active call façade, injected by the plugin coordinator.
     public weak var call: (any CallFacade)?
-    
+
     /// Reactive source of publisher settings preferences (includes `senderStatsEnabled`).
     private let settingsRepository: PublisherSettingsRepository
-    
+
     /// Write-only entry point for pushing live network stats to the settings module.
     private let statsWriter: StatsWriter
-    
+
     /// A stable identifier for this plugin instance.
     public var pluginIdentifier: String { String(describing: type(of: self)) }
-    
+
     /// Creates a new settings plugin.
     ///
     /// - Parameters:
@@ -69,9 +69,9 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
         self.settingsRepository = settingsRepository
         self.statsWriter = statsWriter
     }
-    
+
     // MARK: - VonagePluginCallLifeCycle
-    
+
     /// Called when the call starts and the Vonage session is connected.
     ///
     /// Sets up Combine subscriptions to bridge settings preferences with the call.
@@ -80,16 +80,16 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     public func callDidStart(_ userInfo: [String: Any]) async throws {
         initObservers()
     }
-    
+
     /// Called when the call ends and the Vonage session is disconnecting.
     ///
     /// Clears stats data and cancels all subscriptions.
     public func callDidEnd() async throws {
         cancelObservables()
     }
-    
+
     // MARK: - Private
-    
+
     private func initObservers() {
         // Observe the sender stats toggle and enable/disable network stats collection.
         settingsRepository.preferencesPublisher
@@ -104,7 +104,7 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
                 }
             }
             .store(in: &cancellables)
-        
+
         // Observe SDK-relevant preference changes and trigger a republish.
         // Maps to PublisherAdvancedSettings BEFORE removeDuplicates so that changes
         // to fields not reflected in PublisherAdvancedSettings (e.g. senderStatsEnabled)
@@ -124,7 +124,7 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
                 }
             }
             .store(in: &cancellables)
-        
+
         // Forward network stats from the call to the settings data layer.
         call?.networkStatsPublisher
             .sink { [weak self] stats in
@@ -133,13 +133,13 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
             }
             .store(in: &cancellables)
     }
-    
+
     private func updateStats(_ stats: NetworkMediaStats) {
         Task {
             await statsWriter.updateStats(stats)
         }
     }
-    
+
     private func clearStats() {
         Task {
             await statsWriter.clearStats()

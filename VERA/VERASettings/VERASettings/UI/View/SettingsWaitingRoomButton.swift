@@ -23,7 +23,7 @@ public struct SettingsWaitingRoomButton: View {
     /// Closure for creating the settings view when the button is tapped.
     /// If `nil`, the button will show the sheet but with no content.
     private let makeSettingsView: OnLaunchView?
-    
+
     /// Controls the presentation state of the settings sheet.
     @State private var showSettings = false
 
@@ -38,7 +38,7 @@ public struct SettingsWaitingRoomButton: View {
     public var body: some View {
         CircularControlImageButton(
             isActive: true,
-            image: Image(systemName: "gearshape.fill"),
+            image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
             action: { showSettings = true }
         )
         .sheet(isPresented: $showSettings) {
@@ -51,9 +51,9 @@ public struct SettingsWaitingRoomButton: View {
 // MARK: - Previews
 
 #if DEBUG
-#Preview {
-    SettingsWaitingRoomButton {
-        SettingsView(viewModel: .preview)
+    #Preview {
+        SettingsWaitingRoomButton {
+            SettingsView(viewModel: .preview)
+        }
     }
-}
 #endif
