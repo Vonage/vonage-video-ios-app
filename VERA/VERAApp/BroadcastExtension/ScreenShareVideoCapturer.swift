@@ -127,7 +127,8 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         let scaleX = CGFloat(dstWidth) / extent.width
         let scaleY = CGFloat(dstHeight) / extent.height
         let scaledImage = ciImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
-        ciContext.render(scaledImage, to: dstBuffer, bounds: scaledImage.extent, colorSpace: CGColorSpaceCreateDeviceRGB())
+        ciContext.render(
+            scaledImage, to: dstBuffer, bounds: scaledImage.extent, colorSpace: CGColorSpaceCreateDeviceRGB())
 
         // Pass the actual orientation so the receiving side can rotate correctly.
         videoFrame.timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
