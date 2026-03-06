@@ -54,7 +54,7 @@
             ZStack {
                 OngoingActivityControlImageButton(
                     isActive: state.isSharing,
-                    image: Image(systemName: "rectangle.on.rectangle"),
+                    image: VERACommonUIAsset.Images.screenShareSolid.swiftUIImage,
                     action: {
                         actionTrigger.send()
                     }
