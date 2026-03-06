@@ -41,6 +41,8 @@ where Factory.Session == VonageSession {
     private let publisherRepository: PublisherRepository
     /// Registry containing Vonage plugins to attach to each call.
     private let pluginRegistry: VonagePluginRegistry
+    /// Network data collector audio, video and rtc data
+    private let statsCollector: StatsCollector
 
     /// The currently active call façade, if any.
     ///
@@ -56,11 +58,13 @@ where Factory.Session == VonageSession {
     public init(
         sessionFactory: Factory,
         publisherRepository: PublisherRepository,
-        pluginRegistry: VonagePluginRegistry
+        pluginRegistry: VonagePluginRegistry,
+        statsCollector: StatsCollector
     ) {
         self.sessionFactory = sessionFactory
         self.publisherRepository = publisherRepository
         self.pluginRegistry = pluginRegistry
+        self.statsCollector = statsCollector
     }
 
     /// Creates and configures an Vonage call session.
@@ -85,7 +89,13 @@ where Factory.Session == VonageSession {
             throw Error.publisherCastingError
         }
 
-        let call = VonageCall(credentials: credentials, session: newSession, publisher: publisher)
+        let call = VonageCall(
+            credentials: credentials,
+            session: newSession,
+            publisher: publisher,
+            publisherRepository: publisherRepository,
+            statsCollector: statsCollector
+        )
         call.setup()
         call.assignPlugins(pluginRegistry.plugins)
         call.callState.sink { [weak self] newState in

@@ -6,9 +6,6 @@ import SwiftUI
 import VERADomain
 
 struct AdaptiveGridLayout: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-
     let participants: [Participant]
     let activeSpeakerId: String?
 

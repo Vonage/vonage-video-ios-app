@@ -19,11 +19,14 @@ struct VonageSessionRepositoryTests {
         let sessionFactory = MockVonageSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = VonagePluginRegistry()
+        let statsCollector = MockStatsCollector()
 
         let sut = makeSUT(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry)
+            pluginRegistry: pluginRegistry,
+            statsCollector: statsCollector
+        )
 
         let credentials = makeMockCredentials()
         _ = try sut.createSession(credentials)
@@ -36,11 +39,14 @@ struct VonageSessionRepositoryTests {
         let sessionFactory = MockVonageSessionFactory()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = VonagePluginRegistry()
+        let statsCollector = MockStatsCollector()
 
         let sut = makeSUT(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry)
+            pluginRegistry: pluginRegistry,
+            statsCollector: statsCollector
+        )
 
         let credentials = makeMockCredentials()
         _ = try sut.createSession(credentials)
@@ -57,11 +63,14 @@ struct VonageSessionRepositoryTests {
     private func makeSUT<Factory: SessionFactory>(
         sessionFactory: Factory,
         publisherRepository: PublisherRepository,
-        pluginRegistry: VonagePluginRegistry
+        pluginRegistry: VonagePluginRegistry,
+        statsCollector: StatsCollector
     ) -> VonageSessionRepository<Factory> where Factory.Session == VonageSession {
         VonageSessionRepository(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry)
+            pluginRegistry: pluginRegistry,
+            statsCollector: statsCollector
+        )
     }
 }

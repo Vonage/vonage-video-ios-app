@@ -84,12 +84,13 @@ struct WaitingRoomUserPreviewView: View {
                     }
 
                     if !extraTrailingButtons.isEmpty {
-                        HStack(spacing: 24) {
+                        HStack {
                             Spacer()
-                            ForEach(extraTrailingButtons) { button in
-                                button.content()
+                            ForEach(extraTrailingButtons) {
+                                $0.content()
+                                    .padding(.leading, 2)
                             }
-                        }.padding(.trailing)
+                        }
                     }
                 }
                 .padding(.bottom, 20)

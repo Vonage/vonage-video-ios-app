@@ -26,6 +26,10 @@ import VERADomain
 public final class VonageCall: CallFacade {
 
     private var cancellables = Set<AnyCancellable>()
+    /// Dedicated cancellable set for publisher observation.
+    /// Cleared and rebuilt every time the publisher is replaced so stale subscriptions
+    /// from the old publisher don't accumulate and cause redundant main-thread work.
+    private var publisherCancellables = Set<AnyCancellable>()
     private let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
 
     /// A publisher that emits the current participant state, never fails.
@@ -94,6 +98,20 @@ public final class VonageCall: CallFacade {
     /// Captions cleanup timer to clear captions after a certain period of inactivity.
     private var captionCleanupTimer: Timer?
 
+    // MARK: - Network Stats
+
+    /// Collects publisher and subscriber network stats from the SDK.
+    private let statsCollector: StatsCollector
+
+    /// Tracks whether network stats collection is currently active.
+    private var isNetworkStatsEnabled = false
+
+    /// A publisher that emits aggregated network statistics, never fails.
+    ///
+    /// Emits ``NetworkMediaStats/empty`` when stats collection is disabled.
+    public lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
+        statsCollector.statsPublisher
+
     /// A unique identifier for this call instance.
     ///
     /// Useful for logging, analytics, and correlating call-related operations.
@@ -108,13 +126,18 @@ public final class VonageCall: CallFacade {
     public let session: VonageSession
 
     /// The publisher for the local participant's audio and video.
-    public let publisher: VonagePublisher
+    ///
+    /// Replaced during ``applyPublisherAdvancedSettings(_:)`` when SDK-level settings change.
+    public private(set) var publisher: VonagePublisher
 
     /// The subscriber for the local participant's captions.
     public var publisherCaptions: VonageSubscriber?
 
     /// The participant representation of the local publisher, set after publishing.
     public var publisherParticipant: Participant?
+
+    /// Repository used to recreate the publisher with new settings during ``applyPublisherAdvancedSettings(_:)``.
+    private let publisherRepository: PublisherRepository
 
     private let subscriberFactory = VonageSubscriberFactory()
 
@@ -148,15 +171,21 @@ public final class VonageCall: CallFacade {
     ///   - credentials: Room credentials with session ID, token, and room name.
     ///   - session: The Vonage session wrapper managing connectivity and signals.
     ///   - publisher: Local media publisher for audio/video.
+    ///   - publisherRepository: Repository for recreating the publisher during settings changes.
+    ///   - networkStatsCollector: Collect info of audio, video and rtc data
     /// - Important: Call ``setup()`` before ``connect()`` to configure handlers and observers.
     public init(
         credentials: RoomCredentials,
         session: VonageSession,
-        publisher: VonagePublisher
+        publisher: VonagePublisher,
+        publisherRepository: PublisherRepository,
+        statsCollector: StatsCollector
     ) {
         self.credentials = credentials
         self.session = session
         self.publisher = publisher
+        self.publisherRepository = publisherRepository
+        self.statsCollector = statsCollector
     }
 
     /// Sets up the call by configuring session handlers and initializing observers.
@@ -172,7 +201,7 @@ public final class VonageCall: CallFacade {
         setupActiveSpeakerObservation()
     }
 
-    func setupSessionHandlers() {
+    private func setupSessionHandlers() {
         session.onNewStream = { [weak self] stream in
             self?.addSubscriber(stream)
         }
@@ -221,7 +250,7 @@ public final class VonageCall: CallFacade {
         }
     }
 
-    func updateParticipantsState(_ state: ParticipantsState) async {
+    private func updateParticipantsState(_ state: ParticipantsState) async {
         _participantsPublisher.value = .init(
             localParticipant: publisherParticipant,
             participants: state.participants,
@@ -277,7 +306,7 @@ public final class VonageCall: CallFacade {
                     await self?.updateParticipantsState(newState)
                 }
             }
-            .store(in: &cancellables)
+            .store(in: &publisherCancellables)
     }
 
     // MARK: Subscriber
@@ -298,6 +327,12 @@ public final class VonageCall: CallFacade {
             }
             vonageSubscriber.onCaption = { [weak self] caption in
                 self?.appendCaption(caption)
+            }
+
+            // Wire network stats delegate if collection is active
+            if isNetworkStatsEnabled {
+                vonageSubscriber.otSubscriber.networkStatsDelegate = statsCollector
+                statsCollector.requestRtcStats(from: vonageSubscriber.otSubscriber)
             }
 
             setupSubscriberObservation(vonageSubscriber)
@@ -393,7 +428,10 @@ public final class VonageCall: CallFacade {
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
+            publisherCancellables.removeAll()
             stopCaptionCleanup()
+            isNetworkStatsEnabled = false
+            statsCollector.reset()
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
@@ -602,6 +640,159 @@ public final class VonageCall: CallFacade {
     private func handleSignal(_ signal: VonageSignal) {
         plugins.compactMap { $0 as? VonageSignalHandler }
             .forEach { $0.handleSignal(signal) }
+    }
+
+    // MARK: Apply Publisher Settings
+
+    /// Applies new publisher settings to the active call by performing a republish cycle.
+    ///
+    /// Because Vonage SDK settings (resolution, frame rate, codec, audio bitrate,
+    /// audio fallback) are immutable on a live ``OTPublisher``, this method:
+    ///
+    /// 1. Captures the current runtime state (audio/video mute, camera position,
+    ///    video transformers, stats delegate, captions).
+    /// 2. Unpublishes and cleans up the current publisher.
+    /// 3. Recreates the publisher with the new SDK settings via ``PublisherRepository``.
+    /// 4. Re-publishes the new publisher to the session.
+    /// 5. Restores all captured runtime state.
+    ///
+    /// - Parameter advancedSettings: The desired publisher configuration. Only the SDK-level
+    ///   fields (resolution, frame rate, codec, audio bitrate, audio fallback) are
+    ///   used; audio/video publishing, camera position, and transformers are preserved.
+    /// - Throws: If unpublish, publisher recreation, or re-publish fails.
+    @MainActor
+    public func applyPublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        guard _callState.value == .connected else { return }
+
+        // 1. Capture current runtime state
+        let wasPublishingAudio = publisher.publishAudio
+        let wasPublishingVideo = publisher.publishVideo
+        let cameraPos = publisher.cameraPosition
+        let currentTransformers = publisher.videoTransformers
+        let wasStatsEnabled = isNetworkStatsEnabled
+        let wasCaptionsEnabled = areCaptionsEnabled
+        let publisherName = publisher.participant.name
+        let publisherScaleBehavior = publisher.scaleBehavior
+
+        // 2. Clean up publisher captions subscriber if it exists
+        if let captionsSub = publisherCaptions {
+            try? session.unsubscribe(subscriber: captionsSub)
+            publisherCaptions = nil
+        }
+
+        // 3. Unpublish and clean up the current publisher
+        // Cancel publisher observation BEFORE cleanUp() — cleanUp() fires $participant
+        // with EmptyView, and if the sink is still active it enqueues an async Task that
+        // would later overwrite publisherParticipant with an empty-view participant,
+        // blanking the local video tile after the new publisher is already set up.
+        publisherCancellables.removeAll()
+        try session.unpublish(publisher: publisher)
+        publisher.cleanUp()
+
+        // Yield so the run loop can process the unpublish event before OTPublisher init.
+        await Task.yield()
+
+        // 4. Build merged settings: new SDK fields + preserved runtime state
+        let mergedSettings = PublisherSettings(
+            username: publisherName,
+            publishAudio: wasPublishingAudio,
+            publishVideo: wasPublishingVideo,
+            scaleBehavior: publisherScaleBehavior,
+            advancedSettings: .init(
+                videoResolution: advancedSettings.videoResolution,
+                videoFrameRate: advancedSettings.videoFrameRate,
+                preferredVideoCodecs: advancedSettings.preferredVideoCodecs,
+                maxAudioBitrate: advancedSettings.maxAudioBitrate,
+                maxVideoBitrate: advancedSettings.maxVideoBitrate,
+                publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
+                subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled
+            )
+        )
+
+        // 5. Recreate the publisher off the main thread to avoid blocking
+        try publisherRepository.recreatePublisher(mergedSettings)
+
+        guard let newPublisher = try publisherRepository.getPublisher() as? VonagePublisher else {
+            return
+        }
+
+        // 6. Replace the publisher reference and re-publish
+        self.publisher = newPublisher
+        publishToSession()
+
+        // 7. Restore camera position
+        newPublisher.cameraPosition = cameraPos
+
+        // 8. Restore video transformers
+        if !currentTransformers.isEmpty {
+            newPublisher.setVideoTransformers(currentTransformers)
+        }
+
+        // 9. Restore network stats delegate
+        if wasStatsEnabled {
+            newPublisher.otPublisher.networkStatsDelegate = statsCollector
+            statsCollector.requestRtcStats(from: newPublisher.otPublisher)
+        }
+
+        // 10. Restore captions
+        if wasCaptionsEnabled {
+            newPublisher.enableCaptions()
+            if let stream = newPublisher.stream {
+                subscribeToPublisherCaptions(stream)
+            }
+        }
+
+        // 11. Update media state
+        updateMediaState()
+
+        // 12. Update participants state
+        let state = await callStateManager.getCurrentState()
+        await updateParticipantsState(state)
+    }
+
+    // MARK: Network Stats
+
+    /// Starts collecting network statistics from the SDK.
+    ///
+    /// Sets the `networkStatsDelegate` on the publisher and all current subscribers.
+    /// New subscribers added after this call will also have their delegate set automatically.
+    public func enableNetworkStats() {
+        guard !isNetworkStatsEnabled else { return }
+        isNetworkStatsEnabled = true
+
+        publisher.otPublisher.networkStatsDelegate = statsCollector
+        statsCollector.requestRtcStats(from: publisher.otPublisher)
+
+        Task { [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            for subscriber in subscribers {
+                subscriber.otSubscriber.networkStatsDelegate = self.statsCollector
+                self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
+            }
+        }
+    }
+
+    /// Stops collecting network statistics and clears cached data.
+    ///
+    /// Removes the `networkStatsDelegate` from the publisher and all subscribers,
+    /// and resets the collector to emit ``NetworkMediaStats/empty``.
+    public func disableNetworkStats() {
+        guard isNetworkStatsEnabled else { return }
+        isNetworkStatsEnabled = false
+
+        publisher.otPublisher.networkStatsDelegate = nil
+        publisher.otPublisher.rtcStatsReportDelegate = nil
+        statsCollector.reset()
+
+        Task { [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            for subscriber in subscribers {
+                subscriber.otSubscriber.networkStatsDelegate = nil
+                subscriber.otSubscriber.rtcStatsReportDelegate = nil
+            }
+        }
     }
 
     // MARK: Captions

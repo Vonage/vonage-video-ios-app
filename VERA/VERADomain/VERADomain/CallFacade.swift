@@ -199,6 +199,29 @@ public protocol CaptionsProvider: AnyObject {
     func disableCaptions() async
 }
 
+/// Allows applying new publisher settings (resolution, codec, etc.) to an active call.
+///
+/// Vonage SDK settings like resolution, frame rate, and codec are baked into
+/// the ``OTPublisher`` at creation time. Applying new settings at runtime
+/// requires a **republish cycle**: unpublish → recreate publisher → re-publish.
+///
+/// The implementation preserves runtime state (audio/video mute, camera position,
+/// video transformers, stats delegates) across the republish.
+///
+/// - SeeAlso: ``PublisherSettings``, ``CallFacade``
+public protocol PublisherSettingsApplicable: AnyObject {
+    /// Applies new publisher settings to the active call.
+    ///
+    /// Only SDK-level fields (resolution, frame rate, codec, audio bitrate,
+    /// audio fallback) from `settings` are used. Runtime state such as
+    /// audio/video publishing, camera position and video transformers
+    /// are preserved automatically.
+    ///
+    /// - Parameter settings: The desired publisher configuration.
+    /// - Throws: If the unpublish, recreate, or re-publish step fails.
+    func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws
+}
+
 /// A unified façade protocol for managing a video call.
 ///
 /// Conformers expose reactive state via publishers, connection lifecycle operations,
@@ -222,7 +245,9 @@ public protocol CallFacade: AnyObject,
     CallStatePublisherProvider,
     HoldeableCall,
     CallArchivingPublisherProvider,
-    CaptionsProvider
+    CaptionsProvider,
+    NetworkStatsProvider,
+    PublisherSettingsApplicable
 {}
 
 /// Errors that can occur during call operations.

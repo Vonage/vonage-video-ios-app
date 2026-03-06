@@ -12,17 +12,20 @@ public class WaitingRoomFactory {
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
     private let cameraDevicesRepository: CameraDevicesRepository
     private let userRepository: UserRepository
+    private let advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
 
     public init(
         publisherRepository: PublisherRepository,
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         cameraDevicesRepository: CameraDevicesRepository,
-        userRepository: UserRepository
+        userRepository: UserRepository,
+        advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
     ) {
         self.publisherRepository = publisherRepository
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.userRepository = userRepository
+        self.advancedSettingsUseCase = advancedSettingsUseCase
     }
 
     @MainActor
@@ -37,7 +40,8 @@ public class WaitingRoomFactory {
             joinRoomUseCase: .init(
                 userRepository: userRepository,
                 cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-                publisherRepository: publisherRepository),
+                publisherRepository: publisherRepository,
+                advancedSettingsUseCase: advancedSettingsUseCase),
             requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
             requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
