@@ -37,20 +37,6 @@ let project = Project(
             settings: createBaseBuildSettings()
         ),
 
-        // MARK: - Broadcast Extension Tests
-        .target(
-            name: "BroadcastExtensionTests",
-            destinations: [.iPhone, .iPad, .mac],
-            product: .unitTests,
-            bundleId: "com.vonage.BroadcastExtensionTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            sources: [
-                "BroadcastExtensionTests/**",
-                "../VERAApp/BroadcastExtension/UserDefaultsScreenShareCredentialsStore.swift",
-            ],
-            settings: createBaseBuildSettings()
-        ),
-
         // MARK: - Broadcast Upload Extension
 
         .target(
@@ -75,6 +61,7 @@ let project = Project(
                 .sdk(name: "CoreMedia", type: .framework, status: .required),
                 .sdk(name: "CoreVideo", type: .framework, status: .required),
                 .sdk(name: "ReplayKit", type: .framework, status: .required),
+                .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
             ],
             settings: .settings(
                 base: baseBuildSettings().merging([
@@ -109,13 +96,6 @@ let project = Project(
             buildAction: .buildAction(targets: ["VERAVonageScreenSharePluginTests"]),
             testAction: .targets(["VERAVonageScreenSharePluginTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        ),
-        .scheme(
-            name: "BroadcastExtensionTests",
-            shared: true,
-            buildAction: .buildAction(targets: ["BroadcastExtensionTests"]),
-            testAction: .targets(["BroadcastExtensionTests"], configuration: .debug),
-            runAction: .runAction(configuration: .debug)
-        ),
+        )
     ]
 )

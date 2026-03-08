@@ -6,6 +6,7 @@ import Foundation
 import OSLog
 import OpenTok
 import ReplayKit
+import VERAScreenShare
 
 /// App Group identifier shared between the main VERA app and this extension.
 let veraAppGroupIdentifier = "group.com.vonage.VERA"
