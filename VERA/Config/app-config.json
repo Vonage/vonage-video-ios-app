@@ -12,7 +12,7 @@
   },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,
-    "allowSettings": true,
+    "allowSettings": true
   },
   "meetingRoomSettings": {
     "allowArchiving": true,

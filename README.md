@@ -83,6 +83,7 @@ This application provides features for common conferencing use cases, such as:
 
 - CallKit: Helps iOS to coordinate the calling services with other apps.
 
+- Screen sharing, enabling participants to broadcast their device screen into a Vonage video call using Apple's ReplayKit framework.
 
 
 ## Project Architecture
