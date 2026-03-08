@@ -124,6 +124,19 @@ jobs:
           -resultBundlePath DerivedData/VERADomainTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAScreenShareTests (macOS)
+      id: screenshare-tests-macos
+      run: |
+        echo "🧪 Running VERAScreenShareTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAScreenShareTests \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAScreenShareTests-macOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Run VERAReactionsTests (macOS)
       id: reactions-tests-macos
       run: |
@@ -346,6 +359,28 @@ jobs:
           -resultBundlePath DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAVonageScreenSharePluginTests (iOS Simulator)
+      id: vonagescreenshareplugin-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Running VERAVonageScreenSharePluginTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAVonageScreenSharePluginTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAVonageScreenSharePluginTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Run VERAVonageTests (iOS Simulator)
       id: opentok-tests
       timeout-minutes: 15
@@ -438,6 +473,7 @@ jobs:
           DerivedData/VERADomainTests-macOS.xcresult
           DerivedData/VERAReactionsTests-macOS.xcresult
           DerivedData/VERAVonageChatPluginTests-macOS.xcresult
+          DerivedData/VERAScreenShareTests-macOS.xcresult
           DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
           DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
