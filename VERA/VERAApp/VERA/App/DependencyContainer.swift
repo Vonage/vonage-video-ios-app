@@ -46,6 +46,8 @@ final class DependencyContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
+    lazy var userDefaults = UserDefaults(suiteName: EnvironmentConstants.veraAppGroupIdentifier) ?? .standard
+
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
         checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
@@ -68,7 +70,7 @@ final class DependencyContainer {
     }()
 
     lazy var userRepository: any UserRepository = {
-        UserDefaultsUserRepository(userDefaults: .standard)
+        UserDefaultsUserRepository(userDefaults: userDefaults)
     }()
 
     lazy var landingPageFactory = LandingPageFactory()
@@ -241,7 +243,7 @@ final class DependencyContainer {
     #if SCREEN_SHARE_ENABLED
 
         lazy var screenShareCredentialsRepository: ScreenShareCredentialsRepository =
-            UserDefaultsScreenShareCredentialsRepository()
+            UserDefaultsScreenShareCredentialsRepository(userDefaults: userDefaults)
 
         lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
             credentialsRepository: screenShareCredentialsRepository)

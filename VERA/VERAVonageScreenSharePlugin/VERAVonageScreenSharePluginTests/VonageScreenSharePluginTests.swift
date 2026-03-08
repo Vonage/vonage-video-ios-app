@@ -13,7 +13,7 @@ struct VonageScreenSharePluginTests {
     @Test("callDidStart saves credentials from userInfo")
     func callDidStartSavesCredentials() async throws {
         let repository = InMemoryScreenShareCredentialsRepository()
-        let plugin = VonageScreenSharePlugin(credentialsRepository: repository)
+        let plugin = makeSUT(repository: repository)
 
         let userInfo: [String: Any] = [
             "applicationId": "app-123",
@@ -37,7 +37,7 @@ struct VonageScreenSharePluginTests {
             sessionId: "session-abc",
             token: "token-xyz")
 
-        let plugin = VonageScreenSharePlugin(credentialsRepository: repository)
+        let plugin = makeSUT(repository: repository)
         try await plugin.callDidEnd()
 
         #expect(repository.saved == nil)
@@ -46,11 +46,19 @@ struct VonageScreenSharePluginTests {
     @Test("callDidStart with missing keys does not save credentials")
     func callDidStartWithMissingKeysDoesNotSave() async throws {
         let repository = InMemoryScreenShareCredentialsRepository()
-        let plugin = VonageScreenSharePlugin(credentialsRepository: repository)
+        let plugin = makeSUT(repository: repository)
 
         try await plugin.callDidStart([:])
 
         #expect(repository.saved == nil)
+    }
+
+    // MARK: - Helpers
+
+    private func makeSUT(
+        repository: ScreenShareCredentialsRepository
+    ) -> VonageScreenSharePlugin {
+        return VonageScreenSharePlugin(credentialsRepository: repository)
     }
 }
 

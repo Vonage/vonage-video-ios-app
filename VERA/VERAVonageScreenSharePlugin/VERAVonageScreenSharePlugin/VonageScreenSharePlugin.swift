@@ -36,7 +36,7 @@ public final class VonageScreenSharePlugin: VonagePlugin {
     /// - Parameter credentialsRepository: The repository used to persist session credentials.
     ///   Defaults to the App Group-backed implementation.
     public init(
-        credentialsRepository: ScreenShareCredentialsRepository = UserDefaultsScreenShareCredentialsRepository()
+        credentialsRepository: ScreenShareCredentialsRepository
     ) {
         self.credentialsRepository = credentialsRepository
     }

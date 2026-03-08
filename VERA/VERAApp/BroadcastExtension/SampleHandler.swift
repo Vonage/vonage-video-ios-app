@@ -7,6 +7,9 @@ import OSLog
 import OpenTok
 import ReplayKit
 
+/// App Group identifier shared between the main VERA app and this extension.
+let veraAppGroupIdentifier = "group.com.vonage.VERA"
+
 /// Darwin notification name used to signal the broadcast extension to stop.
 private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
 
@@ -45,7 +48,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         logger.debug("broadcastStarted")
 
-        guard let store = ScreenShareCredentialsStore() else {
+        guard let userDefaults = UserDefaults(suiteName: veraAppGroupIdentifier) else {
             logger.error("App Group is not configured.")
             finishBroadcastWithError(
                 NSError(
@@ -54,6 +57,8 @@ final class SampleHandler: RPBroadcastSampleHandler {
                     userInfo: [NSLocalizedDescriptionKey: "App Group is not configured."]))
             return
         }
+
+        let store = UserDefaultsScreenShareCredentialsStore(userDefaults: userDefaults)
 
         guard let credentials = store.load() else {
             logger.error("No active VERA call found.")

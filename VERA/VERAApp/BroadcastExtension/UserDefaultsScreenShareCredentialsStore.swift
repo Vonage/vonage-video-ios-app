@@ -4,9 +4,6 @@
 
 import Foundation
 
-/// App Group identifier shared between the main VERA app and this extension.
-let veraAppGroupIdentifier = "group.com.vonage.VERA"
-
 private enum Keys {
     static let applicationId = "screenshare_applicationId"
     static let sessionId = "screenshare_sessionId"
@@ -17,14 +14,14 @@ private enum Keys {
 ///
 /// The main app's `VonageScreenSharePlugin` writes these values on `callDidStart`,
 /// and this type reads them so the broadcast extension can connect the same session.
-struct ScreenShareCredentialsStore {
+struct UserDefaultsScreenShareCredentialsStore {
     private let userDefaults: UserDefaults
 
-    init?() {
-        guard let defaults = UserDefaults(suiteName: veraAppGroupIdentifier) else {
-            return nil
-        }
-        self.userDefaults = defaults
+    /// Creates a store backed by the given `UserDefaults`.
+    ///
+    /// - Parameter userDefaults: The `UserDefaults` instance to read credentials from.
+    init(userDefaults: UserDefaults) {
+        self.userDefaults = userDefaults
     }
 
     /// Loads stored credentials, or returns `nil` if the main app hasn't written them yet.
