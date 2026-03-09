@@ -61,6 +61,8 @@ enum EnvironmentConstants {
     /// Base API URL for the application
     /// Generated from BASE_API_URL environment variable
     static let baseAPIURL: String = "$BASE_API_URL"
+
+    static let veraAppGroupIdentifier = "group.com.vonage.VERA"
     
     /// Computed URL property for convenience
     static var baseURL: URL {
