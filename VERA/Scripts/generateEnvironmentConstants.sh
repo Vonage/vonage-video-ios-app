@@ -87,6 +87,10 @@ cat > "$ENTITLEMENTS_FILE" << EOF
     <array>
         <string>applinks:$DOMAIN</string>
     </array>
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.vonage.VERA</string>
+    </array>
 </dict>
 </plist>
 EOF

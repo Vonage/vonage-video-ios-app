@@ -15,10 +15,13 @@ public struct ScreenShareCredentials: Equatable {
     public let sessionId: String
     /// The Vonage token used to authenticate and connect.
     public let token: String
+    /// The Vonage username from the current publisher
+    public let username: String
 
-    public init(applicationId: String, sessionId: String, token: String) {
+    public init(applicationId: String, sessionId: String, token: String, username: String) {
         self.applicationId = applicationId
         self.sessionId = sessionId
         self.token = token
+        self.username = username
     }
 }

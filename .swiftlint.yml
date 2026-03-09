@@ -119,8 +119,8 @@ type_name:
     warning: 3
     error: 3
   max_length:
-    warning: 40
-    error: 50
+    warning: 50
+    error: 60
 
 nesting:
   type_level:

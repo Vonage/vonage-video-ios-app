@@ -8,9 +8,6 @@ import OpenTok
 import ReplayKit
 import VERAScreenShare
 
-/// App Group identifier shared between the main VERA app and this extension.
-let veraAppGroupIdentifier = "group.com.vonage.VERA"
-
 /// Darwin notification name used to signal the broadcast extension to stop.
 private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
 
@@ -43,11 +40,14 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private var publisher: OTPublisherKit?
     private let videoCapturer = ScreenShareVideoCapturer()
     private var didTearDown = false
+    private var store: UserDefaultsScreenShareCredentialsRepository?
 
     // MARK: - Broadcast lifecycle
 
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         logger.debug("broadcastStarted")
+
+        registerStopBroadcastNotification()
 
         guard let userDefaults = UserDefaults(suiteName: veraAppGroupIdentifier) else {
             logger.error("App Group is not configured.")
@@ -59,7 +59,8 @@ final class SampleHandler: RPBroadcastSampleHandler {
             return
         }
 
-        let store = UserDefaultsScreenShareCredentialsStore(userDefaults: userDefaults)
+        let store = UserDefaultsScreenShareCredentialsRepository(userDefaults: userDefaults)
+        self.store = store
 
         guard let credentials = store.load() else {
             logger.error("No active VERA call found.")
@@ -74,8 +75,6 @@ final class SampleHandler: RPBroadcastSampleHandler {
         }
 
         logger.debug("Credentials loaded — sessionId: \(credentials.sessionId, privacy: .public)")
-
-        registerStopBroadcastNotification()
 
         let settings = OTSessionSettings()
         settings.singlePeerConnection = true
@@ -200,7 +199,18 @@ extension SampleHandler: OTSessionDelegate {
         videoCapturer.sessionDidConnect()
 
         let settings = OTPublisherSettings()
-        settings.name = "screenshare"
+        settings.scalableScreenshare = true
+        settings.videoCodecPreference = .manual(withCodecs: [
+            NSNumber(value: OTVideoCodecType.H264.rawValue),
+            NSNumber(value: OTVideoCodecType.VP8.rawValue),
+        ])
+
+        if let credentials = store?.load(), !credentials.username.isEmpty {
+            settings.name = "\(credentials.username)'s screen"
+        } else {
+            settings.name = "Screenshare"
+        }
+
         settings.publisherAudioFallbackEnabled = false
 
         /// Use an `OTPublisherKit` instead of a `OTPublisher`. `OTPublisher` initializes default

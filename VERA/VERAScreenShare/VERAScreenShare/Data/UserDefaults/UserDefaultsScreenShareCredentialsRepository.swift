@@ -4,16 +4,7 @@
 
 import Foundation
 
-/// App Group identifier shared between the main app and the Broadcast Upload Extension.
-public let veraAppGroupIdentifier = "group.com.vonage.VERA"
-
 // MARK: - UserDefaults keys
-
-private enum Keys {
-    static let applicationId = "screenshare_applicationId"
-    static let sessionId = "screenshare_sessionId"
-    static let token = "screenshare_token"
-}
 
 /// Stores and retrieves ``ScreenShareCredentials`` in the shared App Group `UserDefaults`.
 ///
@@ -30,25 +21,32 @@ public final class UserDefaultsScreenShareCredentialsRepository: ScreenShareCred
     }
 
     public func save(_ credentials: ScreenShareCredentials) {
-        userDefaults.set(credentials.applicationId, forKey: Keys.applicationId)
-        userDefaults.set(credentials.sessionId, forKey: Keys.sessionId)
-        userDefaults.set(credentials.token, forKey: Keys.token)
+        userDefaults.set(credentials.applicationId, forKey: ScreenSharingKeys.applicationId)
+        userDefaults.set(credentials.sessionId, forKey: ScreenSharingKeys.sessionId)
+        userDefaults.set(credentials.token, forKey: ScreenSharingKeys.token)
+        userDefaults.set(credentials.username, forKey: ScreenSharingKeys.username)
         userDefaults.synchronize()
     }
 
     public func clear() {
-        userDefaults.removeObject(forKey: Keys.applicationId)
-        userDefaults.removeObject(forKey: Keys.sessionId)
-        userDefaults.removeObject(forKey: Keys.token)
+        userDefaults.removeObject(forKey: ScreenSharingKeys.applicationId)
+        userDefaults.removeObject(forKey: ScreenSharingKeys.sessionId)
+        userDefaults.removeObject(forKey: ScreenSharingKeys.token)
+        userDefaults.removeObject(forKey: ScreenSharingKeys.username)
     }
 
     /// Reads back the stored credentials, or returns `nil` if none are present.
     public func load() -> ScreenShareCredentials? {
         guard
-            let applicationId = userDefaults.string(forKey: Keys.applicationId),
-            let sessionId = userDefaults.string(forKey: Keys.sessionId),
-            let token = userDefaults.string(forKey: Keys.token)
+            let applicationId = userDefaults.string(forKey: ScreenSharingKeys.applicationId),
+            let sessionId = userDefaults.string(forKey: ScreenSharingKeys.sessionId),
+            let token = userDefaults.string(forKey: ScreenSharingKeys.token)
         else { return nil }
-        return ScreenShareCredentials(applicationId: applicationId, sessionId: sessionId, token: token)
+        let username = userDefaults.string(forKey: ScreenSharingKeys.username) ?? ""
+        return ScreenShareCredentials(
+            applicationId: applicationId,
+            sessionId: sessionId,
+            token: token,
+            username: username)
     }
 }

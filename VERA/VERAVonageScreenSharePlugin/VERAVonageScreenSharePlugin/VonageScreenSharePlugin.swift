@@ -53,10 +53,13 @@ public final class VonageScreenSharePlugin: VonagePlugin {
             let token = userInfo[VonageCallParams.token.rawValue] as? String
         else { return }
 
+        let username = userInfo[VonageCallParams.username.rawValue] as? String ?? ""
         let credentials = ScreenShareCredentials(
             applicationId: applicationId,
             sessionId: sessionId,
-            token: token)
+            token: token,
+            username: username)
+
         credentialsRepository.save(credentials)
     }
 
