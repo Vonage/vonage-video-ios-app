@@ -109,6 +109,7 @@ struct VERAApp: App {
                                 }
                             #endif
                         }
+                        .alert(item: $navigationCoordinator.alertItem) { $0.view }
 
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
