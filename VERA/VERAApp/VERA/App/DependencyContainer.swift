@@ -248,7 +248,5 @@ final class DependencyContainer {
         lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
             credentialsRepository: screenShareCredentialsRepository)
 
-        lazy var screenShareFactory = ScreenShareFactory()
-
     #endif
 }
