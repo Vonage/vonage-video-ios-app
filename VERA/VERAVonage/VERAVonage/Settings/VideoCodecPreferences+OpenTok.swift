@@ -14,8 +14,9 @@ extension VideoCodecPreference {
     ///
     /// This computed property provides the OpenTok SDK representation of codec preferences.
     /// The conversion logic:
-    /// - If `automatic` is `true` (or `codecs` is `nil`): Returns `OTVideoCodecPreference.automatic()`
-    /// - If `automatic` is `false` with a codec list: Returns `OTVideoCodecPreference.manual(withCodecs:)`
+    /// - If `automatic` is `true`: Returns `OTVideoCodecPreference.automatic()`
+    /// - If `codecs` is `nil` or empty: Returns `OTVideoCodecPreference.automatic()`
+    /// - If `automatic` is `false` with a non-empty codec list: Returns `OTVideoCodecPreference.manual(withCodecs:)`
     ///   with the ordered list of ``VideoCodecType`` values converted to `OTVideoCodecType` raw values.
     ///
     /// Example:
@@ -30,7 +31,9 @@ extension VideoCodecPreference {
     ///
     /// - Returns: The corresponding OpenTok video codec preference, or `nil` if conversion fails.
     public var otCodecPreference: OTVideoCodecPreference? {
-        guard let codecs else { return OTVideoCodecPreference.automatic() }
+        guard !automatic, let codecs, !codecs.isEmpty else {
+            return OTVideoCodecPreference.automatic()
+        }
 
         let otCodecs = codecs.map { $0.otVideoCodecType.rawValue }.map(NSNumber.init)
 

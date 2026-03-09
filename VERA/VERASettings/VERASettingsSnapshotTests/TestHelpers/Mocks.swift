@@ -6,7 +6,7 @@ import Combine
 import VERADomain
 import VERASettings
 
-final class MockStatsSettingsRepository: PublisherSettingsRepository {
+final actor MockStatsSettingsRepository: PublisherSettingsRepository {
 
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
 
@@ -34,7 +34,7 @@ final class MockStatsSettingsRepository: PublisherSettingsRepository {
     }
 }
 
-final class MockStatsDataSource: StatsDataSource {
+final actor MockStatsDataSource: StatsDataSource {
 
     private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
 
@@ -51,7 +51,7 @@ final class MockStatsDataSource: StatsDataSource {
     }
 }
 
-final class MockStatsOverlayDataSource: StatsDataSource {
+final actor MockStatsOverlayDataSource: StatsDataSource {
 
     private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
 

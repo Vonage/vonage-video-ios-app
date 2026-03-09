@@ -13,7 +13,6 @@ import VERADomain
 ///
 /// `VonagePublisher` manages the local media stream published into an Vonage session.
 /// It provides a SwiftUI-compatible `view`, emits reactive updates for media and participant
-/// It provides a SwiftUI-compatible `view`, emits reactive updates for media and participant
 /// state, and forwards Vonage publisher delegate callbacks through closures.
 ///
 /// ## Overview
@@ -204,7 +203,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// Keeps `participant` synchronized with `publishAudio`, `publishVideo`,
     /// `videoDimensions`, and the rendered `view`.
-    func updateParticipant() {
+    private func updateParticipant() {
         participant = Participant(
             id: id,
             connectionId: stream?.connection.connectionId,

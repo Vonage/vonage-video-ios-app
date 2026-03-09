@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 private enum StatsConstants {
     static let defaultValue = "\u{2014}"
@@ -68,8 +69,7 @@ private struct StatsLiveSection: View {
     private var disabledStatsContent: some View {
         Section {
             VStack(spacing: 12) {
-                Image(systemName: "chart.bar.xaxis")
-                    .font(.system(size: 32))
+                VERACommonUIAsset.Images.chartSolid.swiftUIImage
                     .foregroundStyle(.secondary)
                 Text("Enable Sender Stats above to see real-time metrics.".localized)
                     .font(.subheadline)

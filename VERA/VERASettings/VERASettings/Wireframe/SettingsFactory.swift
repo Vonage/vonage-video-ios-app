@@ -7,7 +7,7 @@ import Foundation
 /// Constants used by the settings factory for configuring view models.
 private enum SettingsConstants {
     /// Time interval between stats overlay UI updates in seconds.
-    /// Set to 1.5 seconds to balance readability with freshness of data.
+    /// Set to 0.5 seconds to balance readability with freshness of data.
     static let statsInterval: TimeInterval = 0.5
 }
 

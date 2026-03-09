@@ -23,7 +23,7 @@ extension VideoResolution {
     /// camera capture settings.
     ///
     /// - Returns: The corresponding OpenTok camera capture resolution.
-    public var otResolucion: OTCameraCaptureResolution {
+    public var otResolution: OTCameraCaptureResolution {
         switch self {
         case .low:
             return .low

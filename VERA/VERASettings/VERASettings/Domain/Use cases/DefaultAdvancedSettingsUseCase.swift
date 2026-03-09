@@ -10,7 +10,7 @@ import VERADomain
 /// This use case bridges the gap between the Settings module and the publisher
 /// creation flow by transforming ``PublisherSettingsPreferences`` into
 /// ``PublisherAdvancedSettings``.
-public final class DefaultAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
+public actor DefaultAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
 
     // MARK: - Dependencies
 

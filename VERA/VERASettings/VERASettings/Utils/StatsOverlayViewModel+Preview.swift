@@ -3,13 +3,13 @@
 //
 
 #if DEBUG
-    @preconcurrency import Combine
+    import Combine
     import VERADomain
     import Foundation
 
     // MARK: - Mock Stats Data Source
 
-    final class PreviewStatsDataSource: StatsDataSource {
+    final actor PreviewStatsDataSource: StatsDataSource {
 
         private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.mock)
 

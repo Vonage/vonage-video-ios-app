@@ -3,7 +3,7 @@
 //
 
 #if DEBUG
-    @preconcurrency import Combine
+    import Combine
     import Foundation
     import VERADomain
 
@@ -11,9 +11,9 @@
 
     final class PreviewSettingsRepository: PublisherSettingsRepository {
 
-        private let subject = CurrentValueSubject<PublisherSettingsPreferences, Never>(.default)
+        private nonisolated let subject = CurrentValueSubject<PublisherSettingsPreferences, Never>(.default)
 
-        var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
+        nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
             subject.eraseToAnyPublisher()
         }
 

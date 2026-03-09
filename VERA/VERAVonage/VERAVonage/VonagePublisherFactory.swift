@@ -70,7 +70,7 @@ public final class VonagePublisherFactory: PublisherFactory {
         if let frameRate = settings.advancedSettings?.videoFrameRate?.otFrameRate {
             publisherSettings.cameraFrameRate = frameRate
         }
-        if let resolution = settings.advancedSettings?.videoResolution?.otResolucion {
+        if let resolution = settings.advancedSettings?.videoResolution?.otResolution {
             publisherSettings.cameraResolution = resolution
         }
         if let maxAudioBitrate = settings.advancedSettings?.maxAudioBitrate {

@@ -33,27 +33,30 @@ public final class JoinRoomUseCase {
         self.advancedSettingsUseCase = advancedSettingsUseCase
     }
 
-    @MainActor
+
     public func callAsFunction(_ request: JoinRoomRequest) async throws {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
+        let advancedSettigs = await advancedSettingsUseCase()
+  
+        try await MainActor.run {
+            let currentPublisher = try cameraPreviewProviderRepository.getPublisher()
 
-        let currentPublisher = try cameraPreviewProviderRepository.getPublisher()
+            let settings = PublisherSettings(
+                username: request.userName,
+                publishAudio: currentPublisher.publishAudio,
+                publishVideo: currentPublisher.publishVideo,
+                advancedSettings: advancedSettigs
+            )
 
-        let settings = PublisherSettings(
-            username: request.userName,
-            publishAudio: currentPublisher.publishAudio,
-            publishVideo: currentPublisher.publishVideo,
-            advancedSettings: await advancedSettingsUseCase()
-        )
+            currentPublisher.cleanUp()
+            try publisherRepository.recreatePublisher(settings)
 
-        currentPublisher.cleanUp()
-        try publisherRepository.recreatePublisher(settings)
-
-        let transformers = currentPublisher.videoTransformers
-        let newPublisher = try publisherRepository.getPublisher()
-        newPublisher.setVideoTransformers(transformers)
-
-        cameraPreviewProviderRepository.resetPublisher()
+            let transformers = currentPublisher.videoTransformers
+            let newPublisher = try publisherRepository.getPublisher()
+            newPublisher.setVideoTransformers(transformers)
+            
+            cameraPreviewProviderRepository.resetPublisher()
+        }
     }
 }

@@ -195,7 +195,7 @@ class DemoViewModel: ObservableObject {
 
 // MARK: - Demo Settings Repository
 
-final class DemoSettingsRepository: PublisherSettingsRepository {
+final actor DemoSettingsRepository: PublisherSettingsRepository {
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
 
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
@@ -221,7 +221,7 @@ final class DemoSettingsRepository: PublisherSettingsRepository {
 
 // MARK: - Demo Stats Data Source
 
-final class DemoStatsDataSource: StatsDataSource {
+final actor DemoStatsDataSource: StatsDataSource {
     private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
 
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {

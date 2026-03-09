@@ -17,7 +17,7 @@ extension String {
 
     public func localized(args: CVarArg..., bundle: Bundle = .main) -> String {
         let format = localized(bundle: bundle)
-        return String(format: format, args)
+        return String(format: format, arguments: args)
     }
 
     public func pluralizeIfNeeded(count: Int) -> String {

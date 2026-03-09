@@ -5,7 +5,7 @@
 import Combine
 import VERASettings
 
-final class MockSettingsRepository: PublisherSettingsRepository {
+final actor MockSettingsRepository: PublisherSettingsRepository {
 
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
 

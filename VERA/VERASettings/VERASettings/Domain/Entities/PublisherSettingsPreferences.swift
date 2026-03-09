@@ -95,7 +95,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             publisherAudioFallbackEnabled = legacy
             subscriberAudioFallbackEnabled = legacy
         }
-        senderStatsEnabled = try container.decode(Bool.self, forKey: .senderStatsEnabled)
+        senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -144,5 +144,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.videoBitratePreset == rhs.videoBitratePreset && lhs.maxVideoBitrate == rhs.maxVideoBitrate
             && lhs.publisherAudioFallbackEnabled == rhs.publisherAudioFallbackEnabled
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled
+            && lhs.senderStatsEnabled == rhs.senderStatsEnabled
     }
 }

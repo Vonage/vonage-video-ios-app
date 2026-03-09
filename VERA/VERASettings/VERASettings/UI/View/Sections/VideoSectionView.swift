@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 private enum VideoUIConstants {
     static let spaceBetweenComponents = 8.0
@@ -74,7 +75,7 @@ struct VideoSectionView: View {
             if viewModel.codecMode == .manual {
                 ForEach(viewModel.orderedCodecs) { codec in
                     HStack {
-                        Image(systemName: "line.3.horizontal")
+                        VERACommonUIAsset.Images.menuSolid.swiftUIImage
                             .foregroundStyle(.secondary)
                         Text(codec.displayName)
                         Spacer()

@@ -26,6 +26,6 @@ extension String {
     /// - Parameter args: Format arguments to substitute in the localized string.
     /// - Returns: The formatted localized string.
     func localized(args: CVarArg...) -> String {
-        return String(format: localized, args)
+        return String(format: localized, arguments: args)
     }
 }
