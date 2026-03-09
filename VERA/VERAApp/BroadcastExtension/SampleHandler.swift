@@ -208,6 +208,11 @@ extension SampleHandler: OTSessionDelegate {
         /// extension to hang and get killed by ReplayKit after a 5-second timeout.
         guard let otPublisher = OTPublisherKit(delegate: self, settings: settings) else {
             logger.error("Failed to create OTPublisherKit.")
+            finishBroadcastWithError(
+                NSError(
+                    domain: "VERABroadcastExtension",
+                    code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "OTPublisherKit creation failed."]))
             return
         }
         otPublisher.videoType = .screen
@@ -221,6 +226,7 @@ extension SampleHandler: OTSessionDelegate {
         session.publish(otPublisher, error: &error)
         if let error {
             logger.error("OTSession publish failed: \(error.localizedDescription)")
+            finishBroadcastWithError(error)
         }
     }
 
