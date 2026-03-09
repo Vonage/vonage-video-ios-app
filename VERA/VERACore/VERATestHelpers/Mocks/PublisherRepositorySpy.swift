@@ -4,17 +4,18 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public class PublisherRepositorySpy: PublisherRepository {
 
     public enum PublisherAction: Equatable {
         case get, reset
-        case recreate(VERACore.PublisherSettings)
+        case recreate(PublisherSettings)
     }
 
     public var actions: [PublisherAction] = []
 
-    public func getPublisher() -> any VERACore.VERAPublisher {
+    public func getPublisher() -> any VERAPublisher {
         actions.append(.get)
         return MockVERAPublisher()
     }
@@ -23,7 +24,7 @@ public class PublisherRepositorySpy: PublisherRepository {
         actions.append(.reset)
     }
 
-    public func recreatePublisher(_ settings: VERACore.PublisherSettings) {
+    public func recreatePublisher(_ settings: PublisherSettings) {
         actions.append(.recreate(settings))
     }
 }

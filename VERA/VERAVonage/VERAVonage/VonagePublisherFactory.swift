@@ -7,6 +7,7 @@ import OpenTok
 import SwiftUI
 import UIKit
 import VERACore
+import VERADomain
 
 /// Creates configured `VonagePublisher` instances from `PublisherSettings`.
 ///
@@ -23,8 +24,20 @@ public final class VonagePublisherFactory: PublisherFactory {
         case publisherInitializationFailed
     }
 
+    private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+
+    /// This factory returns the specific Vonage audio or video transformers
+    lazy var vonageTransformerFactory = VonageTransformerFactory()
+
     /// Creates a new `VonagePublisherFactory`.
-    public init() {}
+    public init(
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    ) {
+        self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
+        self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
+    }
 
     /// Builds a `VERAPublisher` backed by `VonagePublisher`.
     ///
@@ -47,10 +60,12 @@ public final class VonagePublisherFactory: PublisherFactory {
         guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
             throw Error.publisherInitializationFailed
         }
-        otPublisher.publishAudio = settings.publishAudio
-        otPublisher.publishVideo = settings.publishVideo
+        otPublisher.publishAudio = settings.publishAudio && checkMicrophoneAuthorizationStatusUseCase().isAuthorized
+        otPublisher.publishVideo = settings.publishVideo && checkCameraAuthorizationStatusUseCase().isAuthorized
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
-        let publisher = VonagePublisher(publisher: otPublisher)
+        let publisher = VonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: vonageTransformerFactory)
         otPublisher.delegate = publisher
         return publisher
     }

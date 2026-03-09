@@ -18,7 +18,7 @@ public struct ToastView: View {
                 .font(.system(size: 20))
 
             Text(item.message)
-                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .foregroundColor(.black)
                 .adaptiveFont(.bodyBase)
                 .lineLimit(2)
         }

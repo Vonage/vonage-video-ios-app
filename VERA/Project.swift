@@ -42,7 +42,114 @@ private func isChatEnabled() -> Bool {
     return meetingRoomSettings["allowChat"] as! Bool
 }
 
+/// Returns whether archiving is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowArchiving": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowArchiving` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isArchivingEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowArchiving"] as! Bool
+}
+
+/// Returns whether background effects are enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "videoSettings": {
+///     "allowBackgroundEffects": true
+///   }
+/// }
+/// ```
+/// - Returns: `true` if `videoSettings.allowBackgroundEffects` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areBackgroundEffectsEnabled() -> Bool {
+    let config = readAppConfig()
+    let videoSettings = config["videoSettings"] as! [String: Any]
+    return videoSettings["allowBackgroundEffects"] as! Bool
+}
+
+/// Returns whether captions is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowCaptions": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowCaptions` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areCaptionsEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowCaptions"] as! Bool
+}
+
+/// Returns whether emojis/reactions are enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowEmojis": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowEmojis` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areEmojisEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowEmojis"] as! Bool
+}
+
+/// Returns whether Settings is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowSettings": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowSettings` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areSettingsEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowSettings"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
+
+/// Builds Swift Package dependencies dynamically based on feature flags.
+///
+/// - Returns: The list of Swift Package dependencies for the project.
+private func createPackages() -> [Package] {
+    var packages: [Package] = []
+
+    if areBackgroundEffectsEnabled() {
+        packages.append(.vonageVideoTransformersSDK)
+    }
+
+    return packages
+}
 
 /// Builds target dependencies dynamically based on the chat feature flag.
 ///
@@ -66,6 +173,39 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
+    if isArchivingEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAArchiving", path: "VERAArchiving"),
+            .project(target: "VERAVonageArchivingPlugin", path: "VERAVonageArchivingPlugin"),
+        ])
+    }
+
+    if areBackgroundEffectsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
+            .vonageVideoTransformersSDK,
+        ])
+    }
+
+    if areCaptionsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERACaptions", path: "VERACaptions"),
+            .project(target: "VERAVonageCaptionsPlugin", path: "VERAVonageCaptionsPlugin"),
+        ])
+    }
+
+    if areEmojisEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAReactions", path: "VERAReactions"),
+            .project(target: "VERAVonageReactionsPlugin", path: "VERAVonageReactionsPlugin"),
+        ])
+    }
+    if areSettingsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERASettings", path: "VERASettings"),
+            .project(target: "VERAVonageSettingsPlugin", path: "VERAVonageSettingsPlugin"),
+        ])
+    }
     return dependencies
 }
 
@@ -88,9 +228,46 @@ private func createDependencies() -> [TargetDependency] {
 private func createBuildSettings() -> Settings {
     var baseSettings: [String: SettingValue] = baseBuildSettings()
 
+    var flags: [String] = []
+
     if isChatEnabled() {
         baseSettings["CHAT_ENABLED"] = "1"
-        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) CHAT_ENABLED"
+        flags.append("CHAT_ENABLED")
+        print("Chat feature enabled in build settings.")
+    }
+
+    if isArchivingEnabled() {
+        baseSettings["ARCHIVING_ENABLED"] = "1"
+        flags.append("ARCHIVING_ENABLED")
+        print("Archiving feature enabled in build settings.")
+    }
+
+    if areBackgroundEffectsEnabled() {
+        baseSettings["BACKGROUND_EFFECTS_ENABLED"] = "1"
+        flags.append("BACKGROUND_EFFECTS_ENABLED")
+        print("Background effects feature enabled in build settings.")
+    }
+
+    if areCaptionsEnabled() {
+        baseSettings["CAPTIONS_ENABLED"] = "1"
+        flags.append("CAPTIONS_ENABLED")
+        print("Captions feature enabled in build settings.")
+    }
+
+    if areEmojisEnabled() {
+        baseSettings["REACTIONS_ENABLED"] = "1"
+        flags.append("REACTIONS_ENABLED")
+        print("Reactions feature enabled in build settings.")
+    }
+
+    if areSettingsEnabled() {
+        baseSettings["SETTINGS_ENABLED"] = "1"
+        flags.append("SETTINGS_ENABLED")
+        print("Settings feature enabled in build settings.")
+    }
+
+    if !flags.isEmpty {
+        baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) \(flags.joined(separator: " "))"
     }
 
     return .settings(
@@ -126,6 +303,11 @@ private func createBuildSettings() -> Settings {
 /// - SeeAlso: ``createDependencies()``, ``createBuildSettings()``, `combinedPlistValues()`
 let project = Project(
     name: "VERA",
+    options: .options(
+        defaultKnownRegions: ["en", "es"],
+        developmentRegion: "en"
+    ),
+    packages: createPackages(),
     targets: [
         .target(
             name: "VERA",
@@ -137,6 +319,8 @@ let project = Project(
                 with: [
                     "CFBundleName": "VERA",
                     "CFBundleDisplayName": "VERA",
+                    "CFBundleDevelopmentRegion": "en",
+                    "CFBundleLocalizations": .array(["en", "es"]),
                     "LSApplicationCategoryType": "public.app-category.video",
                     "NSCameraUsageDescription":
                         "VERA needs access to your camera to share your video during video calls and meetings.",

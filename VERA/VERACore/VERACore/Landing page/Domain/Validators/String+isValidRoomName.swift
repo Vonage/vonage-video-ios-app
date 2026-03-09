@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 extension RoomName {
     public var maxRoomNameLength: Int { 60 }

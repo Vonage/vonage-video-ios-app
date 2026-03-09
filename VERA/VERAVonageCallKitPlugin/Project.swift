@@ -11,7 +11,7 @@ let project = Project(
             bundleId: "com.vonage.VERAVonageCallKitPlugin",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAVonageCallKitPlugin/**"],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAVonageCallKitPlugin")],
             dependencies: [
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERACore", path: "../VERACore"),

@@ -2,6 +2,8 @@
 //  Created by Vonage on 18/7/25.
 //
 
+import VERADomain
+
 public struct JoinRoomRequest {
     public let roomName: String
     public let userName: String
@@ -42,6 +44,11 @@ public final class JoinRoomUseCase {
             )
 
             try publisherRepository.recreatePublisher(settings)
+
+            let transformers = currentPublisher.videoTransformers
+            let newPublisher = try publisherRepository.getPublisher()
+            newPublisher.setVideoTransformers(transformers)
+
             cameraPreviewProviderRepository.resetPublisher()
         }
     }

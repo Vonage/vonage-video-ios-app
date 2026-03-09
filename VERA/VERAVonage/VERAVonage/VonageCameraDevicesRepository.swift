@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERACore
+import VERADomain
 
 enum VonageCameraDevice: String {
     case front = "Front"

@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAVonage",
     packages: [
-        .package(url: "https://github.com/Vonage/vonage-video-client-sdk-swift", .upToNextMinor(from: "2.32.0"))
+        .vonageVideoSDK
     ],
     targets: [
         .target(
@@ -14,10 +14,10 @@ let project = Project(
             bundleId: "com.vonage.VERAVonage",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAVonage/**"],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERAVonage")],
             dependencies: [
                 .project(target: "VERACore", path: "../VERACore"),
-                .package(product: "VonageClientSDKVideo"),
+                .vonageVideoSDK,
             ],
             settings: createBaseBuildSettings()
         ),

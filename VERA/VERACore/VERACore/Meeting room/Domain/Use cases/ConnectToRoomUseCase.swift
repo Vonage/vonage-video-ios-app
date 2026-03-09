@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Use case for connecting to a room and returning a running call façade.
 ///

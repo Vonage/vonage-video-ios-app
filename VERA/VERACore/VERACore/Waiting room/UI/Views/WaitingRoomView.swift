@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 public struct WaitingRoomState: Equatable {
     public let roomName: String
@@ -58,6 +59,7 @@ public struct WaitingRoomView: View {
 
     let state: WaitingRoomState
     var userName: Binding<String>
+    @Binding var extraTrailingButtons: [ViewHolder]
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -68,6 +70,7 @@ public struct WaitingRoomView: View {
                 HorizontalWaitingRoomContentView(
                     state: state,
                     userName: userName,
+                    extraTrailingButtons: _extraTrailingButtons,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -75,6 +78,7 @@ public struct WaitingRoomView: View {
                 VerticalWaitingRoomContentView(
                     state: state,
                     userName: userName,
+                    extraTrailingButtons: _extraTrailingButtons,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -82,6 +86,7 @@ public struct WaitingRoomView: View {
                 HorizontalWaitingRoomContentView(
                     state: state,
                     userName: userName,
+                    extraTrailingButtons: _extraTrailingButtons,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -95,6 +100,7 @@ struct HorizontalWaitingRoomContentView: View {
 
     let state: WaitingRoomState
     var userName: Binding<String>
+    @Binding var extraTrailingButtons: [ViewHolder]
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -104,6 +110,7 @@ struct HorizontalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
+                extraTrailingButtons: _extraTrailingButtons,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -121,6 +128,7 @@ struct HorizontalWaitingRoomContentView: View {
 struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
+    @Binding var extraTrailingButtons: [ViewHolder]
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -130,6 +138,7 @@ struct VerticalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
+                extraTrailingButtons: _extraTrailingButtons,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -145,6 +154,7 @@ struct VerticalWaitingRoomContentView: View {
 struct VideoPreviewView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
+    @Binding var extraTrailingButtons: [ViewHolder]
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
 
@@ -156,6 +166,7 @@ struct VideoPreviewView: View {
             WaitingRoomUserPreviewView(
                 state: state,
                 userName: userName,
+                extraTrailingButtons: _extraTrailingButtons,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -258,6 +269,7 @@ struct PrepareToJoinRoom: View {
             ],
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
+        extraTrailingButtons: .constant([]),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}
@@ -278,6 +290,7 @@ struct PrepareToJoinRoom: View {
             ],
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
+        extraTrailingButtons: .constant([]),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

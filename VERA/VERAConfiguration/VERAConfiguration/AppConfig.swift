@@ -44,9 +44,14 @@ public struct AppConfig {
 
     public struct WaitingRoomSettings {
         public let allowDeviceSelection: Bool
+        public let allowSettings: Bool
 
-        public init(allowDeviceSelection: Bool = true) {
+        public init(
+            allowDeviceSelection: Bool = true,
+            allowSettings: Bool = true
+        ) {
             self.allowDeviceSelection = allowDeviceSelection
+            self.allowSettings = allowSettings
         }
     }
 
@@ -59,6 +64,7 @@ public struct AppConfig {
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
+        public let allowSettings: Bool
 
         public init(
             allowArchiving: Bool = true,
@@ -68,7 +74,8 @@ public struct AppConfig {
             allowEmojis: Bool = true,
             allowScreenShare: Bool = true,
             defaultLayoutMode: MeetingRoomLayout = .activeSpeaker,
-            showParticipantList: Bool = true
+            showParticipantList: Bool = true,
+            allowSettings: Bool = true
         ) {
             self.allowArchiving = allowArchiving
             self.allowCaptions = allowCaptions
@@ -78,6 +85,7 @@ public struct AppConfig {
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList
+            self.allowSettings = allowSettings
         }
     }
 

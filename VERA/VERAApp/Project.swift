@@ -24,12 +24,14 @@ let project = Project(
                 "VERA/App/Resources/**"
             ],
             entitlements: "VERA/VERA.entitlements",
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERA")],
             dependencies: [
                 .project(target: "VERAChat", path: "../VERAChat"),
                 .project(target: "VERACore", path: "../VERACore"),
+                .project(target: "VERAReactions", path: "../VERAReactions"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERAVonageChatPlugin", path: "../VERAVonageChatPlugin"),
+                .project(target: "VERAVonageReactionsPlugin", path: "../VERAVonageReactionsPlugin"),
             ],
             settings: .settings(
                 base: [

@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 /// Default implementation of ``RoomCredentialsRepository`` that fetches video session credentials from a remote server.
 ///

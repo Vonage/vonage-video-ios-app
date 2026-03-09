@@ -3,7 +3,9 @@
 //
 
 import SwiftUI
+import VERACommonUI
 import VERAConfiguration
+import VERADomain
 
 public class MeetingRoomFactory {
     private let baseURL: URL
@@ -11,6 +13,7 @@ public class MeetingRoomFactory {
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
+    private let captionsStatusDataSource: CaptionsStatusDataSource
     private let appConfig: AppConfig
 
     public init(
@@ -19,7 +22,8 @@ public class MeetingRoomFactory {
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
-        roomCredentialsRepository: RoomCredentialsRepository
+        roomCredentialsRepository: RoomCredentialsRepository,
+        captionsStatusDataSource: CaptionsStatusDataSource
     ) {
         self.baseURL = baseURL
         self.appConfig = appConfig
@@ -27,13 +31,14 @@ public class MeetingRoomFactory {
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
         self.roomCredentialsRepository = roomCredentialsRepository
+        self.captionsStatusDataSource = captionsStatusDataSource
     }
 
+    @MainActor
     public func make(
         roomName: RoomName,
-        onShowChat: @escaping () -> Void = {},
-        onBack: @escaping () -> Void = {},
-        onNext: @escaping () -> Void = {},
+        getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
             roomName: roomName,
@@ -45,12 +50,13 @@ public class MeetingRoomFactory {
                 sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
-            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
+            captionsStatusDataSource: captionsStatusDataSource,
             appConfig: appConfig,
-            meetingRoomNavigation: .init(onBack: onBack, onShowChat: onShowChat, onNext: onNext))
-        return (MeetingRoomScreen(viewModel: viewModel), viewModel)
+            meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
+            getExternalButtons: getExternalButtons
+        )
+        return (make(viewModel: viewModel), viewModel)
     }
 
     @MainActor

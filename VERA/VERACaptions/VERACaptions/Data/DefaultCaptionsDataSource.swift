@@ -1,0 +1,60 @@
+//
+//  Created by Vonage on 8/2/26.
+//
+
+import Foundation
+import VERADomain
+
+public struct EnableCaptionsResponse: Codable {
+    public let captionsId: String?
+    public let status: Int
+
+    public init(captionsId: String?, status: Int) {
+        self.captionsId = captionsId
+        self.status = status
+    }
+}
+
+public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
+    private let baseURL: URL
+    private let httpClient: HTTPClient
+    private let jsonDecoder: JSONDecoder
+
+    enum Error: Swift.Error {
+        case invalidResponse
+        case invalidCaptionsId
+    }
+
+    public init(
+        baseURL: URL,
+        httpClient: HTTPClient,
+        jsonDecoder: JSONDecoder = JSONDecoder()
+    ) {
+        self.baseURL = baseURL
+        self.httpClient = httpClient
+        self.jsonDecoder = jsonDecoder
+    }
+
+    public func enableCaptions(
+        _ request: EnableCaptionsDataSourceRequest
+    ) async throws -> EnableCaptionsDataSourceResponse {
+        let url =
+            baseURL
+            .appendingPathComponent("session")
+            .appendingPathComponent(request.roomName)
+            .appendingPathComponent("enableCaptions")
+
+        let data = try await httpClient.post(url, data: Data())
+        let response = try jsonDecoder.decode(EnableCaptionsResponse.self, from: data)
+
+        if response.status != 200 {
+            throw Error.invalidResponse
+        }
+
+        guard let captionsId = response.captionsId else {
+            throw Error.invalidCaptionsId
+        }
+
+        return .init(captionsId: captionsId)
+    }
+}

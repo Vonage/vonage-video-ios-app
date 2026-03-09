@@ -6,6 +6,12 @@ import Foundation
 import VERAConfiguration
 import VERADomain
 
+public struct MeetingRoomParticipantsState {
+    public let participants: [Participant]
+    public let layout: MeetingRoomLayout
+    public let activeSpeakerId: String?
+}
+
 public struct MeetingRoomState: Equatable {
 
     public let roomName: RoomName
@@ -19,13 +25,11 @@ public struct MeetingRoomState: Equatable {
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
     public let callState: CallState
+    public let archivingState: ArchivingState
 
     public var participantsCount: Int {
         participants.count { !$0.isScreenshare }
     }
-
-    public let showChatButton: Bool
-    public let unreadMessagesCount: Int
 
     public init(
         roomName: RoomName,
@@ -35,12 +39,11 @@ public struct MeetingRoomState: Equatable {
         participants: [Participant],
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
-        showChatButton: Bool,
-        unreadMessagesCount: Int = 0,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
         showParticipantList: Bool,
-        callState: CallState
+        callState: CallState,
+        archivingState: ArchivingState
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -49,12 +52,11 @@ public struct MeetingRoomState: Equatable {
         self.participants = participants
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
-        self.showChatButton = showChatButton
-        self.unreadMessagesCount = unreadMessagesCount
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.callState = callState
+        self.archivingState = archivingState
     }
 
     public static let initial = MeetingRoomState(
@@ -65,9 +67,9 @@ public struct MeetingRoomState: Equatable {
         participants: [],
         layout: .activeSpeaker,
         activeSpeakerId: nil,
-        showChatButton: AppConfig.meetingRoomSettings.allowChat,
         allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
         showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
-        callState: .idle)
+        callState: .idle,
+        archivingState: .idle)
 }

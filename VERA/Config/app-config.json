@@ -11,7 +11,8 @@
     "allowMicrophoneControl": true
   },
   "waitingRoomSettings": {
-    "allowDeviceSelection": true
+    "allowDeviceSelection": true,
+    "allowSettings": true,
   },
   "meetingRoomSettings": {
     "allowArchiving": true,
@@ -20,6 +21,7 @@
     "allowDeviceSelection": true,
     "allowEmojis": true,
     "allowScreenShare": true,
+    "allowSettings": true,
     "defaultLayoutMode": "activespeaker",
     "showParticipantList": true
   }

@@ -4,16 +4,28 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
+/// A tile that displays avatars for participants who are hidden from the main video layout.
+///
+/// This component manages video stream visibility for hidden participants:
+/// - When the tile appears, `onDisappear` is called on each participant to disable their video streams
+/// - When the tile disappears (participants become visible again), `onAppear` is called to re-enable streams
+///
+/// This ensures bandwidth is not wasted on video streams for participants not currently visible.
 struct HiddenParticipantsTile: View {
-    let participantNames: [String]
+    let participants: [Participant]
     let spacedBy: CGFloat
 
+    private var participantNames: [String] {
+        participants.map { $0.name }
+    }
+
     init(
-        participantNames: [String],
+        participants: [Participant],
         spacedBy: CGFloat = -8
     ) {
-        self.participantNames = participantNames
+        self.participants = participants
         self.spacedBy = spacedBy
     }
 
@@ -34,6 +46,14 @@ struct HiddenParticipantsTile: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(radius: 2)
+        .onAppear {
+            // Disable video streams for hidden participants.
+            // Re-enabling is handled by ParticipantVideoCard's .trackingVisibility(of:)
+            // when participants transition back to a visible state.
+            for participant in participants {
+                participant.onDisappear?()
+            }
+        }
     }
 }
 
@@ -66,11 +86,11 @@ struct AdditionalParticipantsAvatar: View {
 struct ParticipantsPlaceholders_Previews: PreviewProvider {
     static var previews: some View {
         HiddenParticipantsTile(
-            participantNames: [
-                "Arthur Dent",
-                "Ford Prefect",
-                "Zaphod Beeblebrox",
-                "Marvin",
+            participants: [
+                PreviewData.arthurDent,
+                PreviewData.eddie,
+                PreviewData.fordPrefect,
+                PreviewData.fenchurch,
             ]
         )
         .previewLayout(.sizeThatFits)

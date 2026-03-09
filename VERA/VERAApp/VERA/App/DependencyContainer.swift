@@ -6,12 +6,32 @@ import AVFoundation
 import Foundation
 import VERAConfiguration
 import VERACore
+import VERADomain
 import VERAVonage
 import VERAVonageCallKitPlugin
 
 #if CHAT_ENABLED
     import VERAChat
     import VERAVonageChatPlugin
+#endif
+
+#if ARCHIVING_ENABLED
+    import VERAArchiving
+    import VERAVonageArchivingPlugin
+#endif
+
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
+#if CAPTIONS_ENABLED
+    import VERACaptions
+    import VERAVonageCaptionsPlugin
+#endif
+
+#if REACTIONS_ENABLED
+    import VERAReactions
+    import VERAVonageReactionsPlugin
 #endif
 
 final class DependencyContainer {
@@ -21,7 +41,10 @@ final class DependencyContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory()
+    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
+        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
+        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
+    )
 
     lazy var appConfig = AppConfig()
 
@@ -57,16 +80,15 @@ final class DependencyContainer {
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository)
+        roomCredentialsRepository: roomCredentialsRepository,
+        captionsStatusDataSource: captionsStatusDataSource)
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
             userRepository: userRepository,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             publisherRepository: publisherRepository),
-        userRepository: userRepository,
-        archivesRepository: archivesRepository,
-        archiveRecordingsRepository: archiveRecordingsRepository)
+        userRepository: userRepository)
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
 
@@ -84,6 +106,15 @@ final class DependencyContainer {
         #if CHAT_ENABLED
             registry.registerPlugin(plugin: vonageChatPlugin)
         #endif
+        #if ARCHIVING_ENABLED
+            registry.registerPlugin(plugin: vonageArchivingPlugin)
+        #endif
+        #if CAPTIONS_ENABLED
+            registry.registerPlugin(plugin: captionsPlugin)
+        #endif
+        #if REACTIONS_ENABLED
+            registry.registerPlugin(plugin: vonageReactionsPlugin)
+        #endif
         registry.registerPlugin(plugin: callKitPlugin)
         return registry
     }()
@@ -95,18 +126,6 @@ final class DependencyContainer {
             jsonDecoder: jsonDecoder
         )
     }()
-
-    lazy var archivesRepository: ArchivesRepository = {
-        DefaultArchivesRepository(archivesDataSource: archivesDataSource)
-    }()
-
-    lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
-        baseURL: baseURL,
-        httpClient: httpClient,
-        jsonDecoder: jsonDecoder)
-
-    lazy var archiveRecordingsRepository: ArchiveRecordingsRepository = DefaultArchiveRecordingsRepository(
-        httpClient: httpClient)
 
     // MARK: Chat feature
 
@@ -129,4 +148,83 @@ final class DependencyContainer {
         plugin.setup()
         return plugin
     }()
+
+    // MARK: Archiving feature
+
+    #if ARCHIVING_ENABLED
+
+        lazy var vonageArchivingPlugin = VonageArchivingPlugin(
+            archivingStatusDataSource: archivingStatusDataSource)
+
+        lazy var archivingStatusDataSource = DefaultArchivingStatusDataSource()
+
+        lazy var archivingFactory = ArchivingFactory(
+            archivesRepository: archivesRepository,
+            archivingDataSource: archivingDataSource,
+            archivingStatusDataSource: archivingStatusDataSource)
+
+        lazy var archivingDataSource: ArchivingDataSource = DefaultArchivingDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient)
+
+        lazy var archivesRepository: ArchivesRepository = {
+            DefaultArchivesRepository(archivesDataSource: archivesDataSource)
+        }()
+
+        lazy var archivesDataSource: ArchivesDataSource = HTTPArchivesDataSource(
+            baseURL: baseURL,
+            httpClient: httpClient,
+            jsonDecoder: jsonDecoder)
+
+    #endif
+
+    // MARK: Background effects
+
+    #if BACKGROUND_EFFECTS_ENABLED
+
+        lazy var backgroundBlurFactory = BackgroundBlurFactory()
+
+    #endif
+
+    // MARK: Captions
+
+    #if CAPTIONS_ENABLED
+
+        lazy var captionsActivationDataSource: CaptionsActivationDataSource = DefaultCaptionsDataSource(
+            baseURL: baseURL, httpClient: httpClient, jsonDecoder: jsonDecoder)
+
+        lazy var captionsStatusDataSource: CaptionsStatusDataSource = DefaultCaptionsStatusDataSource()
+
+        lazy var captionsRepository: CaptionsRepository = DefaultCaptionsRepository()
+
+        lazy var captionsFactory = CaptionsFactory(
+            captionsActivationDataSource: captionsActivationDataSource,
+            captionsStatusDataSource: captionsStatusDataSource,
+            captionsRepository: captionsRepository)
+
+        lazy var captionsPlugin: VonageCaptionsPlugin = {
+            let plugin = VonageCaptionsPlugin(
+                captionsStatusDataSource: captionsStatusDataSource,
+                captionsRepository: captionsRepository)
+            return plugin
+        }()
+    #else
+        lazy var captionsStatusDataSource: CaptionsStatusDataSource = NullCaptionsStatusDataSource()
+    #endif
+
+    // MARK: Reactions feature
+
+    #if REACTIONS_ENABLED
+
+        lazy var reactionsRepository: ReactionsRepository = DefaultReactionsRepository()
+
+        lazy var vonageReactionsPlugin = VonageReactionsPlugin(repository: reactionsRepository)
+
+        lazy var sendReactionUseCase: SendReactionUseCase = VonageSendReactionUseCase(
+            plugin: vonageReactionsPlugin)
+
+        lazy var reactionsFactory = ReactionsFactory(
+            reactionsRepository: reactionsRepository,
+            sendReactionUseCase: sendReactionUseCase)
+    #endif
 }

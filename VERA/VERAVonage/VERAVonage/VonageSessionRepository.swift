@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERACore
+import VERADomain
 
 /// A concrete `SessionRepository` that constructs and manages Vonage call sessions.
 ///
@@ -91,7 +92,8 @@ where Factory.Session == VonageSession {
             guard let self, newState == .disconnected else { return }
             self.clearSession()
             self.publisherRepository.resetPublisher()
-        }.store(in: &cancellables)
+        }
+        .store(in: &cancellables)
 
         currentCall = call
         return call

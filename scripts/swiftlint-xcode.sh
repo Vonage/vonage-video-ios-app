@@ -18,6 +18,12 @@
 
 echo "🚀 SwiftLint Xcode Run Script Phase (Target-Specific)"
 
+# Check if SwiftLint is disabled via environment variable
+if [ "${RUN_SWIFTLINT}" = "NO" ]; then
+  echo "⏭️  SwiftLint skipped (RUN_SWIFTLINT=NO)"
+  exit 0
+fi
+
 # Ensure we have Homebrew in PATH for Xcode Run Script Phases
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 

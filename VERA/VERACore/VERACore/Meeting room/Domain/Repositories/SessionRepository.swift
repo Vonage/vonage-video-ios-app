@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public protocol SessionRepository {
     var currentCall: (any CallFacade)? { get }

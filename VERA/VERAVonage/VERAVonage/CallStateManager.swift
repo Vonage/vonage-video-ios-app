@@ -116,4 +116,12 @@ final actor CallStateManager {
     func setOnHold(_ isOnHold: Bool) async {
         await subscribersRepository.all.forEach { $0.setOnHold(isOnHold) }
     }
+
+    func enableCaptions() async {
+        await subscribersRepository.all.forEach { $0.enableCaptions() }
+    }
+
+    func disableCaptions() async {
+        await subscribersRepository.all.forEach { $0.disableCaptions() }
+    }
 }

@@ -6,11 +6,17 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+private enum MeetingRoomScreenConstants {
+    static let overlaysPaddingFromBottom: CGFloat = 64
+}
+
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
     @State var showToast = false
 
-    public init(viewModel: MeetingRoomViewModel) {
+    public init(
+        viewModel: MeetingRoomViewModel
+    ) {
         self.viewModel = viewModel
     }
 
@@ -29,8 +35,9 @@ public struct MeetingRoomScreen: View {
                                 onCameraSwitch: viewModel.onCameraSwitch,
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
-                                onToggleLayout: viewModel.onToggleLayout,
-                                onShowChat: viewModel.showChat)
+                                onToggleLayout: viewModel.onToggleLayout),
+                            extraButtons: $viewModel.extraButtons,
+                            extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
                         )
 
                         if state.callState == .disconnecting {
@@ -44,19 +51,20 @@ public struct MeetingRoomScreen: View {
                 }
             }
 
-            VStack {
-                if showToast, let toast = viewModel.toast {
-                    toast.view
-                        .padding(.top, 16)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+            GeometryReader { geometry in
+                VStack {
+                    if showToast, let toast = viewModel.toast {
+                        toast.view
+                            .padding(.top, geometry.safeAreaInsets.top)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    Spacer()
                 }
-
-                Spacer()
+                .frame(maxWidth: .infinity)
             }
-            .zIndex(999)
+            .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .alert(item: $viewModel.error) { $0.view }
         .onChange(of: viewModel.toast) { newToast in
             if newToast != nil {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -73,8 +81,8 @@ public struct MeetingRoomScreen: View {
                 }
             }
         }
-        .onAppear {
-            viewModel.loadUI()
+        .task {
+            await viewModel.loadUI()
         }
     }
 }

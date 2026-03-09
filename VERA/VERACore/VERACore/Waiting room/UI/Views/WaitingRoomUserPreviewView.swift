@@ -5,22 +5,38 @@
 import SwiftUI
 import VERACommonUI
 
+public struct ViewHolder: Identifiable {
+    public let id: String
+    public let content: () -> AnyView
+
+    public init<Content: View>(
+        id: String,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.id = id
+        self.content = { AnyView(content()) }
+    }
+}
+
 struct WaitingRoomUserPreviewView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
     private let state: WaitingRoomState
     private let userName: Binding<String>
+    @Binding var extraTrailingButtons: [ViewHolder]
     private let onMicrophoneToggle: () -> Void
     private let onCameraToggle: () -> Void
 
     init(
         state: WaitingRoomState,
         userName: Binding<String>,
+        extraTrailingButtons: Binding<[ViewHolder]> = .constant([]),
         onMicrophoneToggle: @escaping () -> Void,
         onCameraToggle: @escaping () -> Void
     ) {
         self.state = state
         self.userName = userName
+        self._extraTrailingButtons = extraTrailingButtons
         self.onMicrophoneToggle = onMicrophoneToggle
         self.onCameraToggle = onCameraToggle
     }
@@ -47,22 +63,33 @@ struct WaitingRoomUserPreviewView: View {
 
                 Spacer()
 
-                HStack(spacing: 24) {
-                    if state.allowCameraControl {
-                        CircularControlImageButton(
-                            isActive: state.isCameraEnabled,
-                            image: state.isCameraEnabled
-                                ? VERACommonUIAsset.Images.videoLine.swiftUIImage
-                                : VERACommonUIAsset.Images.videoOffLine.swiftUIImage,
-                            action: onCameraToggle)
+                ZStack(alignment: .bottom) {
+                    HStack(spacing: 24) {
+                        if state.allowCameraControl {
+                            CircularControlImageButton(
+                                isActive: state.isCameraEnabled,
+                                image: state.isCameraEnabled
+                                    ? VERACommonUIAsset.Images.videoLine.swiftUIImage
+                                    : VERACommonUIAsset.Images.videoOffLine.swiftUIImage,
+                                action: onCameraToggle)
+                        }
+                        if state.allowMicrophoneControl {
+                            CircularControlImageButton(
+                                isActive: state.isMicrophoneEnabled,
+                                image: state.isMicrophoneEnabled
+                                    ? VERACommonUIAsset.Images.microphoneLine.swiftUIImage
+                                    : VERACommonUIAsset.Images.micMuteLine.swiftUIImage,
+                                action: onMicrophoneToggle)
+                        }
                     }
-                    if state.allowMicrophoneControl {
-                        CircularControlImageButton(
-                            isActive: state.isMicrophoneEnabled,
-                            image: state.isMicrophoneEnabled
-                                ? VERACommonUIAsset.Images.microphoneLine.swiftUIImage
-                                : VERACommonUIAsset.Images.micMuteLine.swiftUIImage,
-                            action: onMicrophoneToggle)
+
+                    if !extraTrailingButtons.isEmpty {
+                        HStack(spacing: 24) {
+                            Spacer()
+                            ForEach(extraTrailingButtons) { button in
+                                button.content()
+                            }
+                        }.padding(.trailing)
                     }
                 }
                 .padding(.bottom, 20)
@@ -126,6 +153,30 @@ struct WaitingRoomUserPreviewView: View {
                 cameras: [],
                 publisher: nil),
             userName: .constant("Slartibartfast"),
+            onMicrophoneToggle: {},
+            onCameraToggle: {}
+        )
+
+        WaitingRoomUserPreviewView(
+            state: .init(
+                roomName: "room name",
+                isMicrophoneEnabled: false,
+                isCameraEnabled: false,
+                allowMicrophoneControl: true,
+                allowCameraControl: true,
+                cameras: [],
+                publisher: nil),
+            userName: .constant("Slartibartfast"),
+            extraTrailingButtons: .constant([
+                .init(
+                    id: "",
+                    content: {
+                        CircularControlImageButton(
+                            isActive: true,
+                            image: VERACommonUIAsset.Images.microphoneLine.swiftUIImage
+                        ) {}
+                    })
+            ]),
             onMicrophoneToggle: {},
             onCameraToggle: {}
         )

@@ -5,15 +5,14 @@
 import AVFoundation
 import Foundation
 
-public protocol CheckCameraAuthorizationStatusUseCase {
-    func callAsFunction() -> Bool
+public protocol CheckCameraAuthorizationStatusUseCase: CheckPermissionUseCase {
 }
 
 public final class DefaultCheckCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase {
 
     public init() {}
 
-    public func callAsFunction() -> Bool {
-        AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+    public func callAsFunction() -> PermissionStatus {
+        AVCaptureDevice.authorizationStatus(for: .video).permissionStatus
     }
 }

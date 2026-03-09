@@ -50,14 +50,49 @@ public final class VonageCall: CallFacade {
     /// - Important: Always subscribe to handle errors surfaced during call operations.
     public lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
 
-    public var _statePublisher = CurrentValueSubject<VERACore.SessionState, Never>(SessionState.initial)
+    private var _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
 
     /// A publisher for local media publishing state (audio/video), never fails.
     ///
     /// Emits when local audio/video publishing toggles change or when muted/unmuted in bulk.
     ///
     /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
-    public lazy var statePublisher: AnyPublisher<VERACore.SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+    public lazy var statePublisher: AnyPublisher<SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+
+    private var _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
+
+    /// A publisher for call recording state, never fails.
+    ///
+    /// Emits ArchivingState events whenever the call recording state changes.
+    ///
+    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+
+    private var _captionsEnabled = CurrentValueSubject<Bool, Never>(false)
+
+    /// A publisher for tracking captions state, never fails.
+    ///
+    /// Emits a boolean value whenever the captions have been activated or deactivated.
+    ///
+    /// - Returns: ``Bool`` reflecting `captionsEnabled`.
+    public lazy var captionsEnabled: AnyPublisher<Bool, Never> = _captionsEnabled.eraseToAnyPublisher()
+
+    private var _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+
+    /// A publisher for the captions list
+    ///
+    /// Emits a list of caption items whenever the captions state changes.
+    ///
+    /// - Returns: ``[CaptionItem]`` reflecting `captions` list.
+    public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> =
+        Publishers.CombineLatest(captionsEnabled, _captionsPublisher)
+        .map { isEnabled, captions in
+            isEnabled ? captions : []
+        }
+        .eraseToAnyPublisher()
+
+    /// Captions cleanup timer to clear captions after a certain period of inactivity.
+    private var captionCleanupTimer: Timer?
 
     /// A unique identifier for this call instance.
     ///
@@ -74,6 +109,9 @@ public final class VonageCall: CallFacade {
 
     /// The publisher for the local participant's audio and video.
     public let publisher: VonagePublisher
+
+    /// The subscriber for the local participant's captions.
+    public var publisherCaptions: VonageSubscriber?
 
     /// The participant representation of the local publisher, set after publishing.
     public var publisherParticipant: Participant?
@@ -163,6 +201,24 @@ public final class VonageCall: CallFacade {
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
         }
+        session.onArchiveStarted = { [weak self] archiveID in
+            self?._archivingState.value = .archiving(archiveID)
+
+            do {
+                let signal = try VonageSignal.archivingState(archiveID)
+                self?.handleSignal(signal)
+            } catch {
+            }
+        }
+        session.onArchiveStopped = { [weak self] _ in
+            self?._archivingState.value = .idle
+
+            do {
+                let signal = try VonageSignal.idleArchivingState()
+                self?.handleSignal(signal)
+            } catch {
+            }
+        }
     }
 
     func updateParticipantsState(_ state: ParticipantsState) async {
@@ -240,6 +296,9 @@ public final class VonageCall: CallFacade {
             vonageSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
             }
+            vonageSubscriber.onCaption = { [weak self] caption in
+                self?.appendCaption(caption)
+            }
 
             setupSubscriberObservation(vonageSubscriber)
             setupAudioLevelObservation(vonageSubscriber)
@@ -248,6 +307,10 @@ public final class VonageCall: CallFacade {
 
             let state = await callStateManager.addSubscriber(vonageSubscriber)
             await updateParticipantsState(state)
+
+            if areCaptionsEnabled {
+                vonageSubscriber.enableCaptions()
+            }
         } catch {
             _eventsPublisher.send(.error(error))
         }
@@ -330,6 +393,7 @@ public final class VonageCall: CallFacade {
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
+            stopCaptionCleanup()
             try session.disconnect()
             publisher.cleanUp()
             session.cleanUp()
@@ -538,5 +602,90 @@ public final class VonageCall: CallFacade {
     private func handleSignal(_ signal: VonageSignal) {
         plugins.compactMap { $0 as? VonageSignalHandler }
             .forEach { $0.handleSignal(signal) }
+    }
+
+    // MARK: Captions
+
+    public var areCaptionsEnabled: Bool { _captionsEnabled.value }
+
+    @MainActor
+    public func enableCaptions() async {
+        await callStateManager.enableCaptions()
+
+        if let stream = publisher.stream, publisherCaptions == nil {
+            subscribeToPublisherCaptions(stream)
+        }
+        publisher.enableCaptions()
+        _captionsEnabled.value = true
+
+        startCaptionCleanup()
+    }
+
+    public func disableCaptions() async {
+        await callStateManager.disableCaptions()
+        publisher.disableCaptions()
+        _captionsEnabled.value = false
+        stopCaptionCleanup()
+    }
+
+    private func subscribeToPublisherCaptions(_ stream: OTStream) {
+        do {
+            let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
+            vonageSubscriber.onError = { [weak self] in
+                self?.removeSubscriber(stream)
+            }
+
+            try session.subscribe(subscriber: vonageSubscriber)
+
+            vonageSubscriber.onConnected = { [weak vonageSubscriber] in
+                vonageSubscriber?.enableCaptions()
+                vonageSubscriber?.enableAudioSubscription(false)
+            }
+
+            vonageSubscriber.onCaption = { [weak self] caption in
+                self?.appendCaption(caption, isMe: true)
+            }
+
+            publisherCaptions = vonageSubscriber
+        } catch {
+            _eventsPublisher.send(.error(error))
+        }
+    }
+
+    private func startCaptionCleanup() {
+        stopCaptionCleanup()
+        captionCleanupTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.cleanupOldCaptions()
+        }
+    }
+
+    private func stopCaptionCleanup() {
+        captionCleanupTimer?.invalidate()
+        captionCleanupTimer = nil
+    }
+
+    private func cleanupOldCaptions() {
+        let now = Date()
+        let maxCaptionAge: TimeInterval = 5.0
+
+        let value = _captionsPublisher.value
+        let filtered = value.filter { now.timeIntervalSince($0.timestamp) < maxCaptionAge }
+
+        if filtered.count != value.count {
+            _captionsPublisher.value = filtered
+        }
+    }
+
+    private func appendCaption(_ caption: VonageCaption, isMe: Bool = false) {
+        /// Before appending, any existing caption from the **same speaker** is removed.
+        var value = _captionsPublisher.value.filter { $0.id != caption.id ?? "" }
+        value.append(
+            .init(id: caption.id ?? UUID().uuidString, speakerName: caption.name ?? "", text: caption.text, isMe: isMe))
+
+        if value.count > 5 {
+            value = Array(value.suffix(5))
+        }
+
+        _captionsPublisher.value = value
     }
 }

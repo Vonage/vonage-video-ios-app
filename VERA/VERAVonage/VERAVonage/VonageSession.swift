@@ -42,7 +42,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
 
     /// Called when the session temporarily loses the connection and starts reconnecting.
     ///
-    /// Use this to notify the UI that the connection did drop and stated reconnecting.
+    /// Use this to notify the UI that the connection did drop and started reconnecting.
     var onSessionDidBeginReconnecting: (() -> Void)?
 
     /// Called when the session reports a failure.
@@ -64,6 +64,16 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     ///
     /// - Parameter signal: An ``VonageSignal`` containing the signal type and optional payload.
     var onSessionSignal: ((VonageSignal) -> Void)?
+
+    /// Called when the session recording begins.
+    ///
+    /// - Parameter Archive ID.
+    var onArchiveStarted: ((String) -> Void)?
+
+    /// Called when the session recording stops.
+    ///
+    /// - Parameter Archive ID.
+    var onArchiveStopped: ((String) -> Void)?
 
     /// Creates a new session wrapper.
     ///
@@ -236,7 +246,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     ) {
         guard let type = type else { return }
 
-        onSessionSignal?(.init(type: type, data: string))
+        onSessionSignal?(.init(type: type, data: string, connectionId: connection?.connectionId))
     }
 
     /// Emits a custom Vonage signal to the session.
@@ -259,6 +269,44 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         }
     }
 
+    // MARK: Archiving
+
+    /// Vonage session delegate method called when archiving starts.
+    ///
+    /// This is invoked when the session begins recording. The archive ID can be used
+    /// to stop the recording later via the archiving API.
+    ///
+    /// - Parameters:
+    ///   - session: The session that started archiving.
+    ///   - archiveId: A unique identifier for this archive. Use this ID to stop the archive.
+    ///   - name: An optional name for the archive.
+    ///
+    /// Forwards the archive ID to ``onArchiveStarted``.
+    public func session(
+        _ session: OTSession,
+        archiveStartedWithId archiveId: String,
+        name: String?
+    ) {
+        onArchiveStarted?(archiveId)
+    }
+
+    /// Vonage session delegate method called when archiving stops.
+    ///
+    /// This is invoked when an active recording session ends, either because it was
+    /// explicitly stopped or reached its maximum duration.
+    ///
+    /// - Parameters:
+    ///   - session: The session that stopped archiving.
+    ///   - archiveId: The unique identifier of the archive that stopped.
+    ///
+    /// Forwards the archive ID to ``onArchiveStopped``.
+    public func session(
+        _ session: OTSession,
+        archiveStoppedWithId archiveId: String
+    ) {
+        onArchiveStopped?(archiveId)
+    }
+
     // MARK: Clean up
 
     /// Clears all session callbacks to prevent retain cycles and further event delivery.
@@ -271,5 +319,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         onNewStream = nil
         onStreamDestroyed = nil
         onSessionSignal = nil
+        onArchiveStarted = nil
+        onArchiveStopped = nil
     }
 }

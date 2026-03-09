@@ -4,7 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERACore",
     packages: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", .upToNextMinor(from: "1.18.4"))
+        .swiftSnapshotTesting
     ],
     targets: [
         .target(
@@ -18,7 +18,7 @@ let project = Project(
                 "VERACore/Resources/**",
                 "VERACore/Resources/**/*.xcassets",
             ],
-            scripts: [.swiftLint],
+            scripts: [.swiftLint(targetName: "VERACore")],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
@@ -61,7 +61,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERACore"),
                 .target(name: "VERATestHelpers"),
-                .package(product: "SnapshotTesting"),
+                .swiftSnapshotTesting,
             ],
             settings: createBaseBuildSettings()
         ),

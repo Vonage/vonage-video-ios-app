@@ -12,6 +12,8 @@ public struct ParticipantsListView: View {
     let roomName: String
     let meetingURL: URL?
     let onDismiss: () -> Void
+    @State private var searchText: String = ""
+
 
     public init(
         participants: [Participant],
@@ -37,7 +39,7 @@ public struct ParticipantsListView: View {
 
                 participantsList
             }
-            .navigationTitle("Participants (\(participantsCount))")
+            .navigationTitle(String(localized: "Participants (\(participantsCount))"))
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -57,6 +59,7 @@ public struct ParticipantsListView: View {
                 #endif
             }
         }
+        .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
@@ -95,7 +98,7 @@ public struct ParticipantsListView: View {
 
     private var participantsList: some View {
         List {
-            ForEach(participants, id: \.id) { participant in
+            ForEach(participants.filtered(by: searchText), id: \.id) { participant in
                 ParticipantRowView(participant: participant)
                     #if os(iOS)
                         .listRowSeparator(.hidden)
@@ -103,6 +106,19 @@ public struct ParticipantsListView: View {
                     .listRowBackground(Color.clear)
             }
         }
+        #if os(iOS)
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search participant..."
+            )
+        #else
+            .searchable(
+                text: $searchText,
+                placement: .automatic,
+                prompt: "Search participant..."
+            )
+        #endif
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
     }

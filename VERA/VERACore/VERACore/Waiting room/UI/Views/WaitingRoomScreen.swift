@@ -21,23 +21,20 @@ public struct WaitingRoomScreen: View {
         case .content(let state):
             WaitingRoomView(
                 state: state,
-                userName: $viewModel.userName
+                userName: $viewModel.userName,
+                extraTrailingButtons: $viewModel.extraTrailingButtons,
             ) {
                 Task {
                     await viewModel.joinRoom()
                 }
             } onMicrophoneToggle: {
-                viewModel.onMicToggle()
+                viewModel.onToggleMic()
             } onCameraToggle: {
-                viewModel.onCameraToggle()
-            }
-            .task {
-                await viewModel.checkPermissions()
+                viewModel.onToggleCamera()
             }
             .onAppear {
                 viewModel.loadUI()
             }
-            .alert(item: $viewModel.error) { $0.view }
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

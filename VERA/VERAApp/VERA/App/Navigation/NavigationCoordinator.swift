@@ -2,18 +2,59 @@ import Combine
 import Foundation
 import SwiftUI
 import VERACore
+import VERADomain
 import os.log
+
+#if ARCHIVING_ENABLED
+    import VERAArchiving
+#endif
+
+#if BACKGROUND_EFFECTS_ENABLED
+    import VERABackgroundEffects
+#endif
+
+#if CAPTIONS_ENABLED
+    import VERACaptions
+#endif
+
+#if REACTIONS_ENABLED
+    import VERAReactions
+#endif
 
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
     @Published var currentMeetingRoom: String?
+    @Published var alertItem: AlertItem?
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
     var goodByeViewModel: GoodByeViewModel?
+    #if ARCHIVING_ENABLED
+        var archiveButtonViewModel: ArchiveButtonViewModel?
+        var archivesViewModel: ArchivesViewModel?
+    #endif
+
+    #if BACKGROUND_EFFECTS_ENABLED
+        var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
+    #endif
+
+    #if CAPTIONS_ENABLED
+        var captionsButtonViewModel: CaptionsButtonViewModel?
+        var captionsViewModel: CaptionsViewModel?
+    #endif
+
+    #if REACTIONS_ENABLED
+        var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
+        var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
+        var floatingEmojisOverlayViewModel: FloatingEmojisOverlayViewModel?
+    #endif
+
+    func showAlert(_ alert: AlertItem) {
+        alertItem = alert
+    }
 
     @MainActor
     public func go(to route: AppRoute) {
@@ -22,6 +63,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
         case .meetingRoom(let roomName): startMeeting(roomName)
         case .goodbye: leaveMeeting()
+        case .settings: navigateToSettings()
         }
     }
 
@@ -58,7 +100,27 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         currentMeetingRoom = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
+        #if ARCHIVING_ENABLED
+            archiveButtonViewModel = nil
+            archivesViewModel = nil
+        #endif
+
+        #if BACKGROUND_EFFECTS_ENABLED
+            backgroundBlurButtonViewModel = nil
+        #endif
+
+        #if CAPTIONS_ENABLED
+            captionsButtonViewModel = nil
+            captionsViewModel = nil
+        #endif
+
         logNavigation("Returned to landing page")
+    }
+
+    private func navigateToSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
 
     // MARK: - Private Helpers
