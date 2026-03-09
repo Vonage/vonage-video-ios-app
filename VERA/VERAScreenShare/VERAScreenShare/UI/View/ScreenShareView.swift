@@ -18,7 +18,8 @@
         /// Creates a screen-share trigger view.
         ///
         /// - Parameters:
-        ///   - viewModel: The view model supplying the extension bundle identifier and mic button preference.
+        ///   - broadcastExtensionBundleId: The bundle identifier of the broadcast upload extension to use.
+        ///   - showsMicrophoneButton: A Boolean value that indicates whether the microphone button is shown.
         public init(
             broadcastExtensionBundleId: String? = "com.vonage.VERA.BroadcastExtension",
             showsMicrophoneButton: Bool = false
