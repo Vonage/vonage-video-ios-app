@@ -474,6 +474,7 @@ jobs:
           DerivedData/VERAReactionsTests-macOS.xcresult
           DerivedData/VERAVonageChatPluginTests-macOS.xcresult
           DerivedData/VERAScreenShareTests-macOS.xcresult
+          DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
           DerivedData/VERAVonageTests-iOS.xcresult
           DerivedData/VERACoreSnapshotTests-iOS.xcresult
           DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
