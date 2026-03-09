@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERAScreenShare
 
 @Suite("UserDefaultsScreenShareCredentialsStore Tests")
 struct UserDefaultsScreenShareCredentialsStoreTests {
