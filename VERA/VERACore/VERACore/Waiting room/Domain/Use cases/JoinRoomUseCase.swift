@@ -38,7 +38,7 @@ public final class JoinRoomUseCase {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
         let advancedSettigs = await advancedSettingsUseCase()
-  
+
         try await MainActor.run {
             let currentPublisher = try cameraPreviewProviderRepository.getPublisher()
 
@@ -55,7 +55,7 @@ public final class JoinRoomUseCase {
             let transformers = currentPublisher.videoTransformers
             let newPublisher = try publisherRepository.getPublisher()
             newPublisher.setVideoTransformers(transformers)
-            
+
             cameraPreviewProviderRepository.resetPublisher()
         }
     }

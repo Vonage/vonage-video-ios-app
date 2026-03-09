@@ -67,19 +67,19 @@ struct UIViewContainer: UIViewRepresentable {
 /// The black background ensures that before the first video frame arrives (when
 /// `OTPublisher.view` or `OTSubscriber.view` is still transparent), the container shows
 /// solid black instead of letting the gray card background bleed through.
-private class VideoContainerView : UIView {
-    
+private class VideoContainerView: UIView {
+
     /// The currently embedded video view.
     private(set) var videoView: UIView?
-    
+
     override init(frame: CGRect) {
         super.init(frame: .zero)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     /// Replaces the current video view with a new one.
     ///
     /// Removes any existing video view subview and adds the new view with full-fill constraints.
