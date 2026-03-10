@@ -45,6 +45,15 @@
         }
 
         public func updateUIView(_ uiView: RPSystemBroadcastPickerView, context: Context) {
+            DispatchQueue.main.async {
+                if let button = uiView.subviews.compactMap({ $0 as? UIButton }).first {
+                    context.coordinator.broadcastButton = button
+                }
+            }
+
+            actionTrigger
+                .sink { context.coordinator.broadcastButton?.sendActions(for: .touchUpInside) }
+                .store(in: &context.coordinator.cancellables)
         }
 
         public class Coordinator {

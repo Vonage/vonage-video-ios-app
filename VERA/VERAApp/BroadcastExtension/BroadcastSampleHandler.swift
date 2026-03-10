@@ -42,6 +42,7 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
     private var publisher: OTPublisherKit?
     private let videoCapturer = ScreenShareVideoCapturer()
     private var didTearDown = false
+    private var shouldProcessVideoSamples = false
     private var store: UserDefaultsScreenShareCredentialsRepository?
 
     // MARK: - Broadcast lifecycle
@@ -111,17 +112,19 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
 
     override func broadcastPaused() {
         logger.debug("broadcastPaused")
+        shouldProcessVideoSamples = false
         publisher?.publishVideo = false
     }
 
     override func broadcastResumed() {
         logger.debug("broadcastResumed")
+        shouldProcessVideoSamples = publisher != nil
         publisher?.publishVideo = true
     }
 
     override func broadcastFinished() {
         logger.debug("broadcastFinished")
-
+        shouldProcessVideoSamples = false
         tearDown()
     }
 
@@ -142,11 +145,14 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
     }
 
     /// Called when the main app signals the broadcast should stop.
+    ///
+    /// Only calls `finishBroadcastWithError` — ReplayKit will stop sending frames
+    /// and then call `broadcastFinished()`, which performs the actual `tearDown()`.
+    /// This avoids disconnecting the OTSession while frames are still arriving.
     private func stopBroadcastFromNotification() {
         logger.debug("Received stop broadcast notification from main app")
 
         DispatchQueue.main.async { [self] in
-            self.tearDown()
             self.finishBroadcastWithError(
                 NSError(
                     domain: "VERABroadcastExtension",
@@ -181,14 +187,11 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
         _ sampleBuffer: CMSampleBuffer,
         with sampleBufferType: RPSampleBufferType
     ) {
-        switch sampleBufferType {
-        case .video:
-            videoCapturer.consumeVideoSampleBuffer(sampleBuffer)
-        case .audioApp, .audioMic:
-            break
-        @unknown default:
-            break
-        }
+        guard sampleBufferType == .video else { return }
+        guard shouldProcessVideoSamples, !didTearDown else { return }
+        guard CMSampleBufferIsValid(sampleBuffer), CMSampleBufferDataIsReady(sampleBuffer) else { return }
+
+        videoCapturer.consumeVideoSampleBuffer(sampleBuffer)
     }
 }
 
@@ -199,6 +202,8 @@ extension BroadcastSampleHandler: OTSessionDelegate {
     func sessionDidConnect(_ session: OTSession) {
         logger.debug("sessionDidConnect")
         videoCapturer.sessionDidConnect()
+
+        shouldProcessVideoSamples = true
 
         let settings = OTPublisherSettings()
         settings.scalableScreenshare = true
@@ -244,12 +249,15 @@ extension BroadcastSampleHandler: OTSessionDelegate {
 
     func sessionDidDisconnect(_ session: OTSession) {
         logger.debug("sessionDidDisconnect")
+        shouldProcessVideoSamples = false
         videoCapturer.sessionDidDisconnect()
     }
 
     func session(_ session: OTSession, didFailWithError error: OTError) {
         logger.error("session didFailWithError: \(error.localizedDescription)")
         videoCapturer.sessionDidDisconnect()
+        shouldProcessVideoSamples = false
+        finishBroadcastWithError(error)
     }
 
     func session(_ session: OTSession, streamCreated stream: OTStream) {
