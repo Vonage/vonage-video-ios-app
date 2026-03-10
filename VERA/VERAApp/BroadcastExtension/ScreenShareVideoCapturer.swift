@@ -113,10 +113,12 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         let orientation = sampleOrientation(from: sampleBuffer)
         let ciImage = CIImage(cvPixelBuffer: srcBuffer)
         let extent = ciImage.extent
-        checkSize(width: Int(extent.width), height: Int(extent.height))
-        guard let dstBuffer = pixelBuffer else { return }
 
         frameLock.lock()
+        defer { frameLock.unlock() }
+
+        checkSize(width: Int(extent.width), height: Int(extent.height))
+        guard let dstBuffer = pixelBuffer else { return }
 
         CVPixelBufferLockBaseAddress(dstBuffer, [])
 
@@ -141,8 +143,6 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         videoCaptureConsumer?.consumeFrame(videoFrame)
 
         CVPixelBufferUnlockBaseAddress(dstBuffer, [])
-
-        frameLock.unlock()
 
         lastSampleBuffer = sampleBuffer
         scheduleRetransmission()
