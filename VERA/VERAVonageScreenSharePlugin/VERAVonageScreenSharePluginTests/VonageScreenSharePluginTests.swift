@@ -19,6 +19,7 @@ struct VonageScreenSharePluginTests {
             "applicationId": "app-123",
             "sessionId": "session-abc",
             "token": "token-xyz",
+            "username": "a-username",
         ]
 
         try await plugin.callDidStart(userInfo)
@@ -27,6 +28,7 @@ struct VonageScreenSharePluginTests {
         #expect(saved?.applicationId == "app-123")
         #expect(saved?.sessionId == "session-abc")
         #expect(saved?.token == "token-xyz")
+        #expect(saved?.username == "a-username")
     }
 
     @Test("callDidEnd clears stored credentials")
@@ -35,7 +37,8 @@ struct VonageScreenSharePluginTests {
         repository.saved = ScreenShareCredentials(
             applicationId: "app-123",
             sessionId: "session-abc",
-            token: "token-xyz")
+            token: "token-xyz",
+            username: "a-username")
 
         let plugin = makeSUT(repository: repository)
         try await plugin.callDidEnd()
