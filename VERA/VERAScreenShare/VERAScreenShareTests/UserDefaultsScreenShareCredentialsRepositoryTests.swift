@@ -60,6 +60,7 @@ struct UserDefaultsScreenShareCredentialsRepositoryTests {
             ["screenshare_sessionId"],
             ["screenshare_token"],
             ["screenshare_applicationId", "screenshare_sessionId"],
+            ["screenshare_username"],
         ]
     )
     func loadReturnsNilWithPartialKeys(keysToSet: [String]) {
@@ -88,9 +89,14 @@ struct UserDefaultsScreenShareCredentialsRepositoryTests {
     private func makeCredentials(
         applicationId: String = "app-id",
         sessionId: String = "session-id",
-        token: String = "token"
+        token: String = "token",
+        username: String = "username"
     ) -> ScreenShareCredentials {
-        ScreenShareCredentials(applicationId: applicationId, sessionId: sessionId, token: token)
+        ScreenShareCredentials(
+            applicationId: applicationId,
+            sessionId: sessionId,
+            token: token,
+            username: username)
     }
 
     private func cleanUp(suiteName: String) {
