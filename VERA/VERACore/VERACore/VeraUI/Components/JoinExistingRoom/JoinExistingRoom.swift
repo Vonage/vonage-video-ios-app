@@ -39,6 +39,7 @@ struct JoinExistingRoom: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
             }
         }
+        .keyboardAware()
         .onChange(of: roomName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
                 roomState = getRoomState()
