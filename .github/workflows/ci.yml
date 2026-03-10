@@ -516,8 +516,21 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
+        # Dynamically find all test directories (ending in "Tests")
+        TESTS_DIRS=$(find VERA -type d -name "*Tests" \
+          | grep -v "DerivedData" \
+          | grep -v ".build" \
+          | grep -v "__Snapshots__" \
+          | sort \
+          | tr '\n' ',' \
+          | sed 's/,$//')
+        
+        echo "📋 Test directories found:"
+        echo "$TESTS_DIRS" | tr ',' '\n'
+        
         sonar-scanner \
           -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.tests="$TESTS_DIRS" \
           -Dsonar.verbose=true
 
   upload-testflight:
