@@ -49,7 +49,7 @@ let project = Project(
                 "CFBundleDisplayName": "VERA Broadcast",
                 "NSExtension": .dictionary([
                     "NSExtensionPointIdentifier": "com.apple.broadcast-services-upload",
-                    "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME).SampleHandler",
+                    "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME).BroadcastSampleHandler",
                     "RPBroadcastProcessMode": "RPBroadcastProcessModeSampleBuffer",
                 ]),
             ]),

@@ -32,9 +32,11 @@ private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as C
 /// on the longest edge when downscaling is needed.
 ///
 /// - SeeAlso: ``ScreenShareVideoCapturer``, ``ScreenShareCredentialsStore``
-final class SampleHandler: RPBroadcastSampleHandler {
+final class BroadcastSampleHandler: RPBroadcastSampleHandler {
 
-    private let logger = Logger(subsystem: "com.vonage.VERA.BroadcastExtension", category: "SampleHandler")
+    private let logger = Logger(
+        subsystem: "com.vonage.VERA.BroadcastExtension",
+        category: "BroadcastSampleHandler")
 
     private var session: OTSession?
     private var publisher: OTPublisherKit?
@@ -130,7 +132,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
             Unmanaged.passUnretained(self).toOpaque(),
             { _, observer, _, _, _ in
                 guard let observer = observer else { return }
-                let handler = Unmanaged<SampleHandler>.fromOpaque(observer).takeUnretainedValue()
+                let handler = Unmanaged<BroadcastSampleHandler>.fromOpaque(observer).takeUnretainedValue()
                 handler.stopBroadcastFromNotification()
             },
             stopBroadcastNotificationName,
@@ -192,7 +194,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
 // MARK: - OTSessionDelegate
 
-extension SampleHandler: OTSessionDelegate {
+extension BroadcastSampleHandler: OTSessionDelegate {
 
     func sessionDidConnect(_ session: OTSession) {
         logger.debug("sessionDidConnect")
@@ -261,7 +263,7 @@ extension SampleHandler: OTSessionDelegate {
 
 // MARK: - OTPublisherDelegate
 
-extension SampleHandler: OTPublisherDelegate {
+extension BroadcastSampleHandler: OTPublisherDelegate {
     func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
         logger.error("publisher didFailWithError: \(error.localizedDescription)")
         finishBroadcastWithError(error)
