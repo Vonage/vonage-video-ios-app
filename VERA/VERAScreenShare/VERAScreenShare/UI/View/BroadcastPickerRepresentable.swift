@@ -37,10 +37,6 @@
                 }
             }
 
-            actionTrigger
-                .sink { context.coordinator.broadcastButton?.sendActions(for: .touchUpInside) }
-                .store(in: &context.coordinator.cancellables)
-
             return picker
         }
 
@@ -52,7 +48,10 @@
             }
 
             actionTrigger
-                .sink { context.coordinator.broadcastButton?.sendActions(for: .touchUpInside) }
+                .sink {
+                    print(Date())
+                    context.coordinator.broadcastButton?.sendActions(for: .touchUpInside)
+                }
                 .store(in: &context.coordinator.cancellables)
         }
 
