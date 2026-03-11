@@ -16,7 +16,7 @@ Screen sharing in VERA involves three modules working together:
 
 1. When a call connects, `VonageScreenSharePlugin.callDidStart(_:)` saves the `applicationId`, `sessionId`, and `token` to the shared App Group `UserDefaults`.
 2. When the user taps the screen share button, iOS launches the Broadcast Upload Extension in a separate process.
-3. `SampleHandler.broadcastStarted(withSetupInfo:)` reads credentials from the same App Group via `UserDefaultsScreenShareCredentialsStore` and connects to the Vonage session.
+3. `BroadcastSampleHandler.broadcastStarted(withSetupInfo:)` reads credentials from the same App Group via `UserDefaultsScreenShareCredentialsStore` and connects to the Vonage session.
 4. When the call ends, `callDidEnd()` clears credentials and sends a Darwin notification to stop the extension.
 
 ## BroadcastExtension (Broadcast Upload Extension)
@@ -27,7 +27,7 @@ Located in `VERAApp/BroadcastExtension/`, the extension runs as a separate proce
 
 | File | Description |
 |------|-------------|
-| `SampleHandler.swift` | `RPBroadcastSampleHandler` entry point — reads credentials, connects `OTSession`, publishes via `OTPublisherKit` |
+| `BroadcastSampleHandler.swift` | `RPBroadcastSampleHandler` entry point — reads credentials, connects `OTSession`, publishes via `OTPublisherKit` |
 | `ScreenShareVideoCapturer.swift` | Custom `OTVideoCapture` that feeds ReplayKit frames to the Vonage SDK |
 
 ## Tests
