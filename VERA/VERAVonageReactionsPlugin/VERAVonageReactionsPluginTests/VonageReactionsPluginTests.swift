@@ -524,6 +524,10 @@ final class MockReactionsRepository: ReactionsRepository, @unchecked Sendable {
 
 final class MockCallFacade: CallFacade, @unchecked Sendable {
 
+    let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
+        _networkStatsPublisher.eraseToAnyPublisher()
+
     let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
     lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
         _participantsPublisher.eraseToAnyPublisher()
@@ -556,4 +560,7 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func setOnHold(_ isOnHold: Bool) { self.isOnHold = isOnHold }
     func enableCaptions() async {}
     func disableCaptions() async {}
+    func enableNetworkStats() {}
+    func disableNetworkStats() {}
+    func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
 }

@@ -49,11 +49,13 @@ struct JoinRoomUseCaseTests {
     private func makeSUT(
         userRepository: UserRepository = makeMockUserRepository(),
         cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
-        publisherRepository: PublisherRepository = makePublisherRepositorySpy()
+        publisherRepository: PublisherRepository = makePublisherRepositorySpy(),
+        advancedSettingsUseCase: PublisherAdvancedSettingsUseCase = makePublisherAdvancedSettingsUseCase(),
     ) -> JoinRoomUseCase {
         JoinRoomUseCase(
             userRepository: userRepository,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            publisherRepository: publisherRepository)
+            publisherRepository: publisherRepository,
+            advancedSettingsUseCase: advancedSettingsUseCase)
     }
 }

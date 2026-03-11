@@ -24,6 +24,10 @@ import VERAVonage
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``, ``VonagePluginCallHolder``, ``VonageCallParams``
 /// - Note: The plugin requires a valid `callID` UUID in `userInfo` to drive CallKit.
 ///   If parsing fails, it throws ``VonageCallKitPlugin/Error/invalidCallID``.
+/// - Warning: CallKit is not supported on the iOS Simulator. When the plugin is
+///   active on a Simulator target, `OTPublisher` fails to publish with a connection
+///   timeout. Skip `setup()` or guard with `#if !targetEnvironment(simulator)` when
+///   running on Simulator.
 public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Errors emitted by the CallKit plugin.
@@ -109,9 +113,12 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Important: Must be called before invoking lifecycle methods or handling events.
     /// - Note: End-call events are ignored while on hold to preserve the paused state.
     public func setup() {
+
         callManager = VERACallManager()
-        sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
-        sessionManager?.enableCallingServicesMode()
+        #if !targetEnvironment(simulator)
+            sessionManager = OTAudioDeviceManager.currentAudioSessionManager()
+            sessionManager?.enableCallingServicesMode()
+        #endif
         providerDelegate = ProviderDelegate(sessionManager: sessionManager)
         providerDelegate?.onEndCall = { [weak self] in
             Task { [weak self] in
@@ -136,5 +143,6 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
         providerDelegate?.onMute = { [weak self] isMuted in
             self?.call?.muteLocalMedia(isMuted)
         }
+
     }
 }

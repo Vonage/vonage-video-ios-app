@@ -30,6 +30,10 @@ import VERAVonage
     import VERAReactions
 #endif
 
+#if SETTINGS_ENABLED
+    import VERASettings
+#endif
+
 // MARK: - Constants
 
 /// Layout constants for the VERA application.
@@ -74,6 +78,7 @@ struct VERAApp: App {
     @State private var showChat = false
     @State private var showPickerView = false
     @State private var showCaptions = false
+    @State private var showSettings = false
 
     var body: some Scene {
         WindowGroup {
@@ -109,6 +114,7 @@ struct VERAApp: App {
                                 }
                             #endif
                         }
+                        .alert(item: $navigationCoordinator.alertItem) { $0.view }
 
                         #if CHAT_ENABLED
                             .sheet(isPresented: $showChat) {
@@ -145,6 +151,16 @@ struct VERAApp: App {
                                 makeCaptionsView()
                             }
                         #endif
+
+                        #if SETTINGS_ENABLED
+                            .sheet(isPresented: $showSettings) {
+                                settingsFactory.makeMeetingRoomSettingsView()
+                                .presentationDetents([.large])
+                            }
+                            .overlay {
+                                makeStatsOverlay()
+                            }
+                        #endif
                 }
             }
             .environmentObject(navigationCoordinator)
@@ -177,6 +193,10 @@ struct VERAApp: App {
 
     #if CAPTIONS_ENABLED
         var captionsFactory: CaptionsFactory { dependencyContainer.captionsFactory }
+    #endif
+
+    #if SETTINGS_ENABLED
+        var settingsFactory: SettingsFactory { dependencyContainer.settingsFactory }
     #endif
 
     private func makeLandingPage() -> some View {
@@ -221,6 +241,8 @@ struct VERAApp: App {
     }
 
     private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
+        var buttons: [ViewHolder] = []
+
         #if BACKGROUND_EFFECTS_ENABLED
             let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
                 getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
@@ -231,10 +253,15 @@ struct VERAApp: App {
                 viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
             )
 
-            return [ViewHolder(id: "Blur", content: { view })]
-        #else
-            return []
+            buttons.append(ViewHolder(id: "Blur", content: { view }))
         #endif
+
+        #if SETTINGS_ENABLED
+            let settingsButton = settingsFactory.makeWaitingRoomButton()
+            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+        #endif
+
+        return buttons
     }
 
     private func makeMeetingRoom(roomName: String) -> some View {
@@ -310,6 +337,11 @@ struct VERAApp: App {
                     dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
             #endif
 
+            #if SETTINGS_ENABLED
+                navigationCoordinator.statsOverlayViewModel =
+                    settingsFactory.makeStatsOverlayViewModel()
+            #endif
+
             viewModel = newViewModel
         }
 
@@ -366,6 +398,14 @@ struct VERAApp: App {
         #if SCREEN_SHARE_ENABLED
             extraButtons.append(dependencyContainer.makeScreenShareButton())
         #endif
+
+        #if SETTINGS_ENABLED
+            extraButtons.append(
+                makeSettingsBottomBarButton {
+                    showSettings = true
+                })
+        #endif
+
         return extraButtons
     }
 
@@ -449,5 +489,28 @@ struct VERAApp: App {
                 captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
             }
         }
+    #endif
+
+    #if SETTINGS_ENABLED
+        @ViewBuilder
+        private func makeStatsOverlay() -> some View {
+            if let statsViewModel = navigationCoordinator.statsOverlayViewModel {
+                settingsFactory.makeStatsOverlayView(viewModel: statsViewModel)
+            }
+        }
+
+        @MainActor
+        func makeSettingsBottomBarButton(onShowSettings: @escaping () -> Void) -> BottomBarButton {
+            let button = settingsFactory.makeMeetingRoomButton(onShowSettings: onShowSettings)
+            return .init(
+                label: String(localized: "Settings"),
+                image: Image(systemName: "gearshape.fill"),
+                onTap: onShowSettings,
+                content: {
+                    button
+                }
+            )
+        }
+
     #endif
 }

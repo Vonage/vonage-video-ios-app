@@ -54,15 +54,56 @@ public final class VonagePublisherFactory: PublisherFactory {
     /// - Throws: ``VonagePublisherFactory/Error/publisherInitializationFailed`` if `OTPublisher` could not be created.
     /// - Important: This does not automatically start publishing to the session; attach and start via the session wrapper.
     public func make(_ settings: PublisherSettings) throws -> any VERAPublisher {
+        let otPublisher = try makeOTPublisher(settings)
+        return wrapPublisher(otPublisher, settings: settings)
+    }
+
+    // MARK: - Private helpers
+
+    /// Configures `OTPublisherSettings` and initialises `OTPublisher`.
+    /// Does **not** touch UIKit — safe to call from a background thread.
+    private func makeOTPublisher(_ settings: PublisherSettings) throws -> OTPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
+
+        // All OTPublisherSettings properties must be set BEFORE OTPublisher is initialised.
+        if let frameRate = settings.advancedSettings?.videoFrameRate?.otFrameRate {
+            publisherSettings.cameraFrameRate = frameRate
+        }
+        if let resolution = settings.advancedSettings?.videoResolution?.otResolution {
+            publisherSettings.cameraResolution = resolution
+        }
+        if let maxAudioBitrate = settings.advancedSettings?.maxAudioBitrate {
+            publisherSettings.audioBitrate = maxAudioBitrate
+        }
+        publisherSettings.subscriberAudioFallbackEnabled =
+            settings.advancedSettings?.subscriberAudioFallbackEnabled ?? false
+        publisherSettings.publisherAudioFallbackEnabled =
+            settings.advancedSettings?.publisherAudioFallbackEnabled ?? false
+        if let preferredVideoCodecs = settings.advancedSettings?.preferredVideoCodecs?.otCodecPreference {
+            publisherSettings.videoCodecPreference = preferredVideoCodecs
+        }
 
         guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
             throw Error.publisherInitializationFailed
         }
+        return otPublisher
+    }
+
+    /// Wraps an already-initialised `OTPublisher` in `VonagePublisher`.
+    /// Accesses `otPublisher.view` (UIKit) — **must** be called on the main thread.
+    private func wrapPublisher(_ otPublisher: OTPublisher, settings: PublisherSettings) -> VonagePublisher {
         otPublisher.publishAudio = settings.publishAudio && checkMicrophoneAuthorizationStatusUseCase().isAuthorized
         otPublisher.publishVideo = settings.publishVideo && checkCameraAuthorizationStatusUseCase().isAuthorized
         otPublisher.viewScaleBehavior = settings.scaleBehavior.otVideoScaleBehavior
+
+        if let bitratePreset = settings.advancedSettings?.videoBitratePreset?.otBitratePreset, bitratePreset != .custom
+        {
+            otPublisher.videoBitratePreset = bitratePreset
+        } else if let maxVideoBitrate = settings.advancedSettings?.maxVideoBitrate, maxVideoBitrate > 0 {
+            otPublisher.maxVideoBitrate = maxVideoBitrate
+        }
+
         let publisher = VonagePublisher(
             publisher: otPublisher,
             transformerFactory: vonageTransformerFactory)

@@ -32,3 +32,16 @@ public class PublisherRepositorySpy: PublisherRepository {
 public func makePublisherRepositorySpy() -> PublisherRepositorySpy {
     .init()
 }
+
+public class MockPublisherAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
+
+    public init() {}
+
+    public func callAsFunction() async -> PublisherAdvancedSettings {
+        .init()
+    }
+}
+
+public func makePublisherAdvancedSettingsUseCase() -> MockPublisherAdvancedSettingsUseCase {
+    .init()
+}

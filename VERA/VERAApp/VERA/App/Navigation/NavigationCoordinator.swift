@@ -21,6 +21,10 @@ import os.log
     import VERAReactions
 #endif
 
+#if SETTINGS_ENABLED
+    import VERASettings
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -50,6 +54,10 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
         var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
         var floatingEmojisOverlayViewModel: FloatingEmojisOverlayViewModel?
+    #endif
+
+    #if SETTINGS_ENABLED
+        var statsOverlayViewModel: StatsOverlayViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {

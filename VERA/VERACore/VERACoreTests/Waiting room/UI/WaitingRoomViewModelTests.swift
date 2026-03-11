@@ -233,9 +233,11 @@ struct WaitingRoomViewModelTests {
         userRepository: UserRepository = makeMockUserRepository(),
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+        advancedSettingsUseCase: PublisherAdvancedSettingsUseCase =
+            makePublisherAdvancedSettingsUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
             makeMockCheckCameraAuthorizationStatusUseCase(),
-        actionHandler: ActionHandler? = nil
+        actionHandler: ActionHandler? = nil,
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
@@ -244,7 +246,9 @@ struct WaitingRoomViewModelTests {
             joinRoomUseCase: .init(
                 userRepository: userRepository,
                 cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-                publisherRepository: publisherRepository),
+                publisherRepository: publisherRepository,
+                advancedSettingsUseCase: advancedSettingsUseCase
+            ),
             requestMicrophonePermissionUseCase: makeMockRequestMicrophonePermissionUseCase(),
             requestCameraPermissionUseCase: makeMockRequestCameraPermissionUseCase(),
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
