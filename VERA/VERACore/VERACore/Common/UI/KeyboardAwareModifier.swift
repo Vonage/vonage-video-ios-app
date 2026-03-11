@@ -42,7 +42,7 @@ struct KeyboardAwareModifier: ViewModifier {
 
                         if height > 0 {
                             // Small delay to ensure layout is updated
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 withAnimation {
                                     // Scroll to custom ID if provided, otherwise to bottom anchor if enabled
                                     if let targetId = scrollToId {
