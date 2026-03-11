@@ -271,7 +271,7 @@ final class DependencyContainer {
         lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
             credentialsRepository: screenShareCredentialsRepository)
     #endif
-  
+
     // MARK: Settings feature
 
     #if SETTINGS_ENABLED
