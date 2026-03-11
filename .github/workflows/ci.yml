@@ -5,9 +5,8 @@ permissions:
   actions: read
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main, develop, feature/VIDSOL-592 ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 
@@ -537,9 +536,8 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-26
-    needs: [format-check]
-    # TODO: revert to (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.event_name == 'push'
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/VIDSOL-592') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: [unit-tests]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.event_name == 'push'
     timeout-minutes: 30
     
     steps:
