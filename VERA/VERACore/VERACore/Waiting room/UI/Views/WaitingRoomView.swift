@@ -252,7 +252,7 @@ struct PrepareToJoinRoom: View {
             }
             .padding()
         }
-        .keyboardAware()
+        .keyboardAware(paddingDivider: 1.4)
     }
 }
 

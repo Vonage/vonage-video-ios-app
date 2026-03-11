@@ -6,6 +6,12 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+typealias ViewNameID = String
+
+enum JoinExistingRoomUIIDs {
+    static let joinButton: ViewNameID = "JoinButton"
+}
+
 enum RoomNameState {
     case initial, valid, invalid
 }
@@ -35,11 +41,11 @@ struct JoinExistingRoom: View {
                     roomState = getRoomState(true)
                     onJoinRoom(roomName)
                 }
+                .id(JoinExistingRoomUIIDs.joinButton)
                 .padding(.vertical, 16)
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
             }
         }
-        .keyboardAware()
         .onChange(of: roomName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
                 roomState = getRoomState()
