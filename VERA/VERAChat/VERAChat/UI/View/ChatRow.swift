@@ -22,12 +22,14 @@ struct ChatRow: View {
                 HStack {
                     Text(message.username)
                         .font(.caption)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
                     Text(message.date)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                 }
                 Text(message.message)
                     .font(.body)
+                    .foregroundColor(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

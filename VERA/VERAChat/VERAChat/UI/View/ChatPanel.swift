@@ -69,9 +69,9 @@ struct ChatPanelInput: View {
 extension Text {
     func secondaryForeground() -> Text {
         if #available(iOS 17.0, *) {
-            return self.foregroundStyle(.gray)
+            return self.foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
         } else {
-            return self.foregroundColor(.gray)
+            return self.foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
         }
     }
 }

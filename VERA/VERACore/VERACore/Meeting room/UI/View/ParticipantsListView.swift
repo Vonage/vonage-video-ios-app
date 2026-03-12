@@ -14,7 +14,6 @@ public struct ParticipantsListView: View {
     let onDismiss: () -> Void
     @State private var searchText: String = ""
 
-
     public init(
         participants: [Participant],
         participantsCount: Int,
@@ -72,7 +71,7 @@ public struct ParticipantsListView: View {
                 HStack {
                     Text(meetingURL.absoluteString)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
@@ -136,7 +135,7 @@ struct ParticipantRowView: View {
             Text(participant.name)
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundColor(.primary)
+                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
 
             Spacer()
 
