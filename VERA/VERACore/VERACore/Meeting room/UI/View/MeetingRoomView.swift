@@ -333,7 +333,7 @@ struct ShareSheetView: UIViewControllerRepresentable {
             showParticipantList: true,
             callState: .connected,
             archivingState: .archiving(""),
-            noiseSuppressionState: .enabled
+            noiseSuppressionState: .disabled
         ),
         actions: .init())
 }

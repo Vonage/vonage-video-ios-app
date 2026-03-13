@@ -14,13 +14,13 @@ public final class VonageTransformerFactory: VERATransformerFactory {
         case audioTransformerInitializationError
     }
 
-    public func makeTransformer(
+    public func makeVideoTransformer(
         for key: String,
         params: String
     ) throws -> any VERATransformer {
 
         guard
-            let backgroundBlurTransformer = OTVideoTransformer(
+            let videoTransformer = OTVideoTransformer(
                 name: key,
                 properties: params
             )
@@ -28,7 +28,7 @@ public final class VonageTransformerFactory: VERATransformerFactory {
 
         return VonageTransformer(
             key: key,
-            transformer: backgroundBlurTransformer)
+            transformer: videoTransformer)
     }
 
     public func makeAudioTransformer(for key: String, params: String) throws -> any VERATransformer {

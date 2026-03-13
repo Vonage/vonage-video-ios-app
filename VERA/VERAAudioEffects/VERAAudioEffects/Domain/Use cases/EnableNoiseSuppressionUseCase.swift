@@ -6,11 +6,11 @@ import Foundation
 import OSLog
 import VERADomain
 
-public protocol EnableNoiseSuppresionUseCase {
+public protocol EnableNoiseSuppressionUseCase {
     func callAsFunction(publisher: VERAPublisher)
 }
 
-public final class DefaultEnableNoiseSuppressionUseCase: EnableNoiseSuppresionUseCase {
+public final class DefaultEnableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase {
 
     private let logger = Logger(
         subsystem: "com.vonage.VERAAudioEffects",
@@ -25,6 +25,7 @@ public final class DefaultEnableNoiseSuppressionUseCase: EnableNoiseSuppresionUs
     public func callAsFunction(publisher: VERAPublisher) {
         do {
             try publisher.setNoiseSuppression(enabled: true)
+
             noiseSuppressionStatusDataSource.set(state: .enabled)
         } catch {
             logger.error("\(error.localizedDescription)")

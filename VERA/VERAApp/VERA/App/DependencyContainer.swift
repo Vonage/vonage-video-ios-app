@@ -92,7 +92,7 @@ final class DependencyContainer {
         #endif
     }()
 
-    lazy var noiseSuppressionStatutsDataSource: any NoiseSuppressionStatusDataSource = {
+    lazy var noiseSuppressionStatusDataSource: any NoiseSuppressionStatusDataSource = {
         #if AUDIOEFFECTS_ENABLED
             return DefaultNoiseSuppressionStatusDataSource()
         #else
@@ -115,7 +115,7 @@ final class DependencyContainer {
         publisherRepository: publisherRepository,
         roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
-        noiseSuppressionStatusDataSource: noiseSuppressionStatutsDataSource)
+        noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource)
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
@@ -305,12 +305,12 @@ final class DependencyContainer {
 
     #if AUDIOEFFECTS_ENABLED
         lazy var audioEffectsFactory = AudioEffectsFactory(
-            publisherRepostiory: publisherRepository,
-            disableNoiseSuppresionUseCase: DefaultDisableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: noiseSuppressionStatutsDataSource
+            publisherRepository: publisherRepository,
+            disableNoiseSuppressionUseCase: DefaultDisableNoiseSuppressionUseCase(
+                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
             ),
-            enableNoiseSuppresionUseCase: DefaultEnableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: noiseSuppressionStatutsDataSource
+            enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
+                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
             )
         )
     #endif

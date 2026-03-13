@@ -78,7 +78,7 @@ public final class MockTransformer: VERATransformer {
 public final class MockTransformerFactory: VERATransformerFactory {
     public init() {}
 
-    public func makeTransformer(
+    public func makeVideoTransformer(
         for key: String,
         params: String
     ) throws -> any VERADomain.VERATransformer {

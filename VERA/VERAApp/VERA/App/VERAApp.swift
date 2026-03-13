@@ -268,12 +268,12 @@ struct VERAApp: App {
             let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
                 getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
             )
-            navigationCoordinator.audioSupressionViewModel = audioViewModel
+            navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
 
             let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
                 viewModel: audioViewModel
             )
-            buttons.append(ViewHolder(id: "AuidoEffects", content: { audioButton }))
+            buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
         #endif
 
         #if SETTINGS_ENABLED
@@ -426,11 +426,11 @@ struct VERAApp: App {
 
         #if AUDIOEFFECTS_ENABLED
             let viewModel: MeetingNoiseSuppressionViewModel
-            if let meetingSupressionButtonViewModel = navigationCoordinator.meetingSupressionButtonViewModel {
-                viewModel = meetingSupressionButtonViewModel
+            if let meetingSuppressionButtonViewModel = navigationCoordinator.meetingNoiseSuppressionButtonViewModel {
+                viewModel = meetingSuppressionButtonViewModel
             } else {
                 viewModel = audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
-                viewModel.state = navigationCoordinator.audioSupressionViewModel?.state ?? .disabled
+                viewModel.state = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
             }
             extraButtons.append(
                 dependencyContainer.makeAudioEffectsButton(viewModel)

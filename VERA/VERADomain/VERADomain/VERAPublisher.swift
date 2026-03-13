@@ -80,7 +80,7 @@ public protocol VERAPublisher: AnyObject {
 }
 
 public protocol VERATransformerFactory {
-    func makeTransformer(for key: String, params: String) throws -> VERATransformer
+    func makeVideoTransformer(for key: String, params: String) throws -> VERATransformer
     func makeAudioTransformer(for key: String, params: String) throws -> VERATransformer
 }
 

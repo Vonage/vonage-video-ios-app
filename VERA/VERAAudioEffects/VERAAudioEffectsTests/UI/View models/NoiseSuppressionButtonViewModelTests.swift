@@ -145,13 +145,13 @@ struct NoiseSuppressionButtonViewModelTests {
 
     private func makeSUT(
         getCurrentPublisher: @escaping () throws -> VERAPublisher = { PublisherSpy() },
-        disableUseCase: DisableNoiseSuppresionUseCase = DisableUseCaseSpy(),
-        enableUseCase: EnableNoiseSuppresionUseCase = EnableUseCaseSpy()
+        disableUseCase: DisableNoiseSuppressionUseCase = DisableUseCaseSpy(),
+        enableUseCase: EnableNoiseSuppressionUseCase = EnableUseCaseSpy()
     ) -> NoiseSuppressionViewModel {
         NoiseSuppressionViewModel(
             getCurrentPublisher: getCurrentPublisher,
-            disableNoiseSuppresionUseCase: disableUseCase,
-            enableNoiseSuppresionUseCase: enableUseCase
+            disableNoiseSuppressionUseCase: disableUseCase,
+            enableNoiseSuppressionUseCase: enableUseCase
         )
     }
 }
@@ -181,7 +181,7 @@ final class PublisherSpy: VERAPublisher {
     }
 }
 
-final class EnableUseCaseSpy: EnableNoiseSuppresionUseCase {
+final class EnableUseCaseSpy: EnableNoiseSuppressionUseCase {
     var callCount = 0
     var lastPublisher: VERAPublisher?
 
@@ -191,10 +191,10 @@ final class EnableUseCaseSpy: EnableNoiseSuppresionUseCase {
     }
 }
 
-final class DisableUseCaseSpy: DisableNoiseSuppresionUseCase {
+final class DisableUseCaseSpy: DisableNoiseSuppressionUseCase {
     var callCount = 0
 
-    func callAsFunction() {
+    func callAsFunction(publisher: VERAPublisher) {
         callCount += 1
     }
 }

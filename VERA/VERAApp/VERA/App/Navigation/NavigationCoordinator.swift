@@ -65,8 +65,8 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     #endif
 
     #if AUDIOEFFECTS_ENABLED
-        var audioSupressionViewModel: WaittingNoiseSuppressionViewModel?
-        var meetingSupressionButtonViewModel: MeetingNoiseSuppressionViewModel?
+        var waitingNoiseSuppressionViewModel: WaitingNoiseSuppressionViewModel?
+        var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
@@ -132,7 +132,8 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         #endif
 
         #if AUDIOEFFECTS_ENABLED
-            audioSupressionViewModel = nil
+            waitingNoiseSuppressionViewModel = nil
+            meetingNoiseSuppressionButtonViewModel = nil
         #endif
 
         logNavigation("Returned to landing page")

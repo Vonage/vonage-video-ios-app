@@ -365,9 +365,6 @@ struct VonageCallTests {
 
         try await sut.applyPublisherAdvancedSettings(advancedSettings)
 
-        // Wait for async DispatchQueue.main.async in updateAudioTransformers
-        await delay()
-
         #expect(newPublisherSpy.audioTransformers.count == 2)
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
     }

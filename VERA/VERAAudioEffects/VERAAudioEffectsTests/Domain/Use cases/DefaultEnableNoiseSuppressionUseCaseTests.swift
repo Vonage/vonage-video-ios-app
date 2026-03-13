@@ -18,6 +18,9 @@ struct DefaultEnableNoiseSuppressionUseCaseTests {
 
         sut(publisher: publisher)
 
+        await delay()
+
+        #expect(publisher.removeAudioTransform_callCount == 1)
         #expect(publisher.setNoiseSuppression_callCount == 1)
     }
 
@@ -41,6 +44,7 @@ struct DefaultEnableNoiseSuppressionUseCaseTests {
 
         sut(publisher: publisher)
 
+        #expect(publisher.removeAudioTransform_callCount == 1)
         #expect(publisher.setNoiseSuppression_callCount == 1)
         #expect(dataSource.setState_callCount == 1)
     }
@@ -82,4 +86,9 @@ struct DefaultEnableNoiseSuppressionUseCaseTests {
             noiseSuppressionStatusDataSource: dataSource
         )
     }
+}
+
+// 0.01 seconds delay
+public func delay(nanoseconds duration: UInt64 = 10_000_000) async {
+    try? await Task.sleep(nanoseconds: duration)
 }

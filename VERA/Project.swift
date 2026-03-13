@@ -155,25 +155,6 @@ private func isScreenShareEnabled() -> Bool {
     return meetingRoomSettings["allowScreenShare"] as! Bool
 }
 
-/// Returns whether AudioEffects is enabled according to `app-config.json`.
-///
-/// Expects the JSON shape:
-/// ```json
-/// {
-///   "meetingRoomSettings": {
-///     "allowAudioEffects": true
-///   }
-/// }
-/// ```
-///
-/// - Returns: `true` if `meetingRoomSettings.allowAudioEffects` is `true`, else `false`.
-/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func areAudioEffectsEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowAudioEffects"] as! Bool
-}
-
 /// Returns whether Settings is enabled according to `app-config.json`.
 ///
 /// Expects the JSON shape:
@@ -272,7 +253,7 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
-    if areAudioEffectsEnabled() && isAdvancedNoiseSuppressionEnabled() {
+    if isAdvancedNoiseSuppressionEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAAudioEffects", path: "VERAAudioEffects")
         ])
@@ -343,7 +324,7 @@ private func createBuildSettings() -> Settings {
         print("Screen share feature enabled in build settings.")
     }
 
-    if areAudioEffectsEnabled() && isAdvancedNoiseSuppressionEnabled() {
+    if isAdvancedNoiseSuppressionEnabled() {
         baseSettings["AUDIOEFFECTS_ENABLED"] = "1"
         flags.append("AUDIOEFFECTS_ENABLED")
         print("AudioEffects feature enabled in build settings.")

@@ -10,22 +10,22 @@
     extension NoiseSuppressionViewModel {
 
         /// Preview instance with noise suppression disabled
-        static var previewDisabled: WaittingNoiseSuppressionViewModel {
-            let viewModel = WaittingNoiseSuppressionViewModel(
+        static var previewDisabled: WaitingNoiseSuppressionViewModel {
+            let viewModel = WaitingNoiseSuppressionViewModel(
                 getCurrentPublisher: { throw NSError(domain: "Preview", code: 0) },
-                disableNoiseSuppresionUseCase: PreviewDisableNoiseSuppresionUseCase(),
-                enableNoiseSuppresionUseCase: PreviewEnableNoiseSuppresionUseCase()
+                disableNoiseSuppressionUseCase: PreviewDisableNoiseSuppressionUseCase(),
+                enableNoiseSuppressionUseCase: PreviewEnableNoiseSuppressionUseCase()
             )
             viewModel.state = .disabled
             return viewModel
         }
 
         /// Preview instance with noise suppression enabled
-        static var previewEnabled: WaittingNoiseSuppressionViewModel {
-            let viewModel = WaittingNoiseSuppressionViewModel(
+        static var previewEnabled: WaitingNoiseSuppressionViewModel {
+            let viewModel = WaitingNoiseSuppressionViewModel(
                 getCurrentPublisher: { throw NSError(domain: "Preview", code: 0) },
-                disableNoiseSuppresionUseCase: PreviewDisableNoiseSuppresionUseCase(),
-                enableNoiseSuppresionUseCase: PreviewEnableNoiseSuppresionUseCase()
+                disableNoiseSuppressionUseCase: PreviewDisableNoiseSuppressionUseCase(),
+                enableNoiseSuppressionUseCase: PreviewEnableNoiseSuppressionUseCase()
             )
             viewModel.state = .enabled
             return viewModel
@@ -35,8 +35,8 @@
         static var meetingPreviewDisabled: MeetingNoiseSuppressionViewModel {
             let viewModel = MeetingNoiseSuppressionViewModel(
                 getCurrentPublisher: PreviewPublisherRepository().getPublisher,
-                disableNoiseSuppresionUseCase: PreviewDisableNoiseSuppresionUseCase(),
-                enableNoiseSuppresionUseCase: PreviewEnableNoiseSuppresionUseCase()
+                disableNoiseSuppressionUseCase: PreviewDisableNoiseSuppressionUseCase(),
+                enableNoiseSuppressionUseCase: PreviewEnableNoiseSuppressionUseCase()
             )
             viewModel.state = .disabled
             return viewModel
@@ -46,20 +46,20 @@
         static var meetingPreviewEnabled: MeetingNoiseSuppressionViewModel {
             let viewModel = MeetingNoiseSuppressionViewModel(
                 getCurrentPublisher: PreviewPublisherRepository().getPublisher,
-                disableNoiseSuppresionUseCase: PreviewDisableNoiseSuppresionUseCase(),
-                enableNoiseSuppresionUseCase: PreviewEnableNoiseSuppresionUseCase()
+                disableNoiseSuppressionUseCase: PreviewDisableNoiseSuppressionUseCase(),
+                enableNoiseSuppressionUseCase: PreviewEnableNoiseSuppressionUseCase()
             )
             viewModel.state = .enabled
             return viewModel
         }
     }
 
-    private final class PreviewEnableNoiseSuppresionUseCase: EnableNoiseSuppresionUseCase {
+    private final class PreviewEnableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase {
         func callAsFunction(publisher: any VERADomain.VERAPublisher) {}
     }
 
-    private final class PreviewDisableNoiseSuppresionUseCase: DisableNoiseSuppresionUseCase {
-        func callAsFunction() {}
+    private final class PreviewDisableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase {
+        func callAsFunction(publisher: VERAPublisher) {}
     }
 
     private final class PreviewPublisherRepository: PublisherRepository {
@@ -121,7 +121,7 @@
 
         public init() {}
 
-        func makeTransformer(for key: String, params: String) throws -> any VERATransformer {
+        func makeVideoTransformer(for key: String, params: String) throws -> any VERATransformer {
             throw NSError(domain: "test", code: 0, userInfo: nil)
         }
 

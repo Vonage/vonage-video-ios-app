@@ -40,6 +40,7 @@ final class NoiseSuppressionPublisherSpy: VERAPublisher {
     var cameraPosition: CameraPosition = .front
 
     var setNoiseSuppression_callCount = 0
+    var removeAudioTransform_callCount = 0
     private let shouldThrowError: Bool
 
     init(
@@ -55,13 +56,19 @@ final class NoiseSuppressionPublisherSpy: VERAPublisher {
     func removeTransformer(_ key: String) {}
 
     func addAudioTransformer(_ transformer: any VERATransformer) {
-        if !shouldThrowError {
-            setNoiseSuppression_callCount += 1
-        }
+        guard !shouldThrowError else { return }
+
+        setNoiseSuppression_callCount += 1
     }
 
     func setAudioTransformers(_ transformers: [any VERATransformer]) {}
-    func removeAudioTransformer(_ key: String) {}
+
+    func removeAudioTransformer(_ key: String) {
+        guard !shouldThrowError else { return }
+
+        removeAudioTransform_callCount += 1
+    }
+
     func switchCamera(to cameraDeviceID: String) {}
     func cleanUp() {}
 }

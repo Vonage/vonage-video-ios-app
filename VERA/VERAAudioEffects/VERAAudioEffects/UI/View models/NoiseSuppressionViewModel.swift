@@ -15,17 +15,17 @@ public final class NoiseSuppressionViewModel: ObservableObject {
         category: "NoiseSuppressionButtonViewModel")
 
     private final let getCurrentPublisher: GetPublisher
-    private final let disableNoiseSuppresionUseCase: DisableNoiseSuppresionUseCase
-    private final let enableNoiseSuppresionUseCase: EnableNoiseSuppresionUseCase
+    private final let disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase
+    private final let enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
 
     public init(
         getCurrentPublisher: @escaping GetPublisher,
-        disableNoiseSuppresionUseCase: DisableNoiseSuppresionUseCase,
-        enableNoiseSuppresionUseCase: EnableNoiseSuppresionUseCase
+        disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase,
+        enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
     ) {
         self.getCurrentPublisher = getCurrentPublisher
-        self.disableNoiseSuppresionUseCase = disableNoiseSuppresionUseCase
-        self.enableNoiseSuppresionUseCase = enableNoiseSuppresionUseCase
+        self.disableNoiseSuppressionUseCase = disableNoiseSuppressionUseCase
+        self.enableNoiseSuppressionUseCase = enableNoiseSuppressionUseCase
     }
 
     public func onTap() {
@@ -35,9 +35,9 @@ public final class NoiseSuppressionViewModel: ObservableObject {
             let publisher = try getCurrentPublisher()
 
             if state.isEnabled {
-                enableNoiseSuppresionUseCase(publisher: publisher)
+                enableNoiseSuppressionUseCase(publisher: publisher)
             } else {
-                disableNoiseSuppresionUseCase()
+                disableNoiseSuppressionUseCase(publisher: publisher)
             }
         } catch {
             logger.error("\(error.localizedDescription)")

@@ -5,10 +5,10 @@
 import VERAAudioEffects
 import VERADomain
 
-final class EnableUseCaseSpy: EnableNoiseSuppresionUseCase {
+final class EnableUseCaseSpy: EnableNoiseSuppressionUseCase {
     func callAsFunction(publisher: VERAPublisher) {}
 }
 
-final class DisableUseCaseSpy: DisableNoiseSuppresionUseCase {
-    func callAsFunction() {}
+final class DisableUseCaseSpy: DisableNoiseSuppressionUseCase {
+    func callAsFunction(publisher: VERAPublisher) {}
 }

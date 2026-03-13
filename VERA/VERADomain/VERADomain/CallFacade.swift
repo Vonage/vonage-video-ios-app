@@ -90,10 +90,10 @@ extension CaptionsState {
 
 public typealias CaptionsID = String
 
-/// The high-level state of the Noise Suppresion feature.
+/// The high-level state of the Noise Suppression feature.
 ///
-/// Represents whether the current call has noise suppresion enabled or not.
-/// Use it to drive noise suppresion-related UI display.
+/// Represents whether the current call has noise suppression enabled or not.
+/// Use it to drive noise suppression-related UI display.
 public enum NoiseSuppressionState: Equatable {
     case enabled
     case disabled

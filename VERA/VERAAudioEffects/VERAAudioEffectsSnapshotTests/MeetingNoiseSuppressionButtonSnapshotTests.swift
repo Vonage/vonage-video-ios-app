@@ -112,8 +112,8 @@ struct MeetingNoiseSuppressionButtonSnapshotTests {
     private func makeViewModel(state: NoiseSuppressionState) -> MeetingNoiseSuppressionViewModel {
         let viewModel = MeetingNoiseSuppressionViewModel(
             getCurrentPublisher: { throw NSError(domain: "Test", code: 0) },
-            disableNoiseSuppresionUseCase: DisableUseCaseSpy(),
-            enableNoiseSuppresionUseCase: EnableUseCaseSpy()
+            disableNoiseSuppressionUseCase: DisableUseCaseSpy(),
+            enableNoiseSuppressionUseCase: EnableUseCaseSpy()
         )
         viewModel.state = state
         return viewModel
