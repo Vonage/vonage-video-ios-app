@@ -29,6 +29,9 @@ jobs:
   unit-tests:
     runs-on: macos-26
     needs: [format-check]
+    defaults:
+      run:
+        shell: bash
     outputs:
       test-results: ${{ steps.tests.outcome }}
     
