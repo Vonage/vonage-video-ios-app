@@ -187,7 +187,7 @@ private func areAudioEffectsEnabled() -> Bool {
 ///
 /// - Returns: `true` if `audioSettings.allowAdvancedNoiseSuppression` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func isAdvancedNoiseSuppression() -> Bool {
+private func isAdvancedNoiseSuppressionEnabled() -> Bool {
     let config = readAppConfig()
     let audioSettings = config["audioSettings"] as! [String: Any]
     return audioSettings["allowAdvancedNoiseSuppression"] as! Bool
@@ -272,7 +272,7 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
-    if areAudioEffectsEnabled() {
+    if areAudioEffectsEnabled() && isAdvancedNoiseSuppressionEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAAudioEffects", path: "VERAAudioEffects")
         ])
@@ -343,7 +343,7 @@ private func createBuildSettings() -> Settings {
         print("Screen share feature enabled in build settings.")
     }
 
-    if areAudioEffectsEnabled() {
+    if areAudioEffectsEnabled() && isAdvancedNoiseSuppressionEnabled() {
         baseSettings["AUDIOEFFECTS_ENABLED"] = "1"
         flags.append("AUDIOEFFECTS_ENABLED")
         print("AudioEffects feature enabled in build settings.")
