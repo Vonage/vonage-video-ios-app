@@ -15,6 +15,10 @@ public class PublisherRepositorySpy: PublisherRepository {
 
     public var actions: [PublisherAction] = []
 
+    public init(actions: [PublisherAction] = []) {
+        self.actions = actions
+    }
+
     public func getPublisher() -> any VERAPublisher {
         actions.append(.get)
         return MockVERAPublisher()

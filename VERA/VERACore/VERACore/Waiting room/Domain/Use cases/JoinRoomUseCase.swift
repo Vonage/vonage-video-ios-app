@@ -33,7 +33,6 @@ public final class JoinRoomUseCase {
         self.advancedSettingsUseCase = advancedSettingsUseCase
     }
 
-
     public func callAsFunction(_ request: JoinRoomRequest) async throws {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
@@ -53,7 +52,7 @@ public final class JoinRoomUseCase {
             try publisherRepository.recreatePublisher(settings)
 
             let videoTransformers = currentPublisher.videoTransformers
-            let audioTransformers = currentPublisher.videoTransformers
+            let audioTransformers = currentPublisher.audioTransformers
             let newPublisher = try publisherRepository.getPublisher()
             newPublisher.setVideoTransformers(videoTransformers)
             newPublisher.setAudioTransformers(audioTransformers)
