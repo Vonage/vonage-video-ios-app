@@ -29,7 +29,6 @@ public struct MeetingRoomView: View {
     @State private var isNavigationBarVisible = true
     @State private var showParticipantsList = false
     @State private var hideTimer: Timer?
-    @State private var showShareSheet = false
     @State private var urlToShare: URL?
 
     public init(
@@ -108,11 +107,6 @@ public struct MeetingRoomView: View {
                     meetingURL: state.roomURL
                 ) {
                     showParticipantsList = false
-                }
-            }
-            .sheet(isPresented: $showShareSheet) {
-                if let url = urlToShare {
-                    ShareSheetView(url: url)
                 }
             }
             .onAppear {
@@ -211,10 +205,7 @@ public struct MeetingRoomView: View {
     }
 
     private func shareButton(url: URL) -> some View {
-        Button {
-            urlToShare = url
-            showShareSheet = true
-        } label: {
+        ShareLink(item: url) {
             VERACommonUIAsset.Images.shareLine.swiftUIImage
         }
     }
@@ -288,33 +279,6 @@ public struct MeetingRoomView: View {
                 actions.onToggleLayout()
             }
         )
-    }
-}
-
-// MARK: - ShareSheetView
-
-/// A SwiftUI wrapper for UIActivityViewController to share URLs.
-///
-/// This view is used instead of ShareLink to provide a stable presentation context
-/// when presenting from a toolbar with dynamic visibility. ShareLink can fail to
-/// present properly when its parent view hierarchy is conditionally visible.
-///
-/// - Note: The share sheet is presented via `.sheet(isPresented:)` modifier to ensure
-///         a stable view hierarchy independent of toolbar visibility state.
-struct ShareSheetView: UIViewControllerRepresentable {
-    /// The URL to be shared via the activity view controller.
-    let url: URL
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let activityViewController = UIActivityViewController(
-            activityItems: [url],
-            applicationActivities: nil
-        )
-        return activityViewController
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
-        // No update needed
     }
 }
 
