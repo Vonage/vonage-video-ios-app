@@ -26,6 +26,7 @@ public struct MeetingRoomState: Equatable {
     public let activeSpeakerId: String?
     public let callState: CallState
     public let archivingState: ArchivingState
+    public let noiseSuppressionState: NoiseSuppressionState
 
     public var participantsCount: Int {
         participants.count { !$0.isScreenshare }
@@ -43,7 +44,8 @@ public struct MeetingRoomState: Equatable {
         allowCameraControl: Bool,
         showParticipantList: Bool,
         callState: CallState,
-        archivingState: ArchivingState
+        archivingState: ArchivingState,
+        noiseSuppressionState: NoiseSuppressionState
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -57,6 +59,7 @@ public struct MeetingRoomState: Equatable {
         self.showParticipantList = showParticipantList
         self.callState = callState
         self.archivingState = archivingState
+        self.noiseSuppressionState = noiseSuppressionState
     }
 
     public static let initial = MeetingRoomState(
@@ -71,5 +74,7 @@ public struct MeetingRoomState: Equatable {
         allowCameraControl: AppConfig.videoSettings.allowCameraControl,
         showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
         callState: .idle,
-        archivingState: .idle)
+        archivingState: .idle,
+        noiseSuppressionState: .idle
+    )
 }

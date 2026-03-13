@@ -70,6 +70,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var isOnHold: Bool = false
     /// Holds the current list of video transformers.
     @Published open private(set) var videoTransformers: [VERATransformer] = []
+    /// Holds the current list of audio transformers.
+    @Published open private(set) var audioTransformers: [VERATransformer] = []
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -316,5 +318,40 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     func disableCaptions() {
         otPublisher.publishCaptions = false
+    }
+
+    // MARK: Audio transformers
+
+    /// Vonage publisher method for adding video transformers
+    ///
+    /// Used to apply audio effects to the publishing and rendering.
+    public func addAudioTransformer(_ transformer: any VERATransformer) {
+        audioTransformers.removeAll { $0.key == transformer.key }
+        audioTransformers.append(transformer)
+
+        updateAudioTransformers()
+    }
+
+    /// Vonage publisher method for setting video transformers
+    ///
+    /// Used to apply audio effects to the publishing and rendering.
+    open func setAudioTransformers(_ transformers: [any VERATransformer]) {
+        audioTransformers = transformers
+
+        updateAudioTransformers()
+    }
+
+    /// Vonage publisher method for removing a audio transformer
+    ///
+    /// Used to removed a previously added transformer, does nothing if the key doesn't match with any transformer.
+    public func removeAudioTransformer(_ key: String) {
+        audioTransformers.removeAll { $0.key == key }
+
+        updateAudioTransformers()
+    }
+
+    open func updateAudioTransformers() {
+        otPublisher.audioTransformers = audioTransformers.map(\.transformer)
+        updateParticipant()
     }
 }

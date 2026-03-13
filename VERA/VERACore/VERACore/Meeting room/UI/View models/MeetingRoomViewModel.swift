@@ -41,6 +41,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let appConfig: AppConfig
     private let meetingRoomNavigation: MeetingRoomDestination
     private let captionsStatusDataSource: CaptionsStatusDataSource
+    private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -48,10 +49,11 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
     @MainActor @Published public var isArchiving = false
 
-    private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(MeetingRoomLayout.activeSpeaker)
-    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
-    private let callStatePublisher = CurrentValueSubject<CallState, Never>(CallState.idle)
-    private let archivingPublisher = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(.activeSpeaker)
+    private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(.initial)
+    private let callStatePublisher = CurrentValueSubject<CallState, Never>(.idle)
+    private let archivingPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
+    private let noiseSuppressionPublisher = CurrentValueSubject<NoiseSuppressionState, Never>(.idle)
 
     public weak var currentCall: CallFacade?
 
@@ -72,6 +74,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         appConfig: AppConfig,
         meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     ) {
         self.roomName = roomName
         self.baseURL = baseURL
@@ -84,6 +87,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
         self.captionsStatusDataSource = captionsStatusDataSource
+        self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
     }
 
     @MainActor
@@ -142,6 +146,12 @@ public final class MeetingRoomViewModel: ObservableObject {
 
 extension MeetingRoomViewModel {
 
+    fileprivate func handleNoiseSuppressionChange(_ noiseSuppressionState: NoiseSuppressionState) {
+        Task { @MainActor [weak self] in
+            self?.noiseSuppressionPublisher.value = noiseSuppressionState
+        }
+    }
+
     fileprivate func navigateBackIfNeeded(_ callState: CallState) {
         guard callState == .disconnected else { return }
         Task { @MainActor [weak self] in
@@ -180,13 +190,18 @@ extension MeetingRoomViewModel {
                 activeSpeakerId: participantsState.activeParticipantId)
         }
 
-        Publishers.CombineLatest4(
-            sortedParticipantsPublisher,
-            sessionStatePublisher,
-            callStatePublisher,
-            archivingPublisher
+        Publishers.CombineLatest(
+            Publishers.CombineLatest4(
+                sortedParticipantsPublisher,
+                sessionStatePublisher,
+                callStatePublisher,
+                archivingPublisher
+            ),
+            noiseSuppressionPublisher
         )
-        .map { [weak self] participantsState, sessionState, callState, archivingState in
+        .map { [weak self] (state4, noiseSuppressionState) in
+            let (participantsState, sessionState, callState, archivingState) = state4
+
             guard let self else { return MeetingRoomState.initial }
             return MeetingRoomState(
                 roomName: self.roomName,
@@ -201,7 +216,9 @@ extension MeetingRoomViewModel {
                 allowCameraControl: appConfig.videoSettings.allowCameraControl,
                 showParticipantList: appConfig.meetingRoomSettings.showParticipantList,
                 callState: callState,
-                archivingState: archivingState)
+                archivingState: archivingState,
+                noiseSuppressionState: noiseSuppressionState
+            )
         }
         .removeDuplicates()
         .sink { [weak self] newState in
@@ -248,6 +265,12 @@ extension MeetingRoomViewModel {
                     Task { @MainActor [weak self] in
                         self?.updateExtraButtons()
                     }
+                }
+                .store(in: &cancellables)
+
+            noiseSuppressionStatusDataSource.noiseSuppressionState
+                .sink { [weak self] state in
+                    self?.handleNoiseSuppressionChange(state)
                 }
                 .store(in: &cancellables)
 

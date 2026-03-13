@@ -45,6 +45,9 @@ public protocol VERAPublisher: AnyObject {
     /// The current array of video transformers
     var videoTransformers: [VERATransformer] { get }
 
+    /// The current array of audio transformers
+    var audioTransformers: [VERATransformer] { get }
+
     var transformerFactory: VERATransformerFactory { get }
 
     /// Switches camera to a specific device by ID.
@@ -65,10 +68,20 @@ public protocol VERAPublisher: AnyObject {
 
     /// Removes a video transformer from the publisher
     func removeTransformer(_ key: String)
+
+    /// Adds a audio transformer to the current publisher.
+    func addAudioTransformer(_ transformer: VERATransformer)
+
+    /// Sets a list audio transformer to the current publisher.
+    func setAudioTransformers(_ transformers: [VERATransformer])
+
+    /// Removes a audio transformer from the publisher
+    func removeAudioTransformer(_ key: String)
 }
 
 public protocol VERATransformerFactory {
     func makeTransformer(for key: String, params: String) throws -> VERATransformer
+    func makeAudioTransformer(for key: String, params: String) throws -> VERATransformer
 }
 
 public protocol VERATransformer {

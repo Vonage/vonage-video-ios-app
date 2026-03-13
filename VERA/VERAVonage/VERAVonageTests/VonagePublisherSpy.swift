@@ -30,5 +30,13 @@ class VonagePublisherSpy: VonagePublisher {
         super.setVideoTransformers(transformers)
     }
 
-    override func updateVideoTransformers() {}
+    override func updateVideoTransformers() {
+    }
+
+    override func setAudioTransformers(_ transformers: [any VERATransformer]) {
+        super.setAudioTransformers(transformers)
+    }
+
+    override func updateAudioTransformers() {
+    }
 }

@@ -65,7 +65,6 @@ public final class VonagePublisherFactory: PublisherFactory {
     private func makeOTPublisher(_ settings: PublisherSettings) throws -> OTPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
-
         // All OTPublisherSettings properties must be set BEFORE OTPublisher is initialised.
         if let frameRate = settings.advancedSettings?.videoFrameRate?.otFrameRate {
             publisherSettings.cameraFrameRate = frameRate

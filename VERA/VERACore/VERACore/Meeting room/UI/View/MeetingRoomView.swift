@@ -82,13 +82,17 @@ public struct MeetingRoomView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 0) {
+                    HStack(spacing: 8) {
                         if state.archivingState.isArchiving {
                             recordingIndicator
+                        }
+                        if state.noiseSuppressionState.isEnabled {
+                            noiseSuppressionIndicator
                         }
                         Spacer()
                     }
                     .padding(.leading, 16)
+                    .padding(.top, 16)
                     Spacer()
                 }
                 .allowsHitTesting(false)
@@ -188,6 +192,12 @@ public struct MeetingRoomView: View {
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                 .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
         }
+    }
+
+    private var noiseSuppressionIndicator: some View {
+        VERACommonUIAsset.Images.noiseSuppressionEnabled.swiftUIImage
+            .foregroundStyle(
+                VERACommonUIAsset.SemanticColors.onAccent.swiftUIColor)
     }
 
     private var cameraSwitchButton: some View {
@@ -322,6 +332,8 @@ struct ShareSheetView: UIViewControllerRepresentable {
             allowCameraControl: true,
             showParticipantList: true,
             callState: .connected,
-            archivingState: .archiving("")),
+            archivingState: .archiving(""),
+            noiseSuppressionState: .enabled
+        ),
         actions: .init())
 }

@@ -49,7 +49,22 @@ struct WaitingRoomUserPreviewView: View {
                 PublisherVideoView(videoView: nil)
             }
 
+            if !extraTrailingButtons.isEmpty {
+                HStack {
+                    Spacer()
+                    VStack {
+                        ForEach(extraTrailingButtons) {
+                            $0.content()
+                                .padding(.leading, 2)
+                        }
+                    }
+                }.frame(maxWidth: .infinity, alignment: .topTrailing)
+                    .padding(.top, 8)
+                    .padding(.trailing, 8)
+            }
+
             VStack {
+
                 Spacer()
 
                 if !state.isCameraEnabled || state.publisher == nil {
@@ -82,19 +97,10 @@ struct WaitingRoomUserPreviewView: View {
                                 action: onMicrophoneToggle)
                         }
                     }
-
-                    if !extraTrailingButtons.isEmpty {
-                        HStack {
-                            Spacer()
-                            ForEach(extraTrailingButtons) {
-                                $0.content()
-                                    .padding(.leading, 2)
-                            }
-                        }
-                    }
                 }
                 .padding(.bottom, 20)
             }
+            .frame(maxWidth: .infinity)
         }
         .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 480, maxHeight: 320)
     }

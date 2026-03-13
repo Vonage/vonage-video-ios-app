@@ -174,6 +174,25 @@ private func areAudioEffectsEnabled() -> Bool {
     return meetingRoomSettings["allowAudioEffects"] as! Bool
 }
 
+/// Returns whether Settings is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "audioSettings": {
+///     "allowAdvancedNoiseSuppression": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `audioSettings.allowAdvancedNoiseSuppression` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isAdvancedNoiseSuppression() -> Bool {
+    let config = readAppConfig()
+    let audioSettings = config["audioSettings"] as! [String: Any]
+    return audioSettings["allowAdvancedNoiseSuppression"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.

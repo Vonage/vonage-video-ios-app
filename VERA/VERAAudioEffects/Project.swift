@@ -4,41 +4,24 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAAudioEffects",
     packages: [
-        .swiftSnapshotTesting
+        .swiftSnapshotTesting,
+        .vonageVideoTransformersSDK,
     ],
     targets: [
         // MARK: - Framework Target
         .target(
             name: "VERAAudioEffects",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAAudioEffects",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAAudioEffects/**"],
             resources: ["VERAAudioEffects/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAAudioEffects")],
             dependencies: [
-                .project(target: "VERACommonUI", path: "../VERACommonUI")
-            ],
-            settings: createBaseBuildSettings()
-        ),
-
-        // MARK: - Demo App Target
-        .target(
-            name: "VERAAudioEffectsApp",
-            destinations: [.iPhone, .iPad, .mac],
-            product: .app,
-            bundleId: "com.vonage.VERAAudioEffectsApp",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            infoPlist: .extendingDefault(
-                with: [
-                    "CFBundleName": "VERAAudioEffectsApp",
-                    "CFBundleDisplayName": "VERAAudioEffectsApp",
-                ].merging(combinedPlistValues()) { _, new in new }),
-            sources: ["VERAAudioEffectsApp/**"],
-            scripts: [.swiftLint(targetName: "VERAAudioEffectsApp")],
-            dependencies: [
-                .target(name: "VERAAudioEffects")
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .project(target: "VERAVonage", path: "../VERAVonage"),
+                .vonageVideoTransformersSDK,
             ],
             settings: createBaseBuildSettings()
         ),
@@ -46,13 +29,14 @@ let project = Project(
         // MARK: - Unit Tests Target
         .target(
             name: "VERAAudioEffectsTests",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAAudioEffectsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAAudioEffectsTests/**"],
             dependencies: [
-                .target(name: "VERAAudioEffects")
+                .target(name: "VERAAudioEffects"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ],
             settings: createBaseBuildSettings()
         ),
