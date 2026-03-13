@@ -42,7 +42,7 @@ public struct LandingPageView: View {
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .keyboardAware(paddingDivider: 8, scrollToId: JoinExistingRoomUIIDs.joinButton)
+        //.keyboardAware(paddingDivider: 8, scrollToId: JoinExistingRoomUIIDs.joinButton)
     }
 }
 
