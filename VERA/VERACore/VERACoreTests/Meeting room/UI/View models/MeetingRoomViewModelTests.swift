@@ -437,6 +437,115 @@ struct MeetingRoomViewModelTests {
         #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
+    // MARK: - Noise Suppression Tests
+
+    @Test("Initial noise suppression state is idle")
+    @MainActor
+    func initialNoiseSuppressionStateIsIdle() async throws {
+        let dataSource = makeMockNoiseSuppressionStatusDataSource()
+        let sut = makeSUT(noiseSuppressionStatusDataSource: dataSource)
+
+        await sut.loadUI()
+
+        let contentState = try await getContentState(sut)
+
+        #expect(contentState.noiseSuppressionState == .idle)
+    }
+
+    @Test("When noise suppression is enabled, state updates to enabled")
+    @MainActor
+    func whenNoiseSuppressionIsEnabled_stateUpdatesToEnabled() async throws {
+        let dataSource = makeMockNoiseSuppressionStatusDataSource()
+        let sut = makeSUT(noiseSuppressionStatusDataSource: dataSource)
+
+        await sut.loadUI()
+
+        let initialState = try await getContentState(sut)
+        #expect(initialState.noiseSuppressionState == .idle)
+
+        dataSource.set(state: .enabled)
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.noiseSuppressionState == .enabled }
+
+        #expect(updatedState?.noiseSuppressionState == .enabled)
+    }
+
+    @Test("When noise suppression is disabled, state updates to disabled")
+    @MainActor
+    func whenNoiseSuppressionIsDisabled_stateUpdatesToDisabled() async throws {
+        let dataSource = makeMockNoiseSuppressionStatusDataSource()
+        let sut = makeSUT(noiseSuppressionStatusDataSource: dataSource)
+
+        await sut.loadUI()
+
+        dataSource.set(state: .disabled)
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.noiseSuppressionState == .disabled }
+
+        #expect(updatedState?.noiseSuppressionState == .disabled)
+    }
+
+    @Test("Noise suppression state transitions are reflected in view state")
+    @MainActor
+    func noiseSuppressionStateTransitionsAreReflectedInViewState() async throws {
+        let dataSource = makeMockNoiseSuppressionStatusDataSource()
+        let sut = makeSUT(noiseSuppressionStatusDataSource: dataSource)
+
+        await sut.loadUI()
+
+        // Idle -> Enabled
+        dataSource.set(state: .enabled)
+
+        let enabledState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.noiseSuppressionState == .enabled }
+
+        #expect(enabledState?.noiseSuppressionState == .enabled)
+
+        // Enabled -> Disabled
+        dataSource.set(state: .disabled)
+
+        let disabledState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.noiseSuppressionState == .disabled }
+
+        #expect(disabledState?.noiseSuppressionState == .disabled)
+    }
+
+    @Test("Noise suppression changes do not affect other state properties")
+    @MainActor
+    func noiseSuppressionChangesDoNotAffectOtherProperties() async throws {
+        let dataSource = makeMockNoiseSuppressionStatusDataSource()
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let roomName = "test-room"
+
+        let sut = makeSUT(
+            roomName: roomName,
+            connectToRoomUseCase: connectToRoomUseCase,
+            noiseSuppressionStatusDataSource: dataSource
+        )
+
+        await sut.loadUI()
+
+        let initialState = try await getContentState(sut)
+
+        dataSource.set(state: .enabled)
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.noiseSuppressionState == .enabled }
+
+        // Verify other properties remain unchanged
+        #expect(updatedState?.roomName == initialState.roomName)
+        #expect(updatedState?.isMicEnabled == initialState.isMicEnabled)
+        #expect(updatedState?.isCameraEnabled == initialState.isCameraEnabled)
+        #expect(updatedState?.participantsCount == initialState.participantsCount)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -451,6 +560,7 @@ struct MeetingRoomViewModelTests {
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig(),
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -464,7 +574,8 @@ struct MeetingRoomViewModelTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: { _ in [] }
+            getExternalButtons: { _ in [] },
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
         )
     }
 

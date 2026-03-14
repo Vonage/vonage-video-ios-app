@@ -14,6 +14,7 @@ public class MeetingRoomFactory {
     private let publisherRepository: PublisherRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
     private let captionsStatusDataSource: CaptionsStatusDataSource
+    private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let appConfig: AppConfig
 
     public init(
@@ -23,7 +24,8 @@ public class MeetingRoomFactory {
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
         roomCredentialsRepository: RoomCredentialsRepository,
-        captionsStatusDataSource: CaptionsStatusDataSource
+        captionsStatusDataSource: CaptionsStatusDataSource,
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     ) {
         self.baseURL = baseURL
         self.appConfig = appConfig
@@ -32,6 +34,7 @@ public class MeetingRoomFactory {
         self.publisherRepository = publisherRepository
         self.roomCredentialsRepository = roomCredentialsRepository
         self.captionsStatusDataSource = captionsStatusDataSource
+        self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
     }
 
     @MainActor
@@ -45,16 +48,17 @@ public class MeetingRoomFactory {
             baseURL: baseURL,
             connectToRoomUseCase: DefaultConnectToRoomUseCase(
                 sessionRepository: sessionRepository,
-                roomCredentialsRepository: roomCredentialsRepository),
-            disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
-                sessionRepository: sessionRepository),
+                roomCredentialsRepository: roomCredentialsRepository
+            ),
+            disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             captionsStatusDataSource: captionsStatusDataSource,
             appConfig: appConfig,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
-            getExternalButtons: getExternalButtons
+            getExternalButtons: getExternalButtons,
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
         )
         return (make(viewModel: viewModel), viewModel)
     }

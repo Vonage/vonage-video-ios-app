@@ -96,8 +96,9 @@ struct VideoSectionView: View {
         } footer: {
             Text(viewModel.codecMode.footerDescription)
         }
-        .environment(\.editMode, .constant(.active))
-
+        #if os(iOS)
+            .environment(\.editMode, .constant(.active))
+        #endif
         Section("Frame Rate".localized) {
             Picker("Frame Rate".localized, selection: $viewModel.settingsPreference.videoFrameRate) {
                 ForEach(SettingsVideoFrameRate.allCases) { fps in

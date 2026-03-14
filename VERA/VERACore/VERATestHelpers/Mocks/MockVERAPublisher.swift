@@ -7,9 +7,11 @@ import SwiftUI
 import VERADomain
 
 public final class MockVERAPublisher: VERAPublisher {
-    public var videoTransformers: [any VERADomain.VERATransformer] = []
+    public var audioTransformers: [any VERATransformer] = []
 
-    public var transformerFactory: any VERADomain.VERATransformerFactory
+    public var videoTransformers: [any VERATransformer] = []
+
+    public var transformerFactory: any VERATransformerFactory
 
     public var view: AnyView
 
@@ -26,7 +28,7 @@ public final class MockVERAPublisher: VERAPublisher {
         publishAudio: Bool = true,
         publishVideo: Bool = true,
         cameraPosition: CameraPosition = .front,
-        transformerFactory: any VERADomain.VERATransformerFactory = MockTransformerFactory()
+        transformerFactory: any VERATransformerFactory = MockTransformerFactory()
     ) {
         self.view = view
         self.publishAudio = publishAudio
@@ -50,6 +52,14 @@ public final class MockVERAPublisher: VERAPublisher {
 
     public func removeTransformer(_ key: String) {
     }
+    public func addAudioTransformer(_ transformer: any VERATransformer) {
+    }
+
+    public func setAudioTransformers(_ transformers: [any VERATransformer]) {
+    }
+
+    public func removeAudioTransformer(_ key: String) {
+    }
 }
 
 public final class MockTransformer: VERATransformer {
@@ -68,10 +78,14 @@ public final class MockTransformer: VERATransformer {
 public final class MockTransformerFactory: VERATransformerFactory {
     public init() {}
 
-    public func makeTransformer(
+    public func makeVideoTransformer(
         for key: String,
         params: String
     ) throws -> any VERADomain.VERATransformer {
+        MockTransformer(key: key, transformer: NSObject())
+    }
+
+    public func makeAudioTransformer(for key: String, params: String) throws -> any VERATransformer {
         MockTransformer(key: key, transformer: NSObject())
     }
 }

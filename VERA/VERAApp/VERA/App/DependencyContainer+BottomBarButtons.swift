@@ -36,6 +36,11 @@ import VERADomain
     import VERAScreenShare
 #endif
 
+#if AUDIOEFFECTS_ENABLED
+    import SwiftUI
+    import VERAAudioEffects
+#endif
+
 extension DependencyContainer {
     #if ARCHIVING_ENABLED
         func mapToArchiveBottomBarButton(
@@ -148,6 +153,24 @@ extension DependencyContainer {
                 .opacity(0.01)
                 .allowsHitTesting(false)
             }
+        }
+    #endif
+
+    #if AUDIOEFFECTS_ENABLED
+        func makeAudioEffectsButton(
+            _ viewModel: MeetingNoiseSuppressionViewModel
+        ) -> BottomBarButton {
+            let view = audioEffectsFactory.makeMeetingNoiseSuppressionButton(viewModel: viewModel)
+            return .init(
+                label: String(localized: "Noise Suppression"),
+                image: VERACommonUIAsset.Images.noiseSuppressionDisabled.swiftUIImage,
+                onTap: {
+                    viewModel.onTap()
+                },
+                content: {
+                    view
+                }
+            )
         }
     #endif
 }

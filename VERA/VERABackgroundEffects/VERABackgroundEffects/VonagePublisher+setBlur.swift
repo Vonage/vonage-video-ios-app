@@ -15,7 +15,7 @@ extension VERAPublisher {
         if blurLevel != .none {
             let params = try BackgroundBlur().params(blurLevel: blurLevel)
 
-            let vonageTransformer = try transformerFactory.makeTransformer(
+            let vonageTransformer = try transformerFactory.makeVideoTransformer(
                 for: BackgroundBlur.key,
                 params: params)
 

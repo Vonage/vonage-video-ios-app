@@ -175,22 +175,13 @@ struct BackgroundBlurButtonViewModelTests {
 // MARK: - Spies
 
 final class PublisherSpy: VERAPublisher {
-    var transformerFactory: any VERADomain.VERATransformerFactory
+    var audioTransformers: [any VERATransformer] = []
+
+    var transformerFactory: any VERATransformerFactory
 
     var view: AnyView { AnyView(EmptyView()) }
 
-    var videoTransformers: [any VERADomain.VERATransformer] = []
-
-    func addVideoTransformer(_ transformer: any VERADomain.VERATransformer) {
-        addVideoTransformerCallCount += 1
-    }
-
-    func setVideoTransformers(_ transformers: [any VERADomain.VERATransformer]) {
-    }
-
-    func removeTransformer(_ key: String) {
-        removeTransformerCallCount += 1
-    }
+    var videoTransformers: [any VERATransformer] = []
 
     var setBackgroundBlurCallCount = 0
     var addVideoTransformerCallCount = 0
@@ -209,5 +200,25 @@ final class PublisherSpy: VERAPublisher {
         transformerFactory: VERATransformerFactory = MockTransformerFactory()
     ) {
         self.transformerFactory = transformerFactory
+    }
+
+    func addVideoTransformer(_ transformer: any VERATransformer) {
+        addVideoTransformerCallCount += 1
+    }
+
+    func setVideoTransformers(_ transformers: [any VERATransformer]) {
+    }
+
+    func removeTransformer(_ key: String) {
+        removeTransformerCallCount += 1
+    }
+
+    func addAudioTransformer(_ transformer: any VERADomain.VERATransformer) {
+    }
+
+    func setAudioTransformers(_ transformers: [any VERADomain.VERATransformer]) {
+    }
+
+    func removeAudioTransformer(_ key: String) {
     }
 }

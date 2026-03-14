@@ -676,6 +676,7 @@ public final class VonageCall: CallFacade {
         let wasCaptionsEnabled = areCaptionsEnabled
         let publisherName = publisher.participant.name
         let publisherScaleBehavior = publisher.scaleBehavior
+        let currentAudioTransformers = publisher.audioTransformers
 
         // 2. Clean up publisher captions subscriber if it exists
         if let captionsSub = publisherCaptions {
@@ -731,13 +732,18 @@ public final class VonageCall: CallFacade {
             newPublisher.setVideoTransformers(currentTransformers)
         }
 
-        // 9. Restore network stats delegate
+        // 9. Restore audio transformers
+        if !currentAudioTransformers.isEmpty {
+            newPublisher.setAudioTransformers(currentAudioTransformers)
+        }
+
+        // 10. Restore network stats delegate
         if wasStatsEnabled {
             newPublisher.otPublisher.networkStatsDelegate = statsCollector
             statsCollector.requestRtcStats(from: newPublisher.otPublisher)
         }
 
-        // 10. Restore captions
+        // 11. Restore captions
         if wasCaptionsEnabled {
             newPublisher.enableCaptions()
             if let stream = newPublisher.stream {
@@ -745,10 +751,10 @@ public final class VonageCall: CallFacade {
             }
         }
 
-        // 11. Update media state
+        // 12. Update media state
         updateMediaState()
 
-        // 12. Update participants state
+        // 13. Update participants state
         let state = await callStateManager.getCurrentState()
         await updateParticipantsState(state)
     }

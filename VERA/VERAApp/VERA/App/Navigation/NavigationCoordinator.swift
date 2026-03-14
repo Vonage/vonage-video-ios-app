@@ -25,6 +25,10 @@ import os.log
     import VERASettings
 #endif
 
+#if AUDIOEFFECTS_ENABLED
+    import VERAAudioEffects
+#endif
+
 @MainActor
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
@@ -58,6 +62,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     #if SETTINGS_ENABLED
         var statsOverlayViewModel: StatsOverlayViewModel?
+    #endif
+
+    #if AUDIOEFFECTS_ENABLED
+        var waitingNoiseSuppressionViewModel: WaitingNoiseSuppressionViewModel?
+        var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
@@ -120,6 +129,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         #if CAPTIONS_ENABLED
             captionsButtonViewModel = nil
             captionsViewModel = nil
+        #endif
+
+        #if AUDIOEFFECTS_ENABLED
+            waitingNoiseSuppressionViewModel = nil
+            meetingNoiseSuppressionButtonViewModel = nil
         #endif
 
         logNavigation("Returned to landing page")

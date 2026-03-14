@@ -44,6 +44,10 @@ import VERAVonageCallKitPlugin
     import VERAVonageSettingsPlugin
 #endif
 
+#if AUDIOEFFECTS_ENABLED
+    import VERAAudioEffects
+#endif
+
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
@@ -88,6 +92,14 @@ final class DependencyContainer {
         #endif
     }()
 
+    lazy var noiseSuppressionStatusDataSource: any NoiseSuppressionStatusDataSource = {
+        #if AUDIOEFFECTS_ENABLED
+            return DefaultNoiseSuppressionStatusDataSource()
+        #else
+            return NullNoiseSuppressionStatusDataSource()
+        #endif
+    }()
+
     lazy var waitingRoomFactory = WaitingRoomFactory(
         publisherRepository: publisherRepository,
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
@@ -102,7 +114,8 @@ final class DependencyContainer {
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
         roomCredentialsRepository: roomCredentialsRepository,
-        captionsStatusDataSource: captionsStatusDataSource)
+        captionsStatusDataSource: captionsStatusDataSource,
+        noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource)
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
@@ -264,7 +277,6 @@ final class DependencyContainer {
     // MARK: Screen share feature
 
     #if SCREEN_SHARE_ENABLED
-
         lazy var screenShareCredentialsRepository: ScreenShareCredentialsRepository =
             UserDefaultsScreenShareCredentialsRepository(userDefaults: userDefaults)
 
@@ -287,5 +299,19 @@ final class DependencyContainer {
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
             statsDataSource: statsRepository)
+    #endif
+
+    // MARK: AudioEffects feature
+
+    #if AUDIOEFFECTS_ENABLED
+        lazy var audioEffectsFactory = AudioEffectsFactory(
+            publisherRepository: publisherRepository,
+            disableNoiseSuppressionUseCase: DefaultDisableNoiseSuppressionUseCase(
+                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+            ),
+            enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
+                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+            )
+        )
     #endif
 }

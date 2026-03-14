@@ -338,6 +338,37 @@ struct VonageCallTests {
         #expect(newPublisherSpy.videoTransformers.first?.key == "blur")
     }
 
+    @Test
+    func applyPublisherAdvancedSettings_restoresAudioTransformers() async throws {
+        let publisherSpy = VonagePublisherSpy()
+        let transformer1 = MockTransformer(key: "NoiseSuppression", transformer: NSObject())
+        let transformer2 = MockTransformer(key: "AudioEffect", transformer: NSObject())
+        publisherSpy.setAudioTransformers([transformer1, transformer2])
+
+        let session = VonageSessionSpy()
+        let newPublisherSpy = VonagePublisherSpy()
+        let publisherRepository = MockPublisherRepository()
+        publisherRepository.publisherToReturn = newPublisherSpy
+
+        let sut = makeSUT(
+            session: session,
+            publisher: publisherSpy,
+            publisherRepository: publisherRepository
+        )
+        sut.setup()
+
+        sut.connect()
+
+        await delay()
+
+        let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
+
+        try await sut.applyPublisherAdvancedSettings(advancedSettings)
+
+        #expect(newPublisherSpy.audioTransformers.count == 2)
+        #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(

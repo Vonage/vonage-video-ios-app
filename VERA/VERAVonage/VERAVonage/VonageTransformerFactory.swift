@@ -11,15 +11,16 @@ public final class VonageTransformerFactory: VERATransformerFactory {
     public enum Error: Swift.Error {
         case encodingError
         case videoTransformerInitializationError
+        case audioTransformerInitializationError
     }
 
-    public func makeTransformer(
+    public func makeVideoTransformer(
         for key: String,
         params: String
-    ) throws -> any VERADomain.VERATransformer {
+    ) throws -> any VERATransformer {
 
         guard
-            let backgroundBlurTransformer = OTVideoTransformer(
+            let videoTransformer = OTVideoTransformer(
                 name: key,
                 properties: params
             )
@@ -27,6 +28,19 @@ public final class VonageTransformerFactory: VERATransformerFactory {
 
         return VonageTransformer(
             key: key,
-            transformer: backgroundBlurTransformer)
+            transformer: videoTransformer)
+    }
+
+    public func makeAudioTransformer(for key: String, params: String) throws -> any VERATransformer {
+        guard
+            let audioTransformer = OTAudioTransformer(
+                name: key,
+                properties: params
+            )
+        else { throw Error.audioTransformerInitializationError }
+
+        return VonageTransformer(
+            key: key,
+            transformer: audioTransformer)
     }
 }

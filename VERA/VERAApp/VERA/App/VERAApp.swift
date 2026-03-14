@@ -34,6 +34,10 @@ import VERAVonage
     import VERASettings
 #endif
 
+#if AUDIOEFFECTS_ENABLED
+    import VERAAudioEffects
+#endif
+
 // MARK: - Constants
 
 /// Layout constants for the VERA application.
@@ -199,6 +203,10 @@ struct VERAApp: App {
         var settingsFactory: SettingsFactory { dependencyContainer.settingsFactory }
     #endif
 
+    #if AUDIOEFFECTS_ENABLED
+        var audioEffectsFactory: AudioEffectsFactory { dependencyContainer.audioEffectsFactory }
+    #endif
+
     private func makeLandingPage() -> some View {
         landingPageFactory.make { roomName in
             navigationCoordinator.go(to: .waitingRoom(roomName))
@@ -256,6 +264,18 @@ struct VERAApp: App {
             buttons.append(ViewHolder(id: "Blur", content: { view }))
         #endif
 
+        #if AUDIOEFFECTS_ENABLED
+            let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+            )
+            navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
+
+            let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                viewModel: audioViewModel
+            )
+            buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+        #endif
+
         #if SETTINGS_ENABLED
             let settingsButton = settingsFactory.makeWaitingRoomButton()
             buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
@@ -295,6 +315,28 @@ struct VERAApp: App {
                     }
                 )
                 archiveButtonViewModel.setup()
+                navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
+            #endif
+
+            #if CAPTIONS_ENABLED
+                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
+                captionsButtonViewModel.setup()
+                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
+
+                let (_, captionsViewModel) = captionsFactory.makeCaptionsView()
+                navigationCoordinator.captionsViewModel = captionsViewModel
+            #endif
+
+            #if REACTIONS_ENABLED
+                navigationCoordinator.emojiButtonContainerViewModel =
+                    dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
+                navigationCoordinator.floatingEmojisOverlayViewModel =
+                    dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
+            #endif
+
+            #if SETTINGS_ENABLED
+                navigationCoordinator.statsOverlayViewModel =
+                    settingsFactory.makeStatsOverlayViewModel()
             #endif
 
             let (_, newViewModel) = meetingRoomFactory.make(
@@ -314,33 +356,8 @@ struct VERAApp: App {
                 }
             )
 
-            #if CAPTIONS_ENABLED
-                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
-                captionsButtonViewModel.setup()
-                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
-
-                let (_, captionsViewModel) = captionsFactory.makeCaptionsView()
-                navigationCoordinator.captionsViewModel = captionsViewModel
-            #endif
-
             newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
             navigationCoordinator.meetingRoomViewModel = newViewModel
-
-            #if ARCHIVING_ENABLED
-                navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
-            #endif
-
-            #if REACTIONS_ENABLED
-                navigationCoordinator.emojiButtonContainerViewModel =
-                    dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
-                navigationCoordinator.floatingEmojisOverlayViewModel =
-                    dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
-            #endif
-
-            #if SETTINGS_ENABLED
-                navigationCoordinator.statsOverlayViewModel =
-                    settingsFactory.makeStatsOverlayViewModel()
-            #endif
 
             viewModel = newViewModel
         }
@@ -403,7 +420,21 @@ struct VERAApp: App {
             extraButtons.append(
                 makeSettingsBottomBarButton {
                     showSettings = true
-                })
+                }
+            )
+        #endif
+
+        #if AUDIOEFFECTS_ENABLED
+            let viewModel: MeetingNoiseSuppressionViewModel
+            if let meetingSuppressionButtonViewModel = navigationCoordinator.meetingNoiseSuppressionButtonViewModel {
+                viewModel = meetingSuppressionButtonViewModel
+            } else {
+                viewModel = audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
+                viewModel.state = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+            }
+            extraButtons.append(
+                dependencyContainer.makeAudioEffectsButton(viewModel)
+            )
         #endif
 
         return extraButtons
@@ -504,13 +535,12 @@ struct VERAApp: App {
             let button = settingsFactory.makeMeetingRoomButton(onShowSettings: onShowSettings)
             return .init(
                 label: String(localized: "Settings"),
-                image: Image(systemName: "gearshape.fill"),
+                image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
                 onTap: onShowSettings,
                 content: {
                     button
                 }
             )
         }
-
     #endif
 }
