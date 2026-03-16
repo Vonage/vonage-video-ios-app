@@ -15,14 +15,18 @@ struct HorizontalContentView<Left: View, Right: View>: View {
     private let showFooter: Bool
     private let footerHeight: CGFloat = 40
 
+    private let ignoresKeyboard: Bool
+
     init(
         showHeader: Bool = true,
         showFooter: Bool = true,
+        ignoresKeyboard: Bool = true,
         @ViewBuilder leftSide: @escaping () -> Left,
         @ViewBuilder rightSide: @escaping () -> Right
     ) {
         self.showHeader = showHeader
         self.showFooter = showFooter
+        self.ignoresKeyboard = ignoresKeyboard
         self.leftSide = leftSide
         self.rightSide = rightSide
     }
@@ -103,7 +107,7 @@ struct HorizontalContentView<Left: View, Right: View>: View {
             )
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-        .ignoresSafeArea(.keyboard)
+        .if(ignoresKeyboard) { $0.ignoresSafeArea(.keyboard) }
         .if(iOS26Available()) {
             $0.ignoresSafeArea(edges: .top)
         }

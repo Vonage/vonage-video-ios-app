@@ -60,7 +60,7 @@ public struct HorizontalLandingContentView: View {
     }
 
     public var body: some View {
-        HorizontalContentView(showFooter: verticalSizeClass == .regular) {
+        HorizontalContentView(showFooter: verticalSizeClass == .regular, ignoresKeyboard: false) {
             LandingPageWelcome()
         } rightSide: {
             CardView {
@@ -88,7 +88,7 @@ public struct VerticalLandingContentView: View {
     }
 
     public var body: some View {
-        VerticalContentView {
+        VerticalContentView(ignoresKeyboard: false) {
             LandingPageWelcome()
                 .padding(.horizontal)
                 .padding()
