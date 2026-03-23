@@ -28,7 +28,6 @@ public struct MeetingRoomView: View {
     @State private var isBottomBarVisible = true
     @State private var isNavigationBarVisible = true
     @State private var showParticipantsList = false
-    @State private var hideTimer: Timer?
     @State private var urlToShare: URL?
 
     public init(
@@ -56,7 +55,7 @@ public struct MeetingRoomView: View {
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isNavigationBarVisible)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    showBottomBarAndResetTimer()
+                    toggleBarsVisibility()
                 }
 
                 VStack(alignment: .center) {
@@ -75,7 +74,7 @@ public struct MeetingRoomView: View {
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
                     .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
                     .onTapGesture {
-                        showBottomBarAndResetTimer()
+                        showBars()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -108,12 +107,6 @@ public struct MeetingRoomView: View {
                 ) {
                     showParticipantsList = false
                 }
-            }
-            .onAppear {
-                startHideTimer()
-            }
-            .onDisappear {
-                cancelHideTimer()
             }
             #if !os(macOS)
                 .toolbar(isNavigationBarVisible ? .visible : .hidden, for: .navigationBar)
@@ -214,34 +207,19 @@ public struct MeetingRoomView: View {
         ProcessInfo.processInfo.isiOSAppOnMac
     }
 
-    // MARK: - Auto-hide Controls Functions
-
-    private func startHideTimer() {
-        cancelHideTimer()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
-            withAnimation(.easeInOut(duration: 0.6)) {
-                isBottomBarVisible = false
-                isNavigationBarVisible = false
-            }
-        }
+    private func toggleBarsVisibility() {
+        showBars(value: !isBottomBarVisible)
     }
 
-    private func cancelHideTimer() {
-        hideTimer?.invalidate()
-        hideTimer = nil
-    }
-
-    private func showBottomBarAndResetTimer() {
-        cancelHideTimer()
+    private func showBars(value: Bool = true) {
         withAnimation(.easeInOut(duration: 0.4)) {
-            isBottomBarVisible = true
-            isNavigationBarVisible = true
+            isBottomBarVisible = value
+            isNavigationBarVisible = value
         }
-        startHideTimer()
     }
 
     private func onBottomBarInteraction() {
-        showBottomBarAndResetTimer()
+        showBars()
     }
 
     private var wrappedActions: MeetingRoomActions {

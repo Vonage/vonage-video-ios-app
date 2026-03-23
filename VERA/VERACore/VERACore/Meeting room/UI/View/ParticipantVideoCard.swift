@@ -204,7 +204,7 @@ struct ParticipantVideoCardOverlays: View {
                     } label: {
                         MenuIndicator()
                     }
-                    .tint(.black)
+                    .tint(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
                 }
             }
         }

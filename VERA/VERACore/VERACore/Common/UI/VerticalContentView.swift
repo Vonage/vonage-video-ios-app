@@ -9,13 +9,16 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
     private let topSide: () -> Top
     private let bottomSide: () -> Bottom
     private let showLogo: Bool
+    private let ignoresKeyboard: Bool
 
     init(
         showLogo: Bool = true,
+        ignoresKeyboard: Bool = true,
         @ViewBuilder topSide: @escaping () -> Top,
         @ViewBuilder bottomSide: @escaping () -> Bottom
     ) {
         self.showLogo = showLogo
+        self.ignoresKeyboard = ignoresKeyboard
         self.topSide = topSide
         self.bottomSide = bottomSide
     }
@@ -47,7 +50,7 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
             .padding(.horizontal)
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-        .ignoresSafeArea(.keyboard)
+        .if(ignoresKeyboard) { $0.ignoresSafeArea(.keyboard) }
     }
 }
 

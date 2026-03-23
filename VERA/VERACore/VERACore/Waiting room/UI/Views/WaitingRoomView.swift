@@ -106,7 +106,7 @@ struct HorizontalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        HorizontalContentView(showHeader: verticalSizeClass == .regular) {
+        HorizontalContentView(showHeader: verticalSizeClass == .regular, ignoresKeyboard: false) {
             VideoPreviewView(
                 state: state,
                 userName: userName,
@@ -134,7 +134,7 @@ struct VerticalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        VerticalContentView(showLogo: false) {
+        VerticalContentView(showLogo: false, ignoresKeyboard: false) {
             VideoPreviewView(
                 state: state,
                 userName: userName,
@@ -142,6 +142,7 @@ struct VerticalWaitingRoomContentView: View {
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
+            .fixedSize(horizontal: false, vertical: true)
         } bottomSide: {
             PrepareToJoinRoom(
                 state: state,

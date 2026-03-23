@@ -11,7 +11,6 @@ public struct ParticipantsListView: View {
     let participantsCount: Int
     let roomName: String
     let meetingURL: URL?
-    let onTogglePin: ((String) -> Void)?
     let onDismiss: () -> Void
     @State private var searchText: String = ""
 
@@ -20,14 +19,12 @@ public struct ParticipantsListView: View {
         participantsCount: Int,
         roomName: String,
         meetingURL: URL?,
-        onTogglePin: ((String) -> Void)? = nil,
         onDismiss: @escaping () -> Void
     ) {
         self.participants = participants
         self.participantsCount = participantsCount
         self.roomName = roomName
         self.meetingURL = meetingURL
-        self.onTogglePin = onTogglePin
         self.onDismiss = onDismiss
     }
 
@@ -101,14 +98,11 @@ public struct ParticipantsListView: View {
     private var participantsList: some View {
         List {
             ForEach(participants.filtered(by: searchText), id: \.id) { participant in
-                ParticipantRowView(
-                    participant: participant,
-                    onTogglePin: onTogglePin
-                )
-                #if os(iOS)
-                    .listRowSeparator(.hidden)
-                #endif
-                .listRowBackground(Color.clear)
+                ParticipantRowView(participant: participant)
+                    #if os(iOS)
+                        .listRowSeparator(.hidden)
+                    #endif
+                    .listRowBackground(Color.clear)
             }
         }
         #if os(iOS)
@@ -146,14 +140,18 @@ struct ParticipantRowView: View {
 
             Spacer()
 
-            Button {
-                onTogglePin?(participant.id)
-            } label: {
-                Image(systemName: participant.isPinned ? "pin.fill" : "pin")
-                    .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+            if participant.isRemote {
+                Button {
+                    participant.onTogglePin?()
+                } label: {
+                    (participant.isPinned
+                        ? VERACommonUIAsset.Images.pin2OffSolid.swiftUIImage
+                        : VERACommonUIAsset.Images.pin2Solid.swiftUIImage)
+                        .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(participant.isPinned ? "Unpin" : "Pin")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(participant.isPinned ? "Unpin" : "Pin")
 
             MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
                 .font(.caption)
