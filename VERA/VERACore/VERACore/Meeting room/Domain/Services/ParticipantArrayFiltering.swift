@@ -35,3 +35,23 @@ extension Array where Element == Participant {
         }
     }
 }
+
+// MARK: - UIParticipant Filtering
+
+extension Array where Element == UIParticipant {
+
+    /// Returns UI participants whose `name` matches the given search text.
+    public func filtered(by searchText: String) -> [UIParticipant] {
+        guard !searchText.isEmpty else {
+            return self
+        }
+
+        return self.filter { participant in
+            participant.name.range(
+                of: searchText,
+                options: [.caseInsensitive, .diacriticInsensitive],
+                locale: .current
+            ) != nil
+        }
+    }
+}

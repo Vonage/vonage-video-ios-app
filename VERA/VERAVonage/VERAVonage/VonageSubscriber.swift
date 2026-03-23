@@ -77,8 +77,6 @@ public class VonageSubscriber: NSObject {
 
     /// Whether the stream represents a screen share.
     @Published public private(set) var isScreenshare: Bool = false
-    /// Whether this subscriber is pinned in the UI.
-    @Published public private(set) var isPinned: Bool = false
     /// Current audio level [0.0, 1.0], smoothed by a log-moving average.
     @Published public private(set) var audioLevel: Float = 0.0
     /// Current video dimensions; reactive for layout and aspect ratio updates.
@@ -119,7 +117,6 @@ public class VonageSubscriber: NSObject {
             videoDimensions: VideoDimensions.initial,
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
-            isPinned: false,
             view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
     }
@@ -178,7 +175,6 @@ public class VonageSubscriber: NSObject {
             videoDimensions: videoDimensions,
             creationTime: date,
             isScreenshare: isScreenshare,
-            isPinned: isPinned,
             view: AnyView(UIViewContainer(view: otSubscriber.view!)))
 
         participant.onAppear = { [weak self] in

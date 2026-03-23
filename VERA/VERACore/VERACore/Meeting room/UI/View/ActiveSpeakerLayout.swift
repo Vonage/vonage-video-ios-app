@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import VERADomain
 
 // MARK: - Layout Constants
 
@@ -91,7 +90,7 @@ struct ActiveSpeakerLayout: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
 
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let activeSpeakerId: String?
 
     /// Determines the preferred layout orientation based on device size classes
@@ -150,14 +149,14 @@ struct ActiveSpeakerLayout: View {
 /// - `verticalSizeClass == .compact` (landscape orientation)
 /// - `horizontalSizeClass == .regular` (iPad)
 struct HorizontalActiveSpeakerLayoutView: View {
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let activeSpeakerId: String?
 
-    private var activeParticipant: Participant? {
+    private var activeParticipant: UIParticipant? {
         participants.first
     }
 
-    private var restOfParticipants: [Participant] {
+    private var restOfParticipants: [UIParticipant] {
         Array(participants.dropFirst())
     }
 
@@ -244,15 +243,15 @@ struct HorizontalActiveSpeakerLayoutView: View {
 /// - Visible participants: Video enabled via `.trackingVisibility(of:)`
 /// - Hidden participants: Video disabled via `onDisappear` when tile appears
 struct SidebarParticipantsView: View {
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let layoutInfo: SidebarLayoutInfo
     let activeSpeakerId: String?
 
-    private var visibleParticipants: [Participant] {
+    private var visibleParticipants: [UIParticipant] {
         Array(participants.prefix(layoutInfo.visibleCount))
     }
 
-    private var hiddenParticipants: [Participant] {
+    private var hiddenParticipants: [UIParticipant] {
         Array(participants.dropFirst(layoutInfo.visibleCount))
     }
 
@@ -296,14 +295,14 @@ struct SidebarParticipantsView: View {
 ///
 /// Used when `horizontalSizeClass == .compact` (iPhone portrait).
 struct VerticalActiveSpeakerLayoutView: View {
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let activeSpeakerId: String?
 
-    private var activeParticipant: Participant? {
+    private var activeParticipant: UIParticipant? {
         participants.first
     }
 
-    private var restOfParticipants: [Participant] {
+    private var restOfParticipants: [UIParticipant] {
         Array(participants.dropFirst())
     }
 
@@ -368,13 +367,13 @@ struct VerticalActiveSpeakerLayoutView: View {
 }
 
 #Preview {
-    ActiveSpeakerLayout(participants: [PreviewData.singleParticipant], activeSpeakerId: nil)
+    ActiveSpeakerLayout(participants: [PreviewData.uiSingleParticipant], activeSpeakerId: nil)
 }
 
 #Preview {
-    ActiveSpeakerLayout(participants: PreviewData.twoParticipants, activeSpeakerId: nil)
+    ActiveSpeakerLayout(participants: PreviewData.uiTwoParticipants, activeSpeakerId: nil)
 }
 
 #Preview {
-    ActiveSpeakerLayout(participants: PreviewData.manyParticipants, activeSpeakerId: nil)
+    ActiveSpeakerLayout(participants: PreviewData.uiManyParticipants, activeSpeakerId: nil)
 }

@@ -14,7 +14,7 @@ import VERADomain
 ///
 /// This ensures bandwidth is not wasted on video streams for participants not currently visible.
 struct HiddenParticipantsTile: View {
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let spacedBy: CGFloat
 
     private var participantNames: [String] {
@@ -22,7 +22,7 @@ struct HiddenParticipantsTile: View {
     }
 
     init(
-        participants: [Participant],
+        participants: [UIParticipant],
         spacedBy: CGFloat = -8
     ) {
         self.participants = participants
@@ -85,15 +85,8 @@ struct AdditionalParticipantsAvatar: View {
 // MARK: - Preview
 struct ParticipantsPlaceholders_Previews: PreviewProvider {
     static var previews: some View {
-        HiddenParticipantsTile(
-            participants: [
-                PreviewData.arthurDent,
-                PreviewData.eddie,
-                PreviewData.fordPrefect,
-                PreviewData.fenchurch,
-            ]
-        )
-        .previewLayout(.sizeThatFits)
-        .padding()
+        HiddenParticipantsTile(participants: PreviewData.uiManyParticipants)
+            .previewLayout(.sizeThatFits)
+            .padding()
     }
 }

@@ -16,7 +16,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.red)
     )
 
@@ -28,7 +27,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.green)
     )
 
@@ -40,7 +38,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.blue)
     )
 
@@ -52,7 +49,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.yellow)
     )
 
@@ -64,7 +60,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.purple)
     )
 
@@ -76,7 +71,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.orange)
     )
 
@@ -88,7 +82,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.cyan)
     )
 
@@ -100,7 +93,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.mint)
     )
 
@@ -112,7 +104,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.pink)
     )
 
@@ -125,7 +116,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.red)
     )
 
@@ -137,7 +127,6 @@ struct PreviewData {
         videoDimensions: .zero,
         creationTime: Date(),
         isScreenshare: false,
-        isPinned: false,
         view: AnyView(Color.blue)
     )
 

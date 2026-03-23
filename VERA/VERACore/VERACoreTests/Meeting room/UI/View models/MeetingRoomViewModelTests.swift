@@ -561,6 +561,7 @@ struct MeetingRoomViewModelTests {
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig(),
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -575,7 +576,8 @@ struct MeetingRoomViewModelTests {
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
             getExternalButtons: { _ in [] },
-            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
+            pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )
     }
 

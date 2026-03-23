@@ -231,7 +231,6 @@ struct AdaptiveGridLayoutUITests {
                     isRemote: true,
                     creationTime: Date().addingTimeInterval(TimeInterval(index)),
                     isScreenshare: false,
-                    isPinned: false,
                     view: AnyView(Color.blue))
             )
         }

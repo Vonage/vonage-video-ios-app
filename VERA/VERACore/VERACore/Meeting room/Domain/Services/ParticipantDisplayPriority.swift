@@ -22,13 +22,13 @@ public struct ParticipantDisplayPriority {
     /// and localized name comparison when needed to ensure stable, user-friendly ordering.
     ///
     /// - Parameters:
-    ///   - participants: Array of participants to sort.
+    ///   - participants: Array of UI participants to sort.
     ///   - activeSpeakerId: The ID of the current active speaker, or `nil` if none.
     /// - Returns: A new array of participants sorted by display priority.
     public static func sortByDisplayPriority(
-        participants: [Participant],
+        participants: [UIParticipant],
         activeSpeakerId: String?
-    ) -> [Participant] {
+    ) -> [UIParticipant] {
         return participants.sorted { participantA, participantB in
             return compareDisplayPriority(
                 participantA: participantA,
@@ -46,8 +46,8 @@ public struct ParticipantDisplayPriority {
     ///   - activeSpeakerId: The ID of the current active speaker, or `nil` if none.
     /// - Returns: `-1` if A has higher priority, `1` if B has higher priority, `0` if equal.
     private static func compareDisplayPriority(
-        participantA: Participant,
-        participantB: Participant,
+        participantA: UIParticipant,
+        participantB: UIParticipant,
         activeSpeakerId: String?
     ) -> Int {
 
@@ -93,11 +93,11 @@ public struct ParticipantDisplayPriority {
 
     /// Sorts participants by their creation date (oldest first).
     ///
-    /// - Parameter participants: Array of participants.
+    /// - Parameter participants: Array of UI participants.
     /// - Returns: A new array sorted by `creationTime` ascending.
     public static func sortByDate(
-        participants: [Participant]
-    ) -> [Participant] {
+        participants: [UIParticipant]
+    ) -> [UIParticipant] {
         return participants.sorted { participantA, participantB in
             participantA.creationTime <= participantB.creationTime
         }
@@ -105,11 +105,11 @@ public struct ParticipantDisplayPriority {
 
     /// Sorts participants by their name (lexicographic).
     ///
-    /// - Parameter participants: Array of participants.
+    /// - Parameter participants: Array of UI participants.
     /// - Returns: A new array sorted by `name` ascending.
     public static func sortByName(
-        participants: [Participant]
-    ) -> [Participant] {
+        participants: [UIParticipant]
+    ) -> [UIParticipant] {
         return participants.sorted { participantA, participantB in
             participantA.name <= participantB.name
         }
@@ -118,14 +118,14 @@ public struct ParticipantDisplayPriority {
 
 // MARK: - Convenience Extensions
 
-/// Convenience method on arrays of participants to sort by display priority.
-extension Array where Element == Participant {
+/// Convenience method on arrays of UI participants to sort by display priority.
+extension Array where Element == UIParticipant {
 
     /// Returns participants sorted by display priority.
     ///
     /// - Parameter activeSpeakerId: The ID of the current active speaker, or `nil` if none.
     /// - Returns: A new array sorted by display priority.
-    public func sortedByDisplayPriority(activeSpeakerId: String?) -> [Participant] {
+    public func sortedByDisplayPriority(activeSpeakerId: String?) -> [UIParticipant] {
         return ParticipantDisplayPriority.sortByDisplayPriority(
             participants: self,
             activeSpeakerId: activeSpeakerId
