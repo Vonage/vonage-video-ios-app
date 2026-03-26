@@ -157,8 +157,19 @@ struct HorizontalActiveSpeakerLayoutView: View {
         participants.first
     }
 
+    /// The second screenshare participant when two screenshares are being received.
+    private var secondScreenshare: Participant? {
+        guard participants.count >= 2,
+            participants[0].isScreenshare,
+            participants[1].isScreenshare
+        else {
+            return nil
+        }
+        return participants[1]
+    }
+
     private var restOfParticipants: [Participant] {
-        Array(participants.dropFirst())
+        Array(participants.dropFirst(secondScreenshare != nil ? 2 : 1))
     }
 
     var body: some View {
@@ -175,13 +186,24 @@ struct HorizontalActiveSpeakerLayoutView: View {
                 )
 
                 HStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
-                    ParticipantVideoCard(
-                        participant: activeParticipant,
-                        activeSpeakerId: activeSpeakerId
-                    )
-                    .id(activeParticipant.id + "_main")
+                    VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
+                        ParticipantVideoCard(
+                            participant: activeParticipant,
+                            activeSpeakerId: activeSpeakerId
+                        )
+                        .id(activeParticipant.id + "_main")
+                        .trackingVisibility(of: activeParticipant)
+
+                        if let secondScreenshare = secondScreenshare {
+                            ParticipantVideoCard(
+                                participant: secondScreenshare,
+                                activeSpeakerId: activeSpeakerId
+                            )
+                            .id(secondScreenshare.id + "_main_secondary")
+                            .trackingVisibility(of: secondScreenshare)
+                        }
+                    }
                     .frame(width: max(1, mainWidth))
-                    .trackingVisibility(of: activeParticipant)
 
                     SidebarParticipantsView(
                         participants: restOfParticipants,
@@ -303,8 +325,19 @@ struct VerticalActiveSpeakerLayoutView: View {
         participants.first
     }
 
+    /// The second screenshare participant when two screenshares are being received.
+    private var secondScreenshare: Participant? {
+        guard participants.count >= 2,
+            participants[0].isScreenshare,
+            participants[1].isScreenshare
+        else {
+            return nil
+        }
+        return participants[1]
+    }
+
     private var restOfParticipants: [Participant] {
-        Array(participants.dropFirst())
+        Array(participants.dropFirst(secondScreenshare != nil ? 2 : 1))
     }
 
     var body: some View {
@@ -316,6 +349,15 @@ struct VerticalActiveSpeakerLayoutView: View {
                 )
                 .id(activeParticipant.id + "_main")
                 .trackingVisibility(of: activeParticipant)
+            }
+
+            if let secondScreenshare = secondScreenshare {
+                ParticipantVideoCard(
+                    participant: secondScreenshare,
+                    activeSpeakerId: activeSpeakerId
+                )
+                .id(secondScreenshare.id + "_main_secondary")
+                .trackingVisibility(of: secondScreenshare)
             }
 
             Group {
