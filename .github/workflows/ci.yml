@@ -674,9 +674,17 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Extract PR number from merge commit message (e.g. "Merge pull request #42 from ...")
+        COMMIT_SHA=$(git rev-parse HEAD)
         COMMIT_MSG=$(git log -1 --pretty=%s)
+
+        # Try to extract PR number from merge commit message (e.g. "Merge pull request #42 from ...")
         PR_NUMBER=$(echo "$COMMIT_MSG" | sed -n 's/.*#\([0-9]*\).*/\1/p')
+
+        # If no PR number in message, query the API for PRs associated with this commit
+        if [ -z "$PR_NUMBER" ]; then
+          PR_NUMBER=$(gh api "repos/${{ github.repository }}/commits/${COMMIT_SHA}/pulls" \
+            --jq '.[0].number' 2>/dev/null || echo "")
+        fi
 
         if [ -n "$PR_NUMBER" ]; then
           PR_TITLE=$(gh pr view "$PR_NUMBER" --json title --jq '.title' 2>/dev/null || echo "")
@@ -707,7 +715,7 @@ jobs:
         echo "$NOTES"
 
     - name: Upload to TestFlight
-      uses: apple-actions/upload-testflight-build@v4
+      uses: apple-actions/upload-testflight-build@v3
       with:
         app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
