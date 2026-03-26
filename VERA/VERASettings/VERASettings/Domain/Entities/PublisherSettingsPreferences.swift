@@ -40,7 +40,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     public var degradationPreference: SettingsDegradationPreference
 
     /// The default settings preferences.
-    /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
     /// Creates a new publisher settings preferences instance.
