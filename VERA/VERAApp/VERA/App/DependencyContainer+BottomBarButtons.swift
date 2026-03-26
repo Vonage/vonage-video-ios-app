@@ -62,13 +62,14 @@ extension DependencyContainer {
 
     #if CHAT_ENABLED
         func mapToChatBottomBarButton(onShowChat: @escaping () -> Void) -> BottomBarButton {
+            let viewModel = chatBadgeButtonViewModel
             return .init(
                 label: "Chat",
                 image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,
                 onTap: onShowChat,
                 content: {
                     ChatBadgeButton(
-                        unreadMessagesCount: 0,
+                        viewModel: viewModel,
                         onShowChat: onShowChat)
                 })
         }

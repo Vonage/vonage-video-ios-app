@@ -2,17 +2,20 @@
 //  Created by Vonage on 14/10/25.
 //
 
+import Combine
 import SwiftUI
 import VERACommonUI
 import VERADomain
 
 public struct ChatBadgeButton: View {
 
-    private let unreadMessagesCount: Int
+    @ObservedObject private var viewModel: ChatBadgeButtonViewModel
     private let onShowChat: () -> Void
 
-    public init(unreadMessagesCount: Int, onShowChat: @escaping () -> Void) {
-        self.unreadMessagesCount = unreadMessagesCount
+    private var unreadMessagesCount: Int { viewModel.unreadMessagesCount }
+
+    public init(viewModel: ChatBadgeButtonViewModel, onShowChat: @escaping () -> Void) {
+        self.viewModel = viewModel
         self.onShowChat = onShowChat
     }
 
@@ -55,5 +58,22 @@ public struct ChatBadgeButton: View {
 }
 
 #Preview {
-    ChatBadgeButton(unreadMessagesCount: 25) {}
+    ChatBadgeButton(
+        viewModel: ChatBadgeButtonViewModel(
+            chatMessagesObserver: PreviewChatMessagesObserver(count: 25)),
+        onShowChat: {})
+}
+
+private class PreviewChatMessagesObserver: ChatMessagesObserver {
+    private let messages: [ChatMessage]
+
+    init(count: Int) {
+        messages = (0..<count).map {
+            ChatMessage(username: "User", message: "Message \($0)", date: Date())
+        }
+    }
+
+    func observeMessages() -> AnyPublisher<[ChatMessage], Never> {
+        Just(messages).eraseToAnyPublisher()
+    }
 }
