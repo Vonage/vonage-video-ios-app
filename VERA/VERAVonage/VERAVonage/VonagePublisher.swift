@@ -159,6 +159,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: false,
             isPinned: false,
+            audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
         otPublisher.audioLevelDelegate = self
