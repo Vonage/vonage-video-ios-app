@@ -668,10 +668,48 @@ jobs:
             -allowProvisioningUpdates \
             -exportPath "$PWD/build" | xcpretty
 
+    - name: Generate release notes from PR
+      id: release_notes
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Extract PR number from merge commit message (e.g. "Merge pull request #42 from ...")
+        COMMIT_MSG=$(git log -1 --pretty=%s)
+        PR_NUMBER=$(echo "$COMMIT_MSG" | sed -n 's/.*#\([0-9]*\).*/\1/p')
+
+        if [ -n "$PR_NUMBER" ]; then
+          PR_TITLE=$(gh pr view "$PR_NUMBER" --json title --jq '.title' 2>/dev/null || echo "")
+          PR_BODY=$(gh pr view "$PR_NUMBER" --json body --jq '.body' 2>/dev/null || echo "")
+
+          if [ -n "$PR_TITLE" ]; then
+            NOTES="$PR_TITLE"
+            if [ -n "$PR_BODY" ]; then
+              NOTES=$(printf "%s\n\n%s" "$PR_TITLE" "$PR_BODY")
+            fi
+          else
+            NOTES="$COMMIT_MSG"
+          fi
+        else
+          NOTES="$COMMIT_MSG"
+        fi
+
+        # TestFlight "What to Test" has a 4000 char limit
+        NOTES=$(echo "$NOTES" | head -c 4000)
+
+        {
+          echo "whats_new<<RELEASE_NOTES_EOF"
+          echo "$NOTES"
+          echo "RELEASE_NOTES_EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "📝 Release notes:"
+        echo "$NOTES"
+
     - name: Upload to TestFlight
-      uses: apple-actions/upload-testflight-build@v3
+      uses: apple-actions/upload-testflight-build@v4
       with:
         app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        release-notes: ${{ steps.release_notes.outputs.whats_new }}
