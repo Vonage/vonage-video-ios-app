@@ -25,4 +25,5 @@ spec:
   system: video-ios-ref-app
   lifecycle: production
   dependsOn:
-    - resource:default/video-native-sdks
+    - component:default/video-react-ref-app
+    - component:default/video-native-sdks
