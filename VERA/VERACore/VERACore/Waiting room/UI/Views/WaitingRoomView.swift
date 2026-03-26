@@ -60,6 +60,7 @@ public struct WaitingRoomView: View {
     let state: WaitingRoomState
     var userName: Binding<String>
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioLevel: Float
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -71,6 +72,7 @@ public struct WaitingRoomView: View {
                     state: state,
                     userName: userName,
                     extraTrailingButtons: _extraTrailingButtons,
+                    audioLevel: audioLevel,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -79,6 +81,7 @@ public struct WaitingRoomView: View {
                     state: state,
                     userName: userName,
                     extraTrailingButtons: _extraTrailingButtons,
+                    audioLevel: audioLevel,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -87,6 +90,7 @@ public struct WaitingRoomView: View {
                     state: state,
                     userName: userName,
                     extraTrailingButtons: _extraTrailingButtons,
+                    audioLevel: audioLevel,
                     onJoinRoom: onJoinRoom,
                     onMicrophoneToggle: onMicrophoneToggle,
                     onCameraToggle: onCameraToggle)
@@ -101,6 +105,7 @@ struct HorizontalWaitingRoomContentView: View {
     let state: WaitingRoomState
     var userName: Binding<String>
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioLevel: Float
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -111,6 +116,7 @@ struct HorizontalWaitingRoomContentView: View {
                 state: state,
                 userName: userName,
                 extraTrailingButtons: _extraTrailingButtons,
+                audioLevel: audioLevel,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -129,6 +135,7 @@ struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioLevel: Float
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -139,6 +146,7 @@ struct VerticalWaitingRoomContentView: View {
                 state: state,
                 userName: userName,
                 extraTrailingButtons: _extraTrailingButtons,
+                audioLevel: audioLevel,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -156,6 +164,7 @@ struct VideoPreviewView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioLevel: Float
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
 
@@ -168,6 +177,7 @@ struct VideoPreviewView: View {
                 state: state,
                 userName: userName,
                 extraTrailingButtons: _extraTrailingButtons,
+                audioLevel: audioLevel,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -271,6 +281,7 @@ struct PrepareToJoinRoom: View {
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
         extraTrailingButtons: .constant([]),
+        audioLevel: 0.5,
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}
@@ -292,6 +303,7 @@ struct PrepareToJoinRoom: View {
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
         extraTrailingButtons: .constant([]),
+        audioLevel: 0.3,
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

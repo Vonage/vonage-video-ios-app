@@ -22,6 +22,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
     @Published public var extraTrailingButtons: [ViewHolder] = []
+    @Published public var audioLevel: Float = 0.0
 
     public let roomName: RoomName
     weak var publisher: VERAPublisher?
@@ -224,11 +225,21 @@ extension WaitingRoomViewModel {
             let publisher = try cameraPreviewProviderRepository.getPublisher()
             self.publisher = publisher
 
+            observeAudioLevel(publisher)
             updateUIState()
 
         } catch {
             self.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
         }
+    }
+
+    fileprivate func observeAudioLevel(_ publisher: VERAPublisher) {
+        publisher.audioLevelPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] level in
+                self?.audioLevel = level
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: Permission requests

@@ -35,6 +35,9 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Internal subscription storage for Combine pipelines.
     var cancellables = Set<AnyCancellable>()
 
+    /// Smooths raw audio level samples for UI visualization.
+    private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
+
     /// A stable identifier for the local publisher participant.
     let id = "publisherID"
 
@@ -72,6 +75,11 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published open private(set) var videoTransformers: [VERATransformer] = []
     /// Holds the current list of audio transformers.
     @Published open private(set) var audioTransformers: [VERATransformer] = []
+
+    /// A Combine publisher that emits the current audio level (0.0 to 1.0).
+    public var audioLevelPublisher: AnyPublisher<Float, Never> {
+        $audioLevel.eraseToAnyPublisher()
+    }
 
     /// Convenience for `videoDimensions.aspectRatio`.
     public var aspectRatio: Double { videoDimensions.aspectRatio }
@@ -153,6 +161,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isPinned: false,
             view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
+        otPublisher.audioLevelDelegate = self
     }
 
     deinit {
@@ -217,6 +226,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: isScreenshare,
             isPinned: isPinned,
+            audioLevel: audioLevel,
             view: view)
     }
 
@@ -353,5 +363,17 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     open func updateAudioTransformers() {
         otPublisher.audioTransformers = audioTransformers.map(\.transformer)
         updateParticipant()
+    }
+}
+
+// MARK: - OTPublisherKitAudioLevelDelegate
+
+extension VonagePublisher: OTPublisherKitAudioLevelDelegate {
+    /// Vonage publisher audio level delegate callback.
+    ///
+    /// Smooths the raw audio level via a log-moving average and publishes the result.
+    public func publisher(_ publisher: OTPublisherKit, audioLevelUpdated audioLevel: Float) {
+        let result = movingAvgAudioLevelTracker.track(audioLevel)
+        self.audioLevel = round(result.logMovingAvg * 100) / 100
     }
 }

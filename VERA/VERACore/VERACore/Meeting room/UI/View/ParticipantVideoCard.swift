@@ -30,7 +30,9 @@ struct ParticipantVideoCard: View {
 
                                     ParticipantVideoCardOverlays(
                                         isMicEnabled: participant.isMicEnabled,
-                                        name: participant.name
+                                        name: participant.name,
+                                        audioLevel: participant.audioLevel,
+                                        isLocal: !participant.isRemote
                                     )
                                 } else {
                                     participant.view
@@ -40,7 +42,9 @@ struct ParticipantVideoCard: View {
 
                                     ParticipantVideoCardOverlays(
                                         isMicEnabled: participant.isMicEnabled,
-                                        name: participant.name
+                                        name: participant.name,
+                                        audioLevel: participant.audioLevel,
+                                        isLocal: !participant.isRemote
                                     )
                                 }
                             }
@@ -63,7 +67,9 @@ struct ParticipantVideoCard: View {
 
                                 ParticipantVideoCardOverlays(
                                     isMicEnabled: participant.isMicEnabled,
-                                    name: participant.name
+                                    name: participant.name,
+                                    audioLevel: participant.audioLevel,
+                                    isLocal: !participant.isRemote
                                 )
                             }
                         )
@@ -85,11 +91,18 @@ struct ParticipantVideoCardOverlays: View {
 
     let isMicEnabled: Bool
     let name: String
+    let audioLevel: Float
+    let isLocal: Bool
 
     var body: some View {
         VStack {
             HStack {
                 Spacer()
+                if isLocal {
+                    AudioLevelIndicatorView(
+                        audioLevel: audioLevel,
+                        isMicEnabled: isMicEnabled)
+                }
                 MicIndicator(isMicEnabled: isMicEnabled)
             }
             Spacer()

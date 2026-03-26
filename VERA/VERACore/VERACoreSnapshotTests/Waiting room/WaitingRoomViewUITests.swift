@@ -92,6 +92,7 @@ class WaitingRoomViewUITests {
             state: makeWaitingRoomState(publisher: publisher),
             userName: .constant("Trillian"),
             extraTrailingButtons: .constant([]),
+            audioLevel: 0.0,
             onJoinRoom: {},
             onMicrophoneToggle: {},
             onCameraToggle: {}
@@ -151,6 +152,7 @@ class WaitingRoomComponentTests {
                     state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
                     extraTrailingButtons: .constant([]),
+                    audioLevel: 0.0,
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})
@@ -161,6 +163,7 @@ class WaitingRoomComponentTests {
                     state: makeWaitingRoomState(publisher: publisher),
                     userName: .constant("Trillian"),
                     extraTrailingButtons: .constant([]),
+                    audioLevel: 0.0,
                     onJoinRoom: {},
                     onMicrophoneToggle: {},
                     onCameraToggle: {})
