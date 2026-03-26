@@ -14,7 +14,7 @@ jobs:
   format-check:
     runs-on: macos-26
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install swift-format
       run: |
@@ -36,7 +36,7 @@ jobs:
       test-results: ${{ steps.tests.outcome }}
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     
     - name: Pull LFS files
       run: git lfs pull
@@ -517,7 +517,7 @@ jobs:
     # Extracted DerivedData/VERAReactionsSnapshotTests-iOS.xcresult and DerivedData/VERASettingsSnapshotTests-iOS.xcresult
     # due to a bug in the latests Xcode version. See https://developer.apple.com/forums/thread/817957
     - name: Upload all test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: unit-test-results
@@ -546,12 +546,12 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
     
     - name: Download unit test results
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: unit-test-results
         path: DerivedData/
@@ -595,7 +595,7 @@ jobs:
     timeout-minutes: 30
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     
     - name: Pull LFS files
       run: git lfs pull
@@ -604,13 +604,13 @@ jobs:
       run: brew install tuist
 
     - name: Import certs
-      uses: Apple-Actions/import-codesign-certs@v5.0.2
+      uses: Apple-Actions/import-codesign-certs@v6
       with:
         p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
         p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
 
-    - name: Provisioning profile (App)
-      uses: Apple-Actions/download-provisioning-profiles@v4
+    - name: Provisioning profile
+      uses: Apple-Actions/download-provisioning-profiles@v5
       with:
         profile-type: IOS_APP_STORE
         bundle-id: 'com.vonage.VERA'
@@ -619,7 +619,7 @@ jobs:
         api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
     - name: Provisioning profile (BroadcastExtension)
-      uses: Apple-Actions/download-provisioning-profiles@v4
+      uses: Apple-Actions/download-provisioning-profiles@v5
       with:
         profile-type: IOS_APP_STORE
         bundle-id: 'com.vonage.VERA.BroadcastExtension'
@@ -669,7 +669,7 @@ jobs:
             -exportPath "$PWD/build" | xcpretty
 
     - name: Upload to TestFlight
-      uses: apple-actions/upload-testflight-build@v3
+      uses: apple-actions/upload-testflight-build@v4
       with:
         app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}

@@ -9,11 +9,11 @@ permissions:
 
 jobs:
   notify-release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Notify Release
     steps:
       - name: Send to slack channels
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
