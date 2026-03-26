@@ -114,6 +114,21 @@ struct VideoSectionView: View {
                 }
             }
         }
+
+        Section {
+            Picker(
+                "Degradation Preference".localized,
+                selection: $viewModel.settingsPreference.degradationPreference
+            ) {
+                ForEach(SettingsDegradationPreference.allCases) { preference in
+                    Text(preference.displayName).tag(preference)
+                }
+            }
+        } header: {
+            Text("Degradation Preference".localized)
+        } footer: {
+            Text(viewModel.settingsPreference.degradationPreference.footerDescription)
+        }
     }
 
     // MARK: - Helpers

@@ -82,6 +82,9 @@ public final class VonagePublisherFactory: PublisherFactory {
         if let preferredVideoCodecs = settings.advancedSettings?.preferredVideoCodecs?.otCodecPreference {
             publisherSettings.videoCodecPreference = preferredVideoCodecs
         }
+        if let degradationPreference = settings.advancedSettings?.degradationPreference?.otDegradationPreference {
+            publisherSettings.degradationPreference = degradationPreference
+        }
 
         guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
             throw Error.publisherInitializationFailed

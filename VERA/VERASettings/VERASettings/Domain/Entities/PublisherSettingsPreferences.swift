@@ -36,6 +36,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Whether sender statistics should be displayed for debugging purposes.
     public var senderStatsEnabled: Bool
 
+    /// The degradation preference policy for adapting frame rate and resolution.
+    public var degradationPreference: SettingsDegradationPreference
+
     /// The default settings preferences.
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
@@ -52,6 +55,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
+    ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -61,7 +65,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         maxVideoBitrate: Int32 = 500_000,
         publisherAudioFallbackEnabled: Bool = true,
         subscriberAudioFallbackEnabled: Bool = true,
-        senderStatsEnabled: Bool = false
+        senderStatsEnabled: Bool = false,
+        degradationPreference: SettingsDegradationPreference = .notSet
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -72,6 +77,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.senderStatsEnabled = senderStatsEnabled
+        self.degradationPreference = degradationPreference
     }
 
     // MARK: - Migration
@@ -96,6 +102,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             subscriberAudioFallbackEnabled = legacy
         }
         senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
+        degradationPreference =
+            try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -117,6 +125,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case publisherAudioFallbackEnabled
         case subscriberAudioFallbackEnabled
         case senderStatsEnabled
+        case degradationPreference
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -136,6 +145,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(publisherAudioFallbackEnabled, forKey: .publisherAudioFallbackEnabled)
         try container.encode(subscriberAudioFallbackEnabled, forKey: .subscriberAudioFallbackEnabled)
         try container.encode(senderStatsEnabled, forKey: .senderStatsEnabled)
+        try container.encode(degradationPreference, forKey: .degradationPreference)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -145,5 +155,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.publisherAudioFallbackEnabled == rhs.publisherAudioFallbackEnabled
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled
             && lhs.senderStatsEnabled == rhs.senderStatsEnabled
+            && lhs.degradationPreference == rhs.degradationPreference
     }
 }

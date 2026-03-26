@@ -35,6 +35,9 @@ public struct PublisherAdvancedSettings: Equatable {
     /// Whether audio fallback is enabled for subscribers.
     public let subscriberAudioFallbackEnabled: Bool?
 
+    /// The degradation preference policy for adapting frame rate and resolution.
+    public let degradationPreference: DegradationPreference?
+
     /// Creates new advanced publisher settings.
     ///
     /// All parameters are optional, allowing you to configure only the settings you need.
@@ -48,6 +51,7 @@ public struct PublisherAdvancedSettings: Equatable {
     ///   - maxVideoBitrate: Custom maximum video bitrate in bps.
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag.
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag.
+    ///   - degradationPreference: Degradation preference policy.
     public init(
         videoResolution: VideoResolution? = nil,
         videoFrameRate: VideoFrameRate? = nil,
@@ -56,7 +60,8 @@ public struct PublisherAdvancedSettings: Equatable {
         videoBitratePreset: VideoBitratePreset? = nil,
         maxVideoBitrate: Int32? = nil,
         publisherAudioFallbackEnabled: Bool? = nil,
-        subscriberAudioFallbackEnabled: Bool? = nil
+        subscriberAudioFallbackEnabled: Bool? = nil,
+        degradationPreference: DegradationPreference? = nil
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -66,5 +71,6 @@ public struct PublisherAdvancedSettings: Equatable {
         self.maxVideoBitrate = maxVideoBitrate
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
+        self.degradationPreference = degradationPreference
     }
 }
