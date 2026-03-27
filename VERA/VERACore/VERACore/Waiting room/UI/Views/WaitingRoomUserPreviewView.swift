@@ -92,9 +92,6 @@ struct WaitingRoomUserPreviewView: View {
                                 action: onCameraToggle)
                         }
                         if state.allowMicrophoneControl {
-                            AudioLevelIndicatorView(
-                                audioLevel: audioLevel,
-                                isMicEnabled: state.isMicrophoneEnabled)
                             CircularControlImageButton(
                                 isActive: state.isMicrophoneEnabled,
                                 image: state.isMicrophoneEnabled
@@ -108,6 +105,20 @@ struct WaitingRoomUserPreviewView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .if(
+            state.isMicrophoneEnabled,
+            transform: {
+                $0.overlay(alignment: .bottomLeading) {
+                    if state.allowMicrophoneControl {
+                        AudioLevelIndicatorView(
+                            audioLevel: audioLevel,
+                            isMicEnabled: state.isMicrophoneEnabled
+                        )
+                        .padding(12)
+                    }
+                }
+            }
+        )
         .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 480, maxHeight: 320)
     }
 }

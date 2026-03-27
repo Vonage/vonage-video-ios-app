@@ -68,13 +68,15 @@ public struct AudioLevelIndicatorView: View {
                             height: AudioLevelIndicatorConstants.size
                                 * min(
                                     max(bars[index], AudioLevelIndicatorConstants.minBarRatio),
-                                    AudioLevelIndicatorConstants.maxBarRatio))
+                                    AudioLevelIndicatorConstants.maxBarRatio)
+                        )
                         .shadow(radius: AudioLevelIndicatorConstants.barShadowRadius)
                 }
             }
             .frame(
                 width: AudioLevelIndicatorConstants.size,
-                height: AudioLevelIndicatorConstants.size)
+                height: AudioLevelIndicatorConstants.size
+            )
             .background(Circle().fill(Color.black.opacity(AudioLevelIndicatorConstants.backgroundOpacity)))
             .animation(.easeInOut(duration: 0.15), value: audioLevel)
         }
