@@ -6,6 +6,7 @@
     import Foundation
     import SwiftUI
     import VERADomain
+    import Combine
 
     extension NoiseSuppressionViewModel {
 
@@ -76,6 +77,7 @@
     }
 
     private final class EmptyVERAPublisher: VERAPublisher {
+
         var view: AnyView
 
         var publishAudio: Bool
@@ -89,6 +91,8 @@
         var audioTransformers: [any VERATransformer]
 
         var transformerFactory: any VERATransformerFactory
+
+        var audioLevelPublisher: AnyPublisher<Float, Never> = CurrentValueSubject(0.0).eraseToAnyPublisher()
 
         public init() {
             self.view = AnyView(EmptyView())
