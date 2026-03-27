@@ -4,10 +4,40 @@
 
 import SwiftUI
 
+/// Constants for AudioLevelIndicatorView layout and appearance
+enum AudioLevelIndicatorConstants {
+    /// Size of the circular indicator
+    static let size: CGFloat = 32
+
+    /// Width of each bar
+    static let barWidth: CGFloat = 4
+
+    /// Spacing between bars
+    static let barSpacing: CGFloat = 4
+
+    /// Corner radius of each bar
+    static let barCornerRadius: CGFloat = 2
+
+    /// Shadow radius for bars
+    static let barShadowRadius: CGFloat = 1
+
+    /// Multipliers for each bar height relative to audioLevel
+    static let barMultipliers: [CGFloat] = [0.6, 0.85, 0.6]
+
+    /// Minimum bar height ratio
+    static let minBarRatio: CGFloat = 0.12
+
+    /// Maximum bar height ratio
+    static let maxBarRatio: CGFloat = 0.9
+
+    /// Background opacity
+    static let backgroundOpacity: Double = 0.6
+}
+
 /// A circular indicator with vertical bars that visually displays the current audio level.
 ///
-/// The indicator shows 4 bars of increasing height. Each bar lights up
-/// when the audio level exceeds its threshold, providing a visual audio meter.
+/// The indicator shows 3 bars whose heights are proportional to the audio level,
+/// providing a visual audio meter.
 ///
 /// - Parameters:
 ///   - audioLevel: The current audio level (0.0 to 1.0).
@@ -18,42 +48,36 @@ public struct AudioLevelIndicatorView: View {
     private let audioLevel: Float
     private let isMicEnabled: Bool
 
-    private let barCount = 4
-    private let barWidth: CGFloat = 2.5
-    private let barSpacing: CGFloat = 1.5
-    private let barHeights: [CGFloat] = [0.3, 0.5, 0.7, 1.0]
-    private let barThresholds: [Float] = [0.05, 0.25, 0.5, 0.75]
-
     public init(audioLevel: Float, isMicEnabled: Bool) {
         self.audioLevel = audioLevel
         self.isMicEnabled = isMicEnabled
     }
 
+    private var bars: [CGFloat] {
+        AudioLevelIndicatorConstants.barMultipliers.map { CGFloat(audioLevel) * $0 }
+    }
+
     public var body: some View {
         if isMicEnabled {
-            HStack(alignment: .bottom, spacing: barSpacing) {
-                ForEach(0..<barCount, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(barColor(for: index))
-                        .frame(width: barWidth, height: barHeight(for: index))
+            HStack(spacing: AudioLevelIndicatorConstants.barSpacing) {
+                ForEach(0..<bars.count, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: AudioLevelIndicatorConstants.barCornerRadius)
+                        .fill(Color.white)
+                        .frame(width: AudioLevelIndicatorConstants.barWidth)
+                        .frame(
+                            height: AudioLevelIndicatorConstants.size
+                                * min(
+                                    max(bars[index], AudioLevelIndicatorConstants.minBarRatio),
+                                    AudioLevelIndicatorConstants.maxBarRatio))
+                        .shadow(radius: AudioLevelIndicatorConstants.barShadowRadius)
                 }
             }
-            .frame(width: 28, height: 28)
-            .background(Color.black.opacity(0.6))
-            .clipShape(Circle())
+            .frame(
+                width: AudioLevelIndicatorConstants.size,
+                height: AudioLevelIndicatorConstants.size)
+            .background(Circle().fill(Color.black.opacity(AudioLevelIndicatorConstants.backgroundOpacity)))
             .animation(.easeInOut(duration: 0.15), value: audioLevel)
         }
-    }
-
-    private func barHeight(for index: Int) -> CGFloat {
-        let maxHeight: CGFloat = 14
-        return maxHeight * barHeights[index]
-    }
-
-    private func barColor(for index: Int) -> Color {
-        audioLevel >= barThresholds[index]
-            ? VERACommonUIAsset.SemanticColors.success.swiftUIColor
-            : Color.white.opacity(0.3)
     }
 }
 

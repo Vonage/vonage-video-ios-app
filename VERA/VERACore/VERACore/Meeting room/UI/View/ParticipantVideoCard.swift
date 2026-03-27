@@ -102,8 +102,9 @@ struct ParticipantVideoCardOverlays: View {
                     AudioLevelIndicatorView(
                         audioLevel: audioLevel,
                         isMicEnabled: isMicEnabled)
+                } else {
+                    MicIndicator(isMicEnabled: isMicEnabled)
                 }
-                MicIndicator(isMicEnabled: isMicEnabled)
             }
             Spacer()
             HStack {
