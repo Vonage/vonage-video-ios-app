@@ -22,7 +22,6 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
     @Published public var extraTrailingButtons: [ViewHolder] = []
-    @Published public var audioLevel: Float = 0.0
 
     public let roomName: RoomName
     weak var publisher: VERAPublisher?
@@ -169,6 +168,12 @@ extension WaitingRoomViewModel {
     }
 
     fileprivate func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
+        let currentAudioLevel: Float
+        if case .content(let currentState) = state {
+            currentAudioLevel = currentState.audioLevel
+        } else {
+            currentAudioLevel = 0.0
+        }
         state = .content(
             .init(
                 roomName: roomName,
@@ -177,6 +182,7 @@ extension WaitingRoomViewModel {
                 allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
                 cameras: availableCameraDevices,
+                audioLevel: currentAudioLevel,
                 publisher: publisher))
     }
 
@@ -237,9 +243,23 @@ extension WaitingRoomViewModel {
         publisher.audioLevelPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] level in
-                self?.audioLevel = level
+                self?.updateAudioLevel(level)
             }
             .store(in: &cancellables)
+    }
+
+    fileprivate func updateAudioLevel(_ level: Float) {
+        guard case .content(let currentState) = state else { return }
+        state = .content(
+            .init(
+                roomName: currentState.roomName,
+                isMicrophoneEnabled: currentState.isMicrophoneEnabled,
+                isCameraEnabled: currentState.isCameraEnabled,
+                allowMicrophoneControl: currentState.allowMicrophoneControl,
+                allowCameraControl: currentState.allowCameraControl,
+                cameras: currentState.cameras,
+                audioLevel: level,
+                publisher: currentState.publisher))
     }
 
     // MARK: Permission requests

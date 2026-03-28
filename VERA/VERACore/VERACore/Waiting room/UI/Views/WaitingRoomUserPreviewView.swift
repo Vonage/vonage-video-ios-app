@@ -24,7 +24,6 @@ struct WaitingRoomUserPreviewView: View {
     private let state: WaitingRoomState
     private let userName: Binding<String>
     @Binding var extraTrailingButtons: [ViewHolder]
-    private let audioLevel: Float
     private let onMicrophoneToggle: () -> Void
     private let onCameraToggle: () -> Void
 
@@ -32,14 +31,12 @@ struct WaitingRoomUserPreviewView: View {
         state: WaitingRoomState,
         userName: Binding<String>,
         extraTrailingButtons: Binding<[ViewHolder]> = .constant([]),
-        audioLevel: Float = 0.0,
         onMicrophoneToggle: @escaping () -> Void,
         onCameraToggle: @escaping () -> Void
     ) {
         self.state = state
         self.userName = userName
         self._extraTrailingButtons = extraTrailingButtons
-        self.audioLevel = audioLevel
         self.onMicrophoneToggle = onMicrophoneToggle
         self.onCameraToggle = onCameraToggle
     }
@@ -111,7 +108,7 @@ struct WaitingRoomUserPreviewView: View {
                 $0.overlay(alignment: .bottomLeading) {
                     if state.allowMicrophoneControl {
                         AudioLevelIndicatorView(
-                            audioLevel: audioLevel,
+                            audioLevel: state.audioLevel,
                             isMicEnabled: state.isMicrophoneEnabled
                         )
                         .padding(12)

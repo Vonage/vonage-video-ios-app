@@ -22,8 +22,7 @@ public struct WaitingRoomScreen: View {
             WaitingRoomView(
                 state: state,
                 userName: $viewModel.userName,
-                extraTrailingButtons: $viewModel.extraTrailingButtons,
-                audioLevel: viewModel.audioLevel
+                extraTrailingButtons: $viewModel.extraTrailingButtons
             ) {
                 Task {
                     await viewModel.joinRoom()
