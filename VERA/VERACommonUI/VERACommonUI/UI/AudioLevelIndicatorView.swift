@@ -29,9 +29,6 @@ enum AudioLevelIndicatorConstants {
 
     /// Maximum bar height ratio
     static let maxBarRatio: CGFloat = 0.9
-
-    /// Background opacity
-    static let backgroundOpacity: Double = 0.6
 }
 
 /// A circular indicator with vertical bars that visually displays the current audio level.
@@ -77,7 +74,7 @@ public struct AudioLevelIndicatorView: View {
                 width: AudioLevelIndicatorConstants.size,
                 height: AudioLevelIndicatorConstants.size
             )
-            .background(Circle().fill(Color.black.opacity(AudioLevelIndicatorConstants.backgroundOpacity)))
+            .background(Circle().fill(VERACommonUIAsset.SemanticColors.primary.swiftUIColor))
             .animation(.easeInOut(duration: 0.15), value: audioLevel)
         }
     }
