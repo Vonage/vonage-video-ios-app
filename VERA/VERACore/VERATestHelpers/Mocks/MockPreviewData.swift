@@ -18,6 +18,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.red)
     )
 
@@ -30,6 +31,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.green)
     )
 
@@ -42,6 +44,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.blue)
     )
 
@@ -54,6 +57,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.yellow)
     )
 
@@ -66,6 +70,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.purple)
     )
 
@@ -78,6 +83,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.orange)
     )
 
@@ -90,6 +96,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.cyan)
     )
 
@@ -102,6 +109,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.mint)
     )
 
@@ -114,6 +122,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.pink)
     )
 
@@ -127,6 +136,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.red)
     )
 
@@ -139,6 +149,7 @@ struct PreviewData {
         creationTime: Date(),
         isScreenshare: false,
         isPinned: false,
+        audioLevel: 0.0,
         view: AnyView(Color.blue)
     )
 

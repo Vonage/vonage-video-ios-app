@@ -2,6 +2,7 @@
 //  Created by Vonage on 12/3/26.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import Testing
@@ -166,6 +167,7 @@ final class PublisherSpy: VERAPublisher {
     var publishAudio: Bool = true
     var publishVideo: Bool = true
     var cameraPosition: CameraPosition = .front
+    var audioLevelPublisher: AnyPublisher<Float, Never> = CurrentValueSubject(0).eraseToAnyPublisher()
 
     func addVideoTransformer(_ transformer: any VERATransformer) {}
     func setVideoTransformers(_ transformers: [any VERATransformer]) {}

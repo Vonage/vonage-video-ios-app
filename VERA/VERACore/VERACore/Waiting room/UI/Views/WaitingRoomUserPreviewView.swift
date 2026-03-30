@@ -102,6 +102,20 @@ struct WaitingRoomUserPreviewView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .if(
+            state.isMicrophoneEnabled,
+            transform: {
+                $0.overlay(alignment: .bottomLeading) {
+                    if state.allowMicrophoneControl {
+                        AudioLevelIndicatorView(
+                            audioLevel: state.audioLevel,
+                            isMicEnabled: state.isMicrophoneEnabled
+                        )
+                        .padding(12)
+                    }
+                }
+            }
+        )
         .frame(maxWidth: horizontalSizeClass == .compact ? .infinity : 480, maxHeight: 320)
     }
 }

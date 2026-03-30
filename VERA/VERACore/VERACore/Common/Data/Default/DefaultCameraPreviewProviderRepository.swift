@@ -19,8 +19,9 @@ public final class DefaultCameraPreviewProviderRepository: CameraPreviewProvider
             return publisher
         }
         let producedPublisher = try publisherFactory.make(.init(scaleBehavior: .fit))
-        self.publisher = producedPublisher
-        return producedPublisher
+        let decorated = MicLevelPublisherDecorator(wrapping: producedPublisher)
+        self.publisher = decorated
+        return decorated
     }
 
     public func resetPublisher() {

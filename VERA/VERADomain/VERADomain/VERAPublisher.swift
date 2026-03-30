@@ -2,6 +2,7 @@
 //  Created by Vonage on 16/7/25.
 //
 
+import Combine
 import SwiftUI
 
 /// The available camera positions for a publisher.
@@ -77,6 +78,11 @@ public protocol VERAPublisher: AnyObject {
 
     /// Removes a audio transformer from the publisher
     func removeAudioTransformer(_ key: String)
+
+    /// A Combine publisher that emits the current audio level (0.0 to 1.0).
+    ///
+    /// Use to observe real-time audio level changes for UI indicators.
+    var audioLevelPublisher: AnyPublisher<Float, Never> { get }
 }
 
 public protocol VERATransformerFactory {
