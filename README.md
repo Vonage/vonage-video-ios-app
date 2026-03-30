@@ -146,7 +146,7 @@ You can find the `DEVELOPMENT_TEAM` ID in the top right corner of the `Certifica
 ```
 export BASE_API_URL=https://api.example.net/
 export DEVELOPMENT_TEAM=AB0C12DE34
-export MARKETING_VERSION=1.0
+export MARKETING_VERSION=1.1
 export CURRENT_PROJECT_VERSION=1
 ```
 
