@@ -121,9 +121,12 @@ struct VERAApp: App {
                         .alert(item: $navigationCoordinator.alertItem) { $0.view }
 
                         #if CHAT_ENABLED
-                            .sheet(isPresented: $showChat, onDismiss: {
-                                dependencyContainer.chatBadgeButtonViewModel.chatDidClose()
-                            }) {
+                            .sheet(
+                                isPresented: $showChat,
+                                onDismiss: {
+                                    dependencyContainer.chatBadgeButtonViewModel.chatDidClose()
+                                }
+                            ) {
                                 makeChatView()
                             }
                         #endif
