@@ -117,6 +117,7 @@ public class VonageSubscriber: NSObject {
             videoDimensions: VideoDimensions.initial,
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
+            audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
     }
@@ -175,6 +176,7 @@ public class VonageSubscriber: NSObject {
             videoDimensions: videoDimensions,
             creationTime: date,
             isScreenshare: isScreenshare,
+            audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: otSubscriber.view!)))
 
         participant.onAppear = { [weak self] in

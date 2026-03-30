@@ -84,6 +84,8 @@ struct ParticipantVideoCard: View {
                                         name: participant.name,
                                         isPinned: participant.isPinned,
                                         isRemote: participant.isRemote,
+                                        audioLevel: participant.audioLevel,
+                                        isLocal: !participant.isRemote,
                                         onTogglePin: participant.onTogglePin
                                     )
                                 } else {
@@ -97,6 +99,8 @@ struct ParticipantVideoCard: View {
                                         name: participant.name,
                                         isPinned: participant.isPinned,
                                         isRemote: participant.isRemote,
+                                        audioLevel: participant.audioLevel,
+                                        isLocal: !participant.isRemote,
                                         onTogglePin: participant.onTogglePin
                                     )
                                 }
@@ -132,6 +136,8 @@ struct ParticipantVideoCard: View {
                                     name: participant.name,
                                     isPinned: participant.isPinned,
                                     isRemote: participant.isRemote,
+                                    audioLevel: participant.audioLevel,
+                                    isLocal: !participant.isRemote,
                                     onTogglePin: participant.onTogglePin
                                 )
                             }
@@ -157,6 +163,8 @@ struct ParticipantVideoCardOverlays: View {
     let name: String
     let isPinned: Bool
     let isRemote: Bool
+    let audioLevel: Float
+    let isLocal: Bool
     var onTogglePin: (() -> Void)?
 
     var body: some View {
@@ -177,7 +185,13 @@ struct ParticipantVideoCardOverlays: View {
                             height: ParticipantVideoCardConstants.indicatorSize)
                 }
                 Spacer()
-                MicIndicator(isMicEnabled: isMicEnabled)
+                if isLocal {
+                    AudioLevelIndicatorView(
+                        audioLevel: audioLevel,
+                        isMicEnabled: isMicEnabled)
+                } else {
+                    MicIndicator(isMicEnabled: isMicEnabled)
+                }
             }
             Spacer()
             HStack {
