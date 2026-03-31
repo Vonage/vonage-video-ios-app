@@ -78,7 +78,7 @@ struct ActiveSpeakerLayoutUITests {
 
     private func makeSUT() -> ActiveSpeakerLayout {
         return ActiveSpeakerLayout(
-            participants: PreviewData.manyParticipants,
+            participants: PreviewData.uiManyParticipants,
             activeSpeakerId: PreviewData.marvin.id)
     }
 
@@ -122,13 +122,13 @@ struct ActiveSpeakerLayoutTests {
         case "Horizontal":
             view = AnyView(
                 HorizontalActiveSpeakerLayoutView(
-                    participants: PreviewData.manyParticipants,
+                    participants: PreviewData.uiManyParticipants,
                     activeSpeakerId: PreviewData.zaphodBeeblebrox.id)
             )
         case "Vertical":
             view = AnyView(
                 VerticalActiveSpeakerLayoutView(
-                    participants: PreviewData.manyParticipants,
+                    participants: PreviewData.uiManyParticipants,
                     activeSpeakerId: PreviewData.slartibartfast.id)
             )
         default:

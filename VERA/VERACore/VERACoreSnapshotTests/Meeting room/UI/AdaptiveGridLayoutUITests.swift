@@ -39,7 +39,9 @@ struct AdaptiveGridLayoutUITests {
             ("iPad", ViewImageConfig.iPadPro11),
         ])
     func oneParticipantLayout(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT(participants: [PreviewData.arthurDent])
+        let sut = makeSUT(participants: [
+            UIParticipant(participant: PreviewData.arthurDent, isPinned: false)
+        ])
 
         snapshot(sut, named: "\(deviceName)_OneParticipant", config: config)
     }
@@ -53,7 +55,8 @@ struct AdaptiveGridLayoutUITests {
         ])
     func twoParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
-            PreviewData.arthurDent, PreviewData.trillian,
+            UIParticipant(participant: PreviewData.arthurDent),
+            UIParticipant(participant: PreviewData.trillian),
         ])
 
         snapshot(sut, named: "\(deviceName)_TwoParticipants", config: config)
@@ -68,8 +71,9 @@ struct AdaptiveGridLayoutUITests {
         ])
     func threeParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
-            PreviewData.arthurDent, PreviewData.trillian,
-            PreviewData.marvin,
+            UIParticipant(participant: PreviewData.arthurDent),
+            UIParticipant(participant: PreviewData.trillian),
+            UIParticipant(participant: PreviewData.marvin),
         ])
 
         snapshot(sut, named: "\(deviceName)_ThreeParticipants", config: config)
@@ -84,8 +88,10 @@ struct AdaptiveGridLayoutUITests {
         ])
     func fourParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(participants: [
-            PreviewData.arthurDent, PreviewData.trillian,
-            PreviewData.marvin, PreviewData.zaphodBeeblebrox,
+            UIParticipant(participant: PreviewData.arthurDent),
+            UIParticipant(participant: PreviewData.trillian),
+            UIParticipant(participant: PreviewData.marvin),
+            UIParticipant(participant: PreviewData.zaphodBeeblebrox),
         ])
 
         snapshot(sut, named: "\(deviceName)_FourParticipants", config: config)
@@ -99,7 +105,7 @@ struct AdaptiveGridLayoutUITests {
             ("iPad", ViewImageConfig.iPadPro11),
         ])
     func manyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT(participants: PreviewData.manyParticipants)
+        let sut = makeSUT(participants: PreviewData.uiManyParticipants)
 
         snapshot(sut, named: "\(deviceName)_ManyParticipants", config: config)
     }
@@ -194,7 +200,7 @@ struct AdaptiveGridLayoutUITests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        participants: [Participant] = PreviewData.manyParticipants
+        participants: [UIParticipant] = PreviewData.uiManyParticipants
     ) -> AdaptiveGridLayout {
         return AdaptiveGridLayout(
             participants: participants,
@@ -219,19 +225,20 @@ struct AdaptiveGridLayoutUITests {
         )
     }
 
-    func createParticipants(count: Int) -> [Participant] {
-        var participants: [Participant] = []
+    func createParticipants(count: Int) -> [UIParticipant] {
+        var participants: [UIParticipant] = []
         for index in 1...count {
             participants.append(
-                Participant(
-                    id: "participant_\(index)",
-                    name: "User \(index)", isMicEnabled: index % 3 != 0,
-                    isCameraEnabled: index % 4 != 0,
-                    videoDimensions: .init(width: 640, height: 480),
-                    isRemote: true,
-                    creationTime: Date().addingTimeInterval(TimeInterval(index)),
-                    isScreenshare: false,
-                    view: AnyView(Color.blue))
+                UIParticipant(
+                    participant: Participant(
+                        id: "participant_\(index)",
+                        name: "User \(index)", isMicEnabled: index % 3 != 0,
+                        isCameraEnabled: index % 4 != 0,
+                        videoDimensions: .init(width: 640, height: 480),
+                        isRemote: true,
+                        creationTime: Date().addingTimeInterval(TimeInterval(index)),
+                        isScreenshare: false,
+                        view: AnyView(Color.blue)))
             )
         }
         return participants
