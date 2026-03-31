@@ -254,7 +254,8 @@ extension MeetingRoomViewModel {
     ) -> UIParticipant {
         var uiParticipant = UIParticipant(
             participant: participant,
-            isPinned: pinnedIds.contains(participant.id))
+            isPinned: pinnedIds.contains(participant.id),
+            canBePinned: pinnedIds.isRoomForPinning)
         uiParticipant.onTogglePin = { [weak self] in
             self?.onTogglePin(participantId: participant.id)
         }
@@ -367,4 +368,10 @@ extension MeetingRoomViewModel {
         extraButtons = getExternalButtons(.init(archivingState: archivingState))
     }
 
+}
+
+fileprivate extension Set<String> where Element == String {
+    var isRoomForPinning: Bool {
+        return count < 3
+    }
 }

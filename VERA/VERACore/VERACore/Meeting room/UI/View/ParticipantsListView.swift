@@ -140,7 +140,7 @@ struct ParticipantRowView: View {
 
             Spacer()
 
-            if participant.isRemote {
+            if participant.canTogglePinState {
                 Button {
                     participant.onTogglePin?()
                 } label: {

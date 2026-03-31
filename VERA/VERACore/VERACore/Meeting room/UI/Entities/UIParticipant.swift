@@ -14,12 +14,21 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public let participant: Participant
     /// Whether this participant is pinned in the UI.
     public let isPinned: Bool
+    /// Whether this participant can be pinned.
+    public let canBePinned: Bool
+    /// Whether this participant can be pinned or unpinned.
+    public var canTogglePinState: Bool { (canBePinned || isPinned) && participant.isRemote }
     /// Toggle the pin state
     public var onTogglePin: (() -> Void)?
 
-    public init(participant: Participant, isPinned: Bool = false) {
+    public init(
+        participant: Participant,
+        isPinned: Bool = false,
+        canBePinned: Bool = false
+    ) {
         self.participant = participant
         self.isPinned = isPinned
+        self.canBePinned = canBePinned
     }
 
     // MARK: - Delegated Properties
@@ -37,13 +46,16 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var containerAspectRatio: Double { participant.containerAspectRatio }
     public var aspectRatio: Double { participant.aspectRatio }
     public var audioLevel: Float { participant.audioLevel }
+    public var isProminent: Bool { participant.isScreenshare || isPinned }
     public var onAppear: (() -> Void)? { participant.onAppear }
     public var onDisappear: (() -> Void)? { participant.onDisappear }
 
     // MARK: - Equatable
 
     public static func == (lhs: UIParticipant, rhs: UIParticipant) -> Bool {
-        lhs.participant == rhs.participant && lhs.isPinned == rhs.isPinned
+        lhs.participant == rhs.participant &&
+        lhs.isPinned == rhs.isPinned &&
+        lhs.canBePinned == rhs.canBePinned
     }
 
     // MARK: - Hashable
@@ -51,5 +63,6 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(participant)
         hasher.combine(isPinned)
+        hasher.combine(canBePinned)
     }
 }

@@ -83,6 +83,7 @@ struct ParticipantVideoCard: View {
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
+                                        canTogglePinState: participant.canTogglePinState,
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
@@ -98,6 +99,7 @@ struct ParticipantVideoCard: View {
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
+                                        canTogglePinState: participant.canTogglePinState,
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
@@ -135,6 +137,7 @@ struct ParticipantVideoCard: View {
                                     isMicEnabled: participant.isMicEnabled,
                                     name: participant.name,
                                     isPinned: participant.isPinned,
+                                    canTogglePinState: participant.canTogglePinState,
                                     isRemote: participant.isRemote,
                                     audioLevel: participant.audioLevel,
                                     isLocal: !participant.isRemote,
@@ -162,6 +165,7 @@ struct ParticipantVideoCardOverlays: View {
     let isMicEnabled: Bool
     let name: String
     let isPinned: Bool
+    let canTogglePinState: Bool
     let isRemote: Bool
     let audioLevel: Float
     let isLocal: Bool
@@ -197,7 +201,7 @@ struct ParticipantVideoCardOverlays: View {
             HStack {
                 NameLabel(name: name)
                 Spacer()
-                if let onTogglePin, isRemote {
+                if let onTogglePin, canTogglePinState {
                     Menu {
                         Button {
                             onTogglePin()
