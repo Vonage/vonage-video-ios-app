@@ -211,7 +211,7 @@ public class VonageSubscriber: NSObject {
         guard subscriberDidConnect else { return }
 
         otSubscriber.subscribeToVideo = visible
-        
+
         updateParticipant()
     }
 
