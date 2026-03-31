@@ -53,9 +53,7 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     // MARK: - Equatable
 
     public static func == (lhs: UIParticipant, rhs: UIParticipant) -> Bool {
-        lhs.participant == rhs.participant &&
-        lhs.isPinned == rhs.isPinned &&
-        lhs.canBePinned == rhs.canBePinned
+        lhs.participant == rhs.participant && lhs.isPinned == rhs.isPinned && lhs.canBePinned == rhs.canBePinned
     }
 
     // MARK: - Hashable

@@ -152,18 +152,33 @@ struct HorizontalActiveSpeakerLayoutView: View {
     let participants: [UIParticipant]
     let activeSpeakerId: String?
 
-    private var activeParticipant: UIParticipant? {
-        participants.first
+    private func isParticipantProminent(_ participant: UIParticipant) -> Bool {
+        participant.isProminent || participant.id == activeSpeakerId
     }
 
+    /// Dynamically collects up to 3 prominent participants for the main viewing area.
+    private var mainAreaParticipants: [UIParticipant] {
+        guard let first = participants.first else { return [] }
+        var result = [first]
+
+        // Scan the rest of the array (bypassing the injected local participant if it's not prominent)
+        let others = participants.dropFirst().filter { isParticipantProminent($0) }
+        result.append(contentsOf: others.prefix(2))
+        return result
+    }
+
+    /// The remaining participants that will be shown in the sidebar.
     private var restOfParticipants: [UIParticipant] {
-        Array(participants.dropFirst())
+        guard !participants.isEmpty else { return [] }
+        let mainIds = Set(mainAreaParticipants.map { $0.id })
+        // Preserve original ordering for the sidebar
+        return participants.filter { !mainIds.contains($0.id) }
     }
 
     var body: some View {
         GeometryReader { geometry in
             if geometry.size.width > 0 && geometry.size.height > 0,
-                let activeParticipant = activeParticipant
+                !mainAreaParticipants.isEmpty
             {
                 let mainWidth = geometry.size.width * ActiveSpeakerLayoutConstants.mainParticipantWidthRatio
                 let sidebarWidth = geometry.size.width * ActiveSpeakerLayoutConstants.sidebarWidthRatio
@@ -174,13 +189,17 @@ struct HorizontalActiveSpeakerLayoutView: View {
                 )
 
                 HStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
-                    ParticipantVideoCard(
-                        participant: activeParticipant,
-                        activeSpeakerId: activeSpeakerId
-                    )
-                    .id(activeParticipant.id + "_main")
+                    VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
+                        ForEach(mainAreaParticipants, id: \.id) { participant in
+                            ParticipantVideoCard(
+                                participant: participant,
+                                activeSpeakerId: activeSpeakerId
+                            )
+                            .id(participant.id + "_main")
+                            .trackingVisibility(of: participant)
+                        }
+                    }
                     .frame(width: max(1, mainWidth))
-                    .trackingVisibility(of: activeParticipant)
 
                     SidebarParticipantsView(
                         participants: restOfParticipants,
@@ -298,25 +317,40 @@ struct VerticalActiveSpeakerLayoutView: View {
     let participants: [UIParticipant]
     let activeSpeakerId: String?
 
-    private var activeParticipant: UIParticipant? {
-        participants.first
+    private func isParticipantProminent(_ participant: UIParticipant) -> Bool {
+        participant.isProminent || participant.id == activeSpeakerId
     }
 
+    /// Dynamically collects up to 3 prominent participants for the main viewing area.
+    private var mainAreaParticipants: [UIParticipant] {
+        guard let first = participants.first else { return [] }
+        var result = [first]
+
+        let others = participants.dropFirst().filter { isParticipantProminent($0) }
+        result.append(contentsOf: others.prefix(2))
+        return result
+    }
+
+    /// The remaining participants that will be shown in the sidebar equivalent.
     private var restOfParticipants: [UIParticipant] {
-        Array(participants.dropFirst())
+        guard !participants.isEmpty else { return [] }
+        let mainIds = Set(mainAreaParticipants.map { $0.id })
+        return participants.filter { !mainIds.contains($0.id) }
     }
 
     var body: some View {
         VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
-            if let activeParticipant = activeParticipant {
+            // Main Prominent Area
+            ForEach(mainAreaParticipants, id: \.id) { participant in
                 ParticipantVideoCard(
-                    participant: activeParticipant,
+                    participant: participant,
                     activeSpeakerId: activeSpeakerId
                 )
-                .id(activeParticipant.id + "_main")
-                .trackingVisibility(of: activeParticipant)
+                .id(participant.id + "_main")
+                .trackingVisibility(of: participant)
             }
 
+            // Sidebar / Secondary Area
             Group {
                 if restOfParticipants.count == 1 {
                     ParticipantVideoCard(

@@ -370,8 +370,8 @@ extension MeetingRoomViewModel {
 
 }
 
-fileprivate extension Set<String> where Element == String {
-    var isRoomForPinning: Bool {
+extension Set<String> where Element == String {
+    fileprivate var isRoomForPinning: Bool {
         return count < 3
     }
 }
