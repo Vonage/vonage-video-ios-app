@@ -29,7 +29,6 @@ final class MicVolumeListener {
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             guard let self else { return }
             let rms = self.normalizeAudioLevel(buffer: buffer)
-            Self.logger.debug("mic volume RMS \(rms)")
             self.volumeSubject.send(min(max(rms, 0), 1))
         }
 
