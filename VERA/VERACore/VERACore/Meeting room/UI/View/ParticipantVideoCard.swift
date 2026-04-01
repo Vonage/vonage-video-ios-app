@@ -212,17 +212,17 @@ struct ParticipantVideoCardOverlays: View {
                                 (isPinned
                                     ? VERACommonUIAsset.Images.pin2OffSolid.swiftUIImage
                                     : VERACommonUIAsset.Images.pin2Solid.swiftUIImage)
-                                    .renderingMode(.original)
+                                    .renderingMode(.template)
                                     .resizable()
                                     .frame(
                                         width: ParticipantVideoCardConstants.labelIconSize,
                                         height: ParticipantVideoCardConstants.labelIconSize)
+                                    .foregroundStyle(.white)
                             }
                         }
                     } label: {
                         MenuIndicator()
                     }
-                    .tint(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
                 }
             }
         }
