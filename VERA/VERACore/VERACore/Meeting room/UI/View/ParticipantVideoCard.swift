@@ -216,7 +216,8 @@ struct ParticipantVideoCardOverlays: View {
                                     .resizable()
                                     .frame(
                                         width: ParticipantVideoCardConstants.labelIconSize,
-                                        height: ParticipantVideoCardConstants.labelIconSize)
+                                        height: ParticipantVideoCardConstants.labelIconSize
+                                    )
                                     .foregroundStyle(.white)
                             }
                         }
