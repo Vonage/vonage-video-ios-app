@@ -567,10 +567,10 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: [participant], activeParticipantId: nil)
         )
 
-        // Wait for participants to appear
-        _ = try await sut.$state.values
+        let initialState = try await sut.$state.values
             .compactMap(\.contentState)
             .first { $0.participantsCount == 1 }
+        #expect(initialState?.participants.first(where: { $0.id == "p1" })?.isPinned == false)
 
         sut.onTogglePin(participantId: "p1")
 
@@ -604,9 +604,10 @@ struct MeetingRoomViewModelTests {
         // Pin the participant first
         sut.onTogglePin(participantId: "p1")
 
-        _ = await sut.$state.values
+        let pinnedState = await sut.$state.values
             .compactMap(\.contentState)
             .first { $0.participants.contains(where: { $0.id == "p1" && $0.isPinned }) }
+        #expect(pinnedState?.participants.first(where: { $0.id == "p1" })?.isPinned == true)
 
         // Unpin the participant
         sut.onTogglePin(participantId: "p1")
@@ -642,9 +643,10 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
         )
 
-        _ = try await sut.$state.values
+        let initialState = try await sut.$state.values
             .compactMap(\.contentState)
             .first { $0.participantsCount == 3 }
+        #expect(initialState?.participantsCount == 3)
 
         sut.onTogglePin(participantId: "p2")
 
@@ -687,9 +689,10 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
         )
 
-        _ = try await sut.$state.values
+        let initialState = try await sut.$state.values
             .compactMap(\.contentState)
             .first { $0.participantsCount == 4 }
+        #expect(initialState?.participantsCount == 4)
 
         // Pin 3 participants
         sut.onTogglePin(participantId: "p1")
