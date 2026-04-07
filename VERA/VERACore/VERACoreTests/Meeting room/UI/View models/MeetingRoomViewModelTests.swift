@@ -717,6 +717,81 @@ struct MeetingRoomViewModelTests {
         #expect(alice.canTogglePinState == true)
     }
 
+    @Test(
+        "Given 3 pinned participants including a screen share, When the screen share leaves, Then pin counter is restored and canBePinned becomes true"
+    )
+    @MainActor
+    func pinCapacity_whenPinnedScreenShareLeaves_canBePinnedIsRestored() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+            makeMockParticipant(id: "screen1", name: "ScreenShare", isScreenshare: true),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
+        )
+
+        let initialState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.count == 4 }
+        #expect(initialState?.participants.count == 4)
+
+        // Pin 3 participants: Alice, Bob, and the screen share
+        sut.onTogglePin(participantId: "p1")
+        sut.onTogglePin(participantId: "p2")
+        sut.onTogglePin(participantId: "screen1")
+
+        let pinnedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { state in
+                state.participants.filter(\.isPinned).count == 3
+            }
+
+        // Verify Charlie cannot be pinned (3 slots used)
+        let charlieBeforeRemoval = try #require(pinnedState?.participants.first(where: { $0.id == "p3" }))
+        #expect(charlieBeforeRemoval.canBePinned == false)
+
+        // Screen share session ends — remove it from participants
+        let remainingParticipants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: remainingParticipants, activeParticipantId: nil)
+        )
+
+        // Verify Charlie can now be pinned (stale screen share ID no longer counts)
+        let restoredState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { state in
+                state.participants.filter(\.isPinned).count == 2
+                    && state.participants.first(where: { $0.id == "p3" })?.canBePinned == true
+            }
+
+        let charlieAfterRemoval = try #require(restoredState?.participants.first(where: { $0.id == "p3" }))
+        #expect(charlieAfterRemoval.canBePinned == true)
+        #expect(charlieAfterRemoval.isPinned == false)
+
+        // Alice and Bob should still be pinned
+        let aliceAfter = try #require(restoredState?.participants.first(where: { $0.id == "p1" }))
+        let bobAfter = try #require(restoredState?.participants.first(where: { $0.id == "p2" }))
+        #expect(aliceAfter.isPinned == true)
+        #expect(bobAfter.isPinned == true)
+    }
+
     // MARK: SUT
 
     func makeSUT(

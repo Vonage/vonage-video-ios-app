@@ -18,6 +18,12 @@ public protocol PinnedParticipantsDataSource {
     /// - Parameter participantId: The ID of the participant to toggle.
     func togglePin(participantId: String) async
 
+    /// Removes pinned IDs that are no longer present in the given set of active participant IDs.
+    ///
+    /// Call this when participants leave the call so stale pin entries don't consume pin slots.
+    /// - Parameter activeIds: The IDs of participants currently in the call.
+    func removeParticipants(notIn activeIds: Set<String>) async
+
     /// Removes all pinned participants.
     func reset() async
 }

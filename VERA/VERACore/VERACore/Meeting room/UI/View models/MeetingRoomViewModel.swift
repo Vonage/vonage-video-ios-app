@@ -174,8 +174,17 @@ extension MeetingRoomViewModel {
             layoutPublisher,
             pinnedParticipantsDataSource.pinnedParticipantIds
         ).map { participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+            let currentParticipantIds = Set(participantsState.participants.map(\.id))
+            let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
+
+            if activePinnedIds != pinnedIds {
+                Task { [weak self] in
+                    await self?.pinnedParticipantsDataSource.removeParticipants(notIn: currentParticipantIds)
+                }
+            }
+
             let uiParticipants = participantsState.participants.map { participant in
-                self.mapToUIParticipant(participant, pinnedIds: pinnedIds)
+                self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
             }
 
             let localUIParticipant = participantsState.localParticipant.map { participant in

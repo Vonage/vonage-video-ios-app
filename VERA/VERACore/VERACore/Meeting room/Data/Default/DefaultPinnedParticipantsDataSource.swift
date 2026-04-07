@@ -37,6 +37,12 @@ public actor DefaultPinnedParticipantsDataSource: PinnedParticipantsDataSource {
         pinnedIdsSubject.send(current)
     }
 
+    public func removeParticipants(notIn activeIds: Set<String>) {
+        let filtered = pinnedIdsSubject.value.intersection(activeIds)
+        guard filtered != pinnedIdsSubject.value else { return }
+        pinnedIdsSubject.send(filtered)
+    }
+
     public func reset() {
         pinnedIdsSubject.send([])
     }
