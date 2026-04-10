@@ -475,7 +475,6 @@ struct VonageReactionsPluginTests {
             videoDimensions: .zero,
             creationTime: Date(),
             isScreenshare: false,
-            isPinned: false,
             view: AnyView(EmptyView())
         )
     }

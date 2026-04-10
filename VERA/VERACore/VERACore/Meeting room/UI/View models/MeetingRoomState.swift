@@ -7,7 +7,7 @@ import VERAConfiguration
 import VERADomain
 
 public struct MeetingRoomParticipantsState {
-    public let participants: [Participant]
+    public let participants: [UIParticipant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
 }
@@ -21,7 +21,7 @@ public struct MeetingRoomState: Equatable {
     public let allowMicrophoneControl: Bool
     public let allowCameraControl: Bool
     public let showParticipantList: Bool
-    public let participants: [Participant]
+    public let participants: [UIParticipant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
     public let callState: CallState
@@ -37,7 +37,7 @@ public struct MeetingRoomState: Equatable {
         roomURL: URL?,
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
-        participants: [Participant],
+        participants: [UIParticipant],
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
         allowMicrophoneControl: Bool,

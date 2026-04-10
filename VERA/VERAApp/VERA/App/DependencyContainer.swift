@@ -115,7 +115,8 @@ final class DependencyContainer {
         publisherRepository: publisherRepository,
         roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
-        noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource)
+        noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
+        pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource())
 
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(

@@ -11,7 +11,7 @@ import VERADomain
 /// when it leaves the screen, enabling bandwidth optimization by only subscribing to visible
 /// participant video streams.
 struct ParticipantVisibilityModifier: ViewModifier {
-    let participant: Participant
+    let participant: UIParticipant
 
     func body(content: Content) -> some View {
         content
@@ -32,7 +32,7 @@ extension View {
     ///
     /// - Parameter participant: The participant whose visibility should be tracked.
     /// - Returns: A view that automatically manages the participant's video subscription.
-    func trackingVisibility(of participant: Participant) -> some View {
+    func trackingVisibility(of participant: UIParticipant) -> some View {
         modifier(ParticipantVisibilityModifier(participant: participant))
     }
 }

@@ -57,8 +57,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     /// Whether the publisher is currently sharing the screen.
     @Published public private(set) var isScreenshare: Bool = false
-    /// Whether this publisher is pinned in the UI.
-    @Published public private(set) var isPinned: Bool = false
     /// Current audio level [0.0, 1.0]; reactive property for UI bindings.
     @Published public private(set) var audioLevel: Float = 0.0
     /// Current video dimensions; reactive for layout and aspect ratio updates.
@@ -158,7 +156,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isRemote: false,
             creationTime: date,
             isScreenshare: false,
-            isPinned: false,
             audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
@@ -226,7 +223,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isRemote: false,
             creationTime: date,
             isScreenshare: isScreenshare,
-            isPinned: isPinned,
             audioLevel: audioLevel,
             view: view)
     }

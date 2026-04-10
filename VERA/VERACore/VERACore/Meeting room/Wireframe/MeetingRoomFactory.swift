@@ -15,6 +15,7 @@ public class MeetingRoomFactory {
     private let roomCredentialsRepository: RoomCredentialsRepository
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
+    private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
     private let appConfig: AppConfig
 
     public init(
@@ -25,7 +26,8 @@ public class MeetingRoomFactory {
         publisherRepository: PublisherRepository,
         roomCredentialsRepository: RoomCredentialsRepository,
         captionsStatusDataSource: CaptionsStatusDataSource,
-        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
         self.baseURL = baseURL
         self.appConfig = appConfig
@@ -35,6 +37,7 @@ public class MeetingRoomFactory {
         self.roomCredentialsRepository = roomCredentialsRepository
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
+        self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
     }
 
     @MainActor
@@ -58,7 +61,8 @@ public class MeetingRoomFactory {
             appConfig: appConfig,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
             getExternalButtons: getExternalButtons,
-            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
+            pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )
         return (make(viewModel: viewModel), viewModel)
     }
