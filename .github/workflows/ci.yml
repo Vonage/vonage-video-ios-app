@@ -669,7 +669,7 @@ jobs:
             -exportPath "$PWD/build" | xcpretty
 
     - name: Upload to TestFlight
-      uses: apple-actions/upload-testflight-build@v4
+      uses: apple-actions/upload-testflight-build@v3.0.1
       with:
         app-path: build/VERA.ipa
         issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
