@@ -5,7 +5,7 @@ applyTo: "**/*Tests.swift"
 ## Testing rules
 
 ### Framework
-- Use **Swift Testing** (`@Suite`, `@Test`, `#expect`, `#require`, `Issue.record()`). XCTest is only used for memory leak tracking (`trackForMemoryLeaks` via `XCTestCase` extension).
+- Prefer **Swift Testing** for unit tests (`@Suite`, `@Test`, `#expect`, `#require`, `Issue.record()`). XCTest remains in use for UI tests and for memory leak tracking helpers (`trackForMemoryLeaks` via `XCTestCase` extension).
 - Test types are `struct` with `@Suite("Description")`, not `class`.
 - Mark tests that touch `@MainActor` ViewModels or `@Published` properties with `@MainActor`.
 
