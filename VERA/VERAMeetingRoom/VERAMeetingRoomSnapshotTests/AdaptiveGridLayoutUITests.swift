@@ -8,6 +8,7 @@ import Testing
 import VERADomain
 
 @testable import VERACore
+@testable import VERAMeetingRoom
 
 @Suite("AdaptiveGrid layout UI Tests")
 @MainActor

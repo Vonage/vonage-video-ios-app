@@ -7,6 +7,7 @@ import SwiftUI
 import Testing
 
 @testable import VERACore
+@testable import VERAMeetingRoom
 
 @Suite("Active speaker layout UI Tests")
 @MainActor

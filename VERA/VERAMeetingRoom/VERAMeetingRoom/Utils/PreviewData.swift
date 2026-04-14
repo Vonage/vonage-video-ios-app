@@ -6,9 +6,9 @@ import Foundation
 import SwiftUI
 import VERADomain
 
-struct PreviewData {
+public struct PreviewData {
     // MARK: - Individual Participants
-    static let arthurDent = Participant(
+    public static let arthurDent = Participant(
         id: "1",
         name: "Arthur Dent",
         isMicEnabled: true,
@@ -19,7 +19,7 @@ struct PreviewData {
         view: AnyView(Color.red)
     )
 
-    static let fordPrefect = Participant(
+    public static let fordPrefect = Participant(
         id: "2",
         name: "Ford Prefect",
         isMicEnabled: true,
@@ -30,7 +30,7 @@ struct PreviewData {
         view: AnyView(Color.green)
     )
 
-    static let zaphodBeeblebrox = Participant(
+    public static let zaphodBeeblebrox = Participant(
         id: "3",
         name: "Zaphod Beeblebrox",
         isMicEnabled: true,
@@ -41,7 +41,7 @@ struct PreviewData {
         view: AnyView(Color.blue)
     )
 
-    static let trillian = Participant(
+    public static let trillian = Participant(
         id: "4",
         name: "Trillian",
         isMicEnabled: true,
@@ -52,7 +52,7 @@ struct PreviewData {
         view: AnyView(Color.yellow)
     )
 
-    static let marvin = Participant(
+    public static let marvin = Participant(
         id: "5",
         name: "Marvin",
         isMicEnabled: true,
@@ -63,7 +63,7 @@ struct PreviewData {
         view: AnyView(Color.purple)
     )
 
-    static let slartibartfast = Participant(
+    public static let slartibartfast = Participant(
         id: "6",
         name: "Slartibartfast",
         isMicEnabled: true,
@@ -74,7 +74,7 @@ struct PreviewData {
         view: AnyView(Color.orange)
     )
 
-    static let eddie = Participant(
+    public static let eddie = Participant(
         id: "7",
         name: "Eddie",
         isMicEnabled: true,
@@ -85,7 +85,7 @@ struct PreviewData {
         view: AnyView(Color.cyan)
     )
 
-    static let hummaKavula = Participant(
+    public static let hummaKavula = Participant(
         id: "8",
         name: "Humma Kavula",
         isMicEnabled: true,
@@ -96,7 +96,7 @@ struct PreviewData {
         view: AnyView(Color.mint)
     )
 
-    static let fenchurch = Participant(
+    public static let fenchurch = Participant(
         id: "9",
         name: "Fenchurch",
         isMicEnabled: true,
@@ -108,7 +108,7 @@ struct PreviewData {
     )
 
     // MARK: - Special State Participants
-    static let cameraOffParticipant = Participant(
+    public static let cameraOffParticipant = Participant(
         id: "cam_off",
         name: "Camera Off",
         isMicEnabled: true,
@@ -119,7 +119,7 @@ struct PreviewData {
         view: AnyView(Color.red)
     )
 
-    static let micOffParticipant = Participant(
+    public static let micOffParticipant = Participant(
         id: "mic_off",
         name: "Mic Off",
         isMicEnabled: false,
@@ -131,7 +131,7 @@ struct PreviewData {
     )
 
     // MARK: - Array Collections
-    static let participants: [Participant] = [
+    public static let participants: [Participant] = [
         arthurDent,
         fordPrefect,
         zaphodBeeblebrox,
@@ -143,20 +143,20 @@ struct PreviewData {
         fenchurch,
     ]
 
-    static let singleParticipant = arthurDent
-    static let twoParticipants = [arthurDent, fordPrefect]
-    static let manyParticipants = participants
+    public static let singleParticipant = arthurDent
+    public static let twoParticipants = [arthurDent, fordPrefect]
+    public static let manyParticipants = participants
 
-    static let mixedStates: [Participant] = [
+    public static let mixedStates: [Participant] = [
         cameraOffParticipant,
         micOffParticipant,
     ]
 
     // MARK: - UIParticipant Collections
-    static let uiSingleParticipant = UIParticipant(participant: arthurDent, isPinned: false)
-    static let uiTwoParticipants = [
+    public static let uiSingleParticipant = UIParticipant(participant: arthurDent, isPinned: false)
+    public static let uiTwoParticipants = [
         UIParticipant(participant: arthurDent, isPinned: false),
         UIParticipant(participant: fordPrefect, isPinned: false),
     ]
-    static let uiManyParticipants = participants.map { UIParticipant(participant: $0, isPinned: false) }
+    public static let uiManyParticipants = participants.map { UIParticipant(participant: $0, isPinned: false) }
 }

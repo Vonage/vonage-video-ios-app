@@ -5,6 +5,7 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
+import VERAMeetingRoom
 
 @testable import VERACore
 
