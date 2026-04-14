@@ -21,8 +21,7 @@ public final class ChatBadgeButtonViewModel: ObservableObject {
                 guard let self else { return }
                 self.totalMessageCount = messages.count
                 if self.isChatVisible {
-                    self.lastReadCount = messages.count
-                    self.unreadMessagesCount = 0
+                    self.markAllAsRead()
                 } else {
                     self.unreadMessagesCount = max(0, messages.count - self.lastReadCount)
                 }
@@ -32,6 +31,10 @@ public final class ChatBadgeButtonViewModel: ObservableObject {
 
     public func chatDidOpen() {
         isChatVisible = true
+        markAllAsRead()
+    }
+
+    private func markAllAsRead() {
         lastReadCount = totalMessageCount
         unreadMessagesCount = 0
     }
