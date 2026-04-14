@@ -166,6 +166,19 @@ jobs:
           -resultBundlePath DerivedData/VERASettingsTests-macOS.xcresult \
           $XCODE_COMMON_FLAGS | xcpretty
 
+    - name: Run VERAMeetingRoomTests (macOS)
+      id: meetingroom-tests-macos
+      run: |
+        echo "🧪 Running VERAMeetingRoomTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAMeetingRoomTests \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
     - name: Preboot iOS Simulator
       run: |
         set -euo pipefail
@@ -268,6 +281,31 @@ jobs:
           -derivedDataPath DerivedData \
           -enableCodeCoverage YES \
           -resultBundlePath DerivedData/VERACaptionsSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+    - name: Run VERAMeetingRoomSnapshotTests (iOS Simulator)
+      id: meetingroom-snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Building VERAMeetingRoomSnapshotTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAMeetingRoomSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+        
+        echo "📸 Running VERAMeetingRoomSnapshotTests on iOS Simulator"
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAMeetingRoomSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult \
           -parallel-testing-enabled NO \
           $XCODE_COMMON_FLAGS | xcpretty
 
@@ -537,6 +575,8 @@ jobs:
           DerivedData/VERATests-iOS.xcresult
           DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
           DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult
+          DerivedData/VERAMeetingRoomTests-macOS.xcresult
+          DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
           DerivedData/Build/Products/
           
   sonarcloud:

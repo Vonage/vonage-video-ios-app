@@ -6,6 +6,7 @@ import Foundation
 import VERACore
 import VERADomain
 import VERAMeetingRoom
+import VERATestHelpers
 
 public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {
     MockConnectToRoomUseCase()

@@ -24,7 +24,6 @@ let project = Project(
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERAConfiguration", path: "../VERAConfiguration"),
-                .project(target: "VERAMeetingRoom", path: "../VERAMeetingRoom"),
             ],
             settings: createBaseBuildSettings()
         ),
@@ -36,8 +35,7 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERATestHelpers/**"],
             dependencies: [
-                .target(name: "VERACore"),
-                .project(target: "VERAMeetingRoom", path: "../VERAMeetingRoom"),
+                .target(name: "VERACore")
             ],
             settings: createBaseBuildSettings()
         ),
