@@ -1,76 +1,87 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
-@testable import VERALogger
 import CocoaLumberjackSwift
-import XCTest
+import Foundation
+import Testing
 
-final class CocoaLumberjackStrategyTests: XCTestCase {
+@testable import VERALogger
 
-    override func tearDown() {
-        DDLog.removeAllLoggers()
-        super.tearDown()
+@Suite("CocoaLumberjackStrategy Tests")
+struct CocoaLumberjackStrategyTests {
+
+    // MARK: - Test Helpers
+
+    private func makeTempDir(name: String = "vera-dd") -> String {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(name)-\(UUID().uuidString)")
+            .path
+    }
+
+    private func cleanup(_ path: String) {
+        try? FileManager.default.removeItem(atPath: path)
     }
 
     // MARK: - Backward Compatibility
 
-    func testDefaultInitAddsOSLogger() {
+    @Test("Default init adds OS logger without crash")
+    func defaultInitAddsOSLogger() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy()
-        // Should not crash, OS logger is added
         strategy.log(LogEvent(level: .info, tag: "Test", message: "default init"))
     }
 
-    func testInitWithConfigureDefaultsFalse() {
+    @Test("Init with configureDefaults false does not crash")
+    func initWithConfigureDefaultsFalse() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy(configureDefaults: false)
-        // Should not crash even with no loggers
         strategy.log(LogEvent(level: .debug, tag: "Test", message: "no defaults"))
     }
 
     // MARK: - Builder
 
-    func testBuilderWithOSLogger() {
+    @Test("Builder with OS logger does not crash")
+    func builderWithOSLogger() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Builder", message: "os logger test"))
-        // Should not crash
     }
 
-    func testBuilderWithFileLogger() {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vera-dd-test-\(UUID().uuidString)")
-            .path
+    @Test("Builder with file logger creates log files")
+    func builderWithFileLogger() {
+        defer { DDLog.removeAllLoggers() }
+        let tempDir = makeTempDir(name: "vera-dd-test")
+        defer { cleanup(tempDir) }
 
         let strategy = CocoaLumberjackStrategy.Builder()
             .withFileLogger(directory: tempDir, maxNumberOfFiles: 3)
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Builder", message: "file logger test"))
-
-        // DDLog writes asynchronously; flush to ensure the file is created
         DDLog.flushLog()
 
-        XCTAssertFalse(strategy.logFilePaths.isEmpty)
-
-        // Clean up
-        try? FileManager.default.removeItem(atPath: tempDir)
+        #expect(!strategy.logFilePaths.isEmpty)
     }
 
-    func testBuilderWithConsoleLogger() {
+    @Test("Builder with console logger does not crash")
+    func builderWithConsoleLogger() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withConsoleLogger()
             .build()
 
         strategy.log(LogEvent(level: .debug, tag: "Builder", message: "console test"))
-        // Should not crash
     }
 
-    func testBuilderWithMultipleLoggers() {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vera-dd-multi-\(UUID().uuidString)")
-            .path
+    @Test("Builder with multiple loggers all work together")
+    func builderWithMultipleLoggers() {
+        defer { DDLog.removeAllLoggers() }
+        let tempDir = makeTempDir(name: "vera-dd-multi")
+        defer { cleanup(tempDir) }
 
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
@@ -81,36 +92,37 @@ final class CocoaLumberjackStrategyTests: XCTestCase {
         strategy.log(LogEvent(level: .warn, tag: "Multi", message: "all loggers"))
         DDLog.flushLog()
 
-        XCTAssertFalse(strategy.logFilePaths.isEmpty)
-
-        try? FileManager.default.removeItem(atPath: tempDir)
+        #expect(!strategy.logFilePaths.isEmpty)
     }
 
-    func testBuilderWithCustomFormatter() {
-        // Any DDLogFormatter can be passed to customize output
+    @Test("Builder with custom formatter does not crash")
+    func builderWithCustomFormatter() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Fmt", message: "custom formatter"))
-        // Should not crash
     }
 
     // MARK: - Log File Access
 
-    func testLogFilePathsEmptyWithoutFileLogger() {
+    @Test("Log file paths are empty without file logger")
+    func logFilePathsEmptyWithoutFileLogger() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
 
-        XCTAssertTrue(strategy.logFilePaths.isEmpty)
-        XCTAssertTrue(strategy.logFileURLs.isEmpty)
+        #expect(strategy.logFilePaths.isEmpty)
+        #expect(strategy.logFileURLs.isEmpty)
     }
 
-    func testLogFilePathsReturnPathsWithFileLogger() {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vera-dd-paths-\(UUID().uuidString)")
-            .path
+    @Test("Log file paths return paths with file logger")
+    func logFilePathsReturnPathsWithFileLogger() {
+        defer { DDLog.removeAllLoggers() }
+        let tempDir = makeTempDir(name: "vera-dd-paths")
+        defer { cleanup(tempDir) }
 
         let strategy = CocoaLumberjackStrategy.Builder()
             .withFileLogger(directory: tempDir)
@@ -119,28 +131,29 @@ final class CocoaLumberjackStrategyTests: XCTestCase {
         strategy.log(LogEvent(level: .info, tag: "Paths", message: "test"))
         DDLog.flushLog()
 
-        XCTAssertFalse(strategy.logFilePaths.isEmpty)
-        XCTAssertEqual(strategy.logFilePaths.count, strategy.logFileURLs.count)
+        #expect(!strategy.logFilePaths.isEmpty)
+        #expect(strategy.logFilePaths.count == strategy.logFileURLs.count)
 
         for url in strategy.logFileURLs {
-            XCTAssertTrue(url.isFileURL)
+            #expect(url.isFileURL)
         }
-
-        try? FileManager.default.removeItem(atPath: tempDir)
     }
 
     // MARK: - Convenience Factories
 
-    func testOsOnlyFactory() {
+    @Test("osOnly factory creates strategy without file logging")
+    func osOnlyFactory() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.osOnly()
         strategy.log(LogEvent(level: .info, tag: "Factory", message: "os only"))
-        XCTAssertTrue(strategy.logFilePaths.isEmpty)
+        #expect(strategy.logFilePaths.isEmpty)
     }
 
-    func testWithFileLoggingFactory() {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vera-dd-factory-\(UUID().uuidString)")
-            .path
+    @Test("withFileLogging factory creates strategy with file logging")
+    func withFileLoggingFactory() {
+        defer { DDLog.removeAllLoggers() }
+        let tempDir = makeTempDir(name: "vera-dd-factory")
+        defer { cleanup(tempDir) }
 
         let strategy = CocoaLumberjackStrategy.withFileLogging(
             directory: tempDir,
@@ -150,29 +163,29 @@ final class CocoaLumberjackStrategyTests: XCTestCase {
         strategy.log(LogEvent(level: .error, tag: "Factory", message: "file factory"))
         DDLog.flushLog()
 
-        XCTAssertFalse(strategy.logFilePaths.isEmpty)
-
-        try? FileManager.default.removeItem(atPath: tempDir)
+        #expect(!strategy.logFilePaths.isEmpty)
     }
 
-    func testFullFactory() {
+    @Test("full factory creates strategy without crash")
+    func fullFactory() {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.full()
         strategy.log(LogEvent(level: .info, tag: "Factory", message: "full factory"))
-        // Should not crash — all loggers active
     }
 
     // MARK: - File Logger Configuration
 
-    func testFileLoggerRollingFrequency() {
-        let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vera-dd-rolling-\(UUID().uuidString)")
-            .path
+    @Test("File logger respects custom rolling configuration")
+    func fileLoggerRollingFrequency() {
+        defer { DDLog.removeAllLoggers() }
+        let tempDir = makeTempDir(name: "vera-dd-rolling")
+        defer { cleanup(tempDir) }
 
         let strategy = CocoaLumberjackStrategy.Builder()
             .withFileLogger(
                 directory: tempDir,
-                rollingFrequency: 60 * 60 * 12,  // 12 hours
-                maxFileSize: 2 * 1024 * 1024,     // 2 MB
+                rollingFrequency: 60 * 60 * 12,
+                maxFileSize: 2 * 1024 * 1024,
                 maxNumberOfFiles: 5
             )
             .build()
@@ -180,22 +193,21 @@ final class CocoaLumberjackStrategyTests: XCTestCase {
         strategy.log(LogEvent(level: .info, tag: "Config", message: "custom rolling"))
         DDLog.flushLog()
 
-        XCTAssertFalse(strategy.logFilePaths.isEmpty)
-
-        try? FileManager.default.removeItem(atPath: tempDir)
+        #expect(!strategy.logFilePaths.isEmpty)
     }
 
     // MARK: - All Log Levels
 
-    func testAllLogLevelsWork() {
+    @Test(
+        "All log levels work without crash",
+        arguments: [LogLevel.verbose, .debug, .info, .warn, .error]
+    )
+    func allLogLevelsWork(level: LogLevel) {
+        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
 
-        let levels: [LogLevel] = [.verbose, .debug, .info, .warn, .error]
-        for level in levels {
-            strategy.log(LogEvent(level: level, tag: "Levels", message: "\(level)"))
-        }
-        // Should not crash for any level
+        strategy.log(LogEvent(level: level, tag: "Levels", message: "\(level)"))
     }
 }

@@ -1,5 +1,5 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
 import Foundation
@@ -21,10 +21,10 @@ public enum LogLevel: Int, Sendable, Comparable, CaseIterable, CustomStringConve
     public var description: String {
         switch self {
         case .verbose: return "VERBOSE"
-        case .debug:   return "DEBUG"
-        case .info:    return "INFO"
-        case .warn:    return "WARN"
-        case .error:   return "ERROR"
+        case .debug: return "DEBUG"
+        case .info: return "INFO"
+        case .warn: return "WARN"
+        case .error: return "ERROR"
         }
     }
 }

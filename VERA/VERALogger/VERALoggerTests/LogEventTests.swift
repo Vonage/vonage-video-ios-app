@@ -1,32 +1,38 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
+import Foundation
+import Testing
+
 @testable import VERALogger
-import XCTest
 
-final class LogEventTests: XCTestCase {
+@Suite("LogEvent Tests")
+struct LogEventTests {
 
-    func testDefaultTimestampAndThread() {
+    @Test("Default timestamp is set to now and thread is non-empty")
+    func defaultTimestampAndThread() {
         let before = Date()
         let event = LogEvent(level: .debug, tag: "T", message: "msg")
         let after = Date()
 
-        XCTAssertGreaterThanOrEqual(event.timestamp, before)
-        XCTAssertLessThanOrEqual(event.timestamp, after)
-        XCTAssertFalse(event.thread.isEmpty)
+        #expect(event.timestamp >= before)
+        #expect(event.timestamp <= after)
+        #expect(!event.thread.isEmpty)
     }
 
-    func testCopyOverridesFields() {
+    @Test("Copy overrides specified fields")
+    func copyOverridesFields() {
         let event = LogEvent(level: .debug, tag: "Original", message: "msg")
         let copied = event.copy(tag: "Changed", message: "new msg")
 
-        XCTAssertEqual(copied.tag, "Changed")
-        XCTAssertEqual(copied.message, "new msg")
-        XCTAssertEqual(copied.level, .debug) // unchanged
+        #expect(copied.tag == "Changed")
+        #expect(copied.message == "new msg")
+        #expect(copied.level == .debug)
     }
 
-    func testCopyPreservesUnchangedFields() {
+    @Test("Copy preserves unchanged fields")
+    func copyPreservesUnchangedFields() {
         let error = NSError(domain: "test", code: 1)
         let event = LogEvent(
             level: .error,
@@ -38,16 +44,17 @@ final class LogEventTests: XCTestCase {
         )
         let copied = event.copy(level: .warn)
 
-        XCTAssertEqual(copied.level, .warn)
-        XCTAssertEqual(copied.tag, "T")
-        XCTAssertEqual(copied.message, "msg")
-        XCTAssertNotNil(copied.error)
-        XCTAssertEqual(copied.timestamp, Date(timeIntervalSince1970: 1000))
-        XCTAssertEqual(copied.thread, "mythread")
+        #expect(copied.level == .warn)
+        #expect(copied.tag == "T")
+        #expect(copied.message == "msg")
+        #expect(copied.error != nil)
+        #expect(copied.timestamp == Date(timeIntervalSince1970: 1000))
+        #expect(copied.thread == "mythread")
     }
 
-    func testNilErrorDefault() {
+    @Test("Error defaults to nil")
+    func nilErrorDefault() {
         let event = LogEvent(level: .info, tag: "T", message: "msg")
-        XCTAssertNil(event.error)
+        #expect(event.error == nil)
     }
 }

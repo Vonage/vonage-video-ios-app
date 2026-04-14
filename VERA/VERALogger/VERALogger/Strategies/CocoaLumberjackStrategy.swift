@@ -1,9 +1,9 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
-import Foundation
 import CocoaLumberjackSwift
+import Foundation
 
 /// A logging strategy that uses CocoaLumberjack for log output.
 ///

@@ -1,13 +1,16 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
+import Foundation
+import Testing
+
 @testable import VERALogger
-import XCTest
 
-final class LoggerCompositeTests: XCTestCase {
+@Suite("LoggerComposite Tests")
+struct LoggerCompositeTests {
 
-    // MARK: - Helpers
+    // MARK: - Test Helpers
 
     /// A test strategy that records all events it receives.
     private final class CollectingStrategy: LoggerStrategy, @unchecked Sendable {
@@ -27,7 +30,7 @@ final class LoggerCompositeTests: XCTestCase {
         }
     }
 
-    /// A test strategy that blocks events.
+    /// A test strategy that blocks all events.
     private final class BlockingStrategy: LoggerStrategy, @unchecked Sendable {
         private let lock = NSLock()
         private var _events: [LogEvent] = []
@@ -38,8 +41,8 @@ final class LoggerCompositeTests: XCTestCase {
             return _events
         }
 
-        func shouldLog(_ event: LogEvent) -> LogEvent? {
-            nil
+        func shouldLog(_ event: LogEvent) -> Bool {
+            false
         }
 
         func log(_ event: LogEvent) {
@@ -49,8 +52,8 @@ final class LoggerCompositeTests: XCTestCase {
         }
     }
 
-    /// A test strategy that transforms the tag.
-    private final class TransformingStrategy: LoggerStrategy, @unchecked Sendable {
+    /// A test strategy that only accepts error-level events.
+    private final class ErrorOnlyStrategy: LoggerStrategy, @unchecked Sendable {
         private let lock = NSLock()
         private var _events: [LogEvent] = []
 
@@ -60,8 +63,8 @@ final class LoggerCompositeTests: XCTestCase {
             return _events
         }
 
-        func shouldLog(_ event: LogEvent) -> LogEvent? {
-            event.copy(tag: "Transformed")
+        func shouldLog(_ event: LogEvent) -> Bool {
+            event.level >= .error
         }
 
         func log(_ event: LogEvent) {
@@ -71,9 +74,10 @@ final class LoggerCompositeTests: XCTestCase {
         }
     }
 
-    // MARK: - Tests
+    // MARK: - Dispatch Tests
 
-    func testLogDispatchesToAllStrategies() {
+    @Test("Log dispatches to all strategies")
+    func logDispatchesToAllStrategies() {
         let strategy1 = CollectingStrategy()
         let strategy2 = CollectingStrategy()
         let composite = LoggerComposite(strategies: [strategy1, strategy2])
@@ -81,35 +85,38 @@ final class LoggerCompositeTests: XCTestCase {
         let event = LogEvent(level: .debug, tag: "Test", message: "hello")
         composite.logSync(event)
 
-        XCTAssertEqual(strategy1.events.count, 1)
-        XCTAssertEqual(strategy2.events.count, 1)
-        XCTAssertEqual(strategy1.events[0].message, "hello")
+        #expect(strategy1.events.count == 1)
+        #expect(strategy2.events.count == 1)
+        #expect(strategy1.events[0].message == "hello")
     }
 
-    func testLogPreservesEventFields() {
+    @Test("Log preserves event fields")
+    func logPreservesEventFields() {
         let strategy = CollectingStrategy()
         let composite = LoggerComposite(strategies: [strategy])
 
         let event = LogEvent(level: .error, tag: "MyTag", message: "test msg")
         composite.logSync(event)
 
-        XCTAssertEqual(strategy.events.count, 1)
-        XCTAssertEqual(strategy.events[0].level, .error)
-        XCTAssertEqual(strategy.events[0].tag, "MyTag")
-        XCTAssertEqual(strategy.events[0].message, "test msg")
+        #expect(strategy.events.count == 1)
+        #expect(strategy.events[0].level == .error)
+        #expect(strategy.events[0].tag == "MyTag")
+        #expect(strategy.events[0].message == "test msg")
     }
 
-    func testFilterBlocksEvent() {
+    @Test("Filter blocks event from strategy")
+    func filterBlocksEvent() {
         let blocker = BlockingStrategy()
         let composite = LoggerComposite(strategies: [blocker])
 
         let event = LogEvent(level: .debug, tag: "T", message: "should be blocked")
         composite.logSync(event)
 
-        XCTAssertTrue(blocker.events.isEmpty)
+        #expect(blocker.events.isEmpty)
     }
 
-    func testFilterOnOneStrategyDoesNotAffectOthers() {
+    @Test("Filter on one strategy does not affect others")
+    func filterOnOneStrategyDoesNotAffectOthers() {
         let blocker = BlockingStrategy()
         let collector = CollectingStrategy()
         let composite = LoggerComposite(strategies: [blocker, collector])
@@ -117,30 +124,32 @@ final class LoggerCompositeTests: XCTestCase {
         let event = LogEvent(level: .info, tag: "T", message: "partial")
         composite.logSync(event)
 
-        XCTAssertTrue(blocker.events.isEmpty)
-        XCTAssertEqual(collector.events.count, 1)
+        #expect(blocker.events.isEmpty)
+        #expect(collector.events.count == 1)
     }
 
-    func testTransformHookModifiesEvent() {
-        let transformer = TransformingStrategy()
-        let composite = LoggerComposite(strategies: [transformer])
+    @Test("Error-only filter passes errors and skips others")
+    func errorOnlyFilter() {
+        let errorOnly = ErrorOnlyStrategy()
+        let composite = LoggerComposite(strategies: [errorOnly])
 
-        let event = LogEvent(level: .debug, tag: "Original", message: "test")
-        composite.logSync(event)
+        composite.logSync(LogEvent(level: .debug, tag: "T", message: "should skip"))
+        composite.logSync(LogEvent(level: .error, tag: "T", message: "should pass"))
 
-        XCTAssertEqual(transformer.events.count, 1)
-        XCTAssertEqual(transformer.events[0].tag, "Transformed")
+        #expect(errorOnly.events.count == 1)
+        #expect(errorOnly.events[0].level == .error)
     }
 
-    func testNoStrategiesDoesNotCrash() {
+    @Test("Empty strategies does not crash")
+    func noStrategiesDoesNotCrash() {
         let composite = LoggerComposite(strategies: [])
         let event = LogEvent(level: .debug, tag: "T", message: "no listeners")
 
         composite.logSync(event)
-        // Should not crash
     }
 
-    func testMultipleEventsAreAllDispatched() {
+    @Test("Multiple events are all dispatched")
+    func multipleEventsAreAllDispatched() {
         let strategy = CollectingStrategy()
         let composite = LoggerComposite(strategies: [strategy])
 
@@ -148,19 +157,78 @@ final class LoggerCompositeTests: XCTestCase {
             composite.logSync(LogEvent(level: .info, tag: "T", message: "msg \(i)"))
         }
 
-        XCTAssertEqual(strategy.events.count, 5)
+        #expect(strategy.events.count == 5)
     }
 
-    func testAllLogLevelsAreDispatched() {
+    @Test(
+        "All log levels are dispatched",
+        arguments: [LogLevel.verbose, .debug, .info, .warn, .error]
+    )
+    func allLogLevelsAreDispatched(level: LogLevel) {
         let strategy = CollectingStrategy()
         let composite = LoggerComposite(strategies: [strategy])
 
-        let levels: [LogLevel] = [.verbose, .debug, .info, .warn, .error]
-        for level in levels {
-            composite.logSync(LogEvent(level: level, tag: "T", message: "\(level)"))
+        composite.logSync(LogEvent(level: level, tag: "T", message: "\(level)"))
+
+        #expect(strategy.events.count == 1)
+        #expect(strategy.events[0].level == level)
+    }
+
+    // MARK: - Custom Queue Tests
+
+    @Test("Async log dispatches on custom queue")
+    func asyncLogDispatchesOnCustomQueue() async {
+        let customQueue = DispatchQueue(label: "com.vonage.VERALogger.test.custom", qos: .userInitiated)
+        let strategy = CollectingStrategy()
+        let composite = LoggerComposite(strategies: [strategy], queue: customQueue)
+
+        let event = LogEvent(level: .info, tag: "Queue", message: "custom queue")
+        composite.log(event)
+
+        // Wait for the async dispatch to complete
+        await withCheckedContinuation { continuation in
+            customQueue.async {
+                continuation.resume()
+            }
         }
 
-        XCTAssertEqual(strategy.events.count, 5)
-        XCTAssertEqual(strategy.events.map(\.level), levels)
+        #expect(strategy.events.count == 1)
+        #expect(strategy.events[0].message == "custom queue")
+    }
+
+    @Test("Custom queue preserves serial ordering")
+    func customQueuePreservesSerialOrdering() async {
+        let customQueue = DispatchQueue(label: "com.vonage.VERALogger.test.ordering")
+        let strategy = CollectingStrategy()
+        let composite = LoggerComposite(strategies: [strategy], queue: customQueue)
+
+        for i in 0..<10 {
+            composite.log(LogEvent(level: .info, tag: "T", message: "msg \(i)"))
+        }
+
+        await withCheckedContinuation { continuation in
+            customQueue.async {
+                continuation.resume()
+            }
+        }
+
+        #expect(strategy.events.count == 10)
+        for i in 0..<10 {
+            #expect(strategy.events[i].message == "msg \(i)")
+        }
+    }
+
+    @Test("Default queue works without explicit queue parameter")
+    func defaultQueueWorks() async {
+        let strategy = CollectingStrategy()
+        let composite = LoggerComposite(strategies: [strategy])
+
+        composite.log(LogEvent(level: .debug, tag: "T", message: "default queue"))
+
+        // Small delay to let default async dispatch complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        #expect(strategy.events.count == 1)
+        #expect(strategy.events[0].message == "default queue")
     }
 }

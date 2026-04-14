@@ -5,7 +5,7 @@ let project = Project(
     name: "VERALogger",
     options: defaultProjectOptions(),
     packages: [
-        .cocoaLumberjack,
+        .cocoaLumberjack
     ],
     targets: [
         .target(
@@ -17,7 +17,7 @@ let project = Project(
             sources: ["VERALogger/**"],
             scripts: [.swiftLint(targetName: "VERALogger")],
             dependencies: [
-                .cocoaLumberjackSwift,
+                .cocoaLumberjackSwift
             ],
             settings: createBaseBuildSettings()
         ),

@@ -1,28 +1,39 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
+import Testing
+
 @testable import VERALogger
-import XCTest
 
-final class LogLevelTests: XCTestCase {
+@Suite("LogLevel Tests")
+struct LogLevelTests {
 
-    func testOrdering() {
-        XCTAssertTrue(LogLevel.verbose < LogLevel.debug)
-        XCTAssertTrue(LogLevel.debug < LogLevel.info)
-        XCTAssertTrue(LogLevel.info < LogLevel.warn)
-        XCTAssertTrue(LogLevel.warn < LogLevel.error)
+    @Test("Levels are ordered from verbose to error")
+    func ordering() {
+        #expect(LogLevel.verbose < LogLevel.debug)
+        #expect(LogLevel.debug < LogLevel.info)
+        #expect(LogLevel.info < LogLevel.warn)
+        #expect(LogLevel.warn < LogLevel.error)
     }
 
-    func testDescriptions() {
-        XCTAssertEqual(LogLevel.verbose.description, "VERBOSE")
-        XCTAssertEqual(LogLevel.debug.description, "DEBUG")
-        XCTAssertEqual(LogLevel.info.description, "INFO")
-        XCTAssertEqual(LogLevel.warn.description, "WARN")
-        XCTAssertEqual(LogLevel.error.description, "ERROR")
+    @Test(
+        "Each level has the correct description",
+        arguments: [
+            (LogLevel.verbose, "VERBOSE"),
+            (LogLevel.debug, "DEBUG"),
+            (LogLevel.info, "INFO"),
+            (LogLevel.warn, "WARN"),
+            (LogLevel.error, "ERROR"),
+        ]
+    )
+    func descriptions(testCase: (LogLevel, String)) {
+        let (level, expected) = testCase
+        #expect(level.description == expected)
     }
 
-    func testAllCases() {
-        XCTAssertEqual(LogLevel.allCases.count, 5)
+    @Test("All cases count is 5")
+    func allCases() {
+        #expect(LogLevel.allCases.count == 5)
     }
 }

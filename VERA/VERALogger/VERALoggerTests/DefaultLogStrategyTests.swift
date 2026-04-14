@@ -1,13 +1,17 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
+import Foundation
+import Testing
+
 @testable import VERALogger
-import XCTest
 
-final class DefaultLogStrategyTests: XCTestCase {
+@Suite("DefaultLogStrategy Tests")
+struct DefaultLogStrategyTests {
 
-    func testFormatEventWithoutError() {
+    @Test("Format event without error includes level, thread, tag, and message")
+    func formatEventWithoutError() {
         let strategy = DefaultLogStrategy()
         let event = LogEvent(
             level: .info,
@@ -19,13 +23,14 @@ final class DefaultLogStrategyTests: XCTestCase {
 
         let formatted = strategy.formatEvent(event)
 
-        XCTAssertTrue(formatted.contains("[INFO]"))
-        XCTAssertTrue(formatted.contains("[main]"))
-        XCTAssertTrue(formatted.contains("TestTag: hello"))
-        XCTAssertFalse(formatted.contains("\n"))
+        #expect(formatted.contains("[INFO]"))
+        #expect(formatted.contains("[main]"))
+        #expect(formatted.contains("TestTag: hello"))
+        #expect(!formatted.contains("\n"))
     }
 
-    func testFormatEventWithError() {
+    @Test("Format event with error includes error description")
+    func formatEventWithError() {
         let strategy = DefaultLogStrategy()
         let error = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "fail"])
         let event = LogEvent(
@@ -39,24 +44,27 @@ final class DefaultLogStrategyTests: XCTestCase {
 
         let formatted = strategy.formatEvent(event)
 
-        XCTAssertTrue(formatted.contains("[ERROR]"))
-        XCTAssertTrue(formatted.contains("Err: broke"))
-        XCTAssertTrue(formatted.contains("fail"))
+        #expect(formatted.contains("[ERROR]"))
+        #expect(formatted.contains("Err: broke"))
+        #expect(formatted.contains("fail"))
     }
 
-    func testAllLogLevelsFormat() {
+    @Test(
+        "Format event includes correct level label",
+        arguments: LogLevel.allCases
+    )
+    func allLogLevelsFormat(level: LogLevel) {
         let strategy = DefaultLogStrategy()
+        let event = LogEvent(
+            level: level,
+            tag: "T",
+            message: "msg",
+            timestamp: Date(timeIntervalSince1970: 0),
+            thread: "t"
+        )
 
-        for level in LogLevel.allCases {
-            let event = LogEvent(
-                level: level,
-                tag: "T",
-                message: "msg",
-                timestamp: Date(timeIntervalSince1970: 0),
-                thread: "t"
-            )
-            let formatted = strategy.formatEvent(event)
-            XCTAssertTrue(formatted.contains("[\(level)]"), "Missing level \(level)")
-        }
+        let formatted = strategy.formatEvent(event)
+
+        #expect(formatted.contains("[\(level)]"), "Missing level \(level)")
     }
 }

@@ -1,5 +1,5 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
 import Foundation
@@ -20,26 +20,34 @@ public final class LoggerComposite: @unchecked Sendable {
     private let strategies: [any LoggerStrategy]
     private let queue: DispatchQueue
 
-    /// Creates a composite with the given strategies.
+    /// Creates a composite logger with the given strategies.
     ///
-    /// - Parameter strategies: The logging backends to dispatch events to.
-    public init(strategies: [any LoggerStrategy]) {
+    /// - Parameters:
+    ///   - strategies: The logging backends to which log events are dispatched.
+    ///   - queue: The dispatch queue used for executing logging operations. Defaults to an internal utility queue.
+    public init(
+        strategies: [any LoggerStrategy],
+        queue: DispatchQueue = DispatchQueue(
+            label: "com.vonage.VERALogger.composite",
+            qos: .utility
+        )
+    ) {
         self.strategies = strategies
-        self.queue = DispatchQueue(label: "com.vonage.VERALogger.composite", qos: .utility)
+        self.queue = queue
     }
 
     /// Dispatches a log event to all registered strategies.
     ///
-    /// Each strategy's `shouldLog(_:)` filter is checked first. If it returns a non-nil event,
-    /// the (possibly transformed) event is passed to the strategy's `log(_:)` method.
+    /// Each strategy's `shouldLog(_:)` filter is checked first. If it returns `true`,
+    /// the event is passed to the strategy's `log(_:)` method.
     ///
     /// - Parameter event: The log event to dispatch.
     public func log(_ event: LogEvent) {
         let capturedStrategies = strategies
         queue.async {
             for strategy in capturedStrategies {
-                if let filteredEvent = strategy.shouldLog(event) {
-                    strategy.log(filteredEvent)
+                if strategy.shouldLog(event) {
+                    strategy.log(event)
                 }
             }
         }
@@ -50,8 +58,8 @@ public final class LoggerComposite: @unchecked Sendable {
     /// - Parameter event: The log event to dispatch.
     public func logSync(_ event: LogEvent) {
         for strategy in strategies {
-            if let filteredEvent = strategy.shouldLog(event) {
-                strategy.log(filteredEvent)
+            if strategy.shouldLog(event) {
+                strategy.log(event)
             }
         }
     }

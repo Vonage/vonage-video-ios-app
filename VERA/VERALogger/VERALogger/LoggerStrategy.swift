@@ -1,5 +1,5 @@
 //
-//  Created by Vonage.
+//  Created by Vonage on 8/4/26.
 //
 
 import Foundation
@@ -7,36 +7,36 @@ import Foundation
 /// A logging backend that processes log events.
 ///
 /// Each strategy represents a different log destination (e.g., os.Logger, CocoaLumberjack, file, print).
-/// Strategies can optionally filter or transform events before processing them via `shouldLog(_:)`.
+/// Strategies can optionally filter events before processing them via `shouldLog(_:)`.
 ///
 /// ## Thread Safety
 /// Implementations must be safe to call from any thread. The `LoggerComposite` dispatches
 /// on a serial queue, but strategies should still avoid internal data races.
 public protocol LoggerStrategy: Sendable {
 
-    /// Filters or transforms a log event before it is processed.
+    /// Determines whether this strategy should process the given event.
     ///
-    /// Return the (possibly modified) event to continue processing, or `nil` to skip this event
+    /// Return `true` to process the event, or `false` to skip it
     /// for this strategy only. Other strategies in the composite are unaffected.
     ///
-    /// The default implementation returns the event unchanged.
+    /// The default implementation returns `true`.
     ///
     /// - Parameter event: The incoming log event.
-    /// - Returns: The event to log, or `nil` to suppress logging for this strategy.
-    func shouldLog(_ event: LogEvent) -> LogEvent?
+    /// - Returns: `true` if this strategy should log the event.
+    func shouldLog(_ event: LogEvent) -> Bool
 
     /// Processes the log event.
     ///
-    /// Called only if `shouldLog(_:)` returned a non-nil event.
+    /// Called only if `shouldLog(_:)` returned `true`.
     ///
-    /// - Parameter event: The (possibly transformed) log event.
+    /// - Parameter event: The log event.
     func log(_ event: LogEvent)
 }
 
 // MARK: - Default Implementation
 
-public extension LoggerStrategy {
-    func shouldLog(_ event: LogEvent) -> LogEvent? {
-        event
+extension LoggerStrategy {
+    public func shouldLog(_ event: LogEvent) -> Bool {
+        true
     }
 }
