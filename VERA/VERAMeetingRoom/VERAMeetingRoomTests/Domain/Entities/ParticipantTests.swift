@@ -4,8 +4,8 @@
 
 import Foundation
 import Testing
-import VERAMeetingRoom
 import VERADomain
+import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Participant tests")

@@ -7,6 +7,7 @@ import SwiftUI
 import Testing
 import VERAMeetingRoom
 import VERATestHelpers
+import VERAVonage
 
 @Suite("ActiveSpeakerTracker tests")
 struct ActiveSpeakerTrackerTests {

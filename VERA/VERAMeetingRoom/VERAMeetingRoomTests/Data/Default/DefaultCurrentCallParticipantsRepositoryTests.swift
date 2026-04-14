@@ -5,8 +5,8 @@
 import Foundation
 import SwiftUI
 import Testing
-import VERAMeetingRoom
 import VERADomain
+import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("DefaultCurrentCallParticipantsRepository tests")

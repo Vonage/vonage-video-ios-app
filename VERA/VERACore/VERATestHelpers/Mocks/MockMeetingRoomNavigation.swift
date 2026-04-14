@@ -4,8 +4,8 @@
 
 import VERACommonUI
 import VERACore
-import VERAMeetingRoom
 import VERADomain
+import VERAMeetingRoom
 
 public struct MockMeetingRoomNavigation: MeetingRoomDestination {
 

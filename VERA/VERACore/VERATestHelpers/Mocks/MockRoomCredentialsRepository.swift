@@ -15,8 +15,8 @@ public class MockRoomCredentialsRepository: RoomCredentialsRepository {
     }
 
     public func getRoomCredentials(
-        _ request: VERACore.RoomCredentialsRequest
-    ) async throws -> VERACore.RoomCredentialsResponse {
+        _ request: RoomCredentialsRequest
+    ) async throws -> RoomCredentialsResponse {
         response
     }
 }
