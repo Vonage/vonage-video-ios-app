@@ -546,6 +546,252 @@ struct MeetingRoomViewModelTests {
         #expect(updatedState?.participantsCount == initialState.participantsCount)
     }
 
+    // MARK: - Pin / Unpin Tests
+
+    @Test("Given a participant, When the user pins them, Then the participant isPinned becomes true")
+    @MainActor
+    func pinParticipant_updatesIsPinnedToTrue() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participant = makeMockParticipant(id: "p1", name: "Alice")
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: [participant], activeParticipantId: nil)
+        )
+
+        let initialState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participantsCount == 1 }
+        #expect(initialState?.participants.first(where: { $0.id == "p1" })?.isPinned == false)
+
+        sut.onTogglePin(participantId: "p1")
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.contains(where: { $0.id == "p1" && $0.isPinned }) }
+
+        let pinnedParticipant = try #require(updatedState?.participants.first(where: { $0.id == "p1" }))
+        #expect(pinnedParticipant.isPinned == true)
+    }
+
+    @Test("Given a pinned participant, When the user unpins them, Then the participant isPinned becomes false")
+    @MainActor
+    func unpinParticipant_updatesIsPinnedToFalse() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participant = makeMockParticipant(id: "p1", name: "Alice")
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: [participant], activeParticipantId: nil)
+        )
+
+        // Pin the participant first
+        sut.onTogglePin(participantId: "p1")
+
+        let pinnedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.contains(where: { $0.id == "p1" && $0.isPinned }) }
+        #expect(pinnedState?.participants.first(where: { $0.id == "p1" })?.isPinned == true)
+
+        // Unpin the participant
+        sut.onTogglePin(participantId: "p1")
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.contains(where: { $0.id == "p1" && !$0.isPinned }) }
+
+        let unpinnedParticipant = try #require(updatedState?.participants.first(where: { $0.id == "p1" }))
+        #expect(unpinnedParticipant.isPinned == false)
+    }
+
+    @Test("Given multiple participants, When one is pinned, Then only that participant isPinned is true")
+    @MainActor
+    func pinOneOfMultipleParticipants_onlyPinnedParticipantHasIsPinnedTrue() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
+        )
+
+        let initialState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participantsCount == 3 }
+        #expect(initialState?.participantsCount == 3)
+
+        sut.onTogglePin(participantId: "p2")
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.contains(where: { $0.id == "p2" && $0.isPinned }) }
+
+        let stateParticipants = try #require(updatedState?.participants)
+
+        let alice = try #require(stateParticipants.first(where: { $0.id == "p1" }))
+        let bob = try #require(stateParticipants.first(where: { $0.id == "p2" }))
+        let charlie = try #require(stateParticipants.first(where: { $0.id == "p3" }))
+
+        #expect(alice.isPinned == false)
+        #expect(bob.isPinned == true)
+        #expect(charlie.isPinned == false)
+    }
+
+    @Test(
+        "Given 3 participants are already pinned, When checking canBePinned for an unpinned participant, Then canBePinned is false"
+    )
+    @MainActor
+    func pinCapacity_whenThreeParticipantsPinned_canBePinnedIsFalse() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+            makeMockParticipant(id: "p4", name: "Dave"),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
+        )
+
+        let initialState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participantsCount == 4 }
+        #expect(initialState?.participantsCount == 4)
+
+        // Pin 3 participants
+        sut.onTogglePin(participantId: "p1")
+        sut.onTogglePin(participantId: "p2")
+        sut.onTogglePin(participantId: "p3")
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { state in
+                state.participants.filter(\.isPinned).count == 3
+            }
+
+        let dave = try #require(updatedState?.participants.first(where: { $0.id == "p4" }))
+        #expect(dave.isPinned == false)
+        #expect(dave.canBePinned == false)
+
+        // Pinned participants should still be able to toggle (unpin)
+        let alice = try #require(updatedState?.participants.first(where: { $0.id == "p1" }))
+        #expect(alice.isPinned == true)
+        #expect(alice.canTogglePinState == true)
+    }
+
+    @Test(
+        "Given 3 pinned participants including a screen share, When the screen share leaves, Then pin counter is restored and canBePinned becomes true"
+    )
+    @MainActor
+    func pinCapacity_whenPinnedScreenShareLeaves_canBePinnedIsRestored() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let pinnedDataSource = DefaultPinnedParticipantsDataSource()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            pinnedParticipantsDataSource: pinnedDataSource
+        )
+
+        await sut.loadUI()
+
+        let participants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+            makeMockParticipant(id: "screen1", name: "ScreenShare", isScreenshare: true),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
+        )
+
+        let initialState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.count == 4 }
+        #expect(initialState?.participants.count == 4)
+
+        // Pin 3 participants: Alice, Bob, and the screen share
+        sut.onTogglePin(participantId: "p1")
+        sut.onTogglePin(participantId: "p2")
+        sut.onTogglePin(participantId: "screen1")
+
+        let pinnedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { state in
+                state.participants.filter(\.isPinned).count == 3
+            }
+
+        // Verify Charlie cannot be pinned (3 slots used)
+        let charlieBeforeRemoval = try #require(pinnedState?.participants.first(where: { $0.id == "p3" }))
+        #expect(charlieBeforeRemoval.canBePinned == false)
+
+        // Screen share session ends — remove it from participants
+        let remainingParticipants = [
+            makeMockParticipant(id: "p1", name: "Alice"),
+            makeMockParticipant(id: "p2", name: "Bob"),
+            makeMockParticipant(id: "p3", name: "Charlie"),
+        ]
+        mockCall._participantsPublisher.send(
+            ParticipantsState(localParticipant: nil, participants: remainingParticipants, activeParticipantId: nil)
+        )
+
+        // Verify Charlie can now be pinned (stale screen share ID no longer counts)
+        let restoredState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { state in
+                state.participants.filter(\.isPinned).count == 2
+                    && state.participants.first(where: { $0.id == "p3" })?.canBePinned == true
+            }
+
+        let charlieAfterRemoval = try #require(restoredState?.participants.first(where: { $0.id == "p3" }))
+        #expect(charlieAfterRemoval.canBePinned == true)
+        #expect(charlieAfterRemoval.isPinned == false)
+
+        // Alice and Bob should still be pinned
+        let aliceAfter = try #require(restoredState?.participants.first(where: { $0.id == "p1" }))
+        let bobAfter = try #require(restoredState?.participants.first(where: { $0.id == "p2" }))
+        #expect(aliceAfter.isPinned == true)
+        #expect(bobAfter.isPinned == true)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -561,6 +807,7 @@ struct MeetingRoomViewModelTests {
             makeMockCurrentCallParticipantsRepository(),
         appConfig: AppConfig = AppConfig(),
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -575,7 +822,8 @@ struct MeetingRoomViewModelTests {
             appConfig: appConfig,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
             getExternalButtons: { _ in [] },
-            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
+            pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )
     }
 

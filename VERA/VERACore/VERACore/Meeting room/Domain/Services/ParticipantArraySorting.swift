@@ -45,3 +45,29 @@ extension Array where Element == Participant {
         }
     }
 }
+
+// MARK: - UIParticipant Sorting
+
+extension Array where Element == UIParticipant {
+
+    /// Returns UI participants sorted by creation date (oldest first).
+    public func sortedByCreationDate() -> [UIParticipant] {
+        sorted { participantA, participantB in
+            if participantA.creationTime == participantB.creationTime {
+                return participantA.name.localizedStandardCompare(participantB.name) == .orderedAscending
+            }
+            return participantA.creationTime <= participantB.creationTime
+        }
+    }
+
+    /// Returns UI participants sorted by name using localized, diacritic- and case-insensitive comparison.
+    public func sortedByName() -> [UIParticipant] {
+        sorted { participantA, participantB in
+            let nameComparison = participantA.name.localizedStandardCompare(participantB.name)
+            if nameComparison == .orderedSame {
+                return participantA.creationTime <= participantB.creationTime
+            }
+            return nameComparison == .orderedAscending
+        }
+    }
+}

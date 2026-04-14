@@ -38,6 +38,7 @@ final class NoiseSuppressionPublisherSpy: VERAPublisher {
     var publishAudio: Bool = true
     var publishVideo: Bool = true
     var cameraPosition: CameraPosition = .front
+    var audioLevelPublisher: AnyPublisher<Float, Never> = CurrentValueSubject(0).eraseToAnyPublisher()
 
     var setNoiseSuppression_callCount = 0
     var removeAudioTransform_callCount = 0

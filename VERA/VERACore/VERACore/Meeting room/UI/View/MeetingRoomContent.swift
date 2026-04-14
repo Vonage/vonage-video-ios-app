@@ -7,16 +7,16 @@ import VERADomain
 
 struct MeetingRoomContent: View {
 
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let showBottomSheet: Bool
     let layout: MeetingRoomLayout
     let activeSpeakerId: String?
 
     init(
-        participants: [Participant],
+        participants: [UIParticipant],
         showBottomSheet: Bool,
         layout: MeetingRoomLayout,
-        activeSpeakerId: String?
+        activeSpeakerId: String?,
     ) {
         self.participants = participants
         self.showBottomSheet = showBottomSheet

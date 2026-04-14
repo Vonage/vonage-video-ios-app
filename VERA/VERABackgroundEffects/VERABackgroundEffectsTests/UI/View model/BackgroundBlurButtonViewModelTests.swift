@@ -2,6 +2,7 @@
 //  Created by Vonage on 29/1/26.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import Testing
@@ -188,6 +189,7 @@ final class PublisherSpy: VERAPublisher {
     var removeTransformerCallCount = 0
     var lastBlurLevel: BlurLevel? = nil
     var shouldThrowError = false
+    var audioLevelPublisher: AnyPublisher<Float, Never> = CurrentValueSubject(0).eraseToAnyPublisher()
 
     var publishAudio: Bool = true
     var publishVideo: Bool = true

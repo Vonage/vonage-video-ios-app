@@ -42,6 +42,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let meetingRoomNavigation: MeetingRoomDestination
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
+    private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -74,7 +75,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         appConfig: AppConfig,
         meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
-        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
         self.roomName = roomName
         self.baseURL = baseURL
@@ -88,6 +90,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.getExternalButtons = getExternalButtons
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
+        self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
     }
 
     @MainActor
@@ -129,6 +132,12 @@ public final class MeetingRoomViewModel: ObservableObject {
         layoutPublisher.value = newLayout
     }
 
+    public func onTogglePin(participantId: String) {
+        Task {
+            await pinnedParticipantsDataSource.togglePin(participantId: participantId)
+        }
+    }
+
     public func endCall() {
         Task { @MainActor in
             do {
@@ -160,32 +169,51 @@ extension MeetingRoomViewModel {
     }
 
     fileprivate func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
-        let sortedParticipantsPublisher = Publishers.CombineLatest(
-            participantsPublisher.removeDuplicates(), layoutPublisher
-        ).map { participantsState, layout in
-            var sortedPaticipants = participantsState.participants
+        let sortedParticipantsPublisher = Publishers.CombineLatest3(
+            participantsPublisher.removeDuplicates(),
+            layoutPublisher,
+            pinnedParticipantsDataSource.pinnedParticipantIds
+        ).map { participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+            let currentParticipantIds = Set(participantsState.participants.map(\.id))
+            let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
+
+            if activePinnedIds != pinnedIds {
+                Task { [weak self] in
+                    await self?.pinnedParticipantsDataSource.removeParticipants(notIn: currentParticipantIds)
+                }
+            }
+
+            let uiParticipants = participantsState.participants.map { participant in
+                self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
+            }
+
+            let localUIParticipant = participantsState.localParticipant.map { participant in
+                UIParticipant(participant: participant)
+            }
+
+            var sortedParticipants: [UIParticipant]
             if layout == .activeSpeaker {
-                sortedPaticipants = sortedPaticipants.sortedByDisplayPriority(
+                sortedParticipants = uiParticipants.sortedByDisplayPriority(
                     activeSpeakerId: participantsState.activeParticipantId)
-                if let localParticipant = participantsState.localParticipant {
-                    if sortedPaticipants.isEmpty {
-                        sortedPaticipants.append(localParticipant)
+                if let localUIParticipant {
+                    if sortedParticipants.isEmpty {
+                        sortedParticipants.append(localUIParticipant)
                     } else {
-                        sortedPaticipants.insert(localParticipant, at: 1)
+                        sortedParticipants.insert(localUIParticipant, at: 1)
                     }
                 }
             } else {
-                sortedPaticipants = sortedPaticipants.sortedByCreationDate()
-                if let localParticipant = participantsState.localParticipant {
-                    if sortedPaticipants.isEmpty {
-                        sortedPaticipants.append(localParticipant)
+                sortedParticipants = uiParticipants.sortedByCreationDate()
+                if let localUIParticipant {
+                    if sortedParticipants.isEmpty {
+                        sortedParticipants.append(localUIParticipant)
                     } else {
-                        sortedPaticipants.insert(localParticipant, at: 0)
+                        sortedParticipants.insert(localUIParticipant, at: 0)
                     }
                 }
             }
             return MeetingRoomParticipantsState(
-                participants: sortedPaticipants,
+                participants: sortedParticipants,
                 layout: layout,
                 activeSpeakerId: participantsState.activeParticipantId)
         }
@@ -227,6 +255,20 @@ extension MeetingRoomViewModel {
             }
         }
         .store(in: &cancellables)
+    }
+
+    fileprivate func mapToUIParticipant(
+        _ participant: Participant,
+        pinnedIds: Set<String>
+    ) -> UIParticipant {
+        var uiParticipant = UIParticipant(
+            participant: participant,
+            isPinned: pinnedIds.contains(participant.id),
+            canBePinned: pinnedIds.isRoomForPinning)
+        uiParticipant.onTogglePin = { [weak self] in
+            self?.onTogglePin(participantId: participant.id)
+        }
+        return uiParticipant
     }
 
     fileprivate func addObservers() async {
@@ -335,4 +377,10 @@ extension MeetingRoomViewModel {
         extraButtons = getExternalButtons(.init(archivingState: archivingState))
     }
 
+}
+
+extension Set<String> where Element == String {
+    fileprivate var isRoomForPinning: Bool {
+        return count < 3
+    }
 }

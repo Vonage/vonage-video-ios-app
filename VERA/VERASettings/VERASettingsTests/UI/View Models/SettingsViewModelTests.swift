@@ -27,6 +27,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
+        #expect(viewModel.settingsPreference.degradationPreference == .notSet)
         #expect(viewModel.isPresented == true)
     }
 
@@ -44,7 +45,8 @@ struct SettingsViewModelTests {
             maxVideoBitrate: 2_000_000,
             publisherAudioFallbackEnabled: false,
             subscriberAudioFallbackEnabled: false,
-            senderStatsEnabled: true
+            senderStatsEnabled: true,
+            degradationPreference: .balanced
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
         let viewModel = SettingsViewModel(repository: repository)
@@ -60,6 +62,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == false)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == false)
         #expect(viewModel.senderStatsEnabled == true)
+        #expect(viewModel.settingsPreference.degradationPreference == .balanced)
     }
 
     // MARK: - Save Tests
@@ -173,6 +176,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
+        #expect(viewModel.settingsPreference.degradationPreference == .notSet)
     }
 
     // MARK: - Cancel Tests
@@ -277,6 +281,12 @@ struct SettingsViewModelTests {
 
         viewModel.settingsPreference.senderStatsEnabled = true
         #expect(viewModel.senderStatsEnabled == true)
+
+        viewModel.settingsPreference.degradationPreference = .maintainFrameRate
+        #expect(viewModel.settingsPreference.degradationPreference == .maintainFrameRate)
+
+        viewModel.settingsPreference.degradationPreference = .balanced
+        #expect(viewModel.settingsPreference.degradationPreference == .balanced)
 
         viewModel.isPresented = false
         #expect(viewModel.isPresented == false)

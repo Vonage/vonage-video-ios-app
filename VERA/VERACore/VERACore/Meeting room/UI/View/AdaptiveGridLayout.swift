@@ -3,10 +3,9 @@
 //
 
 import SwiftUI
-import VERADomain
 
 struct AdaptiveGridLayout: View {
-    let participants: [Participant]
+    let participants: [UIParticipant]
     let activeSpeakerId: String?
 
     var body: some View {
@@ -50,7 +49,7 @@ struct AdaptiveGridLayout: View {
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .onAppear {
-            participants.forEach { $0.onAppear?() }
+            participants.forEach { $0.participant.onAppear?() }
         }
     }
 
