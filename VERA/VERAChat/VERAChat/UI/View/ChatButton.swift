@@ -9,13 +9,14 @@ import VERADomain
 
 public struct ChatBadgeButton: View {
 
-    @ObservedObject private var viewModel: ChatBadgeButtonViewModel
+    private let unreadMessagesCount: Int
     private let onShowChat: () -> Void
 
-    private var unreadMessagesCount: Int { viewModel.unreadMessagesCount }
-
-    public init(viewModel: ChatBadgeButtonViewModel, onShowChat: @escaping () -> Void) {
-        self.viewModel = viewModel
+    public init(
+        unreadMessagesCount: Int,
+        onShowChat: @escaping () -> Void
+    ) {
+        self.unreadMessagesCount = unreadMessagesCount
         self.onShowChat = onShowChat
     }
 
@@ -58,22 +59,5 @@ public struct ChatBadgeButton: View {
 }
 
 #Preview {
-    ChatBadgeButton(
-        viewModel: ChatBadgeButtonViewModel(
-            chatMessagesObserver: PreviewChatMessagesObserver(count: 25)),
-        onShowChat: {})
-}
-
-private class PreviewChatMessagesObserver: ChatMessagesObserver {
-    private let messages: [ChatMessage]
-
-    init(count: Int) {
-        messages = (0..<count).map {
-            ChatMessage(username: "User", message: "Message \($0)", date: Date())
-        }
-    }
-
-    func observeMessages() -> AnyPublisher<[ChatMessage], Never> {
-        Just(messages).eraseToAnyPublisher()
-    }
+    ChatBadgeButton(unreadMessagesCount: 25) {}
 }

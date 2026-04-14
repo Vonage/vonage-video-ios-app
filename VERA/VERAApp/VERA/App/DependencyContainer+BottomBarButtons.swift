@@ -68,7 +68,7 @@ extension DependencyContainer {
                 image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,
                 onTap: onShowChat,
                 content: {
-                    ChatBadgeButton(
+                    ChatBadgeComponentButton(
                         viewModel: viewModel,
                         onShowChat: onShowChat)
                 })
