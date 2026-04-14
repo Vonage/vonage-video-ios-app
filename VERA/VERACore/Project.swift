@@ -24,6 +24,7 @@ let project = Project(
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERAConfiguration", path: "../VERAConfiguration"),
+                .project(target: "VERAMeetingRoom", path: "../VERAMeetingRoom"),
             ],
             settings: createBaseBuildSettings()
         ),

@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import VERAConfiguration
 import VERADomain
 
 public enum MeetingRoomViewState: Equatable {
@@ -38,7 +37,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let disconnectRoomUseCase: DisconnectRoomUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
-    private let appConfig: AppConfig
+    private let configuration: MeetingRoomConfiguration
     private let meetingRoomNavigation: MeetingRoomDestination
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
@@ -72,7 +71,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         captionsStatusDataSource: CaptionsStatusDataSource,
-        appConfig: AppConfig,
+        configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
         getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
@@ -85,7 +84,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
-        self.appConfig = appConfig
+        self.configuration = configuration
         self.meetingRoomNavigation = meetingRoomNavigation
         self.getExternalButtons = getExternalButtons
         self.captionsStatusDataSource = captionsStatusDataSource
@@ -240,9 +239,9 @@ extension MeetingRoomViewModel {
                 participants: participantsState.participants,
                 layout: participantsState.layout,
                 activeSpeakerId: participantsState.activeSpeakerId,
-                allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: appConfig.videoSettings.allowCameraControl,
-                showParticipantList: appConfig.meetingRoomSettings.showParticipantList,
+                allowMicrophoneControl: configuration.allowMicrophoneControl,
+                allowCameraControl: configuration.allowCameraControl,
+                showParticipantList: configuration.showParticipantList,
                 callState: callState,
                 archivingState: archivingState,
                 noiseSuppressionState: noiseSuppressionState

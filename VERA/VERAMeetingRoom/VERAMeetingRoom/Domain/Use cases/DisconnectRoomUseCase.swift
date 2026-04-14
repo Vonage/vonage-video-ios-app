@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Use case for disconnecting the current call session.
 ///

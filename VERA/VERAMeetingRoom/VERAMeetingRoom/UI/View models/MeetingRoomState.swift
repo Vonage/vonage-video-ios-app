@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERAConfiguration
 import VERADomain
 
 public struct MeetingRoomParticipantsState {
@@ -70,9 +69,9 @@ public struct MeetingRoomState: Equatable {
         participants: [],
         layout: .activeSpeaker,
         activeSpeakerId: nil,
-        allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
-        allowCameraControl: AppConfig.videoSettings.allowCameraControl,
-        showParticipantList: AppConfig.meetingRoomSettings.showParticipantList,
+        allowMicrophoneControl: true,
+        allowCameraControl: true,
+        showParticipantList: true,
         callState: .idle,
         archivingState: .idle,
         noiseSuppressionState: .idle

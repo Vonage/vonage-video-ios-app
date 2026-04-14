@@ -4,7 +4,6 @@
 
 import SwiftUI
 import VERACommonUI
-import VERAConfiguration
 import VERADomain
 
 public class MeetingRoomFactory {
@@ -16,11 +15,11 @@ public class MeetingRoomFactory {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
-    private let appConfig: AppConfig
+    private let configuration: MeetingRoomConfiguration
 
     public init(
         baseURL: URL,
-        appConfig: AppConfig,
+        configuration: MeetingRoomConfiguration,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
@@ -30,7 +29,7 @@ public class MeetingRoomFactory {
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
         self.baseURL = baseURL
-        self.appConfig = appConfig
+        self.configuration = configuration
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
@@ -58,7 +57,7 @@ public class MeetingRoomFactory {
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             captionsStatusDataSource: captionsStatusDataSource,
-            appConfig: appConfig,
+            configuration: configuration,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
             getExternalButtons: getExternalButtons,
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,

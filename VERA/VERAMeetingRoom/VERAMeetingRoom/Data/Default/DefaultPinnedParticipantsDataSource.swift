@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERADomain
 
 /// Thread-safe actor managing pinned participant state.
 ///
