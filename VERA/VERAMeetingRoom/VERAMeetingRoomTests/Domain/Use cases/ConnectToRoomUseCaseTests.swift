@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
