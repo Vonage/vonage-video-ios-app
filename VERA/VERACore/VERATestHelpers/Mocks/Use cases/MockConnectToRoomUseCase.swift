@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERAMeetingRoom
 import VERADomain
 
 public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {

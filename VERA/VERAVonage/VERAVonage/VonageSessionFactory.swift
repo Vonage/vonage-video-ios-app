@@ -5,6 +5,7 @@
 import Foundation
 import OpenTok
 import VERACore
+import VERADomain
 
 /// Creates configured `VonageSession` instances from `RoomCredentials`.
 ///

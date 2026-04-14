@@ -5,9 +5,8 @@
 import Foundation
 import Testing
 import VERACommonUI
-import VERAConfiguration
-import VERACore
 import VERADomain
+import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("MeetingRoomViewModel tests")
@@ -256,54 +255,54 @@ struct MeetingRoomViewModelTests {
 
     @Test
     func activateMicrophoneControlIfActivatedInAppConfig() async throws {
-        let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: true))
+        let configuration = MeetingRoomConfiguration(allowMicrophoneControl: true)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.allowMicrophoneControl == true)
     }
 
     @Test
     func deactivateMicrophoneControlIfDeactivatedInAppConfig() async throws {
-        let appConfig = AppConfig(audioSettings: AppConfig.AudioSettings(allowMicrophoneControl: false))
+        let configuration = MeetingRoomConfiguration(allowMicrophoneControl: false)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.allowMicrophoneControl == false)
     }
 
     @Test
     func activateCameraControlIfActivatedInAppConfig() async throws {
-        let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: true))
+        let configuration = MeetingRoomConfiguration(allowCameraControl: true)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.allowCameraControl == true)
     }
 
     @Test
     func deactivateCameraControlIfDeactivatedInAppConfig() async throws {
-        let appConfig = AppConfig(videoSettings: AppConfig.VideoSettings(allowCameraControl: false))
+        let configuration = MeetingRoomConfiguration(allowCameraControl: false)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.allowCameraControl == false)
     }
 
     @Test
     func showParticipantListIfActivatedInAppConfig() async throws {
-        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: true))
+        let configuration = MeetingRoomConfiguration(showParticipantList: true)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.showParticipantList == true)
     }
 
     @Test
     func hideParticipantListIfDeactivatedInAppConfig() async throws {
-        let appConfig = AppConfig(meetingRoomSettings: AppConfig.MeetingRoomSettings(showParticipantList: false))
+        let configuration = MeetingRoomConfiguration(showParticipantList: false)
 
-        let contentState = try await when(given: appConfig)
+        let contentState = try await when(given: configuration)
 
         #expect(contentState.showParticipantList == false)
     }
@@ -805,7 +804,7 @@ struct MeetingRoomViewModelTests {
             makeMockCheckCameraAuthorizationStatusUseCase(),
         currentCallParticipantsRepository: CurrentCallParticipantsRepository =
             makeMockCurrentCallParticipantsRepository(),
-        appConfig: AppConfig = AppConfig(),
+        configuration: MeetingRoomConfiguration = MeetingRoomConfiguration(),
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
         pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
         actionHandler: ActionHandler? = nil
@@ -819,7 +818,7 @@ struct MeetingRoomViewModelTests {
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
-            appConfig: appConfig,
+            configuration: configuration,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
             getExternalButtons: { _ in [] },
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
@@ -835,8 +834,8 @@ struct MeetingRoomViewModelTests {
             .first { _ in true } ?? { throw Error.nilValue }()
     }
 
-    func when(given appConfig: AppConfig) async throws -> MeetingRoomState {
-        let sut = makeSUT(appConfig: appConfig)
+    func when(given configuration: MeetingRoomConfiguration) async throws -> MeetingRoomState {
+        let sut = makeSUT(configuration: configuration)
 
         await sut.loadUI()
 

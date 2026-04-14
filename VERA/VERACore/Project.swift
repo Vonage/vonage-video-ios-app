@@ -36,7 +36,8 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERATestHelpers/**"],
             dependencies: [
-                .target(name: "VERACore")
+                .target(name: "VERACore"),
+                .project(target: "VERAMeetingRoom", path: "../VERAMeetingRoom"),
             ],
             settings: createBaseBuildSettings()
         ),

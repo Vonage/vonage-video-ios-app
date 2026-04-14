@@ -8,7 +8,7 @@ import Testing
 import VERADomain
 import VERATestHelpers
 
-@testable import VERACore
+@testable import VERAMeetingRoom
 
 @Suite("Participant display priority tests")
 struct ParticipantDisplayPriorityTests {

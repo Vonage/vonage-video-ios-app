@@ -4,7 +4,7 @@
 
 import Foundation
 import Testing
-import VERACore
+import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Connect to room use case tests")

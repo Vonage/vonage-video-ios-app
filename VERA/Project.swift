@@ -198,6 +198,7 @@ private func createPackages() -> [Package] {
 private func createDependencies() -> [TargetDependency] {
     var dependencies: [TargetDependency] = [
         .project(target: "VERACore", path: "VERACore"),
+        .project(target: "VERAMeetingRoom", path: "VERAMeetingRoom"),
         .project(target: "VERAVonage", path: "VERAVonage"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),

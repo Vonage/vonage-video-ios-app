@@ -5,7 +5,7 @@
 import Foundation
 import SwiftUI
 import Testing
-import VERACore
+import VERAMeetingRoom
 import VERADomain
 import VERATestHelpers
 

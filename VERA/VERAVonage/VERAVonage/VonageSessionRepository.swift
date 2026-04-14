@@ -83,7 +83,7 @@ where Factory.Session == VonageSession {
     /// - Obtains the publisher from `publisherRepository.getPublisher()`
     /// - Creates an `VonageCall`, calls `setup()`, and assigns plugins
     /// - Subscribes to `call.callState` to clear session and reset publisher on disconnect
-    public func createSession(_ credentials: VERACore.RoomCredentials) throws -> CallFacade {
+    public func createSession(_ credentials: VERADomain.RoomCredentials) throws -> CallFacade {
         let newSession = try sessionFactory.make(credentials)
         guard let publisher = try publisherRepository.getPublisher() as? VonagePublisher else {
             throw Error.publisherCastingError

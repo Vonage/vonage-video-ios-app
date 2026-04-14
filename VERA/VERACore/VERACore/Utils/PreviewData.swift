@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import VERADomain
+import VERAMeetingRoom
 
 struct PreviewData {
     // MARK: - Individual Participants

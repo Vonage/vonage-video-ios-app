@@ -4,7 +4,7 @@
 
 import Foundation
 import Testing
-import VERACore
+import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Disconnect room use case tests")

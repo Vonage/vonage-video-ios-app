@@ -4,7 +4,7 @@
 
 import Testing
 
-@testable import VERACore
+@testable import VERAMeetingRoom
 
 @Suite("DefaultPinnedParticipantsDataSource tests")
 struct DefaultPinnedParticipantsDataSourceTests {
