@@ -5,6 +5,24 @@
 import SwiftUI
 import VERACommonUI
 
+/// Layout constants for the archive list view.
+private enum ArchiveListConstants {
+    /// Bottom padding below the section title.
+    static let titleBottomPadding: CGFloat = 10
+    /// Top padding above the divider in the empty state.
+    static let dividerTopPadding: CGFloat = 8
+    /// Size of the progress spinner in the download column.
+    static let progressViewSize: CGFloat = 44
+    /// Top inset for each list row.
+    static let rowInsetTop: CGFloat = 4
+    /// Leading inset for each list row.
+    static let rowInsetLeading: CGFloat = 8
+    /// Bottom inset for each list row.
+    static let rowInsetBottom: CGFloat = 4
+    /// Trailing inset for each list row.
+    static let rowInsetTrailing: CGFloat = 8
+}
+
 struct ArchiveList: View {
 
     let archives: [ArchiveUIData]
@@ -19,7 +37,7 @@ struct ArchiveList: View {
                 .adaptiveFont(.heading1)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, 10)
+                .padding(.bottom, ArchiveListConstants.titleBottomPadding)
 
             if archives.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
@@ -31,7 +49,7 @@ struct ArchiveList: View {
                     }
                     Divider()
                         .foregroundColor(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
-                        .padding(.top, 8)
+                        .padding(.top, ArchiveListConstants.dividerTopPadding)
                 }
             } else {
                 List(archives, id: \.id) { archive in
@@ -63,11 +81,19 @@ struct ArchiveList: View {
                                 }
                             } else {
                                 ProgressView()
-                                    .frame(width: 44, height: 44)
+                                    .frame(
+                                        width: ArchiveListConstants.progressViewSize,
+                                        height: ArchiveListConstants.progressViewSize
+                                    )
                             }
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(EdgeInsets(
+                        top: ArchiveListConstants.rowInsetTop,
+                        leading: ArchiveListConstants.rowInsetLeading,
+                        bottom: ArchiveListConstants.rowInsetBottom,
+                        trailing: ArchiveListConstants.rowInsetTrailing
+                    ))
                     .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)
