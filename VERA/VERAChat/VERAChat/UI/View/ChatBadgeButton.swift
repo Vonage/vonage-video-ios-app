@@ -2,6 +2,7 @@
 //  Created by Vonage on 14/10/25.
 //
 
+import Combine
 import SwiftUI
 import VERACommonUI
 import VERADomain
@@ -11,7 +12,10 @@ public struct ChatBadgeButton: View {
     private let unreadMessagesCount: Int
     private let onShowChat: () -> Void
 
-    public init(unreadMessagesCount: Int, onShowChat: @escaping () -> Void) {
+    public init(
+        unreadMessagesCount: Int,
+        onShowChat: @escaping () -> Void
+    ) {
         self.unreadMessagesCount = unreadMessagesCount
         self.onShowChat = onShowChat
     }
