@@ -14,17 +14,17 @@ jobs:
   format-check:
     runs-on: macos-26
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-    - name: Install swift-format
-      run: |
-        brew install swift-format
-        swift-format --version
+      - name: Install swift-format
+        run: |
+          brew install swift-format
+          swift-format --version
   
-    - name: Check Swift formatting
-      run: |
-        chmod +x scripts/format.sh
-        ./scripts/format.sh --check
+      - name: Check Swift formatting
+        run: |
+          chmod +x scripts/format.sh
+          ./scripts/format.sh --check
 
   unit-tests:
     runs-on: macos-26
@@ -36,548 +36,548 @@ jobs:
       test-results: ${{ steps.tests.outcome }}
     
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
     
-    - name: Pull LFS files
-      run: git lfs pull
+      - name: Pull LFS files
+        run: git lfs pull
     
-    - name: Install SwiftLint
-      run: |
-        brew install swiftlint
+      - name: Install SwiftLint
+        run: |
+          brew install swiftlint
 
-    - name: Install Tuist
-      run: brew install tuist
+      - name: Install Tuist
+        run: brew install tuist
 
-    - name: Clean Tuist cache
-      run: |
-        echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
-        tuist clean
-        rm -rf ~/.cache/tuist
+      - name: Clean Tuist cache
+        run: |
+          echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+          tuist clean
+          rm -rf ~/.cache/tuist
 
-    - name: Generate project with Tuist
-      run: |
-        cd VERA
-        export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-        export BASE_API_URL=${{ secrets.BASE_API_URL }}
-        ./Scripts/generateEnvironmentConstants.sh
-        ./Scripts/regenerateSigningConfig.sh
-        tuist generate --no-open
-        cd ..
+      - name: Generate project with Tuist
+        run: |
+          cd VERA
+          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
+          export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          ./Scripts/generateEnvironmentConstants.sh
+          ./Scripts/regenerateSigningConfig.sh
+          tuist generate --no-open
+          cd ..
 
-    - name: List available simulators
-      run: |
-        echo "📱 Available iOS Simulators:"
-        xcrun simctl list devices
+      - name: List available simulators
+        run: |
+          echo "📱 Available iOS Simulators:"
+          xcrun simctl list devices
 
-    - name: Export build flags
-      run: |
-        {
-          echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
-        } >> $GITHUB_ENV
+      - name: Export build flags
+        run: |
+          {
+            echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
+          } >> $GITHUB_ENV
 
-    - name: Run VERACoreTests (macOS)
-      id: core-tests-macos
-      run: |
-        echo "🧪 Running VERACoreTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACoreTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERACoreTests (macOS)
+        id: core-tests-macos
+        run: |
+          echo "🧪 Running VERACoreTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACoreTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERACoreTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAChatTests (macOS)
-      id: chat-tests-macos
-      run: |
-        echo "🧪 Running VERAChatTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChatTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAChatTests (macOS)
+        id: chat-tests-macos
+        run: |
+          echo "🧪 Running VERAChatTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAChatTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAChatTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAArchivingTests (macOS)
-      id: archiving-tests-macos
-      run: |
-        echo "🧪 Running VERAArchivingTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAArchivingTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAArchivingTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAArchivingTests (macOS)
+        id: archiving-tests-macos
+        run: |
+          echo "🧪 Running VERAArchivingTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAArchivingTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAArchivingTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERADomainTests (macOS)
-      id: domain-tests-macos
-      run: |
-        echo "🧪 Running VERADomainTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERADomainTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERADomainTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERADomainTests (macOS)
+        id: domain-tests-macos
+        run: |
+          echo "🧪 Running VERADomainTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERADomainTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERADomainTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAScreenShareTests (macOS)
-      id: screenshare-tests-macos
-      run: |
-        echo "🧪 Running VERAScreenShareTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAScreenShareTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAScreenShareTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAScreenShareTests (macOS)
+        id: screenshare-tests-macos
+        run: |
+          echo "🧪 Running VERAScreenShareTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAScreenShareTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAScreenShareTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAReactionsTests (macOS)
-      id: reactions-tests-macos
-      run: |
-        echo "🧪 Running VERAReactionsTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAReactionsTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAReactionsTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAReactionsTests (macOS)
+        id: reactions-tests-macos
+        run: |
+          echo "🧪 Running VERAReactionsTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAReactionsTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAReactionsTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERASettingsTests (macOS)
-      id: settings-tests-macos
-      run: |
-        echo "🧪 Running VERASettingsTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERASettingsTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERASettingsTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERASettingsTests (macOS)
+        id: settings-tests-macos
+        run: |
+          echo "🧪 Running VERASettingsTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERASettingsTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERASettingsTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAMeetingRoomTests (macOS)
-      id: meetingroom-tests-macos
-      run: |
-        echo "🧪 Running VERAMeetingRoomTests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAMeetingRoomTests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAMeetingRoomTests (macOS)
+        id: meetingroom-tests-macos
+        run: |
+          echo "🧪 Running VERAMeetingRoomTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAMeetingRoomTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Preboot iOS Simulator
-      run: |
-        set -euo pipefail
-        xcrun simctl boot "iPhone 17" || true 
+      - name: Preboot iOS Simulator
+        run: |
+          set -euo pipefail
+          xcrun simctl boot "iPhone 17" || true 
 
-    - name: Run VERAAudioEffectsTests (iOS Simulator)
-      id: audioeffects-tests-ios
-      timeout-minutes: 15
-      run: |
-        echo "🧪 Building VERAAudioEffectsTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAAudioEffectsTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAAudioEffectsTests (iOS Simulator)
+        id: audioeffects-tests-ios
+        timeout-minutes: 15
+        run: |
+          echo "🧪 Building VERAAudioEffectsTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioEffectsTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        echo "🧪 Running VERAAudioEffectsTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAAudioEffectsTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAAudioEffectsTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+          echo "🧪 Running VERAAudioEffectsTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioEffectsTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAAudioEffectsTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERACoreSnapshotTests (iOS Simulator)
-      id: core-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Building VERACoreSnapshotTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACoreSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERACoreSnapshotTests (iOS Simulator)
+        id: core-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERACoreSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACoreSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACoreSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+          echo "📸 Running VERACoreSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACoreSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERACoreSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAChatSnapshotTests (iOS Simulator)
-      id: chat-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Building VERAChatSnapshotTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChatSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAChatSnapshotTests (iOS Simulator)
+        id: chat-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERAChatSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAChatSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
         
-        echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAChatSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+          echo "📸 Running VERAChatSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAChatSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAChatSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERACaptionsSnapshotTests (iOS Simulator)
-      id: captions-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Building VERACaptionsSnapshotTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACaptionsSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERACaptionsSnapshotTests (iOS Simulator)
+        id: captions-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERACaptionsSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACaptionsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
         
-        echo "📸 Running VERACaptionsSnapshotTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACaptionsSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACaptionsSnapshotTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+          echo "📸 Running VERACaptionsSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACaptionsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERACaptionsSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAMeetingRoomSnapshotTests (iOS Simulator)
-      id: meetingroom-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Building VERAMeetingRoomSnapshotTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAMeetingRoomSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAMeetingRoomSnapshotTests (iOS Simulator)
+        id: meetingroom-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERAMeetingRoomSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAMeetingRoomSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
+          
+          echo "📸 Running VERAMeetingRoomSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAMeetingRoomSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
+
+      #- name: Run VERAReactionsSnapshotTests (iOS Simulator)
+      #  id: reactions-snapshot-tests
+      #  timeout-minutes: 15
+      #  run: |
+      #    echo "📸 Building VERAReactionsSnapshotTests on iOS Simulator"
+      #    xcodebuild build-for-testing \
+      #      -workspace VERA/VERA.xcworkspace \
+      #      -scheme VERAReactionsSnapshotTests \
+      #      -destination "platform=iOS Simulator,name=iPhone 17" \
+      #      -derivedDataPath DerivedData \
+      #      -enableCodeCoverage YES \
+      #      -parallel-testing-enabled NO \
+      #      $XCODE_COMMON_FLAGS | xcpretty
         
-        echo "📸 Running VERAMeetingRoomSnapshotTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAMeetingRoomSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      #    echo "📸 Running VERAReactionsSnapshotTests on iOS Simulator"
+      #    xcodebuild test-without-building \
+      #      -workspace VERA/VERA.xcworkspace \
+      #      -scheme VERAReactionsSnapshotTests \
+      #      -destination "platform=iOS Simulator,name=iPhone 17" \
+      #      -derivedDataPath DerivedData \
+      #      -enableCodeCoverage YES \
+      #      -resultBundlePath DerivedData/VERAReactionsSnapshotTests-iOS.xcresult \
+      #      -parallel-testing-enabled NO \
+      #      $XCODE_COMMON_FLAGS | xcpretty
 
-    #- name: Run VERAReactionsSnapshotTests (iOS Simulator)
-    #  id: reactions-snapshot-tests
-    #  timeout-minutes: 15
-    #  run: |
-    #    echo "📸 Building VERAReactionsSnapshotTests on iOS Simulator"
-    #    xcodebuild build-for-testing \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERAReactionsSnapshotTests \
-    #      -destination "platform=iOS Simulator,name=iPhone 17" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -parallel-testing-enabled NO \
-    #      $XCODE_COMMON_FLAGS | xcpretty
+      #- name: Run VERASettingsSnapshotTests (iOS Simulator)
+      #  id: settings-snapshot-tests
+      #  timeout-minutes: 15
+      #  run: |
+      #    echo "📸 Building VERASettingsSnapshotTests on iOS Simulator"
+      #    xcodebuild build-for-testing \
+      #      -workspace VERA/VERA.xcworkspace \
+      #      -scheme VERASettingsSnapshotTests \
+      #      -destination "platform=iOS Simulator,name=iPhone 17" \
+      #      -derivedDataPath DerivedData \
+      #      -enableCodeCoverage YES \
+      #      -parallel-testing-enabled NO \
+      #      $XCODE_COMMON_FLAGS | xcpretty
         
-    #    echo "📸 Running VERAReactionsSnapshotTests on iOS Simulator"
-    #    xcodebuild test-without-building \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERAReactionsSnapshotTests \
-    #      -destination "platform=iOS Simulator,name=iPhone 17" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -resultBundlePath DerivedData/VERAReactionsSnapshotTests-iOS.xcresult \
-    #      -parallel-testing-enabled NO \
-    #      $XCODE_COMMON_FLAGS | xcpretty
+      #    echo "📸 Running VERASettingsSnapshotTests on iOS Simulator"
+      #    xcodebuild test-without-building \
+      #      -workspace VERA/VERA.xcworkspace \
+      #      -scheme VERASettingsSnapshotTests \
+      #      -destination "platform=iOS Simulator,name=iPhone 17" \
+      #      -derivedDataPath DerivedData \
+      #      -enableCodeCoverage YES \
+      #      -resultBundlePath DerivedData/VERASettingsSnapshotTests-iOS.xcresult \
+      #      -parallel-testing-enabled NO \
+      #      $XCODE_COMMON_FLAGS | xcpretty
 
-    #- name: Run VERASettingsSnapshotTests (iOS Simulator)
-    #  id: settings-snapshot-tests
-    #  timeout-minutes: 15
-    #  run: |
-    #    echo "📸 Building VERASettingsSnapshotTests on iOS Simulator"
-    #    xcodebuild build-for-testing \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERASettingsSnapshotTests \
-    #      -destination "platform=iOS Simulator,name=iPhone 17" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -parallel-testing-enabled NO \
-    #      $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAAudioEffectsSnapshotTests (iOS Simulator)
+        id: audioeffects-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERAAudioEffectsSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioEffectsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
         
-    #    echo "📸 Running VERASettingsSnapshotTests on iOS Simulator"
-    #    xcodebuild test-without-building \
-    #      -workspace VERA/VERA.xcworkspace \
-    #      -scheme VERASettingsSnapshotTests \
-    #      -destination "platform=iOS Simulator,name=iPhone 17" \
-    #      -derivedDataPath DerivedData \
-    #      -enableCodeCoverage YES \
-    #      -resultBundlePath DerivedData/VERASettingsSnapshotTests-iOS.xcresult \
-    #      -parallel-testing-enabled NO \
-    #      $XCODE_COMMON_FLAGS | xcpretty
+          echo "📸 Running VERAAudioEffectsSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioEffectsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAAudioEffectsSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAAudioEffectsSnapshotTests (iOS Simulator)
-      id: audioeffects-snapshot-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Building VERAAudioEffectsSnapshotTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAAudioEffectsSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
-        
-        echo "📸 Running VERAAudioEffectsSnapshotTests on iOS Simulator"
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAAudioEffectsSnapshotTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAAudioEffectsSnapshotTests-iOS.xcresult \
-          -parallel-testing-enabled NO \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageChatPluginTests (iOS Simulator)
+        id: ot-chat-plugin-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Running VERAVonageChatPluginTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageChatPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageChatPluginTests (iOS Simulator)
-      id: ot-chat-plugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAVonageChatPluginTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageChatPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageChatPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageChatPluginTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageChatPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageChatPluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageArchivingPlugin (iOS Simulator)
+        id: ot-archiving-plugin-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Running VERAVonageArchivingPlugin on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageArchivingPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageArchivingPlugin (iOS Simulator)
-      id: ot-archiving-plugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAVonageArchivingPlugin on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageArchivingPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageArchivingPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageArchivingPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageSettingsPluginTests (iOS Simulator)
+        id: vonagesettingsplugin-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Running VERAVonageSettingsPluginTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageSettingsPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageSettingsPluginTests (iOS Simulator)
-      id: vonagesettingsplugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAVonageSettingsPluginTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageSettingsPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageSettingsPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageSettingsPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageScreenSharePluginTests (iOS Simulator)
+        id: vonagescreenshareplugin-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Running VERAVonageScreenSharePluginTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageScreenSharePluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageScreenSharePluginTests (iOS Simulator)
-      id: vonagescreenshareplugin-tests
-      timeout-minutes: 15
-      run: |
-        echo "📸 Running VERAVonageScreenSharePluginTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageScreenSharePluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageScreenSharePluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageScreenSharePluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageTests (iOS Simulator)
+        id: opentok-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERAVonageTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageTests (iOS Simulator)
-      id: opentok-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERAVonageTests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
-
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
     
-    - name: Run VERACommonUITests (iOS Simulator)
-      id: common-ui-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERACommonUITests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACommonUITests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERACommonUITests (iOS Simulator)
+        id: common-ui-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERACommonUITests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACommonUITests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERACommonUITests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACommonUITests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERATests (iOS Simulator)
-      id: vera-app-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERATests on iOS Simulator"
-        xcodebuild build-for-testing \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERATests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERATests (iOS Simulator)
+        id: vera-app-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERATests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERATests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-        xcodebuild test-without-building \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERATests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERATests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERATests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERATests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Run VERAVonageCallKitPluginTests (iOS Simulator)
-      id: vera-callkit-tests
-      timeout-minutes: 15
-      run: |
-        echo "📡 Running VERAVonageCallKitPluginTests on iOS Simulator"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAVonageCallKitPluginTests \
-          -destination "platform=iOS Simulator,name=iPhone 17" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+      - name: Run VERAVonageCallKitPluginTests (iOS Simulator)
+        id: vera-callkit-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERAVonageCallKitPluginTests on iOS Simulator"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAVonageCallKitPluginTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
     
-    # Extracted DerivedData/VERAReactionsSnapshotTests-iOS.xcresult and DerivedData/VERASettingsSnapshotTests-iOS.xcresult
-    # due to a bug in the latests Xcode version. See https://developer.apple.com/forums/thread/817957
-    - name: Upload all test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: unit-test-results
-        path: |
-          DerivedData/VERACoreTests-macOS.xcresult
-          DerivedData/VERAChatTests-macOS.xcresult
-          DerivedData/VERAArchivingTests-macOS.xcresult
-          DerivedData/VERADomainTests-macOS.xcresult
-          DerivedData/VERAReactionsTests-macOS.xcresult
-          DerivedData/VERAVonageChatPluginTests-macOS.xcresult
-          DerivedData/VERAScreenShareTests-macOS.xcresult
-          DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
-          DerivedData/VERAVonageTests-iOS.xcresult
-          DerivedData/VERACoreSnapshotTests-iOS.xcresult
-          DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
-          DerivedData/VERAVonageChatPluginTests-iOS.xcresult
-          DerivedData/VERATests-iOS.xcresult
-          DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
-          DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult
-          DerivedData/VERAMeetingRoomTests-macOS.xcresult
-          DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
-          DerivedData/Build/Products/
+      # Extracted DerivedData/VERAReactionsSnapshotTests-iOS.xcresult and DerivedData/VERASettingsSnapshotTests-iOS.xcresult
+      # due to a bug in the latests Xcode version. See https://developer.apple.com/forums/thread/817957
+      - name: Upload all test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            DerivedData/VERACoreTests-macOS.xcresult
+            DerivedData/VERAChatTests-macOS.xcresult
+            DerivedData/VERAArchivingTests-macOS.xcresult
+            DerivedData/VERADomainTests-macOS.xcresult
+            DerivedData/VERAReactionsTests-macOS.xcresult
+            DerivedData/VERAVonageChatPluginTests-macOS.xcresult
+            DerivedData/VERAScreenShareTests-macOS.xcresult
+            DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
+            DerivedData/VERAVonageTests-iOS.xcresult
+            DerivedData/VERACoreSnapshotTests-iOS.xcresult
+            DerivedData/VERACaptionsSnapshotTests-iOS.xcresult
+            DerivedData/VERAVonageChatPluginTests-iOS.xcresult
+            DerivedData/VERATests-iOS.xcresult
+            DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
+            DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult
+            DerivedData/VERAMeetingRoomTests-macOS.xcresult
+            DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
+            DerivedData/Build/Products/
           
   sonarcloud:
     name: SonarCloud Analysis
@@ -586,46 +586,46 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
     
-    - name: Download unit test results
-      uses: actions/download-artifact@v4
-      with:
-        name: unit-test-results
-        path: DerivedData/
+      - name: Download unit test results
+        uses: actions/download-artifact@v8
+        with:
+          name: unit-test-results
+          path: DerivedData/
     
-    - name: Install dependencies
-      run: |
-        brew update
-        brew install sonar-scanner coreutils
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install sonar-scanner coreutils
 
-    - name: Merge coverage from ./DerivedData
-      run: |
-        ./scripts/merge_coverage.sh
+      - name: Merge coverage from ./DerivedData
+        run: |
+          ./scripts/merge_coverage.sh
 
-    - name: SonarCloud Analysis
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        # Dynamically find all test directories (ending in "Tests")
-        TESTS_DIRS=$(find VERA -type d -name "*Tests" \
-          | grep -v "DerivedData" \
-          | grep -v ".build" \
-          | grep -v "__Snapshots__" \
-          | sort \
-          | tr '\n' ',' \
-          | sed 's/,$//')
+      - name: SonarCloud Analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          # Dynamically find all test directories (ending in "Tests")
+          TESTS_DIRS=$(find VERA -type d -name "*Tests" \
+            | grep -v "DerivedData" \
+            | grep -v ".build" \
+            | grep -v "__Snapshots__" \
+            | sort \
+            | tr '\n' ',' \
+            | sed 's/,$//')
         
-        echo "📋 Test directories found:"
-        echo "$TESTS_DIRS" | tr ',' '\n'
+          echo "📋 Test directories found:"
+          echo "$TESTS_DIRS" | tr ',' '\n'
         
-        sonar-scanner \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.tests="$TESTS_DIRS" \
-          -Dsonar.verbose=true
+          sonar-scanner \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.tests="$TESTS_DIRS" \
+            -Dsonar.verbose=true
 
   upload-testflight:
     name: Upload to TestFlight
@@ -635,83 +635,83 @@ jobs:
     timeout-minutes: 30
     
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
     
-    - name: Pull LFS files
-      run: git lfs pull
+      - name: Pull LFS files
+        run: git lfs pull
     
-    - name: Install Tuist
-      run: brew install tuist
+      - name: Install Tuist
+        run: brew install tuist
 
-    - name: Import certs
-      uses: Apple-Actions/import-codesign-certs@v5.0.2
-      with:
-        p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
-        p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+      - name: Import certs
+        uses: Apple-Actions/import-codesign-certs@v6
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
 
-    - name: Provisioning profile (App)
-      uses: Apple-Actions/download-provisioning-profiles@v4
-      with:
-        profile-type: IOS_APP_STORE
-        bundle-id: 'com.vonage.VERA'
-        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Provisioning profile
+        uses: Apple-Actions/download-provisioning-profiles@v5
+        with:
+          profile-type: IOS_APP_STORE
+          bundle-id: 'com.vonage.VERA'
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
-    - name: Provisioning profile (BroadcastExtension)
-      uses: Apple-Actions/download-provisioning-profiles@v4
-      with:
-        profile-type: IOS_APP_STORE
-        bundle-id: 'com.vonage.VERA.BroadcastExtension'
-        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Provisioning profile (BroadcastExtension)
+        uses: Apple-Actions/download-provisioning-profiles@v5
+        with:
+          profile-type: IOS_APP_STORE
+          bundle-id: 'com.vonage.VERA.BroadcastExtension'
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
 
-    - name: Generate build number
-      id: buildnumber
-      run: |
-        # Generate build number with only numeric values for App Store compatibility
-        # Use timestamp to ensure uniqueness and avoid conflicts
-        TIMESTAMP=$(date +%s)
-        BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
-        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-        echo "Generated build number: $BUILD_NUMBER"
+      - name: Generate build number
+        id: buildnumber
+        run: |
+          # Generate build number with only numeric values for App Store compatibility
+          # Use timestamp to ensure uniqueness and avoid conflicts
+          TIMESTAMP=$(date +%s)
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${TIMESTAMP: -6}"
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "Generated build number: $BUILD_NUMBER"
 
-    - name: Generate project with Tuist
-      run: |
-        cd VERA
-        export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-        export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
-        export BASE_API_URL=${{ secrets.BASE_API_URL }}
-        ./Scripts/generateEnvironmentConstants.sh
-        ./Scripts/regenerateSigningConfig.sh
-        tuist generate --no-open
-        cd ..
+      - name: Generate project with Tuist
+        run: |
+          cd VERA
+          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
+          export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
+          export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          ./Scripts/generateEnvironmentConstants.sh
+          ./Scripts/regenerateSigningConfig.sh
+          tuist generate --no-open
+          cd ..
 
-    - name: Build archive
-      run: |
-          echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
-          xcodebuild -workspace VERA/VERA.xcworkspace \
-            -scheme VERA \
-            -sdk iphoneos \
-            -configuration Release \
-            -allowProvisioningUpdates \
-            -archivePath $PWD/build/VERA.xcarchive \
-            CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
-            archive | xcpretty
+      - name: Build archive
+        run: |
+            echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
+            xcodebuild -workspace VERA/VERA.xcworkspace \
+              -scheme VERA \
+              -sdk iphoneos \
+              -configuration Release \
+              -allowProvisioningUpdates \
+              -archivePath $PWD/build/VERA.xcarchive \
+              CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
+              archive | xcpretty
 
-    - name: Export IPA
-      run: |
-        xcodebuild -exportArchive \
-            -archivePath "$PWD/build/VERA.xcarchive" \
-            -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
-            -allowProvisioningUpdates \
-            -exportPath "$PWD/build" | xcpretty
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+              -archivePath "$PWD/build/VERA.xcarchive" \
+              -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
+              -allowProvisioningUpdates \
+              -exportPath "$PWD/build" | xcpretty
 
-    - name: Upload to TestFlight
-      uses: apple-actions/upload-testflight-build@v3
-      with:
-        app-path: build/VERA.ipa
-        issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-        api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v3.0.1
+        with:
+          app-path: build/VERA.ipa
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
