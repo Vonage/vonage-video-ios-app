@@ -80,7 +80,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
             let handle = try FileHandle(forWritingTo: fileURL)
             defer { try? handle.close() }
-            handle.seekToEndOfFile()
+            _ = try handle.seekToEnd()
             handle.write(data)
         } catch {
             // Silently ignore — logging should never crash the app.
