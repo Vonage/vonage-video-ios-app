@@ -5,6 +5,14 @@
 import SwiftUI
 import VERACommonUI
 
+/// Layout constants for the landing page welcome section.
+private enum LandingPageWelcomeConstants {
+    /// Bottom padding beneath the headline title.
+    static let titleBottomPadding: CGFloat = 10
+    /// Minimum scale factor for the headline text.
+    static let minimumScaleFactor: CGFloat = 0.5
+}
+
 struct LandingPageWelcome: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -28,9 +36,9 @@ struct LandingPageWelcomeCompact: View {
         VStack(alignment: .leading, spacing: 0) {
             LandingTitleCompact()
                 .lineLimit(2)
-                .padding(.bottom, 10)
+                .padding(.bottom, LandingPageWelcomeConstants.titleBottomPadding)
                 .adaptiveFont(.headline)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(LandingPageWelcomeConstants.minimumScaleFactor)
         }
     }
 }
@@ -42,8 +50,8 @@ struct LandingPageWelcomeRegular: View {
             LandingTitleRegular()
                 .adaptiveFont(.headline)
                 .lineLimit(3)
-                .minimumScaleFactor(0.5)
-                .padding(.bottom, 10)
+                .minimumScaleFactor(LandingPageWelcomeConstants.minimumScaleFactor)
+                .padding(.bottom, LandingPageWelcomeConstants.titleBottomPadding)
 
             Text("Power your business with video that transforms customer satisfaction.", bundle: .veraCore)
                 .adaptiveFont(.heading2)

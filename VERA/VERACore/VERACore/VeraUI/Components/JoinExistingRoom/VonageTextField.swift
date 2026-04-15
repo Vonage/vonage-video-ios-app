@@ -12,6 +12,32 @@ enum VonageTextFieldState: Equatable {
     case invalid(TextFieldError)
 }
 
+/// Layout constants for the floating-label text field.
+private enum VonageTextFieldConstants {
+    /// Horizontal padding for the floating label when floating.
+    static let floatingLabelHorizontalPadding: CGFloat = 4
+    /// Corner radius for the floating label background pill.
+    static let floatingLabelCornerRadius: CGFloat = 4
+    /// X offset of the floating label.
+    static let floatingLabelOffsetX: CGFloat = 12
+    /// X offset of the resting label.
+    static let restingLabelOffsetX: CGFloat = 16
+    /// Y offset of the floating label.
+    static let floatingLabelOffsetY: CGFloat = -24
+    /// Horizontal padding inside the text field.
+    static let textFieldHorizontalPadding: CGFloat = 16
+    /// Vertical padding inside the text field.
+    static let textFieldVerticalPadding: CGFloat = 12
+    /// Fixed height of the text field container.
+    static let textFieldHeight: CGFloat = 48
+    /// Width of the border stroke.
+    static let borderWidth: CGFloat = 1
+    /// Letter spacing (kerning) for input text and labels.
+    static let kerning: CGFloat = 0.15
+    /// Duration of the float/focus animations.
+    static let animationDuration: Double = 0.2
+}
+
 struct FloatingLabel: View {
     let text: String
     let isFloating: Bool
@@ -22,10 +48,10 @@ struct FloatingLabel: View {
         Text(text.capitalizingFirstLetter)
             .adaptiveFont(isFloating ? .caption : .bodyBase)
             .foregroundColor(color)
-            .kerning(0.15)
-            .padding(.horizontal, isFloating ? 4 : 0)
+            .kerning(VonageTextFieldConstants.kerning)
+            .padding(.horizontal, isFloating ? VonageTextFieldConstants.floatingLabelHorizontalPadding : 0)
             .background(
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: VonageTextFieldConstants.floatingLabelCornerRadius)
                     .fill(backgroundColor)
                     .opacity(isFloating ? 1 : 0)
             )
@@ -34,8 +60,13 @@ struct FloatingLabel: View {
                     Color.clear.preference(key: LabelWidthPreferenceKey.self, value: geo.size.width)
                 }
             )
-            .offset(x: isFloating ? 12 : 16, y: isFloating ? -24 : 0)
-            .animation(.easeInOut(duration: 0.2), value: isFloating)
+            .offset(
+                x: isFloating
+                    ? VonageTextFieldConstants.floatingLabelOffsetX
+                    : VonageTextFieldConstants.restingLabelOffsetX,
+                y: isFloating ? VonageTextFieldConstants.floatingLabelOffsetY : 0
+            )
+            .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: isFloating)
     }
 }
 
@@ -79,7 +110,7 @@ struct VonageTextField: View {
                             .adaptiveFont(.bodyBase)
                             .focused($isFocused)
                             .foregroundStyle(textColor)
-                            .kerning(0.15)
+                            .kerning(VonageTextFieldConstants.kerning)
                             #if os(iOS)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
@@ -90,16 +121,16 @@ struct VonageTextField: View {
                             .adaptiveFont(.bodyBase)
                             .focused($isFocused)
                             .foregroundStyle(textColor)
-                            .kerning(0.15)
+                            .kerning(VonageTextFieldConstants.kerning)
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.horizontal, VonageTextFieldConstants.textFieldHorizontalPadding)
+                .padding(.vertical, VonageTextFieldConstants.textFieldVerticalPadding)
             }
-            .frame(height: 48)
+            .frame(height: VonageTextFieldConstants.textFieldHeight)
             .background(
                 RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                    .stroke(borderColor, lineWidth: 1)
+                    .stroke(borderColor, lineWidth: VonageTextFieldConstants.borderWidth)
             )
             .background(
                 RoundedRectangle(cornerRadius: BorderRadius.medium.value)
@@ -108,8 +139,8 @@ struct VonageTextField: View {
             .onPreferenceChange(LabelWidthPreferenceKey.self) { width in
                 self.labelWidth = width
             }
-            .animation(.easeInOut(duration: 0.2), value: text.wrappedValue.isEmpty)
-            .animation(.easeInOut(duration: 0.2), value: isFocused)
+            .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: text.wrappedValue.isEmpty)
+            .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: isFocused)
 
             if case .invalid(let error) = state {
                 Text(NSLocalizedString(error, bundle: .veraCore, comment: ""))

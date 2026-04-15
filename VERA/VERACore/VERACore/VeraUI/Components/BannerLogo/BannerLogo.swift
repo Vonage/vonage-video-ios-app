@@ -4,6 +4,14 @@
 
 import SwiftUI
 
+/// Layout constants for the banner logo component.
+private enum BannerLogoConstants {
+    /// Height of the logo in compact (mobile) layout.
+    static let compactHeight: CGFloat = 30
+    /// Height of the logo in regular (desktop/tablet) layout.
+    static let regularHeight: CGFloat = 78
+}
+
 struct BannerLogo: View {
 
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -13,12 +21,12 @@ struct BannerLogo: View {
             VERACoreAsset.logoMobile.swiftUIImage
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 30)
+                .frame(height: BannerLogoConstants.compactHeight)
         } else {
             VERACoreAsset.logoDesktop.swiftUIImage
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 78)
+                .frame(height: BannerLogoConstants.regularHeight)
         }
     }
 }
