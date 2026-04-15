@@ -30,7 +30,7 @@ let project = Project(
             sources: ["VERALoggerTests/**"],
             dependencies: [
                 .target(name: "VERALogger"),
-                .cocoaLumberjackSwift
+                .cocoaLumberjackSwift,
             ],
             settings: createBaseBuildSettings()
         ),
