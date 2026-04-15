@@ -24,7 +24,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     private let fileURL: URL
     private let maxFileSize: UInt64
-    private let dateFormat: String
+    private let dateFormatter: DateFormatter
     private let lock = NSLock()
 
     /// Creates a file logging strategy.
@@ -40,7 +40,10 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     ) {
         self.fileURL = fileURL
         self.maxFileSize = maxFileSize
-        self.dateFormat = dateFormat
+        let formatter = DateFormatter()
+        formatter.dateFormat = dateFormat
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        self.dateFormatter = formatter
     }
 
     public func log(_ event: LogEvent) {
@@ -53,11 +56,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     ///
     /// Visible for testing.
     internal func formatEvent(_ event: LogEvent) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = dateFormat
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
-        let time = formatter.string(from: event.timestamp)
+        let time = dateFormatter.string(from: event.timestamp)
         var line = "\(time) [\(event.thread)] [\(event.level)] \(event.tag): \(event.message)"
         if let error = event.error {
             line += "\n\(error)"
@@ -68,11 +67,11 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     // MARK: - File Operations
 
     private func writeToFile(_ event: LogEvent) {
-        let line = formatEvent(event) + "\n"
-        guard let data = line.data(using: .utf8) else { return }
-
         lock.lock()
         defer { lock.unlock() }
+
+        let line = formatEvent(event) + "\n"
+        guard let data = line.data(using: .utf8) else { return }
 
         do {
             try ensureFileExists()
