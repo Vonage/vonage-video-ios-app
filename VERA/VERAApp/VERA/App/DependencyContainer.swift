@@ -193,6 +193,9 @@ final class DependencyContainer {
 
         lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
 
+        lazy var chatBadgeButtonViewModel = ChatBadgeButtonViewModel(
+            chatMessagesObserver: chatMessagesRepository)
+
         lazy var chatFactory = ChatFactory(
             chatMessagesRepository: chatMessagesRepository,
             sendChatMessageUseCase: sendChatMessageUseCase)

@@ -573,10 +573,10 @@ jobs:
             DerivedData/VERATests-iOS.xcresult
             DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult
             DerivedData/VERAVonageArchivingPluginTests-iOS.xcresult
-            DerivedData/VERAMeetingRoomTests-macOS.xcresult
-            DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
             DerivedData/VERAReactionsSnapshotTests-iOS.xcresult
             DerivedData/VERASettingsSnapshotTests-iOS.xcresult
+            DerivedData/VERAMeetingRoomTests-macOS.xcresult
+            DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
             DerivedData/Build/Products/
           
   sonarcloud:
