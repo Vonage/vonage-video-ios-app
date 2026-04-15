@@ -8,6 +8,7 @@ import SwiftUI
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAMeetingRoom
 import VERAVonage
 
 #if CHAT_ENABLED

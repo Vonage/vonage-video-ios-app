@@ -5,6 +5,7 @@
 import Foundation
 import OpenTok
 import VERACore
+import VERADomain
 import VERAVonage
 
 class MockVonageSessionFactory: SessionFactory {

@@ -3,6 +3,7 @@ import Foundation
 import SwiftUI
 import VERACore
 import VERADomain
+import VERAMeetingRoom
 import os.log
 
 #if ARCHIVING_ENABLED

@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import VERACommonUI
 import VERACore
+import VERAMeetingRoom
 
 public final class MeetingRoomTopTrailingButtons {
     static var topTrailingButtons: [ViewGenerator] = {

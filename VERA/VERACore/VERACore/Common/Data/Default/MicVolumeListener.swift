@@ -26,6 +26,16 @@ final class MicVolumeListener {
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
 
+        guard format.sampleRate > 0, format.channelCount > 0 else {
+            Self.logger.warning(
+                "Invalid input format (sampleRate: \(format.sampleRate), channels: \(format.channelCount)). Microphone may be unavailable."
+            )
+            return
+                volumeSubject
+                .throttle(for: .seconds(samplingInterval), scheduler: DispatchQueue.main, latest: true)
+                .eraseToAnyPublisher()
+        }
+
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             guard let self else { return }
             let rms = self.normalizeAudioLevel(buffer: buffer)

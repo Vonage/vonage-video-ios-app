@@ -7,6 +7,7 @@ import Foundation
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAMeetingRoom
 
 #if CHAT_ENABLED
     import VERAChat

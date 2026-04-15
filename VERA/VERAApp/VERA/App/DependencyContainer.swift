@@ -7,6 +7,7 @@ import Foundation
 import VERAConfiguration
 import VERACore
 import VERADomain
+import VERAMeetingRoom
 import VERAVonage
 import VERAVonageCallKitPlugin
 
@@ -109,7 +110,11 @@ final class DependencyContainer {
 
     lazy var meetingRoomFactory = MeetingRoomFactory(
         baseURL: baseURL,
-        appConfig: appConfig,
+        configuration: MeetingRoomConfiguration(
+            allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
+            allowCameraControl: appConfig.videoSettings.allowCameraControl,
+            showParticipantList: appConfig.meetingRoomSettings.showParticipantList
+        ),
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,

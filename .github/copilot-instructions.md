@@ -61,7 +61,7 @@ xcodebuild test \
   -destination "platform=macOS" \
   COMPILER_INDEX_STORE_ENABLE=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
 ```
-Replace `VERACoreTests` with any scheme: `VERAChatTests`, `VERADomainTests`, `VERAArchivingTests`, `VERAReactionsTests`, `VERASettingsTests`, `VERAScreenShareTests`, `VERAAudioEffectsTests`, `VERACommonUITests`, `VERAVonageTests`, `VERABackgroundEffectsTests`, `VERACaptionsTests`, and plugin tests such as `VERAVonageChatPluginTests`, `VERAVonageSettingsPluginTests`, etc.
+Replace `VERACoreTests` with any scheme: `VERAMeetingRoomTests`, `VERAChatTests`, `VERADomainTests`, `VERAArchivingTests`, `VERAReactionsTests`, `VERASettingsTests`, `VERAScreenShareTests`, `VERAAudioEffectsTests`, `VERACommonUITests`, `VERAVonageTests`, `VERABackgroundEffectsTests`, `VERACaptionsTests`, and plugin tests such as `VERAVonageChatPluginTests`, `VERAVonageSettingsPluginTests`, etc.
 
 ### Run snapshot tests (iOS Simulator required)
 ```bash
@@ -72,7 +72,7 @@ xcodebuild test \
   -parallel-testing-enabled NO \
   CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
 ```
-Replace `VERACoreSnapshotTests` with any snapshot scheme: `VERAChatSnapshotTests`, `VERASettingsSnapshotTests`, `VERAAudioEffectsSnapshotTests`, `VERACaptionsSnapshotTests`, `VERAReactionsSnapshotTests`.
+Replace `VERACoreSnapshotTests` with any snapshot scheme: `VERAMeetingRoomSnapshotTests`, `VERAChatSnapshotTests`, `VERASettingsSnapshotTests`, `VERAAudioEffectsSnapshotTests`, `VERACaptionsSnapshotTests`, `VERAReactionsSnapshotTests`.
 Snapshot images live in `__Snapshots__` folders. Record new snapshots by setting `record: true` in the snapshot assertion.
 
 ## Linting & Formatting
@@ -133,18 +133,22 @@ vonage-video-ios-app/
     │   ├── VERATests/
     │   └── VERAUITests/
     ├── VERADomain/                          # Protocols, entities, value types (no SDK imports)
+    │                                        #   Includes shared session & permission protocols
     ├── VERACore/                            # Main UI + business logic
     │   ├── VERACore/
     │   │   ├── Landing page/                #   Each flow: Data/ Domain/ UI/ Wireframe/
     │   │   ├── Waiting room/
-    │   │   ├── Meeting room/
     │   │   ├── GoodBye/
     │   │   ├── Common/
     │   │   └── Extensions/
     │   ├── VERATestHelpers/                 #   Shared mocks & spies for all test targets
     │   ├── VERACoreTests/
     │   └── VERACoreSnapshotTests/
-    ├── VERAVonage/                          # Vonage Video SDK adapter layer
+    ├── VERAMeetingRoom/                     # Meeting room (extracted from VERACore)
+    │   ├── VERAMeetingRoom/                 #   Data/ Domain/ UI/ Utils/ Wireframe/
+    │   ├── VERAMeetingRoomTests/
+    │   └── VERAMeetingRoomSnapshotTests/
+    ├── VERAVonage/                          # Vonage Video SDK adapter + ActiveSpeakerTracker
     ├── VERACommonUI/                        # Shared SwiftUI components & theme assets
     ├── VERAConfiguration/                   # Generated AppConfig model
     │
@@ -191,8 +195,11 @@ The app is fully managed by [Tuist](https://tuist.dev). Each module has its own 
 ```
 VERAApp              – Composition root; DependencyContainer wires all modules together
 VERADomain           – Shared protocols, entities, and value types (no SDK imports)
-VERACore             – Main UI + business logic (Landing, WaitingRoom, MeetingRoom, GoodBye flows)
-VERAVonage           – Vonage Video SDK adapter layer
+                       Includes session protocols (SessionRepository, RoomCredentials, Permissions, SpeakerInfo)
+VERACore             – Main UI + business logic (Landing, WaitingRoom, GoodBye flows)
+VERAMeetingRoom      – Meeting room feature (extracted from VERACore); depends on VERADomain + VERACommonUI
+                       Uses MeetingRoomConfiguration instead of AppConfig for decoupling
+VERAVonage           – Vonage Video SDK adapter layer + ActiveSpeakerTracker
 VERACommonUI         – Shared SwiftUI components and theme assets
 VERAConfiguration    – AppConfig model generated from app-config.json
 
@@ -273,7 +280,7 @@ Wireframe/           – Factory classes that wire Domain + Data + UI together
 - `Utils/` contains pure helpers (extensions, formatters) with no layer dependencies.
 
 ### Multi-platform targets
-Core framework modules (`VERACore`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 16+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
+Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 16+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
 
 ### Testing helpers
 `VERATestHelpers` (a framework target inside `VERACore`) provides shared mocks and spies (`MockCall`, `MockSessionRepository`, etc.) for use across all test targets.
