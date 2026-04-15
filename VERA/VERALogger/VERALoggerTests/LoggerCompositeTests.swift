@@ -9,6 +9,7 @@ import Testing
 
 @Suite("LoggerComposite Tests")
 struct LoggerCompositeTests {
+    private static let asyncDispatchTimeout: DispatchTimeInterval = .seconds(1)
 
     // MARK: - Test Helpers
 
@@ -219,16 +220,32 @@ struct LoggerCompositeTests {
     }
 
     @Test("Default queue works without explicit queue parameter")
-    func defaultQueueWorks() async {
+    func defaultQueueWorks() {
         let strategy = CollectingStrategy()
-        let composite = LoggerComposite(strategies: [strategy])
+        let eventProcessed = DispatchSemaphore(value: 0)
+        let verifyingStrategy = CallbackStrategy {
+            eventProcessed.signal()
+        }
+        let signalingComposite = LoggerComposite(strategies: [strategy, verifyingStrategy])
 
-        composite.log(LogEvent(level: .debug, tag: "T", message: "default queue"))
+        signalingComposite.log(LogEvent(level: .debug, tag: "T", message: "default queue"))
 
-        // Small delay to let default async dispatch complete
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        let waitResult = eventProcessed.wait(timeout: .now() + Self.asyncDispatchTimeout)
+        #expect(waitResult == .success)
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].message == "default queue")
+    }
+
+    private final class CallbackStrategy: LoggerStrategy, @unchecked Sendable {
+        private let callback: @Sendable () -> Void
+
+        init(callback: @escaping @Sendable () -> Void) {
+            self.callback = callback
+        }
+
+        func log(_ event: LogEvent) {
+            callback()
+        }
     }
 }

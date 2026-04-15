@@ -11,15 +11,32 @@ import Foundation
 /// os.Logger and CocoaLumberjack are unavailable.
 public struct DefaultLogStrategy: LoggerStrategy, Sendable {
 
-    /// The date formatter used for timestamps.
-    private let dateFormat: String
+    private final class FormatterStorage: @unchecked Sendable {
+        private let formatter: DateFormatter
+        private let lock = NSLock()
+
+        init(dateFormat: String) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = dateFormat
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            self.formatter = formatter
+        }
+
+        func string(from date: Date) -> String {
+            lock.lock()
+            defer { lock.unlock() }
+            return formatter.string(from: date)
+        }
+    }
+
+    private let formatterStorage: FormatterStorage
 
     /// Creates a default (print-based) log strategy.
     ///
     /// - Parameter dateFormat: The date format string for timestamps.
     ///   Defaults to `"yyyy-MM-dd HH:mm:ss.SSS"`.
     public init(dateFormat: String = "yyyy-MM-dd HH:mm:ss.SSS") {
-        self.dateFormat = dateFormat
+        formatterStorage = FormatterStorage(dateFormat: dateFormat)
     }
 
     public func log(_ event: LogEvent) {
@@ -31,11 +48,7 @@ public struct DefaultLogStrategy: LoggerStrategy, Sendable {
     ///
     /// Visible for testing.
     internal func formatEvent(_ event: LogEvent) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = dateFormat
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-
-        let time = formatter.string(from: event.timestamp)
+        let time = formatterStorage.string(from: event.timestamp)
         var line = "\(time) [\(event.thread)] [\(event.level)] \(event.tag): \(event.message)"
         if let error = event.error {
             line += "\n\(error)"
