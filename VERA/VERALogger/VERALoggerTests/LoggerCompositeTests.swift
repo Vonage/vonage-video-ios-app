@@ -219,6 +219,21 @@ struct LoggerCompositeTests {
         }
     }
 
+    @Test("Sync and async logs are serialized on the same queue")
+    func syncAndAsyncLogsAreSerialized() {
+        let customQueue = DispatchQueue(label: "com.vonage.VERALogger.test.sync.async")
+        let strategy = CollectingStrategy()
+        let composite = LoggerComposite(strategies: [strategy], queue: customQueue)
+
+        composite.log(LogEvent(level: .info, tag: "T", message: "async first"))
+        composite.logSync(LogEvent(level: .error, tag: "T", message: "sync second"))
+        customQueue.sync { }
+
+        #expect(strategy.events.count == 2)
+        #expect(strategy.events[0].message == "async first")
+        #expect(strategy.events[1].message == "sync second")
+    }
+
     @Test("Default queue works without explicit queue parameter")
     func defaultQueueWorks() {
         let strategy = CollectingStrategy()

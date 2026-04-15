@@ -57,9 +57,12 @@ public final class LoggerComposite: @unchecked Sendable {
     ///
     /// - Parameter event: The log event to dispatch.
     public func logSync(_ event: LogEvent) {
-        for strategy in strategies {
-            if strategy.shouldLog(event) {
-                strategy.log(event)
+        let capturedStrategies = strategies
+        queue.sync {
+            for strategy in capturedStrategies {
+                if strategy.shouldLog(event) {
+                    strategy.log(event)
+                }
             }
         }
     }
