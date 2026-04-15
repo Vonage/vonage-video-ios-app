@@ -88,12 +88,14 @@ struct ArchiveList: View {
                             }
                         }
                     }
-                    .listRowInsets(EdgeInsets(
-                        top: ArchiveListConstants.rowInsetTop,
-                        leading: ArchiveListConstants.rowInsetLeading,
-                        bottom: ArchiveListConstants.rowInsetBottom,
-                        trailing: ArchiveListConstants.rowInsetTrailing
-                    ))
+                    .listRowInsets(
+                        EdgeInsets(
+                            top: ArchiveListConstants.rowInsetTop,
+                            leading: ArchiveListConstants.rowInsetLeading,
+                            bottom: ArchiveListConstants.rowInsetBottom,
+                            trailing: ArchiveListConstants.rowInsetTrailing
+                        )
+                    )
                     .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)

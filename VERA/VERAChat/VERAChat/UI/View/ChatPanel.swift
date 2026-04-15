@@ -113,14 +113,6 @@ struct GlassBackground: View {
             }
         #endif
     }
-
-    #if !os(macOS)
-        @available(iOS 26.0, *)
-        private func glassEffectBackground() -> some View {
-            RoundedRectangle(cornerRadius: ChatPanelConstants.glassCornerRadius)
-                .glassEffect(in: .rect(cornerRadius: ChatPanelConstants.glassCornerRadius))
-        }
-    #endif
 }
 
 // MARK: - Previews

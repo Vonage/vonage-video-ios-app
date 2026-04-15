@@ -5,23 +5,23 @@
 import SwiftUI
 
 /// Layout constants for the avatar group component.
-private enum AvatarGroupConstants {
+public enum AvatarGroupConstants {
     /// Default maximum number of visible avatars.
-    static let defaultMaxVisible: Int = 4
+    public static let defaultMaxVisible: Int = 4
     /// Default avatar circle diameter.
-    static let defaultSize: CGFloat = 40
+    public static let defaultSize: CGFloat = 40
     /// Default overlap spacing between avatars.
-    static let defaultSpacing: CGFloat = -8
+    public static let defaultSpacing: CGFloat = -8
     /// Scale factor for the initials font relative to avatar size.
-    static let initialsFontScale: CGFloat = 0.4
+    public static let initialsFontScale: CGFloat = 0.4
     /// Scale factor for the overflow count font relative to avatar size.
-    static let overflowFontScale: CGFloat = 0.35
+    public static let overflowFontScale: CGFloat = 0.35
     /// Width of the border stroke around each avatar.
-    static let strokeWidth: CGFloat = 2
+    public static let strokeWidth: CGFloat = 2
     /// Opacity of the overflow count circle background.
-    static let overflowBackgroundOpacity: Double = 0.3
+    public static let overflowBackgroundOpacity: Double = 0.3
     /// Duration of the avatar group animation.
-    static let animationDuration: Double = 0.3
+    public static let animationDuration: Double = 0.3
 }
 
 public struct AvatarGroup: View {

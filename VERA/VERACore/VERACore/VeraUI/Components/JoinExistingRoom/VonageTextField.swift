@@ -139,7 +139,9 @@ struct VonageTextField: View {
             .onPreferenceChange(LabelWidthPreferenceKey.self) { width in
                 self.labelWidth = width
             }
-            .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: text.wrappedValue.isEmpty)
+            .animation(
+                .easeInOut(duration: VonageTextFieldConstants.animationDuration), value: text.wrappedValue.isEmpty
+            )
             .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: isFocused)
 
             if case .invalid(let error) = state {

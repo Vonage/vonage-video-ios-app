@@ -99,8 +99,10 @@ struct AdditionalParticipantsAvatar: View {
 
     var body: some View {
         Circle()
-            .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor
-                .opacity(HiddenParticipantsTileConstants.backgroundOpacity))
+            .fill(
+                VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                    .opacity(HiddenParticipantsTileConstants.backgroundOpacity)
+            )
             .frame(width: size, height: size)
             .overlay(
                 Circle()

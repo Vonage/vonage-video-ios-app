@@ -101,7 +101,9 @@ public struct MeetingRoomView: View {
                         extraButtons: _extraButtons
                     )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
-                    .animation(.easeInOut(duration: MeetingRoomViewConstants.barFadeDuration), value: isBottomBarVisible)
+                    .animation(
+                        .easeInOut(duration: MeetingRoomViewConstants.barFadeDuration), value: isBottomBarVisible
+                    )
                     .onTapGesture {
                         showBars()
                     }
