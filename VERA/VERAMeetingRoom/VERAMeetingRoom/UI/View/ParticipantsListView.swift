@@ -6,6 +6,22 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+/// Layout constants for the participants list panel.
+private enum ParticipantsListViewConstants {
+    /// Horizontal padding for the share link button.
+    static let shareLinkHorizontalPadding: CGFloat = 12
+    /// Vertical padding for the share link button.
+    static let shareLinkVerticalPadding: CGFloat = 6
+    /// Corner radius for the share link button.
+    static let shareLinkCornerRadius: CGFloat = 6
+    /// Background opacity for the meeting URL section.
+    static let urlSectionBackgroundOpacity: Double = 0.1
+    /// Spacing between avatar and participant name in a row.
+    static let rowSpacing: CGFloat = 16
+    /// Diameter of the participant avatar circle.
+    static let avatarSize: CGFloat = 40
+}
+
 public struct ParticipantsListView: View {
     let participants: [UIParticipant]
     let participantsCount: Int
@@ -80,9 +96,9 @@ public struct ParticipantsListView: View {
                     ShareLink(item: meetingURL) {
                         VERACommonUIAsset.Images.shareLine.swiftUIImage
                             .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .cornerRadius(6)
+                            .padding(.horizontal, ParticipantsListViewConstants.shareLinkHorizontalPadding)
+                            .padding(.vertical, ParticipantsListViewConstants.shareLinkVerticalPadding)
+                            .cornerRadius(ParticipantsListViewConstants.shareLinkCornerRadius)
                     }
                 }
                 .padding()
@@ -90,7 +106,7 @@ public struct ParticipantsListView: View {
             } else {
                 EmptyView()
             }
-        }.background(Color.gray.opacity(0.1))
+        }.background(Color.gray.opacity(ParticipantsListViewConstants.urlSectionBackgroundOpacity))
     }
 
     // MARK: - Participants List
@@ -130,7 +146,7 @@ struct ParticipantRowView: View {
     var onTogglePin: ((String) -> Void)?
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: ParticipantsListViewConstants.rowSpacing) {
             ParticipantAvatarView(participant: participant)
 
             Text(participant.name)
@@ -168,7 +184,10 @@ struct ParticipantAvatarView: View {
     var body: some View {
         Circle()
             .fill(participant.name.getParticipantColor())
-            .frame(width: 40, height: 40)
+            .frame(
+                width: ParticipantsListViewConstants.avatarSize,
+                height: ParticipantsListViewConstants.avatarSize
+            )
             .overlay {
                 Text(participant.name.getInitials())
                     .font(.body)

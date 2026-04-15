@@ -6,6 +6,30 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+/// Layout constants for the meeting room screen.
+private enum MeetingRoomViewConstants {
+    /// Spring animation response for content transitions.
+    static let springResponse: Double = 0.6
+    /// Spring animation damping fraction.
+    static let springDamping: Double = 0.8
+    /// Spacing between status indicator icons.
+    static let statusIconSpacing: CGFloat = 8
+    /// Leading padding for the status indicator row.
+    static let statusLeadingPadding: CGFloat = 16
+    /// Top padding for the status indicator row.
+    static let statusTopPadding: CGFloat = 16
+    /// Size of the recording indicator icon.
+    static let recordingIconSize: CGFloat = 20
+    /// Pulse fraction for the recording indicator animation.
+    static let recordingPulseFraction: CGFloat = 1.1
+    /// Duration of the recording pulse animation in seconds.
+    static let recordingPulseDuration: Double = 0.6
+    /// Duration of the bottom bar fade animation.
+    static let barFadeDuration: Double = 0.3
+    /// Duration of the bar toggle animation.
+    static let barToggleDuration: Double = 0.4
+}
+
 public struct ViewGenerator: Identifiable {
     public let id: String
     public let content: () -> AnyView
@@ -52,7 +76,12 @@ public struct MeetingRoomView: View {
                     activeSpeakerId: state.activeSpeakerId
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isNavigationBarVisible)
+                .animation(
+                    .spring(
+                        response: MeetingRoomViewConstants.springResponse,
+                        dampingFraction: MeetingRoomViewConstants.springDamping
+                    ), value: isNavigationBarVisible
+                )
                 .contentShape(Rectangle())
                 .onTapGesture {
                     toggleBarsVisibility()
@@ -72,7 +101,7 @@ public struct MeetingRoomView: View {
                         extraButtons: _extraButtons
                     )
                     .opacity(isBottomBarVisible ? 1.0 : 0.0)
-                    .animation(.easeInOut(duration: 0.3), value: isBottomBarVisible)
+                    .animation(.easeInOut(duration: MeetingRoomViewConstants.barFadeDuration), value: isBottomBarVisible)
                     .onTapGesture {
                         showBars()
                     }
@@ -80,7 +109,7 @@ public struct MeetingRoomView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: MeetingRoomViewConstants.statusIconSpacing) {
                         if state.archivingState.isArchiving {
                             recordingIndicator
                         }
@@ -89,8 +118,8 @@ public struct MeetingRoomView: View {
                         }
                         Spacer()
                     }
-                    .padding(.leading, 16)
-                    .padding(.top, 16)
+                    .padding(.leading, MeetingRoomViewConstants.statusLeadingPadding)
+                    .padding(.top, MeetingRoomViewConstants.statusTopPadding)
                     Spacer()
                 }
                 .allowsHitTesting(false)
@@ -175,9 +204,15 @@ public struct MeetingRoomView: View {
         VStack(spacing: 0) {
             Image(systemName: "record.circle")
                 .resizable()
-                .frame(width: 20, height: 20)
+                .frame(
+                    width: MeetingRoomViewConstants.recordingIconSize,
+                    height: MeetingRoomViewConstants.recordingIconSize
+                )
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
-                .pulsating(pulseFraction: 1.1, durationSeconds: 0.6)
+                .pulsating(
+                    pulseFraction: MeetingRoomViewConstants.recordingPulseFraction,
+                    durationSeconds: MeetingRoomViewConstants.recordingPulseDuration
+                )
         }
     }
 
@@ -212,7 +247,7 @@ public struct MeetingRoomView: View {
     }
 
     private func showBars(value: Bool = true) {
-        withAnimation(.easeInOut(duration: 0.4)) {
+        withAnimation(.easeInOut(duration: MeetingRoomViewConstants.barToggleDuration)) {
             isBottomBarVisible = value
             isNavigationBarVisible = value
         }
