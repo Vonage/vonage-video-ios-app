@@ -6,6 +6,30 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+/// Layout constants for the hidden participants tile.
+private enum HiddenParticipantsTileConstants {
+    /// Default overlap spacing between stacked avatars.
+    static let defaultAvatarSpacing: CGFloat = -8
+    /// Background fill opacity.
+    static let backgroundOpacity: Double = 0.8
+    /// Aspect ratio width component for the tile (16:9).
+    static let aspectRatioWidth: CGFloat = 16.0
+    /// Aspect ratio height component for the tile (16:9).
+    static let aspectRatioHeight: CGFloat = 9.0
+    /// Maximum number of visible avatars in the group.
+    static let maxVisibleAvatars: Int = 3
+    /// Avatar size within the hidden participants tile.
+    static let avatarSize: CGFloat = 42
+    /// Corner radius of the tile.
+    static let cornerRadius: CGFloat = 8
+    /// Shadow radius around the tile.
+    static let shadowRadius: CGFloat = 2
+    /// Default size of the additional participants avatar circle.
+    static let additionalAvatarDefaultSize: CGFloat = 96
+    /// Stroke width for the additional participants circle border.
+    static let additionalAvatarStrokeWidth: CGFloat = 2
+}
+
 /// A tile that displays avatars for participants who are hidden from the main video layout.
 ///
 /// This component manages video stream visibility for hidden participants:
@@ -23,7 +47,7 @@ struct HiddenParticipantsTile: View {
 
     init(
         participants: [UIParticipant],
-        spacedBy: CGFloat = -8
+        spacedBy: CGFloat = HiddenParticipantsTileConstants.defaultAvatarSpacing
     ) {
         self.participants = participants
         self.spacedBy = spacedBy
@@ -32,20 +56,27 @@ struct HiddenParticipantsTile: View {
     var body: some View {
         ZStack(alignment: .center) {
             Rectangle()
-                .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
-                .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                .fill(
+                    VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                        .opacity(HiddenParticipantsTileConstants.backgroundOpacity)
+                )
+                .aspectRatio(
+                    HiddenParticipantsTileConstants.aspectRatioWidth
+                        / HiddenParticipantsTileConstants.aspectRatioHeight,
+                    contentMode: .fit
+                )
                 .overlay(
                     AvatarGroup(
                         users: participantNames.map {
                             AvatarGroupUser(name: $0)
                         },
-                        maxVisible: 3,
-                        size: 42
+                        maxVisible: HiddenParticipantsTileConstants.maxVisibleAvatars,
+                        size: HiddenParticipantsTileConstants.avatarSize
                     )
                 )
         }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .shadow(radius: 2)
+        .clipShape(RoundedRectangle(cornerRadius: HiddenParticipantsTileConstants.cornerRadius))
+        .shadow(radius: HiddenParticipantsTileConstants.shadowRadius)
         .onAppear {
             // Disable video streams for hidden participants.
             // Re-enabling is handled by ParticipantVideoCard's .trackingVisibility(of:)
@@ -61,18 +92,21 @@ struct AdditionalParticipantsAvatar: View {
     let count: Int
     let size: CGFloat
 
-    init(count: Int, size: CGFloat = 96) {
+    init(count: Int, size: CGFloat = HiddenParticipantsTileConstants.additionalAvatarDefaultSize) {
         self.count = count
         self.size = size
     }
 
     var body: some View {
         Circle()
-            .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
+            .fill(
+                VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                    .opacity(HiddenParticipantsTileConstants.backgroundOpacity)
+            )
             .frame(width: size, height: size)
             .overlay(
                 Circle()
-                    .stroke(Color.white, lineWidth: 2)
+                    .stroke(Color.white, lineWidth: HiddenParticipantsTileConstants.additionalAvatarStrokeWidth)
             )
             .overlay(
                 Text("+\(count)")

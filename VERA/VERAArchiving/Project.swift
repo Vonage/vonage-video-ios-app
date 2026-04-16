@@ -4,6 +4,9 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAArchiving",
     options: defaultProjectOptions(),
+    packages: [
+        .swiftSnapshotTesting
+    ],
     targets: [
         .target(
             name: "VERAArchiving",
@@ -48,6 +51,19 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
+        .target(
+            name: "VERAArchivingSnapshotTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.vonage.VERAArchivingSnapshotTests",
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            sources: ["VERAArchivingSnapshotTests/**"],
+            dependencies: [
+                .target(name: "VERAArchiving"),
+                .swiftSnapshotTesting,
+            ],
+            settings: createBaseBuildSettings()
+        ),
     ],
     schemes: [
         .scheme(
@@ -56,6 +72,13 @@ let project = Project(
             buildAction: .buildAction(targets: ["VERAArchivingTests"]),
             testAction: .targets(["VERAArchivingTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        )
+        ),
+        .scheme(
+            name: "VERAArchivingSnapshotTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERAArchivingSnapshotTests"]),
+            testAction: .targets(["VERAArchivingSnapshotTests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
+        ),
     ]
 )

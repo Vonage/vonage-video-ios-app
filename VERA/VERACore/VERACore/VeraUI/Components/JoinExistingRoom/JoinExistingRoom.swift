@@ -16,6 +16,22 @@ enum RoomNameState {
     case initial, valid, invalid
 }
 
+/// Layout constants for the join-existing-room form.
+private enum JoinExistingRoomConstants {
+    /// Vertical spacing between form elements.
+    static let fieldSpacing: CGFloat = 8
+    /// Bottom padding for the section title.
+    static let titleBottomPadding: CGFloat = 8
+    /// Vertical padding around the join button.
+    static let joinButtonVerticalPadding: CGFloat = 16
+    /// Spring animation response for field state changes.
+    static let springResponse: Double = 0.3
+    /// Spring animation damping fraction.
+    static let springDamping: Double = 0.7
+    /// Duration of the room-state validation animation.
+    static let validationAnimationDuration: Double = 0.2
+}
+
 struct JoinExistingRoom: View {
 
     @State var roomName: RoomName = ""
@@ -25,11 +41,11 @@ struct JoinExistingRoom: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: JoinExistingRoomConstants.fieldSpacing) {
                 Text("Join existing meeting", bundle: .veraCore)
                     .adaptiveFont(.heading4)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, JoinExistingRoomConstants.titleBottomPadding)
 
                 VonageTextField(
                     placeholder: String(localized: "Room name", bundle: .veraCore),
@@ -42,12 +58,17 @@ struct JoinExistingRoom: View {
                     onJoinRoom(roomName)
                 }
                 .id(JoinExistingRoomUIIDs.joinButton)
-                .padding(.vertical, 16)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: roomState)
+                .padding(.vertical, JoinExistingRoomConstants.joinButtonVerticalPadding)
+                .animation(
+                    .spring(
+                        response: JoinExistingRoomConstants.springResponse,
+                        dampingFraction: JoinExistingRoomConstants.springDamping
+                    ), value: roomState
+                )
             }
         }
         .onChange(of: roomName) { _ in
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.easeInOut(duration: JoinExistingRoomConstants.validationAnimationDuration)) {
                 roomState = getRoomState()
             }
         }

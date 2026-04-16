@@ -4,6 +4,52 @@
 
 import SwiftUI
 
+/// Layout constants for the adaptive participant grid.
+private enum AdaptiveGridLayoutConstants {
+    /// Minimum height for a single-participant card.
+    static let singleParticipantMinHeight: CGFloat = 200
+    /// Bottom padding below the grid content.
+    static let bottomPadding: CGFloat = 4
+    /// Horizontal padding around the grid content.
+    static let horizontalPadding: CGFloat = 12
+    /// Padding for a single-participant layout.
+    static let singleParticipantPadding: Double = 16
+    /// Padding for layouts with two participants.
+    static let twoParticipantPadding: Double = 12
+    /// Spacing between cells in a two-participant layout.
+    static let twoParticipantSpacing: Double = 6
+    /// Padding threshold for ≤ 4 participants in multi-layout.
+    static let fewParticipantsPadding: Double = 12
+    /// Padding for > 4 participants in multi-layout.
+    static let manyParticipantsPadding: Double = 8
+    /// Spacing for ≤ 2 participants in multi-layout.
+    static let fewParticipantsSpacing: Double = 6
+    /// Spacing for 3–4 participants in multi-layout.
+    static let mediumParticipantsSpacing: Double = 4
+    /// Spacing for > 4 participants in multi-layout.
+    static let manyParticipantsSpacing: Double = 2
+    /// Minimum allowed cell width.
+    static let minCellWidth: Double = 100
+    /// Minimum allowed cell height.
+    static let minCellHeight: Double = 60
+    /// Maximum number of columns to try.
+    static let maxReasonableColumns: Int = 6
+    /// Fallback number of columns when no valid grid is found.
+    static let fallbackColumns: Int = 3
+    /// Fallback efficiency when no valid grid is found.
+    static let fallbackEfficiency: Double = 0.5
+    /// Divisor for aspect ratio penalty calculation.
+    static let aspectRatioPenaltyDivisor: Double = 3.0
+    /// Multiplier for balanced aspect ratio bonus.
+    static let aspectRatioBonusMultiplier: Double = 0.1
+    /// Multiplier for cell utilization bonus.
+    static let utilizationBonusMultiplier: Double = 0.05
+    /// Weight for video content efficiency in scoring.
+    static let videoContentWeight: Double = 0.8
+    /// Weight for overall efficiency in scoring.
+    static let overallEfficiencyWeight: Double = 0.2
+}
+
 struct AdaptiveGridLayout: View {
     let participants: [UIParticipant]
     let activeSpeakerId: String?
@@ -16,7 +62,7 @@ struct AdaptiveGridLayout: View {
                     activeSpeakerId: activeSpeakerId
                 )
                 .id(participant.id)
-                .frame(maxWidth: .infinity, minHeight: 200)
+                .frame(maxWidth: .infinity, minHeight: AdaptiveGridLayoutConstants.singleParticipantMinHeight)
                 .transition(.opacity)
             } else if participants.count > 1 {
                 GeometryReader { geometry in
@@ -45,8 +91,8 @@ struct AdaptiveGridLayout: View {
                 }
             }
         }
-        .padding(.bottom, 4)
-        .padding(.horizontal, 12)
+        .padding(.bottom, AdaptiveGridLayoutConstants.bottomPadding)
+        .padding(.horizontal, AdaptiveGridLayoutConstants.horizontalPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .onAppear {
             participants.forEach { $0.participant.onAppear?() }
@@ -78,7 +124,7 @@ struct AdaptiveGridLayout: View {
         return GridLayout(
             columns: [GridItem(.flexible())],
             spacing: 0,
-            padding: 16,
+            padding: AdaptiveGridLayoutConstants.singleParticipantPadding,
             customCellSize: nil
         )
     }
@@ -90,19 +136,19 @@ struct AdaptiveGridLayout: View {
             // Side by side with optimized spacing
             return GridLayout(
                 columns: [
-                    GridItem(.flexible(), spacing: 6),
-                    GridItem(.flexible(), spacing: 6),
+                    GridItem(.flexible(), spacing: AdaptiveGridLayoutConstants.twoParticipantSpacing),
+                    GridItem(.flexible(), spacing: AdaptiveGridLayoutConstants.twoParticipantSpacing),
                 ],
-                spacing: 6,
-                padding: 12,
+                spacing: AdaptiveGridLayoutConstants.twoParticipantSpacing,
+                padding: AdaptiveGridLayoutConstants.twoParticipantPadding,
                 customCellSize: nil
             )
         } else {
             // Stacked vertically with optimized spacing
             return GridLayout(
                 columns: [GridItem(.flexible())],
-                spacing: 6,
-                padding: 12,
+                spacing: AdaptiveGridLayoutConstants.twoParticipantSpacing,
+                padding: AdaptiveGridLayoutConstants.twoParticipantPadding,
                 customCellSize: nil
             )
         }
@@ -138,11 +184,19 @@ struct AdaptiveGridLayout: View {
     ) {
 
         // Reduce spacing based on participant count for maximum space utilization
-        let padding: Double = participantCount <= 4 ? 12 : 8
-        let spacing: Double = participantCount <= 2 ? 6 : (participantCount <= 4 ? 4 : 2)
+        let padding: Double =
+            participantCount <= 4
+            ? AdaptiveGridLayoutConstants.fewParticipantsPadding
+            : AdaptiveGridLayoutConstants.manyParticipantsPadding
+        let spacing: Double =
+            participantCount <= 2
+            ? AdaptiveGridLayoutConstants.fewParticipantsSpacing
+            : (participantCount <= 4
+                ? AdaptiveGridLayoutConstants.mediumParticipantsSpacing
+                : AdaptiveGridLayoutConstants.manyParticipantsSpacing)
 
-        let minCellWidth: Double = 100
-        let minCellHeight: Double = 60
+        let minCellWidth: Double = AdaptiveGridLayoutConstants.minCellWidth
+        let minCellHeight: Double = AdaptiveGridLayoutConstants.minCellHeight
 
         var bestGrid:
             (
@@ -151,7 +205,7 @@ struct AdaptiveGridLayout: View {
             )?
 
         // Try different grid configurations to find the one that maximizes space usage
-        let maxReasonableColumns = min(participantCount, 6)  // Reasonable upper limit
+        let maxReasonableColumns = min(participantCount, AdaptiveGridLayoutConstants.maxReasonableColumns)
 
         for columns in 1...maxReasonableColumns {
             let rows = Int(ceil(Double(participantCount) / Double(columns)))
@@ -181,12 +235,16 @@ struct AdaptiveGridLayout: View {
 
             // Bonus for more balanced aspect ratios (not too wide or too tall)
             let cellAspectRatio = cellWidth / cellHeight
-            let aspectRatioBalance = 1.0 - abs(log2(cellAspectRatio)) / 3.0  // Penalize extreme ratios
-            let balancedAspectRatioBonus = max(0, aspectRatioBalance) * 0.1
+            let aspectRatioBalance =
+                1.0 - abs(log2(cellAspectRatio)) / AdaptiveGridLayoutConstants.aspectRatioPenaltyDivisor
+            let balancedAspectRatioBonus =
+                max(0, aspectRatioBalance) * AdaptiveGridLayoutConstants.aspectRatioBonusMultiplier
 
             // Bonus for using more of the available participants (fewer empty cells)
             let emptyCells = rows * columns - participantCount
-            let utilizationBonus = (1.0 - Double(emptyCells) / Double(rows * columns)) * 0.05
+            let utilizationBonus =
+                (1.0 - Double(emptyCells) / Double(rows * columns))
+                * AdaptiveGridLayoutConstants.utilizationBonusMultiplier
 
             // Enhanced score prioritizing actual video content area
             let score = calculateGridScore(
@@ -215,9 +273,12 @@ struct AdaptiveGridLayout: View {
 
         // Fallback if no valid grid found (should rarely happen with reduced minimums)
         guard let best = bestGrid else {
-            let fallbackColumns = min(3, participantCount)
+            let fallbackColumns = min(AdaptiveGridLayoutConstants.fallbackColumns, participantCount)
             let fallbackRows = Int(ceil(Double(participantCount) / Double(fallbackColumns)))
-            return (fallbackRows, fallbackColumns, minCellWidth, minCellHeight, spacing, padding, 0.5)
+            return (
+                fallbackRows, fallbackColumns, minCellWidth, minCellHeight, spacing, padding,
+                AdaptiveGridLayoutConstants.fallbackEfficiency
+            )
         }
 
         return best
@@ -231,7 +292,9 @@ struct AdaptiveGridLayout: View {
         aspectRatioBalance: Double,
         utilizationBonus: Double
     ) -> Double {
-        return videoContentEfficiency * 0.8 + efficiency * 0.2 + aspectRatioBalance + utilizationBonus
+        return videoContentEfficiency * AdaptiveGridLayoutConstants.videoContentWeight
+            + efficiency * AdaptiveGridLayoutConstants.overallEfficiencyWeight
+            + aspectRatioBalance + utilizationBonus
     }
 
     private func calculateExistingGridScore(
@@ -245,10 +308,14 @@ struct AdaptiveGridLayout: View {
         let videoContentEfficiency =
             (Double(bestGrid.columns) * bestGrid.cellWidth * Double(bestGrid.rows) * bestGrid.cellHeight)
             / (containerSize.width * containerSize.height)
-        let aspectRatioBalance = (1.0 - abs(log2(bestGrid.cellWidth / bestGrid.cellHeight)) / 3.0) * 0.1
+        let aspectRatioBalance =
+            (1.0 - abs(log2(bestGrid.cellWidth / bestGrid.cellHeight))
+                / AdaptiveGridLayoutConstants.aspectRatioPenaltyDivisor)
+            * AdaptiveGridLayoutConstants.aspectRatioBonusMultiplier
         let utilizationBonus =
             (1.0 - Double((bestGrid.rows * bestGrid.columns - participantCount))
-                / Double(bestGrid.rows * bestGrid.columns)) * 0.05
+                / Double(bestGrid.rows * bestGrid.columns))
+            * AdaptiveGridLayoutConstants.utilizationBonusMultiplier
 
         return calculateGridScore(
             videoContentEfficiency: videoContentEfficiency,

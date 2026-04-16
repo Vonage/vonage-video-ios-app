@@ -4,6 +4,14 @@
 
 import SwiftUI
 
+/// Layout constants shared by control button variants.
+private enum ControlButtonConstants {
+    /// Diameter of the circular button.
+    static let buttonSize: CGFloat = 50
+    /// Duration of the active-state toggle animation.
+    static let animationDuration: Double = 0.2
+}
+
 public struct ControlButton: View {
     private let isActive: Bool
     private let iconName: String
@@ -39,12 +47,12 @@ public struct ControlImageButton: View {
             image
                 .font(.title2)
                 .foregroundStyle(isActive ? VERACommonUIAsset.SemanticColors.surface.swiftUIColor : .red)
-                .frame(width: 50, height: 50)
+                .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
                 .background(
                     Circle()
                         .fill(isActive ? VERACommonUIAsset.Colors.vGray4.swiftUIColor : .clear)
                 )
-                .animation(.easeInOut(duration: 0.2), value: isActive)
+                .animation(.easeInOut(duration: ControlButtonConstants.animationDuration), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -61,7 +69,7 @@ public struct ButtonImage: View {
         image
             .font(.title2)
             .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-            .frame(width: 50, height: 50)
+            .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
             .background(
                 Circle()
                     .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor)

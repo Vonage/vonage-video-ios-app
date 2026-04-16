@@ -5,6 +5,18 @@
 import SwiftUI
 import VERADomain
 
+/// Layout constants for the toast notification view.
+private enum ToastViewConstants {
+    /// Spacing between icon and message text.
+    static let contentSpacing: CGFloat = 12
+    /// Font size of the leading icon.
+    static let iconSize: CGFloat = 20
+    /// Horizontal padding around toast content.
+    static let horizontalPadding: CGFloat = 16
+    /// Vertical padding around toast content.
+    static let verticalPadding: CGFloat = 12
+}
+
 public struct ToastView: View {
     public let item: ToastItem
 
@@ -13,17 +25,17 @@ public struct ToastView: View {
     }
 
     public var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: ToastViewConstants.contentSpacing) {
             item.image
-                .font(.system(size: 20))
+                .font(.system(size: ToastViewConstants.iconSize))
 
             Text(item.message)
                 .foregroundColor(.black)
                 .adaptiveFont(.bodyBase)
                 .lineLimit(2)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, ToastViewConstants.horizontalPadding)
+        .padding(.vertical, ToastViewConstants.verticalPadding)
         .background(
             GlassBackground()
         )
