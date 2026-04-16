@@ -14,7 +14,7 @@ struct ParticipantsBadgeButtonUITests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "ParticipantsBadgeButton"
 
     // MARK: - Badge Count Tests

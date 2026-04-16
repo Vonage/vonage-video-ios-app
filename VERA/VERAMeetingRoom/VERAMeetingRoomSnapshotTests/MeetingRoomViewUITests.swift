@@ -15,7 +15,7 @@ struct MeetingRoomViewUITests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "MeetingRoomView"
 
     // MARK: - State Variant Tests
@@ -59,7 +59,8 @@ struct MeetingRoomViewUITests {
             "WithoutShareURL",
         ])
     func shareURLVisibility(variantName: String) throws {
-        let roomURL: URL? = variantName == "WithShareURL"
+        let roomURL: URL? =
+            variantName == "WithShareURL"
             ? URL(string: "https://video.vonage.com/heart-of-gold")
             : nil
         let sut = makeSUT(roomURL: roomURL)

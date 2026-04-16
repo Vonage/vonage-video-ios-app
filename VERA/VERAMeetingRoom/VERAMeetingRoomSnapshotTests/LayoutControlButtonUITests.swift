@@ -15,7 +15,7 @@ struct LayoutControlButtonUITests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "LayoutControlButton"
 
     // MARK: - Layout State Tests

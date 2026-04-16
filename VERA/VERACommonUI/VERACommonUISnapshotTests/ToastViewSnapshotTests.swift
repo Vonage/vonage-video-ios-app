@@ -14,7 +14,7 @@ struct ToastViewSnapshotTests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "ToastView"
 
     // MARK: - Toast Mode Tests

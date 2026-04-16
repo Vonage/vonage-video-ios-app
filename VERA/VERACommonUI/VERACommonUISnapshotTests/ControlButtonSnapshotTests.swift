@@ -13,7 +13,7 @@ struct ControlButtonSnapshotTests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "ControlButton"
 
     // MARK: - Active State Tests

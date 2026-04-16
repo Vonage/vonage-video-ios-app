@@ -14,7 +14,7 @@ struct ArchiveListSnapshotTests {
 
     // MARK: - Test Configuration
 
-    private let isRecording = true
+    private let isRecording = false
     private let snapshotPrefix = "ArchiveList"
 
     // MARK: - Content State Tests
