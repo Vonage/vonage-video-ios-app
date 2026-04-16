@@ -33,6 +33,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
+    var meetingRoomPrebuilt: MeetingRoomPrebuilt?
     var goodByeViewModel: GoodByeViewModel?
 
     #if ARCHIVING_ENABLED

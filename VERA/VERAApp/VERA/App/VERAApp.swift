@@ -189,11 +189,15 @@ struct VERAApp: App {
     /// Creates the meeting room using the SDK builder, replacing ~200 lines
     /// of manual dependency wiring, plugin registration, and overlay composition.
     private func makeMeetingRoom(roomName: String) -> some View {
-        if let existingViewModel = navigationCoordinator.meetingRoomViewModel,
-            existingViewModel.roomName == roomName
+        // Reuse existing SDK-built view if available for the same room
+        if let existing = navigationCoordinator.meetingRoomPrebuilt,
+            existing.viewModel.roomName == roomName
         {
-            // Reuse existing meeting room - the SDK view is self-contained
-            return AnyView(EmptyView())
+            return existing.view
+                .onDisappear {
+                    navigationCoordinator.meetingRoomViewModel = nil
+                    navigationCoordinator.meetingRoomPrebuilt = nil
+                }
         }
 
         var builder = MeetingRoomBuilder()
@@ -239,11 +243,13 @@ struct VERAApp: App {
 
         let result = builder.build()
         navigationCoordinator.meetingRoomViewModel = result.viewModel
+        navigationCoordinator.meetingRoomPrebuilt = result
 
         return result.view
             .onDisappear {
-                // Clear view model when leaving the meeting room
+                // Clear cached meeting room when leaving
                 navigationCoordinator.meetingRoomViewModel = nil
+                navigationCoordinator.meetingRoomPrebuilt = nil
             }
     }
 
