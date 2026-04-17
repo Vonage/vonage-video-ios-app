@@ -57,6 +57,16 @@ struct AudioSectionView: View {
         }
 
         Section {
+            Toggle("Opus DTX".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
+        } header: {
+            Text("Discontinuous Transmission".localized)
+        } footer: {
+            Text(
+                "Reduces bandwidth during silence by not transmitting audio packets when no speech is detected."
+                    .localized)
+        }
+
+        Section {
             Toggle(
                 "Publisher Audio Fallback".localized, isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled)
         } header: {

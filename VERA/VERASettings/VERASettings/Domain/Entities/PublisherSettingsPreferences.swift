@@ -39,6 +39,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// The degradation preference policy for adapting frame rate and resolution.
     public var degradationPreference: SettingsDegradationPreference
 
+    /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
+    public var opusDtxEnabled: Bool
+
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
@@ -55,6 +58,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
+    ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `false`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -65,7 +69,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         publisherAudioFallbackEnabled: Bool = true,
         subscriberAudioFallbackEnabled: Bool = true,
         senderStatsEnabled: Bool = false,
-        degradationPreference: SettingsDegradationPreference = .notSet
+        degradationPreference: SettingsDegradationPreference = .notSet,
+        opusDtxEnabled: Bool = false
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -77,6 +82,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.senderStatsEnabled = senderStatsEnabled
         self.degradationPreference = degradationPreference
+        self.opusDtxEnabled = opusDtxEnabled
     }
 
     // MARK: - Migration
@@ -103,6 +109,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
+        opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? false
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -125,6 +132,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case subscriberAudioFallbackEnabled
         case senderStatsEnabled
         case degradationPreference
+        case opusDtxEnabled
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -145,6 +153,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(subscriberAudioFallbackEnabled, forKey: .subscriberAudioFallbackEnabled)
         try container.encode(senderStatsEnabled, forKey: .senderStatsEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
+        try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -155,5 +164,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled
             && lhs.senderStatsEnabled == rhs.senderStatsEnabled
             && lhs.degradationPreference == rhs.degradationPreference
+            && lhs.opusDtxEnabled == rhs.opusDtxEnabled
     }
 }

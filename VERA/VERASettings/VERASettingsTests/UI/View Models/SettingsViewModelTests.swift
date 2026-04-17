@@ -28,6 +28,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == false)
         #expect(viewModel.isPresented == true)
     }
 
@@ -46,7 +47,8 @@ struct SettingsViewModelTests {
             publisherAudioFallbackEnabled: false,
             subscriberAudioFallbackEnabled: false,
             senderStatsEnabled: true,
-            degradationPreference: .balanced
+            degradationPreference: .balanced,
+            opusDtxEnabled: true
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
         let viewModel = SettingsViewModel(repository: repository)
@@ -63,6 +65,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == false)
         #expect(viewModel.senderStatsEnabled == true)
         #expect(viewModel.settingsPreference.degradationPreference == .balanced)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
     }
 
     // MARK: - Save Tests
@@ -175,6 +178,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == false)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
     }

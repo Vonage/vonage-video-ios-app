@@ -21,7 +21,8 @@ extension PublisherSettingsPreferences {
             maxVideoBitrate: videoBitratePreset == .custom ? maxVideoBitrate : nil,
             publisherAudioFallbackEnabled: publisherAudioFallbackEnabled,
             subscriberAudioFallbackEnabled: subscriberAudioFallbackEnabled,
-            degradationPreference: degradationPreference.vonageDegradationPreference
+            degradationPreference: degradationPreference.vonageDegradationPreference,
+            opusDtxEnabled: opusDtxEnabled
         )
     }
 }
