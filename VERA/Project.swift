@@ -234,7 +234,7 @@ private func createDependencies() -> [TargetDependency] {
 
     if isScreenShareEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin"),
+            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin")
         ])
     }
 

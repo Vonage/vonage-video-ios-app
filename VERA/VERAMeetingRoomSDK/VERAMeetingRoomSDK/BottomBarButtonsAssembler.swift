@@ -5,8 +5,8 @@
 import Combine
 import Foundation
 import SwiftUI
-import VERAAudioEffects
 import VERAArchiving
+import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
 import VERAChat
@@ -187,7 +187,8 @@ final class BottomBarButtonsAssembler {
 
     private func makeScreenShareButton() -> BottomBarButton {
         let actionTrigger = PassthroughSubject<Void, Never>()
-        let extensionId = container.broadcastExtensionBundleId
+        let extensionId =
+            container.broadcastExtensionBundleId
             ?? (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
         let button = ScreenShareFactory.make(broadcastExtensionBundleId: extensionId)
         return .init(

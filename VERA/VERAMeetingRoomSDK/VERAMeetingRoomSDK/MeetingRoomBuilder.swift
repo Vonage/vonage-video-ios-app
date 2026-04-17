@@ -5,6 +5,7 @@
 import AVKit
 import Foundation
 import SwiftUI
+import VERAArchiving
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions

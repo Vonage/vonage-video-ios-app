@@ -5,8 +5,8 @@
 import AVKit
 import Combine
 import SwiftUI
-import VERAAudioEffects
 import VERAArchiving
+import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
 import VERAChat
@@ -63,32 +63,40 @@ struct MeetingRoomComposedView: View {
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel)
-            .modifier(ChatSheetModifier(
-                isEnabled: enabledFeatures.contains(.chat),
-                showChat: $showChat,
-                container: container
-            ))
-            .modifier(ReactionsOverlayModifier(
-                isEnabled: enabledFeatures.contains(.reactions),
-                showPickerView: $showPickerView,
-                emojiPickerContainerViewModel: emojiPickerContainerViewModel,
-                floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
-                container: container
-            ))
-            .modifier(CaptionsOverlayModifier(
-                isEnabled: enabledFeatures.contains(.captions),
-                showCaptions: $showCaptions,
-                captionsButtonViewModel: captionsButtonViewModel,
-                captionsViewModel: captionsViewModel,
-                meetingRoomViewModel: viewModel,
-                container: container
-            ))
-            .modifier(SettingsOverlayModifier(
-                isEnabled: enabledFeatures.contains(.settings),
-                showSettings: $showSettings,
-                statsOverlayViewModel: statsOverlayViewModel,
-                container: container
-            ))
+            .modifier(
+                ChatSheetModifier(
+                    isEnabled: enabledFeatures.contains(.chat),
+                    showChat: $showChat,
+                    container: container
+                )
+            )
+            .modifier(
+                ReactionsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.reactions),
+                    showPickerView: $showPickerView,
+                    emojiPickerContainerViewModel: emojiPickerContainerViewModel,
+                    floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
+                    container: container
+                )
+            )
+            .modifier(
+                CaptionsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.captions),
+                    showCaptions: $showCaptions,
+                    captionsButtonViewModel: captionsButtonViewModel,
+                    captionsViewModel: captionsViewModel,
+                    meetingRoomViewModel: viewModel,
+                    container: container
+                )
+            )
+            .modifier(
+                SettingsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.settings),
+                    showSettings: $showSettings,
+                    statsOverlayViewModel: statsOverlayViewModel,
+                    container: container
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }

@@ -203,11 +203,13 @@ struct VERAApp: App {
         var builder = MeetingRoomBuilder()
             .baseURL(dependencyContainer.baseURL)
             .roomName(roomName)
-            .configuration(MeetingRoomConfiguration(
-                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
-                showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
-            ))
+            .configuration(
+                MeetingRoomConfiguration(
+                    allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
+                    allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                    showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
+                )
+            )
             .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
             .publisherRepository(dependencyContainer.publisherRepository)
             .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
