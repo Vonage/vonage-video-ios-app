@@ -602,6 +602,21 @@ jobs:
             -resultBundlePath DerivedData/VERAVonageCallKitPluginTests-iOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
     
+      - name: Run VERAMeetingRoomSDKTests (iOS Simulator)
+        id: vera-meeting-room-sdk-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERAMeetingRoomSDKTests on iOS Simulator"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAMeetingRoomSDKTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAMeetingRoomSDKTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty  
+            
+
       - name: Upload all test results
         uses: actions/upload-artifact@v7
         if: always()
@@ -630,6 +645,7 @@ jobs:
             DerivedData/VERAArchivingSnapshotTests-iOS.xcresult
             DerivedData/VERAChatSnapshotTests-iOS.xcresult
             DerivedData/VERACommonUISnapshotTests-iOS.xcresult
+            DerivedData/VERAMeetingRoomSDKTests-iOS.xcresult
             DerivedData/Build/Products/
           
   sonarcloud:
