@@ -200,34 +200,34 @@ struct VERAApp: App {
                 }
         }
 
-        var builder = MeetingRoomBuilder()
-            .baseURL(dependencyContainer.baseURL)
-            .roomName(roomName)
-            .configuration(
-                MeetingRoomConfiguration(
-                    allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
-                    allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
-                    showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
-                )
+        var builder = MeetingRoomBuilder(
+            baseURL: dependencyContainer.baseURL,
+            roomName: roomName
+        ).configuration(
+            MeetingRoomConfiguration(
+                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
             )
-            .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
-            .publisherRepository(dependencyContainer.publisherRepository)
-            .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
-            .broadcastExtensionBundleId(
-                (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
-            )
-            .onAction { [weak navigationCoordinator] action in
-                switch action {
-                case .presentAlert(let alertItem):
-                    navigationCoordinator?.showAlert(alertItem)
-                case .navigateToGoodbye:
-                    navigationCoordinator?.go(to: .goodbye(roomName))
-                case .navigateToSettings:
-                    navigationCoordinator?.go(to: .settings)
-                case .navigateToWaitingRoom(let room):
-                    navigationCoordinator?.go(to: .waitingRoom(room))
-                }
+        )
+        .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
+        .publisherRepository(dependencyContainer.publisherRepository)
+        .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
+        .broadcastExtensionBundleId(
+            (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
+        )
+        .onAction { [weak navigationCoordinator] action in
+            switch action {
+            case .presentAlert(let alertItem):
+                navigationCoordinator?.showAlert(alertItem)
+            case .navigateToGoodbye:
+                navigationCoordinator?.go(to: .goodbye(roomName))
+            case .navigateToSettings:
+                navigationCoordinator?.go(to: .settings)
+            case .navigateToWaitingRoom(let room):
+                navigationCoordinator?.go(to: .waitingRoom(room))
             }
+        }
 
         // Transfer background blur state from waiting room
         #if BACKGROUND_EFFECTS_ENABLED

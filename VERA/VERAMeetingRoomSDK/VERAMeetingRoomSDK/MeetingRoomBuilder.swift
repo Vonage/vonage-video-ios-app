@@ -70,8 +70,8 @@ public struct MeetingRoomPrebuilt {
 /// ``publisherRepository(_:)`` to reuse the publisher from a waiting room.
 public final class MeetingRoomBuilder {
 
-    private var _baseURL: URL?
-    private var _roomName: String?
+    private var baseURL: URL
+    private var roomName: String
     private var _configuration = MeetingRoomConfiguration()
     private var _enabledFeatures: Set<MeetingRoomFeature> = []
     private var _onAction: ((MeetingRoomSDKAction) -> Void)?
@@ -82,15 +82,21 @@ public final class MeetingRoomBuilder {
     private var _broadcastExtensionBundleId: String?
 
     /// Creates a new meeting room builder.
-    public init() {}
+    public init(
+        baseURL: URL,
+        roomName: String
+    ) {
+        self.baseURL = baseURL
+        self.roomName = roomName
+    }
 
     // MARK: - Test-Visible Accessors
 
     /// The currently configured base URL. Visible for testing.
-    var currentBaseURL: URL? { _baseURL }
+    var currentBaseURL: URL? { baseURL }
 
     /// The currently configured room name. Visible for testing.
-    var currentRoomName: String? { _roomName }
+    var currentRoomName: String? { roomName }
 
     /// The currently configured meeting room configuration. Visible for testing.
     var currentConfiguration: MeetingRoomConfiguration { _configuration }
@@ -110,7 +116,7 @@ public final class MeetingRoomBuilder {
     /// - Returns: The builder for chaining.
     @discardableResult
     public func baseURL(_ url: URL) -> MeetingRoomBuilder {
-        _baseURL = url
+        baseURL = url
         return self
     }
 
@@ -120,7 +126,7 @@ public final class MeetingRoomBuilder {
     /// - Returns: The builder for chaining.
     @discardableResult
     public func roomName(_ name: String) -> MeetingRoomBuilder {
-        _roomName = name
+        roomName = name
         return self
     }
 
@@ -228,13 +234,6 @@ public final class MeetingRoomBuilder {
     /// - Returns: A ``MeetingRoomPrebuilt`` containing the composed view and view model.
     @MainActor
     public func build() -> MeetingRoomPrebuilt {
-        guard let baseURL = _baseURL else {
-            preconditionFailure("MeetingRoomBuilder: baseURL is required. Call .baseURL(_:) before .build().")
-        }
-        guard let roomName = _roomName else {
-            preconditionFailure("MeetingRoomBuilder: roomName is required. Call .roomName(_:) before .build().")
-        }
-
         let onAction = _onAction ?? { _ in }
 
         // 1. Create container with all dependencies
@@ -256,7 +255,6 @@ public final class MeetingRoomBuilder {
         // 3. Set up feature view models that need pre-creation
 
         // Background Effects
-        var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
         if _enabledFeatures.contains(.backgroundEffects) {
             let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
@@ -264,12 +262,10 @@ public final class MeetingRoomBuilder {
             if let initialLevel = _initialBackgroundBlurLevel {
                 blurVM.currentBlurLevel = initialLevel
             }
-            backgroundBlurButtonViewModel = blurVM
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
         }
 
         // Archiving
-        var archiveButtonViewModel: ArchiveButtonViewModel?
         if _enabledFeatures.contains(.archiving) {
             let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
                 roomName: roomName,
@@ -278,7 +274,6 @@ public final class MeetingRoomBuilder {
                 }
             )
             archiveVM.setup()
-            archiveButtonViewModel = archiveVM
             buttonsAssembler.archiveButtonViewModel = archiveVM
         }
 

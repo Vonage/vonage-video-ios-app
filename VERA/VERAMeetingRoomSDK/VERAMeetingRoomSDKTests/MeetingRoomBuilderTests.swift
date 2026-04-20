@@ -12,19 +12,19 @@ import VERAMeetingRoom
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
-    private let testBaseURL = URL(string: "https://api.example.com")!
-    private let testRoomName = "test-room"
+    let testBaseURL: URL = URL(string: "https://api.example.com")!
+    let testRoomName: String = "test-room"
 
     @Test("Builder stores baseURL")
     func builderStoresBaseURL() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .baseURL(testBaseURL)
         #expect(builder.currentBaseURL == testBaseURL)
     }
 
     @Test("Builder stores roomName")
     func builderStoresRoomName() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .roomName(testRoomName)
         #expect(builder.currentRoomName == testRoomName)
     }
@@ -36,7 +36,7 @@ struct MeetingRoomBuilderTests {
             allowCameraControl: true,
             showParticipantList: false
         )
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .configuration(config)
         #expect(builder.currentConfiguration == config)
     }
@@ -44,27 +44,27 @@ struct MeetingRoomBuilderTests {
     @Test("Builder stores enabled features")
     func builderStoresEnabledFeatures() {
         let features: Set<MeetingRoomFeature> = [.chat, .captions, .reactions]
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .enabledFeatures(features)
         #expect(builder.currentEnabledFeatures == features)
     }
 
     @Test("Builder defaults to empty feature set")
     func builderDefaultsToEmptyFeatures() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
         #expect(builder.currentEnabledFeatures.isEmpty)
     }
 
     @Test("Builder defaults to standard MeetingRoomConfiguration")
     func builderDefaultsToStandardConfiguration() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
         let defaultConfig = MeetingRoomConfiguration()
         #expect(builder.currentConfiguration == defaultConfig)
     }
 
     @Test("Builder supports chaining all methods")
     func builderSupportsChaining() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .baseURL(testBaseURL)
             .roomName(testRoomName)
             .configuration(.init(allowMicrophoneControl: false))
@@ -80,14 +80,14 @@ struct MeetingRoomBuilderTests {
 
     @Test("Builder stores appGroupIdentifier")
     func builderStoresAppGroupIdentifier() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .appGroupIdentifier("group.com.vonage.test")
         #expect(builder.currentAppGroupIdentifier == "group.com.vonage.test")
     }
 
     @Test("Builder stores broadcastExtensionBundleId")
     func builderStoresBroadcastExtensionBundleId() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .broadcastExtensionBundleId("com.vonage.broadcast")
         #expect(builder.currentBroadcastExtensionBundleId == "com.vonage.broadcast")
     }
@@ -95,16 +95,23 @@ struct MeetingRoomBuilderTests {
     @Test("Builder can set all features at once")
     func builderCanSetAllFeatures() {
         let allFeatures = Set(MeetingRoomFeature.allCases)
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .enabledFeatures(allFeatures)
         #expect(builder.currentEnabledFeatures.count == 9)
     }
 
     @Test("Overwriting enabled features replaces the set")
     func overwritingEnabledFeatures() {
-        let builder = MeetingRoomBuilder()
+        let builder = makeMeetingRoomBuilder()
             .enabledFeatures([.chat, .captions])
             .enabledFeatures([.reactions])
         #expect(builder.currentEnabledFeatures == [.reactions])
+    }
+
+    func makeMeetingRoomBuilder(
+        testBaseURL: URL = URL(string: "https://api.example.com")!,
+        testRoomName: String = "test-room"
+    ) -> MeetingRoomBuilder {
+        MeetingRoomBuilder(baseURL: testBaseURL, roomName: testRoomName)
     }
 }
