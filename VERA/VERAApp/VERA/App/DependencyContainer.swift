@@ -105,6 +105,7 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowScreenShare { features.insert(.screenShare) }
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
         if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
+        features.insert(.callKit)
         return features
     }
 
@@ -152,13 +153,15 @@ final class DependencyContainer {
     // MARK: - AudioEffects feature (waiting room)
 
     #if AUDIOEFFECTS_ENABLED
+        lazy var defaultNoiseSuppressionStatusDataSource = DefaultNoiseSuppressionStatusDataSource()
+
         lazy var audioEffectsFactory = AudioEffectsFactory(
             publisherRepository: publisherRepository,
             disableNoiseSuppressionUseCase: DefaultDisableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: DefaultNoiseSuppressionStatusDataSource()
+                noiseSuppressionStatusDataSource: defaultNoiseSuppressionStatusDataSource
             ),
             enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: DefaultNoiseSuppressionStatusDataSource()
+                noiseSuppressionStatusDataSource: defaultNoiseSuppressionStatusDataSource
             )
         )
     #endif
