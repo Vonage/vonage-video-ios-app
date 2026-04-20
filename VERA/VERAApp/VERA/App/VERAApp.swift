@@ -287,7 +287,9 @@ struct VERAApp: App {
                 let (view, viewModel) = archiveFactory.make(
                     roomName: roomName
                 ) { recording in
-                    UIApplication.shared.open(recording.url)
+                    Task { @MainActor in
+                        UIApplication.shared.open(recording.url)
+                    }
                 }
                 navigationCoordinator.archivesViewModel = viewModel
                 return AnyView(view)
