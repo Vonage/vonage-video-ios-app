@@ -171,11 +171,6 @@ struct BottomBarButtonsAssemblerTests {
     ) -> MeetingRoomSDKContainer {
         MeetingRoomSDKContainer(
             baseURL: Self.testBaseURL,
-            enabledFeatures: enabledFeatures,
-            configuration: MeetingRoomConfiguration(),
-            publisherRepository: nil,
-            appGroupIdentifier: nil,
-            broadcastExtensionBundleId: nil
-        )
+            enabledFeatures: enabledFeatures)
     }
 }

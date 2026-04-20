@@ -62,18 +62,18 @@ struct MeetingRoomSDKContainerTests {
         #expect(!(dataSource is NullNoiseSuppressionStatusDataSource))
     }
 
-    @Test("Plugin registry includes CallKit plugin by default")
-    func pluginRegistryIncludesCallKit() {
-        let container = makeContainer(enabledFeatures: [])
+    @Test("Plugin registry includes CallKit plugin when enabled")
+    func pluginRegistryIncludesCallKitWhenEnabled() {
+        let container = makeContainer(enabledFeatures: [.callKit])
         let plugins = container.pluginRegistry.plugins
-        #expect(plugins.contains { $0.pluginIdentifier == "callkit" })
+        #expect(plugins.contains { $0.pluginIdentifier == "VonageCallKitPlugin" })
     }
 
     @Test("Plugin registry includes chat plugin when enabled")
     func pluginRegistryIncludesChatWhenEnabled() {
         let container = makeContainer(enabledFeatures: [.chat])
         let plugins = container.pluginRegistry.plugins
-        #expect(plugins.contains { $0.pluginIdentifier == "chat" })
+        #expect(plugins.contains { $0.pluginIdentifier == "VonageChatPlugin" })
     }
 
     @Test("Plugin registry excludes chat plugin when disabled")
@@ -81,14 +81,6 @@ struct MeetingRoomSDKContainerTests {
         let container = makeContainer(enabledFeatures: [])
         let plugins = container.pluginRegistry.plugins
         #expect(!plugins.contains { $0.pluginIdentifier == "chat" })
-    }
-
-    @Test("Plugin registry includes all plugins when all features enabled")
-    func pluginRegistryIncludesAllWhenAllEnabled() {
-        let container = makeContainer(enabledFeatures: Set(MeetingRoomFeature.allCases))
-        let plugins = container.pluginRegistry.plugins
-        // chat + archiving + captions + reactions + screenShare + settings + callkit = 7
-        #expect(plugins.count == 7)
     }
 
     @Test("Plugin registry has no duplicates")

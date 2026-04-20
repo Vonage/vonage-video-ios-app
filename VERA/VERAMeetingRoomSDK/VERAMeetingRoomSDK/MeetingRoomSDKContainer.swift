@@ -42,11 +42,11 @@ final class MeetingRoomSDKContainer {
 
     init(
         baseURL: URL,
-        enabledFeatures: Set<MeetingRoomFeature>,
-        configuration: MeetingRoomConfiguration,
-        publisherRepository: (any PublisherRepository)?,
-        appGroupIdentifier: String?,
-        broadcastExtensionBundleId: String?
+        enabledFeatures: Set<MeetingRoomFeature> = Set(),
+        configuration: MeetingRoomConfiguration = .init(),
+        publisherRepository: (any PublisherRepository)? = nil,
+        appGroupIdentifier: String? = nil,
+        broadcastExtensionBundleId: String? = nil
     ) {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
@@ -131,7 +131,9 @@ final class MeetingRoomSDKContainer {
         if enabledFeatures.contains(.settings) {
             registry.registerPlugin(plugin: vonageSettingsPlugin)
         }
-        registry.registerPlugin(plugin: callKitPlugin)
+        if enabledFeatures.contains(.callKit) {
+            registry.registerPlugin(plugin: callKitPlugin)
+        }
         return registry
     }()
 
@@ -218,9 +220,9 @@ final class MeetingRoomSDKContainer {
         return NullCaptionsStatusDataSource()
     }()
 
-    lazy var captionsRepository: any CaptionsRepository = DefaultCaptionsRepository()
+    lazy var captionsRepository = DefaultCaptionsRepository()
 
-    lazy var captionsFactory: CaptionsFactory = CaptionsFactory(
+    lazy var captionsFactory = CaptionsFactory(
         captionsActivationDataSource: captionsActivationDataSource,
         captionsStatusDataSource: captionsStatusDataSource,
         captionsRepository: captionsRepository)
@@ -282,7 +284,7 @@ final class MeetingRoomSDKContainer {
         return NullNoiseSuppressionStatusDataSource()
     }()
 
-    lazy var audioEffectsFactory: AudioEffectsFactory = AudioEffectsFactory(
+    lazy var audioEffectsFactory = AudioEffectsFactory(
         publisherRepository: publisherRepository,
         disableNoiseSuppressionUseCase: DefaultDisableNoiseSuppressionUseCase(
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource

@@ -65,9 +65,9 @@ public final class ArchivesViewModel: ObservableObject {
     }
 
     public func downloadArchive(_ archive: Archive) {
-        Task {
+        Task { @MainActor [weak self] in
             do {
-                try await playRecordingUseCase(archive)
+                try await self?.playRecordingUseCase(archive)
             } catch {
                 Task { @MainActor [weak self] in
                     self?.error = AlertItem.downloadError(error.localizedDescription)

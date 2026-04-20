@@ -15,7 +15,7 @@ struct MeetingRoomFeatureTests {
     @Test("All features are available via CaseIterable")
     func allFeaturesAvailable() {
         let allFeatures = MeetingRoomFeature.allCases
-        #expect(allFeatures.count == 8)
+        #expect(allFeatures.count == 9)
         #expect(allFeatures.contains(.chat))
         #expect(allFeatures.contains(.archiving))
         #expect(allFeatures.contains(.captions))
@@ -24,6 +24,7 @@ struct MeetingRoomFeatureTests {
         #expect(allFeatures.contains(.screenShare))
         #expect(allFeatures.contains(.backgroundEffects))
         #expect(allFeatures.contains(.audioEffects))
+        #expect(allFeatures.contains(.callKit))
     }
 
     @Test("Features are Hashable and can be stored in a Set")
@@ -52,7 +53,7 @@ struct MeetingRoomFeatureTests {
     @Test("Full feature set contains all features")
     func fullFeatureSet() {
         let features = Set(MeetingRoomFeature.allCases)
-        #expect(features.count == 8)
+        #expect(features.count == 9)
         for feature in MeetingRoomFeature.allCases {
             #expect(features.contains(feature))
         }
