@@ -45,14 +45,4 @@ struct MeetingRoomSDKActionTests {
             Issue.record("Expected presentAlert action")
         }
     }
-
-    @Test("navigateToSettings action is creatable")
-    func navigateToSettingsAction() {
-        let action = MeetingRoomSDKAction.navigateToSettings
-        if case .navigateToSettings = action {
-            // pass
-        } else {
-            Issue.record("Expected navigateToSettings action")
-        }
-    }
 }

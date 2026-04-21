@@ -159,7 +159,8 @@ public struct MeetingRoomView: View {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         toolbarContent
                     }
-                }.tint(.white)
+                }
+                .tint(.white)
             #endif
         }
         #if !os(macOS)
