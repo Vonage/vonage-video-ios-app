@@ -44,6 +44,36 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
+        // MARK: - Demo App Target
+
+        .target(
+            name: "VERAMeetingRoomSDKApp",
+            destinations: .iOS,
+            product: .app,
+            bundleId: "com.vonage.VERAMeetingRoomSDKApp",
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            infoPlist: .extendingDefault(
+                with: [
+                    "CFBundleName": "VERAMeetingRoomSDKApp",
+                    "CFBundleDisplayName": "MeetingRoom SDK",
+                    "NSCameraUsageDescription":
+                        "VERAMeetingRoomSDKApp needs access to your camera to share your video during video calls.",
+                    "NSMicrophoneUsageDescription":
+                        "VERAMeetingRoomSDKApp needs access to your microphone to share your audio during video calls.",
+                    "UIBackgroundModes": .array(["audio", "voip"]),
+                ].merging(combinedPlistValues()) { _, new in new }),
+            sources: ["VERAMeetingRoomSDKApp/**"],
+            scripts: [.swiftLint(targetName: "VERAMeetingRoomSDKApp")],
+            dependencies: [
+                .target(name: "VERAMeetingRoomSDK"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .vonageVideoTransformersSDK,
+            ],
+            settings: createBaseBuildSettings()
+        ),
+
+        // MARK: - Unit Tests Target
+
         .target(
             name: "VERAMeetingRoomSDKTests",
             destinations: .iOS,
@@ -60,11 +90,17 @@ let project = Project(
     ],
     schemes: [
         .scheme(
+            name: "VERAMeetingRoomSDKApp",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERAMeetingRoomSDKApp"]),
+            runAction: .runAction(configuration: .debug)
+        ),
+        .scheme(
             name: "VERAMeetingRoomSDKTests",
             shared: true,
             buildAction: .buildAction(targets: ["VERAMeetingRoomSDKTests"]),
             testAction: .targets(["VERAMeetingRoomSDKTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        )
+        ),
     ]
 )
