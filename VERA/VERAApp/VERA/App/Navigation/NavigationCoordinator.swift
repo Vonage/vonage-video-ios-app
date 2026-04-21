@@ -112,13 +112,13 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         logNavigation("Returned to landing page")
     }
 
+    // MARK: - Private Helpers
+
     private func navigateToSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
     }
-
-    // MARK: - Private Helpers
 
     private func logNavigation(_ message: String) {
         #if DEBUG

@@ -15,9 +15,9 @@ import VERADomain
 /// MeetingRoomBuilder()
 ///     .onAction { action in
 ///         switch action {
-///         case .navigateToGoodbye:
+///         case .callDidEnd:
 ///             coordinator.go(to: .goodbye)
-///         case .navigateToWaitingRoom(let room):
+///         case .goBack(let room):
 ///             coordinator.go(to: .waitingRoom(room))
 ///         case .presentAlert(let alert):
 ///             coordinator.showAlert(alert)
@@ -28,14 +28,11 @@ import VERADomain
 /// ```
 public enum MeetingRoomSDKAction {
     /// The call ended and the host app should navigate to the goodbye screen.
-    case navigateToGoodbye
+    case callDidEnd
 
     /// The user should be returned to the waiting room (e.g., reconnect).
-    case navigateToWaitingRoom(String)
+    case goBack(RoomName)
 
     /// An alert should be presented to the user.
     case presentAlert(AlertItem)
-
-    /// The user requested navigation to app settings.
-    case navigateToSettings
 }

@@ -89,8 +89,8 @@ struct AudioRoutePickerViewTests {
     }
 }
 
-private extension UIView {
-    func flattenedSubviews() -> [UIView] {
+extension UIView {
+    fileprivate func flattenedSubviews() -> [UIView] {
         var result: [UIView] = []
         for subview in subviews {
             result.append(subview)

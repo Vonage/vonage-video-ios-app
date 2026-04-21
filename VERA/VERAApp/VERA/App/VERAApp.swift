@@ -220,11 +220,9 @@ struct VERAApp: App {
             switch action {
             case .presentAlert(let alertItem):
                 navigationCoordinator?.showAlert(alertItem)
-            case .navigateToGoodbye:
+            case .callDidEnd:
                 navigationCoordinator?.go(to: .goodbye(roomName))
-            case .navigateToSettings:
-                navigationCoordinator?.go(to: .settings)
-            case .navigateToWaitingRoom(let room):
+            case .goBack(let room):
                 navigationCoordinator?.go(to: .waitingRoom(room))
             }
         }

@@ -5,11 +5,8 @@
 import AVKit
 import Foundation
 import SwiftUI
-import VERAArchiving
-import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
-import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
 import VERAReactions
@@ -42,9 +39,10 @@ public struct MeetingRoomPrebuilt {
 ///
 /// ## Usage
 /// ```swift
-/// let result = MeetingRoomBuilder()
-///     .baseURL(url)
-///     .roomName("my-room")
+/// let result = MeetingRoomBuilder(
+///     baseURL: url,
+///     roomName: "my-room"
+///)
 ///     .configuration(.init(allowMicrophoneControl: true, allowCameraControl: true))
 ///     .enabledFeatures([.chat, .captions, .reactions])
 ///     .onAction { action in
@@ -156,7 +154,7 @@ public final class MeetingRoomBuilder {
     /// Sets the action handler for navigation and alert callbacks.
     ///
     /// The host app must handle these actions to integrate navigation
-    /// (goodbye screen, waiting room, settings) and alert presentation.
+    /// (callDidEnd, goBack) and alert presentation.
     ///
     /// - Parameter handler: Closure called when the meeting room emits an action.
     /// - Returns: The builder for chaining.
@@ -323,16 +321,17 @@ public final class MeetingRoomBuilder {
             getExternalButtons: { state in
                 buttonsAssembler.buildButtons(state)
             },
-            onActionHandler: { action in
+            onActionHandler: { [weak self] action in
+                guard let self else { return }
                 switch action {
                 case .presentAlert(let alertItem):
                     onAction(.presentAlert(alertItem))
                 case .navigateToGoodbye:
-                    onAction(.navigateToGoodbye)
+                    onAction(.callDidEnd)
                 case .navigateToSettings:
-                    onAction(.navigateToSettings)
+                    self.navigateToSettings()
                 case .navigateToWaitingRoom(let room):
-                    onAction(.navigateToWaitingRoom(room))
+                    onAction(.goBack(room))
                 default:
                     break
                 }
@@ -361,6 +360,12 @@ public final class MeetingRoomBuilder {
             view: AnyView(composedView),
             viewModel: meetingRoomViewModel
         )
+    }
+
+    private func navigateToSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
 
     // MARK: - Top Trailing Buttons

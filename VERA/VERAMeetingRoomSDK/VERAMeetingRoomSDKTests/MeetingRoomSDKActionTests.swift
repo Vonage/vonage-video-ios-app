@@ -13,8 +13,8 @@ struct MeetingRoomSDKActionTests {
 
     @Test("navigateToGoodbye action is creatable")
     func navigateToGoodbyeAction() {
-        let action = MeetingRoomSDKAction.navigateToGoodbye
-        if case .navigateToGoodbye = action {
+        let action = MeetingRoomSDKAction.callDidEnd
+        if case .callDidEnd = action {
             // pass
         } else {
             Issue.record("Expected navigateToGoodbye action")
@@ -23,8 +23,8 @@ struct MeetingRoomSDKActionTests {
 
     @Test("navigateToWaitingRoom action carries room name")
     func navigateToWaitingRoomAction() {
-        let action = MeetingRoomSDKAction.navigateToWaitingRoom("test-room")
-        if case .navigateToWaitingRoom(let name) = action {
+        let action = MeetingRoomSDKAction.goBack("test-room")
+        if case .goBack(let name) = action {
             #expect(name == "test-room")
         } else {
             Issue.record("Expected navigateToWaitingRoom action")
