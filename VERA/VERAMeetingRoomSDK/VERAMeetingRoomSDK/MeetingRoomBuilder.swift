@@ -68,16 +68,16 @@ public struct MeetingRoomPrebuilt {
 /// ``publisherRepository(_:)`` to reuse the publisher from a waiting room.
 public final class MeetingRoomBuilder {
 
-    private var baseURL: URL
-    private var roomName: String
-    private var _configuration = MeetingRoomConfiguration()
-    private var _enabledFeatures: Set<MeetingRoomFeature> = []
-    private var _onAction: ((MeetingRoomSDKAction) -> Void)?
-    private var _publisherRepository: (any PublisherRepository)?
-    private var _initialBackgroundBlurLevel: BlurLevel?
-    private var _initialNoiseSuppressionState: NoiseSuppressionState?
-    private var _appGroupIdentifier: String?
-    private var _broadcastExtensionBundleId: String?
+    var baseURL: URL
+    var roomName: String
+    var _configuration = MeetingRoomConfiguration()
+    var _enabledFeatures: Set<MeetingRoomFeature> = []
+    var _onAction: ((MeetingRoomSDKAction) -> Void)?
+    var _publisherRepository: (any PublisherRepository)?
+    var _initialBackgroundBlurLevel: BlurLevel?
+    var _initialNoiseSuppressionState: NoiseSuppressionState?
+    var _appGroupIdentifier: String?
+    var _broadcastExtensionBundleId: String?
 
     /// Creates a new meeting room builder.
     public init(

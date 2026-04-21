@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERABackgroundEffects
 import VERADomain
 import VERAMeetingRoom
 
@@ -83,6 +84,20 @@ struct MeetingRoomBuilderTests {
         let builder = makeMeetingRoomBuilder()
             .appGroupIdentifier("group.com.vonage.test")
         #expect(builder.currentAppGroupIdentifier == "group.com.vonage.test")
+    }
+
+    @Test("Builder stores blur level")
+    func builderStoresBlurLevel() {
+        let builder = makeMeetingRoomBuilder()
+            .initialBackgroundBlurLevel(.high)
+        #expect(builder._initialBackgroundBlurLevel == .high)
+    }
+
+    @Test("Builder stores noise supression")
+    func builderStoresNoiseSuppresionState() {
+        let builder = makeMeetingRoomBuilder()
+            .initialNoiseSuppressionState(.enabled)
+        #expect(builder._initialNoiseSuppressionState == .enabled)
     }
 
     @Test("Builder stores broadcastExtensionBundleId")
