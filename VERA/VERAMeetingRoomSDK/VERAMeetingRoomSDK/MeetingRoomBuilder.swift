@@ -42,7 +42,7 @@ public struct MeetingRoomPrebuilt {
 /// let result = MeetingRoomBuilder(
 ///     baseURL: url,
 ///     roomName: "my-room"
-///)
+/// )
 ///     .configuration(.init(allowMicrophoneControl: true, allowCameraControl: true))
 ///     .enabledFeatures([.chat, .captions, .reactions])
 ///     .onAction { action in
@@ -321,8 +321,8 @@ public final class MeetingRoomBuilder {
             getExternalButtons: { state in
                 buttonsAssembler.buildButtons(state)
             },
-            onActionHandler: { [weak self] action in
-                guard let self else { return }
+            // This can not be weak, otherwise the reference to self is lost
+            onActionHandler: { action in
                 switch action {
                 case .presentAlert(let alertItem):
                     onAction(.presentAlert(alertItem))
