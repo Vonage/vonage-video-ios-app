@@ -162,6 +162,7 @@ public struct MeetingRoomView: View {
                 }.tint(.white)
             #endif
         }
+        .navigationViewStyle(.stack)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
