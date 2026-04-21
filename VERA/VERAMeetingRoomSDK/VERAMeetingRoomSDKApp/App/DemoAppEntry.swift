@@ -21,7 +21,6 @@ struct VERAMeetingRoomSDKDemoApp: App {
 struct DemoRootView: View {
     @State private var prebuilt: MeetingRoomPrebuilt?
     @State private var activeAlert: AlertItem?
-    @State private var onCall: Bool = false
 
     var body: some View {
         ZStack {
@@ -62,7 +61,6 @@ struct DemoRootView: View {
             handleAction(action, roomName: roomName)
         }
         .build()
-        onCall = true
     }
 
     private func handleAction(_ action: MeetingRoomSDKAction, roomName: String) {
