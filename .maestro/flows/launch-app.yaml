@@ -1,0 +1,20 @@
+appId: com.vonage.VERA
+---
+# Test: Launch VERA app and verify landing page
+- launchApp
+
+# Verify welcome text is visible (with line breaks)
+- assertVisible: "Upgrade video \ncommunication"
+
+# Verify "Create new room" section
+- assertVisible: "Start a new video meeting"
+- assertVisible: "Create a new room"
+
+# Take a screenshot for documentation
+- takeScreenshot: landing-page-loaded
+
+# Test creating a new room
+- tapOn: "Create a new room"
+- waitForAnimationToEnd
+
+- takeScreenshot: after-create-room

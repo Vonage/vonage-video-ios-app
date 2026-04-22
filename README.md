@@ -124,6 +124,7 @@ The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/
 - **SwiftLint**
 - **SwiftFormat**
 - **Git LFS**
+- **Java 17** (required for Maestro UI testing)
 
 ## Running Locally
 
@@ -207,11 +208,396 @@ The app is fully prepared for internationalization using Xcode's **String Catalo
 
 ## Testing
 
+### Unit, Integration & Snapshot Tests
+
 This project uses the <em>Swift Testing</em> framework for the unit, integration and snapshot tests. 
 
 Tuist will generate the testing schemes for all the modules, then for testing you could execute the tests by running the <em>tuist test</em> command or by executing them with `⌘U` in the selected testing target in Xcode.
 
 You can also edit the snapshot test images by recording new screenshots in the snapshot testing files.
+
+### UI Testing with Maestro
+
+VERA uses [Maestro](https://maestro.mobile.dev) for declarative UI testing. Maestro tests are YAML-based, fast, and don't require recompiling the app when you modify test flows.
+
+#### Prerequisites
+
+##### 1. Install Maestro
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash
+```
+
+Verify installation:
+```bash
+maestro --version
+```
+
+##### 2. Install Java 17 (Required by Maestro)
+```bash
+# Using Homebrew
+brew install openjdk@17
+
+# Set JAVA_HOME (add to ~/.zshrc for persistence)
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+```
+
+Add to `~/.zshrc`:
+```bash
+echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Test Structure
+
+Maestro flows are located in `.maestro/`:
+```
+.maestro/
+├── config.yaml              # Global configuration (appId, device preferences)
+└── flows/                   # Test scenarios (YAML files)
+    ├── launch-app.yaml      # Example: App launch and navigation test
+    ├── join-meeting.yaml
+    └── grant-permissions.yaml
+```
+
+#### Running Tests
+
+##### Quick Start
+From the repository root:
+```bash
+./scripts/run-maestro-tests.sh
+```
+
+This script will:
+1. ✅ Check Maestro installation
+2. 🔨 Build VERA.app if needed (or reuse existing build)
+3. 🚀 Boot iOS Simulator
+4. 📲 Install the app
+5. 🧪 Run all test flows in `.maestro/flows/`
+6. 📸 Save screenshots to `~/.maestro/tests/<timestamp>/`
+
+##### Custom Simulator
+```bash
+SIMULATOR_DEVICE="iPhone 17 Pro Max" ./scripts/run-maestro-tests.sh
+```
+
+##### Run Specific Flow
+```bash
+maestro test .maestro/flows/launch-app.yaml
+```
+
+##### Run with Debug Output
+```bash
+maestro test .maestro/flows/ --debug
+```
+
+##### View Test Results
+HTML reports and screenshots are saved in:
+```bash
+~/.maestro/tests/<timestamp>/
+```
+
+Open the latest report:
+```bash
+open $(ls -t ~/.maestro/tests/*/report.html | head -n 1)
+```
+
+#### Writing Test Flows
+
+##### Basic Flow Example
+Create a new YAML file in `.maestro/flows/`:
+
+```yaml
+# filepath: .maestro/flows/join-meeting.yaml
+appId: com.vonage.video.vera
+---
+- launchApp
+- tapOn: "Join existing room"
+- inputText: "test-room-123"
+- tapOn: "Join"
+- assertVisible: "Connected"
+- takeScreenshot: meeting-joined
+```
+
+##### Advanced Flow Examples
+
+**1. Handling System Permissions**
+```yaml
+# filepath: .maestro/flows/grant-permissions.yaml
+appId: com.vonage.video.vera
+---
+- launchApp
+- tapOn: "Create a new room"
+
+# Camera permission dialog
+- assertVisible: "VERA Would Like to Access the Camera"
+- tapOn: "Allow"
+
+# Microphone permission dialog
+- assertVisible: "VERA Would Like to Access the Microphone"
+- tapOn: "Allow"
+
+# Verify we're in the meeting
+- assertVisible: "Leave"
+- takeScreenshot: permissions-granted
+```
+
+**2. Error Handling & Recovery**
+```yaml
+# filepath: .maestro/flows/handle-network-error.yaml
+appId: com.vonage.video.vera
+---
+- launchApp
+- tapOn: "Join existing room"
+- inputText: "invalid-room-999"
+- tapOn: "Join"
+
+# Assert error message appears
+- assertVisible: "Unable to connect"
+- assertVisible: "Try Again"
+
+# Test retry mechanism
+- tapOn: "Try Again"
+- takeScreenshot: retry-attempt
+
+# Go back to home
+- tapOn: "Back"
+- assertVisible: "Join existing room"
+```
+
+**3. Complete E2E Flow**
+```yaml
+# filepath: .maestro/flows/complete-meeting-flow.yaml
+appId: com.vonage.video.vera
+---
+# 1. Launch and create room
+- launchApp
+- assertVisible: "Upgrade video \ncommunication"
+- tapOn: "Create a new room"
+- takeScreenshot: room-creation-start
+
+# 2. Grant permissions
+- assertVisible: "VERA Would Like to Access the Camera"
+- tapOn: "Allow"
+- assertVisible: "VERA Would Like to Access the Microphone"
+- tapOn: "Allow"
+- waitForAnimationToEnd
+
+# 3. Verify meeting room is active
+- assertVisible: "Leave"
+- takeScreenshot: meeting-room-active
+
+# 4. Test chat (if enabled)
+- tapOn:
+    id: "chat-button"
+    optional: true
+- inputText: "Test message"
+    optional: true
+- tapOn: "Send"
+    optional: true
+- takeScreenshot: chat-message-sent
+
+# 5. Open settings (if enabled)
+- tapOn:
+    id: "settings-button"
+    optional: true
+- assertVisible: "Video Settings"
+    optional: true
+- tapOn: "Done"
+    optional: true
+
+# 6. Leave meeting
+- tapOn: "Leave"
+- assertVisible: "Create a new room"
+- takeScreenshot: back-to-landing
+```
+
+#### Common Commands Reference
+
+```yaml
+# Assertions
+- assertVisible: "Text"               # Element must be visible
+- assertNotVisible: "Text"            # Element must not be visible
+- assertVisible:
+    id: "element-id"                  # Check by accessibility identifier
+
+# Interactions
+- tapOn: "Button Text"                # Tap by text
+- tapOn:
+    id: "button-id"                   # Tap by accessibility ID
+- inputText: "Hello"                  # Type into focused field
+- swipe:
+    direction: UP                     # UP, DOWN, LEFT, RIGHT
+    duration: 500
+- scrollUntilVisible:
+    element: "Item Text"
+    direction: DOWN
+
+# Navigation
+- pressKey: Home                      # Simulate home button
+- pressKey: Back                      # Android back button
+- back                                # Maestro back navigation
+
+# App Lifecycle
+- stopApp                             # Stop the app
+- launchApp                           # Launch/relaunch
+- clearState                          # Clear app data (reinstall)
+
+# Timing & Flow Control
+- waitForAnimationToEnd               # Wait for animations
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:                            # Embed sub-flows
+    file: common-setup.yaml
+- repeat:                             # Loop commands
+    times: 3
+    commands:
+      - tapOn: "Next"
+
+# Screenshots & Debugging
+- takeScreenshot: descriptive-name    # Capture screen
+- extendedWaitUntil:                  # Custom wait conditions
+    visible: "Loading..."
+    timeout: 30000
+```
+
+For complete command reference, see [Maestro Documentation](https://maestro.mobile.dev/api-reference/commands).
+
+#### Recording New Flows
+
+Maestro Studio provides an interactive way to record test flows:
+
+```bash
+# Launch Maestro Studio
+maestro studio
+
+# This will:
+# 1. Start a web interface at http://localhost:9999
+# 2. Show you the simulator screen
+# 3. Record your interactions as YAML
+# 4. Generate assertions automatically
+```
+
+You can also record flows directly from terminal:
+```bash
+# Record interactions
+maestro record .maestro/flows/new-flow.yaml
+
+# Interact with the app in the simulator
+# Press Ctrl+C when done to save the flow
+```
+
+#### Best Practices
+
+1. **One flow per user journey** — Keep flows focused on a single feature or scenario
+2. **Use meaningful screenshot names** — `takeScreenshot: meeting-room-with-3-participants`
+3. **Handle optional features** — Use `optional: true` for elements that may not be present
+4. **Test happy path + error cases** — Don't just test success scenarios
+5. **Add accessibility IDs** — Makes selectors more reliable than text-based matching
+6. **Use sub-flows for common setup** — Extract login/setup into reusable flows with `runFlow`
+7. **Keep flows maintainable** — Add comments to explain complex interactions
+8. **Run locally before pushing** — Verify tests pass before opening a PR
+
+#### Troubleshooting
+
+##### "Maestro command not found"
+Ensure `~/.maestro/bin` is in your PATH:
+```bash
+export PATH="$HOME/.maestro/bin:$PATH"
+```
+
+Add to `~/.zshrc`:
+```bash
+echo 'export PATH="$HOME/.maestro/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+##### "Invalid JAVA_HOME"
+Set Java 17 as active version:
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+```
+
+Add to `~/.zshrc`:
+```bash
+echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
+source ~/.zshrc
+```
+
+##### "App not found" or Build Issues
+Clean and rebuild:
+```bash
+rm -rf DerivedData
+cd VERA && tuist clean && tuist generate && cd ..
+./scripts/run-maestro-tests.sh
+```
+
+##### Simulator Issues
+If the simulator fails to boot or install:
+```bash
+# List available simulators
+xcrun simctl list devices | grep iPhone
+
+# Delete and recreate simulator
+xcrun simctl delete "iPhone 17"
+xcrun simctl create "iPhone 17" \
+  com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
+  com.apple.CoreSimulator.SimRuntime.iOS-18-0
+```
+
+##### Test Failures
+- Check the HTML report for detailed logs and screenshots
+- Run with `--debug` flag: `maestro test .maestro/flows/ --debug`
+- Verify the app is in the expected state before each assertion
+- Add `- takeScreenshot` commands before assertions to debug UI state
+- Use `waitForAnimationToEnd` before assertions if animations cause flakiness
+
+##### Element Not Found
+```yaml
+# Add explicit waits
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Try different selectors
+- tapOn: "Button Text"           # By text
+- tapOn:
+    id: "button-id"               # By accessibility ID
+- tapOn:
+    point: "50%,80%"              # By screen coordinates (last resort)
+
+# Scroll to make element visible
+- scrollUntilVisible:
+    element: "Target Element"
+    direction: DOWN
+```
+
+##### Flaky Tests
+```yaml
+# Add retries for flaky interactions
+- repeat:
+    times: 3
+    commands:
+      - tapOn: "Unstable Button"
+        optional: true
+      - assertVisible: "Success"
+```
+
+#### CI/CD Integration
+
+Maestro tests can run in GitHub Actions. See `.github/workflows/maestro.yml` for the complete workflow configuration.
+
+##### Maestro Cloud (Optional - Parallel Testing)
+
+For running tests across multiple devices in parallel:
+
+```bash
+# Upload your flows to Maestro Cloud
+maestro cloud \
+  --apiKey $MAESTRO_CLOUD_API_KEY \
+  --app DerivedData/Build/Products/Debug-iphonesimulator/VERA.app \
+  .maestro/flows
+```
+
+Get your API key at [cloud.mobile.dev](https://cloud.mobile.dev).
 
 ## Code style
 
