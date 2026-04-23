@@ -27,7 +27,7 @@ import os.log
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
-    @Published var currentMeetingRoom: String?
+    @Published var currentMeetingRoomRequest: NewRoomRequest?
     @Published var alertItem: AlertItem?
 
     // Cache for waiting room view models to prevent recreation
@@ -57,7 +57,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         switch route {
         case .landing: returnToLanding()
         case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
-        case .meetingRoom(let roomName): startMeeting(roomName)
+        case .meetingRoom(let request): startMeeting(request)
         case .goodbye: leaveMeeting()
         case .settings: navigateToSettings()
         }
@@ -67,25 +67,25 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     private func navigateToWaitingRoom(_ roomName: String) {
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
 
         path.removeLast(path.count)
         path.append(AppRoute.waitingRoom(roomName))
         logNavigation("Navigating to waiting room: \(roomName)")
     }
 
-    private func startMeeting(_ roomName: String) {
-        currentMeetingRoom = roomName
+    private func startMeeting(_ request: NewRoomRequest) {
+        currentMeetingRoomRequest = request
         isInMeeting = true
 
         path.removeLast(path.count)
-        path.append(AppRoute.goodbye(roomName))
-        logNavigation("Starting meeting: \(roomName)")
+        path.append(AppRoute.goodbye(request.roomName))
+        logNavigation("Starting meeting: \(request.roomName)")
     }
 
     private func leaveMeeting() {
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
 
         logNavigation("Left meeting, navigating to goodbye")
     }
@@ -93,7 +93,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     private func returnToLanding() {
         path.removeLast(path.count)
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
 

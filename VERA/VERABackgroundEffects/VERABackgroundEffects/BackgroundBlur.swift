@@ -4,6 +4,7 @@
 
 import Foundation
 import OpenTok
+import VERADomain
 import VERAVonage
 import VonageClientSDKVideo
 
@@ -34,10 +35,4 @@ public struct Radius: Codable {
     public init(radius: BlurLevel) {
         self.radius = radius
     }
-}
-
-public enum BlurLevel: String, Codable {
-    case low = "Low"
-    case high = "High"
-    case none = "None"
 }

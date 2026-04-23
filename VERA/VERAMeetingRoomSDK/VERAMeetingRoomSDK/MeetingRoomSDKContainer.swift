@@ -38,14 +38,12 @@ final class MeetingRoomSDKContainer {
     let appGroupIdentifier: String?
     let broadcastExtensionBundleId: String?
 
-    private let externalPublisherRepository: (any PublisherRepository)?
     private let initialPublisherSettings: PublisherSettings?
 
     init(
         baseURL: URL,
         enabledFeatures: Set<MeetingRoomFeature> = Set(),
         configuration: MeetingRoomConfiguration = .init(),
-        publisherRepository: (any PublisherRepository)? = nil,
         publisherSettings: PublisherSettings? = nil,
         appGroupIdentifier: String? = nil,
         broadcastExtensionBundleId: String? = nil
@@ -53,7 +51,6 @@ final class MeetingRoomSDKContainer {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
         self.configuration = configuration
-        self.externalPublisherRepository = publisherRepository
         self.initialPublisherSettings = publisherSettings
         self.appGroupIdentifier = appGroupIdentifier
         self.broadcastExtensionBundleId = broadcastExtensionBundleId
@@ -71,9 +68,6 @@ final class MeetingRoomSDKContainer {
     )
 
     lazy var publisherRepository: any PublisherRepository = {
-        if let externalPublisherRepository {
-            return externalPublisherRepository
-        }
         let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
         if let initialPublisherSettings {
             try? repository.recreatePublisher(initialPublisherSettings)

@@ -10,7 +10,7 @@
 /// This type is converted to OpenTok SDK settings in VERAVonage module.
 ///
 /// - SeeAlso: ``PublisherSettings``, ``VideoResolution``, ``VideoFrameRate``, ``VideoCodecPreference``
-public struct PublisherAdvancedSettings: Equatable {
+public struct PublisherAdvancedSettings: Equatable, Hashable {
     /// The desired video capture resolution.
     public let videoResolution: VideoResolution?
 
@@ -72,5 +72,17 @@ public struct PublisherAdvancedSettings: Equatable {
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.degradationPreference = degradationPreference
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(videoResolution)
+        hasher.combine(videoFrameRate)
+        hasher.combine(preferredVideoCodecs)
+        hasher.combine(maxAudioBitrate)
+        hasher.combine(videoBitratePreset)
+        hasher.combine(maxVideoBitrate)
+        hasher.combine(publisherAudioFallbackEnabled)
+        hasher.combine(subscriberAudioFallbackEnabled)
+        hasher.combine(degradationPreference)
     }
 }

@@ -72,10 +72,7 @@ public final class MeetingRoomBuilder {
     var _configuration = MeetingRoomConfiguration()
     var _enabledFeatures: Set<MeetingRoomFeature> = []
     var _onAction: ((MeetingRoomSDKAction) -> Void)?
-    var _publisherRepository: (any PublisherRepository)?
     var _publisherSettings: PublisherSettings?
-    var _initialBackgroundBlurLevel: BlurLevel?
-    var _initialNoiseSuppressionState: NoiseSuppressionState?
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
@@ -171,20 +168,6 @@ public final class MeetingRoomBuilder {
         return self
     }
 
-    /// Injects an external publisher repository for publisher reuse.
-    ///
-    /// Use this to share the publisher created in the waiting room with
-    /// the meeting room, preserving camera/microphone state.
-    ///
-    /// - Parameter repository: The shared publisher repository.
-    /// - Returns: The builder for chaining.
-    @available(*, deprecated, message: "Use publisherSettings(_:) instead")
-    @discardableResult
-    public func publisherRepository(_ repository: any PublisherRepository) -> MeetingRoomBuilder {
-        _publisherRepository = repository
-        return self
-    }
-
     /// Sets the initial publisher configuration.
     ///
     /// The SDK creates its own publisher internally using these settings.
@@ -197,29 +180,6 @@ public final class MeetingRoomBuilder {
     @discardableResult
     public func publisherSettings(_ settings: PublisherSettings) -> MeetingRoomBuilder {
         _publisherSettings = settings
-        return self
-    }
-
-    /// Sets the initial background blur level from the waiting room.
-    ///
-    /// When the user configured background blur in the waiting room,
-    /// pass the blur level here to maintain it in the meeting room.
-    ///
-    /// - Parameter level: The blur level to apply initially.
-    /// - Returns: The builder for chaining.
-    @discardableResult
-    public func initialBackgroundBlurLevel(_ level: BlurLevel) -> MeetingRoomBuilder {
-        _initialBackgroundBlurLevel = level
-        return self
-    }
-
-    /// Sets the initial noise suppression state from the waiting room.
-    ///
-    /// - Parameter state: The noise suppression state to apply initially.
-    /// - Returns: The builder for chaining.
-    @discardableResult
-    public func initialNoiseSuppressionState(_ state: NoiseSuppressionState) -> MeetingRoomBuilder {
-        _initialNoiseSuppressionState = state
         return self
     }
 
@@ -281,7 +241,6 @@ public final class MeetingRoomBuilder {
             baseURL: baseURL,
             enabledFeatures: _enabledFeatures,
             configuration: _configuration,
-            publisherRepository: _publisherRepository,
             publisherSettings: _publisherSettings,
             appGroupIdentifier: _appGroupIdentifier,
             broadcastExtensionBundleId: _broadcastExtensionBundleId
@@ -303,7 +262,7 @@ public final class MeetingRoomBuilder {
             let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
-            if let initialLevel = _initialBackgroundBlurLevel {
+            if let initialLevel = _publisherSettings?.backgroundBlurLevel {
                 blurVM.currentBlurLevel = initialLevel
             }
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
@@ -355,7 +314,7 @@ public final class MeetingRoomBuilder {
         // Audio Effects
         if _enabledFeatures.contains(.audioEffects) {
             let audioVM = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
-            if let initialState = _initialNoiseSuppressionState {
+            if let initialState = _publisherSettings?.noiseSuppressionState {
                 audioVM.state = initialState
             }
             buttonsAssembler.meetingNoiseSuppressionButtonViewModel = audioVM

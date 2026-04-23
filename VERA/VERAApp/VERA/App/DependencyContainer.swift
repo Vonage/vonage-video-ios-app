@@ -75,7 +75,6 @@ final class DependencyContainer {
     }()
 
     lazy var waitingRoomFactory = WaitingRoomFactory(
-        publisherRepository: publisherRepository,
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository,
@@ -85,7 +84,6 @@ final class DependencyContainer {
         joinRoomUseCase: .init(
             userRepository: userRepository,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            publisherRepository: publisherRepository,
             advancedSettingsUseCase: advancedSettingsUseCase),
         userRepository: userRepository)
 

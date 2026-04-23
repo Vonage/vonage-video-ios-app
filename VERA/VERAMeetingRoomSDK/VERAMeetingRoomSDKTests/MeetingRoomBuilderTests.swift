@@ -14,7 +14,7 @@ import VERAMeetingRoom
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
-    let testBaseURL: URL = URL(string: "https://api.example.com")!
+    let testBaseURL = URL(string: "https://api.example.com")!
     let testRoomName: String = "test-room"
 
     @Test("Builder stores baseURL")
@@ -85,20 +85,6 @@ struct MeetingRoomBuilderTests {
         let builder = makeMeetingRoomBuilder()
             .appGroupIdentifier("group.com.vonage.test")
         #expect(builder.currentAppGroupIdentifier == "group.com.vonage.test")
-    }
-
-    @Test("Builder stores blur level")
-    func builderStoresBlurLevel() {
-        let builder = makeMeetingRoomBuilder()
-            .initialBackgroundBlurLevel(.high)
-        #expect(builder._initialBackgroundBlurLevel == .high)
-    }
-
-    @Test("Builder stores noise supression")
-    func builderStoresNoiseSuppresionState() {
-        let builder = makeMeetingRoomBuilder()
-            .initialNoiseSuppressionState(.enabled)
-        #expect(builder._initialNoiseSuppressionState == .enabled)
     }
 
     @Test("Builder stores broadcastExtensionBundleId")

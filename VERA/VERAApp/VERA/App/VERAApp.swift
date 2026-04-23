@@ -65,8 +65,8 @@ struct VERAApp: App {
                     }
             }
             .fullScreenCover(isPresented: $navigationCoordinator.isInMeeting) {
-                if let currentRoom = navigationCoordinator.currentMeetingRoom {
-                    makeMeetingRoom(roomName: currentRoom)
+                if let newRoomRequest = navigationCoordinator.currentMeetingRoomRequest {
+                    makeMeetingRoom(request: newRoomRequest)
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                             #if ARCHIVING_ENABLED
@@ -159,11 +159,13 @@ struct VERAApp: App {
             )
             navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
-            let view = backgroundBlurFactory.makeBlurButton(
-                viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
-            )
+            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                let view = backgroundBlurFactory.makeBlurButton(
+                    viewModel: backgroundBlurButtonViewModel
+                )
 
-            buttons.append(ViewHolder(id: "Blur", content: { view }))
+                buttons.append(ViewHolder(id: "Blur", content: { view }))
+            }
         #endif
 
         #if AUDIOEFFECTS_ENABLED
@@ -188,10 +190,10 @@ struct VERAApp: App {
 
     /// Creates the meeting room using the SDK builder, replacing ~200 lines
     /// of manual dependency wiring, plugin registration, and overlay composition.
-    private func makeMeetingRoom(roomName: String) -> some View {
+    private func makeMeetingRoom(request: NewRoomRequest) -> some View {
         // Reuse existing SDK-built view if available for the same room
         if let existing = navigationCoordinator.meetingRoomPrebuilt,
-            existing.viewModel.roomName == roomName
+            existing.viewModel.roomName == request.roomName
         {
             return existing.view
                 .onDisappear {
@@ -200,9 +202,12 @@ struct VERAApp: App {
                 }
         }
 
-        var builder = MeetingRoomBuilder(
+        let currentBlurLevel = navigationCoordinator.backgroundBlurButtonViewModel?.currentBlurLevel ?? .none
+        let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+
+        let builder = MeetingRoomBuilder(
             baseURL: dependencyContainer.baseURL,
-            roomName: roomName
+            roomName: request.roomName
         ).configuration(
             MeetingRoomConfiguration(
                 allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
@@ -211,7 +216,11 @@ struct VERAApp: App {
             )
         )
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
-        .publisherRepository(dependencyContainer.publisherRepository)
+        .publisherSettings(
+            request.publisherSettings
+                .backgroundBlurLevel(currentBlurLevel)
+                .noiseSuppressionState(currentNoiseSuppressionState)
+        )
         .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
         .broadcastExtensionBundleId(
             (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
@@ -219,25 +228,11 @@ struct VERAApp: App {
         .onAction { [weak navigationCoordinator] action in
             switch action {
             case .callDidEnd:
-                navigationCoordinator?.go(to: .goodbye(roomName))
+                navigationCoordinator?.go(to: .goodbye(request.roomName))
             case .goBack(let room):
                 navigationCoordinator?.go(to: .waitingRoom(room))
             }
         }
-
-        // Transfer background blur state from waiting room
-        #if BACKGROUND_EFFECTS_ENABLED
-            if let blurLevel = navigationCoordinator.backgroundBlurButtonViewModel?.currentBlurLevel {
-                builder = builder.initialBackgroundBlurLevel(blurLevel)
-            }
-        #endif
-
-        // Transfer noise suppression state from waiting room
-        #if AUDIOEFFECTS_ENABLED
-            if let noiseState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state {
-                builder = builder.initialNoiseSuppressionState(noiseState)
-            }
-        #endif
 
         let result = builder.build()
         navigationCoordinator.meetingRoomViewModel = result.viewModel

@@ -43,7 +43,6 @@ struct DemoRootView: View {
             roomName: roomName
         )
         .theme(theme)
-        .publisherSettings(.init())
         .onAction { action in
             handleAction(action)
         }
