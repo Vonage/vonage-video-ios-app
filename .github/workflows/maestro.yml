@@ -25,9 +25,13 @@ jobs:
           xcrun simctl list devices available | grep iPhone
 
       - name: Install Tuist
+        run: brew install tuist
+
+      - name: Clean Tuist cache
         run: |
-          curl -Ls https://install.tuist.io | bash
-          echo "$HOME/.tuist/bin" >> $GITHUB_PATH
+          echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+          tuist clean
+          rm -rf ~/.cache/tuist
 
       - name: Install Java 17 (Maestro dependency)
         uses: actions/setup-java@v4
@@ -48,29 +52,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deriveddata-
 
-      - name: Generate Environment Constants
+      - name: Generate project with Tuist
         run: |
           cd VERA
-          export BASE_API_URL="${{ secrets.BASE_API_URL || 'https://api.example.net/' }}"
-          export DEVELOPMENT_TEAM="${{ secrets.DEVELOPMENT_TEAM || 'AB0C12DE34' }}"
+          export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export MARKETING_VERSION="1.1"
-          export CURRENT_PROJECT_VERSION="${{ github.run_number }}"
-          
+          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
           python3 ./Scripts/generate-app-config.py
           python3 ./Scripts/generate-app-theme.py
+          tuist generate --no-open
+          cd ..
 
-      - name: Generate Xcode Workspace
+      - name: List available simulators
         run: |
-          cd VERA
-          tuist generate
+          echo "📱 Available iOS Simulators:"
+          xcrun simctl list devices
 
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
         env:
-          BASE_API_URL: ${{ secrets.BASE_API_URL || 'https://api.example.net/' }}
-          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM || 'AB0C12DE34' }}
+          BASE_API_URL: ${{ secrets.BASE_API_URL }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
           MARKETING_VERSION: "1.1"
           CURRENT_PROJECT_VERSION: ${{ github.run_number }}
 
