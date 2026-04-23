@@ -6,6 +6,7 @@ import SwiftUI
 import VERACommonUI
 
 struct EndCallControlButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let action: () -> Void
 
     init(action: @escaping () -> Void = {}) {
@@ -16,7 +17,7 @@ struct EndCallControlButton: View {
         Button(action: action) {
             VERACommonUIAsset.Images.endCallSolid.swiftUIImage
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+                .foregroundStyle(theme.surface)
                 .frame(width: 50, height: 50)
                 .background(
                     Circle()

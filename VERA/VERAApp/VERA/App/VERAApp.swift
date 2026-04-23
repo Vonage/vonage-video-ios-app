@@ -218,8 +218,6 @@ struct VERAApp: App {
         )
         .onAction { [weak navigationCoordinator] action in
             switch action {
-            case .presentAlert(let alertItem):
-                navigationCoordinator?.showAlert(alertItem)
             case .callDidEnd:
                 navigationCoordinator?.go(to: .goodbye(roomName))
             case .goBack(let room):

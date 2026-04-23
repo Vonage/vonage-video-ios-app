@@ -8,7 +8,7 @@ import VERADomain
 /// Actions emitted by the meeting room SDK that the host app must handle.
 ///
 /// The host app provides an action handler closure to ``MeetingRoomBuilder``
-/// to receive navigation and alert events from the meeting room.
+/// to receive navigation events from the meeting room.
 ///
 /// ## Usage
 /// ```swift
@@ -19,10 +19,6 @@ import VERADomain
 ///             coordinator.go(to: .goodbye)
 ///         case .goBack(let room):
 ///             coordinator.go(to: .waitingRoom(room))
-///         case .presentAlert(let alert):
-///             coordinator.showAlert(alert)
-///         case .navigateToSettings:
-///             coordinator.go(to: .settings)
 ///         }
 ///     }
 /// ```
@@ -32,7 +28,4 @@ public enum MeetingRoomSDKAction {
 
     /// The user should be returned to the waiting room (e.g., reconnect).
     case goBack(RoomName)
-
-    /// An alert should be presented to the user.
-    case presentAlert(AlertItem)
 }

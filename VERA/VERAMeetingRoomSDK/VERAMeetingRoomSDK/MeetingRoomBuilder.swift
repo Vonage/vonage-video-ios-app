@@ -7,6 +7,7 @@ import Foundation
 import SwiftUI
 import VERABackgroundEffects
 import VERACaptions
+import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
 import VERAReactions
@@ -47,10 +48,8 @@ public struct MeetingRoomPrebuilt {
 ///     .enabledFeatures([.chat, .captions, .reactions])
 ///     .onAction { action in
 ///         switch action {
-///         case .navigateToGoodbye: coordinator.leaveMeeting()
-///         case .navigateToWaitingRoom(let room): coordinator.goToWaitingRoom(room)
-///         case .presentAlert(let alert): coordinator.showAlert(alert)
-///         case .navigateToSettings: coordinator.goToSettings()
+///         case .callDidEnd: coordinator.leaveMeeting()
+///         case .goBack(let room): coordinator.goToWaitingRoom(room)
 ///         }
 ///     }
 ///     .build()
@@ -74,10 +73,12 @@ public final class MeetingRoomBuilder {
     var _enabledFeatures: Set<MeetingRoomFeature> = []
     var _onAction: ((MeetingRoomSDKAction) -> Void)?
     var _publisherRepository: (any PublisherRepository)?
+    var _publisherSettings: PublisherSettings?
     var _initialBackgroundBlurLevel: BlurLevel?
     var _initialNoiseSuppressionState: NoiseSuppressionState?
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
+    var _theme: MeetingRoomTheme?
 
     /// Creates a new meeting room builder.
     public init(
@@ -107,6 +108,12 @@ public final class MeetingRoomBuilder {
 
     /// The currently configured broadcast extension bundle ID. Visible for testing.
     var currentBroadcastExtensionBundleId: String? { _broadcastExtensionBundleId }
+
+    /// The currently configured publisher settings. Visible for testing.
+    var currentPublisherSettings: PublisherSettings? { _publisherSettings }
+
+    /// The currently configured theme. Visible for testing.
+    var currentTheme: MeetingRoomTheme? { _theme }
 
     /// Sets the base URL for API requests (room credentials, archiving, captions).
     ///
@@ -171,9 +178,25 @@ public final class MeetingRoomBuilder {
     ///
     /// - Parameter repository: The shared publisher repository.
     /// - Returns: The builder for chaining.
+    @available(*, deprecated, message: "Use publisherSettings(_:) instead")
     @discardableResult
     public func publisherRepository(_ repository: any PublisherRepository) -> MeetingRoomBuilder {
         _publisherRepository = repository
+        return self
+    }
+
+    /// Sets the initial publisher configuration.
+    ///
+    /// The SDK creates its own publisher internally using these settings.
+    /// Use this to carry over user preferences (username, resolution, codec,
+    /// audio/video flags) from the waiting room without exposing the
+    /// publisher repository.
+    ///
+    /// - Parameter settings: The publisher configuration to apply.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func publisherSettings(_ settings: PublisherSettings) -> MeetingRoomBuilder {
+        _publisherSettings = settings
         return self
     }
 
@@ -223,6 +246,25 @@ public final class MeetingRoomBuilder {
         return self
     }
 
+    /// Sets a custom theme for the meeting room UI.
+    ///
+    /// Use ``MeetingRoomTheme/vonage`` as a starting point and modify
+    /// individual color properties to match your brand.
+    ///
+    /// ```swift
+    /// var theme = MeetingRoomTheme.vonage
+    /// theme.primary = .blue
+    /// builder.theme(theme)
+    /// ```
+    ///
+    /// - Parameter theme: The theme to apply.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func theme(_ theme: MeetingRoomTheme) -> MeetingRoomBuilder {
+        _theme = theme
+        return self
+    }
+
     /// Builds the meeting room with all configured features and dependencies.
     ///
     /// This method creates the complete dependency graph, registers plugins,
@@ -240,6 +282,7 @@ public final class MeetingRoomBuilder {
             enabledFeatures: _enabledFeatures,
             configuration: _configuration,
             publisherRepository: _publisherRepository,
+            publisherSettings: _publisherSettings,
             appGroupIdentifier: _appGroupIdentifier,
             broadcastExtensionBundleId: _broadcastExtensionBundleId
         )
@@ -250,7 +293,10 @@ public final class MeetingRoomBuilder {
             enabledFeatures: _enabledFeatures
         )
 
-        // 3. Set up feature view models that need pre-creation
+        // 3. Create alert presenter bridge
+        let alertPresenter = AlertPresenter()
+
+        // 4. Set up feature view models that need pre-creation
 
         // Background Effects
         if _enabledFeatures.contains(.backgroundEffects) {
@@ -268,7 +314,7 @@ public final class MeetingRoomBuilder {
             let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
                 roomName: roomName,
                 showAlert: { alertItem in
-                    onAction(.presentAlert(alertItem))
+                    alertPresenter.present?(alertItem)
                 }
             )
             archiveVM.setup()
@@ -325,7 +371,7 @@ public final class MeetingRoomBuilder {
             onActionHandler: { action in
                 switch action {
                 case .presentAlert(let alertItem):
-                    onAction(.presentAlert(alertItem))
+                    alertPresenter.present?(alertItem)
                 case .navigateToGoodbye:
                     onAction(.callDidEnd)
                 case .navigateToSettings:
@@ -349,6 +395,7 @@ public final class MeetingRoomBuilder {
             enabledFeatures: _enabledFeatures,
             buttonsAssembler: buttonsAssembler,
             onAction: onAction,
+            alertPresenter: alertPresenter,
             captionsButtonViewModel: captionsButtonViewModel,
             captionsViewModel: captionsViewModel,
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
@@ -356,8 +403,12 @@ public final class MeetingRoomBuilder {
             statsOverlayViewModel: statsOverlayViewModel
         )
 
+        let themedView =
+            composedView
+            .environment(\.meetingRoomTheme, _theme ?? .vonage)
+
         return MeetingRoomPrebuilt(
-            view: AnyView(composedView),
+            view: AnyView(themedView),
             viewModel: meetingRoomViewModel
         )
     }

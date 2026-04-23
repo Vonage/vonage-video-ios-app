@@ -22,6 +22,7 @@ private enum ChatPanelConstants {
 }
 
 public struct ChatPanel: View {
+    @Environment(\.meetingRoomTheme) private var theme
     public let messages: [UIChatMessage]
     public let onSendMessage: (String) -> Void
 
@@ -41,11 +42,12 @@ public struct ChatPanel: View {
                 .padding(.horizontal, ChatPanelConstants.inputAreaHorizontalPadding)
                 .padding(.vertical, ChatPanelConstants.inputAreaVerticalPadding)
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .background(theme.surface)
     }
 }
 
 struct ChatPanelInput: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let onSendMessage: (String) -> Void
     @State private var messageText = ""
 
@@ -54,7 +56,7 @@ struct ChatPanelInput: View {
             TextField(
                 "Type a message...",
                 text: $messageText,
-                prompt: Text("Type a message...").secondaryForeground(),
+                prompt: Text("Type a message...").secondaryForeground(color: theme.textTertiary),
                 axis: .vertical
             )
             .lineLimit(1...3)
@@ -64,7 +66,7 @@ struct ChatPanelInput: View {
                     .font(.title2)
                     .foregroundColor(
                         messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            ? .gray : VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                            ? .gray : theme.primary)
             }
             .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .buttonStyle(PlainButtonStyle())
@@ -83,21 +85,23 @@ struct ChatPanelInput: View {
 }
 
 extension Text {
-    func secondaryForeground() -> Text {
+    func secondaryForeground(color: Color) -> Text {
         if #available(iOS 17.0, *) {
-            return self.foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+            return self.foregroundStyle(color)
         } else {
-            return self.foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+            return self.foregroundColor(color)
         }
     }
 }
 
 struct GlassBackground: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: ChatPanelConstants.glassCornerRadius)
                 .fill(
-                    VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                    theme.vGray4
                         .opacity(ChatPanelConstants.glassBackgroundOpacity))
         #else
             Group {
@@ -107,7 +111,7 @@ struct GlassBackground: View {
                 } else {
                     RoundedRectangle(cornerRadius: ChatPanelConstants.glassCornerRadius)
                         .fill(
-                            VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                            theme.vGray4
                                 .opacity(ChatPanelConstants.glassBackgroundOpacity))
                 }
             }

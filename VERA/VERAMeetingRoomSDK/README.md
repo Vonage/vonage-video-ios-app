@@ -30,8 +30,6 @@ let prebuilt = MeetingRoomBuilder(
         // Navigate to goodbye screen
     case .goBack(let roomName):
         // Return to waiting room
-    case .presentAlert(let alertItem):
-        // Present the alert to the user
     }
 }
 .build()
@@ -54,13 +52,14 @@ MeetingRoomBuilder(baseURL: URL, roomName: String)
 | Method | Description |
 |---|---|
 | `.enabledFeatures(_ features: Set<MeetingRoomFeature>)` | Defines which optional features are active at runtime. |
-| `.onAction(_ handler: @escaping (MeetingRoomSDKAction) -> Void)` | Receives navigation and alert callbacks from the SDK. |
+| `.onAction(_ handler: @escaping (MeetingRoomSDKAction) -> Void)` | Receives navigation callbacks from the SDK. |
 | `.configuration(_ config: MeetingRoomConfiguration)` | Customises the meeting room UI (microphone, camera, participant list controls). |
-| `.publisherRepository(_ repository: any PublisherRepository)` | Injects an existing publisher to preserve camera/mic state from the waiting room. |
+| `.publisherSettings(_ settings: PublisherSettings)` | Sets the initial publisher configuration (username, resolution, codec, audio/video flags). |
 | `.initialBackgroundBlurLevel(_ level: BlurLevel)` | Carries the waiting room's background blur level into the call. |
 | `.initialNoiseSuppressionState(_ state: NoiseSuppressionState)` | Carries the waiting room's noise suppression state into the call. |
 | `.appGroupIdentifier(_ identifier: String)` | App group for screen share credential storage. Required when `.screenShare` is enabled. |
 | `.broadcastExtensionBundleId(_ bundleId: String)` | Bundle ID of the broadcast extension. Required when `.screenShare` is enabled. |
+| `.theme(_ theme: MeetingRoomTheme)` | Applies a custom color theme. Defaults to `MeetingRoomTheme.vonage`. |
 
 #### Build
 
@@ -111,12 +110,12 @@ Pass any subset to `.enabledFeatures(_:)`. Only enabled features create dependen
 ### `MeetingRoomSDKAction`
 
 Emitted by the SDK via the `onAction` closure. The host app must handle all cases.
+Alerts (permission prompts, errors) are presented automatically by the SDK.
 
 ```swift
 public enum MeetingRoomSDKAction {
     case callDidEnd               // Call ended — navigate to the goodbye screen
     case goBack(RoomName)         // Return to the waiting room
-    case presentAlert(AlertItem)  // Show an alert to the user
 }
 ```
 
@@ -156,17 +155,43 @@ MeetingRoomBuilder(baseURL: baseURL, roomName: roomName)
 
 ## Sharing State from the Waiting Room
 
-If your app has a waiting room, you can carry the publisher and any user preferences into the call seamlessly:
+If your app has a waiting room, you can carry user preferences into the call:
 
 ```swift
 MeetingRoomBuilder(baseURL: baseURL, roomName: roomName)
     .enabledFeatures([.backgroundEffects, .audioEffects])
-    .publisherRepository(waitingRoom.publisherRepository)
+    .publisherSettings(
+        PublisherSettings(
+            username: waitingRoom.username,
+            publishAudio: waitingRoom.isMicEnabled,
+            publishVideo: waitingRoom.isCameraEnabled
+        )
+    )
     .initialBackgroundBlurLevel(waitingRoom.selectedBlurLevel)
     .initialNoiseSuppressionState(waitingRoom.noiseSuppressionState)
     .onAction { action in handleAction(action) }
     .build()
 ```
+
+---
+
+## Custom Theming
+
+Override the Vonage color palette to match your brand:
+
+```swift
+var theme = MeetingRoomTheme.vonage   // start from defaults
+theme.primary = .blue
+theme.error = .red
+theme.surface = Color(.systemGray6)
+
+MeetingRoomBuilder(baseURL: baseURL, roomName: roomName)
+    .theme(theme)
+    .onAction { action in handleAction(action) }
+    .build()
+```
+
+`MeetingRoomTheme` contains all semantic colors (primary, surface, error, accent, text…) plus legacy colors (vGray0–4, videoBackground). When no theme is set, the default Vonage theme is used.
 
 ---
 

@@ -24,6 +24,8 @@ private enum ParticipantsBadgeButtonConstants {
 
 struct ParticipantsBadgeButton: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let participantsCount: Int
     private let onToggleParticipants: () -> Void
 
@@ -53,7 +55,7 @@ struct ParticipantsBadgeButton: View {
                 .frame(minWidth: badgeSize, minHeight: badgeSize)
                 .background(
                     Circle()
-                        .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
+                        .fill(theme.vGray3)
                 )
                 .scaleEffect(
                     participantsCount > maxBadgeCount

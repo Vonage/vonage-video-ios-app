@@ -45,6 +45,8 @@ public enum StatsOverlayUIConstants {
 /// The overlay is non-interactive (``allowsHitTesting(false)``) so taps pass through to underlying UI.
 public struct StatsOverlayView: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     /// View model driving the overlay's visibility and stats text.
     @ObservedObject var viewModel: StatsOverlayViewModel
 
@@ -79,7 +81,7 @@ public struct StatsOverlayView: View {
                 .background(
                     RoundedRectangle(cornerRadius: StatsOverlayUIConstants.cornerRadius)
                         .fill(
-                            VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(
+                            theme.vGray4.opacity(
                                 StatsOverlayUIConstants.backgroundOpacity))
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

@@ -172,7 +172,8 @@ extension MeetingRoomViewModel {
             participantsPublisher.removeDuplicates(),
             layoutPublisher,
             pinnedParticipantsDataSource.pinnedParticipantIds
-        ).map { participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+        )
+        .map { participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
             let currentParticipantIds = Set(participantsState.participants.map(\.id))
             let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
 
@@ -226,8 +227,8 @@ extension MeetingRoomViewModel {
             ),
             noiseSuppressionPublisher
         )
-        .map { [weak self] (state4, noiseSuppressionState) in
-            let (participantsState, sessionState, callState, archivingState) = state4
+        .map { [weak self] state, noiseSuppressionState in
+            let (participantsState, sessionState, callState, archivingState) = state
 
             guard let self else { return MeetingRoomState.initial }
             return MeetingRoomState(

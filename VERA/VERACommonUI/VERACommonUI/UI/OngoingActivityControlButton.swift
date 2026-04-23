@@ -32,6 +32,7 @@ public struct OngoingActivityControlButton: View {
 }
 
 public struct OngoingActivityControlImageButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
@@ -46,7 +47,7 @@ public struct OngoingActivityControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+                .foregroundStyle(theme.surface)
                 .frame(
                     width: OngoingActivityControlButtonConstants.buttonSize,
                     height: OngoingActivityControlButtonConstants.buttonSize
@@ -55,8 +56,8 @@ public struct OngoingActivityControlImageButton: View {
                     Circle()
                         .fill(
                             isActive
-                                ? VERACommonUIAsset.Colors.vGray2.swiftUIColor
-                                : VERACommonUIAsset.Colors.vGray4.swiftUIColor)
+                                ? theme.vGray2
+                                : theme.vGray4)
                 )
                 .animation(
                     .easeInOut(duration: OngoingActivityControlButtonConstants.animationDuration),

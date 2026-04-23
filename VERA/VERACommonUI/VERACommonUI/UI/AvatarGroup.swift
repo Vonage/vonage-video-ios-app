@@ -73,6 +73,7 @@ public struct AvatarGroup: View {
 
 // MARK: - Avatar individual
 struct AvatarView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let user: AvatarGroupUser
     let size: CGFloat
 
@@ -98,7 +99,7 @@ struct AvatarView: View {
         .overlay(
             Circle()
                 .stroke(
-                    VERACommonUIAsset.SemanticColors.surface.swiftUIColor,
+                    theme.surface,
                     lineWidth: AvatarGroupConstants.strokeWidth
                 )
         )
@@ -107,6 +108,7 @@ struct AvatarView: View {
 
 // MARK: - Avatar overflow counter
 struct OverflowCountAvatar: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let count: Int
     let size: CGFloat
 
@@ -123,7 +125,7 @@ struct OverflowCountAvatar: View {
         .overlay(
             Circle()
                 .stroke(
-                    VERACommonUIAsset.SemanticColors.surface.swiftUIColor,
+                    theme.surface,
                     lineWidth: AvatarGroupConstants.strokeWidth
                 )
         )

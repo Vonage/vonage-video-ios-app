@@ -38,6 +38,7 @@ private enum HiddenParticipantsTileConstants {
 ///
 /// This ensures bandwidth is not wasted on video streams for participants not currently visible.
 struct HiddenParticipantsTile: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let participants: [UIParticipant]
     let spacedBy: CGFloat
 
@@ -57,7 +58,7 @@ struct HiddenParticipantsTile: View {
         ZStack(alignment: .center) {
             Rectangle()
                 .fill(
-                    VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                    theme.vGray4
                         .opacity(HiddenParticipantsTileConstants.backgroundOpacity)
                 )
                 .aspectRatio(
@@ -89,6 +90,7 @@ struct HiddenParticipantsTile: View {
 }
 
 struct AdditionalParticipantsAvatar: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let count: Int
     let size: CGFloat
 
@@ -100,7 +102,7 @@ struct AdditionalParticipantsAvatar: View {
     var body: some View {
         Circle()
             .fill(
-                VERACommonUIAsset.Colors.vGray4.swiftUIColor
+                theme.vGray4
                     .opacity(HiddenParticipantsTileConstants.backgroundOpacity)
             )
             .frame(width: size, height: size)

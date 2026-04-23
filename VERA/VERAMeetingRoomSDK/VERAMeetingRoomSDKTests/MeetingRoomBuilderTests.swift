@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERABackgroundEffects
+import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
 
@@ -105,6 +106,33 @@ struct MeetingRoomBuilderTests {
         let builder = makeMeetingRoomBuilder()
             .broadcastExtensionBundleId("com.vonage.broadcast")
         #expect(builder.currentBroadcastExtensionBundleId == "com.vonage.broadcast")
+    }
+
+    @Test("Builder stores publisherSettings")
+    func builderStoresPublisherSettings() {
+        let settings = PublisherSettings(
+            username: "Alice",
+            publishAudio: false,
+            publishVideo: true
+        )
+        let builder = makeMeetingRoomBuilder()
+            .publisherSettings(settings)
+        #expect(builder.currentPublisherSettings == settings)
+    }
+
+    @Test("Builder stores theme")
+    func builderStoresTheme() {
+        var theme = MeetingRoomTheme.vonage
+        theme.primary = .blue
+        let builder = makeMeetingRoomBuilder()
+            .theme(theme)
+        #expect(builder.currentTheme != nil)
+    }
+
+    @Test("Builder defaults to nil theme")
+    func builderDefaultsToNilTheme() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentTheme == nil)
     }
 
     @Test("Builder can set all features at once")
