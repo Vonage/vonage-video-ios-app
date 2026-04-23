@@ -83,18 +83,55 @@ fi
 
 echo -e "${GREEN}✓ Tuist $(tuist version 2>/dev/null || echo 'installed') detected${NC}"
 
+# Check Xcode
+if ! command -v xcodebuild &> /dev/null; then
+    echo -e "${RED}❌ Xcode is not installed${NC}"
+    exit 1
+fi
+
+XCODE_VERSION=$(xcodebuild -version | head -n 1)
+echo -e "${GREEN}✓ $XCODE_VERSION detected${NC}"
+
 echo ""
 
 # ============================================================================
-# 2. Configuration
+# 2. Configuration & Simulator Detection
 # ============================================================================
 
-DEVICE=${SIMULATOR_DEVICE:-"iPhone 17"}
 APP_SCHEME=${APP_SCHEME:-"VERA"}
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
 
+# Auto-detect simulator: use env var, or find best available iPhone
+if [ -n "$SIMULATOR_DEVICE" ]; then
+    DEVICE="$SIMULATOR_DEVICE"
+else
+    echo -e "${BLUE}🔍 Auto-detecting simulator...${NC}"
+    
+    if xcrun simctl list devices available | grep -q "iPhone 17"; then
+        DEVICE="iPhone 17"
+    elif xcrun simctl list devices available | grep -q "iPhone 16 Pro"; then
+        DEVICE="iPhone 16 Pro"
+    elif xcrun simctl list devices available | grep -q "iPhone 16"; then
+        DEVICE="iPhone 16"
+    elif xcrun simctl list devices available | grep -q "iPhone 15 Pro"; then
+        DEVICE="iPhone 15 Pro"
+    elif xcrun simctl list devices available | grep -q "iPhone 15"; then
+        DEVICE="iPhone 15"
+    else
+        DEVICE=$(xcrun simctl list devices available | grep "iPhone" | head -n 1 | sed 's/^ *//' | sed 's/ (.*//')
+    fi
+    
+    if [ -z "$DEVICE" ]; then
+        echo -e "${RED}❌ No iPhone simulator found${NC}"
+        echo -e "${YELLOW}Available devices:${NC}"
+        xcrun simctl list devices available
+        exit 1
+    fi
+fi
+
 echo -e "${BLUE}Configuration:${NC}"
+echo -e "  Xcode:      ${GREEN}$XCODE_VERSION${NC}"
 echo -e "  Device:     ${GREEN}$DEVICE${NC}"
 echo -e "  Scheme:     ${GREEN}$APP_SCHEME${NC}"
 echo -e "  Workspace:  ${GREEN}$WORKSPACE${NC}"
@@ -243,18 +280,28 @@ echo -e "${BLUE}📱 App path: $APP_PATH${NC}\n"
 
 echo -e "${YELLOW}🚀 Managing simulator '$DEVICE'...${NC}"
 
-# Check if simulator exists
-if ! xcrun simctl list devices | grep -q "$DEVICE"; then
-    echo -e "${RED}❌ Simulator '$DEVICE' not found${NC}"
+# Validate simulator exists
+if ! xcrun simctl list devices available | grep -q "$DEVICE"; then
+    echo -e "${RED}❌ Simulator '$DEVICE' not available${NC}"
     echo -e "${YELLOW}Available simulators:${NC}"
-    xcrun simctl list devices | grep "iPhone"
+    xcrun simctl list devices available | grep "iPhone"
     echo ""
-    echo -e "${YELLOW}💡 Use a different device with: SIMULATOR_DEVICE=\"iPhone 15\" ./scripts/run-maestro-tests.sh${NC}"
+    echo -e "${YELLOW}💡 Use: SIMULATOR_DEVICE=\"iPhone 16\" ./scripts/run-maestro-tests.sh${NC}"
     exit 1
 fi
 
-# Boot simulator
-BOOT_OUTPUT=$(xcrun simctl boot "$DEVICE" 2>&1 || true)
+# Get simulator UUID for reliable operations
+SIMULATOR_ID=$(xcrun simctl list devices available | grep "$DEVICE" | head -n 1 | grep -oE '\([A-F0-9-]+\)' | tr -d '()')
+
+if [ -z "$SIMULATOR_ID" ]; then
+    echo -e "${RED}❌ Could not get simulator ID for '$DEVICE'${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Found simulator: $DEVICE ($SIMULATOR_ID)${NC}"
+
+# Boot simulator using UUID
+BOOT_OUTPUT=$(xcrun simctl boot "$SIMULATOR_ID" 2>&1 || true)
 if echo "$BOOT_OUTPUT" | grep -q "Unable to boot device in current state: Booted"; then
     echo -e "${BLUE}ℹ️  Simulator already booted${NC}"
 elif echo "$BOOT_OUTPUT" | grep -q "Unable to boot"; then
@@ -262,16 +309,20 @@ elif echo "$BOOT_OUTPUT" | grep -q "Unable to boot"; then
     exit 1
 else
     echo -e "${GREEN}✓ Simulator booted${NC}"
-    sleep 3  # Give simulator time to fully boot
+    # Wait for simulator to be fully ready
+    echo -e "${BLUE}⏳ Waiting for simulator to be ready...${NC}"
+    xcrun simctl bootstatus "$SIMULATOR_ID" -b 2>/dev/null || sleep 5
+    echo -e "${GREEN}✓ Simulator ready${NC}"
 fi
 
-# Install app
+# Install app using UUID
 echo -e "${YELLOW}📲 Installing VERA app on simulator...${NC}"
-INSTALL_OUTPUT=$(xcrun simctl install "$DEVICE" "$APP_PATH" 2>&1)
+INSTALL_OUTPUT=$(xcrun simctl install "$SIMULATOR_ID" "$APP_PATH" 2>&1)
 INSTALL_RESULT=$?
 
 if [ $INSTALL_RESULT -ne 0 ]; then
     echo -e "${RED}❌ Failed to install app: $INSTALL_OUTPUT${NC}"
+    echo -e "${YELLOW}💡 Try: xcrun simctl shutdown \"$SIMULATOR_ID\" && xcrun simctl erase \"$SIMULATOR_ID\"${NC}"
     exit 1
 fi
 
@@ -334,8 +385,9 @@ if [ $TEST_RESULT -ne 0 ]; then
     echo -e "${YELLOW}🔧 Troubleshooting tips:${NC}"
     echo -e "   1. Check the HTML report for detailed logs and screenshots"
     echo -e "   2. Run with debug: ${BLUE}maestro test .maestro/flows/ --debug${NC}"
-    echo -e "   3. Clean build: ${BLUE}rm -rf $BUILD_DIR && cd VERA && tuist clean && tuist generate && cd ..${NC}"
-    echo -e "   4. Check simulator logs: ${BLUE}xcrun simctl spawn booted log stream --level=debug${NC}"
+    echo -e "   3. Run single flow: ${BLUE}maestro test .maestro/flows/<flow-name>.yaml${NC}"
+    echo -e "   4. Clean build: ${BLUE}rm -rf $BUILD_DIR && cd VERA && tuist clean && tuist generate && cd ..${NC}"
+    echo -e "   5. Check simulator logs: ${BLUE}xcrun simctl spawn booted log stream --level=debug${NC}"
     echo ""
 fi
 

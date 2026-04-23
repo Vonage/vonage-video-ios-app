@@ -10,22 +10,19 @@ on:
 jobs:
   maestro-tests:
     name: Run Maestro UI Tests
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 60
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
-      - name: Checkout LFS objects
-        run: git lfs pull
-
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.0'
+      - name: Print Xcode & Simulator Info
+        run: |
+          xcodebuild -version
+          echo ""
+          echo "Available iOS Simulators:"
+          xcrun simctl list devices available | grep iPhone
 
       - name: Install Tuist
         run: |
@@ -43,25 +40,6 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
-      - name: Verify installations
-        run: |
-          echo "Tuist version:"
-          tuist version
-          echo "Java version:"
-          java -version
-          echo "Maestro version:"
-          maestro --version
-
-      - name: Cache Tuist dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/tuist
-            ~/.tuist/Cache
-          key: ${{ runner.os }}-tuist-${{ hashFiles('**/Project.swift', '**/Tuist/**') }}
-          restore-keys: |
-            ${{ runner.os }}-tuist-
-
       - name: Cache DerivedData
         uses: actions/cache@v4
         with:
@@ -73,21 +51,14 @@ jobs:
       - name: Generate Environment Constants
         run: |
           cd VERA
-          export BASE_API_URL="${{ secrets.BASE_API_URL }}"
-          export DEVELOPMENT_TEAM="${{ secrets.DEVELOPMENT_TEAM }}"
+          export BASE_API_URL="${{ secrets.BASE_API_URL || 'https://api.example.net/' }}"
+          export DEVELOPMENT_TEAM="${{ secrets.DEVELOPMENT_TEAM || 'AB0C12DE34' }}"
           export MARKETING_VERSION="1.1"
           export CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+          
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
-
-      - name: Generate App Config
-        run: |
-          cd VERA
           python3 ./Scripts/generate-app-config.py
-
-      - name: Generate App Theme
-        run: |
-          cd VERA
           python3 ./Scripts/generate-app-theme.py
 
       - name: Generate Xcode Workspace
@@ -95,15 +66,13 @@ jobs:
           cd VERA
           tuist generate
 
-      - name: List Available Simulators
-        run: |
-          xcrun simctl list devices available | grep iPhone
-
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
         env:
-          SIMULATOR_DEVICE: "iPhone 17"
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+          BASE_API_URL: ${{ secrets.BASE_API_URL || 'https://api.example.net/' }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM || 'AB0C12DE34' }}
+          MARKETING_VERSION: "1.1"
+          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
 
       - name: Upload Test Results
         if: always()
@@ -123,40 +92,20 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Upload HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: maestro-report-${{ github.run_number }}
-          path: ~/.maestro/tests/*/*.html
-          retention-days: 7
-          if-no-files-found: warn
-
       - name: Comment PR with Results
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const testResult = '${{ job.status }}';
-            const runNumber = '${{ github.run_number }}';
-            
-            let emoji = testResult === 'success' ? '✅' : '❌';
-            let status = testResult === 'success' ? 'passed' : 'failed';
-            
-            const comment = `## ${emoji} Maestro UI Tests ${status}
-            
-            **Run:** [#${runNumber}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            
-            <details>
-            <summary>View test artifacts</summary>
-            
-            - [Test Results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - [Screenshots](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - [HTML Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            
-            </details>`;
-            
+            let comment = '## 🎭 Maestro UI Test Results\n\n';
+            if ('${{ job.status }}' === 'success') {
+              comment += '✅ **All tests passed!**\n\n';
+            } else {
+              comment += '❌ **Some tests failed**\n\n';
+            }
+            comment += `- **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;
+            comment += `- **Commit**: \`${{ github.sha }}\`\n\n`;
+            comment += '📊 View artifacts for detailed reports and screenshots.';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
