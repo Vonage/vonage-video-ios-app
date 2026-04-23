@@ -15,7 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Pull LFS files
+        run: git lfs pull
 
       - name: Print Xcode & Simulator Info
         run: |
@@ -44,25 +47,13 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
-      - name: Cache DerivedData
-        uses: actions/cache@v4
-        with:
-          path: DerivedData
-          key: ${{ runner.os }}-deriveddata-${{ hashFiles('**/Project.swift') }}
-          restore-keys: |
-            ${{ runner.os }}-deriveddata-
-
       - name: Generate project with Tuist
         run: |
           cd VERA
-          export BASE_API_URL=${{ secrets.BASE_API_URL }}
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-          export MARKETING_VERSION="1.1"
-          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
+          export BASE_API_URL=${{ secrets.BASE_API_URL }}
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
-          python3 ./Scripts/generate-app-config.py
-          python3 ./Scripts/generate-app-theme.py
           tuist generate --no-open
           cd ..
 
@@ -76,8 +67,6 @@ jobs:
         env:
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
-          MARKETING_VERSION: "1.1"
-          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
 
       - name: Upload Test Results
         if: always()
