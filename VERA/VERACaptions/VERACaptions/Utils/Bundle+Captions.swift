@@ -10,6 +10,10 @@ final class VERACaptionsBundle {}
 extension Bundle {
     /// The bundle containing veraCaptions resources
     public static var veraCaptions: Bundle {
-        Bundle(for: VERACaptionsBundle.self)
+        #if SWIFT_PACKAGE
+        return .module
+        #else
+        return Bundle(for: VERACaptionsBundle.self)
+        #endif
     }
 }
