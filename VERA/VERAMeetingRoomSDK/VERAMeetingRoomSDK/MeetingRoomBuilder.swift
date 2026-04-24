@@ -57,14 +57,6 @@ public struct MeetingRoomPrebuilt {
 /// // Present the view
 /// result.view
 /// ```
-///
-/// ## Feature Configuration
-/// Features are enabled at runtime via ``enabledFeatures(_:)`` instead of
-/// compile-time `#if` flags. Only enabled features create dependencies and UI.
-///
-/// ## Dependency Injection
-/// For advanced use cases, inject a shared `PublisherRepository` via
-/// ``publisherRepository(_:)`` to reuse the publisher from a waiting room.
 public final class MeetingRoomBuilder {
 
     var baseURL: URL
@@ -72,7 +64,7 @@ public final class MeetingRoomBuilder {
     var _configuration = MeetingRoomConfiguration()
     var _enabledFeatures: Set<MeetingRoomFeature> = []
     var _onAction: ((MeetingRoomSDKAction) -> Void)?
-    var _publisherSettings: PublisherSettings?
+    var _publisherSettings: PublisherSettings = .init()
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
@@ -262,7 +254,7 @@ public final class MeetingRoomBuilder {
             let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
-            if let initialLevel = _publisherSettings?.backgroundBlurLevel {
+            if let initialLevel = _publisherSettings.backgroundBlurLevel {
                 blurVM.currentBlurLevel = initialLevel
             }
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
@@ -314,7 +306,7 @@ public final class MeetingRoomBuilder {
         // Audio Effects
         if _enabledFeatures.contains(.audioEffects) {
             let audioVM = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
-            if let initialState = _publisherSettings?.noiseSuppressionState {
+            if let initialState = _publisherSettings.noiseSuppressionState {
                 audioVM.state = initialState
             }
             buttonsAssembler.meetingNoiseSuppressionButtonViewModel = audioVM
