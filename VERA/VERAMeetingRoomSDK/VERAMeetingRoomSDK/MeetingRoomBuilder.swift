@@ -255,7 +255,7 @@ public final class MeetingRoomBuilder {
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
             if let initialLevel = _publisherSettings.backgroundBlurLevel {
-                blurVM.currentBlurLevel = initialLevel
+                blurVM.update(blurLevel: initialLevel)
             }
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
         }
@@ -307,7 +307,7 @@ public final class MeetingRoomBuilder {
         if _enabledFeatures.contains(.audioEffects) {
             let audioVM = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
             if let initialState = _publisherSettings.noiseSuppressionState {
-                audioVM.state = initialState
+                audioVM.updateState(to: initialState)
             }
             buttonsAssembler.meetingNoiseSuppressionButtonViewModel = audioVM
         }
