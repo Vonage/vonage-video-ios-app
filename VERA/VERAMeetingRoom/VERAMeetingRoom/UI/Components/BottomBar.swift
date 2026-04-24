@@ -171,7 +171,7 @@ struct BottomBar: View {
         }
     }
 
-    private func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
+    func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
         let padding = BottomBarConstants.containerPaddingHorizontal * 2
