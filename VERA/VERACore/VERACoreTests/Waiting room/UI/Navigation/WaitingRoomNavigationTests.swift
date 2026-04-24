@@ -75,7 +75,9 @@ struct WaitingRoomNavigationTests {
         }
     }
 
-    @Test("Given a room request, when goToMeetingRoom is called, then .navigateToMeetingRoom is dispatched with the request")
+    @Test(
+        "Given a room request, when goToMeetingRoom is called, then .navigateToMeetingRoom is dispatched with the request"
+    )
     func goToMeetingRoomDispatchesNavigateToMeetingRoom() {
         var dispatchedAction: Action?
         let sut = makeSUT { dispatchedAction = $0 }
