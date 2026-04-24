@@ -2,6 +2,14 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the root directory (parent of scripts/)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root to ensure paths are correct
+cd "$PROJECT_ROOT"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,15 +37,26 @@ fi
 
 echo -e "${GREEN}✓ Maestro $(maestro --version) installed${NC}"
 
-# Check Java installation (required by Maestro)
+# Check and install Java 17 (required by Maestro)
+echo -e "${BLUE}🔍 Checking Java 17 installation...${NC}"
+
 if ! command -v java &> /dev/null; then
-    echo -e "${RED}❌ Java is not installed (required by Maestro)${NC}"
-    echo -e "${YELLOW}📥 Install with: brew install openjdk@17${NC}"
-    echo -e "${YELLOW}   Then set JAVA_HOME: export JAVA_HOME=\$(/usr/libexec/java_home -v 17)${NC}"
-    exit 1
+    echo -e "${YELLOW}⚠️  Java is not installed, attempting to install Java 17...${NC}"
+    if command -v brew &> /dev/null; then
+        brew install openjdk@17
+    else
+        echo -e "${RED}❌ Homebrew not found. Cannot install Java 17 automatically.${NC}"
+        echo -e "${YELLOW}📥 Install manually with: brew install openjdk@17${NC}"
+        exit 1
+    fi
 fi
 
-# Validate JAVA_HOME
+# Validate and auto-detect JAVA_HOME
+if [ -n "$JAVA_HOME" ] && [ ! -d "$JAVA_HOME" ]; then
+    echo -e "${YELLOW}⚠️  JAVA_HOME is set but invalid ($JAVA_HOME), auto-detecting...${NC}"
+    unset JAVA_HOME
+fi
+
 if [ -z "$JAVA_HOME" ]; then
     echo -e "${YELLOW}⚠️  JAVA_HOME not set, attempting to auto-detect Java 17...${NC}"
     if /usr/libexec/java_home -v 17 &> /dev/null; then
@@ -45,13 +64,11 @@ if [ -z "$JAVA_HOME" ]; then
         echo -e "${GREEN}✓ Auto-detected JAVA_HOME: $JAVA_HOME${NC}"
     else
         echo -e "${RED}❌ Java 17 not found${NC}"
-        echo -e "${YELLOW}📥 Install with: brew install openjdk@17${NC}"
-        exit 1
+        echo -e "${YELLOW}📥 Installing Java 17...${NC}"
+        brew install openjdk@17
+        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+        echo -e "${GREEN}✓ Installed and set JAVA_HOME: $JAVA_HOME${NC}"
     fi
-elif [ ! -d "$JAVA_HOME" ]; then
-    echo -e "${RED}❌ JAVA_HOME points to invalid directory: $JAVA_HOME${NC}"
-    echo -e "${YELLOW}Fix with: export JAVA_HOME=\$(/usr/libexec/java_home -v 17)${NC}"
-    exit 1
 fi
 
 echo -e "${GREEN}✓ Java $(java -version 2>&1 | grep version | cut -d'"' -f2) detected${NC}"
@@ -314,6 +331,10 @@ else
     xcrun simctl bootstatus "$SIMULATOR_ID" -b 2>/dev/null || sleep 5
     echo -e "${GREEN}✓ Simulator ready${NC}"
 fi
+
+# Terminate app if running
+echo -e "${YELLOW}⏹️  Closing app if running...${NC}"
+xcrun simctl terminate "$SIMULATOR_ID" "com.vonage.VERA" 2>/dev/null || true
 
 # Install app using UUID
 echo -e "${YELLOW}📲 Installing VERA app on simulator...${NC}"

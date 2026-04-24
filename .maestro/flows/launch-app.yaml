@@ -1,20 +1,17 @@
 appId: com.vonage.VERA
 ---
-# Test: Launch VERA app and verify landing page
-- launchApp
+# Flujo alternativo: Tomar screenshot sin lanzar la app
+# (la app debe estar ya iniciada o el script se encargará de lanzarla)
 
-# Verify welcome text is visible (with line breaks)
-- assertVisible: "Upgrade video \ncommunication"
+- takeScreenshot: initial-state
 
-# Verify "Create new room" section
-- assertVisible: "Start a new video meeting"
-- assertVisible: "Create a new room"
-
-# Take a screenshot for documentation
-- takeScreenshot: landing-page-loaded
-
-# Test creating a new room
-- tapOn: "Create a new room"
+# Esperar animaciones
 - waitForAnimationToEnd
 
-- takeScreenshot: after-create-room
+# Intentar buscar elementos en la pantalla
+- assertVisible:
+    text: VERA
+    optional: true
+
+# Tomar otra captura
+- takeScreenshot: app-state

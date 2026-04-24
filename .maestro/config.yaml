@@ -1,5 +1,4 @@
 appId: com.vonage.VERA
----
-env:
+
   APP_ID: com.vonage.VERA
   SIMULATOR_DEVICE: "iPhone 17"
