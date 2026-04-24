@@ -630,6 +630,7 @@ jobs:
             DerivedData/VERAReactionsTests-macOS.xcresult
             DerivedData/VERAVonageChatPluginTests-macOS.xcresult
             DerivedData/VERAScreenShareTests-macOS.xcresult
+            DerivedData/VERASettingsTests-macOS.xcresult
             DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
             DerivedData/VERAVonageTests-iOS.xcresult
             DerivedData/VERACoreSnapshotTests-iOS.xcresult
@@ -646,6 +647,10 @@ jobs:
             DerivedData/VERAChatSnapshotTests-iOS.xcresult
             DerivedData/VERACommonUISnapshotTests-iOS.xcresult
             DerivedData/VERAMeetingRoomSDKTests-iOS.xcresult
+            DerivedData/VERAAudioEffectsTests-iOS.xcresult
+            DerivedData/VERAAudioEffectsSnapshotTests-iOS.xcresult
+            DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult
+            DerivedData/VERACommonUITests-iOS.xcresult
             DerivedData/Build/Products/
           
   sonarcloud:
