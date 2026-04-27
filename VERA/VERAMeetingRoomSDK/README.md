@@ -55,8 +55,6 @@ MeetingRoomBuilder(baseURL: URL, roomName: String)
 | `.onAction(_ handler: @escaping (MeetingRoomSDKAction) -> Void)` | Receives navigation callbacks from the SDK. |
 | `.configuration(_ config: MeetingRoomConfiguration)` | Customises the meeting room UI (microphone, camera, participant list controls). |
 | `.publisherSettings(_ settings: PublisherSettings)` | Sets the initial publisher configuration (username, resolution, codec, audio/video flags). |
-| `.initialBackgroundBlurLevel(_ level: BlurLevel)` | Carries the waiting room's background blur level into the call. |
-| `.initialNoiseSuppressionState(_ state: NoiseSuppressionState)` | Carries the waiting room's noise suppression state into the call. |
 | `.appGroupIdentifier(_ identifier: String)` | App group for screen share credential storage. Required when `.screenShare` is enabled. |
 | `.broadcastExtensionBundleId(_ bundleId: String)` | Bundle ID of the broadcast extension. Required when `.screenShare` is enabled. |
 | `.theme(_ theme: MeetingRoomTheme)` | Applies a custom color theme. Defaults to `MeetingRoomTheme.vonage`. |
@@ -167,8 +165,6 @@ MeetingRoomBuilder(baseURL: baseURL, roomName: roomName)
             publishVideo: waitingRoom.isCameraEnabled
         )
     )
-    .initialBackgroundBlurLevel(waitingRoom.selectedBlurLevel)
-    .initialNoiseSuppressionState(waitingRoom.noiseSuppressionState)
     .onAction { action in handleAction(action) }
     .build()
 ```
