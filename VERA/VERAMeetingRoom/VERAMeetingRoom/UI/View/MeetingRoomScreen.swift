@@ -65,6 +65,7 @@ public struct MeetingRoomScreen: View {
             .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("meeting-room-screen")
         .onChange(of: viewModel.toast) { newToast in
             if newToast != nil {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {

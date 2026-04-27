@@ -14,6 +14,7 @@ struct GoToLandingPageButton: View {
             color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
             isDisabled: false,
             onAction: onReturnToLanding)
+            .accessibilityIdentifier("goodbye-return-button")
     }
 }
 

@@ -87,6 +87,7 @@ struct WaitingRoomUserPreviewView: View {
                                     ? VERACommonUIAsset.Images.videoLine.swiftUIImage
                                     : VERACommonUIAsset.Images.videoOffLine.swiftUIImage,
                                 action: onCameraToggle)
+                                .accessibilityIdentifier("waiting-room-camera-toggle")
                         }
                         if state.allowMicrophoneControl {
                             CircularControlImageButton(
@@ -95,6 +96,7 @@ struct WaitingRoomUserPreviewView: View {
                                     ? VERACommonUIAsset.Images.microphoneLine.swiftUIImage
                                     : VERACommonUIAsset.Images.micMuteLine.swiftUIImage,
                                 action: onMicrophoneToggle)
+                                .accessibilityIdentifier("waiting-room-mic-toggle")
                         }
                     }
                 }

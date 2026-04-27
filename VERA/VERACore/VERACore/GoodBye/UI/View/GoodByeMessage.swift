@@ -19,11 +19,13 @@ struct GoodByeMessage: View {
                 .adaptiveFont(.headline)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                 .padding(.bottom, 10)
+                .accessibilityIdentifier("goodbye-title")
             if showSubtitle {
                 Text("Thank you for joining!", bundle: .veraCore)
                     .adaptiveFont(.heading2)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
                     .padding(.bottom, 20)
+                    .accessibilityIdentifier("goodbye-message")
             }
         }
     }

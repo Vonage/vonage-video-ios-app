@@ -14,8 +14,10 @@ struct RoomJoinContainer: View {
             Text("Start a new video meeting", bundle: .veraCore)
                 .adaptiveFont(.heading4)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .accessibilityIdentifier("landing-create-meeting-label")
 
             NewRoomButton(onHandleNewRoom: onHandleNewRoom)
+                .accessibilityIdentifier("landing-create-room-button")
 
             JoinContainerSeparator()
 

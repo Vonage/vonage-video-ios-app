@@ -75,6 +75,7 @@ public struct MeetingRoomView: View {
                     layout: state.layout,
                     activeSpeakerId: state.activeSpeakerId
                 )
+                .accessibilityIdentifier("meeting-room-video-grid")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .animation(
                     .spring(
@@ -163,6 +164,7 @@ public struct MeetingRoomView: View {
             #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("meeting-room-screen")
     }
 
     private struct IOS26ToolbarModifier: ViewModifier {

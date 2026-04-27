@@ -142,6 +142,7 @@ struct BottomBar: View {
                                 ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
                                 : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
                             action: actions.onToggleMic)
+                            .accessibilityIdentifier("meeting-room-mic-button")
                     }
                     if allowCameraControl {
                         ControlImageButton(
@@ -150,6 +151,7 @@ struct BottomBar: View {
                                 ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
                                 : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
                             action: actions.onToggleCamera)
+                            .accessibilityIdentifier("meeting-room-camera-button")
                     }
                     LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
                     if showParticipantList {
@@ -159,6 +161,7 @@ struct BottomBar: View {
                     }
                     buildExtraButtons(availableWidth: geometry.size.width)
                     EndCallControlButton(action: actions.onEndCall)
+                        .accessibilityIdentifier("meeting-room-leave-button")
                 }
                 .padding(.horizontal, BottomBarConstants.containerPaddingHorizontal)
                 .padding(.vertical, BottomBarConstants.containerPaddingVertical)

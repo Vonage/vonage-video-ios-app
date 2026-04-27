@@ -96,6 +96,7 @@ public struct WaitingRoomView: View {
                     onCameraToggle: onCameraToggle)
             }
         }
+        .accessibilityIdentifier("waiting-room-screen")
     }
 }
 
@@ -175,6 +176,7 @@ struct VideoPreviewView: View {
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
+            .accessibilityIdentifier("waiting-room-preview")
             .aspectRatio(16 / 9, contentMode: .fit)
             .clipShape(
                 RoundedRectangle(cornerRadius: cornerRadius)
@@ -244,16 +246,19 @@ struct PrepareToJoinRoom: View {
                 Text("Prepare to join:", bundle: .veraCore)
                     .font(.headline)
                     .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                    .accessibilityIdentifier("waiting-room-title")
 
                 Text(state.roomName)
                     .font(.subheadline)
                     .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     .padding(.bottom, 8)
+                    .accessibilityIdentifier("waiting-room-room-name")
 
                 JoinRoomButton {
                     usernameState = userName.wrappedValue.getUsernameState(true)
                     onJoinRoom()
                 }
+                .accessibilityIdentifier("waiting-room-join-button")
             }
             .padding()
         }

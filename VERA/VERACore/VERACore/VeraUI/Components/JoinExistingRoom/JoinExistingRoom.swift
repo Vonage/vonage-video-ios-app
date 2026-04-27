@@ -46,18 +46,21 @@ struct JoinExistingRoom: View {
                     .adaptiveFont(.heading4)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
                     .padding(.bottom, JoinExistingRoomConstants.titleBottomPadding)
+                    .accessibilityIdentifier("landing-join-meeting-label")
 
                 VonageTextField(
                     placeholder: String(localized: "Room name", bundle: .veraCore),
                     text: $roomName,
                     state: roomState,
                     forceLowercase: true)
+                    .accessibilityIdentifier("landing-room-name-field")
 
                 JoinButton(color: joinColor) {
                     roomState = getRoomState(true)
                     onJoinRoom(roomName)
                 }
                 .id(JoinExistingRoomUIIDs.joinButton)
+                .accessibilityIdentifier("landing-join-button")
                 .padding(.vertical, JoinExistingRoomConstants.joinButtonVerticalPadding)
                 .animation(
                     .spring(

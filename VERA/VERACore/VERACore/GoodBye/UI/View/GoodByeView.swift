@@ -42,6 +42,7 @@ public struct GoodByeView<ContentView: View>: View {
                     onReturnToLanding: onReturnToLanding)
             }
         }
+        .accessibilityIdentifier("goodbye-screen")
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
