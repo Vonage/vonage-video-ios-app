@@ -264,8 +264,8 @@ public final class MeetingRoomBuilder {
         if _enabledFeatures.contains(.archiving) {
             let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
                 roomName: roomName,
-                showAlert: { alertItem in
-                    alertPresenter.present?(alertItem)
+                showAlert: { [weak alertPresenter] alertItem in
+                    alertPresenter?.present?(alertItem)
                 }
             )
             archiveVM.setup()
@@ -315,20 +315,26 @@ public final class MeetingRoomBuilder {
         // 4. Create the meeting room view + view model via factory
         let (_, meetingRoomViewModel) = container.meetingRoomFactory.make(
             roomName: roomName,
-            getExternalButtons: { state in
-                buttonsAssembler.buildButtons(state)
+            getExternalButtons: { [weak buttonsAssembler] state in
+                buttonsAssembler?.buildButtons(state) ?? []
             },
-            // This can not be weak, otherwise the reference to self is lost
-            onActionHandler: { action in
+
+            onActionHandler: { [weak self, weak alertPresenter, weak buttonsAssembler] action in
                 switch action {
                 case .presentAlert(let alertItem):
-                    alertPresenter.present?(alertItem)
+                    alertPresenter?.present?(alertItem)
                 case .navigateToGoodbye:
                     onAction(.callDidEnd)
+                    alertPresenter?.present = nil
+                    buttonsAssembler?.cleanUp()
+                    self?._onAction = nil
                 case .navigateToSettings:
-                    self.navigateToSettings()
+                    self?.navigateToSettings()
                 case .navigateToWaitingRoom(let room):
                     onAction(.goBack(room))
+                    alertPresenter?.present = nil
+                    buttonsAssembler?.cleanUp()
+                    self?._onAction = nil
                 default:
                     break
                 }

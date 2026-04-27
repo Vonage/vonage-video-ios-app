@@ -247,4 +247,17 @@ final class BottomBarButtonsAssembler {
             }
         )
     }
+
+
+    func cleanUp() {
+        backgroundBlurButtonViewModel = nil
+        archiveButtonViewModel = nil
+        captionsButtonViewModel = nil
+        emojiButtonContainerViewModel = nil
+        meetingNoiseSuppressionButtonViewModel = nil
+
+        onShowChat = nil
+        onShowPickerView = nil
+        onShowSettings = nil
+    }
 }

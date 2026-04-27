@@ -49,6 +49,9 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
     @MainActor @Published public var isArchiving = false
 
+    /// Tracks the fallback disconnection task so it can be cancelled on normal call end.
+    @MainActor private var disconnectionTask: Task<Void, Never>?
+
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(.activeSpeaker)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(.initial)
     private let callStatePublisher = CurrentValueSubject<CallState, Never>(.idle)
@@ -138,15 +141,14 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func endCall() {
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             do {
                 try await disconnectRoomUseCase()
             } catch CallError.callNotConnected {
                 // Wait until the call connects instead of showing an error
             } catch {
-                await MainActor.run { [weak self] in
-                    self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: false)
-                }
+                meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: false)
             }
         }
     }
@@ -163,6 +165,8 @@ extension MeetingRoomViewModel {
     fileprivate func navigateBackIfNeeded(_ callState: CallState) {
         guard callState == .disconnected else { return }
         Task { @MainActor [weak self] in
+            self?.disconnectionTask?.cancel()
+            self?.disconnectionTask = nil
             self?.meetingRoomNavigation.onNext()
         }
     }
@@ -173,7 +177,13 @@ extension MeetingRoomViewModel {
             layoutPublisher,
             pinnedParticipantsDataSource.pinnedParticipantIds
         )
-        .map { participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+        .map { [weak self] participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+            guard let self else {
+                return MeetingRoomParticipantsState(
+                    participants: [],
+                    layout: .activeSpeaker,
+                    activeSpeakerId: nil)
+            }
             let currentParticipantIds = Set(participantsState.participants.map(\.id))
             let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
 
@@ -353,17 +363,28 @@ extension MeetingRoomViewModel {
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
                 self.toast = .init(message: "Session did disconnect", mode: .failure)
-                try? await startDisconnectionProcess()
+                self.scheduleDisconnection()
             default:
                 break
             }
         }
     }
 
-    fileprivate func startDisconnectionProcess() async throws {
-        try await Task.sleep(for: .seconds(MeetingRoomViewModel.disconnectionTimeoutInSeconds))
-
-        try? await disconnectRoomUseCase()
+    /// Schedules a fallback disconnection after a timeout.
+    ///
+    /// Called when an unexpected session disconnection is detected. The task is stored
+    /// so it can be cancelled immediately when the call ends via the normal path
+    /// (`navigateBackIfNeeded`), preventing a 6-second strong retain on `self`.
+    @MainActor
+    fileprivate func scheduleDisconnection() {
+        disconnectionTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .seconds(MeetingRoomViewModel.disconnectionTimeoutInSeconds))
+            } catch {
+                return  // Task was cancelled — normal call end already handled cleanup
+            }
+            try? await self?.disconnectRoomUseCase()
+        }
     }
 
     @MainActor
