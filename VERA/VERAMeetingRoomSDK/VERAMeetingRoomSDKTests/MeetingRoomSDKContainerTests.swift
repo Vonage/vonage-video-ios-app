@@ -80,7 +80,7 @@ struct MeetingRoomSDKContainerTests {
     func pluginRegistryExcludesChatWhenDisabled() {
         let container = makeContainer(enabledFeatures: [])
         let plugins = container.pluginRegistry.plugins
-        #expect(!plugins.contains { $0.pluginIdentifier == "chat" })
+        #expect(!plugins.contains { $0.pluginIdentifier == "VonageChatPlugin" })
     }
 
     @Test("Plugin registry has no duplicates")
