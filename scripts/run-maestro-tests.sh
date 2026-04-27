@@ -199,34 +199,53 @@ fi
 # 4. Check/Generate Workspace
 # ============================================================================
 
-if [ ! -f "$WORKSPACE/contents.xcworkspacedata" ]; then
-    echo -e "${YELLOW}📦 Workspace not found, generating with Tuist...${NC}\n"
+if [ -f "$WORKSPACE/contents.xcworkspacedata" ]; then
+    echo -e "${GREEN}✓ Workspace exists at $WORKSPACE${NC}\n"
+else
+    echo -e "${YELLOW}📦 Workspace not found, generating...${NC}\n"
     
+    echo -e "${BLUE}🔧 Running project generation scripts...${NC}"
     cd VERA
     
-    # Generate environment constants if env vars are set
-    if [ ${#MISSING_VARS[@]} -eq 0 ]; then
-        echo -e "${BLUE}🔧 Generating environment constants...${NC}"
+    # Generate environment constants (always required)
+    if [ -f "./Scripts/generateEnvironmentConstants.sh" ]; then
+        chmod +x ./Scripts/generateEnvironmentConstants.sh
         ./Scripts/generateEnvironmentConstants.sh
-        
-        echo -e "${BLUE}🔧 Generating signing configuration...${NC}"
-        ./Scripts/regenerateSigningConfig.sh
-        
-        if [ -f "./Scripts/generate-app-config.py" ]; then
-            echo -e "${BLUE}🔧 Generating app config...${NC}"
-            python3 ./Scripts/generate-app-config.py
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}❌ Failed to generate environment constants${NC}"
+            cd ..
+            exit 1
         fi
-        
-        if [ -f "./Scripts/generate-app-theme.py" ]; then
-            echo -e "${BLUE}🔧 Generating theme assets...${NC}"
-            python3 ./Scripts/generate-app-theme.py
-        fi
-        
-        echo ""
     fi
     
-    echo -e "${BLUE}🏗️  Running tuist generate...${NC}"
-    tuist generate
+    # Generate signing configuration (always required)
+    if [ -f "./Scripts/regenerateSigningConfig.sh" ]; then
+        chmod +x ./Scripts/regenerateSigningConfig.sh
+        ./Scripts/regenerateSigningConfig.sh
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}❌ Failed to generate signing configuration${NC}"
+            cd ..
+            exit 1
+        fi
+    fi
+    
+    # Generate app config if available
+    if [ -f "./Scripts/generate-app-config.py" ]; then
+        echo -e "${BLUE}🔧 Generating app config...${NC}"
+        python3 ./Scripts/generate-app-config.py
+    fi
+    
+    # Generate theme assets if available
+    if [ -f "./Scripts/generate-app-theme.py" ]; then
+        echo -e "${BLUE}🔧 Generating theme assets...${NC}"
+        python3 ./Scripts/generate-app-theme.py
+    fi
+    
+    echo -e "${GREEN}✓ Generation scripts completed${NC}\n"
+    
+    # Generate workspace with Tuist
+    echo -e "${BLUE}🏗️  Generating Xcode workspace with Tuist...${NC}"
+    tuist generate --no-open
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Tuist generate failed${NC}"
@@ -236,8 +255,6 @@ if [ ! -f "$WORKSPACE/contents.xcworkspacedata" ]; then
     
     cd ..
     echo -e "${GREEN}✓ Workspace generated successfully${NC}\n"
-else
-    echo -e "${GREEN}✓ Workspace exists${NC}\n"
 fi
 
 # ============================================================================
