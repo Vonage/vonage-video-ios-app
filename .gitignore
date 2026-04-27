@@ -2,6 +2,11 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## Build artifacts
+DerivedData/
+build/
+*.xcarchive
+
 ## User settings
 xcuserdata/
 
@@ -60,6 +65,10 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Test artifacts
+*.xcresult/
+*.xcresult
 
 # Ruby/Bundler (for Slather and other gems)
 vendor/bundle/
