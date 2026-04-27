@@ -50,6 +50,7 @@ public struct FilledButton: View {
 }
 
 struct FilledButtonStyle: ButtonStyle {
+    @Environment(\.meetingRoomTheme) private var theme
     var cornerRadius: CGFloat = BorderRadius.medium.value
 
     func makeBody(configuration: Configuration) -> some View {
@@ -57,7 +58,7 @@ struct FilledButtonStyle: ButtonStyle {
             .padding(.horizontal, FilledButtonConstants.horizontalPadding)
             .padding(.vertical, FilledButtonConstants.verticalPadding)
             .background(
-                VERACommonUIAsset.SemanticColors.primary.swiftUIColor.opacity(
+                theme.primary.opacity(
                     configuration.isPressed ? FilledButtonConstants.pressedOpacity : 1)
             )
             .foregroundColor(.white)
@@ -65,7 +66,7 @@ struct FilledButtonStyle: ButtonStyle {
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(
-                        VERACommonUIAsset.SemanticColors.border.swiftUIColor,
+                        theme.border,
                         lineWidth: FilledButtonConstants.strokeWidth
                     )
             )

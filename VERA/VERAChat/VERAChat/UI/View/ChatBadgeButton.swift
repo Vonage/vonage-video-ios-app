@@ -25,6 +25,8 @@ private enum ChatBadgeButtonConstants {
 
 public struct ChatBadgeButton: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let unreadMessagesCount: Int
     private let onShowChat: () -> Void
 
@@ -57,7 +59,7 @@ public struct ChatBadgeButton: View {
                 .frame(minWidth: badgeSize, minHeight: badgeSize)
                 .background(
                     Circle()
-                        .fill(VERACommonUIAsset.Colors.vGray3.swiftUIColor)
+                        .fill(theme.vGray3)
                 )
                 .scaleEffect(
                     unreadMessagesCount > maxBadgeCount

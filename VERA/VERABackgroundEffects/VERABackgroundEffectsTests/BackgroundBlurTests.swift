@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERABackgroundEffects
+import VERADomain
 
 @Suite("BackgroundBlur Tests")
 struct BackgroundBlurTests {

@@ -32,6 +32,7 @@ public struct ControlButton: View {
 }
 
 public struct ControlImageButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
@@ -46,11 +47,11 @@ public struct ControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(isActive ? VERACommonUIAsset.SemanticColors.surface.swiftUIColor : .red)
+                .foregroundStyle(isActive ? theme.surface : .red)
                 .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
                 .background(
                     Circle()
-                        .fill(isActive ? VERACommonUIAsset.Colors.vGray4.swiftUIColor : .clear)
+                        .fill(isActive ? theme.vGray4 : .clear)
                 )
                 .animation(.easeInOut(duration: ControlButtonConstants.animationDuration), value: isActive)
         }
@@ -59,6 +60,7 @@ public struct ControlImageButton: View {
 }
 
 public struct ButtonImage: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let image: Image
 
     public init(image: Image) {
@@ -68,11 +70,11 @@ public struct ButtonImage: View {
     public var body: some View {
         image
             .font(.title2)
-            .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+            .foregroundStyle(theme.surface)
             .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
             .background(
                 Circle()
-                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor)
+                    .fill(theme.vGray4)
             )
     }
 }

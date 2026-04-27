@@ -23,6 +23,7 @@ private enum ParticipantsListViewConstants {
 }
 
 public struct ParticipantsListView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let participants: [UIParticipant]
     let participantsCount: Int
     let roomName: String
@@ -63,7 +64,7 @@ public struct ParticipantsListView: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                        }.tint(theme.textSecondary)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {
@@ -74,7 +75,7 @@ public struct ParticipantsListView: View {
                 #endif
             }
         }
-        .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+        .tint(theme.textSecondary)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
@@ -87,7 +88,7 @@ public struct ParticipantsListView: View {
                 HStack {
                     Text(meetingURL.absoluteString)
                         .font(.caption)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                        .foregroundColor(theme.textTertiary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
@@ -95,7 +96,7 @@ public struct ParticipantsListView: View {
 
                     ShareLink(item: meetingURL) {
                         VERACommonUIAsset.Images.shareLine.swiftUIImage
-                            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            .foregroundColor(theme.textSecondary)
                             .padding(.horizontal, ParticipantsListViewConstants.shareLinkHorizontalPadding)
                             .padding(.vertical, ParticipantsListViewConstants.shareLinkVerticalPadding)
                             .cornerRadius(ParticipantsListViewConstants.shareLinkCornerRadius)
@@ -142,6 +143,7 @@ public struct ParticipantsListView: View {
 // MARK: - Participant Row View
 
 struct ParticipantRowView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     var onTogglePin: ((String) -> Void)?
 
@@ -152,7 +154,7 @@ struct ParticipantRowView: View {
             Text(participant.name)
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .foregroundColor(theme.textSecondary)
 
             Spacer()
 
@@ -163,7 +165,7 @@ struct ParticipantRowView: View {
                     (participant.isPinned
                         ? VERACommonUIAsset.Images.pin2OffSolid.swiftUIImage
                         : VERACommonUIAsset.Images.pin2Solid.swiftUIImage)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                        .foregroundColor(theme.textSecondary)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(participant.isPinned ? "Unpin" : "Pin")
@@ -171,7 +173,7 @@ struct ParticipantRowView: View {
 
             MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
                 .font(.caption)
-                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .foregroundColor(theme.textSecondary)
         }
     }
 }

@@ -11,10 +11,10 @@ import VERADomain
 import VERATestHelpers
 
 @Suite("NoiseSuppressionButtonViewModel tests")
+@MainActor
 struct NoiseSuppressionButtonViewModelTests {
 
     @Test
-    @MainActor
     func initialStateIsDisabled() async throws {
         let sut = makeSUT()
 
@@ -22,7 +22,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapTogglesFromDisabledToEnabled() async throws {
         let sut = makeSUT()
 
@@ -34,7 +33,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapTogglesFromEnabledToDisabled() async throws {
         let sut = makeSUT()
         sut.state = .enabled
@@ -45,7 +43,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCallsEnableUseCaseWhenEnabling() async throws {
         let spy = PublisherSpy()
         let enableUseCase = EnableUseCaseSpy()
@@ -62,7 +59,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCallsDisableUseCaseWhenDisabling() async throws {
         let disableUseCase = DisableUseCaseSpy()
         let sut = makeSUT(disableUseCase: disableUseCase)
@@ -75,7 +71,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapAppliesCorrectStateToPublisher() async throws {
         let enableUseCase = EnableUseCaseSpy()
         let disableUseCase = DisableUseCaseSpy()
@@ -98,7 +93,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapHandlesPublisherErrorGracefully() async throws {
         let sut = makeSUT(
             getCurrentPublisher: {
@@ -114,7 +108,6 @@ struct NoiseSuppressionButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func multipleTapsToggleBetweenStates() async throws {
         let enableUseCase = EnableUseCaseSpy()
         let disableUseCase = DisableUseCaseSpy()
@@ -140,6 +133,124 @@ struct NoiseSuppressionButtonViewModelTests {
         await Task.yield()
         #expect(sut.state == .enabled)
         #expect(enableUseCase.callCount == 2)
+    }
+
+    // MARK: - updateState(to:) Tests
+
+    @Test
+    func updateStateSetsStateToEnabled() {
+        let sut = makeSUT()
+
+        sut.updateState(to: .enabled)
+
+        #expect(sut.state == .enabled)
+    }
+
+    @Test
+    func updateStateSetsStateToDisabled() {
+        let sut = makeSUT()
+        sut.state = .enabled
+
+        sut.updateState(to: .disabled)
+
+        #expect(sut.state == .disabled)
+    }
+
+    @Test
+    func updateStateToEnabledCallsEnableUseCase() async {
+        let spy = PublisherSpy()
+        let enableUseCase = EnableUseCaseSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy }, enableUseCase: enableUseCase)
+
+        sut.updateState(to: .enabled)
+        await Task.yield()
+
+        #expect(enableUseCase.callCount == 1)
+        #expect(enableUseCase.lastPublisher === spy)
+    }
+
+    @Test
+    func updateStateToDisabledCallsDisableUseCase() async {
+        let spy = PublisherSpy()
+        let disableUseCase = DisableUseCaseSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy }, disableUseCase: disableUseCase)
+
+        sut.updateState(to: .disabled)
+        await Task.yield()
+
+        #expect(disableUseCase.callCount == 1)
+    }
+
+    @Test
+    func updateStateToEnabledDoesNotCallDisableUseCase() async {
+        let enableUseCase = EnableUseCaseSpy()
+        let disableUseCase = DisableUseCaseSpy()
+        let sut = makeSUT(disableUseCase: disableUseCase, enableUseCase: enableUseCase)
+
+        sut.updateState(to: .enabled)
+        await Task.yield()
+
+        #expect(enableUseCase.callCount == 1)
+        #expect(disableUseCase.callCount == 0)
+    }
+
+    @Test
+    func updateStateToDisabledDoesNotCallEnableUseCase() async {
+        let enableUseCase = EnableUseCaseSpy()
+        let disableUseCase = DisableUseCaseSpy()
+        let sut = makeSUT(disableUseCase: disableUseCase, enableUseCase: enableUseCase)
+
+        sut.updateState(to: .disabled)
+        await Task.yield()
+
+        #expect(enableUseCase.callCount == 0)
+        #expect(disableUseCase.callCount == 1)
+    }
+
+    @Test
+    func updateStateHandlesPublisherErrorGracefully() {
+        let sut = makeSUT(getCurrentPublisher: { throw NSError(domain: "Test", code: -1) })
+
+        // Should not crash
+        sut.updateState(to: .enabled)
+
+        // State should still be updated
+        #expect(sut.state == .enabled)
+    }
+
+    @Test
+    func updateStateOverridesPreviousState() async {
+        let sut = makeSUT()
+
+        sut.updateState(to: .enabled)
+        #expect(sut.state == .enabled)
+
+        sut.updateState(to: .disabled)
+        #expect(sut.state == .disabled)
+
+        sut.updateState(to: .enabled)
+        #expect(sut.state == .enabled)
+    }
+
+    @Test
+    func updateStateIsIndependentFromOnTapToggle() async {
+        let enableUseCase = EnableUseCaseSpy()
+        let disableUseCase = DisableUseCaseSpy()
+        let sut = makeSUT(disableUseCase: disableUseCase, enableUseCase: enableUseCase)
+
+        // Advance via onTap
+        sut.onTap()  // disabled -> enabled
+        await Task.yield()
+        #expect(sut.state == .enabled)
+
+        // updateState should set directly regardless of toggle cycle
+        sut.updateState(to: .disabled)
+        #expect(sut.state == .disabled)
+
+        // onTap should now toggle from .disabled
+        sut.onTap()
+        await Task.yield()
+        #expect(sut.state == .enabled)
     }
 
     // MARK: - Test Helpers

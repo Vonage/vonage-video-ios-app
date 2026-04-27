@@ -44,6 +44,8 @@ public struct ViewGenerator: Identifiable {
 }
 
 public struct MeetingRoomView: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
     @Binding private var extraButtons: [BottomBarButton]
@@ -159,9 +161,13 @@ public struct MeetingRoomView: View {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         toolbarContent
                     }
-                }.tint(.white)
+                }
+                .tint(.white)
             #endif
         }
+        #if !os(macOS)
+            .navigationViewStyle(.stack)
+        #endif
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -210,7 +216,7 @@ public struct MeetingRoomView: View {
                     width: MeetingRoomViewConstants.recordingIconSize,
                     height: MeetingRoomViewConstants.recordingIconSize
                 )
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                .foregroundStyle(theme.error)
                 .pulsating(
                     pulseFraction: MeetingRoomViewConstants.recordingPulseFraction,
                     durationSeconds: MeetingRoomViewConstants.recordingPulseDuration
@@ -221,7 +227,7 @@ public struct MeetingRoomView: View {
     private var noiseSuppressionIndicator: some View {
         VERACommonUIAsset.Images.noiseSuppressionEnabled.swiftUIImage
             .foregroundStyle(
-                VERACommonUIAsset.SemanticColors.onAccent.swiftUIColor)
+                theme.onAccent)
     }
 
     private var cameraSwitchButton: some View {

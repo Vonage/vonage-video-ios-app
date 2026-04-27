@@ -75,8 +75,8 @@ public struct MeetingRoomScreen: View {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         showToast = false
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        viewModel.toast = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak viewModel] in
+                        viewModel?.toast = nil
                     }
                 }
             }
