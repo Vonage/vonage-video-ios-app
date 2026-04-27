@@ -99,6 +99,8 @@ public struct MeetingRoomActions {
 
 struct BottomBar: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let participantsCount: Int
@@ -169,7 +171,7 @@ struct BottomBar: View {
         }
     }
 
-    private func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
+    func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
         let padding = BottomBarConstants.containerPaddingHorizontal * 2
@@ -217,9 +219,9 @@ struct BottomBar: View {
                         Button(action: button.onTap) {
                             HStack {
                                 button.image
-                                    .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                    .tint(theme.textSecondary)
                                 Text(button.label)
-                                    .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                    .tint(theme.textSecondary)
                             }.overlay {
                                 if let overlay = button.overlay {
                                     overlay()
@@ -237,17 +239,19 @@ struct BottomBar: View {
 }
 
 struct BottomBarBackground: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: BottomBarConstants.cornerRadius)
-                .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
+                .fill(theme.vGray4.opacity(0.8))
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectBackground()
                 } else {
                     RoundedRectangle(cornerRadius: BottomBarConstants.cornerRadius)
-                        .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(0.8))
+                        .fill(theme.vGray4.opacity(0.8))
                 }
             }
         #endif

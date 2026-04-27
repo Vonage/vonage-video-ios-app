@@ -35,7 +35,7 @@ struct NavigationCoordinatorTests {
     @Test("Initial currentMeetingRoom is nil")
     func initialCurrentMeetingRoomIsNil() {
         let sut = makeSUT()
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
     }
 
     // MARK: - go(to: .waitingRoom)
@@ -58,9 +58,9 @@ struct NavigationCoordinatorTests {
     @Test("go to waitingRoom clears currentMeetingRoom")
     func goToWaitingRoomClearsCurrentMeetingRoom() {
         let sut = makeSUT()
-        sut.currentMeetingRoom = "previous-room"
+        sut.currentMeetingRoomRequest = .init(roomName: "previous-room")
         sut.go(to: .waitingRoom("test-room"))
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
     }
 
     @Test("go to waitingRoom replaces existing path entries")
@@ -76,30 +76,30 @@ struct NavigationCoordinatorTests {
     @Test("go to meetingRoom sets isInMeeting to true")
     func goToMeetingRoomSetsIsInMeeting() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("test-room"))
+        sut.go(to: .meetingRoom(.init(roomName: "test-room")))
         #expect(sut.isInMeeting)
     }
 
     @Test("go to meetingRoom sets currentMeetingRoom to the given room name")
     func goToMeetingRoomSetsCurrentMeetingRoom() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("my-room"))
-        #expect(sut.currentMeetingRoom == "my-room")
+        sut.go(to: .meetingRoom(.init(roomName: "my-room")))
+        #expect(sut.currentMeetingRoomRequest?.roomName == "my-room")
     }
 
     @Test("go to meetingRoom sets path to one route")
     func goToMeetingRoomSetsPath() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("my-room"))
+        sut.go(to: .meetingRoom(.init(roomName: "my-room")))
         #expect(sut.path.count == 1)
     }
 
     @Test("go to meetingRoom with a different room updates currentMeetingRoom")
     func goToMeetingRoomUpdatesMeetingRoom() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("first-room"))
-        sut.go(to: .meetingRoom("second-room"))
-        #expect(sut.currentMeetingRoom == "second-room")
+        sut.go(to: .meetingRoom(.init(roomName: "first-room")))
+        sut.go(to: .meetingRoom(.init(roomName: "second-room")))
+        #expect(sut.currentMeetingRoomRequest?.roomName == "second-room")
     }
 
     // MARK: - go(to: .goodbye)
@@ -115,15 +115,15 @@ struct NavigationCoordinatorTests {
     @Test("go to goodbye clears currentMeetingRoom")
     func goToGoodbyeClearsCurrentMeetingRoom() {
         let sut = makeSUT()
-        sut.currentMeetingRoom = "test-room"
+        sut.currentMeetingRoomRequest = .init(roomName: "test-room")
         sut.go(to: .goodbye("test-room"))
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
     }
 
     @Test("go to goodbye does not modify the navigation path")
     func goToGoodbyeDoesNotModifyPath() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("room"))
+        sut.go(to: .meetingRoom(.init(roomName: "room")))
         let pathCountBeforeGoodbye = sut.path.count
         sut.go(to: .goodbye("room"))
         #expect(sut.path.count == pathCountBeforeGoodbye)
@@ -150,9 +150,9 @@ struct NavigationCoordinatorTests {
     @Test("go to landing clears currentMeetingRoom")
     func goToLandingClearsCurrentMeetingRoom() {
         let sut = makeSUT()
-        sut.currentMeetingRoom = "some-room"
+        sut.currentMeetingRoomRequest = .init(roomName: "some-room")
         sut.go(to: .landing)
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
     }
 
     @Test("go to landing clears waitingRoomViewModel")
@@ -206,17 +206,17 @@ struct NavigationCoordinatorTests {
         sut.go(to: .landing)
         #expect(sut.path.count == 0)
         #expect(!sut.isInMeeting)
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
     }
 
     @Test("navigating to meetingRoom then goodbye clears meeting state but preserves path")
     func meetingRoomThenGoodbyePreservesMeetingPath() {
         let sut = makeSUT()
-        sut.go(to: .meetingRoom("room"))
+        sut.go(to: .meetingRoom(.init(roomName: "room")))
         let pathCount = sut.path.count
         sut.go(to: .goodbye("room"))
         #expect(!sut.isInMeeting)
-        #expect(sut.currentMeetingRoom == nil)
+        #expect(sut.currentMeetingRoomRequest == nil)
         #expect(sut.path.count == pathCount)
     }
 

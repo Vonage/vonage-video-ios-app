@@ -11,7 +11,7 @@
 /// The preference can be either automatic (SDK decides) or manual (user-ordered list).
 ///
 /// - SeeAlso: ``VideoCodecType``, ``PublisherAdvancedSettings``
-public struct VideoCodecPreference: Equatable {
+public struct VideoCodecPreference: Equatable, Hashable {
     /// Whether codec selection should be automatic.
     /// - `true`: SDK automatically selects the best codec based on conditions
     /// - `false`: Use the manually ordered codec list in ``codecs``
@@ -30,5 +30,10 @@ public struct VideoCodecPreference: Equatable {
     public init(automatic: Bool, codecs: [VideoCodecType]?) {
         self.automatic = automatic
         self.codecs = codecs
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(automatic)
+        hasher.combine(codecs)
     }
 }

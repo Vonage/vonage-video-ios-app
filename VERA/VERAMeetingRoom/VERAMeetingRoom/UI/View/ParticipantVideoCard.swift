@@ -56,6 +56,7 @@ enum ParticipantVideoCardConstants {
 }
 
 struct ParticipantVideoCard: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
 
@@ -67,7 +68,7 @@ struct ParticipantVideoCard: View {
                 ZStack {
                     Rectangle()
                         .fill(
-                            VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(
+                            theme.vGray4.opacity(
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
@@ -113,7 +114,7 @@ struct ParticipantVideoCard: View {
                 ZStack {
                     Rectangle()
                         .fill(
-                            VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(
+                            theme.vGray4.opacity(
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
@@ -122,7 +123,7 @@ struct ParticipantVideoCard: View {
                             ZStack {
                                 Rectangle()
                                     .fill(
-                                        VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(
+                                        theme.vGray4.opacity(
                                             ParticipantVideoCardConstants.backgroundOpacity
                                         )
                                     )
@@ -151,7 +152,7 @@ struct ParticipantVideoCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius)
                 .stroke(
-                    VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
+                    theme.primary,
                     lineWidth: participant.id == activeSpeakerId
                         ? ParticipantVideoCardConstants.activeSpeakerStrokeWidth : 0)
         )
@@ -245,11 +246,12 @@ struct NameLabel: View {
 }
 
 struct MicIndicator: View {
+    @Environment(\.meetingRoomTheme) private var theme
     var isMicEnabled: Bool
 
     var body: some View {
         MicIndicatorImage(isMicEnabled: isMicEnabled)
-            .foregroundColor(isMicEnabled ? .white : VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+            .foregroundColor(isMicEnabled ? .white : theme.error)
             .padding(ParticipantVideoCardConstants.indicatorPadding)
             .background(Color.black.opacity(ParticipantVideoCardConstants.indicatorBackgroundOpacity))
             .clipShape(Circle())

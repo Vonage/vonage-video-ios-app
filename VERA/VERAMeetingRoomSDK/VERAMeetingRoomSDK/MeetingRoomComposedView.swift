@@ -40,6 +40,7 @@ struct MeetingRoomComposedView: View {
     let enabledFeatures: Set<MeetingRoomFeature>
     let buttonsAssembler: BottomBarButtonsAssembler
     let onAction: (MeetingRoomSDKAction) -> Void
+    let alertPresenter: AlertPresenter
 
     // MARK: - Feature View Models (created during setup)
 
@@ -60,6 +61,7 @@ struct MeetingRoomComposedView: View {
     @State private var showPickerView = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var activeAlert: AlertItem?
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel)
@@ -97,10 +99,33 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .alert(item: $activeAlert) { item in
+                if let cancelAction = item.cancelAction {
+                    return Alert(
+                        title: Text(item.title),
+                        message: Text(item.message),
+                        primaryButton: .default(
+                            Text(item.okAction ?? String(localized: "OK")),
+                            action: item.onConfirm
+                        ),
+                        secondaryButton: .cancel(Text(cancelAction))
+                    )
+                } else {
+                    return Alert(
+                        title: Text(item.title),
+                        message: Text(item.message),
+                        dismissButton: .default(
+                            Text(item.okAction ?? String(localized: "OK")),
+                            action: item.onConfirm
+                        )
+                    )
+                }
+            }
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                alertPresenter.present = { alertItem in activeAlert = alertItem }
             }
     }
 }

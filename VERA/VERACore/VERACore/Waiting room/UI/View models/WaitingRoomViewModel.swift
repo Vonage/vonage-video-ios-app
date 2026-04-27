@@ -120,9 +120,12 @@ public final class WaitingRoomViewModel: ObservableObject {
             }
 
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
-            try await joinRoomUseCase(request)
+            let settings = try await joinRoomUseCase(request)
             await MainActor.run {
-                waitingRoomNavigation.goToMeetingRoom()
+                waitingRoomNavigation.goToMeetingRoom(
+                    request: .init(
+                        roomName: roomName,
+                        publisherSettings: settings))
             }
         } catch {
             await MainActor.run { [weak self] in

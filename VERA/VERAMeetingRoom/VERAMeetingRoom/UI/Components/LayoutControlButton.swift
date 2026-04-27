@@ -21,6 +21,7 @@ private enum LayoutControlButtonConstants {
 }
 
 struct LayoutControlButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let layout: MeetingRoomLayout
     private let action: () -> Void
 
@@ -33,12 +34,12 @@ struct LayoutControlButton: View {
         Button(action: action) {
             LayoutImage(layout: layout)
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+                .foregroundStyle(theme.surface)
                 .frame(
                     width: LayoutControlButtonConstants.buttonSize,
                     height: LayoutControlButtonConstants.buttonSize
                 )
-                .background(Circle().fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor))
+                .background(Circle().fill(theme.vGray4))
         }
         .buttonStyle(PlainButtonStyle())
     }

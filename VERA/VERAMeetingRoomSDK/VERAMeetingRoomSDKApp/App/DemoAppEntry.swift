@@ -3,7 +3,7 @@
 //
 
 import SwiftUI
-import VERADomain
+import VERACommonUI
 import VERAMeetingRoomSDK
 
 @main
@@ -20,7 +20,6 @@ struct VERAMeetingRoomSDKDemoApp: App {
 @MainActor
 struct DemoRootView: View {
     @State private var prebuilt: MeetingRoomPrebuilt?
-    @State private var activeAlert: AlertItem?
 
     var body: some View {
         ZStack {
@@ -32,43 +31,28 @@ struct DemoRootView: View {
                 }
             }
         }
-        .alert(item: $activeAlert) { item in
-            if let cancelAction = item.cancelAction {
-                return Alert(
-                    title: Text(item.title),
-                    message: Text(item.message),
-                    primaryButton: .default(Text(item.okAction ?? String(localized: "OK")), action: item.onConfirm),
-                    secondaryButton: .cancel(Text(cancelAction))
-                )
-            } else {
-                return Alert(
-                    title: Text(item.title),
-                    message: Text(item.message),
-                    dismissButton: .default(Text(item.okAction ?? String(localized: "OK")), action: item.onConfirm)
-                )
-            }
-        }
     }
 
     // MARK: - Meeting Room Building
 
     private func buildMeetingRoom(roomName: String, baseURL: URL) {
+        var theme = MeetingRoomTheme.vonage
+        theme.primary = .blue
         prebuilt = MeetingRoomBuilder(
             baseURL: baseURL,
             roomName: roomName
         )
+        .theme(theme)
         .onAction { action in
-            handleAction(action, roomName: roomName)
+            handleAction(action)
         }
         .build()
     }
 
-    private func handleAction(_ action: MeetingRoomSDKAction, roomName: String) {
+    private func handleAction(_ action: MeetingRoomSDKAction) {
         switch action {
         case .callDidEnd, .goBack:
             prebuilt = nil
-        case .presentAlert(let alertItem):
-            activeAlert = alertItem
         }
     }
 }

@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERABackgroundEffects
+import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
 
@@ -13,7 +14,7 @@ import VERAMeetingRoom
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
-    let testBaseURL: URL = URL(string: "https://api.example.com")!
+    let testBaseURL = URL(string: "https://api.example.com")!
     let testRoomName: String = "test-room"
 
     @Test("Builder stores baseURL")
@@ -86,25 +87,38 @@ struct MeetingRoomBuilderTests {
         #expect(builder.currentAppGroupIdentifier == "group.com.vonage.test")
     }
 
-    @Test("Builder stores blur level")
-    func builderStoresBlurLevel() {
-        let builder = makeMeetingRoomBuilder()
-            .initialBackgroundBlurLevel(.high)
-        #expect(builder._initialBackgroundBlurLevel == .high)
-    }
-
-    @Test("Builder stores noise supression")
-    func builderStoresNoiseSuppresionState() {
-        let builder = makeMeetingRoomBuilder()
-            .initialNoiseSuppressionState(.enabled)
-        #expect(builder._initialNoiseSuppressionState == .enabled)
-    }
-
     @Test("Builder stores broadcastExtensionBundleId")
     func builderStoresBroadcastExtensionBundleId() {
         let builder = makeMeetingRoomBuilder()
             .broadcastExtensionBundleId("com.vonage.broadcast")
         #expect(builder.currentBroadcastExtensionBundleId == "com.vonage.broadcast")
+    }
+
+    @Test("Builder stores publisherSettings")
+    func builderStoresPublisherSettings() {
+        let settings = PublisherSettings(
+            username: "Alice",
+            publishAudio: false,
+            publishVideo: true
+        )
+        let builder = makeMeetingRoomBuilder()
+            .publisherSettings(settings)
+        #expect(builder.currentPublisherSettings == settings)
+    }
+
+    @Test("Builder stores theme")
+    func builderStoresTheme() {
+        var theme = MeetingRoomTheme.vonage
+        theme.primary = .blue
+        let builder = makeMeetingRoomBuilder()
+            .theme(theme)
+        #expect(builder.currentTheme != nil)
+    }
+
+    @Test("Builder defaults to nil theme")
+    func builderDefaultsToNilTheme() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentTheme == nil)
     }
 
     @Test("Builder can set all features at once")

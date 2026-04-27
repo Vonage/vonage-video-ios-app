@@ -25,6 +25,8 @@ private enum ArchiveListConstants {
 
 struct ArchiveList: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     let archives: [ArchiveUIData]
 
     init(archives: [ArchiveUIData] = []) {
@@ -35,7 +37,7 @@ struct ArchiveList: View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Download recording", bundle: .veraArchiving)
                 .adaptiveFont(.heading1)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, ArchiveListConstants.titleBottomPadding)
 
@@ -45,10 +47,10 @@ struct ArchiveList: View {
                         VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
                         Text("The meeting hasn't been recorded", bundle: .veraArchiving)
                             .adaptiveFont(.bodyBase)
-                            .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            .foregroundStyle(theme.textSecondary)
                     }
                     Divider()
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
+                        .foregroundColor(theme.border)
                         .padding(.top, ArchiveListConstants.dividerTopPadding)
                 }
             } else {
@@ -60,10 +62,10 @@ struct ArchiveList: View {
                         VStack(alignment: .leading) {
                             Text(archive.title)
                                 .adaptiveFont(.bodyBase)
-                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                .foregroundStyle(theme.textSecondary)
                             Text(archive.subtitle)
                                 .adaptiveFont(.bodyBase)
-                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                                .foregroundStyle(theme.textTertiary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
@@ -73,10 +75,10 @@ struct ArchiveList: View {
                                 } label: {
                                     HStack(alignment: .center) {
                                         VERACommonUIAsset.Images.downloadLine.swiftUIImage
-                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                            .foregroundStyle(theme.primary)
                                         Text("Download", bundle: .veraArchiving)
                                             .adaptiveFont(.bodyBase)
-                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                            .foregroundStyle(theme.primary)
                                     }
                                 }
                             } else {

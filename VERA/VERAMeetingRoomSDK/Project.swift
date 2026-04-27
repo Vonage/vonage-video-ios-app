@@ -15,6 +15,9 @@ let project = Project(
             bundleId: "com.vonage.VERAMeetingRoomSDK",
             deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAMeetingRoomSDK/**"],
+            resources: [
+                "VERAMeetingRoomSDK/Resources/**"
+            ],
             scripts: [.swiftLint(targetName: "VERAMeetingRoomSDK")],
             dependencies: [
                 // Core modules

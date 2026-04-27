@@ -42,6 +42,8 @@ enum AudioLevelIndicatorConstants {
 ///     The indicator is only visible when the mic is on.
 public struct AudioLevelIndicatorView: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let audioLevel: Float
     private let isMicEnabled: Bool
 
@@ -74,7 +76,7 @@ public struct AudioLevelIndicatorView: View {
                 width: AudioLevelIndicatorConstants.size,
                 height: AudioLevelIndicatorConstants.size
             )
-            .background(Circle().fill(VERACommonUIAsset.SemanticColors.primary.swiftUIColor))
+            .background(Circle().fill(theme.primary))
             .animation(.easeInOut(duration: 0.15), value: audioLevel)
         }
     }

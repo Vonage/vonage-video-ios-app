@@ -110,7 +110,6 @@ struct MeetingRoomSDKContainerTests {
             baseURL: Self.testBaseURL,
             enabledFeatures: [],
             configuration: config,
-            publisherRepository: nil,
             appGroupIdentifier: nil,
             broadcastExtensionBundleId: nil
         )
@@ -126,7 +125,6 @@ struct MeetingRoomSDKContainerTests {
             baseURL: Self.testBaseURL,
             enabledFeatures: enabledFeatures,
             configuration: MeetingRoomConfiguration(),
-            publisherRepository: nil,
             appGroupIdentifier: nil,
             broadcastExtensionBundleId: nil
         )

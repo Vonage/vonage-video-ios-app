@@ -3,11 +3,12 @@
 //
 
 import Foundation
+import VERADomain
 
 public enum AppRoute: Hashable {
     case landing
     case waitingRoom(String)
-    case meetingRoom(String)
+    case meetingRoom(NewRoomRequest)
     case goodbye(String)
     case settings
 

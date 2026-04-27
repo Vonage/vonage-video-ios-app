@@ -206,8 +206,10 @@ struct WaitingRoomViewModelTests {
         var navigateToSettingsAlert = false
 
         await confirmation("App settings should be presented") { confirm in
-            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase) {
-                action in
+            let sut = makeSUT(
+                roomName: roomName,
+                checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase
+            ) { action in
                 switch action {
                 case .presentAlert(let item):
                     item.onConfirm?()
@@ -227,7 +229,6 @@ struct WaitingRoomViewModelTests {
 
     func makeSUT(
         roomName: RoomName = "heart-of-gold",
-        publisherRepository: PublisherRepository = makeMockVERAPublisherRepository(),
         cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
         userRepository: UserRepository = makeMockUserRepository(),
@@ -246,7 +247,6 @@ struct WaitingRoomViewModelTests {
             joinRoomUseCase: .init(
                 userRepository: userRepository,
                 cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-                publisherRepository: publisherRepository,
                 advancedSettingsUseCase: advancedSettingsUseCase
             ),
             requestMicrophonePermissionUseCase: makeMockRequestMicrophonePermissionUseCase(),

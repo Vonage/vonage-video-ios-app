@@ -11,38 +11,23 @@ import VERADomain
 @Suite("MeetingRoomSDKAction tests")
 struct MeetingRoomSDKActionTests {
 
-    @Test("navigateToGoodbye action is creatable")
-    func navigateToGoodbyeAction() {
+    @Test("callDidEnd action is creatable")
+    func callDidEndAction() {
         let action = MeetingRoomSDKAction.callDidEnd
         if case .callDidEnd = action {
             // pass
         } else {
-            Issue.record("Expected navigateToGoodbye action")
+            Issue.record("Expected callDidEnd action")
         }
     }
 
-    @Test("navigateToWaitingRoom action carries room name")
-    func navigateToWaitingRoomAction() {
+    @Test("goBack action carries room name")
+    func goBackAction() {
         let action = MeetingRoomSDKAction.goBack("test-room")
         if case .goBack(let name) = action {
             #expect(name == "test-room")
         } else {
-            Issue.record("Expected navigateToWaitingRoom action")
-        }
-    }
-
-    @Test("presentAlert action carries alert item")
-    func presentAlertAction() {
-        let alertItem = AlertItem(
-            title: "Test",
-            message: "Test message"
-        )
-        let action = MeetingRoomSDKAction.presentAlert(alertItem)
-        if case .presentAlert(let item) = action {
-            #expect(item.title == "Test")
-            #expect(item.message == "Test message")
-        } else {
-            Issue.record("Expected presentAlert action")
+            Issue.record("Expected goBack action")
         }
     }
 }
