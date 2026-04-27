@@ -82,21 +82,54 @@ jobs:
           CURRENT_PROJECT_VERSION: ${{ github.run_number }}
           XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
 
+      - name: List Maestro test artifacts
+        if: always()
+        run: |
+          echo "📁 Maestro test directory contents:"
+          ls -la ~/.maestro/tests/ 2>/dev/null || echo "No tests directory"
+          
+          echo ""
+          echo "📸 Screenshots found:"
+          find ~/.maestro/tests -type f \( -name "*.png" -o -name "*.jpg" \) 2>/dev/null | head -20
+
+      - name: Generate Test Report
+        if: always()
+        run: |
+          mkdir -p test-reports
+          cat > test-reports/maestro-summary.txt << EOF
+          🎭 Maestro Test Execution Summary
+          ==================================
+          Run Number: ${{ github.run_number }}
+          Timestamp: $(date)
+          Branch: ${{ github.ref }}
+          Commit: ${{ github.sha }}
+          
+          Test Results Location:
+          ~/.maestro/tests/
+          
+          Screenshots and test artifacts have been uploaded below.
+          EOF
+          
+          # Copy test results to reports folder
+          if [ -d ~/.maestro/tests ]; then
+            cp -r ~/.maestro/tests/* test-reports/ 2>/dev/null || true
+          fi
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: maestro-test-results-${{ github.run_number }}
-          path: ~/.maestro/tests/*
+          path: ~/.maestro/tests/
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Upload Screenshots
-        if: failure()
+      - name: Upload Test Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: maestro-screenshots-${{ github.run_number }}
-          path: ~/.maestro/tests/*/screenshots/
+          name: maestro-report-${{ github.run_number }}
+          path: test-reports/
           retention-days: 7
           if-no-files-found: warn
 
@@ -113,7 +146,10 @@ jobs:
             }
             comment += `- **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;
             comment += `- **Commit**: \`${{ github.sha }}\`\n\n`;
-            comment += '📊 View artifacts for detailed reports and screenshots.';
+            comment += '📊 **Artifacts:**\n';
+            comment += `  - maestro-test-results-${{ github.run_number }}\n`;
+            comment += `  - maestro-report-${{ github.run_number }}\n\n`;
+            comment += '📸 View the complete test results and screenshots in the artifacts section above.';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
