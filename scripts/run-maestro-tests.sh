@@ -27,18 +27,25 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 
 echo -e "${BLUE}🔍 Checking prerequisites...${NC}\n"
 
+# Check & install SwiftLint
+if ! command -v swiftlint &> /dev/null; then
+    echo -e "${YELLOW}📦 SwiftLint not found, installing...${NC}"
+    brew install swiftlint
+fi
+echo -e "${GREEN}✓ SwiftLint $(swiftlint --version 2>/dev/null | head -n 1) installed${NC}"
+
 # Check Maestro installation
 if ! command -v maestro &> /dev/null; then
-    echo -e "${RED}❌ Maestro is not installed${NC}"
-    echo -e "${YELLOW}📥 Install with: curl -Ls \"https://get.maestro.mobile.dev\" | bash${NC}"
-    echo -e "${YELLOW}   Then add to PATH: export PATH=\"\$HOME/.maestro/bin:\$PATH\"${NC}"
-    exit 1
+    echo -e "${YELLOW}📦 Maestro not found, installing...${NC}"
+    curl -Ls "https://get.maestro.mobile.dev" | bash
+    export PATH="$HOME/.maestro/bin:$PATH"
+    echo -e "${GREEN}✓ Maestro installed${NC}"
+else
+    echo -e "${GREEN}✓ Maestro $(maestro --version) installed${NC}"
 fi
 
-echo -e "${GREEN}✓ Maestro $(maestro --version) installed${NC}"
-
 # Check and install Java 17 (required by Maestro)
-echo -e "${BLUE}🔍 Checking Java 17 installation...${NC}"
+echo -e "${BLUE}🔍 Checking Java 17...${NC}"
 
 if ! command -v java &> /dev/null; then
     echo -e "${YELLOW}⚠️  Java is not installed, attempting to install Java 17...${NC}"
@@ -93,9 +100,11 @@ echo -e "${GREEN}✓ Found $FLOW_COUNT test flow(s)${NC}"
 
 # Check Tuist installation
 if ! command -v tuist &> /dev/null; then
-    echo -e "${RED}❌ Tuist is not installed${NC}"
-    echo -e "${YELLOW}📥 Install with: curl -Ls https://install.tuist.io | bash${NC}"
-    exit 1
+    echo -e "${YELLOW}📦 Tuist not found, installing...${NC}"
+    brew install tuist
+    echo -e "${GREEN}✓ Tuist installed${NC}"
+else
+    echo -e "${GREEN}✓ Tuist installed${NC}"
 fi
 
 echo -e "${GREEN}✓ Tuist $(tuist version 2>/dev/null || echo 'installed') detected${NC}"
@@ -281,6 +290,7 @@ if [ -z "$APP_PATH" ]; then
       CODE_SIGN_IDENTITY="" \
       CODE_SIGNING_REQUIRED=NO \
       COMPILER_INDEX_STORE_ENABLE=NO \
+      RUN_SWIFTLINT=NO \
       -quiet
     
     BUILD_RESULT=$?
