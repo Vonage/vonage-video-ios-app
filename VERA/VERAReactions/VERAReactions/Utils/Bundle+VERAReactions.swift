@@ -11,9 +11,9 @@ extension Bundle {
     /// The bundle containing VERAReactions resources
     public static var veraReactions: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERAReactionsBundle.self)
+            return Bundle(for: VERAReactionsBundle.self)
         #endif
     }
 }

@@ -9,9 +9,9 @@ extension Bundle {
     /// The bundle associated with the VERAScreenShare module.
     public static var veraScreenShare: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERAScreenShareBundleToken.self)
+            return Bundle(for: VERAScreenShareBundleToken.self)
         #endif
     }
 }

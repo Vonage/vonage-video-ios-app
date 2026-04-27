@@ -9,9 +9,9 @@ extension Bundle {
     /// The bundle associated with the VERAAudioEffects module.
     public static var veraAudioEffects: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERAAudioEffectsBundleToken.self)
+            return Bundle(for: VERAAudioEffectsBundleToken.self)
         #endif
     }
 }

@@ -9,9 +9,9 @@ final class VERAArchiving {}
 extension Bundle {
     static var veraArchiving: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERAArchiving.self)
+            return Bundle(for: VERAArchiving.self)
         #endif
     }
 }

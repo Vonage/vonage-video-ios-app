@@ -7,9 +7,9 @@ import Foundation
 extension Bundle {
     static var veraCore: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERACore.self)
+            return Bundle(for: VERACore.self)
         #endif
     }
 }

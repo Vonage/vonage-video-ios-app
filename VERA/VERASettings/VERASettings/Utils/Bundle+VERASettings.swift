@@ -9,9 +9,9 @@ extension Bundle {
     /// The bundle associated with the `VERASettings`  module.
     public static var veraSettings: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERASettingsBundleToken.self)
+            return Bundle(for: VERASettingsBundleToken.self)
         #endif
     }
 }

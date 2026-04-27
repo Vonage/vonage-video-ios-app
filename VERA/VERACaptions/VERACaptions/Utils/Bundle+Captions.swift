@@ -11,9 +11,9 @@ extension Bundle {
     /// The bundle containing veraCaptions resources
     public static var veraCaptions: Bundle {
         #if SWIFT_PACKAGE
-        return .module
+            return .module
         #else
-        return Bundle(for: VERACaptionsBundle.self)
+            return Bundle(for: VERACaptionsBundle.self)
         #endif
     }
 }
