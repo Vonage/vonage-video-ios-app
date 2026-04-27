@@ -47,11 +47,22 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Export build flags
+        run: |
+          {
+            echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
+          } >> $GITHUB_ENV
+
       - name: Generate project with Tuist
         run: |
           cd VERA
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export MARKETING_VERSION=1.1
+          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
           tuist generate --no-open
@@ -67,6 +78,9 @@ jobs:
         env:
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+          MARKETING_VERSION: "1.1"
+          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+          XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
 
       - name: Upload Test Results
         if: always()
