@@ -1,0 +1,148 @@
+appId: com.vonage.VERA
+---
+# E2E Test: Complete call flow from landing to goodbye
+# This test verifies the entire user journey through the app
+
+# ============================================
+# Step 1: Launch app
+# ============================================
+- launchApp
+
+# Step 2: Verify we can see "Create a new room" text
+- assertVisible: "Create a new room"
+
+- takeScreenshot: "01-landing-page"
+
+# ============================================
+# Step 3: Create a new room
+# ============================================
+- tapOn: "Create a new room"
+
+# Wait for waiting room screen to be fully loaded
+- assertVisible:
+      id: "waiting-room-screen"
+
+- takeScreenshot: "02-waiting-room-loaded"
+
+# ============================================
+# Step 4: Enter display name
+# ============================================
+# Wait for the name field to appear
+- assertVisible: "Enter your name"
+
+# Tap on the name field
+- tapOn: "Enter your name"
+
+# Enter user name
+- inputText: "TestUser"
+
+# Hide keyboard by tapping outside
+- tapOn:
+      point: "50%,30%"
+
+# Wait a moment to ensure text is saved
+- waitForAnimationToEnd
+
+- takeScreenshot: "03-name-entered"
+
+# ============================================
+# Step 5: Join the meeting
+# ============================================
+# Make sure join button is visible
+- assertVisible: "Join meeting"
+
+- tapOn: "Join meeting"
+
+- takeScreenshot: "04a-after-join-tap"
+
+# Wait for navigation to complete
+- waitForAnimationToEnd:
+      timeout: 10000
+
+- takeScreenshot: "04b-after-10s"
+
+# NOTE: Meeting room navigation may require backend connectivity
+# For now, we verify the app didn't crash and we're still running
+- assertVisible:
+      text: ".*"
+
+- takeScreenshot: "04c-app-still-running"
+
+# TODO: Add meeting room tests once backend is configured
+# - assertVisible:
+#     id: "meeting-room-screen"
+
+- takeScreenshot: "04-joined-meeting"
+
+# ============================================
+# Step 6: Verify in meeting room
+# ============================================
+- assertVisible:
+      id: "meeting-room-video-grid"
+
+- takeScreenshot: "05-in-meeting-room"
+
+# ============================================
+# Step 7: Test microphone toggle
+# ============================================
+- tapOn:
+      id: "meeting-room-mic-button"
+
+- waitForAnimationToEnd
+
+- takeScreenshot: "06-mic-muted"
+
+# Toggle back on
+- tapOn:
+      id: "meeting-room-mic-button"
+
+- waitForAnimationToEnd
+
+# ============================================
+# Step 8: Test camera toggle
+# ============================================
+- tapOn:
+      id: "meeting-room-camera-button"
+
+- waitForAnimationToEnd
+
+- takeScreenshot: "07-camera-off"
+
+# Toggle back on
+- tapOn:
+      id: "meeting-room-camera-button"
+
+- waitForAnimationToEnd
+
+# ============================================
+# Step 9: Leave the call
+# ============================================
+- tapOn:
+      id: "meeting-room-leave-button"
+
+# Wait for goodbye screen to appear
+- waitForAnimationToEnd:
+      timeout: 5000
+
+# Verify goodbye screen loaded
+- assertVisible:
+      id: "goodbye-screen"
+
+- takeScreenshot: "08-goodbye-screen"
+
+# Verify goodbye content (use text instead of ID for compatibility)
+- assertVisible: "You have left the meeting."
+
+- takeScreenshot: "09-goodbye-complete"
+
+# ============================================
+# Step 10: Return to landing
+# ============================================
+# Use text instead of ID for better reliability
+- tapOn: "View Landing Page"
+
+# Wait for navigation back to landing
+- assertVisible:
+      text: "Create a new room"
+
+- takeScreenshot: "10-back-to-landing"
