@@ -8,6 +8,8 @@ description: |
 on:
   schedule: daily
   workflow_dispatch:
+  push:
+    branches: [ main, develop ]
 
 permissions:
   contents: read
