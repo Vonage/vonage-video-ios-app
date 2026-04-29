@@ -6,10 +6,8 @@ description: |
   and project recommendations.
 
 on:
-  schedule: daily
-  workflow_dispatch:
-  push:
-    branches: [ main, develop ]
+ pull_request:
+  types: [opened, synchronize]
 
 permissions:
   contents: read
