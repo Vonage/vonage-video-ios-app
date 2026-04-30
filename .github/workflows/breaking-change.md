@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
   pull-requests: read
 
 network: defaults
@@ -23,7 +24,6 @@ tools:
     lockdown: false
     min-integrity: none
   web-fetch:
-  web-search:
 
 safe-outputs:
   add-comment:
@@ -34,6 +34,13 @@ safe-outputs:
 
 A pull request has been opened or updated.
 
+## Posting on this PR (critical)
+
+GitHub Actions does **not** publish PR comments from ordinary agent text or from read-only GitHub tools. The workflow only posts when you invoke the **Safe Outputs `add_comment`** tool (sometimes exposed as `add_comment` in the agent tool list). You **must** call that tool once per run with the full Markdown body for PR ${{ github.event.pull_request.number }}.
+
+- Using **noop** does **not** add a visible comment on the PR thread (it only logs to the workflow run). Do **not** use noop when you want reviewers to see the result on the PR—use **`add_comment`** instead.
+- After you call **`add_comment`**, do not call noop.
+
 ## Your Task
 
 ### Step 1 - Identify changed packages
@@ -43,7 +50,7 @@ A pull request has been opened or updated.
 - List every package whose version has changed (added, removed, or bumped).
 - For each package, note the old version and the new version.
 - Detect the package manager used: Swift Package Manager (Package.swift / Package.resolved), CocoaPods (Podfile / Podfile.lock), or Carthage (Cartfile / Cartfile.resolved).
-- If no dependency files were changed, call the noop tool with the message "No dependency changes detected in this PR" and stop.
+- If no dependency files were changed, call **`add_comment`** on this PR with a short summary that includes: "No dependency changes detected in this PR" and a clear verdict line **"✅ Safe to merge"** (with respect to dependency breaking-change risk only). Then stop.
 
 ### Step 2 - Classify the version bump
 
@@ -66,16 +73,24 @@ For each package with a major or minor bump:
   - Behavior changes that could silently break existing code
   - Migration guides mentioned in release notes
 
-### Step 4 - Post a PR comment
+### Step 4 - Post via `add_comment` (required)
 
-- If breaking changes were found, post a comment on PR number ${{ github.event.pull_request.number }} with:
-  - A table listing each changed package, package manager, old version, new version, bump type, and whether breaking changes were found
-  - For each package with breaking changes: what changed, the impact, and migration steps
-- If no breaking changes were found, post a comment saying "✅ No breaking changes detected in this PR's dependency updates"
+Call **`add_comment`** once on PR ${{ github.event.pull_request.number }} with Markdown that includes:
+
+1. A one-line **verdict** at the top:
+   - If no breaking changes were identified in dependency updates: **"✅ Safe to merge"** (dependency/breaking-change check only; always mention this scope).
+   - If breaking changes were found or changelog/research was inconclusive for a risky bump: **"⚠️ Review required before merge"** (and explain why).
+
+2. **If dependency files changed**: a table with each changed package, package manager, old version, new version, bump type, and whether breaking changes were found.
+
+3. **If breaking changes were found**: for each affected package, brief notes on impact and migration steps.
+
+4. **If no breaking changes were found** (but deps did change): state explicitly that no breaking changes were detected in the researched release notes, plus **"✅ Safe to merge"** for this workflow’s scope.
+
+Do not modify repository files. Do not rely on narrating a comment in chat—only **`add_comment`** publishes to the PR.
 
 ## Style
 
 - Be concise and developer-friendly 🔍
 - Use emojis moderately for clarity (✅ safe, ⚠️ breaking)
 - If you cannot find changelog information for a package, say so explicitly rather than guessing
-- Do not modify any files in the repository - only post a comment
