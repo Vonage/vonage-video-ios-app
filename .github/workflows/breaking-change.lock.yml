@@ -25,7 +25,7 @@ jobs:
     needs: pre_activation
     if: >
       needs.pre_activation.outputs.activated == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.repository_id)
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -149,14 +149,14 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_08f93470b868abdc_EOF'
+          cat << 'GH_AW_PROMPT_de41700391fa860d_EOF'
           <system>
-          GH_AW_PROMPT_08f93470b868abdc_EOF
+          GH_AW_PROMPT_de41700391fa860d_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_08f93470b868abdc_EOF'
+          cat << 'GH_AW_PROMPT_de41700391fa860d_EOF'
           <safe-output-tools>
           Tools: add_comment, missing_tool, missing_data, noop
           </safe-output-tools>
@@ -188,12 +188,12 @@ jobs:
           {{/if}}
           </github-context>
 
-          GH_AW_PROMPT_08f93470b868abdc_EOF
+          GH_AW_PROMPT_de41700391fa860d_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_08f93470b868abdc_EOF'
+          cat << 'GH_AW_PROMPT_de41700391fa860d_EOF'
           </system>
           {{#runtime-import .github/workflows/breaking-change.md}}
-          GH_AW_PROMPT_08f93470b868abdc_EOF
+          GH_AW_PROMPT_de41700391fa860d_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
@@ -373,9 +373,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_e06a114210148f24_EOF'
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_3e9855ea2a0a76b4_EOF'
           {"add_comment":{"hide_older_comments":true,"max":1},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_e06a114210148f24_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_3e9855ea2a0a76b4_EOF
       - name: Write Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -561,7 +561,7 @@ jobs:
 
           mkdir -p /home/runner/.copilot
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_f10b2532dba4cdf1_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_fcea34bead9bccd4_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "github": {
@@ -605,7 +605,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_f10b2532dba4cdf1_EOF
+          GH_AW_MCP_CONFIG_fcea34bead9bccd4_EOF
       - name: Clean git credentials
         continue-on-error: true
         run: bash "${RUNNER_TEMP}/gh-aw/actions/clean_git_credentials.sh"
@@ -803,7 +803,7 @@ jobs:
     if: >
       always() && (needs.agent.result != 'skipped' || needs.activation.outputs.lockdown_check_failed == 'true' ||
       needs.activation.outputs.stale_lock_file_failed == 'true')
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       discussions: write
@@ -1017,7 +1017,7 @@ jobs:
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           WORKFLOW_NAME: "Breaking Change Detector"
-          WORKFLOW_DESCRIPTION: "This workflow analyzes pull requests that modify dependency files and detects\nbreaking changes. It compares old and new package versions, researches changelogs\nand release notes, and posts a summary comment on the PR with a breakdown of\nsafe updates vs potentially breaking changes."
+          WORKFLOW_DESCRIPTION: "This workflow analyzes pull requests that update Swift dependencies (SPM, CocoaPods, Carthage),\ncompares package versions, and posts a comment summarizing safe updates and any breaking\nchanges with migration steps."
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
         with:
           script: |
@@ -1099,7 +1099,7 @@ jobs:
 
   pre_activation:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.repository_id
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     outputs:
       activated: ${{ steps.check_membership.outputs.is_team_member == 'true' }}
       matched_command: ""
@@ -1130,7 +1130,7 @@ jobs:
       - agent
       - detection
     if: (!cancelled()) && needs.agent.result != 'skipped' && needs.detection.result == 'success'
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       discussions: write

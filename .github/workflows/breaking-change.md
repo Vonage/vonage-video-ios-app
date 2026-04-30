@@ -1,9 +1,8 @@
 ---
 description: |
-  This workflow analyzes pull requests that modify dependency files and detects
-  breaking changes. It compares old and new package versions, researches changelogs
-  and release notes, and posts a summary comment on the PR with a breakdown of
-  safe updates vs potentially breaking changes.
+  This workflow analyzes pull requests that update Swift dependencies (SPM, CocoaPods, Carthage),
+  compares package versions, and posts a comment summarizing safe updates and any breaking
+  changes with migration steps.
 
 on:
   pull_request:
@@ -21,6 +20,7 @@ permissions:
   pull-requests: read
 
 network: defaults
+runs-on-slim: ubuntu-24.04
 
 tools:
   github:
