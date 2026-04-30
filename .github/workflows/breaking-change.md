@@ -7,6 +7,8 @@ description: |
 on:
   pull_request:
     types: [opened, synchronize]
+    branches:
+      - develop
 
 permissions:
   contents: read
