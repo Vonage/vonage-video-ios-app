@@ -7,19 +7,13 @@ description: |
 on:
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - "Package.swift"
-      - "Package.resolved"
-      - "Podfile"
-      - "Podfile.lock"
-      - "Cartfile"
-      - "Cartfile.resolved"
 
 permissions:
   contents: read
   pull-requests: read
 
 network: defaults
+
 runs-on-slim: ubuntu-24.04
 
 tools:
@@ -36,16 +30,18 @@ safe-outputs:
 
 # Breaking Change Detector
 
-A pull request has been opened or updated that modifies one or more Swift dependency files.
+A pull request has been opened or updated.
 
 ## Your Task
 
 ### Step 1 - Identify changed packages
 
 - Read the diff of the dependency files in PR number ${{ github.event.pull_request.number }}.
+- Look for changes in: Package.swift, Package.resolved, Podfile, Podfile.lock, Cartfile, Cartfile.resolved.
 - List every package whose version has changed (added, removed, or bumped).
 - For each package, note the old version and the new version.
 - Detect the package manager used: Swift Package Manager (Package.swift / Package.resolved), CocoaPods (Podfile / Podfile.lock), or Carthage (Cartfile / Cartfile.resolved).
+- If no dependency files were changed, call the noop tool with the message "No dependency changes detected in this PR" and stop.
 
 ### Step 2 - Classify the version bump
 
@@ -70,12 +66,10 @@ For each package with a major or minor bump:
 
 ### Step 4 - Post a PR comment
 
-Post a comment on PR number ${{ github.event.pull_request.number }} with:
-
-- A table listing each changed package, package manager, old version, new version, bump type, and whether breaking changes were found
-- For each package with breaking changes: what changed, the impact, and migration steps
-- A list of safe updates with no detected breaking changes
-- If no dependency files were changed, call the noop tool with a message explaining no changes were detected
+- If breaking changes were found, post a comment on PR number ${{ github.event.pull_request.number }} with:
+  - A table listing each changed package, package manager, old version, new version, bump type, and whether breaking changes were found
+  - For each package with breaking changes: what changed, the impact, and migration steps
+- If no breaking changes were found, post a comment saying "✅ No breaking changes detected in this PR's dependency updates"
 
 ## Style
 
