@@ -1,0 +1,46 @@
+//
+//  Created by Vonage on 11/11/25.
+//
+
+import Foundation
+import VERACore
+import VERADomain
+import VERAMeetingRoom
+import VERATestHelpers
+
+public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {
+    MockConnectToRoomUseCase()
+}
+
+public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
+    public enum Actions: Equatable {
+        case connect(String)
+    }
+
+    public var recordedActions: [Actions] = []
+
+    public var call = MockCall()
+
+    public func callAsFunction(
+        roomName: RoomName
+    ) async throws -> any CallFacade {
+        recordedActions.append(.connect(roomName))
+        return call
+    }
+}
+
+public func makeFailingMockConnectToRoomUseCase() -> MockFailingConnectToRoomUseCase {
+    MockFailingConnectToRoomUseCase()
+}
+
+public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
+    public enum Error: Swift.Error {
+        case errorMock
+    }
+
+    public func callAsFunction(
+        roomName: RoomName
+    ) async throws -> any CallFacade {
+        throw Error.errorMock
+    }
+}

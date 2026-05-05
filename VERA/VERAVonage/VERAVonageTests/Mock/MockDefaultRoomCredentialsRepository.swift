@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 import VERATestHelpers
 import VERAVonage
 

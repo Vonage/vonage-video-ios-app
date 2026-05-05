@@ -4,6 +4,20 @@
 
 import SwiftUI
 
+/// Layout constants for the filled button style.
+private enum FilledButtonConstants {
+    /// Horizontal padding inside the button.
+    static let horizontalPadding: CGFloat = 24
+    /// Vertical padding inside the button.
+    static let verticalPadding: CGFloat = 12
+    /// Width of the border stroke.
+    static let strokeWidth: CGFloat = 1
+    /// Opacity when the button is pressed.
+    static let pressedOpacity: Double = 0.8
+    /// Duration of the press animation.
+    static let animationDuration: Double = 0.15
+}
+
 public struct FilledButton: View {
     public let text: Text
     public let image: Image?
@@ -36,22 +50,27 @@ public struct FilledButton: View {
 }
 
 struct FilledButtonStyle: ButtonStyle {
+    @Environment(\.meetingRoomTheme) private var theme
     var cornerRadius: CGFloat = BorderRadius.medium.value
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.horizontal, FilledButtonConstants.horizontalPadding)
+            .padding(.vertical, FilledButtonConstants.verticalPadding)
             .background(
-                VERACommonUIAsset.SemanticColors.primary.swiftUIColor.opacity(configuration.isPressed ? 0.8 : 1)
+                theme.primary.opacity(
+                    configuration.isPressed ? FilledButtonConstants.pressedOpacity : 1)
             )
             .foregroundColor(.white)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(VERACommonUIAsset.SemanticColors.border.swiftUIColor, lineWidth: 1)
+                    .stroke(
+                        theme.border,
+                        lineWidth: FilledButtonConstants.strokeWidth
+                    )
             )
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .animation(.easeOut(duration: FilledButtonConstants.animationDuration), value: configuration.isPressed)
             .frame(maxWidth: .infinity)
     }
 }

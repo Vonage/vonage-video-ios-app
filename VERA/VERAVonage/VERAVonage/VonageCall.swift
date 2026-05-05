@@ -26,6 +26,10 @@ import VERADomain
 public final class VonageCall: CallFacade {
 
     private var cancellables = Set<AnyCancellable>()
+    /// Per-subscriber cancellable sets keyed by subscriber ID.
+    /// Cancelled individually when a subscriber is removed to prevent stale sinks
+    /// from re-adding participants to the repository during cleanup.
+    private var subscriberCancellables: [String: Set<AnyCancellable>] = [:]
     /// Dedicated cancellable set for publisher observation.
     /// Cleared and rebuilt every time the publisher is replaced so stale subscriptions
     /// from the old publisher don't accumulate and cause redundant main-thread work.
@@ -360,7 +364,7 @@ public final class VonageCall: CallFacade {
                     await self.updateParticipantsState(state)
                 }
             }
-            .store(in: &cancellables)
+            .store(in: &subscriberCancellables[subscriber.id, default: []])
     }
 
     private func setupAudioLevelObservation(_ subscriber: VonageSubscriber) {
@@ -376,12 +380,15 @@ public final class VonageCall: CallFacade {
                     await self.callStateManager.updateActiveSpeaker(speakerInfo)
                 }
             }
-            .store(in: &cancellables)
+            .store(in: &subscriberCancellables[subscriber.id, default: []])
     }
 
     private func removeSubscriber(_ stream: OTStream) {
         Task { @MainActor [weak self] in
             guard let self = self else { return }
+            // Cancel subscriber sinks before cleanup to prevent $participant
+            // from re-adding the participant to the repository.
+            self.subscriberCancellables[stream.streamId] = nil
             let (_, state) = await callStateManager.removeSubscriber(id: stream.streamId)
             // There is no need to do a session unsubscribe if the stream has been destroyed
             await self.updateParticipantsState(state)
@@ -428,6 +435,7 @@ public final class VonageCall: CallFacade {
             unassignPlugins()
             cancellables.forEach { $0.cancel() }
             cancellables.removeAll()
+            subscriberCancellables.removeAll()
             publisherCancellables.removeAll()
             stopCaptionCleanup()
             isNetworkStatsEnabled = false
@@ -709,7 +717,8 @@ public final class VonageCall: CallFacade {
                 maxAudioBitrate: advancedSettings.maxAudioBitrate,
                 maxVideoBitrate: advancedSettings.maxVideoBitrate,
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
-                subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled
+                subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,
+                degradationPreference: advancedSettings.degradationPreference
             )
         )
 

@@ -4,6 +4,18 @@
 
 import SwiftUI
 
+/// Layout constants for the chat messages panel.
+private enum ChatPanelMessagesConstants {
+    /// Duration of the scroll-to-bottom animation.
+    static let scrollAnimationDuration: Double = 0.3
+    /// Vertical spacing between message rows.
+    static let messageSpacing: CGFloat = 8
+    /// Horizontal padding around the message list.
+    static let horizontalPadding: CGFloat = 16
+    /// Vertical padding around the message list.
+    static let verticalPadding: CGFloat = 8
+}
+
 struct ChatPanelMessages: View {
     let messages: [UIChatMessage]
 
@@ -16,7 +28,7 @@ struct ChatPanelMessages: View {
             let scrollToBottomAction = {
                 guard let messageId = lastMessageId else { return }
 
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(.easeInOut(duration: ChatPanelMessagesConstants.scrollAnimationDuration)) {
                     proxy.scrollTo(messageId, anchor: .bottom)
                 }
             }
@@ -25,13 +37,13 @@ struct ChatPanelMessages: View {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
 
-                    LazyVStack(spacing: 8) {
+                    LazyVStack(spacing: ChatPanelMessagesConstants.messageSpacing) {
                         ForEach(messages) { message in
                             ChatRow(message: message)
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, ChatPanelMessagesConstants.horizontalPadding)
+                    .padding(.vertical, ChatPanelMessagesConstants.verticalPadding)
                     .frame(maxWidth: .infinity, alignment: .bottom)
                 }
             }

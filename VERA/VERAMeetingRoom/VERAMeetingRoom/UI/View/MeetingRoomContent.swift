@@ -1,0 +1,46 @@
+//
+//  Created by Vonage on 23/7/25.
+//
+
+import SwiftUI
+import VERADomain
+
+struct MeetingRoomContent: View {
+
+    let participants: [UIParticipant]
+    let showBottomSheet: Bool
+    let layout: MeetingRoomLayout
+    let activeSpeakerId: String?
+
+    init(
+        participants: [UIParticipant],
+        showBottomSheet: Bool,
+        layout: MeetingRoomLayout,
+        activeSpeakerId: String?,
+    ) {
+        self.participants = participants
+        self.showBottomSheet = showBottomSheet
+        self.layout = layout
+        self.activeSpeakerId = activeSpeakerId
+    }
+
+    var body: some View {
+        if layout == .grid {
+            AdaptiveGridLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
+        } else {
+            ActiveSpeakerLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
+        }
+    }
+}
+
+#Preview {
+    MeetingRoomContent(
+        participants: [],
+        showBottomSheet: false,
+        layout: .grid,
+        activeSpeakerId: nil)
+}

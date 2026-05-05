@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public func makeMockCredentials(
     sessionId: String = "sessionId",

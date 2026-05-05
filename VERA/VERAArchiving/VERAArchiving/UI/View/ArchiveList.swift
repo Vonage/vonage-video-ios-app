@@ -5,7 +5,27 @@
 import SwiftUI
 import VERACommonUI
 
+/// Layout constants for the archive list view.
+private enum ArchiveListConstants {
+    /// Bottom padding below the section title.
+    static let titleBottomPadding: CGFloat = 10
+    /// Top padding above the divider in the empty state.
+    static let dividerTopPadding: CGFloat = 8
+    /// Size of the progress spinner in the download column.
+    static let progressViewSize: CGFloat = 44
+    /// Top inset for each list row.
+    static let rowInsetTop: CGFloat = 4
+    /// Leading inset for each list row.
+    static let rowInsetLeading: CGFloat = 8
+    /// Bottom inset for each list row.
+    static let rowInsetBottom: CGFloat = 4
+    /// Trailing inset for each list row.
+    static let rowInsetTrailing: CGFloat = 8
+}
+
 struct ArchiveList: View {
+
+    @Environment(\.meetingRoomTheme) private var theme
 
     let archives: [ArchiveUIData]
 
@@ -17,9 +37,9 @@ struct ArchiveList: View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Download recording", bundle: .veraArchiving)
                 .adaptiveFont(.heading1)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, 10)
+                .padding(.bottom, ArchiveListConstants.titleBottomPadding)
 
             if archives.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
@@ -27,11 +47,11 @@ struct ArchiveList: View {
                         VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
                         Text("The meeting hasn't been recorded", bundle: .veraArchiving)
                             .adaptiveFont(.bodyBase)
-                            .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                            .foregroundStyle(theme.textSecondary)
                     }
                     Divider()
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
-                        .padding(.top, 8)
+                        .foregroundColor(theme.border)
+                        .padding(.top, ArchiveListConstants.dividerTopPadding)
                 }
             } else {
                 List(archives, id: \.id) { archive in
@@ -42,10 +62,10 @@ struct ArchiveList: View {
                         VStack(alignment: .leading) {
                             Text(archive.title)
                                 .adaptiveFont(.bodyBase)
-                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                .foregroundStyle(theme.textSecondary)
                             Text(archive.subtitle)
                                 .adaptiveFont(.bodyBase)
-                                .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                                .foregroundStyle(theme.textTertiary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
@@ -55,19 +75,29 @@ struct ArchiveList: View {
                                 } label: {
                                     HStack(alignment: .center) {
                                         VERACommonUIAsset.Images.downloadLine.swiftUIImage
-                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                            .foregroundStyle(theme.primary)
                                         Text("Download", bundle: .veraArchiving)
                                             .adaptiveFont(.bodyBase)
-                                            .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                            .foregroundStyle(theme.primary)
                                     }
                                 }
                             } else {
                                 ProgressView()
-                                    .frame(width: 44, height: 44)
+                                    .frame(
+                                        width: ArchiveListConstants.progressViewSize,
+                                        height: ArchiveListConstants.progressViewSize
+                                    )
                             }
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowInsets(
+                        EdgeInsets(
+                            top: ArchiveListConstants.rowInsetTop,
+                            leading: ArchiveListConstants.rowInsetLeading,
+                            bottom: ArchiveListConstants.rowInsetBottom,
+                            trailing: ArchiveListConstants.rowInsetTrailing
+                        )
+                    )
                     .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)

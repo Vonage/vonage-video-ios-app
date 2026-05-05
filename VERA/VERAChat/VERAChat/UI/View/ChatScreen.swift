@@ -7,6 +7,7 @@ import VERACommonUI
 
 public struct ChatScreen: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
     @ObservedObject var viewModel: ChatPanelViewModel
     let onDismiss: () -> Void
 
@@ -37,7 +38,7 @@ public struct ChatScreen: View {
                     ToolbarItem(placement: .cancellationAction) {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
-                        }.tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                        }.tint(theme.textSecondary)
                     }
                 #else
                     ToolbarItem(placement: .primaryAction) {

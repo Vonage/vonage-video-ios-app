@@ -198,19 +198,19 @@ private func createPackages() -> [Package] {
 private func createDependencies() -> [TargetDependency] {
     var dependencies: [TargetDependency] = [
         .project(target: "VERACore", path: "VERACore"),
+        .project(target: "VERAMeetingRoom", path: "VERAMeetingRoom"),
         .project(target: "VERAVonage", path: "VERAVonage"),
         .project(target: "VERACommonUI", path: "VERACommonUI"),
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),
         .project(target: "VERAVonageCallKitPlugin", path: "VERAVonageCallKitPlugin"),
         .project(target: "VERALogger", path: "VERALogger"),
+        // SDK module handles meeting room dependency wiring and all feature modules
+        .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
     ]
 
-    if isChatEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERAChat", path: "VERAChat"),
-            .project(target: "VERAVonageChatPlugin", path: "VERAVonageChatPlugin"),
-        ])
-    }
+    // The following dependencies are still needed directly by VERAApp
+    // for non-meeting-room screens (waiting room, goodbye page).
+    // Meeting room features are handled by VERAMeetingRoomSDK at runtime.
 
     if isArchivingEnabled() {
         dependencies.append(contentsOf: [
@@ -226,19 +226,6 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
-    if areCaptionsEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERACaptions", path: "VERACaptions"),
-            .project(target: "VERAVonageCaptionsPlugin", path: "VERAVonageCaptionsPlugin"),
-        ])
-    }
-
-    if areEmojisEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERAReactions", path: "VERAReactions"),
-            .project(target: "VERAVonageReactionsPlugin", path: "VERAVonageReactionsPlugin"),
-        ])
-    }
     if areSettingsEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERASettings", path: "VERASettings"),
@@ -248,9 +235,7 @@ private func createDependencies() -> [TargetDependency] {
 
     if isScreenShareEnabled() {
         dependencies.append(contentsOf: [
-            .project(target: "VERAScreenShare", path: "VERAScreenShare"),
-            .project(target: "VERAVonageScreenSharePlugin", path: "VERAVonageScreenSharePlugin"),
-            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin"),
+            .project(target: "BroadcastExtension", path: "VERAVonageScreenSharePlugin")
         ])
     }
 
@@ -283,11 +268,12 @@ private func createBuildSettings() -> Settings {
 
     var flags: [String] = []
 
-    if isChatEnabled() {
-        baseSettings["CHAT_ENABLED"] = "1"
-        flags.append("CHAT_ENABLED")
-        print("Chat feature enabled in build settings.")
-    }
+    // Note: Chat, Captions, Reactions, and Screen Share compile-time flags
+    // have been removed from VERAApp. These features are now handled at runtime
+    // by VERAMeetingRoomSDK via the MeetingRoomBuilder API.
+    //
+    // The following flags remain because VERAApp still uses them directly
+    // for non-meeting-room screens (waiting room, goodbye page).
 
     if isArchivingEnabled() {
         baseSettings["ARCHIVING_ENABLED"] = "1"
@@ -301,28 +287,10 @@ private func createBuildSettings() -> Settings {
         print("Background effects feature enabled in build settings.")
     }
 
-    if areCaptionsEnabled() {
-        baseSettings["CAPTIONS_ENABLED"] = "1"
-        flags.append("CAPTIONS_ENABLED")
-        print("Captions feature enabled in build settings.")
-    }
-
-    if areEmojisEnabled() {
-        baseSettings["REACTIONS_ENABLED"] = "1"
-        flags.append("REACTIONS_ENABLED")
-        print("Reactions feature enabled in build settings.")
-    }
-
     if areSettingsEnabled() {
         baseSettings["SETTINGS_ENABLED"] = "1"
         flags.append("SETTINGS_ENABLED")
         print("Settings feature enabled in build settings.")
-    }
-
-    if isScreenShareEnabled() {
-        baseSettings["SCREEN_SHARE_ENABLED"] = "1"
-        flags.append("SCREEN_SHARE_ENABLED")
-        print("Screen share feature enabled in build settings.")
     }
 
     if isAdvancedNoiseSuppressionEnabled() {

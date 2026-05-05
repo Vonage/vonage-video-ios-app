@@ -4,6 +4,26 @@
 
 import SwiftUI
 
+/// Layout constants for the avatar group component.
+public enum AvatarGroupConstants {
+    /// Default maximum number of visible avatars.
+    public static let defaultMaxVisible: Int = 4
+    /// Default avatar circle diameter.
+    public static let defaultSize: CGFloat = 40
+    /// Default overlap spacing between avatars.
+    public static let defaultSpacing: CGFloat = -8
+    /// Scale factor for the initials font relative to avatar size.
+    public static let initialsFontScale: CGFloat = 0.4
+    /// Scale factor for the overflow count font relative to avatar size.
+    public static let overflowFontScale: CGFloat = 0.35
+    /// Width of the border stroke around each avatar.
+    public static let strokeWidth: CGFloat = 2
+    /// Opacity of the overflow count circle background.
+    public static let overflowBackgroundOpacity: Double = 0.3
+    /// Duration of the avatar group animation.
+    public static let animationDuration: Double = 0.3
+}
+
 public struct AvatarGroup: View {
     let users: [AvatarGroupUser]
     let maxVisible: Int
@@ -12,9 +32,9 @@ public struct AvatarGroup: View {
 
     public init(
         users: [AvatarGroupUser],
-        maxVisible: Int = 4,
-        size: CGFloat = 40,
-        spacing: CGFloat = -8
+        maxVisible: Int = AvatarGroupConstants.defaultMaxVisible,
+        size: CGFloat = AvatarGroupConstants.defaultSize,
+        spacing: CGFloat = AvatarGroupConstants.defaultSpacing
     ) {
         self.users = users
         self.maxVisible = maxVisible
@@ -53,6 +73,7 @@ public struct AvatarGroup: View {
 
 // MARK: - Avatar individual
 struct AvatarView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let user: AvatarGroupUser
     let size: CGFloat
 
@@ -72,34 +93,41 @@ struct AvatarView: View {
                 .frame(width: size, height: size)
 
             Text(initials)
-                .font(.system(size: size * 0.4, weight: .medium))
+                .font(.system(size: size * AvatarGroupConstants.initialsFontScale, weight: .medium))
                 .foregroundColor(user.textColor)
         }
         .overlay(
             Circle()
-                .stroke(VERACommonUIAsset.SemanticColors.surface.swiftUIColor, lineWidth: 2)
+                .stroke(
+                    theme.surface,
+                    lineWidth: AvatarGroupConstants.strokeWidth
+                )
         )
     }
 }
 
 // MARK: - Avatar overflow counter
 struct OverflowCountAvatar: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let count: Int
     let size: CGFloat
 
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.gray.opacity(0.3))
+                .fill(Color.gray.opacity(AvatarGroupConstants.overflowBackgroundOpacity))
                 .frame(width: size, height: size)
 
             Text("+\(count)")
-                .font(.system(size: size * 0.35, weight: .medium))
+                .font(.system(size: size * AvatarGroupConstants.overflowFontScale, weight: .medium))
                 .foregroundColor(.white)
         }
         .overlay(
             Circle()
-                .stroke(VERACommonUIAsset.SemanticColors.surface.swiftUIColor, lineWidth: 2)
+                .stroke(
+                    theme.surface,
+                    lineWidth: AvatarGroupConstants.strokeWidth
+                )
         )
     }
 }
@@ -133,9 +161,9 @@ struct AdvancedAvatarGroup: View {
 
     init(
         users: [AvatarGroupUser],
-        maxVisible: Int = 4,
-        size: CGFloat = 40,
-        spacing: CGFloat = -8,
+        maxVisible: Int = AvatarGroupConstants.defaultMaxVisible,
+        size: CGFloat = AvatarGroupConstants.defaultSize,
+        spacing: CGFloat = AvatarGroupConstants.defaultSpacing,
         showBorder: Bool = true,
         onTap: ((AvatarGroupUser) -> Void)? = nil,
         onOverflowTap: (([AvatarGroupUser]) -> Void)? = nil
@@ -185,7 +213,7 @@ struct AdvancedAvatarGroup: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: users.count)
+        .animation(.easeInOut(duration: AvatarGroupConstants.animationDuration), value: users.count)
     }
 }
 

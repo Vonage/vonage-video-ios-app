@@ -53,6 +53,8 @@ private enum CaptionsViewConstants {
 ///
 /// - SeeAlso: ``CaptionsViewContainer``, ``CaptionItemView``, ``UICaptionItem``
 public struct CaptionsView: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     /// The caption items to display, ordered by the view model (newest last).
     public let captions: [UICaptionItem]
 
@@ -78,7 +80,7 @@ public struct CaptionsView: View {
             .frame(maxWidth: CaptionsViewConstants.maxWidth)
             .background(
                 RoundedRectangle(cornerRadius: CaptionsViewConstants.cornerRadius)
-                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(CaptionsViewConstants.backgroundOpacity))
+                    .fill(theme.vGray4.opacity(CaptionsViewConstants.backgroundOpacity))
             )
             .padding(.horizontal, CaptionsViewConstants.horizontalPadding)
             .onChange(of: captions.last?.id) { latestId in

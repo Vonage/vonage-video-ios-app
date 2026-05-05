@@ -39,6 +39,8 @@ struct FloatingEmojiView: View {
 
     // MARK: - Properties
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     /// The emoji character to render.
     let emoji: String
 
@@ -66,10 +68,10 @@ struct FloatingEmojiView: View {
                     .frame(maxWidth: FloatingEmojiConstants.maxDisplayNameWidth)
                     .fixedSize(horizontal: true, vertical: false)
                     .font(.caption2)
-                    .foregroundStyle(VERACommonUIAsset.SemanticColors.onAccent.swiftUIColor)
+                    .foregroundStyle(theme.onAccent)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(VERACommonUIAsset.SemanticColors.accent.swiftUIColor)
+                    .background(theme.accent)
                     .cornerRadius(8)
             }
         }
