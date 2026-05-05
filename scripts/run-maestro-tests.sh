@@ -34,51 +34,14 @@ if ! command -v swiftlint &> /dev/null; then
 fi
 echo -e "${GREEN}✓ SwiftLint $(swiftlint --version 2>/dev/null | head -n 1) installed${NC}"
 
-# Check Maestro installation
-if ! command -v maestro &> /dev/null; then
-    echo -e "${YELLOW}📦 Maestro not found, installing...${NC}"
-    curl -Ls "https://get.maestro.mobile.dev" | bash
-    export PATH="$HOME/.maestro/bin:$PATH"
-    echo -e "${GREEN}✓ Maestro installed${NC}"
+# Install Maestro and Java 17 (uses shared install script)
+INSTALL_MAESTRO_SCRIPT="$SCRIPT_DIR/install-maestro.sh"
+if [ -f "$INSTALL_MAESTRO_SCRIPT" ]; then
+    source "$INSTALL_MAESTRO_SCRIPT"
 else
-    echo -e "${GREEN}✓ Maestro $(maestro --version) installed${NC}"
+    echo -e "${RED}❌ install-maestro.sh not found at $INSTALL_MAESTRO_SCRIPT${NC}"
+    exit 1
 fi
-
-# Check and install Java 17 (required by Maestro)
-echo -e "${BLUE}🔍 Checking Java 17...${NC}"
-
-if ! command -v java &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Java is not installed, attempting to install Java 17...${NC}"
-    if command -v brew &> /dev/null; then
-        brew install openjdk@17
-    else
-        echo -e "${RED}❌ Homebrew not found. Cannot install Java 17 automatically.${NC}"
-        echo -e "${YELLOW}📥 Install manually with: brew install openjdk@17${NC}"
-        exit 1
-    fi
-fi
-
-# Validate and auto-detect JAVA_HOME
-if [ -n "$JAVA_HOME" ] && [ ! -d "$JAVA_HOME" ]; then
-    echo -e "${YELLOW}⚠️  JAVA_HOME is set but invalid ($JAVA_HOME), auto-detecting...${NC}"
-    unset JAVA_HOME
-fi
-
-if [ -z "$JAVA_HOME" ]; then
-    echo -e "${YELLOW}⚠️  JAVA_HOME not set, attempting to auto-detect Java 17...${NC}"
-    if /usr/libexec/java_home -v 17 &> /dev/null; then
-        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-        echo -e "${GREEN}✓ Auto-detected JAVA_HOME: $JAVA_HOME${NC}"
-    else
-        echo -e "${RED}❌ Java 17 not found${NC}"
-        echo -e "${YELLOW}📥 Installing Java 17...${NC}"
-        brew install openjdk@17
-        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-        echo -e "${GREEN}✓ Installed and set JAVA_HOME: $JAVA_HOME${NC}"
-    fi
-fi
-
-echo -e "${GREEN}✓ Java $(java -version 2>&1 | grep version | cut -d'"' -f2) detected${NC}"
 
 # Check if .maestro/flows directory exists
 if [ ! -d ".maestro/flows" ]; then
@@ -270,7 +233,11 @@ fi
 # 5. Build or Find App
 # ============================================================================
 
-APP_PATH=$(find "$BUILD_DIR/Build/Products" -name "VERA.app" -print -quit 2>/dev/null || echo "")
+echo -e "${BLUE}🧹 Cleaning DerivedData...${NC}"
+rm -rf "$BUILD_DIR"
+echo -e "${GREEN}✓ DerivedData cleaned${NC}\n"
+
+APP_PATH=""
 
 if [ -z "$APP_PATH" ]; then
     echo -e "${YELLOW}🔨 Building VERA app (this may take a few minutes)...${NC}\n"

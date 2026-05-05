@@ -216,388 +216,170 @@ Tuist will generate the testing schemes for all the modules, then for testing yo
 
 You can also edit the snapshot test images by recording new screenshots in the snapshot testing files.
 
-### UI Testing with Maestro
+### E2E Testing with Maestro
 
-VERA uses [Maestro](https://maestro.mobile.dev) for declarative UI testing. Maestro tests are YAML-based, fast, and don't require recompiling the app when you modify test flows.
+VERA uses [Maestro](https://maestro.mobile.dev) for end-to-end UI testing. Tests are YAML-based and interact with the app through accessibility identifiers.
 
-#### Prerequisites
+#### Installation
 
-##### 1. Install Maestro
+Use the provided install script (installs Maestro CLI + Java 17):
+
 ```bash
-curl -Ls "https://get.maestro.mobile.dev" | bash
+./scripts/install-maestro.sh
 ```
 
-Verify installation:
-```bash
-maestro --version
-```
+#### Folder Structure
 
-##### 2. Install Java 17 (Required by Maestro)
-```bash
-# Using Homebrew
-brew install openjdk@17
-
-# Set JAVA_HOME (add to ~/.zshrc for persistence)
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-```
-
-Add to `~/.zshrc`:
-```bash
-echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
-source ~/.zshrc
-```
-
-#### Test Structure
-
-Maestro flows are located in `.maestro/`:
 ```
 .maestro/
-├── config.yaml              # Global configuration (appId, device preferences)
-└── flows/                   # Test scenarios (YAML files)
-    ├── launch-app.yaml      # Example: App launch and navigation test
-    ├── join-meeting.yaml
-    └── grant-permissions.yaml
+├── config.yaml          # Global configuration (appId, simulator device)
+└── flows/               # Test flows (YAML files)
+    └── launch-app.yaml  # P0: Launch app and validate landing screen
 ```
+
+Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is a sequential number.
 
 #### Running Tests
 
-##### Quick Start
-From the repository root:
 ```bash
+# Run all tests (cleans DerivedData, builds, boots simulator, runs flows)
 ./scripts/run-maestro-tests.sh
-```
 
-This script will:
-1. ✅ Check Maestro installation
-2. 🔨 Build VERA.app if needed (or reuse existing build)
-3. 🚀 Boot iOS Simulator
-4. 📲 Install the app
-5. 🧪 Run all test flows in `.maestro/flows/`
-6. 📸 Save screenshots to `~/.maestro/tests/<timestamp>/`
+# Run with a specific simulator
+SIMULATOR_DEVICE="iPhone 17 Pro" ./scripts/run-maestro-tests.sh
 
-##### Custom Simulator
-```bash
-SIMULATOR_DEVICE="iPhone 17 Pro Max" ./scripts/run-maestro-tests.sh
-```
-
-##### Run Specific Flow
-```bash
+# Run a single flow
 maestro test .maestro/flows/launch-app.yaml
 ```
 
-##### Run with Debug Output
-```bash
-maestro test .maestro/flows/ --debug
-```
+#### Writing Tests with Accessibility IDs
 
-##### View Test Results
-HTML reports and screenshots are saved in:
-```bash
-~/.maestro/tests/<timestamp>/
-```
+Tests target elements using accessibility identifiers. See the full ID reference in [`.github/instructions/e2e-maestro.instructions.md`](.github/instructions/e2e-maestro.instructions.md).
 
-Open the latest report:
-```bash
-open $(ls -t ~/.maestro/tests/*/report.html | head -n 1)
-```
-
-#### Writing Test Flows
-
-##### Basic Flow Example
-Create a new YAML file in `.maestro/flows/`:
+##### Example 1: Validate the landing screen
 
 ```yaml
-# filepath: .maestro/flows/join-meeting.yaml
-appId: com.vonage.video.vera
+appId: com.vonage.VERA
 ---
-- launchApp
-- tapOn: "Join existing room"
-- inputText: "test-room-123"
-- tapOn: "Join"
-- assertVisible: "Connected"
-- takeScreenshot: meeting-joined
-```
+# E2E Test: Launch App
+# Priority: P0
 
-##### Advanced Flow Examples
+- launchApp:
+    clearState: true
 
-**1. Handling System Permissions**
-```yaml
-# filepath: .maestro/flows/grant-permissions.yaml
-appId: com.vonage.video.vera
----
-- launchApp
-- tapOn: "Create a new room"
+- waitForAnimationToEnd:
+    timeout: 5000
 
-# Camera permission dialog
-- assertVisible: "VERA Would Like to Access the Camera"
-- tapOn: "Allow"
-
-# Microphone permission dialog
-- assertVisible: "VERA Would Like to Access the Microphone"
-- tapOn: "Allow"
-
-# Verify we're in the meeting
-- assertVisible: "Leave"
-- takeScreenshot: permissions-granted
-```
-
-**2. Error Handling & Recovery**
-```yaml
-# filepath: .maestro/flows/handle-network-error.yaml
-appId: com.vonage.video.vera
----
-- launchApp
-- tapOn: "Join existing room"
-- inputText: "invalid-room-999"
-- tapOn: "Join"
-
-# Assert error message appears
-- assertVisible: "Unable to connect"
-- assertVisible: "Try Again"
-
-# Test retry mechanism
-- tapOn: "Try Again"
-- takeScreenshot: retry-attempt
-
-# Go back to home
-- tapOn: "Back"
-- assertVisible: "Join existing room"
-```
-
-**3. Complete E2E Flow**
-```yaml
-# filepath: .maestro/flows/complete-meeting-flow.yaml
-appId: com.vonage.video.vera
----
-# 1. Launch and create room
-- launchApp
-- assertVisible: "Upgrade video \ncommunication"
-- tapOn: "Create a new room"
-- takeScreenshot: room-creation-start
-
-# 2. Grant permissions
-- assertVisible: "VERA Would Like to Access the Camera"
-- tapOn: "Allow"
-- assertVisible: "VERA Would Like to Access the Microphone"
-- tapOn: "Allow"
-- waitForAnimationToEnd
-
-# 3. Verify meeting room is active
-- assertVisible: "Leave"
-- takeScreenshot: meeting-room-active
-
-# 4. Test chat (if enabled)
-- tapOn:
-    id: "chat-button"
-    optional: true
-- inputText: "Test message"
-    optional: true
-- tapOn: "Send"
-    optional: true
-- takeScreenshot: chat-message-sent
-
-# 5. Open settings (if enabled)
-- tapOn:
-    id: "settings-button"
-    optional: true
-- assertVisible: "Video Settings"
-    optional: true
-- tapOn: "Done"
-    optional: true
-
-# 6. Leave meeting
-- tapOn: "Leave"
-- assertVisible: "Create a new room"
-- takeScreenshot: back-to-landing
-```
-
-#### Common Commands Reference
-
-```yaml
-# Assertions
-- assertVisible: "Text"               # Element must be visible
-- assertNotVisible: "Text"            # Element must not be visible
 - assertVisible:
-    id: "element-id"                  # Check by accessibility identifier
+    id: "landing-screen"
 
-# Interactions
-- tapOn: "Button Text"                # Tap by text
-- tapOn:
-    id: "button-id"                   # Tap by accessibility ID
-- inputText: "Hello"                  # Type into focused field
-- swipe:
-    direction: UP                     # UP, DOWN, LEFT, RIGHT
-    duration: 500
-- scrollUntilVisible:
-    element: "Item Text"
-    direction: DOWN
+- takeScreenshot: landing-screen
+```
 
-# Navigation
-- pressKey: Home                      # Simulate home button
-- pressKey: Back                      # Android back button
-- back                                # Maestro back navigation
+##### Example 2: Complete meeting flow
 
-# App Lifecycle
-- stopApp                             # Stop the app
-- launchApp                           # Launch/relaunch
-- clearState                          # Clear app data (reinstall)
+```yaml
+appId: com.vonage.VERA
+---
+# E2E Test: Create Room → Join → Leave → Goodbye
+# Priority: P0
 
-# Timing & Flow Control
-- waitForAnimationToEnd               # Wait for animations
+- launchApp:
+    clearState: true
 - waitForAnimationToEnd:
     timeout: 5000
-- runFlow:                            # Embed sub-flows
-    file: common-setup.yaml
-- repeat:                             # Loop commands
-    times: 3
-    commands:
-      - tapOn: "Next"
+- assertVisible:
+    id: "landing-screen"
 
-# Screenshots & Debugging
-- takeScreenshot: descriptive-name    # Capture screen
-- extendedWaitUntil:                  # Custom wait conditions
-    visible: "Loading..."
-    timeout: 30000
-```
-
-For complete command reference, see [Maestro Documentation](https://maestro.mobile.dev/api-reference/commands).
-
-#### Recording New Flows
-
-Maestro Studio provides an interactive way to record test flows:
-
-```bash
-# Launch Maestro Studio
-maestro studio
-
-# This will:
-# 1. Start a web interface at http://localhost:9999
-# 2. Show you the simulator screen
-# 3. Record your interactions as YAML
-# 4. Generate assertions automatically
-```
-
-You can also record flows directly from terminal:
-```bash
-# Record interactions
-maestro record .maestro/flows/new-flow.yaml
-
-# Interact with the app in the simulator
-# Press Ctrl+C when done to save the flow
-```
-
-#### Best Practices
-
-1. **One flow per user journey** — Keep flows focused on a single feature or scenario
-2. **Use meaningful screenshot names** — `takeScreenshot: meeting-room-with-3-participants`
-3. **Handle optional features** — Use `optional: true` for elements that may not be present
-4. **Test happy path + error cases** — Don't just test success scenarios
-5. **Add accessibility IDs** — Makes selectors more reliable than text-based matching
-6. **Use sub-flows for common setup** — Extract login/setup into reusable flows with `runFlow`
-7. **Keep flows maintainable** — Add comments to explain complex interactions
-8. **Run locally before pushing** — Verify tests pass before opening a PR
-
-#### Troubleshooting
-
-##### "Maestro command not found"
-Ensure `~/.maestro/bin` is in your PATH:
-```bash
-export PATH="$HOME/.maestro/bin:$PATH"
-```
-
-Add to `~/.zshrc`:
-```bash
-echo 'export PATH="$HOME/.maestro/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-##### "Invalid JAVA_HOME"
-Set Java 17 as active version:
-```bash
-export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-```
-
-Add to `~/.zshrc`:
-```bash
-echo 'export JAVA_HOME=$(/usr/libexec/java_home -v 17)' >> ~/.zshrc
-source ~/.zshrc
-```
-
-##### "App not found" or Build Issues
-Clean and rebuild:
-```bash
-rm -rf DerivedData
-cd VERA && tuist clean && tuist generate && cd ..
-./scripts/run-maestro-tests.sh
-```
-
-##### Simulator Issues
-If the simulator fails to boot or install:
-```bash
-# List available simulators
-xcrun simctl list devices | grep iPhone
-
-# Delete and recreate simulator
-xcrun simctl delete "iPhone 17"
-xcrun simctl create "iPhone 17" \
-  com.apple.CoreSimulator.SimDeviceType.iPhone-17 \
-  com.apple.CoreSimulator.SimRuntime.iOS-18-0
-```
-
-##### Test Failures
-- Check the HTML report for detailed logs and screenshots
-- Run with `--debug` flag: `maestro test .maestro/flows/ --debug`
-- Verify the app is in the expected state before each assertion
-- Add `- takeScreenshot` commands before assertions to debug UI state
-- Use `waitForAnimationToEnd` before assertions if animations cause flakiness
-
-##### Element Not Found
-```yaml
-# Add explicit waits
+- tapOn:
+    id: "landing-create-room-button"
 - waitForAnimationToEnd:
     timeout: 5000
 
-# Try different selectors
-- tapOn: "Button Text"           # By text
+- assertVisible:
+    id: "waiting-room-screen"
 - tapOn:
-    id: "button-id"               # By accessibility ID
+    id: "waiting-room-name-field"
+- inputText: "Test User"
+- hideKeyboard
+
 - tapOn:
-    point: "50%,80%"              # By screen coordinates (last resort)
+    id: "waiting-room-join-button"
+- extendedWaitUntil:
+    visible:
+        id: "meeting-room-screen"
+    timeout: 15000
 
-# Scroll to make element visible
-- scrollUntilVisible:
-    element: "Target Element"
-    direction: DOWN
+- tapOn:
+    id: "meeting-room-leave-button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "goodbye-screen"
+- takeScreenshot: goodbye-screen
 ```
 
-##### Flaky Tests
-```yaml
-# Add retries for flaky interactions
-- repeat:
-    times: 3
-    commands:
-      - tapOn: "Unstable Button"
-        optional: true
-      - assertVisible: "Success"
+#### Adding Accessibility IDs in SwiftUI
+
+For Maestro to find elements, accessibility identifiers must be applied correctly:
+
+##### Screen anchors (invisible element inside a ZStack)
+
+```swift
+public var body: some View {
+    ZStack {
+        // Accessibility anchor for Maestro E2E tests
+        Color.clear
+            .frame(width: 1, height: 1)
+            .accessibilityElement()
+            .accessibilityIdentifier("landing-screen")
+
+        // Your actual content
+        Group { ... }
+    }
+}
 ```
 
-#### CI/CD Integration
+##### Buttons (pass `accessibilityID` parameter)
 
-Maestro tests can run in GitHub Actions. See `.github/workflows/maestro.yml` for the complete workflow configuration.
+```swift
+// Button component with accessibilityID support
+public struct FilledButton: View {
+    public let text: Text
+    public let accessibilityID: String?
+    public let onAction: () -> Void
 
-##### Maestro Cloud (Optional - Parallel Testing)
+    public var body: some View {
+        Button { onAction() } label: { text }
+            .if(accessibilityID != nil) { view in
+                view.accessibilityIdentifier(accessibilityID!)
+            }
+    }
+}
 
-For running tests across multiple devices in parallel:
-
-```bash
-# Upload your flows to Maestro Cloud
-maestro cloud \
-  --apiKey $MAESTRO_CLOUD_API_KEY \
-  --app DerivedData/Build/Products/Debug-iphonesimulator/VERA.app \
-  .maestro/flows
+// Usage
+FilledButton(
+    text: Text("Join meeting"),
+    accessibilityID: "waiting-room-join-button",
+    onAction: onJoinRoom
+)
 ```
 
-Get your API key at [cloud.mobile.dev](https://cloud.mobile.dev).
+##### Text fields (apply directly to the TextField)
+
+```swift
+TextField("", text: $userName)
+    .accessibilityIdentifier("waiting-room-name-field")
+```
+
+> **Important:** Do not apply `.accessibilityIdentifier()` to container views (`Group`, `VStack`, `NavigationView`) — Maestro won't find them. Use the invisible anchor pattern for screens and apply IDs directly to interactive elements.
+
+#### Useful Links
+
+- [Maestro Documentation](https://maestro.mobile.dev)
+- [Maestro CLI Commands](https://maestro.mobile.dev/api-reference/commands)
+- [Maestro Studio (interactive recorder)](https://maestro.mobile.dev/getting-started/maestro-studio)
 
 ## Code style
 

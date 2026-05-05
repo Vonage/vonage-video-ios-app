@@ -1,17 +1,16 @@
 appId: com.vonage.VERA
 ---
-# Flujo alternativo: Tomar screenshot sin lanzar la app
-# (la app debe estar ya iniciada o el script se encargará de lanzarla)
+# E2E Test: Launch App
+# Description: Launch the app and validate the Landing screen is visible
+# Priority: P0
 
-- takeScreenshot: initial-state
+- launchApp:
+    clearState: true
 
-# Esperar animaciones
-- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 5000
 
-# Intentar buscar elementos en la pantalla
 - assertVisible:
-    text: VERA
-    optional: true
+    id: "landing-screen"
 
-# Tomar otra captura
-- takeScreenshot: app-state
+- takeScreenshot: landing-screen
