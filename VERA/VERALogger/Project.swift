@@ -4,9 +4,6 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERALogger",
     options: defaultProjectOptions(),
-    packages: [
-        .cocoaLumberjack
-    ],
     targets: [
         .target(
             name: "VERALogger",
@@ -16,9 +13,6 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERALogger/**"],
             scripts: [.swiftLint(targetName: "VERALogger")],
-            dependencies: [
-                .cocoaLumberjackSwift
-            ],
             settings: createBaseBuildSettings()
         ),
         .target(
@@ -30,7 +24,10 @@ let project = Project(
             sources: ["VERALoggerTests/**"],
             dependencies: [
                 .target(name: "VERALogger"),
-                .cocoaLumberjackSwift,
+                .project(
+                    target: "VERALoggerCocoaLumberjackStrategy",
+                    path: "../VERALoggerCocoaLumberjackStrategy"
+                ),
             ],
             settings: createBaseBuildSettings()
         ),

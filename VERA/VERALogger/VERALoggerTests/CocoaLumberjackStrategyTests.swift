@@ -4,8 +4,9 @@
 
 import Foundation
 import Testing
+import VERALogger
 
-@testable import VERALogger
+@testable import VERALoggerCocoaLumberjackStrategy
 
 @Suite("CocoaLumberjackStrategy Tests", .serialized)
 struct CocoaLumberjackStrategyTests {

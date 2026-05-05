@@ -4,6 +4,7 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import VERALogger
 
 /// A logging strategy that uses CocoaLumberjack for log output.
 ///
@@ -72,8 +73,10 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
     /// Flushes pending log messages for this strategy's logger pipeline.
     ///
     /// This call blocks until the strategy-owned `DDLog` instance has drained its
-    /// queued messages to configured destinations. It is intended for tests that
-    /// need deterministic assertions against file-backed output.
+    /// queued messages to configured destinations.
+    ///
+    /// Intended for deterministic test assertions against file-backed output.
+    /// Production logging paths should not need to call this API.
     internal func flush() {
         ddlog.flushLog()
     }
