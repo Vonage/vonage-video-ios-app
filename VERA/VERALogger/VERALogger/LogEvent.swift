@@ -45,12 +45,50 @@ public struct LogEvent: Sendable {
         self.thread = thread
     }
 
-    /// Returns a copy of this event with optional field overrides.
+    /// Returns a copy of this event with optional field overrides, preserving the current error.
     public func copy(
         level: LogLevel? = nil,
         tag: String? = nil,
         message: String? = nil,
-        error: Error?? = nil,
+        timestamp: Date? = nil,
+        thread: String? = nil
+    ) -> LogEvent {
+        copy(
+            level: level,
+            tag: tag,
+            message: message,
+            error: self.error,
+            timestamp: timestamp,
+            thread: thread
+        )
+    }
+
+    /// Returns a copy of this event with optional field overrides.
+    ///
+    /// Pass `nil` to clear the current error.
+    public func copy(
+        level: LogLevel? = nil,
+        tag: String? = nil,
+        message: String? = nil,
+        error: Error?,
+        timestamp: Date? = nil,
+        thread: String? = nil
+    ) -> LogEvent {
+        makeCopy(
+            level: level,
+            tag: tag,
+            message: message,
+            error: error,
+            timestamp: timestamp,
+            thread: thread
+        )
+    }
+
+    private func makeCopy(
+        level: LogLevel? = nil,
+        tag: String? = nil,
+        message: String? = nil,
+        error: Error?,
         timestamp: Date? = nil,
         thread: String? = nil
     ) -> LogEvent {
@@ -58,7 +96,7 @@ public struct LogEvent: Sendable {
             level: level ?? self.level,
             tag: tag ?? self.tag,
             message: message ?? self.message,
-            error: error ?? self.error,
+            error: error,
             timestamp: timestamp ?? self.timestamp,
             thread: thread ?? self.thread
         )
