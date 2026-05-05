@@ -45,7 +45,7 @@ public struct PublisherSettings: Equatable, Hashable {
         scaleBehavior: VideoScaleBehavior = .fill,
         advancedSettings: PublisherAdvancedSettings? = nil,
         backgroundBlurLevel: BlurLevel? = nil,
-        noiseSuppressionLevel: NoiseSuppressionState? = nil
+        noiseSuppressionState: NoiseSuppressionState? = nil
     ) {
         self.username = username
         self.publishAudio = publishAudio
@@ -53,7 +53,7 @@ public struct PublisherSettings: Equatable, Hashable {
         self.scaleBehavior = scaleBehavior
         self.advancedSettings = advancedSettings
         self.backgroundBlurLevel = backgroundBlurLevel
-        self.noiseSuppressionState = noiseSuppressionLevel
+        self.noiseSuppressionState = noiseSuppressionState
     }
 
     public func hash(into hasher: inout Hasher) {

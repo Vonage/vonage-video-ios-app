@@ -14,6 +14,31 @@ Features (chat, captions, reactions, archiving, screen share, etc.) are enabled 
 - Xcode 26
 - Swift 5.9
 
+## Installation
+
+### Swift Package Manager
+
+Add the package to your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/Vonage/vonage-video-ios-app", from: "1.0.0")
+]
+```
+
+Then add the product to your target:
+
+```swift
+.target(
+    name: "YourApp",
+    dependencies: [
+        .product(name: "VERAMeetingRoomSDK", package: "vonage-video-ios-app")
+    ]
+)
+```
+
+Or in Xcode: **File → Add Package Dependencies…**, enter the repository URL, and select the `VERAMeetingRoomSDK` library product.
+
 ## Quick Start
 
 ```swift

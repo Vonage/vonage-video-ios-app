@@ -12,9 +12,11 @@ import VERADomain
 ///
 /// ## Usage
 /// ```swift
-/// MeetingRoomBuilder()
-///     .onAction { action in
-///         switch action {
+/// MeetingRoomBuilder(
+/// baseURL: baseURL,
+/// roomName: roomName)
+/// .onAction { action in
+///     switch action {
 ///         case .callDidEnd:
 ///             coordinator.go(to: .goodbye)
 ///         case .goBack(let room):

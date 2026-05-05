@@ -105,7 +105,7 @@ final class BottomBarButtonsAssembler {
     private func makeChatButton() -> BottomBarButton {
         let viewModel = container.chatBadgeButtonViewModel
         return .init(
-            label: "Chat",
+            label: String(localized: "Chat"),
             image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,
             onTap: { [weak self] in
                 viewModel.chatDidOpen()

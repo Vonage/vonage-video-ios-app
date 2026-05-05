@@ -10,6 +10,10 @@ final class VERAReactionsBundle {}
 extension Bundle {
     /// The bundle containing VERAReactions resources
     public static var veraReactions: Bundle {
-        Bundle(for: VERAReactionsBundle.self)
+        #if SWIFT_PACKAGE
+            return .module
+        #else
+            return Bundle(for: VERAReactionsBundle.self)
+        #endif
     }
 }
