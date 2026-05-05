@@ -17,7 +17,7 @@ struct OSLogStrategyTests {
             (.debug, .debug),
             (.info, .info),
             (.warn, .warning),
-            (.error, .error)
+            (.error, .error),
         ]
     )
     func routesLogLevelToExpectedOSMethod(level: LogLevel, expectedCall: OSLoggerSpy.Call) {
@@ -41,7 +41,7 @@ struct OSLogStrategyTests {
                 level: .error,
                 tag: "Tag",
                 message: "Message",
-                error: TestError()
+                error: TestError(),
             )
         )
 

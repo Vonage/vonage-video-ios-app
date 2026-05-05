@@ -37,9 +37,31 @@ struct VonageLoggerTests {
         return (logger, strategy)
     }
 
-    /// Waits briefly for fire-and-forget Tasks to be processed by the actor.
-    private func waitForDelivery() async throws {
-        try await Task.sleep(for: .milliseconds(100))
+    /// Polls for asynchronously-delivered log events until the expected count is reached.
+    ///
+    /// The helper yields to the scheduler between checks and records a test issue if
+    /// the expected count is not observed within the timeout.
+    ///
+    /// - Parameters:
+    ///   - expectedCount: Minimum number of events expected in the strategy.
+    ///   - strategy: Strategy collecting emitted log events.
+    ///   - timeout: Maximum wait duration before recording a test issue.
+    private func waitForEvents(
+        _ expectedCount: Int,
+        in strategy: CollectingStrategy,
+        timeout: Duration = .seconds(1)
+    ) async {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: timeout)
+
+        while clock.now < deadline {
+            if strategy.events.count >= expectedCount {
+                return
+            }
+            await Task.yield()
+        }
+
+        Issue.record("Timed out waiting for \(expectedCount) log event(s)")
     }
 
     // MARK: - Builder Tests
@@ -49,7 +71,7 @@ struct VonageLoggerTests {
         let (logger, strategy) = makeSUT()
 
         logger.log(level: .debug, tag: "T", message: "builder test")
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy)
 
         #expect(strategy.events.count == 1)
     }
@@ -71,7 +93,7 @@ struct VonageLoggerTests {
         let (logger, strategy) = makeSUT()
 
         logger.log(level: level, tag: "T", message: msg)
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy)
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].level == level)
@@ -86,7 +108,7 @@ struct VonageLoggerTests {
 
         let error = NSError(domain: "test", code: 42)
         logger.log(level: .error, tag: "T", message: "failed", error: error)
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy)
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].error != nil)
@@ -98,7 +120,7 @@ struct VonageLoggerTests {
         let (logger, strategy) = makeSUT()
 
         logger.log(level: .info, tag: "T", message: "heartbeat")
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy)
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].error == nil)
@@ -112,7 +134,7 @@ struct VonageLoggerTests {
 
         logger.log(level: .info, tag: "TagA", message: "first")
         logger.log(level: .info, tag: "TagB", message: "second")
-        try await waitForDelivery()
+        await waitForEvents(2, in: strategy)
 
         #expect(strategy.events.count == 2)
         #expect(strategy.events[0].tag == "TagA")
@@ -127,7 +149,7 @@ struct VonageLoggerTests {
 
         let before = Date()
         logger.log(level: .debug, tag: "T", message: "timestamped")
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy)
         let after = Date()
 
         #expect(strategy.events.count == 1)
@@ -140,7 +162,7 @@ struct VonageLoggerTests {
     func noStrategiesDoesNotCrash() async throws {
         let logger = VonageLogger.Builder().build()
         logger.log(level: .debug, tag: "T", message: "nothing listening")
-        try await waitForDelivery()
+        await Task.yield()
     }
 
     @Test("Multiple strategies all receive events")
@@ -153,7 +175,8 @@ struct VonageLoggerTests {
             .build()
 
         logger.log(level: .info, tag: "T", message: "multi")
-        try await waitForDelivery()
+        await waitForEvents(1, in: strategy1)
+        await waitForEvents(1, in: strategy2)
 
         #expect(strategy1.events.count == 1)
         #expect(strategy2.events.count == 1)

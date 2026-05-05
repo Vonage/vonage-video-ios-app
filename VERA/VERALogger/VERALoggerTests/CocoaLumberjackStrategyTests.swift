@@ -2,7 +2,6 @@
 //  Created by Vonage on 8/4/26.
 //
 
-import CocoaLumberjackSwift
 import Foundation
 import Testing
 
@@ -27,14 +26,12 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Default init adds OS logger without crash")
     func defaultInitAddsOSLogger() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy()
         strategy.log(LogEvent(level: .info, tag: "Test", message: "default init"))
     }
 
     @Test("Init with configureDefaults false does not crash")
     func initWithConfigureDefaultsFalse() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy(configureDefaults: false)
         strategy.log(LogEvent(level: .debug, tag: "Test", message: "no defaults"))
     }
@@ -43,7 +40,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Builder with OS logger does not crash")
     func builderWithOSLogger() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
@@ -53,7 +49,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Builder with file logger creates log files")
     func builderWithFileLogger() {
-        defer { DDLog.removeAllLoggers() }
         let tempDir = makeTempDir(name: "vera-dd-test")
         defer { cleanup(tempDir) }
 
@@ -62,14 +57,13 @@ struct CocoaLumberjackStrategyTests {
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Builder", message: "file logger test"))
-        DDLog.flushLog()
+        strategy.flush()
 
         #expect(!strategy.logFilePaths.isEmpty)
     }
 
     @Test("Builder with console logger does not crash")
     func builderWithConsoleLogger() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withConsoleLogger()
             .build()
@@ -79,7 +73,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Builder with multiple loggers all work together")
     func builderWithMultipleLoggers() {
-        defer { DDLog.removeAllLoggers() }
         let tempDir = makeTempDir(name: "vera-dd-multi")
         defer { cleanup(tempDir) }
 
@@ -90,14 +83,13 @@ struct CocoaLumberjackStrategyTests {
             .build()
 
         strategy.log(LogEvent(level: .warn, tag: "Multi", message: "all loggers"))
-        DDLog.flushLog()
+        strategy.flush()
 
         #expect(!strategy.logFilePaths.isEmpty)
     }
 
     @Test("Builder with custom formatter does not crash")
     func builderWithCustomFormatter() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
@@ -109,7 +101,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Log file paths are empty without file logger")
     func logFilePathsEmptyWithoutFileLogger() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
@@ -120,7 +111,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("Log file paths return paths with file logger")
     func logFilePathsReturnPathsWithFileLogger() {
-        defer { DDLog.removeAllLoggers() }
         let tempDir = makeTempDir(name: "vera-dd-paths")
         defer { cleanup(tempDir) }
 
@@ -129,7 +119,7 @@ struct CocoaLumberjackStrategyTests {
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Paths", message: "test"))
-        DDLog.flushLog()
+        strategy.flush()
 
         #expect(!strategy.logFilePaths.isEmpty)
         #expect(strategy.logFilePaths.count == strategy.logFileURLs.count)
@@ -143,7 +133,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("osOnly factory creates strategy without file logging")
     func osOnlyFactory() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.osOnly()
         strategy.log(LogEvent(level: .info, tag: "Factory", message: "os only"))
         #expect(strategy.logFilePaths.isEmpty)
@@ -151,7 +140,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("withFileLogging factory creates strategy with file logging")
     func withFileLoggingFactory() {
-        defer { DDLog.removeAllLoggers() }
         let tempDir = makeTempDir(name: "vera-dd-factory")
         defer { cleanup(tempDir) }
 
@@ -161,14 +149,13 @@ struct CocoaLumberjackStrategyTests {
         )
 
         strategy.log(LogEvent(level: .error, tag: "Factory", message: "file factory"))
-        DDLog.flushLog()
+        strategy.flush()
 
         #expect(!strategy.logFilePaths.isEmpty)
     }
 
     @Test("full factory creates strategy without crash")
     func fullFactory() {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.full()
         strategy.log(LogEvent(level: .info, tag: "Factory", message: "full factory"))
     }
@@ -177,7 +164,6 @@ struct CocoaLumberjackStrategyTests {
 
     @Test("File logger respects custom rolling configuration")
     func fileLoggerRollingFrequency() {
-        defer { DDLog.removeAllLoggers() }
         let tempDir = makeTempDir(name: "vera-dd-rolling")
         defer { cleanup(tempDir) }
 
@@ -191,7 +177,7 @@ struct CocoaLumberjackStrategyTests {
             .build()
 
         strategy.log(LogEvent(level: .info, tag: "Config", message: "custom rolling"))
-        DDLog.flushLog()
+        strategy.flush()
 
         #expect(!strategy.logFilePaths.isEmpty)
     }
@@ -203,7 +189,6 @@ struct CocoaLumberjackStrategyTests {
         arguments: [LogLevel.verbose, .debug, .info, .warn, .error]
     )
     func allLogLevelsWork(level: LogLevel) {
-        defer { DDLog.removeAllLoggers() }
         let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()

@@ -30,6 +30,7 @@ import Foundation
 public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable {
 
     private let fileLogger: DDFileLogger?
+    private let ddlog: DDLog
 
     // MARK: - Backward-Compatible Init
 
@@ -38,14 +39,16 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
     /// - Parameter configureDefaults: If `true`, automatically adds `DDOSLogger` on first use.
     ///   Set to `false` if you configure CocoaLumberjack loggers yourself.
     public convenience init(configureDefaults: Bool = true) {
-        self.init(fileLogger: nil)
+        let ddlog = DDLog()
+        self.init(fileLogger: nil, ddlog: ddlog)
         if configureDefaults {
-            DDLog.add(DDOSLogger.sharedInstance)
+            ddlog.add(DDOSLogger.sharedInstance)
         }
     }
 
-    private init(fileLogger: DDFileLogger?) {
+    private init(fileLogger: DDFileLogger?, ddlog: DDLog) {
         self.fileLogger = fileLogger
+        self.ddlog = ddlog
     }
 
     // MARK: - LoggerStrategy
@@ -54,16 +57,25 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
         let msg = formatMessage(event)
         switch event.level {
         case .verbose:
-            DDLogVerbose("\(msg)")
+            DDLogVerbose("\(msg)", ddlog: ddlog)
         case .debug:
-            DDLogDebug("\(msg)")
+            DDLogDebug("\(msg)", ddlog: ddlog)
         case .info:
-            DDLogInfo("\(msg)")
+            DDLogInfo("\(msg)", ddlog: ddlog)
         case .warn:
-            DDLogWarn("\(msg)")
+            DDLogWarn("\(msg)", ddlog: ddlog)
         case .error:
-            DDLogError("\(msg)")
+            DDLogError("\(msg)", ddlog: ddlog)
         }
+    }
+
+    /// Flushes pending log messages for this strategy's logger pipeline.
+    ///
+    /// This call blocks until the strategy-owned `DDLog` instance has drained its
+    /// queued messages to configured destinations. It is intended for tests that
+    /// need deterministic assertions against file-backed output.
+    internal func flush() {
+        ddlog.flushLog()
     }
 
     private func formatMessage(_ event: LogEvent) -> String {
@@ -228,6 +240,7 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
 
         /// Builds the `CocoaLumberjackStrategy` and registers all configured loggers with `DDLog`.
         public func build() -> CocoaLumberjackStrategy {
+            let ddlog = DDLog()
             var fileLogger: DDFileLogger?
 
             if addOSLogger {
@@ -235,7 +248,7 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
                 if let formatter = osFormatter {
                     osLogger.logFormatter = formatter
                 }
-                DDLog.add(osLogger)
+                ddlog.add(osLogger)
             }
 
             if let config = fileLoggerConfig {
@@ -252,7 +265,7 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
                 ddFileLogger.maximumFileSize = config.maxFileSize
                 ddFileLogger.logFormatter = config.formatter
 
-                DDLog.add(ddFileLogger)
+                ddlog.add(ddFileLogger)
                 fileLogger = ddFileLogger
             }
 
@@ -261,11 +274,11 @@ public final class CocoaLumberjackStrategy: LoggerStrategy, @unchecked Sendable 
                     if let formatter = consoleFormatter {
                         ttyLogger.logFormatter = formatter
                     }
-                    DDLog.add(ttyLogger)
+                    ddlog.add(ttyLogger)
                 }
             }
 
-            return CocoaLumberjackStrategy(fileLogger: fileLogger)
+            return CocoaLumberjackStrategy(fileLogger: fileLogger, ddlog: ddlog)
         }
     }
 }
