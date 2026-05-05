@@ -8,7 +8,7 @@ import Testing
 
 @testable import VERALogger
 
-@Suite("CocoaLumberjackStrategy Tests")
+@Suite("CocoaLumberjackStrategy Tests", .serialized)
 struct CocoaLumberjackStrategyTests {
 
     // MARK: - Test Helpers
