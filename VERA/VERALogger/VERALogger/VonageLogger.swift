@@ -17,7 +17,7 @@ import Foundation
 ///     .build()
 ///
 /// logger.debug("MyFeature", "User logged in")
-/// logger.error("MyFeature", "Something failed", error)
+/// logger.error("MyFeature", "Something failed", error: error)
 /// ```
 public final class VonageLogger: Sendable {
 
