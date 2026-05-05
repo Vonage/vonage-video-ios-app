@@ -82,7 +82,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
         do {
             try ensureFileExists()
-            try rotateIfNeeded()
+            try rotateIfNeeded(appendingByteCount: UInt64(data.count))
 
             let handle = try FileHandle(forWritingTo: fileURL)
             defer { try? handle.close() }
@@ -103,10 +103,11 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
         }
     }
 
-    private func rotateIfNeeded() throws {
+    private func rotateIfNeeded(appendingByteCount: UInt64) throws {
         let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
         let fileSize = attributes[.size] as? UInt64 ?? 0
-        if fileSize > maxFileSize {
+        let (updatedSize, didOverflow) = fileSize.addingReportingOverflow(appendingByteCount)
+        if didOverflow || updatedSize > maxFileSize {
             try Data().write(to: fileURL)
         }
     }

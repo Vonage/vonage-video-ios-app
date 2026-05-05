@@ -154,6 +154,23 @@ struct FileLogStrategyTests {
         #expect(content.contains("new entry"))
     }
 
+    @Test("Rotates when append would exceed max size")
+    func rotatesWhenAppendWouldExceedMaxSize() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy(fileURL: logFileURL, maxFileSize: 200)
+
+        let existingContent = String(repeating: "x", count: 180)
+        try existingContent.write(to: logFileURL, atomically: true, encoding: .utf8)
+
+        strategy.log(LogEvent(level: .info, tag: "T", message: "new entry"))
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        #expect(content.contains("new entry"))
+        #expect(!content.contains(existingContent))
+        #expect(content.utf8.count <= 200)
+    }
+
     // MARK: - Constants
 
     @Test("Default constants have expected values")
