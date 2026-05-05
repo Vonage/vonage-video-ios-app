@@ -57,6 +57,21 @@ if [ -z "$JAVA_HOME" ]; then
     fi
 fi
 
+# Validate Java major version is 17 regardless of how JAVA_HOME was set
+JAVA_MAJOR_VERSION=$(java -version 2>&1 | head -1 | sed 's/.*"\([0-9]*\)\..*/\1/')
+if [ "$JAVA_MAJOR_VERSION" != "17" ]; then
+    echo -e "${YELLOW}⚠️  Java $JAVA_MAJOR_VERSION detected but Java 17 is required${NC}"
+    if /usr/libexec/java_home -v 17 &> /dev/null; then
+        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+        echo -e "${GREEN}✓ Switched JAVA_HOME to Java 17: $JAVA_HOME${NC}"
+    else
+        echo -e "${YELLOW}📥 Java 17 not found, installing...${NC}"
+        brew install openjdk@17
+        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+        echo -e "${GREEN}✓ Installed and set JAVA_HOME: $JAVA_HOME${NC}"
+    fi
+fi
+
 echo -e "${GREEN}✓ Java $(java -version 2>&1 | grep version | cut -d'"' -f2) detected${NC}"
 
 # ── 3. Maestro ───────────────────────────────────────────────────────────────

@@ -217,9 +217,7 @@ else
     
     # Generate workspace with Tuist
     echo -e "${BLUE}🏗️  Generating Xcode workspace with Tuist...${NC}"
-    tuist generate --no-open
-    
-    if [ $? -ne 0 ]; then
+    if ! tuist generate --no-open; then
         echo -e "${RED}❌ Tuist generate failed${NC}"
         cd ..
         exit 1
@@ -249,7 +247,7 @@ if [ -z "$APP_PATH" ]; then
     fi
     
     # Build
-    xcodebuild clean build \
+    if ! xcodebuild clean build \
       -workspace "$WORKSPACE" \
       -scheme "$APP_SCHEME" \
       -destination "platform=iOS Simulator,name=$DEVICE" \
@@ -258,12 +256,8 @@ if [ -z "$APP_PATH" ]; then
       CODE_SIGNING_REQUIRED=NO \
       COMPILER_INDEX_STORE_ENABLE=NO \
       RUN_SWIFTLINT=NO \
-      -quiet
-    
-    BUILD_RESULT=$?
-    
-    if [ $BUILD_RESULT -ne 0 ]; then
-        echo -e "${RED}❌ Build failed (exit code: $BUILD_RESULT)${NC}"
+      -quiet; then
+        echo -e "${RED}❌ Build failed${NC}"
         echo -e "${YELLOW}💡 Try cleaning and regenerating:${NC}"
         echo -e "   cd VERA && tuist clean && tuist generate && cd .."
         echo -e "   rm -rf $BUILD_DIR"
@@ -332,10 +326,7 @@ xcrun simctl terminate "$SIMULATOR_ID" "com.vonage.VERA" 2>/dev/null || true
 
 # Install app using UUID
 echo -e "${YELLOW}📲 Installing VERA app on simulator...${NC}"
-INSTALL_OUTPUT=$(xcrun simctl install "$SIMULATOR_ID" "$APP_PATH" 2>&1)
-INSTALL_RESULT=$?
-
-if [ $INSTALL_RESULT -ne 0 ]; then
+if ! INSTALL_OUTPUT=$(xcrun simctl install "$SIMULATOR_ID" "$APP_PATH" 2>&1); then
     echo -e "${RED}❌ Failed to install app: $INSTALL_OUTPUT${NC}"
     echo -e "${YELLOW}💡 Try: xcrun simctl shutdown \"$SIMULATOR_ID\" && xcrun simctl erase \"$SIMULATOR_ID\"${NC}"
     exit 1
@@ -351,9 +342,11 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-maestro test .maestro/flows
-
-TEST_RESULT=$?
+if maestro test .maestro/flows; then
+    TEST_RESULT=0
+else
+    TEST_RESULT=$?
+fi
 
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
