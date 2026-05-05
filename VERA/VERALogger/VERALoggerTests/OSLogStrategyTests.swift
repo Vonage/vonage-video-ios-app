@@ -20,7 +20,7 @@ struct OSLogStrategyTests {
             (.error, .error),
         ]
     )
-    func routesLogLevelToExpectedOSMethod(level: LogLevel, expectedCall: OSLoggerSpy.Call) {
+    fileprivate func routesLogLevelToExpectedOSMethod(level: LogLevel, expectedCall: OSLoggerSpy.Call) {
         let spy = OSLoggerSpy()
         let sut = OSLogStrategy(logger: spy)
 
