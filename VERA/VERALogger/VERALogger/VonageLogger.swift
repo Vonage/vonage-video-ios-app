@@ -6,6 +6,8 @@ import Foundation
 
 /// A logger facade that provides convenience logging methods and a builder for configuration.
 ///
+/// Log methods are synchronous from the caller's perspective. Requests are
+/// serialized internally by a `LoggerComposite` actor.
 ///
 /// ```swift
 /// let logger = VonageLogger.Builder()
@@ -48,15 +50,12 @@ public final class VonageLogger: Sendable {
     }
 
     /// Logs an event with the given level, tag, message, and optional error.
+    ///
+    /// The call returns immediately; the event is dispatched to the
+    /// `LoggerComposite` actor for serialized processing.
     public func log(level: LogLevel, tag: String, message: String, error: Error? = nil) {
         let event = LogEvent(level: level, tag: tag, message: message, error: error)
-        composite.log(event)
-    }
-
-    /// Logs an event synchronously. Use for critical errors where order matters.
-    public func logSync(level: LogLevel, tag: String, message: String, error: Error? = nil) {
-        let event = LogEvent(level: level, tag: tag, message: message, error: error)
-        composite.logSync(event)
+        Task { await composite.log(event) }
     }
 
     // MARK: - Builder

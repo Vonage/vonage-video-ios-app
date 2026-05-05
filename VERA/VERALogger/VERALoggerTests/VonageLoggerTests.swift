@@ -37,13 +37,19 @@ struct VonageLoggerTests {
         return (logger, strategy)
     }
 
+    /// Waits briefly for fire-and-forget Tasks to be processed by the actor.
+    private func waitForDelivery() async throws {
+        try await Task.sleep(for: .milliseconds(100))
+    }
+
     // MARK: - Builder Tests
 
     @Test("Builder creates logger with strategies")
-    func builderCreatesLoggerWithStrategies() {
+    func builderCreatesLoggerWithStrategies() async throws {
         let (logger, strategy) = makeSUT()
 
-        logger.logSync(level: .debug, tag: "T", message: "builder test")
+        logger.log(level: .debug, tag: "T", message: "builder test")
+        try await waitForDelivery()
 
         #expect(strategy.events.count == 1)
     }
@@ -60,11 +66,12 @@ struct VonageLoggerTests {
             (LogLevel.error, "e"),
         ]
     )
-    func levelMethodsProduceCorrectLevels(testCase: (LogLevel, String)) {
+    func levelMethodsProduceCorrectLevels(testCase: (LogLevel, String)) async throws {
         let (level, msg) = testCase
         let (logger, strategy) = makeSUT()
 
-        logger.logSync(level: level, tag: "T", message: msg)
+        logger.log(level: level, tag: "T", message: msg)
+        try await waitForDelivery()
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].level == level)
@@ -74,11 +81,12 @@ struct VonageLoggerTests {
     // MARK: - Error Handling Tests
 
     @Test("Error is passed through to strategy")
-    func errorIsPassed() {
+    func errorIsPassed() async throws {
         let (logger, strategy) = makeSUT()
 
         let error = NSError(domain: "test", code: 42)
-        logger.logSync(level: .error, tag: "T", message: "failed", error: error)
+        logger.log(level: .error, tag: "T", message: "failed", error: error)
+        try await waitForDelivery()
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].error != nil)
@@ -86,10 +94,11 @@ struct VonageLoggerTests {
     }
 
     @Test("Message without error has nil error")
-    func messageWithoutErrorHasNilError() {
+    func messageWithoutErrorHasNilError() async throws {
         let (logger, strategy) = makeSUT()
 
-        logger.logSync(level: .info, tag: "T", message: "heartbeat")
+        logger.log(level: .info, tag: "T", message: "heartbeat")
+        try await waitForDelivery()
 
         #expect(strategy.events.count == 1)
         #expect(strategy.events[0].error == nil)
@@ -98,11 +107,12 @@ struct VonageLoggerTests {
     // MARK: - Tag Tests
 
     @Test("Tag is set per call")
-    func tagIsSetPerCall() {
+    func tagIsSetPerCall() async throws {
         let (logger, strategy) = makeSUT()
 
-        logger.logSync(level: .info, tag: "TagA", message: "first")
-        logger.logSync(level: .info, tag: "TagB", message: "second")
+        logger.log(level: .info, tag: "TagA", message: "first")
+        logger.log(level: .info, tag: "TagB", message: "second")
+        try await waitForDelivery()
 
         #expect(strategy.events.count == 2)
         #expect(strategy.events[0].tag == "TagA")
@@ -112,11 +122,12 @@ struct VonageLoggerTests {
     // MARK: - Event Metadata Tests
 
     @Test("Event contains timestamp and thread")
-    func eventContainsTimestampAndThread() {
+    func eventContainsTimestampAndThread() async throws {
         let (logger, strategy) = makeSUT()
 
         let before = Date()
-        logger.logSync(level: .debug, tag: "T", message: "timestamped")
+        logger.log(level: .debug, tag: "T", message: "timestamped")
+        try await waitForDelivery()
         let after = Date()
 
         #expect(strategy.events.count == 1)
@@ -126,13 +137,14 @@ struct VonageLoggerTests {
     }
 
     @Test("No strategies does not crash")
-    func noStrategiesDoesNotCrash() {
+    func noStrategiesDoesNotCrash() async throws {
         let logger = VonageLogger.Builder().build()
-        logger.logSync(level: .debug, tag: "T", message: "nothing listening")
+        logger.log(level: .debug, tag: "T", message: "nothing listening")
+        try await waitForDelivery()
     }
 
     @Test("Multiple strategies all receive events")
-    func multipleStrategiesAllReceiveEvents() {
+    func multipleStrategiesAllReceiveEvents() async throws {
         let strategy1 = CollectingStrategy()
         let strategy2 = CollectingStrategy()
         let logger = VonageLogger.Builder()
@@ -140,7 +152,8 @@ struct VonageLoggerTests {
             .addStrategy(strategy2)
             .build()
 
-        logger.logSync(level: .info, tag: "T", message: "multi")
+        logger.log(level: .info, tag: "T", message: "multi")
+        try await waitForDelivery()
 
         #expect(strategy1.events.count == 1)
         #expect(strategy2.events.count == 1)

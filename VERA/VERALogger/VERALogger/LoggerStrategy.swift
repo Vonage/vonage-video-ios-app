@@ -10,8 +10,8 @@ import Foundation
 /// Strategies can optionally filter events before processing them via `shouldLog(_:)`.
 ///
 /// ## Thread Safety
-/// Implementations must be safe to call from any thread. The `LoggerComposite` dispatches
-/// on a serial queue, but strategies should still avoid internal data races.
+/// Implementations must be safe to call from any thread. The `LoggerComposite` actor
+/// serializes calls, but strategies should still avoid internal data races.
 public protocol LoggerStrategy: Sendable {
 
     /// Determines whether this strategy should process the given event.
