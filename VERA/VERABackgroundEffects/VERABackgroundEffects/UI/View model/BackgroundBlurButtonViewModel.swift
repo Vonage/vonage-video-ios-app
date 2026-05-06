@@ -15,12 +15,18 @@ public final class BackgroundBlurButtonViewModel: ObservableObject {
     }
 
     public func onTap() {
+        let newBlurLevel: BlurLevel
         switch currentBlurLevel {
-        case .none: currentBlurLevel = .low
-        case .low: currentBlurLevel = .high
-        case .high: currentBlurLevel = .none
+        case .none: newBlurLevel = .low
+        case .low: newBlurLevel = .high
+        case .high: newBlurLevel = .none
         }
 
+        update(blurLevel: newBlurLevel)
+    }
+
+    public func update(blurLevel: BlurLevel) {
+        currentBlurLevel = blurLevel
         do {
             let publisher = try getCurrentPublisher()
             try publisher.setBackgroundBlur(blurLevel: currentBlurLevel)

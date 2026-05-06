@@ -18,27 +18,26 @@ public final class JoinRoomUseCase {
 
     private let userRepository: UserRepository
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
-    private let publisherRepository: PublisherRepository
     private let advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
 
     public init(
         userRepository: UserRepository,
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
-        publisherRepository: PublisherRepository,
         advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
     ) {
         self.userRepository = userRepository
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
-        self.publisherRepository = publisherRepository
         self.advancedSettingsUseCase = advancedSettingsUseCase
     }
 
-    public func callAsFunction(_ request: JoinRoomRequest) async throws {
+    public func callAsFunction(
+        _ request: JoinRoomRequest
+    ) async throws -> PublisherSettings {
         let user = try await userRepository.get() ?? User(name: "")
         try await userRepository.save(user.updateName(request.userName))
         let advancedSettigs = await advancedSettingsUseCase()
 
-        try await MainActor.run {
+        return try await MainActor.run {
             let currentPublisher = try cameraPreviewProviderRepository.getPublisher()
 
             let settings = PublisherSettings(
@@ -48,16 +47,9 @@ public final class JoinRoomUseCase {
                 advancedSettings: advancedSettigs
             )
 
-            currentPublisher.cleanUp()
-            try publisherRepository.recreatePublisher(settings)
-
-            let videoTransformers = currentPublisher.videoTransformers
-            let audioTransformers = currentPublisher.audioTransformers
-            let newPublisher = try publisherRepository.getPublisher()
-            newPublisher.setVideoTransformers(videoTransformers)
-            newPublisher.setAudioTransformers(audioTransformers)
-
             cameraPreviewProviderRepository.resetPublisher()
+
+            return settings
         }
     }
 }

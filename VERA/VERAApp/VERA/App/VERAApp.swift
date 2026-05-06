@@ -9,11 +9,8 @@ import VERACommonUI
 import VERACore
 import VERADomain
 import VERAMeetingRoom
+import VERAMeetingRoomSDK
 import VERAVonage
-
-#if CHAT_ENABLED
-    import VERAChat
-#endif
 
 #if ARCHIVING_ENABLED
     import VERAArchiving
@@ -23,14 +20,6 @@ import VERAVonage
     import VERABackgroundEffects
 #endif
 
-#if CAPTIONS_ENABLED
-    import VERACaptions
-#endif
-
-#if REACTIONS_ENABLED
-    import VERAReactions
-#endif
-
 #if SETTINGS_ENABLED
     import VERASettings
 #endif
@@ -38,22 +27,6 @@ import VERAVonage
 #if AUDIOEFFECTS_ENABLED
     import VERAAudioEffects
 #endif
-
-// MARK: - Constants
-
-/// Layout constants for the VERA application.
-///
-/// Contains computed values that depend on other module constants
-/// to ensure consistent spacing and positioning across the app.
-private enum VERAAppConstants {
-    /// Padding for overlays positioned above the bottom bar.
-    ///
-    /// Calculated as the total bottom bar height plus a small gap
-    /// to visually separate overlay content from the bar.
-    static var overlayBottomPadding: CGFloat {
-        BottomBarConstants.totalHeight + 4
-    }
-}
 
 @main
 struct VERAApp: App {
@@ -66,24 +39,7 @@ struct VERAApp: App {
             navigator: navigationCoordinator)
     }
 
-    #if CAPTIONS_ENABLED
-        private var captionsStatePublisher: AnyPublisher<CaptionsState, Never> {
-            navigationCoordinator.captionsButtonViewModel?.$state
-                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
-        }
-
-        private var captionsToastPublisher: AnyPublisher<ToastItem, Never> {
-            navigationCoordinator.captionsButtonViewModel?.$toast
-                .compactMap { $0 }
-                .eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()
-        }
-    #endif
-
     @State private var previousPath = NavigationPath()
-    @State private var showChat = false
-    @State private var showPickerView = false
-    @State private var showCaptions = false
-    @State private var showSettings = false
 
     var body: some Scene {
         WindowGroup {
@@ -109,8 +65,8 @@ struct VERAApp: App {
                     }
             }
             .fullScreenCover(isPresented: $navigationCoordinator.isInMeeting) {
-                if let currentRoom = navigationCoordinator.currentMeetingRoom {
-                    makeMeetingRoom(roomName: currentRoom)
+                if let newRoomRequest = navigationCoordinator.currentMeetingRoomRequest {
+                    makeMeetingRoom(request: newRoomRequest)
                         .onDisappear {
                             dependencyContainer.publisherRepository.resetPublisher()
                             #if ARCHIVING_ENABLED
@@ -120,57 +76,6 @@ struct VERAApp: App {
                             #endif
                         }
                         .alert(item: $navigationCoordinator.alertItem) { $0.view }
-
-                        #if CHAT_ENABLED
-                            .sheet(
-                                isPresented: $showChat,
-                                onDismiss: {
-                                    dependencyContainer.chatBadgeButtonViewModel.chatDidClose()
-                                }
-                            ) {
-                                makeChatView()
-                            }
-                        #endif
-
-                        #if REACTIONS_ENABLED
-                            .dismissibleOverlay(
-                                isPresented: $showPickerView,
-                                alignment: .bottom,
-                                edgePadding: VERAAppConstants.overlayBottomPadding
-                            ) {
-                                makePickerView()
-                            }
-                            .overlay {
-                                makeFloatingEmojisOverlay()
-                            }
-                        #endif
-
-                        #if CAPTIONS_ENABLED
-                            .onReceive(captionsStatePublisher) { state in
-                                showCaptions = state.captionsEnabled
-                            }
-                            .onReceive(captionsToastPublisher) { toast in
-                                navigationCoordinator.meetingRoomViewModel?.toast = toast
-                            }
-                            .dismissibleOverlay(
-                                isPresented: $showCaptions,
-                                alignment: .bottom,
-                                edgePadding: VERAAppConstants.overlayBottomPadding,
-                                allowsHitTesting: false
-                            ) {
-                                makeCaptionsView()
-                            }
-                        #endif
-
-                        #if SETTINGS_ENABLED
-                            .sheet(isPresented: $showSettings) {
-                                settingsFactory.makeMeetingRoomSettingsView()
-                                .presentationDetents([.large])
-                            }
-                            .overlay {
-                                makeStatsOverlay()
-                            }
-                        #endif
                 }
             }
             .environmentObject(navigationCoordinator)
@@ -186,12 +91,7 @@ struct VERAApp: App {
 
     var landingPageFactory: LandingPageFactory { dependencyContainer.landingPageFactory }
     var waitingRoomFactory: WaitingRoomFactory { dependencyContainer.waitingRoomFactory }
-    var meetingRoomFactory: MeetingRoomFactory { dependencyContainer.meetingRoomFactory }
     var goodByePageFactory: GoodByePageFactory { dependencyContainer.goodByePageFactory }
-
-    #if CHAT_ENABLED
-        var chatFactory: ChatFactory { dependencyContainer.chatFactory }
-    #endif
 
     #if ARCHIVING_ENABLED
         var archiveFactory: ArchivingFactory { dependencyContainer.archivingFactory }
@@ -199,10 +99,6 @@ struct VERAApp: App {
 
     #if BACKGROUND_EFFECTS_ENABLED
         var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
-    #endif
-
-    #if CAPTIONS_ENABLED
-        var captionsFactory: CaptionsFactory { dependencyContainer.captionsFactory }
     #endif
 
     #if SETTINGS_ENABLED
@@ -263,11 +159,13 @@ struct VERAApp: App {
             )
             navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
-            let view = backgroundBlurFactory.makeBlurButton(
-                viewModel: navigationCoordinator.backgroundBlurButtonViewModel!
-            )
+            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
+                let view = backgroundBlurFactory.makeBlurButton(
+                    viewModel: backgroundBlurButtonViewModel
+                )
 
-            buttons.append(ViewHolder(id: "Blur", content: { view }))
+                buttons.append(ViewHolder(id: "Blur", content: { view }))
+            }
         #endif
 
         #if AUDIOEFFECTS_ENABLED
@@ -290,161 +188,62 @@ struct VERAApp: App {
         return buttons
     }
 
-    private func makeMeetingRoom(roomName: String) -> some View {
-        let viewModel: MeetingRoomViewModel
-
-        if let existingViewModel = navigationCoordinator.meetingRoomViewModel,
-            existingViewModel.roomName == roomName
+    /// Creates the meeting room using the SDK builder, replacing ~200 lines
+    /// of manual dependency wiring, plugin registration, and overlay composition.
+    private func makeMeetingRoom(request: NewRoomRequest) -> some View {
+        // Reuse existing SDK-built view if available for the same room
+        if let existing = navigationCoordinator.meetingRoomPrebuilt,
+            existing.viewModel.roomName == request.roomName
         {
-            viewModel = existingViewModel
-        } else {
-            #if BACKGROUND_EFFECTS_ENABLED
-                // Copy the current blur level from the waiting room
-                // and apply it to the meeting room blur view model
-                // the publisher repositories are different
-                let (_, meetingRoomBlurViewModel) = backgroundBlurFactory.makeBlurButton(
-                    getCurrentPublisher: dependencyContainer.publisherRepository.getPublisher
-                )
-
-                if let blurViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
-                    meetingRoomBlurViewModel.currentBlurLevel = blurViewModel.currentBlurLevel
+            return existing.view
+                .onDisappear {
+                    navigationCoordinator.meetingRoomViewModel = nil
+                    navigationCoordinator.meetingRoomPrebuilt = nil
                 }
-                navigationCoordinator.backgroundBlurButtonViewModel = meetingRoomBlurViewModel
-
-            #endif
-
-            #if ARCHIVING_ENABLED
-                let (_, archiveButtonViewModel) = archiveFactory.makeArchivingButton(
-                    roomName: roomName,
-                    showAlert: { [weak navigationCoordinator] alertItem in
-                        navigationCoordinator?.showAlert(alertItem)
-                    }
-                )
-                archiveButtonViewModel.setup()
-                navigationCoordinator.archiveButtonViewModel = archiveButtonViewModel
-            #endif
-
-            #if CAPTIONS_ENABLED
-                let (_, captionsButtonViewModel) = captionsFactory.makeCaptionsButton(roomName: roomName)
-                captionsButtonViewModel.setup()
-                navigationCoordinator.captionsButtonViewModel = captionsButtonViewModel
-
-                let (_, captionsViewModel) = captionsFactory.makeCaptionsView()
-                navigationCoordinator.captionsViewModel = captionsViewModel
-            #endif
-
-            #if REACTIONS_ENABLED
-                navigationCoordinator.emojiButtonContainerViewModel =
-                    dependencyContainer.reactionsFactory.makeEmojiButton().viewModel
-                navigationCoordinator.floatingEmojisOverlayViewModel =
-                    dependencyContainer.reactionsFactory.makeFloatingEmojisOverlay().viewModel
-            #endif
-
-            #if SETTINGS_ENABLED
-                navigationCoordinator.statsOverlayViewModel =
-                    settingsFactory.makeStatsOverlayViewModel()
-            #endif
-
-            let (_, newViewModel) = meetingRoomFactory.make(
-                roomName: roomName,
-                getExternalButtons: getBottomBarButtons,
-                onActionHandler: {
-                    switch $0 {
-                    case .presentAlert(let alertItem): navigationCoordinator.showAlert(alertItem)
-                    case .navigateToGoodbye:
-                        navigationCoordinator.go(to: .goodbye(roomName))
-                    case .navigateToSettings:
-                        navigationCoordinator.go(to: .settings)
-                    case .navigateToWaitingRoom(let roomName):
-                        navigationCoordinator.go(to: .waitingRoom(roomName))
-                    default: break
-                    }
-                }
-            )
-
-            newViewModel.extraTopTrailingButtons = MeetingRoomTopTrailingButtons.topTrailingButtons
-            navigationCoordinator.meetingRoomViewModel = newViewModel
-
-            viewModel = newViewModel
         }
 
-        return meetingRoomFactory.make(viewModel: viewModel)
+        let currentBlurLevel = navigationCoordinator.backgroundBlurButtonViewModel?.currentBlurLevel ?? .none
+        let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+
+        let builder = MeetingRoomBuilder(
+            baseURL: dependencyContainer.baseURL,
+            roomName: request.roomName
+        ).configuration(
+            MeetingRoomConfiguration(
+                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
+                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
+            )
+        )
+        .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
+        .publisherSettings(
+            request.publisherSettings
+                .backgroundBlurLevel(currentBlurLevel)
+                .noiseSuppressionState(currentNoiseSuppressionState)
+        )
+        .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
+        .broadcastExtensionBundleId(
+            (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
+        )
+        .onAction { [weak navigationCoordinator] action in
+            switch action {
+            case .callDidEnd:
+                navigationCoordinator?.go(to: .goodbye(request.roomName))
+            case .goBack(let room):
+                navigationCoordinator?.go(to: .waitingRoom(room))
+            }
+        }
+
+        let result = builder.build()
+        navigationCoordinator.meetingRoomViewModel = result.viewModel
+        navigationCoordinator.meetingRoomPrebuilt = result
+
+        return result.view
             .onDisappear {
-                // Clear view model when leaving the meeting room
+                // Clear cached meeting room when leaving
                 navigationCoordinator.meetingRoomViewModel = nil
+                navigationCoordinator.meetingRoomPrebuilt = nil
             }
-    }
-
-    private func getBottomBarButtons(
-        _ state: MeetingRoomButtonsState
-    ) -> [BottomBarButton] {
-        var extraButtons: [BottomBarButton] = []
-        #if CHAT_ENABLED
-            extraButtons.append(
-                dependencyContainer.mapToChatBottomBarButton {
-                    dependencyContainer.chatBadgeButtonViewModel.chatDidOpen()
-                    showChat = true
-                }
-            )
-        #endif
-
-        #if BACKGROUND_EFFECTS_ENABLED
-            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
-                extraButtons.append(
-                    dependencyContainer.makeBackgroundEffectsButton(backgroundBlurButtonViewModel)
-                )
-            }
-
-        #endif
-
-        #if ARCHIVING_ENABLED
-            if let archiveButtonViewModel = navigationCoordinator.archiveButtonViewModel {
-                extraButtons.append(dependencyContainer.mapToArchiveBottomBarButton(archiveButtonViewModel, state))
-            }
-        #endif
-
-        #if CAPTIONS_ENABLED
-            if let captionsButtonViewModel = navigationCoordinator.captionsButtonViewModel {
-                extraButtons.append(dependencyContainer.makeCaptionsButton(captionsButtonViewModel))
-            }
-        #endif
-
-        #if REACTIONS_ENABLED
-            if let viewModel = navigationCoordinator.emojiButtonContainerViewModel {
-                extraButtons.append(
-                    dependencyContainer.mapToReactionsBottomBarButton(viewModel) {
-                        showPickerView = true
-                    }
-                )
-            }
-        #endif
-
-        #if SCREEN_SHARE_ENABLED
-            extraButtons.append(dependencyContainer.makeScreenShareButton())
-        #endif
-
-        #if SETTINGS_ENABLED
-            extraButtons.append(
-                makeSettingsBottomBarButton {
-                    showSettings = true
-                }
-            )
-        #endif
-
-        #if AUDIOEFFECTS_ENABLED
-            let viewModel: MeetingNoiseSuppressionViewModel
-            if let meetingSuppressionButtonViewModel = navigationCoordinator.meetingNoiseSuppressionButtonViewModel {
-                viewModel = meetingSuppressionButtonViewModel
-            } else {
-                viewModel = audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
-                viewModel.state = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
-            }
-            extraButtons.append(
-                dependencyContainer.makeAudioEffectsButton(viewModel)
-            )
-        #endif
-
-        return extraButtons
     }
 
     private func makeGoodbyePage(roomName: String) -> some View {
@@ -479,7 +278,9 @@ struct VERAApp: App {
                 let (view, viewModel) = archiveFactory.make(
                     roomName: roomName
                 ) { recording in
-                    UIApplication.shared.open(recording.url)
+                    Task { @MainActor in
+                        UIApplication.shared.open(recording.url)
+                    }
                 }
                 navigationCoordinator.archivesViewModel = viewModel
                 return AnyView(view)
@@ -488,66 +289,4 @@ struct VERAApp: App {
             return EmptyView()
         #endif
     }
-
-    #if CHAT_ENABLED
-        private func makeChatView() -> some View {
-            let result = chatFactory.make {
-                showChat = false
-            }
-            return result.view
-        }
-    #endif
-
-    #if REACTIONS_ENABLED
-        private func makePickerView() -> some View {
-            let view: EmojiPickerViewContainer
-            if let viewModel = navigationCoordinator.emojiPickerContainerViewModel {
-                view = EmojiPickerViewContainer(viewModel: viewModel)
-            } else {
-                let result = dependencyContainer.reactionsFactory.makeEmojiPickerContainer()
-                navigationCoordinator.emojiPickerContainerViewModel = result.viewModel
-                view = result.view
-            }
-
-            return view
-        }
-
-        @ViewBuilder
-        private func makeFloatingEmojisOverlay() -> some View {
-            if let viewModel = navigationCoordinator.floatingEmojisOverlayViewModel {
-                FloatingEmojisOverlayView(viewModel: viewModel)
-            }
-        }
-    #endif
-
-    #if CAPTIONS_ENABLED
-        @ViewBuilder
-        private func makeCaptionsView() -> some View {
-            if let captionsViewModel = navigationCoordinator.captionsViewModel {
-                captionsFactory.makeCaptionsView(viewModel: captionsViewModel)
-            }
-        }
-    #endif
-
-    #if SETTINGS_ENABLED
-        @ViewBuilder
-        private func makeStatsOverlay() -> some View {
-            if let statsViewModel = navigationCoordinator.statsOverlayViewModel {
-                settingsFactory.makeStatsOverlayView(viewModel: statsViewModel)
-            }
-        }
-
-        @MainActor
-        func makeSettingsBottomBarButton(onShowSettings: @escaping () -> Void) -> BottomBarButton {
-            let button = settingsFactory.makeMeetingRoomButton(onShowSettings: onShowSettings)
-            return .init(
-                label: String(localized: "Settings"),
-                image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
-                onTap: onShowSettings,
-                content: {
-                    button
-                }
-            )
-        }
-    #endif
 }

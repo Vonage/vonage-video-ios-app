@@ -25,23 +25,31 @@ public struct LandingPageView: View {
     }
 
     public var body: some View {
-        Group {
-            if verticalSizeClass == .compact {
-                HorizontalLandingContentView(
-                    onHandleNewRoom: onHandleNewRoom,
-                    onJoinRoom: onJoinRoom)
-            } else if horizontalSizeClass == .compact {
-                VerticalLandingContentView(
-                    onHandleNewRoom: onHandleNewRoom,
-                    onJoinRoom: onJoinRoom)
-            } else {
-                HorizontalLandingContentView(
-                    onHandleNewRoom: onHandleNewRoom,
-                    onJoinRoom: onJoinRoom)
+        ZStack {
+            // Accessibility anchor for Maestro E2E tests
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityIdentifier("landing-screen")
+
+            Group {
+                if verticalSizeClass == .compact {
+                    HorizontalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
+                } else if horizontalSizeClass == .compact {
+                    VerticalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
+                } else {
+                    HorizontalLandingContentView(
+                        onHandleNewRoom: onHandleNewRoom,
+                        onJoinRoom: onJoinRoom)
+                }
             }
+            .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

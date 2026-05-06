@@ -14,7 +14,7 @@ public protocol WaitingRoomDestination {
 
     func goToSettings()
 
-    func goToMeetingRoom()
+    func goToMeetingRoom(request: NewRoomRequest)
 }
 
 public struct WaitingRoomNavigation: WaitingRoomDestination {
@@ -52,7 +52,7 @@ public struct WaitingRoomNavigation: WaitingRoomDestination {
         actionHandler(.navigateToSettings)
     }
 
-    public func goToMeetingRoom() {
-        actionHandler(.navigateToMeetingRoom(roomName))
+    public func goToMeetingRoom(request: NewRoomRequest) {
+        actionHandler(.navigateToMeetingRoom(request))
     }
 }

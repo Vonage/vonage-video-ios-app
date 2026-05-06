@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "vonage-client-sdk-video-transformers",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Vonage/vonage-client-sdk-video-transformers",
+      "state" : {
+        "revision" : "a66115f8d947225710eb80cf25bd9dd06c5ba02e",
+        "version" : "2.33.0"
+      }
+    },
+    {
+      "identity" : "vonage-video-client-sdk-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Vonage/vonage-video-client-sdk-swift",
+      "state" : {
+        "revision" : "fac6d45cc868a2d9df4ad7abcb87cf509ce36154",
+        "version" : "2.33.0"
+      }
+    }
+  ],
+  "version" : 2
+}

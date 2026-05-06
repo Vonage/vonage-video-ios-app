@@ -11,6 +11,7 @@ import VERADomain
 import VERATestHelpers
 
 @Suite("BackgroundBlurButtonViewModel tests")
+@MainActor
 struct BackgroundBlurButtonViewModelTests {
 
     enum Error: Swift.Error {
@@ -20,7 +21,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func initialBlurLevelIsNone() async throws {
         let sut = makeSUT()
 
@@ -28,7 +28,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCyclesFromNoneToLow() async throws {
         let sut = makeSUT()
 
@@ -40,7 +39,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCyclesFromLowToHigh() async throws {
         let sut = makeSUT()
         sut.currentBlurLevel = .low
@@ -51,7 +49,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCyclesFromHighToNone() async throws {
         let sut = makeSUT()
         sut.currentBlurLevel = .high
@@ -62,7 +59,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapCallsGetCurrentPublisher() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
@@ -73,7 +69,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapAppliesBlurToPublisher() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
@@ -86,7 +81,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapAppliesCorrectBlurLevelToPublisher() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
@@ -108,7 +102,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapHandlesPublisherErrorGracefully() async throws {
         let sut = makeSUT(getCurrentPublisher: { throw Error.publisherError })
 
@@ -120,7 +113,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func onTapHandlesBlurErrorGracefully() async throws {
         let spy = PublisherSpy()
         spy.shouldThrowError = true
@@ -134,7 +126,6 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    @MainActor
     func multipleTapsToggleThroughAllLevels() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
@@ -164,6 +155,103 @@ struct BackgroundBlurButtonViewModelTests {
         #expect(spy.addVideoTransformerCallCount == 3)
     }
 
+    // MARK: - update(blurLevel:) Tests
+
+    @Test
+    func updateSetsBlurLevelToNone() {
+        let sut = makeSUT()
+        sut.currentBlurLevel = .high
+
+        sut.update(blurLevel: .none)
+
+        #expect(sut.currentBlurLevel == .none)
+    }
+
+    @Test
+    func updateSetsBlurLevelToLow() {
+        let sut = makeSUT()
+
+        sut.update(blurLevel: .low)
+
+        #expect(sut.currentBlurLevel == .low)
+    }
+
+    @Test
+    func updateSetsBlurLevelToHigh() {
+        let sut = makeSUT()
+
+        sut.update(blurLevel: .high)
+
+        #expect(sut.currentBlurLevel == .high)
+    }
+
+    @Test
+    func updateAppliesBlurLevelToPublisher() {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+
+        sut.update(blurLevel: .low)
+
+        #expect(spy.addVideoTransformerCallCount == 1)
+    }
+
+    @Test
+    func updateToNoneRemovesTransformerWithoutAdding() {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+
+        sut.update(blurLevel: .none)
+
+        #expect(spy.addVideoTransformerCallCount == 0)
+        #expect(spy.removeTransformerCallCount == 1)
+    }
+
+    @Test
+    func updateHandlesBlurErrorGracefully() {
+        let spy = PublisherSpy()
+        spy.shouldThrowError = true
+        let sut = makeSUT(getCurrentPublisher: { spy })
+
+        // Should not crash
+        sut.update(blurLevel: .high)
+
+        // State should still be updated
+        #expect(sut.currentBlurLevel == .high)
+    }
+
+    @Test
+    func updateOverridesPreviousBlurLevel() {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+
+        sut.update(blurLevel: .low)
+        #expect(sut.currentBlurLevel == .low)
+
+        sut.update(blurLevel: .high)
+        #expect(sut.currentBlurLevel == .high)
+
+        sut.update(blurLevel: .none)
+        #expect(sut.currentBlurLevel == .none)
+    }
+
+    @Test
+    func updateIsIndependentFromOnTapCycle() {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+
+        // Advance the onTap cycle to .low
+        sut.onTap()
+        #expect(sut.currentBlurLevel == .low)
+
+        // update() should set any level directly
+        sut.update(blurLevel: .high)
+        #expect(sut.currentBlurLevel == .high)
+
+        // onTap() should now cycle from .high
+        sut.onTap()
+        #expect(sut.currentBlurLevel == .none)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -187,7 +275,7 @@ final class PublisherSpy: VERAPublisher {
     var setBackgroundBlurCallCount = 0
     var addVideoTransformerCallCount = 0
     var removeTransformerCallCount = 0
-    var lastBlurLevel: BlurLevel? = nil
+    var lastBlurLevel: BlurLevel?
     var shouldThrowError = false
     var audioLevelPublisher: AnyPublisher<Float, Never> = CurrentValueSubject(0).eraseToAnyPublisher()
 

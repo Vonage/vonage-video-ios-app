@@ -29,7 +29,13 @@ public final class NoiseSuppressionViewModel: ObservableObject {
     }
 
     public func onTap() {
-        state = state.isEnabled ? .disabled : .enabled
+        let newState: NoiseSuppressionState = state.isEnabled ? .disabled : .enabled
+
+        updateState(to: newState)
+    }
+
+    public func updateState(to state: NoiseSuppressionState) {
+        self.state = state
 
         do {
             let publisher = try getCurrentPublisher()

@@ -8,13 +8,9 @@ import VERAConfiguration
 import VERACore
 import VERADomain
 import VERAMeetingRoom
+import VERAMeetingRoomSDK
 import VERAVonage
 import VERAVonageCallKitPlugin
-
-#if CHAT_ENABLED
-    import VERAChat
-    import VERAVonageChatPlugin
-#endif
 
 #if ARCHIVING_ENABLED
     import VERAArchiving
@@ -23,21 +19,6 @@ import VERAVonageCallKitPlugin
 
 #if BACKGROUND_EFFECTS_ENABLED
     import VERABackgroundEffects
-#endif
-
-#if CAPTIONS_ENABLED
-    import VERACaptions
-    import VERAVonageCaptionsPlugin
-#endif
-
-#if REACTIONS_ENABLED
-    import VERAReactions
-    import VERAVonageReactionsPlugin
-#endif
-
-#if SCREEN_SHARE_ENABLED
-    import VERAScreenShare
-    import VERAVonageScreenSharePlugin
 #endif
 
 #if SETTINGS_ENABLED
@@ -93,128 +74,42 @@ final class DependencyContainer {
         #endif
     }()
 
-    lazy var noiseSuppressionStatusDataSource: any NoiseSuppressionStatusDataSource = {
-        #if AUDIOEFFECTS_ENABLED
-            return DefaultNoiseSuppressionStatusDataSource()
-        #else
-            return NullNoiseSuppressionStatusDataSource()
-        #endif
-    }()
-
     lazy var waitingRoomFactory = WaitingRoomFactory(
-        publisherRepository: publisherRepository,
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository,
         advancedSettingsUseCase: advancedSettingsUseCase)
 
-    lazy var meetingRoomFactory = MeetingRoomFactory(
-        baseURL: baseURL,
-        configuration: MeetingRoomConfiguration(
-            allowMicrophoneControl: appConfig.audioSettings.allowMicrophoneControl,
-            allowCameraControl: appConfig.videoSettings.allowCameraControl,
-            showParticipantList: appConfig.meetingRoomSettings.showParticipantList
-        ),
-        currentCallParticipantsRepository: currentCallParticipantsRepository,
-        sessionRepository: sessionRepository,
-        publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository,
-        captionsStatusDataSource: captionsStatusDataSource,
-        noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource())
-
     lazy var goodByePageFactory = GoodByePageFactory(
         joinRoomUseCase: .init(
             userRepository: userRepository,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            publisherRepository: publisherRepository,
             advancedSettingsUseCase: advancedSettingsUseCase),
         userRepository: userRepository)
 
-    lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
+    // MARK: - Meeting Room SDK
 
-    lazy var sessionFactory = VonageSessionFactory()
+    /// Computes the set of enabled meeting room features from the app configuration.
+    ///
+    /// Replaces compile-time `#if FEATURE_ENABLED` flags for meeting room features
+    /// with runtime configuration read from ``AppConfig``.
+    var meetingRoomEnabledFeatures: Set<MeetingRoomFeature> {
+        var features: Set<MeetingRoomFeature> = []
+        if appConfig.meetingRoomSettings.allowChat { features.insert(.chat) }
+        if appConfig.meetingRoomSettings.allowArchiving { features.insert(.archiving) }
+        if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
+        if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
+        if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
+        if appConfig.meetingRoomSettings.allowScreenShare { features.insert(.screenShare) }
+        if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
+        if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
+        features.insert(.callKit)
+        return features
+    }
 
-    lazy var statsCollector: any StatsCollector = {
-        #if SETTINGS_ENABLED
-            return NetworkStatsCollector()
-        #else
-            return NullStatsCollector()
-        #endif
-    }()
-
-    lazy var sessionRepository: SessionRepository = {
-        VonageSessionRepository(
-            sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry,
-            statsCollector: statsCollector
-        )
-    }()
-
-    lazy var pluginRegistry: VonagePluginRegistry = {
-        let registry = VonagePluginRegistry()
-        #if CHAT_ENABLED
-            registry.registerPlugin(plugin: vonageChatPlugin)
-        #endif
-        #if ARCHIVING_ENABLED
-            registry.registerPlugin(plugin: vonageArchivingPlugin)
-        #endif
-        #if CAPTIONS_ENABLED
-            registry.registerPlugin(plugin: captionsPlugin)
-        #endif
-        #if REACTIONS_ENABLED
-            registry.registerPlugin(plugin: vonageReactionsPlugin)
-        #endif
-        #if SCREEN_SHARE_ENABLED
-            registry.registerPlugin(plugin: vonageScreenSharePlugin)
-        #endif
-        #if SETTINGS_ENABLED
-            registry.registerPlugin(plugin: vonageSettingsPlugin)
-        #endif
-        registry.registerPlugin(plugin: callKitPlugin)
-        return registry
-    }()
-
-    lazy var roomCredentialsRepository: RoomCredentialsRepository = {
-        DefaultRoomCredentialsRepository(
-            baseURL: baseURL,
-            httpClient: httpClient,
-            jsonDecoder: jsonDecoder
-        )
-    }()
-
-    // MARK: Chat feature
-
-    #if CHAT_ENABLED
-        lazy var vonageChatPlugin = VonageChatPlugin(repository: chatMessagesRepository)
-
-        lazy var sendChatMessageUseCase = VonageSendChatMessageUseCase(vonageChatPlugin: vonageChatPlugin)
-
-        lazy var chatMessagesRepository: ChatMessagesRepository = DefaultChatMessagesRepository()
-
-        lazy var chatBadgeButtonViewModel = ChatBadgeButtonViewModel(
-            chatMessagesObserver: chatMessagesRepository)
-
-        lazy var chatFactory = ChatFactory(
-            chatMessagesRepository: chatMessagesRepository,
-            sendChatMessageUseCase: sendChatMessageUseCase)
-    #endif
-
-    // MARK: CallKit feature
-
-    lazy var callKitPlugin: VonageCallKitPlugin = {
-        let plugin = VonageCallKitPlugin()
-        plugin.setup()
-        return plugin
-    }()
-
-    // MARK: Archiving feature
+    // MARK: - Archiving feature (goodbye page)
 
     #if ARCHIVING_ENABLED
-        lazy var vonageArchivingPlugin = VonageArchivingPlugin(
-            archivingStatusDataSource: archivingStatusDataSource)
-
         lazy var archivingStatusDataSource = DefaultArchivingStatusDataSource()
 
         lazy var archivingFactory = ArchivingFactory(
@@ -234,92 +129,37 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient,
             jsonDecoder: jsonDecoder)
-
     #endif
 
-    // MARK: Background effects feature
+    // MARK: - Background effects feature (waiting room)
 
     #if BACKGROUND_EFFECTS_ENABLED
         lazy var backgroundBlurFactory = BackgroundBlurFactory()
     #endif
 
-    // MARK: Captions feature
-
-    #if CAPTIONS_ENABLED
-        lazy var captionsActivationDataSource: CaptionsActivationDataSource = DefaultCaptionsDataSource(
-            baseURL: baseURL, httpClient: httpClient, jsonDecoder: jsonDecoder)
-
-        lazy var captionsStatusDataSource: CaptionsStatusDataSource = DefaultCaptionsStatusDataSource()
-
-        lazy var captionsRepository: CaptionsRepository = DefaultCaptionsRepository()
-
-        lazy var captionsFactory = CaptionsFactory(
-            captionsActivationDataSource: captionsActivationDataSource,
-            captionsStatusDataSource: captionsStatusDataSource,
-            captionsRepository: captionsRepository)
-
-        lazy var captionsPlugin: VonageCaptionsPlugin = {
-            let plugin = VonageCaptionsPlugin(
-                captionsStatusDataSource: captionsStatusDataSource,
-                captionsRepository: captionsRepository)
-            return plugin
-        }()
-    #else
-        lazy var captionsStatusDataSource: CaptionsStatusDataSource = NullCaptionsStatusDataSource()
-    #endif
-
-    // MARK: Reactions feature
-
-    #if REACTIONS_ENABLED
-        lazy var reactionsRepository: ReactionsRepository = DefaultReactionsRepository()
-
-        lazy var vonageReactionsPlugin = VonageReactionsPlugin(repository: reactionsRepository)
-
-        lazy var sendReactionUseCase: SendReactionUseCase = VonageSendReactionUseCase(
-            plugin: vonageReactionsPlugin)
-
-        lazy var reactionsFactory = ReactionsFactory(
-            reactionsRepository: reactionsRepository,
-            sendReactionUseCase: sendReactionUseCase)
-    #endif
-
-    // MARK: Screen share feature
-
-    #if SCREEN_SHARE_ENABLED
-        lazy var screenShareCredentialsRepository: ScreenShareCredentialsRepository =
-            UserDefaultsScreenShareCredentialsRepository(userDefaults: userDefaults)
-
-        lazy var vonageScreenSharePlugin = VonageScreenSharePlugin(
-            credentialsRepository: screenShareCredentialsRepository)
-    #endif
-
-    // MARK: Settings feature
+    // MARK: - Settings feature (waiting room)
 
     #if SETTINGS_ENABLED
         lazy var settingsRepository: PublisherSettingsRepository =
             UserDefaultsSettingsRepository()
 
-        lazy var statsRepository: StatsRepository = InMemoryStatsRepository()
-
-        lazy var vonageSettingsPlugin = VonageSettingsPlugin(
-            settingsRepository: settingsRepository,
-            statsWriter: statsRepository)
-
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: statsRepository)
+            statsDataSource: InMemoryStatsRepository())
     #endif
 
-    // MARK: AudioEffects feature
+    // MARK: - AudioEffects feature (waiting room)
 
     #if AUDIOEFFECTS_ENABLED
+        lazy var defaultNoiseSuppressionStatusDataSource = DefaultNoiseSuppressionStatusDataSource()
+
         lazy var audioEffectsFactory = AudioEffectsFactory(
             publisherRepository: publisherRepository,
             disableNoiseSuppressionUseCase: DefaultDisableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+                noiseSuppressionStatusDataSource: defaultNoiseSuppressionStatusDataSource
             ),
             enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
-                noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
+                noiseSuppressionStatusDataSource: defaultNoiseSuppressionStatusDataSource
             )
         )
     #endif

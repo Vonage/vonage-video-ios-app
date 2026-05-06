@@ -18,6 +18,7 @@ private enum ToastViewConstants {
 }
 
 public struct ToastView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     public let item: ToastItem
 
     public init(item: ToastItem) {
@@ -26,7 +27,7 @@ public struct ToastView: View {
 
     public var body: some View {
         HStack(spacing: ToastViewConstants.contentSpacing) {
-            item.image
+            item.image(theme: theme)
                 .font(.system(size: ToastViewConstants.iconSize))
 
             Text(item.message)
@@ -42,36 +43,38 @@ public struct ToastView: View {
     }
 }
 extension ToastItem {
-    var image: some View {
+    func image(theme: MeetingRoomTheme) -> some View {
         switch mode {
         case .info:
             VERACommonUIAsset.Images.infoLine.swiftUIImage
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                .foregroundStyle(theme.primary)
         case .failure:
             VERACommonUIAsset.Images.errorLine.swiftUIImage
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                .foregroundStyle(theme.error)
         case .warning:
             VERACommonUIAsset.Images.warningLine.swiftUIImage
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                .foregroundStyle(theme.error)
         case .success:
             VERACommonUIAsset.Images.checkCircleLine.swiftUIImage
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                .foregroundStyle(theme.primary)
         }
     }
 }
 
 struct GlassBackground: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     var body: some View {
         #if os(macOS)
             RoundedRectangle(cornerRadius: BorderRadius.large.value)
-                .fill(VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor)
+                .fill(theme.tertiary)
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectBackground()
                 } else {
                     RoundedRectangle(cornerRadius: BorderRadius.large.value)
-                        .fill(VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor)
+                        .fill(theme.tertiary)
                 }
             }
         #endif

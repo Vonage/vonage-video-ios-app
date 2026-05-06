@@ -7,6 +7,7 @@ import VERACommonUI
 import VERADomain
 
 struct ChatRow: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let message: UIChatMessage
 
     var body: some View {
@@ -22,14 +23,14 @@ struct ChatRow: View {
                 HStack {
                     Text(message.username)
                         .font(.caption)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
+                        .foregroundColor(theme.secondary)
                     Text(message.date)
                         .font(.caption)
-                        .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                        .foregroundColor(theme.textTertiary)
                 }
                 Text(message.message)
                     .font(.body)
-                    .foregroundColor(VERACommonUIAsset.SemanticColors.secondary.swiftUIColor)
+                    .foregroundColor(theme.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

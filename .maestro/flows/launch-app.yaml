@@ -1,0 +1,16 @@
+appId: com.vonage.VERA
+---
+# E2E Test: Launch App
+# Description: Launch the app and validate the Landing screen is visible
+# Priority: P0
+
+- launchApp:
+    clearState: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- takeScreenshot: landing-screen

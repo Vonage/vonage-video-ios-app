@@ -68,6 +68,7 @@ public struct CircularControlImageButton: View {
 }
 
 struct CircularControlBackground: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let isActive: Bool
 
     var body: some View {
@@ -95,7 +96,7 @@ struct CircularControlBackground: View {
                     glassEffectCircle(
                         isActive
                             ? .clear
-                            : VERACommonUIAsset.SemanticColors.error.swiftUIColor
+                            : theme.error
                                 .opacity(CircularControlButtonConstants.errorTintOpacity))
                 } else {
                     ZStack {
@@ -104,7 +105,7 @@ struct CircularControlBackground: View {
                                 .fill(Material.ultraThinMaterial)
                         } else {
                             Circle()
-                                .fill(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                                .fill(theme.error)
                         }
 
                         Circle()
@@ -118,8 +119,8 @@ struct CircularControlBackground: View {
                                                 CircularControlButtonConstants.activeGradientEndOpacity),
                                         ]
                                         : [
-                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
-                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                                            theme.error,
+                                            theme.error,
                                         ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
