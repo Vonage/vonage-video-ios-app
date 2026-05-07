@@ -5,76 +5,48 @@
 import CocoaLumberjackSwift
 import Foundation
 import Testing
+import VERALogger
 
 @testable import VERACocoaLumberjackLogger
 
-// MARK: - Log Level Tests
+// MARK: - Strategy Conformance Tests
 
-@Suite("CocoaLumberjackLogLevel Tests")
-struct CocoaLumberjackLogLevelTests {
+@Suite("CocoaLumberjackStrategy Conformance Tests")
+struct CocoaLumberjackStrategyConformanceTests {
 
-    @Test("Levels are ordered from verbose to error")
-    func ordering() {
-        #expect(CocoaLumberjackLogLevel.verbose < .debug)
-        #expect(CocoaLumberjackLogLevel.debug < .info)
-        #expect(CocoaLumberjackLogLevel.info < .warn)
-        #expect(CocoaLumberjackLogLevel.warn < .error)
+    @Test("CocoaLumberjackStrategy conforms to LoggerStrategy")
+    func conformsToLoggerStrategy() {
+        let strategy = CocoaLumberjackStrategy.Builder().build()
+        let _: any LoggerStrategy = strategy
     }
 
-    @Test(
-        "Each level has the correct description",
-        arguments: [
-            (CocoaLumberjackLogLevel.verbose, "VERBOSE"),
-            (.debug, "DEBUG"),
-            (.info, "INFO"),
-            (.warn, "WARN"),
-            (.error, "ERROR"),
-        ]
-    )
-    func descriptions(testCase: (CocoaLumberjackLogLevel, String)) {
-        let (level, expected) = testCase
-        #expect(level.description == expected)
-    }
-
-    @Test("All cases count is 5")
-    func allCases() {
-        #expect(CocoaLumberjackLogLevel.allCases.count == 5)
-    }
-
-    @Test(
-        "Each level maps to the correct DDLogFlag",
-        arguments: [
-            (CocoaLumberjackLogLevel.verbose, DDLogFlag.verbose),
-            (.debug, .debug),
-            (.info, .info),
-            (.warn, .warning),
-            (.error, .error),
-        ]
-    )
-    func ddLogFlagMapping(testCase: (CocoaLumberjackLogLevel, DDLogFlag)) {
-        let (level, expectedFlag) = testCase
-        #expect(level.ddLogFlag == expectedFlag)
+    @Test("shouldLog returns true by default")
+    func shouldLogReturnsTrue() {
+        let strategy = CocoaLumberjackStrategy.Builder().build()
+        let event = LogEvent(level: .info, tag: "Test", message: "hello")
+        #expect(strategy.shouldLog(event))
     }
 }
 
 // MARK: - Builder Tests
 
-@Suite("CocoaLumberjackLogger Builder Tests")
-struct CocoaLumberjackLoggerBuilderTests {
+@Suite("CocoaLumberjackStrategy Builder Tests")
+struct CocoaLumberjackStrategyBuilderTests {
 
-    @Test("Builder with no loggers creates a valid logger without crashing")
+    @Test("Builder with no loggers creates a valid strategy without crashing")
     func builderWithNoLoggers() {
-        let logger = CocoaLumberjackLogger.Builder().build()
-        logger.info("Test", "should not crash")
+        let strategy = CocoaLumberjackStrategy.Builder().build()
+        let event = LogEvent(level: .info, tag: "Test", message: "should not crash")
+        strategy.log(event)
     }
 
     @Test("withOSLogger adds a DDOSLogger")
     func withOSLogger() {
-        let logger = CocoaLumberjackLogger.Builder()
+        let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .build()
 
-        let loggers = logger.ddLog.allLoggers
+        let loggers = strategy.ddLog.allLoggers
         let hasOSLogger = loggers.contains { $0 is DDOSLogger }
         #expect(hasOSLogger)
     }
@@ -85,45 +57,45 @@ struct CocoaLumberjackLoggerBuilderTests {
             .appendingPathComponent("cocoalumberjack-test-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let logger = CocoaLumberjackLogger.Builder()
+        let strategy = CocoaLumberjackStrategy.Builder()
             .withFileLogger(directory: tempDir.path)
             .build()
 
-        let loggers = logger.ddLog.allLoggers
+        let loggers = strategy.ddLog.allLoggers
         let hasFileLogger = loggers.contains { $0 is DDFileLogger }
         #expect(hasFileLogger)
     }
 
     @Test("withFileLogger without directory uses defaults")
     func withFileLoggerDefaultDir() {
-        let logger = CocoaLumberjackLogger.Builder()
+        let strategy = CocoaLumberjackStrategy.Builder()
             .withFileLogger()
             .build()
 
-        let loggers = logger.ddLog.allLoggers
+        let loggers = strategy.ddLog.allLoggers
         let hasFileLogger = loggers.contains { $0 is DDFileLogger }
         #expect(hasFileLogger)
     }
 
     @Test("withConsoleLogger adds a ConsoleDDLogger")
     func withConsoleLogger() {
-        let logger = CocoaLumberjackLogger.Builder()
+        let strategy = CocoaLumberjackStrategy.Builder()
             .withConsoleLogger()
             .build()
 
-        let loggers = logger.ddLog.allLoggers
+        let loggers = strategy.ddLog.allLoggers
         let hasConsoleLogger = loggers.contains { $0 is ConsoleDDLogger }
         #expect(hasConsoleLogger)
     }
 
     @Test("Builder supports chaining multiple loggers")
     func chainingMultipleLoggers() {
-        let logger = CocoaLumberjackLogger.Builder()
+        let strategy = CocoaLumberjackStrategy.Builder()
             .withOSLogger()
             .withConsoleLogger()
             .build()
 
-        let loggers = logger.ddLog.allLoggers
+        let loggers = strategy.ddLog.allLoggers
         #expect(loggers.count == 2)
         #expect(loggers.contains { $0 is DDOSLogger })
         #expect(loggers.contains { $0 is ConsoleDDLogger })
@@ -132,28 +104,21 @@ struct CocoaLumberjackLoggerBuilderTests {
 
 // MARK: - Message Formatting Tests
 
-@Suite("CocoaLumberjackLogger Message Formatting Tests")
-struct CocoaLumberjackLoggerFormattingTests {
+@Suite("CocoaLumberjackStrategy Message Formatting Tests")
+struct CocoaLumberjackStrategyFormattingTests {
 
     @Test("Message format includes tag and message")
     func formatMessageWithoutError() {
-        let formatted = CocoaLumberjackLogger.formatMessage(
-            tag: "MyTag",
-            message: "hello world",
-            error: nil
-        )
-
+        let event = LogEvent(level: .info, tag: "MyTag", message: "hello world")
+        let formatted = CocoaLumberjackStrategy.formatMessage(event)
         #expect(formatted == "[MyTag] hello world")
     }
 
     @Test("Message format includes error when present")
     func formatMessageWithError() {
         let error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "boom"])
-        let formatted = CocoaLumberjackLogger.formatMessage(
-            tag: "Err",
-            message: "failed",
-            error: error
-        )
+        let event = LogEvent(level: .error, tag: "Err", message: "failed", error: error)
+        let formatted = CocoaLumberjackStrategy.formatMessage(event)
 
         #expect(formatted.contains("[Err] failed"))
         #expect(formatted.contains("boom"))
@@ -161,34 +126,67 @@ struct CocoaLumberjackLoggerFormattingTests {
 
     @Test("Message without error has no newline")
     func formatMessageWithoutErrorHasNoNewline() {
-        let formatted = CocoaLumberjackLogger.formatMessage(
-            tag: "Tag",
-            message: "msg",
-            error: nil
-        )
-
+        let event = LogEvent(level: .debug, tag: "Tag", message: "msg")
+        let formatted = CocoaLumberjackStrategy.formatMessage(event)
         #expect(!formatted.contains("\n"))
+    }
+}
+
+// MARK: - Level Mapping Tests
+
+@Suite("CocoaLumberjackStrategy Level Mapping Tests")
+struct CocoaLumberjackStrategyLevelMappingTests {
+
+    @Test(
+        "Each LogLevel maps to the correct DDLogFlag",
+        arguments: [
+            (LogLevel.verbose, DDLogFlag.verbose),
+            (.debug, .debug),
+            (.info, .info),
+            (.warn, .warning),
+            (.error, .error),
+        ]
+    )
+    func ddLogFlagMapping(testCase: (LogLevel, DDLogFlag)) {
+        let (level, expectedFlag) = testCase
+        #expect(level.ddLogFlag == expectedFlag)
+    }
+
+    @Test(
+        "Each LogLevel maps to the correct DDLogLevel",
+        arguments: [
+            (LogLevel.verbose, DDLogLevel.verbose),
+            (.debug, .debug),
+            (.info, .info),
+            (.warn, .warning),
+            (.error, .error),
+        ]
+    )
+    func ddLogLevelMapping(testCase: (LogLevel, DDLogLevel)) {
+        let (level, expectedLevel) = testCase
+        #expect(level.ddLogLevel == expectedLevel)
     }
 }
 
 // MARK: - Logging Behavior Tests
 
-@Suite("CocoaLumberjackLogger Logging Tests")
-struct CocoaLumberjackLoggerLoggingTests {
+@Suite("CocoaLumberjackStrategy Logging Tests")
+struct CocoaLumberjackStrategyLoggingTests {
 
-    private func makeSUT() -> (CocoaLumberjackLogger, DDLoggerSpy) {
+    private func makeSUT() -> (CocoaLumberjackStrategy, DDLoggerSpy) {
         let ddLog = DDLog()
         let spy = DDLoggerSpy()
         ddLog.add(spy, with: .all)
-        let logger = CocoaLumberjackLogger(ddLog: ddLog)
-        return (logger, spy)
+        let strategy = CocoaLumberjackStrategy(ddLog: ddLog)
+        return (strategy, spy)
     }
 
     @Test("Log dispatches message to registered DDLoggers")
     func logDispatchesMessage() async throws {
-        let (logger, spy) = makeSUT()
+        let (strategy, spy) = makeSUT()
 
-        logger.info("TestTag", "hello world")
+        let event = LogEvent(level: .info, tag: "TestTag", message: "hello world")
+        strategy.log(event)
 
         await waitForLogEvents(1, in: spy)
 
@@ -197,20 +195,21 @@ struct CocoaLumberjackLoggerLoggingTests {
     }
 
     @Test(
-        "Each level method dispatches with the correct DDLogFlag",
+        "Each level dispatches with the correct DDLogFlag",
         arguments: [
-            (CocoaLumberjackLogLevel.verbose, DDLogFlag.verbose),
+            (LogLevel.verbose, DDLogFlag.verbose),
             (.debug, .debug),
             (.info, .info),
             (.warn, .warning),
             (.error, .error),
         ]
     )
-    func levelMethodDispatchesCorrectFlag(testCase: (CocoaLumberjackLogLevel, DDLogFlag)) async {
+    func levelDispatchesCorrectFlag(testCase: (LogLevel, DDLogFlag)) async {
         let (level, expectedFlag) = testCase
-        let (logger, spy) = makeSUT()
+        let (strategy, spy) = makeSUT()
 
-        logger.log(level: level, tag: "T", message: "test")
+        let event = LogEvent(level: level, tag: "T", message: "test")
+        strategy.log(event)
 
         await waitForLogEvents(1, in: spy)
 
@@ -220,10 +219,11 @@ struct CocoaLumberjackLoggerLoggingTests {
 
     @Test("Error details are included in the dispatched message")
     func errorDetailsIncluded() async {
-        let (logger, spy) = makeSUT()
+        let (strategy, spy) = makeSUT()
 
         let error = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "crash"])
-        logger.error("Err", "failure", error: error)
+        let event = LogEvent(level: .error, tag: "Err", message: "failure", error: error)
+        strategy.log(event)
 
         await waitForLogEvents(1, in: spy)
 
@@ -232,23 +232,12 @@ struct CocoaLumberjackLoggerLoggingTests {
         #expect(spy.messages.first?.message.contains("crash") == true)
     }
 
-    @Test("Nil error is not appended to the message")
-    func nilErrorNotAppended() async {
-        let (logger, spy) = makeSUT()
-
-        logger.debug("Tag", "clean message")
-
-        await waitForLogEvents(1, in: spy)
-
-        #expect(spy.messages.count >= 1)
-        #expect(spy.messages.first?.message.contains("\n") == false)
-    }
-
     @Test("Tag is passed as DDLogMessage tag")
     func tagIsPassedAsDDLogMessageTag() async {
-        let (logger, spy) = makeSUT()
+        let (strategy, spy) = makeSUT()
 
-        logger.info("MyModule", "test")
+        let event = LogEvent(level: .info, tag: "MyModule", message: "test")
+        strategy.log(event)
 
         await waitForLogEvents(1, in: spy)
 
@@ -258,11 +247,11 @@ struct CocoaLumberjackLoggerLoggingTests {
 
     @Test("Multiple log calls are all dispatched")
     func multipleLogCallsDispatched() async {
-        let (logger, spy) = makeSUT()
+        let (strategy, spy) = makeSUT()
 
-        logger.info("T", "first")
-        logger.info("T", "second")
-        logger.info("T", "third")
+        strategy.log(LogEvent(level: .info, tag: "T", message: "first"))
+        strategy.log(LogEvent(level: .info, tag: "T", message: "second"))
+        strategy.log(LogEvent(level: .info, tag: "T", message: "third"))
 
         await waitForLogEvents(3, in: spy)
 
@@ -298,12 +287,42 @@ struct ConsoleDDLoggerTests {
         let ddLog = DDLog()
         let consoleLogger = ConsoleDDLogger()
         ddLog.add(consoleLogger, with: .all)
-        let logger = CocoaLumberjackLogger(ddLog: ddLog)
+        let strategy = CocoaLumberjackStrategy(ddLog: ddLog)
 
-        logger.info("Console", "test message")
+        let event = LogEvent(level: .info, tag: "Console", message: "test message")
+        strategy.log(event)
 
-        // Allow async dispatch to complete
         try? await Task.sleep(for: .milliseconds(100))
+    }
+}
+
+// MARK: - Integration with VonageLogger
+
+@Suite("CocoaLumberjackStrategy Integration Tests")
+struct CocoaLumberjackStrategyIntegrationTests {
+
+    @Test("Strategy works when added to VonageLogger")
+    func worksWithVonageLogger() async {
+        let ddLog = DDLog()
+        let spy = DDLoggerSpy()
+        ddLog.add(spy, with: .all)
+        let strategy = CocoaLumberjackStrategy(ddLog: ddLog)
+
+        let logger = VonageLogger.Builder()
+            .addStrategy(strategy)
+            .build()
+
+        logger.info("Integration", "hello from VonageLogger")
+
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(2))
+        while clock.now < deadline {
+            if spy.messages.count >= 1 { break }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+
+        #expect(spy.messages.count >= 1)
+        #expect(spy.messages.first?.message.contains("[Integration] hello from VonageLogger") == true)
     }
 }
 
