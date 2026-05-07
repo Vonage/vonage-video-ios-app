@@ -204,6 +204,7 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERAConfiguration", path: "VERAConfiguration"),
         .project(target: "VERAVonageCallKitPlugin", path: "VERAVonageCallKitPlugin"),
         .project(target: "VERALogger", path: "VERALogger"),
+        .project(target: "VERACocoaLumberjackLogger", path: "VERACocoaLumberjackLogger"),
         // SDK module handles meeting room dependency wiring and all feature modules
         .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
     ]

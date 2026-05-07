@@ -23,11 +23,7 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERALoggerTests/**"],
             dependencies: [
-                .target(name: "VERALogger"),
-                .project(
-                    target: "VERALoggerCocoaLumberjackStrategy",
-                    path: "../VERALoggerCocoaLumberjackStrategy"
-                ),
+                .target(name: "VERALogger")
             ],
             settings: createBaseBuildSettings()
         ),

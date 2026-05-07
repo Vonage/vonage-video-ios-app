@@ -25,7 +25,6 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     private let fileURL: URL
     private let maxFileSize: UInt64
     private let dateFormatter: DateFormatter
-    private let formatterLock = NSLock()
     private let lock = NSLock()
 
     /// Creates a file logging strategy.
@@ -54,8 +53,6 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     // MARK: - Formatting
 
     private func formattedTimestamp(_ timestamp: Date) -> String {
-        formatterLock.lock()
-        defer { formatterLock.unlock() }
         return dateFormatter.string(from: timestamp)
     }
 
