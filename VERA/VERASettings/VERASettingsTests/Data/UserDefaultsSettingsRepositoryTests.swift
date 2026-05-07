@@ -106,12 +106,11 @@ struct UserDefaultsSettingsRepositoryTests {
         await repository.save(customPreferences)
 
         // Verify data is stored in UserDefaults
-        let storedData = userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences")
-        #expect(storedData != nil)
+        let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
 
         // Verify data can be decoded
         let decoder = JSONDecoder()
-        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData!)
+        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData)
         #expect(decodedPreferences == customPreferences)
     }
 
@@ -137,11 +136,10 @@ struct UserDefaultsSettingsRepositoryTests {
         #expect(loadedPreferences.opusDtxEnabled == true)
 
         // Verify encoding/decoding
-        let storedData = userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences")
-        #expect(storedData != nil)
+        let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
 
         let decoder = JSONDecoder()
-        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData!)
+        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData)
         #expect(decodedPreferences.opusDtxEnabled == true)
     }
 

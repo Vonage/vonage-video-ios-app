@@ -568,6 +568,12 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "Activar Opus DTX puede reducir el uso de ancho de banda en transmisiones que tienen largos periodos de silencio."
           }
         }

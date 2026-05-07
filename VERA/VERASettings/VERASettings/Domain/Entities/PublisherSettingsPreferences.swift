@@ -70,7 +70,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         subscriberAudioFallbackEnabled: Bool = true,
         senderStatsEnabled: Bool = false,
         degradationPreference: SettingsDegradationPreference = .notSet,
-        opusDtxEnabled: Bool = false
+        opusDtxEnabled: Bool = true
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -109,7 +109,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
-        opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? false
+        opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
