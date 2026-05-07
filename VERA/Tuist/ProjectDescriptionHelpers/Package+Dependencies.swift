@@ -32,3 +32,14 @@ extension Package {
 extension TargetDependency {
     public static let swiftSnapshotTesting = TargetDependency.package(product: "SnapshotTesting")
 }
+
+extension Package {
+    public static let cocoaLumberjack = Package.package(
+        url: "https://github.com/CocoaLumberjack/CocoaLumberjack",
+        .upToNextMajor(from: "3.8.5")
+    )
+}
+
+extension TargetDependency {
+    public static let cocoaLumberjackSwift = TargetDependency.package(product: "CocoaLumberjackSwift")
+}
