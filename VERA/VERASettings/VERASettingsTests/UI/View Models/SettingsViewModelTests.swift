@@ -94,6 +94,21 @@ struct SettingsViewModelTests {
         #expect(viewModel.isPresented == false)
     }
 
+    @Test("Save persists opusDtxEnabled toggle")
+    func savePersistsOpusDtx() async throws {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.opusDtxEnabled = true
+
+        viewModel.save()
+
+        await delay()
+
+        #expect(repository.saveCallCount == 1)
+        #expect(repository.lastSavedPreferences?.opusDtxEnabled == true)
+    }
+
     @Test("Save with custom bitrate preset persists custom value")
     func saveWithCustomBitrate() async throws {
         let repository = MockSettingsRepository()

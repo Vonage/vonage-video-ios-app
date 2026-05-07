@@ -57,12 +57,12 @@ struct AudioSectionView: View {
         }
 
         Section {
-            Toggle("Opus DTX".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
+            Toggle("Enable Opus Dtx".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
         } header: {
             Text("Discontinuous Transmission".localized)
         } footer: {
             Text(
-                "Reduces bandwidth during silence by not transmitting audio packets when no speech is detected."
+                "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
                     .localized)
         }
 

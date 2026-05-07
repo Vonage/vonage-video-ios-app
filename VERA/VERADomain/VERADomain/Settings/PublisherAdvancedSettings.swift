@@ -90,5 +90,6 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         hasher.combine(publisherAudioFallbackEnabled)
         hasher.combine(subscriberAudioFallbackEnabled)
         hasher.combine(degradationPreference)
+        hasher.combine(opusDtxEnabled)
     }
 }

@@ -493,6 +493,23 @@
         }
       }
     },
+    "Discontinuous Transmission" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discontinuous Transmission"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transmisión discontinua"
+          }
+        }
+      }
+    },
     "Drag to reorder. The SDK will try codecs in this order during negotiation." : {
       "comment" : "Footer text explaining the manual codec ordering.",
       "localizations" : {
@@ -500,6 +517,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arrastra para reordenar. El SDK probará los códecs en este orden durante la negociación."
+          }
+        }
+      }
+    },
+    "Enable Opus Dtx" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable Opus Dtx"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habilitar Opus Dtx"
           }
         }
       }
@@ -524,6 +558,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Habilita Estadísticas del Emisor arriba para ver métricas en tiempo real."
+          }
+        }
+      }
+    },
+    "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar Opus DTX puede reducir el uso de ancho de banda en transmisiones que tienen largos periodos de silencio."
           }
         }
       }

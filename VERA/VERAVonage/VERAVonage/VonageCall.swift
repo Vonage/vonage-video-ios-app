@@ -718,7 +718,8 @@ public final class VonageCall: CallFacade {
                 maxVideoBitrate: advancedSettings.maxVideoBitrate,
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
                 subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,
-                degradationPreference: advancedSettings.degradationPreference
+                degradationPreference: advancedSettings.degradationPreference,
+                opusDtxEnabled: advancedSettings.opusDtxEnabled
             )
         )
 
