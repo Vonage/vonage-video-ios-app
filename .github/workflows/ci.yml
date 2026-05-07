@@ -673,7 +673,6 @@ jobs:
             DerivedData/VERAAudioEffectsSnapshotTests-iOS.xcresult
             DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult
             DerivedData/VERACommonUITests-iOS.xcresult
-            DerivedData/VERALoggerTests-iOS.xcresult
             DerivedData/VERACocoaLumberjackLoggerTests-iOS.xcresult
             DerivedData/Build/Products/
           
