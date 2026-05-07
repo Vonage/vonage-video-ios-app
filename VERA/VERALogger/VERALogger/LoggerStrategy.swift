@@ -6,7 +6,7 @@ import Foundation
 
 /// A logging backend that processes log events.
 ///
-/// Each strategy represents a different log destination (e.g., os.Logger, CocoaLumberjack, file, print).
+/// Each strategy represents a different log destination (e.g., os.Logger, file, print).
 /// Strategies can optionally filter events before processing them via `shouldLog(_:)`.
 ///
 /// ## Thread Safety

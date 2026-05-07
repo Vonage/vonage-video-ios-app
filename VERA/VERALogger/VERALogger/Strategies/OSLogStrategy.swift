@@ -58,7 +58,7 @@ public struct OSLogStrategy: LoggerStrategy, Sendable {
         subsystem: String = Bundle.main.bundleIdentifier ?? "com.vonage.VERA",
         category: String = "VERALogger"
     ) {
-        let logger = os.Logger(subsystem: subsystem, category: category)
+        lazy var logger = os.Logger(subsystem: subsystem, category: category)
         self.logger = SystemOSLogger(logger: logger)
     }
 
