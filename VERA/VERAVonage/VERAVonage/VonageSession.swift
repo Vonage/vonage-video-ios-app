@@ -321,5 +321,6 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         onSessionSignal = nil
         onArchiveStarted = nil
         onArchiveStopped = nil
+        session.delegate = nil
     }
 }

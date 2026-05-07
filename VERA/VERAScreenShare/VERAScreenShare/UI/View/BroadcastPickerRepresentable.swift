@@ -31,8 +31,8 @@
             picker.preferredExtension = preferredExtension
             picker.showsMicrophoneButton = false
 
-            DispatchQueue.main.async {
-                if let button = picker.subviews.compactMap({ $0 as? UIButton }).first {
+            DispatchQueue.main.async { [weak picker] in
+                if let button = picker?.subviews.compactMap({ $0 as? UIButton }).first {
                     context.coordinator.broadcastButton = button
                 }
             }
@@ -41,22 +41,21 @@
         }
 
         public func updateUIView(_ uiView: RPSystemBroadcastPickerView, context: Context) {
-            DispatchQueue.main.async {
-                if let button = uiView.subviews.compactMap({ $0 as? UIButton }).first {
+            DispatchQueue.main.async { [weak uiView] in
+                if let button = uiView?.subviews.compactMap({ $0 as? UIButton }).first {
                     context.coordinator.broadcastButton = button
                 }
             }
 
             actionTrigger
-                .sink {
-                    print(Date())
-                    context.coordinator.broadcastButton?.sendActions(for: .touchUpInside)
+                .sink { [weak coordinator = context.coordinator] in
+                    coordinator?.broadcastButton?.sendActions(for: .touchUpInside)
                 }
                 .store(in: &context.coordinator.cancellables)
         }
 
         public class Coordinator {
-            var broadcastButton: UIButton?
+            weak var broadcastButton: UIButton?
             var cancellables = Set<AnyCancellable>()
         }
     }
