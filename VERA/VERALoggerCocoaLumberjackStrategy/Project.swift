@@ -21,6 +21,6 @@ let project = Project(
                 .cocoaLumberjackSwift,
             ],
             settings: createBaseBuildSettings()
-        ),
+        )
     ]
 )
