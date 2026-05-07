@@ -16,7 +16,7 @@ let project = Project(
             scripts: [.swiftLint(targetName: "VERACocoaLumberjackLogger")],
             dependencies: [
                 .cocoaLumberjackSwift,
-                .project(target: "VERALogger", path: "../VERALogger")
+                .project(target: "VERALogger", path: "../VERALogger"),
             ],
             settings: createBaseBuildSettings()
         ),
@@ -29,7 +29,7 @@ let project = Project(
             sources: ["VERACocoaLumberjackLoggerTests/**"],
             dependencies: [
                 .target(name: "VERACocoaLumberjackLogger"),
-                .project(target: "VERALogger", path: "../VERALogger")
+                .project(target: "VERALogger", path: "../VERALogger"),
             ],
             settings: createBaseBuildSettings()
         ),
