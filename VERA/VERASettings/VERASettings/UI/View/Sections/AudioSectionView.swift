@@ -57,6 +57,16 @@ struct AudioSectionView: View {
         }
 
         Section {
+            Toggle("Enable Opus Dtx".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
+        } header: {
+            Text("Discontinuous Transmission".localized)
+        } footer: {
+            Text(
+                "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
+                    .localized)
+        }
+
+        Section {
             Toggle(
                 "Publisher Audio Fallback".localized, isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled)
         } header: {
