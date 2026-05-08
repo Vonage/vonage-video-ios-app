@@ -119,11 +119,11 @@ struct UserDefaultsSettingsRepositoryTests {
         let userDefaults = UserDefaults.ephemeral()
         let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
 
-        // Verify default value is false
+        // Verify default value is true
         let defaultPreferences = await repository.getPreferences()
         #expect(defaultPreferences.opusDtxEnabled == true)
 
-        // Save with opusDtxEnabled = true
+        // Save with opusDtxEnabled = false
         let customPreferences = PublisherSettingsPreferences(
             videoResolution: .medium,
             maxAudioBitrate: 40_000,
