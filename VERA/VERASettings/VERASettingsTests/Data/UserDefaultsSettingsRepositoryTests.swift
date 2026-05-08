@@ -114,33 +114,33 @@ struct UserDefaultsSettingsRepositoryTests {
         #expect(decodedPreferences == customPreferences)
     }
 
-    @Test("opusDtxEnabled defaults to false and persists correctly")
+    @Test("opusDtxEnabled defaults to true and persists correctly")
     func opusDtxDefaultsAndPersists() async throws {
         let userDefaults = UserDefaults.ephemeral()
         let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
 
         // Verify default value is false
         let defaultPreferences = await repository.getPreferences()
-        #expect(defaultPreferences.opusDtxEnabled == false)
+        #expect(defaultPreferences.opusDtxEnabled == true)
 
         // Save with opusDtxEnabled = true
         let customPreferences = PublisherSettingsPreferences(
             videoResolution: .medium,
             maxAudioBitrate: 40_000,
-            opusDtxEnabled: true
+            opusDtxEnabled: false
         )
         await repository.save(customPreferences)
 
         // Verify persistence
         let loadedPreferences = await repository.getPreferences()
-        #expect(loadedPreferences.opusDtxEnabled == true)
+        #expect(loadedPreferences.opusDtxEnabled == false)
 
         // Verify encoding/decoding
         let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
 
         let decoder = JSONDecoder()
         let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData)
-        #expect(decodedPreferences.opusDtxEnabled == true)
+        #expect(decodedPreferences.opusDtxEnabled == false)
     }
 
     @Test("save() updates subject and emits through publisher")

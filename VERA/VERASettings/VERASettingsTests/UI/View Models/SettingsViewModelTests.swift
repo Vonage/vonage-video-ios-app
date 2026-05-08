@@ -28,7 +28,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
-        #expect(viewModel.settingsPreference.opusDtxEnabled == false)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.isPresented == true)
     }
 
@@ -193,7 +193,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
-        #expect(viewModel.settingsPreference.opusDtxEnabled == false)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
     }
