@@ -13,9 +13,15 @@ public final class BackgroundBlurFactory {
     }
 
     public func makeBlurButton(
-        getCurrentPublisher: @escaping () throws -> VERAPublisher
+        getCurrentPublisher: @escaping () throws -> VERAPublisher,
+        getProvider: @escaping () -> BackgroundEffectProvider = { .vonage },
+        getAppleVisionQuality: @escaping () -> AppleVisionSegmentationQuality = { .fast }
     ) -> (view: some View, viewModel: BackgroundBlurButtonViewModel) {
-        let viewModel = BackgroundBlurButtonViewModel(getCurrentPublisher: getCurrentPublisher)
+        let viewModel = BackgroundBlurButtonViewModel(
+            getCurrentPublisher: getCurrentPublisher,
+            getProvider: getProvider,
+            getAppleVisionQuality: getAppleVisionQuality
+        )
         let view = BackgroundBlurScreenButton(viewModel: viewModel)
         return (view, viewModel)
     }
@@ -28,5 +34,11 @@ public final class BackgroundBlurFactory {
     public func makeMeetingBlurButton(viewModel: BackgroundBlurButtonViewModel) -> some View {
         let view = MeetingBackgroundBlurScreenButton(viewModel: viewModel)
         return (view)
+    }
+
+    /// Returns a small HUD overlay showing the live performance counters for
+    /// the active background-effect provider. Intended for DEBUG instrumentation.
+    public func makeHUDView() -> some View {
+        PerformanceHUDView()
     }
 }

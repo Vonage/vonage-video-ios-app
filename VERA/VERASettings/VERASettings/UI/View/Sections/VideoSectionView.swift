@@ -117,6 +117,37 @@ struct VideoSectionView: View {
 
         Section {
             Picker(
+                "Provider".localized,
+                selection: $viewModel.settingsPreference.backgroundProvider
+            ) {
+                ForEach(SettingsBackgroundProvider.allCases) { provider in
+                    Text(provider.displayName).tag(provider)
+                }
+            }
+
+            if viewModel.settingsPreference.backgroundProvider == .appleVision {
+                Picker(
+                    "Quality".localized,
+                    selection: $viewModel.settingsPreference.appleVisionQuality
+                ) {
+                    ForEach(SettingsAppleVisionQuality.allCases) { quality in
+                        Text(quality.displayName).tag(quality)
+                    }
+                }
+            }
+
+            Toggle(
+                "Performance HUD".localized,
+                isOn: $viewModel.settingsPreference.performanceHUDEnabled
+            )
+        } header: {
+            Text("Background Effects".localized)
+        } footer: {
+            Text(backgroundEffectsFooter)
+        }
+
+        Section {
+            Picker(
                 "Degradation Preference".localized,
                 selection: $viewModel.settingsPreference.degradationPreference
             ) {
@@ -129,6 +160,22 @@ struct VideoSectionView: View {
         } footer: {
             Text(viewModel.settingsPreference.degradationPreference.footerDescription)
         }
+    }
+
+    /// Footer copy for the Background Effects section. Split out of the body to
+    /// keep individual lines under SwiftLint's `line_length` cap.
+    private var backgroundEffectsFooter: String {
+        let providerCopy: String
+        switch viewModel.settingsPreference.backgroundProvider {
+        case .appleVision:
+            providerCopy =
+                "Apple Vision runs the segmentation on-device using the Neural Engine. "
+                + "Higher quality is slower but more accurate."
+        case .vonage:
+            providerCopy = "Vonage Media Library uses the SDK's bundled segmentation pipeline."
+        }
+        let hudCopy = "The Performance HUD overlays per-frame timing on the preview."
+        return "\(providerCopy) \(hudCopy)"
     }
 
     // MARK: - Helpers

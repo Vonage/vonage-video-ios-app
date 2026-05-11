@@ -42,6 +42,17 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public var opusDtxEnabled: Bool
 
+    /// The engine used for background-effect segmentation (Vonage or Apple Vision).
+    public var backgroundProvider: SettingsBackgroundProvider
+
+    /// The Apple Vision segmentation quality level (only used when ``backgroundProvider`` is `.appleVision`).
+    public var appleVisionQuality: SettingsAppleVisionQuality
+
+    /// Whether the performance HUD overlay (provider / engine / fps / per-phase ms)
+    /// is shown on the camera preview. Off by default — turning it on is opt-in
+    /// for both debugging and field-perf comparison.
+    public var performanceHUDEnabled: Bool
+
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
@@ -59,6 +70,11 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `false`.
+    ///   - backgroundProvider: Background segmentation engine. Defaults to `.vonage`
+    ///     to preserve existing behaviour for upgrading users.
+    ///   - appleVisionQuality: Apple Vision segmentation quality. Defaults to `.fast`.
+    ///   - performanceHUDEnabled: Whether to overlay the per-frame performance HUD on
+    ///     the camera preview. Defaults to `false`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -70,7 +86,10 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         subscriberAudioFallbackEnabled: Bool = true,
         senderStatsEnabled: Bool = false,
         degradationPreference: SettingsDegradationPreference = .notSet,
-        opusDtxEnabled: Bool = true
+        opusDtxEnabled: Bool = true,
+        backgroundProvider: SettingsBackgroundProvider = .vonage,
+        appleVisionQuality: SettingsAppleVisionQuality = .fast,
+        performanceHUDEnabled: Bool = false
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -83,6 +102,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.senderStatsEnabled = senderStatsEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.backgroundProvider = backgroundProvider
+        self.appleVisionQuality = appleVisionQuality
+        self.performanceHUDEnabled = performanceHUDEnabled
     }
 
     // MARK: - Migration
@@ -110,6 +132,12 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
+        backgroundProvider =
+            try container.decodeIfPresent(SettingsBackgroundProvider.self, forKey: .backgroundProvider) ?? .vonage
+        appleVisionQuality =
+            try container.decodeIfPresent(SettingsAppleVisionQuality.self, forKey: .appleVisionQuality) ?? .fast
+        performanceHUDEnabled =
+            try container.decodeIfPresent(Bool.self, forKey: .performanceHUDEnabled) ?? false
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -133,6 +161,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case senderStatsEnabled
         case degradationPreference
         case opusDtxEnabled
+        case backgroundProvider
+        case appleVisionQuality
+        case performanceHUDEnabled
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -154,6 +185,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(senderStatsEnabled, forKey: .senderStatsEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encode(backgroundProvider, forKey: .backgroundProvider)
+        try container.encode(appleVisionQuality, forKey: .appleVisionQuality)
+        try container.encode(performanceHUDEnabled, forKey: .performanceHUDEnabled)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -165,5 +199,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.senderStatsEnabled == rhs.senderStatsEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
+            && lhs.backgroundProvider == rhs.backgroundProvider
+            && lhs.appleVisionQuality == rhs.appleVisionQuality
+            && lhs.performanceHUDEnabled == rhs.performanceHUDEnabled
     }
 }

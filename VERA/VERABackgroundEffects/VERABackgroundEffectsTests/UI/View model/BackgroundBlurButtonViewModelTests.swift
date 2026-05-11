@@ -85,20 +85,26 @@ struct BackgroundBlurButtonViewModelTests {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
+        // setBackgroundBlur clears the Vonage, Apple Vision, and FrameCounter
+        // transformer keys on every call so switching providers mid-effect leaves
+        // no stale transformer. That means `removeTransformer` is invoked three
+        // times per tap regardless of state. The FrameCounter is only chained when
+        // the HUD is enabled, so `addVideoTransformer` is invoked once per non-none tap.
+
         // None -> Low
         sut.onTap()
         #expect(spy.addVideoTransformerCallCount == 1)
-        #expect(spy.removeTransformerCallCount == 1)
+        #expect(spy.removeTransformerCallCount == 3)
 
         // Low -> High
         sut.onTap()
         #expect(spy.addVideoTransformerCallCount == 2)
-        #expect(spy.removeTransformerCallCount == 2)
+        #expect(spy.removeTransformerCallCount == 6)
 
         // High -> None (solo remove, no add)
         sut.onTap()
         #expect(spy.addVideoTransformerCallCount == 2)
-        #expect(spy.removeTransformerCallCount == 3)
+        #expect(spy.removeTransformerCallCount == 9)
     }
 
     @Test
@@ -203,7 +209,8 @@ struct BackgroundBlurButtonViewModelTests {
         sut.update(blurLevel: .none)
 
         #expect(spy.addVideoTransformerCallCount == 0)
-        #expect(spy.removeTransformerCallCount == 1)
+        // Three keys cleared (Vonage, Apple Vision, FrameCounter) regardless of state.
+        #expect(spy.removeTransformerCallCount == 3)
     }
 
     @Test
@@ -250,6 +257,46 @@ struct BackgroundBlurButtonViewModelTests {
         // onTap() should now cycle from .high
         sut.onTap()
         #expect(sut.currentBlurLevel == .none)
+    }
+
+    // MARK: - Provider/Quality closure tests
+
+    @Test
+    func onTapConsultsProviderAndQualityClosures() async throws {
+        let spy = PublisherSpy()
+        var providerCallCount = 0
+        var qualityCallCount = 0
+
+        let sut = BackgroundBlurButtonViewModel(
+            getCurrentPublisher: { spy },
+            getProvider: {
+                providerCallCount += 1
+                return .vonage
+            },
+            getAppleVisionQuality: {
+                qualityCallCount += 1
+                return .fast
+            }
+        )
+
+        sut.onTap()  // none -> low triggers a set call
+
+        #expect(providerCallCount == 1)
+        #expect(qualityCallCount == 1)
+    }
+
+    @Test
+    func onTapWithExplicitVonageProviderStillAddsBlurTransformer() async throws {
+        let spy = PublisherSpy()
+        let sut = BackgroundBlurButtonViewModel(
+            getCurrentPublisher: { spy },
+            getProvider: { .vonage }
+        )
+
+        sut.onTap()
+
+        #expect(spy.addVideoTransformerCallCount == 1)
+        #expect(sut.currentBlurLevel == .low)
     }
 
     // MARK: - Test Helpers

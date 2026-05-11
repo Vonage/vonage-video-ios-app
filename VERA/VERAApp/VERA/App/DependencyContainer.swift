@@ -135,6 +135,11 @@ final class DependencyContainer {
 
     #if BACKGROUND_EFFECTS_ENABLED
         lazy var backgroundBlurFactory = BackgroundBlurFactory()
+
+        #if SETTINGS_ENABLED
+            lazy var backgroundEffectsPreferencesAdapter =
+                BackgroundEffectsPreferencesAdapter(repository: settingsRepository)
+        #endif
     #endif
 
     // MARK: - Settings feature (waiting room)

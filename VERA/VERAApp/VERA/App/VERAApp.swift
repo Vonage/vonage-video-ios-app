@@ -154,9 +154,18 @@ struct VERAApp: App {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
+            #if SETTINGS_ENABLED
+                let backgroundPreferences = dependencyContainer.backgroundEffectsPreferencesAdapter
+                let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher,
+                    getProvider: { [backgroundPreferences] in backgroundPreferences.getProvider() },
+                    getAppleVisionQuality: { [backgroundPreferences] in backgroundPreferences.getVisionQuality() }
+                )
+            #else
+                let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+                )
+            #endif
             navigationCoordinator.backgroundBlurButtonViewModel = viewModel
 
             if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
@@ -166,6 +175,12 @@ struct VERAApp: App {
 
                 buttons.append(ViewHolder(id: "Blur", content: { view }))
             }
+
+            // The HUD view internally returns EmptyView when its tracker isn't visible,
+            // so it's safe to always append. Visibility is controlled by the
+            // Settings → Background Effects → Performance HUD toggle (default off).
+            let hud = backgroundBlurFactory.makeHUDView()
+            buttons.append(ViewHolder(id: "PerfHUD", content: { hud }))
         #endif
 
         #if AUDIOEFFECTS_ENABLED
@@ -221,6 +236,14 @@ struct VERAApp: App {
                 .backgroundBlurLevel(currentBlurLevel)
                 .noiseSuppressionState(currentNoiseSuppressionState)
         )
+        #if BACKGROUND_EFFECTS_ENABLED && SETTINGS_ENABLED
+            .getBackgroundEffectProvider { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
+                adapter.getProvider()
+            }
+            .getAppleVisionQuality { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
+                adapter.getVisionQuality()
+            }
+        #endif
         .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
         .broadcastExtensionBundleId(
             (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"

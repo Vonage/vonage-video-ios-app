@@ -68,6 +68,8 @@ public final class MeetingRoomBuilder {
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
+    var _getBackgroundEffectProvider: () -> BackgroundEffectProvider = { .vonage }
+    var _getAppleVisionQuality: () -> AppleVisionSegmentationQuality = { .fast }
 
     /// Creates a new meeting room builder.
     public init(
@@ -217,6 +219,30 @@ public final class MeetingRoomBuilder {
         return self
     }
 
+    /// Sets the resolver used to pick the background-effect provider when the
+    /// meeting-room blur button is constructed.
+    ///
+    /// Without this the meeting room defaults to `.vonage`. Host apps that
+    /// surface a "provider" Settings choice should pass a closure that reads
+    /// the current Settings value here.
+    @discardableResult
+    public func getBackgroundEffectProvider(
+        _ resolver: @escaping () -> BackgroundEffectProvider
+    ) -> MeetingRoomBuilder {
+        _getBackgroundEffectProvider = resolver
+        return self
+    }
+
+    /// Sets the resolver used to pick the Apple Vision segmentation quality when
+    /// the meeting-room blur button is constructed.
+    @discardableResult
+    public func getAppleVisionQuality(
+        _ resolver: @escaping () -> AppleVisionSegmentationQuality
+    ) -> MeetingRoomBuilder {
+        _getAppleVisionQuality = resolver
+        return self
+    }
+
     /// Builds the meeting room with all configured features and dependencies.
     ///
     /// This method creates the complete dependency graph, registers plugins,
@@ -252,7 +278,9 @@ public final class MeetingRoomBuilder {
         // Background Effects
         if _enabledFeatures.contains(.backgroundEffects) {
             let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
-                getCurrentPublisher: container.publisherRepository.getPublisher
+                getCurrentPublisher: container.publisherRepository.getPublisher,
+                getProvider: _getBackgroundEffectProvider,
+                getAppleVisionQuality: _getAppleVisionQuality
             )
             if let initialLevel = _publisherSettings.backgroundBlurLevel {
                 blurVM.update(blurLevel: initialLevel)
