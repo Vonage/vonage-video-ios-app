@@ -237,10 +237,10 @@ struct VERAApp: App {
                 .noiseSuppressionState(currentNoiseSuppressionState)
         )
         #if BACKGROUND_EFFECTS_ENABLED && SETTINGS_ENABLED
-            .getBackgroundEffectProvider { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
+            .backgroundEffectProviderResolver { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
                 adapter.getProvider()
             }
-            .getAppleVisionQuality { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
+            .appleVisionQualityResolver { [adapter = dependencyContainer.backgroundEffectsPreferencesAdapter] in
                 adapter.getVisionQuality()
             }
         #endif

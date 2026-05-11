@@ -226,7 +226,7 @@ public final class MeetingRoomBuilder {
     /// surface a "provider" Settings choice should pass a closure that reads
     /// the current Settings value here.
     @discardableResult
-    public func getBackgroundEffectProvider(
+    public func backgroundEffectProviderResolver(
         _ resolver: @escaping () -> BackgroundEffectProvider
     ) -> MeetingRoomBuilder {
         _getBackgroundEffectProvider = resolver
@@ -236,7 +236,7 @@ public final class MeetingRoomBuilder {
     /// Sets the resolver used to pick the Apple Vision segmentation quality when
     /// the meeting-room blur button is constructed.
     @discardableResult
-    public func getAppleVisionQuality(
+    public func appleVisionQualityResolver(
         _ resolver: @escaping () -> AppleVisionSegmentationQuality
     ) -> MeetingRoomBuilder {
         _getAppleVisionQuality = resolver

@@ -169,8 +169,8 @@ struct VideoSectionView: View {
         switch viewModel.settingsPreference.backgroundProvider {
         case .appleVision:
             providerCopy =
-                "Apple Vision runs the segmentation on-device using the Neural Engine. "
-                + "Higher quality is slower but more accurate."
+                "Apple Vision runs the segmentation on-device via Core ML and may use the "
+                + "Neural Engine where available. Higher quality is slower but more accurate."
         case .vonage:
             providerCopy = "Vonage Media Library uses the SDK's bundled segmentation pipeline."
         }

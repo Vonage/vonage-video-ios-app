@@ -47,6 +47,7 @@ public final class TransformPerformanceTracker: ObservableObject {
     private var frameTimestamps: [CFAbsoluteTime] = []
     private var lastUIPushAt: CFAbsoluteTime = 0
     private let uiPushIntervalSeconds: CFAbsoluteTime = 0.2  // 5 Hz HUD refresh
+    private var lastResolution: (Int, Int)?
     private let lock = NSLock()
 
     public init() {}
@@ -71,7 +72,18 @@ public final class TransformPerformanceTracker: ObservableObject {
     /// Update the resolution label. Pushed from inside the Apple Vision
     /// transformer; for the Vonage path we have no in-line resolution signal,
     /// so it stays at the last known value (or "—" after a `reset`).
+    ///
+    /// Called once per frame in the Vision transformer, so we skip the
+    /// `Task { @MainActor }` hop when the value hasn't changed — otherwise the
+    /// hop runs at the capture frame rate even though the label is the same.
     public func setResolution(width: Int, height: Int) {
+        lock.lock()
+        if lastResolution == (width, height) {
+            lock.unlock()
+            return
+        }
+        lastResolution = (width, height)
+        lock.unlock()
         Task { @MainActor in
             self.resolutionLabel = "\(width)x\(height)"
         }
@@ -171,6 +183,7 @@ public final class TransformPerformanceTracker: ObservableObject {
         compositeSamples.removeAll()
         copyOutSamples.removeAll()
         frameTimestamps.removeAll()
+        lastResolution = nil
         lock.unlock()
 
         Task { @MainActor in
