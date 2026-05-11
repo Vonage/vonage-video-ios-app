@@ -57,8 +57,26 @@ final class DependencyContainer {
     }()
 
     lazy var cameraPreviewProviderRepository: any CameraPreviewProviderRepository = {
-        DefaultCameraPreviewProviderRepository(publisherFactory: publisherFactory)
+        #if SETTINGS_ENABLED
+            let adapter = publisherAdvancedSettingsAdapter
+            return DefaultCameraPreviewProviderRepository(
+                publisherFactory: publisherFactory,
+                advancedSettingsProvider: { adapter.get() }
+            )
+        #else
+            return DefaultCameraPreviewProviderRepository(publisherFactory: publisherFactory)
+        #endif
     }()
+
+    #if SETTINGS_ENABLED
+        lazy var publisherAdvancedSettingsAdapter: PublisherAdvancedSettingsAdapter = {
+            let adapter = PublisherAdvancedSettingsAdapter(repository: settingsRepository)
+            adapter.onChange = { [weak self] in
+                self?.cameraPreviewProviderRepository.resetPublisher()
+            }
+            return adapter
+        }()
+    #endif
 
     lazy var userRepository: any UserRepository = {
         UserDefaultsUserRepository(userDefaults: userDefaults)

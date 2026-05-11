@@ -34,10 +34,21 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
 
     /// Creates a new UserDefaults-backed settings repository.
     ///
+    /// The persisted preferences (if any) are loaded synchronously at init so
+    /// subscribers to ``preferencesPublisher`` immediately receive the user's
+    /// saved values rather than `.default`. Falling back to `.default` only
+    /// happens when no payload has been written yet.
+    ///
     /// - Parameter userDefaults: The UserDefaults instance to use. Defaults to `.standard`.
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        self.subject = CurrentValueSubject(.default)
+        let initial = Self.loadPersisted(from: userDefaults) ?? .default
+        self.subject = CurrentValueSubject(initial)
+    }
+
+    private static func loadPersisted(from userDefaults: UserDefaults) -> PublisherSettingsPreferences? {
+        guard let data = userDefaults.data(forKey: storeKey) else { return nil }
+        return try? JSONDecoder().decode(PublisherSettingsPreferences.self, from: data)
     }
 
     // MARK: - PublisherSettingsRepository

@@ -77,6 +77,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         initialised = true
 
         observeCameraDevices()
+        observeCameraPreviewReset()
 
         loadUsername()
 
@@ -152,6 +153,15 @@ extension WaitingRoomViewModel {
             self?.updateUIState()
         }
         .store(in: &cancellables)
+    }
+
+    fileprivate func observeCameraPreviewReset() {
+        cameraPreviewProviderRepository.didResetPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.startVideoPreview()
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func loadUsername() {
