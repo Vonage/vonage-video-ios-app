@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import VERADomain
 
 @testable import VERABackgroundEffects
 
