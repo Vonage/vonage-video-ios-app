@@ -78,7 +78,7 @@ public final class TransformPerformanceTracker: ObservableObject {
     /// hop runs at the capture frame rate even though the label is the same.
     public func setResolution(width: Int, height: Int) {
         lock.lock()
-        if lastResolution == (width, height) {
+        if let last = lastResolution, last == (width, height) {
             lock.unlock()
             return
         }
