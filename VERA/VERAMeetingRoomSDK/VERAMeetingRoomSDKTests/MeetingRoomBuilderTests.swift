@@ -137,6 +137,47 @@ struct MeetingRoomBuilderTests {
         #expect(builder.currentEnabledFeatures == [.reactions])
     }
 
+    @Test("Builder defaults to vonage provider resolver")
+    func builderDefaultsToVonageProvider() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentBackgroundEffectProviderResolver() == .vonage)
+    }
+
+    @Test("Builder stores backgroundEffectProviderResolver")
+    func builderStoresBackgroundEffectProviderResolver() {
+        let builder = makeMeetingRoomBuilder()
+            .backgroundEffectProviderResolver { .appleVision }
+        #expect(builder.currentBackgroundEffectProviderResolver() == .appleVision)
+    }
+
+    @Test("Builder defaults to fast apple vision quality resolver")
+    func builderDefaultsToFastQuality() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentAppleVisionQualityResolver() == .fast)
+    }
+
+    @Test("Builder stores appleVisionQualityResolver")
+    func builderStoresAppleVisionQualityResolver() {
+        let builder = makeMeetingRoomBuilder()
+            .appleVisionQualityResolver { .accurate }
+        #expect(builder.currentAppleVisionQualityResolver() == .accurate)
+    }
+
+    @Test("Builder resolvers are re-read on every access")
+    func builderResolversAreReReadOnEveryAccess() {
+        // A resolver-based API is only useful if the host can change the
+        // returned value over time. Verify the closure is invoked on every
+        // call, not snapshotted at registration.
+        var providerValue: BackgroundEffectProvider = .vonage
+        let builder = makeMeetingRoomBuilder()
+            .backgroundEffectProviderResolver { providerValue }
+
+        #expect(builder.currentBackgroundEffectProviderResolver() == .vonage)
+
+        providerValue = .appleVision
+        #expect(builder.currentBackgroundEffectProviderResolver() == .appleVision)
+    }
+
     func makeMeetingRoomBuilder(
         testBaseURL: URL = URL(string: "https://api.example.com")!,
         testRoomName: String = "test-room"

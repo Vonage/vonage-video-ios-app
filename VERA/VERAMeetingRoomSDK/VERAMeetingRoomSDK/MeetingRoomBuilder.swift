@@ -106,6 +106,12 @@ public final class MeetingRoomBuilder {
     /// The currently configured theme. Visible for testing.
     var currentTheme: MeetingRoomTheme? { _theme }
 
+    /// The currently configured background-effect provider resolver. Visible for testing.
+    var currentBackgroundEffectProviderResolver: () -> BackgroundEffectProvider { _getBackgroundEffectProvider }
+
+    /// The currently configured Apple Vision quality resolver. Visible for testing.
+    var currentAppleVisionQualityResolver: () -> AppleVisionSegmentationQuality { _getAppleVisionQuality }
+
     /// Sets the base URL for API requests (room credentials, archiving, captions).
     ///
     /// - Parameter url: The backend API base URL.
