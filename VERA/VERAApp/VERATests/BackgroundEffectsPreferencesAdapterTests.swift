@@ -116,4 +116,3 @@ private final class StubPreferencesRepository: PublisherSettingsRepository, @unc
     func save(_ preferences: PublisherSettingsPreferences) async throws { subject.send(preferences) }
     func reset() async { subject.send(.default) }
 }
-
