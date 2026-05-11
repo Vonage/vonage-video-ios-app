@@ -87,3 +87,9 @@ slather-report/
 setUpInfoPlist.sh
 VERA.entitlements
 EnvironmentConstants.swift
+
+# Local SDK builds dropped into the wrapper at:
+#   VERA/Tuist/LocalPackages/<pkg>/OpenTok.xcframework
+# The wrapper's Package.swift is checked in, but the unsigned xcframework
+# itself is reproduced from the upstream SDK source tree (see PR description).
+VERA/Tuist/LocalPackages/*/OpenTok.xcframework/

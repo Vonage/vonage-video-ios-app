@@ -1,9 +1,11 @@
 import ProjectDescription
 
 extension Package {
+    // Local wrapper for an unsigned SDK build with Phase 1+2 camera-enumeration
+    // changes (real device list on Mac, new `OTCameraDevice` API). When the
+    // upstream SDK ships these changes this can revert to the remote URL.
     public static let vonageVideoSDK = Package.package(
-        url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-        .upToNextMinor(from: "2.33")
+        path: "../Tuist/LocalPackages/vonage-video-client-sdk-swift"
     )
 }
 

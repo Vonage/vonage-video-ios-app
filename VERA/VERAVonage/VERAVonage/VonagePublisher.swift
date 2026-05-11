@@ -118,8 +118,27 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
 
     /// Switches camera to a specific device by ID.
     ///
-    /// - Parameter cameraDeviceID: One of the known `VonageCameraDevice` raw values.
+    /// `cameraDeviceID` is either an `AVCaptureDevice.uniqueID` (produced by
+    /// `VonageCameraDevicesRepository` via `AVCaptureDevice.DiscoverySession`)
+    /// or one of the legacy `VonageCameraDevice` raw values (`"Front"` / `"Back"`)
+    /// for back-compat with older fixtures/tests.
+    ///
+    /// When the SDK exposes a matching `OTCameraDevice` we use the new
+    /// `setCameraDevice(_:error:)` API — that's the only path that works on
+    /// "Designed for iPad on Mac" with non-front/back devices (Studio Display,
+    /// USB, Continuity Camera). Otherwise we fall back to position-based
+    /// switching.
     public func switchCamera(to cameraDeviceID: String) {
+        if let match = otPublisher.availableCameraDevices?.first(where: { $0.uniqueID == cameraDeviceID }) {
+            do {
+                try otPublisher.setCameraDevice(match)
+            } catch {
+                // Swallow — there's no UI hook to surface the failure from the
+                // toggle and the next preview start will recover.
+            }
+            return
+        }
+
         switch cameraDeviceID {
         case VonageCameraDevice.front.rawValue:
             otPublisher.cameraPosition = .front

@@ -192,13 +192,28 @@ extension WaitingRoomViewModel {
     fileprivate func makeUICameraDevice(
         device: CameraDevice
     ) -> UICameraDevice {
-        if device.id == "Front" {
-            return makeFrontCamera(device)
-        } else {
-            return makeBackCamera(device)
+        var ui = UICameraDevice(
+            id: device.id,
+            name: device.name,
+            iconName: Self.iconName(for: device.kind))
+        ui.onTap = { [weak self] in
+            self?.publisher?.switchCamera(to: device.id)
+        }
+        return ui
+    }
+
+    fileprivate static func iconName(for kind: CameraKind) -> String {
+        switch kind {
+        case .front: return "person.fill.viewfinder"
+        case .back: return "iphone.rear.camera"
+        case .continuity: return "iphone"
+        case .external: return "web.camera"
+        case .unknown: return "video"
         }
     }
 
+    // Retained for source-compatibility with anything that still constructs
+    // UI cameras directly from a `CameraDevice` (e.g. previews/tests).
     fileprivate func makeFrontCamera(_ device: CameraDevice) -> UICameraDevice {
         var device = UICameraDevice(
             id: device.id,

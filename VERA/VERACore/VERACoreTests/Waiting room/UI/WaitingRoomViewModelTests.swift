@@ -63,8 +63,8 @@ struct WaitingRoomViewModelTests {
         let cameraDevicesRepository = makeMockCameraDevicesRepository()
 
         let cameraDevices = [
-            CameraDevice(id: "Front", name: "a name"),
-            CameraDevice(id: "Back", name: "another name"),
+            CameraDevice(id: "Front", name: "a name", kind: .front),
+            CameraDevice(id: "Back", name: "another name", kind: .back),
         ]
         cameraDevicesRepository.set(cameraDevices)
 
