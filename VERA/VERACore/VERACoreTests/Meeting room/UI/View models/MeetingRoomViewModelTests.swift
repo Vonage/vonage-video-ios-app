@@ -546,74 +546,6 @@ struct MeetingRoomViewModelTests {
         #expect(updatedState?.participantsCount == initialState.participantsCount)
     }
 
-    // MARK: - Permission Request Tests
-
-    @Test("loadUI requests microphone permission")
-    @MainActor
-    func loadUI_requestsMicrophonePermission() async {
-        let requestMicUseCase = makeMockRequestMicrophonePermissionUseCase()
-        let checkMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .notDetermined)
-        let sut = makeSUT(
-            requestMicrophonePermissionUseCase: requestMicUseCase,
-            checkMicrophoneAuthorizationStatusUseCase: checkMicUseCase)
-
-        await sut.loadUI()
-
-        #expect(requestMicUseCase.callCount == 1)
-    }
-
-    @Test("loadUI requests camera permission")
-    @MainActor
-    func loadUI_requestsCameraPermission() async {
-        let requestCameraUseCase = makeMockRequestCameraPermissionUseCase()
-        let checkCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .notDetermined)
-        let sut = makeSUT(
-            requestCameraPermissionUseCase: requestCameraUseCase,
-            checkCameraAuthorizationStatusUseCase: checkCameraUseCase)
-
-        await sut.loadUI()
-
-        #expect(requestCameraUseCase.callCount == 1)
-    }
-
-    @Test("loadUI does not request permissions when already authorized")
-    @MainActor
-    func loadUI_doesNotRequestPermissionsWhenAlreadyAuthorized() async {
-        let requestMicUseCase = makeMockRequestMicrophonePermissionUseCase()
-        let requestCameraUseCase = makeMockRequestCameraPermissionUseCase()
-        let checkMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .authorized)
-        let checkCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .authorized)
-        let sut = makeSUT(
-            requestMicrophonePermissionUseCase: requestMicUseCase,
-            requestCameraPermissionUseCase: requestCameraUseCase,
-            checkMicrophoneAuthorizationStatusUseCase: checkMicUseCase,
-            checkCameraAuthorizationStatusUseCase: checkCameraUseCase)
-
-        await sut.loadUI()
-
-        #expect(requestMicUseCase.callCount == 0)
-        #expect(requestCameraUseCase.callCount == 0)
-    }
-
-    @Test("loadUI still connects to room when permissions are denied")
-    @MainActor
-    func loadUI_stillConnectsToRoomWhenPermissionsDenied() async throws {
-        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
-        let checkMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .denied)
-        let checkCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .denied)
-        let roomName = "test-room"
-        let sut = makeSUT(
-            roomName: roomName,
-            connectToRoomUseCase: connectToRoomUseCase,
-            checkMicrophoneAuthorizationStatusUseCase: checkMicUseCase,
-            checkCameraAuthorizationStatusUseCase: checkCameraUseCase)
-
-        await sut.loadUI()
-
-        #expect(connectToRoomUseCase.recordedActions == [.connect(roomName)])
-        #expect(sut.currentCall != nil)
-    }
-
     // MARK: SUT
 
     func makeSUT(
@@ -621,10 +553,6 @@ struct MeetingRoomViewModelTests {
         baseURL: URL = .init(string: "https://example.com")!,
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
-        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase =
-            makeMockRequestMicrophonePermissionUseCase(),
-        requestCameraPermissionUseCase: RequestCameraPermissionUseCase =
-            makeMockRequestCameraPermissionUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
@@ -640,8 +568,6 @@ struct MeetingRoomViewModelTests {
             baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
-            requestMicrophonePermissionUseCase: requestMicrophonePermissionUseCase,
-            requestCameraPermissionUseCase: requestCameraPermissionUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
             currentCallParticipantsRepository: currentCallParticipantsRepository,

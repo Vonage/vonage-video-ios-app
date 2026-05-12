@@ -81,9 +81,6 @@ public struct MeetingRoomScreen: View {
                 }
             }
         }
-        .task {
-            await viewModel.loadUI()
-        }
     }
 }
 

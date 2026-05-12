@@ -51,8 +51,6 @@ public class MeetingRoomFactory {
                 roomCredentialsRepository: roomCredentialsRepository
             ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
-            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
-            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,
@@ -67,6 +65,29 @@ public class MeetingRoomFactory {
 
     @MainActor
     public func make(viewModel: MeetingRoomViewModel) -> some View {
-        MeetingRoomScreen(viewModel: viewModel)
+        MeetingRoomScreenWithPermissions(viewModel: viewModel)
     }
 }
+
+private struct MeetingRoomScreenWithPermissions: View {
+    let viewModel: MeetingRoomViewModel
+
+    var body: some View {
+        MeetingRoomScreen(viewModel: viewModel)
+            .task {
+                await requestPermissions()
+                await viewModel.loadUI()
+            }
+    }
+
+    private func requestPermissions() async {
+        let micStatus = DefaultCheckMicrophoneAuthorizationStatusUseCase()()
+        if !micStatus.isAuthorized && !micStatus.isDenied {
+            _ = await DefaultRequestMicrophonePermissionUseCase()()
+        }
+
+        let cameraStatus = DefaultCheckCameraAuthorizationStatusUseCase()()
+        if !cameraStatus.isAuthorized && !cameraStatus.isDenied {
+            _ = await DefaultRequestCameraPermissionUseCase()()
+        }
+    }
