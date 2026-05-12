@@ -194,6 +194,8 @@ struct ScreenShareLayoutUITests {
     }
 }
 
+// MARK: - Component Tests
+
 @Suite("Active Speaker Layout Components")
 @MainActor
 struct ActiveSpeakerLayoutTests {

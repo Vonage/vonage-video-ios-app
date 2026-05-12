@@ -29,6 +29,8 @@ enum ActiveSpeakerLayoutConstants {
     static let horizontalPadding: Double = 12
     /// Fraction of available height allocated to the screen share tile in a split layout
     static let screenShareHeightRatio: Double = 0.65
+    /// Minimum height (in points) for a tile in the screen share split layout
+    static let minimumTileHeight: Double = 1
 }
 
 // MARK: - Layout Info
@@ -448,7 +450,7 @@ struct ScreenShareLayoutView: View {
         if let pinned = pinnedParticipant {
             GeometryReader { geometry in
                 let screenShareHeight = max(
-                    1,
+                    ActiveSpeakerLayoutConstants.minimumTileHeight,
                     (geometry.size.height - ActiveSpeakerLayoutConstants.spacing)
                         * ActiveSpeakerLayoutConstants.screenShareHeightRatio
                 )
