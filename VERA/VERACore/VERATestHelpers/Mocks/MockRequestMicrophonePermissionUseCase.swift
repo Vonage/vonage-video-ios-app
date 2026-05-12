@@ -13,12 +13,14 @@ public func makeMockRequestMicrophonePermissionUseCase(
 
 public final class MockRequestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase {
     public var isAuthorized: Bool = true
+    public var callCount: Int = 0
 
     public init(isAuthorized: Bool) {
         self.isAuthorized = isAuthorized
     }
 
     public func callAsFunction() async -> Bool {
-        isAuthorized
+        callCount += 1
+        return isAuthorized
     }
 }

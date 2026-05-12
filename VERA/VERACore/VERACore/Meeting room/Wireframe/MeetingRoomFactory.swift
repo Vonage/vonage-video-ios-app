@@ -51,6 +51,8 @@ public class MeetingRoomFactory {
                 roomCredentialsRepository: roomCredentialsRepository
             ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
+            requestMicrophonePermissionUseCase: DefaultRequestMicrophonePermissionUseCase(),
+            requestCameraPermissionUseCase: DefaultRequestCameraPermissionUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             currentCallParticipantsRepository: currentCallParticipantsRepository,

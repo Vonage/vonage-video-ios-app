@@ -36,6 +36,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let connectToRoomUseCase: ConnectToRoomUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
+    private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let appConfig: AppConfig
@@ -67,6 +69,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
+        requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase,
+        requestCameraPermissionUseCase: RequestCameraPermissionUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
@@ -80,6 +84,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
+        self.requestMicrophonePermissionUseCase = requestMicrophonePermissionUseCase
+        self.requestCameraPermissionUseCase = requestCameraPermissionUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
@@ -95,6 +101,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         guard !initialised else { return }
         initialised = true
 
+        await requestPermissions()
         await addObservers()
 
         updateExtraButtons()
@@ -145,6 +152,15 @@ public final class MeetingRoomViewModel: ObservableObject {
 }
 
 extension MeetingRoomViewModel {
+
+    fileprivate func requestPermissions() async {
+        _ = await requestPermission(
+            permissionChecker: checkMicrophoneAuthorizationStatusUseCase,
+            permissionRequester: requestMicrophonePermissionUseCase)
+        _ = await requestPermission(
+            permissionChecker: checkCameraAuthorizationStatusUseCase,
+            permissionRequester: requestCameraPermissionUseCase)
+    }
 
     fileprivate func handleNoiseSuppressionChange(_ noiseSuppressionState: NoiseSuppressionState) {
         Task { @MainActor [weak self] in

@@ -13,12 +13,14 @@ public func makeMockRequestCameraPermissionUseCase(
 
 public final class MockRequestCameraPermissionUseCase: RequestCameraPermissionUseCase {
     public var isAuthorized: Bool = true
+    public var callCount: Int = 0
 
     public init(isAuthorized: Bool) {
         self.isAuthorized = isAuthorized
     }
 
     public func callAsFunction() async -> Bool {
-        isAuthorized
+        callCount += 1
+        return isAuthorized
     }
 }
