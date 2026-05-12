@@ -163,6 +163,7 @@ struct HorizontalActiveSpeakerLayoutView: View {
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
+    /// Internal (not private) to allow direct unit testing of prominence logic.
     var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
@@ -333,6 +334,7 @@ struct VerticalActiveSpeakerLayoutView: View {
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
+    /// Internal (not private) to allow direct unit testing of prominence logic.
     var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
