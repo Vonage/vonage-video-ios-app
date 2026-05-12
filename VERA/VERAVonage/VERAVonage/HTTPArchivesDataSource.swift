@@ -8,37 +8,44 @@ import VERADomain
 public final class HTTPArchivesDataSource: ArchivesDataSource {
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
+    private let jsonEncoder: JSONEncoder
     private let baseURL: URL
 
     public init(
         baseURL: URL,
         httpClient: HTTPClient,
-        jsonDecoder: JSONDecoder
+        jsonDecoder: JSONDecoder,
+        jsonEncoder: JSONEncoder = JSONEncoder()
     ) {
         self.baseURL = baseURL
         self.httpClient = httpClient
         self.jsonDecoder = jsonDecoder
+        self.jsonEncoder = jsonEncoder
     }
 
     public func getArchives(
-        roomName: RoomName
+        sessionKey: String
     ) async throws -> [Archive] {
-        let url =
-            baseURL
-            .appendingPathComponent("session")
-            .appending(path: roomName)
-            .appending(path: "archives")
+        let url = baseURL
+            .appendingPathComponent("v2")
+            .appendingPathComponent("searchArchives")
 
-        let response = try await httpClient.get(url)
-        let archivesResponse = try jsonDecoder.decode(RemoteArchivesResponse.self, from: response)
+        let body = try jsonEncoder.encode(SessionKeyBody(sessionKey: sessionKey))
+        let response = try await httpClient.post(url, data: body)
+        let archivesResponse = try jsonDecoder.decode(
+            TRPCResponse<SearchArchivesResponse>.self, from: response)
 
-        return archivesResponse.archives.compactMap { $0.toDomain }
+        return archivesResponse.result.data.items.compactMap { $0.toDomain }
     }
 }
 
-public struct RemoteArchivesResponse: Decodable {
-    public let archives: [RemoteArchive]
-    public let status: Int
+private struct SessionKeyBody: Encodable {
+    let sessionKey: String
+}
+
+struct SearchArchivesResponse: Decodable {
+    let items: [RemoteArchive]
+    let count: Int
 }
 
 public struct RemoteArchive: Decodable {

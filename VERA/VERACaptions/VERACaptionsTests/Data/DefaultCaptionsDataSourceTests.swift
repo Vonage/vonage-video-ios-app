@@ -17,57 +17,31 @@ struct DefaultCaptionsDataSourceTests {
     func enableCaptionsSuccess() async throws {
         let (sut, httpClient) = makeSUT(baseURL: URL(string: "https://api.example.com")!)
         let responseJSON = """
-            {"captionsId": "captions-123", "status": 200}
+            {"result": {"data": {"captionsId": "captions-123"}}}
             """
         httpClient.postResult = .success(Data(responseJSON.utf8))
 
-        let response = try await sut.enableCaptions(.init(roomName: "my-room"))
+        let response = try await sut.enableCaptions(.init(sessionKey: "my-session-key"))
 
         #expect(response.captionsId == "captions-123")
         #expect(httpClient.postCallCount == 1)
-        #expect(httpClient.lastPostURL?.absoluteString == "https://api.example.com/session/my-room/enableCaptions")
+        #expect(httpClient.lastPostURL?.absoluteString == "https://api.example.com/v2/ensureCaptionsEnabled")
     }
 
-    // MARK: - Enable Captions — Errors
-
-    @Test("Enable captions throws invalidResponse when status is not 200")
-    func enableCaptionsInvalidStatus() async throws {
-        let (sut, httpClient) = makeSUT()
-        let responseJSON = """
-            {"captionsId": "captions-123", "status": 500}
-            """
-        httpClient.postResult = .success(Data(responseJSON.utf8))
-
-        await #expect(throws: DefaultCaptionsDataSource.Error.self) {
-            try await sut.enableCaptions(.init(roomName: "room"))
-        }
-    }
-
-    @Test("Enable captions throws invalidCaptionsId when captionsId is nil")
+    @Test("Enable captions returns nil captionsId when response has null")
     func enableCaptionsNilCaptionsId() async throws {
         let (sut, httpClient) = makeSUT()
         let responseJSON = """
-            {"captionsId": null, "status": 200}
+            {"result": {"data": {"captionsId": null}}}
             """
         httpClient.postResult = .success(Data(responseJSON.utf8))
 
-        await #expect(throws: DefaultCaptionsDataSource.Error.self) {
-            try await sut.enableCaptions(.init(roomName: "room"))
-        }
+        let response = try await sut.enableCaptions(.init(sessionKey: "key"))
+
+        #expect(response.captionsId == nil)
     }
 
-    @Test("Enable captions throws when captionsId key is missing")
-    func enableCaptionsMissingCaptionsIdKey() async throws {
-        let (sut, httpClient) = makeSUT()
-        let responseJSON = """
-            {"status": 200}
-            """
-        httpClient.postResult = .success(Data(responseJSON.utf8))
-
-        await #expect(throws: DefaultCaptionsDataSource.Error.self) {
-            try await sut.enableCaptions(.init(roomName: "room"))
-        }
-    }
+    // MARK: - Enable Captions — Errors
 
     @Test("Enable captions propagates network error from HTTP client")
     func enableCaptionsNetworkError() async throws {
@@ -75,7 +49,7 @@ struct DefaultCaptionsDataSourceTests {
         httpClient.postResult = .failure(MockNetworkError.connectionFailed)
 
         await #expect(throws: MockNetworkError.self) {
-            try await sut.enableCaptions(.init(roomName: "room"))
+            try await sut.enableCaptions(.init(sessionKey: "key"))
         }
     }
 
@@ -85,7 +59,7 @@ struct DefaultCaptionsDataSourceTests {
         httpClient.postResult = .success(Data("not json".utf8))
 
         await #expect(throws: DecodingError.self) {
-            try await sut.enableCaptions(.init(roomName: "room"))
+            try await sut.enableCaptions(.init(sessionKey: "key"))
         }
     }
 

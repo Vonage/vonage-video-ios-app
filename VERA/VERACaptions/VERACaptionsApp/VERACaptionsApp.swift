@@ -37,11 +37,12 @@ struct CaptionsDemoView: View {
         let factory = CaptionsFactory(
             captionsActivationDataSource: activationDataSource,
             captionsStatusDataSource: statusDataSource,
-            captionsRepository: repository
+            captionsRepository: repository,
+            sessionKeyProvider: DefaultSessionKeyHolder()
         )
 
         let captionsResult = factory.makeCaptionsView()
-        let buttonResult = factory.makeCaptionsButton(roomName: "demo-room")
+        let buttonResult = factory.makeCaptionsButton()
 
         self.repository = repository
         self.statusDataSource = statusDataSource

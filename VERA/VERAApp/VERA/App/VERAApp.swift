@@ -225,6 +225,7 @@ struct VERAApp: App {
         .broadcastExtensionBundleId(
             (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
         )
+        .sessionKeyHolder(dependencyContainer.sessionKeyHolder)
         .onAction { [weak navigationCoordinator] action in
             switch action {
             case .callDidEnd:
@@ -275,9 +276,7 @@ struct VERAApp: App {
             if let viewModel = navigationCoordinator.archivesViewModel {
                 return AnyView(archiveFactory.make(viewModel: viewModel))
             } else {
-                let (view, viewModel) = archiveFactory.make(
-                    roomName: roomName
-                ) { recording in
+                let (view, viewModel) = archiveFactory.make { recording in
                     Task { @MainActor in
                         UIApplication.shared.open(recording.url)
                     }

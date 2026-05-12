@@ -36,24 +36,30 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
 
     private let sessionRepository: SessionRepository
     private let roomCredentialsRepository: RoomCredentialsRepository
+    private let sessionKeyWriter: SessionKeyWriter
 
     /// Creates a new use case with required repositories.
     ///
     /// - Parameters:
     ///   - sessionRepository: Repository responsible for creating call sessions.
     ///   - roomCredentialsRepository: Repository that fetches room credentials from backend.
+    ///   - sessionKeyWriter: Writer populated with the session key JWT after credentials are fetched.
     public init(
         sessionRepository: SessionRepository,
-        roomCredentialsRepository: RoomCredentialsRepository
+        roomCredentialsRepository: RoomCredentialsRepository,
+        sessionKeyWriter: SessionKeyWriter
     ) {
         self.sessionRepository = sessionRepository
         self.roomCredentialsRepository = roomCredentialsRepository
+        self.sessionKeyWriter = sessionKeyWriter
     }
 
     /// Connects to the given room and returns an active call façade.
     ///
     /// Resolves the room credentials, converts them to domain ``RoomCredentials``,
     /// creates a session via the repository, and triggers `connect()` on the call.
+    /// Also populates the ``SessionKeyHolder`` with the session key for use by
+    /// feature view models (archiving, captions, etc.).
     ///
     /// - Parameter roomName: The target room name to connect to.
     /// - Returns: A connected ``CallFacade`` ready for interaction.
@@ -70,6 +76,7 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
     /// - Throws: Errors from the session repository.
     @MainActor
     private func getConnectedCall(_ credentials: RoomCredentials) async throws -> CallFacade {
+        sessionKeyWriter.setSessionKey(credentials.sessionKey)
         let call = try await sessionRepository.createSession(credentials)
         call.connect()
         return call
@@ -93,6 +100,7 @@ extension RoomCredentialsResponse {
             token: token,
             applicationId: apiKey,
             roomName: roomName,
+            sessionKey: sessionKey,
             captionsId: captionsId)
     }
 }

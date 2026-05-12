@@ -13,9 +13,6 @@ struct ConnectToRoomUseCaseTestsTests {
 
     @Test
     func connectToRoomUseCaseCreatesAndCallsToConnect() async throws {
-        let httpClient = MockHTTPClient()
-        httpClient.data = try makeCredentialsJSONResponse()
-
         let roomCredentialsRepository = makeMockRoomCredentialsRepository()
         let sessionRepository = makeMockSessionRepository()
 
@@ -41,6 +38,7 @@ struct ConnectToRoomUseCaseTestsTests {
     ) -> ConnectToRoomUseCase {
         return DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
-            roomCredentialsRepository: roomCredentialsRepository)
+            roomCredentialsRepository: roomCredentialsRepository,
+            sessionKeyWriter: DefaultSessionKeyHolder())
     }
 }

@@ -17,7 +17,7 @@ import SwiftUI
 ///
 /// ## Usage
 ///
-/// Create via ``CaptionsFactory/makeCaptionsButton(roomName:)`` or
+/// Create via ``CaptionsFactory/makeCaptionsButton()`` or
 /// instantiate directly:
 ///
 /// ```swift

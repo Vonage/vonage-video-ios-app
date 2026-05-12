@@ -23,7 +23,7 @@ public class MockRoomCredentialsRepository: RoomCredentialsRepository {
 
 public func makeMockRoomCredentialsRepository(
     _ response: RoomCredentialsResponse = .init(
-        sessionId: "a-sessionId", token: "a-tokenId", apiKey: "anAPIKey")
+        sessionId: "a-sessionId", token: "a-tokenId", apiKey: "anAPIKey", sessionKey: "aSessionKey")
 ) -> MockRoomCredentialsRepository {
     MockRoomCredentialsRepository(response: response)
 }

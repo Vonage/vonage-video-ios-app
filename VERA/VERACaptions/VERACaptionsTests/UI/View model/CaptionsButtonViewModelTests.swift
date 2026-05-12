@@ -65,9 +65,9 @@ struct CaptionsButtonViewModelTests {
 
     // MARK: - onTap Enable
 
-    @Test("Tapping when disabled calls enable use case with room name")
+    @Test("Tapping when disabled calls enable use case with session key")
     func tapWhenDisabledCallsEnable() async throws {
-        let (sut, mocks) = makeSUT(roomName: "my-room")
+        let (sut, mocks) = makeSUT(sessionKey: "my-session-key")
         sut.setup()
 
         sut.onTap()
@@ -75,7 +75,7 @@ struct CaptionsButtonViewModelTests {
         try await waitUntil { mocks.enableUseCase.callCount > 0 }
 
         #expect(mocks.enableUseCase.callCount == 1)
-        #expect(mocks.enableUseCase.lastRoomName == "my-room")
+        #expect(mocks.enableUseCase.lastSessionKey == "my-session-key")
         #expect(mocks.disableUseCase.callCount == 0)
     }
 
@@ -83,7 +83,7 @@ struct CaptionsButtonViewModelTests {
 
     @Test("Tapping when enabled calls disable use case and state becomes disabled")
     func tapWhenEnabledCallsDisable() async throws {
-        let (sut, mocks) = makeSUT(roomName: "my-room")
+        let (sut, mocks) = makeSUT(sessionKey: "my-session-key")
         sut.setup()
 
         mocks.statusDataSource.set(captionsState: .enabled("captions-456"))
@@ -185,14 +185,16 @@ struct CaptionsButtonViewModelTests {
     }
 
     private func makeSUT(
-        roomName: RoomName = "test-room"
+        sessionKey: String = "test-session-key"
     ) -> (CaptionsButtonViewModel, Mocks) {
         let enableUseCase = MockEnableCaptionsUseCase()
         let disableUseCase = MockDisableCaptionsUseCase()
         let statusDataSource = DefaultCaptionsStatusDataSource()
+        let holder = DefaultSessionKeyHolder()
+        holder.setSessionKey(sessionKey)
 
         let viewModel = CaptionsButtonViewModel(
-            roomName: roomName,
+            sessionKeyProvider: holder,
             enableCaptionsUseCase: enableUseCase,
             disableCaptionsUseCase: disableUseCase,
             captionsStatusDataSource: statusDataSource
@@ -225,12 +227,12 @@ struct CaptionsButtonViewModelTests {
 
 private final class MockEnableCaptionsUseCase: EnableCaptionsUseCase, @unchecked Sendable {
     var callCount = 0
-    var lastRoomName: String?
+    var lastSessionKey: String?
     var shouldThrow = false
 
     func callAsFunction(_ request: EnableCaptionsRequest) async throws {
         callCount += 1
-        lastRoomName = request.roomName
+        lastSessionKey = request.sessionKey
         if shouldThrow {
             throw MockError.forced
         }

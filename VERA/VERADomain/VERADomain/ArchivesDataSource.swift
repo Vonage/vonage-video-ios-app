@@ -5,5 +5,5 @@
 import Foundation
 
 public protocol ArchivesDataSource {
-    func getArchives(roomName: RoomName) async throws -> [Archive]
+    func getArchives(sessionKey: String) async throws -> [Archive]
 }

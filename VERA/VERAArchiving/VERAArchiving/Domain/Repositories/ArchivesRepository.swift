@@ -7,5 +7,5 @@ import Foundation
 import VERADomain
 
 public protocol ArchivesRepository {
-    func getArchives(roomName: RoomName) async -> AnyPublisher<[Archive], Error>
+    func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error>
 }

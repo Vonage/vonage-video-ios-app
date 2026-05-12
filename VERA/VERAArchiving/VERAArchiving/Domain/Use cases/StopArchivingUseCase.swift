@@ -5,11 +5,11 @@
 import Foundation
 
 public struct StopArchivingRequest {
-    public let roomName: String
+    public let sessionKey: String
     public let archiveID: String
 
-    public init(roomName: String, archiveID: String) {
-        self.roomName = roomName
+    public init(sessionKey: String, archiveID: String) {
+        self.sessionKey = sessionKey
         self.archiveID = archiveID
     }
 }
@@ -29,7 +29,7 @@ public final class DefaultStopArchivingUseCase: StopArchivingUseCase {
         _ request: StopArchivingRequest
     ) async throws {
         let newRequest = StopArchivingDataSourceRequest(
-            roomName: request.roomName,
+            sessionKey: request.sessionKey,
             archiveID: request.archiveID)
         _ = try await archivingDataSource.stopArchiving(newRequest)
     }

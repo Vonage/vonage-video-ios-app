@@ -11,7 +11,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
 
     @Published public var state: ArchivingState = .idle
 
-    private let roomName: RoomName
+    private let sessionKeyProvider: SessionKeyProvider
     private let startArchivingUseCase: StartArchivingUseCase
     private let stopArchivingUseCase: StopArchivingUseCase
     private let archivingStatusDataSource: ArchivingStatusDataSource
@@ -19,13 +19,13 @@ public final class ArchiveButtonViewModel: ObservableObject {
     private var initiated = false
 
     public init(
-        roomName: RoomName,
+        sessionKeyProvider: SessionKeyProvider,
         startArchivingUseCase: StartArchivingUseCase,
         stopArchivingUseCase: StopArchivingUseCase,
         archivingStatusDataSource: ArchivingStatusDataSource,
         showAlert: @escaping (AlertItem) -> Void
     ) {
-        self.roomName = roomName
+        self.sessionKeyProvider = sessionKeyProvider
         self.startArchivingUseCase = startArchivingUseCase
         self.stopArchivingUseCase = stopArchivingUseCase
         self.archivingStatusDataSource = archivingStatusDataSource
@@ -87,7 +87,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
     @MainActor
     private func startArchiving() async {
         do {
-            _ = try await startArchivingUseCase(.init(roomName: roomName))
+            _ = try await startArchivingUseCase(.init(sessionKey: sessionKeyProvider.sessionKey))
         } catch {
         }
     }
@@ -95,7 +95,7 @@ public final class ArchiveButtonViewModel: ObservableObject {
     @MainActor
     private func stopArchiving(withID id: String) async {
         do {
-            try await stopArchivingUseCase(.init(roomName: roomName, archiveID: id))
+            try await stopArchivingUseCase(.init(sessionKey: sessionKeyProvider.sessionKey, archiveID: id))
         } catch {
         }
     }

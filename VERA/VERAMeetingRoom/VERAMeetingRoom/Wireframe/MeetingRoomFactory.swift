@@ -16,6 +16,7 @@ public class MeetingRoomFactory {
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
     private let configuration: MeetingRoomConfiguration
+    private let sessionKeyHolder: SessionKeyHolder
 
     public init(
         baseURL: URL,
@@ -26,7 +27,8 @@ public class MeetingRoomFactory {
         roomCredentialsRepository: RoomCredentialsRepository,
         captionsStatusDataSource: CaptionsStatusDataSource,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: PinnedParticipantsDataSource
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource,
+        sessionKeyHolder: SessionKeyHolder
     ) {
         self.baseURL = baseURL
         self.configuration = configuration
@@ -37,6 +39,7 @@ public class MeetingRoomFactory {
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
+        self.sessionKeyHolder = sessionKeyHolder
     }
 
     @MainActor
@@ -50,7 +53,8 @@ public class MeetingRoomFactory {
             baseURL: baseURL,
             connectToRoomUseCase: DefaultConnectToRoomUseCase(
                 sessionRepository: sessionRepository,
-                roomCredentialsRepository: roomCredentialsRepository
+                roomCredentialsRepository: roomCredentialsRepository,
+                sessionKeyWriter: sessionKeyHolder
             ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),

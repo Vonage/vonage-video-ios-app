@@ -68,6 +68,7 @@ public final class MeetingRoomBuilder {
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
+    var _sessionKeyHolder: SessionKeyHolder?
 
     /// Creates a new meeting room builder.
     public init(
@@ -217,6 +218,20 @@ public final class MeetingRoomBuilder {
         return self
     }
 
+    /// Sets an external session key holder for sharing the session key JWT.
+    ///
+    /// When provided, the builder uses this holder instead of creating its own.
+    /// This allows the host app to access the session key for features like
+    /// the archives screen on the goodbye page.
+    ///
+    /// - Parameter holder: The session key holder to use.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func sessionKeyHolder(_ holder: SessionKeyHolder) -> MeetingRoomBuilder {
+        _sessionKeyHolder = holder
+        return self
+    }
+
     /// Builds the meeting room with all configured features and dependencies.
     ///
     /// This method creates the complete dependency graph, registers plugins,
@@ -237,6 +252,11 @@ public final class MeetingRoomBuilder {
             appGroupIdentifier: _appGroupIdentifier,
             broadcastExtensionBundleId: _broadcastExtensionBundleId
         )
+
+        // Use external session key holder if provided
+        if let externalHolder = _sessionKeyHolder {
+            container.sessionKeyHolder = externalHolder
+        }
 
         // 2. Create buttons assembler
         let buttonsAssembler = BottomBarButtonsAssembler(
@@ -263,9 +283,8 @@ public final class MeetingRoomBuilder {
         // Archiving
         if _enabledFeatures.contains(.archiving) {
             let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
-                roomName: roomName,
                 showAlert: { [weak alertPresenter] alertItem in
-                    alertPresenter?.present?(alertItem)
+                    alertPresenter?.present(alertItem)
                 }
             )
             archiveVM.setup()
@@ -276,7 +295,7 @@ public final class MeetingRoomBuilder {
         var captionsButtonViewModel: CaptionsButtonViewModel?
         var captionsViewModel: CaptionsViewModel?
         if _enabledFeatures.contains(.captions) {
-            let (_, captionsBtnVM) = container.captionsFactory.makeCaptionsButton(roomName: roomName)
+            let (_, captionsBtnVM) = container.captionsFactory.makeCaptionsButton()
             captionsBtnVM.setup()
             captionsButtonViewModel = captionsBtnVM
             buttonsAssembler.captionsButtonViewModel = captionsBtnVM
@@ -322,17 +341,17 @@ public final class MeetingRoomBuilder {
             onActionHandler: { [weak self, weak alertPresenter, weak buttonsAssembler] action in
                 switch action {
                 case .presentAlert(let alertItem):
-                    alertPresenter?.present?(alertItem)
+                    alertPresenter?.present(alertItem)
                 case .navigateToGoodbye:
                     onAction(.callDidEnd)
-                    alertPresenter?.present = nil
+                    alertPresenter?.reset()
                     buttonsAssembler?.cleanUp()
                     self?._onAction = nil
                 case .navigateToSettings:
                     self?.navigateToSettings()
                 case .navigateToWaitingRoom(let room):
                     onAction(.goBack(room))
-                    alertPresenter?.present = nil
+                    alertPresenter?.reset()
                     buttonsAssembler?.cleanUp()
                     self?._onAction = nil
                 default:

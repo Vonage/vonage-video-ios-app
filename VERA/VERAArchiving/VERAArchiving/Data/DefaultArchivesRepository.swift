@@ -21,27 +21,27 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     }
 
     public func getArchives(
-        roomName: RoomName
+        sessionKey: String
     ) -> AnyPublisher<[Archive], Error> {
-        let publisher = getPublisher(roomName: roomName)
+        let publisher = getPublisher(sessionKey: sessionKey)
 
         // Start polling
-        startPolling(for: roomName, publisher: publisher)
+        startPolling(for: sessionKey, publisher: publisher)
 
         return publisher.eraseToAnyPublisher()
     }
 
     private func startPolling(
-        for roomName: RoomName,
+        for sessionKey: String,
         publisher: CurrentValueSubject<[Archive], Error>
     ) {
         // Cancel any existing polling task for this room
-        pollingTasks[roomName]?.cancel()
+        pollingTasks[sessionKey]?.cancel()
 
         let task = Task {
             repeat {
                 do {
-                    let archives = try await archivesDataSource.getArchives(roomName: roomName)
+                    let archives = try await archivesDataSource.getArchives(sessionKey: sessionKey)
 
                     // Check if task was cancelled
                     guard !Task.isCancelled else { return }
@@ -50,7 +50,7 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                     // Stop polling if all archives are available or if any failed
                     if shouldStopPolling(archives) {
-                        pollingTasks.removeValue(forKey: roomName)
+                        pollingTasks.removeValue(forKey: sessionKey)
                         return
                     }
 
@@ -60,13 +60,13 @@ public final class DefaultArchivesRepository: ArchivesRepository {
                 } catch {
                     guard !Task.isCancelled else { return }
                     publisher.send(completion: .failure(error))
-                    pollingTasks[roomName] = nil
+                    pollingTasks[sessionKey] = nil
                     return
                 }
             } while !Task.isCancelled
         }
 
-        pollingTasks[roomName] = task
+        pollingTasks[sessionKey] = task
     }
 
     private func shouldStopPolling(_ archives: [Archive]) -> Bool {
@@ -82,13 +82,13 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     }
 
     private func getPublisher(
-        roomName: RoomName
+        sessionKey: String
     ) -> CurrentValueSubject<[Archive], Error> {
-        if let publisher = cache[roomName] {
+        if let publisher = cache[sessionKey] {
             return publisher
         }
         let publisher = CurrentValueSubject<[Archive], Error>([])
-        cache[roomName] = publisher
+        cache[sessionKey] = publisher
         return publisher
     }
 }

@@ -5,69 +5,69 @@
 import Foundation
 import VERADomain
 
-public struct StartArchivingResponse: Codable {
-    public let archiveId: String
-    public let status: Int
-
-    public init(archiveId: String, status: Int) {
-        self.archiveId = archiveId
-        self.status = status
-    }
+struct StartArchiveResponse: Decodable {
+    let id: String
+    let status: String
 }
 
-public struct StopArchivingResponse: Codable {
-    public let archiveId: String
-    public let status: Int
-
-    public init(archiveId: String, status: Int) {
-        self.archiveId = archiveId
-        self.status = status
-    }
+struct StopArchiveResponse: Decodable {
+    let id: String
+    let status: String
 }
 
 public struct DefaultArchivingDataSource: ArchivingDataSource {
     private let baseURL: URL
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
+    private let jsonEncoder: JSONEncoder
 
     public init(
         baseURL: URL,
         httpClient: HTTPClient,
-        jsonDecoder: JSONDecoder = JSONDecoder()
+        jsonDecoder: JSONDecoder = JSONDecoder(),
+        jsonEncoder: JSONEncoder = JSONEncoder()
     ) {
         self.baseURL = baseURL
         self.httpClient = httpClient
         self.jsonDecoder = jsonDecoder
+        self.jsonEncoder = jsonEncoder
     }
 
     public func startArchiving(
         _ request: StartArchivingDataSourceRequest
     ) async throws -> StartArchivingDataSourceResponse {
-        let url =
-            baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(request.roomName)
+        let url = baseURL
+            .appendingPathComponent("v2")
             .appendingPathComponent("startArchive")
 
-        let data = try await httpClient.post(url, data: Data())
-        let response = try jsonDecoder.decode(StartArchivingResponse.self, from: data)
+        let body = try jsonEncoder.encode(SessionKeyBody(sessionKey: request.sessionKey))
+        let data = try await httpClient.post(url, data: body)
+        let response = try jsonDecoder.decode(TRPCResponse<StartArchiveResponse>.self, from: data)
 
-        return .init(archiveId: response.archiveId)
+        return .init(archiveId: response.result.data.id)
     }
 
     public func stopArchiving(
         _ request: StopArchivingDataSourceRequest
     ) async throws -> StopArchivingDataSourceResponse {
-        let url =
-            baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(request.roomName)
-            .appendingPathComponent(request.archiveID)
+        let url = baseURL
+            .appendingPathComponent("v2")
             .appendingPathComponent("stopArchive")
 
-        let data = try await httpClient.post(url, data: Data())
-        let response = try jsonDecoder.decode(StopArchivingResponse.self, from: data)
+        let body = try jsonEncoder.encode(
+            StopArchiveBody(archiveId: request.archiveID, sessionKey: request.sessionKey))
+        let data = try await httpClient.post(url, data: body)
+        let response = try jsonDecoder.decode(TRPCResponse<StopArchiveResponse>.self, from: data)
 
-        return .init(archiveId: response.archiveId)
+        return .init(archiveId: response.result.data.id)
     }
+}
+
+private struct SessionKeyBody: Encodable {
+    let sessionKey: String
+}
+
+private struct StopArchiveBody: Encodable {
+    let archiveId: String
+    let sessionKey: String
 }
