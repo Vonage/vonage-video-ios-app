@@ -163,7 +163,7 @@ struct HorizontalActiveSpeakerLayoutView: View {
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
-    private var mainAreaParticipants: [UIParticipant] {
+    var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
 
@@ -333,7 +333,7 @@ struct VerticalActiveSpeakerLayoutView: View {
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
-    private var mainAreaParticipants: [UIParticipant] {
+    var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
 
