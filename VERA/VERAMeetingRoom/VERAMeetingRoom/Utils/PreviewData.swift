@@ -170,17 +170,4 @@ public struct PreviewData {
         UIParticipant(participant: fordPrefect, isPinned: false),
     ]
     public static let uiManyParticipants = participants.map { UIParticipant(participant: $0, isPinned: false) }
-
-    /// Participants with an active screen share sorted to the front.
-    public static let uiParticipantsWithScreenShare: [UIParticipant] = [
-        UIParticipant(participant: screenShare, isPinned: false),
-    ] + participants.map { UIParticipant(participant: $0, isPinned: false) }
-
-    /// Participants with an active screen share and one pinned participant.
-    public static let uiParticipantsWithScreenShareAndPinned: [UIParticipant] = [
-        UIParticipant(participant: screenShare, isPinned: false),
-        UIParticipant(participant: arthurDent, isPinned: true),
-        UIParticipant(participant: fordPrefect, isPinned: false),
-        UIParticipant(participant: zaphodBeeblebrox, isPinned: false),
-    ]
 }

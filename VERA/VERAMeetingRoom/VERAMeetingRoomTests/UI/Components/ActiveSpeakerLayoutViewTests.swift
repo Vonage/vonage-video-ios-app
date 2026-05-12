@@ -18,7 +18,9 @@ struct ActiveSpeakerLayoutViewTests {
     @Suite("HorizontalActiveSpeakerLayoutView")
     struct HorizontalLayoutTests {
 
-        private func makeSUT(participants: [UIParticipant], activeSpeakerId: String?) -> HorizontalActiveSpeakerLayoutView {
+        private func makeSUT(
+            participants: [UIParticipant], activeSpeakerId: String?
+        ) -> HorizontalActiveSpeakerLayoutView {
             HorizontalActiveSpeakerLayoutView(participants: participants, activeSpeakerId: activeSpeakerId)
         }
 
@@ -79,7 +81,8 @@ struct ActiveSpeakerLayoutViewTests {
     @Suite("VerticalActiveSpeakerLayoutView")
     struct VerticalLayoutTests {
 
-        private func makeSUT(participants: [UIParticipant], activeSpeakerId: String?) -> VerticalActiveSpeakerLayoutView {
+        private func makeSUT(participants: [UIParticipant], activeSpeakerId: String?) -> VerticalActiveSpeakerLayoutView
+        {
             VerticalActiveSpeakerLayoutView(participants: participants, activeSpeakerId: activeSpeakerId)
         }
 
