@@ -59,6 +59,10 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
+    /// When `false`, the card fills all available space without enforcing a 16:9 container
+    /// aspect ratio. Use this for screen sharing in full-screen or split-screen layouts so
+    /// the card expands to its parent's bounds and the video letterboxes to its native ratio.
+    var applyAspectRatio: Bool = true
 
     var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
@@ -72,7 +76,10 @@ struct ParticipantVideoCard: View {
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
-                        .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                        .aspectRatio(
+                            applyAspectRatio ? ParticipantVideoCardConstants.containerAspectRatio : nil,
+                            contentMode: .fit
+                        )
                         .overlay(
                             ZStack {
                                 if participant.isScreenshare {
@@ -118,7 +125,10 @@ struct ParticipantVideoCard: View {
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
-                        .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                        .aspectRatio(
+                            applyAspectRatio ? ParticipantVideoCardConstants.containerAspectRatio : nil,
+                            contentMode: .fit
+                        )
                         .overlay {
                             ZStack {
                                 Rectangle()

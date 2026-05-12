@@ -27,6 +27,8 @@ enum ActiveSpeakerLayoutConstants {
     static let bottomPadding: Double = 4
     /// Horizontal padding for the layout container
     static let horizontalPadding: Double = 12
+    /// Fraction of available height allocated to the screen share tile in a split layout
+    static let screenShareHeightRatio: Double = 0.65
 }
 
 // MARK: - Layout Info
@@ -62,9 +64,12 @@ private enum LayoutOrientation {
 ///
 /// ## Layout Behavior
 ///
-/// The layout automatically adapts based on device size class:
+/// The layout automatically adapts based on device size class and session state:
+/// - **Screen sharing active** — The screen share tile takes the full available space.
+///   If a participant is also pinned, the screen share appears on top (65%) with the
+///   pinned participant below (35%); no sidebar is shown.
 /// - **Horizontal** (iPad, landscape): Main speaker left, sidebar right
-/// - **Vertical** (iPhone, portrait): Main speaker top, others bottom
+/// - **Vertical** (iPhone, portrait): Main speaker top, others below
 ///
 /// ## Participant Overflow
 ///
@@ -105,9 +110,26 @@ struct ActiveSpeakerLayout: View {
         }
     }
 
+    /// The first screen sharing participant, if any.
+    private var screenShareParticipant: UIParticipant? {
+        participants.first(where: { $0.isScreenshare })
+    }
+
+    /// The first pinned participant that is not a screen share, if any.
+    /// Used alongside `screenShareParticipant` to build the split-screen layout.
+    private var firstNonScreenSharePinnedParticipant: UIParticipant? {
+        participants.first(where: { $0.isPinned && !$0.isScreenshare })
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if let singleParticipant = participants.first, participants.count == 1 {
+            if let screenShare = screenShareParticipant {
+                ScreenShareLayoutView(
+                    screenShareParticipant: screenShare,
+                    pinnedParticipant: firstNonScreenSharePinnedParticipant,
+                    activeSpeakerId: activeSpeakerId
+                )
+            } else if let singleParticipant = participants.first, participants.count == 1 {
                 ParticipantVideoCard(
                     participant: singleParticipant,
                     activeSpeakerId: activeSpeakerId
@@ -398,6 +420,70 @@ struct VerticalActiveSpeakerLayoutView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Screen Share Layout
+
+/// A layout that displays screen sharing as the sole primary content.
+///
+/// ## Layout variants
+///
+/// - **Screen share only** (no pinned participant): The screen share tile fills the entire
+///   available space. The video letterboxes to its native aspect ratio inside the tile.
+/// - **Screen share + pinned participant**: A vertical split where the screen share occupies
+///   the top 65% and the pinned participant occupies the remaining 35%. No sidebar is shown
+///   regardless of how many other participants are in the session.
+///
+/// Only the **first** pinned non-screenshare participant is shown. If multiple participants
+/// are pinned, only the top-priority one appears next to the screen share.
+struct ScreenShareLayoutView: View {
+    let screenShareParticipant: UIParticipant
+    /// The first non-screenshare pinned participant to display alongside the screen share,
+    /// or `nil` if no participant is pinned.
+    let pinnedParticipant: UIParticipant?
+    let activeSpeakerId: String?
+
+    var body: some View {
+        if let pinned = pinnedParticipant {
+            GeometryReader { geometry in
+                let screenShareHeight = max(
+                    1,
+                    (geometry.size.height - ActiveSpeakerLayoutConstants.spacing)
+                        * ActiveSpeakerLayoutConstants.screenShareHeightRatio
+                )
+                VStack(spacing: ActiveSpeakerLayoutConstants.spacing) {
+                    ParticipantVideoCard(
+                        participant: screenShareParticipant,
+                        activeSpeakerId: activeSpeakerId,
+                        applyAspectRatio: false
+                    )
+                    .id(screenShareParticipant.id + "_screenshare")
+                    .frame(height: screenShareHeight)
+                    .trackingVisibility(of: screenShareParticipant)
+
+                    ParticipantVideoCard(
+                        participant: pinned,
+                        activeSpeakerId: activeSpeakerId,
+                        applyAspectRatio: false
+                    )
+                    .id(pinned.id + "_pinned")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .trackingVisibility(of: pinned)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ParticipantVideoCard(
+                participant: screenShareParticipant,
+                activeSpeakerId: activeSpeakerId,
+                applyAspectRatio: false
+            )
+            .id(screenShareParticipant.id + "_screenshare")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .trackingVisibility(of: screenShareParticipant)
+        }
     }
 }
 
