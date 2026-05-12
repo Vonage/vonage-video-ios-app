@@ -208,7 +208,7 @@ struct DefaultArchivingDataSourceTests {
             "result": [
                 "data": [
                     "id": archiveId,
-                    "status": "started"
+                    "status": "started",
                 ]
             ]
         ]
@@ -222,7 +222,7 @@ struct DefaultArchivingDataSourceTests {
             "result": [
                 "data": [
                     "id": archiveId,
-                    "status": "stopped"
+                    "status": "stopped",
                 ]
             ]
         ]

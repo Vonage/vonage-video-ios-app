@@ -15,7 +15,7 @@ public func makeCreateSessionJSONResponse(
             "data": [
                 "sessionId": sessionId,
                 "sessionKey": sessionKey,
-                "applicationId": applicationId
+                "applicationId": applicationId,
             ]
         ]
     ]

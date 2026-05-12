@@ -18,7 +18,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         httpClient.responses = [
             try makeCreateSessionJSONResponse(
                 sessionId: "session-123", sessionKey: "jwt-key-abc", applicationId: "app-id-42"),
-            try makeJoinSessionJSONResponse(token: "token-xyz")
+            try makeJoinSessionJSONResponse(token: "token-xyz"),
         ]
 
         let sut = makeSUT(httpClient: httpClient)
@@ -36,7 +36,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let httpClient = SequentialMockHTTPClient()
         httpClient.responses = [
             try makeCreateSessionJSONResponse(),
-            try makeJoinSessionJSONResponse()
+            try makeJoinSessionJSONResponse(),
         ]
 
         let sut = makeSUT(httpClient: httpClient)
@@ -51,7 +51,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let httpClient = SequentialMockHTTPClient()
         httpClient.responses = [
             try makeCreateSessionJSONResponse(),
-            try makeJoinSessionJSONResponse()
+            try makeJoinSessionJSONResponse(),
         ]
 
         let sut = makeSUT(httpClient: httpClient)
@@ -66,7 +66,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let httpClient = SequentialMockHTTPClient()
         httpClient.responses = [
             try makeCreateSessionJSONResponse(),
-            try makeJoinSessionJSONResponse()
+            try makeJoinSessionJSONResponse(),
         ]
 
         let sut = makeSUT(httpClient: httpClient)
@@ -82,7 +82,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let httpClient = SequentialMockHTTPClient()
         httpClient.responses = [
             try makeCreateSessionJSONResponse(sessionKey: "the-jwt-key"),
-            try makeJoinSessionJSONResponse()
+            try makeJoinSessionJSONResponse(),
         ]
 
         let sut = makeSUT(httpClient: httpClient)
@@ -110,7 +110,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         let httpClient = SequentialMockHTTPClient()
         httpClient.responses = [
             try makeCreateSessionJSONResponse(),
-            try makeJoinSessionJSONResponse()
+            try makeJoinSessionJSONResponse(),
         ]
 
         let sut = makeSUT(httpClient: httpClient)

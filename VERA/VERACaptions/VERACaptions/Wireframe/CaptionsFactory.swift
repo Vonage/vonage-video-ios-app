@@ -24,8 +24,7 @@ public final class CaptionsFactory {
         self.sessionKeyProvider = sessionKeyProvider
     }
 
-    public func makeCaptionsButton(
-    ) -> (view: some View, viewModel: CaptionsButtonViewModel) {
+    public func makeCaptionsButton() -> (view: some View, viewModel: CaptionsButtonViewModel) {
         let viewModel = CaptionsButtonViewModel(
             sessionKeyProvider: sessionKeyProvider,
             enableCaptionsUseCase: DefaultEnableCaptionsUseCase(

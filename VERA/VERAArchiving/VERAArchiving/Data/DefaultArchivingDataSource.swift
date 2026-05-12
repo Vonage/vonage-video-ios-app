@@ -36,7 +36,8 @@ public struct DefaultArchivingDataSource: ArchivingDataSource {
     public func startArchiving(
         _ request: StartArchivingDataSourceRequest
     ) async throws -> StartArchivingDataSourceResponse {
-        let url = baseURL
+        let url =
+            baseURL
             .appendingPathComponent("v2")
             .appendingPathComponent("startArchive")
 
@@ -50,7 +51,8 @@ public struct DefaultArchivingDataSource: ArchivingDataSource {
     public func stopArchiving(
         _ request: StopArchivingDataSourceRequest
     ) async throws -> StopArchivingDataSourceResponse {
-        let url = baseURL
+        let url =
+            baseURL
             .appendingPathComponent("v2")
             .appendingPathComponent("stopArchive")
 

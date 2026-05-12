@@ -26,7 +26,8 @@ public final class HTTPArchivesDataSource: ArchivesDataSource {
     public func getArchives(
         sessionKey: String
     ) async throws -> [Archive] {
-        let url = baseURL
+        let url =
+            baseURL
             .appendingPathComponent("v2")
             .appendingPathComponent("searchArchives")
 

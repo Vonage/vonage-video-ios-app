@@ -30,7 +30,8 @@ public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
     public func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse {
-        let url = baseURL
+        let url =
+            baseURL
             .appendingPathComponent("v2")
             .appendingPathComponent("ensureCaptionsEnabled")
 
