@@ -16,7 +16,7 @@ struct DefaultArchivesRepositoryTests {
         let mockDataSource = MockArchivesDataSource()
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         let archives = try await awaitFirstValue(from: publisher)
         #expect(archives.isEmpty)
@@ -33,7 +33,7 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.archivesToReturn = expectedArchives
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         // Wait for the first non-empty value
         let archives = try await awaitFirstNonEmptyValue(from: publisher)
@@ -57,7 +57,7 @@ struct DefaultArchivesRepositoryTests {
         ]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         // Collect multiple values from the publisher
         let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
@@ -101,7 +101,7 @@ struct DefaultArchivesRepositoryTests {
         ]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
 
@@ -127,7 +127,7 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.archivesToReturn = [availableArchive, failedArchive]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
 
         // Collect first 2 values (initial empty array + first fetch result)
@@ -153,7 +153,7 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.archivesToReturn = [availableArchive]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         // Collect first 2 values (initial empty array + first fetch result)
         let values = try await publisher.values.first { $0.count == 1 }!
@@ -175,7 +175,7 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.shouldThrowError = true
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        let publisher = sut.getArchives(sessionKey: "test-room")
+        let publisher = await sut.getArchives(sessionKey: "test-room")
 
         let error = try await awaitError(from: publisher)
         #expect(error is MockArchivesDataSourceError)
@@ -189,8 +189,8 @@ struct DefaultArchivesRepositoryTests {
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
 
-        let publisher1 = sut.getArchives(sessionKey: "test-room")
-        let publisher2 = sut.getArchives(sessionKey: "test-room")
+        let publisher1 = await sut.getArchives(sessionKey: "test-room")
+        let publisher2 = await sut.getArchives(sessionKey: "test-room")
 
         // Collect first 2 values from first publisher
         let values1 = try await publisher1.values.first { $0.count == 1 }!
@@ -214,8 +214,8 @@ struct DefaultArchivesRepositoryTests {
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
 
-        let publisher1 = sut.getArchives(sessionKey: "room1")
-        let publisher2 = sut.getArchives(sessionKey: "room2")
+        let publisher1 = await sut.getArchives(sessionKey: "room1")
+        let publisher2 = await sut.getArchives(sessionKey: "room2")
 
         // Collect first 2 values from each publisher
         let archives1 = try await publisher1.values.first { $0.count == 1 }!

@@ -58,8 +58,8 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
     ///
     /// Resolves the room credentials, converts them to domain ``RoomCredentials``,
     /// creates a session via the repository, and triggers `connect()` on the call.
-    /// Also populates the ``SessionKeyHolder`` with the session key for use by
-    /// feature view models (archiving, captions, etc.).
+    /// Populates the ``SessionKeyHolder`` with the session key only after the
+    /// session is successfully created, so the holder stays clean on failure.
     ///
     /// - Parameter roomName: The target room name to connect to.
     /// - Returns: A connected ``CallFacade`` ready for interaction.
@@ -76,8 +76,8 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
     /// - Throws: Errors from the session repository.
     @MainActor
     private func getConnectedCall(_ credentials: RoomCredentials) async throws -> CallFacade {
-        sessionKeyWriter.setSessionKey(credentials.sessionKey)
         let call = try await sessionRepository.createSession(credentials)
+        sessionKeyWriter.setSessionKey(credentials.sessionKey)
         call.connect()
         return call
     }

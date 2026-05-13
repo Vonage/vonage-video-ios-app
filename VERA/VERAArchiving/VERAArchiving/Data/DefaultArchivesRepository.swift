@@ -22,7 +22,7 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
     public func getArchives(
         sessionKey: String
-    ) -> AnyPublisher<[Archive], Error> {
+    ) async -> AnyPublisher<[Archive], Error> {
         let publisher = getPublisher(sessionKey: sessionKey)
 
         // Start polling

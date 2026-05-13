@@ -4,11 +4,12 @@
 
 import Foundation
 
-/// Produces a tRPC-wrapped `createSession` JSON response.
-public func makeCreateSessionJSONResponse(
+/// Produces a tRPC-wrapped `createSessionAndJoin` JSON response.
+public func makeCreateSessionAndJoinJSONResponse(
     sessionId: String = "sessionId",
     sessionKey: String = "sessionKey",
-    applicationId: String = "applicationId"
+    applicationId: String = "applicationId",
+    token: String = "token"
 ) throws -> Data {
     let json: [String: Any] = [
         "result": [
@@ -16,20 +17,7 @@ public func makeCreateSessionJSONResponse(
                 "sessionId": sessionId,
                 "sessionKey": sessionKey,
                 "applicationId": applicationId,
-            ]
-        ]
-    ]
-    return try JSONSerialization.data(withJSONObject: json)
-}
-
-/// Produces a tRPC-wrapped `joinSession` JSON response.
-public func makeJoinSessionJSONResponse(
-    token: String = "token"
-) throws -> Data {
-    let json: [String: Any] = [
-        "result": [
-            "data": [
-                "token": token
+                "token": token,
             ]
         ]
     ]
