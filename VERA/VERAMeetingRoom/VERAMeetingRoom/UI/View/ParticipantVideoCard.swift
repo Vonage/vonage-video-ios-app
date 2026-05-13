@@ -59,7 +59,6 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-    var applyAspectRatio: Bool { participant.isScreenshare }
     var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
     var body: some View {
