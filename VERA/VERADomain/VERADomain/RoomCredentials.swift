@@ -17,6 +17,8 @@ public struct RoomCredentials: CustomStringConvertible {
     public let token: String
     /// The human-readable room name.
     public let roomName: String
+    /// The session key JWT used to authenticate subsequent v2 API calls.
+    public let sessionKey: String
     /// Optional captions stream identifier, when captions are enabled.
     public let captionsId: String?
 
@@ -27,18 +29,21 @@ public struct RoomCredentials: CustomStringConvertible {
     ///   - token: The Vonage token used for authentication.
     ///   - applicationId: The Vonage application (API) key.
     ///   - roomName: A human-readable room name.
+    ///   - sessionKey: The session key JWT for v2 API authentication.
     ///   - captionsId: Optional captions stream identifier.
     public init(
         sessionId: String,
         token: String,
         applicationId: String,
         roomName: String,
+        sessionKey: String,
         captionsId: String? = nil
     ) {
         self.sessionId = sessionId
         self.token = token
         self.applicationId = applicationId
         self.roomName = roomName
+        self.sessionKey = sessionKey
         self.captionsId = captionsId
     }
 

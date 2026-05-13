@@ -38,7 +38,7 @@ struct ArchivesViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         #expect(repository.getArchivesCallCount == 1)
-        #expect(repository.lastRoomName == "heart-of-gold")
+        #expect(repository.lastSessionKey == "heart-of-gold")
     }
 
     @Test func loadDataMapsArchivesToUIData() async {
@@ -248,12 +248,14 @@ struct ArchivesViewModelTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        roomName: RoomName = "heart-of-gold",
+        sessionKey: String = "heart-of-gold",
         archivesRepository: ArchivesRepository = SpyArchivesRepository(),
         playRecordingUseCase: PlayRecordingUseCase = SpyPlayRecordingUseCase()
     ) -> ArchivesViewModel {
-        ArchivesViewModel(
-            roomName: roomName,
+        let holder = DefaultSessionKeyHolder()
+        holder.setSessionKey(sessionKey)
+        return ArchivesViewModel(
+            sessionKeyProvider: holder,
             archivesRepository: archivesRepository,
             playRecordingUseCase: playRecordingUseCase
         )
@@ -287,13 +289,13 @@ struct ArchivesViewModelTests {
 
 final class SpyArchivesRepository: ArchivesRepository {
     var getArchivesCallCount = 0
-    var lastRoomName: RoomName?
+    var lastSessionKey: String?
     var shouldFail = false
     let subject = PassthroughSubject<[Archive], Error>()
 
-    func getArchives(roomName: RoomName) async -> AnyPublisher<[Archive], Error> {
+    func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
         getArchivesCallCount += 1
-        lastRoomName = roomName
+        lastSessionKey = sessionKey
 
         if shouldFail {
             return Fail(error: NSError(domain: "test", code: -1))

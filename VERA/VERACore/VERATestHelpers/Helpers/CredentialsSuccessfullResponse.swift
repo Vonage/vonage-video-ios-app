@@ -4,37 +4,22 @@
 
 import Foundation
 
-public struct CredentialsSuccessfullResponse: Codable {
-    public let sessionId: String
-    public let token: String
-    public let apiKey: String
-    public let captionsId: String?
-
-    public init(
-        sessionId: String,
-        token: String,
-        apiKey: String,
-        captionsId: String? = nil
-    ) {
-        self.sessionId = sessionId
-        self.token = token
-        self.apiKey = apiKey
-        self.captionsId = captionsId
-    }
-}
-
-public func makeCredentialsJSONResponse(
+/// Produces a tRPC-wrapped `createSessionAndJoin` JSON response.
+public func makeCreateSessionAndJoinJSONResponse(
     sessionId: String = "sessionId",
-    token: String = "token",
-    apiKey: String = "apiKey",
-    captionsId: String? = "captionsId"
+    sessionKey: String = "sessionKey",
+    applicationId: String = "applicationId",
+    token: String = "token"
 ) throws -> Data {
-    let response = CredentialsSuccessfullResponse(
-        sessionId: sessionId,
-        token: token,
-        apiKey: apiKey,
-        captionsId: captionsId
-    )
-
-    return try JSONEncoder().encode(response)
+    let json: [String: Any] = [
+        "result": [
+            "data": [
+                "sessionId": sessionId,
+                "sessionKey": sessionKey,
+                "applicationId": applicationId,
+                "token": token,
+            ]
+        ]
+    ]
+    return try JSONSerialization.data(withJSONObject: json)
 }

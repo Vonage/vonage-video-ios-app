@@ -17,10 +17,10 @@ struct DefaultEnableCaptionsUseCaseTests {
         let (sut, mocks) = makeSUT()
         mocks.dataSource.enableResult = .success(.init(captionsId: "captions-abc"))
 
-        try await sut(.init(roomName: "my-room"))
+        try await sut(.init(sessionKey: "my-session-key"))
 
         #expect(mocks.dataSource.enableCallCount == 1)
-        #expect(mocks.dataSource.lastRoomName == "my-room")
+        #expect(mocks.dataSource.lastSessionKey == "my-session-key")
 
         let state = try await currentState(mocks.statusDataSource)
         #expect(state == .enabled("captions-abc"))
@@ -32,7 +32,7 @@ struct DefaultEnableCaptionsUseCaseTests {
         mocks.dataSource.enableResult = .failure(MockError.forced)
 
         await #expect(throws: MockError.self) {
-            try await sut(.init(roomName: "room"))
+            try await sut(.init(sessionKey: "room"))
         }
 
         #expect(mocks.dataSource.enableCallCount == 1)
@@ -72,14 +72,14 @@ struct DefaultEnableCaptionsUseCaseTests {
 
 private final class MockCaptionsActivationDataSource: CaptionsActivationDataSource, @unchecked Sendable {
     var enableCallCount = 0
-    var lastRoomName: String?
+    var lastSessionKey: String?
     var enableResult: Result<EnableCaptionsDataSourceResponse, Error> = .success(.init(captionsId: "default-id"))
 
     func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse {
         enableCallCount += 1
-        lastRoomName = request.roomName
+        lastSessionKey = request.sessionKey
         return try enableResult.get()
     }
 }

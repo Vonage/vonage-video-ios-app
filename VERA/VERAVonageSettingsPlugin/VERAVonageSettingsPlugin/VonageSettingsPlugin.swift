@@ -44,6 +44,8 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Tracks the in-flight publisher-settings Task so it can be cancelled if new
     /// settings arrive before the previous republish cycle finishes.
     private var applySettingsTask: Task<Void, Never>?
+    /// Tracks the stats-forwarding Task so it can be cancelled on call end.
+    private var statsTask: Task<Void, Never>?
 
     /// The active call façade, injected by the plugin coordinator.
     public weak var call: (any CallFacade)?
@@ -85,7 +87,7 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// Clears stats data and cancels all subscriptions.
     public func callDidEnd() async throws {
-        cancelObservables()
+        await cancelObservables()
     }
 
     // MARK: - Private
@@ -126,30 +128,24 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
             .store(in: &cancellables)
 
         // Forward network stats from the call to the settings data layer.
-        call?.networkStatsPublisher
-            .sink { [weak self] stats in
-                guard let self else { return }
-                self.updateStats(stats)
+        // Uses a stored Task with `for await` so that each `statsWriter.updateStats`
+        // call completes before processing the next value, avoiding fire-and-forget races.
+        if let publisher = call?.networkStatsPublisher {
+            statsTask = Task { [weak self] in
+                for await stats in publisher.values {
+                    guard let self else { return }
+                    await self.statsWriter.updateStats(stats)
+                }
             }
-            .store(in: &cancellables)
-    }
-
-    private func updateStats(_ stats: NetworkMediaStats) {
-        Task {
-            await statsWriter.updateStats(stats)
         }
     }
 
-    private func clearStats() {
-        Task {
-            await statsWriter.clearStats()
-        }
-    }
-
-    private func cancelObservables() {
-        clearStats()
+    private func cancelObservables() async {
+        statsTask?.cancel()
+        statsTask = nil
         applySettingsTask?.cancel()
         applySettingsTask = nil
         cancellables.removeAll()
+        await statsWriter.clearStats()
     }
 }

@@ -4,13 +4,28 @@
 
 import VERADomain
 
-/// A bridge that allows the builder's closures to present alerts
-/// inside ``MeetingRoomComposedView`` via a shared reference.
+/// Bridge that delegates alert presentation to an ``AlertPresentable``.
 ///
-/// Follows the same pattern as `BottomBarButtonsAssembler` callbacks:
-/// the composed view sets `present` in `.onAppear`, and closures created
-/// during `build()` call `present?(_:)` when an alert is needed.
+/// Injected into the view layer; keeps UI concerns decoupled from
+/// view models and factories. Accepts any ``AlertPresentable``
+/// implementation, defaulting to ``UIKitAlertPresenter``.
 @MainActor
 final class AlertPresenter {
-    var present: ((AlertItem) -> Void)?
+    private var presenter: AlertPresentable?
+
+    init() {
+        self.presenter = UIKitAlertPresenter()
+    }
+
+    init(presenter: AlertPresentable) {
+        self.presenter = presenter
+    }
+
+    func present(_ alertItem: AlertItem) {
+        presenter?.presentAlert(alertItem)
+    }
+
+    func reset() {
+        presenter = nil
+    }
 }

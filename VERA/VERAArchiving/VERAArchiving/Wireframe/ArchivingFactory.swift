@@ -10,23 +10,25 @@ public final class ArchivingFactory {
     private let archivesRepository: ArchivesRepository
     private let archivingDataSource: ArchivingDataSource
     private let archivingStatusDataSource: ArchivingStatusDataSource
+    private let sessionKeyProvider: SessionKeyProvider
 
     public init(
         archivesRepository: ArchivesRepository,
         archivingDataSource: ArchivingDataSource,
-        archivingStatusDataSource: ArchivingStatusDataSource
+        archivingStatusDataSource: ArchivingStatusDataSource,
+        sessionKeyProvider: SessionKeyProvider
     ) {
         self.archivesRepository = archivesRepository
         self.archivingDataSource = archivingDataSource
         self.archivingStatusDataSource = archivingStatusDataSource
+        self.sessionKeyProvider = sessionKeyProvider
     }
 
     public func makeArchivingButton(
-        roomName: RoomName,
         showAlert: @escaping (AlertItem) -> Void
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
         let viewModel = ArchiveButtonViewModel(
-            roomName: roomName,
+            sessionKeyProvider: sessionKeyProvider,
             startArchivingUseCase: DefaultStartArchivingUseCase(
                 archivingDataSource: archivingDataSource),
             stopArchivingUseCase: DefaultStopArchivingUseCase(
@@ -43,11 +45,10 @@ public final class ArchivingFactory {
     }
 
     public func make(
-        roomName: RoomName,
         onPlay: @escaping (ArchiveRecording) -> Void
     ) -> (view: some View, viewModel: ArchivesViewModel) {
         let viewModel = ArchivesViewModel(
-            roomName: roomName,
+            sessionKeyProvider: sessionKeyProvider,
             archivesRepository: archivesRepository,
             playRecordingUseCase: DefaultPlayRecordingUseCase(
                 onPlay: onPlay

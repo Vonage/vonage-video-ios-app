@@ -37,6 +37,8 @@ final class DependencyContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
+    let sessionKeyHolder = DefaultSessionKeyHolder()
+
     lazy var userDefaults = UserDefaults(suiteName: EnvironmentConstants.veraAppGroupIdentifier) ?? .standard
 
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
@@ -115,7 +117,8 @@ final class DependencyContainer {
         lazy var archivingFactory = ArchivingFactory(
             archivesRepository: archivesRepository,
             archivingDataSource: archivingDataSource,
-            archivingStatusDataSource: archivingStatusDataSource)
+            archivingStatusDataSource: archivingStatusDataSource,
+            sessionKeyProvider: sessionKeyHolder)
 
         lazy var archivingDataSource: ArchivingDataSource = DefaultArchivingDataSource(
             baseURL: baseURL,
