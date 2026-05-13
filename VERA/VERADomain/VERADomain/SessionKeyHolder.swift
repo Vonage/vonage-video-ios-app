@@ -26,6 +26,7 @@ public final class DefaultSessionKeyHolder: SessionKeyHolder {
         lock.withLock { $0 }
     }
 
+    // Lock is initialized inline — no additional setup needed.
     public init() {}
 
     /// Updates the stored session key.

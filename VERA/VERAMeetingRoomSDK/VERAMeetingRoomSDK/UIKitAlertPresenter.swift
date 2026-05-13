@@ -12,6 +12,7 @@ import VERADomain
 @MainActor
 public final class UIKitAlertPresenter: AlertPresentable {
 
+    // No stored properties — public init required for external instantiation.
     public init() {}
 
     public func presentAlert(_ alertItem: AlertItem) {
