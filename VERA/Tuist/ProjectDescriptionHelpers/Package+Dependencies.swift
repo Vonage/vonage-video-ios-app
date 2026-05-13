@@ -3,7 +3,7 @@ import ProjectDescription
 extension Package {
     public static let vonageVideoSDK = Package.package(
         url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-        .upToNextMinor(from: "2.33")
+        .upToNextMinor(from: "2.34")
     )
 }
 
