@@ -8,12 +8,11 @@ import Foundation
 /// A simple fallback logging strategy that uses `print()`.
 ///
 /// Useful for development, playgrounds, or environments where
-/// os.Logger and CocoaLumberjack are unavailable.
+/// os.Logger are unavailable.
 public struct DefaultLogStrategy: LoggerStrategy, Sendable {
 
     private final class FormatterStorage: @unchecked Sendable {
         private let formatter: DateFormatter
-        private let lock = NSLock()
 
         init(dateFormat: String) {
             let formatter = DateFormatter()
@@ -23,8 +22,6 @@ public struct DefaultLogStrategy: LoggerStrategy, Sendable {
         }
 
         func string(from date: Date) -> String {
-            lock.lock()
-            defer { lock.unlock() }
             return formatter.string(from: date)
         }
     }

@@ -28,6 +28,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.isPresented == true)
     }
 
@@ -46,7 +47,8 @@ struct SettingsViewModelTests {
             publisherAudioFallbackEnabled: false,
             subscriberAudioFallbackEnabled: false,
             senderStatsEnabled: true,
-            degradationPreference: .balanced
+            degradationPreference: .balanced,
+            opusDtxEnabled: true
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
         let viewModel = SettingsViewModel(repository: repository)
@@ -63,6 +65,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == false)
         #expect(viewModel.senderStatsEnabled == true)
         #expect(viewModel.settingsPreference.degradationPreference == .balanced)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
     }
 
     // MARK: - Save Tests
@@ -89,6 +92,21 @@ struct SettingsViewModelTests {
         #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
         #expect(repository.lastSavedPreferences?.senderStatsEnabled == true)
         #expect(viewModel.isPresented == false)
+    }
+
+    @Test("Save persists opusDtxEnabled toggle")
+    func savePersistsOpusDtx() async throws {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.opusDtxEnabled = true
+
+        viewModel.save()
+
+        await delay()
+
+        #expect(repository.saveCallCount == 1)
+        #expect(repository.lastSavedPreferences?.opusDtxEnabled == true)
     }
 
     @Test("Save with custom bitrate preset persists custom value")
@@ -175,6 +193,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
+        #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
     }

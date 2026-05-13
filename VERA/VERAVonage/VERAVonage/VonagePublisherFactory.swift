@@ -75,6 +75,9 @@ public final class VonagePublisherFactory: PublisherFactory {
         if let maxAudioBitrate = settings.advancedSettings?.maxAudioBitrate {
             publisherSettings.audioBitrate = maxAudioBitrate
         }
+        if let opusDtxEnabled = settings.advancedSettings?.opusDtxEnabled {
+            publisherSettings.enableOpusDtx = opusDtxEnabled
+        }
         publisherSettings.subscriberAudioFallbackEnabled =
             settings.advancedSettings?.subscriberAudioFallbackEnabled ?? false
         publisherSettings.publisherAudioFallbackEnabled =

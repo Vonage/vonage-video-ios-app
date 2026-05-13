@@ -7,8 +7,6 @@ import SwiftUI
 import Testing
 import VERAMeetingRoom
 
-@testable import VERACore
-
 @Suite("Participants List View UI Tests")
 @MainActor
 struct ParticipantsListViewUITests {

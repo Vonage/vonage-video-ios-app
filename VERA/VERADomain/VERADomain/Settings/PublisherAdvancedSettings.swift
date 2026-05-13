@@ -38,6 +38,9 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
     /// The degradation preference policy for adapting frame rate and resolution.
     public let degradationPreference: DegradationPreference?
 
+    /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
+    public let opusDtxEnabled: Bool?
+
     /// Creates new advanced publisher settings.
     ///
     /// All parameters are optional, allowing you to configure only the settings you need.
@@ -52,6 +55,7 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag.
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag.
     ///   - degradationPreference: Degradation preference policy.
+    ///   - opusDtxEnabled: Whether Opus DTX is enabled.
     public init(
         videoResolution: VideoResolution? = nil,
         videoFrameRate: VideoFrameRate? = nil,
@@ -61,7 +65,8 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         maxVideoBitrate: Int32? = nil,
         publisherAudioFallbackEnabled: Bool? = nil,
         subscriberAudioFallbackEnabled: Bool? = nil,
-        degradationPreference: DegradationPreference? = nil
+        degradationPreference: DegradationPreference? = nil,
+        opusDtxEnabled: Bool? = nil
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -72,6 +77,7 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.degradationPreference = degradationPreference
+        self.opusDtxEnabled = opusDtxEnabled
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -84,5 +90,6 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         hasher.combine(publisherAudioFallbackEnabled)
         hasher.combine(subscriberAudioFallbackEnabled)
         hasher.combine(degradationPreference)
+        hasher.combine(opusDtxEnabled)
     }
 }

@@ -313,7 +313,7 @@ extension MeetingRoomViewModel {
                 .store(in: &cancellables)
 
             captionsStatusDataSource.captionsState
-                .sink { state in
+                .sink { [weak self] _ in
                     Task { @MainActor [weak self] in
                         self?.updateExtraButtons()
                     }

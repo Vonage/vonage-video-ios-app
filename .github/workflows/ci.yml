@@ -566,6 +566,28 @@ jobs:
             -resultBundlePath DerivedData/VERACommonUITests-iOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
 
+      - name: Run VERACocoaLumberjackLoggerTests (iOS Simulator)
+        id: cocoalumberjack-logger-tests
+        timeout-minutes: 15
+        run: |
+          echo "📡 Running VERACocoaLumberjackLoggerTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACocoaLumberjackLoggerTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            $XCODE_COMMON_FLAGS | xcpretty
+
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERACocoaLumberjackLoggerTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERACocoaLumberjackLoggerTests-iOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
+
       - name: Run VERATests (iOS Simulator)
         id: vera-app-tests
         timeout-minutes: 15
@@ -651,6 +673,7 @@ jobs:
             DerivedData/VERAAudioEffectsSnapshotTests-iOS.xcresult
             DerivedData/VERAVonageSettingsPluginTests-iOS.xcresult
             DerivedData/VERACommonUITests-iOS.xcresult
+            DerivedData/VERACocoaLumberjackLoggerTests-iOS.xcresult
             DerivedData/Build/Products/
           
   sonarcloud:
