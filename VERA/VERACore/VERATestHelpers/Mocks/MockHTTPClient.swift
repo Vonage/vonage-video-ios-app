@@ -7,11 +7,15 @@ import VERADomain
 
 public final class MockHTTPClient: HTTPClient {
     public var data = Data()
+    public var dataSequence: [Data] = []
     public var shouldThrowError = false
+    public var shouldThrowErrorOnCallNumber: Int?
     public var delaySeconds: TimeInterval = 0
     public var callCount = 0
     public var recordedURL: URL!
+    public var recordedURLs: [URL] = []
     public var recordedData: Data?
+    public var recordedDataSequence: [Data] = []
 
     public init(
         data: Data = Data(),
@@ -30,33 +34,29 @@ public final class MockHTTPClient: HTTPClient {
     }
 
     public func get(_ url: URL) async throws -> Data {
-        callCount += 1
-        recordedURL = url
-
-        if delaySeconds > 0 {
-            try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
-        }
-
-        if shouldThrowError {
-            throw MockHTTPError()
-        }
-
-        return data
+        try recordAndReturn(url: url, data: nil)
     }
 
     public func post(_ url: URL, data: Data) async throws -> Data {
+        try recordAndReturn(url: url, data: data)
+    }
+
+    private func recordAndReturn(url: URL, data: Data?) throws -> Data {
         callCount += 1
         recordedURL = url
-        recordedData = data
-
-        if delaySeconds > 0 {
-            try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
+        recordedURLs.append(url)
+        if let data {
+            recordedData = data
+            recordedDataSequence.append(data)
         }
 
-        if shouldThrowError {
+        if shouldThrowError || shouldThrowErrorOnCallNumber == callCount {
             throw MockHTTPError()
         }
 
+        if !dataSequence.isEmpty {
+            return dataSequence[min(callCount - 1, dataSequence.count - 1)]
+        }
         return self.data
     }
 }
