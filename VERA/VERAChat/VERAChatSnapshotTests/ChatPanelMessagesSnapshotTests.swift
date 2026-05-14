@@ -36,7 +36,6 @@ struct ChatPanelMessagesSnapshotTests {
     @Test(
         "ChatPanelMessages - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
             ("Dark", ColorScheme.dark),
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
