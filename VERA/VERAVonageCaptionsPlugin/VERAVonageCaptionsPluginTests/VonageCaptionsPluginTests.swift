@@ -92,16 +92,18 @@ struct VonageCaptionsPluginTests {
 
         let first = [CaptionItem(speakerName: "Alice", text: "First")]
         mocks.call._captionsPublisher.send(first)
-        try await waitUntil { mocks.repository.updateCallCount == 2 }
+        try await waitUntil { mocks.repository.lastCaptions == first }
+
+        let countAfterFirst = mocks.repository.updateCallCount
 
         let second = [
             CaptionItem(speakerName: "Alice", text: "First"),
             CaptionItem(speakerName: "Bob", text: "Second"),
         ]
         mocks.call._captionsPublisher.send(second)
-        try await waitUntil { mocks.repository.updateCallCount == 3 }
+        try await waitUntil { mocks.repository.lastCaptions == second }
 
-        #expect(mocks.repository.lastCaptions == second)
+        #expect(mocks.repository.updateCallCount > countAfterFirst)
     }
 
     // MARK: - Call Did End

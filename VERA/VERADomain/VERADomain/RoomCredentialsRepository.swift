@@ -34,26 +34,45 @@ public struct RoomCredentialsResponse: CustomStringConvertible {
     }
 }
 
-/// Response from `POST /v2/createSessionAndJoin`.
-public struct CreateSessionAndJoinResponse: Decodable {
+/// Response from `POST /v2/createSession`.
+public struct CreateSessionResponse: Decodable {
     public let sessionId: String
     public let sessionKey: String
     public let applicationId: String
-    public let token: String
 
-    public init(sessionId: String, sessionKey: String, applicationId: String, token: String) {
+    public init(sessionId: String, sessionKey: String, applicationId: String) {
         self.sessionId = sessionId
         self.sessionKey = sessionKey
         self.applicationId = applicationId
-        self.token = token
     }
 }
 
-public struct CreateSessionAndJoinRequestBody: Encodable {
+/// Request body for `POST /v2/createSession`.
+public struct CreateSessionRequestBody: Encodable {
     let roomName: String
 
     public init(roomName: String) {
         self.roomName = roomName
+    }
+}
+
+/// Response from `POST /v2/joinSession`.
+public struct JoinSessionResponse: Decodable {
+    public let token: String
+    public let applicationId: String
+
+    public init(token: String, applicationId: String) {
+        self.token = token
+        self.applicationId = applicationId
+    }
+}
+
+/// Request body for `POST /v2/joinSession`.
+public struct JoinSessionRequestBody: Encodable {
+    let sessionKey: String
+
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 
