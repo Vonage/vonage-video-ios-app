@@ -72,10 +72,11 @@ final class DependencyContainer {
 
     #if SETTINGS_ENABLED
         lazy var publisherAdvancedSettingsAdapter: PublisherAdvancedSettingsAdapter = {
-            let adapter = PublisherAdvancedSettingsAdapter(repository: settingsRepository)
+            let adapter = PublisherAdvancedSettingsAdapter()
             adapter.onChange = { [weak self] in
                 self?.cameraPreviewProviderRepository.resetPublisher()
             }
+            adapter.setup(with: settingsRepository.preferencesPublisher)
             return adapter
         }()
     #endif
@@ -161,8 +162,11 @@ final class DependencyContainer {
     // MARK: - Settings feature (waiting room)
 
     #if SETTINGS_ENABLED
-        lazy var settingsRepository: PublisherSettingsRepository =
-            UserDefaultsSettingsRepository()
+        lazy var settingsRepository: PublisherSettingsRepository = {
+            let repository = UserDefaultsSettingsRepository()
+            Task { await repository.setup() }
+            return repository
+        }()
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,

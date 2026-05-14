@@ -34,21 +34,24 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
 
     /// Creates a new UserDefaults-backed settings repository.
     ///
-    /// The persisted preferences (if any) are loaded synchronously at init so
-    /// subscribers to ``preferencesPublisher`` immediately receive the user's
-    /// saved values rather than `.default`. Falling back to `.default` only
-    /// happens when no payload has been written yet.
+    /// Call ``setup()`` once after construction to seed ``preferencesPublisher``
+    /// with any persisted preferences.
     ///
     /// - Parameter userDefaults: The UserDefaults instance to use. Defaults to `.standard`.
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        let initial = Self.loadPersisted(from: userDefaults) ?? .default
-        self.subject = CurrentValueSubject(initial)
+        self.subject = CurrentValueSubject(.default)
     }
 
-    private static func loadPersisted(from userDefaults: UserDefaults) -> PublisherSettingsPreferences? {
-        guard let data = userDefaults.data(forKey: storeKey) else { return nil }
-        return try? JSONDecoder().decode(PublisherSettingsPreferences.self, from: data)
+    /// Loads the persisted preferences (if any) and seeds ``preferencesPublisher``
+    /// so subscribers receive the user's saved values rather than `.default`.
+    ///
+    /// Call once after construction. Because the repository is an `actor` and
+    /// `UserDefaults` is not `Sendable`, this is `async`; subscribers that attach
+    /// before it completes first observe `.default`, then the persisted value.
+    public func setup() async {
+        guard let persisted = load(from: userDefaults) else { return }
+        subject.send(persisted)
     }
 
     // MARK: - PublisherSettingsRepository
