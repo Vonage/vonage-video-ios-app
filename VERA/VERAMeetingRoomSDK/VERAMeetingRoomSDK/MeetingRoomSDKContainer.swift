@@ -62,6 +62,8 @@ final class MeetingRoomSDKContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
+    var sessionKeyHolder: SessionKeyHolder = DefaultSessionKeyHolder()
+
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
         checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
@@ -160,7 +162,8 @@ final class MeetingRoomSDKContainer {
         roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
         noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: pinnedParticipantsDataSource
+        pinnedParticipantsDataSource: pinnedParticipantsDataSource,
+        sessionKeyHolder: sessionKeyHolder
     )
 
     // MARK: - Chat Feature
@@ -203,7 +206,8 @@ final class MeetingRoomSDKContainer {
     lazy var archivingFactory = ArchivingFactory(
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
-        archivingStatusDataSource: archivingStatusDataSource)
+        archivingStatusDataSource: archivingStatusDataSource,
+        sessionKeyProvider: sessionKeyHolder)
 
     // MARK: - Background Effects Feature
 
@@ -229,7 +233,8 @@ final class MeetingRoomSDKContainer {
     lazy var captionsFactory = CaptionsFactory(
         captionsActivationDataSource: captionsActivationDataSource,
         captionsStatusDataSource: captionsStatusDataSource,
-        captionsRepository: captionsRepository)
+        captionsRepository: captionsRepository,
+        sessionKeyProvider: sessionKeyHolder)
 
     lazy var captionsPlugin: VonageCaptionsPlugin = {
         VonageCaptionsPlugin(

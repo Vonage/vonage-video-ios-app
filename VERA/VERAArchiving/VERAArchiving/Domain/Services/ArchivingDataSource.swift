@@ -10,19 +10,19 @@ public enum ArchivingDataSourceError: Swift.Error {
 }
 
 public struct StartArchivingDataSourceRequest {
-    public let roomName: String
+    public let sessionKey: String
 
-    public init(roomName: String) {
-        self.roomName = roomName
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 
 public struct StopArchivingDataSourceRequest {
-    public let roomName: String
+    public let sessionKey: String
     public let archiveID: String
 
-    public init(roomName: String, archiveID: String) {
-        self.roomName = roomName
+    public init(sessionKey: String, archiveID: String) {
+        self.sessionKey = sessionKey
         self.archiveID = archiveID
     }
 }

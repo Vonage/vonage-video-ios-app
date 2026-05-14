@@ -24,7 +24,7 @@ public final class MockArchivesDataSource: ArchivesDataSource {
         self.callCount = callCount
     }
 
-    public func getArchives(roomName: RoomName) async throws -> [Archive] {
+    public func getArchives(sessionKey: String) async throws -> [Archive] {
         callCount += 1
 
         if shouldThrowError {

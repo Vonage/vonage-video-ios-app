@@ -6,10 +6,10 @@ import Foundation
 import VERADomain
 
 public struct EnableCaptionsRequest {
-    public let roomName: String
+    public let sessionKey: String
 
-    public init(roomName: String) {
-        self.roomName = roomName
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 
@@ -33,7 +33,7 @@ public final class DefaultEnableCaptionsUseCase: EnableCaptionsUseCase {
         _ request: EnableCaptionsRequest
     ) async throws {
         let newRequest = EnableCaptionsDataSourceRequest(
-            roomName: request.roomName
+            sessionKey: request.sessionKey
         )
         let response = try await captionsActivationDataSource.enableCaptions(newRequest)
         captionsStatusDataSource.set(captionsState: .enabled(response.captionsId))

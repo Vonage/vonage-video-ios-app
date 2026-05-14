@@ -6,17 +6,17 @@ import Foundation
 import VERADomain
 
 public struct EnableCaptionsDataSourceRequest {
-    public let roomName: String
+    public let sessionKey: String
 
-    public init(roomName: String) {
-        self.roomName = roomName
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 
 public struct EnableCaptionsDataSourceResponse {
-    public let captionsId: CaptionsID
+    public let captionsId: CaptionsID?
 
-    public init(captionsId: CaptionsID) {
+    public init(captionsId: CaptionsID?) {
         self.captionsId = captionsId
     }
 }

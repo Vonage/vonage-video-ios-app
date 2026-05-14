@@ -188,7 +188,7 @@ struct MeetingRoomViewModelTests {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository())
+            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
         let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
 
         let sut = makeSUT(
@@ -217,7 +217,7 @@ struct MeetingRoomViewModelTests {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository())
+            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
         let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())

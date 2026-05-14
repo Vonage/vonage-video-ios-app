@@ -10,22 +10,23 @@ public final class CaptionsFactory {
     private let captionsActivationDataSource: CaptionsActivationDataSource
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let captionsRepository: CaptionsRepository
+    private let sessionKeyProvider: SessionKeyProvider
 
     public init(
         captionsActivationDataSource: CaptionsActivationDataSource,
         captionsStatusDataSource: CaptionsStatusDataSource,
-        captionsRepository: CaptionsRepository
+        captionsRepository: CaptionsRepository,
+        sessionKeyProvider: SessionKeyProvider
     ) {
         self.captionsActivationDataSource = captionsActivationDataSource
         self.captionsStatusDataSource = captionsStatusDataSource
         self.captionsRepository = captionsRepository
+        self.sessionKeyProvider = sessionKeyProvider
     }
 
-    public func makeCaptionsButton(
-        roomName: RoomName
-    ) -> (view: some View, viewModel: CaptionsButtonViewModel) {
+    public func makeCaptionsButton() -> (view: some View, viewModel: CaptionsButtonViewModel) {
         let viewModel = CaptionsButtonViewModel(
-            roomName: roomName,
+            sessionKeyProvider: sessionKeyProvider,
             enableCaptionsUseCase: DefaultEnableCaptionsUseCase(
                 captionsActivationDataSource: captionsActivationDataSource,
                 captionsStatusDataSource: captionsStatusDataSource),

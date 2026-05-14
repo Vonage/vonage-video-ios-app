@@ -64,7 +64,7 @@ private enum LayoutOrientation {
 ///
 /// The layout automatically adapts based on device size class:
 /// - **Horizontal** (iPad, landscape): Main speaker left, sidebar right
-/// - **Vertical** (iPhone, portrait): Main speaker top, others bottom
+/// - **Vertical** (iPhone, portrait): Main speaker top, others below
 ///
 /// ## Participant Overflow
 ///
@@ -154,11 +154,17 @@ struct HorizontalActiveSpeakerLayoutView: View {
     let activeSpeakerId: String?
 
     private func isParticipantProminent(_ participant: UIParticipant) -> Bool {
-        participant.isProminent || participant.id == activeSpeakerId
+        // When screen sharing is active, do not promote the active speaker into the main
+        // area — the screen share should not share space with a non-pinned active speaker.
+        if participants.first?.isScreenshare == true {
+            return participant.isProminent
+        }
+        return participant.isProminent || participant.id == activeSpeakerId
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
-    private var mainAreaParticipants: [UIParticipant] {
+    /// Internal (not private) to allow direct unit testing of prominence logic.
+    var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
 
@@ -319,11 +325,17 @@ struct VerticalActiveSpeakerLayoutView: View {
     let activeSpeakerId: String?
 
     private func isParticipantProminent(_ participant: UIParticipant) -> Bool {
-        participant.isProminent || participant.id == activeSpeakerId
+        // When screen sharing is active, do not promote the active speaker into the main
+        // area — the screen share should not share space with a non-pinned active speaker.
+        if participants.first?.isScreenshare == true {
+            return participant.isProminent
+        }
+        return participant.isProminent || participant.id == activeSpeakerId
     }
 
     /// Dynamically collects up to 3 prominent participants for the main viewing area.
-    private var mainAreaParticipants: [UIParticipant] {
+    /// Internal (not private) to allow direct unit testing of prominence logic.
+    var mainAreaParticipants: [UIParticipant] {
         guard let first = participants.first else { return [] }
         var result = [first]
 

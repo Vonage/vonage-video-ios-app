@@ -84,7 +84,7 @@ struct ArchiveButtonViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         #expect(startUseCase.callCount == 1)
-        #expect(startUseCase.lastRequest?.roomName == "heart-of-gold")
+        #expect(startUseCase.lastRequest?.sessionKey == "heart-of-gold")
     }
 
     @Test func onTapShowsStopRecordingConfirmation() async {
@@ -116,7 +116,7 @@ struct ArchiveButtonViewModelTests {
 
         #expect(stopUseCase.callCount == 1)
         #expect(stopUseCase.lastRequest?.archiveID == "archive-123")
-        #expect(stopUseCase.lastRequest?.roomName == "heart-of-gold")
+        #expect(stopUseCase.lastRequest?.sessionKey == "heart-of-gold")
     }
 
     @Test func onTapStopsArchivingWhenArchiveIDPresent() async {
@@ -256,14 +256,16 @@ struct ArchiveButtonViewModelTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        roomName: RoomName = "heart-of-gold",
+        sessionKey: String = "heart-of-gold",
         startArchivingUseCase: StartArchivingUseCase = SpyStartArchivingUseCase(),
         stopArchivingUseCase: StopArchivingUseCase = SpyStopArchivingUseCase(),
         archivingStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy(),
         showAlert: @escaping (AlertItem) -> Void = { _ in }
     ) -> ArchiveButtonViewModel {
-        ArchiveButtonViewModel(
-            roomName: roomName,
+        let holder = DefaultSessionKeyHolder()
+        holder.setSessionKey(sessionKey)
+        return ArchiveButtonViewModel(
+            sessionKeyProvider: holder,
             startArchivingUseCase: startArchivingUseCase,
             stopArchivingUseCase: stopArchivingUseCase,
             archivingStatusDataSource: archivingStatusDataSource,

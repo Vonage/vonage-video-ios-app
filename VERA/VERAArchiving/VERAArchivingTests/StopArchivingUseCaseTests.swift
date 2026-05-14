@@ -12,7 +12,7 @@ struct StopArchivingUseCaseTests {
     @Test func stopArchivingSucceeds() async throws {
         let sut = makeSUT()
 
-        try await sut(.init(roomName: "heart-of-gold", archiveID: "anArchiveId"))
+        try await sut(.init(sessionKey: "heart-of-gold", archiveID: "anArchiveId"))
 
         // No exception means that the function has successfully executed
     }
@@ -24,7 +24,7 @@ struct StopArchivingUseCaseTests {
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
         await #expect(throws: ArchivingDataSourceError.networkError) {
-            try await sut(.init(roomName: "heart-of-gold", archiveID: "anArchiveId"))
+            try await sut(.init(sessionKey: "heart-of-gold", archiveID: "anArchiveId"))
         }
     }
 
@@ -35,7 +35,7 @@ struct StopArchivingUseCaseTests {
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
         await #expect(throws: ArchivingDataSourceError.invalidData) {
-            try await sut(.init(roomName: "heart-of-gold", archiveID: "anArchiveId"))
+            try await sut(.init(sessionKey: "heart-of-gold", archiveID: "anArchiveId"))
         }
     }
 
@@ -43,11 +43,11 @@ struct StopArchivingUseCaseTests {
         let dataSourceMock = MockArchivingDataSource()
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
-        let roomName = "heart-of-gold"
+        let sessionKey = "heart-of-gold"
         let archiveId = "anArchiveId"
-        try await sut(.init(roomName: roomName, archiveID: archiveId))
+        try await sut(.init(sessionKey: sessionKey, archiveID: archiveId))
 
-        #expect(dataSourceMock.lastRoomName == roomName)
+        #expect(dataSourceMock.lastSessionKey == sessionKey)
         #expect(dataSourceMock.lastArchiveID == archiveId)
     }
 

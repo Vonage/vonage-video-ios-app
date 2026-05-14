@@ -107,6 +107,17 @@ public struct PreviewData {
         view: AnyView(Color.pink)
     )
 
+    public static let screenShare = Participant(
+        id: "screenshare",
+        name: "Screen Share",
+        isMicEnabled: true,
+        isCameraEnabled: true,
+        videoDimensions: .zero,
+        creationTime: Date(),
+        isScreenshare: true,
+        view: AnyView(Color.indigo)
+    )
+
     // MARK: - Special State Participants
     public static let cameraOffParticipant = Participant(
         id: "cam_off",
