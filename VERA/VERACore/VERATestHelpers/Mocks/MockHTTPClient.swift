@@ -34,20 +34,24 @@ public final class MockHTTPClient: HTTPClient {
     }
 
     public func get(_ url: URL) async throws -> Data {
-        try recordAndReturn(url: url, data: nil)
+        try await recordAndReturn(url: url, data: nil)
     }
 
     public func post(_ url: URL, data: Data) async throws -> Data {
-        try recordAndReturn(url: url, data: data)
+        try await recordAndReturn(url: url, data: data)
     }
 
-    private func recordAndReturn(url: URL, data: Data?) throws -> Data {
+    private func recordAndReturn(url: URL, data: Data?) async throws -> Data {
         callCount += 1
         recordedURL = url
         recordedURLs.append(url)
         if let data {
             recordedData = data
             recordedDataSequence.append(data)
+        }
+
+        if delaySeconds > 0 {
+            try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
         }
 
         if shouldThrowError || shouldThrowErrorOnCallNumber == callCount {

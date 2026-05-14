@@ -90,6 +90,21 @@ struct DefaultRoomCredentialsRepositoryTests {
         }
     }
 
+    @Test("Malformed joinSession response throws decoding error")
+    func malformedJoinSessionResponseThrowsDecodingError() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(),
+            "{}".data(using: .utf8)!,
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        await #expect(throws: DecodingError.self) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
+    }
+
     @Test("Makes exactly two POST calls")
     func makesTwoPostCalls() async throws {
         let httpClient = try makeHTTPClientWithResponses()

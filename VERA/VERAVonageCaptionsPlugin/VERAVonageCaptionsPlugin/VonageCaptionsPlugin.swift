@@ -100,6 +100,7 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Tears down all state related to the current call session.
     private func cancelObservables() async throws {
         captionsTask?.cancel()
+        await captionsTask?.value
         captionsTask = nil
         captionsStatusDataSource.reset()
         await captionsRepository.updateCaptions([])
@@ -118,6 +119,7 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
         // Uses a stored Task with `for await` so that each write completes
         // before processing the next value, avoiding fire-and-forget races.
         if let publisher = call?.captionsPublisher {
+            captionsTask?.cancel()
             captionsTask = Task { [weak self] in
                 for await captions in publisher.values {
                     guard let self else { return }
