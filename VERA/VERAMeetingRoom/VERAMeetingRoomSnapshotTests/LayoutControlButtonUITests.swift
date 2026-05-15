@@ -23,7 +23,7 @@ struct LayoutControlButtonUITests {
     @Test(
         "LayoutControlButton - Color Schemes",
         arguments: [
-            ("Dark", ColorScheme.dark),
+            ("Dark", ColorScheme.dark)
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT(layout: .activeSpeaker)

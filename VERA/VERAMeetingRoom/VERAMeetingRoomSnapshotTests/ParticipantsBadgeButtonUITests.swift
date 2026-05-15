@@ -22,7 +22,7 @@ struct ParticipantsBadgeButtonUITests {
     @Test(
         "ParticipantsBadgeButton - Color Schemes",
         arguments: [
-            ("Dark", ColorScheme.dark),
+            ("Dark", ColorScheme.dark)
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT(participantsCount: 25)

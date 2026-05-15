@@ -42,7 +42,7 @@ struct SettingsSnapshotTests {
     @Test(
         "SettingsView - iPhone Color Schemes",
         arguments: [
-            ("iPhone-Dark", ColorScheme.dark),
+            ("iPhone-Dark", ColorScheme.dark)
         ])
     func iPhoneColorSchemes(
         schemeName: String,
@@ -63,7 +63,7 @@ struct SettingsSnapshotTests {
     @Test(
         "SettingsView - iPad Color Schemes",
         arguments: [
-            ("iPad-Dark", ColorScheme.dark),
+            ("iPad-Dark", ColorScheme.dark)
         ])
     func iPadColorSchemes(
         schemeName: String,
