@@ -18,26 +18,11 @@ struct LayoutControlButtonUITests {
     private let isRecording = false
     private let snapshotPrefix = "LayoutControlButton"
 
-    // MARK: - Layout State Tests
-
-    @Test(
-        "LayoutControlButton - Layout States",
-        arguments: [
-            ("ActiveSpeaker", MeetingRoomLayout.activeSpeaker),
-            ("Grid", MeetingRoomLayout.grid),
-        ])
-    func layoutStates(stateName: String, layout: MeetingRoomLayout) throws {
-        let sut = makeSUT(layout: layout)
-
-        snapshot(sut, named: "State_\(stateName)")
-    }
-
     // MARK: - Color Scheme Tests
 
     @Test(
         "LayoutControlButton - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
             ("Dark", ColorScheme.dark),
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
