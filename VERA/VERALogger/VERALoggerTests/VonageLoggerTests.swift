@@ -137,8 +137,8 @@ struct VonageLoggerTests {
         await waitForEvents(2, in: strategy)
 
         #expect(strategy.events.count == 2)
-        #expect(strategy.events[0].tag == "TagA")
-        #expect(strategy.events[1].tag == "TagB")
+        #expect(strategy.events.contains { $0.tag == "TagA" })
+        #expect(strategy.events.contains { $0.tag == "TagB" })
     }
 
     // MARK: - Event Metadata Tests

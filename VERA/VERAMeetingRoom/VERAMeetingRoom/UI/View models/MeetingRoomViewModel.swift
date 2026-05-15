@@ -100,9 +100,20 @@ public final class MeetingRoomViewModel: ObservableObject {
         guard !initialised else { return }
         initialised = true
 
-        await addObservers()
+        do {
+            await MediaPermissions.requestPermissionsIfNeeded()
 
-        updateExtraButtons()
+            let call = try await connect()
+            currentCall = call
+
+            await addObservers(call)
+
+            updateExtraButtons()
+        } catch {
+            await MainActor.run { [weak self] in
+                self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: true)
+            }
+        }
     }
 
     public func onToggleMic() {
@@ -281,57 +292,52 @@ extension MeetingRoomViewModel {
         return uiParticipant
     }
 
-    fileprivate func addObservers() async {
-        do {
-            let call = try await connectToRoomUseCase(roomName: roomName)
-            observeSessionState(call.participantsPublisher)
+    fileprivate func connect() async throws -> CallFacade {
+        try await connectToRoomUseCase(roomName: roomName)
+    }
 
-            call.statePublisher
-                .sink { [weak self] state in
-                    self?.sessionStatePublisher.send(state)
-                }
-                .store(in: &cancellables)
+    fileprivate func addObservers(_ call: CallFacade) async {
+        observeSessionState(call.participantsPublisher)
 
-            call.callState
-                .sink { [weak self] callState in
-                    self?.callStatePublisher.send(callState)
-                    self?.navigateBackIfNeeded(callState)
-                }
-                .store(in: &cancellables)
-
-            call.archivingState
-                .dropFirst()
-                .sink { [weak self] archivingState in
-                    self?.handleArchivingStateChange(archivingState)
-                }
-                .store(in: &cancellables)
-
-            call.eventsPublisher
-                .sink { [weak self] event in
-                    self?.handleEvents(event)
-                }
-                .store(in: &cancellables)
-
-            captionsStatusDataSource.captionsState
-                .sink { [weak self] _ in
-                    Task { @MainActor [weak self] in
-                        self?.updateExtraButtons()
-                    }
-                }
-                .store(in: &cancellables)
-
-            noiseSuppressionStatusDataSource.noiseSuppressionState
-                .sink { [weak self] state in
-                    self?.handleNoiseSuppressionChange(state)
-                }
-                .store(in: &cancellables)
-
-            self.currentCall = call
-        } catch {
-            await MainActor.run { [weak self] in
-                self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: true)
+        call.statePublisher
+            .sink { [weak self] state in
+                self?.sessionStatePublisher.send(state)
             }
-        }
+            .store(in: &cancellables)
+
+        call.callState
+            .sink { [weak self] callState in
+                self?.callStatePublisher.send(callState)
+                self?.navigateBackIfNeeded(callState)
+            }
+            .store(in: &cancellables)
+
+        call.archivingState
+            .dropFirst()
+            .sink { [weak self] archivingState in
+                self?.handleArchivingStateChange(archivingState)
+            }
+            .store(in: &cancellables)
+
+        call.eventsPublisher
+            .sink { [weak self] event in
+                self?.handleEvents(event)
+            }
+            .store(in: &cancellables)
+
+        captionsStatusDataSource.captionsState
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.updateExtraButtons()
+                }
+            }
+            .store(in: &cancellables)
+
+        noiseSuppressionStatusDataSource.noiseSuppressionState
+            .sink { [weak self] state in
+                self?.handleNoiseSuppressionChange(state)
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {

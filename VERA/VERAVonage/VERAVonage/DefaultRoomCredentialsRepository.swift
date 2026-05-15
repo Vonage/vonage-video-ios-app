@@ -11,9 +11,11 @@ import VERADomain
 /// This actor provides thread-safe access to room credentials with built-in caching to minimize network requests.
 /// Credentials are cached per room name and reused for subsequent requests to the same room.
 ///
-/// The v2 flow uses a single call:
-/// - `POST /v2/createSessionAndJoin` — creates (or retrieves) a session and joins it in one step,
-///   returning `sessionId`, `sessionKey` (JWT), `applicationId`, and a client `token`.
+/// The v2 flow uses two sequential calls:
+/// - `POST /v2/createSession` — creates (or retrieves) a session, returning `sessionId`, `sessionKey` (JWT),
+///   and `applicationId`.
+/// - `POST /v2/joinSession` — joins the session using the `sessionKey`, returning a client `token`
+///   and `applicationId`.
 ///
 /// ### Creating a Repository
 /// - ``init(baseURL:httpClient:jsonDecoder:jsonEncoder:)``
@@ -44,18 +46,26 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
             return cached
         }
 
-        let createBody = try jsonEncoder.encode(CreateSessionAndJoinRequestBody(roomName: request.roomName))
+        let createBody = try jsonEncoder.encode(CreateSessionRequestBody(roomName: request.roomName))
         let createData = try await httpClient.post(
-            baseURL.appendingPathComponent("v2").appendingPathComponent("createSessionAndJoin"),
+            baseURL.appendingPathComponent("v2").appendingPathComponent("createSession"),
             data: createBody)
-        let response = try jsonDecoder.decode(
-            TRPCResponse<CreateSessionAndJoinResponse>.self, from: createData)
+        let createResponse = try jsonDecoder.decode(
+            TRPCResponse<CreateSessionResponse>.self, from: createData)
+
+        let joinBody = try jsonEncoder.encode(
+            JoinSessionRequestBody(sessionKey: createResponse.result.data.sessionKey))
+        let joinData = try await httpClient.post(
+            baseURL.appendingPathComponent("v2").appendingPathComponent("joinSession"),
+            data: joinBody)
+        let joinResponse = try jsonDecoder.decode(
+            TRPCResponse<JoinSessionResponse>.self, from: joinData)
 
         let credentials = RoomCredentialsResponse(
-            sessionId: response.result.data.sessionId,
-            token: response.result.data.token,
-            apiKey: response.result.data.applicationId,
-            sessionKey: response.result.data.sessionKey)
+            sessionId: createResponse.result.data.sessionId,
+            token: joinResponse.result.data.token,
+            apiKey: createResponse.result.data.applicationId,
+            sessionKey: createResponse.result.data.sessionKey)
 
         cache[request.roomName] = credentials
 
