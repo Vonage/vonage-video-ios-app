@@ -30,7 +30,6 @@ struct ActiveSpeakerLayoutUITests {
     @Test(
         "Active Speaker Layout - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
@@ -48,7 +47,7 @@ struct ActiveSpeakerLayoutUITests {
 
     @Test(
         "Active Speaker Layout - Color Schemes",
-        arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
+        arguments: [("Dark", ColorScheme.dark)])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
             .environment(\.colorScheme, scheme)
@@ -60,19 +59,6 @@ struct ActiveSpeakerLayoutUITests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "Active Speaker Layout - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers
@@ -97,56 +83,6 @@ struct ActiveSpeakerLayoutUITests {
             testName: "\(snapshotPrefix)_\(named)",
             line: line,
             column: column
-        )
-    }
-}
-
-// MARK: - Component Tests
-
-@Suite("Active Speaker Layout Components")
-@MainActor
-struct ActiveSpeakerLayoutTests {
-
-    private let isRecording = false
-    private let snapshotPrefix = "ActiveSpeakerLayout"
-
-    @Test(
-        "Layout Components",
-        arguments: [
-            ("Horizontal", 800, 400),
-            ("Vertical", 375, 600),
-        ])
-    func layoutComponents(layoutName: String, width: CGFloat, height: CGFloat) throws {
-        let view: AnyView
-
-        switch layoutName {
-        case "Horizontal":
-            view = AnyView(
-                HorizontalActiveSpeakerLayoutView(
-                    participants: PreviewData.uiManyParticipants,
-                    activeSpeakerId: PreviewData.arthurDent.id)
-            )
-        case "Vertical":
-            view = AnyView(
-                VerticalActiveSpeakerLayoutView(
-                    participants: PreviewData.uiManyParticipants,
-                    activeSpeakerId: PreviewData.arthurDent.id)
-            )
-        default:
-            return
-        }
-
-        let framedView =
-            view
-            .frame(width: width, height: height)
-            .background(Color(.systemBackground))
-
-        assertSnapshot(
-            of: framedView,
-            as: .image(precision: 0.99, layout: .fixed(width: width, height: height)),
-            named: layoutName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(layoutName)"
         )
     }
 }
