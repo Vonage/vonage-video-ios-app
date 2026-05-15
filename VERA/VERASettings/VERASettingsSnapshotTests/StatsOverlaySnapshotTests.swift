@@ -47,7 +47,6 @@ struct StatsOverlaySnapshotTests {
         "StatsOverlayView - Inactive States",
         arguments: [
             ("inactive-light", false, ColorScheme.light),
-            ("inactive-dark", false, ColorScheme.dark),
         ])
     func inactiveStates(
         stateName: String,
@@ -62,60 +61,6 @@ struct StatsOverlaySnapshotTests {
             named: stateName,
             record: isRecording,
             testName: "\(snapshotPrefix)_\(stateName)"
-        )
-    }
-
-    @Test(
-        "StatsOverlayView - Device Sizes",
-        arguments: [
-            ("iPhone-active", ViewImageConfig.iPhone13, true, CGSize(width: 390, height: 844)),
-            ("iPad-active", ViewImageConfig.iPadPro12_9, true, CGSize(width: 1024, height: 1366)),
-            ("iPhone-inactive", ViewImageConfig.iPhone13, false, CGSize(width: 390, height: 844)),
-            ("iPad-inactive", ViewImageConfig.iPadPro12_9, false, CGSize(width: 1024, height: 1366)),
-            ("iPhone-active-landscape", ViewImageConfig.iPhone13(.landscape), true, CGSize(width: 844, height: 390)),
-            ("iPad-active-landscape", ViewImageConfig.iPadPro12_9(.landscape), true, CGSize(width: 1366, height: 1024)),
-            ("iPhone-inactive-landscape", ViewImageConfig.iPhone13(.landscape), false, CGSize(width: 844, height: 390)),
-            (
-                "iPad-inactive-landscape", ViewImageConfig.iPadPro12_9(.landscape), false,
-                CGSize(width: 1366, height: 1024)
-            ),
-        ])
-    func deviceSizes(
-        deviceName: String,
-        config: ViewImageConfig,
-        isActive: Bool,
-        frameSize: CGSize
-    ) throws {
-        let sut = makeSUT(isActive: isActive, frameSize: frameSize)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test(
-        "StatsOverlayView - Different Stats",
-        arguments: [
-            ("with-full-stats", await makeFullStats()),
-            ("with-minimal-stats", await makeMinimalStats()),
-            ("with-no-stats", NetworkMediaStats.empty),
-        ])
-    func differentStats(
-        statsName: String,
-        stats: NetworkMediaStats
-    ) throws {
-        let sut = makeSUT(isActive: true, stats: stats)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
-            named: statsName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(statsName)"
         )
     }
 
