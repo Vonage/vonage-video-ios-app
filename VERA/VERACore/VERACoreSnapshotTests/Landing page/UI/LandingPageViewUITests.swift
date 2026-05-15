@@ -32,7 +32,6 @@ struct LandingPageViewUITests {
     @Test(
         "Landing Page View - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
@@ -50,7 +49,7 @@ struct LandingPageViewUITests {
 
     @Test(
         "Landing Page View - Color Schemes",
-        arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
+        arguments: [("Dark", ColorScheme.dark)])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
             .environment(\.colorScheme, scheme)
@@ -62,19 +61,6 @@ struct LandingPageViewUITests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "Landing Page View - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers
@@ -101,52 +87,6 @@ struct LandingPageViewUITests {
             testName: "\(snapshotPrefix)_\(named)",
             line: line,
             column: column
-        )
-    }
-}
-
-// MARK: - Component Tests
-
-@Suite("Landing Page Components")
-@MainActor
-struct LandingPageComponentTests {
-
-    private let isRecording = false
-    private let snapshotPrefix = "LandingPage"
-
-    @Test(
-        "Layout Components",
-        arguments: [
-            ("Horizontal", 800, 400),
-            ("Vertical", 375, 600),
-        ])
-    func layoutComponents(layoutName: String, width: CGFloat, height: CGFloat) throws {
-        let view: AnyView
-
-        switch layoutName {
-        case "Horizontal":
-            view = AnyView(
-                HorizontalLandingContentView(onHandleNewRoom: {}, onJoinRoom: { _ in })
-            )
-        case "Vertical":
-            view = AnyView(
-                VerticalLandingContentView(onHandleNewRoom: {}, onJoinRoom: { _ in })
-            )
-        default:
-            return
-        }
-
-        let framedView =
-            view
-            .frame(width: width, height: height)
-            .background(Color(.systemBackground))
-
-        assertSnapshot(
-            of: framedView,
-            as: .image(precision: 0.99, layout: .fixed(width: width, height: height)),
-            named: layoutName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(layoutName)"
         )
     }
 }

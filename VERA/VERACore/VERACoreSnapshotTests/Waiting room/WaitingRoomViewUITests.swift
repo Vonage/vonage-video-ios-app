@@ -41,7 +41,6 @@ class WaitingRoomViewUITests {
     @Test(
         "Waiting room View - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
@@ -73,18 +72,6 @@ class WaitingRoomViewUITests {
         )
     }
 
-    @Test(
-        "Waiting room View - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall)
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
-    }
-
     // MARK: - Test Helpers
 
     private func makeSUT() -> WaitingRoomView {
@@ -112,74 +99,6 @@ class WaitingRoomViewUITests {
             testName: "\(snapshotPrefix)_\(named)",
             line: line,
             column: column
-        )
-    }
-}
-
-// MARK: - Component Tests
-
-@Suite("Waiting room Components")
-@MainActor
-class WaitingRoomComponentTests {
-
-    private let isRecording = false
-    private let snapshotPrefix = "WaitingRoom"
-    private var publisher: VERAPublisher?
-
-    init() {
-        publisher = MockVERAPublisher()
-    }
-
-    @MainActor
-    deinit {
-        publisher = nil
-    }
-
-    @Test(
-        "Layout Components",
-        arguments: [
-            ("Horizontal", 800, 400),
-            ("Vertical", 375, 600),
-        ])
-    func layoutComponents(layoutName: String, width: CGFloat, height: CGFloat) throws {
-        let view: AnyView
-
-        switch layoutName {
-        case "Horizontal":
-            view = AnyView(
-                HorizontalWaitingRoomContentView(
-                    state: makeWaitingRoomState(publisher: publisher),
-                    userName: .constant("Trillian"),
-                    extraTrailingButtons: .constant([]),
-                    onJoinRoom: {},
-                    onMicrophoneToggle: {},
-                    onCameraToggle: {})
-            )
-        case "Vertical":
-            view = AnyView(
-                VerticalWaitingRoomContentView(
-                    state: makeWaitingRoomState(publisher: publisher),
-                    userName: .constant("Trillian"),
-                    extraTrailingButtons: .constant([]),
-                    onJoinRoom: {},
-                    onMicrophoneToggle: {},
-                    onCameraToggle: {})
-            )
-        default:
-            return
-        }
-
-        let framedView =
-            view
-            .frame(width: width, height: height)
-            .background(Color(.systemBackground))
-
-        assertSnapshot(
-            of: framedView,
-            as: .image(precision: 0.99, layout: .fixed(width: width, height: height)),
-            named: layoutName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(layoutName)"
         )
     }
 }

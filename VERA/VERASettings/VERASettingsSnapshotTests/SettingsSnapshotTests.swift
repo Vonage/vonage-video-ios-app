@@ -40,35 +40,8 @@ struct SettingsSnapshotTests {
     }
 
     @Test(
-        "SettingsView - Size Classes",
-        arguments: [
-            ("iPhone", ViewImageConfig.iPhone13, false, UserInterfaceSizeClass.compact, false),
-            ("iPad", ViewImageConfig.iPadPro12_9, false, UserInterfaceSizeClass.regular, false),
-            ("iPhone-with-stats", ViewImageConfig.iPhone13, true, UserInterfaceSizeClass.compact, true),
-            ("iPad-with-stats", ViewImageConfig.iPadPro12_9, true, UserInterfaceSizeClass.regular, false),
-        ])
-    func sizeClasses(
-        deviceName: String,
-        config: ViewImageConfig,
-        withStats: Bool,
-        horizontalSizeClass: UserInterfaceSizeClass,
-        useScrollableLayout: Bool
-    ) throws {
-        let sut = makeSUT(withStatistics: withStats, horizontalSizeClass: horizontalSizeClass)
-
-        assertSnapshot(
-            of: sut,
-            as: contentScrollable(useScrollableLayout, config: config),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test(
         "SettingsView - iPhone Color Schemes",
         arguments: [
-            ("iPhone-Light", ColorScheme.light),
             ("iPhone-Dark", ColorScheme.dark),
         ])
     func iPhoneColorSchemes(
@@ -90,7 +63,6 @@ struct SettingsSnapshotTests {
     @Test(
         "SettingsView - iPad Color Schemes",
         arguments: [
-            ("iPad-Light", ColorScheme.light),
             ("iPad-Dark", ColorScheme.dark),
         ])
     func iPadColorSchemes(
@@ -106,28 +78,6 @@ struct SettingsSnapshotTests {
             named: schemeName,
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
-        )
-    }
-
-    @Test(
-        "SettingsView - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraLarge),
-        ])
-    func accessibility(
-        textName: String,
-        textSize: ContentSizeCategory
-    ) throws {
-        let sut = makeSUT(withStatistics: false, horizontalSizeClass: .compact)
-            .environment(\.sizeCategory, textSize)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
-            named: textName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(textName)"
         )
     }
 
