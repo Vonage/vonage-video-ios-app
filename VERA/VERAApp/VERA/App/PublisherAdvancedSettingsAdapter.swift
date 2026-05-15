@@ -39,7 +39,8 @@ import Foundation
 
         /// Subscribes to the preferences publisher. Call once after instantiation.
         func setup(with preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never>) {
-            cancellable = preferencesPublisher
+            cancellable =
+                preferencesPublisher
                 .sink { [weak self] preferences in
                     guard let self else { return }
                     guard self.apply(preferences) else { return }
