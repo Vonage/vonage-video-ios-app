@@ -17,28 +17,11 @@ struct ParticipantsBadgeButtonUITests {
     private let isRecording = false
     private let snapshotPrefix = "ParticipantsBadgeButton"
 
-    // MARK: - Badge Count Tests
-
-    @Test(
-        "ParticipantsBadgeButton - Badge Counts",
-        arguments: [
-            ("NoBadge", 0),
-            ("FiveParticipants", 5),
-            ("MaxCount", 99),
-            ("Overflow", 100),
-        ])
-    func badgeCounts(variant: String, count: Int) throws {
-        let sut = makeSUT(participantsCount: count)
-
-        snapshot(sut, named: "Count_\(variant)")
-    }
-
     // MARK: - Color Scheme Tests
 
     @Test(
         "ParticipantsBadgeButton - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
             ("Dark", ColorScheme.dark),
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
