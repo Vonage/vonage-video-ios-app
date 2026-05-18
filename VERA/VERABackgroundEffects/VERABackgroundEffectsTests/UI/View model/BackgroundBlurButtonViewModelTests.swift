@@ -280,7 +280,6 @@ final class PublisherSpy: VERAPublisher {
 
     var videoTransformers: [any VERATransformer] = []
 
-    var setBackgroundBlurCallCount = 0
     var addVideoTransformerCallCount = 0
     var removeTransformerCallCount = 0
     var lastBlurLevel: BlurLevel?
