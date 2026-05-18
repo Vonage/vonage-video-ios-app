@@ -359,6 +359,12 @@ fi
 
 echo -e "${GREEN}✓ App installed successfully${NC}\n"
 
+# Grant permissions via simctl (reliable in CI, persists across clearState)
+echo -e "${YELLOW}🔐 Granting camera and microphone permissions...${NC}"
+xcrun simctl privacy "$SIMULATOR_ID" grant camera "$APP_ID"
+xcrun simctl privacy "$SIMULATOR_ID" grant microphone "$APP_ID"
+echo -e "${GREEN}✓ Permissions granted${NC}\n"
+
 # ============================================================================
 # 7. Run Maestro Tests
 # ============================================================================
