@@ -59,6 +59,19 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
+    func onTapCyclesFromBackgroundImageToNone() async throws {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+        sut.currentVideoEffect = .backgroundImage(id: "sample", imagePath: "/tmp/sample.png")
+
+        sut.onTap()
+
+        #expect(sut.currentVideoEffect == .none)
+        #expect(spy.addVideoTransformerCallCount == 0)
+        #expect(spy.removeTransformerCallCount == 2)
+    }
+
+    @Test
     func onTapCallsGetCurrentPublisher() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
