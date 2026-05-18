@@ -144,6 +144,10 @@ struct BottomBar: View {
                                 ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
                                 : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
                             action: actions.onToggleMic)
+                        .accessibilityIdentifier(
+                            isMicEnabled
+                                ? MeetingRoomAccessibilityID.micEnabled
+                                : MeetingRoomAccessibilityID.micDisabled)
                     }
                     if allowCameraControl {
                         ControlImageButton(
@@ -152,6 +156,10 @@ struct BottomBar: View {
                                 ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
                                 : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
                             action: actions.onToggleCamera)
+                        .accessibilityIdentifier(
+                            isCameraEnabled
+                                ? MeetingRoomAccessibilityID.cameraEnabled
+                                : MeetingRoomAccessibilityID.cameraDisabled)
                     }
                     LayoutControlButton(layout: currentLayout, action: actions.onToggleLayout)
                     if showParticipantList {

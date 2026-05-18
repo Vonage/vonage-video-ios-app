@@ -13,6 +13,7 @@ struct ReenterRoomButton: View {
             text: Text("Go back to meeting", bundle: .veraCore),
             image: VERACommonUIAsset.Images.enterLine.swiftUIImage,
             onAction: onReenter)
+        .accessibilityIdentifier(GoodByeAccessibilityID.reenterButton)
     }
 }
 

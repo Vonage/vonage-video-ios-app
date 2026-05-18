@@ -25,6 +25,10 @@ struct ArchiveButton: View {
                 ? VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage
                 : VERACommonUIAsset.Images.radioChecked2Solid.swiftUIImage,
             action: action)
+        .accessibilityIdentifier(
+            state.isArchiving
+                ? ArchivingAccessibilityID.stopRecordingButton
+                : ArchivingAccessibilityID.startRecordingButton)
     }
 }
 

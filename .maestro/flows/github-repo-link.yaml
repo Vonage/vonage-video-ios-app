@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Verify GitHub button is visible
+- assertVisible:
+    id: "github-repo-button"
+
+- takeScreenshot: 01-github-button-visible
+
+# Tap the GitHub button (opens external URL)
+- tapOn:
+    id: "github-repo-button"
+
+- takeScreenshot: 02-after-github-tap

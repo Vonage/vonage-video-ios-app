@@ -1,0 +1,76 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    permissions:
+      camera: allow
+      microphone: allow
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room
+
+# End the call (async disconnect + fullScreenCover dismiss animation)
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Verify goodbye screen and both buttons
+- assertVisible:
+    id: "goodbye-screen"
+
+- assertVisible:
+    id: "goodbye-reenter-button"
+
+- assertVisible:
+    id: "goodbye-landing-page-button"
+
+- takeScreenshot: 02-goodbye-screen
+
+# Tap "View Landing Page" and verify return to landing
+- tapOn:
+    id: "goodbye-landing-page-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- takeScreenshot: 03-back-to-landing

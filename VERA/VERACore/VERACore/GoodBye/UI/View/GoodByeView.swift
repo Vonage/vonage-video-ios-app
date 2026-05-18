@@ -24,25 +24,27 @@ public struct GoodByeView<ContentView: View>: View {
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            if verticalSizeClass == .compact {
-                HorizontalGoodByeContentView(
-                    additionalContentView: additionalContentView,
-                    onReenter: onReenter,
-                    onReturnToLanding: onReturnToLanding)
-            } else if horizontalSizeClass == .compact {
-                VerticalGoodByeContentView(
-                    additionalContentView: additionalContentView,
-                    onReenter: onReenter,
-                    onReturnToLanding: onReturnToLanding)
-            } else {
-                HorizontalGoodByeContentView(
-                    additionalContentView: additionalContentView,
-                    onReenter: onReenter,
-                    onReturnToLanding: onReturnToLanding)
+        ScreenIdentifierContainer(GoodByeAccessibilityID.screen) {
+            VStack(spacing: 0) {
+                if verticalSizeClass == .compact {
+                    HorizontalGoodByeContentView(
+                        additionalContentView: additionalContentView,
+                        onReenter: onReenter,
+                        onReturnToLanding: onReturnToLanding)
+                } else if horizontalSizeClass == .compact {
+                    VerticalGoodByeContentView(
+                        additionalContentView: additionalContentView,
+                        onReenter: onReenter,
+                        onReturnToLanding: onReturnToLanding)
+                } else {
+                    HorizontalGoodByeContentView(
+                        additionalContentView: additionalContentView,
+                        onReenter: onReenter,
+                        onReturnToLanding: onReturnToLanding)
+                }
             }
+            .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         }
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
     }
 }
 

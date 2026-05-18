@@ -14,6 +14,7 @@ struct JoinButton: View {
             text: Text("Join waiting room", bundle: .veraCore),
             color: color,
             onAction: onJoinRoom)
+        .accessibilityIdentifier(LandingPageAccessibilityID.joinWaitingRoomButton)
     }
 }
 

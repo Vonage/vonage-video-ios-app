@@ -25,6 +25,7 @@ struct EndCallControlButton: View {
                 )
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityIdentifier(MeetingRoomAccessibilityID.endCallButton)
     }
 }
 

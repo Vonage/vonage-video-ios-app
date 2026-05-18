@@ -52,6 +52,7 @@ struct JoinExistingRoom: View {
                     text: $roomName,
                     state: roomState,
                     forceLowercase: true)
+                .accessibilityIdentifier(LandingPageAccessibilityID.roomNameInput)
 
                 JoinButton(color: joinColor) {
                     roomState = getRoomState(true)
