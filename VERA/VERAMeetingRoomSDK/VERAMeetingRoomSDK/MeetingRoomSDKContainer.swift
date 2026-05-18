@@ -70,11 +70,7 @@ final class MeetingRoomSDKContainer {
     )
 
     lazy var publisherRepository: any PublisherRepository = {
-        let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
-        if let initialPublisherSettings {
-            try? repository.recreatePublisher(initialPublisherSettings)
-        }
-        return repository
+        DefaultPublisherRepository(publisherFactory: publisherFactory)
     }()
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
@@ -114,6 +110,13 @@ final class MeetingRoomSDKContainer {
         }
         return NullAdvancedSettingsUseCase()
     }()
+
+    // MARK: - Publisher helpers
+
+    func resetPublisher() {
+        guard let initialPublisherSettings = initialPublisherSettings else { return }
+        try? publisherRepository.recreatePublisher(initialPublisherSettings)
+    }
 
     // MARK: - Plugin Registry
 

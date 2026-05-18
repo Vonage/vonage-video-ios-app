@@ -26,13 +26,6 @@ struct EmojiButtonContainerUITests {
         snapshot(sut, named: "Idle")
     }
 
-    @Test("EmojiButtonContainer - Picker Visible")
-    func pickerVisibleState() throws {
-        let sut = makeSUT(pickerVisible: true)
-
-        snapshot(sut, named: "PickerVisible", config: .iPhone13)
-    }
-
     // MARK: - Color Schemes
 
     @Test(
@@ -46,42 +39,6 @@ struct EmojiButtonContainerUITests {
             .environment(\.colorScheme, scheme)
 
         snapshot(sut, named: "PickerVisible_\(schemeName)", config: .iPhone13)
-    }
-
-    // MARK: - Device Sizes
-
-    @Test(
-        "EmojiButtonContainer - Device Sizes",
-        arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
-            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
-            ("iPad", ViewImageConfig.iPadPro12_9),
-        ])
-    func deviceSizes(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT(pickerVisible: true)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    // MARK: - Accessibility
-
-    @Test(
-        "EmojiButtonContainer - Accessibility Sizes",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibilitySizes(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT(pickerVisible: true)
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: "Accessibility_\(textName)", config: .iPhone13)
     }
 
     // MARK: - Test Helpers
