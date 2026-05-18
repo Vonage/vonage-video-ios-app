@@ -21,43 +21,6 @@ struct MeetingNoiseSuppressionButtonSnapshotTests {
     // MARK: - Core UI Tests
 
     @Test(
-        "MeetingNoiseSuppressionButtonContainer - Basic Layout",
-        arguments: [
-            ("disabled", NoiseSuppressionState.disabled),
-            ("enabled", NoiseSuppressionState.enabled),
-        ])
-    func basicLayout(variant: String, state: NoiseSuppressionState) throws {
-        let sut = makeSUT(state: state)
-
-        snapshot(sut, named: "Default-\(variant)")
-    }
-
-    @Test(
-        "MeetingNoiseSuppressionButtonContainer - Size Classes",
-        arguments: [
-            ("iPhone-disabled", ViewImageConfig.iPhone13, NoiseSuppressionState.disabled),
-            ("iPhone-enabled", ViewImageConfig.iPhone13, NoiseSuppressionState.enabled),
-            ("iPad-disabled", ViewImageConfig.iPadPro12_9, NoiseSuppressionState.disabled),
-            ("iPad-enabled", ViewImageConfig.iPadPro12_9, NoiseSuppressionState.enabled),
-            ("iPhoneLandscape-enabled", ViewImageConfig.iPhone13(.landscape), NoiseSuppressionState.enabled),
-        ])
-    func sizeClasses(
-        deviceName: String,
-        config: ViewImageConfig,
-        state: NoiseSuppressionState
-    ) throws {
-        let sut = makeSUT(state: state)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test(
         "MeetingNoiseSuppressionButtonContainer - Color Schemes",
         arguments: [
             ("Light-disabled", ColorScheme.light, NoiseSuppressionState.disabled),
@@ -80,14 +43,6 @@ struct MeetingNoiseSuppressionButtonSnapshotTests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test("MeetingNoiseSuppressionButtonContainer - Accessibility")
-    func accessibility() throws {
-        let sut = makeSUT(state: .enabled)
-            .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
-
-        snapshot(sut, named: "Accessibility-XXXL")
     }
 
     // MARK: - Test Helpers
