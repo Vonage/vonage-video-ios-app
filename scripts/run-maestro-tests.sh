@@ -21,6 +21,30 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🎭 VERA Maestro UI Test Runner${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
+# Parse optional flow argument
+# Usage: ./scripts/run-maestro-tests.sh [flow-name.yaml]
+# Examples:
+#   ./scripts/run-maestro-tests.sh                                    # Run all flows
+#   ./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml  # Run single flow by name
+#   ./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml     # Run single flow by path
+FLOW_ARG="$1"
+if [ -n "$FLOW_ARG" ]; then
+    if [ -f "$FLOW_ARG" ]; then
+        FLOW_TARGET="$FLOW_ARG"
+    elif [ -f ".maestro/flows/$FLOW_ARG" ]; then
+        FLOW_TARGET=".maestro/flows/$FLOW_ARG"
+    else
+        echo -e "${RED}❌ Flow not found: $FLOW_ARG${NC}"
+        echo -e "${YELLOW}Available flows:${NC}"
+        find .maestro/flows -name '*.yaml' -o -name '*.yml' 2>/dev/null | while read -r f; do echo "  $(basename "$f")"; done
+        exit 1
+    fi
+    echo -e "${BLUE}▶ Running single flow: $(basename "$FLOW_TARGET")${NC}\n"
+else
+    FLOW_TARGET=".maestro/flows"
+    echo -e "${BLUE}▶ Running all flows${NC}\n"
+fi
+
 # ============================================================================
 # 1. Check Prerequisites
 # ============================================================================
@@ -342,7 +366,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-if maestro test .maestro/flows; then
+if maestro test "$FLOW_TARGET"; then
     TEST_RESULT=0
 else
     TEST_RESULT=$?
