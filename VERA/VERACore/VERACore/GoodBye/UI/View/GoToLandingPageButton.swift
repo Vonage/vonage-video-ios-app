@@ -13,7 +13,8 @@ struct GoToLandingPageButton: View {
             text: Text("View Landing Page", bundle: .veraCore),
             color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
             isDisabled: false,
-            onAction: onReturnToLanding)
+            onAction: onReturnToLanding
+        )
         .accessibilityIdentifier(GoodByeAccessibilityID.landingPageButton)
     }
 }

@@ -13,7 +13,8 @@ struct NewRoomButton: View {
         FilledButton(
             text: Text("Create a new room", bundle: .veraCore),
             image: VERACommonUIAsset.Images.plusLine.swiftUIImage,
-            onAction: onHandleNewRoom)
+            onAction: onHandleNewRoom
+        )
         .accessibilityIdentifier(LandingPageAccessibilityID.createNewRoomButton)
     }
 }

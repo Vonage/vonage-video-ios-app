@@ -143,7 +143,8 @@ struct BottomBar: View {
                             image: isMicEnabled
                                 ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
                                 : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
-                            action: actions.onToggleMic)
+                            action: actions.onToggleMic
+                        )
                         .accessibilityIdentifier(
                             isMicEnabled
                                 ? MeetingRoomAccessibilityID.micEnabled
@@ -155,7 +156,8 @@ struct BottomBar: View {
                             image: isCameraEnabled
                                 ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
                                 : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
-                            action: actions.onToggleCamera)
+                            action: actions.onToggleCamera
+                        )
                         .accessibilityIdentifier(
                             isCameraEnabled
                                 ? MeetingRoomAccessibilityID.cameraEnabled

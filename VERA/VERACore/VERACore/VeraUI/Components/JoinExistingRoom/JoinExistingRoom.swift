@@ -51,7 +51,8 @@ struct JoinExistingRoom: View {
                     placeholder: String(localized: "Room name", bundle: .veraCore),
                     text: $roomName,
                     state: roomState,
-                    forceLowercase: true)
+                    forceLowercase: true
+                )
                 .accessibilityIdentifier(LandingPageAccessibilityID.roomNameInput)
 
                 JoinButton(color: joinColor) {

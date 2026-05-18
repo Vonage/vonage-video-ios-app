@@ -12,7 +12,8 @@ struct ReenterRoomButton: View {
         FilledButton(
             text: Text("Go back to meeting", bundle: .veraCore),
             image: VERACommonUIAsset.Images.enterLine.swiftUIImage,
-            onAction: onReenter)
+            onAction: onReenter
+        )
         .accessibilityIdentifier(GoodByeAccessibilityID.reenterButton)
     }
 }

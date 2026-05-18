@@ -24,7 +24,8 @@ struct ArchiveButton: View {
             image: state.isArchiving
                 ? VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage
                 : VERACommonUIAsset.Images.radioChecked2Solid.swiftUIImage,
-            action: action)
+            action: action
+        )
         .accessibilityIdentifier(
             state.isArchiving
                 ? ArchivingAccessibilityID.stopRecordingButton
