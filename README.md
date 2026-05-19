@@ -113,7 +113,7 @@ The current minimum deployment target for the reference app is iOS 16+. Some of 
 
 ### Vonage Video SDK Compatibility
 
-This reference app has been tested with **Vonage Video SDK 2.32** and **2.33**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
+This reference app has been tested with **Vonage Video SDK 2.33** and **2.34**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
 
 The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift`) and can be adjusted there if needed.
 
@@ -147,7 +147,7 @@ You can find the `DEVELOPMENT_TEAM` ID in the top right corner of the `Certifica
 ```
 export BASE_API_URL=https://api.example.net/
 export DEVELOPMENT_TEAM=AB0C12DE34
-export MARKETING_VERSION=1.1
+export MARKETING_VERSION=1.0
 export CURRENT_PROJECT_VERSION=1
 ```
 
