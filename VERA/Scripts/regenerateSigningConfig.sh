@@ -17,7 +17,7 @@ cd "$VERA_DIR"
 
 mkdir -p Config
 echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" > Config/Signing.xcconfig
-echo "MARKETING_VERSION = 1.0" >> Config/Signing.xcconfig
+echo "MARKETING_VERSION = 1.2" >> Config/Signing.xcconfig
 echo "CURRENT_PROJECT_VERSION = $CURRENT_PROJECT_VERSION" >> Config/Signing.xcconfig
 
 echo "✅ Signing.xcconfig generated"

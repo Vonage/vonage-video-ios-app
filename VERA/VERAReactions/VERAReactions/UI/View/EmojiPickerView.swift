@@ -52,6 +52,8 @@ public enum EmojiPickerConstants {
 ///
 /// - Note: Each cell is 36x36 points with 8pt spacing between items.
 public struct EmojiPickerView: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     /// The array of emojis to display in the grid
     public let emojis: [UIEmojiReaction]
 
@@ -90,7 +92,7 @@ public struct EmojiPickerView: View {
             onEmojiSelected: onEmojiSelected
         )
         .padding(EmojiPickerConstants.contentPadding)
-        .background(VERACommonUIAsset.Colors.vGray4.swiftUIColor.opacity(EmojiPickerConstants.backgroundOpacity))
+        .background(theme.vGray4.opacity(EmojiPickerConstants.backgroundOpacity))
         .cornerRadius(EmojiPickerConstants.cornerRadius)
         .fixedSize(horizontal: true, vertical: false)
     }

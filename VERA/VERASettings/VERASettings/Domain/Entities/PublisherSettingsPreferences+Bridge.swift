@@ -20,7 +20,9 @@ extension PublisherSettingsPreferences {
             videoBitratePreset: videoBitratePreset.vonageBitratePreset,
             maxVideoBitrate: videoBitratePreset == .custom ? maxVideoBitrate : nil,
             publisherAudioFallbackEnabled: publisherAudioFallbackEnabled,
-            subscriberAudioFallbackEnabled: subscriberAudioFallbackEnabled
+            subscriberAudioFallbackEnabled: subscriberAudioFallbackEnabled,
+            degradationPreference: degradationPreference.vonageDegradationPreference,
+            opusDtxEnabled: opusDtxEnabled
         )
     }
 }
@@ -122,5 +124,25 @@ extension SettingsVideoFrameRate {
     /// - Returns: The corresponding ``VideoFrameRate`` from VERADomain.
     var vonageFrameRate: VideoFrameRate {
         .init(rawValue: rawValue) ?? .rate30FPS
+    }
+}
+
+extension SettingsDegradationPreference {
+    /// Converts to ``DegradationPreference`` used by VERADomain.
+    ///
+    /// This property bridges the Settings module's ``SettingsDegradationPreference`` to the domain layer's
+    /// ``DegradationPreference``. Both enums share identical raw values:
+    /// - `.notSet` (-1) → `DegradationPreference.notSet` (-1)
+    /// - `.maintainFrameRateAndResolution` (0) → `DegradationPreference.maintainFrameRateAndResolution` (0)
+    /// - `.maintainFrameRate` (1) → `DegradationPreference.maintainFrameRate` (1)
+    /// - `.maintainResolution` (2) → `DegradationPreference.maintainResolution` (2)
+    /// - `.balanced` (3) → `DegradationPreference.balanced` (3)
+    ///
+    /// Falls back to `.notSet` if the raw value doesn't match (defensive programming),
+    /// though this should never occur in practice.
+    ///
+    /// - Returns: The corresponding ``DegradationPreference`` from VERADomain.
+    var vonageDegradationPreference: DegradationPreference {
+        .init(rawValue: rawValue) ?? .notSet
     }
 }

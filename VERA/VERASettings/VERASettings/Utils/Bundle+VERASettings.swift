@@ -7,7 +7,13 @@ import Foundation
 /// Provides the resource bundle for the `VERASettings`  framework.
 extension Bundle {
     /// The bundle associated with the `VERASettings`  module.
-    public static var veraSettings: Bundle { Bundle(for: VERASettingsBundleToken.self) }
+    public static var veraSettings: Bundle {
+        #if SWIFT_PACKAGE
+            return .module
+        #else
+            return Bundle(for: VERASettingsBundleToken.self)
+        #endif
+    }
 }
 
 /// Private token class used to locate the VERASettings bundle.

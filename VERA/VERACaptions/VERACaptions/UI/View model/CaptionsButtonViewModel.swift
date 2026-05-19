@@ -42,8 +42,8 @@ public final class CaptionsButtonViewModel: ObservableObject {
     /// and present the toast to the user.
     @Published public var toast: ToastItem?
 
-    /// The room name passed to ``EnableCaptionsUseCase`` when activating captions.
-    private let roomName: RoomName
+    /// The session key provider for reading the JWT for ``EnableCaptionsUseCase``.
+    private let sessionKeyProvider: SessionKeyProvider
     /// Use case responsible for enabling captions via the backend.
     private let enableCaptionsUseCase: EnableCaptionsUseCase
     /// Use case responsible for disabling captions locally.
@@ -56,17 +56,17 @@ public final class CaptionsButtonViewModel: ObservableObject {
     /// Creates a new button view model.
     ///
     /// - Parameters:
-    ///   - roomName: The name of the active room, forwarded when enabling captions.
+    ///   - sessionKeyProvider: The provider of the session key JWT for enabling captions.
     ///   - enableCaptionsUseCase: The use case that activates captions on the backend.
     ///   - disableCaptionsUseCase: The use case that deactivates captions locally.
     ///   - captionsStatusDataSource: The data source that publishes activation state changes.
     public init(
-        roomName: RoomName,
+        sessionKeyProvider: SessionKeyProvider,
         enableCaptionsUseCase: EnableCaptionsUseCase,
         disableCaptionsUseCase: DisableCaptionsUseCase,
         captionsStatusDataSource: CaptionsStatusDataSource
     ) {
-        self.roomName = roomName
+        self.sessionKeyProvider = sessionKeyProvider
         self.enableCaptionsUseCase = enableCaptionsUseCase
         self.disableCaptionsUseCase = disableCaptionsUseCase
         self.captionsStatusDataSource = captionsStatusDataSource
@@ -103,7 +103,7 @@ public final class CaptionsButtonViewModel: ObservableObject {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 do {
-                    try await enableCaptionsUseCase(.init(roomName: roomName))
+                    try await enableCaptionsUseCase(.init(sessionKey: sessionKeyProvider.sessionKey))
                 } catch {
                     self.toast = .init(
                         message: String(localized: "captions_enable_error", bundle: .veraCaptions),

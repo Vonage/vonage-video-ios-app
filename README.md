@@ -113,7 +113,7 @@ The current minimum deployment target for the reference app is iOS 16+. Some of 
 
 ### Vonage Video SDK Compatibility
 
-This reference app has been tested with **Vonage Video SDK 2.32** and **2.33**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
+This reference app has been tested with **Vonage Video SDK 2.33** and **2.34**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
 
 The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift`) and can be adjusted there if needed.
 
@@ -124,6 +124,7 @@ The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/
 - **SwiftLint**
 - **SwiftFormat**
 - **Git LFS**
+- **Java 17** (required for Maestro UI testing)
 
 ## Running Locally
 
@@ -207,11 +208,178 @@ The app is fully prepared for internationalization using Xcode's **String Catalo
 
 ## Testing
 
+### Unit, Integration & Snapshot Tests
+
 This project uses the <em>Swift Testing</em> framework for the unit, integration and snapshot tests. 
 
 Tuist will generate the testing schemes for all the modules, then for testing you could execute the tests by running the <em>tuist test</em> command or by executing them with `⌘U` in the selected testing target in Xcode.
 
 You can also edit the snapshot test images by recording new screenshots in the snapshot testing files.
+
+### E2E Testing with Maestro
+
+VERA uses [Maestro](https://maestro.mobile.dev) for end-to-end UI testing. Tests are YAML-based and interact with the app through accessibility identifiers.
+
+#### Installation
+
+Use the provided install script (installs Maestro CLI + Java 17):
+
+```bash
+./scripts/install-maestro.sh
+```
+
+#### Folder Structure
+
+```
+.maestro/
+├── config.yaml          # Global configuration (appId, simulator device)
+└── flows/               # Test flows (YAML files)
+    └── launch-app.yaml  # P0: Launch app and validate landing screen
+```
+
+Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is a sequential number.
+
+#### Running Tests
+
+```bash
+# Run all tests (cleans DerivedData, builds, boots simulator, runs flows)
+./scripts/run-maestro-tests.sh
+
+# Run with a specific simulator
+SIMULATOR_DEVICE="iPhone 17 Pro" ./scripts/run-maestro-tests.sh
+
+# Run a single flow
+maestro test .maestro/flows/launch-app.yaml
+```
+
+#### Writing Tests with Accessibility IDs
+
+Tests target elements using accessibility identifiers. See the full ID reference in [`.github/instructions/e2e-maestro.instructions.md`](.github/instructions/e2e-maestro.instructions.md).
+
+##### Example 1: Validate the landing screen
+
+```yaml
+appId: com.vonage.VERA
+---
+# E2E Test: Launch App
+# Priority: P0
+
+- launchApp:
+    clearState: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- takeScreenshot: landing-screen
+```
+
+##### Example 2: Complete meeting flow
+
+```yaml
+appId: com.vonage.VERA
+---
+# E2E Test: Create Room → Join → Leave → Goodbye
+# Priority: P0
+
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "landing-screen"
+
+- tapOn:
+    id: "landing-create-room-button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+- tapOn:
+    id: "waiting-room-name-field"
+- inputText: "Test User"
+- hideKeyboard
+
+- tapOn:
+    id: "waiting-room-join-button"
+- extendedWaitUntil:
+    visible:
+        id: "meeting-room-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "meeting-room-leave-button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "goodbye-screen"
+- takeScreenshot: goodbye-screen
+```
+
+#### Adding Accessibility IDs in SwiftUI
+
+For Maestro to find elements, accessibility identifiers must be applied correctly:
+
+##### Screen anchors (invisible element inside a ZStack)
+
+```swift
+public var body: some View {
+    ZStack {
+        // Accessibility anchor for Maestro E2E tests
+        Color.clear
+            .frame(width: 1, height: 1)
+            .accessibilityElement()
+            .accessibilityIdentifier("landing-screen")
+
+        // Your actual content
+        Group { ... }
+    }
+}
+```
+
+##### Buttons (pass `accessibilityID` parameter)
+
+```swift
+// Button component with accessibilityID support
+public struct FilledButton: View {
+    public let text: Text
+    public let accessibilityID: String?
+    public let onAction: () -> Void
+
+    public var body: some View {
+        Button { onAction() } label: { text }
+            .if(accessibilityID != nil) { view in
+                view.accessibilityIdentifier(accessibilityID!)
+            }
+    }
+}
+
+// Usage
+FilledButton(
+    text: Text("Join meeting"),
+    accessibilityID: "waiting-room-join-button",
+    onAction: onJoinRoom
+)
+```
+
+##### Text fields (apply directly to the TextField)
+
+```swift
+TextField("", text: $userName)
+    .accessibilityIdentifier("waiting-room-name-field")
+```
+
+> **Important:** Do not apply `.accessibilityIdentifier()` to container views (`Group`, `VStack`, `NavigationView`) — Maestro won't find them. Use the invisible anchor pattern for screens and apply IDs directly to interactive elements.
+
+#### Useful Links
+
+- [Maestro Documentation](https://maestro.mobile.dev)
+- [Maestro CLI Commands](https://maestro.mobile.dev/api-reference/commands)
+- [Maestro Studio (interactive recorder)](https://maestro.mobile.dev/getting-started/maestro-studio)
 
 ## Code style
 

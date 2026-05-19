@@ -38,7 +38,8 @@ struct UserDefaultsSettingsRepositoryTests {
             maxVideoBitrate: 2_000_000,
             publisherAudioFallbackEnabled: false,
             subscriberAudioFallbackEnabled: false,
-            senderStatsEnabled: true
+            senderStatsEnabled: true,
+            degradationPreference: .balanced
         )
 
         let encoder = JSONEncoder()
@@ -105,13 +106,41 @@ struct UserDefaultsSettingsRepositoryTests {
         await repository.save(customPreferences)
 
         // Verify data is stored in UserDefaults
-        let storedData = userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences")
-        #expect(storedData != nil)
+        let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
 
         // Verify data can be decoded
         let decoder = JSONDecoder()
-        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData!)
+        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData)
         #expect(decodedPreferences == customPreferences)
+    }
+
+    @Test("opusDtxEnabled defaults to true and persists correctly")
+    func opusDtxDefaultsAndPersists() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+
+        // Verify default value is true
+        let defaultPreferences = await repository.getPreferences()
+        #expect(defaultPreferences.opusDtxEnabled == true)
+
+        // Save with opusDtxEnabled = false
+        let customPreferences = PublisherSettingsPreferences(
+            videoResolution: .medium,
+            maxAudioBitrate: 40_000,
+            opusDtxEnabled: false
+        )
+        await repository.save(customPreferences)
+
+        // Verify persistence
+        let loadedPreferences = await repository.getPreferences()
+        #expect(loadedPreferences.opusDtxEnabled == false)
+
+        // Verify encoding/decoding
+        let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
+
+        let decoder = JSONDecoder()
+        let decodedPreferences = try decoder.decode(PublisherSettingsPreferences.self, from: storedData)
+        #expect(decodedPreferences.opusDtxEnabled == false)
     }
 
     @Test("save() updates subject and emits through publisher")
@@ -353,7 +382,7 @@ struct UserDefaultsSettingsRepositoryTests {
             for i in 0..<10 {
                 group.addTask {
                     let prefs = PublisherSettingsPreferences(maxAudioBitrate: Int32(i * 1000))
-                    try? await repository.save(prefs)
+                    await repository.save(prefs)
                 }
             }
 
@@ -378,7 +407,7 @@ struct UserDefaultsSettingsRepositoryTests {
         let repository = UserDefaultsSettingsRepository(userDefaults: customDefaults)
 
         let customPreferences = PublisherSettingsPreferences(videoResolution: .high)
-        try await repository.save(customPreferences)
+        await repository.save(customPreferences)
 
         // Verify data is in custom UserDefaults, not standard
         let dataInCustom = customDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences")

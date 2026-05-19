@@ -12,7 +12,7 @@ struct StartArchivingUseCaseTests {
     @Test func startArchivingSucceeds() async throws {
         let sut = makeSUT()
 
-        _ = try await sut(.init(roomName: "heart-of-gold"))
+        _ = try await sut(.init(sessionKey: "heart-of-gold"))
 
         // No exception means that the function has successfully executed
     }
@@ -24,7 +24,7 @@ struct StartArchivingUseCaseTests {
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
         do {
-            _ = try await sut(.init(roomName: "heart-of-gold"))
+            _ = try await sut(.init(sessionKey: "heart-of-gold"))
             Issue.record("Should have thrown a networking error instead")
         } catch ArchivingDataSourceError.networkError {
             // Should throw an exception
@@ -40,7 +40,7 @@ struct StartArchivingUseCaseTests {
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
         do {
-            _ = try await sut(.init(roomName: "heart-of-gold"))
+            _ = try await sut(.init(sessionKey: "heart-of-gold"))
             Issue.record("Should have thrown a networking error instead")
         } catch ArchivingDataSourceError.invalidData {
             // Should throw an exception
@@ -53,10 +53,10 @@ struct StartArchivingUseCaseTests {
         let dataSourceMock = MockArchivingDataSource()
         let sut = makeSUT(archivingDataSource: dataSourceMock)
 
-        let roomName = "heart-of-gold"
-        _ = try await sut(.init(roomName: roomName))
+        let sessionKey = "heart-of-gold"
+        _ = try await sut(.init(sessionKey: sessionKey))
 
-        #expect(dataSourceMock.lastRoomName == roomName)
+        #expect(dataSourceMock.lastSessionKey == sessionKey)
     }
 
     // MARK: - Test Helpers

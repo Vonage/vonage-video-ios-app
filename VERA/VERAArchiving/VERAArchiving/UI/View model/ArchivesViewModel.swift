@@ -8,7 +8,7 @@ import VERADomain
 
 public final class ArchivesViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
-    public let roomName: RoomName
+    private let sessionKeyProvider: SessionKeyProvider
     private let archivesRepository: ArchivesRepository
     private let playRecordingUseCase: PlayRecordingUseCase
 
@@ -16,18 +16,18 @@ public final class ArchivesViewModel: ObservableObject {
     @MainActor @Published public var error: AlertItem?
 
     public init(
-        roomName: RoomName,
+        sessionKeyProvider: SessionKeyProvider,
         archivesRepository: ArchivesRepository,
         playRecordingUseCase: PlayRecordingUseCase,
     ) {
-        self.roomName = roomName
+        self.sessionKeyProvider = sessionKeyProvider
         self.archivesRepository = archivesRepository
         self.playRecordingUseCase = playRecordingUseCase
     }
 
     @BackgroundActor
     public func loadData() async {
-        await archivesRepository.getArchives(roomName: roomName)
+        await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
             .receive(on: DispatchQueue.main)
             .map { [weak self] archives in
                 guard let self else { return [] }
@@ -65,9 +65,9 @@ public final class ArchivesViewModel: ObservableObject {
     }
 
     public func downloadArchive(_ archive: Archive) {
-        Task {
+        Task { @MainActor [weak self] in
             do {
-                try await playRecordingUseCase(archive)
+                try await self?.playRecordingUseCase(archive)
             } catch {
                 Task { @MainActor [weak self] in
                     self?.error = AlertItem.downloadError(error.localizedDescription)

@@ -6,6 +6,8 @@ import SwiftUI
 
 public struct CardView<Content: View>: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let content: () -> Content
 
     public init(@ViewBuilder content: @escaping () -> Content) {
@@ -17,7 +19,7 @@ public struct CardView<Content: View>: View {
             content()
         }
         .padding()
-        .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
+        .background(theme.surface)
         .cornerRadius(.medium)
     }
 }

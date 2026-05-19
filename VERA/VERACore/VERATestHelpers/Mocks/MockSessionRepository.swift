@@ -8,10 +8,16 @@ import VERADomain
 
 public class MockSessionRepository: SessionRepository {
     public var currentCall: (any CallFacade)?
+    public var createSessionError: (any Error)?
+    public private(set) var createSessionCallCount = 0
 
     public func createSession(
         _ credentials: RoomCredentials
-    ) async -> any CallFacade {
+    ) async throws -> any CallFacade {
+        createSessionCallCount += 1
+        if let error = createSessionError {
+            throw error
+        }
         if let currentCall = currentCall {
             return currentCall
         }

@@ -4,6 +4,14 @@
 
 import SwiftUI
 
+/// Layout constants for the ongoing activity control button.
+private enum OngoingActivityControlButtonConstants {
+    /// Diameter of the circular button.
+    static let buttonSize: CGFloat = 50
+    /// Duration of the active-state toggle animation.
+    static let animationDuration: Double = 0.2
+}
+
 public struct OngoingActivityControlButton: View {
     private let isActive: Bool
     private let iconName: String
@@ -24,6 +32,7 @@ public struct OngoingActivityControlButton: View {
 }
 
 public struct OngoingActivityControlImageButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
@@ -38,16 +47,22 @@ public struct OngoingActivityControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-                .frame(width: 50, height: 50)
+                .foregroundStyle(theme.surface)
+                .frame(
+                    width: OngoingActivityControlButtonConstants.buttonSize,
+                    height: OngoingActivityControlButtonConstants.buttonSize
+                )
                 .background(
                     Circle()
                         .fill(
                             isActive
-                                ? VERACommonUIAsset.Colors.vGray2.swiftUIColor
-                                : VERACommonUIAsset.Colors.vGray4.swiftUIColor)
+                                ? theme.vGray2
+                                : theme.vGray4)
                 )
-                .animation(.easeInOut(duration: 0.2), value: isActive)
+                .animation(
+                    .easeInOut(duration: OngoingActivityControlButtonConstants.animationDuration),
+                    value: isActive
+                )
         }
         .buttonStyle(PlainButtonStyle())
     }

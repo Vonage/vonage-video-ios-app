@@ -1,0 +1,158 @@
+name: Maestro UI Tests
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+jobs:
+  maestro-tests:
+    name: Run Maestro UI Tests
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Pull LFS files
+        run: git lfs pull
+
+      - name: Print Xcode & Simulator Info
+        run: |
+          xcodebuild -version
+          echo ""
+          echo "Available iOS Simulators:"
+          xcrun simctl list devices available | grep iPhone
+
+      - name: Install Tuist
+        run: brew install tuist
+
+      - name: Clean Tuist cache
+        run: |
+          echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
+          tuist clean
+          rm -rf ~/.cache/tuist
+
+      - name: Install Java 17 (Maestro dependency)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Export build flags
+        run: |
+          {
+            echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
+          } >> $GITHUB_ENV
+
+      - name: Generate project with Tuist
+        run: |
+          cd VERA
+          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
+          export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export MARKETING_VERSION=1.2
+          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
+          ./Scripts/generateEnvironmentConstants.sh
+          ./Scripts/regenerateSigningConfig.sh
+          tuist generate --no-open
+          cd ..
+
+      - name: List available simulators
+        run: |
+          echo "📱 Available iOS Simulators:"
+          xcrun simctl list devices
+
+      - name: Run Maestro Tests
+        run: ./scripts/run-maestro-tests.sh
+        env:
+          BASE_API_URL: ${{ secrets.BASE_API_URL }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+          MARKETING_VERSION: "1.2"
+          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+          XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
+
+      - name: List Maestro test artifacts
+        if: always()
+        run: |
+          echo "📁 Maestro test directory contents:"
+          ls -la ~/.maestro/tests/ 2>/dev/null || echo "No tests directory"
+          
+          echo ""
+          echo "📸 Screenshots found:"
+          find ~/.maestro/tests -type f \( -name "*.png" -o -name "*.jpg" \) 2>/dev/null | head -20
+
+      - name: Generate Test Report
+        if: always()
+        run: |
+          mkdir -p test-reports
+          cat > test-reports/maestro-summary.txt << EOF
+          🎭 Maestro Test Execution Summary
+          ==================================
+          Run Number: ${{ github.run_number }}
+          Timestamp: $(date)
+          Branch: ${{ github.ref }}
+          Commit: ${{ github.sha }}
+          
+          Test Results Location:
+          ~/.maestro/tests/
+          
+          Screenshots and test artifacts have been uploaded below.
+          EOF
+          
+          # Copy test results to reports folder
+          if [ -d ~/.maestro/tests ]; then
+            cp -r ~/.maestro/tests/* test-reports/ 2>/dev/null || true
+          fi
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-test-results-${{ github.run_number }}
+          path: ~/.maestro/tests/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-report-${{ github.run_number }}
+          path: test-reports/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let comment = '## 🎭 Maestro UI Test Results\n\n';
+            if ('${{ job.status }}' === 'success') {
+              comment += '✅ **All tests passed!**\n\n';
+            } else {
+              comment += '❌ **Some tests failed**\n\n';
+            }
+            comment += `- **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;
+            comment += `- **Commit**: \`${{ github.sha }}\`\n\n`;
+            comment += '📊 **Artifacts:**\n';
+            comment += `  - maestro-test-results-${{ github.run_number }}\n`;
+            comment += `  - maestro-report-${{ github.run_number }}\n\n`;
+            comment += '📸 View the complete test results and screenshots in the artifacts section above.';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

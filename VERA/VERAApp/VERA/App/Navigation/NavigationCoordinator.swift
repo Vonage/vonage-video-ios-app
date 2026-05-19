@@ -3,6 +3,8 @@ import Foundation
 import SwiftUI
 import VERACore
 import VERADomain
+import VERAMeetingRoom
+import VERAMeetingRoomSDK
 import os.log
 
 #if ARCHIVING_ENABLED
@@ -11,14 +13,6 @@ import os.log
 
 #if BACKGROUND_EFFECTS_ENABLED
     import VERABackgroundEffects
-#endif
-
-#if CAPTIONS_ENABLED
-    import VERACaptions
-#endif
-
-#if REACTIONS_ENABLED
-    import VERAReactions
 #endif
 
 #if SETTINGS_ENABLED
@@ -33,15 +27,16 @@ import os.log
 open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var path = NavigationPath()
     @Published var isInMeeting = false
-    @Published var currentMeetingRoom: String?
+    @Published var currentMeetingRoomRequest: NewRoomRequest?
     @Published var alertItem: AlertItem?
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
+    var meetingRoomPrebuilt: MeetingRoomPrebuilt?
     var goodByeViewModel: GoodByeViewModel?
+
     #if ARCHIVING_ENABLED
-        var archiveButtonViewModel: ArchiveButtonViewModel?
         var archivesViewModel: ArchivesViewModel?
     #endif
 
@@ -49,24 +44,8 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
     #endif
 
-    #if CAPTIONS_ENABLED
-        var captionsButtonViewModel: CaptionsButtonViewModel?
-        var captionsViewModel: CaptionsViewModel?
-    #endif
-
-    #if REACTIONS_ENABLED
-        var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
-        var emojiPickerContainerViewModel: EmojiPickerContainerViewModel?
-        var floatingEmojisOverlayViewModel: FloatingEmojisOverlayViewModel?
-    #endif
-
-    #if SETTINGS_ENABLED
-        var statsOverlayViewModel: StatsOverlayViewModel?
-    #endif
-
     #if AUDIOEFFECTS_ENABLED
         var waitingNoiseSuppressionViewModel: WaitingNoiseSuppressionViewModel?
-        var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
     #endif
 
     func showAlert(_ alert: AlertItem) {
@@ -78,7 +57,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         switch route {
         case .landing: returnToLanding()
         case .waitingRoom(let roomName): navigateToWaitingRoom(roomName)
-        case .meetingRoom(let roomName): startMeeting(roomName)
+        case .meetingRoom(let request): startMeeting(request)
         case .goodbye: leaveMeeting()
         case .settings: navigateToSettings()
         }
@@ -88,25 +67,25 @@ open class NavigationCoordinator: ObservableObject, Navigator {
 
     private func navigateToWaitingRoom(_ roomName: String) {
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
 
         path.removeLast(path.count)
         path.append(AppRoute.waitingRoom(roomName))
         logNavigation("Navigating to waiting room: \(roomName)")
     }
 
-    private func startMeeting(_ roomName: String) {
-        currentMeetingRoom = roomName
+    private func startMeeting(_ request: NewRoomRequest) {
+        currentMeetingRoomRequest = request
         isInMeeting = true
 
         path.removeLast(path.count)
-        path.append(AppRoute.goodbye(roomName))
-        logNavigation("Starting meeting: \(roomName)")
+        path.append(AppRoute.goodbye(request.roomName))
+        logNavigation("Starting meeting: \(request.roomName)")
     }
 
     private func leaveMeeting() {
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
 
         logNavigation("Left meeting, navigating to goodbye")
     }
@@ -114,11 +93,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     private func returnToLanding() {
         path.removeLast(path.count)
         isInMeeting = false
-        currentMeetingRoom = nil
+        currentMeetingRoomRequest = nil
         // Clear cached view models when returning to landing
         waitingRoomViewModel = nil
+
         #if ARCHIVING_ENABLED
-            archiveButtonViewModel = nil
             archivesViewModel = nil
         #endif
 
@@ -126,26 +105,20 @@ open class NavigationCoordinator: ObservableObject, Navigator {
             backgroundBlurButtonViewModel = nil
         #endif
 
-        #if CAPTIONS_ENABLED
-            captionsButtonViewModel = nil
-            captionsViewModel = nil
-        #endif
-
         #if AUDIOEFFECTS_ENABLED
             waitingNoiseSuppressionViewModel = nil
-            meetingNoiseSuppressionButtonViewModel = nil
         #endif
 
         logNavigation("Returned to landing page")
     }
+
+    // MARK: - Private Helpers
 
     private func navigateToSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
     }
-
-    // MARK: - Private Helpers
 
     private func logNavigation(_ message: String) {
         #if DEBUG

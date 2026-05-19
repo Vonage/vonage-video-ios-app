@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public class MockRoomCredentialsRepository: RoomCredentialsRepository {
 
@@ -14,15 +15,15 @@ public class MockRoomCredentialsRepository: RoomCredentialsRepository {
     }
 
     public func getRoomCredentials(
-        _ request: VERACore.RoomCredentialsRequest
-    ) async throws -> VERACore.RoomCredentialsResponse {
+        _ request: RoomCredentialsRequest
+    ) async throws -> RoomCredentialsResponse {
         response
     }
 }
 
 public func makeMockRoomCredentialsRepository(
     _ response: RoomCredentialsResponse = .init(
-        sessionId: "a-sessionId", token: "a-tokenId", apiKey: "anAPIKey")
+        sessionId: "a-sessionId", token: "a-tokenId", apiKey: "anAPIKey", sessionKey: "aSessionKey")
 ) -> MockRoomCredentialsRepository {
     MockRoomCredentialsRepository(response: response)
 }

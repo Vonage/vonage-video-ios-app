@@ -4,6 +4,14 @@
 
 import SwiftUI
 
+/// Layout constants shared by control button variants.
+private enum ControlButtonConstants {
+    /// Diameter of the circular button.
+    static let buttonSize: CGFloat = 50
+    /// Duration of the active-state toggle animation.
+    static let animationDuration: Double = 0.2
+}
+
 public struct ControlButton: View {
     private let isActive: Bool
     private let iconName: String
@@ -24,6 +32,7 @@ public struct ControlButton: View {
 }
 
 public struct ControlImageButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let isActive: Bool
     private let image: Image
     private let action: () -> Void
@@ -38,19 +47,20 @@ public struct ControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .foregroundStyle(isActive ? VERACommonUIAsset.SemanticColors.surface.swiftUIColor : .red)
-                .frame(width: 50, height: 50)
+                .foregroundStyle(isActive ? theme.surface : .red)
+                .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
                 .background(
                     Circle()
-                        .fill(isActive ? VERACommonUIAsset.Colors.vGray4.swiftUIColor : .clear)
+                        .fill(isActive ? theme.vGray4 : .clear)
                 )
-                .animation(.easeInOut(duration: 0.2), value: isActive)
+                .animation(.easeInOut(duration: ControlButtonConstants.animationDuration), value: isActive)
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
 public struct ButtonImage: View {
+    @Environment(\.meetingRoomTheme) private var theme
     private let image: Image
 
     public init(image: Image) {
@@ -60,11 +70,11 @@ public struct ButtonImage: View {
     public var body: some View {
         image
             .font(.title2)
-            .foregroundStyle(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
-            .frame(width: 50, height: 50)
+            .foregroundStyle(theme.surface)
+            .frame(width: ControlButtonConstants.buttonSize, height: ControlButtonConstants.buttonSize)
             .background(
                 Circle()
-                    .fill(VERACommonUIAsset.Colors.vGray4.swiftUIColor)
+                    .fill(theme.vGray4)
             )
     }
 }

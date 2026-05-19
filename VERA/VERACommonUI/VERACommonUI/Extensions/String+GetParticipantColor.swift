@@ -5,7 +5,7 @@
 import SwiftUI
 
 extension String {
-    func getParticipantColor() -> Color {
+    public func getParticipantColor() -> Color {
         let colorMap: [Color] = [
             Color(red: 0.96, green: 0.26, blue: 0.21),  // #f44336
             Color(red: 0.38, green: 0.49, blue: 0.54),  // #607d8b

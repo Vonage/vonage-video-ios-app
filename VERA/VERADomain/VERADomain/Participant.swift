@@ -40,8 +40,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let creationTime: Date
     /// `true` when the participant is sharing their screen.
     public let isScreenshare: Bool
-    /// `true` when the participant is pinned (e.g., highlighted in layout).
-    public let isPinned: Bool
+    /// The current audio level of the participant (0.0 to 1.0).
+    public let audioLevel: Float
 
     /// Optional callback invoked when this participant’s view appears on screen.
     ///
@@ -63,8 +63,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     ///   - isRemote: `true` if remote; `false` if local publisher. Defaults to `true`.
     ///   - creationTime: Creation timestamp.
     ///   - isScreenshare: `true` if the participant is screensharing.
-    ///   - isPinned: `true` if pinned in UI.
     ///   - view: SwiftUI-compatible video view.
+    ///   - audioLevel: Current audio level (0.0 to 1.0). Defaults to 0.0.
     public init(
         id: String,
         connectionId: String? = nil,
@@ -75,7 +75,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         isRemote: Bool = true,
         creationTime: Date,
         isScreenshare: Bool,
-        isPinned: Bool,
+        audioLevel: Float = 0.0,
         view: AnyView
     ) {
         self.id = id
@@ -87,7 +87,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.isRemote = isRemote
         self.creationTime = creationTime
         self.isScreenshare = isScreenshare
-        self.isPinned = isPinned
+        self.audioLevel = audioLevel
         self.view = view
     }
 
@@ -105,7 +105,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
             isRemote: isRemote,
             creationTime: creationTime,
             isScreenshare: isScreenshare,
-            isPinned: isPinned,
+            audioLevel: audioLevel,
             view: AnyView(EmptyView()))
     }
 
@@ -119,7 +119,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
             && lhs.isRemote == rhs.isRemote
             && lhs.creationTime == rhs.creationTime
             && lhs.isScreenshare == rhs.isScreenshare
-            && lhs.isPinned == rhs.isPinned
+            && lhs.audioLevel == rhs.audioLevel
     }
 
     /// Hashes identity and core properties for set/dictionary usage.
@@ -136,7 +136,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         hasher.combine(isRemote)
         hasher.combine(creationTime)
         hasher.combine(isScreenshare)
-        hasher.combine(isPinned)
+        hasher.combine(audioLevel)
     }
 
     /// Aspect ratio to use for container sizing, with safe defaults.
@@ -170,8 +170,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         return """
             Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
             isCameraEnabled: \(isCameraEnabled) \
-            isRemote: \(isRemote), isScreenshare: \(isScreenshare), \
-            isPinned: \(isPinned))
+            isRemote: \(isRemote), isScreenshare: \(isScreenshare)),
+            audioLevel: \(audioLevel)
             """
     }
 }

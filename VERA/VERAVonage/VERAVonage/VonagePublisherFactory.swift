@@ -75,6 +75,9 @@ public final class VonagePublisherFactory: PublisherFactory {
         if let maxAudioBitrate = settings.advancedSettings?.maxAudioBitrate {
             publisherSettings.audioBitrate = maxAudioBitrate
         }
+        if let opusDtxEnabled = settings.advancedSettings?.opusDtxEnabled {
+            publisherSettings.enableOpusDtx = opusDtxEnabled
+        }
         publisherSettings.subscriberAudioFallbackEnabled =
             settings.advancedSettings?.subscriberAudioFallbackEnabled ?? false
         publisherSettings.publisherAudioFallbackEnabled =
@@ -85,6 +88,9 @@ public final class VonagePublisherFactory: PublisherFactory {
 
         guard let otPublisher = OTPublisher(delegate: nil, settings: publisherSettings) else {
             throw Error.publisherInitializationFailed
+        }
+        if let degradationPreference = settings.advancedSettings?.degradationPreference?.otDegradationPreference {
+            otPublisher.degradationPreference = degradationPreference
         }
         return otPublisher
     }
@@ -101,6 +107,10 @@ public final class VonagePublisherFactory: PublisherFactory {
             otPublisher.videoBitratePreset = bitratePreset
         } else if let maxVideoBitrate = settings.advancedSettings?.maxVideoBitrate, maxVideoBitrate > 0 {
             otPublisher.maxVideoBitrate = maxVideoBitrate
+        }
+
+        if let degradationPreference = settings.advancedSettings?.degradationPreference?.otDegradationPreference {
+            otPublisher.degradationPreference = degradationPreference
         }
 
         let publisher = VonagePublisher(

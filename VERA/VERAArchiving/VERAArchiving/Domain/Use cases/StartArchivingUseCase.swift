@@ -5,10 +5,10 @@
 import Foundation
 
 public struct StartArchivingRequest {
-    public let roomName: String
+    public let sessionKey: String
 
-    public init(roomName: String) {
-        self.roomName = roomName
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 
@@ -26,7 +26,7 @@ public final class DefaultStartArchivingUseCase: StartArchivingUseCase {
     public func callAsFunction(
         _ request: StartArchivingRequest
     ) async throws -> ArchiveID {
-        let request = StartArchivingDataSourceRequest(roomName: request.roomName)
+        let request = StartArchivingDataSourceRequest(sessionKey: request.sessionKey)
         let response = try await archivingDataSource.startArchiving(request)
         return response.archiveId
     }

@@ -4,37 +4,36 @@
 
 import Foundation
 
-public struct CredentialsSuccessfullResponse: Codable {
-    public let sessionId: String
-    public let token: String
-    public let apiKey: String
-    public let captionsId: String?
-
-    public init(
-        sessionId: String,
-        token: String,
-        apiKey: String,
-        captionsId: String? = nil
-    ) {
-        self.sessionId = sessionId
-        self.token = token
-        self.apiKey = apiKey
-        self.captionsId = captionsId
-    }
+/// Produces a tRPC-wrapped `createSession` JSON response.
+public func makeCreateSessionJSONResponse(
+    sessionId: String = "sessionId",
+    sessionKey: String = "sessionKey",
+    applicationId: String = "applicationId"
+) throws -> Data {
+    let json: [String: Any] = [
+        "result": [
+            "data": [
+                "sessionId": sessionId,
+                "sessionKey": sessionKey,
+                "applicationId": applicationId,
+            ]
+        ]
+    ]
+    return try JSONSerialization.data(withJSONObject: json)
 }
 
-public func makeCredentialsJSONResponse(
-    sessionId: String = "sessionId",
+/// Produces a tRPC-wrapped `joinSession` JSON response.
+public func makeJoinSessionJSONResponse(
     token: String = "token",
-    apiKey: String = "apiKey",
-    captionsId: String? = "captionsId"
+    applicationId: String = "applicationId"
 ) throws -> Data {
-    let response = CredentialsSuccessfullResponse(
-        sessionId: sessionId,
-        token: token,
-        apiKey: apiKey,
-        captionsId: captionsId
-    )
-
-    return try JSONEncoder().encode(response)
+    let json: [String: Any] = [
+        "result": [
+            "data": [
+                "token": token,
+                "applicationId": applicationId,
+            ]
+        ]
+    ]
+    return try JSONSerialization.data(withJSONObject: json)
 }

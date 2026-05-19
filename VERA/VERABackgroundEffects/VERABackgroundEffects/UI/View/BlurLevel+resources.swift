@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 extension BlurLevel {
     public var image: Image {

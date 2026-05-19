@@ -120,9 +120,12 @@ public final class WaitingRoomViewModel: ObservableObject {
             }
 
             let request = JoinRoomRequest(roomName: roomName, userName: userName)
-            try await joinRoomUseCase(request)
+            let settings = try await joinRoomUseCase(request)
             await MainActor.run {
-                waitingRoomNavigation.goToMeetingRoom()
+                waitingRoomNavigation.goToMeetingRoom(
+                    request: .init(
+                        roomName: roomName,
+                        publisherSettings: settings))
             }
         } catch {
             await MainActor.run { [weak self] in
@@ -168,6 +171,12 @@ extension WaitingRoomViewModel {
     }
 
     fileprivate func buildContentUiState(roomName: String, isMicrophoneEnabled: Bool, isCameraEnabled: Bool) {
+        let currentAudioLevel: Float
+        if case .content(let currentState) = state {
+            currentAudioLevel = currentState.audioLevel
+        } else {
+            currentAudioLevel = 0.0
+        }
         state = .content(
             .init(
                 roomName: roomName,
@@ -176,6 +185,7 @@ extension WaitingRoomViewModel {
                 allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
                 cameras: availableCameraDevices,
+                audioLevel: currentAudioLevel,
                 publisher: publisher))
     }
 
@@ -224,11 +234,35 @@ extension WaitingRoomViewModel {
             let publisher = try cameraPreviewProviderRepository.getPublisher()
             self.publisher = publisher
 
+            observeAudioLevel(publisher)
             updateUIState()
 
         } catch {
             self.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
         }
+    }
+
+    fileprivate func observeAudioLevel(_ publisher: VERAPublisher) {
+        publisher.audioLevelPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] level in
+                self?.updateAudioLevel(level)
+            }
+            .store(in: &cancellables)
+    }
+
+    fileprivate func updateAudioLevel(_ level: Float) {
+        guard case .content(let currentState) = state else { return }
+        state = .content(
+            .init(
+                roomName: currentState.roomName,
+                isMicrophoneEnabled: currentState.isMicrophoneEnabled,
+                isCameraEnabled: currentState.isCameraEnabled,
+                allowMicrophoneControl: currentState.allowMicrophoneControl,
+                allowCameraControl: currentState.allowCameraControl,
+                cameras: currentState.cameras,
+                audioLevel: level,
+                publisher: currentState.publisher))
     }
 
     // MARK: Permission requests

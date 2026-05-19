@@ -51,6 +51,7 @@ final actor CallStateManager {
         let subscriber = await subscribersRepository.getSubscriber(id: id)
         await subscribersRepository.removeSubscriber(id: id)
         await participantsRepository.removeParticipant(id: id)
+        subscriber?.cleanUp()
         await recalculateActiveSpeaker()
         let state = await getCurrentState()
         return (subscriber, state)

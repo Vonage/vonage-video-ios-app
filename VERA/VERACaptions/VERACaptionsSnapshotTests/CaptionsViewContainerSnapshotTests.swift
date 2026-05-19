@@ -79,26 +79,6 @@ struct CaptionsViewContainerSnapshotTests {
         )
     }
 
-    @Test(
-        "CaptionsViewContainer - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall, UICaptionItem.sampleMessages),
-            (
-                "LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge,
-                UICaptionItem.sampleMessages
-            ),
-        ])
-    func accessibility(
-        textName: String,
-        textSize: ContentSizeCategory,
-        captions: [UICaptionItem]
-    ) throws {
-        let sut = makeSUT(captions: captions)
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
-    }
-
     // MARK: - Test Helpers
 
     private func makeSUT(

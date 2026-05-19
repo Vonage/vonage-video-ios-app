@@ -28,19 +28,17 @@ struct DefaultArchivingDataSourceTests {
 
     @Test("Start archiving constructs correct URL")
     func startArchivingConstructsCorrectURL() async throws {
-        let roomName = "test-room"
         let baseURL = URL(string: "https://example.com")!
         let httpClient = MockHTTPClient()
         httpClient.data = try makeStartArchivingJSONResponse()
 
         let sut = makeSUT(baseURL: baseURL, httpClient: httpClient)
 
-        _ = try await sut.startArchiving(makeStartArchivingRequest(roomName: roomName))
+        _ = try await sut.startArchiving(makeStartArchivingRequest())
 
         let expectedURL =
             baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(roomName)
+            .appendingPathComponent("v2")
             .appendingPathComponent("startArchive")
 
         #expect(httpClient.recordedURL == expectedURL)
@@ -112,21 +110,17 @@ struct DefaultArchivingDataSourceTests {
 
     @Test("Stop archiving constructs correct URL")
     func stopArchivingConstructsCorrectURL() async throws {
-        let roomName = "test-room"
-        let archiveID = "archive-789"
         let baseURL = URL(string: "https://example.com")!
         let httpClient = MockHTTPClient()
         httpClient.data = try makeStopArchivingJSONResponse()
 
         let sut = makeSUT(baseURL: baseURL, httpClient: httpClient)
 
-        _ = try await sut.stopArchiving(makeStopArchivingRequest(roomName: roomName, archiveID: archiveID))
+        _ = try await sut.stopArchiving(makeStopArchivingRequest())
 
         let expectedURL =
             baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(roomName)
-            .appendingPathComponent(archiveID)
+            .appendingPathComponent("v2")
             .appendingPathComponent("stopArchive")
 
         #expect(httpClient.recordedURL == expectedURL)
@@ -195,37 +189,43 @@ struct DefaultArchivingDataSourceTests {
     }
 
     private func makeStartArchivingRequest(
-        roomName: String = "test-room"
+        sessionKey: String = "test-session-key"
     ) -> StartArchivingDataSourceRequest {
-        StartArchivingDataSourceRequest(roomName: roomName)
+        StartArchivingDataSourceRequest(sessionKey: sessionKey)
     }
 
     private func makeStopArchivingRequest(
-        roomName: String = "test-room",
+        sessionKey: String = "test-session-key",
         archiveID: String = "archive-123"
     ) -> StopArchivingDataSourceRequest {
-        StopArchivingDataSourceRequest(roomName: roomName, archiveID: archiveID)
+        StopArchivingDataSourceRequest(sessionKey: sessionKey, archiveID: archiveID)
     }
 
     private func makeStartArchivingJSONResponse(
-        archiveId: String = "archive-123",
-        status: Int = 200
+        archiveId: String = "archive-123"
     ) throws -> Data {
-        let response = StartArchivingResponse(
-            archiveId: archiveId,
-            status: status
-        )
-        return try JSONEncoder().encode(response)
+        let json: [String: Any] = [
+            "result": [
+                "data": [
+                    "id": archiveId,
+                    "status": "started",
+                ]
+            ]
+        ]
+        return try JSONSerialization.data(withJSONObject: json)
     }
 
     private func makeStopArchivingJSONResponse(
-        archiveId: String = "archive-123",
-        status: Int = 200
+        archiveId: String = "archive-123"
     ) throws -> Data {
-        let response = StopArchivingResponse(
-            archiveId: archiveId,
-            status: status
-        )
-        return try JSONEncoder().encode(response)
+        let json: [String: Any] = [
+            "result": [
+                "data": [
+                    "id": archiveId,
+                    "status": "stopped",
+                ]
+            ]
+        ]
+        return try JSONSerialization.data(withJSONObject: json)
     }
 }

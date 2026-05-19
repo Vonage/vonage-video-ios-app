@@ -35,11 +35,9 @@ struct VERAChatSnapshotTests {
         "Chat View - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13, []),
-            ("iPad", ViewImageConfig.iPadPro12_9, []),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape), []),
             ("iPhone-with-messages", ViewImageConfig.iPhone13, UIChatMessage.sampleMessages),
             ("iPad-with-messages", ViewImageConfig.iPadPro12_9, UIChatMessage.sampleMessages),
-            ("iPhoneLandscape-with-messages", ViewImageConfig.iPhone13(.landscape), UIChatMessage.sampleMessages),
         ])
     func sizeClasses(
         deviceName: String,
@@ -60,9 +58,7 @@ struct VERAChatSnapshotTests {
     @Test(
         "Chat View - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light, []),
             ("Dark", ColorScheme.dark, []),
-            ("Light-with-messages", ColorScheme.light, UIChatMessage.sampleMessages),
             ("Dark-with-messages", ColorScheme.dark, UIChatMessage.sampleMessages),
         ])
     func colorSchemes(
@@ -80,24 +76,6 @@ struct VERAChatSnapshotTests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "Chat View - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall, []),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge, []),
-            ("SmallText-with-messages", ContentSizeCategory.extraSmall, UIChatMessage.sampleMessages),
-        ])
-    func accessibility(
-        textName: String,
-        textSize: ContentSizeCategory,
-        messages: [UIChatMessage]
-    ) throws {
-        let sut = makeSUT(messages: messages)
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers

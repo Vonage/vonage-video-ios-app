@@ -167,7 +167,8 @@ struct VonageCallTests {
         let advancedSettings = PublisherAdvancedSettings(
             videoResolution: .high,
             videoFrameRate: .rate30FPS,
-            maxAudioBitrate: 40000
+            maxAudioBitrate: 40000,
+            opusDtxEnabled: true
         )
 
         try await sut.applyPublisherAdvancedSettings(advancedSettings)
@@ -184,6 +185,7 @@ struct VonageCallTests {
         #expect(recordedSettings.advancedSettings?.videoResolution == .high)
         #expect(recordedSettings.advancedSettings?.videoFrameRate == .rate30FPS)
         #expect(recordedSettings.advancedSettings?.maxAudioBitrate == 40000)
+        #expect(recordedSettings.advancedSettings?.opusDtxEnabled == true)
     }
 
     @Test

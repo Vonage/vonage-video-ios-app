@@ -13,6 +13,7 @@ public struct WaitingRoomState: Equatable {
     public let allowMicrophoneControl: Bool
     public let allowCameraControl: Bool
     public let cameras: [UICameraDevice]
+    public let audioLevel: Float
     public weak var publisher: VERAPublisher?
 
     public init(
@@ -22,6 +23,7 @@ public struct WaitingRoomState: Equatable {
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
         cameras: [UICameraDevice],
+        audioLevel: Float = 0.0,
         publisher: VERAPublisher?
     ) {
         self.roomName = roomName
@@ -30,6 +32,7 @@ public struct WaitingRoomState: Equatable {
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.cameras = cameras
+        self.audioLevel = audioLevel
         self.publisher = publisher
     }
 
@@ -49,6 +52,7 @@ public struct WaitingRoomState: Equatable {
             && lhs.cameras.count == rhs.cameras.count
             && lhs.allowMicrophoneControl == rhs.allowMicrophoneControl
             && lhs.allowCameraControl == rhs.allowCameraControl
+            && lhs.audioLevel == rhs.audioLevel
     }
 }
 

@@ -4,6 +4,20 @@
 
 import SwiftUI
 
+/// Layout constants for the outlined button style.
+private enum OutlinedButtonConstants {
+    /// Horizontal padding inside the button.
+    static let horizontalPadding: CGFloat = 24
+    /// Vertical padding inside the button.
+    static let verticalPadding: CGFloat = 12
+    /// Width of the border stroke.
+    static let strokeWidth: CGFloat = 1
+    /// Opacity when the button is pressed.
+    static let pressedOpacity: Double = 0.8
+    /// Duration of the press animation.
+    static let animationDuration: Double = 0.15
+}
+
 public struct OutlinedButton: View {
     public let text: Text
     public let color: Color
@@ -55,16 +69,16 @@ struct OutlinedButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.horizontal, OutlinedButtonConstants.horizontalPadding)
+            .padding(.vertical, OutlinedButtonConstants.verticalPadding)
             .background(.clear)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(color, lineWidth: 1)
+                    .stroke(color, lineWidth: OutlinedButtonConstants.strokeWidth)
             )
-            .opacity(configuration.isPressed ? 0.8 : 1)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .opacity(configuration.isPressed ? OutlinedButtonConstants.pressedOpacity : 1)
+            .animation(.easeOut(duration: OutlinedButtonConstants.animationDuration), value: configuration.isPressed)
     }
 }
 

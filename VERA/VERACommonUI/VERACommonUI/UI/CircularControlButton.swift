@@ -4,6 +4,20 @@
 
 import SwiftUI
 
+/// Layout constants for the circular control button.
+private enum CircularControlButtonConstants {
+    /// Diameter of the circular button.
+    static let buttonSize: CGFloat = 50
+    /// Width of the gradient border stroke.
+    static let strokeWidth: CGFloat = 1.2
+    /// Active-state gradient start opacity.
+    static let activeGradientStartOpacity: Double = 0.6
+    /// Active-state gradient end opacity.
+    static let activeGradientEndOpacity: Double = 0.1
+    /// Inactive-state error tint opacity.
+    static let errorTintOpacity: Double = 0.7
+}
+
 public struct CircularControlButton: View {
 
     private let isActive: Bool
@@ -40,7 +54,10 @@ public struct CircularControlImageButton: View {
         Button(action: action) {
             image
                 .font(.title2)
-                .frame(width: 50, height: 50)
+                .frame(
+                    width: CircularControlButtonConstants.buttonSize,
+                    height: CircularControlButtonConstants.buttonSize
+                )
                 .foregroundColor(.white)
                 .background(
                     CircularControlBackground(isActive: isActive)
@@ -51,6 +68,7 @@ public struct CircularControlImageButton: View {
 }
 
 struct CircularControlBackground: View {
+    @Environment(\.meetingRoomTheme) private var theme
     let isActive: Bool
 
     var body: some View {
@@ -61,18 +79,25 @@ struct CircularControlBackground: View {
                     Circle()
                         .stroke(
                             LinearGradient(
-                                colors: isActive ? [.white.opacity(0.6), .white.opacity(0.1)] : [.red, .red],
+                                colors: isActive
+                                    ? [
+                                        .white.opacity(CircularControlButtonConstants.activeGradientStartOpacity),
+                                        .white.opacity(CircularControlButtonConstants.activeGradientEndOpacity),
+                                    ] : [.red, .red],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
-                            lineWidth: 1.2
+                            lineWidth: CircularControlButtonConstants.strokeWidth
                         )
                 )
         #else
             Group {
                 if #available(iOS 26.0, *) {
                     glassEffectCircle(
-                        isActive ? .clear : VERACommonUIAsset.SemanticColors.error.swiftUIColor.opacity(0.7))
+                        isActive
+                            ? .clear
+                            : theme.error
+                                .opacity(CircularControlButtonConstants.errorTintOpacity))
                 } else {
                     ZStack {
                         if isActive {
@@ -80,22 +105,27 @@ struct CircularControlBackground: View {
                                 .fill(Material.ultraThinMaterial)
                         } else {
                             Circle()
-                                .fill(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+                                .fill(theme.error)
                         }
 
                         Circle()
                             .stroke(
                                 LinearGradient(
                                     colors: isActive
-                                        ? [.white.opacity(0.6), .white.opacity(0.1)]
+                                        ? [
+                                            .white.opacity(
+                                                CircularControlButtonConstants.activeGradientStartOpacity),
+                                            .white.opacity(
+                                                CircularControlButtonConstants.activeGradientEndOpacity),
+                                        ]
                                         : [
-                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
-                                            VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                                            theme.error,
+                                            theme.error,
                                         ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: 1.2
+                                lineWidth: CircularControlButtonConstants.strokeWidth
                             )
                     }
                 }

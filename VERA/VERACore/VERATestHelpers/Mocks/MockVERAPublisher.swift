@@ -2,6 +2,7 @@
 //  Created by Vonage on 16/7/25.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import VERADomain
@@ -22,6 +23,12 @@ public final class MockVERAPublisher: VERAPublisher {
     public var cameraPosition: CameraPosition
 
     public var didCallCleanUp: Bool = false
+
+    public var audioLevelPublisher: AnyPublisher<Float, Never> {
+        audioLevelSubject.eraseToAnyPublisher()
+    }
+
+    public let audioLevelSubject = CurrentValueSubject<Float, Never>(0.0)
 
     public init(
         view: AnyView = AnyView(Color.red),

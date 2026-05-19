@@ -50,7 +50,8 @@ disabled_rules:
   - identifier_name
   - conditional_returns_on_newline
   - opening_brace
-
+  - unused_closure_parameter
+  
 # Rules to enable (opt-in rules)
 opt_in_rules:
   - array_init

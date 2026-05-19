@@ -17,7 +17,7 @@ struct CaptionsFactoryTests {
     func makeCaptionsButtonReturnsViewModel() {
         let sut = makeSUT()
 
-        let (_, viewModel) = sut.makeCaptionsButton(roomName: "test-room")
+        let (_, viewModel) = sut.makeCaptionsButton()
 
         #expect(viewModel.state == .disabled)
     }
@@ -26,7 +26,7 @@ struct CaptionsFactoryTests {
     func makeCaptionsButtonSetup() {
         let sut = makeSUT()
 
-        let (_, viewModel) = sut.makeCaptionsButton(roomName: "room")
+        let (_, viewModel) = sut.makeCaptionsButton()
         viewModel.setup()
 
         #expect(viewModel.state == .disabled)
@@ -47,7 +47,8 @@ struct CaptionsFactoryTests {
         let sut = CaptionsFactory(
             captionsActivationDataSource: MockCaptionsActivationDataSource(),
             captionsStatusDataSource: DefaultCaptionsStatusDataSource(),
-            captionsRepository: repository
+            captionsRepository: repository,
+            sessionKeyProvider: DefaultSessionKeyHolder()
         )
 
         let caption = CaptionItem(id: "1", speakerName: "Alice", text: "Hi")
@@ -67,7 +68,8 @@ struct CaptionsFactoryTests {
         CaptionsFactory(
             captionsActivationDataSource: MockCaptionsActivationDataSource(),
             captionsStatusDataSource: DefaultCaptionsStatusDataSource(),
-            captionsRepository: DefaultCaptionsRepository()
+            captionsRepository: DefaultCaptionsRepository(),
+            sessionKeyProvider: DefaultSessionKeyHolder()
         )
     }
 }
