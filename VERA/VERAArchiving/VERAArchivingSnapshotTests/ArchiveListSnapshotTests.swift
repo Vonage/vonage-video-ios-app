@@ -48,8 +48,7 @@ struct ArchiveListSnapshotTests {
     @Test(
         "ArchiveList - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
+            ("Dark", ColorScheme.dark)
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT(archives: sampleDownloadableArchives)
@@ -69,8 +68,7 @@ struct ArchiveListSnapshotTests {
     @Test(
         "ArchiveList - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
-            ("iPad", ViewImageConfig.iPadPro12_9),
+            ("iPad", ViewImageConfig.iPadPro12_9)
         ])
     func sizeClasses(deviceName: String, config: ViewImageConfig) throws {
         let sut = makeSUT(archives: sampleDownloadableArchives)

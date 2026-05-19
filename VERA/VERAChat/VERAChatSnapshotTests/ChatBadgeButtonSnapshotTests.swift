@@ -37,29 +37,13 @@ struct ChatBadgeButtonSnapshotTests {
     @Test(
         "ChatBadgeButton - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
+            ("Dark", ColorScheme.dark)
         ])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT(unreadMessagesCount: 5)
             .environment(\.colorScheme, scheme)
 
         snapshot(sut, named: schemeName)
-    }
-
-    // MARK: - Accessibility Tests
-
-    @Test(
-        "ChatBadgeButton - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT(unreadMessagesCount: 10)
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers

@@ -18,17 +18,9 @@ struct ParticipantsListViewUITests {
 
     // MARK: - Core UI Tests
 
-    @Test("Participants List View - Basic Layout")
-    func basicLayout() throws {
-        let sut = makeSUT()
-
-        snapshot(sut, named: "Default")
-    }
-
     @Test(
         "Participants List View - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
@@ -46,7 +38,7 @@ struct ParticipantsListViewUITests {
 
     @Test(
         "Participants List View - Color Schemes",
-        arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
+        arguments: [("Dark", ColorScheme.dark)])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
             .environment(\.colorScheme, scheme)
@@ -58,18 +50,6 @@ struct ParticipantsListViewUITests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "Participants List View - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall)
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers

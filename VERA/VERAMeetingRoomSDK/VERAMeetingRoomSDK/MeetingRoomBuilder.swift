@@ -377,7 +377,12 @@ public final class MeetingRoomBuilder {
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
             emojiPickerContainerViewModel: emojiPickerContainerViewModel,
             statsOverlayViewModel: statsOverlayViewModel
-        )
+        ).task { [weak container = container] in
+            guard let container else { return }
+            await MediaPermissions.requestPermissionsIfNeeded()
+
+            container.resetPublisher()
+        }
 
         let themedView =
             composedView
@@ -398,15 +403,6 @@ public final class MeetingRoomBuilder {
     // MARK: - Top Trailing Buttons
 
     private static var topTrailingButtons: [ViewGenerator] {
-        [
-            .init(
-                id: "Speaker",
-                content: {
-                    ZStack {
-                        AudioRoutePickerView()
-                            .frame(width: 44, height: 44)
-                    }
-                })
-        ]
+        [ViewGenerator.avPicker()]
     }
 }
