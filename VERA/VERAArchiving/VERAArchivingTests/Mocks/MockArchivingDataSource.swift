@@ -7,7 +7,7 @@ import VERAArchiving
 
 public final class MockArchivingDataSource: ArchivingDataSource {
     var error: Error?
-    var lastRoomName: String?
+    var lastSessionKey: String?
     var lastArchiveID: String?
 
     var startResponse: VERAArchiving.StartArchivingDataSourceResponse?
@@ -19,7 +19,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         if let error = error {
             throw error
         }
-        lastRoomName = request.roomName
+        lastSessionKey = request.sessionKey
 
         return startResponse ?? .init(archiveId: "123")
     }
@@ -30,7 +30,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         if let error = error {
             throw error
         }
-        lastRoomName = request.roomName
+        lastSessionKey = request.sessionKey
         lastArchiveID = request.archiveID
 
         return stopResponse ?? .init(archiveId: "123")

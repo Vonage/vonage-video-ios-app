@@ -36,6 +36,8 @@ import VERAVonage
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``CaptionsStatusDataSource``
 public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     private var cancellables = Set<AnyCancellable>()
+    /// Tracks the caption-forwarding Task so it can be cancelled on call end.
+    private var captionsTask: Task<Void, Never>?
 
     /// The active call façade, injected by the plugin coordinator after initialisation.
     ///
@@ -97,6 +99,9 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Tears down all state related to the current call session.
     private func cancelObservables() async throws {
+        captionsTask?.cancel()
+        await captionsTask?.value
+        captionsTask = nil
         captionsStatusDataSource.reset()
         await captionsRepository.updateCaptions([])
         cancellables.removeAll()
@@ -110,12 +115,18 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
             }
             .store(in: &cancellables)
 
-        call?.captionsPublisher
-            .sink { [weak self] captions in
-                guard let self else { return }
-                Task { await self.captionsRepository.updateCaptions(captions) }
+        // Forward captions from the call to the repository.
+        // Uses a stored Task with `for await` so that each write completes
+        // before processing the next value, avoiding fire-and-forget races.
+        if let publisher = call?.captionsPublisher {
+            captionsTask?.cancel()
+            captionsTask = Task { [weak self] in
+                for await captions in publisher.values {
+                    guard let self else { return }
+                    await self.captionsRepository.updateCaptions(captions)
+                }
             }
-            .store(in: &cancellables)
+        }
     }
 
     /// Reacts to a captions state change by enabling or disabling captions on the call.

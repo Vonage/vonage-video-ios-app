@@ -12,98 +12,160 @@ import VERAVonage
 @Suite("Default Room Credentials Repository tests")
 struct DefaultRoomCredentialsRepositoryTests {
 
-    @Test(
-        "Feeding valid data into the HTTP client returns the correct credentials",
-        arguments: [
-            makeMockCredentials(
-                sessionId: "a sessionId",
-                token: "a token",
-                applicationId: "an application ID",
-                captionsId: "a captions ID"),
-            makeMockCredentials(
-                sessionId: "another sessionId",
-                token: "another token",
-                applicationId: "an application ID",
-                captionsId: "another captions ID"),
-            makeMockCredentials(
-                sessionId: "another sessionId",
-                token: "another token",
-                applicationId: "an application ID",
-                captionsId: nil),
-        ])
-    func getRoomCredentialsReturnsCredentials(testCase: RoomCredentials) async throws {
-        let sessionId = testCase.sessionId
-        let token = testCase.token
-        let applicationId = testCase.applicationId
-        let captionsId = testCase.captionsId
-
-        let httpClient = MockHTTPClient()
-
-        let responseData = try makeCredentialsJSONResponse(
-            sessionId: sessionId,
-            token: token,
-            apiKey: applicationId,
-            captionsId: captionsId)
-
-        httpClient.data = responseData
+    @Test("Valid createSession + joinSession returns correct credentials")
+    func getRoomCredentialsReturnsCredentials() async throws {
+        let httpClient = try makeHTTPClientWithResponses(
+            sessionId: "session-123",
+            sessionKey: "jwt-key-abc",
+            applicationId: "app-id-42",
+            token: "token-xyz")
 
         let sut = makeSUT(httpClient: httpClient)
 
         let credentials = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
 
-        #expect(credentials.sessionId == sessionId)
-        #expect(credentials.token == token)
-        #expect(credentials.apiKey == applicationId)
-        #expect(credentials.captionsId == captionsId)
+        #expect(credentials.sessionId == "session-123")
+        #expect(credentials.sessionKey == "jwt-key-abc")
+        #expect(credentials.token == "token-xyz")
+        #expect(credentials.apiKey == "app-id-42")
     }
 
-    @Test func givenEmptyJSONFileErrorIsThrown() async throws {
-        let httpClient = MockHTTPClient()
+    @Test("First call posts to /v2/createSession")
+    func firstCallPostsToCreateSession() async throws {
+        let httpClient = try makeHTTPClientWithResponses()
 
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+
+        let url = try #require(httpClient.recordedURLs.first)
+        #expect(url.lastPathComponent == "createSession")
+        #expect(url.pathComponents.contains("v2"))
+    }
+
+    @Test("Second call posts to /v2/joinSession")
+    func secondCallPostsToJoinSession() async throws {
+        let httpClient = try makeHTTPClientWithResponses()
+
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+
+        let url = try #require(httpClient.recordedURLs.last)
+        #expect(url.lastPathComponent == "joinSession")
+        #expect(url.pathComponents.contains("v2"))
+    }
+
+    @Test("createSession request body contains roomName")
+    func createSessionRequestBodyContainsRoomName() async throws {
+        let httpClient = try makeHTTPClientWithResponses()
+
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "Heart-of-Gold"))
+
+        let body = try #require(httpClient.recordedDataSequence.first)
+        let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+        #expect(json?["roomName"] as? String == "Heart-of-Gold")
+    }
+
+    @Test("joinSession request body contains sessionKey")
+    func joinSessionRequestBodyContainsSessionKey() async throws {
+        let httpClient = try makeHTTPClientWithResponses(sessionKey: "my-jwt")
+
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+
+        let body = try #require(httpClient.recordedDataSequence.last)
+        let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+        #expect(json?["sessionKey"] as? String == "my-jwt")
+    }
+
+    @Test("Empty JSON response throws decoding error")
+    func givenEmptyJSONFileErrorIsThrown() async throws {
+        let httpClient = MockHTTPClient()
         httpClient.data = "{}".data(using: .utf8)!
 
         let sut = makeSUT(httpClient: httpClient)
 
-        do {
+        await #expect(throws: DecodingError.self) {
             _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
-            #expect(Bool(false))
-        } catch DecodingError.keyNotFound {
-            // Expect to fail
-            print("error")
-        } catch {
-            #expect(Bool(false))
         }
     }
 
-    @Test func givenEmptyFileErrorIsThrown() async throws {
+    @Test("Malformed joinSession response throws decoding error")
+    func malformedJoinSessionResponseThrowsDecodingError() async throws {
         let httpClient = MockHTTPClient()
-
-        httpClient.data = "".data(using: .utf8)!
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(),
+            "{}".data(using: .utf8)!,
+        ]
 
         let sut = makeSUT(httpClient: httpClient)
 
-        do {
+        await #expect(throws: DecodingError.self) {
             _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
-            #expect(Bool(false))
-        } catch DecodingError.dataCorrupted {
-            // Expect to fail
-            print("error")
-        } catch {
-            #expect(Bool(false))
         }
     }
 
-    @Test func givenARoomNameItShouldBeEncodedInHTTPRequest() async throws {
-        let httpClient = MockHTTPClient()
+    @Test("Makes exactly two POST calls")
+    func makesTwoPostCalls() async throws {
+        let httpClient = try makeHTTPClientWithResponses()
 
-        httpClient.data = try makeCredentialsJSONResponse()
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+
+        #expect(httpClient.callCount == 2)
+    }
+
+    @Test("Caches credentials for same room")
+    func cachesCredentialsForSameRoom() async throws {
+        let httpClient = try makeHTTPClientWithResponses()
+
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
+
+        #expect(httpClient.callCount == 2)
+    }
+
+    @Test("Different rooms are fetched independently")
+    func differentRoomsAreNotCached() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(),
+            try makeJoinSessionJSONResponse(),
+            try makeCreateSessionJSONResponse(),
+            try makeJoinSessionJSONResponse(),
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "roomA"))
+        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "roomB"))
+
+        #expect(httpClient.callCount == 4)
+    }
+
+    @Test("Error from createSession propagates")
+    func errorFromCreateSessionPropagates() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.shouldThrowError = true
 
         let sut = makeSUT(httpClient: httpClient)
 
-        let request = makeRoomCredentialsRequest()
-        _ = try await sut.getRoomCredentials(request)
+        await #expect(throws: MockHTTPError.self) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
+    }
 
-        #expect(httpClient.recordedURL.lastPathComponent == request.roomName)
+    @Test("Error from joinSession propagates")
+    func errorFromJoinSessionPropagates() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [try makeCreateSessionJSONResponse()]
+        httpClient.shouldThrowErrorOnCallNumber = 2
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        await #expect(throws: MockHTTPError.self) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
     }
 
     // MARK: - Test Helpers
@@ -119,9 +181,28 @@ struct DefaultRoomCredentialsRepositoryTests {
             jsonDecoder: jsonDecoder)
     }
 
-    func makeRoomCredentialsRequest(
+    private func makeRoomCredentialsRequest(
         roomName: String = "Magrathea"
     ) -> RoomCredentialsRequest {
         RoomCredentialsRequest(roomName: roomName)
+    }
+
+    private func makeHTTPClientWithResponses(
+        sessionId: String = "sessionId",
+        sessionKey: String = "sessionKey",
+        applicationId: String = "applicationId",
+        token: String = "token"
+    ) throws -> MockHTTPClient {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(
+                sessionId: sessionId,
+                sessionKey: sessionKey,
+                applicationId: applicationId),
+            try makeJoinSessionJSONResponse(
+                token: token,
+                applicationId: applicationId),
+        ]
+        return httpClient
     }
 }

@@ -4,21 +4,24 @@
 
 import Foundation
 
-public struct RoomCredentialsResponse: Decodable, CustomStringConvertible {
+public struct RoomCredentialsResponse: CustomStringConvertible {
     public let sessionId: String
     public let token: String
     public let apiKey: String
+    public let sessionKey: String
     public let captionsId: String?
 
     public init(
         sessionId: String,
         token: String,
         apiKey: String,
+        sessionKey: String,
         captionsId: String? = nil
     ) {
         self.sessionId = sessionId
         self.token = token
         self.apiKey = apiKey
+        self.sessionKey = sessionKey
         self.captionsId = captionsId
     }
 
@@ -28,6 +31,48 @@ public struct RoomCredentialsResponse: Decodable, CustomStringConvertible {
         SessionID: \(sessionId)
         Token:     \(token)
         """
+    }
+}
+
+/// Response from `POST /v2/createSession`.
+public struct CreateSessionResponse: Decodable {
+    public let sessionId: String
+    public let sessionKey: String
+    public let applicationId: String
+
+    public init(sessionId: String, sessionKey: String, applicationId: String) {
+        self.sessionId = sessionId
+        self.sessionKey = sessionKey
+        self.applicationId = applicationId
+    }
+}
+
+/// Request body for `POST /v2/createSession`.
+public struct CreateSessionRequestBody: Encodable {
+    let roomName: String
+
+    public init(roomName: String) {
+        self.roomName = roomName
+    }
+}
+
+/// Response from `POST /v2/joinSession`.
+public struct JoinSessionResponse: Decodable {
+    public let token: String
+    public let applicationId: String
+
+    public init(token: String, applicationId: String) {
+        self.token = token
+        self.applicationId = applicationId
+    }
+}
+
+/// Request body for `POST /v2/joinSession`.
+public struct JoinSessionRequestBody: Encodable {
+    let sessionKey: String
+
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
     }
 }
 

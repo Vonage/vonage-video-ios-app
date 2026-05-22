@@ -5,34 +5,26 @@
 import Foundation
 import VERADomain
 
-public struct EnableCaptionsResponse: Codable {
-    public let captionsId: String?
-    public let status: Int
-
-    public init(captionsId: String?, status: Int) {
-        self.captionsId = captionsId
-        self.status = status
-    }
+struct EnableCaptionsResponse: Decodable {
+    let captionsId: String?
 }
 
 public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
     private let baseURL: URL
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
-
-    enum Error: Swift.Error {
-        case invalidResponse
-        case invalidCaptionsId
-    }
+    private let jsonEncoder: JSONEncoder
 
     public init(
         baseURL: URL,
         httpClient: HTTPClient,
-        jsonDecoder: JSONDecoder = JSONDecoder()
+        jsonDecoder: JSONDecoder = JSONDecoder(),
+        jsonEncoder: JSONEncoder = JSONEncoder()
     ) {
         self.baseURL = baseURL
         self.httpClient = httpClient
         self.jsonDecoder = jsonDecoder
+        self.jsonEncoder = jsonEncoder
     }
 
     public func enableCaptions(
@@ -40,21 +32,18 @@ public final class DefaultCaptionsDataSource: CaptionsActivationDataSource {
     ) async throws -> EnableCaptionsDataSourceResponse {
         let url =
             baseURL
-            .appendingPathComponent("session")
-            .appendingPathComponent(request.roomName)
-            .appendingPathComponent("enableCaptions")
+            .appendingPathComponent("v2")
+            .appendingPathComponent("ensureCaptionsEnabled")
 
-        let data = try await httpClient.post(url, data: Data())
-        let response = try jsonDecoder.decode(EnableCaptionsResponse.self, from: data)
+        let body = try jsonEncoder.encode(SessionKeyBody(sessionKey: request.sessionKey))
+        let data = try await httpClient.post(url, data: body)
+        let response = try jsonDecoder.decode(
+            TRPCResponse<EnableCaptionsResponse>.self, from: data)
 
-        if response.status != 200 {
-            throw Error.invalidResponse
-        }
-
-        guard let captionsId = response.captionsId else {
-            throw Error.invalidCaptionsId
-        }
-
-        return .init(captionsId: captionsId)
+        return .init(captionsId: response.result.data.captionsId)
     }
+}
+
+private struct SessionKeyBody: Encodable {
+    let sessionKey: String
 }

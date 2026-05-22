@@ -9,13 +9,10 @@ import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Connect to room use case tests")
-struct ConnectToRoomUseCaseTestsTests {
+struct ConnectToRoomUseCaseTests {
 
     @Test
     func connectToRoomUseCaseCreatesAndCallsToConnect() async throws {
-        let httpClient = MockHTTPClient()
-        httpClient.data = try makeCredentialsJSONResponse()
-
         let roomCredentialsRepository = makeMockRoomCredentialsRepository()
         let sessionRepository = makeMockSessionRepository()
 
@@ -28,19 +25,56 @@ struct ConnectToRoomUseCaseTestsTests {
 
         _ = try await sut(roomName: "heart-of-gold")
 
-        #expect(sessionRepository.currentCall != nil)
-
+        #expect(sessionRepository.createSessionCallCount == 1)
         #expect(mockCall.recordedActions == [.connect])
+    }
+
+    @Test
+    func sessionKeyIsSetAfterSuccessfulConnection() async throws {
+        let sessionKeyHolder = DefaultSessionKeyHolder()
+        let sessionRepository = makeMockSessionRepository()
+        sessionRepository.currentCall = MockCall()
+
+        let sut = makeSUT(
+            sessionRepository: sessionRepository,
+            sessionKeyWriter: sessionKeyHolder)
+
+        _ = try await sut(roomName: "heart-of-gold")
+
+        #expect(sessionKeyHolder.sessionKey == "aSessionKey")
+    }
+
+    @Test
+    func sessionKeyIsNotSetWhenCreateSessionFails() async throws {
+        let sessionKeyHolder = DefaultSessionKeyHolder()
+        let sessionRepository = makeMockSessionRepository()
+        sessionRepository.createSessionError = MockError.sessionCreationFailed
+
+        let sut = makeSUT(
+            sessionRepository: sessionRepository,
+            sessionKeyWriter: sessionKeyHolder)
+
+        await #expect(throws: MockError.self) {
+            try await sut(roomName: "heart-of-gold")
+        }
+
+        #expect(sessionKeyHolder.sessionKey == "")
     }
 
     // MARK: - Test Helpers
 
+    private enum MockError: Error {
+        case sessionCreationFailed
+    }
+
     private func makeSUT(
         roomCredentialsRepository: RoomCredentialsRepository = makeMockRoomCredentialsRepository(),
-        sessionRepository: SessionRepository = makeMockSessionRepository()
+        sessionRepository: SessionRepository = makeMockSessionRepository(),
+        sessionKeyWriter: SessionKeyWriter = DefaultSessionKeyHolder()
     ) -> ConnectToRoomUseCase {
         return DefaultConnectToRoomUseCase(
             sessionRepository: sessionRepository,
-            roomCredentialsRepository: roomCredentialsRepository)
+            roomCredentialsRepository: roomCredentialsRepository,
+            sessionKeyWriter: sessionKeyWriter)
     }
 }

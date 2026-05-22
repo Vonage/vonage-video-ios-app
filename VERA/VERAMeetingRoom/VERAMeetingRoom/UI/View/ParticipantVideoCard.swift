@@ -59,7 +59,6 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-
     var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
     var body: some View {
@@ -72,7 +71,18 @@ struct ParticipantVideoCard: View {
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
-                        .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                        .if(
+                            !participant.isScreenshare,
+                            transform: { view in
+                                view.aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                            }
+                        )
+                        .if(
+                            participant.isScreenshare,
+                            transform: { view in
+                                view.aspectRatio(participant.aspectRatio, contentMode: .fit)
+                            }
+                        )
                         .overlay(
                             ZStack {
                                 if participant.isScreenshare {
@@ -118,7 +128,18 @@ struct ParticipantVideoCard: View {
                                 ParticipantVideoCardConstants.backgroundOpacity
                             )
                         )
-                        .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                        .if(
+                            !participant.isScreenshare,
+                            transform: { view in
+                                view.aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                            }
+                        )
+                        .if(
+                            participant.isScreenshare,
+                            transform: { view in
+                                view.aspectRatio(participant.aspectRatio, contentMode: .fit)
+                            }
+                        )
                         .overlay {
                             ZStack {
                                 Rectangle()

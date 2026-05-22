@@ -62,17 +62,15 @@ final class MeetingRoomSDKContainer {
 
     lazy var jsonDecoder = JSONDecoder()
 
+    var sessionKeyHolder: SessionKeyHolder = DefaultSessionKeyHolder()
+
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
         checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
     )
 
     lazy var publisherRepository: any PublisherRepository = {
-        let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
-        if let initialPublisherSettings {
-            try? repository.recreatePublisher(initialPublisherSettings)
-        }
-        return repository
+        DefaultPublisherRepository(publisherFactory: publisherFactory)
     }()
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
@@ -112,6 +110,13 @@ final class MeetingRoomSDKContainer {
         }
         return NullAdvancedSettingsUseCase()
     }()
+
+    // MARK: - Publisher helpers
+
+    func resetPublisher() {
+        guard let initialPublisherSettings = initialPublisherSettings else { return }
+        try? publisherRepository.recreatePublisher(initialPublisherSettings)
+    }
 
     // MARK: - Plugin Registry
 
@@ -160,7 +165,8 @@ final class MeetingRoomSDKContainer {
         roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
         noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: pinnedParticipantsDataSource
+        pinnedParticipantsDataSource: pinnedParticipantsDataSource,
+        sessionKeyHolder: sessionKeyHolder
     )
 
     // MARK: - Chat Feature
@@ -203,7 +209,8 @@ final class MeetingRoomSDKContainer {
     lazy var archivingFactory = ArchivingFactory(
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
-        archivingStatusDataSource: archivingStatusDataSource)
+        archivingStatusDataSource: archivingStatusDataSource,
+        sessionKeyProvider: sessionKeyHolder)
 
     // MARK: - Background Effects Feature
 
@@ -229,7 +236,8 @@ final class MeetingRoomSDKContainer {
     lazy var captionsFactory = CaptionsFactory(
         captionsActivationDataSource: captionsActivationDataSource,
         captionsStatusDataSource: captionsStatusDataSource,
-        captionsRepository: captionsRepository)
+        captionsRepository: captionsRepository,
+        sessionKeyProvider: sessionKeyHolder)
 
     lazy var captionsPlugin: VonageCaptionsPlugin = {
         VonageCaptionsPlugin(

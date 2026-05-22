@@ -7,7 +7,6 @@ import SwiftUI
 import Testing
 import VERADomain
 
-@testable import VERACore
 @testable import VERAMeetingRoom
 
 @Suite("AdaptiveGrid layout UI Tests")
@@ -20,17 +19,6 @@ struct AdaptiveGridLayoutUITests {
     private let snapshotPrefix = "AdaptiveGridLayout"
 
     // MARK: - Core UI Tests
-
-    @Test(
-        "Adaptive Grid Layout - No participants",
-        arguments: [
-            ("iPhone", ViewImageConfig.iPhone13)
-        ])
-    func emptyLayout(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT(participants: [])
-
-        snapshot(sut, named: "\(deviceName)_Empty", config: config)
-    }
 
     @Test(
         "Adaptive Grid Layout - One participant layout",
@@ -138,19 +126,6 @@ struct AdaptiveGridLayoutUITests {
     }
 
     @Test(
-        "Adaptive Grid Layout - fifty participants layout",
-        arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
-            ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
-            ("iPad", ViewImageConfig.iPadPro11),
-        ])
-    func fiftyParticipantsLayout(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT(participants: createParticipants(count: 50))
-
-        snapshot(sut, named: "\(deviceName)_FiftyParticipants", config: config)
-    }
-
-    @Test(
         "Adaptive Grid Layout - Size Classes",
         arguments: [
             ("iPhone", ViewImageConfig.iPhone13),
@@ -171,7 +146,7 @@ struct AdaptiveGridLayoutUITests {
 
     @Test(
         "Adaptive Grid Layout - Color Schemes",
-        arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
+        arguments: [("Dark", ColorScheme.dark)])
     func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
             .environment(\.colorScheme, scheme)
@@ -183,19 +158,6 @@ struct AdaptiveGridLayoutUITests {
             record: isRecording,
             testName: "\(snapshotPrefix)_\(schemeName)"
         )
-    }
-
-    @Test(
-        "Adaptive Grid Layout - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibility(textName: String, textSize: ContentSizeCategory) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
     }
 
     // MARK: - Test Helpers

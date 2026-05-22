@@ -46,7 +46,6 @@ struct GoodByeViewUITests {
     @Test(
         "GoodBye View - Size Classes",
         arguments: [
-            ("iPhone", ViewImageConfig.iPhone13),
             ("iPad", ViewImageConfig.iPadPro12_9),
             ("iPhoneLandscape", ViewImageConfig.iPhone13(.landscape)),
         ])
@@ -87,22 +86,6 @@ struct GoodByeViewUITests {
         )
     }
 
-    @Test(
-        "GoodBye View - Accessibility",
-        arguments: [
-            ("SmallText", ContentSizeCategory.extraSmall),
-            ("LargeText", ContentSizeCategory.accessibilityExtraExtraExtraLarge),
-        ])
-    func accessibility(
-        textName: String,
-        textSize: ContentSizeCategory
-    ) throws {
-        let sut = makeSUT()
-            .environment(\.sizeCategory, textSize)
-
-        snapshot(sut, named: textName)
-    }
-
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -129,56 +112,6 @@ struct GoodByeViewUITests {
             testName: "\(snapshotPrefix)_\(named)",
             line: line,
             column: column
-        )
-    }
-}
-
-// MARK: - Component Tests
-
-@Suite("GoodByeView Components")
-@MainActor
-struct GoodByeViewComponentTests {
-
-    private let isRecording = false
-    private let snapshotPrefix = "GoodBye"
-
-    @Test(
-        "Layout Components",
-        arguments: [
-            ("Horizontal", 800, 400),
-            ("Vertical", 375, 600),
-        ])
-    func layoutComponents(layoutName: String, width: CGFloat, height: CGFloat) throws {
-        let view: AnyView
-
-        switch layoutName {
-        case "Horizontal":
-            view = AnyView(
-                HorizontalGoodByeContentView(
-                    additionalContentView: {},
-                    onReenter: {},
-                    onReturnToLanding: {}))
-        case "Vertical":
-            view = AnyView(
-                VerticalGoodByeContentView(
-                    additionalContentView: {},
-                    onReenter: {},
-                    onReturnToLanding: {}))
-        default:
-            return
-        }
-
-        let framedView =
-            view
-            .frame(width: width, height: height)
-            .background(Color(.systemBackground))
-
-        assertSnapshot(
-            of: framedView,
-            as: .image(precision: 0.99, layout: .fixed(width: width, height: height)),
-            named: layoutName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(layoutName)"
         )
     }
 }

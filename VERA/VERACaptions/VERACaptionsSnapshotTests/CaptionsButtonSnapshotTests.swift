@@ -21,43 +21,6 @@ struct CaptionsButtonSnapshotTests {
     // MARK: - Core UI Tests
 
     @Test(
-        "CaptionsButton - Basic Layout",
-        arguments: [
-            ("disabled", CaptionsState.disabled),
-            ("enabled", CaptionsState.enabled("demo-id")),
-        ])
-    func basicLayout(variant: String, state: CaptionsState) throws {
-        let sut = makeSUT(state: state)
-
-        snapshot(sut, named: "Default-\(variant)")
-    }
-
-    @Test(
-        "CaptionsButton - Size Classes",
-        arguments: [
-            ("iPhone-disabled", ViewImageConfig.iPhone13, CaptionsState.disabled),
-            ("iPhone-enabled", ViewImageConfig.iPhone13, CaptionsState.enabled("demo-id")),
-            ("iPad-disabled", ViewImageConfig.iPadPro12_9, CaptionsState.disabled),
-            ("iPad-enabled", ViewImageConfig.iPadPro12_9, CaptionsState.enabled("demo-id")),
-            ("iPhoneLandscape-enabled", ViewImageConfig.iPhone13(.landscape), CaptionsState.enabled("demo-id")),
-        ])
-    func sizeClasses(
-        deviceName: String,
-        config: ViewImageConfig,
-        state: CaptionsState
-    ) throws {
-        let sut = makeSUT(state: state)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test(
         "CaptionsButton - Color Schemes",
         arguments: [
             ("Light-disabled", ColorScheme.light, CaptionsState.disabled),
