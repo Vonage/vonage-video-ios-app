@@ -21,8 +21,10 @@ public final class MockStatsCollector: NSObject, StatsCollector {
     public var requestRtcStatsFromPublisherCallCount = 0
     public var requestRtcStatsFromSubscriberCallCount = 0
     public var resetCallCount = 0
+    public var removeSubscriberCallCount = 0
     public var publishersRequested: [OTPublisherKit] = []
     public var subscribersRequested: [OTSubscriberKit] = []
+    public var removedConnectionIds: [String] = []
 
     public func reset() {
         resetCallCount += 1
@@ -36,6 +38,11 @@ public final class MockStatsCollector: NSObject, StatsCollector {
     public func requestRtcStats(from publisher: OTPublisherKit) {
         requestRtcStatsFromPublisherCallCount += 1
         publishersRequested.append(publisher)
+    }
+
+    public func removeSubscriber(connectionId: String) {
+        removeSubscriberCallCount += 1
+        removedConnectionIds.append(connectionId)
     }
 
     // MARK: - OTPublisherKitNetworkStatsDelegate
@@ -69,4 +76,18 @@ public final class MockStatsCollector: NSObject, StatsCollector {
     // MARK: - OTSubscriberKitRtcStatsReportDelegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
+
+    // MARK: - Publisher Media Link Stats
+
+    public func publisher(
+        _ publisher: OTPublisherKit,
+        mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
+    ) {}
+
+    // MARK: - Subscriber Media Link Stats
+
+    public func subscriber(
+        _ subscriber: OTSubscriberKit,
+        mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
+    ) {}
 }

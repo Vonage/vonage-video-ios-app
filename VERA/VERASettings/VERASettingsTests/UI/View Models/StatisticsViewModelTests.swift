@@ -227,13 +227,19 @@ struct StatisticsViewModelTests {
         await repository.save(prefs)
 
         let mockStats = NetworkMediaStats(
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 3000,
-                packetsLost: 30,
-                bytesReceived: 150_000,
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: 512_000
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "test-1",
+                    subscriberName: "Test",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 3000,
+                        packetsLost: 30,
+                        bytesReceived: 150_000,
+                        timestamp: Date().timeIntervalSince1970,
+                        estimatedBandwidth: 512_000
+                    )
+                )
+            ]
         )
         await dataSource.updateStats(mockStats)
 
@@ -241,8 +247,8 @@ struct StatisticsViewModelTests {
         await delay()
 
         #expect(viewModel.isStatsEnabled == true)
-        #expect(viewModel.stats.receivedAudio?.packetsReceived == 3000)
-        #expect(viewModel.stats.receivedAudio?.estimatedBandwidth == 512_000)
+        #expect(viewModel.stats.subscriberStats.first?.receivedAudio?.packetsReceived == 3000)
+        #expect(viewModel.stats.subscriberStats.first?.receivedAudio?.estimatedBandwidth == 512_000)
 
         // Keep objects alive
         _ = repository
@@ -274,8 +280,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats == NetworkMediaStats.empty)
         #expect(viewModel.stats.sentAudio == nil)
         #expect(viewModel.stats.sentVideo == nil)
-        #expect(viewModel.stats.receivedAudio == nil)
-        #expect(viewModel.stats.receivedVideo == nil)
+        #expect(viewModel.stats.subscriberStats.isEmpty)
 
         // Keep objects alive
         _ = repository
@@ -313,8 +318,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats.sentAudio != nil)
         #expect(viewModel.stats.sentAudio?.packetsSent == 500)
         #expect(viewModel.stats.sentVideo == nil)
-        #expect(viewModel.stats.receivedAudio == nil)
-        #expect(viewModel.stats.receivedVideo == nil)
+        #expect(viewModel.stats.subscriberStats.isEmpty)
 
         // Keep objects alive
         _ = repository

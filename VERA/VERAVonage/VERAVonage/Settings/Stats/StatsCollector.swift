@@ -16,4 +16,5 @@ public protocol StatsCollector: OTPublisherKitNetworkStatsDelegate,
     func reset()
     func requestRtcStats(from subscriber: OTSubscriberKit)
     func requestRtcStats(from publisher: OTPublisherKit)
+    func removeSubscriber(connectionId: String)
 }
