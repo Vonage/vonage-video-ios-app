@@ -27,8 +27,5 @@ public protocol CameraPreviewProviderRepository {
     func getPublisher() throws -> VERAPublisher
     func resetPublisher()
 
-    /// Emits when ``resetPublisher()`` is called so subscribers (e.g. the
-    /// waiting-room view model) can re-fetch a fresh publisher built with
-    /// the latest advanced settings (resolution, frame rate, codec, etc.).
     var didResetPublisher: AnyPublisher<Void, Never> { get }
 }

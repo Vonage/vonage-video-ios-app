@@ -17,10 +17,6 @@ public final class DefaultCameraPreviewProviderRepository: CameraPreviewProvider
         resetSubject.eraseToAnyPublisher()
     }
 
-    /// - Parameter advancedSettingsProvider: Optional closure that supplies
-    ///   the current `PublisherAdvancedSettings` to apply when building the
-    ///   preview publisher. The default returns `nil` so existing call-sites
-    ///   keep their previous behaviour (SDK capture defaults).
     public init(
         publisherFactory: PublisherFactory,
         advancedSettingsProvider: @escaping () -> PublisherAdvancedSettings? = { nil }
