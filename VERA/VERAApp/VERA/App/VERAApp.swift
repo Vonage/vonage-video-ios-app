@@ -45,7 +45,6 @@ struct VERAApp: App {
         WindowGroup {
             NavigationStack(path: $navigationCoordinator.path) {
                 makeLandingPage()
-                    .macInitialWindowSize()
                     .navigationDestination(for: AppRoute.self) { destination in
                         switch destination {
                         case .waitingRoom(let roomName):
