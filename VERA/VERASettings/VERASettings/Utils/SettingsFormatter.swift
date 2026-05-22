@@ -207,12 +207,34 @@ enum SettingsFormatter {
     /// Formats a ``NetworkCondition`` value for display.
     static func formatNetworkCondition(_ condition: NetworkCondition) -> String {
         switch condition {
-        case .unknown: "Unknown"
-        case .critical: "Critical"
-        case .warning: "Warning"
-        case .fair: "Fair"
-        case .good: "Good"
-        case .excellent: "Excellent"
+        case .unknown: "Unknown".localized
+        case .critical: "Critical".localized
+        case .warning: "Warning".localized
+        case .fair: "Fair".localized
+        case .good: "Good".localized
+        case .excellent: "Excellent".localized
+        }
+    }
+
+    /// Formats a ``QualityLimitationReason`` value for display.
+    static func formatQualityLimitation(_ reason: QualityLimitationReason) -> String {
+        switch reason {
+        case .none: "None".localized
+        case .bandwidth: "Bandwidth".localized
+        case .cpu: "CPU"
+        case .codec: "Codec".localized
+        case .resolution: "Resolution".localized
+        case .layerChange: "Layer Change".localized
+        }
+    }
+
+    /// Formats a ``NetworkDegradationSource`` value for display.
+    static func formatDegradationSource(_ source: NetworkDegradationSource) -> String {
+        switch source {
+        case .local: "Local".localized
+        case .remote: "Remote".localized
+        case .bothOrUnclear: "Both or Unclear".localized
+        case .unknown: "Unknown".localized
         }
     }
 }

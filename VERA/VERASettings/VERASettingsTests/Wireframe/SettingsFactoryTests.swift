@@ -35,15 +35,6 @@ struct SettingsFactoryTests {
         #expect(statsVM1 !== statsVM2)
     }
 
-    @Test("makeMeetingRoomSettingsView returns a valid view")
-    func makeMeetingRoomSettingsViewReturnsView() {
-        let factory = makeFactory()
-
-        let view = factory.makeMeetingRoomSettingsView()
-
-        #expect(view != nil)
-    }
-
     @Test("makeMeetingRoomViewModels with stats enabled repository")
     func makeMeetingRoomViewModelsWithStatsEnabled() async {
         let repository = MockSettingsRepository(
@@ -58,17 +49,6 @@ struct SettingsFactoryTests {
         await viewModel.setup()
 
         #expect(viewModel.senderStatsEnabled == true)
-    }
-
-    // MARK: - makeSettingsView
-
-    @Test("makeSettingsView returns a view with default state")
-    func makeSettingsViewReturnsDefaultView() {
-        let factory = makeFactory()
-
-        let view = factory.makeSettingsView()
-
-        #expect(view != nil)
     }
 
     // MARK: - Helpers

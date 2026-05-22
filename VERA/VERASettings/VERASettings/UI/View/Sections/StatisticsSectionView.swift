@@ -187,7 +187,7 @@ private struct PublisherStatsSection: View {
         if layer.qualityLimitationReason != .none {
             StatsRow(
                 metric: "Quality Limitation".localized,
-                value: "\(layer.qualityLimitationReason)"
+                value: SettingsFormatter.formatQualityLimitation(layer.qualityLimitationReason)
             )
         }
     }
@@ -300,7 +300,7 @@ private struct SubscriberStatsContent: View {
             if mediaLink.networkDegradationSource != .unknown {
                 StatsRow(
                     metric: "Degradation Source".localized,
-                    value: "\(mediaLink.networkDegradationSource)"
+                    value: SettingsFormatter.formatDegradationSource(mediaLink.networkDegradationSource)
                 )
             }
         }

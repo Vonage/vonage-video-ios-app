@@ -191,6 +191,40 @@ struct SettingsFormatterTests {
         #expect(SettingsFormatter.qualityLabel(index: 2, count: 4) == "Medium Quality")
         #expect(SettingsFormatter.qualityLabel(index: 3, count: 4) == "High Quality")
     }
+
+    // MARK: - formatNetworkCondition Tests
+
+    @Test("formatNetworkCondition returns localized strings for all cases")
+    func formatNetworkConditionAllCases() {
+        #expect(SettingsFormatter.formatNetworkCondition(.unknown) == "Unknown")
+        #expect(SettingsFormatter.formatNetworkCondition(.critical) == "Critical")
+        #expect(SettingsFormatter.formatNetworkCondition(.warning) == "Warning")
+        #expect(SettingsFormatter.formatNetworkCondition(.fair) == "Fair")
+        #expect(SettingsFormatter.formatNetworkCondition(.good) == "Good")
+        #expect(SettingsFormatter.formatNetworkCondition(.excellent) == "Excellent")
+    }
+
+    // MARK: - formatQualityLimitation Tests
+
+    @Test("formatQualityLimitation returns localized strings for all cases")
+    func formatQualityLimitationAllCases() {
+        #expect(SettingsFormatter.formatQualityLimitation(.none) == "None")
+        #expect(SettingsFormatter.formatQualityLimitation(.bandwidth) == "Bandwidth")
+        #expect(SettingsFormatter.formatQualityLimitation(.cpu) == "CPU")
+        #expect(SettingsFormatter.formatQualityLimitation(.codec) == "Codec")
+        #expect(SettingsFormatter.formatQualityLimitation(.resolution) == "Resolution")
+        #expect(SettingsFormatter.formatQualityLimitation(.layerChange) == "Layer Change")
+    }
+
+    // MARK: - formatDegradationSource Tests
+
+    @Test("formatDegradationSource returns localized strings for all cases")
+    func formatDegradationSourceAllCases() {
+        #expect(SettingsFormatter.formatDegradationSource(.local) == "Local")
+        #expect(SettingsFormatter.formatDegradationSource(.remote) == "Remote")
+        #expect(SettingsFormatter.formatDegradationSource(.bothOrUnclear) == "Both or Unclear")
+        #expect(SettingsFormatter.formatDegradationSource(.unknown) == "Unknown")
+    }
 }
 
 extension NumberFormatter {

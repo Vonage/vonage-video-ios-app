@@ -287,6 +287,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
             subscribers[connectionId] = SubscriberState(
                 name: subscriber.stream?.name ?? ""
             )
+            subscriberOrder.append(connectionId)
         }
     }
 
@@ -443,11 +444,6 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
 
     /// Assembles the latest cached stats into a ``NetworkMediaStats`` and emits it.
     private func emitCurrent() {
-        // Track new subscribers while preserving existing order.
-        for connectionId in subscribers.keys where !subscriberOrder.contains(connectionId) {
-            subscriberOrder.append(connectionId)
-        }
-
         let perSubscriber = subscriberOrder.compactMap { connectionId -> SubscriberMediaStats? in
             guard let state = subscribers[connectionId] else { return nil }
             return SubscriberMediaStats(
