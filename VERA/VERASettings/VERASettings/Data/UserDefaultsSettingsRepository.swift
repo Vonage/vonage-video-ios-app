@@ -40,6 +40,11 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
         self.subject = CurrentValueSubject(.default)
     }
 
+    public func setup() async {
+        guard let persisted = load(from: userDefaults) else { return }
+        subject.send(persisted)
+    }
+
     // MARK: - PublisherSettingsRepository
 
     /// Retrieves the current preferences from UserDefaults or returns the default values.

@@ -2,6 +2,7 @@
 //  Created by Vonage on 8/8/25.
 //
 
+import Combine
 import Foundation
 
 /// CameraPreviewProviderRepository manages publisher instances across different app contexts.
@@ -25,4 +26,6 @@ import Foundation
 public protocol CameraPreviewProviderRepository {
     func getPublisher() throws -> VERAPublisher
     func resetPublisher()
+
+    var didResetPublisher: AnyPublisher<Void, Never> { get }
 }
