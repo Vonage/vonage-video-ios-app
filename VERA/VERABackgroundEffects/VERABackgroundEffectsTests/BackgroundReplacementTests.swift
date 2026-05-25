@@ -24,25 +24,14 @@ struct BackgroundReplacementTests {
         #expect(params.contains("image_file_path"))
     }
 
-    @Test("params contains the provided image path")
-    func paramsContainsProvidedImagePath() throws {
-        let sut = makeSUT()
-        let path = "/absolute/path/to/bg.jpg"
-
-        let params = try sut.params(imagePath: path)
-
-        #expect(params.contains(path))
-    }
-
     @Test("params produces valid JSON")
     func paramsProducesValidJSON() throws {
         let sut = makeSUT()
 
         let params = try sut.params(imagePath: "/path/image.jpg")
-        let data = params.data(using: .utf8)
+        let data = try #require(params.data(using: .utf8))
 
-        #expect(data != nil)
-        let decoded = try JSONDecoder().decode(ImageParams.self, from: data!)
+        let decoded = try JSONDecoder().decode(ImageParams.self, from: data)
         #expect(decoded.imageFilePath == "/path/image.jpg")
     }
 
