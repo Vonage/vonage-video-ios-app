@@ -274,8 +274,8 @@ public final class MeetingRoomBuilder {
             let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
-            if let initialLevel = _publisherSettings.backgroundBlurLevel {
-                blurVM.update(blurLevel: initialLevel)
+            if let initialEffect = _publisherSettings.initialVideoEffect {
+                blurVM.apply(initialEffect)
             }
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
         }

@@ -208,7 +208,7 @@ struct VERAApp: App {
                 }
         }
 
-        let currentBlurLevel = navigationCoordinator.backgroundBlurButtonViewModel?.currentBlurLevel ?? .none
+        let currentVideoEffect = navigationCoordinator.backgroundBlurButtonViewModel?.currentVideoEffect ?? .none
         let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
 
         let builder = MeetingRoomBuilder(
@@ -224,7 +224,7 @@ struct VERAApp: App {
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
         .publisherSettings(
             request.publisherSettings
-                .backgroundBlurLevel(currentBlurLevel)
+                .initialVideoEffect(currentVideoEffect)
                 .noiseSuppressionState(currentNoiseSuppressionState)
         )
         .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)

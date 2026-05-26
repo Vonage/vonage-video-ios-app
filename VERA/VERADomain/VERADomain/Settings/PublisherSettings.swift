@@ -26,7 +26,7 @@ public struct PublisherSettings: Equatable, Hashable {
     /// Optional advanced settings for fine-tuning video/audio configuration.
     public var advancedSettings: PublisherAdvancedSettings?
 
-    public var backgroundBlurLevel: BlurLevel?
+    public var initialVideoEffect: VideoEffect?
 
     public var noiseSuppressionState: NoiseSuppressionState?
 
@@ -38,13 +38,14 @@ public struct PublisherSettings: Equatable, Hashable {
     ///   - publishVideo: Whether to publish video. Defaults to `true`.
     ///   - scaleBehavior: Video scaling behavior. Defaults to `.fill`.
     ///   - advancedSettings: Optional advanced configuration. Defaults to `nil`.
+    ///   - initialVideoEffect: The initial video effect to apply. Defaults to `nil`.
     public init(
         username: String = "",
         publishAudio: Bool = true,
         publishVideo: Bool = true,
         scaleBehavior: VideoScaleBehavior = .fill,
         advancedSettings: PublisherAdvancedSettings? = nil,
-        backgroundBlurLevel: BlurLevel? = nil,
+        initialVideoEffect: VideoEffect? = nil,
         noiseSuppressionState: NoiseSuppressionState? = nil
     ) {
         self.username = username
@@ -52,7 +53,7 @@ public struct PublisherSettings: Equatable, Hashable {
         self.publishVideo = publishVideo
         self.scaleBehavior = scaleBehavior
         self.advancedSettings = advancedSettings
-        self.backgroundBlurLevel = backgroundBlurLevel
+        self.initialVideoEffect = initialVideoEffect
         self.noiseSuppressionState = noiseSuppressionState
     }
 
@@ -62,7 +63,7 @@ public struct PublisherSettings: Equatable, Hashable {
         hasher.combine(publishVideo)
         hasher.combine(scaleBehavior)
         hasher.combine(advancedSettings)
-        hasher.combine(backgroundBlurLevel)
+        hasher.combine(initialVideoEffect)
         hasher.combine(noiseSuppressionState)
     }
 
@@ -108,11 +109,11 @@ public struct PublisherSettings: Equatable, Hashable {
         return copy
     }
 
-    /// Sets the background blur level and returns the modified settings.
+    /// Sets the initial video effect and returns the modified settings.
     @discardableResult
-    public func backgroundBlurLevel(_ backgroundBlurLevel: BlurLevel?) -> PublisherSettings {
+    public func initialVideoEffect(_ initialVideoEffect: VideoEffect?) -> PublisherSettings {
         var copy = self
-        copy.backgroundBlurLevel = backgroundBlurLevel
+        copy.initialVideoEffect = initialVideoEffect
         return copy
     }
 

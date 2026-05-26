@@ -21,41 +21,54 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    func initialBlurLevelIsNone() async throws {
+    func initialVideoEffectIsNone() async throws {
         let sut = makeSUT()
 
-        #expect(sut.currentBlurLevel == .none)
+        #expect(sut.currentVideoEffect == .none)
     }
 
     @Test
-    func onTapCyclesFromNoneToLow() async throws {
+    func onTapCyclesFromNoneToBlurLow() async throws {
         let sut = makeSUT()
 
-        #expect(sut.currentBlurLevel == .none)
+        #expect(sut.currentVideoEffect == .none)
 
         sut.onTap()
 
-        #expect(sut.currentBlurLevel == .low)
+        #expect(sut.currentVideoEffect == .blurLow)
     }
 
     @Test
-    func onTapCyclesFromLowToHigh() async throws {
+    func onTapCyclesFromBlurLowToBlurHigh() async throws {
         let sut = makeSUT()
-        sut.currentBlurLevel = .low
+        sut.currentVideoEffect = .blurLow
 
         sut.onTap()
 
-        #expect(sut.currentBlurLevel == .high)
+        #expect(sut.currentVideoEffect == .blurHigh)
     }
 
     @Test
-    func onTapCyclesFromHighToNone() async throws {
+    func onTapCyclesFromBlurHighToNone() async throws {
         let sut = makeSUT()
-        sut.currentBlurLevel = .high
+        sut.currentVideoEffect = .blurHigh
 
         sut.onTap()
 
-        #expect(sut.currentBlurLevel == .none)
+        #expect(sut.currentVideoEffect == .none)
+    }
+
+    @Test
+    func onTapCyclesFromBackgroundImageToNone() async throws {
+        let spy = PublisherSpy()
+        let sut = makeSUT(getCurrentPublisher: { spy })
+        sut.currentVideoEffect = .backgroundImage(id: "sample", imagePath: "/tmp/sample.png")
+
+        sut.onTap()
+
+        #expect(sut.currentVideoEffect == .none)
+        #expect(spy.addVideoTransformerCallCount == 0)
+        #expect(spy.removeTransformerCallCount == 2)
     }
 
     @Test
@@ -69,7 +82,7 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    func onTapAppliesBlurToPublisher() async throws {
+    func onTapAppliesEffectToPublisher() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
@@ -81,24 +94,24 @@ struct BackgroundBlurButtonViewModelTests {
     }
 
     @Test
-    func onTapAppliesCorrectBlurLevelToPublisher() async throws {
+    func onTapCyclesEffectsAndCallsTransformersCorrectly() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
-        // None -> Low
+        // None -> BlurLow: removes both keys, adds blur
         sut.onTap()
         #expect(spy.addVideoTransformerCallCount == 1)
-        #expect(spy.removeTransformerCallCount == 1)
-
-        // Low -> High
-        sut.onTap()
-        #expect(spy.addVideoTransformerCallCount == 2)
         #expect(spy.removeTransformerCallCount == 2)
 
-        // High -> None (solo remove, no add)
+        // BlurLow -> BlurHigh: removes both keys, adds blur
         sut.onTap()
         #expect(spy.addVideoTransformerCallCount == 2)
-        #expect(spy.removeTransformerCallCount == 3)
+        #expect(spy.removeTransformerCallCount == 4)
+
+        // BlurHigh -> None: removes both keys, no add
+        sut.onTap()
+        #expect(spy.addVideoTransformerCallCount == 2)
+        #expect(spy.removeTransformerCallCount == 6)
     }
 
     @Test
@@ -109,11 +122,11 @@ struct BackgroundBlurButtonViewModelTests {
         sut.onTap()
 
         // State should still change
-        #expect(sut.currentBlurLevel == .low)
+        #expect(sut.currentVideoEffect == .blurLow)
     }
 
     @Test
-    func onTapHandlesBlurErrorGracefully() async throws {
+    func onTapHandlesTransformerErrorGracefully() async throws {
         let spy = PublisherSpy()
         spy.shouldThrowError = true
         let sut = makeSUT(getCurrentPublisher: { spy })
@@ -122,134 +135,129 @@ struct BackgroundBlurButtonViewModelTests {
         sut.onTap()
 
         // State should still change
-        #expect(sut.currentBlurLevel == .low)
+        #expect(sut.currentVideoEffect == .blurLow)
     }
 
     @Test
-    func multipleTapsToggleThroughAllLevels() async throws {
+    func multipleTapsToggleThroughAllEffects() async throws {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
         #expect(spy.addVideoTransformerCallCount == 0)
+        #expect(sut.currentVideoEffect == .none)
 
-        #expect(sut.currentBlurLevel == .none)
-
-        sut.onTap()  // none -> low
-        #expect(sut.currentBlurLevel == .low)
-
+        sut.onTap()  // none -> blurLow
+        #expect(sut.currentVideoEffect == .blurLow)
         #expect(spy.addVideoTransformerCallCount == 1)
 
-        sut.onTap()  // low -> high
-        #expect(sut.currentBlurLevel == .high)
-
+        sut.onTap()  // blurLow -> blurHigh
+        #expect(sut.currentVideoEffect == .blurHigh)
         #expect(spy.addVideoTransformerCallCount == 2)
 
-        sut.onTap()  // high -> none
-        #expect(sut.currentBlurLevel == .none)
+        sut.onTap()  // blurHigh -> none
+        #expect(sut.currentVideoEffect == .none)
+        #expect(spy.addVideoTransformerCallCount == 2)  // No change, only removes
 
-        #expect(spy.addVideoTransformerCallCount == 2)  // No change, only remove
-
-        sut.onTap()  // none -> low (cycle repeats)
-        #expect(sut.currentBlurLevel == .low)
-
+        sut.onTap()  // none -> blurLow (cycle repeats)
+        #expect(sut.currentVideoEffect == .blurLow)
         #expect(spy.addVideoTransformerCallCount == 3)
     }
 
-    // MARK: - update(blurLevel:) Tests
+    // MARK: - apply(_:) Tests
 
     @Test
-    func updateSetsBlurLevelToNone() {
+    func applySetsEffectToNone() {
         let sut = makeSUT()
-        sut.currentBlurLevel = .high
+        sut.currentVideoEffect = .blurHigh
 
-        sut.update(blurLevel: .none)
+        sut.apply(.none)
 
-        #expect(sut.currentBlurLevel == .none)
+        #expect(sut.currentVideoEffect == .none)
     }
 
     @Test
-    func updateSetsBlurLevelToLow() {
+    func applySetsEffectToBlurLow() {
         let sut = makeSUT()
 
-        sut.update(blurLevel: .low)
+        sut.apply(.blurLow)
 
-        #expect(sut.currentBlurLevel == .low)
+        #expect(sut.currentVideoEffect == .blurLow)
     }
 
     @Test
-    func updateSetsBlurLevelToHigh() {
+    func applySetsEffectToBlurHigh() {
         let sut = makeSUT()
 
-        sut.update(blurLevel: .high)
+        sut.apply(.blurHigh)
 
-        #expect(sut.currentBlurLevel == .high)
+        #expect(sut.currentVideoEffect == .blurHigh)
     }
 
     @Test
-    func updateAppliesBlurLevelToPublisher() {
+    func applyAddsTransformerForBlurEffect() {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
-        sut.update(blurLevel: .low)
+        sut.apply(.blurLow)
 
         #expect(spy.addVideoTransformerCallCount == 1)
     }
 
     @Test
-    func updateToNoneRemovesTransformerWithoutAdding() {
+    func applyNoneRemovesBothTransformersWithoutAdding() {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
-        sut.update(blurLevel: .none)
+        sut.apply(.none)
 
         #expect(spy.addVideoTransformerCallCount == 0)
-        #expect(spy.removeTransformerCallCount == 1)
+        #expect(spy.removeTransformerCallCount == 2)
     }
 
     @Test
-    func updateHandlesBlurErrorGracefully() {
+    func applyHandlesTransformerErrorGracefully() {
         let spy = PublisherSpy()
         spy.shouldThrowError = true
         let sut = makeSUT(getCurrentPublisher: { spy })
 
         // Should not crash
-        sut.update(blurLevel: .high)
+        sut.apply(.blurHigh)
 
         // State should still be updated
-        #expect(sut.currentBlurLevel == .high)
+        #expect(sut.currentVideoEffect == .blurHigh)
     }
 
     @Test
-    func updateOverridesPreviousBlurLevel() {
+    func applyOverridesPreviousEffect() {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
-        sut.update(blurLevel: .low)
-        #expect(sut.currentBlurLevel == .low)
+        sut.apply(.blurLow)
+        #expect(sut.currentVideoEffect == .blurLow)
 
-        sut.update(blurLevel: .high)
-        #expect(sut.currentBlurLevel == .high)
+        sut.apply(.blurHigh)
+        #expect(sut.currentVideoEffect == .blurHigh)
 
-        sut.update(blurLevel: .none)
-        #expect(sut.currentBlurLevel == .none)
+        sut.apply(.none)
+        #expect(sut.currentVideoEffect == .none)
     }
 
     @Test
-    func updateIsIndependentFromOnTapCycle() {
+    func applyIsIndependentFromOnTapCycle() {
         let spy = PublisherSpy()
         let sut = makeSUT(getCurrentPublisher: { spy })
 
-        // Advance the onTap cycle to .low
+        // Advance the onTap cycle to .blurLow
         sut.onTap()
-        #expect(sut.currentBlurLevel == .low)
+        #expect(sut.currentVideoEffect == .blurLow)
 
-        // update() should set any level directly
-        sut.update(blurLevel: .high)
-        #expect(sut.currentBlurLevel == .high)
+        // apply() should set any effect directly
+        sut.apply(.blurHigh)
+        #expect(sut.currentVideoEffect == .blurHigh)
 
-        // onTap() should now cycle from .high
+        // onTap() should now cycle from .blurHigh
         sut.onTap()
-        #expect(sut.currentBlurLevel == .none)
+        #expect(sut.currentVideoEffect == .none)
     }
 
     // MARK: - Test Helpers
@@ -272,7 +280,6 @@ final class PublisherSpy: VERAPublisher {
 
     var videoTransformers: [any VERATransformer] = []
 
-    var setBackgroundBlurCallCount = 0
     var addVideoTransformerCallCount = 0
     var removeTransformerCallCount = 0
     var lastBlurLevel: BlurLevel?
