@@ -68,22 +68,20 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
     }
 
-    // MARK: - Save Tests
+    // MARK: - Auto-Save Tests
 
-    @Test("Save persists current state and dismisses view")
-    func savePersistsAndDismisses() async throws {
+    @Test("Auto-save persists changes after setup")
+    func autoSavePersistsAfterSetup() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
         // Modify some values
         viewModel.settingsPreference.videoResolution = .high
         viewModel.settingsPreference.maxAudioBitrate = 128_000
         viewModel.settingsPreference.senderStatsEnabled = true
 
-        // Save
-        viewModel.save()
-
-        // Wait for update
+        // Wait for debounce + persist
         await delay()
 
         // Verify persistence
@@ -91,74 +89,93 @@ struct SettingsViewModelTests {
         #expect(repository.lastSavedPreferences?.videoResolution == .high)
         #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
         #expect(repository.lastSavedPreferences?.senderStatsEnabled == true)
-        #expect(viewModel.isPresented == false)
     }
 
-    @Test("Save persists opusDtxEnabled toggle")
-    func savePersistsOpusDtx() async throws {
+    @Test("Auto-save persists opusDtxEnabled toggle")
+    func autoSavePersistsOpusDtx() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
-        viewModel.settingsPreference.opusDtxEnabled = true
-
-        viewModel.save()
+        viewModel.settingsPreference.opusDtxEnabled = false
 
         await delay()
 
         #expect(repository.saveCallCount == 1)
-        #expect(repository.lastSavedPreferences?.opusDtxEnabled == true)
+        #expect(repository.lastSavedPreferences?.opusDtxEnabled == false)
     }
 
-    @Test("Save with custom bitrate preset persists custom value")
-    func saveWithCustomBitrate() async throws {
+    @Test("Auto-save with custom bitrate preset persists custom value")
+    func autoSaveWithCustomBitrate() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
         viewModel.settingsPreference.videoBitratePreset = .custom
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        viewModel.save()
-
-        // Wait for update
+        // Wait for debounce + persist
         await delay()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .custom)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 5_000_000)
     }
 
-    @Test("Save with non-custom bitrate preset saves zero for maxVideoBitrate")
-    func saveWithNonCustomBitrate() async throws {
+    @Test("Auto-save with non-custom bitrate preset saves zero for maxVideoBitrate")
+    func autoSaveWithNonCustomBitrate() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
         viewModel.settingsPreference.videoBitratePreset = .default
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        viewModel.save()
-
-        // Wait for update
+        // Wait for debounce + persist
         await delay()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .default)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 0)
     }
 
-    @Test("Save persists codec preference correctly")
-    func savePersistsCodecPreference() async throws {
+    @Test("Auto-save persists codec preference correctly")
+    func autoSavePersistsCodecPreference() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
         viewModel.settingsPreference.codecPreference.mode = .manual
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
 
-        viewModel.save()
-
-        // Wait for update
+        // Wait for debounce + persist
         await delay()
 
         let savedPreference = repository.lastSavedPreferences?.codecPreference
         #expect(savedPreference?.mode == .manual)
         #expect(savedPreference?.orderedCodecs == [.h264, .vp9, .vp8])
+    }
+
+    @Test("Auto-save does not persist before setup")
+    func autoSaveDoesNotPersistBeforeSetup() async throws {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+
+        // Modify without calling setup
+        viewModel.settingsPreference.videoResolution = .high
+
+        await delay()
+
+        // No auto-save pipeline active
+        #expect(repository.saveCallCount == 0)
+    }
+
+    @Test("Dismiss sets isPresented to false")
+    func dismissSetsIsPresentedToFalse() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.dismiss()
+
+        #expect(viewModel.isPresented == false)
     }
 
     // MARK: - Reset Tests
@@ -200,20 +217,25 @@ struct SettingsViewModelTests {
 
     // MARK: - Cancel Tests
 
-    @Test("Cancel dismisses without saving")
-    func cancelDismissesWithoutSaving() {
+    @Test("Dismiss does not trigger additional save")
+    func dismissDoesNotTriggerAdditionalSave() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
 
-        // Modify values
+        // Modify values (will auto-save)
         viewModel.settingsPreference.videoResolution = .high
-        viewModel.settingsPreference.maxAudioBitrate = 128_000
 
-        // Cancel
-        viewModel.cancel()
+        await delay()
+        let saveCountAfterAutoSave = repository.saveCallCount
 
-        // Verify no save happened
-        #expect(repository.saveCallCount == 0)
+        // Dismiss
+        viewModel.dismiss()
+
+        await delay()
+
+        // No additional save beyond the auto-save
+        #expect(repository.saveCallCount == saveCountAfterAutoSave)
         #expect(viewModel.isPresented == false)
     }
 
