@@ -277,7 +277,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tasa de Bits de Audio"
+            "value" : "Tasa de bits de audio"
           }
         }
       }
@@ -288,7 +288,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatico"
+            "value" : "Automático"
           }
         }
       }
@@ -320,7 +320,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ahorrador de ancho de banda"
+            "value" : "Ahorro de ancho de banda"
           }
         }
       }
@@ -332,7 +332,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tasa de Bits"
+            "value" : "Tasa de bits"
           }
         }
       }
@@ -394,7 +394,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bytes Recibidos"
+            "value" : "Bytes recibidos"
           }
         }
       }
@@ -417,7 +417,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bytes Enviados"
+            "value" : "Bytes enviados"
           }
         }
       }
@@ -441,7 +441,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Códec"
+            "value" : "Codec"
           }
         }
       }
@@ -463,7 +463,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Controla la tasa de bits máxima de codificación de audio enviada a la sesión. Valores más altos mejoran la calidad pero usan más ancho de banda."
+            "value" : "Elige automáticamente el valor predeterminado del SDK, o personalizada para definir la tasa de bits máxima de codificación de audio enviada a la sesión."
           }
         }
       }
@@ -494,7 +494,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Personalizado"
+            "value" : "Personalizada"
           }
         }
       }
@@ -516,7 +516,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tasa de bits adaptativa predeterminada — el SDK optimiza la calidad automáticamente."
+            "value" : "Vonage Video API permite usar perfiles de tasa de bits o definir una tasa de bits máxima de video personalizada."
           }
         }
       }
@@ -555,7 +555,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arrastra para reordenar. El SDK probará los códecs en este orden durante la negociación."
+            "value" : "Arrastra y suelta para elegir el orden de preferencia de los codecs, de primero a último."
           }
         }
       }
@@ -572,7 +572,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Habilitar Opus Dtx"
+            "value" : "Activar Opus DTX"
           }
         }
       }
@@ -609,7 +609,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activar Opus DTX puede reducir el uso de ancho de banda en transmisiones que tienen largos periodos de silencio."
+            "value" : "Cuando está activado, la transmisión discontinua de Opus reduce el ancho de banda de audio durante los silencios."
           }
         }
       }
@@ -638,7 +638,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ancho de Banda Estimado"
+            "value" : "Ancho de banda estimado"
           }
         }
       }
@@ -677,7 +677,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ahorro de ancho de banda adicional"
+            "value" : "Ahorro extra de ancho de banda"
           }
         }
       }
@@ -699,7 +699,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Velocidad de Fotogramas"
+            "value" : "Fotogramas por segundo"
           }
         }
       }
@@ -879,7 +879,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tasa de Bits Máxima Asignada"
+            "value" : "Tasa de bits máxima asignada"
           }
         }
       }
@@ -897,8 +897,8 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Tasa de Bits de Audio Máxima: %@"
+            "state" : "translated",
+            "value" : "Tasa de bits de audio personalizada: %@"
           }
         }
       }
@@ -950,8 +950,8 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Tasa de Bits de Video Máxima: %@"
+            "state" : "translated",
+            "value" : "Tasa de bits personalizada: %@"
           }
         }
       }
@@ -1039,7 +1039,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paquetes Perdidos (Recepción)"
+            "value" : "Paquetes perdidos (recepción)"
           }
         }
       }
@@ -1051,7 +1051,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paquetes Perdidos (Envío)"
+            "value" : "Paquetes perdidos (envío)"
           }
         }
       }
@@ -1063,7 +1063,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paquetes Recibidos"
+            "value" : "Paquetes recibidos"
           }
         }
       }
@@ -1074,7 +1074,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paquetes Enviados"
+            "value" : "Paquetes enviados"
           }
         }
       }
@@ -1123,7 +1123,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Respaldo de Audio del Publicador"
+            "value" : "Audio de respaldo del publicador"
           }
         }
       }
@@ -1174,7 +1174,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restablecer Valores Predeterminados"
+            "value" : "Restablecer valores predeterminados"
           }
         }
       }
@@ -1209,7 +1209,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restaura todos los ajustes a sus valores predeterminados."
+            "value" : "Restaura todos los ajustes a sus valores predeterminados"
           }
         }
       }
@@ -1262,7 +1262,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Establece una tasa de bits de video máxima explícita entre 5 kbps y 10 Mbps."
+            "value" : "Define una tasa de bits máxima de video entre 5 kbps y 10 Mbps."
           }
         }
       }
@@ -1297,7 +1297,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Respaldo de Audio del Suscriptor"
+            "value" : "Audio de respaldo del suscriptor"
           }
         }
       }
@@ -1320,7 +1320,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El SDK selecciona automáticamente el mejor códec según las condiciones de red y las capacidades de los participantes."
+            "value" : "El SDK selecciona automáticamente el mejor codec según las condiciones de red y las capacidades de los participantes. Los cambios se aplican en la próxima llamada."
           }
         }
       }
@@ -1343,7 +1343,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Video"
+            "value" : "Vídeo"
           }
         }
       }
