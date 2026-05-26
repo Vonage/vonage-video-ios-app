@@ -8,28 +8,29 @@ import VERADomain
 public final class BackgroundBlurButtonViewModel: ObservableObject {
 
     private let getCurrentPublisher: () throws -> VERAPublisher
-    @Published public var currentBlurLevel: BlurLevel = .none
+    @Published public var currentVideoEffect: VideoEffect = .none
 
     public init(getCurrentPublisher: @escaping () throws -> VERAPublisher) {
         self.getCurrentPublisher = getCurrentPublisher
     }
 
     public func onTap() {
-        let newBlurLevel: BlurLevel
-        switch currentBlurLevel {
-        case .none: newBlurLevel = .low
-        case .low: newBlurLevel = .high
-        case .high: newBlurLevel = .none
+        let nextEffect: VideoEffect
+        switch currentVideoEffect {
+        case .none: nextEffect = .blurLow
+        case .blurLow: nextEffect = .blurHigh
+        case .blurHigh: nextEffect = .none
+        case .backgroundImage: nextEffect = .none
         }
 
-        update(blurLevel: newBlurLevel)
+        apply(nextEffect)
     }
 
-    public func update(blurLevel: BlurLevel) {
-        currentBlurLevel = blurLevel
+    public func apply(_ effect: VideoEffect) {
+        currentVideoEffect = effect
         do {
             let publisher = try getCurrentPublisher()
-            try publisher.setBackgroundBlur(blurLevel: currentBlurLevel)
+            try publisher.applyVideoEffect(currentVideoEffect)
         } catch {
 
         }
