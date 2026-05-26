@@ -13,8 +13,9 @@ private enum SettingsConstants {
 
 /// Drives ``SettingsView`` by reading and writing publisher setting preferences.
 ///
-/// All mutations go through ``PublisherSettingsRepository`` so that they are
-/// immediately available to the publisher creation flow.
+/// Changes are auto-saved to the repository as the user edits, with a short
+/// debounce to batch rapid changes (e.g. slider drags). Downstream consumers
+/// react immediately via ``PublisherSettingsRepository/preferencesPublisher``.
 ///
 public final class SettingsViewModel: ObservableObject {
 
@@ -25,7 +26,7 @@ public final class SettingsViewModel: ObservableObject {
     @Published public var isPresented: Bool = true
 
     /// The current publisher settings preferences being edited.
-    /// This is a published property that binds to the settings form.
+    /// Changes are auto-persisted after a short debounce.
     @Published public var settingsPreference: PublisherSettingsPreferences
 
     /// The current codec mode preference (auto or manual).
@@ -77,6 +78,12 @@ public final class SettingsViewModel: ObservableObject {
     /// The repository responsible for persisting and retrieving publisher settings.
     private let repository: PublisherSettingsRepository
 
+    /// Cancellable for the auto-save subscription.
+    private var autoSaveCancellable: AnyCancellable?
+
+    /// Debounce interval for auto-save (seconds).
+    private let autoSaveDebounce: TimeInterval
+
     // MARK: - Init
 
     /// Creates a new settings view model.
@@ -84,12 +91,15 @@ public final class SettingsViewModel: ObservableObject {
     /// - Parameters:
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
+    ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
     public init(
         repository: PublisherSettingsRepository,
-        settingsPreference: PublisherSettingsPreferences = .default
+        settingsPreference: PublisherSettingsPreferences = .default,
+        autoSaveDebounce: TimeInterval = 0.3
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
+        self.autoSaveDebounce = autoSaveDebounce
     }
 
     // MARK: - Actions
@@ -117,17 +127,19 @@ public final class SettingsViewModel: ObservableObject {
         settingsPreference.maxAudioBitrate = Int32(maxAudioBitrate)
     }
 
-    /// Loads the current settings preferences from the repository.
-    /// This should be called when the view appears to ensure the latest values are displayed.
+    /// Loads the current settings preferences from the repository and starts
+    /// the auto-save pipeline.
+    ///
+    /// This should be called when the view appears to ensure the latest values
+    /// are displayed. Subsequent changes are automatically persisted.
     @MainActor
     public func setup() async {
         settingsPreference = await repository.getPreferences()
+        startAutoSave()
     }
 
-    /// Persists the current form values to the repository and dismisses the settings view.
-    /// Changes are saved before the view is dismissed.
-    public func save() {
-        persistCurrentState()
+    /// Dismisses the settings view. Changes are already auto-saved.
+    public func dismiss() {
         isPresented = false
     }
 
@@ -140,13 +152,24 @@ public final class SettingsViewModel: ObservableObject {
         }
     }
 
-    /// Dismisses the settings view without saving any changes.
-    /// All modifications made during this session are discarded.
-    public func cancel() {
-        isPresented = false
+    // MARK: - Private
+
+    /// Sets up a Combine pipeline that auto-saves preferences after a debounce.
+    ///
+    /// `dropFirst()` avoids re-saving the value just loaded from the repository.
+    /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
+    /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
+    private func startAutoSave() {
+        autoSaveCancellable = $settingsPreference
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.persistCurrentState()
+            }
     }
 
-    /// Persists all current field values to the repository without dismissing the view.
+    /// Persists all current field values to the repository.
     /// Sanitizes the settings before saving to ensure data consistency.
     private func persistCurrentState() {
         Task { @MainActor in
