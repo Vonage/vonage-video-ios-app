@@ -327,11 +327,12 @@ struct FileLogStrategyTests {
 
         let fileNames = strategy.allLogFileURLs().map(\.lastPathComponent)
 
-        #expect(fileNames == [
-            logFileURL.lastPathComponent,
-            newerFile.lastPathComponent,
-            oldestFile.lastPathComponent,
-        ])
+        #expect(
+            fileNames == [
+                logFileURL.lastPathComponent,
+                newerFile.lastPathComponent,
+                oldestFile.lastPathComponent,
+            ])
     }
 
     @Test("Rolling mode: deleteAllLogFiles removes all files")

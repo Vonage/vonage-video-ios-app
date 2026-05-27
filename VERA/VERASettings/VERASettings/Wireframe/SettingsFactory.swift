@@ -112,6 +112,22 @@ public final class SettingsFactory {
     /// live audio/video network metrics.
     @MainActor
     public func makeMeetingRoomSettingsView() -> SettingsView {
+
+        let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
+        return .init(
+            viewModel: viewModel,
+            statisticsViewModel: statisticsViewModel
+        )
+    }
+
+    /// Creates the view models for the meeting room settings without building the view.
+    ///
+    /// Used by ``SettingsSheetContent`` to own the view models via `@StateObject`,
+    /// ensuring they survive parent re-renders while the sheet is presented.
+    ///
+    /// - Returns: A tuple of the settings view model and the statistics view model.
+    @MainActor
+    public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
         let viewModel = SettingsViewModel(
             repository: repository,
             loggingRepository: loggingRepository,
@@ -122,10 +138,7 @@ public final class SettingsFactory {
             statsDataSource: statsDataSource,
             settingsRepository: repository
         )
-        return .init(
-            viewModel: viewModel,
-            statisticsViewModel: statisticsViewModel
-        )
+        return (viewModel, statisticsViewModel)
     }
 
     /// Creates the gear button for the meeting room bottom bar.

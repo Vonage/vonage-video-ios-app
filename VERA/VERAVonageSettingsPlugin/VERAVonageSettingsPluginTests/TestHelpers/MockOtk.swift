@@ -11,7 +11,9 @@ var dummySubscriber: OTSubscriberKit {
 }
 
 class MockPublisher: OTPublisherKit {
-    init() {
-        super.init(delegate: nil, settings: OTPublisherKitSettings())!
+    init(name: String? = nil) {
+        let settings = OTPublisherKitSettings()
+        settings.name = name
+        super.init(delegate: nil, settings: settings)!
     }
 }

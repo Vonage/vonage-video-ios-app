@@ -269,15 +269,18 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     }
 
     private func managedLogFileURLs(sortedNewestFirst: Bool) -> [URL] {
-        guard let urls = try? fileManager.contentsOfDirectory(
-            at: logsDirectory,
-            includingPropertiesForKeys: [.contentModificationDateKey],
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let urls = try? fileManager.contentsOfDirectory(
+                at: logsDirectory,
+                includingPropertiesForKeys: [.contentModificationDateKey],
+                options: [.skipsHiddenFiles]
+            )
+        else {
             return []
         }
 
-        return urls
+        return
+            urls
             .filter(isManagedLogFile)
             .sorted { lhs, rhs in
                 let leftDate = modificationDate(for: lhs)

@@ -40,7 +40,8 @@ public final class SDKLoggingService: @unchecked Sendable {
             self.logsDirectory = logsDirectory
         } else {
             let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-            self.logsDirectory = cachesDirectory.appendingPathComponent(Self.defaultLogsDirectoryName, isDirectory: true)
+            self.logsDirectory = cachesDirectory.appendingPathComponent(
+                Self.defaultLogsDirectoryName, isDirectory: true)
         }
     }
 
@@ -66,7 +67,8 @@ public final class SDKLoggingService: @unchecked Sendable {
             fileStrategy = strategy
 
             // Write a startup marker so a log file exists immediately.
-            let marker = LogEvent(level: .info, tag: "SDKLogging", message: "SDK file logging started (level: \(logLevel))")
+            let marker = LogEvent(
+                level: .info, tag: "SDKLogging", message: "SDK file logging started (level: \(logLevel))")
             strategy.log(marker)
 
             startStderrCapture(strategy: strategy)

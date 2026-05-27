@@ -197,22 +197,24 @@ public final class SettingsViewModel: ObservableObject {
         }
     }
 
-    /// Persists the current form values to the repository.
-    ///
+    /// Persists the current form values to the repository and dismisses the settings view.
     /// Shows a restart alert if logging settings changed, otherwise dismisses.
     /// SDK logging changes only take effect after the app is killed and reopened.
-    @MainActor
-    public func save() async {
-        await persistCurrentState()
-        await persistLoggingState()
+    /// Changes are fully saved before the view is dismissed.
+    public func save() {
+        Task { @MainActor in
+            await persistCurrentState()
+            await persistLoggingState()
 
-        let loggingChanged = loggingRepository != nil
-            && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
+            let loggingChanged =
+                loggingRepository != nil
+                && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
 
-        if loggingChanged {
-            showRestartAlert = true
-        } else {
-            isPresented = false
+            if loggingChanged {
+                showRestartAlert = true
+            } else {
+                isPresented = false
+            }
         }
     }
 
@@ -233,7 +235,6 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Persists all current field values to the repository without dismissing the view.
     /// Sanitizes the settings before saving to ensure data consistency.
-    @MainActor
     private func persistCurrentState() async {
         await sanitize()
         try? await repository.save(settingsPreference)

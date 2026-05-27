@@ -20,6 +20,8 @@ public final class NullStatsCollector: NSObject, StatsCollector {
 
     public func requestRtcStats(from publisher: OTPublisherKit) {}
 
+    public func removeSubscriber(connectionId: String) {}
+
     // MARK: - OTPublisherKitNetworkStatsDelegate
 
     public func publisher(
@@ -51,4 +53,18 @@ public final class NullStatsCollector: NSObject, StatsCollector {
     // MARK: - OTSubscriberKitRtcStatsReportDelegate
 
     public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
+
+    // MARK: - Publisher Media Link Stats
+
+    public func publisher(
+        _ publisher: OTPublisherKit,
+        mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
+    ) {}
+
+    // MARK: - Subscriber Media Link Stats
+
+    public func subscriber(
+        _ subscriber: OTSubscriberKit,
+        mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
+    ) {}
 }

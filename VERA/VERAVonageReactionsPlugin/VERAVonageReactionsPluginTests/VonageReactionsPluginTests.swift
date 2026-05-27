@@ -547,7 +547,7 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     var isOnHold: Bool = false
     var areCaptionsEnabled: Bool = false
 
-    let _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
     func connect() {}
