@@ -176,19 +176,25 @@ class DemoViewModel: ObservableObject {
                 timestamp: Date().timeIntervalSince1970,
                 videoCodec: "VP8"
             ),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: Int64.random(in: 900...1900),
-                packetsLost: Int64.random(in: 0...15),
-                bytesReceived: Int64.random(in: 380_000...580_000),
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: Int64.random(in: 450_000...550_000)
-            ),
-            receivedVideo: VideoReceiveStats(
-                packetsReceived: UInt64.random(in: 4500...9500),
-                packetsLost: UInt64.random(in: 20...80),
-                bytesReceived: UInt64.random(in: 1_900_000...2_900_000),
-                timestamp: Date().timeIntervalSince1970
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "demo-1",
+                    subscriberName: "Demo Subscriber",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: Int64.random(in: 900...1900),
+                        packetsLost: Int64.random(in: 0...15),
+                        bytesReceived: Int64.random(in: 380_000...580_000),
+                        timestamp: Date().timeIntervalSince1970,
+                        estimatedBandwidth: Int64.random(in: 450_000...550_000)
+                    ),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: UInt64.random(in: 4500...9500),
+                        packetsLost: UInt64.random(in: 20...80),
+                        bytesReceived: UInt64.random(in: 1_900_000...2_900_000),
+                        timestamp: Date().timeIntervalSince1970
+                    )
+                )
+            ]
         )
     }
 }

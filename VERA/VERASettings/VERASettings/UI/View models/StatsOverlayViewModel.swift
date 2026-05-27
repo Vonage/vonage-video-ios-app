@@ -148,22 +148,28 @@ public final class StatsOverlayViewModel: ObservableObject {
             lines.append("Lost".localized(args: videoSend.packetsLost.description))
         }
 
-        if let audioRecv = stats.receivedAudio {
+        let audioRecvStats = stats.subscriberStats.compactMap(\.receivedAudio)
+        if !audioRecvStats.isEmpty {
+            let totalPacketsReceived = audioRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = audioRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = audioRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("🔈 Audio Recv".localized)
             lines.append(
-                "Pkts".localized(args: audioRecv.packetsReceived.description, audioRecv.packetsLost.description))
-            lines.append("Bytes".localized(args: audioRecv.bytesReceivedFormmatted))
+                "Pkts".localized(args: totalPacketsReceived.description, totalPacketsLost.description))
+            lines.append("Bytes".localized(args: SettingsFormatter.formatBytes(totalBytesReceived)))
             lines.append("Max Bitrate".localized(args: SettingsFormatter.formatBandwidth(maxAudioBitrate) ?? ""))
-            if let bw = audioRecv.estimatedBandwidthFormatted {
-                lines.append("Est. Bandwidth".localized(args: bw))
-            }
         }
 
-        if let videoRecv = stats.receivedVideo {
+        let videoRecvStats = stats.subscriberStats.compactMap(\.receivedVideo)
+        if !videoRecvStats.isEmpty {
+            let totalPacketsReceived = videoRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = videoRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = videoRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("📺 Video Recv".localized)
             lines.append(
-                "Recv".localized(args: videoRecv.packetsReceived.description, videoRecv.bytesReceivedFormmatted))
-            lines.append("Lost".localized(args: videoRecv.packetsLost.description))
+                "Recv".localized(
+                    args: totalPacketsReceived.description, SettingsFormatter.formatBytes(Int64(totalBytesReceived))))
+            lines.append("Lost".localized(args: totalPacketsLost.description))
         }
 
         return lines.isEmpty ? "Waiting for stats…".localized : lines.joined(separator: "\n")

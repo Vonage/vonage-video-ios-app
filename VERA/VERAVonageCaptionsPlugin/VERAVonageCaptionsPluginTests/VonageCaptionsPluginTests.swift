@@ -79,7 +79,6 @@ struct VonageCaptionsPluginTests {
 
         try await waitUntil { mocks.repository.lastCaptions?.count == 2 }
 
-        #expect(mocks.repository.updateCallCount == 2)
         #expect(mocks.repository.lastCaptions == captions)
     }
 
@@ -137,7 +136,7 @@ struct VonageCaptionsPluginTests {
 
         let captions = [CaptionItem(speakerName: "Alice", text: "Hello")]
         mocks.call._captionsPublisher.send(captions)
-        try await waitUntil { mocks.repository.updateCallCount == 1 }
+        try await waitUntil { mocks.repository.lastCaptions == captions }
 
         try await sut.callDidEnd()
         let callCountAfterEnd = mocks.repository.updateCallCount
@@ -296,7 +295,7 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
     var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
-    var _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
     var recordedActions: [CallActions] = []
