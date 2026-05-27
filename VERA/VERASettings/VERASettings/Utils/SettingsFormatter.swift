@@ -139,10 +139,10 @@ enum SettingsFormatter {
     /// Formats bitrate in bits per second to a human-readable string.
     ///
     /// - Parameter bps: The bitrate in bits per second.
-    /// - Returns: A formatted string like "1.5 Mbps", "500 kbps", or `nil` if zero.
+    /// - Returns: A formatted string like "1.5 Mbps", "500 kbps", "bps", or `nil` if zero or negative.
     private static func formatBandwidth(_ bps: Double) -> String? {
         return switch bps {
-        case 0: nil
+        case ...0: nil
         case 1_000_000...:
             String(format: "%.1f Mbps", bps / 1_000_000)
         case 1_000...:
@@ -283,6 +283,15 @@ extension TransportStats {
     /// Formatted estimated bandwidth.
     var bandwidthFormatted: String? {
         SettingsFormatter.formatBandwidth(connectionEstimatedBandwidth)
+    }
+
+    /// Formatted estimated bandwidth, showing "Datos no disponibles" when not yet available.
+    /// Used specifically for display in stats UI where unavailable state should be explicit.
+    var bandwidthFormattedWithUnavailable: String? {
+        if connectionEstimatedBandwidth <= 0 {
+            return "Data unavailable".localized
+        }
+        return SettingsFormatter.formatBandwidth(connectionEstimatedBandwidth)
     }
 
     /// Formatted network condition.

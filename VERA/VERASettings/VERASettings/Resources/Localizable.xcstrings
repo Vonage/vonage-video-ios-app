@@ -499,6 +499,24 @@
         }
       }
     },
+    "Data unavailable" : {
+      "comment" : "Message shown when estimated bandwidth data is not yet available.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data unavailable"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datos no disponibles"
+          }
+        }
+      }
+    },
     "Default" : {
       "extractionState" : "manual",
       "localizations" : {

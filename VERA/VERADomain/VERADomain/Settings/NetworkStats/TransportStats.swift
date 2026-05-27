@@ -25,4 +25,9 @@ public struct TransportStats: Equatable {
         self.networkCondition = networkCondition
         self.networkConditionReason = networkConditionReason
     }
+
+    /// Returns true if bandwidth information is not yet available (value is zero or negative).
+    public var isBandwidthUnknown: Bool {
+        connectionEstimatedBandwidth <= 0
+    }
 }
