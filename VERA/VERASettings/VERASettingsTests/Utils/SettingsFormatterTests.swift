@@ -95,6 +95,12 @@ struct SettingsFormatterTests {
         #expect(SettingsFormatter.formatBandwidth(Int32(0)) == nil)
     }
 
+    @Test("formatBandwidth returns nil for negative values")
+    func formatBandwidthReturnsNilForNegativeValues() {
+        #expect(SettingsFormatter.formatBandwidth(Int64(-1)) == nil)
+        #expect(SettingsFormatter.formatBandwidth(Int64(-1000)) == nil)
+    }
+
     @Test("formatBandwidth formats kbps correctly")
     func formatBandwidthKbps() {
         let result = SettingsFormatter.formatBandwidth(Int64(5000))

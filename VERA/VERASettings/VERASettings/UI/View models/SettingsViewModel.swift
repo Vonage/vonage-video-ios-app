@@ -160,31 +160,35 @@ public final class SettingsViewModel: ObservableObject {
     /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
     /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
     private func startAutoSave() {
-        autoSaveCancellable = $settingsPreference
+        autoSaveCancellable =
+            $settingsPreference
             .dropFirst()
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.persistCurrentState()
+                Task { [weak self] in
+                    await self?.persistCurrentState()
+                }
             }
     }
 
     /// Persists all current field values to the repository.
     /// Sanitizes the settings before saving to ensure data consistency.
-    private func persistCurrentState() {
-        Task { @MainActor in
-            await sanitize()
-            try await repository.save(settingsPreference)
-        }
+    private func persistCurrentState() async {
+        let sanitized = await sanitize()
+        try? await repository.save(sanitized)
     }
 
-    /// Sanitizes the settings to ensure data consistency.
+    /// Returns a sanitized copy of the current settings.
     /// Resets the maximum video bitrate to 0 when using the default preset.
+    /// Does not modify the local state.
     @MainActor
-    private func sanitize() async {
-        if settingsPreference.videoBitratePreset == .default {
-            settingsPreference.maxVideoBitrate = 0
+    private func sanitize() async -> PublisherSettingsPreferences {
+        var sanitized = settingsPreference
+        if sanitized.videoBitratePreset == .default {
+            sanitized.maxVideoBitrate = 0
         }
+        return sanitized
     }
 
     /// Resets the local settings preference to default values.

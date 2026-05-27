@@ -97,10 +97,22 @@ private struct SubscriberStatsContent: View {
                 metric: "Network Condition".localized,
                 value: mediaLink.transport.conditionFormatted
             )
-            StatsRow(
-                metric: "Est. Bandwidth".localized,
-                value: mediaLink.transport.bandwidthFormatted
-            )
+            // Est. Bandwidth con icono de info cuando no disponible
+            HStack {
+                Text("Est. Bandwidth".localized)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                HStack(spacing: 4) {
+                    if mediaLink.transport.isBandwidthUnknown {
+                        Image(systemName: "info.circle")
+                            .foregroundStyle(.orange)
+                            .font(.caption)
+                    }
+                    Text(mediaLink.transport.bandwidthFormattedWithUnavailable ?? "-")
+                        .monospacedDigit()
+                        .fontWeight(.medium)
+                }
+            }
             if mediaLink.networkDegradationSource != .unknown {
                 StatsRow(
                     metric: "Degradation Source".localized,

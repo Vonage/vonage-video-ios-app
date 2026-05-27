@@ -99,7 +99,7 @@ struct SettingsViewModelTests {
 
         viewModel.settingsPreference.opusDtxEnabled = false
 
-        await delay()
+        await delayLong()
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.opusDtxEnabled == false)
@@ -226,7 +226,7 @@ struct SettingsViewModelTests {
         // Modify values (will auto-save)
         viewModel.settingsPreference.videoResolution = .high
 
-        await delay()
+        await delayForAsyncPersistence()
         let saveCountAfterAutoSave = repository.saveCallCount
 
         // Dismiss
