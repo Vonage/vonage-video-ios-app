@@ -39,6 +39,20 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
+        .target(
+            name: "VERABackgroundEffectsSnapshotTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.vonage.VERABackgroundEffectsSnapshotTests",
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            sources: ["VERABackgroundEffectsSnapshotTests/**"],
+            dependencies: [
+                .target(name: "VERABackgroundEffects"),
+                .swiftSnapshotTesting,
+                .project(target: "VERATestHelpers", path: "../VERACore"),
+            ],
+            settings: createBaseBuildSettings()
+        ),
     ],
     schemes: [
         .scheme(
@@ -47,6 +61,13 @@ let project = Project(
             buildAction: .buildAction(targets: ["VERABackgroundEffectsTests"]),
             testAction: .targets(["VERABackgroundEffectsTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        )
+        ),
+        .scheme(
+            name: "VERABackgroundEffectsSnapshotTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERABackgroundEffectsSnapshotTests"]),
+            testAction: .targets(["VERABackgroundEffectsSnapshotTests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
+        ),
     ]
 )

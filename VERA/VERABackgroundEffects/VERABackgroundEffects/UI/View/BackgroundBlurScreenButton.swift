@@ -15,7 +15,7 @@ public struct BackgroundBlurScreenButton: View {
 
     public var body: some View {
         BackgroundBlurButton(
-            image: viewModel.currentBlurLevel.image,
+            image: viewModel.currentVideoEffect.image,
             action: viewModel.onTap)
     }
 }
