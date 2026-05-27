@@ -193,13 +193,19 @@ struct InMemoryStatsRepositoryTests {
 
         // Update with data
         let testStats = NetworkMediaStats(
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 150,
-                packetsLost: 3,
-                bytesReceived: 7500,
-                timestamp: 1500,
-                estimatedBandwidth: 128_000
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "test-1",
+                    subscriberName: "Test",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 150,
+                        packetsLost: 3,
+                        bytesReceived: 7500,
+                        timestamp: 1500,
+                        estimatedBandwidth: 128_000
+                    )
+                )
+            ]
         )
         await repository.updateStats(testStats)
         await delay()

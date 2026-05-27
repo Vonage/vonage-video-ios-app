@@ -85,7 +85,6 @@ struct SettingsSnapshotTests {
         "SettingsView - Settings States",
         arguments: [
             ("default-settings", PublisherSettingsPreferences.default),
-            ("stats-enabled", await makeStatsEnabledPreferences()),
             ("custom-bitrates", await makeCustomBitratePreferences()),
             ("vp8-codec", await makeVP8Preferences()),
         ])
@@ -132,6 +131,49 @@ struct SettingsSnapshotTests {
         )
     }
 
+    // MARK: - Statistics Section Tests
+
+    @Test("Stats section - Publisher and subscribers list (collapsed)")
+    func statsListWithPublisherAndSubscribers() throws {
+        let (sut, _) = makeSUTWithStats()
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 900)),
+            named: "stats-list",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_stats-list"
+        )
+    }
+
+    @Test("Stats section - Publisher detail (expanded)")
+    func statsPublisherDetail() throws {
+        let (sut, statsViewModel) = makeSUTWithStats()
+        statsViewModel.isPublisherExpanded = true
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 2800)),
+            named: "stats-publisher-detail",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_stats-publisher-detail"
+        )
+    }
+
+    @Test("Stats section - Subscriber detail (expanded)")
+    func statsSubscriberDetail() throws {
+        let (sut, statsViewModel) = makeSUTWithStats()
+        statsViewModel.expandedSubscribers.insert("conn-1")
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 2600)),
+            named: "stats-subscriber-detail",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_stats-subscriber-detail"
+        )
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -169,22 +211,41 @@ struct SettingsSnapshotTests {
         }
     }
 
+    private func makeSUTWithStats(
+        selectedSection: SettingsSection = .stats,
+        horizontalSizeClass: UserInterfaceSizeClass = .compact
+    ) -> (AnyView, StatisticsViewModel) {
+        var preferences = PublisherSettingsPreferences.default
+        preferences.senderStatsEnabled = true
+
+        let repository = MockStatsSettingsRepository(initialPreferences: preferences)
+        let viewModel = SettingsViewModel(repository: repository, settingsPreference: preferences)
+        let statsViewModel = StatisticsViewModel(
+            statsDataSource: MockStatsDataSource(initialStats: sampleStats()),
+            settingsRepository: repository
+        )
+        statsViewModel.stats = sampleStats()
+        statsViewModel.isStatsEnabled = true
+
+        let view = AnyView(
+            SettingsView(
+                viewModel: viewModel, statisticsViewModel: statsViewModel, selectedSection: selectedSection
+            )
+            .environment(\.horizontalSizeClass, horizontalSizeClass)
+        )
+        return (view, statsViewModel)
+    }
+
     private func contentScrollable(
         _ useScrollableLayout: Bool,
         config: ViewImageConfig
     ) -> Snapshotting<AnyView, UIImage> {
         useScrollableLayout
-            ? .image(precision: 0.99, layout: .fixed(width: 390, height: 2250))
+            ? .image(precision: 0.99, layout: .fixed(width: 390, height: 2800))
             : .image(precision: 0.99, layout: .device(config: config))
     }
 
     // MARK: - Sample Data
-
-    private static func makeStatsEnabledPreferences() async -> PublisherSettingsPreferences {
-        var prefs = PublisherSettingsPreferences.default
-        prefs.senderStatsEnabled = true
-        return prefs
-    }
 
     private static func makeCustomBitratePreferences() async -> PublisherSettingsPreferences {
         var prefs = PublisherSettingsPreferences.default
@@ -204,33 +265,112 @@ struct SettingsSnapshotTests {
     }
 
     private func sampleStats() -> NetworkMediaStats {
-        NetworkMediaStats(
+        let timestamp: Double = 1_716_300_000
+        return NetworkMediaStats(
+            publisherName: "Alice",
             sentAudio: AudioSendStats(
                 packetsSent: 1000,
                 packetsLost: 5,
                 bytesSent: 500_000,
-                timestamp: Date().timeIntervalSince1970,
+                timestamp: timestamp,
                 audioCodec: "opus"
             ),
             sentVideo: VideoSendStats(
                 packetsSent: 5000,
                 packetsLost: 25,
                 bytesSent: 2_500_000,
-                timestamp: Date().timeIntervalSince1970,
-                videoCodec: "VP8"
+                timestamp: timestamp,
+                videoCodec: "VP8",
+                videoLayers: [
+                    VideoLayerStats(
+                        width: 320, height: 180,
+                        encodedFrameRate: 15,
+                        bitrate: 150_000, totalBitrate: 160_000,
+                        codec: "VP8"
+                    ),
+                    VideoLayerStats(
+                        width: 640, height: 360,
+                        encodedFrameRate: 24,
+                        bitrate: 500_000, totalBitrate: 530_000,
+                        codec: "VP8"
+                    ),
+                    VideoLayerStats(
+                        width: 1280, height: 720,
+                        encodedFrameRate: 30,
+                        bitrate: 1_500_000, totalBitrate: 1_550_000,
+                        codec: "VP8",
+                        qualityLimitationReason: .bandwidth
+                    ),
+                ]
             ),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 950,
-                packetsLost: 10,
-                bytesReceived: 475_000,
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: 500_000
-            ),
-            receivedVideo: VideoReceiveStats(
-                packetsReceived: 4800,
-                packetsLost: 50,
-                bytesReceived: 2_400_000,
-                timestamp: Date().timeIntervalSince1970
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "conn-1",
+                    subscriberName: "Bob",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 800,
+                        packetsLost: 8,
+                        bytesReceived: 400_000,
+                        timestamp: timestamp,
+                        audioCodec: "opus",
+                        estimatedBandwidth: 450_000
+                    ),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 3500,
+                        packetsLost: 30,
+                        bytesReceived: 1_750_000,
+                        timestamp: timestamp,
+                        width: 1280,
+                        height: 720,
+                        decodedFrameRate: 30,
+                        bitrate: 1_500_000,
+                        codec: "VP8"
+                    ),
+                    mediaLinkStats: SubscriberMediaLinkStats(
+                        transport: TransportStats(
+                            connectionEstimatedBandwidth: 3_000_000,
+                            networkCondition: .excellent
+                        )
+                    )
+                ),
+                SubscriberMediaStats(
+                    subscriberID: "conn-2",
+                    subscriberName: "Charlie",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 750,
+                        packetsLost: 12,
+                        bytesReceived: 375_000,
+                        timestamp: timestamp,
+                        audioCodec: "opus",
+                        estimatedBandwidth: 400_000
+                    ),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 3200,
+                        packetsLost: 45,
+                        bytesReceived: 1_600_000,
+                        timestamp: timestamp,
+                        width: 640,
+                        height: 480,
+                        decodedFrameRate: 24,
+                        bitrate: 800_000,
+                        codec: "H264",
+                        freezeCount: 2,
+                        totalFreezesDuration: 500
+                    ),
+                    mediaLinkStats: SubscriberMediaLinkStats(
+                        transport: TransportStats(
+                            connectionEstimatedBandwidth: 500_000,
+                            networkCondition: .warning
+                        ),
+                        networkDegradationSource: .remote
+                    )
+                ),
+            ],
+            publisherMediaLinkStats: PublisherMediaLinkStats(
+                transport: TransportStats(
+                    connectionEstimatedBandwidth: 2_500_000,
+                    networkCondition: .good
+                )
             )
         )
     }

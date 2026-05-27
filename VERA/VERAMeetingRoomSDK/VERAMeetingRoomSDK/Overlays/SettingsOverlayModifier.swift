@@ -17,7 +17,7 @@ struct SettingsOverlayModifier: ViewModifier {
         if isEnabled {
             content
                 .sheet(isPresented: $showSettings) {
-                    container.settingsFactory.makeMeetingRoomSettingsView()
+                    SettingsSheetContent(factory: container.settingsFactory)
                         .presentationDetents([.large])
                 }
                 .overlay {

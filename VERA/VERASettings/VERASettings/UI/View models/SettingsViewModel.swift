@@ -125,10 +125,12 @@ public final class SettingsViewModel: ObservableObject {
     }
 
     /// Persists the current form values to the repository and dismisses the settings view.
-    /// Changes are saved before the view is dismissed.
+    /// Changes are fully saved before the view is dismissed.
     public func save() {
-        persistCurrentState()
-        isPresented = false
+        Task { @MainActor in
+            await persistCurrentState()
+            isPresented = false
+        }
     }
 
     /// Reverts all settings to their default values and persists the changes.
@@ -148,11 +150,9 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Persists all current field values to the repository without dismissing the view.
     /// Sanitizes the settings before saving to ensure data consistency.
-    private func persistCurrentState() {
-        Task { @MainActor in
-            await sanitize()
-            try await repository.save(settingsPreference)
-        }
+    private func persistCurrentState() async {
+        await sanitize()
+        try? await repository.save(settingsPreference)
     }
 
     /// Sanitizes the settings to ensure data consistency.

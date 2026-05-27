@@ -89,7 +89,7 @@ public struct SettingsView: View {
             Form {
                 VideoSectionView(viewModel: viewModel)
                 AudioSectionView(viewModel: viewModel)
-                StatisticsSectionView(
+                StatisticsSectionScreen(
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
@@ -170,7 +170,7 @@ public struct SettingsView: View {
             case .audio:
                 AudioSectionView(viewModel: viewModel)
             case .stats:
-                StatisticsSectionView(
+                StatisticsSectionScreen(
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )

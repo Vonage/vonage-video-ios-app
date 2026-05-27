@@ -45,19 +45,25 @@
                     timestamp: Date().timeIntervalSince1970,
                     videoCodec: "VP8"
                 ),
-                receivedAudio: AudioReceiveStats(
-                    packetsReceived: 4321,
-                    packetsLost: 12,
-                    bytesReceived: 768_000,
-                    timestamp: Date().timeIntervalSince1970,
-                    estimatedBandwidth: 512_000
-                ),
-                receivedVideo: VideoReceiveStats(
-                    packetsReceived: 9876,
-                    packetsLost: 45,
-                    bytesReceived: 6_291_456,
-                    timestamp: Date().timeIntervalSince1970
-                )
+                subscriberStats: [
+                    SubscriberMediaStats(
+                        subscriberID: "preview-1",
+                        subscriberName: "Preview Subscriber",
+                        receivedAudio: AudioReceiveStats(
+                            packetsReceived: 4321,
+                            packetsLost: 12,
+                            bytesReceived: 768_000,
+                            timestamp: Date().timeIntervalSince1970,
+                            estimatedBandwidth: 512_000
+                        ),
+                        receivedVideo: VideoReceiveStats(
+                            packetsReceived: 9876,
+                            packetsLost: 45,
+                            bytesReceived: 6_291_456,
+                            timestamp: Date().timeIntervalSince1970
+                        )
+                    )
+                ]
             )
         }
     }
