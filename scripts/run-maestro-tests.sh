@@ -26,7 +26,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 # Examples:
 #   ./scripts/run-maestro-tests.sh                                    # Run all flows
 #   ./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml  # Run single flow by name
-#   ./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml     # Run single flow by path
+#   ./scripts/run-maestro-tests.sh .maestro/flows/github-repo-link.yaml     # Run single flow by path
 FLOW_ARG="$1"
 if [ -n "$FLOW_ARG" ]; then
     if [ -f "$FLOW_ARG" ]; then

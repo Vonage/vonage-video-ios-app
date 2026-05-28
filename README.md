@@ -234,7 +234,7 @@ Use the provided install script (installs Maestro CLI + Java 17):
 .maestro/
 ├── config.yaml          # Global configuration (appId, simulator device)
 └── flows/               # Test flows (YAML files)
-    └── launch-app.yaml  # P0: Launch app and validate landing screen
+    └── github-repo-link.yaml  # Launch app and validate GitHub link
 ```
 
 Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is a sequential number.
@@ -249,13 +249,13 @@ Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is
 ./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml
 
 # Run a single flow by path
-./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml
+./scripts/run-maestro-tests.sh .maestro/flows/github-repo-link.yaml
 
 # Run with a specific simulator
 SIMULATOR_DEVICE="iPhone 17 Pro" ./scripts/run-maestro-tests.sh
 
 # Run a single flow directly with Maestro CLI (skips build)
-maestro test .maestro/flows/launch-app.yaml
+maestro test .maestro/flows/github-repo-link.yaml
 ```
 
 #### Writing Tests with Accessibility IDs

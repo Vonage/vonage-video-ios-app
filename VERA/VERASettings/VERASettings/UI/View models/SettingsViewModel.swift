@@ -138,8 +138,24 @@ public final class SettingsViewModel: ObservableObject {
         startAutoSave()
     }
 
-    /// Dismisses the settings view. Changes are already auto-saved.
+    /// Dismisses the settings view after flushing any pending changes.
+    /// Uses a detached task to ensure persistence completes even if the
+    /// view model is destroyed during sheet dismissal animation.
     public func dismiss() {
+        // Cancel any pending debounced save
+        autoSaveCancellable?.cancel()
+
+        // Capture current state and repository reference before dismissing
+        let currentPrefs = settingsPreference
+        let repo = repository
+
+        // Persist in detached task (survives view model lifecycle)
+        Task.detached {
+            let sanitized = Self.sanitizePreferences(currentPrefs)
+            try? await repo.save(sanitized)
+        }
+
+        // Dismiss sheet immediately
         isPresented = false
     }
 
@@ -184,7 +200,14 @@ public final class SettingsViewModel: ObservableObject {
     /// Does not modify the local state.
     @MainActor
     private func sanitize() async -> PublisherSettingsPreferences {
-        var sanitized = settingsPreference
+        Self.sanitizePreferences(settingsPreference)
+    }
+
+    /// Sanitizes preferences for persistence.
+    /// Static method to avoid capturing self in detached task.
+    /// Resets the maximum video bitrate to 0 when using the default preset.
+    private static func sanitizePreferences(_ prefs: PublisherSettingsPreferences) -> PublisherSettingsPreferences {
+        var sanitized = prefs
         if sanitized.videoBitratePreset == .default {
             sanitized.maxVideoBitrate = 0
         }
