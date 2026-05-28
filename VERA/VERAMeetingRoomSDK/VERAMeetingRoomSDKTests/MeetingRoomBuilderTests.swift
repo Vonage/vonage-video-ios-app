@@ -4,10 +4,6 @@
 
 import Foundation
 import Testing
-import VERABackgroundEffects
-import VERACommonUI
-import VERADomain
-import VERAMeetingRoom
 
 @testable import VERAMeetingRoomSDK
 
@@ -96,7 +92,7 @@ struct MeetingRoomBuilderTests {
 
     @Test("Builder stores publisherSettings")
     func builderStoresPublisherSettings() {
-        let settings = PublisherSettings(
+        let settings = MeetingRoomPublisherSettings(
             username: "Alice",
             publishAudio: false,
             publishVideo: true

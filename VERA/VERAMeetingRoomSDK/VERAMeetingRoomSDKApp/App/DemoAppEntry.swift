@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import VERACommonUI
 import VERAMeetingRoomSDK
 
 @main

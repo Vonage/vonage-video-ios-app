@@ -79,10 +79,11 @@ MeetingRoomBuilder(baseURL: URL, roomName: String)
 | `.enabledFeatures(_ features: Set<MeetingRoomFeature>)` | Defines which optional features are active at runtime. |
 | `.onAction(_ handler: @escaping (MeetingRoomSDKAction) -> Void)` | Receives navigation callbacks from the SDK. |
 | `.configuration(_ config: MeetingRoomConfiguration)` | Customises the meeting room UI (microphone, camera, participant list controls). |
-| `.publisherSettings(_ settings: PublisherSettings)` | Sets the initial publisher configuration (username, resolution, codec, audio/video flags). |
+| `.publisherSettings(_ settings: MeetingRoomPublisherSettings)` | Sets the initial publisher configuration (username, resolution, codec, audio/video flags). |
 | `.appGroupIdentifier(_ identifier: String)` | App group for screen share credential storage. Required when `.screenShare` is enabled. |
 | `.broadcastExtensionBundleId(_ bundleId: String)` | Bundle ID of the broadcast extension. Required when `.screenShare` is enabled. |
 | `.theme(_ theme: MeetingRoomTheme)` | Applies a custom color theme. Defaults to `MeetingRoomTheme.vonage`. |
+| `.sessionKeyHolder(_ holder: MeetingRoomSessionKeyHolder)` | Provides an external session key holder for JWT sharing. |
 
 #### Build
 
@@ -101,12 +102,12 @@ The result of `.build()`.
 
 ```swift
 public struct MeetingRoomPrebuilt {
-    public let view: AnyView                    // Fully composed view with all overlays applied
-    public let viewModel: MeetingRoomViewModel   // For observing call state from outside
+    public let view: AnyView                           // Fully composed view with all overlays applied
+    public let callObserver: MeetingRoomCallObserving   // For observing call state from outside
 }
 ```
 
-Present `view` using a `fullScreenCover`, a `NavigationStack` push, or directly as a child view. Use `viewModel` to observe call state from the host app without coupling to internal SDK types.
+Present `view` using a `fullScreenCover`, a `NavigationStack` push, or directly as a child view. Use `callObserver` to observe call state from the host app without importing any sub-modules.
 
 ---
 
@@ -138,7 +139,7 @@ Alerts (permission prompts, errors) are presented automatically by the SDK.
 ```swift
 public enum MeetingRoomSDKAction {
     case callDidEnd               // Call ended — navigate to the goodbye screen
-    case goBack(RoomName)         // Return to the waiting room
+    case goBack(String)           // Return to the waiting room (room name)
 }
 ```
 
@@ -184,7 +185,7 @@ If your app has a waiting room, you can carry user preferences into the call:
 MeetingRoomBuilder(baseURL: baseURL, roomName: roomName)
     .enabledFeatures([.backgroundEffects, .audioEffects])
     .publisherSettings(
-        PublisherSettings(
+        MeetingRoomPublisherSettings(
             username: waitingRoom.username,
             publishAudio: waitingRoom.isMicEnabled,
             publishVideo: waitingRoom.isCameraEnabled

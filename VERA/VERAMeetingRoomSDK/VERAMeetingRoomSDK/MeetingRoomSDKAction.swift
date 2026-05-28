@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERADomain
 
 /// Actions emitted by the meeting room SDK that the host app must handle.
 ///
@@ -29,5 +28,5 @@ public enum MeetingRoomSDKAction {
     case callDidEnd
 
     /// The user should be returned to the waiting room (e.g., reconnect).
-    case goBack(RoomName)
+    case goBack(String)
 }

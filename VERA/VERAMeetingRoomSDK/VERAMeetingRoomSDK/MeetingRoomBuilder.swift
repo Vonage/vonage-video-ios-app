@@ -15,8 +15,8 @@ import VERASettings
 
 /// The result of building a meeting room with ``MeetingRoomBuilder``.
 ///
-/// Contains the fully composed SwiftUI view and the underlying view model
-/// for external state observation (e.g., monitoring call state).
+/// Contains the fully composed SwiftUI view and an observer for
+/// external state observation (e.g., monitoring call state).
 public struct MeetingRoomPrebuilt {
 
     /// The fully composed meeting room view with all feature overlays applied.
@@ -25,10 +25,14 @@ public struct MeetingRoomPrebuilt {
     /// complete meeting room experience.
     public let view: AnyView
 
-    /// The meeting room view model for external state observation.
+    /// The meeting room call observer for external state observation.
     ///
     /// Use this to monitor call state, archiving state, or other meeting room
-    /// properties from the host app.
+    /// properties from the host app without importing sub-modules.
+    public let callObserver: MeetingRoomCallObserving
+
+    /// The underlying view model for internal consumers that import VERAMeetingRoom directly.
+    /// Not intended for external SDK consumers — use `callObserver` instead.
     public let viewModel: MeetingRoomViewModel
 }
 
@@ -61,14 +65,14 @@ public final class MeetingRoomBuilder {
 
     var baseURL: URL
     var roomName: String
-    var _configuration = MeetingRoomConfiguration()
+    var _configuration = VERAMeetingRoomSDK.MeetingRoomConfiguration()
     var _enabledFeatures: Set<MeetingRoomFeature> = []
     var _onAction: ((MeetingRoomSDKAction) -> Void)?
-    var _publisherSettings: PublisherSettings = .init()
+    var _publisherSettings: MeetingRoomPublisherSettings = .init()
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
-    var _theme: MeetingRoomTheme?
-    var _sessionKeyHolder: SessionKeyHolder?
+    var _theme: VERAMeetingRoomSDK.MeetingRoomTheme?
+    var _sessionKeyHolder: MeetingRoomSessionKeyHolder?
 
     /// Creates a new meeting room builder.
     public init(
@@ -88,7 +92,7 @@ public final class MeetingRoomBuilder {
     var currentRoomName: String? { roomName }
 
     /// The currently configured meeting room configuration. Visible for testing.
-    var currentConfiguration: MeetingRoomConfiguration { _configuration }
+    var currentConfiguration: VERAMeetingRoomSDK.MeetingRoomConfiguration { _configuration }
 
     /// The currently configured enabled features. Visible for testing.
     var currentEnabledFeatures: Set<MeetingRoomFeature> { _enabledFeatures }
@@ -100,10 +104,10 @@ public final class MeetingRoomBuilder {
     var currentBroadcastExtensionBundleId: String? { _broadcastExtensionBundleId }
 
     /// The currently configured publisher settings. Visible for testing.
-    var currentPublisherSettings: PublisherSettings? { _publisherSettings }
+    var currentPublisherSettings: MeetingRoomPublisherSettings? { _publisherSettings }
 
     /// The currently configured theme. Visible for testing.
-    var currentTheme: MeetingRoomTheme? { _theme }
+    var currentTheme: VERAMeetingRoomSDK.MeetingRoomTheme? { _theme }
 
     /// Sets the base URL for API requests (room credentials, archiving, captions).
     ///
@@ -130,7 +134,7 @@ public final class MeetingRoomBuilder {
     /// - Parameter config: Controls for microphone, camera, and participant list visibility.
     /// - Returns: The builder for chaining.
     @discardableResult
-    public func configuration(_ config: MeetingRoomConfiguration) -> MeetingRoomBuilder {
+    public func configuration(_ config: VERAMeetingRoomSDK.MeetingRoomConfiguration) -> MeetingRoomBuilder {
         _configuration = config
         return self
     }
@@ -171,7 +175,7 @@ public final class MeetingRoomBuilder {
     /// - Parameter settings: The publisher configuration to apply.
     /// - Returns: The builder for chaining.
     @discardableResult
-    public func publisherSettings(_ settings: PublisherSettings) -> MeetingRoomBuilder {
+    public func publisherSettings(_ settings: MeetingRoomPublisherSettings) -> MeetingRoomBuilder {
         _publisherSettings = settings
         return self
     }
@@ -213,7 +217,7 @@ public final class MeetingRoomBuilder {
     /// - Parameter theme: The theme to apply.
     /// - Returns: The builder for chaining.
     @discardableResult
-    public func theme(_ theme: MeetingRoomTheme) -> MeetingRoomBuilder {
+    public func theme(_ theme: VERAMeetingRoomSDK.MeetingRoomTheme) -> MeetingRoomBuilder {
         _theme = theme
         return self
     }
@@ -227,7 +231,7 @@ public final class MeetingRoomBuilder {
     /// - Parameter holder: The session key holder to use.
     /// - Returns: The builder for chaining.
     @discardableResult
-    public func sessionKeyHolder(_ holder: SessionKeyHolder) -> MeetingRoomBuilder {
+    public func sessionKeyHolder(_ holder: MeetingRoomSessionKeyHolder) -> MeetingRoomBuilder {
         _sessionKeyHolder = holder
         return self
     }
@@ -243,19 +247,23 @@ public final class MeetingRoomBuilder {
     public func build() -> MeetingRoomPrebuilt {
         let onAction = _onAction ?? { _ in }
 
+        // Convert public wrapper types to internal types
+        let internalConfiguration = _configuration.toInternal()
+        let internalPublisherSettings = _publisherSettings.toInternal()
+
         // 1. Create container with all dependencies
         let container = MeetingRoomSDKContainer(
             baseURL: baseURL,
             enabledFeatures: _enabledFeatures,
-            configuration: _configuration,
-            publisherSettings: _publisherSettings,
+            configuration: internalConfiguration,
+            publisherSettings: internalPublisherSettings,
             appGroupIdentifier: _appGroupIdentifier,
             broadcastExtensionBundleId: _broadcastExtensionBundleId
         )
 
         // Use external session key holder if provided
         if let externalHolder = _sessionKeyHolder {
-            container.sessionKeyHolder = externalHolder
+            container.sessionKeyHolder = SessionKeyHolderAdapter(holder: externalHolder)
         }
 
         // 2. Create buttons assembler
@@ -275,7 +283,7 @@ public final class MeetingRoomBuilder {
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
             if let initialEffect = _publisherSettings.initialVideoEffect {
-                blurVM.apply(initialEffect)
+                blurVM.apply(initialEffect.toInternal())
             }
             buttonsAssembler.backgroundBlurButtonViewModel = blurVM
         }
@@ -326,7 +334,7 @@ public final class MeetingRoomBuilder {
         if _enabledFeatures.contains(.audioEffects) {
             let audioVM = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
             if let initialState = _publisherSettings.noiseSuppressionState {
-                audioVM.updateState(to: initialState)
+                audioVM.updateState(to: initialState.toInternal())
             }
             buttonsAssembler.meetingNoiseSuppressionButtonViewModel = audioVM
         }
@@ -386,10 +394,11 @@ public final class MeetingRoomBuilder {
 
         let themedView =
             composedView
-            .environment(\.meetingRoomTheme, _theme ?? .vonage)
+            .environment(\.meetingRoomTheme, _theme?.toInternal() ?? .vonage)
 
         return MeetingRoomPrebuilt(
             view: AnyView(themedView),
+            callObserver: meetingRoomViewModel,
             viewModel: meetingRoomViewModel
         )
     }

@@ -4,7 +4,6 @@
 
 import Foundation
 import Testing
-import VERADomain
 
 @testable import VERAMeetingRoomSDK
 
