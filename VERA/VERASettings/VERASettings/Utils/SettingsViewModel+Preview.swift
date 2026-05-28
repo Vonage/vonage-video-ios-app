@@ -48,5 +48,12 @@
             prefs.senderStatsEnabled = true
             return SettingsViewModel(repository: repo, settingsPreference: prefs)
         }
+
+        static var previewWithLoggingEnabled: SettingsViewModel {
+            SettingsViewModel(
+                repository: PreviewSettingsRepository(),
+                initialLoggingPreferences: SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
+            )
+        }
     }
 #endif

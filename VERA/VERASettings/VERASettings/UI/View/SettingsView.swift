@@ -75,6 +75,30 @@ public struct SettingsView: View {
         .task {
             await viewModel.setup()
         }
+        #if canImport(UIKit)
+            .sheet(isPresented: $viewModel.showShareSheet) {
+                ShareSheet(activityItems: viewModel.logFileURLs) {
+                    viewModel.showShareSheet = false
+                }
+            }
+        #endif
+        .alert("Restart Required".localized, isPresented: $viewModel.showRestartAlert) {
+            Button("OK".localized) {
+                viewModel.isPresented = false
+                dismiss()
+            }
+        } message: {
+            Text(
+                "Please close and reopen the app for SDK logging changes to take effect.".localized
+            )
+        }
+        .alert("No Logs Available".localized, isPresented: $viewModel.showNoLogsAlert) {
+            Button("OK".localized, role: .cancel) {}
+        } message: {
+            Text(
+                "No log files have been generated yet. Use the app and try again.".localized
+            )
+        }
     }
 
     // MARK: - Compact (iPhone)
@@ -93,6 +117,9 @@ public struct SettingsView: View {
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
+                if viewModel.hasLoggingSupport {
+                    LoggingSectionView(viewModel: viewModel)
+                }
                 GeneralSectionView(viewModel: viewModel)
             }
             .navigationTitle("Settings".localized)
@@ -102,8 +129,7 @@ public struct SettingsView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save".localized) {
-                        viewModel.save()
-                        dismiss()
+                        saveAndDismissIfNeeded()
                     }
                 }
             }
@@ -126,6 +152,13 @@ public struct SettingsView: View {
         .navigationSplitViewStyle(.balanced)
     }
 
+    /// The sections to show based on available features.
+    private var availableSections: [SettingsSection] {
+        SettingsSection.allCases.filter { section in
+            section != .logging || viewModel.hasLoggingSupport
+        }
+    }
+
     // MARK: - Sidebar
 
     /// Sidebar list showing all available settings sections.
@@ -133,7 +166,7 @@ public struct SettingsView: View {
     /// Displays section icons and names. Selected section drives the detail pane content.
     /// Includes Cancel and Save buttons in the toolbar.
     private var sidebar: some View {
-        List(SettingsSection.allCases, selection: $selectedSection) { section in
+        List(availableSections, selection: $selectedSection) { section in
             Label(section.displayName, systemImage: section.iconName)
         }
         .navigationTitle("Settings".localized)
@@ -143,8 +176,7 @@ public struct SettingsView: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Save")) {
-                    viewModel.save()
-                    dismiss()
+                    saveAndDismissIfNeeded()
                 }
             }
         }
@@ -174,10 +206,21 @@ public struct SettingsView: View {
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
+            case .logging:
+                LoggingSectionView(viewModel: viewModel)
             }
         }
         .id(section)
         .navigationTitle(section.displayName)
+    }
+
+    private func saveAndDismissIfNeeded() {
+        Task { @MainActor in
+            await viewModel.save()
+            if !viewModel.showRestartAlert {
+                dismiss()
+            }
+        }
     }
 }
 

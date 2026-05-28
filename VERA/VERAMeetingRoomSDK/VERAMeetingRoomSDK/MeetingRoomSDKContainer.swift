@@ -283,9 +283,21 @@ final class MeetingRoomSDKContainer {
         settingsRepository: settingsRepository,
         statsWriter: statsRepository)
 
+    lazy var sdkLoggingRepository: SDKLoggingRepository =
+        UserDefaultsSDKLoggingRepository()
+
+    lazy var sdkLoggingService = SDKLoggingService()
+
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository)
+        statsDataSource: statsRepository,
+        loggingRepository: sdkLoggingRepository,
+        loggingPreferencesLoader: {
+            UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+        },
+        logFileURLProvider: { [weak self] in
+            self?.sdkLoggingService.getLogFileURLs() ?? []
+        })
 
     // MARK: - Audio Effects Feature
 

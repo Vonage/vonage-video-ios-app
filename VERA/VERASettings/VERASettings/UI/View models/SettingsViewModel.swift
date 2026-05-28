@@ -28,6 +28,21 @@ public final class SettingsViewModel: ObservableObject {
     /// This is a published property that binds to the settings form.
     @Published public var settingsPreference: PublisherSettingsPreferences
 
+    /// Whether SDK logging is enabled.
+    @Published public var isLoggingEnabled: Bool
+
+    /// The selected SDK logging level.
+    @Published public var sdkLogLevel: SDKLogLevel
+
+    /// Controls presentation of the iOS share sheet for log files.
+    @Published public var showShareSheet: Bool = false
+
+    /// Controls presentation of the alert shown when no log files are available.
+    @Published public var showNoLogsAlert: Bool = false
+
+    /// Controls presentation of the restart-required alert after logging changes.
+    @Published public var showRestartAlert: Bool = false
+
     /// The current codec mode preference (auto or manual).
     public var codecMode: SettingsCodecMode {
         settingsPreference.codecPreference.mode
@@ -72,10 +87,48 @@ public final class SettingsViewModel: ObservableObject {
         settingsPreference.senderStatsEnabled
     }
 
+    /// Whether SDK logging support is configured.
+    /// When `false`, the logging UI section should be hidden.
+    public var hasLoggingSupport: Bool {
+        loggingRepository != nil
+    }
+
+    /// Current log file URLs returned by the injected provider.
+    public var logFileURLs: [URL] {
+        logFileURLProvider?() ?? []
+    }
+
+    /// Whether any log files are currently available to share.
+    public var hasLogFiles: Bool {
+        !logFileURLs.isEmpty
+    }
+
+    /// Attempts to share log files. Shows the share sheet if files exist,
+    /// or an alert if no log files are available yet.
+    public func sendLogs() {
+        if hasLogFiles {
+            showShareSheet = true
+        } else {
+            showNoLogsAlert = true
+        }
+    }
+
     // MARK: - Dependencies
 
     /// The repository responsible for persisting and retrieving publisher settings.
     private let repository: PublisherSettingsRepository
+
+    /// Repository for reading and writing SDK logging preferences.
+    private let loggingRepository: SDKLoggingRepository?
+
+    /// Supplies URLs for currently available log files.
+    private let logFileURLProvider: (() -> [URL])?
+
+    /// Tracks the original persisted logging toggle to decide cleanup behavior.
+    private var initialLoggingEnabled: Bool = false
+
+    /// Tracks the original persisted log level to detect changes.
+    private var initialLogLevel: SDKLogLevel = .debug
 
     // MARK: - Init
 
@@ -84,12 +137,24 @@ public final class SettingsViewModel: ObservableObject {
     /// - Parameters:
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
+    ///   - loggingRepository: Repository for SDK logging preferences. Defaults to `nil`.
+    ///   - initialLoggingPreferences: Synchronously loaded logging preferences for immediate UI state. Defaults to `.default`.
+    ///   - logFileURLProvider: Provider for shareable log file URLs. Defaults to `nil`.
     public init(
         repository: PublisherSettingsRepository,
-        settingsPreference: PublisherSettingsPreferences = .default
+        settingsPreference: PublisherSettingsPreferences = .default,
+        loggingRepository: SDKLoggingRepository? = nil,
+        initialLoggingPreferences: SDKLoggingPreferences = .default,
+        logFileURLProvider: (() -> [URL])? = nil
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
+        self.loggingRepository = loggingRepository
+        self.logFileURLProvider = logFileURLProvider
+        self.isLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
+        self.sdkLogLevel = initialLoggingPreferences.logLevel
+        self.initialLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
+        self.initialLogLevel = initialLoggingPreferences.logLevel
     }
 
     // MARK: - Actions
@@ -122,13 +187,33 @@ public final class SettingsViewModel: ObservableObject {
     @MainActor
     public func setup() async {
         settingsPreference = await repository.getPreferences()
+
+        if let loggingRepository {
+            let loggingPreferences = await loggingRepository.getPreferences()
+            isLoggingEnabled = loggingPreferences.isLoggingEnabled
+            sdkLogLevel = loggingPreferences.logLevel
+            initialLoggingEnabled = loggingPreferences.isLoggingEnabled
+            initialLogLevel = loggingPreferences.logLevel
+        }
     }
 
-    /// Persists the current form values to the repository and dismisses the settings view.
-    /// Changes are saved before the view is dismissed.
-    public func save() {
-        persistCurrentState()
-        isPresented = false
+    /// Persists the current form values to the repository.
+    ///
+    /// Shows a restart alert if logging settings changed, otherwise dismisses.
+    /// SDK logging changes only take effect after the app is killed and reopened.
+    @MainActor
+    public func save() async {
+        await persistCurrentState()
+        await persistLoggingState()
+
+        let loggingChanged = loggingRepository != nil
+            && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
+
+        if loggingChanged {
+            showRestartAlert = true
+        } else {
+            isPresented = false
+        }
     }
 
     /// Reverts all settings to their default values and persists the changes.
@@ -148,11 +233,28 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Persists all current field values to the repository without dismissing the view.
     /// Sanitizes the settings before saving to ensure data consistency.
-    private func persistCurrentState() {
-        Task { @MainActor in
-            await sanitize()
-            try await repository.save(settingsPreference)
-        }
+    @MainActor
+    private func persistCurrentState() async {
+        await sanitize()
+        try? await repository.save(settingsPreference)
+    }
+
+    /// Persists the current logging values. When the logging toggle or log
+    /// level has changed, sets ``SDKLoggingPreferences/pendingLogCleanup``
+    /// so that log files are cleared on the next app launch.
+    private func persistLoggingState() async {
+        guard let loggingRepository else { return }
+
+        let loggingToggleChanged = isLoggingEnabled != initialLoggingEnabled
+        let logLevelChanged = sdkLogLevel != initialLogLevel
+
+        let preferences = SDKLoggingPreferences(
+            isLoggingEnabled: isLoggingEnabled,
+            logLevel: sdkLogLevel,
+            pendingLogCleanup: loggingToggleChanged || logLevelChanged
+        )
+
+        await loggingRepository.save(preferences)
     }
 
     /// Sanitizes the settings to ensure data consistency.
