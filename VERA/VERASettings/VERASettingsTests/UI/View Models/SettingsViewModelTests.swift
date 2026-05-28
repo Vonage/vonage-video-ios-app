@@ -81,8 +81,8 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.maxAudioBitrate = 128_000
         viewModel.settingsPreference.senderStatsEnabled = true
 
-        // Wait for debounce + persist
-        await delay()
+        // Wait for multiple debounce cycles + async persistence
+        await delayForAsyncPersistence()
 
         // Verify persistence
         #expect(repository.saveCallCount == 1)
@@ -114,8 +114,8 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.videoBitratePreset = .custom
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        // Wait for debounce + persist
-        await delay()
+        // Wait for multiple debounce cycles + async persistence
+        await delayForAsyncPersistence()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .custom)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 5_000_000)
@@ -130,8 +130,8 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.videoBitratePreset = .default
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        // Wait for debounce + persist
-        await delay()
+        // Wait for multiple debounce cycles + async persistence
+        await delayForAsyncPersistence()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .default)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 0)
@@ -143,11 +143,14 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        viewModel.settingsPreference.codecPreference.mode = .manual
-        viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
+        // Single assignment - avoids multiple debounce cycles from nested property mutations
+        viewModel.settingsPreference.codecPreference = SettingsCodecPreference(
+            mode: .manual,
+            orderedCodecs: [.h264, .vp9, .vp8]
+        )
 
-        // Wait for debounce + persist
-        await delay()
+        // Wait for debounce + async persistence
+        await delayForAsyncPersistence()
 
         let savedPreference = repository.lastSavedPreferences?.codecPreference
         #expect(savedPreference?.mode == .manual)
