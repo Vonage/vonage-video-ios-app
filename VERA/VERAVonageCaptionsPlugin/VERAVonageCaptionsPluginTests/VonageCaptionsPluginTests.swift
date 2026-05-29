@@ -77,9 +77,11 @@ struct VonageCaptionsPluginTests {
         ]
         mocks.call._captionsPublisher.send(captions)
 
-        try await waitUntil { mocks.repository.lastCaptions?.count == 2 }
+        // Wait for the actual captions value, not just the count
+        try await waitUntil { mocks.repository.lastCaptions == captions }
 
         #expect(mocks.repository.lastCaptions == captions)
+        #expect(mocks.repository.updateCallCount == 1)
     }
 
     @Test("callDidStart forwards multiple caption updates to repository")
@@ -93,16 +95,25 @@ struct VonageCaptionsPluginTests {
         mocks.call._captionsPublisher.send(first)
         try await waitUntil { mocks.repository.lastCaptions == first }
 
+        // Small delay to ensure async processing is fully settled
+        try await Task.sleep(nanoseconds: 20_000_000)  // 20ms
+
         let countAfterFirst = mocks.repository.updateCallCount
+        #expect(countAfterFirst == 1)
 
         let second = [
             CaptionItem(speakerName: "Alice", text: "First"),
             CaptionItem(speakerName: "Bob", text: "Second"),
         ]
         mocks.call._captionsPublisher.send(second)
-        try await waitUntil { mocks.repository.lastCaptions == second }
+        try await waitUntil {
+            mocks.repository.lastCaptions == second && mocks.repository.updateCallCount > countAfterFirst
+        }
 
-        #expect(mocks.repository.updateCallCount > countAfterFirst)
+        #expect(mocks.repository.updateCallCount == 2)
+        #expect(mocks.repository.allUpdates.count == 2)
+        #expect(mocks.repository.allUpdates[0] == first)
+        #expect(mocks.repository.allUpdates[1] == second)
     }
 
     // MARK: - Call Did End
@@ -138,17 +149,27 @@ struct VonageCaptionsPluginTests {
         mocks.call._captionsPublisher.send(captions)
         try await waitUntil { mocks.repository.lastCaptions == captions }
 
+        // Ensure first update has fully settled
+        try await Task.sleep(nanoseconds: 20_000_000)  // 20ms
+        #expect(mocks.repository.updateCallCount == 1)
+
         try await sut.callDidEnd()
+
+        // callDidEnd calls updateCaptions([]), so count should be 2
+        try await waitUntil { mocks.repository.updateCallCount == 2 }
+        #expect(mocks.repository.lastCaptions == [])
+
         let callCountAfterEnd = mocks.repository.updateCallCount
 
         // Send more captions after call ended — should be ignored
         mocks.call._captionsPublisher.send([CaptionItem(speakerName: "Bob", text: "Ignored")])
         mocks.statusDataSource.set(captionsState: .enabled("new-id"))
 
-        try await Task.sleep(nanoseconds: 100_000_000)
+        try await Task.sleep(nanoseconds: 100_000_000)  // 100ms
 
-        // Only the callDidEnd updateCaptions([]) should have been recorded
+        // Count should not have increased beyond the callDidEnd clear
         #expect(mocks.repository.updateCallCount == callCountAfterEnd)
+        #expect(mocks.repository.lastCaptions == [])
     }
 
     // MARK: - Edge Cases
