@@ -285,8 +285,9 @@ extension TransportStats {
         SettingsFormatter.formatBandwidth(connectionEstimatedBandwidth)
     }
 
-    /// Formatted estimated bandwidth, showing "Datos no disponibles" when not yet available.
-    /// Used specifically for display in stats UI where unavailable state should be explicit.
+    /// Formatted estimated bandwidth, falling back to a localized "Data unavailable"
+    /// string when the value is zero or negative. Used in stats UI where the
+    /// unavailable state should be made explicit to the user.
     var bandwidthFormattedWithUnavailable: String? {
         if connectionEstimatedBandwidth <= 0 {
             return "Data unavailable".localized
