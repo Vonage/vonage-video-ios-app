@@ -91,6 +91,10 @@ public final class SettingsViewModel: ObservableObject {
     /// Logger for error reporting.
     private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
 
+    /// Called after each persistence attempt (success or failure).
+    /// Used by tests to synchronise with the auto-save pipeline.
+    var onDidSave: (@Sendable () -> Void)?
+
     // MARK: - Init
 
     /// Creates a new settings view model.
@@ -199,6 +203,7 @@ public final class SettingsViewModel: ObservableObject {
         } catch {
             logger.error("Failed to save settings preferences: \(error.localizedDescription)")
         }
+        onDidSave?()
     }
 
     /// Returns a sanitized copy of the preferences to ensure data consistency.

@@ -12,6 +12,20 @@ import VERADomain
 @Suite("Settings ViewModel Tests")
 struct SettingsViewModelTests {
 
+    /// Waits deterministically for the auto-save pipeline to complete.
+    /// Sets the `onDidSave` callback, executes `perform`, then suspends
+    /// until `persistCurrentState()` finishes and invokes the callback.
+    private func awaitAutoSave(
+        on viewModel: SettingsViewModel,
+        while perform: () -> Void
+    ) async {
+        await withCheckedContinuation { continuation in
+            viewModel.onDidSave = { continuation.resume() }
+            perform()
+        }
+        viewModel.onDidSave = nil
+    }
+
     // MARK: - Initialization Tests
 
     @Test("ViewModel initializes with default preferences")
@@ -92,8 +106,9 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.videoResolution == .medium)
 
         // Auto-save should still work (only one subscription was created)
-        viewModel.settingsPreference.videoResolution = .low
-        await delay()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoResolution = .low
+        }
         #expect(repository.saveCallCount == 2)  // 1 from our manual save + 1 from auto-save
         #expect(repository.lastSavedPreferences?.videoResolution == .low)
     }
@@ -104,12 +119,11 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        // Modify some values
-        viewModel.settingsPreference.videoResolution = .high
-        viewModel.settingsPreference.maxAudioBitrate = 128_000
-        viewModel.settingsPreference.senderStatsEnabled = true
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoResolution = .high
+            viewModel.settingsPreference.maxAudioBitrate = 128_000
+            viewModel.settingsPreference.senderStatsEnabled = true
+        }
 
         // Verify persistence
         #expect(repository.saveCallCount == 1)
@@ -127,10 +141,9 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        // Toggle to opposite value
-        viewModel.settingsPreference.opusDtxEnabled = true
-
-        await waitForAutoSave(yields: 5)  // Extra yields for long debounce
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.opusDtxEnabled = true
+        }
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.opusDtxEnabled == true)
@@ -142,10 +155,10 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        viewModel.settingsPreference.videoBitratePreset = .custom
-        viewModel.settingsPreference.maxVideoBitrate = 5_000_000
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoBitratePreset = .custom
+            viewModel.settingsPreference.maxVideoBitrate = 5_000_000
+        }
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .custom)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 5_000_000)
@@ -157,10 +170,10 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        viewModel.settingsPreference.videoBitratePreset = .default
-        viewModel.settingsPreference.maxVideoBitrate = 5_000_000
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoBitratePreset = .default
+            viewModel.settingsPreference.maxVideoBitrate = 5_000_000
+        }
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .default)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 0)
@@ -172,10 +185,10 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        viewModel.settingsPreference.codecPreference.mode = .manual
-        viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.codecPreference.mode = .manual
+            viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
+        }
 
         let savedPreference = repository.lastSavedPreferences?.codecPreference
         #expect(savedPreference?.mode == .manual)
@@ -190,7 +203,8 @@ struct SettingsViewModelTests {
         // Modify without calling setup
         viewModel.settingsPreference.videoResolution = .high
 
-        await waitForAutoSave()
+        // Wait long enough for debounce to have fired if pipeline were active
+        await delay()
 
         // No auto-save pipeline active
         #expect(repository.saveCallCount == 0)
@@ -276,10 +290,9 @@ struct SettingsViewModelTests {
         // Make save fail
         repository.shouldThrowOnSave = true
 
-        // Make changes - auto-save will attempt but fail
-        viewModel.settingsPreference.videoResolution = .high
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoResolution = .high
+        }
 
         // Verify save was attempted despite error (error is logged, not thrown)
         #expect(repository.saveCallCount >= 1)
@@ -330,10 +343,10 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        // Modify values (will auto-save)
-        viewModel.settingsPreference.videoResolution = .high
-
-        await waitForAutoSave()
+        // Modify values and wait for auto-save
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoResolution = .high
+        }
         let saveCountAfterAutoSave = repository.saveCallCount
 
         // Make another change and dismiss immediately
@@ -599,9 +612,9 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        viewModel.setMaxAudioBitrate(128_000.0)
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.setMaxAudioBitrate(128_000.0)
+        }
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
@@ -613,11 +626,11 @@ struct SettingsViewModelTests {
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        // Set preset to custom so sanitization doesn't reset to 0
-        viewModel.settingsPreference.videoBitratePreset = .custom
-        viewModel.setMaxVideorate(2_000_000.0)
-
-        await waitForAutoSave()
+        await awaitAutoSave(on: viewModel) {
+            // Set preset to custom so sanitization doesn't reset to 0
+            viewModel.settingsPreference.videoBitratePreset = .custom
+            viewModel.setMaxVideorate(2_000_000.0)
+        }
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 2_000_000)
