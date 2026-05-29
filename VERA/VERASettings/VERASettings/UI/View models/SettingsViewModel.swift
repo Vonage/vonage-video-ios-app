@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import os.log
 
 /// Constants used throughout the settings system.
 private enum SettingsConstants {
@@ -84,6 +85,12 @@ public final class SettingsViewModel: ObservableObject {
     /// Debounce interval for auto-save (seconds).
     private let autoSaveDebounce: TimeInterval
 
+    /// Tracks whether the view model has been initialized.
+    private var isInitialized: Bool = false
+
+    /// Logger for error reporting.
+    private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
+
     // MARK: - Init
 
     /// Creates a new settings view model.
@@ -132,14 +139,24 @@ public final class SettingsViewModel: ObservableObject {
     ///
     /// This should be called when the view appears to ensure the latest values
     /// are displayed. Subsequent changes are automatically persisted.
+    /// Subsequent calls are ignored to prevent re-initialization.
     @MainActor
     public func setup() async {
+        guard !isInitialized else { return }
+        isInitialized = true
+
         settingsPreference = await repository.getPreferences()
         startAutoSave()
     }
 
-    /// Dismisses the settings view. Changes are already auto-saved.
-    public func dismiss() {
+    /// Dismisses the settings view after ensuring all pending changes are saved.
+    ///
+    /// This method persists any changes that might still be in the debounce window
+    /// before dismissing, ensuring no data loss on quick dismissals.
+    @MainActor
+    public func dismiss() async {
+        // Save any pending changes that haven't been auto-saved yet
+        await persistCurrentState()
         isPresented = false
     }
 
@@ -160,31 +177,39 @@ public final class SettingsViewModel: ObservableObject {
     /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
     /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
     private func startAutoSave() {
-        autoSaveCancellable = $settingsPreference
+        autoSaveCancellable =
+            $settingsPreference
             .dropFirst()
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 Task {
-                   await self?.persistCurrentState()
+                    await self?.persistCurrentState()
                 }
             }
     }
 
     /// Persists all current field values to the repository.
     /// Sanitizes the settings before saving to ensure data consistency.
+    /// Logs any errors that occur during persistence.
     private func persistCurrentState() async {
-        await sanitize()
-        try? await repository.save(settingsPreference)
+        let sanitized = sanitized(settingsPreference)
+        do {
+            try await repository.save(sanitized)
+        } catch {
+            logger.error("Failed to save settings preferences: \(error.localizedDescription)")
+        }
     }
 
-    /// Sanitizes the settings to ensure data consistency.
+    /// Returns a sanitized copy of the preferences to ensure data consistency.
     /// Resets the maximum video bitrate to 0 when using the default preset.
-    @MainActor
-    private func sanitize() async {
-        if settingsPreference.videoBitratePreset == .default {
-            settingsPreference.maxVideoBitrate = 0
+    /// Does not modify the original to avoid triggering another auto-save cycle.
+    private func sanitized(_ preferences: PublisherSettingsPreferences) -> PublisherSettingsPreferences {
+        var sanitized = preferences
+        if sanitized.videoBitratePreset == .default {
+            sanitized.maxVideoBitrate = 0
         }
+        return sanitized
     }
 
     /// Resets the local settings preference to default values.

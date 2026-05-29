@@ -98,7 +98,12 @@ public struct SettingsView: View {
             .navigationTitle("Settings".localized)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Close".localized) { dismiss() }
+                    Button("Close".localized) {
+                        Task { @MainActor in
+                            await viewModel.dismiss()
+                            dismiss()
+                        }
+                    }
                 }
             }
         }
@@ -133,7 +138,12 @@ public struct SettingsView: View {
         .navigationTitle("Settings".localized)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: "Close")) { dismiss() }
+                Button(String(localized: "Close")) {
+                    Task { @MainActor in
+                        await viewModel.dismiss()
+                        dismiss()
+                    }
+                }
             }
         }
     }
