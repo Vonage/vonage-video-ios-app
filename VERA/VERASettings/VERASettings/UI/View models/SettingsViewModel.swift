@@ -82,6 +82,10 @@ public final class SettingsViewModel: ObservableObject {
     /// Cancellable for the auto-save subscription.
     private var autoSaveCancellable: AnyCancellable?
 
+    /// In-flight auto-save task. Cancelled before each new save to
+    /// prevent overlapping writes that could overwrite newer data.
+    private var autoSaveTask: Task<Void, Never>?
+
     /// Debounce interval for auto-save (seconds).
     private let autoSaveDebounce: TimeInterval
 
@@ -187,7 +191,8 @@ public final class SettingsViewModel: ObservableObject {
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                Task {
+                self?.autoSaveTask?.cancel()
+                self?.autoSaveTask = Task {
                     await self?.persistCurrentState()
                 }
             }

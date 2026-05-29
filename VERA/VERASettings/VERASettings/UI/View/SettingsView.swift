@@ -83,7 +83,7 @@ public struct SettingsView: View {
     ///
     /// Used on iPhone and iPad in compact width (e.g., slideover, split view).
     /// Displays all settings sections in a single form with no navigation hierarchy.
-    /// Changes are auto-saved; a Done button dismisses the sheet.
+    /// Changes are auto-saved; a Close button dismisses the sheet.
     private var compactLayout: some View {
         NavigationStack {
             Form {
@@ -130,7 +130,7 @@ public struct SettingsView: View {
     /// Sidebar list showing all available settings sections.
     ///
     /// Displays section icons and names. Selected section drives the detail pane content.
-    /// Changes are auto-saved; a Done button dismisses the sheet.
+    /// Changes are auto-saved; a Close button dismisses the sheet.
     private var sidebar: some View {
         List(SettingsSection.allCases, selection: $selectedSection) { section in
             Label(section.displayName, systemImage: section.iconName)
