@@ -215,28 +215,50 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
     }
 
-    // MARK: - Cancel Tests
+    // MARK: - Dismiss Tests
 
-    @Test("Dismiss does not trigger additional save")
-    func dismissDoesNotTriggerAdditionalSave() async throws {
+    @Test("Dismiss flushes pending changes before closing")
+    func dismissFlushesPendingChanges() async throws {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
-        // Modify values (will auto-save)
+        // Modify values
         viewModel.settingsPreference.videoResolution = .high
 
-        await delayForAsyncPersistence()
-        let saveCountAfterAutoSave = repository.saveCallCount
-
-        // Dismiss
+        // Dismiss immediately (before debounce fires)
         viewModel.dismiss()
 
-        await delay()
+        await delayForAsyncPersistence()
 
-        // No additional save beyond the auto-save
-        #expect(repository.saveCallCount == saveCountAfterAutoSave)
+        // Verify change was saved despite early dismissal
+        #expect(repository.saveCallCount == 1)
+        #expect(repository.lastSavedPreferences?.videoResolution == .high)
         #expect(viewModel.isPresented == false)
+    }
+
+    @Test("Dismiss within debounce window persists changes")
+    func dismissWithinDebounceWindowPersistsChanges() async throws {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.3)
+        await viewModel.setup()
+
+        // Make changes
+        viewModel.settingsPreference.videoResolution = .high
+        viewModel.settingsPreference.maxAudioBitrate = 128_000
+
+        // Wait less than debounce time (simulate user closing quickly)
+        try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1s < 0.3s debounce
+
+        // Dismiss before auto-save fires
+        viewModel.dismiss()
+
+        await delayForAsyncPersistence()
+
+        // Changes should still be saved
+        #expect(repository.saveCallCount == 1)
+        #expect(repository.lastSavedPreferences?.videoResolution == .high)
+        #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
     }
 
     // MARK: - Formatted Properties Tests
