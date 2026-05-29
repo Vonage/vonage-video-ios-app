@@ -221,7 +221,7 @@ enum SettingsFormatter {
         switch reason {
         case .none: "None".localized
         case .bandwidth: "Bandwidth".localized
-        case .cpu: "CPU"
+        case .cpu: "CPU".localized
         case .codec: "Codec".localized
         case .resolution: "Resolution".localized
         case .layerChange: "Layer Change".localized
