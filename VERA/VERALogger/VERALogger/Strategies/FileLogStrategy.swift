@@ -68,7 +68,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     private let archivePrefix: String
     private static let archiveSuffix = ".log"
-    private static let archiveDateFormat = "yyyyMMdd-HHmmss"
+    private static let archiveDateFormat = "yyyyMMdd-HHmmssSSS"
 
     // MARK: - Initialisation
 
@@ -322,7 +322,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     }
 
     private func isTimestampFileName(_ value: String) -> Bool {
-        guard value.count == 15 else { return false }
+        guard value.count == 18 else { return false }
         for (index, character) in value.enumerated() {
             if index == 8 {
                 guard character == "-" else { return false }

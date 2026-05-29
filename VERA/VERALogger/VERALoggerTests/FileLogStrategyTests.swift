@@ -285,9 +285,9 @@ struct FileLogStrategyTests {
             maxFileSize: 100,
             rotationPolicy: .rolling(maxFileCount: 3)
         )
-        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000.log")
-        let middleFile = logsDir.appendingPathComponent("sdk-log-20240101-000001.log")
-        let newestArchive = logsDir.appendingPathComponent("sdk-log-20240101-000002.log")
+        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
+        let middleFile = logsDir.appendingPathComponent("sdk-log-20240101-000001000.log")
+        let newestArchive = logsDir.appendingPathComponent("sdk-log-20240101-000002000.log")
 
         try createFile(at: oldestFile, contents: "oldest", modificationDate: Date(timeIntervalSince1970: 1))
         try createFile(at: middleFile, contents: "middle", modificationDate: Date(timeIntervalSince1970: 2))
@@ -318,8 +318,8 @@ struct FileLogStrategyTests {
             fileURL: logFileURL,
             rotationPolicy: .rolling(maxFileCount: 5)
         )
-        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000.log")
-        let newerFile = logsDir.appendingPathComponent("sdk-log-20240101-000001.log")
+        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
+        let newerFile = logsDir.appendingPathComponent("sdk-log-20240101-000001000.log")
 
         try createFile(at: oldestFile, contents: "oldest", modificationDate: Date(timeIntervalSince1970: 1))
         try createFile(at: newerFile, contents: "newer", modificationDate: Date(timeIntervalSince1970: 2))
@@ -344,7 +344,7 @@ struct FileLogStrategyTests {
             fileURL: logFileURL,
             rotationPolicy: .rolling(maxFileCount: 5)
         )
-        let rotatedFile = logsDir.appendingPathComponent("sdk-log-20240101-000000.log")
+        let rotatedFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
 
         try createFile(at: logFileURL, contents: "current")
         try createFile(at: rotatedFile, contents: "rotated")
