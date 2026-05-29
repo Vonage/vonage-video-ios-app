@@ -1,7 +1,6 @@
 appId: ${APP_ID}
 ---
 - launchApp:
-    clearState: true
     permissions:
       camera: allow
       microphone: allow
