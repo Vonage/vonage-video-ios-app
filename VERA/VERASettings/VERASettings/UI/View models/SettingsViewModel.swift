@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import os
 
 /// Constants used throughout the settings system.
 private enum SettingsConstants {
@@ -114,6 +115,12 @@ public final class SettingsViewModel: ObservableObject {
     }
 
     // MARK: - Dependencies
+
+    /// Logger for recording errors during settings persistence.
+    private let logger = Logger(
+        subsystem: "com.vonage.vera.settings",
+        category: "SettingsViewModel"
+    )
 
     /// The repository responsible for persisting and retrieving publisher settings.
     private let repository: PublisherSettingsRepository
@@ -237,7 +244,11 @@ public final class SettingsViewModel: ObservableObject {
     /// Sanitizes the settings before saving to ensure data consistency.
     private func persistCurrentState() async {
         await sanitize()
-        try? await repository.save(settingsPreference)
+        do {
+            try await repository.save(settingsPreference)
+        } catch {
+            logger.error("Failed to save settings: \(error.localizedDescription)")
+        }
     }
 
     /// Persists the current logging values. When the logging toggle or log
