@@ -314,13 +314,22 @@ extension MeetingRoomVideoResolution {
 
 extension MeetingRoomVideoFrameRate {
     func toInternal() -> VideoFrameRate {
-        VideoFrameRate(rawValue: rawValue)!
+        switch self {
+        case .rate30FPS: return .rate30FPS
+        case .rate15FPS: return .rate15FPS
+        case .rate7FPS: return .rate7FPS
+        case .rate1FPS: return .rate1FPS
+        }
     }
 }
 
 extension MeetingRoomVideoCodecType {
     func toInternal() -> VideoCodecType {
-        VideoCodecType(rawValue: rawValue)!
+        switch self {
+        case .vp8: return .vp8
+        case .h264: return .h264
+        case .vp9: return .vp9
+        }
     }
 }
 
@@ -335,13 +344,24 @@ extension MeetingRoomVideoCodecPreference {
 
 extension MeetingRoomVideoBitratePreset {
     func toInternal() -> VideoBitratePreset {
-        VideoBitratePreset(rawValue: rawValue)!
+        switch self {
+        case .default: return .default
+        case .bwSaver: return .bwSaver
+        case .extraBwSaver: return .extraBwSaver
+        case .customBitrate: return .customBitrate
+        }
     }
 }
 
 extension MeetingRoomDegradationPreference {
     func toInternal() -> DegradationPreference {
-        DegradationPreference(rawValue: rawValue)!
+        switch self {
+        case .notSet: return .notSet
+        case .maintainFrameRateAndResolution: return .maintainFrameRateAndResolution
+        case .maintainFrameRate: return .maintainFrameRate
+        case .maintainResolution: return .maintainResolution
+        case .balanced: return .balanced
+        }
     }
 }
 

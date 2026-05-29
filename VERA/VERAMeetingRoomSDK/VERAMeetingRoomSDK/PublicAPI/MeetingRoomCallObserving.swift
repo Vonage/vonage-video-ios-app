@@ -23,7 +23,7 @@ public enum MeetingRoomCallState: Equatable, Sendable {
 // MARK: - Toast
 
 /// The mode/severity of a toast notification.
-public enum MeetingRoomToastMode: Sendable {
+public enum MeetingRoomToastMode: Equatable, Sendable {
     case warning, info, failure, success
 }
 
@@ -40,7 +40,7 @@ public struct MeetingRoomToastItem: Equatable, Sendable {
     }
 
     public static func == (lhs: MeetingRoomToastItem, rhs: MeetingRoomToastItem) -> Bool {
-        lhs.message == rhs.message
+        lhs.message == rhs.message && lhs.mode == rhs.mode
     }
 }
 

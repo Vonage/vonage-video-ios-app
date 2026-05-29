@@ -149,8 +149,8 @@ struct MeetingRoomThemeConversionTests {
         let theme = VERAMeetingRoomSDK.MeetingRoomTheme.vonage
         let internal_ = theme.toInternal()
         // Verify a sampling of properties propagated
-        #expect(internal_.primary != nil)
-        #expect(internal_.error != nil)
+        #expect(internal_.primary == theme.primary)
+        #expect(internal_.error == theme.error)
     }
 
     @Test("Custom theme colors propagate")

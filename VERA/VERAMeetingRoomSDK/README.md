@@ -104,6 +104,7 @@ The result of `.build()`.
 public struct MeetingRoomPrebuilt {
     public let view: AnyView                           // Fully composed view with all overlays applied
     public let callObserver: MeetingRoomCallObserving   // For observing call state from outside
+    public let viewModel: MeetingRoomViewModel        // Internal compatibility API for VERAApp
 }
 ```
 

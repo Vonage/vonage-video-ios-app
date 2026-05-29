@@ -24,7 +24,7 @@ public protocol MeetingRoomSessionKeyWriter: Sendable {
 /// Combined read/write access to the session key JWT.
 public typealias MeetingRoomSessionKeyHolder = MeetingRoomSessionKeyProvider & MeetingRoomSessionKeyWriter
 
-/// A default implementation of ``MeetingRoomSessionKeyHolder`` backed by an actor-isolated store.
+/// A default implementation of ``MeetingRoomSessionKeyHolder`` backed by an `NSLock`-protected store.
 public final class DefaultMeetingRoomSessionKeyHolder: MeetingRoomSessionKeyHolder, @unchecked Sendable {
     private let lock = NSLock()
     private var _sessionKey: String = ""
