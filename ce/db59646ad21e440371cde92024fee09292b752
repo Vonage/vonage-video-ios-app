@@ -1,0 +1,19 @@
+docs/adr/0001-defer-api-boundary-hardening.md
+  s_1956e26ae23f20::t_876ac24db00304 1-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "cedb59646ad21e440371cde92024fee09292b752",
+  "prompts": {},
+  "sessions": {
+    "s_1956e26ae23f20": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "7b84ffcc-df25-48c8-97f8-6e39228efaa2",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
