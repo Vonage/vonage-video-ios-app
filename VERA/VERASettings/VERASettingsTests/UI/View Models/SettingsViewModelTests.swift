@@ -319,6 +319,106 @@ struct SettingsViewModelTests {
         #expect(vm2.sdkLogLevel == .error)
     }
 
+    // MARK: - Send Logs Tests
+
+    @Test("sendLogs shows share sheet when log files exist")
+    @MainActor
+    func sendLogsShowsShareSheetWhenFilesExist() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: {
+                [URL(fileURLWithPath: "/tmp/test.log")]
+            }
+        )
+
+        viewModel.sendLogs()
+
+        #expect(viewModel.showShareSheet == true)
+        #expect(viewModel.showNoLogsAlert == false)
+    }
+
+    @Test("sendLogs shows no-logs alert when no files exist")
+    @MainActor
+    func sendLogsShowsNoLogsAlertWhenNoFilesExist() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: { [] }
+        )
+
+        viewModel.sendLogs()
+
+        #expect(viewModel.showShareSheet == false)
+        #expect(viewModel.showNoLogsAlert == true)
+    }
+
+    @Test("sendLogs shows no-logs alert when provider is nil")
+    @MainActor
+    func sendLogsShowsNoLogsAlertWhenProviderIsNil() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: nil
+        )
+
+        viewModel.sendLogs()
+
+        #expect(viewModel.showShareSheet == false)
+        #expect(viewModel.showNoLogsAlert == true)
+    }
+
+    @Test("hasLogFiles returns true when provider has files")
+    @MainActor
+    func hasLogFilesReturnsTrueWhenProviderHasFiles() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: {
+                [URL(fileURLWithPath: "/tmp/test.log")]
+            }
+        )
+
+        #expect(viewModel.hasLogFiles == true)
+    }
+
+    @Test("hasLogFiles returns false when provider returns empty")
+    @MainActor
+    func hasLogFilesReturnsFalseWhenEmpty() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: { [] }
+        )
+
+        #expect(viewModel.hasLogFiles == false)
+    }
+
+    @Test("hasLoggingSupport returns true when logging repository is set")
+    @MainActor
+    func hasLoggingSupportReturnsTrueWithRepo() {
+        let repository = MockSettingsRepository()
+        let loggingRepository = MockSDKLoggingRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: loggingRepository
+        )
+
+        #expect(viewModel.hasLoggingSupport == true)
+    }
+
+    @Test("hasLoggingSupport returns false when logging repository is nil")
+    @MainActor
+    func hasLoggingSupportReturnsFalseWithoutRepo() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: nil
+        )
+
+        #expect(viewModel.hasLoggingSupport == false)
+    }
+
     // MARK: - Reset Tests
 
     @Test("Reset to defaults restores all values")
