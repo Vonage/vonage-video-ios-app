@@ -58,7 +58,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     public func save(_ preferences: SDKLoggingPreferences) async {
         if let data = try? JSONEncoder().encode(preferences) {
             userDefaults.set(data, forKey: Self.storeKey)
-            userDefaults.synchronize()
         }
         subject.send(preferences)
     }
