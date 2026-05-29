@@ -97,7 +97,7 @@ private struct SubscriberStatsContent: View {
                 metric: "Network Condition".localized,
                 value: mediaLink.transport.conditionFormatted
             )
-            // Est. Bandwidth con icono de info cuando no disponible
+            // Est. Bandwidth with info icon when unavailable
             HStack {
                 Text("Est. Bandwidth".localized)
                     .foregroundStyle(.secondary)
