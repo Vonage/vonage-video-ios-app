@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import OpenTok
 import VERALogger
 
 /// Sets the SDK log level. 0 = disabled, 1 = error, 2 = warn, 3 = info, 4 = debug.
