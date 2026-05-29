@@ -109,9 +109,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.maxAudioBitrate = 128_000
         viewModel.settingsPreference.senderStatsEnabled = true
 
-        // Wait for debounce + persist
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         // Verify persistence
         #expect(repository.saveCallCount == 1)
@@ -132,8 +130,7 @@ struct SettingsViewModelTests {
         // Toggle to opposite value
         viewModel.settingsPreference.opusDtxEnabled = true
 
-        await delayLong()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave(yields: 5)  // Extra yields for long debounce
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.opusDtxEnabled == true)
@@ -148,9 +145,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.videoBitratePreset = .custom
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        // Wait for debounce + persist
-        await delayForAsyncPersistence()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .custom)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 5_000_000)
@@ -165,9 +160,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.videoBitratePreset = .default
         viewModel.settingsPreference.maxVideoBitrate = 5_000_000
 
-        // Wait for debounce + persist
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         #expect(repository.lastSavedPreferences?.videoBitratePreset == .default)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 0)
@@ -182,9 +175,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.codecPreference.mode = .manual
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9, .vp8]
 
-        // Wait for debounce + persist
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         let savedPreference = repository.lastSavedPreferences?.codecPreference
         #expect(savedPreference?.mode == .manual)
@@ -199,8 +190,7 @@ struct SettingsViewModelTests {
         // Modify without calling setup
         viewModel.settingsPreference.videoResolution = .high
 
-        await delay()
-        await Task.yield()  // Ensure MainActor processes any pending work
+        await waitForAutoSave()
 
         // No auto-save pipeline active
         #expect(repository.saveCallCount == 0)
@@ -289,9 +279,7 @@ struct SettingsViewModelTests {
         // Make changes - auto-save will attempt but fail
         viewModel.settingsPreference.videoResolution = .high
 
-        // Wait for debounce + persist attempt
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         // Verify save was attempted despite error (error is logged, not thrown)
         #expect(repository.saveCallCount >= 1)
@@ -345,8 +333,7 @@ struct SettingsViewModelTests {
         // Modify values (will auto-save)
         viewModel.settingsPreference.videoResolution = .high
 
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
         let saveCountAfterAutoSave = repository.saveCallCount
 
         // Make another change and dismiss immediately
@@ -614,8 +601,7 @@ struct SettingsViewModelTests {
 
         viewModel.setMaxAudioBitrate(128_000.0)
 
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
@@ -631,8 +617,7 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.videoBitratePreset = .custom
         viewModel.setMaxVideorate(2_000_000.0)
 
-        await delay()
-        await Task.yield()  // Ensure MainActor processes pending save Task
+        await waitForAutoSave()
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 2_000_000)
