@@ -97,7 +97,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     ) {
         if let data = try? JSONEncoder().encode(preferences) {
             userDefaults.set(data, forKey: storeKey)
-            userDefaults.synchronize()
         }
     }
 
