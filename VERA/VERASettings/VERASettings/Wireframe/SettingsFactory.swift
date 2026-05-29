@@ -112,7 +112,6 @@ public final class SettingsFactory {
     /// live audio/video network metrics.
     @MainActor
     public func makeMeetingRoomSettingsView() -> SettingsView {
-
         let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
         return .init(
             viewModel: viewModel,
