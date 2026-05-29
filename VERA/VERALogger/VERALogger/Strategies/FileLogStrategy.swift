@@ -239,10 +239,11 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
             try? Data().write(to: fileURL)
 
         case .rolling:
-            let archiveURL = logsDirectory.appendingPathComponent(archiveFileName(for: Date()))
+            var archiveURL = logsDirectory.appendingPathComponent(archiveFileName(for: Date()))
             do {
                 if fileManager.fileExists(atPath: archiveURL.path) {
-                    try fileManager.removeItem(at: archiveURL)
+                    let uniqueName = archiveFileName(for: Date(), uniqueSuffix: UUID().uuidString)
+                    archiveURL = logsDirectory.appendingPathComponent(uniqueName)
                 }
                 try fileManager.moveItem(at: fileURL, to: archiveURL)
                 fileManager.createFile(atPath: fileURL.path, contents: nil)
@@ -333,7 +334,8 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
         return true
     }
 
-    private func archiveFileName(for date: Date) -> String {
-        "\(archivePrefix)\(fileNameDateFormatter.string(from: date))\(Self.archiveSuffix)"
+    private func archiveFileName(for date: Date, uniqueSuffix: String? = nil) -> String {
+        let suffix = uniqueSuffix.map { "-\($0)" } ?? ""
+        return "\(archivePrefix)\(fileNameDateFormatter.string(from: date))\(suffix)\(Self.archiveSuffix)"
     }
 }
