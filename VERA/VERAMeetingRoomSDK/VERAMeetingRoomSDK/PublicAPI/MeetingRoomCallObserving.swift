@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/5/26.
 //
 
+import Combine
 import Foundation
 
 // MARK: - Call State
@@ -66,6 +67,15 @@ public protocol MeetingRoomCallObserving: AnyObject {
 
     /// The current toast notification, if any.
     var currentToast: MeetingRoomToastItem? { get }
+
+    /// Publisher for observing loading state updates.
+    var isLoadingPublisher: AnyPublisher<Bool, Never> { get }
+
+    /// Publisher for observing archiving state updates.
+    var isArchivingPublisher: AnyPublisher<Bool, Never> { get }
+
+    /// Publisher for observing toast updates.
+    var currentToastPublisher: AnyPublisher<MeetingRoomToastItem?, Never> { get }
 }
 
 // MARK: - ViewModel Conformance
@@ -81,6 +91,33 @@ extension MeetingRoomViewModel: MeetingRoomCallObserving {
 
     public var currentToast: MeetingRoomToastItem? {
         guard let toast else { return nil }
+        return mapToastItem(toast)
+    }
+
+    public var isLoadingPublisher: AnyPublisher<Bool, Never> {
+        $state
+            .map { state in
+                if case .loading = state { return true }
+                return false
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    public var isArchivingPublisher: AnyPublisher<Bool, Never> {
+        $isArchiving.eraseToAnyPublisher()
+    }
+
+    public var currentToastPublisher: AnyPublisher<MeetingRoomToastItem?, Never> {
+        $toast
+            .map { toast in
+                toast.map(mapToastItem)
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    private func mapToastItem(_ toast: ToastItem) -> MeetingRoomToastItem {
         let mode: MeetingRoomToastMode
         switch toast.mode {
         case .warning: mode = .warning

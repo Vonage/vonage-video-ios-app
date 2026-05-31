@@ -110,6 +110,13 @@ public struct MeetingRoomPrebuilt {
 
 Present `view` using a `fullScreenCover`, a `NavigationStack` push, or directly as a child view. Use `callObserver` to observe call state from the host app without importing any sub-modules.
 
+```swift
+let cancellable = prebuilt.callObserver.isArchivingPublisher
+    .sink { isArchiving in
+        print("Archiving changed:", isArchiving)
+    }
+```
+
 ---
 
 ### `MeetingRoomFeature`
