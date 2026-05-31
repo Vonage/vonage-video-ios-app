@@ -68,6 +68,19 @@ struct DefaultVideoEffectRepositoryTests {
         #expect(loaded == .none)
     }
 
+    @Test("load auto-repairs UserDefaults when backgroundImage path is deleted")
+    func loadAutoRepairsWhenPathDeleted() {
+        let defaults = makeIsolatedDefaults()
+        let sut = DefaultVideoEffectRepository(defaults: defaults)
+
+        sut.save(.backgroundImage(id: "gone", imagePath: "/nonexistent/path.jpg"))
+        _ = sut.load()
+
+        // Second load should still return .none (auto-repaired in UserDefaults)
+        let secondLoad = sut.load()
+        #expect(secondLoad == .none)
+    }
+
     // MARK: - Helpers
 
     private func makeIsolatedDefaults() -> UserDefaults {

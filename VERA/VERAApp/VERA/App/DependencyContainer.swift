@@ -158,7 +158,26 @@ final class DependencyContainer {
     // MARK: - Background effects feature (waiting room)
 
     #if BACKGROUND_EFFECTS_ENABLED
-        lazy var backgroundBlurFactory = BackgroundBlurFactory()
+        lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository()
+
+        lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository()
+
+        lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
+
+        lazy var backgroundEffectFactory = BackgroundEffectFactory(
+            getBackgroundsUseCase: GetBackgroundsUseCase(
+                backgroundEffectsRepository: backgroundEffectsRepository,
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            addBackgroundUseCase: AddBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            deleteBackgroundUseCase: DeleteBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository,
+                videoEffectRepository: videoEffectRepository
+            ),
+            videoEffectRepository: videoEffectRepository
+        )
     #endif
 
     // MARK: - Settings feature (waiting room)

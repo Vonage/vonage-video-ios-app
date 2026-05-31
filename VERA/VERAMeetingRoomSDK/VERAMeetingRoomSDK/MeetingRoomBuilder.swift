@@ -271,13 +271,13 @@ public final class MeetingRoomBuilder {
 
         // Background Effects
         if _enabledFeatures.contains(.backgroundEffects) {
-            let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
+            let (_, effectsVM) = container.backgroundEffectFactory.makeEffectsButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
             if let initialEffect = _publisherSettings.initialVideoEffect {
-                blurVM.apply(initialEffect)
+                effectsVM.selectEffect(initialEffect)
             }
-            buttonsAssembler.backgroundBlurButtonViewModel = blurVM
+            buttonsAssembler.videoEffectsViewModel = effectsVM
         }
 
         // Archiving
@@ -377,11 +377,12 @@ public final class MeetingRoomBuilder {
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
             emojiPickerContainerViewModel: emojiPickerContainerViewModel,
             statsOverlayViewModel: statsOverlayViewModel
-        ).task { [weak container = container] in
+        ).task { [weak container, weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
             guard let container else { return }
             await MediaPermissions.requestPermissionsIfNeeded()
 
             container.resetPublisher()
+            await effectsVM?.reapplyCurrentEffect()
         }
 
         let themedView =

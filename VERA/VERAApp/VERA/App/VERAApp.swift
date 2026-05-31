@@ -98,7 +98,7 @@ struct VERAApp: App {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-        var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
+        var backgroundEffectFactory: BackgroundEffectFactory { dependencyContainer.backgroundEffectFactory }
     #endif
 
     #if SETTINGS_ENABLED
@@ -138,6 +138,13 @@ struct VERAApp: App {
             }
             waitingRoomViewModel = result.viewModel
             waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
+
+            #if BACKGROUND_EFFECTS_ENABLED
+                waitingRoomViewModel.onPublisherReady = { [weak navigationCoordinator] in
+                    navigationCoordinator?.videoEffectsViewModel?.reapplyCurrentEffect()
+                }
+            #endif
+
             navigationCoordinator.waitingRoomViewModel = waitingRoomViewModel
         }
 
@@ -154,17 +161,17 @@ struct VERAApp: App {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+            let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
                 getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
             )
-            navigationCoordinator.backgroundBlurButtonViewModel = viewModel
+            navigationCoordinator.videoEffectsViewModel = viewModel
 
-            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
-                let view = backgroundBlurFactory.makeBlurButton(
-                    viewModel: backgroundBlurButtonViewModel
+            if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
+                let view = backgroundEffectFactory.makeEffectsButton(
+                    viewModel: videoEffectsViewModel
                 )
 
-                buttons.append(ViewHolder(id: "Blur", content: { view }))
+                buttons.append(ViewHolder(id: "Effects", content: { view }))
             }
         #endif
 
@@ -202,7 +209,9 @@ struct VERAApp: App {
                 }
         }
 
-        let currentVideoEffect = navigationCoordinator.backgroundBlurButtonViewModel?.currentVideoEffect ?? .none
+        let currentVideoEffect =
+            navigationCoordinator.videoEffectsViewModel?.selectedEffect
+            ?? dependencyContainer.videoEffectRepository.load()
         let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
 
         let builder = MeetingRoomBuilder(

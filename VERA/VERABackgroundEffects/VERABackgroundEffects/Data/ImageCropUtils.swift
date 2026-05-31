@@ -27,7 +27,7 @@ enum ImageCropUtils {
         compressionQuality: CGFloat = 0.85
     ) -> Data? {
         guard let source = CGImageSourceCreateWithData(imageData as CFData, nil),
-              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil)
+            let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil)
         else { return nil }
 
         let cropped = centerCropToPortrait(cgImage, aspectRatio: aspectRatio)
@@ -61,12 +61,14 @@ enum ImageCropUtils {
     /// Encodes a `CGImage` as JPEG data.
     static func jpegData(from image: CGImage, quality: CGFloat) -> Data? {
         let data = NSMutableData()
-        guard let destination = CGImageDestinationCreateWithData(
-            data as CFMutableData,
-            "public.jpeg" as CFString,
-            1,
-            nil
-        ) else { return nil }
+        guard
+            let destination = CGImageDestinationCreateWithData(
+                data as CFMutableData,
+                "public.jpeg" as CFString,
+                1,
+                nil
+            )
+        else { return nil }
 
         let options: [CFString: Any] = [
             kCGImageDestinationLossyCompressionQuality: quality

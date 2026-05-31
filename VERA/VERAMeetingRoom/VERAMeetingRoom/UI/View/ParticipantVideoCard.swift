@@ -179,6 +179,7 @@ struct ParticipantVideoCard: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius))
         .shadow(radius: ParticipantVideoCardConstants.shadowRadius)
+        .animation(.easeInOut(duration: 0.25), value: participant.aspectRatio)
     }
 }
 

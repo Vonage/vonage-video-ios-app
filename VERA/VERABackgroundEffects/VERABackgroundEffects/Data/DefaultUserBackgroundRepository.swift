@@ -19,7 +19,9 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
 
     public init(directory: URL? = nil, fileManager: FileManager = .default) {
         self.fileManager = fileManager
-        self.directory = directory ?? fileManager
+        self.directory =
+            directory
+            ?? fileManager
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("user_backgrounds", isDirectory: true)
     }
@@ -35,7 +37,8 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
             options: .skipsHiddenFiles
         )
 
-        return files
+        return
+            files
             .filter { $0.pathExtension.lowercased() == "jpg" }
             .sorted { url1, url2 in
                 let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
@@ -56,7 +59,11 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
     public func save(_ imageData: Data) throws -> VideoBackgroundItem {
         try ensureDirectory()
 
-        let id = "user_bg_\(Int(Date().timeIntervalSince1970 * 1000))"
+        guard remainingSlots > 0 else {
+            throw UserBackgroundError.maxSlotsReached
+        }
+
+        let id = "user_bg_\(UUID().uuidString)"
         let filePath = directory.appendingPathComponent("\(id).jpg")
 
         guard let croppedData = ImageCropUtils.centerCropToPortrait(imageData) else {

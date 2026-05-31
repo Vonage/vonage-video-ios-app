@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+import UIKit
 import VERABackgroundEffects
 import VERADomain
 
@@ -91,10 +92,12 @@ struct DefaultUserBackgroundRepositoryTests {
     }
 
     private func makeMinimalJPEGData() -> Data {
-        // Minimal valid JPEG header
-        Data([
-            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00,
-            0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xFF, 0xD9,
-        ])
+        let size = CGSize(width: 100, height: 100)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            UIColor.blue.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+        }
+        return image.jpegData(compressionQuality: 0.8)!
     }
 }

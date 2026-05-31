@@ -2,10 +2,13 @@
 //  Created by Vonage on 31/05/2026.
 //
 
+import CoreGraphics
 import Foundation
+import ImageIO
 import Testing
-import VERABackgroundEffects
 import VERADomain
+
+@testable import VERABackgroundEffects
 
 @Suite("ImageCropUtils tests")
 struct ImageCropUtilsTests {

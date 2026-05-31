@@ -30,12 +30,13 @@ public final class DefaultVideoEffectRepository: VideoEffectRepository {
 
     public func load() -> VideoEffect {
         guard let data = defaults.data(forKey: Self.key),
-              let effect = try? JSONDecoder().decode(VideoEffect.self, from: data)
+            let effect = try? JSONDecoder().decode(VideoEffect.self, from: data)
         else { return .none }
 
         if case .backgroundImage(_, let path) = effect,
-           !fileManager.fileExists(atPath: path)
+            !fileManager.fileExists(atPath: path)
         {
+            save(.none)
             return .none
         }
 

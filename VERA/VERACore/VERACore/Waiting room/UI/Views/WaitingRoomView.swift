@@ -53,6 +53,7 @@ public struct WaitingRoomState: Equatable {
             && lhs.allowMicrophoneControl == rhs.allowMicrophoneControl
             && lhs.allowCameraControl == rhs.allowCameraControl
             && lhs.audioLevel == rhs.audioLevel
+            && lhs.publisher === rhs.publisher
     }
 }
 

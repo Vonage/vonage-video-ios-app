@@ -32,7 +32,8 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
     ) {
         self.bundle = bundle
         self.fileManager = fileManager
-        self.cacheDirectory = fileManager
+        self.cacheDirectory =
+            fileManager
             .urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("video_backgrounds", isDirectory: true)
     }
@@ -65,7 +66,7 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
         }
 
         guard let image = UIImage(named: assetName, in: bundle, compatibleWith: nil),
-              let imageData = image.jpegData(compressionQuality: 0.9)
+            let imageData = image.jpegData(compressionQuality: 0.9)
         else { return nil }
 
         guard let croppedData = ImageCropUtils.centerCropToPortrait(imageData) else {
