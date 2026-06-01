@@ -1,0 +1,48 @@
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffect+resources.swift
+  s_83ee5ef081bf83::t_8fc8154fbed178 1-30
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/BackgroundBlurScreenButton.swift
+  s_83ee5ef081bf83::t_ebca4a36dac65f 18
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/MeetingBackgroundBlurScreenButton.swift
+  s_83ee5ef081bf83::t_30339d3ab4d24b 19
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_83ee5ef081bf83::t_ef8a032fc2af97 277-278
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_83ee5ef081bf83::t_bb6c02786c50e1 205,221
+VERA/VERABackgroundEffects/VERABackgroundEffects/BackgroundReplacement.swift
+  s_83ee5ef081bf83::t_ecfe58ff08392b 1-41
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/BackgroundBlurButtonViewModelTests.swift"
+  s_83ee5ef081bf83::t_78b639e1bda77b 24,27,31,34,38,42,44,48,52,54,58,72,84,88,91,93,96,98,101,112,116,125,129,134,136-137,140-141,144-146,148-149,153,156,158,160,162,166,169,171,175,178,180,184,188,194,198,201,205,211,214,218,222-223,225-226,228-229,233,237,239,241-243,245,247
+VERA/VERADomain/VERADomain/Settings/PublisherSettings.swift
+  s_83ee5ef081bf83::t_e7c69baa23876c 48,56,66
+  s_83ee5ef081bf83::t_f8fa191d1a656a 29
+  s_83ee5ef081bf83::t_26c1175ec63ea7 112,114,116
+  s_83ee5ef081bf83::t_9271e3b1f54ebb 41
+VERA/VERADomain/VERADomain/VideoEffects/VideoEffect.swift
+  s_83ee5ef081bf83::t_3c12cc655b32ff 1-43
+VERA/VERADomain/VERADomainTests/VideoEffects/VideoEffectTests.swift
+  s_83ee5ef081bf83::t_92ef3649a73ae0 1-78
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_83ee5ef081bf83::t_c3ec08c88c54aa 130
+VERA/VERABackgroundEffects/VERABackgroundEffects/VonagePublisher+applyVideoEffect.swift
+  s_83ee5ef081bf83::t_312c03c51cba00 1-37
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/BackgroundBlurButtonViewModel.swift"
+  s_83ee5ef081bf83::t_d62dca32db6652 11,18-23,26,29-30,33
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/BackgroundReplacementTests.swift
+  s_83ee5ef081bf83::t_1ed4dcd641f902 1-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.9",
+  "base_commit_sha": "499ec129601d1574e290c3621057843137e6c5f0",
+  "prompts": {},
+  "sessions": {
+    "s_83ee5ef081bf83": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "75dd2d95-361c-4f05-9cdb-914e80aa0bcc",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
