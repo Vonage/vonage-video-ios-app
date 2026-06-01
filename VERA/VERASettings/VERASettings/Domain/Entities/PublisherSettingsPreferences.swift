@@ -58,7 +58,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
-    ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `false`.
+    ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,

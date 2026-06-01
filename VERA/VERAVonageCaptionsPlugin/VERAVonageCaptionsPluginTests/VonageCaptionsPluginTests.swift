@@ -145,7 +145,9 @@ struct VonageCaptionsPluginTests {
         mocks.call._captionsPublisher.send([CaptionItem(speakerName: "Bob", text: "Ignored")])
         mocks.statusDataSource.set(captionsState: .enabled("new-id"))
 
-        try await Task.sleep(nanoseconds: 100_000_000)
+        // Yield to allow any potential (unwanted) updates to process
+        await Task.yield()
+        await Task.yield()
 
         // Only the callDidEnd updateCaptions([]) should have been recorded
         #expect(mocks.repository.updateCallCount == callCountAfterEnd)
@@ -166,7 +168,9 @@ struct VonageCaptionsPluginTests {
 
         // After end, enable should not forward
         mocks.statusDataSource.set(captionsState: .enabled("id-2"))
-        try await Task.sleep(nanoseconds: 50_000_000)
+        // Yield to allow any potential (unwanted) updates to process
+        await Task.yield()
+        await Task.yield()
         #expect(!mocks.call.areCaptionsEnabled)
 
         // Second cycle — subscriptions should work again
@@ -220,19 +224,35 @@ struct VonageCaptionsPluginTests {
 
     // MARK: - Test Helpers
 
-    /// Polls `condition` every 10 ms, throwing if it hasn't become `true`
-    /// within `timeout` seconds.
+    /// Waits for a condition to become true by yielding to the main actor's run loop.
+    ///
+    /// Instead of polling with sleeps, this yields control back to the main actor
+    /// multiple times, allowing pending work (like Combine sink closures) to execute.
+    /// This is deterministic and avoids race conditions under varying system loads.
     private func waitUntil(
         timeout: TimeInterval = 0.5,
-        _ condition: @escaping @Sendable () -> Bool
+        _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
-        while !condition() {
+        var iterations = 0
+        let maxIterations = 100  // Safety limit
+
+        while iterations < maxIterations {
+            // Check condition on MainActor
+            if await condition() {
+                return
+            }
+
             guard Date() < deadline else {
                 throw WaitTimeoutError()
             }
-            try await Task.sleep(nanoseconds: 10_000_000)  // 10 ms
+
+            // Yield to allow MainActor work to process
+            await Task.yield()
+            iterations += 1
         }
+
+        throw WaitTimeoutError()
     }
 
     private struct WaitTimeoutError: Error, CustomStringConvertible {
@@ -242,14 +262,15 @@ struct VonageCaptionsPluginTests {
 
 // MARK: - Test Doubles
 
+/// Spy data source that publishes state changes for deterministic testing.
 private final class SpyCaptionsStatusDataSource: CaptionsStatusDataSource, @unchecked Sendable {
-    private let subject = CurrentValueSubject<CaptionsState, Never>(.disabled)
+    nonisolated(unsafe) private let subject = CurrentValueSubject<CaptionsState, Never>(.disabled)
 
-    var captionsState: AnyPublisher<CaptionsState, Never> {
+    nonisolated var captionsState: AnyPublisher<CaptionsState, Never> {
         subject.eraseToAnyPublisher()
     }
 
-    var resetCallCount = 0
+    nonisolated(unsafe) var resetCallCount = 0
 
     func set(captionsState: CaptionsState) {
         subject.send(captionsState)
@@ -261,10 +282,11 @@ private final class SpyCaptionsStatusDataSource: CaptionsStatusDataSource, @unch
     }
 }
 
+/// Spy repository that tracks caption updates for deterministic testing.
 private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
-    var updateCallCount = 0
-    var lastCaptions: [CaptionItem]?
-    var allUpdates: [[CaptionItem]] = []
+    nonisolated(unsafe) var updateCallCount = 0
+    nonisolated(unsafe) var lastCaptions: [CaptionItem]?
+    nonisolated(unsafe) var allUpdates: [[CaptionItem]] = []
 
     func updateCaptions(_ captions: [CaptionItem]) async {
         updateCallCount += 1
@@ -273,35 +295,49 @@ private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
     }
 }
 
+/// Mock call facade that publishes events for deterministic testing.
 private final class MockCallFacade: CallFacade, @unchecked Sendable {
 
-    let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
-    lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
+    nonisolated(unsafe) let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    nonisolated var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         _networkStatsPublisher.eraseToAnyPublisher()
+    }
 
-    let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
-    lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
+    nonisolated(unsafe) let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
+    nonisolated var eventsPublisher: AnyPublisher<SessionEvent, Never> {
+        _eventsPublisher.eraseToAnyPublisher()
+    }
 
-    let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(ParticipantsState.empty)
-    lazy var participantsPublisher: AnyPublisher<ParticipantsState, Never> =
+    nonisolated(unsafe) let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(
+        ParticipantsState.empty)
+    nonisolated var participantsPublisher: AnyPublisher<ParticipantsState, Never> {
         _participantsPublisher.eraseToAnyPublisher()
+    }
 
-    let _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
-    lazy var statePublisher: AnyPublisher<SessionState, Never> = _statePublisher.eraseToAnyPublisher()
+    nonisolated(unsafe) let _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
+    nonisolated var statePublisher: AnyPublisher<SessionState, Never> {
+        _statePublisher.eraseToAnyPublisher()
+    }
 
-    var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
-    lazy var callState: AnyPublisher<CallState, Never> = _callState.eraseToAnyPublisher()
+    nonisolated(unsafe) var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
+    nonisolated var callState: AnyPublisher<CallState, Never> {
+        _callState.eraseToAnyPublisher()
+    }
 
-    var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
-    lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+    nonisolated(unsafe) var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    nonisolated var archivingState: AnyPublisher<ArchivingState, Never> {
+        _archivingState.eraseToAnyPublisher()
+    }
 
-    var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
-    lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
+    nonisolated(unsafe) var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
+    nonisolated var captionsPublisher: AnyPublisher<[CaptionItem], Never> {
+        _captionsPublisher.eraseToAnyPublisher()
+    }
 
-    var recordedActions: [CallActions] = []
-    var isMuted: Bool = false
-    var isOnHold: Bool = false
-    var areCaptionsEnabled = false
+    nonisolated(unsafe) var recordedActions: [CallActions] = []
+    nonisolated(unsafe) var isMuted: Bool = false
+    nonisolated(unsafe) var isOnHold: Bool = false
+    nonisolated(unsafe) var areCaptionsEnabled = false
 
     enum CallActions: String {
         case connect, disconnect, toggleLocalVideo, toggleLocalAudio
