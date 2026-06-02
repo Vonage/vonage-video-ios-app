@@ -1,0 +1,30 @@
+.maestro/flows/create-new-room.yaml
+  h_2499cc15b3806e 39
+.maestro/flows/goodbye-reenter-room.yaml
+  h_2499cc15b3806e 39,50,80
+.maestro/flows/waiting-room-controls-enabled.yaml
+  h_2499cc15b3806e 48
+.maestro/flows/waiting-room-controls-disabled.yaml
+  h_2499cc15b3806e 68
+.github/workflows/maestro.yml
+  h_2499cc15b3806e 10-13,27-28,41
+.maestro/flows/goodbye-view-landing-page.yaml
+  h_2499cc15b3806e 39,50
+scripts/run-maestro-tests.sh
+  h_2499cc15b3806e 351-352
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  h_2499cc15b3806e 45
+.maestro/flows/recording.yaml
+  h_2499cc15b3806e 46,105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "1487413c5c493405c2b90472f269a95378c0af01",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
