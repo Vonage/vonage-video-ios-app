@@ -209,17 +209,35 @@ struct CaptionsButtonViewModelTests {
         return (viewModel, mocks)
     }
 
+    /// Waits for a condition to become true by yielding to the main actor's run loop.
+    ///
+    /// Instead of polling with sleeps, this yields control back to the main actor
+    /// multiple times, allowing pending work (like Combine sink closures) to execute.
+    /// This is deterministic and avoids race conditions under varying system loads.
     private func waitUntil(
         timeout: TimeInterval = 0.5,
-        _ condition: @escaping @Sendable () -> Bool
+        _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
-        while !condition() {
+        var iterations = 0
+        let maxIterations = 100  // Safety limit
+
+        while iterations < maxIterations {
+            // Check condition on MainActor
+            if await condition() {
+                return
+            }
+
             guard Date() < deadline else {
                 throw WaitTimeoutError()
             }
-            try await Task.sleep(nanoseconds: 10_000_000)
+
+            // Yield to allow MainActor work to process
+            await Task.yield()
+            iterations += 1
         }
+
+        throw WaitTimeoutError()
     }
 }
 

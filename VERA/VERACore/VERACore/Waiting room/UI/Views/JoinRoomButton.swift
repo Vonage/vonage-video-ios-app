@@ -12,7 +12,9 @@ struct JoinRoomButton: View {
     var body: some View {
         FilledButton(
             text: Text("Join meeting", bundle: .veraCore),
-            onAction: onJoinRoom)
+            onAction: onJoinRoom
+        )
+        .accessibilityIdentifier(WaitingRoomAccessibilityID.joinMeetingButton)
     }
 }
 

@@ -4,7 +4,7 @@
 
 import Combine
 import Foundation
-import os
+import os.log
 
 /// Constants used throughout the settings system.
 private enum SettingsConstants {
@@ -14,8 +14,9 @@ private enum SettingsConstants {
 
 /// Drives ``SettingsView`` by reading and writing publisher setting preferences.
 ///
-/// All mutations go through ``PublisherSettingsRepository`` so that they are
-/// immediately available to the publisher creation flow.
+/// Changes are auto-saved to the repository as the user edits, with a short
+/// debounce to batch rapid changes (e.g. slider drags). Downstream consumers
+/// react immediately via ``PublisherSettingsRepository/preferencesPublisher``.
 ///
 public final class SettingsViewModel: ObservableObject {
 
@@ -26,7 +27,7 @@ public final class SettingsViewModel: ObservableObject {
     @Published public var isPresented: Bool = true
 
     /// The current publisher settings preferences being edited.
-    /// This is a published property that binds to the settings form.
+    /// Changes are auto-persisted after a short debounce.
     @Published public var settingsPreference: PublisherSettingsPreferences
 
     /// Whether SDK logging is enabled.
@@ -136,6 +137,25 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Tracks the original persisted log level to detect changes.
     private var initialLogLevel: SDKLogLevel = .debug
+    /// Cancellable for the auto-save subscription.
+    private var autoSaveCancellable: AnyCancellable?
+
+    /// In-flight auto-save task. Cancelled before each new save to
+    /// prevent overlapping writes that could overwrite newer data.
+    private var autoSaveTask: Task<Void, Never>?
+
+    /// Debounce interval for auto-save (seconds).
+    private let autoSaveDebounce: TimeInterval
+
+    /// Tracks whether the view model has been initialized.
+    private var isInitialized: Bool = false
+
+    /// Logger for error reporting.
+    private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
+
+    /// Called after each persistence attempt (success or failure).
+    /// Used by tests to synchronise with the auto-save pipeline.
+    var onDidSave: (@Sendable () -> Void)?
 
     // MARK: - Init
 
@@ -147,15 +167,18 @@ public final class SettingsViewModel: ObservableObject {
     ///   - loggingRepository: Repository for SDK logging preferences. Defaults to `nil`.
     ///   - initialLoggingPreferences: Synchronously loaded logging preferences for immediate UI state. Defaults to `.default`.
     ///   - logFileURLProvider: Provider for shareable log file URLs. Defaults to `nil`.
+    ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
     public init(
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
+        autoSaveDebounce: TimeInterval = 0.3
         loggingRepository: SDKLoggingRepository? = nil,
         initialLoggingPreferences: SDKLoggingPreferences = .default,
         logFileURLProvider: (() -> [URL])? = nil
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
+        self.autoSaveDebounce = autoSaveDebounce
         self.loggingRepository = loggingRepository
         self.logFileURLProvider = logFileURLProvider
         self.isLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
@@ -189,12 +212,19 @@ public final class SettingsViewModel: ObservableObject {
         settingsPreference.maxAudioBitrate = Int32(maxAudioBitrate)
     }
 
-    /// Loads the current settings preferences from the repository.
-    /// This should be called when the view appears to ensure the latest values are displayed.
+    /// Loads the current settings preferences from the repository and starts
+    /// the auto-save pipeline.
+    ///
+    /// This should be called when the view appears to ensure the latest values
+    /// are displayed. Subsequent changes are automatically persisted.
+    /// Subsequent calls are ignored to prevent re-initialization.
     @MainActor
     public func setup() async {
-        settingsPreference = await repository.getPreferences()
+        guard !isInitialized else { return }
+        isInitialized = true
 
+        settingsPreference = await repository.getPreferences()
+      
         if let loggingRepository {
             let loggingPreferences = await loggingRepository.getPreferences()
             isLoggingEnabled = loggingPreferences.isLoggingEnabled
@@ -202,27 +232,20 @@ public final class SettingsViewModel: ObservableObject {
             initialLoggingEnabled = loggingPreferences.isLoggingEnabled
             initialLogLevel = loggingPreferences.logLevel
         }
+        startAutoSave()
     }
 
-    /// Persists the current form values to the repository and dismisses the settings view.
-    /// Shows a restart alert if logging settings changed, otherwise dismisses.
-    /// SDK logging changes only take effect after the app is killed and reopened.
-    /// Changes are fully saved before the view is dismissed.
-    public func save() {
-        Task { @MainActor in
-            await persistCurrentState()
-            await persistLoggingState()
+    /// Dismisses the settings view after ensuring all pending changes are saved.
+    ///
+    /// This method persists any changes that might still be in the debounce window
+    /// before dismissing, ensuring no data loss on quick dismissals.
+    @MainActor
+    public func dismiss() async {
+        // Save any pending changes that haven't been auto-saved yet
+        await persistCurrentState()
+        await persistLoggingState()
+        isPresented = false
 
-            let loggingChanged =
-                loggingRepository != nil
-                && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
-
-            if loggingChanged {
-                showRestartAlert = true
-            } else {
-                isPresented = false
-            }
-        }
     }
 
     /// Reverts all settings to their default values and persists the changes.
@@ -234,21 +257,45 @@ public final class SettingsViewModel: ObservableObject {
         }
     }
 
-    /// Dismisses the settings view without saving any changes.
-    /// All modifications made during this session are discarded.
-    public func cancel() {
-        isPresented = false
+    // MARK: - Private
+
+    /// Sets up a Combine pipeline that auto-saves preferences after a debounce.
+    ///
+    /// `dropFirst()` avoids re-saving the value just loaded from the repository.
+    /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
+    /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
+    private func startAutoSave() {
+        autoSaveCancellable =
+            $settingsPreference
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.autoSaveTask?.cancel()
+                self?.autoSaveTask = Task {
+                    await self?.persistCurrentState()
+                    let loggingChanged =
+                        loggingRepository != nil
+                         && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
+
+                     if loggingChanged {
+                          showRestartAlert = true
+                      }
+                }
+            }
     }
 
-    /// Persists all current field values to the repository without dismissing the view.
+    /// Persists all current field values to the repository.
     /// Sanitizes the settings before saving to ensure data consistency.
+    /// Logs any errors that occur during persistence.
     private func persistCurrentState() async {
-        await sanitize()
+        let sanitized = sanitized(settingsPreference)
         do {
-            try await repository.save(settingsPreference)
+            try await repository.save(sanitized)
         } catch {
-            logger.error("Failed to save settings: \(error.localizedDescription)")
+            logger.error("Failed to save settings preferences: \(error.localizedDescription)")
         }
+        onDidSave?()
     }
 
     /// Persists the current logging values. When the logging toggle or log
@@ -269,13 +316,15 @@ public final class SettingsViewModel: ObservableObject {
         await loggingRepository.save(preferences)
     }
 
-    /// Sanitizes the settings to ensure data consistency.
+    /// Returns a sanitized copy of the preferences to ensure data consistency.
     /// Resets the maximum video bitrate to 0 when using the default preset.
-    @MainActor
-    private func sanitize() async {
-        if settingsPreference.videoBitratePreset == .default {
-            settingsPreference.maxVideoBitrate = 0
+    /// Does not modify the original to avoid triggering another auto-save cycle.
+    private func sanitized(_ preferences: PublisherSettingsPreferences) -> PublisherSettingsPreferences {
+        var sanitized = preferences
+        if sanitized.videoBitratePreset == .default {
+            sanitized.maxVideoBitrate = 0
         }
+        return sanitized
     }
 
     /// Resets the local settings preference to default values.

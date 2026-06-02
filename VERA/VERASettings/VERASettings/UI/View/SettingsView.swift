@@ -107,7 +107,7 @@ public struct SettingsView: View {
     ///
     /// Used on iPhone and iPad in compact width (e.g., slideover, split view).
     /// Displays all settings sections in a single form with no navigation hierarchy.
-    /// Includes Cancel and Save buttons in the toolbar.
+    /// Changes are auto-saved; a Close button dismisses the sheet.
     private var compactLayout: some View {
         NavigationStack {
             Form {
@@ -124,12 +124,12 @@ public struct SettingsView: View {
             }
             .navigationTitle("Settings".localized)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel".localized) { dismiss() }
-                }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save".localized) {
-                        saveAndDismissIfNeeded()
+                    Button("Close".localized) {
+                        Task { @MainActor in
+                            await viewModel.dismiss()
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -164,19 +164,19 @@ public struct SettingsView: View {
     /// Sidebar list showing all available settings sections.
     ///
     /// Displays section icons and names. Selected section drives the detail pane content.
-    /// Includes Cancel and Save buttons in the toolbar.
+    /// Changes are auto-saved; a Close button dismisses the sheet.
     private var sidebar: some View {
         List(availableSections, selection: $selectedSection) { section in
             Label(section.displayName, systemImage: section.iconName)
         }
         .navigationTitle("Settings".localized)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button(String(localized: "Cancel")) { dismiss() }
-            }
             ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: "Save")) {
-                    saveAndDismissIfNeeded()
+                Button(String(localized: "Close")) {
+                    Task { @MainActor in
+                        await viewModel.dismiss()
+                        dismiss()
+                    }
                 }
             }
         }

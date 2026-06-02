@@ -6,13 +6,21 @@ import Combine
 
 @testable import VERASettings
 
+enum MockSettingsRepositoryError: Error {
+    case saveFailed
+}
+
 final actor MockSettingsRepository: PublisherSettingsRepository {
 
     private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
 
     nonisolated(unsafe) private(set) var saveCallCount = 0
     nonisolated(unsafe) private(set) var resetCallCount = 0
+    nonisolated(unsafe) private(set) var getPreferencesCallCount = 0
     nonisolated(unsafe) private(set) var lastSavedPreferences: PublisherSettingsPreferences?
+
+    /// When true, save operations will throw an error.
+    nonisolated(unsafe) var shouldThrowOnSave = false
 
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
         subject.eraseToAnyPublisher()
@@ -23,10 +31,15 @@ final actor MockSettingsRepository: PublisherSettingsRepository {
     }
 
     func getPreferences() async -> PublisherSettingsPreferences {
-        subject.value
+        getPreferencesCallCount += 1
+        return subject.value
     }
 
-    func save(_ preferences: PublisherSettingsPreferences) async {
+    func save(_ preferences: PublisherSettingsPreferences) async throws {
+        if shouldThrowOnSave {
+            saveCallCount += 1
+            throw MockSettingsRepositoryError.saveFailed
+        }
         saveCallCount += 1
         lastSavedPreferences = preferences
         subject.send(preferences)
@@ -41,6 +54,6 @@ final actor MockSettingsRepository: PublisherSettingsRepository {
     func updatePreferences(_ update: (inout PublisherSettingsPreferences) -> Void) async {
         var preferences = subject.value
         update(&preferences)
-        await save(preferences)
+        try? await save(preferences)
     }
 }

@@ -127,6 +127,22 @@ public final class SettingsFactory {
     /// - Returns: A tuple of the settings view model and the statistics view model.
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
+        let viewModel = SettingsViewModel(repository: repository)
+        let statisticsViewModel = StatisticsViewModel(
+            statsDataSource: statsDataSource,
+            settingsRepository: repository
+        )
+        return (viewModel, statisticsViewModel)
+    }
+
+    /// Creates the view models for the meeting room settings without building the view.
+    ///
+    /// Used by ``SettingsSheetContent`` to own the view models via `@StateObject`,
+    /// ensuring they survive parent re-renders while the sheet is presented.
+    ///
+    /// - Returns: A tuple of the settings view model and the statistics view model.
+    @MainActor
+    public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
         let viewModel = SettingsViewModel(
             repository: repository,
             loggingRepository: loggingRepository,
