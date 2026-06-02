@@ -160,14 +160,14 @@ public struct VideoEffectsSheet: View {
                             lineWidth: 2
                         )
                 )
-                .overlay(alignment: .topTrailing) {
-                    if item.isUserUploaded {
-                        deleteOverlay(item)
-                    }
-                }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(item.id)
+        .overlay(alignment: .topTrailing) {
+            if item.isUserUploaded {
+                deleteOverlay(item)
+            }
+        }
     }
 
     @ViewBuilder

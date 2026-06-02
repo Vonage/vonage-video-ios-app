@@ -278,5 +278,6 @@ final class BottomBarButtonsAssembler {
         onShowChat = nil
         onShowPickerView = nil
         onShowSettings = nil
+        onShowEffects = nil
     }
 }

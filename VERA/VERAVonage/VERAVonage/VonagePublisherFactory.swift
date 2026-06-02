@@ -115,7 +115,7 @@ public final class VonagePublisherFactory: PublisherFactory {
 
         let initialDimensions =
             settings.advancedSettings?.videoResolution?.dimensions
-            ?? CGSize(width: 640, height: 480)
+            ?? VideoDimensions.initial
 
         let publisher = VonagePublisher(
             publisher: otPublisher,
