@@ -79,7 +79,7 @@ struct StatisticsViewModelTests {
         // Enable stats
         var prefs = await repository.getPreferences()
         prefs.senderStatsEnabled = true
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         // Wait for update
         await delay()
@@ -88,7 +88,7 @@ struct StatisticsViewModelTests {
 
         // Disable stats
         prefs.senderStatsEnabled = false
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         // Wait for update
         await delay()
@@ -224,7 +224,7 @@ struct StatisticsViewModelTests {
         // Update both simultaneously
         var prefs = await repository.getPreferences()
         prefs.senderStatsEnabled = true
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         let mockStats = NetworkMediaStats(
             subscriberStats: [
