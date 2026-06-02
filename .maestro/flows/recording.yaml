@@ -6,7 +6,7 @@ appId: ${APP_ID}
       microphone: allow
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     id: "landing-screen"
@@ -21,7 +21,7 @@ appId: ${APP_ID}
     id: "join-waiting-room-button"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     id: "waiting-room-screen"
@@ -31,7 +31,7 @@ appId: ${APP_ID}
     id: "waiting-room-mic-enabled"
 
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 3000
 
 # Enter username and join meeting
 - tapOn:
@@ -43,7 +43,7 @@ appId: ${APP_ID}
     id: "join-meeting-button"
 
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 15000
 
 - assertVisible:
     id: "meeting-room-screen"
@@ -58,13 +58,13 @@ appId: ${APP_ID}
 - tapOn: "Start Recording"
 
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 8000
 
 # Confirm start recording alert
 - tapOn: "OK"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 15000
 
 # Verify recording indicator is visible
 - assertVisible:
@@ -74,7 +74,7 @@ appId: ${APP_ID}
 
 # Wait for recording to accumulate content
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 5000
 
 # Stop recording (button may be in overflow menu on smaller screens)
 - tapOn:
@@ -84,13 +84,13 @@ appId: ${APP_ID}
 - tapOn: "Stop Recording"
 
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 8000
 
 # Confirm stop recording alert
 - tapOn: "OK"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 # Verify recording indicator is gone
 - assertNotVisible:

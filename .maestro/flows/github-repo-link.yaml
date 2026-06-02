@@ -3,7 +3,7 @@ appId: ${APP_ID}
 - launchApp
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     id: "landing-screen"

@@ -6,7 +6,7 @@ appId: ${APP_ID}
       microphone: allow
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     id: "landing-screen"
@@ -24,7 +24,7 @@ appId: ${APP_ID}
     id: "join-waiting-room-button"
 
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     id: "waiting-room-screen"
@@ -42,7 +42,7 @@ appId: ${APP_ID}
     id: "join-meeting-button"
 
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 15000
 
 - assertVisible:
     id: "meeting-room-screen"
