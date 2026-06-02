@@ -116,21 +116,32 @@ APP_ID="com.vonage.VERA"
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
 
+find_simulator_id() {
+    xcrun simctl list devices available | awk -v device="$1" '
+        $0 ~ "^[[:space:]]*" device " \\(" {
+            if (match($0, /\([A-F0-9-]+\)/)) {
+                print substr($0, RSTART + 1, RLENGTH - 2)
+                exit
+            }
+        }
+    '
+}
+
 # Auto-detect simulator: use env var, or find best available iPhone
 if [ -n "$SIMULATOR_DEVICE" ]; then
     DEVICE="$SIMULATOR_DEVICE"
 else
     echo -e "${BLUE}🔍 Auto-detecting simulator...${NC}"
     
-    if xcrun simctl list devices available | grep -q "iPhone 17"; then
+    if [ -n "$(find_simulator_id "iPhone 17")" ]; then
         DEVICE="iPhone 17"
-    elif xcrun simctl list devices available | grep -q "iPhone 16 Pro"; then
+    elif [ -n "$(find_simulator_id "iPhone 16 Pro")" ]; then
         DEVICE="iPhone 16 Pro"
-    elif xcrun simctl list devices available | grep -q "iPhone 16"; then
+    elif [ -n "$(find_simulator_id "iPhone 16")" ]; then
         DEVICE="iPhone 16"
-    elif xcrun simctl list devices available | grep -q "iPhone 15 Pro"; then
+    elif [ -n "$(find_simulator_id "iPhone 15 Pro")" ]; then
         DEVICE="iPhone 15 Pro"
-    elif xcrun simctl list devices available | grep -q "iPhone 15"; then
+    elif [ -n "$(find_simulator_id "iPhone 15")" ]; then
         DEVICE="iPhone 15"
     else
         DEVICE=$(xcrun simctl list devices available | grep "iPhone" | head -n 1 | sed 's/^ *//' | sed 's/ (.*//')
@@ -144,9 +155,21 @@ else
     fi
 fi
 
+SIMULATOR_ID=$(find_simulator_id "$DEVICE")
+
+if [ -z "$SIMULATOR_ID" ]; then
+    echo -e "${RED}❌ Could not get simulator ID for '$DEVICE'${NC}"
+    echo -e "${YELLOW}Available simulators:${NC}"
+    xcrun simctl list devices available | grep "iPhone"
+    echo ""
+    echo -e "${YELLOW}💡 Use: SIMULATOR_DEVICE=\"iPhone 16\" ./scripts/run-maestro-tests.sh${NC}"
+    exit 1
+fi
+
 echo -e "${BLUE}Configuration:${NC}"
 echo -e "  Xcode:      ${GREEN}$XCODE_VERSION${NC}"
 echo -e "  Device:     ${GREEN}$DEVICE${NC}"
+echo -e "  Device ID:  ${GREEN}$SIMULATOR_ID${NC}"
 echo -e "  Scheme:     ${GREEN}$APP_SCHEME${NC}"
 echo -e "  Workspace:  ${GREEN}$WORKSPACE${NC}"
 echo ""
@@ -275,7 +298,7 @@ if [ -z "$APP_PATH" ]; then
     if ! xcodebuild clean build \
       -workspace "$WORKSPACE" \
       -scheme "$APP_SCHEME" \
-      -destination "platform=iOS Simulator,name=$DEVICE" \
+      -destination "id=$SIMULATOR_ID" \
       -derivedDataPath "$BUILD_DIR" \
       CODE_SIGN_IDENTITY="" \
       CODE_SIGNING_REQUIRED=NO \
@@ -309,24 +332,6 @@ echo -e "${BLUE}📱 App path: $APP_PATH${NC}\n"
 # ============================================================================
 
 echo -e "${YELLOW}🚀 Managing simulator '$DEVICE'...${NC}"
-
-# Validate simulator exists
-if ! xcrun simctl list devices available | grep -q "$DEVICE"; then
-    echo -e "${RED}❌ Simulator '$DEVICE' not available${NC}"
-    echo -e "${YELLOW}Available simulators:${NC}"
-    xcrun simctl list devices available | grep "iPhone"
-    echo ""
-    echo -e "${YELLOW}💡 Use: SIMULATOR_DEVICE=\"iPhone 16\" ./scripts/run-maestro-tests.sh${NC}"
-    exit 1
-fi
-
-# Get simulator UUID for reliable operations
-SIMULATOR_ID=$(xcrun simctl list devices available | grep "$DEVICE" | head -n 1 | grep -oE '\([A-F0-9-]+\)' | tr -d '()')
-
-if [ -z "$SIMULATOR_ID" ]; then
-    echo -e "${RED}❌ Could not get simulator ID for '$DEVICE'${NC}"
-    exit 1
-fi
 
 echo -e "${GREEN}✓ Found simulator: $DEVICE ($SIMULATOR_ID)${NC}"
 
@@ -391,7 +396,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-if maestro test --env APP_ID="$APP_ID" "$FLOW_TARGET"; then
+if maestro test --device "$SIMULATOR_ID" --env APP_ID="$APP_ID" "$FLOW_TARGET"; then
     TEST_RESULT=0
 else
     TEST_RESULT=$?
