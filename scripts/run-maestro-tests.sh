@@ -345,6 +345,11 @@ else
     echo -e "${GREEN}✓ Simulator ready${NC}"
 fi
 
+# Disable simulator animations for faster CI
+echo -e "${YELLOW}⚡ Disabling simulator animations...${NC}"
+xcrun simctl spawn "$SIMULATOR_ID" defaults write com.apple.springboard SBAnimationSpeed 1000
+echo -e "${GREEN}✓ Animations disabled${NC}"
+
 # Terminate app if running
 echo -e "${YELLOW}⏹️  Closing app if running...${NC}"
 xcrun simctl terminate "$SIMULATOR_ID" "com.vonage.VERA" 2>/dev/null || true

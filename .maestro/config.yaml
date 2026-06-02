@@ -1,1 +1,4 @@
 appId: com.vonage.VERA
+platform:
+  ios:
+    disableAnimations: true
