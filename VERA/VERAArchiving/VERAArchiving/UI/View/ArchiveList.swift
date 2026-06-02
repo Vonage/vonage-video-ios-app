@@ -81,6 +81,7 @@ struct ArchiveList: View {
                                             .foregroundStyle(theme.primary)
                                     }
                                 }
+                                .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                             } else {
                                 ProgressView()
                                     .frame(
@@ -104,6 +105,7 @@ struct ArchiveList: View {
                 .scrollContentBackground(.hidden)
             }
         }
+        .accessibilityIdentifier(ArchivingAccessibilityID.archiveList)
     }
 }
 

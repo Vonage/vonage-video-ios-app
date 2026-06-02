@@ -245,10 +245,16 @@ Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is
 # Run all tests (cleans DerivedData, builds, boots simulator, runs flows)
 ./scripts/run-maestro-tests.sh
 
+# Run a single flow by name
+./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml
+
+# Run a single flow by path
+./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml
+
 # Run with a specific simulator
 SIMULATOR_DEVICE="iPhone 17 Pro" ./scripts/run-maestro-tests.sh
 
-# Run a single flow
+# Run a single flow directly with Maestro CLI (skips build)
 maestro test .maestro/flows/launch-app.yaml
 ```
 
