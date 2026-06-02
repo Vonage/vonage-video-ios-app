@@ -1,0 +1,16 @@
+VERA/VERAVonage/VERAVonage/VonagePublisherFactory.swift
+  h_2499cc15b3806e 118
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  h_2499cc15b3806e 281
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9504d3e5594d127f04916a6a947057b7aabce13f",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
