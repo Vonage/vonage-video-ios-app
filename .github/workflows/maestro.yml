@@ -7,6 +7,10 @@ on:
     branches: [develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   maestro-tests:
     name: Run Maestro UI Tests
@@ -20,6 +24,9 @@ jobs:
       - name: Pull LFS files
         run: git lfs pull
 
+      - name: Pre-boot simulator
+        run: xcrun simctl boot "iPhone 17" 2>/dev/null || true
+
       - name: Print Xcode & Simulator Info
         run: |
           xcodebuild -version
@@ -31,6 +38,7 @@ jobs:
         run: brew install tuist
 
       - name: Clean Tuist cache
+        if: contains(github.event.head_commit.modified, 'VERA/Project.swift') || contains(github.event.head_commit.modified, 'VERA/Workspace.swift') || contains(github.event.head_commit.modified, 'Package.resolved')
         run: |
           echo "🧹 Cleaning Tuist cache to avoid cross-branch contamination"
           tuist clean

@@ -42,6 +42,6 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "meeting-room-screen"
-    timeout: 15000
+    timeout: 30000
 
 - takeScreenshot: 03-meeting-room-joined

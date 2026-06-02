@@ -348,6 +348,8 @@ fi
 # Disable simulator animations for faster CI
 echo -e "${YELLOW}⚡ Disabling simulator animations...${NC}"
 xcrun simctl spawn "$SIMULATOR_ID" defaults write com.apple.springboard SBAnimationSpeed 1000
+xcrun simctl spawn "$SIMULATOR_ID" defaults write com.apple.UIKit UIAnimationDragCoefficient 0
+xcrun simctl spawn "$SIMULATOR_ID" defaults write -g AppleReduceMotionEnabled -bool true
 echo -e "${GREEN}✓ Animations disabled${NC}"
 
 # Terminate app if running

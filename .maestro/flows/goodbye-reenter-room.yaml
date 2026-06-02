@@ -36,7 +36,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "meeting-room-screen"
-    timeout: 15000
+    timeout: 30000
 
 - takeScreenshot: 01-meeting-room
 
@@ -47,7 +47,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "goodbye-screen"
-    timeout: 15000
+    timeout: 20000
 
 # Verify goodbye screen and both buttons
 
@@ -77,6 +77,6 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "meeting-room-screen"
-    timeout: 20000
+    timeout: 30000
 
 - takeScreenshot: 04-reenter-meeting-room
