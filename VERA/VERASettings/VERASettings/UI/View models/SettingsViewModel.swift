@@ -150,8 +150,6 @@ public final class SettingsViewModel: ObservableObject {
     /// Tracks whether the view model has been initialized.
     private var isInitialized: Bool = false
 
-    /// Logger for error reporting.
-    private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
 
     /// Called after each persistence attempt (success or failure).
     /// Used by tests to synchronise with the auto-save pipeline.
@@ -171,7 +169,7 @@ public final class SettingsViewModel: ObservableObject {
     public init(
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
-        autoSaveDebounce: TimeInterval = 0.3
+        autoSaveDebounce: TimeInterval = 0.3,
         loggingRepository: SDKLoggingRepository? = nil,
         initialLoggingPreferences: SDKLoggingPreferences = .default,
         logFileURLProvider: (() -> [URL])? = nil
@@ -224,7 +222,7 @@ public final class SettingsViewModel: ObservableObject {
         isInitialized = true
 
         settingsPreference = await repository.getPreferences()
-      
+
         if let loggingRepository {
             let loggingPreferences = await loggingRepository.getPreferences()
             isLoggingEnabled = loggingPreferences.isLoggingEnabled
@@ -274,13 +272,15 @@ public final class SettingsViewModel: ObservableObject {
                 self?.autoSaveTask?.cancel()
                 self?.autoSaveTask = Task {
                     await self?.persistCurrentState()
+                    await self?.persistLoggingState()
                     let loggingChanged =
-                        loggingRepository != nil
-                         && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
+                        self?.loggingRepository != nil
+                        && (self?.isLoggingEnabled != self?.initialLoggingEnabled
+                            || self?.sdkLogLevel != self?.initialLogLevel)
 
-                     if loggingChanged {
-                          showRestartAlert = true
-                      }
+                    if loggingChanged {
+                        self?.showRestartAlert = true
+                    }
                 }
             }
     }
