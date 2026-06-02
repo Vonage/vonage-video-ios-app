@@ -2,6 +2,7 @@
 //  Created by Vonage on 21/05/2026.
 //
 
+import Combine
 import Foundation
 import Testing
 
@@ -90,5 +91,91 @@ struct UserDefaultsSDKLoggingRepositoryTests {
 
         loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
         #expect(loaded.pendingLogCleanup == false)
+    }
+
+    // MARK: - Publisher Tests
+
+    @Test("preferencesPublisher emits current value on subscription")
+    func preferencesPublisherEmitsCurrentValue() async throws {
+        let (sut, _) = makeSUT()
+
+        let received = try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = sut.preferencesPublisher
+                .first()
+                .sink { value in
+                    continuation.resume(returning: value)
+                    cancellable?.cancel()
+                }
+        }
+
+        #expect(received == .default)
+    }
+
+    @Test("preferencesPublisher emits updated value after save")
+    func preferencesPublisherEmitsAfterSave() async throws {
+        let (sut, _) = makeSUT()
+        let expected = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .error)
+
+        await sut.save(expected)
+
+        let received = try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            cancellable = sut.preferencesPublisher
+                .first()
+                .sink { value in
+                    continuation.resume(returning: value)
+                    cancellable?.cancel()
+                }
+        }
+
+        #expect(received == expected)
+    }
+
+    @Test("getPreferences syncs subject when UserDefaults has newer data")
+    func getPreferencesSyncsSubjectFromUserDefaults() async {
+        let userDefaults = UserDefaults.ephemeral()
+        let sut = UserDefaultsSDKLoggingRepository(userDefaults: userDefaults)
+
+        // Write directly to UserDefaults, bypassing the actor
+        let external = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn)
+        if let data = try? JSONEncoder().encode(external) {
+            userDefaults.set(data, forKey: "com.vonage.vera.sdkLoggingPreferences")
+        }
+
+        let preferences = await sut.getPreferences()
+        #expect(preferences == external)
+    }
+
+    @Test("loadPreferencesSync returns defaults when UserDefaults is empty")
+    func loadPreferencesSyncReturnsDefaultsWhenEmpty() {
+        let userDefaults = UserDefaults.ephemeral()
+        let loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        #expect(loaded == .default)
+    }
+
+    @Test("loadPreferencesSync returns defaults with corrupted data")
+    func loadPreferencesSyncReturnsDefaultsWithCorruptedData() {
+        let userDefaults = UserDefaults.ephemeral()
+        userDefaults.set(Data("not json".utf8), forKey: "com.vonage.vera.sdkLoggingPreferences")
+
+        let loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        #expect(loaded == .default)
+    }
+
+    @Test("Multiple saves emit multiple publisher values")
+    func multipleSavesEmitMultiplePublisherValues() async {
+        let (sut, _) = makeSUT()
+
+        let prefs1 = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
+        let prefs2 = SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .error)
+
+        await sut.save(prefs1)
+        let first = await sut.getPreferences()
+        #expect(first == prefs1)
+
+        await sut.save(prefs2)
+        let second = await sut.getPreferences()
+        #expect(second == prefs2)
     }
 }

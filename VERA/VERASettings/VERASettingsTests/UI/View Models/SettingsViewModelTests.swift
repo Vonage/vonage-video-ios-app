@@ -536,6 +536,131 @@ struct SettingsViewModelTests {
         #expect(viewModel.hasLogFiles == true)
     }
 
+    @Test("logFileURLs returns empty when provider is nil")
+    func logFileURLsReturnsEmptyWhenProviderIsNil() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            logFileURLProvider: nil
+        )
+
+        #expect(viewModel.logFileURLs.isEmpty)
+    }
+
+    // MARK: - Sorting & Bitrate Setters
+
+    @Test("sortingCodec reorders codec list")
+    func sortingCodecReordersCodecs() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
+        viewModel.sortingCodec(source: IndexSet(integer: 2), destination: 0)
+
+        #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.vp9, .vp8, .h264])
+    }
+
+    @Test("setMaxVideorate updates maximum video bitrate")
+    func setMaxVideorateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxVideorate(2_500_000)
+
+        #expect(viewModel.settingsPreference.maxVideoBitrate == 2_500_000)
+    }
+
+    @Test("setMaxAudioBitrate updates maximum audio bitrate")
+    func setMaxAudioBitrateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxAudioBitrate(96_000)
+
+        #expect(viewModel.settingsPreference.maxAudioBitrate == 96_000)
+    }
+
+    // MARK: - Cancel & Logging Tests
+
+    @Test("Cancel does not persist logging preferences")
+    func cancelDoesNotPersistLoggingPreferences() async {
+        let repository = MockSettingsRepository()
+        let loggingRepository = MockSDKLoggingRepository(
+            initialPreferences: SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .debug)
+        )
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: loggingRepository
+        )
+        await viewModel.setup()
+
+        viewModel.isLoggingEnabled = true
+        viewModel.sdkLogLevel = .error
+        viewModel.cancel()
+
+        #expect(loggingRepository.saveCallCount == 0)
+        #expect(viewModel.isPresented == false)
+    }
+
+    @Test("Save without logging repository skips logging persistence")
+    func saveWithoutLoggingRepositorySkipsLogging() async {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: nil
+        )
+
+        viewModel.isLoggingEnabled = true
+        await viewModel.save()
+
+        #expect(viewModel.showRestartAlert == false)
+        #expect(viewModel.isPresented == false)
+    }
+
+    @Test("showShareSheet defaults to false")
+    func showShareSheetDefaultsToFalse() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.showShareSheet == false)
+    }
+
+    @Test("showNoLogsAlert defaults to false")
+    func showNoLogsAlertDefaultsToFalse() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.showNoLogsAlert == false)
+    }
+
+    @Test("showRestartAlert defaults to false")
+    func showRestartAlertDefaultsToFalse() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.showRestartAlert == false)
+    }
+
+    @Test("codecMode reflects preference mode")
+    func codecModeReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.codecMode == .automatic)
+
+        viewModel.settingsPreference.codecPreference.mode = .manual
+        #expect(viewModel.codecMode == .manual)
+    }
+
+    @Test("orderedCodecs reflects preference codecs")
+    func orderedCodecsReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9]
+        #expect(viewModel.orderedCodecs == [.h264, .vp9])
+    }
+
     // MARK: - State Mutation Tests
 
     @Test("Modifying properties updates values correctly")

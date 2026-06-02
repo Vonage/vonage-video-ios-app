@@ -187,7 +187,10 @@ public final class SDKLoggingService: @unchecked Sendable {
     // MARK: - Level Mapping
 
     /// Maps SDKLogLevel raw value to the OTC log level expected by `otc_log_enable`.
-    private static func mapToOTCLevel(rawValue: Int) -> Int32 {
+    ///
+    /// - Parameter rawValue: The raw value from ``SDKLogLevel`` (0 = verbose … 4 = error).
+    /// - Returns: The corresponding OTC level (4 = debug … 1 = error, default = 4).
+    static func mapToOTCLevel(rawValue: Int) -> Int32 {
         switch rawValue {
         case 0: return 4  // verbose → debug (most permissive SDK level)
         case 1: return 4  // debug
