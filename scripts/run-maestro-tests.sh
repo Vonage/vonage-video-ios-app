@@ -115,6 +115,15 @@ APP_SCHEME=${APP_SCHEME:-"VERA"}
 APP_ID="com.vonage.VERA"
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
+LOG_PIDS=()
+
+stop_live_logs() {
+    if [ ${#LOG_PIDS[@]} -gt 0 ]; then
+        kill "${LOG_PIDS[@]}" 2>/dev/null || true
+        wait "${LOG_PIDS[@]}" 2>/dev/null || true
+        LOG_PIDS=()
+    fi
+}
 
 find_simulator_id() {
     xcrun simctl list devices available | awk -v device="$1" '
@@ -388,6 +397,32 @@ xcrun simctl privacy "$SIMULATOR_ID" grant camera "$APP_ID"
 xcrun simctl privacy "$SIMULATOR_ID" grant microphone "$APP_ID"
 echo -e "${GREEN}✓ Permissions granted${NC}\n"
 
+if [ -n "${MAESTRO_LOG_DIR:-}" ]; then
+    mkdir -p "$MAESTRO_LOG_DIR"
+
+    echo -e "${BLUE}🪵 Capturing simulator logs in $MAESTRO_LOG_DIR...${NC}"
+
+    APP_LOG_PREDICATE='process == "VERA" OR subsystem CONTAINS "com.vonage" OR senderImagePath CONTAINS "/VERA.app/" OR eventMessage CONTAINS[c] "VERA"'
+    SYSTEM_LOG_PREDICATE='process == "SpringBoard" OR subsystem CONTAINS "com.apple.frontboard" OR subsystem CONTAINS "com.apple.runningboard" OR subsystem CONTAINS "com.apple.launchservices"'
+
+    xcrun simctl spawn "$SIMULATOR_ID" log stream \
+        --style compact \
+        --level debug \
+        --predicate "$APP_LOG_PREDICATE" \
+        > "$MAESTRO_LOG_DIR/vera-app-live.log" 2>&1 &
+    LOG_PIDS+=($!)
+
+    xcrun simctl spawn "$SIMULATOR_ID" log stream \
+        --style compact \
+        --level debug \
+        --predicate "$SYSTEM_LOG_PREDICATE" \
+        > "$MAESTRO_LOG_DIR/simulator-live.log" 2>&1 &
+    LOG_PIDS+=($!)
+
+    trap stop_live_logs EXIT
+    echo -e "${GREEN}✓ Live log capture started${NC}\n"
+fi
+
 # ============================================================================
 # 7. Run Maestro Tests
 # ============================================================================
@@ -400,6 +435,22 @@ if maestro test --device "$SIMULATOR_ID" --env APP_ID="$APP_ID" "$FLOW_TARGET"; 
     TEST_RESULT=0
 else
     TEST_RESULT=$?
+fi
+
+if [ -n "${MAESTRO_LOG_DIR:-}" ]; then
+    stop_live_logs
+
+    xcrun simctl spawn "$SIMULATOR_ID" log show \
+        --last 30m \
+        --style compact \
+        --predicate "$APP_LOG_PREDICATE" \
+        > "$MAESTRO_LOG_DIR/vera-app-history.log" 2>&1 || true
+
+    xcrun simctl spawn "$SIMULATOR_ID" log show \
+        --last 30m \
+        --style compact \
+        --predicate "$SYSTEM_LOG_PREDICATE" \
+        > "$MAESTRO_LOG_DIR/simulator-history.log" 2>&1 || true
 fi
 
 echo ""

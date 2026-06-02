@@ -85,19 +85,10 @@ jobs:
         run: |
           mkdir -p test-reports
 
-          xcrun simctl spawn booted log stream \
-            --style compact \
-            --level debug \
-            --predicate 'process == "VERA" OR process == "SpringBoard" OR subsystem CONTAINS "com.apple.frontboard" OR subsystem CONTAINS "com.apple.runningboard"' \
-            > test-reports/simulator-live.log 2>&1 &
-          LOG_PID=$!
-
           set +e
-          ./scripts/run-maestro-tests.sh 2>&1 | tee test-reports/maestro-run.log
+          MAESTRO_LOG_DIR=test-reports ./scripts/run-maestro-tests.sh 2>&1 | tee test-reports/maestro-run.log
           TEST_RESULT=${PIPESTATUS[0]}
           set -e
-
-          kill "$LOG_PID" 2>/dev/null || true
 
           xcrun simctl diagnose --output test-reports/simctl-diagnose 2>/dev/null || true
           cp -R ~/Library/Logs/DiagnosticReports test-reports/DiagnosticReports 2>/dev/null || true
