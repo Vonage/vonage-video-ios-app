@@ -82,7 +82,27 @@ jobs:
           xcrun simctl list devices
 
       - name: Run Maestro Tests
-        run: ./scripts/run-maestro-tests.sh
+        run: |
+          mkdir -p test-reports
+
+          xcrun simctl spawn booted log stream \
+            --style compact \
+            --level debug \
+            --predicate 'process == "VERA" OR process == "SpringBoard" OR subsystem CONTAINS "com.apple.frontboard" OR subsystem CONTAINS "com.apple.runningboard"' \
+            > test-reports/simulator-live.log 2>&1 &
+          LOG_PID=$!
+
+          set +e
+          ./scripts/run-maestro-tests.sh
+          TEST_RESULT=$?
+          set -e
+
+          kill "$LOG_PID" 2>/dev/null || true
+
+          xcrun simctl diagnose --output test-reports/simctl-diagnose 2>/dev/null || true
+          cp -R ~/Library/Logs/DiagnosticReports test-reports/DiagnosticReports 2>/dev/null || true
+
+          exit "$TEST_RESULT"
         env:
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
