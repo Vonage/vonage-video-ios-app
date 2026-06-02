@@ -1,0 +1,21 @@
+.github/workflows/maestro.yml
+  s_5475f91bb91129::t_3c78a78ee1ce04 96-97
+scripts/run-maestro-tests.sh
+  s_5475f91bb91129::t_bf352467d4ec57 369-379
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "30cd09e00652591a05ed48d29c7d9b156386377f",
+  "prompts": {},
+  "sessions": {
+    "s_5475f91bb91129": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8891-7568-7491-8b22-6cf3c00c939e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
