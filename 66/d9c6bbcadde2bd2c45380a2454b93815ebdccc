@@ -1,0 +1,16 @@
+scripts/run-maestro-tests.sh
+  h_2499cc15b3806e 348-352
+.maestro/config.yaml
+  h_2499cc15b3806e 2-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "66d9c6bbcadde2bd2c45380a2454b93815ebdccc",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
