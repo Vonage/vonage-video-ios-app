@@ -2,11 +2,10 @@ appId: ${APP_ID}
 ---
 - launchApp
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "landing-screen"
     timeout: 10000
-
-- assertVisible:
-    id: "landing-screen"
 
 # Verify GitHub button is visible
 - assertVisible:

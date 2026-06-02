@@ -5,11 +5,10 @@ appId: ${APP_ID}
       camera: allow
       microphone: allow
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "landing-screen"
     timeout: 10000
-
-- assertVisible:
-    id: "landing-screen"
 
 - takeScreenshot: 01-landing-screen
 
@@ -23,11 +22,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "join-waiting-room-button"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "waiting-room-screen"
     timeout: 10000
-
-- assertVisible:
-    id: "waiting-room-screen"
 
 - takeScreenshot: 02-waiting-room-permissions-granted
 
@@ -41,10 +39,9 @@ appId: ${APP_ID}
 - tapOn:
     id: "join-meeting-button"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "meeting-room-screen"
     timeout: 15000
-
-- assertVisible:
-    id: "meeting-room-screen"
 
 - takeScreenshot: 03-meeting-room-joined

@@ -5,11 +5,10 @@ appId: ${APP_ID}
       camera: allow
       microphone: allow
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "landing-screen"
     timeout: 10000
-
-- assertVisible:
-    id: "landing-screen"
 
 # Enter a room name
 - tapOn:
@@ -20,11 +19,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "join-waiting-room-button"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "waiting-room-screen"
     timeout: 10000
-
-- assertVisible:
-    id: "waiting-room-screen"
 
 # Disable mic (match React spec: audio off)
 - tapOn:
@@ -42,11 +40,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "join-meeting-button"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "meeting-room-screen"
     timeout: 15000
-
-- assertVisible:
-    id: "meeting-room-screen"
 
 - takeScreenshot: 01-meeting-room
 
@@ -63,12 +60,12 @@ appId: ${APP_ID}
 # Confirm start recording alert
 - tapOn: "OK"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "archiving-recording-indicator"
     timeout: 15000
 
 # Verify recording indicator is visible
-- assertVisible:
-    id: "archiving-recording-indicator"
 
 - takeScreenshot: 02-recording-in-progress
 
@@ -89,12 +86,12 @@ appId: ${APP_ID}
 # Confirm stop recording alert
 - tapOn: "OK"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    notVisible:
+      id: "archiving-recording-indicator"
     timeout: 10000
 
 # Verify recording indicator is gone
-- assertNotVisible:
-    id: "archiving-recording-indicator"
 
 - takeScreenshot: 03-recording-stopped
 
@@ -102,11 +99,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "meeting-room-end-call-button"
 
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible:
+      id: "goodbye-screen"
     timeout: 15000
-
-- assertVisible:
-    id: "goodbye-screen"
 
 # Verify archive list is visible on goodbye page
 - assertVisible:
