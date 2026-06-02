@@ -366,6 +366,17 @@ fi
 
 echo -e "${GREEN}✓ App installed successfully${NC}\n"
 
+echo -e "${BLUE}🔎 Verifying installed app...${NC}"
+echo -e "${BLUE}   Built app bundle identifier:${NC}"
+/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP_PATH/Info.plist" 2>/dev/null || echo "Unable to read CFBundleIdentifier from $APP_PATH/Info.plist"
+
+echo -e "${BLUE}   Installed app container:${NC}"
+xcrun simctl get_app_container "$SIMULATOR_ID" "$APP_ID" app 2>&1 || true
+
+echo -e "${BLUE}   Installed app registration:${NC}"
+xcrun simctl listapps "$SIMULATOR_ID" 2>/dev/null | grep -A 5 -B 5 "$APP_ID" || true
+echo ""
+
 # Grant permissions via simctl (reliable in CI, persists across clearState)
 echo -e "${YELLOW}🔐 Granting camera and microphone permissions...${NC}"
 xcrun simctl privacy "$SIMULATOR_ID" grant camera "$APP_ID"
