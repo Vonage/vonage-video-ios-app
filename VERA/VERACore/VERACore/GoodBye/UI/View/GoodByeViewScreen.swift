@@ -4,7 +4,6 @@
 
 import SwiftUI
 import VERACommonUI
-import VERADomain
 
 struct GoodByeViewScreen<ContentView: View>: View {
     @ObservedObject var viewModel: GoodByeViewModel
@@ -23,6 +22,6 @@ struct GoodByeViewScreen<ContentView: View>: View {
             additionalContentView: additionalContentView,
             onReenter: viewModel.onReenter,
             onReturnToLanding: viewModel.onReturnToLanding
-        ).alert(item: $viewModel.error) { $0.view }
+        )
     }
 }
