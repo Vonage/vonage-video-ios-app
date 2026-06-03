@@ -1,0 +1,25 @@
+VERA/VERACore/VERACore/GoodBye/Wireframe/GoodByePageFactory.swift
+  s_5475f91bb91129::t_282c04665f619e 9
+scripts/run-maestro-tests.sh
+  s_5475f91bb91129::t_74cb3cca96b90e 105-106
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_5475f91bb91129::t_282c04665f619e 104
+"VERA/VERACore/VERACore/GoodBye/UI/View models/GoodByeViewModel.swift"
+  s_5475f91bb91129::t_282c04665f619e 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9a169d3c50cb9585f0355d9559be7e90e8a66f6e",
+  "prompts": {},
+  "sessions": {
+    "s_5475f91bb91129": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8891-7568-7491-8b22-6cf3c00c939e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
