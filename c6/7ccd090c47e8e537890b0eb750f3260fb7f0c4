@@ -1,0 +1,37 @@
+.maestro/flows/waiting-room-controls-enabled.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 19-21,45-46
+.maestro/flows/goodbye-reenter-room.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 19-21,36-37
+VERA/VERACore/VERACore/VeraUI/Components/JoinExistingRoom/JoinExistingRoom.swift
+  s_5475f91bb91129::t_81e265d137d7b7 54-55
+.maestro/flows/waiting-room-controls-disabled.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 19-21,65-66
+"VERA/VERACore/VERACore/Waiting room/UI/Views/UsernameInput.swift"
+  s_5475f91bb91129::t_5bb2d3cdd65c6b 18-19
+VERA/VERACore/VERACore/VeraUI/Components/JoinExistingRoom/VonageTextField.swift
+  s_5475f91bb91129::t_4e76c22c16a26a 79,88-89,95,117,129,210-211,213-216
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 21-23,41-42
+.maestro/flows/recording.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 19-21,43-44
+.maestro/flows/create-new-room.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 33-35
+.maestro/flows/goodbye-view-landing-page.yaml
+  s_5475f91bb91129::t_e1b49d4ccd3548 19-21,36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "c67ccd090c47e8e537890b0eb750f3260fb7f0c4",
+  "prompts": {},
+  "sessions": {
+    "s_5475f91bb91129": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8891-7568-7491-8b22-6cf3c00c939e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
