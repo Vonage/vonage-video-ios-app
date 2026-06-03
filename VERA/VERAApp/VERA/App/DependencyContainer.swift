@@ -101,12 +101,7 @@ final class DependencyContainer {
         userRepository: userRepository,
         advancedSettingsUseCase: advancedSettingsUseCase)
 
-    lazy var goodByePageFactory = GoodByePageFactory(
-        joinRoomUseCase: .init(
-            userRepository: userRepository,
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            advancedSettingsUseCase: advancedSettingsUseCase),
-        userRepository: userRepository)
+    lazy var goodByePageFactory = GoodByePageFactory()
 
     // MARK: - Meeting Room SDK
 

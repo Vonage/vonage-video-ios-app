@@ -102,7 +102,8 @@ if ! command -v xcodebuild &> /dev/null; then
     exit 1
 fi
 
-XCODE_VERSION=$(xcodebuild -version | head -n 1)
+XCODE_VERSION_OUTPUT=$(xcodebuild -version)
+XCODE_VERSION="${XCODE_VERSION_OUTPUT%%$'\n'*}"
 echo -e "${GREEN}✓ $XCODE_VERSION detected${NC}"
 
 echo ""
