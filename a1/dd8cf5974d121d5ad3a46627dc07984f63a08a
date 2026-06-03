@@ -1,0 +1,36 @@
+.maestro/flows/waiting-room-controls-enabled.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,18-19,46
+.maestro/flows/create-new-room.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,32
+.maestro/flows/goodbye-reenter-room.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,18-19,37
+  s_5475f91bb91129::t_f81f4ed7048aaa 58-64
+.maestro/flows/github-repo-link.yaml
+  s_5475f91bb91129::t_39e043751a9892 3-4
+.maestro/flows/goodbye-view-landing-page.yaml
+  s_5475f91bb91129::t_f81f4ed7048aaa 58-64
+  s_5475f91bb91129::t_39e043751a9892 4,18-19,37
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,20-21,42
+.maestro/flows/recording.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,18-19,44
+  s_5475f91bb91129::t_f81f4ed7048aaa 115-121
+.maestro/flows/waiting-room-controls-disabled.yaml
+  s_5475f91bb91129::t_39e043751a9892 4,18-19,66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a1dd8cf5974d121d5ad3a46627dc07984f63a08a",
+  "prompts": {},
+  "sessions": {
+    "s_5475f91bb91129": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8891-7568-7491-8b22-6cf3c00c939e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
