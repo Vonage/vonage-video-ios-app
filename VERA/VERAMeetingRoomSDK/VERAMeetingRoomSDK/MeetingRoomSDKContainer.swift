@@ -214,7 +214,13 @@ final class MeetingRoomSDKContainer {
 
     // MARK: - Background Effects Feature
 
-    lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository()
+    lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+        bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+        cacheProvider: DefaultBackgroundEffectsCacheProvider(
+            fileManager: .default,
+            pathComponent: "video_backgrounds"
+        )
+    )
 
     lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository()
 

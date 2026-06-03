@@ -158,7 +158,13 @@ final class DependencyContainer {
     // MARK: - Background effects feature (waiting room)
 
     #if BACKGROUND_EFFECTS_ENABLED
-        lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository()
+        lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+            bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+            cacheProvider: DefaultBackgroundEffectsCacheProvider(
+                fileManager: .default,
+                pathComponent: "video_backgrounds"
+            )
+        )
 
         lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository()
 

@@ -23,23 +23,18 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
     ]
 
     private let bundle: Bundle
-    private let cacheDirectory: URL
-    private let fileManager: FileManager
+    private let cacheProvider: BackgroundEffectsCacheProviding
 
     public init(
-        bundle: Bundle = .init(for: DefaultBackgroundEffectsRepository.self),
-        fileManager: FileManager = .default
+        bundle: Bundle,
+        cacheProvider: BackgroundEffectsCacheProviding
     ) {
         self.bundle = bundle
-        self.fileManager = fileManager
-        self.cacheDirectory =
-            fileManager
-            .urls(for: .cachesDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("video_backgrounds", isDirectory: true)
+        self.cacheProvider = cacheProvider
     }
 
     public func availableBackgrounds() throws -> [VideoBackgroundItem] {
-        try ensureCacheDirectory()
+        try cacheProvider.ensureCacheDirectory()
         return try Self.stockAssetNames.compactMap { assetName in
             try exportIfNeeded(assetName: assetName)
         }
@@ -47,16 +42,10 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
 
     // MARK: - Private
 
-    private func ensureCacheDirectory() throws {
-        if !fileManager.fileExists(atPath: cacheDirectory.path) {
-            try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-        }
-    }
-
     private func exportIfNeeded(assetName: String) throws -> VideoBackgroundItem? {
-        let cachedPath = cacheDirectory.appendingPathComponent("\(assetName).jpg")
+        let cachedPath = try cacheProvider.cachedFileURL(for: assetName)
 
-        if fileManager.fileExists(atPath: cachedPath.path) {
+        if try cacheProvider.cachedFileExists(for: assetName) {
             return VideoBackgroundItem(
                 id: assetName,
                 thumbnailResource: assetName,
