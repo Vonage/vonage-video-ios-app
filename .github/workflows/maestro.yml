@@ -6,12 +6,6 @@ on:
   push:
     branches: [develop]
   workflow_dispatch:
-    inputs:
-      runner_benchmark:
-        description: 'Run Maestro runner benchmark instead of the full suite'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,8 +14,7 @@ concurrency:
 jobs:
   maestro-tests:
     name: Run Maestro UI Tests
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.runner_benchmark != true }}
-    runs-on: macos-26
+    runs-on: macos-26-xlarge
     timeout-minutes: 60
 
     steps:
@@ -182,119 +175,3 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
-
-  maestro-runner-benchmark:
-    name: Benchmark Maestro on ${{ matrix.os }}
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.runner_benchmark == true }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-15, macos-26, macos-26-arm64]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Pull LFS files
-        run: git lfs pull
-
-      - name: Pre-boot simulator
-        run: xcrun simctl boot "iPhone 17" 2>/dev/null || true
-
-      - name: Print runner diagnostics
-        run: |
-          sw_vers
-          echo ""
-          xcodebuild -version
-          echo ""
-          sysctl -n hw.ncpu | xargs echo "CPU cores:"
-          sysctl -n hw.memsize | awk '{ printf "Memory: %.2f GB\n", $1 / 1024 / 1024 / 1024 }'
-          uptime
-          echo ""
-          echo "Available iOS Simulators:"
-          xcrun simctl list devices available | grep iPhone
-
-      - name: Install Tuist
-        run: brew install tuist
-
-      - name: Install Java 17 (Maestro dependency)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install Maestro
-        run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-
-      - name: Install SwiftLint
-        run: brew install swiftlint
-
-      - name: Export build flags
-        run: |
-          {
-            echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
-          } >> $GITHUB_ENV
-
-      - name: Generate project with Tuist
-        run: |
-          cd VERA
-          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-          export BASE_API_URL=${{ secrets.BASE_API_URL }}
-          export MARKETING_VERSION=1.1
-          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
-          ./Scripts/generateEnvironmentConstants.sh
-          ./Scripts/regenerateSigningConfig.sh
-          tuist generate --no-open
-          cd ..
-
-      - name: Run Maestro benchmark flows
-        run: |
-          mkdir -p test-reports
-
-          echo "# Maestro runner benchmark (${{ matrix.os }})" | tee test-reports/benchmark-summary.txt
-          echo "Run: ${{ github.run_number }}" | tee -a test-reports/benchmark-summary.txt
-          echo "Commit: ${{ github.sha }}" | tee -a test-reports/benchmark-summary.txt
-          echo "" | tee -a test-reports/benchmark-summary.txt
-
-          set +e
-
-          START=$(date +%s)
-          MAESTRO_LOG_DIR=test-reports ./scripts/run-maestro-tests.sh github-repo-link.yaml 2>&1 | tee test-reports/github-repo-link.log
-          GITHUB_FLOW_RESULT=${PIPESTATUS[0]}
-          END=$(date +%s)
-          echo "github-repo-link: $((END - START))s (exit $GITHUB_FLOW_RESULT)" | tee -a test-reports/benchmark-summary.txt
-
-          START=$(date +%s)
-          MAESTRO_LOG_DIR=test-reports ./scripts/run-maestro-tests.sh waiting-room-controls-enabled.yaml 2>&1 | tee test-reports/waiting-room-controls-enabled.log
-          WAITING_FLOW_RESULT=${PIPESTATUS[0]}
-          END=$(date +%s)
-          echo "waiting-room-controls-enabled: $((END - START))s (exit $WAITING_FLOW_RESULT)" | tee -a test-reports/benchmark-summary.txt
-
-          set -e
-
-          xcrun simctl diagnose --output test-reports/simctl-diagnose 2>/dev/null || true
-          cp -R ~/Library/Logs/DiagnosticReports test-reports/DiagnosticReports 2>/dev/null || true
-
-          if [ "$GITHUB_FLOW_RESULT" -ne 0 ] || [ "$WAITING_FLOW_RESULT" -ne 0 ]; then
-            exit 1
-          fi
-        env:
-          BASE_API_URL: ${{ secrets.BASE_API_URL }}
-          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
-          MARKETING_VERSION: "1.1"
-          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
-          XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
-
-      - name: Upload Benchmark Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: maestro-runner-benchmark-${{ matrix.os }}-${{ github.run_number }}
-          path: test-reports/
-          retention-days: 7
-          if-no-files-found: warn
