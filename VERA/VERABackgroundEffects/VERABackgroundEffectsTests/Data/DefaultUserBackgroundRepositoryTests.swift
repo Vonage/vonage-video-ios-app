@@ -13,9 +13,8 @@ struct DefaultUserBackgroundRepositoryTests {
 
     @Test("save stores image and returns item")
     func saveStoresImageAndReturnsItem() throws {
-        let dir = makeTempDirectory()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let sut = DefaultUserBackgroundRepository(directory: dir)
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let imageData = makeMinimalJPEGData()
         let item = try sut.save(imageData)
@@ -26,9 +25,8 @@ struct DefaultUserBackgroundRepositoryTests {
 
     @Test("savedBackgrounds returns saved items")
     func savedBackgroundsReturnsSavedItems() throws {
-        let dir = makeTempDirectory()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let sut = DefaultUserBackgroundRepository(directory: dir)
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let imageData = makeMinimalJPEGData()
         _ = try sut.save(imageData)
@@ -40,9 +38,8 @@ struct DefaultUserBackgroundRepositoryTests {
 
     @Test("delete removes file and background")
     func deleteRemovesFileAndBackground() throws {
-        let dir = makeTempDirectory()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let sut = DefaultUserBackgroundRepository(directory: dir)
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let imageData = makeMinimalJPEGData()
         let item = try sut.save(imageData)
@@ -55,9 +52,8 @@ struct DefaultUserBackgroundRepositoryTests {
 
     @Test("remainingSlots accounts for saved items")
     func remainingSlotsAccountsForSavedItems() throws {
-        let dir = makeTempDirectory()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let sut = DefaultUserBackgroundRepository(directory: dir)
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let initialSlots = sut.remainingSlots
         let imageData = makeMinimalJPEGData()
@@ -68,9 +64,8 @@ struct DefaultUserBackgroundRepositoryTests {
 
     @Test("save throws maxSlotsReached when limit exceeded")
     func saveThrowsMaxSlotsReached() throws {
-        let dir = makeTempDirectory()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let sut = DefaultUserBackgroundRepository(directory: dir)
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let imageData = makeMinimalJPEGData()
         for _ in 0..<DefaultUserBackgroundRepository.maxUserBackgrounds {
@@ -84,11 +79,19 @@ struct DefaultUserBackgroundRepositoryTests {
 
     // MARK: - Helpers
 
-    private func makeTempDirectory() -> URL {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("test_user_bg_\(UUID().uuidString)")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir
+    private func makeSUT() -> (DefaultUserBackgroundRepository, URL) {
+        let pathComponent = "test_user_bg_\(UUID().uuidString)"
+        let directory = cachesDirectory.appendingPathComponent(pathComponent, isDirectory: true)
+        let storageProvider = DefaultBackgroundEffectsStorageProvider(
+            fileManager: .default,
+            searchPathDirectory: .cachesDirectory,
+            pathComponent: pathComponent
+        )
+        return (DefaultUserBackgroundRepository(storageProvider: storageProvider), directory)
+    }
+
+    private var cachesDirectory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
     }
 
     private func makeMinimalJPEGData() -> Data {

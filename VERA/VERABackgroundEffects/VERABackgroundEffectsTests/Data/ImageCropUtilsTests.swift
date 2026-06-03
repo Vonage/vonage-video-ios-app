@@ -16,25 +16,30 @@ struct ImageCropUtilsTests {
     @Test("centerCropToPortrait returns data for valid JPEG input")
     func centerCropToPortraitReturnsDataForValidInput() throws {
         let imageData = makeTestJPEGData(width: 1920, height: 1080)
-        let result = ImageCropUtils.centerCropToPortrait(imageData)
+        let result = try ImageCropUtils.centerCropToPortrait(imageData)
 
-        #expect(result != nil)
+        #expect(!result.isEmpty)
     }
 
-    @Test("centerCropToPortrait returns nil for invalid data")
-    func centerCropToPortraitReturnsNilForInvalidData() {
-        let result = ImageCropUtils.centerCropToPortrait(Data([0x00, 0x01, 0x02]))
+    @Test("centerCropToPortrait throws for invalid data")
+    func centerCropToPortraitThrowsForInvalidData() throws {
+        #expect(throws: ImageCropUtilsError.imageDecodingFailed) {
+            try ImageCropUtils.centerCropToPortrait(Data([0x00, 0x01, 0x02]))
+        }
+    }
 
-        #expect(result == nil)
+    @Test("centerCropToPortrait handles already portrait image")
+    func centerCropToPortraitHandlesAlreadyPortraitImage() throws {
+        let imageData = makeTestJPEGData(width: 720, height: 1280)
+        let result = try ImageCropUtils.centerCropToPortrait(imageData)
+
+        #expect(!result.isEmpty)
     }
 
     @Test("centerCropToPortrait produces portrait aspect ratio")
     func centerCropToPortraitProducesPortraitAspectRatio() throws {
         let imageData = makeTestJPEGData(width: 1920, height: 1080)
-        guard let croppedData = ImageCropUtils.centerCropToPortrait(imageData) else {
-            Issue.record("Expected cropped data")
-            return
-        }
+        let croppedData = try ImageCropUtils.centerCropToPortrait(imageData)
 
         guard let source = CGImageSourceCreateWithData(croppedData as CFData, nil),
             let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any],
@@ -47,14 +52,6 @@ struct ImageCropUtilsTests {
 
         // Height should be greater than width (portrait)
         #expect(height > width)
-    }
-
-    @Test("centerCropToPortrait handles already portrait image")
-    func centerCropToPortraitHandlesAlreadyPortraitImage() throws {
-        let imageData = makeTestJPEGData(width: 720, height: 1280)
-        let result = ImageCropUtils.centerCropToPortrait(imageData)
-
-        #expect(result != nil)
     }
 
     // MARK: - Helpers

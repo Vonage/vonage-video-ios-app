@@ -53,7 +53,11 @@ public final class VideoEffectsViewModel: ObservableObject {
 
     public func selectEffect(_ effect: VideoEffect) {
         selectedEffect = effect
-        videoEffectRepository.save(effect)
+        do {
+            try videoEffectRepository.save(effect)
+        } catch {
+            Self.logger.error("Failed to save video effect: \(error.localizedDescription)")
+        }
         applyToPublisher()
     }
 

@@ -7,8 +7,8 @@ import VERADomain
 
 /// Persists the selected `VideoEffect` to `UserDefaults`.
 ///
-/// On load, validates that `.backgroundImage` paths still exist on disk;
-/// falls back to `.none` if the referenced file was deleted.
+/// On load, validates that `.backgroundImage` paths still exist on disk and
+/// returns `.none` if the referenced file was deleted.
 public final class DefaultVideoEffectRepository: VideoEffectRepository {
 
     private static let key = "com.vonage.vera.selectedVideoEffect"
@@ -23,8 +23,8 @@ public final class DefaultVideoEffectRepository: VideoEffectRepository {
         self.fileManager = fileManager
     }
 
-    public func save(_ effect: VideoEffect) {
-        guard let data = try? JSONEncoder().encode(effect) else { return }
+    public func save(_ effect: VideoEffect) throws {
+        let data = try JSONEncoder().encode(effect)
         defaults.set(data, forKey: Self.key)
     }
 
@@ -36,7 +36,6 @@ public final class DefaultVideoEffectRepository: VideoEffectRepository {
         if case .backgroundImage(_, let path) = effect,
             !fileManager.fileExists(atPath: path)
         {
-            save(.none)
             return .none
         }
 

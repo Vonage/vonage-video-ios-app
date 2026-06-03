@@ -14,25 +14,16 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
 
     public static let maxUserBackgrounds = 10
 
-    private let directory: URL
-    private let fileManager: FileManager
+    private let storageProvider: BackgroundEffectsStorageProviding
 
-    public init(directory: URL? = nil, fileManager: FileManager = .default) {
-        self.fileManager = fileManager
-        self.directory =
-            directory
-            ?? fileManager
-            .urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("user_backgrounds", isDirectory: true)
+    public init(storageProvider: BackgroundEffectsStorageProviding) {
+        self.storageProvider = storageProvider
     }
 
     public func savedBackgrounds() throws -> [VideoBackgroundItem] {
-        try ensureDirectory()
+        try storageProvider.ensureDirectory()
 
-        guard fileManager.fileExists(atPath: directory.path) else { return [] }
-
-        let files = try fileManager.contentsOfDirectory(
-            at: directory,
+        let files = try storageProvider.contentsOfDirectory(
             includingPropertiesForKeys: [.creationDateKey],
             options: .skipsHiddenFiles
         )
@@ -57,16 +48,19 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
     }
 
     public func save(_ imageData: Data) throws -> VideoBackgroundItem {
-        try ensureDirectory()
+        try storageProvider.ensureDirectory()
 
         guard remainingSlots > 0 else {
             throw UserBackgroundError.maxSlotsReached
         }
 
         let id = "user_bg_\(UUID().uuidString)"
-        let filePath = directory.appendingPathComponent("\(id).jpg")
+        let filePath = try storageProvider.fileURL(for: id)
 
-        guard let croppedData = ImageCropUtils.centerCropToPortrait(imageData) else {
+        let croppedData: Data
+        do {
+            croppedData = try ImageCropUtils.centerCropToPortrait(imageData)
+        } catch {
             throw UserBackgroundError.cropFailed
         }
 
@@ -81,9 +75,8 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
     }
 
     public func delete(_ id: String) throws {
-        let filePath = directory.appendingPathComponent("\(id).jpg")
-        if fileManager.fileExists(atPath: filePath.path) {
-            try fileManager.removeItem(at: filePath)
+        if try storageProvider.fileExists(for: id) {
+            try storageProvider.removeFile(for: id)
         }
     }
 
@@ -93,12 +86,6 @@ public final class DefaultUserBackgroundRepository: UserBackgroundRepository {
     }
 
     // MARK: - Private
-
-    private func ensureDirectory() throws {
-        if !fileManager.fileExists(atPath: directory.path) {
-            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
-        }
-    }
 }
 
 public enum UserBackgroundError: Error {

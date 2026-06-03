@@ -13,29 +13,29 @@ struct DefaultBackgroundEffectsRepositoryTests {
 
     @Test("availableBackgrounds ensures cache directory")
     func availableBackgroundsEnsuresCacheDirectory() throws {
-        let cacheProvider = MockBackgroundEffectsCacheProvider()
+        let storageProvider = MockBackgroundEffectsStorageProvider()
         let sut = DefaultBackgroundEffectsRepository(
             bundle: .init(for: DefaultBackgroundEffectsRepository.self),
-            cacheProvider: cacheProvider
+            storageProvider: storageProvider
         )
 
         _ = try sut.availableBackgrounds()
 
-        #expect(cacheProvider.ensureCacheDirectoryCallCount == 1)
+        #expect(storageProvider.ensureDirectoryCallCount == 1)
     }
 
-    @Test("availableBackgrounds returns cached items from cache provider")
-    func availableBackgroundsReturnsCachedItemsFromCacheProvider() throws {
+    @Test("availableBackgrounds returns cached items from storage provider")
+    func availableBackgroundsReturnsCachedItemsFromStorageProvider() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_stock_bg_\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let cacheProvider = MockBackgroundEffectsCacheProvider(directory: directory)
-        cacheProvider.existingAssetNames = Set(DefaultBackgroundEffectsRepository.stockAssetNames)
+        let storageProvider = MockBackgroundEffectsStorageProvider(directory: directory)
+        storageProvider.existingIDs = Set(DefaultBackgroundEffectsRepository.stockAssetNames)
         let sut = DefaultBackgroundEffectsRepository(
             bundle: .init(for: DefaultBackgroundEffectsRepository.self),
-            cacheProvider: cacheProvider
+            storageProvider: storageProvider
         )
 
         let items = try sut.availableBackgrounds()
@@ -46,11 +46,28 @@ struct DefaultBackgroundEffectsRepositoryTests {
         #expect(items.allSatisfy { $0.imagePath.hasPrefix(directory.path) })
     }
 
+    @Test("availableBackgrounds throws when stock asset is missing")
+    func availableBackgroundsThrowsWhenStockAssetIsMissing() throws {
+        let bundleDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_empty_bundle_\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: bundleDirectory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: bundleDirectory) }
+
+        let sut = DefaultBackgroundEffectsRepository(
+            bundle: try #require(Bundle(path: bundleDirectory.path)),
+            storageProvider: MockBackgroundEffectsStorageProvider()
+        )
+
+        #expect(throws: BackgroundEffectsRepositoryError.assetNotFound(assetName: "bg_bookshelf_room")) {
+            _ = try sut.availableBackgrounds()
+        }
+    }
+
     // MARK: - Helpers
 
-    private final class MockBackgroundEffectsCacheProvider: BackgroundEffectsCacheProviding {
-        var ensureCacheDirectoryCallCount = 0
-        var existingAssetNames: Set<String> = []
+    private final class MockBackgroundEffectsStorageProvider: BackgroundEffectsStorageProviding {
+        var ensureDirectoryCallCount = 0
+        var existingIDs: Set<String> = []
 
         private let directory: URL
 
@@ -58,16 +75,27 @@ struct DefaultBackgroundEffectsRepositoryTests {
             self.directory = directory
         }
 
-        func ensureCacheDirectory() throws {
-            ensureCacheDirectoryCallCount += 1
+        func ensureDirectory() throws {
+            ensureDirectoryCallCount += 1
         }
 
-        func cachedFileURL(for assetName: String) throws -> URL {
-            directory.appendingPathComponent("\(assetName).jpg")
+        func fileURL(for id: String) throws -> URL {
+            directory.appendingPathComponent("\(id).jpg")
         }
 
-        func cachedFileExists(for assetName: String) throws -> Bool {
-            existingAssetNames.contains(assetName)
+        func fileExists(for id: String) throws -> Bool {
+            existingIDs.contains(id)
+        }
+
+        func contentsOfDirectory(
+            includingPropertiesForKeys keys: [URLResourceKey],
+            options: FileManager.DirectoryEnumerationOptions
+        ) throws -> [URL] {
+            []
+        }
+
+        func removeFile(for id: String) throws {
+            existingIDs.remove(id)
         }
     }
 }

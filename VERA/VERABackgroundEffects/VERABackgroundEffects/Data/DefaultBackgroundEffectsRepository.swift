@@ -23,29 +23,29 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
     ]
 
     private let bundle: Bundle
-    private let cacheProvider: BackgroundEffectsCacheProviding
+    private let storageProvider: BackgroundEffectsStorageProviding
 
     public init(
         bundle: Bundle,
-        cacheProvider: BackgroundEffectsCacheProviding
+        storageProvider: BackgroundEffectsStorageProviding
     ) {
         self.bundle = bundle
-        self.cacheProvider = cacheProvider
+        self.storageProvider = storageProvider
     }
 
     public func availableBackgrounds() throws -> [VideoBackgroundItem] {
-        try cacheProvider.ensureCacheDirectory()
-        return try Self.stockAssetNames.compactMap { assetName in
+        try storageProvider.ensureDirectory()
+        return try Self.stockAssetNames.map { assetName in
             try exportIfNeeded(assetName: assetName)
         }
     }
 
     // MARK: - Private
 
-    private func exportIfNeeded(assetName: String) throws -> VideoBackgroundItem? {
-        let cachedPath = try cacheProvider.cachedFileURL(for: assetName)
+    private func exportIfNeeded(assetName: String) throws -> VideoBackgroundItem {
+        let cachedPath = try storageProvider.fileURL(for: assetName)
 
-        if try cacheProvider.cachedFileExists(for: assetName) {
+        if try storageProvider.fileExists(for: assetName) {
             return VideoBackgroundItem(
                 id: assetName,
                 thumbnailResource: assetName,
@@ -54,12 +54,19 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
             )
         }
 
-        guard let image = UIImage(named: assetName, in: bundle, compatibleWith: nil),
-            let imageData = image.jpegData(compressionQuality: 0.9)
-        else { return nil }
+        guard let image = UIImage(named: assetName, in: bundle, compatibleWith: nil) else {
+            throw BackgroundEffectsRepositoryError.assetNotFound(assetName: assetName)
+        }
 
-        guard let croppedData = ImageCropUtils.centerCropToPortrait(imageData) else {
-            return nil
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else {
+            throw BackgroundEffectsRepositoryError.jpegEncodingFailed(assetName: assetName)
+        }
+
+        let croppedData: Data
+        do {
+            croppedData = try ImageCropUtils.centerCropToPortrait(imageData)
+        } catch {
+            throw BackgroundEffectsRepositoryError.cropFailed(assetName: assetName)
         }
 
         try croppedData.write(to: cachedPath)
@@ -71,4 +78,10 @@ public final class DefaultBackgroundEffectsRepository: BackgroundEffectsReposito
             isUserUploaded: false
         )
     }
+}
+
+public enum BackgroundEffectsRepositoryError: Error, Equatable {
+    case assetNotFound(assetName: String)
+    case jpegEncodingFailed(assetName: String)
+    case cropFailed(assetName: String)
 }

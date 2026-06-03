@@ -26,7 +26,7 @@ public struct DeleteBackgroundUseCase {
 
         let currentEffect = videoEffectRepository.load()
         if case .backgroundImage(let activeId, _) = currentEffect, activeId == id {
-            videoEffectRepository.save(.none)
+            try videoEffectRepository.save(.none)
             return true
         }
         return false

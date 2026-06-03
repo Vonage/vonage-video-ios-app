@@ -11,22 +11,22 @@ import VERADomain
 struct DefaultVideoEffectRepositoryTests {
 
     @Test("save and load round-trips blur effect")
-    func saveAndLoadRoundTripsBlurEffect() {
+    func saveAndLoadRoundTripsBlurEffect() throws {
         let defaults = makeIsolatedDefaults()
         let sut = DefaultVideoEffectRepository(defaults: defaults)
 
-        sut.save(.blurHigh)
+        try sut.save(.blurHigh)
         let loaded = sut.load()
 
         #expect(loaded == .blurHigh)
     }
 
     @Test("save and load round-trips none")
-    func saveAndLoadRoundTripsNone() {
+    func saveAndLoadRoundTripsNone() throws {
         let defaults = makeIsolatedDefaults()
         let sut = DefaultVideoEffectRepository(defaults: defaults)
 
-        sut.save(.none)
+        try sut.save(.none)
         let loaded = sut.load()
 
         #expect(loaded == .none)
@@ -41,7 +41,7 @@ struct DefaultVideoEffectRepositoryTests {
 
         let sut = DefaultVideoEffectRepository(defaults: defaults)
 
-        sut.save(.backgroundImage(id: "test", imagePath: tmpFile.path))
+        try sut.save(.backgroundImage(id: "test", imagePath: tmpFile.path))
         let loaded = sut.load()
 
         #expect(loaded == .backgroundImage(id: "test", imagePath: tmpFile.path))
@@ -58,27 +58,31 @@ struct DefaultVideoEffectRepositoryTests {
     }
 
     @Test("load returns none when backgroundImage path is deleted")
-    func loadReturnsNoneWhenPathDeleted() {
+    func loadReturnsNoneWhenPathDeleted() throws {
         let defaults = makeIsolatedDefaults()
         let sut = DefaultVideoEffectRepository(defaults: defaults)
 
-        sut.save(.backgroundImage(id: "gone", imagePath: "/nonexistent/path.jpg"))
+        try sut.save(.backgroundImage(id: "gone", imagePath: "/nonexistent/path.jpg"))
         let loaded = sut.load()
 
         #expect(loaded == .none)
     }
 
-    @Test("load auto-repairs UserDefaults when backgroundImage path is deleted")
-    func loadAutoRepairsWhenPathDeleted() {
+    @Test("load does not overwrite backgroundImage when path is deleted")
+    func loadDoesNotOverwriteBackgroundImageWhenPathDeleted() throws {
         let defaults = makeIsolatedDefaults()
+        let tmpFile = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_bg_\(UUID().uuidString).jpg")
+        defer { try? FileManager.default.removeItem(at: tmpFile) }
+
         let sut = DefaultVideoEffectRepository(defaults: defaults)
+        let effect = VideoEffect.backgroundImage(id: "gone", imagePath: tmpFile.path)
 
-        sut.save(.backgroundImage(id: "gone", imagePath: "/nonexistent/path.jpg"))
-        _ = sut.load()
+        try sut.save(effect)
+        #expect(sut.load() == .none)
 
-        // Second load should still return .none (auto-repaired in UserDefaults)
-        let secondLoad = sut.load()
-        #expect(secondLoad == .none)
+        try Data([0xFF]).write(to: tmpFile)
+        #expect(sut.load() == effect)
     }
 
     // MARK: - Helpers

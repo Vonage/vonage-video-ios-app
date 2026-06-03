@@ -25,13 +25,13 @@ enum ImageCropUtils {
         _ imageData: Data,
         aspectRatio: CGFloat = defaultPortraitRatio,
         compressionQuality: CGFloat = 0.85
-    ) -> Data? {
+    ) throws -> Data {
         guard let source = CGImageSourceCreateWithData(imageData as CFData, nil),
             let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil)
-        else { return nil }
+        else { throw ImageCropUtilsError.imageDecodingFailed }
 
         let cropped = centerCropToPortrait(cgImage, aspectRatio: aspectRatio)
-        return jpegData(from: cropped, quality: compressionQuality)
+        return try jpegData(from: cropped, quality: compressionQuality)
     }
 
     /// Center-crops a `CGImage` to the given portrait aspect ratio.
@@ -59,7 +59,7 @@ enum ImageCropUtils {
     }
 
     /// Encodes a `CGImage` as JPEG data.
-    static func jpegData(from image: CGImage, quality: CGFloat) -> Data? {
+    static func jpegData(from image: CGImage, quality: CGFloat) throws -> Data {
         let data = NSMutableData()
         guard
             let destination = CGImageDestinationCreateWithData(
@@ -68,14 +68,22 @@ enum ImageCropUtils {
                 1,
                 nil
             )
-        else { return nil }
+        else { throw ImageCropUtilsError.jpegDestinationCreationFailed }
 
         let options: [CFString: Any] = [
             kCGImageDestinationLossyCompressionQuality: quality
         ]
         CGImageDestinationAddImage(destination, image, options as CFDictionary)
 
-        guard CGImageDestinationFinalize(destination) else { return nil }
+        guard CGImageDestinationFinalize(destination) else {
+            throw ImageCropUtilsError.jpegDestinationFinalizeFailed
+        }
         return data as Data
     }
+}
+
+enum ImageCropUtilsError: Error, Equatable {
+    case imageDecodingFailed
+    case jpegDestinationCreationFailed
+    case jpegDestinationFinalizeFailed
 }

@@ -160,13 +160,20 @@ final class DependencyContainer {
     #if BACKGROUND_EFFECTS_ENABLED
         lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
             bundle: .init(for: DefaultBackgroundEffectsRepository.self),
-            cacheProvider: DefaultBackgroundEffectsCacheProvider(
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
                 fileManager: .default,
+                searchPathDirectory: .cachesDirectory,
                 pathComponent: "video_backgrounds"
             )
         )
 
-        lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository()
+        lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository(
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
+                fileManager: .default,
+                searchPathDirectory: .documentDirectory,
+                pathComponent: "user_backgrounds"
+            )
+        )
 
         lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
 

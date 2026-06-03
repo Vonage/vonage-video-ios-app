@@ -62,6 +62,18 @@ struct VideoEffectsViewModelTests {
         #expect(spy.addVideoTransformerCallCount == 1)
     }
 
+    @Test("selectEffect applies to publisher when saving fails")
+    func selectEffectAppliesToPublisherWhenSavingFails() {
+        let spy = PublisherSpy()
+        let repo = MockVideoEffectRepository(saveError: TestError.saveError)
+        let sut = makeSUT(getCurrentPublisher: { spy }, videoEffectRepository: repo)
+
+        sut.selectEffect(.blurLow)
+
+        #expect(sut.selectedEffect == .blurLow)
+        #expect(spy.addVideoTransformerCallCount == 1)
+    }
+
     @Test("selectEffect none removes transformers without adding")
     func selectEffectNoneRemovesTransformers() {
         let spy = PublisherSpy()
@@ -316,6 +328,7 @@ struct VideoEffectsViewModelTests {
 
     private enum TestError: Error {
         case publisherError
+        case saveError
     }
 
     private func makeSUT(
@@ -393,12 +406,17 @@ private final class MockUserBackgroundRepository: UserBackgroundRepository {
 private final class MockVideoEffectRepository: VideoEffectRepository {
     var savedEffect: VideoEffect?
     private let storedEffect: VideoEffect
+    private let saveError: Error?
 
-    init(storedEffect: VideoEffect = .none) {
+    init(storedEffect: VideoEffect = .none, saveError: Error? = nil) {
         self.storedEffect = storedEffect
+        self.saveError = saveError
     }
 
-    func save(_ effect: VideoEffect) {
+    func save(_ effect: VideoEffect) throws {
+        if let saveError {
+            throw saveError
+        }
         savedEffect = effect
     }
 

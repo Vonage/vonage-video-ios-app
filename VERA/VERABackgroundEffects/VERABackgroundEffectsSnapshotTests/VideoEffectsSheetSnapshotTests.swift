@@ -164,6 +164,6 @@ private final class StubUserBackgroundRepository: UserBackgroundRepository {
 private final class StubVideoEffectRepository: VideoEffectRepository {
     private let storedEffect: VideoEffect
     init(storedEffect: VideoEffect = .none) { self.storedEffect = storedEffect }
-    func save(_ effect: VideoEffect) {}
+    func save(_ effect: VideoEffect) throws {}
     func load() -> VideoEffect { storedEffect }
 }
