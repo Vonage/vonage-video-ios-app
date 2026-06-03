@@ -214,14 +214,6 @@ public struct SettingsView: View {
         .navigationTitle(section.displayName)
     }
 
-    private func saveAndDismissIfNeeded() {
-        Task { @MainActor in
-            await viewModel.save()
-            if !viewModel.showRestartAlert {
-                dismiss()
-            }
-        }
-    }
 }
 
 // MARK: - Previews
