@@ -187,7 +187,7 @@ private func isAdvancedNoiseSuppressionEnabled() -> Bool {
 ///
 /// - Returns: `true` if `meetingRoomSettings.allowFeedback` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func areFeedbackEnabled() -> Bool {
+private func isFeedbackEnabled() -> Bool {
     let config = readAppConfig()
     let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
     return meetingRoomSettings["allowFeedback"] as! Bool
@@ -264,7 +264,7 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAAudioEffects", path: "VERAAudioEffects")
         ])
     }
-    if areFeedbackEnabled() {
+    if isFeedbackEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAFeedback", path: "VERAFeedback")
         ])
@@ -324,7 +324,7 @@ private func createBuildSettings() -> Settings {
         print("AudioEffects feature enabled in build settings.")
     }
 
-    if areFeedbackEnabled() {
+    if isFeedbackEnabled() {
         baseSettings["FEEDBACK_ENABLED"] = "1"
         flags.append("FEEDBACK_ENABLED")
         print("Feedback feature enabled in build settings.")
