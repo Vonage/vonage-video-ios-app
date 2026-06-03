@@ -1,6 +1,7 @@
 appId: ${APP_ID}
 ---
 - launchApp:
+    clearState: true
     permissions:
       camera: allow
       microphone: allow
@@ -13,6 +14,8 @@ appId: ${APP_ID}
 # Enter a room name
 - tapOn:
     id: "room-name-input"
+
+- eraseText
 
 - inputText: "testroom"
 
@@ -37,6 +40,8 @@ appId: ${APP_ID}
 # Enter username and join meeting
 - tapOn:
     id: "username-input"
+
+- eraseText
 
 - inputText: "Test User"
 
@@ -106,6 +111,13 @@ appId: ${APP_ID}
 # End call
 - tapOn:
     id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- tapOn:
+    id: "meeting-room-end-call-button"
+    optional: true
 
 - extendedWaitUntil:
     visible:
