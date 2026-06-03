@@ -179,7 +179,20 @@ jobs:
             -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
 
-      - name: Preboot iOS Simulator
+      - name: Run VERAFeedbackTests (macOS)
+      id: feedback-tests-macos
+      run: |
+        echo "🧪 Running VERAFeedbackTests on macOS"
+        xcodebuild test \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAFeedbackTests \
+          -destination "platform=macOS" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAFeedbackTests-macOS.xcresult \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+    - name: Preboot iOS Simulator
         run: |
           set -euo pipefail
           xcrun simctl boot "iPhone 17" || true 
@@ -434,7 +447,32 @@ jobs:
             -parallel-testing-enabled NO \
             $XCODE_COMMON_FLAGS | xcpretty
 
-      - name: Run VERAVonageChatPluginTests (iOS Simulator)
+      - name: Run VERAFeedbackSnapshotTests (iOS Simulator)
+      id: feedback-snapshot-tests
+      timeout-minutes: 15
+      run: |
+        echo "📸 Building VERAFeedbackSnapshotTests on iOS Simulator"
+        xcodebuild build-for-testing \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAFeedbackSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+        
+        echo "📸 Running VERAFeedbackSnapshotTests on iOS Simulator"
+        xcodebuild test-without-building \
+          -workspace VERA/VERA.xcworkspace \
+          -scheme VERAFeedbackSnapshotTests \
+          -destination "platform=iOS Simulator,name=iPhone 17" \
+          -derivedDataPath DerivedData \
+          -enableCodeCoverage YES \
+          -resultBundlePath DerivedData/VERAFeedbackSnapshotTests-iOS.xcresult \
+          -parallel-testing-enabled NO \
+          $XCODE_COMMON_FLAGS | xcpretty
+
+    - name: Run VERAVonageChatPluginTests (iOS Simulator)
         id: ot-chat-plugin-tests
         timeout-minutes: 15
         run: |
