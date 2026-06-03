@@ -179,6 +179,19 @@ jobs:
             -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
 
+      - name: Run VERALoggerTests (macOS)
+        id: logger-tests-macos
+        run: |
+          echo "🧪 Running VERALoggerTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERALoggerTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERALoggerTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
+
       - name: Preboot iOS Simulator
         run: |
           set -euo pipefail
@@ -714,6 +727,7 @@ jobs:
             DerivedData/VERAReactionsSnapshotTests-iOS.xcresult
             DerivedData/VERASettingsSnapshotTests-iOS.xcresult
             DerivedData/VERAMeetingRoomTests-macOS.xcresult
+            DerivedData/VERALoggerTests-macOS.xcresult
             DerivedData/VERAMeetingRoomSnapshotTests-iOS.xcresult
             DerivedData/VERAArchivingSnapshotTests-iOS.xcresult
             DerivedData/VERAChatSnapshotTests-iOS.xcresult
