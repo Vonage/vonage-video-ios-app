@@ -1347,6 +1347,7 @@
     },
     "Restart Required" : {
       "comment" : "Alert title shown when logging settings change requires an app restart.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

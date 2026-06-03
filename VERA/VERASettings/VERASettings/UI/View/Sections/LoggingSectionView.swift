@@ -29,9 +29,18 @@ struct LoggingSectionView: View {
         } header: {
             Text("Logging".localized)
         } footer: {
-            Text(
-                "When enabled, Vonage SDK logs are saved to files that can be shared for troubleshooting."
-                    .localized)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(
+                    "When enabled, Vonage SDK logs are saved to files that can be shared for troubleshooting."
+                        .localized)
+                if viewModel.loggingSettingsChanged {
+                    Text(
+                        "Please close and reopen the app for SDK logging changes to take effect."
+                            .localized
+                    )
+                    .foregroundStyle(.orange)
+                }
+            }
         }
     }
 }

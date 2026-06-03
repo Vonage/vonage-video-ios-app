@@ -42,9 +42,6 @@ public final class SettingsViewModel: ObservableObject {
     /// Controls presentation of the alert shown when no log files are available.
     @Published public var showNoLogsAlert: Bool = false
 
-    /// Controls presentation of the restart-required alert after logging changes.
-    @Published public var showRestartAlert: Bool = false
-
     /// The current codec mode preference (auto or manual).
     public var codecMode: SettingsCodecMode {
         settingsPreference.codecPreference.mode
@@ -100,6 +97,13 @@ public final class SettingsViewModel: ObservableObject {
         logFileURLProvider?() ?? []
     }
 
+    /// Whether the logging configuration has been modified from its initial state.
+    /// Used by the UI to show a restart-required note.
+    public var loggingSettingsChanged: Bool {
+        loggingRepository != nil
+            && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
+    }
+
     /// Whether any log files are currently available to share.
     public var hasLogFiles: Bool {
         !logFileURLs.isEmpty
@@ -137,8 +141,8 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Tracks the original persisted log level to detect changes.
     private var initialLogLevel: SDKLogLevel = .debug
-    /// Cancellable for the auto-save subscription.
-    private var autoSaveCancellable: AnyCancellable?
+    /// Cancellables for auto-save subscriptions.
+    private var autoSaveCancellables: Set<AnyCancellable> = []
 
     /// In-flight auto-save task. Cancelled before each new save to
     /// prevent overlapping writes that could overwrite newer data.
@@ -257,32 +261,56 @@ public final class SettingsViewModel: ObservableObject {
 
     // MARK: - Private
 
-    /// Sets up a Combine pipeline that auto-saves preferences after a debounce.
+    /// Sets up Combine pipelines that auto-save preferences after a debounce.
+    ///
+    /// Two pipelines run independently:
+    /// 1. **Settings pipeline** – watches `$settingsPreference` and persists both
+    ///    publisher settings and logging preferences on every debounced change.
+    /// 2. **Logging pipeline** – watches `$isLoggingEnabled` and `$sdkLogLevel`
+    ///    so that toggling the logging switch or changing the log level triggers
+    ///    persistence and a restart alert even when no other setting changes.
     ///
     /// `dropFirst()` avoids re-saving the value just loaded from the repository.
     /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
     /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
     private func startAutoSave() {
-        autoSaveCancellable =
-            $settingsPreference
+        $settingsPreference
             .dropFirst()
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.autoSaveTask?.cancel()
-                self?.autoSaveTask = Task {
-                    await self?.persistCurrentState()
-                    await self?.persistLoggingState()
-                    let loggingChanged =
-                        self?.loggingRepository != nil
-                        && (self?.isLoggingEnabled != self?.initialLoggingEnabled
-                            || self?.sdkLogLevel != self?.initialLogLevel)
-
-                    if loggingChanged {
-                        self?.showRestartAlert = true
-                    }
-                }
+                self?.scheduleAutoSave()
             }
+            .store(in: &autoSaveCancellables)
+
+        guard loggingRepository != nil else { return }
+
+        $isLoggingEnabled
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleAutoSave()
+            }
+            .store(in: &autoSaveCancellables)
+
+        $sdkLogLevel
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleAutoSave()
+            }
+            .store(in: &autoSaveCancellables)
+    }
+
+    /// Coalesces multiple pipeline triggers into a single auto-save task.
+    private func scheduleAutoSave() {
+        autoSaveTask?.cancel()
+        autoSaveTask = Task {
+            await persistCurrentState()
+            await persistLoggingState()
+        }
     }
 
     /// Persists all current field values to the repository.

@@ -318,59 +318,98 @@ struct SettingsViewModelTests {
         #expect(repository.saveCallCount >= 1)
     }
 
-    @Test("Save shows restart alert when logging toggle changes")
-    func saveShowsRestartAlertWhenLoggingToggleChanges() async throws {
+    @Test("loggingSettingsChanged is true when logging toggle changes")
+    func loggingSettingsChangedWhenToggleChanges() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
         let viewModel = SettingsViewModel(
             repository: repository,
+            autoSaveDebounce: 0.05,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: initialPrefs
         )
         await viewModel.setup()
 
-        viewModel.isLoggingEnabled = true
-        viewModel.sdkLogLevel = .error
+        #expect(viewModel.loggingSettingsChanged == false)
 
-        await viewModel.save()
+        viewModel.isLoggingEnabled = true
+
+        #expect(viewModel.loggingSettingsChanged == true)
+    }
+
+    @Test("Auto-save persists logging when toggle changes")
+    func autoSavePersistsLoggingWhenToggleChanges() async throws {
+        let repository = MockSettingsRepository()
+        let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .debug)
+        let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            autoSaveDebounce: 0.05,
+            loggingRepository: loggingRepository,
+            initialLoggingPreferences: initialPrefs
+        )
+        await viewModel.setup()
+
+        await awaitAutoSave(on: viewModel) {
+            viewModel.isLoggingEnabled = true
+        }
+        await delay()
 
         #expect(loggingRepository.saveCallCount == 1)
         #expect(
             loggingRepository.lastSavedPreferences
-                == SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .error, pendingLogCleanup: true)
+                == SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug, pendingLogCleanup: true)
         )
-        #expect(viewModel.showRestartAlert == true)
-        #expect(viewModel.isPresented == true)
     }
 
-    @Test("Save shows restart alert when only log level changes")
-    func saveShowsRestartAlertWhenLogLevelChanges() async throws {
+    @Test("loggingSettingsChanged is true when only log level changes")
+    func loggingSettingsChangedWhenLogLevelChanges() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
         let viewModel = SettingsViewModel(
             repository: repository,
+            autoSaveDebounce: 0.05,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: initialPrefs
         )
         await viewModel.setup()
 
+        #expect(viewModel.loggingSettingsChanged == false)
+
         viewModel.sdkLogLevel = .warn
 
-        await viewModel.save()
+        #expect(viewModel.loggingSettingsChanged == true)
+    }
+
+    @Test("Auto-save persists logging when log level changes")
+    func autoSavePersistsLoggingWhenLogLevelChanges() async throws {
+        let repository = MockSettingsRepository()
+        let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
+        let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            autoSaveDebounce: 0.05,
+            loggingRepository: loggingRepository,
+            initialLoggingPreferences: initialPrefs
+        )
+        await viewModel.setup()
+
+        await awaitAutoSave(on: viewModel) {
+            viewModel.sdkLogLevel = .warn
+        }
+        await delay()
 
         #expect(loggingRepository.saveCallCount == 1)
         #expect(
             loggingRepository.lastSavedPreferences
                 == SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn, pendingLogCleanup: true)
         )
-        #expect(viewModel.showRestartAlert == true)
-        #expect(viewModel.isPresented == true)
     }
 
-    @Test("Save dismisses without alert when logging settings are unchanged")
-    func saveDismissesWhenLoggingSettingsAreUnchanged() async throws {
+    @Test("loggingSettingsChanged is false when logging settings are unchanged")
+    func loggingSettingsChangedIsFalseWhenUnchanged() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
@@ -381,14 +420,11 @@ struct SettingsViewModelTests {
         )
         await viewModel.setup()
 
-        await viewModel.save()
-
-        #expect(viewModel.showRestartAlert == false)
-        #expect(viewModel.isPresented == false)
+        #expect(viewModel.loggingSettingsChanged == false)
     }
 
-    @Test("Save sets pendingLogCleanup when logging is re-enabled")
-    func saveSetsCleanupFlagWhenLoggingIsReenabled() async throws {
+    @Test("Dismiss sets pendingLogCleanup when logging is re-enabled")
+    func dismissSetsCleanupFlagWhenLoggingIsReenabled() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
@@ -400,14 +436,14 @@ struct SettingsViewModelTests {
         await viewModel.setup()
 
         viewModel.isLoggingEnabled = true
-        await viewModel.save()
+        await viewModel.dismiss()
 
         let saved = await loggingRepository.getPreferences()
         #expect(saved.pendingLogCleanup == true)
     }
 
-    @Test("Save sets pendingLogCleanup when log level changes")
-    func saveSetsCleanupFlagWhenLogLevelChanges() async throws {
+    @Test("Dismiss sets pendingLogCleanup when log level changes")
+    func dismissSetsCleanupFlagWhenLogLevelChanges() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
@@ -419,14 +455,14 @@ struct SettingsViewModelTests {
         await viewModel.setup()
 
         viewModel.sdkLogLevel = .info
-        await viewModel.save()
+        await viewModel.dismiss()
 
         let saved = await loggingRepository.getPreferences()
         #expect(saved.pendingLogCleanup == true)
     }
 
-    @Test("Save does not set pendingLogCleanup when nothing changes")
-    func saveDoesNotSetCleanupFlagWhenNothingChanges() async throws {
+    @Test("Dismiss does not set pendingLogCleanup when nothing changes")
+    func dismissDoesNotSetCleanupFlagWhenNothingChanges() async throws {
         let repository = MockSettingsRepository()
         let initialPrefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
         let loggingRepository = MockSDKLoggingRepository(initialPreferences: initialPrefs)
@@ -437,7 +473,7 @@ struct SettingsViewModelTests {
         )
         await viewModel.setup()
 
-        await viewModel.save()
+        await viewModel.dismiss()
 
         let saved = await loggingRepository.getPreferences()
         #expect(saved.pendingLogCleanup == false)
@@ -458,7 +494,7 @@ struct SettingsViewModelTests {
 
         vm1.isLoggingEnabled = true
         vm1.sdkLogLevel = .error
-        await vm1.save()
+        await vm1.dismiss()
 
         let vm2 = SettingsViewModel(
             repository: settingsRepo,
@@ -737,10 +773,10 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.maxAudioBitrate == 96_000)
     }
 
-    // MARK: - Cancel & Logging Tests
+    // MARK: - Dismiss & Logging Tests
 
-    @Test("Cancel does not persist logging preferences")
-    func cancelDoesNotPersistLoggingPreferences() async {
+    @Test("Dismiss does not persist logging when no changes made")
+    func dismissDoesNotPersistLoggingWhenNoChanges() async {
         let repository = MockSettingsRepository()
         let loggingRepository = MockSDKLoggingRepository(
             initialPreferences: SDKLoggingPreferences(isLoggingEnabled: false, logLevel: .debug)
@@ -751,16 +787,17 @@ struct SettingsViewModelTests {
         )
         await viewModel.setup()
 
+        // Change logging but then dismiss — logging should still be saved
         viewModel.isLoggingEnabled = true
         viewModel.sdkLogLevel = .error
-        viewModel.cancel()
+        await viewModel.dismiss()
 
-        #expect(loggingRepository.saveCallCount == 0)
+        #expect(loggingRepository.saveCallCount == 1)
         #expect(viewModel.isPresented == false)
     }
 
-    @Test("Save without logging repository skips logging persistence")
-    func saveWithoutLoggingRepositorySkipsLogging() async {
+    @Test("Dismiss without logging repository skips logging persistence")
+    func dismissWithoutLoggingRepositorySkipsLogging() async {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
@@ -768,9 +805,9 @@ struct SettingsViewModelTests {
         )
 
         viewModel.isLoggingEnabled = true
-        await viewModel.save()
+        await viewModel.dismiss()
 
-        #expect(viewModel.showRestartAlert == false)
+        #expect(viewModel.loggingSettingsChanged == false)
         #expect(viewModel.isPresented == false)
     }
 
@@ -790,12 +827,13 @@ struct SettingsViewModelTests {
         #expect(viewModel.showNoLogsAlert == false)
     }
 
-    @Test("showRestartAlert defaults to false")
-    func showRestartAlertDefaultsToFalse() {
+    @Test("loggingSettingsChanged is false without logging repository")
+    func loggingSettingsChangedIsFalseWithoutRepo() {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(repository: repository)
 
-        #expect(viewModel.showRestartAlert == false)
+        viewModel.isLoggingEnabled = true
+        #expect(viewModel.loggingSettingsChanged == false)
     }
 
     @Test("codecMode reflects preference mode")

@@ -82,16 +82,6 @@ public struct SettingsView: View {
                 }
             }
         #endif
-        .alert("Restart Required".localized, isPresented: $viewModel.showRestartAlert) {
-            Button("OK".localized) {
-                viewModel.isPresented = false
-                dismiss()
-            }
-        } message: {
-            Text(
-                "Please close and reopen the app for SDK logging changes to take effect.".localized
-            )
-        }
         .alert("No Logs Available".localized, isPresented: $viewModel.showNoLogsAlert) {
             Button("OK".localized, role: .cancel) {}
         } message: {
