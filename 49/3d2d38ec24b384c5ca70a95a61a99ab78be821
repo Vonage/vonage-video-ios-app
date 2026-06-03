@@ -1,0 +1,62 @@
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultBackgroundEffectsStorageProvider.swift
+  s_9f3bf297c04727::t_d5b6e9b3c711d7 7-15,18,21,25,29,31,36-38,41-42,46-48,51,54-74,78-79
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/VideoEffectsViewModelTests.swift"
+  s_9f3bf297c04727::t_ba9c973ca28cbf 65-76,331,409,411,413,416-419
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultVideoEffectRepository.swift
+  s_9f3bf297c04727::t_ba9c973ca28cbf 26-27
+  s_9f3bf297c04727::t_07be31c9602205 10-11
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_9f3bf297c04727::t_d5b6e9b3c711d7 163,165,170-176
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultBackgroundEffectsRepository.swift
+  s_9f3bf297c04727::t_a4228c85ce3cfa 65-68
+  s_9f3bf297c04727::t_d5b6e9b3c711d7 26,30,33,37,46,48
+  s_9f3bf297c04727::t_466babda00c4f5 38,45,57-63,69,82-86
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultBackgroundEffectsRepositoryTests.swift
+  s_9f3bf297c04727::t_9bbe1f26451775 16,19,24,27-28,34-35,38,58,68-70,78-87,90-94,97-98
+  s_9f3bf297c04727::t_466babda00c4f5 49-57,59-65
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/DeleteBackgroundUseCase.swift
+  s_9f3bf297c04727::t_ba9c973ca28cbf 29
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultUserBackgroundRepositoryTests.swift
+  s_9f3bf297c04727::t_9bbe1f26451775 16-17,28-29,41-42,55-56,67-68,82-94
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultUserBackgroundRepository.swift
+  s_9f3bf297c04727::t_9213d4e0f57dbb 51
+  s_9f3bf297c04727::t_435a28695c838d 60-63
+  s_9f3bf297c04727::t_d5b6e9b3c711d7 17-20,24,26,58,78-79
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  s_9f3bf297c04727::t_ba9c973ca28cbf 56-60
+VERA/VERADomain/VERADomain/VideoEffects/VideoEffectRepository.swift
+  s_9f3bf297c04727::t_ba9c973ca28cbf 10
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/ImageCropUtils.swift
+  s_9f3bf297c04727::t_8c193df8da8c90 28,31,34,62,71,78-80,84-88
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultVideoEffectRepositoryTests.swift
+  s_9f3bf297c04727::t_ba9c973ca28cbf 14,18,25,29,44,61,65
+  s_9f3bf297c04727::t_bdb6d163f039b1 71-72,74-77,79,81-82,84-85
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_9f3bf297c04727::t_d5b6e9b3c711d7 219,221,226-232
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/BackgroundEffectScreenButtonSnapshotTests.swift
+  s_9f3bf297c04727::t_aa32a95a7c8301 89
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/MeetingBackgroundEffectScreenButtonSnapshotTests.swift
+  s_9f3bf297c04727::t_aa32a95a7c8301 89
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultBackgroundEffectsStorageProviderTests.swift
+  s_9f3bf297c04727::t_9bbe1f26451775 9-10,12-13,15,21,26-27,29,35,38-39,41-65,67-74,78-79,81,83,86-88,90,94-95,98-99,109-116
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/ImageCropUtilsTests.swift
+  s_9f3bf297c04727::t_c58bfdef53fb20 19,21,24-29,31-36,42
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/VideoEffectsSheetSnapshotTests.swift
+  s_9f3bf297c04727::t_aa32a95a7c8301 167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "493d2d38ec24b384c5ca70a95a61a99ab78be821",
+  "prompts": {},
+  "sessions": {
+    "s_9f3bf297c04727": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8c46-3988-7011-ae21-a8d3c62fe0a2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
