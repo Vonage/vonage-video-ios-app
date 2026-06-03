@@ -144,9 +144,7 @@ public struct SettingsView: View {
 
     /// The sections to show based on available features.
     private var availableSections: [SettingsSection] {
-        SettingsSection.allCases.filter { section in
-            section != .logging || viewModel.hasLoggingSupport
-        }
+        viewModel.availableSections
     }
 
     // MARK: - Sidebar

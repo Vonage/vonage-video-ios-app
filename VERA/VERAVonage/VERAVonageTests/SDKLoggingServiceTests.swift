@@ -291,4 +291,108 @@ struct SDKLoggingServiceTests {
         // Cleanup
         service.configure(enabled: false, logLevel: 0)
     }
+
+    // MARK: - makeFallbackStrategy
+
+    @Test("getLogFileURLs uses fallback strategy when not configured")
+    func getLogFileURLsUsesFallbackStrategy() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let service = SDKLoggingService(logsDirectory: logsDir)
+
+        // Create a file in the logs directory without configuring the service
+        try createFile(
+            at: logsDir.appendingPathComponent("sdk-log-current.log"),
+            contents: "fallback test"
+        )
+
+        // Should find the file through the fallback strategy
+        let urls = service.getLogFileURLs()
+        #expect(urls.count == 1)
+    }
+
+    @Test("clearLogFiles uses fallback strategy when not configured")
+    func clearLogFilesUsesFallbackStrategy() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let service = SDKLoggingService(logsDirectory: logsDir)
+
+        try createFile(
+            at: logsDir.appendingPathComponent("sdk-log-current.log"),
+            contents: "will be deleted"
+        )
+        #expect(!service.getLogFileURLs().isEmpty)
+
+        service.clearLogFiles()
+        #expect(service.getLogFileURLs().isEmpty)
+    }
+
+    @Test("clearLogFiles with active strategy clears strategy files")
+    func clearLogFilesWithActiveStrategy() {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let service = SDKLoggingService(logsDirectory: logsDir)
+
+        service.configure(enabled: true, logLevel: 2)
+        #expect(!service.getLogFileURLs().isEmpty)
+
+        service.clearLogFiles()
+        #expect(service.getLogFileURLs().isEmpty)
+
+        service.configure(enabled: false, logLevel: 0)
+    }
+
+    // MARK: - Thread Safety
+
+    @Test("Concurrent getLogFileURLs and clearLogFiles do not crash")
+    func concurrentAccessDoesNotCrash() async throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let service = SDKLoggingService(logsDirectory: logsDir)
+
+        try createFile(
+            at: logsDir.appendingPathComponent("sdk-log-current.log"),
+            contents: "concurrent test"
+        )
+
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<10 {
+                group.addTask {
+                    _ = service.getLogFileURLs()
+                }
+                group.addTask {
+                    service.clearLogFiles()
+                }
+            }
+        }
+
+        // No crash — test passes if we get here
+        #expect(true)
+    }
+
+    @Test("configure with each log level writes startup marker")
+    func configureWithEachLogLevelWritesMarker() {
+        for level in 0...4 {
+            let logsDir = makeLogsDirectory()
+            defer { cleanup(logsDir) }
+            let service = SDKLoggingService(logsDirectory: logsDir)
+
+            service.configure(enabled: true, logLevel: level)
+            service.configure(enabled: false, logLevel: 0)
+
+            let logFile = logsDir.appendingPathComponent(SDKLoggingService.currentFileName)
+            let exists = FileManager.default.fileExists(atPath: logFile.path)
+            #expect(exists, "Log file should exist for level \(level)")
+        }
+    }
+
+    @Test("getLogFileURLs returns empty after clearLogFiles with no configure")
+    func getLogFileURLsEmptyAfterClearNoConfig() {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let service = SDKLoggingService(logsDirectory: logsDir)
+
+        service.clearLogFiles()
+        #expect(service.getLogFileURLs().isEmpty)
+    }
 }

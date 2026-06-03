@@ -104,6 +104,14 @@ public final class SettingsViewModel: ObservableObject {
             && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
     }
 
+    /// The settings sections to display, filtered by feature availability.
+    /// Excludes the logging section when SDK logging is not configured.
+    public var availableSections: [SettingsSection] {
+        SettingsSection.allCases.filter { section in
+            section != .logging || hasLoggingSupport
+        }
+    }
+
     /// Whether any log files are currently available to share.
     public var hasLogFiles: Bool {
         !logFileURLs.isEmpty
