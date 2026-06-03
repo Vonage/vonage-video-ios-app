@@ -1,0 +1,34 @@
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultBackgroundEffectsCacheProviderTests.swift
+  s_9f3bf297c04727::t_398ded2bb16649 1-29,31-40,42-54,56,58,60-61,78-85,95-96
+  s_9f3bf297c04727::t_1df25f5493ebbf 30,41,55,57,59,62-77,86-94
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultBackgroundEffectsCacheProvider.swift
+  s_9f3bf297c04727::t_1df25f5493ebbf 9-10,16,25-26,31-34,39-43,48-49,51-54
+  s_9f3bf297c04727::t_e7a20638681803 1-8,11-15,17-24,27-30,35-38,44,46-47,50,55
+  s_9f3bf297c04727::t_8988223f899aef 45
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_9f3bf297c04727::t_e7a20638681803 217-223
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultBackgroundEffectsRepository.swift
+  s_9f3bf297c04727::t_1df25f5493ebbf 46,48
+  s_9f3bf297c04727::t_e7a20638681803 26,29-30,33,37
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_9f3bf297c04727::t_e7a20638681803 161-167
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultBackgroundEffectsRepositoryTests.swift
+  s_9f3bf297c04727::t_1df25f5493ebbf 65,69
+  s_9f3bf297c04727::t_398ded2bb16649 1-64,66-68,70-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "e43f604d851073261cdf4fb4e0e178dac3d30dab",
+  "prompts": {},
+  "sessions": {
+    "s_9f3bf297c04727": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e8c46-3988-7011-ae21-a8d3c62fe0a2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
