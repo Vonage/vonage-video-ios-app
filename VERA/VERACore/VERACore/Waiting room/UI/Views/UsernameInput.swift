@@ -15,9 +15,9 @@ struct UsernameInput: View {
             VonageTextField(
                 placeholder: String(localized: "Enter your name", bundle: .veraCore),
                 text: $userName,
-                state: usernameState
+                state: usernameState,
+                accessibilityIdentifier: WaitingRoomAccessibilityID.usernameInput
             )
-            .accessibilityIdentifier(WaitingRoomAccessibilityID.usernameInput)
         }
         .onChange(of: userName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {

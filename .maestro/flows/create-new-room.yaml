@@ -30,6 +30,9 @@ appId: ${APP_ID}
 
 - inputText: "Test User"
 
+- waitForAnimationToEnd:
+    timeout: 2000
+
 - tapOn:
     id: "join-meeting-button"
 

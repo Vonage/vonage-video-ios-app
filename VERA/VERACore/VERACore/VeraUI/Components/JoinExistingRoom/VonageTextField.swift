@@ -76,6 +76,7 @@ struct VonageTextField: View {
     private var text: Binding<String>
     private var state: VonageTextFieldState
     private let forceLowercase: Bool
+    private let accessibilityIdentifier: String?
 
     @State private var labelWidth: CGFloat = 0
     @FocusState private var isFocused: Bool
@@ -84,12 +85,14 @@ struct VonageTextField: View {
         placeholder: String,
         text: Binding<String>,
         state: VonageTextFieldState,
-        forceLowercase: Bool = false
+        forceLowercase: Bool = false,
+        accessibilityIdentifier: String? = nil
     ) {
         self.placeholder = placeholder
         self.text = text
         self.state = state
         self.forceLowercase = forceLowercase
+        self.accessibilityIdentifier = accessibilityIdentifier
     }
 
     var body: some View {
@@ -111,6 +114,7 @@ struct VonageTextField: View {
                             .focused($isFocused)
                             .foregroundStyle(textColor)
                             .kerning(VonageTextFieldConstants.kerning)
+                            .accessibilityIdentifierIfPresent(accessibilityIdentifier)
                             #if os(iOS)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
@@ -122,6 +126,7 @@ struct VonageTextField: View {
                             .focused($isFocused)
                             .foregroundStyle(textColor)
                             .kerning(VonageTextFieldConstants.kerning)
+                            .accessibilityIdentifierIfPresent(accessibilityIdentifier)
                     }
                 }
                 .padding(.horizontal, VonageTextFieldConstants.textFieldHorizontalPadding)
@@ -198,6 +203,17 @@ struct VonageTextField: View {
                 VERACommonUIAsset.SemanticColors.tertiary.swiftUIColor
             }
         case .invalid: VERACommonUIAsset.SemanticColors.error.swiftUIColor
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    fileprivate func accessibilityIdentifierIfPresent(_ identifier: String?) -> some View {
+        if let identifier {
+            accessibilityIdentifier(identifier)
+        } else {
+            self
         }
     }
 }

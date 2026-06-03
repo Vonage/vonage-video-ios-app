@@ -18,6 +18,9 @@ appId: ${APP_ID}
 
 - inputText: "testroom"
 
+- waitForAnimationToEnd:
+    timeout: 2000
+
 # Navigate to the waiting room
 - tapOn:
     id: "join-waiting-room-button"
@@ -34,6 +37,9 @@ appId: ${APP_ID}
     id: "username-input"
 
 - inputText: "Test User"
+
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # Join the meeting
 - tapOn:
