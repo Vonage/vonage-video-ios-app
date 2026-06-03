@@ -19,11 +19,14 @@ appId: ${APP_ID}
 
 - inputText: "testroom"
 
+- hideKeyboard
+
 - waitForAnimationToEnd:
     timeout: 2000
 
 - tapOn:
     id: "join-waiting-room-button"
+    optional: true
 
 - extendedWaitUntil:
     visible:
@@ -45,11 +48,16 @@ appId: ${APP_ID}
 
 - inputText: "Test User"
 
+- tapOn:
+    id: "waiting-room-screen"
+    point: "50%,55%"
+
 - waitForAnimationToEnd:
     timeout: 2000
 
 - tapOn:
     id: "join-meeting-button"
+    optional: true
 
 - extendedWaitUntil:
     visible:
