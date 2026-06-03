@@ -141,9 +141,16 @@ final class BottomBarButtonsAssembler {
         _ state: MeetingRoomButtonsState
     ) -> BottomBarButton {
         let button = container.archivingFactory.makeArchivingButton(viewModel: viewModel)
+        let isArchiving = state.archivingState.isArchiving
+        let accessibilityIdentifier =
+            isArchiving
+            ? ArchivingAccessibilityID.stopRecordingButton
+            : ArchivingAccessibilityID.startRecordingButton
         return .init(
-            label: state.archivingState.isArchiving
+            id: accessibilityIdentifier,
+            label: isArchiving
                 ? String(localized: "Stop Recording") : String(localized: "Start Recording"),
+            accessibilityIdentifier: accessibilityIdentifier,
             image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
             onTap: viewModel.onTap,
             content: {

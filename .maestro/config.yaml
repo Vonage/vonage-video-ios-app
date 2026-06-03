@@ -1,4 +1,3 @@
-appId: com.vonage.VERA
 executionOrder:
   continueOnFailure: true
   flowsOrder:
