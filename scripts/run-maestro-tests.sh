@@ -432,7 +432,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-if maestro test --device "$SIMULATOR_ID" --env APP_ID="$APP_ID" "$FLOW_TARGET"; then
+if maestro test --config .maestro/config.yaml --device "$SIMULATOR_ID" --env APP_ID="$APP_ID" "$FLOW_TARGET"; then
     TEST_RESULT=0
 else
     TEST_RESULT=$?

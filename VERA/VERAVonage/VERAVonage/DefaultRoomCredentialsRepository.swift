@@ -27,7 +27,7 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
     private let jsonDecoder: JSONDecoder
     private let jsonEncoder: JSONEncoder
     private let baseURL: URL
-    private var cache: [String: RoomCredentialsResponse] = [:]
+    private var sessionCache: [String: CreateSessionResponse] = [:]
 
     public init(
         baseURL: URL,
@@ -42,19 +42,10 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
     }
 
     public func getRoomCredentials(_ request: RoomCredentialsRequest) async throws -> RoomCredentialsResponse {
-        if let cached = cache[request.roomName] {
-            return cached
-        }
-
-        let createBody = try jsonEncoder.encode(CreateSessionRequestBody(roomName: request.roomName))
-        let createData = try await httpClient.post(
-            baseURL.appendingPathComponent("v2").appendingPathComponent("createSession"),
-            data: createBody)
-        let createResponse = try jsonDecoder.decode(
-            TRPCResponse<CreateSessionResponse>.self, from: createData)
+        let createResponse = try await getOrCreateSession(for: request.roomName)
 
         let joinBody = try jsonEncoder.encode(
-            JoinSessionRequestBody(sessionKey: createResponse.result.data.sessionKey))
+            JoinSessionRequestBody(sessionKey: createResponse.sessionKey))
         let joinData = try await httpClient.post(
             baseURL.appendingPathComponent("v2").appendingPathComponent("joinSession"),
             data: joinBody)
@@ -62,13 +53,26 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
             TRPCResponse<JoinSessionResponse>.self, from: joinData)
 
         let credentials = RoomCredentialsResponse(
-            sessionId: createResponse.result.data.sessionId,
+            sessionId: createResponse.sessionId,
             token: joinResponse.result.data.token,
-            apiKey: createResponse.result.data.applicationId,
-            sessionKey: createResponse.result.data.sessionKey)
-
-        cache[request.roomName] = credentials
-
+            apiKey: createResponse.applicationId,
+            sessionKey: createResponse.sessionKey)
         return credentials
+    }
+
+    private func getOrCreateSession(for roomName: String) async throws -> CreateSessionResponse {
+        if let cached = sessionCache[roomName] {
+            return cached
+        }
+
+        let createBody = try jsonEncoder.encode(CreateSessionRequestBody(roomName: roomName))
+        let createData = try await httpClient.post(
+            baseURL.appendingPathComponent("v2").appendingPathComponent("createSession"),
+            data: createBody)
+        let createResponse = try jsonDecoder.decode(
+            TRPCResponse<CreateSessionResponse>.self, from: createData)
+
+        sessionCache[roomName] = createResponse.result.data
+        return createResponse.result.data
     }
 }

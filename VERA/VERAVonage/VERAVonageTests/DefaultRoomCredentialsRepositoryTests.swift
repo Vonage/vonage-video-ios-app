@@ -115,15 +115,23 @@ struct DefaultRoomCredentialsRepositoryTests {
         #expect(httpClient.callCount == 2)
     }
 
-    @Test("Caches credentials for same room")
-    func cachesCredentialsForSameRoom() async throws {
-        let httpClient = try makeHTTPClientWithResponses()
+    @Test("Caches session but refreshes join token for same room")
+    func cachesSessionButRefreshesJoinTokenForSameRoom() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(),
+            try makeJoinSessionJSONResponse(token: "token-1"),
+            try makeJoinSessionJSONResponse(token: "token-2"),
+        ]
 
         let sut = makeSUT(httpClient: httpClient)
-        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
-        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
+        let firstCredentials = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
+        let secondCredentials = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
 
-        #expect(httpClient.callCount == 2)
+        #expect(httpClient.callCount == 3)
+        #expect(httpClient.recordedURLs.map(\.lastPathComponent) == ["createSession", "joinSession", "joinSession"])
+        #expect(firstCredentials.token == "token-1")
+        #expect(secondCredentials.token == "token-2")
     }
 
     @Test("Different rooms are fetched independently")
