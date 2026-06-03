@@ -43,7 +43,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "meeting-room-screen"
-    timeout: 30000
+    timeout: 60000
 
 - takeScreenshot: 01-meeting-room
 

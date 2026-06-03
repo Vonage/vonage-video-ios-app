@@ -1,4 +1,15 @@
 appId: com.vonage.VERA
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - join-with-camera-mic-allowed
+    - create-new-room
+    - waiting-room-controls-disabled
+    - waiting-room-controls-enabled
+    - goodbye-view-landing-page
+    - goodbye-reenter-room
+    - recording
+    - github-repo-link
 platform:
   ios:
     disableAnimations: true
