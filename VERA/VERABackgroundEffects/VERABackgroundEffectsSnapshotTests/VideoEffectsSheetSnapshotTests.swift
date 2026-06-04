@@ -2,6 +2,7 @@
 //  Created by Vonage on 01/06/2026.
 //
 
+import Combine
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -119,17 +120,17 @@ struct VideoEffectsSheetSnapshotTests {
 
         let viewModel = VideoEffectsViewModel(
             getCurrentPublisher: { MockVERAPublisher() },
-            getBackgroundsUseCase: GetBackgroundsUseCase(
+            getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
                 backgroundEffectsRepository: repository,
                 userBackgroundRepository: userRepo
             ),
-            addBackgroundUseCase: AddBackgroundUseCase(
+            addBackgroundUseCase: DefaultAddBackgroundUseCase(
                 userBackgroundRepository: userRepo
             ),
-            deleteBackgroundUseCase: DeleteBackgroundUseCase(
-                userBackgroundRepository: userRepo,
-                videoEffectRepository: StubVideoEffectRepository(storedEffect: effect)
+            deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+                userBackgroundRepository: userRepo
             ),
+            remainingSlotsPublisher: userRepo.remainingSlotsPublisher,
             videoEffectRepository: StubVideoEffectRepository(storedEffect: effect)
         )
 
@@ -154,6 +155,9 @@ private final class StubUserBackgroundRepository: UserBackgroundRepository {
     static let maxUserBackgrounds = 10
     let remainingSlots: Int
     init(remainingSlots: Int = 10) { self.remainingSlots = remainingSlots }
+    var remainingSlotsPublisher: AnyPublisher<Int, Never> {
+        Just(remainingSlots).eraseToAnyPublisher()
+    }
     func savedBackgrounds() throws -> [VideoBackgroundItem] { [] }
     func save(_ imageData: Data) throws -> VideoBackgroundItem {
         VideoBackgroundItem(id: "stub", imagePath: "/tmp/stub.jpg", isUserUploaded: true)

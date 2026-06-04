@@ -2,6 +2,7 @@
 //  Created by Vonage on 25/05/2026.
 //
 
+import Combine
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -48,19 +49,20 @@ struct MeetingBackgroundEffectScreenButtonSnapshotTests {
     // MARK: - Test Helpers
 
     private func makeMockViewModel(effect: VideoEffect) -> VideoEffectsViewModel {
+        let userRepo = StubUserBackgroundRepository()
         let viewModel = VideoEffectsViewModel(
             getCurrentPublisher: { MockVERAPublisher() },
-            getBackgroundsUseCase: GetBackgroundsUseCase(
+            getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
                 backgroundEffectsRepository: StubBackgroundEffectsRepository(),
-                userBackgroundRepository: StubUserBackgroundRepository()
+                userBackgroundRepository: userRepo
             ),
-            addBackgroundUseCase: AddBackgroundUseCase(
-                userBackgroundRepository: StubUserBackgroundRepository()
+            addBackgroundUseCase: DefaultAddBackgroundUseCase(
+                userBackgroundRepository: userRepo
             ),
-            deleteBackgroundUseCase: DeleteBackgroundUseCase(
-                userBackgroundRepository: StubUserBackgroundRepository(),
-                videoEffectRepository: StubVideoEffectRepository()
+            deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+                userBackgroundRepository: userRepo
             ),
+            remainingSlotsPublisher: userRepo.remainingSlotsPublisher,
             videoEffectRepository: StubVideoEffectRepository(storedEffect: effect)
         )
         return viewModel
@@ -75,12 +77,14 @@ private final class StubBackgroundEffectsRepository: BackgroundEffectsRepository
 
 private final class StubUserBackgroundRepository: UserBackgroundRepository {
     static let maxUserBackgrounds = 10
+    var remainingSlotsPublisher: AnyPublisher<Int, Never> {
+        Just(10).eraseToAnyPublisher()
+    }
     func savedBackgrounds() throws -> [VideoBackgroundItem] { [] }
     func save(_ imageData: Data) throws -> VideoBackgroundItem {
         VideoBackgroundItem(id: "stub", imagePath: "/tmp/stub.jpg", isUserUploaded: true)
     }
     func delete(_ id: String) throws {}
-    var remainingSlots: Int { 10 }
 }
 
 private final class StubVideoEffectRepository: VideoEffectRepository {

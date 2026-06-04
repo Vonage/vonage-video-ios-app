@@ -133,14 +133,27 @@ struct VideoEffectsViewModelTests {
         #expect(sut.backgrounds[1].id == "user_1")
     }
 
-    @Test("loadBackgrounds sets remainingSlots")
-    func loadBackgroundsSetsRemainingSlots() {
+    @Test("initializes remainingSlots from publisher")
+    func initializesRemainingSlotsFromPublisher() async {
         let userRepo = MockUserBackgroundRepository(items: [])
         let sut = makeSUT(userBackgroundRepository: userRepo)
 
-        sut.loadBackgrounds()
+        await delay()
 
         #expect(sut.remainingSlots == 10)
+    }
+
+    @Test("remainingSlots updates on main from background publisher emission")
+    func remainingSlotsUpdatesOnMainFromBackgroundPublisherEmission() async {
+        let userRepo = MockUserBackgroundRepository(items: [])
+        let sut = makeSUT(userBackgroundRepository: userRepo)
+
+        DispatchQueue.global().async {
+            userRepo.sendRemainingSlots(7)
+        }
+        await delay()
+
+        #expect(sut.remainingSlots == 7)
     }
 
     // MARK: - deleteBackground
@@ -177,6 +190,25 @@ struct VideoEffectsViewModelTests {
         sut.deleteBackground(userItem)
 
         #expect(sut.selectedEffect == .none)
+        #expect(repo.savedEffect == VideoEffect.none)
+    }
+
+    @Test("deleteBackground keeps selected effect if deleted background was not active")
+    func deleteBackgroundKeepsSelectedEffectIfDeletedBackgroundWasNotActive() {
+        let userItem = VideoBackgroundItem(
+            id: "user_1", imagePath: "/p/u1.jpg", isUserUploaded: true)
+        let repo = MockVideoEffectRepository(storedEffect: .blurHigh)
+        let userRepo = MockUserBackgroundRepository(items: [userItem])
+        let sut = makeSUT(
+            userBackgroundRepository: userRepo,
+            videoEffectRepository: repo
+        )
+        sut.loadBackgrounds()
+
+        sut.deleteBackground(userItem)
+
+        #expect(sut.selectedEffect == .blurHigh)
+        #expect(repo.savedEffect == nil)
     }
 
     @Test("deleteBackground ignores stock items")
@@ -337,22 +369,22 @@ struct VideoEffectsViewModelTests {
         userBackgroundRepository: UserBackgroundRepository = MockUserBackgroundRepository(),
         videoEffectRepository: VideoEffectRepository = MockVideoEffectRepository()
     ) -> VideoEffectsViewModel {
-        let getBackgrounds = GetBackgroundsUseCase(
+        let getBackgrounds = DefaultGetBackgroundsUseCase(
             backgroundEffectsRepository: backgroundEffectsRepository,
             userBackgroundRepository: userBackgroundRepository
         )
-        let addBackground = AddBackgroundUseCase(
+        let addBackground = DefaultAddBackgroundUseCase(
             userBackgroundRepository: userBackgroundRepository
         )
-        let deleteBackground = DeleteBackgroundUseCase(
-            userBackgroundRepository: userBackgroundRepository,
-            videoEffectRepository: videoEffectRepository
+        let deleteBackground = DefaultDeleteBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
         )
         return VideoEffectsViewModel(
             getCurrentPublisher: getCurrentPublisher,
             getBackgroundsUseCase: getBackgrounds,
             addBackgroundUseCase: addBackground,
             deleteBackgroundUseCase: deleteBackground,
+            remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
             videoEffectRepository: videoEffectRepository
         )
     }
@@ -377,9 +409,15 @@ private final class MockUserBackgroundRepository: UserBackgroundRepository {
 
     var items: [VideoBackgroundItem]
     var deletedIds: [String] = []
+    private let remainingSlotsSubject: CurrentValueSubject<Int, Never>
 
     init(items: [VideoBackgroundItem] = []) {
         self.items = items
+        remainingSlotsSubject = CurrentValueSubject(max(0, Self.maxUserBackgrounds - items.count))
+    }
+
+    var remainingSlotsPublisher: AnyPublisher<Int, Never> {
+        remainingSlotsSubject.eraseToAnyPublisher()
     }
 
     func savedBackgrounds() throws -> [VideoBackgroundItem] {
@@ -387,19 +425,28 @@ private final class MockUserBackgroundRepository: UserBackgroundRepository {
     }
 
     func save(_ imageData: Data) throws -> VideoBackgroundItem {
+        guard items.count < Self.maxUserBackgrounds else {
+            throw UserBackgroundError.maxSlotsReached
+        }
         let item = VideoBackgroundItem(
             id: "user_bg_\(items.count)", imagePath: "/tmp/saved.jpg", isUserUploaded: true)
         items.append(item)
+        publishRemainingSlots()
         return item
     }
 
     func delete(_ id: String) throws {
         deletedIds.append(id)
         items.removeAll { $0.id == id }
+        publishRemainingSlots()
     }
 
-    var remainingSlots: Int {
-        max(0, Self.maxUserBackgrounds - items.count)
+    private func publishRemainingSlots() {
+        remainingSlotsSubject.send(max(0, Self.maxUserBackgrounds - items.count))
+    }
+
+    func sendRemainingSlots(_ remainingSlots: Int) {
+        remainingSlotsSubject.send(remainingSlots)
     }
 }
 

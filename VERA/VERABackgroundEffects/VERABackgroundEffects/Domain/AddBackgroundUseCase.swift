@@ -6,7 +6,11 @@ import Foundation
 import VERADomain
 
 /// Saves a user-selected photo as a new background image after cropping.
-public struct AddBackgroundUseCase {
+public protocol AddBackgroundUseCase {
+    func callAsFunction(_ imageData: Data) throws -> VideoBackgroundItem
+}
+
+public final class DefaultAddBackgroundUseCase: AddBackgroundUseCase {
 
     private let userBackgroundRepository: UserBackgroundRepository
 
@@ -14,10 +18,7 @@ public struct AddBackgroundUseCase {
         self.userBackgroundRepository = userBackgroundRepository
     }
 
-    public func execute(_ imageData: Data) throws -> VideoBackgroundItem {
-        guard userBackgroundRepository.remainingSlots > 0 else {
-            throw UserBackgroundError.maxSlotsReached
-        }
-        return try userBackgroundRepository.save(imageData)
+    public func callAsFunction(_ imageData: Data) throws -> VideoBackgroundItem {
+        try userBackgroundRepository.save(imageData)
     }
 }

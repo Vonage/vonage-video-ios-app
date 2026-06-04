@@ -2,6 +2,7 @@
 //  Created by Vonage on 26/1/26.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import VERACommonUI
@@ -12,17 +13,20 @@ public final class BackgroundEffectFactory {
     private let getBackgroundsUseCase: GetBackgroundsUseCase
     private let addBackgroundUseCase: AddBackgroundUseCase
     private let deleteBackgroundUseCase: DeleteBackgroundUseCase
+    private let remainingSlotsPublisher: AnyPublisher<Int, Never>
     private let videoEffectRepository: VideoEffectRepository
 
     public init(
         getBackgroundsUseCase: GetBackgroundsUseCase,
         addBackgroundUseCase: AddBackgroundUseCase,
         deleteBackgroundUseCase: DeleteBackgroundUseCase,
+        remainingSlotsPublisher: AnyPublisher<Int, Never>,
         videoEffectRepository: VideoEffectRepository
     ) {
         self.getBackgroundsUseCase = getBackgroundsUseCase
         self.addBackgroundUseCase = addBackgroundUseCase
         self.deleteBackgroundUseCase = deleteBackgroundUseCase
+        self.remainingSlotsPublisher = remainingSlotsPublisher
         self.videoEffectRepository = videoEffectRepository
     }
 
@@ -57,6 +61,7 @@ public final class BackgroundEffectFactory {
             getBackgroundsUseCase: getBackgroundsUseCase,
             addBackgroundUseCase: addBackgroundUseCase,
             deleteBackgroundUseCase: deleteBackgroundUseCase,
+            remainingSlotsPublisher: remainingSlotsPublisher,
             videoEffectRepository: videoEffectRepository
         )
     }

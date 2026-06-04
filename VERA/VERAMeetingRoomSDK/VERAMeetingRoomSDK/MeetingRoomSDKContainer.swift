@@ -234,17 +234,17 @@ final class MeetingRoomSDKContainer {
     lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
 
     lazy var backgroundEffectFactory = BackgroundEffectFactory(
-        getBackgroundsUseCase: GetBackgroundsUseCase(
+        getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
             backgroundEffectsRepository: backgroundEffectsRepository,
             userBackgroundRepository: userBackgroundRepository
         ),
-        addBackgroundUseCase: AddBackgroundUseCase(
+        addBackgroundUseCase: DefaultAddBackgroundUseCase(
             userBackgroundRepository: userBackgroundRepository
         ),
-        deleteBackgroundUseCase: DeleteBackgroundUseCase(
-            userBackgroundRepository: userBackgroundRepository,
-            videoEffectRepository: videoEffectRepository
+        deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
         ),
+        remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
         videoEffectRepository: videoEffectRepository
     )
 

@@ -2,6 +2,7 @@
 //  Created by Vonage on 31/05/2026.
 //
 
+import Combine
 import Foundation
 import Testing
 import UIKit
@@ -50,16 +51,35 @@ struct DefaultUserBackgroundRepositoryTests {
         #expect(!FileManager.default.fileExists(atPath: item.imagePath))
     }
 
-    @Test("remainingSlots accounts for saved items")
-    func remainingSlotsAccountsForSavedItems() throws {
+    @Test("remainingSlotsPublisher emits initial slots")
+    func remainingSlotsPublisherEmitsInitialSlots() throws {
         let (sut, directory) = makeSUT()
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        let initialSlots = sut.remainingSlots
+        #expect(remainingSlots(from: sut) == DefaultUserBackgroundRepository.maxUserBackgrounds)
+    }
+
+    @Test("remainingSlotsPublisher emits after save")
+    func remainingSlotsPublisherEmitsAfterSave() throws {
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
         let imageData = makeMinimalJPEGData()
         _ = try sut.save(imageData)
 
-        #expect(sut.remainingSlots == initialSlots - 1)
+        #expect(remainingSlots(from: sut) == DefaultUserBackgroundRepository.maxUserBackgrounds - 1)
+    }
+
+    @Test("remainingSlotsPublisher emits after delete")
+    func remainingSlotsPublisherEmitsAfterDelete() throws {
+        let (sut, directory) = makeSUT()
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let imageData = makeMinimalJPEGData()
+        let item = try sut.save(imageData)
+        try sut.delete(item.id)
+
+        #expect(remainingSlots(from: sut) == DefaultUserBackgroundRepository.maxUserBackgrounds)
     }
 
     @Test("save throws maxSlotsReached when limit exceeded")
@@ -102,5 +122,12 @@ struct DefaultUserBackgroundRepositoryTests {
             context.fill(CGRect(origin: .zero, size: size))
         }
         return image.jpegData(compressionQuality: 0.8)!
+    }
+
+    private func remainingSlots(from sut: DefaultUserBackgroundRepository) -> Int {
+        var remainingSlots = -1
+        let cancellable = sut.remainingSlotsPublisher.sink { remainingSlots = $0 }
+        cancellable.cancel()
+        return remainingSlots
     }
 }

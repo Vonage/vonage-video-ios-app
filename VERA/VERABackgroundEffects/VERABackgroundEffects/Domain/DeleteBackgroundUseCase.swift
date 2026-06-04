@@ -5,30 +5,20 @@
 import Foundation
 import VERADomain
 
-/// Deletes a user-uploaded background and resets the active effect if it was the deleted one.
-public struct DeleteBackgroundUseCase {
+/// Deletes a user-uploaded background.
+public protocol DeleteBackgroundUseCase {
+    func callAsFunction(_ id: String) throws
+}
+
+public final class DefaultDeleteBackgroundUseCase: DeleteBackgroundUseCase {
 
     private let userBackgroundRepository: UserBackgroundRepository
-    private let videoEffectRepository: VideoEffectRepository
 
-    public init(
-        userBackgroundRepository: UserBackgroundRepository,
-        videoEffectRepository: VideoEffectRepository
-    ) {
+    public init(userBackgroundRepository: UserBackgroundRepository) {
         self.userBackgroundRepository = userBackgroundRepository
-        self.videoEffectRepository = videoEffectRepository
     }
 
-    /// Deletes the background and returns `true` if the active effect was reset to `.none`.
-    @discardableResult
-    public func execute(_ id: String) throws -> Bool {
+    public func callAsFunction(_ id: String) throws {
         try userBackgroundRepository.delete(id)
-
-        let currentEffect = videoEffectRepository.load()
-        if case .backgroundImage(let activeId, _) = currentEffect, activeId == id {
-            try videoEffectRepository.save(.none)
-            return true
-        }
-        return false
     }
 }

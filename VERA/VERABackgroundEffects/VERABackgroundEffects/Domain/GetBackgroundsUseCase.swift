@@ -5,8 +5,20 @@
 import Foundation
 import VERADomain
 
-/// Merges stock and user-uploaded backgrounds into a single list and computes remaining upload slots.
-public struct GetBackgroundsUseCase {
+/// Merges stock and user-uploaded backgrounds into a single list.
+public protocol GetBackgroundsUseCase {
+    func callAsFunction() throws -> GetBackgroundsUseCaseResult
+}
+
+public struct GetBackgroundsUseCaseResult {
+    public let backgrounds: [VideoBackgroundItem]
+
+    public init(backgrounds: [VideoBackgroundItem]) {
+        self.backgrounds = backgrounds
+    }
+}
+
+public final class DefaultGetBackgroundsUseCase: GetBackgroundsUseCase {
 
     private let backgroundEffectsRepository: BackgroundEffectsRepository
     private let userBackgroundRepository: UserBackgroundRepository
@@ -19,17 +31,9 @@ public struct GetBackgroundsUseCase {
         self.userBackgroundRepository = userBackgroundRepository
     }
 
-    public struct Result {
-        public let backgrounds: [VideoBackgroundItem]
-        public let remainingSlots: Int
-    }
-
-    public func execute() throws -> Result {
+    public func callAsFunction() throws -> GetBackgroundsUseCaseResult {
         let stock = try backgroundEffectsRepository.availableBackgrounds()
         let user = try userBackgroundRepository.savedBackgrounds()
-        return Result(
-            backgrounds: stock + user,
-            remainingSlots: userBackgroundRepository.remainingSlots
-        )
+        return GetBackgroundsUseCaseResult(backgrounds: stock + user)
     }
 }

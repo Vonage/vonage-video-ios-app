@@ -2,6 +2,7 @@
 //  Created by Vonage on 31/05/2026.
 //
 
+import Combine
 import Foundation
 
 /// Manages user-uploaded background images.
@@ -22,6 +23,6 @@ public protocol UserBackgroundRepository {
     /// Deletes a user-uploaded background by its identifier.
     func delete(_ id: String) throws
 
-    /// The number of remaining upload slots.
-    var remainingSlots: Int { get }
+    /// Publishes the number of remaining upload slots.
+    var remainingSlotsPublisher: AnyPublisher<Int, Never> { get }
 }
