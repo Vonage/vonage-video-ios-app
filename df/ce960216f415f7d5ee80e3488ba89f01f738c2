@@ -1,0 +1,30 @@
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_43abc85b87dc37::t_5e5cf51babbea6 34,42,49,58,66,246
+  s_43abc85b87dc37::t_2ffc0abff17d99 252
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomAccessibilityID.swift
+  s_43abc85b87dc37::t_5dda5c7b418239 12
+.maestro/flows/recording.yaml
+  s_43abc85b87dc37::t_5dda5c7b418239 55,58-59,82,85-86
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_43abc85b87dc37::t_5e5cf51babbea6 5-10
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_43abc85b87dc37::t_5e5cf51babbea6 147-148
+scripts/run-maestro-tests.sh
+  s_43abc85b87dc37::t_4bf5fc8d7d8166 376-377,382
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "dfce960216f415f7d5ee80e3488ba89f01f738c2",
+  "prompts": {},
+  "sessions": {
+    "s_43abc85b87dc37": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e92dd-a5da-76f3-ba06-bc2393e57d92",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
