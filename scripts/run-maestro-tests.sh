@@ -379,7 +379,7 @@ if maestro test --env APP_ID="$APP_ID" "$FLOW_TARGET"; then
     TEST_RESULT=0
 else
     TEST_RESULT=$?
-    xcrun simctl spawn "$SIMULATOR_ID" log show --style syslog --last 30m > test-reports/logcat.txt || true
+    xcrun simctl spawn "$SIMULATOR_ID" log show --style syslog --last 30m > test-reports/os-simulator.log || true
 fi
 
 echo ""

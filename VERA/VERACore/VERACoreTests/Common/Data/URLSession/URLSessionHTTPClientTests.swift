@@ -63,6 +63,7 @@ final class URLSessionHTTPClientTests {
                     method: "GET",
                     url: url,
                     statusCode: nil,
+                    requestBodyPreview: nil,
                     responseBodyPreview: nil,
                     errorDescription: String(describing: HTTPClientError.invalidResponse))
             ])
@@ -95,15 +96,39 @@ final class URLSessionHTTPClientTests {
                     method: "GET",
                     url: url,
                     statusCode: statusCode,
+                    requestBodyPreview: nil,
                     responseBodyPreview: String(data: responseBody, encoding: .utf8),
                     errorDescription: String(describing: HTTPClientError.httpError(statusCode: statusCode)))
             ])
     }
 
     @Test
+    func get_deliversNetworkErrorAndLogsFailureEvent() async throws {
+        let url = URL(string: "https://a-url.com")!
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, _) = makeSUT(interceptor: interceptor)
+
+        await #expect(
+            performing: {
+                try await sut.get(url)
+            },
+            throws: { _ in true })
+
+        let event = try #require(interceptor.events.first)
+        #expect(interceptor.events.count == 1)
+        #expect(event.method == "GET")
+        #expect(event.url == url)
+        #expect(event.statusCode == nil)
+        #expect(event.requestBodyPreview == nil)
+        #expect(event.responseBodyPreview == nil)
+        #expect(event.errorDescription.isEmpty == false)
+    }
+
+    @Test
     func get_deliversDataOn200HTTPResponse() async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
         let expectedData = Data("any data".utf8)
 
         spy.stub(url: url, statusCode: 200, data: expectedData)
@@ -111,6 +136,15 @@ final class URLSessionHTTPClientTests {
         let receivedData = try await sut.get(url)
 
         #expect(receivedData == expectedData)
+        #expect(
+            interceptor.successEvents == [
+                HTTPClientSuccessEvent(
+                    method: "GET",
+                    url: url,
+                    statusCode: 200,
+                    requestBodyPreview: nil,
+                    responseBodyPreview: "any data")
+            ])
     }
 
     @Test(arguments: [200, 201, 250, 280, 299])
@@ -208,6 +242,7 @@ final class URLSessionHTTPClientTests {
                     method: "POST",
                     url: url,
                     statusCode: nil,
+                    requestBodyPreview: nil,
                     responseBodyPreview: nil,
                     errorDescription: String(describing: HTTPClientError.invalidResponse))
             ])
@@ -218,12 +253,13 @@ final class URLSessionHTTPClientTests {
         let url = URL(string: "https://a-url.com")!
         let interceptor = HTTPClientInterceptorSpy()
         let (sut, spy) = makeSUT(interceptor: interceptor)
+        let requestBody = Data("{\"archiveId\":\"archive-1\",\"sessionKey\":\"secret-session-key\"}".utf8)
         let responseBody = Data("{\"error\":\"something went wrong\"}".utf8)
         spy.stub(url: url, statusCode: statusCode, data: responseBody)
 
         await #expect(
             performing: {
-                try await sut.post(url, data: Data())
+                try await sut.post(url, data: requestBody)
             },
             throws: { error in
                 guard let httpError = error as? HTTPClientError,
@@ -240,6 +276,7 @@ final class URLSessionHTTPClientTests {
                     method: "POST",
                     url: url,
                     statusCode: statusCode,
+                    requestBodyPreview: "{\"archiveId\":\"archive-1\",\"sessionKey\":\"<redacted>\"}",
                     responseBodyPreview: String(data: responseBody, encoding: .utf8),
                     errorDescription: String(describing: HTTPClientError.httpError(statusCode: statusCode)))
             ])
@@ -248,14 +285,64 @@ final class URLSessionHTTPClientTests {
     @Test
     func post_deliversDataOn200HTTPResponse() async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
-        let expectedData = Data("response data".utf8)
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
+        let requestBody = Data(
+            """
+            {"roomName":"testroom","sessionKey":"secret-session-key","archiveId":"archive-1"}
+            """.utf8)
+        let expectedData = Data(
+            """
+            {"result":{"data":{"applicationId":"secret-app","count":1,"items":[{"id":"archive-1","status":"available","token":"secret-token"}]}}}
+            """.utf8)
 
         spy.stub(url: url, statusCode: 200, data: expectedData)
 
-        let receivedData = try await sut.post(url, data: Data("request".utf8))
+        let receivedData = try await sut.post(url, data: requestBody)
 
         #expect(receivedData == expectedData)
+        #expect(
+            interceptor.successEvents == [
+                HTTPClientSuccessEvent(
+                    method: "POST",
+                    url: url,
+                    statusCode: 200,
+                    requestBodyPreview:
+                        "{\"archiveId\":\"archive-1\",\"roomName\":\"testroom\",\"sessionKey\":\"<redacted>\"}",
+                    responseBodyPreview:
+                        "{\"result\":{\"data\":{\"applicationId\":\"<redacted>\",\"count\":1,\"items\":[{\"id\":\"archive-1\",\"status\":\"available\",\"token\":\"<redacted>\"}]}}}"
+                )
+            ])
+    }
+
+    @Test
+    func post_truncatesSanitizedBodyPreviews() async throws {
+        let url = URL(string: "https://a-url.com")!
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
+        let longRoomName = String(repeating: "a", count: 3_000)
+        let requestBody = Data(
+            """
+            {"apiKey":"secret-api-key","roomName":"\(longRoomName)","sessionKey":"secret-session-key"}
+            """.utf8)
+        let responseBody = Data(
+            """
+            {"apiKey":"secret-api-key","count":1,"status":"available","token":"secret-token","message":"\(longRoomName)"}
+            """.utf8)
+
+        spy.stub(url: url, statusCode: 200, data: responseBody)
+
+        _ = try await sut.post(url, data: requestBody)
+
+        let successEvent = try #require(interceptor.successEvents.first)
+        #expect(successEvent.requestBodyPreview?.contains("\"apiKey\":\"<redacted>\"") == true)
+        #expect(successEvent.requestBodyPreview?.contains("secret-api-key") == false)
+        #expect(successEvent.requestBodyPreview?.contains("secret-session-key") == false)
+        #expect(successEvent.requestBodyPreview?.hasSuffix("... <truncated>") == true)
+        #expect(successEvent.responseBodyPreview?.contains("\"apiKey\":\"<redacted>\"") == true)
+        #expect(successEvent.responseBodyPreview?.contains("secret-api-key") == false)
+        #expect(successEvent.responseBodyPreview?.contains("secret-token") == false)
+        #expect(successEvent.responseBodyPreview?.hasSuffix("... <truncated>") == true)
     }
 
     @Test(arguments: [200, 201, 250, 280, 299])
@@ -388,7 +475,12 @@ final class URLSessionHTTPClientTests {
     }
 
     private final class HTTPClientInterceptorSpy: HTTPClientInterceptor, @unchecked Sendable {
+        private(set) var successEvents: [HTTPClientSuccessEvent] = []
         private(set) var events: [HTTPClientFailureEvent] = []
+
+        func didSucceed(_ event: HTTPClientSuccessEvent) {
+            successEvents.append(event)
+        }
 
         func didFail(_ event: HTTPClientFailureEvent) {
             events.append(event)

@@ -37,6 +37,7 @@ public final class URLSessionHTTPClient: HTTPClient {
     private func perform(_ request: URLRequest) async throws -> Data {
         let responseData: Data
         let response: URLResponse
+        let requestBodyPreview = bodyPreview(from: request.httpBody)
 
         do {
             (responseData, response) = try await session.data(for: request)
@@ -46,6 +47,7 @@ public final class URLSessionHTTPClient: HTTPClient {
                     method: request.httpMethod ?? "UNKNOWN",
                     url: request.url,
                     statusCode: nil,
+                    requestBodyPreview: requestBodyPreview,
                     responseBodyPreview: nil,
                     errorDescription: error.localizedDescription))
             throw error
@@ -58,6 +60,7 @@ public final class URLSessionHTTPClient: HTTPClient {
                     method: request.httpMethod ?? "UNKNOWN",
                     url: request.url,
                     statusCode: nil,
+                    requestBodyPreview: requestBodyPreview,
                     responseBodyPreview: bodyPreview(from: responseData),
                     errorDescription: String(describing: error)))
             throw error
@@ -70,26 +73,86 @@ public final class URLSessionHTTPClient: HTTPClient {
                     method: request.httpMethod ?? "UNKNOWN",
                     url: request.url,
                     statusCode: httpResponse.statusCode,
+                    requestBodyPreview: requestBodyPreview,
                     responseBodyPreview: bodyPreview(from: responseData),
                     errorDescription: String(describing: error)))
             throw error
         }
 
+        interceptor.didSucceed(
+            HTTPClientSuccessEvent(
+                method: request.httpMethod ?? "UNKNOWN",
+                url: request.url,
+                statusCode: httpResponse.statusCode,
+                requestBodyPreview: requestBodyPreview,
+                responseBodyPreview: bodyPreview(from: responseData)))
+
         return responseData
     }
 
-    private func bodyPreview(from data: Data) -> String? {
-        guard !data.isEmpty else { return nil }
+    private func bodyPreview(from data: Data?) -> String? {
+        guard let data, !data.isEmpty else { return nil }
 
         let maxLength = 2_048
-        let prefix = data.prefix(maxLength)
-        guard let body = String(data: prefix, encoding: .utf8) else {
+        guard let body = String(data: data, encoding: .utf8) else {
             return "<non-utf8 response body: \(data.count) bytes>"
         }
 
-        return data.count > maxLength ? "\(body)... <truncated>" : body
+        let sanitizedBody = sanitize(body)
+        guard sanitizedBody.count > maxLength else {
+            return sanitizedBody
+        }
+
+        let endIndex = sanitizedBody.index(sanitizedBody.startIndex, offsetBy: maxLength)
+        return "\(sanitizedBody[..<endIndex])... <truncated>"
+    }
+
+    private func sanitize(_ body: String) -> String {
+        guard let data = body.data(using: .utf8),
+            let json = try? JSONSerialization.jsonObject(with: data)
+        else {
+            return body
+        }
+
+        let sanitizedJSON = sanitize(json)
+        guard JSONSerialization.isValidJSONObject(sanitizedJSON),
+            let sanitizedData = try? JSONSerialization.data(withJSONObject: sanitizedJSON, options: [.sortedKeys]),
+            let sanitizedBody = String(data: sanitizedData, encoding: .utf8)
+        else {
+            return body
+        }
+
+        return sanitizedBody
+    }
+
+    private func sanitize(_ value: Any) -> Any {
+        if let dictionary = value as? [String: Any] {
+            return dictionary.reduce(into: [String: Any]()) { result, pair in
+                if sensitiveKeys.contains(pair.key.lowercased()) {
+                    result[pair.key] = "<redacted>"
+                } else {
+                    result[pair.key] = sanitize(pair.value)
+                }
+            }
+        }
+
+        if let array = value as? [Any] {
+            return array.map(sanitize)
+        }
+
+        return value
     }
 }
+
+private let sensitiveKeys: Set<String> = [
+    "sessionkey",
+    "token",
+    "apikey",
+    "applicationid",
+    "password",
+    "authorization",
+    "jwt",
+]
 
 extension Int {
     var isOK: Bool {
@@ -106,6 +169,7 @@ public struct HTTPClientFailureEvent: Equatable, Sendable {
     public let method: String
     public let url: URL?
     public let statusCode: Int?
+    public let requestBodyPreview: String?
     public let responseBodyPreview: String?
     public let errorDescription: String
 
@@ -113,19 +177,48 @@ public struct HTTPClientFailureEvent: Equatable, Sendable {
         method: String,
         url: URL?,
         statusCode: Int?,
+        requestBodyPreview: String?,
         responseBodyPreview: String?,
         errorDescription: String
     ) {
         self.method = method
         self.url = url
         self.statusCode = statusCode
+        self.requestBodyPreview = requestBodyPreview
         self.responseBodyPreview = responseBodyPreview
         self.errorDescription = errorDescription
     }
 }
 
+public struct HTTPClientSuccessEvent: Equatable, Sendable {
+    public let method: String
+    public let url: URL?
+    public let statusCode: Int
+    public let requestBodyPreview: String?
+    public let responseBodyPreview: String?
+
+    public init(
+        method: String,
+        url: URL?,
+        statusCode: Int,
+        requestBodyPreview: String?,
+        responseBodyPreview: String?
+    ) {
+        self.method = method
+        self.url = url
+        self.statusCode = statusCode
+        self.requestBodyPreview = requestBodyPreview
+        self.responseBodyPreview = responseBodyPreview
+    }
+}
+
 public protocol HTTPClientInterceptor: Sendable {
+    func didSucceed(_ event: HTTPClientSuccessEvent)
     func didFail(_ event: HTTPClientFailureEvent)
+}
+
+extension HTTPClientInterceptor {
+    public func didSucceed(_ event: HTTPClientSuccessEvent) {}
 }
 
 public struct OSLogHTTPClientInterceptor: HTTPClientInterceptor {
@@ -138,6 +231,17 @@ public struct OSLogHTTPClientInterceptor: HTTPClientInterceptor {
         logger = Logger(subsystem: subsystem, category: category)
     }
 
+    public func didSucceed(_ event: HTTPClientSuccessEvent) {
+        logger.info(
+            """
+            HTTP request succeeded method=\(event.method, privacy: .public) \
+            url=\(event.url?.absoluteString ?? "<nil>", privacy: .public) \
+            status=\(String(event.statusCode), privacy: .public) \
+            requestBody=\(event.requestBodyPreview ?? "<empty>", privacy: .public) \
+            responseBody=\(event.responseBodyPreview ?? "<empty>", privacy: .public)
+            """)
+    }
+
     public func didFail(_ event: HTTPClientFailureEvent) {
         logger.error(
             """
@@ -145,6 +249,7 @@ public struct OSLogHTTPClientInterceptor: HTTPClientInterceptor {
             url=\(event.url?.absoluteString ?? "<nil>", privacy: .public) \
             status=\(event.statusCode.map(String.init) ?? "<none>", privacy: .public) \
             error=\(event.errorDescription, privacy: .public) \
+            requestBody=\(event.requestBodyPreview ?? "<empty>", privacy: .public) \
             responseBody=\(event.responseBodyPreview ?? "<empty>", privacy: .public)
             """)
     }
