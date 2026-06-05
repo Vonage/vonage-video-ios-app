@@ -58,7 +58,9 @@ final class MeetingRoomSDKContainer {
 
     // MARK: - Core Dependencies
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    lazy var httpClient: any HTTPClient = URLSessionHTTPClient(
+        interceptor: OSLogHTTPClientInterceptor()
+    )
 
     lazy var jsonDecoder = JSONDecoder()
 

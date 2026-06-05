@@ -33,7 +33,9 @@ import VERAVonageCallKitPlugin
 final class DependencyContainer {
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    lazy var httpClient: any HTTPClient = URLSessionHTTPClient(
+        interceptor: OSLogHTTPClientInterceptor()
+    )
 
     lazy var jsonDecoder = JSONDecoder()
 

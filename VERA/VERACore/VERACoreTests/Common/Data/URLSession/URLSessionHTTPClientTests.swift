@@ -38,7 +38,8 @@ final class URLSessionHTTPClientTests {
     @Test
     func get_deliversInvalidResponseErrorOnNonHTTPResponse() async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
 
         let response = URLResponse(
             url: url,
@@ -55,13 +56,25 @@ final class URLSessionHTTPClientTests {
                 guard let httpError = error as? HTTPClientError else { return false }
                 return httpError == .invalidResponse
             })
+
+        #expect(
+            interceptor.events == [
+                HTTPClientFailureEvent(
+                    method: "GET",
+                    url: url,
+                    statusCode: nil,
+                    responseBodyPreview: nil,
+                    errorDescription: String(describing: HTTPClientError.invalidResponse))
+            ])
     }
 
     @Test(arguments: [199, 300, 400, 500])
     func get_deliversHTTPErrorOnNon2xxStatusCode(statusCode: Int) async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
-        spy.stub(url: url, statusCode: statusCode, data: Data())
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
+        let responseBody = Data("{\"error\":\"something went wrong\"}".utf8)
+        spy.stub(url: url, statusCode: statusCode, data: responseBody)
 
         await #expect(
             performing: {
@@ -75,6 +88,16 @@ final class URLSessionHTTPClientTests {
                 }
                 return receivedStatusCode == statusCode
             })
+
+        #expect(
+            interceptor.events == [
+                HTTPClientFailureEvent(
+                    method: "GET",
+                    url: url,
+                    statusCode: statusCode,
+                    responseBodyPreview: String(data: responseBody, encoding: .utf8),
+                    errorDescription: String(describing: HTTPClientError.httpError(statusCode: statusCode)))
+            ])
     }
 
     @Test
@@ -156,7 +179,8 @@ final class URLSessionHTTPClientTests {
     @Test
     func post_deliversInvalidResponseErrorOnNonHTTPResponse() async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
 
         let response = URLResponse(
             url: url,
@@ -177,13 +201,25 @@ final class URLSessionHTTPClientTests {
                 guard let httpError = error as? HTTPClientError else { return false }
                 return httpError == .invalidResponse
             })
+
+        #expect(
+            interceptor.events == [
+                HTTPClientFailureEvent(
+                    method: "POST",
+                    url: url,
+                    statusCode: nil,
+                    responseBodyPreview: nil,
+                    errorDescription: String(describing: HTTPClientError.invalidResponse))
+            ])
     }
 
     @Test(arguments: [199, 300, 400, 500])
     func post_deliversHTTPErrorOnNon2xxStatusCode(statusCode: Int) async throws {
         let url = URL(string: "https://a-url.com")!
-        let (sut, spy) = makeSUT()
-        spy.stub(url: url, statusCode: statusCode, data: Data())
+        let interceptor = HTTPClientInterceptorSpy()
+        let (sut, spy) = makeSUT(interceptor: interceptor)
+        let responseBody = Data("{\"error\":\"something went wrong\"}".utf8)
+        spy.stub(url: url, statusCode: statusCode, data: responseBody)
 
         await #expect(
             performing: {
@@ -197,6 +233,16 @@ final class URLSessionHTTPClientTests {
                 }
                 return receivedStatusCode == statusCode
             })
+
+        #expect(
+            interceptor.events == [
+                HTTPClientFailureEvent(
+                    method: "POST",
+                    url: url,
+                    statusCode: statusCode,
+                    responseBodyPreview: String(data: responseBody, encoding: .utf8),
+                    errorDescription: String(describing: HTTPClientError.httpError(statusCode: statusCode)))
+            ])
     }
 
     @Test
@@ -228,6 +274,7 @@ final class URLSessionHTTPClientTests {
     // MARK: - Helpers
 
     private func makeSUT(
+        interceptor: any HTTPClientInterceptor = HTTPClientInterceptorSpy(),
         file: StaticString = #filePath,
         line: UInt = #line
     ) -> (sut: URLSessionHTTPClient, spy: URLSessionHTTPClientSpy) {
@@ -235,7 +282,7 @@ final class URLSessionHTTPClientTests {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [URLProtocolStub.self]
         let session = URLSession(configuration: configuration)
-        let sut = URLSessionHTTPClient(session: session)
+        let sut = URLSessionHTTPClient(session: session, interceptor: interceptor)
 
         URLProtocolStub.stub = spy
 
@@ -338,5 +385,13 @@ final class URLSessionHTTPClientTests {
         }
 
         override func stopLoading() {}
+    }
+
+    private final class HTTPClientInterceptorSpy: HTTPClientInterceptor, @unchecked Sendable {
+        private(set) var events: [HTTPClientFailureEvent] = []
+
+        func didFail(_ event: HTTPClientFailureEvent) {
+            events.append(event)
+        }
     }
 }
