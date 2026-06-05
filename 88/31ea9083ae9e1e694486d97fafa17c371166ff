@@ -1,0 +1,28 @@
+.maestro/flows/recording.yaml
+  h_2499cc15b3806e 119,122,125,127,129
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveList.swift
+  s_43abc85b87dc37::t_e936e0bd6a73c9 94
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_43abc85b87dc37::t_07fedee78164ac 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8831ea9083ae9e1e694486d97fafa17c371166ff",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_43abc85b87dc37": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e92dd-a5da-76f3-ba06-bc2393e57d92",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
