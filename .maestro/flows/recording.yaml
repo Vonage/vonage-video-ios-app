@@ -52,10 +52,11 @@ appId: ${APP_ID}
 
 # Start recording (button may be in overflow menu on smaller screens)
 - tapOn:
-    text: "More options"
+    id: "meeting-room-more-options-button"
     optional: true
 
-- tapOn: "Start Recording"
+- tapOn:
+    id: "archiving-start-recording-button"
 
 - waitForAnimationToEnd:
     timeout: 3000
@@ -78,10 +79,11 @@ appId: ${APP_ID}
 
 # Stop recording (button may be in overflow menu on smaller screens)
 - tapOn:
-    text: "More options"
+    id: "meeting-room-more-options-button"
     optional: true
 
-- tapOn: "Stop Recording"
+- tapOn:
+    id: "archiving-stop-recording-button"
 
 - waitForAnimationToEnd:
     timeout: 3000
