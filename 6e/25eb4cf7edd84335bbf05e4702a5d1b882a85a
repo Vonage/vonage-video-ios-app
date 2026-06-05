@@ -1,0 +1,14 @@
+.github/workflows/maestro.yml
+  h_2499cc15b3806e 10-13,17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "6e25eb4cf7edd84335bbf05e4702a5d1b882a85a",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
