@@ -9,5 +9,7 @@ import Foundation
 public final class FeedbackViewModel: ObservableObject {
     // TODO: Add published properties and dependencies
 
-    public init() {}
+    public init() {
+        // TODO: Add initialisation, inject usecase
+    }
 }
