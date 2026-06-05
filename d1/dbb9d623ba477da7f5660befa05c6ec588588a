@@ -1,0 +1,26 @@
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_43abc85b87dc37::t_fccb49393edcff 36-38
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_43abc85b87dc37::t_9a9b10bc6883da 61-63
+VERA/VERACore/VERACoreTests/Common/Data/URLSession/URLSessionHTTPClientTests.swift
+  s_43abc85b87dc37::t_c77b0fab9287a5 41-42,59-68,74-77,91-100,182-183,204-213,219-222,236-245,277,285,389-395
+VERA/VERACore/VERACore/Common/Data/URLSession/URLSessionHTTPClient.swift
+  s_43abc85b87dc37::t_5ccaa21a85f8c0 15
+  s_43abc85b87dc37::t_6f8fed9a35e1f0 11,13-14,16,18,22-24,34-52,55-63,67-75,80-91,105-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "d1dbb9d623ba477da7f5660befa05c6ec588588a",
+  "prompts": {},
+  "sessions": {
+    "s_43abc85b87dc37": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e92dd-a5da-76f3-ba06-bc2393e57d92",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
