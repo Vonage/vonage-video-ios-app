@@ -61,6 +61,7 @@ struct MeetingRoomComposedView: View {
     @State private var showPickerView = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var showFeedbackForm = false
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel)
@@ -98,10 +99,20 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .modifier(
+                FeedbackFormOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.settings),
+                    showFeedbackForm: $showFeedbackForm,
+                    statsOverlayViewModel: statsOverlayViewModel,
+                    container: container
+                )
+            )
+
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
             }
     }
 }
