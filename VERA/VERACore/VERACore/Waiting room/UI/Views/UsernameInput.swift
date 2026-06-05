@@ -17,6 +17,7 @@ struct UsernameInput: View {
                 text: $userName,
                 state: usernameState
             )
+            .accessibilityIdentifier(WaitingRoomAccessibilityID.usernameInput)
         }
         .onChange(of: userName) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {

@@ -1,0 +1,50 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- takeScreenshot: 01-landing-screen
+
+# Enter a room name in the text field
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+# Navigate to the waiting room
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+- takeScreenshot: 02-waiting-room-permissions-granted
+
+# Enter username
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+# Join the meeting
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 03-meeting-room-joined

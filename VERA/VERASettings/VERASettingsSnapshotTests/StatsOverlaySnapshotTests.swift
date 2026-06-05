@@ -180,16 +180,24 @@ struct StatsOverlaySnapshotTests {
             lines.append("Lost: \(videoSend.packetsLost)")
         }
 
-        if let audioRecv = stats.receivedAudio {
+        let audioRecvStats = stats.subscriberStats.compactMap(\.receivedAudio)
+        if !audioRecvStats.isEmpty {
+            let totalPacketsReceived = audioRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = audioRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = audioRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("🔈 Audio Recv")
-            lines.append("Pkts: \(audioRecv.packetsReceived), Lost: \(audioRecv.packetsLost)")
-            lines.append("Bytes: \(formatBytes(audioRecv.bytesReceived))")
+            lines.append("Pkts: \(totalPacketsReceived), Lost: \(totalPacketsLost)")
+            lines.append("Bytes: \(formatBytes(totalBytesReceived))")
         }
 
-        if let videoRecv = stats.receivedVideo {
+        let videoRecvStats = stats.subscriberStats.compactMap(\.receivedVideo)
+        if !videoRecvStats.isEmpty {
+            let totalPacketsReceived = videoRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = videoRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = videoRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("📺 Video Recv")
-            lines.append("Recv: \(videoRecv.packetsReceived), \(formatBytes(Int64(videoRecv.bytesReceived)))")
-            lines.append("Lost: \(videoRecv.packetsLost)")
+            lines.append("Recv: \(totalPacketsReceived), \(formatBytes(Int64(totalBytesReceived)))")
+            lines.append("Lost: \(totalPacketsLost)")
         }
 
         return lines.isEmpty ? "Waiting for stats…" : lines.joined(separator: "\n")
@@ -219,19 +227,25 @@ struct StatsOverlaySnapshotTests {
                 timestamp: Date().timeIntervalSince1970,
                 videoCodec: "VP8"
             ),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 4321,
-                packetsLost: 12,
-                bytesReceived: 768_000,
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: 512_000
-            ),
-            receivedVideo: VideoReceiveStats(
-                packetsReceived: 9876,
-                packetsLost: 45,
-                bytesReceived: 6_291_456,
-                timestamp: Date().timeIntervalSince1970
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "snap-1",
+                    subscriberName: "Snapshot Sub",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 4321,
+                        packetsLost: 12,
+                        bytesReceived: 768_000,
+                        timestamp: Date().timeIntervalSince1970,
+                        estimatedBandwidth: 512_000
+                    ),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 9876,
+                        packetsLost: 45,
+                        bytesReceived: 6_291_456,
+                        timestamp: Date().timeIntervalSince1970
+                    )
+                )
+            ]
         )
     }
 
@@ -243,10 +257,7 @@ struct StatsOverlaySnapshotTests {
                 bytesSent: 50_000,
                 timestamp: Date().timeIntervalSince1970,
                 audioCodec: "opus"
-            ),
-            sentVideo: nil,
-            receivedAudio: nil,
-            receivedVideo: nil
+            )
         )
     }
 }
@@ -270,19 +281,25 @@ extension NetworkMediaStats {
                 timestamp: Date().timeIntervalSince1970,
                 videoCodec: "VP8"
             ),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 950,
-                packetsLost: 10,
-                bytesReceived: 475_000,
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: 500_000
-            ),
-            receivedVideo: VideoReceiveStats(
-                packetsReceived: 4800,
-                packetsLost: 50,
-                bytesReceived: 2_400_000,
-                timestamp: Date().timeIntervalSince1970
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "mock-1",
+                    subscriberName: "Mock Sub",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 950,
+                        packetsLost: 10,
+                        bytesReceived: 475_000,
+                        timestamp: Date().timeIntervalSince1970,
+                        estimatedBandwidth: 500_000
+                    ),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 4800,
+                        packetsLost: 50,
+                        bytesReceived: 2_400_000,
+                        timestamp: Date().timeIntervalSince1970
+                    )
+                )
+            ]
         )
     }
 }

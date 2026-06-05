@@ -21,18 +21,22 @@ public struct AudioSendStats: Equatable {
     ///
     /// Populated from the WebRTC RTC stats report. `nil` until the first report arrives.
     public let audioCodec: String?
+    /// Timestamp (ms since epoch) from which cumulative totals started accumulating.
+    public let startTime: Double
 
     public init(
         packetsSent: Int64 = 0,
         packetsLost: Int64 = 0,
         bytesSent: Int64 = 0,
         timestamp: Double = 0,
-        audioCodec: String? = nil
+        audioCodec: String? = nil,
+        startTime: Double = 0
     ) {
         self.packetsSent = packetsSent
         self.packetsLost = packetsLost
         self.bytesSent = bytesSent
         self.timestamp = timestamp
         self.audioCodec = audioCodec
+        self.startTime = startTime
     }
 }

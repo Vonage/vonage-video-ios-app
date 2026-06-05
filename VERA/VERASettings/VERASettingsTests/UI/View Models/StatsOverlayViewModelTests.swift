@@ -44,9 +44,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -82,9 +80,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -117,9 +113,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -158,8 +152,16 @@ struct StatsOverlayViewModelTests {
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
                 packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "test-1",
+                    subscriberName: "Test",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                )
+            ]
         )
         await dataSource.updateStats(stats)
 
@@ -191,10 +193,7 @@ struct StatsOverlayViewModelTests {
 
         let stats = NetworkMediaStats(
             sentAudio: AudioSendStats(
-                packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
-            sentVideo: nil,
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: nil
+                packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus")
         )
         await dataSource.updateStats(stats)
 
@@ -223,11 +222,8 @@ struct StatsOverlayViewModelTests {
         await repository.updatePreferences { $0.senderStatsEnabled = true }
 
         let stats = NetworkMediaStats(
-            sentAudio: nil,
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: nil,
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -283,9 +279,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats1)
 
@@ -300,10 +294,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 200, packetsLost: 0, bytesSent: 10000, timestamp: 2000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 100, packetsLost: 0, bytesSent: 20000, timestamp: 2000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 180, packetsLost: 2, bytesReceived: 9000, timestamp: 2000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 90, packetsLost: 4, bytesReceived: 19000, timestamp: 2000)
+                packetsSent: 100, packetsLost: 0, bytesSent: 20000, timestamp: 2000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats2)
 
@@ -336,9 +327,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -377,9 +366,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 

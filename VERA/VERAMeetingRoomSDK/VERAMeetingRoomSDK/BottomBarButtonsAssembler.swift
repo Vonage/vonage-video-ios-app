@@ -127,7 +127,7 @@ final class BottomBarButtonsAssembler {
         let button = container.backgroundBlurFactory.makeMeetingBlurButton(viewModel: viewModel)
         return .init(
             label: String(localized: "Blur"),
-            image: viewModel.currentBlurLevel.image,
+            image: viewModel.currentVideoEffect.image,
             onTap: {
                 viewModel.onTap()
             },

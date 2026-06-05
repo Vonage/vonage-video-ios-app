@@ -1,0 +1,127 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Disable mic (match React spec: audio off)
+- tapOn:
+    id: "waiting-room-mic-enabled"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room
+
+# Start recording (button may be in overflow menu on smaller screens)
+- tapOn:
+    text: "More options"
+    optional: true
+
+- tapOn: "Start Recording"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Confirm start recording alert
+- tapOn: "OK"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify recording indicator is visible
+- assertVisible:
+    id: "archiving-recording-indicator"
+
+- takeScreenshot: 02-recording-in-progress
+
+# Wait for recording to accumulate content
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Stop recording (button may be in overflow menu on smaller screens)
+- tapOn:
+    text: "More options"
+    optional: true
+
+- tapOn: "Stop Recording"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Confirm stop recording alert
+- tapOn: "OK"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify recording indicator is gone
+- assertNotVisible:
+    id: "archiving-recording-indicator"
+
+- takeScreenshot: 03-recording-stopped
+
+# End call
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+# Verify archive list is visible on goodbye page
+- assertVisible:
+    id: "archiving-archive-list"
+
+- takeScreenshot: 04-goodbye-archives
+
+# Wait for archive to process (up to 3 minutes)
+- extendedWaitUntil:
+    visible:
+      id: "archiving-download-button"
+    timeout: 180000
+
+# Verify download button is available
+- assertVisible:
+    id: "archiving-download-button"
+
+- takeScreenshot: 05-archive-download-ready

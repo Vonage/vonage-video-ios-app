@@ -389,6 +389,7 @@ public final class VonageCall: CallFacade {
             // Cancel subscriber sinks before cleanup to prevent $participant
             // from re-adding the participant to the repository.
             self.subscriberCancellables[stream.streamId] = nil
+            self.statsCollector.removeSubscriber(connectionId: stream.connection.connectionId)
             let (_, state) = await callStateManager.removeSubscriber(id: stream.streamId)
             // There is no need to do a session unsubscribe if the stream has been destroyed
             await self.updateParticipantsState(state)

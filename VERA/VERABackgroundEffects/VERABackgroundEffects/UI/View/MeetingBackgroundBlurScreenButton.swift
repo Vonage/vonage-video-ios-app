@@ -16,7 +16,7 @@ public struct MeetingBackgroundBlurScreenButton: View {
 
     public var body: some View {
         MeetingBackgroundBlurButton(
-            image: viewModel.currentBlurLevel.image,
+            image: viewModel.currentVideoEffect.image,
             action: viewModel.onTap)
     }
 }

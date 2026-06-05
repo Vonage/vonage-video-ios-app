@@ -89,6 +89,29 @@ struct UserDefaultsSettingsRepositoryTests {
         cancellable.cancel()
     }
 
+    @Test("setup() seeds publisher with persisted preferences")
+    func setupSeedsPublisherWithPersistedPreferences() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+
+        let customPreferences = PublisherSettingsPreferences(
+            videoResolution: .high,
+            senderStatsEnabled: true
+        )
+        let data = try JSONEncoder().encode(customPreferences)
+        userDefaults.set(data, forKey: "com.vonage.vera.publisherSettingsPreferences")
+
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        await repository.setup()
+
+        var receivedPreferences: PublisherSettingsPreferences?
+        let cancellable = repository.preferencesPublisher
+            .sink { receivedPreferences = $0 }
+
+        #expect(receivedPreferences == customPreferences)
+
+        cancellable.cancel()
+    }
+
     // MARK: - Save Tests
 
     @Test("save() encodes and stores in UserDefaults")

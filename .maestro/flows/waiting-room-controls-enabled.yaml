@@ -1,0 +1,60 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Verify mic and camera are enabled by default in waiting room
+- assertVisible:
+    id: "waiting-room-mic-enabled"
+
+- assertVisible:
+    id: "waiting-room-camera-enabled"
+
+- takeScreenshot: 01-waiting-room-controls-enabled
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+# Verify mic and camera remain enabled in meeting room
+- assertVisible:
+    id: "meeting-room-mic-enabled"
+
+- assertVisible:
+    id: "meeting-room-camera-enabled"
+
+- takeScreenshot: 02-meeting-room-controls-enabled

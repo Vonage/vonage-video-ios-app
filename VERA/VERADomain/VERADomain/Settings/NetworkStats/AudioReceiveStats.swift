@@ -18,22 +18,31 @@ public struct AudioReceiveStats: Equatable {
     public let bytesReceived: Int64
     /// Timestamp of this stats sample (seconds since epoch).
     public let timestamp: Double
+    /// The audio codec in use, extracted from the WebRTC RTC stats report
+    /// (`inbound-rtp` for subscribers). `nil` until the first RTC stats report arrives.
+    public let audioCodec: String?
     /// Estimated available incoming bandwidth in bits per second,
     /// derived from the ICE candidate-pair `availableIncomingBitrate` field
     /// in the WebRTC RTC stats report. `nil` until the first RTC stats report arrives.
     public let estimatedBandwidth: Int64?
+    /// Sender-side metrics from the remote publisher, if available.
+    public let senderStats: SenderStats?
 
     public init(
         packetsReceived: Int64 = 0,
         packetsLost: Int64 = 0,
         bytesReceived: Int64 = 0,
         timestamp: Double = 0,
-        estimatedBandwidth: Int64? = nil
+        audioCodec: String? = nil,
+        estimatedBandwidth: Int64? = nil,
+        senderStats: SenderStats? = nil
     ) {
         self.packetsReceived = packetsReceived
         self.packetsLost = packetsLost
         self.bytesReceived = bytesReceived
         self.timestamp = timestamp
+        self.audioCodec = audioCodec
         self.estimatedBandwidth = estimatedBandwidth
+        self.senderStats = senderStats
     }
 }
