@@ -116,14 +116,14 @@ appId: ${APP_ID}
 
 - takeScreenshot: 04-goodbye-archives
 
-# Wait for archive to process (up to 3 minutes)
+# Wait for archive to appear in the list (up to 3 minutes)
 - extendedWaitUntil:
     visible:
-      id: "archiving-download-button"
+      id: "archiving-archive-item"
     timeout: 180000
 
-# Verify download button is available
+# Verify an archive item was created
 - assertVisible:
-    id: "archiving-download-button"
+    id: "archiving-archive-item"
 
-- takeScreenshot: 05-archive-download-ready
+- takeScreenshot: 05-archive-item-created

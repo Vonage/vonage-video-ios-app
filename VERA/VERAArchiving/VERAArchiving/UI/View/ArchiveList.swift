@@ -91,6 +91,7 @@ struct ArchiveList: View {
                             }
                         }
                     }
+                    .accessibilityIdentifier(ArchivingAccessibilityID.archiveItem)
                     .listRowInsets(
                         EdgeInsets(
                             top: ArchiveListConstants.rowInsetTop,
