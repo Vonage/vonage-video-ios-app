@@ -319,6 +319,16 @@ This creates a new VERA feature module with the standard layer structure, `Proje
 - `main` receives periodic batch merges from `develop`
 - Jira ticket format: `VIDSOL-NNN`
 
+## Contributing Guidance
+
+Before proposing non-trivial changes, review `docs/CONTRIBUTING.md` and align work with its expectations.
+
+- Prefer small, single-concern changes and PRs.
+- Link work to a discussed issue for anything beyond a minor bug fix.
+- Add or update tests for new or changed logic.
+- Avoid introducing new dependencies without prior discussion.
+- Be prepared to explain and maintain any submitted change, including AI-assisted code.
+
 ## Repositories & Documentation
 
 | Resource | Link |
