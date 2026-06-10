@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import UIKit
 import VERASettings
 
 // MARK: - Settings Overlay Modifier
@@ -52,7 +53,7 @@ struct FeedbackFormOverlayModifier: ViewModifier {
 }
 
 enum FeedbackFieldType {
-    case text, image
+    case text, info, image
 }
 
 protocol FieldValidatable {
@@ -67,6 +68,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
     let key: String
     let footer: String?
     @Published var value: String
+    @Published var attachedImage: UIImage?
     var type: FeedbackFieldType
     var isRequired: Bool
     
@@ -83,33 +85,46 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
     }
     
     var isValid: Bool {
-        if type == .text, let maxChars {
-            return value.count <= maxChars
+        switch type {
+        case .info:
+            return true
+        case .image:
+            return !isRequired || attachedImage != nil
+        case .text:
+            if let maxChars, value.count > maxChars {
+                return false
+            }
+            if isRequired {
+                return !value.isEmpty
+            }
+            return true
         }
-        
-        if isRequired {
-            return value.isEmpty == false
-        }
-        return true
     }
     
     var validationMessage: String? {
-        var message: String?
-        if isRequired && value.isEmpty != false {
-            message = key + " is required"
-        }
-        
-        if type == .text, let maxChars {
-            if message == nil {
-                message = key
-            } else {
-                message? += " and"
+        switch type {
+        case .info:
+            return nil
+        case .image:
+            if isRequired, attachedImage == nil {
+                return "\(key) is required"
             }
-            
-            message = (message ?? "") + " must be less than \(maxChars) characters"
-            
+            return nil
+        case .text:
+            var message: String?
+            if isRequired, value.isEmpty {
+                message = "\(key) is required"
+            }
+
+            if let maxChars, value.count > maxChars {
+                if message == nil {
+                    message = "\(key) must be less than \(maxChars) characters"
+                } else {
+                    message? += " and must be less than \(maxChars) characters"
+                }
+            }
+            return message
         }
-        return message
     }
 }
 
@@ -125,6 +140,7 @@ class FeedbackSectionViewModel: ObservableObject {
     }
 
     let title = "Report isue"
+    @Published var showValidationErrors = false
     @Published var feedbackFields = [
         FeedbackFieldViewModel(
             maxChars: 100, minLineLimit: 2, maxLineLimit: 5,
@@ -132,22 +148,33 @@ class FeedbackSectionViewModel: ObservableObject {
             key: "Title", type: .text
         ),
         FeedbackFieldViewModel(
-            maxChars: 100, minLineLimit: 2, maxLineLimit: 5,
+            maxChars: 100, minLineLimit: 1, maxLineLimit: 5,
             title: "Tell us your name", key: "Name", type: .text
         ),
         FeedbackFieldViewModel(
             maxChars: 1000, minLineLimit: 5, maxLineLimit: 10,
-            title: "Describe your issue", key: "Description",
-            footer: "Please do not include any sensitive information", type: .text
+            title: "Describe your issue", key: "Description", type: .text
         ),
-        FeedbackFieldViewModel(title: "", key: "Image", type: .image, isRequired: false),
+        FeedbackFieldViewModel(
+            title: "", key: "Info", type: .info,
+            value: "Please do not include any sensitive information.",
+            isRequired: false
+        ),
+        FeedbackFieldViewModel(
+            title: "", key: "Image", type: .image,
+            value: "A screenshot will help us better understand the issue. (optional)",
+            isRequired: false
+        ),
     ]
     
-    init() {
+    init() {}
 
+    var isValid: Bool {
+        feedbackFields.allSatisfy(\.isValid)
     }
-    
+
     func onSubmit() {
-        
+        showValidationErrors = true
+        guard isValid else { return }
     }
 }
