@@ -31,17 +31,16 @@ struct SDKLoggingServiceTests {
 
     // MARK: - Init
 
-    @Test("Uses default Caches directory when no directory provided")
-    func usesDefaultCachesDirectory() {
-        let service = SDKLoggingService()
-        let urls = service.getLogFileURLs()
+    @Test("SDKLoggingDirectoryProvider returns Caches/VERASDKLogs directory")
+    func defaultDirectoryProvider() {
+        let dir = SDKLoggingDirectoryProvider.defaultDirectory()
 
-        // No files initially — just verifying it doesn't crash
-        #expect(urls.isEmpty || !urls.isEmpty)
+        #expect(dir.lastPathComponent == SDKLoggingService.defaultLogsDirectoryName)
+        #expect(dir.pathComponents.contains("Caches"))
     }
 
-    @Test("Uses custom logs directory when provided")
-    func usesCustomLogsDirectory() throws {
+    @Test("Uses provided logs directory")
+    func usesProvidedLogsDirectory() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
         let service = SDKLoggingService(logsDirectory: logsDir)

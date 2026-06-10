@@ -9,6 +9,21 @@ import VERALogger
 @_silgen_name("otc_log_enable")
 private func otc_log_enable(_ level: Int32)
 
+/// Resolves the default logs directory for SDK logging.
+///
+/// Isolated here so that `SDKLoggingService.init` stays a pure assignment
+/// and callers don't need to know the file-system layout.
+public enum SDKLoggingDirectoryProvider {
+    /// Returns `<Caches>/VERASDKLogs/`.
+    public static func defaultDirectory(
+        fileManager: FileManager = .default
+    ) -> URL {
+        let cachesDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        return cachesDirectory.appendingPathComponent(
+            SDKLoggingService.defaultLogsDirectoryName, isDirectory: true)
+    }
+}
+
 /// Manages Vonage Video SDK log capture to file.
 ///
 /// Call `configure(enabled:logLevel:)` early in the app lifecycle (before any
@@ -18,30 +33,32 @@ private func otc_log_enable(_ level: Int32)
 /// pipe so that every message is both forwarded to the original stderr (keeping the
 /// Xcode console working) and written to rotating log files managed by a
 /// ``FileLogStrategy`` in rolling mode.
+///
+/// `@unchecked Sendable` is required because the dispatch-source event handler
+/// runs on a GCD utility queue while properties are guarded by `NSLock` and
+/// POSIX file descriptor operations that the compiler cannot verify.
 public final class SDKLoggingService: @unchecked Sendable {
     public static let defaultLogsDirectoryName = "VERASDKLogs"
     public static let currentFileName = "sdk-log-current.log"
     public static let defaultMaxFileCount = 5
     public static let defaultMaxFileSize: UInt64 = 2 * 1024 * 1024
-
-    private var fileStrategy: FileLogStrategy?
+    public static let archivePrefix = "sdk-log-"
 
     private let logsDirectory: URL
     private let lock = NSLock()
+
+    private var fileStrategy: FileLogStrategy?
 
     // stderr capture state
     private var savedStderrFd: Int32 = -1
     private var capturePipe: Pipe?
     private var readSource: DispatchSourceRead?
 
-    public init(logsDirectory: URL? = nil) {
-        if let logsDirectory {
-            self.logsDirectory = logsDirectory
-        } else {
-            let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-            self.logsDirectory = cachesDirectory.appendingPathComponent(
-                Self.defaultLogsDirectoryName, isDirectory: true)
-        }
+    /// Creates the service.
+    ///
+    /// - Parameter logsDirectory: The directory where log files are stored.
+    public init(logsDirectory: URL) {
+        self.logsDirectory = logsDirectory
     }
 
     /// Configures SDK logging.
@@ -52,17 +69,15 @@ public final class SDKLoggingService: @unchecked Sendable {
     ///     The SDK itself performs the level filtering; the file captures everything
     ///     the SDK outputs.
     public func configure(enabled: Bool, logLevel: Int) {
-        lock.lock()
-        defer { lock.unlock() }
-
         if enabled {
             let logFileURL = logsDirectory.appendingPathComponent(Self.currentFileName)
-            let strategy = FileLogStrategy(
-                fileURL: logFileURL,
-                maxFileSize: Self.defaultMaxFileSize,
-                rotationPolicy: .rolling(maxFileCount: Self.defaultMaxFileCount),
-                minLevel: .verbose
-            )
+            let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+                .logsDirectory(logsDirectory)
+                .archivePrefix(Self.archivePrefix)
+                .maxFileSize(Self.defaultMaxFileSize)
+                .rotationPolicy(.rolling(maxFileCount: Self.defaultMaxFileCount))
+                .minLevel(.verbose)
+                .build()
             fileStrategy = strategy
 
             // Write a startup marker so a log file exists immediately.
@@ -108,10 +123,11 @@ public final class SDKLoggingService: @unchecked Sendable {
     }
 
     private func makeFallbackStrategy() -> FileLogStrategy {
-        FileLogStrategy(
-            fileURL: logsDirectory.appendingPathComponent(Self.currentFileName),
-            rotationPolicy: .rolling(maxFileCount: Self.defaultMaxFileCount)
-        )
+        FileLogStrategy.Builder(fileURL: logsDirectory.appendingPathComponent(Self.currentFileName))
+            .logsDirectory(logsDirectory)
+            .archivePrefix(Self.archivePrefix)
+            .rotationPolicy(.rolling(maxFileCount: Self.defaultMaxFileCount))
+            .build()
     }
 
     // MARK: - stderr Capture

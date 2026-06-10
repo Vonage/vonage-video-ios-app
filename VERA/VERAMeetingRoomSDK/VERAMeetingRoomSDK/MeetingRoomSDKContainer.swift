@@ -96,7 +96,11 @@ final class MeetingRoomSDKContainer {
     }()
 
     lazy var sessionRepository: any SessionRepository = {
-        VonageSessionRepository(
+        // Ensure SDK logging is configured before any OTSession is created.
+        if enabledFeatures.contains(.settings) {
+            _ = sdkLoggingService
+        }
+        return VonageSessionRepository(
             sessionFactory: sessionFactory,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry,
@@ -286,7 +290,23 @@ final class MeetingRoomSDKContainer {
     lazy var sdkLoggingRepository: SDKLoggingRepository =
         UserDefaultsSDKLoggingRepository()
 
-    lazy var sdkLoggingService = SDKLoggingService()
+    lazy var sdkLoggingService: SDKLoggingService = {
+        let service = SDKLoggingService(
+            logsDirectory: SDKLoggingDirectoryProvider.defaultDirectory())
+        var prefs = UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+
+        if prefs.pendingLogCleanup {
+            service.clearLogFiles()
+            prefs.pendingLogCleanup = false
+            UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs)
+        }
+
+        service.configure(
+            enabled: prefs.isLoggingEnabled,
+            logLevel: prefs.logLevel.rawValue
+        )
+        return service
+    }()
 
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,

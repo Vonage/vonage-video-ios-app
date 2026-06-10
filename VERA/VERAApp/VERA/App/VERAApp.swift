@@ -33,12 +33,6 @@ struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
     let dependencyContainer = DependencyContainer()
 
-    init() {
-        #if SETTINGS_ENABLED
-            dependencyContainer.configureSDKLogging()
-        #endif
-    }
-
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
             baseURL: dependencyContainer.baseURL,

@@ -173,7 +173,23 @@ final class DependencyContainer {
         lazy var sdkLoggingRepository: SDKLoggingRepository =
             UserDefaultsSDKLoggingRepository()
 
-        lazy var sdkLoggingService = SDKLoggingService()
+        lazy var sdkLoggingService: SDKLoggingService = {
+            let service = SDKLoggingService(
+                logsDirectory: SDKLoggingDirectoryProvider.defaultDirectory())
+            var prefs = UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+
+            if prefs.pendingLogCleanup {
+                service.clearLogFiles()
+                prefs.pendingLogCleanup = false
+                UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs)
+            }
+
+            service.configure(
+                enabled: prefs.isLoggingEnabled,
+                logLevel: prefs.logLevel.rawValue
+            )
+            return service
+        }()
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
@@ -185,24 +201,6 @@ final class DependencyContainer {
             logFileURLProvider: { [weak self] in
                 self?.sdkLoggingService.getLogFileURLs() ?? []
             })
-
-        /// Clears pending log files if the user changed logging settings in the
-        /// previous session, then configures the Vonage SDK log level and stderr
-        /// capture. Must be called once at app launch before any `OTSession`.
-        func configureSDKLogging() {
-            var prefs = UserDefaultsSDKLoggingRepository.loadPreferencesSync()
-
-            if prefs.pendingLogCleanup {
-                sdkLoggingService.clearLogFiles()
-                prefs.pendingLogCleanup = false
-                UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs)
-            }
-
-            sdkLoggingService.configure(
-                enabled: prefs.isLoggingEnabled,
-                logLevel: prefs.logLevel.rawValue
-            )
-        }
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

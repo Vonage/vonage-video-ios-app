@@ -13,7 +13,7 @@ import Foundation
 /// let logger = VonageLogger.Builder()
 ///     .addStrategy(OSLogStrategy())
 ///     .addStrategy(DefaultLogStrategy())
-///     .addStrategy(FileLogStrategy(fileURL: myLogFileURL))
+///     .addStrategy(FileLogStrategy.Builder(fileURL: myLogFileURL).build())
 ///     .build()
 ///
 /// logger.debug("MyFeature", "User logged in")

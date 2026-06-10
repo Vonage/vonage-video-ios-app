@@ -16,15 +16,12 @@ import Foundation
 ///
 /// Thread-safe: uses `NSLock` to serialize file I/O.
 ///
+/// Use ``Builder`` for convenient construction:
 /// ```swift
-/// // Single-file mode (default)
-/// let strategy = FileLogStrategy(fileURL: logsDir.appending(component: "app.log"))
-///
-/// // Rolling mode – up to 5 files
-/// let strategy = FileLogStrategy(
-///     fileURL: logsDir.appending(component: "sdk-log-current.log"),
-///     rotationPolicy: .rolling(maxFileCount: 5)
-/// )
+/// let strategy = FileLogStrategy.Builder(fileURL: logsDir.appending(component: "app.log"))
+///     .maxFileSize(10 * 1024 * 1024)
+///     .rotationPolicy(.rolling(maxFileCount: 5))
+///     .build()
 /// ```
 public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
@@ -54,6 +51,9 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     /// Default rotation policy.
     public static let defaultRotationPolicy: RotationPolicy = .truncate
 
+    static let archiveSuffix = ".log"
+    static let archiveDateFormat = "yyyyMMdd-HHmmssSSS"
+
     // MARK: - Properties
 
     private let fileURL: URL
@@ -65,53 +65,160 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
     private let fileNameDateFormatter: DateFormatter
     private let fileManager: FileManager
     private let lock = NSLock()
-
     private let archivePrefix: String
-    private static let archiveSuffix = ".log"
-    private static let archiveDateFormat = "yyyyMMdd-HHmmssSSS"
 
     // MARK: - Initialisation
 
-    /// Creates a file logging strategy.
+    /// Creates a file logging strategy with all dependencies provided explicitly.
+    ///
+    /// Prefer using ``Builder`` for convenient construction with sensible defaults.
     ///
     /// - Parameters:
     ///   - fileURL: URL of the active log file.
-    ///   - maxFileSize: Maximum file size in bytes before rotation. Defaults to 5 MB.
-    ///   - rotationPolicy: How to handle a full file. Defaults to `.truncate`.
-    ///   - minLevel: Minimum log level written to file. Defaults to `.verbose`.
-    ///   - dateFormat: Timestamp format for formatted log lines.
+    ///   - logsDirectory: Directory containing log files.
+    ///   - archivePrefix: Prefix for archive file names (e.g. `"sdk-log-"`).
+    ///   - maxFileSize: Maximum file size in bytes before rotation.
+    ///   - rotationPolicy: How to handle a full file.
+    ///   - minLevel: Minimum log level written to file.
+    ///   - dateFormatter: Formatter for log line timestamps.
+    ///   - fileNameDateFormatter: Formatter for archive file name timestamps.
+    ///   - fileManager: File manager instance for file I/O.
     public init(
         fileURL: URL,
-        maxFileSize: UInt64 = FileLogStrategy.defaultMaxFileSize,
-        rotationPolicy: RotationPolicy = FileLogStrategy.defaultRotationPolicy,
-        minLevel: LogLevel = FileLogStrategy.defaultMinLevel,
-        dateFormat: String = FileLogStrategy.defaultDateFormat
+        logsDirectory: URL,
+        archivePrefix: String,
+        maxFileSize: UInt64,
+        rotationPolicy: RotationPolicy,
+        minLevel: LogLevel,
+        dateFormatter: DateFormatter,
+        fileNameDateFormatter: DateFormatter,
+        fileManager: FileManager = .default
     ) {
         self.fileURL = fileURL
-        self.logsDirectory = fileURL.deletingLastPathComponent()
+        self.logsDirectory = logsDirectory
+        self.archivePrefix = archivePrefix
         self.maxFileSize = maxFileSize
         self.rotationPolicy = rotationPolicy
         self.minLevel = minLevel
-        self.fileManager = .default
+        self.dateFormatter = dateFormatter
+        self.fileNameDateFormatter = fileNameDateFormatter
+        self.fileManager = fileManager
+    }
 
-        // Derive archive prefix from the file name (e.g. "sdk-log-current.log" → "sdk-log-").
-        let baseName = fileURL.deletingPathExtension().lastPathComponent
-        let nameParts = baseName.components(separatedBy: "-")
-        if nameParts.count >= 2 {
-            self.archivePrefix = nameParts.dropLast().joined(separator: "-") + "-"
-        } else {
-            self.archivePrefix = baseName + "-"
+    // MARK: - Builder
+
+    /// Fluent builder for creating ``FileLogStrategy`` instances with sensible defaults.
+    ///
+    /// ```swift
+    /// let strategy = FileLogStrategy.Builder(fileURL: logFile)
+    ///     .archivePrefix("sdk-log-")
+    ///     .rotationPolicy(.rolling(maxFileCount: 5))
+    ///     .build()
+    /// ```
+    public final class Builder {
+        private let fileURL: URL
+        private var _logsDirectory: URL?
+        private var _archivePrefix: String?
+        private var _maxFileSize: UInt64 = FileLogStrategy.defaultMaxFileSize
+        private var _rotationPolicy: RotationPolicy = FileLogStrategy.defaultRotationPolicy
+        private var _minLevel: LogLevel = FileLogStrategy.defaultMinLevel
+        private var _dateFormat: String = FileLogStrategy.defaultDateFormat
+        private var _fileManager: FileManager = .default
+
+        /// Creates a builder for the given log file URL.
+        ///
+        /// - Parameter fileURL: URL of the active log file.
+        public init(fileURL: URL) {
+            self.fileURL = fileURL
         }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = dateFormat
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        self.dateFormatter = formatter
+        /// Sets the directory containing log files. Defaults to the parent directory of `fileURL`.
+        @discardableResult
+        public func logsDirectory(_ value: URL) -> Builder {
+            _logsDirectory = value
+            return self
+        }
 
-        let fileNameFormatter = DateFormatter()
-        fileNameFormatter.dateFormat = Self.archiveDateFormat
-        fileNameFormatter.locale = Locale(identifier: "en_US_POSIX")
-        self.fileNameDateFormatter = fileNameFormatter
+        /// Sets the archive file name prefix. Defaults to a value derived from the file name
+        /// (e.g. `"sdk-log-current.log"` → `"sdk-log-"`).
+        @discardableResult
+        public func archivePrefix(_ value: String) -> Builder {
+            _archivePrefix = value
+            return self
+        }
+
+        /// Sets the maximum file size before rotation. Defaults to 5 MB.
+        @discardableResult
+        public func maxFileSize(_ value: UInt64) -> Builder {
+            _maxFileSize = value
+            return self
+        }
+
+        /// Sets the rotation policy. Defaults to `.truncate`.
+        @discardableResult
+        public func rotationPolicy(_ value: RotationPolicy) -> Builder {
+            _rotationPolicy = value
+            return self
+        }
+
+        /// Sets the minimum log level. Defaults to `.verbose`.
+        @discardableResult
+        public func minLevel(_ value: LogLevel) -> Builder {
+            _minLevel = value
+            return self
+        }
+
+        /// Sets the date format for log line timestamps. Defaults to `"yyyy-MM-dd HH:mm:ss.SSS"`.
+        @discardableResult
+        public func dateFormat(_ value: String) -> Builder {
+            _dateFormat = value
+            return self
+        }
+
+        /// Sets the file manager instance. Defaults to `.default`.
+        @discardableResult
+        public func fileManager(_ value: FileManager) -> Builder {
+            _fileManager = value
+            return self
+        }
+
+        /// Builds the ``FileLogStrategy`` instance.
+        public func build() -> FileLogStrategy {
+            let logsDirectory = _logsDirectory ?? fileURL.deletingLastPathComponent()
+
+            let archivePrefix: String
+            if let explicit = _archivePrefix {
+                archivePrefix = explicit
+            } else {
+                let baseName = fileURL.deletingPathExtension().lastPathComponent
+                let nameParts = baseName.components(separatedBy: "-")
+                if nameParts.count >= 2 {
+                    archivePrefix = nameParts.dropLast().joined(separator: "-") + "-"
+                } else {
+                    archivePrefix = baseName + "-"
+                }
+            }
+
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = _dateFormat
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+            let fileNameDateFormatter = DateFormatter()
+            fileNameDateFormatter.dateFormat = FileLogStrategy.archiveDateFormat
+            fileNameDateFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+            return FileLogStrategy(
+                fileURL: fileURL,
+                logsDirectory: logsDirectory,
+                archivePrefix: archivePrefix,
+                maxFileSize: _maxFileSize,
+                rotationPolicy: _rotationPolicy,
+                minLevel: _minLevel,
+                dateFormatter: dateFormatter,
+                fileNameDateFormatter: fileNameDateFormatter,
+                fileManager: _fileManager
+            )
+        }
     }
 
     // MARK: - LoggerStrategy
