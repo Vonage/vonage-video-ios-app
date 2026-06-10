@@ -1,0 +1,23 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/SettingsOverlayModifier.swift
+  s_151ba86e4d048f::t_4f1833de907d6e 45-46
+VERA/VERACommonUI/VERACommonUI/UI/OutlinedButton.swift
+  s_151ba86e4d048f::t_a2c7c53deadd1a 26-27,35-36,43-44,52-64,68-84,91,99
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/UI/FeedbackKeyboardDoneToolbar.swift
+  s_151ba86e4d048f::t_5fa9572843e60f 14-15,19-20,24-26,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7405ab955d9852d2d80de80e1e6aa5221a0afede",
+  "prompts": {},
+  "sessions": {
+    "s_151ba86e4d048f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8069d2b-0ace-47f6-8ddc-6b80e75ea5b4",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
