@@ -1,0 +1,51 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/UI/CameraImagePicker.swift
+  s_151ba86e4d048f::t_f8e33a1b2edf70 1-48
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/SettingsOverlayModifier.swift
+  s_151ba86e4d048f::t_bce282767421ea 143
+  s_151ba86e4d048f::t_12b6e02e987ba4 6
+  s_151ba86e4d048f::t_16194dc018760b 71
+  s_151ba86e4d048f::t_eed7ddaa3f0ddb 88-91,97,99-100
+  s_151ba86e4d048f::t_e6362f9faf03eb 56
+  s_151ba86e4d048f::t_64e818aa007db9 156-166
+  s_151ba86e4d048f::t_99ea1ad5d59196 105-124,126
+  s_151ba86e4d048f::t_4503426e75ce71 92-96,98
+  s_151ba86e4d048f::t_1e6958bc1fbfa2 170,172-173,175,177-178
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/UI/FeedbackView.swift
+  s_151ba86e4d048f::t_16ddc66df0f2c0 96-97
+  s_151ba86e4d048f::t_42b462b4f0c22a 233
+  s_151ba86e4d048f::t_ee36a078e20144 1-8,10-93,100-102,140-142,146,175-179,189-190,202-203,261-264,278-279,286,291,296,359-361
+  s_151ba86e4d048f::t_203863d2c02fa9 9,103-110
+  s_151ba86e4d048f::t_89201f266355b3 188,191
+  s_151ba86e4d048f::t_5384f454d56a81 297-300,302,304,306,308,310-323,325,330,334
+  s_151ba86e4d048f::t_b390ed9fe3b1b1 185
+  s_151ba86e4d048f::t_a97bef324c0dc7 147
+  s_151ba86e4d048f::t_52fca5091923fb 145,148-149,157-158
+  s_151ba86e4d048f::t_847dd767528906 180-184,186-187,192-201,220,232,239,241-260
+  s_151ba86e4d048f::t_c24793af4f2fe0 229
+  s_151ba86e4d048f::t_aa845ff66573e8 122-139,143-144,151-155,160-162,301
+  s_151ba86e4d048f::t_e8d9290e16c46f 111-118,164-165
+  s_151ba86e4d048f::t_cd5078ca5f84e7 270-274
+  s_151ba86e4d048f::t_67ec5b2847abe5 204-217,221-224,226-228,230-231,234-237,240
+  s_151ba86e4d048f::t_53679616fc50f2 326-329,331-332
+  s_151ba86e4d048f::t_eeb589fa317bf4 238
+  s_151ba86e4d048f::t_f2ea2c913e1fce 150,159
+  s_151ba86e4d048f::t_a68b67289bf8db 265-269,275-277,280-285,288-290,292-295,303,305,307,309,324,333,335-358
+  s_151ba86e4d048f::t_89098a42af1137 287
+  s_151ba86e4d048f::t_8928d49804ee4a 94-95,98-99,119-121,163,166-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "10455dfcfeee1ae5653d12a7ad87a194a4274e5c",
+  "prompts": {},
+  "sessions": {
+    "s_151ba86e4d048f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8069d2b-0ace-47f6-8ddc-6b80e75ea5b4",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
