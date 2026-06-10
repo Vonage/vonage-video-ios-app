@@ -190,6 +190,7 @@ jobs:
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
             -resultBundlePath DerivedData/VERALoggerTests-macOS.xcresult \
+
       - name: Run VERAFeedbackTests (macOS)
         id: feedback-tests-macos
         run: |
