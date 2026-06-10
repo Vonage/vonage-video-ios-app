@@ -143,22 +143,22 @@ final class BottomBarButtonsAssembler {
             })
     }
 
-//    private func makeSettingsButton() -> BottomBarButton {
-//        let button = container.settingsFactory.makeMeetingRoomButton { [weak self] in
-//            self?.onShowSettings?()
-//        }
-//        return .init(
-//            label: String(localized: "Settings"),
-//            image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
-//            onTap: { [weak self] in
-//                self?.onShowSettings?()
-//            },
-//            content: {
-//                button
-//            }
-//        )
-//    }
-    
+    //    private func makeSettingsButton() -> BottomBarButton {
+    //        let button = container.settingsFactory.makeMeetingRoomButton { [weak self] in
+    //            self?.onShowSettings?()
+    //        }
+    //        return .init(
+    //            label: String(localized: "Settings"),
+    //            image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
+    //            onTap: { [weak self] in
+    //                self?.onShowSettings?()
+    //            },
+    //            content: {
+    //                button
+    //            }
+    //        )
+    //    }
+
     private func makeFeedbackReportButton() -> BottomBarButton {
         let button = container.feedbackFactory.makeMeetingRoomButton { [weak self] in
             self?.onShowFeedbackForm?()

@@ -5,9 +5,9 @@
 
 public final class FeedbackFactory {
 
-   
+
     public init() {
-        
+
     }
 
     @MainActor
@@ -24,22 +24,22 @@ public final class FeedbackFactory {
     /// Falls back to a fresh repository if the factory is deallocated.
     ///
     /// - Returns: A configured waiting room settings button.
-//    @MainActor
-//    public func makeWaitingRoomButton() -> FeedbackComponentButton {
-//        FeedbackComponentButton(onShowFeedbackForm: {
-//            
-//        })
-//        
-//        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
-//            guard let self else {
-//                let fallbackRepo = UserDefaultsSettingsRepository()
-//                return SettingsView(
-//                    viewModel: SettingsViewModel(repository: fallbackRepo)
-//                )
-//            }
-//            return self.makeSettingsView()
-//        })
-//    }
+    //    @MainActor
+    //    public func makeWaitingRoomButton() -> FeedbackComponentButton {
+    //        FeedbackComponentButton(onShowFeedbackForm: {
+    //
+    //        })
+    //
+    //        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
+    //            guard let self else {
+    //                let fallbackRepo = UserDefaultsSettingsRepository()
+    //                return SettingsView(
+    //                    viewModel: SettingsViewModel(repository: fallbackRepo)
+    //                )
+    //            }
+    //            return self.makeSettingsView()
+    //        })
+    //    }
 
     // MARK: - Meeting Room Button
 
@@ -48,14 +48,14 @@ public final class FeedbackFactory {
     /// Unlike ``makeSettingsView()`` (used for the waiting room), this version
     /// injects a ``StatisticsViewModel`` so that the Stats section displays
     /// live audio/video network metrics.
-//    @MainActor
-//    public func makeMeetingRoomSettingsView() -> SettingsView {
-//        let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
-//        return .init(
-//            viewModel: viewModel,
-//            statisticsViewModel: statisticsViewModel
-//        )
-//    }
+    //    @MainActor
+    //    public func makeMeetingRoomSettingsView() -> SettingsView {
+    //        let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
+    //        return .init(
+    //            viewModel: viewModel,
+    //            statisticsViewModel: statisticsViewModel
+    //        )
+    //    }
 
     /// Creates the view models for the meeting room settings without building the view.
     ///
@@ -63,15 +63,15 @@ public final class FeedbackFactory {
     /// ensuring they survive parent re-renders while the sheet is presented.
     ///
     /// - Returns: A tuple of the settings view model and the statistics view model.
-//    @MainActor
-//    public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
-//        let viewModel = SettingsViewModel(repository: repository)
-//        let statisticsViewModel = StatisticsViewModel(
-//            statsDataSource: statsDataSource,
-//            settingsRepository: repository
-//        )
-//        return (viewModel, statisticsViewModel)
-//    }
+    //    @MainActor
+    //    public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
+    //        let viewModel = SettingsViewModel(repository: repository)
+    //        let statisticsViewModel = StatisticsViewModel(
+    //            statsDataSource: statsDataSource,
+    //            settingsRepository: repository
+    //        )
+    //        return (viewModel, statisticsViewModel)
+    //    }
 
     /// Creates the gear button for the meeting room bottom bar.
     ///
@@ -90,21 +90,21 @@ public final class FeedbackFactory {
     /// to prevent the overlay text from updating too rapidly for users to read.
     ///
     /// - Returns: A configured stats overlay view model.
-//    @MainActor
-//    public func makeStatsOverlayViewModel() -> StatsOverlayViewModel {
-//        .init(
-//            settingsRepository: repository,
-//            statsDataSource: statsDataSource,
-//            statsUpdateInterval: SettingsConstants.statsInterval
-//        )
-//    }
-//
-//    /// Creates a ``StatsOverlayView`` backed by the given view model.
-//    ///
-//    /// - Parameter viewModel: The view model driving the overlay's state and text.
-//    /// - Returns: A configured stats overlay view.
-//    @MainActor
-//    public func makeStatsOverlayView(viewModel: StatsOverlayViewModel) -> StatsOverlayView {
-//        .init(viewModel: viewModel)
-//    }
+    //    @MainActor
+    //    public func makeStatsOverlayViewModel() -> StatsOverlayViewModel {
+    //        .init(
+    //            settingsRepository: repository,
+    //            statsDataSource: statsDataSource,
+    //            statsUpdateInterval: SettingsConstants.statsInterval
+    //        )
+    //    }
+    //
+    //    /// Creates a ``StatsOverlayView`` backed by the given view model.
+    //    ///
+    //    /// - Parameter viewModel: The view model driving the overlay's state and text.
+    //    /// - Returns: A configured stats overlay view.
+    //    @MainActor
+    //    public func makeStatsOverlayView(viewModel: StatsOverlayViewModel) -> StatsOverlayView {
+    //        .init(viewModel: viewModel)
+    //    }
 }

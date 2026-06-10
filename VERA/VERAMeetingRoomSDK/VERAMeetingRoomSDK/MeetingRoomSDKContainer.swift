@@ -12,6 +12,7 @@ import VERAChat
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -286,6 +287,8 @@ final class MeetingRoomSDKContainer {
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
         statsDataSource: statsRepository)
+
+    lazy var feedbackFactory = FeedbackFactory()
 
     // MARK: - Audio Effects Feature
 
