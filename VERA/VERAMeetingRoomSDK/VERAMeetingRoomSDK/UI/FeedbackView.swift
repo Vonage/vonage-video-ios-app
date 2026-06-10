@@ -92,21 +92,30 @@ struct FeedbackSheetContent: View {
 struct FeedbackSectionView: View {
 
     private enum Layout {
-        static let topInset: CGFloat = 15
+        static let topScrollInset: CGFloat = 15
+        static let bottomScrollInset: CGFloat = 70
         static let horizontalPadding: CGFloat = 16
         static let verticalPadding: CGFloat = 12
     }
 
     @ObservedObject var feedbackSectionViewModel: FeedbackSectionViewModel
 
+    
     var body: some View {
-        VStack {
+        ZStack(alignment: .bottom) {
             feedbackFieldsList
-                .modifier(ScrollContentTopInset(height: Layout.topInset))
+                .modifier(
+                    FeedbackScrollContentInset(
+                        topInset: Layout.topScrollInset,
+                        bottomInset: Layout.bottomScrollInset
+                    )
+                )
             sendButton
                 .padding(.horizontal, Layout.horizontalPadding)
                 .padding(.vertical, Layout.verticalPadding)
                 .background(Color(uiColor: .systemGroupedBackground))
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
         }
     }
 
@@ -163,14 +172,19 @@ private extension View {
     }
 }
 
-private struct ScrollContentTopInset: ViewModifier {
-    let height: CGFloat
+private struct FeedbackScrollContentInset: ViewModifier {
+    let topInset: CGFloat
+    let bottomInset: CGFloat
 
     func body(content: Content) -> some View {
         if #available(iOS 17.0, *) {
-            content.contentMargins(.top, height, for: .scrollContent)
+            content
+                .contentMargins(.top, topInset, for: .scrollContent)
+                .contentMargins(.bottom, bottomInset, for: .scrollContent)
         } else {
-            content.padding(.top, height)
+            content
+                .padding(.top, topInset)
+                .padding(.bottom, bottomInset)
         }
     }
 }
