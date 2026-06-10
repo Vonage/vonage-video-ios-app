@@ -179,7 +179,6 @@ jobs:
             -resultBundlePath DerivedData/VERAMeetingRoomTests-macOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
 
-<<<<<<< vidsol-672
       - name: Run VERALoggerTests (macOS)
         id: logger-tests-macos
         run: |
@@ -191,7 +190,6 @@ jobs:
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
             -resultBundlePath DerivedData/VERALoggerTests-macOS.xcresult \
-=======
       - name: Run VERAFeedbackTests (macOS)
         id: feedback-tests-macos
         run: |
@@ -203,7 +201,6 @@ jobs:
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
             -resultBundlePath DerivedData/VERAFeedbackTests-macOS.xcresult \
->>>>>>> develop
             $XCODE_COMMON_FLAGS | xcpretty
 
       - name: Preboot iOS Simulator
