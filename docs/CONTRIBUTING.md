@@ -96,6 +96,6 @@ We may close pull requests that appear abandoned, especially when they have unre
 ### Branching
 Our `main` branch is the evergreen source of truth for the Vonage Video iOS Reference App. All new development should be done in the `develop` branch. Contributions should be made by branching off `develop`, and pull requests should be submitted against `develop`. Periodically, `develop` will be merged into `main` as a batch.
 
-Internally, we use Jira for issue tracking. Internal branches use the format `DEVELOPERNAME/TICKETNUMBER-SHORTDESCRIPTION`, for example `alicesmith/VIDCS-123-fix-broken-icon`. If you'd like to contribute a pull request from your fork, please use a descriptive branch name, for example `fix-broken-icon`.
+Internally, we use Jira for issue tracking. Internal branches use the format `DEVELOPERNAME/TICKETNUMBER-SHORTDESCRIPTION`, for example `alicesmith/VIDSOL-123-fix-broken-icon`. If you'd like to contribute a pull request from your fork, please use a descriptive branch name, for example `fix-broken-icon`.
 
 Release versions use the format `rc-RELEASENUMBER`, for example `rc-1.0.0`. We follow [Semantic Versioning](https://semver.org/).
