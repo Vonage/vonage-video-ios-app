@@ -159,6 +159,7 @@ final class BottomBarButtonsAssembler {
         let button = container.captionsFactory.makeCaptionsButton(viewModel: viewModel)
         return .init(
             label: String(localized: "Captions"),
+            accessibilityIdentifier: CaptionsAccessibilityID.toggleButton,
             image: viewModel.state.captionsEnabled
                 ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
                 : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,

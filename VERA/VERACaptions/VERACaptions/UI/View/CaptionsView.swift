@@ -82,6 +82,7 @@ public struct CaptionsView: View {
                 RoundedRectangle(cornerRadius: CaptionsViewConstants.cornerRadius)
                     .fill(theme.vGray4.opacity(CaptionsViewConstants.backgroundOpacity))
             )
+            .accessibilityIdentifier(CaptionsAccessibilityID.overlay)
             .padding(.horizontal, CaptionsViewConstants.horizontalPadding)
             .onChange(of: captions.last?.id) { latestId in
                 guard let latestId else { return }

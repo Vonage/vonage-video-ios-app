@@ -292,9 +292,13 @@ final class URLSessionHTTPClientTests {
             {"roomName":"testroom","sessionKey":"secret-session-key","archiveId":"archive-1"}
             """.utf8)
         let expectedData = Data(
-            """
-            {"result":{"data":{"applicationId":"secret-app","count":1,"items":[{"id":"archive-1","status":"available","token":"secret-token"}]}}}
-            """.utf8)
+            (#"{"result":{"data":{"applicationId":"secret-app","count":1,"items":["#
+                + #"{"id":"archive-1","status":"available","token":"secret-token"}]}}}"#).utf8)
+        let expectedRequestBodyPreview =
+            #"{"archiveId":"archive-1","roomName":"testroom","sessionKey":"<redacted>"}"#
+        let expectedResponseBodyPreview =
+            #"{"result":{"data":{"applicationId":"<redacted>","count":1,"items":["#
+            + #"{"id":"archive-1","status":"available","token":"<redacted>"}]}}}"#
 
         spy.stub(url: url, statusCode: 200, data: expectedData)
 
@@ -307,11 +311,8 @@ final class URLSessionHTTPClientTests {
                     method: "POST",
                     url: url,
                     statusCode: 200,
-                    requestBodyPreview:
-                        "{\"archiveId\":\"archive-1\",\"roomName\":\"testroom\",\"sessionKey\":\"<redacted>\"}",
-                    responseBodyPreview:
-                        "{\"result\":{\"data\":{\"applicationId\":\"<redacted>\",\"count\":1,\"items\":[{\"id\":\"archive-1\",\"status\":\"available\",\"token\":\"<redacted>\"}]}}}"
-                )
+                    requestBodyPreview: expectedRequestBodyPreview,
+                    responseBodyPreview: expectedResponseBodyPreview)
             ])
     }
 

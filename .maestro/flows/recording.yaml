@@ -4,6 +4,8 @@ appId: ${APP_ID}
     permissions:
       camera: allow
       microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
 
 - waitForAnimationToEnd:
     timeout: 5000
@@ -116,11 +118,11 @@ appId: ${APP_ID}
 
 - takeScreenshot: 04-goodbye-archives
 
-# Wait for archive to appear in the list (up to 3 minutes)
+# Wait for archive to appear in the list (up to 1 minute)
 - extendedWaitUntil:
     visible:
       id: "archiving-archive-item"
-    timeout: 180000
+    timeout: 90000
 
 # Verify an archive item was created
 - assertVisible:

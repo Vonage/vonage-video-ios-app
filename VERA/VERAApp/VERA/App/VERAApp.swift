@@ -8,6 +8,7 @@ import SwiftUI
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
@@ -31,7 +32,13 @@ import VERAVonage
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
-    let dependencyContainer = DependencyContainer()
+
+    var dependencyContainer: DependencyContainer = {
+        let httpClient = AppHTTPClientProvider(
+            isE2EEnabled: E2EConfiguration.isEnabled
+        )
+        return DependencyContainer(httpClient: httpClient())
+    }()
 
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
@@ -233,6 +240,15 @@ struct VERAApp: App {
             case .goBack(let room):
                 navigationCoordinator?.go(to: .waitingRoom(room))
             }
+        }
+
+        builder.httpClientFactory(
+            SharedMeetingRoomHTTPClientFactory(httpClient: dependencyContainer.httpClient)
+        )
+        if E2EConfiguration.isEnabled {
+            builder
+                .sessionRepositoryFactory(E2EMeetingRoomSessionRepositoryFactory())
+                .archivingDataSourceFactory(E2EMeetingRoomArchivingDataSourceFactory())
         }
 
         let result = builder.build()

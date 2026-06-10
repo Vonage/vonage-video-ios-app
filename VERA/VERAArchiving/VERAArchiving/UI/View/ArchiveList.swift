@@ -80,8 +80,8 @@ struct ArchiveList: View {
                                             .adaptiveFont(.bodyBase)
                                             .foregroundStyle(theme.primary)
                                     }
+                                    .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                                 }
-                                .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                             } else {
                                 ProgressView()
                                     .frame(
