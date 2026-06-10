@@ -122,13 +122,23 @@ class FeedbackSectionViewModel: ObservableObject {
 
     let title = "Report isue"
     @Published var feedbackFields = [
-        FeedbackFieldViewModel(maxChars: 100, minLineLimit: 2, maxLineLimit: 5, title: "When you noticed this issue, what where you trying to do?", key: "Title", type: .text),
-        FeedbackFieldViewModel(maxChars: 100, minLineLimit: 2, maxLineLimit: 5, title: "Tell us your name", key: "Name", type: .text),
-        FeedbackFieldViewModel(maxChars: 1000, minLineLimit: 5, maxLineLimit: 10, title: "Describe your issue", key: "Description", footer: "Please do not include any sensitive information", type: .text),
+        FeedbackFieldViewModel(
+            maxChars: 100, minLineLimit: 2, maxLineLimit: 5,
+            title: "When you noticed this issue, what where you trying to do?",
+            key: "Title", type: .text
+        ),
+        FeedbackFieldViewModel(
+            maxChars: 100, minLineLimit: 2, maxLineLimit: 5,
+            title: "Tell us your name", key: "Name", type: .text
+        ),
+        FeedbackFieldViewModel(
+            maxChars: 1000, minLineLimit: 5, maxLineLimit: 10,
+            title: "Describe your issue", key: "Description",
+            footer: "Please do not include any sensitive information", type: .text
+        ),
         FeedbackFieldViewModel(title: "", key: "Image", type: .image, isRequired: false),
     ]
-    
-    
+
     enum Const {
         static let maxStandardFieldChars = 100
         static let maxDescriptionChars = 1000
@@ -142,7 +152,6 @@ class FeedbackSectionViewModel: ObservableObject {
 struct FeedbackSectionView: View {
 
     @ObservedObject var feedbackSectionViewModel: FeedbackSectionViewModel
-    @FocusState private var focusedField: Int?
 
     var body: some View {
         List {
@@ -151,10 +160,12 @@ struct FeedbackSectionView: View {
                 switch field.type {
                 case .text:
                     FeedbackTextFieldView(
-                        feedbackFieldViewModel: $feedbackSectionViewModel.feedbackFields[index]
+                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
                     )
                 case .image:
-                    FeedbackImageFieldView(feedbackFieldViewModel: $feedbackSectionViewModel.feedbackFields[index])
+                    FeedbackImageFieldView(
+                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
+                    )
                 }
             }
         }
@@ -164,18 +175,26 @@ struct FeedbackSectionView: View {
 
 struct FeedbackTextFieldView: View {
 
-    @Binding var feedbackFieldViewModel: FeedbackFieldViewModel
+    private static let lineHeight: CGFloat = 21
+
+    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
 
     var body: some View {
         Section {
-            if let minLineLimit = feedbackFieldViewModel.minLineLimit, let maxLineLimit = feedbackFieldViewModel.maxLineLimit {
-//                TextField("", text: $feedbackFieldViewModel.value, axis: .vertical)
-//                    .lineLimit(minLineLimit...maxLineLimit)
-//                    .frame(maxHeight: 200)
-                TextEditor(text: $feedbackFieldViewModel.value)
-                    .frame(minHeight: 150, maxHeight: 200)
+            if let maxLineLimit = feedbackFieldViewModel.maxLineLimit {
+                LimitedMultilineTextView(
+                    text: Binding(
+                        get: { feedbackFieldViewModel.value },
+                        set: { feedbackFieldViewModel.value = $0 }
+                    ),
+                    minLines: feedbackFieldViewModel.minLineLimit ?? 1,
+                    maxLines: maxLineLimit,
+                    maxCharacters: feedbackFieldViewModel.maxChars,
+                    lineHeight: Self.lineHeight
+                )
             } else {
                 TextField("", text: $feedbackFieldViewModel.value, axis: .vertical)
+                    .autocorrectionDisabled()
                     .frame(maxHeight: 200)
             }
         } header: {
@@ -200,11 +219,12 @@ struct FeedbackTextFieldView: View {
 
 struct FeedbackImageFieldView: View {
 
-    @Binding var feedbackFieldViewModel: FeedbackFieldViewModel
+    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
 
     var body: some View {
         Section {
             TextField("", text: $feedbackFieldViewModel.value)
+                .autocorrectionDisabled()
         } header: {
             Text(feedbackFieldViewModel.title)
         } footer: {
