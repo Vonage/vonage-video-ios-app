@@ -71,6 +71,9 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
     @Published var attachedImage: UIImage?
     var type: FeedbackFieldType
     var isRequired: Bool
+    private var valueWithoutWhitespaces: String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     
     init(maxChars: Int? = nil, minLineLimit: Int? = nil, maxLineLimit: Int? = nil, title: String, key: String, footer: String? = nil, type: FeedbackFieldType, value: String = "", isRequired: Bool = true) {
         self.maxChars = maxChars
@@ -95,7 +98,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
                 return false
             }
             if isRequired {
-                return !value.isEmpty
+                return !valueWithoutWhitespaces.isEmpty
             }
             return true
         }
@@ -112,7 +115,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
             return nil
         case .text:
             var message: String?
-            if isRequired, value.isEmpty {
+            if isRequired, valueWithoutWhitespaces.isEmpty {
                 message = "\(key) is required"
             }
 
