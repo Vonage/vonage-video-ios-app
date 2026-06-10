@@ -134,6 +134,7 @@ private struct LimitedMultilineTextViewRepresentable: UIViewRepresentable {
                 self?.textView?.resignFirstResponder()
             }
             keyboardAccessoryHostingController = hostingController
+
             textView.inputAccessoryView = hostingController.view
         }
 

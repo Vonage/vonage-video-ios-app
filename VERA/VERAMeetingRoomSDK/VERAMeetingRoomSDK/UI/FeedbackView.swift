@@ -2,11 +2,11 @@
 //  Created by Vonage on 10/06/2026.
 //
 
-import SwiftUI
 import PhotosUI
+import SwiftUI
 import UIKit
-import VERASettings
 import VERACommonUI
+import VERASettings
 
 /// Adaptive feedback form presentation.
 ///
@@ -91,28 +91,32 @@ struct FeedbackSheetContent: View {
 
 struct FeedbackSectionView: View {
 
-    private enum Layout {
+    private enum Constants {
         static let topScrollInset: CGFloat = 15
         static let bottomScrollInset: CGFloat = 70
         static let horizontalPadding: CGFloat = 16
         static let verticalPadding: CGFloat = 12
+        static let bottomListId = "bottomListId"
     }
 
     @ObservedObject var feedbackSectionViewModel: FeedbackSectionViewModel
 
-    
+    // Triggers for scroll interaction
+    @State private var imagePickedTrigger: Int = 0
+    @State private var didValidateTrigger: Int = 0
+
     var body: some View {
         ZStack(alignment: .bottom) {
             feedbackFieldsList
                 .modifier(
                     FeedbackScrollContentInset(
-                        topInset: Layout.topScrollInset,
-                        bottomInset: Layout.bottomScrollInset
+                        topInset: Constants.topScrollInset,
+                        bottomInset: Constants.bottomScrollInset
                     )
                 )
             sendButton
-                .padding(.horizontal, Layout.horizontalPadding)
-                .padding(.vertical, Layout.verticalPadding)
+                .padding(.horizontal, Constants.horizontalPadding)
+                .padding(.vertical, Constants.verticalPadding)
                 .background(Color(uiColor: .systemGroupedBackground))
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -122,38 +126,70 @@ struct FeedbackSectionView: View {
     private var sendButton: some View {
         FilledButton(
             text: Text("Send"),
-            onAction: feedbackSectionViewModel.onSubmit
+            onAction: {
+                feedbackSectionViewModel.onSubmit()
+                if !feedbackSectionViewModel.isValid {
+                    didValidateTrigger += 1
+                }
+            }
         )
         .accessibilityIdentifier("send_button")
     }
 
     private var feedbackFieldsList: some View {
-        List {
-            ForEach(feedbackSectionViewModel.feedbackFields.indices, id: \.self) { index in
-                let field = feedbackSectionViewModel.feedbackFields[index]
-                switch field.type {
-                case .text:
-                    FeedbackTextFieldView(
-                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index],
-                        showValidationErrors: feedbackSectionViewModel.showValidationErrors
-                    )
-                case .info:
-                    FeedbackInfoFieldView(
-                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
-                    )
-                case .image:
-                    FeedbackImageFieldView(
-                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index],
-                        showValidationErrors: feedbackSectionViewModel.showValidationErrors
-                    )
+        ScrollViewReader { proxy in
+            List {
+                ForEach(feedbackSectionViewModel.feedbackFields.indices, id: \.self) { index in
+                    let field = feedbackSectionViewModel.feedbackFields[index]
+                    switch field.type {
+                    case .text:
+                        FeedbackTextFieldView(
+                            feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index],
+                            showValidationErrors: feedbackSectionViewModel.showValidationErrors
+                        )
+                        .id(index)
+                    case .info:
+                        FeedbackInfoFieldView(
+                            feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
+                        )
+                        .id(index)
+                    case .image:
+                        FeedbackImageFieldView(
+                            feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index],
+                            showValidationErrors: feedbackSectionViewModel.showValidationErrors,
+                            onImagePicked: {
+                                imagePickedTrigger += 1
+                            }
+                        )
+                        .id(index)
+                    }
+                }
+                Color.clear.frame(height: 1)
+                    .feedbackFieldListRowStyle()
+                    .id(Constants.bottomListId)
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Color(uiColor: .systemGroupedBackground))
+            .scrollDismissesKeyboard(.interactively)
+            .environment(\.defaultMinListRowHeight, 0)
+            .onChange(of: imagePickedTrigger) { _ in
+                let lastIndex = feedbackSectionViewModel.feedbackFields.count - 1
+                guard lastIndex >= 0 else { return }
+                withAnimation {
+                    proxy.scrollTo(Constants.bottomListId, anchor: .top)
                 }
             }
+            .onChange(of: didValidateTrigger) { _ in
+                guard let firstIndex = feedbackSectionViewModel.feedbackFields.firstIndex(where: { !$0.isValid }) else {
+                    return
+                }
+                withAnimation {
+                    proxy.scrollTo(firstIndex, anchor: .top)
+                }
+            }
+
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(Color(uiColor: .systemGroupedBackground))
-        .scrollDismissesKeyboard(.interactively)
-        .environment(\.defaultMinListRowHeight, 0)
     }
 }
 
@@ -166,8 +202,8 @@ private struct FeedbackFieldListRowStyle: ViewModifier {
     }
 }
 
-private extension View {
-    func feedbackFieldListRowStyle() -> some View {
+extension View {
+    fileprivate func feedbackFieldListRowStyle() -> some View {
         modifier(FeedbackFieldListRowStyle())
     }
 }
@@ -217,7 +253,6 @@ struct FeedbackTextFieldView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(feedbackFieldViewModel.title)
-                .foregroundStyle(.secondary)
 
             fieldContent
                 .padding(.horizontal, Layout.horizontalPadding)
@@ -230,7 +265,6 @@ struct FeedbackTextFieldView: View {
                 }
                 .animation(.easeInOut(duration: 0.2), value: showsError)
 
-            
 
             if showsError, let message = feedbackFieldViewModel.validationMessage {
                 Text(message)
@@ -299,6 +333,7 @@ struct FeedbackImageFieldView: View {
 
     @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
     let showValidationErrors: Bool
+    var onImagePicked: (() -> Void)? = nil
     @State private var isPhotoLibraryPresented = false
     @State private var isCameraPresented = false
     @State private var selectedPhotoItem: PhotosPickerItem?
@@ -315,14 +350,14 @@ struct FeedbackImageFieldView: View {
 
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 OutlinedButton(
-                    text: Text(String(localized: "Capture screenshot")),
+                    text: Text(String(localized: "Use Camera")),
                     color: primaryColor,
                     onAction: { isCameraPresented = true }
                 )
             }
 
             OutlinedButton(
-                text: Text(String(localized: "Add screenshot")),
+                text: Text(String(localized: "Add image from photo library")),
                 color: primaryColor,
                 onAction: { isPhotoLibraryPresented = true }
             )
@@ -335,11 +370,23 @@ struct FeedbackImageFieldView: View {
                     .clipShape(
                         RoundedRectangle(cornerRadius: Layout.previewCornerRadius, style: .continuous)
                     )
+                VStack(alignment: .leading) {
+                    Button(action: {
+                        feedbackFieldViewModel.attachedImage = nil
+                    }) {
+                        HStack {
+                            VERACommonUIAsset.Images.removeLine.swiftUIImage
+                            Text(String(localized: "Remove image"))
+                        }
+                    }
+
+                }
             }
 
             if showValidationErrors,
-               !feedbackFieldViewModel.isValid,
-               let message = feedbackFieldViewModel.validationMessage {
+                !feedbackFieldViewModel.isValid,
+                let message = feedbackFieldViewModel.validationMessage
+            {
                 Text(message)
                     .font(.footnote)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
@@ -354,6 +401,7 @@ struct FeedbackImageFieldView: View {
         .fullScreenCover(isPresented: $isCameraPresented) {
             CameraImagePicker { image in
                 feedbackFieldViewModel.attachedImage = image
+                onImagePicked?()
             }
             .ignoresSafeArea()
         }
@@ -366,9 +414,11 @@ struct FeedbackImageFieldView: View {
         guard let item else { return }
         Task {
             guard let data = try? await item.loadTransferable(type: Data.self),
-                  let image = UIImage(data: data) else { return }
+                let image = UIImage(data: data)
+            else { return }
             await MainActor.run {
                 feedbackFieldViewModel.attachedImage = image
+                onImagePicked?()
             }
         }
     }

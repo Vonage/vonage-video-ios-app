@@ -39,7 +39,8 @@ struct FeedbackKeyboardDoneToolbar: View {
 enum FeedbackKeyboardDoneAccessory {
     static let estimatedHeight: CGFloat = 54
 
-    static func makeHostingController(onDone: @escaping () -> Void) -> UIHostingController<FeedbackKeyboardDoneToolbar> {
+    static func makeHostingController(onDone: @escaping () -> Void) -> UIHostingController<FeedbackKeyboardDoneToolbar>
+    {
         let hostingController = UIHostingController(rootView: FeedbackKeyboardDoneToolbar(onDone: onDone))
         hostingController.view.backgroundColor = .clear
         hostingController.view.frame = CGRect(

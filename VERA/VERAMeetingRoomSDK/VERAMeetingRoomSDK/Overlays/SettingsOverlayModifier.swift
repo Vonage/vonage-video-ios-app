@@ -60,7 +60,7 @@ protocol FieldValidatable {
     var isValid: Bool { get }
     var validationMessage: String? { get }
 }
-class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
+class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
     let maxChars: Int?
     let minLineLimit: Int?
     let maxLineLimit: Int?
@@ -74,8 +74,11 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
     private var valueWithoutWhitespaces: String {
         value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
-    init(maxChars: Int? = nil, minLineLimit: Int? = nil, maxLineLimit: Int? = nil, title: String, key: String, footer: String? = nil, type: FeedbackFieldType, value: String = "", isRequired: Bool = true) {
+
+    init(
+        maxChars: Int? = nil, minLineLimit: Int? = nil, maxLineLimit: Int? = nil, title: String, key: String,
+        footer: String? = nil, type: FeedbackFieldType, value: String = "", isRequired: Bool = true
+    ) {
         self.maxChars = maxChars
         self.minLineLimit = minLineLimit
         self.maxLineLimit = maxLineLimit
@@ -86,7 +89,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
         self.value = value
         self.isRequired = isRequired
     }
-    
+
     var isValid: Bool {
         switch type {
         case .info:
@@ -103,7 +106,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable  {
             return true
         }
     }
-    
+
     var validationMessage: String? {
         switch type {
         case .info:
@@ -136,7 +139,7 @@ extension FeedbackFieldViewModel: Identifiable {
 }
 
 class FeedbackSectionViewModel: ObservableObject {
-    
+
     enum Const {
         static let maxStandardFieldChars = 100
         static let maxDescriptionChars = 1000
@@ -169,7 +172,7 @@ class FeedbackSectionViewModel: ObservableObject {
             isRequired: false
         ),
     ]
-    
+
     init() {}
 
     var isValid: Bool {
