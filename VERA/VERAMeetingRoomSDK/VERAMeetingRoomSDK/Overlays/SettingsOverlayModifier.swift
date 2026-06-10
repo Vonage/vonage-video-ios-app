@@ -37,14 +37,13 @@ struct FeedbackFormOverlayModifier: ViewModifier {
     @Binding var showFeedbackForm: Bool
     let statsOverlayViewModel: StatsOverlayViewModel?
     let container: MeetingRoomSDKContainer
-    
-    @StateObject private var feedbackSectionViewModel = FeedbackSectionViewModel()
 
     func body(content: Content) -> some View {
         if isEnabled {
             content
                 .sheet(isPresented: $showFeedbackForm) {
-                    FeedbackSectionView(feedbackSectionViewModel: feedbackSectionViewModel)
+                    FeedbackSheetContent()
+                        .presentationDetents([.large])
                 }
         } else {
             content
@@ -119,6 +118,11 @@ extension FeedbackFieldViewModel: Identifiable {
 }
 
 class FeedbackSectionViewModel: ObservableObject {
+    
+    enum Const {
+        static let maxStandardFieldChars = 100
+        static let maxDescriptionChars = 1000
+    }
 
     let title = "Report isue"
     @Published var feedbackFields = [
@@ -138,98 +142,12 @@ class FeedbackSectionViewModel: ObservableObject {
         ),
         FeedbackFieldViewModel(title: "", key: "Image", type: .image, isRequired: false),
     ]
-
-    enum Const {
-        static let maxStandardFieldChars = 100
-        static let maxDescriptionChars = 1000
-    }
     
     init() {
+
+    }
+    
+    func onSubmit() {
         
-    }
-}
-
-struct FeedbackSectionView: View {
-
-    @ObservedObject var feedbackSectionViewModel: FeedbackSectionViewModel
-
-    var body: some View {
-        List {
-            ForEach(feedbackSectionViewModel.feedbackFields.indices, id: \.self) { index in
-                let field = feedbackSectionViewModel.feedbackFields[index]
-                switch field.type {
-                case .text:
-                    FeedbackTextFieldView(
-                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
-                    )
-                case .image:
-                    FeedbackImageFieldView(
-                        feedbackFieldViewModel: feedbackSectionViewModel.feedbackFields[index]
-                    )
-                }
-            }
-        }
-        .scrollDismissesKeyboard(.interactively)
-    }
-}
-
-struct FeedbackTextFieldView: View {
-
-    private static let lineHeight: CGFloat = 21
-
-    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
-
-    var body: some View {
-        Section {
-            if let maxLineLimit = feedbackFieldViewModel.maxLineLimit {
-                LimitedMultilineTextView(
-                    text: Binding(
-                        get: { feedbackFieldViewModel.value },
-                        set: { feedbackFieldViewModel.value = $0 }
-                    ),
-                    minLines: feedbackFieldViewModel.minLineLimit ?? 1,
-                    maxLines: maxLineLimit,
-                    maxCharacters: feedbackFieldViewModel.maxChars,
-                    lineHeight: Self.lineHeight
-                )
-            } else {
-                TextField("", text: $feedbackFieldViewModel.value, axis: .vertical)
-                    .autocorrectionDisabled()
-                    .frame(maxHeight: 200)
-            }
-        } header: {
-            Text(feedbackFieldViewModel.title)
-        } footer: {
-            if feedbackFieldViewModel.isValid == false, let message = feedbackFieldViewModel.validationMessage {
-                Text(message)
-            } else {
-                if let maxChars = feedbackFieldViewModel.maxChars {
-                    HStack {
-                        Spacer()
-                        Text("\(feedbackFieldViewModel.value.count)/\(maxChars)")
-                    }
-                }
-            }
-            
-            Text(
-                feedbackFieldViewModel.footer ?? "")
-        }
-    }
-}
-
-struct FeedbackImageFieldView: View {
-
-    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
-
-    var body: some View {
-        Section {
-            TextField("", text: $feedbackFieldViewModel.value)
-                .autocorrectionDisabled()
-        } header: {
-            Text(feedbackFieldViewModel.title)
-        } footer: {
-            Text(
-                feedbackFieldViewModel.footer ?? "")
-        }
     }
 }

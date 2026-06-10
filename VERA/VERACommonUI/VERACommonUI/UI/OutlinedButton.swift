@@ -23,6 +23,8 @@ public struct OutlinedButton: View {
     public let color: Color
     public let image: Image?
     public let isDisabled: Bool
+    public let expandsToFillWidth: Bool
+    public let fillColor: Color
     public let onAction: () -> Void
 
     public init(
@@ -30,12 +32,16 @@ public struct OutlinedButton: View {
         color: Color,
         image: Image? = nil,
         isDisabled: Bool = false,
+        expandsToFillWidth: Bool = true,
+        fillColor: Color = .clear,
         onAction: @escaping () -> Void
     ) {
         self.text = text
         self.color = color
         self.image = image
         self.isDisabled = isDisabled
+        self.expandsToFillWidth = expandsToFillWidth
+        self.fillColor = fillColor
         self.onAction = onAction
     }
 
@@ -43,27 +49,46 @@ public struct OutlinedButton: View {
         Button {
             onAction()
         } label: {
-            if let image = image {
-                HStack {
-                    image
-                        .foregroundStyle(color)
-                    text
-                        .foregroundStyle(color)
-                }.frame(maxWidth: .infinity)
-            } else {
+            labelContent
+        }
+        .buttonStyle(OutlinedButtonStyle(color: color, fillColor: fillColor))
+        .disabled(isDisabled)
+        .modifier(HorizontalExpansionModifier(isEnabled: expandsToFillWidth))
+    }
+
+    @ViewBuilder
+    private var labelContent: some View {
+        if let image = image {
+            HStack {
+                image
+                    .foregroundStyle(color)
                 text
                     .foregroundStyle(color)
-                    .frame(maxWidth: .infinity)
             }
+            .modifier(HorizontalExpansionModifier(isEnabled: expandsToFillWidth))
+        } else {
+            text
+                .foregroundStyle(color)
+                .modifier(HorizontalExpansionModifier(isEnabled: expandsToFillWidth))
         }
-        .buttonStyle(OutlinedButtonStyle(color: color))
-        .disabled(isDisabled)
-        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct HorizontalExpansionModifier: ViewModifier {
+    let isEnabled: Bool
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.frame(maxWidth: .infinity)
+        } else {
+            content
+        }
     }
 }
 
 struct OutlinedButtonStyle: ButtonStyle {
     let color: Color
+    let fillColor: Color
 
     var cornerRadius: CGFloat = BorderRadius.medium.value
 
@@ -71,7 +96,7 @@ struct OutlinedButtonStyle: ButtonStyle {
         configuration.label
             .padding(.horizontal, OutlinedButtonConstants.horizontalPadding)
             .padding(.vertical, OutlinedButtonConstants.verticalPadding)
-            .background(.clear)
+            .background(fillColor)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)

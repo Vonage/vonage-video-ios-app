@@ -11,17 +11,19 @@ struct FeedbackKeyboardDoneToolbar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                Spacer()
+            HStack {
+                Spacer(minLength: 0)
                 OutlinedButton(
                     text: Text(String(localized: "Done")),
                     color: VERACommonUIAsset.SemanticColors.primary.swiftUIColor,
+                    expandsToFillWidth: false,
+                    fillColor: .white,
                     onAction: onDone
                 )
-                .frame(maxHeight: 130)
-                .padding(.horizontal, Layout.horizontalPadding)
-                .padding(.vertical, Layout.verticalPadding)
             }
+            .padding(.trailing, Layout.horizontalPadding)
+            .padding(.vertical, Layout.verticalPadding)
+
             Color.clear.frame(height: Layout.keyboardSpacing)
         }
         .background(Color.clear)
@@ -35,7 +37,7 @@ struct FeedbackKeyboardDoneToolbar: View {
 }
 
 enum FeedbackKeyboardDoneAccessory {
-    static let estimatedHeight: CGFloat = 66
+    static let estimatedHeight: CGFloat = 54
 
     static func makeHostingController(onDone: @escaping () -> Void) -> UIHostingController<FeedbackKeyboardDoneToolbar> {
         let hostingController = UIHostingController(rootView: FeedbackKeyboardDoneToolbar(onDone: onDone))
