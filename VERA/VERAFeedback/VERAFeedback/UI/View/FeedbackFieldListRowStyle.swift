@@ -1,3 +1,9 @@
+//
+//  Created by Vonage on 10/06/2026.
+//
+
+import SwiftUI
+
 private struct FeedbackFieldListRowStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -8,7 +14,7 @@ private struct FeedbackFieldListRowStyle: ViewModifier {
 }
 
 extension View {
-    fileprivate func feedbackFieldListRowStyle() -> some View {
+    func feedbackFieldListRowStyle() -> some View {
         modifier(FeedbackFieldListRowStyle())
     }
 }
