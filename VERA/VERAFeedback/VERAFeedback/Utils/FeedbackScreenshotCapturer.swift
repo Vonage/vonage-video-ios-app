@@ -2,12 +2,31 @@
 //  Created by Vonage on 11/06/2026.
 //
 
-import UIKit
+import Foundation
 
 enum FeedbackScreenshotCapturer {
 
+    /// Captures the content behind the currently presented modal and returns it as a platform image.
+    ///
+    /// - Returns: A snapshot of the screen behind the modal, or `nil` when no modal is presented.
     @MainActor
-    static func captureContentBehindModal() -> UIImage? {
+    static func captureContentBehindModal() -> PlatformImage? {
+        #if canImport(UIKit)
+        return captureOnUIKit()
+        #elseif canImport(AppKit)
+        return captureOnAppKit()
+        #else
+        return nil
+        #endif
+    }
+}
+
+#if canImport(UIKit)
+import UIKit
+
+extension FeedbackScreenshotCapturer {
+    @MainActor
+    private static func captureOnUIKit() -> UIImage? {
         guard let presenter = presenterOfTopmostModal() else {
             return nil
         }
@@ -47,3 +66,53 @@ enum FeedbackScreenshotCapturer {
         }
     }
 }
+
+#elseif canImport(AppKit)
+import AppKit
+
+extension FeedbackScreenshotCapturer {
+    @MainActor
+    private static func captureOnAppKit() -> NSImage? {
+        guard let window = windowBehindModal(),
+            let contentView = window.contentView
+        else {
+            return nil
+        }
+        return render(contentView)
+    }
+
+    @MainActor
+    private static func windowBehindModal() -> NSWindow? {
+        let visibleWindows = NSApplication.shared.windows.filter(\.isVisible)
+
+        if let sheetWindow = visibleWindows.first(where: { $0.isKeyWindow && $0.sheetParent != nil }) {
+            return sheetWindow.sheetParent
+        }
+
+        if let parentWindow = visibleWindows.first(where: { $0.attachedSheet != nil }) {
+            return parentWindow
+        }
+
+        if let keyWindow = NSApplication.shared.keyWindow, keyWindow.sheetParent == nil {
+            return keyWindow
+        }
+
+        return NSApplication.shared.mainWindow
+    }
+
+    @MainActor
+    private static func render(_ view: NSView) -> NSImage? {
+        guard view.bounds.width > 0, view.bounds.height > 0 else { return nil }
+
+        guard let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
+            return nil
+        }
+
+        view.cacheDisplay(in: view.bounds, to: bitmapRep)
+
+        let image = NSImage(size: view.bounds.size)
+        image.addRepresentation(bitmapRep)
+        return image
+    }
+}
+#endif

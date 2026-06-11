@@ -3,7 +3,6 @@
 //
 
 import Combine
-import UIKit
 
 enum FeedbackFieldType {
     case text, info, image
@@ -20,7 +19,7 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
     let title: String
     let key: String
     @Published var value: String
-    @Published var attachedImage: UIImage?
+    @Published var attachedImage: PlatformImage?
     var type: FeedbackFieldType
     var isRequired: Bool
     private var valueWithoutWhitespaces: String {

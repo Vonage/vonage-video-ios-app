@@ -43,7 +43,7 @@ struct FeedbackImageFieldView: View {
             )
 
             if let image = feedbackFieldViewModel.attachedImage {
-                Image(uiImage: image)
+                Image(platformImage: image)
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: Layout.previewMaxHeight)
@@ -93,7 +93,7 @@ struct FeedbackImageFieldView: View {
         guard let item else { return }
         Task {
             guard let data = try? await item.loadTransferable(type: Data.self),
-                let image = UIImage(data: data)
+                let image = PlatformImageFactory.image(from: data)
             else { return }
             await MainActor.run {
                 feedbackFieldViewModel.attachedImage = image

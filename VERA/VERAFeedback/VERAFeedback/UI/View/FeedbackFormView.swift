@@ -35,7 +35,7 @@ struct FeedbackFormView: View {
             sendButton
                 .padding(.horizontal, Constants.horizontalPadding)
                 .padding(.vertical, Constants.verticalPadding)
-                .background(Color(uiColor: .systemGroupedBackground))
+                .background(Color.feedbackFormBackground)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
         }
@@ -77,10 +77,9 @@ struct FeedbackFormView: View {
                         FeedbackImageFieldView(
                             feedbackFieldViewModel: feedbackFormViewModel.feedbackFields[index],
                             showValidationErrors: feedbackFormViewModel.showValidationErrors,
-                            onImagePicked: {
-                                imagePickedTrigger += 1
-                            }
-                        )
+                        ) {
+                            imagePickedTrigger += 1
+                        }
                         .id(index)
                     }
                 }
@@ -90,7 +89,8 @@ struct FeedbackFormView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background(Color(uiColor: .systemGroupedBackground))
+            .background(Color.feedbackFormBackground)
+            #if os(iOS)
             .scrollDismissesKeyboard(.interactively)
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
@@ -111,6 +111,7 @@ struct FeedbackFormView: View {
                     }
                 }
             }
+            #endif
             .onChange(of: focusedFieldIndex) { fieldIndex in
                 guard let fieldIndex else { return }
                 withAnimation {
@@ -185,4 +186,3 @@ private struct FeedbackScrollContentInset: ViewModifier {
         }
     }
 }
-

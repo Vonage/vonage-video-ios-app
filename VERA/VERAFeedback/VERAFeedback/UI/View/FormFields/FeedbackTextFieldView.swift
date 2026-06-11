@@ -56,7 +56,7 @@ struct FeedbackTextFieldView: View {
     private var fieldContent: some View {
         TextField("", text: $feedbackFieldViewModel.value, axis: .vertical)
             .textFieldStyle(.plain)
-            .autocorrectionDisabled()
+            .autocorrectionDisabled(true)
             .focused(focusedFieldIndex, equals: fieldIndex)
             .frame(minHeight: 30, maxHeight: 200)
             .padding(.horizontal, Layout.horizontalPadding)
