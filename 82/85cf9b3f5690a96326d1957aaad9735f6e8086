@@ -1,0 +1,36 @@
+VERA/VERASettings/VERASettings/UI/Entities/SettingsAudioBitrateMode.swift
+  s_79962ee4a482ad::t_34111a8b60c40d 1-28
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  s_79962ee4a482ad::t_46e0442aa87d6f 131,133,160-161
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_79962ee4a482ad::t_88c2f0e30e0986 77-78,85-90,246
+  s_79962ee4a482ad::t_91fd4a13a1a32f 91-101,103-105
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_79962ee4a482ad::t_7e27f54e9c1f2e 40,80,780-791
+  s_79962ee4a482ad::t_8a98c8a66d2e79 39,639,680-681,1064
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  s_79962ee4a482ad::t_dd7fc98bd73c53 422
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  s_79962ee4a482ad::t_633c7fe203c623 22-24,56,68,98
+VERA/VERASettings/VERASettings/UI/View/Sections/AudioSectionView.swift
+  s_79962ee4a482ad::t_141212b1adf442 28-32,35-39,41-42,44-52
+  s_79962ee4a482ad::t_47b6789091d15a 21-24,27
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  s_79962ee4a482ad::t_96ef999f0073bf 1624
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8285cf9b3f5690a96326d1957aaad9735f6e8086",
+  "prompts": {},
+  "sessions": {
+    "s_79962ee4a482ad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb203-bea3-7183-88d9-ad5eb2a9206b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
