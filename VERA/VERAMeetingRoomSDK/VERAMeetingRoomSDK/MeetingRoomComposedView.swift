@@ -101,13 +101,10 @@ struct MeetingRoomComposedView: View {
             )
             .modifier(
                 FeedbackFormOverlayModifier(
-                    isEnabled: enabledFeatures.contains(.settings),
-                    showFeedbackForm: $showFeedbackForm,
-                    statsOverlayViewModel: statsOverlayViewModel,
-                    container: container
+                    isEnabled: enabledFeatures.contains(.feedback),
+                    showFeedbackForm: $showFeedbackForm
                 )
             )
-
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }

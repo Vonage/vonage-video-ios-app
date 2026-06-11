@@ -13,6 +13,7 @@ struct FeedbackFormView: View {
         static let horizontalPadding: CGFloat = 16
         static let verticalPadding: CGFloat = 12
         static let bottomListId = "bottomListId"
+        static let sendAccessibilityId = "send_button"
     }
 
     @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
@@ -41,7 +42,7 @@ struct FeedbackFormView: View {
 
     private var sendButton: some View {
         FilledButton(
-            text: Text("Send"),
+            text: Text(String(localized: "Send")),
             onAction: {
                 feedbackFormViewModel.onSubmit()
                 if !feedbackFormViewModel.isValid {
@@ -49,7 +50,7 @@ struct FeedbackFormView: View {
                 }
             }
         )
-        .accessibilityIdentifier("send_button")
+        .accessibilityIdentifier(Constants.sendAccessibilityId)
     }
 
     private var feedbackFieldsList: some View {
@@ -88,10 +89,7 @@ struct FeedbackFormView: View {
             .scrollContentBackground(.hidden)
             .background(Color(uiColor: .systemGroupedBackground))
             .scrollDismissesKeyboard(.interactively)
-            .environment(\.defaultMinListRowHeight, 0)
             .onChange(of: imagePickedTrigger) { _ in
-                let lastIndex = feedbackFormViewModel.feedbackFields.count - 1
-                guard lastIndex >= 0 else { return }
                 withAnimation {
                     proxy.scrollTo(Constants.bottomListId, anchor: .top)
                 }
