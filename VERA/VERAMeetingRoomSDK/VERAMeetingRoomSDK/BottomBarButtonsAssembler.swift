@@ -100,9 +100,8 @@ final class BottomBarButtonsAssembler {
         }
 
         if enabledFeatures.contains(.feedback) {
-
+            buttons.append(makeFeedbackReportButton())
         }
-        buttons.append(makeFeedbackReportButton())
 
         return buttons
     }
