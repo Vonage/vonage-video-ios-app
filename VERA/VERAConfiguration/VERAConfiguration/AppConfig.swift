@@ -61,11 +61,11 @@ public struct AppConfig {
         public let allowChat: Bool
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
+        public let allowFeedback: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
         public let allowSettings: Bool
-        public let allowFeedback: Bool
 
         public init(
             allowArchiving: Bool = true,
@@ -73,22 +73,22 @@ public struct AppConfig {
             allowChat: Bool = true,
             allowDeviceSelection: Bool = true,
             allowEmojis: Bool = true,
+            allowFeedback: Bool = true,
             allowScreenShare: Bool = true,
             defaultLayoutMode: MeetingRoomLayout = .activeSpeaker,
             showParticipantList: Bool = true,
-            allowSettings: Bool = true,
-            allowFeedback: Bool = true
+            allowSettings: Bool = true
         ) {
             self.allowArchiving = allowArchiving
             self.allowCaptions = allowCaptions
             self.allowChat = allowChat
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
+            self.allowFeedback = allowFeedback
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList
             self.allowSettings = allowSettings
-            self.allowFeedback = allowFeedback
         }
     }
 
