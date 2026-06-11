@@ -419,7 +419,7 @@ struct UserDefaultsSettingsRepositoryTests {
 
         // Repository should still be in valid state
         let finalPreferences = await repository.getPreferences()
-        #expect(finalPreferences.videoResolution == .medium || finalPreferences.maxAudioBitrate >= 0)
+        #expect(finalPreferences.videoResolution == .medium || (finalPreferences.maxAudioBitrate ?? 0) >= 0)
     }
 
     // MARK: - Edge Cases

@@ -36,7 +36,8 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.videoResolution == .medium)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
         #expect(viewModel.settingsPreference.codecPreference.mode == .automatic)
-        #expect(viewModel.maxAudioBitrate == 40_000)
+        #expect(viewModel.maxAudioBitrate == nil)
+        #expect(viewModel.audioBitrateMode == .default)
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
@@ -73,6 +74,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.codecPreference.mode == .manual)
         #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.vp8, .h264, .vp9])
         #expect(viewModel.maxAudioBitrate == 128_000)
+        #expect(viewModel.audioBitrateMode == .custom)
         #expect(viewModel.videoBitratePreset == .custom)
         #expect(viewModel.customMaxVideoBitrate == 2_000_000)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == false)
@@ -326,7 +328,7 @@ struct SettingsViewModelTests {
         #expect(repository.resetCallCount == 1)
         #expect(viewModel.settingsPreference.videoResolution == .medium)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
-        #expect(viewModel.maxAudioBitrate == 40_000)
+        #expect(viewModel.maxAudioBitrate == nil)
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
@@ -367,6 +369,8 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(repository: repository)
 
+        #expect(viewModel.maxAudioBitrateFormatted == "Default")
+
         viewModel.settingsPreference.maxAudioBitrate = 40_000
         let formatted1 = viewModel.maxAudioBitrateFormatted
         #expect(formatted1 == "40.0 kbps")
@@ -404,6 +408,85 @@ struct SettingsViewModelTests {
         // Keep objects alive until end of test
         _ = repository
         _ = viewModel
+    }
+
+    // MARK: - Sorting & Bitrate Setters
+
+    @Test("sortingCodec reorders codec list")
+    func sortingCodecReordersCodecs() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
+        viewModel.sortingCodec(source: IndexSet(integer: 2), destination: 0)
+
+        #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.vp9, .vp8, .h264])
+    }
+
+    @Test("setMaxVideorate updates maximum video bitrate")
+    func setMaxVideorateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxVideorate(2_500_000)
+
+        #expect(viewModel.settingsPreference.maxVideoBitrate == 2_500_000)
+    }
+
+    @Test("setMaxAudioBitrate updates maximum audio bitrate")
+    func setMaxAudioBitrateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxAudioBitrate(96_000)
+
+        #expect(viewModel.settingsPreference.maxAudioBitrate == 96_000)
+    }
+
+    @Test("audioBitrateMode updates audio bitrate preference")
+    func audioBitrateModeUpdatesPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.audioBitrateMode = .custom
+        #expect(viewModel.maxAudioBitrate == 40_000)
+        #expect(viewModel.audioBitrateMode == .custom)
+
+        viewModel.audioBitrateMode = .default
+        #expect(viewModel.maxAudioBitrate == nil)
+        #expect(viewModel.audioBitrateMode == .default)
+    }
+
+    @Test("audioBitrateMode custom preserves existing custom bitrate")
+    func audioBitrateModeCustomPreservesExistingValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.maxAudioBitrate = 128_000
+        viewModel.audioBitrateMode = .custom
+
+        #expect(viewModel.maxAudioBitrate == 128_000)
+        #expect(viewModel.audioBitrateMode == .custom)
+    }
+
+    @Test("codecMode reflects preference mode")
+    func codecModeReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.codecMode == .automatic)
+
+        viewModel.settingsPreference.codecPreference.mode = .manual
+        #expect(viewModel.codecMode == .manual)
+    }
+
+    @Test("orderedCodecs reflects preference codecs")
+    func orderedCodecsReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9]
+        #expect(viewModel.orderedCodecs == [.h264, .vp9])
     }
 
     // MARK: - State Mutation Tests
@@ -593,7 +676,7 @@ struct SettingsViewModelTests {
 
         // Set to zero
         viewModel.setMaxAudioBitrate(0.0)
-        #expect(viewModel.maxAudioBitrate == 0)
+        #expect(viewModel.maxAudioBitrate == 6_000)
     }
 
     @Test("setMaxAudioBitrate converts Double to Int32")

@@ -19,7 +19,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     public var codecPreference: SettingsCodecPreference
 
     /// The maximum audio bitrate in bits per second.
-    public var maxAudioBitrate: Int32
+    ///
+    /// `nil` means automatic mode, letting the SDK decide the audio bitrate.
+    public var maxAudioBitrate: Int32?
 
     /// The video bitrate preset (default or custom).
     public var videoBitratePreset: SettingsVideoBitratePreset
@@ -51,7 +53,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - videoResolution: The video resolution. Defaults to `.medium`.
     ///   - videoFrameRate: The video frame rate. Defaults to `.fps30`.
     ///   - codecPreference: The codec preference. Defaults to `.automatic`.
-    ///   - maxAudioBitrate: The maximum audio bitrate in bps. Defaults to 40,000.
+    ///   - maxAudioBitrate: The maximum audio bitrate in bps. Defaults to `nil` (SDK default).
     ///   - videoBitratePreset: The video bitrate preset. Defaults to `.default`.
     ///   - maxVideoBitrate: The maximum video bitrate in bps. Defaults to 500,000.
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
@@ -63,7 +65,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
         codecPreference: SettingsCodecPreference = .automatic,
-        maxAudioBitrate: Int32 = 40_000,
+        maxAudioBitrate: Int32? = nil,
         videoBitratePreset: SettingsVideoBitratePreset = .default,
         maxVideoBitrate: Int32 = 500_000,
         publisherAudioFallbackEnabled: Bool = true,
@@ -93,7 +95,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         videoResolution = try container.decode(SettingsVideoResolution.self, forKey: .videoResolution)
         videoFrameRate = try container.decode(SettingsVideoFrameRate.self, forKey: .videoFrameRate)
-        maxAudioBitrate = try container.decode(Int32.self, forKey: .maxAudioBitrate)
+        maxAudioBitrate = try container.decodeIfPresent(Int32.self, forKey: .maxAudioBitrate)
         videoBitratePreset =
             try container.decodeIfPresent(SettingsVideoBitratePreset.self, forKey: .videoBitratePreset) ?? .default
         maxVideoBitrate = try container.decodeIfPresent(Int32.self, forKey: .maxVideoBitrate) ?? 0

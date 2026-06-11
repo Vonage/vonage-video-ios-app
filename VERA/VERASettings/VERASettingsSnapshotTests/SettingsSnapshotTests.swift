@@ -131,6 +131,32 @@ struct SettingsSnapshotTests {
         )
     }
 
+    @Test(
+        "SettingsView - Audio Bitrate Modes",
+        arguments: [
+            ("iPad-audio-default", PublisherSettingsPreferences.default),
+            ("iPad-audio-custom", await makeCustomAudioBitratePreferences()),
+        ])
+    func audioBitrateModes(
+        snapshotName: String,
+        preferences: PublisherSettingsPreferences
+    ) throws {
+        let sut = makeSUT(
+            withStatistics: false,
+            preferences: preferences,
+            selectedSection: .audio,
+            horizontalSizeClass: .regular
+        )
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPadPro12_9)),
+            named: snapshotName,
+            record: isRecording,
+            testName: "\(snapshotPrefix)_\(snapshotName)"
+        )
+    }
+
     // MARK: - Statistics Section Tests
 
     @Test("Stats section - Publisher and subscribers list (collapsed)")
@@ -251,6 +277,12 @@ struct SettingsSnapshotTests {
         var prefs = PublisherSettingsPreferences.default
         prefs.videoBitratePreset = .custom
         prefs.maxVideoBitrate = 2_000_000  // 2 Mbps
+        prefs.maxAudioBitrate = 128_000  // 128 kbps
+        return prefs
+    }
+
+    private static func makeCustomAudioBitratePreferences() async -> PublisherSettingsPreferences {
+        var prefs = PublisherSettingsPreferences.default
         prefs.maxAudioBitrate = 128_000  // 128 kbps
         return prefs
     }

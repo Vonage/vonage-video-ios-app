@@ -7,9 +7,13 @@ import Foundation
 import os.log
 
 /// Constants used throughout the settings system.
-private enum SettingsConstants {
-    /// The default maximum audio bitrate in bits per second (500 kbps).
-    static let defaultMaxAudioBitrate: Int32 = 500_000
+public enum AudioSettingsConstants {
+    // OT SDK valid range: 6000 – 510 000 bps.
+    static let audioBitrateRange: ClosedRange<Double> = 6_000...510_000
+    static let audioBitrateStep: Double = 2_000
+    /// The default custom maximum audio bitrate in bits per second (40 kbps). https://vonage.github.io/video-docs/video-react-native-reference/latest/OTPublisher.html#:~:text=The%20default%20value%20is%2040%2C000.
+    static let defaultAudioBitrate: Int32 = 40_000
+
 }
 
 /// Drives ``SettingsView`` by reading and writing publisher setting preferences.
@@ -58,15 +62,35 @@ public final class SettingsViewModel: ObservableObject {
         SettingsFormatter.formatBandwidth(customMaxVideoBitrate) ?? ""
     }
 
-    /// The maximum audio bitrate in bits per second.
-    public var maxAudioBitrate: Int32 {
+    /// The maximum audio bitrate in bits per second. `nil` means the SDK decides.
+    public var maxAudioBitrate: Int32? {
         settingsPreference.maxAudioBitrate
     }
 
     /// A human-readable formatted string of the current audio bitrate.
     /// Returns an empty string if formatting fails.
     public var maxAudioBitrateFormatted: String {
-        SettingsFormatter.formatBandwidth(maxAudioBitrate) ?? ""
+        guard let maxAudioBitrate else {
+            return "Default".localized
+        }
+        return SettingsFormatter.formatBandwidth(maxAudioBitrate) ?? ""
+    }
+
+    /// The audio bitrate selection mode.
+    public var audioBitrateMode: SettingsAudioBitrateMode {
+        get {
+            settingsPreference.maxAudioBitrate == nil ? .default : .custom
+        }
+        set {
+            switch newValue {
+            case .default:
+                settingsPreference.maxAudioBitrate = nil
+            case .custom:
+                if settingsPreference.maxAudioBitrate == nil {
+                    settingsPreference.maxAudioBitrate = AudioSettingsConstants.defaultAudioBitrate
+                }
+            }
+        }
     }
 
     /// Indicates whether sender statistics are enabled for debugging.
@@ -139,7 +163,10 @@ public final class SettingsViewModel: ObservableObject {
     ///
     /// - Parameter maxAudioBitrate: The new maximum audio bitrate in bits per second.
     public func setMaxAudioBitrate(_ maxAudioBitrate: Double) {
-        settingsPreference.maxAudioBitrate = Int32(maxAudioBitrate)
+        let roundedValue = Int32(maxAudioBitrate)
+        let minValue = Int32(AudioSettingsConstants.audioBitrateRange.lowerBound)
+        let maxValue = Int32(AudioSettingsConstants.audioBitrateRange.upperBound)
+        settingsPreference.maxAudioBitrate = min(max(roundedValue, minValue), maxValue)
     }
 
     /// Loads the current settings preferences from the repository and starts
