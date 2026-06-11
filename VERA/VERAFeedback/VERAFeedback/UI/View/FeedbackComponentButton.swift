@@ -8,13 +8,9 @@ import VERACommonUI
 import VERADomain
 
 public struct FeedbackComponentButton: View {
-    //    @ObservedObject private var viewModel: ChatBadgeButtonViewModel
     private let onShowFeedbackForm: () -> Void
 
-    //    private var unreadMessagesCount: Int { viewModel.unreadMessagesCount }
-
     public init(onShowFeedbackForm: @escaping () -> Void) {
-        //        self.viewModel = viewModel
         self.onShowFeedbackForm = onShowFeedbackForm
     }
 
@@ -35,7 +31,6 @@ public struct FeedbackButton: View {
     /// - Parameter onShowSettings: Optional closure called when the button is tapped.
     ///                             Typically provided by the parent view to handle sheet presentation.
     public init(onShowFeedbackForm: @escaping () -> Void) {
-        //        self.viewModel = viewModel
         self.onShowFeedbackForm = onShowFeedbackForm
     }
 
