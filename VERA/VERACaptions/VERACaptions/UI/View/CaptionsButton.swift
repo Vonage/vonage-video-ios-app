@@ -53,7 +53,9 @@ struct CaptionsButton: View {
             image: state.captionsEnabled
                 ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
                 : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
-            action: action)
+            action: action
+        )
+        .accessibilityIdentifier(CaptionsAccessibilityID.toggleButton)
     }
 }
 
