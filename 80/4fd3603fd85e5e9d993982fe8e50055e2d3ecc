@@ -1,0 +1,22 @@
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  s_79962ee4a482ad::t_8fbe91080fd2a8 134-137,139-159,285
+  s_79962ee4a482ad::t_42ba108d46172e 138,284
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_79962ee4a482ad::t_d0a86e86f6fc82 39-40,77,331,372-373,413-580,768
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "804fd3603fd85e5e9d993982fe8e50055e2d3ecc",
+  "prompts": {},
+  "sessions": {
+    "s_79962ee4a482ad": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb203-bea3-7183-88d9-ad5eb2a9206b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
