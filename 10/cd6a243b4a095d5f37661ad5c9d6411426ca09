@@ -1,0 +1,47 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/UI/LimitedMultilineTextView.swift
+  s_151ba86e4d048f::t_69d44a3b737aa2 8,10,13,15-60,68-69,80,95,109,123,128,152,168-184,202-205
+  s_151ba86e4d048f::t_6a407ed2e3203c 65-66,70-72,99,101-103
+  s_151ba86e4d048f::t_01bac002be9a9d 209-217
+  s_151ba86e4d048f::t_3467eb98d2f557 126
+  s_151ba86e4d048f::t_7981d8a8216914 132,134-135,138-139
+  s_151ba86e4d048f::t_42dfa3d4f94adf 133,136-137
+  s_151ba86e4d048f::t_38b1eb59489344 1-7,9,11-12,14,61-64,67,73-79,82-83,85-94,96-98,100,104-108,110-111,122,124,127,129-131,140-151,153-167,185-201,206-208
+  s_151ba86e4d048f::t_ec224f98e4a591 81
+  s_151ba86e4d048f::t_37b7e1ee3744c8 112-121
+  s_151ba86e4d048f::t_241bc10cde4d69 125
+  s_151ba86e4d048f::t_738e2070238e7e 84
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/UI/FeedbackKeyboardDoneToolbar.swift
+  s_151ba86e4d048f::t_b957e8be364842 27
+  s_151ba86e4d048f::t_77e9f1518becc3 28-33
+  s_151ba86e4d048f::t_15c348c240a013 1-12,23-26,34-37,41-42,50-51
+  s_151ba86e4d048f::t_53bda267a655d0 38
+  s_151ba86e4d048f::t_eacbd523bfe8d0 13,48
+  s_151ba86e4d048f::t_e915c5f6698a1c 16-19,22,40,43-47,49
+  s_151ba86e4d048f::t_8e5b7bc2f1f1a2 39
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/SettingsOverlayModifier.swift
+  s_151ba86e4d048f::t_5c4ffea2857ba4 180,184
+  s_151ba86e4d048f::t_2e460d5c16947e 222
+  s_151ba86e4d048f::t_c9d14171b10a2c 190,193
+  s_151ba86e4d048f::t_312326159d9e03 197
+  s_151ba86e4d048f::t_1e595c1c6d46cf 163,166-168
+  s_151ba86e4d048f::t_da1425c73179e7 125-138
+  s_151ba86e4d048f::t_3432e6016b6abc 185-189,191-192,194
+  s_151ba86e4d048f::t_7a9ff5ff0755fa 179
+  s_151ba86e4d048f::t_644788f3be4ca4 227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "10cd6a243b4a095d5f37661ad5c9d6411426ca09",
+  "prompts": {},
+  "sessions": {
+    "s_151ba86e4d048f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8069d2b-0ace-47f6-8ddc-6b80e75ea5b4",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
