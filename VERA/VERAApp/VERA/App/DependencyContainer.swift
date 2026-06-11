@@ -31,9 +31,14 @@ import VERAVonageCallKitPlugin
 #endif
 
 final class DependencyContainer {
-    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    let httpClient: HTTPClient
+
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
+    }
+
+    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
     lazy var jsonDecoder = JSONDecoder()
 
@@ -101,14 +106,7 @@ final class DependencyContainer {
         userRepository: userRepository,
         advancedSettingsUseCase: advancedSettingsUseCase)
 
-    lazy var goodByePageFactory = GoodByePageFactory(
-        joinRoomUseCase: .init(
-            userRepository: userRepository,
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            advancedSettingsUseCase: advancedSettingsUseCase),
-        userRepository: userRepository)
-
-    // MARK: - Meeting Room SDK
+    lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
