@@ -1,3 +1,9 @@
+//
+//  Created by Vonage on 10/06/2026.
+//
+
+import SwiftUI
+import VERACommonUI
 
 struct FeedbackTextFieldView: View {
 
@@ -7,9 +13,8 @@ struct FeedbackTextFieldView: View {
         static let borderWidth: CGFloat = 1
         static let horizontalPadding: CGFloat = 12
         static let verticalPadding: CGFloat = 8
+        static let errorColor = VERACommonUIAsset.SemanticColors.error.swiftUIColor
     }
-
-    private static let errorColor = VERACommonUIAsset.SemanticColors.error.swiftUIColor
 
     @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
     let showValidationErrors: Bool
@@ -20,7 +25,7 @@ struct FeedbackTextFieldView: View {
 
     private var borderColor: Color {
         showsError
-            ? Self.errorColor
+            ? Layout.errorColor
             : VERACommonUIAsset.SemanticColors.border.swiftUIColor
     }
 
@@ -43,7 +48,7 @@ struct FeedbackTextFieldView: View {
             if showsError, let message = feedbackFieldViewModel.validationMessage {
                 Text(message)
                     .font(.footnote)
-                    .foregroundStyle(Self.errorColor)
+                    .foregroundStyle(Layout.errorColor)
             } else if let maxChars = feedbackFieldViewModel.maxChars {
                 HStack {
                     Spacer()
@@ -51,12 +56,6 @@ struct FeedbackTextFieldView: View {
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            }
-
-            if let footer = feedbackFieldViewModel.footer, !footer.isEmpty {
-                Text(footer)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
         }
         .feedbackFieldListRowStyle()

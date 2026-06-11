@@ -1,8 +1,13 @@
+//
+//  Created by Vonage on 10/06/2026.
+//
+
+import SwiftUI
+import VERAFeedback
+
 struct FeedbackFormOverlayModifier: ViewModifier {
     let isEnabled: Bool
     @Binding var showFeedbackForm: Bool
-    let statsOverlayViewModel: StatsOverlayViewModel?
-    let container: MeetingRoomSDKContainer
 
     func body(content: Content) -> some View {
         if isEnabled {
