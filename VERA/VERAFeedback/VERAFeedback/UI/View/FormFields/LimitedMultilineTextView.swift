@@ -130,7 +130,7 @@ private struct LimitedMultilineTextViewRepresentable: UIViewRepresentable {
         }
 
         func configureKeyboardAccessory(for textView: UITextView) {
-            let hostingController = FeedbackKeyboardDoneAccessory.makeHostingController { [weak self] in
+            let hostingController = LimitedMultilineKeyboardAccessory.makeHostingController { [weak self] in
                 self?.textView?.resignFirstResponder()
             }
             keyboardAccessoryHostingController = hostingController
@@ -205,6 +205,22 @@ private struct LimitedMultilineTextViewRepresentable: UIViewRepresentable {
         private enum Layout {
             static let verticalInset: CGFloat = 16
         }
+    }
+}
+
+private enum LimitedMultilineKeyboardAccessory {
+    static let estimatedHeight: CGFloat = 54
+
+    static func makeHostingController(onDone: @escaping () -> Void) -> UIHostingController<FeedbackKeyboardDoneToolbar> {
+        let hostingController = UIHostingController(rootView: FeedbackKeyboardDoneToolbar(onDone: onDone))
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: UIScreen.main.bounds.width,
+            height: estimatedHeight
+        )
+        return hostingController
     }
 }
 

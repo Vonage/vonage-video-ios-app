@@ -18,7 +18,6 @@ struct FeedbackImageFieldView: View {
     let showValidationErrors: Bool
     var onImagePicked: (() -> Void)? = nil
     @State private var isPhotoLibraryPresented = false
-    @State private var isCameraPresented = false
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     private var primaryColor: Color {
@@ -31,13 +30,11 @@ struct FeedbackImageFieldView: View {
                 .font(.body)
                 .foregroundStyle(.primary)
 
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                OutlinedButton(
-                    text: Text(String(localized: "Use Camera")),
-                    color: primaryColor,
-                    onAction: { isCameraPresented = true }
-                )
-            }
+            OutlinedButton(
+                text: Text(String(localized: "Capture screenshot")),
+                color: primaryColor,
+                onAction: { captureScreenshot() }
+            )
 
             OutlinedButton(
                 text: Text(String(localized: "Add image from photo library")),
@@ -81,16 +78,15 @@ struct FeedbackImageFieldView: View {
             selection: $selectedPhotoItem,
             matching: .images
         )
-        .fullScreenCover(isPresented: $isCameraPresented) {
-            CameraImagePicker { image in
-                feedbackFieldViewModel.attachedImage = image
-                onImagePicked?()
-            }
-            .ignoresSafeArea()
-        }
         .onChange(of: selectedPhotoItem) { newItem in
             loadPhoto(from: newItem)
         }
+    }
+
+    private func captureScreenshot() {
+        guard let image = FeedbackScreenshotCapturer.captureContentBehindModal() else { return }
+        feedbackFieldViewModel.attachedImage = image
+        onImagePicked?()
     }
 
     private func loadPhoto(from item: PhotosPickerItem?) {
