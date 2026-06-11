@@ -91,26 +91,26 @@ struct FeedbackFormView: View {
             .scrollContentBackground(.hidden)
             .background(Color.feedbackFormBackground)
             #if os(iOS)
-            .scrollDismissesKeyboard(.interactively)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button(action: focusPrevious) {
-                        Image(systemName: "chevron.up")
-                    }
-                    .disabled(focusedFieldIndex == nil || isFirstTextFieldFocused)
+                .scrollDismissesKeyboard(.interactively)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Button(action: focusPrevious) {
+                            Image(systemName: "chevron.up")
+                        }
+                        .disabled(focusedFieldIndex == nil || isFirstTextFieldFocused)
 
-                    Button(action: focusNext) {
-                        Image(systemName: "chevron.down")
-                    }
-                    .disabled(focusedFieldIndex == nil || isLastTextFieldFocused)
+                        Button(action: focusNext) {
+                            Image(systemName: "chevron.down")
+                        }
+                        .disabled(focusedFieldIndex == nil || isLastTextFieldFocused)
 
-                    Spacer()
+                        Spacer()
 
-                    Button(String(localized: "Done")) {
-                        focusedFieldIndex = nil
+                        Button(String(localized: "Done")) {
+                            focusedFieldIndex = nil
+                        }
                     }
                 }
-            }
             #endif
             .onChange(of: focusedFieldIndex) { fieldIndex in
                 guard let fieldIndex else { return }

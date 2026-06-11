@@ -5,50 +5,50 @@
 import SwiftUI
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 
-typealias PlatformImage = UIImage
-typealias PlatformView = UIView
+    typealias PlatformImage = UIImage
+    typealias PlatformView = UIView
 
-enum PlatformImageFactory {
-    static func image(from data: Data) -> PlatformImage? {
-        UIImage(data: data)
+    enum PlatformImageFactory {
+        static func image(from data: Data) -> PlatformImage? {
+            UIImage(data: data)
+        }
     }
-}
 
-extension Image {
-    init(platformImage: PlatformImage) {
-        self.init(uiImage: platformImage)
+    extension Image {
+        init(platformImage: PlatformImage) {
+            self.init(uiImage: platformImage)
+        }
     }
-}
 
-extension Color {
-    static var feedbackFormBackground: Color {
-        Color(uiColor: .systemGroupedBackground)
+    extension Color {
+        static var feedbackFormBackground: Color {
+            Color(uiColor: .systemGroupedBackground)
+        }
     }
-}
 
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 
-typealias PlatformImage = NSImage
-typealias PlatformView = NSView
+    typealias PlatformImage = NSImage
+    typealias PlatformView = NSView
 
-enum PlatformImageFactory {
-    static func image(from data: Data) -> PlatformImage? {
-        NSImage(data: data)
+    enum PlatformImageFactory {
+        static func image(from data: Data) -> PlatformImage? {
+            NSImage(data: data)
+        }
     }
-}
 
-extension Image {
-    init(platformImage: PlatformImage) {
-        self.init(nsImage: platformImage)
+    extension Image {
+        init(platformImage: PlatformImage) {
+            self.init(nsImage: platformImage)
+        }
     }
-}
 
-extension Color {
-    static var feedbackFormBackground: Color {
-        Color(nsColor: .windowBackgroundColor)
+    extension Color {
+        static var feedbackFormBackground: Color {
+            Color(nsColor: .windowBackgroundColor)
+        }
     }
-}
 #endif
