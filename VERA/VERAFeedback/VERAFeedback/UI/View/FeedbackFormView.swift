@@ -17,6 +17,7 @@ struct FeedbackFormView: View {
     }
 
     @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
+    @FocusState private var focusedFieldIndex: Int?
 
     // Triggers for scroll interaction
     @State private var imagePickedTrigger: Int = 0
@@ -62,7 +63,9 @@ struct FeedbackFormView: View {
                     case .text:
                         FeedbackTextFieldView(
                             feedbackFieldViewModel: feedbackFormViewModel.feedbackFields[index],
-                            showValidationErrors: feedbackFormViewModel.showValidationErrors
+                            showValidationErrors: feedbackFormViewModel.showValidationErrors,
+                            fieldIndex: index,
+                            focusedFieldIndex: $focusedFieldIndex
                         )
                         .id(index)
                     case .info:
@@ -89,6 +92,31 @@ struct FeedbackFormView: View {
             .scrollContentBackground(.hidden)
             .background(Color(uiColor: .systemGroupedBackground))
             .scrollDismissesKeyboard(.interactively)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button(action: focusPrevious) {
+                        Image(systemName: "chevron.up")
+                    }
+                    .disabled(focusedFieldIndex == nil || isFirstTextFieldFocused)
+
+                    Button(action: focusNext) {
+                        Image(systemName: "chevron.down")
+                    }
+                    .disabled(focusedFieldIndex == nil || isLastTextFieldFocused)
+
+                    Spacer()
+
+                    Button(String(localized: "Done")) {
+                        focusedFieldIndex = nil
+                    }
+                }
+            }
+            .onChange(of: focusedFieldIndex) { fieldIndex in
+                guard let fieldIndex else { return }
+                withAnimation {
+                    proxy.scrollTo(fieldIndex, anchor: .center)
+                }
+            }
             .onChange(of: imagePickedTrigger) { _ in
                 withAnimation {
                     proxy.scrollTo(Constants.bottomListId, anchor: .top)
@@ -104,6 +132,40 @@ struct FeedbackFormView: View {
             }
 
         }
+    }
+
+    private var textFieldIndices: [Int] {
+        feedbackFormViewModel.feedbackFields.indices.filter {
+            feedbackFormViewModel.feedbackFields[$0].type == .text
+        }
+    }
+
+    private var isFirstTextFieldFocused: Bool {
+        guard let focusedFieldIndex else { return false }
+        return focusedFieldIndex == textFieldIndices.first
+    }
+
+    private var isLastTextFieldFocused: Bool {
+        guard let focusedFieldIndex else { return false }
+        return focusedFieldIndex == textFieldIndices.last
+    }
+
+    private func focusPrevious() {
+        guard let focusedFieldIndex,
+            let currentIndex = textFieldIndices.firstIndex(of: focusedFieldIndex),
+            currentIndex > 0
+        else { return }
+
+        self.focusedFieldIndex = textFieldIndices[currentIndex - 1]
+    }
+
+    private func focusNext() {
+        guard let focusedFieldIndex,
+            let currentIndex = textFieldIndices.firstIndex(of: focusedFieldIndex),
+            currentIndex < textFieldIndices.count - 1
+        else { return }
+
+        self.focusedFieldIndex = textFieldIndices[currentIndex + 1]
     }
 }
 
@@ -123,3 +185,4 @@ private struct FeedbackScrollContentInset: ViewModifier {
         }
     }
 }
+
