@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import UIKit
 import VERACommonUI
 
 /// Adaptive feedback form presentation.
