@@ -1,0 +1,30 @@
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/TestHelpers/FeedbackSnapshotHelpers.swift
+  s_4c8897a2e7cb07::t_6942688bae66b4 1-32
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/FeedbackSnapshotTests.swift
+  s_4c8897a2e7cb07::t_5359b4b021d218 117
+  s_4c8897a2e7cb07::t_fb5aa5c6500488 139
+  s_4c8897a2e7cb07::t_0907d7701dcbe2 31-32,36,42
+  s_4c8897a2e7cb07::t_3e0ceef3d9b231 23
+  s_4c8897a2e7cb07::t_dbd15c7afe66da 5-6,18,20-22,24-30,33-35,37-41,43-93,97-99,101-116,118-138,140-146
+  s_4c8897a2e7cb07::t_69d83897eac50b 11-16
+  s_4c8897a2e7cb07::t_362a3292d9efb3 94-96,100
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/FeedbackComponentButtonSnapshotTests.swift
+  s_4c8897a2e7cb07::t_04d392fc77c75a 1-16,18-53
+  s_4c8897a2e7cb07::t_69d1c529148c9e 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5eafe5b860b8122e51ddf8e29c6494048972842d",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
