@@ -16,21 +16,15 @@ class FeedbackFormViewModel: ObservableObject {
     @Published var feedbackFields = [
         FeedbackFieldViewModel(
             maxChars: Const.maxStandardFieldChars,
-            minLineLimit: 2,
-            maxLineLimit: 5,
             title: String(localized: "When you noticed this issue, what where you trying to do?"),
             key: String(localized: "Title"), type: .text
         ),
         FeedbackFieldViewModel(
             maxChars: Const.maxStandardFieldChars,
-            minLineLimit: 1,
-            maxLineLimit: 5,
             title: String(localized: "Tell us your name"), key: String(localized: "Name"), type: .text
         ),
         FeedbackFieldViewModel(
             maxChars: Const.maxDescriptionChars,
-            minLineLimit: 5,
-            maxLineLimit: 10,
             title: String(localized: "Describe your issue"), key: String(localized: "Description"), type: .text
         ),
         FeedbackFieldViewModel(

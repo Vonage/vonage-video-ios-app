@@ -14,8 +14,6 @@ protocol FieldValidatable {
 }
 class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
     let maxChars: Int?
-    let minLineLimit: Int?
-    let maxLineLimit: Int?
     let title: String
     let key: String
     @Published var value: String
@@ -28,8 +26,6 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
 
     init(
         maxChars: Int? = nil,
-        minLineLimit: Int? = nil,
-        maxLineLimit: Int? = nil,
         title: String,
         key: String,
         type: FeedbackFieldType,
@@ -37,8 +33,6 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
         isRequired: Bool = true
     ) {
         self.maxChars = maxChars
-        self.minLineLimit = minLineLimit
-        self.maxLineLimit = maxLineLimit
         self.title = title
         self.key = key
         self.type = type
