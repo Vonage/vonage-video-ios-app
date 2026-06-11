@@ -20,6 +20,7 @@ struct GHRepoButton: View {
                 .frame(height: 30)
                 .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor.opacity(0.5))
         }
+        .accessibilityIdentifier(LandingPageAccessibilityID.githubRepoButton)
     }
 }
 

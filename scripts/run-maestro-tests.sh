@@ -21,6 +21,66 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🎭 VERA Maestro UI Test Runner${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
+# Parse optional arguments
+# Usage: ./scripts/run-maestro-tests.sh [--online-mode] [flow-name.yaml]
+# Examples:
+#   ./scripts/run-maestro-tests.sh                                           # Run all flows with E2E mocks
+#   ./scripts/run-maestro-tests.sh --online-mode                             # Run all flows against real services
+#   ./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml         # Run single flow by name
+#   ./scripts/run-maestro-tests.sh --online-mode .maestro/flows/launch-app.yaml
+FLOW_ARG=""
+VERA_E2E_MOCKS_VALUE=1
+
+print_usage() {
+    echo -e "${YELLOW}Usage:${NC}"
+    echo -e "  ./scripts/run-maestro-tests.sh [--online-mode] [flow-name.yaml]"
+    echo -e "  ./scripts/run-maestro-tests.sh [flow-name.yaml] [--online-mode]"
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        --online-mode)
+            VERA_E2E_MOCKS_VALUE=0
+            ;;
+        -*)
+            echo -e "${RED}❌ Unknown option: $arg${NC}"
+            print_usage
+            exit 1
+            ;;
+        *)
+            if [ -n "$FLOW_ARG" ]; then
+                echo -e "${RED}❌ Only one flow can be specified${NC}"
+                print_usage
+                exit 1
+            fi
+            FLOW_ARG="$arg"
+            ;;
+    esac
+done
+
+if [ -n "$FLOW_ARG" ]; then
+    if [ -f "$FLOW_ARG" ]; then
+        FLOW_TARGET="$FLOW_ARG"
+    elif [ -f ".maestro/flows/$FLOW_ARG" ]; then
+        FLOW_TARGET=".maestro/flows/$FLOW_ARG"
+    else
+        echo -e "${RED}❌ Flow not found: $FLOW_ARG${NC}"
+        echo -e "${YELLOW}Available flows:${NC}"
+        find .maestro/flows -name '*.yaml' -o -name '*.yml' 2>/dev/null | while read -r f; do echo "  $(basename "$f")"; done
+        exit 1
+    fi
+    echo -e "${BLUE}▶ Running single flow: $(basename "$FLOW_TARGET")${NC}\n"
+else
+    FLOW_TARGET=".maestro/flows"
+    echo -e "${BLUE}▶ Running all flows${NC}\n"
+fi
+
+if [ "$VERA_E2E_MOCKS_VALUE" -eq 1 ]; then
+    echo -e "${BLUE}▶ E2E mocks enabled${NC}\n"
+else
+    echo -e "${BLUE}▶ Online mode enabled: using real services${NC}\n"
+fi
+
 # ============================================================================
 # 1. Check Prerequisites
 # ============================================================================
@@ -88,6 +148,7 @@ echo ""
 # ============================================================================
 
 APP_SCHEME=${APP_SCHEME:-"VERA"}
+APP_ID="com.vonage.VERA"
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
 
@@ -334,6 +395,12 @@ fi
 
 echo -e "${GREEN}✓ App installed successfully${NC}\n"
 
+# Grant permissions via simctl (reliable in CI, persists across clearState)
+echo -e "${YELLOW}🔐 Granting camera and microphone permissions...${NC}"
+xcrun simctl privacy "$SIMULATOR_ID" grant camera "$APP_ID"
+xcrun simctl privacy "$SIMULATOR_ID" grant microphone "$APP_ID"
+echo -e "${GREEN}✓ Permissions granted${NC}\n"
+
 # ============================================================================
 # 7. Run Maestro Tests
 # ============================================================================
@@ -342,10 +409,16 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-if maestro test .maestro/flows; then
+mkdir -p test-reports
+
+if maestro test \
+    --env APP_ID="$APP_ID" \
+    --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
+    "$FLOW_TARGET"; then
     TEST_RESULT=0
 else
     TEST_RESULT=$?
+    xcrun simctl spawn "$SIMULATOR_ID" log show --style syslog --last 30m > test-reports/os-simulator.log || true
 fi
 
 echo ""

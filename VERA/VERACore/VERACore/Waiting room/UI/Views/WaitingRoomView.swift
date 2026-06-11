@@ -70,31 +70,33 @@ public struct WaitingRoomView: View {
     let onCameraToggle: () -> Void
 
     public var body: some View {
-        VStack(spacing: 0) {
-            if verticalSizeClass == .compact {
-                HorizontalWaitingRoomContentView(
-                    state: state,
-                    userName: userName,
-                    extraTrailingButtons: _extraTrailingButtons,
-                    onJoinRoom: onJoinRoom,
-                    onMicrophoneToggle: onMicrophoneToggle,
-                    onCameraToggle: onCameraToggle)
-            } else if horizontalSizeClass == .compact {
-                VerticalWaitingRoomContentView(
-                    state: state,
-                    userName: userName,
-                    extraTrailingButtons: _extraTrailingButtons,
-                    onJoinRoom: onJoinRoom,
-                    onMicrophoneToggle: onMicrophoneToggle,
-                    onCameraToggle: onCameraToggle)
-            } else {
-                HorizontalWaitingRoomContentView(
-                    state: state,
-                    userName: userName,
-                    extraTrailingButtons: _extraTrailingButtons,
-                    onJoinRoom: onJoinRoom,
-                    onMicrophoneToggle: onMicrophoneToggle,
-                    onCameraToggle: onCameraToggle)
+        ScreenIdentifierContainer(WaitingRoomAccessibilityID.screen) {
+            VStack(spacing: 0) {
+                if verticalSizeClass == .compact {
+                    HorizontalWaitingRoomContentView(
+                        state: state,
+                        userName: userName,
+                        extraTrailingButtons: _extraTrailingButtons,
+                        onJoinRoom: onJoinRoom,
+                        onMicrophoneToggle: onMicrophoneToggle,
+                        onCameraToggle: onCameraToggle)
+                } else if horizontalSizeClass == .compact {
+                    VerticalWaitingRoomContentView(
+                        state: state,
+                        userName: userName,
+                        extraTrailingButtons: _extraTrailingButtons,
+                        onJoinRoom: onJoinRoom,
+                        onMicrophoneToggle: onMicrophoneToggle,
+                        onCameraToggle: onCameraToggle)
+                } else {
+                    HorizontalWaitingRoomContentView(
+                        state: state,
+                        userName: userName,
+                        extraTrailingButtons: _extraTrailingButtons,
+                        onJoinRoom: onJoinRoom,
+                        onMicrophoneToggle: onMicrophoneToggle,
+                        onCameraToggle: onCameraToggle)
+                }
             }
         }
     }

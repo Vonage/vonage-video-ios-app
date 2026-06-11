@@ -70,7 +70,7 @@ public struct MeetingRoomView: View {
 
     public var body: some View {
         NavigationView {
-            ZStack {
+            ScreenIdentifierContainer(MeetingRoomAccessibilityID.screen) {
                 MeetingRoomContent(
                     participants: state.participants,
                     showBottomSheet: false,
@@ -222,6 +222,7 @@ public struct MeetingRoomView: View {
                     durationSeconds: MeetingRoomViewConstants.recordingPulseDuration
                 )
         }
+        .accessibilityIdentifier(MeetingRoomAccessibilityID.recordingIndicator)
     }
 
     private var noiseSuppressionIndicator: some View {

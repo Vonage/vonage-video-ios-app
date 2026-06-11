@@ -7,10 +7,14 @@ on:
     branches: [develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   maestro-tests:
     name: Run Maestro UI Tests
-    runs-on: macos-26-large
+    runs-on: macos-26-xlarge
     timeout-minutes: 60
 
     steps:

@@ -80,6 +80,7 @@ struct ArchiveList: View {
                                             .adaptiveFont(.bodyBase)
                                             .foregroundStyle(theme.primary)
                                     }
+                                    .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                                 }
                             } else {
                                 ProgressView()
@@ -90,6 +91,7 @@ struct ArchiveList: View {
                             }
                         }
                     }
+                    .accessibilityIdentifier(ArchivingAccessibilityID.archiveItem)
                     .listRowInsets(
                         EdgeInsets(
                             top: ArchiveListConstants.rowInsetTop,
@@ -104,6 +106,7 @@ struct ArchiveList: View {
                 .scrollContentBackground(.hidden)
             }
         }
+        .accessibilityIdentifier(ArchivingAccessibilityID.archiveList)
     }
 }
 
