@@ -11,36 +11,36 @@ class FeedbackFormViewModel: ObservableObject {
         static let maxDescriptionChars = 1000
     }
 
-    let title = "Report issue"
+    let title = String(localized: "Report issue")
     @Published var showValidationErrors = false
     @Published var feedbackFields = [
         FeedbackFieldViewModel(
             maxChars: Const.maxStandardFieldChars,
             minLineLimit: 2,
             maxLineLimit: 5,
-            title: "When you noticed this issue, what where you trying to do?",
-            key: "Title", type: .text
+            title: String(localized: "When you noticed this issue, what where you trying to do?"),
+            key: String(localized: "Title"), type: .text
         ),
         FeedbackFieldViewModel(
             maxChars: Const.maxStandardFieldChars,
             minLineLimit: 1,
             maxLineLimit: 5,
-            title: "Tell us your name", key: "Name", type: .text
+            title: String(localized: "Tell us your name"), key: String(localized: "Name"), type: .text
         ),
         FeedbackFieldViewModel(
             maxChars: Const.maxDescriptionChars,
             minLineLimit: 5,
             maxLineLimit: 10,
-            title: "Describe your issue", key: "Description", type: .text
+            title: String(localized: "Describe your issue"), key: String(localized: "Description"), type: .text
         ),
         FeedbackFieldViewModel(
-            title: "", key: "Info", type: .info,
-            value: "Please do not include any sensitive information.",
+            title: "", key: String(localized: "Info"), type: .info,
+            value: String(localized: "Please do not include any sensitive information."),
             isRequired: false
         ),
         FeedbackFieldViewModel(
-            title: "", key: "Image", type: .image,
-            value: "A screenshot will help us better understand the issue. (optional)",
+            title: "", key: String(localized: "Image"), type: .image,
+            value: String(localized: "A screenshot will help us better understand the issue. (optional)"),
             isRequired: false
         ),
     ]
@@ -54,7 +54,6 @@ class FeedbackFormViewModel: ObservableObject {
     func onSubmit() {
         showValidationErrors = true
         guard isValid else { return }
-        
-        // TODO: Add usecase to submit this
+        // TODO: Add usecase to submit the form
     }
 }

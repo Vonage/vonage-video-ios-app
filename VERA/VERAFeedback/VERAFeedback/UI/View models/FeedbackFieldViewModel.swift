@@ -2,7 +2,8 @@
 //  Created by Vonage on 10/06/2026.
 //
 
-
+import Combine
+import UIKit
 
 enum FeedbackFieldType {
     case text, info, image
@@ -18,7 +19,6 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
     let maxLineLimit: Int?
     let title: String
     let key: String
-    let footer: String?
     @Published var value: String
     @Published var attachedImage: UIImage?
     var type: FeedbackFieldType
@@ -28,15 +28,20 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
     }
 
     init(
-        maxChars: Int? = nil, minLineLimit: Int? = nil, maxLineLimit: Int? = nil, title: String, key: String,
-        footer: String? = nil, type: FeedbackFieldType, value: String = "", isRequired: Bool = true
+        maxChars: Int? = nil,
+        minLineLimit: Int? = nil,
+        maxLineLimit: Int? = nil,
+        title: String,
+        key: String,
+        type: FeedbackFieldType,
+        value: String = "",
+        isRequired: Bool = true
     ) {
         self.maxChars = maxChars
         self.minLineLimit = minLineLimit
         self.maxLineLimit = maxLineLimit
         self.title = title
         self.key = key
-        self.footer = footer
         self.type = type
         self.value = value
         self.isRequired = isRequired
@@ -65,21 +70,13 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
             return nil
         case .image:
             if isRequired, attachedImage == nil {
-                return "\(key) is required"
+                return "\(key) " + String(localized: "is required")
             }
             return nil
         case .text:
             var message: String?
             if isRequired, valueWithoutWhitespaces.isEmpty {
-                message = "\(key) is required"
-            }
-
-            if let maxChars, value.count > maxChars {
-                if message == nil {
-                    message = "\(key) must be less than \(maxChars) characters"
-                } else {
-                    message? += " and must be less than \(maxChars) characters"
-                }
+                message = "\(key) " + String(localized: "is required")
             }
             return message
         }
@@ -89,4 +86,3 @@ class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
 extension FeedbackFieldViewModel: Identifiable {
     var id: String { key }
 }
-
