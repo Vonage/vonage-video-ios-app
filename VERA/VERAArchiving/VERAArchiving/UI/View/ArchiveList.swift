@@ -80,8 +80,8 @@ struct ArchiveList: View {
                                             .adaptiveFont(.bodyBase)
                                             .foregroundStyle(theme.primary)
                                     }
+                                    .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                                 }
-                                .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
                             } else {
                                 ProgressView()
                                     .frame(
@@ -91,6 +91,7 @@ struct ArchiveList: View {
                             }
                         }
                     }
+                    .accessibilityIdentifier(ArchivingAccessibilityID.archiveItem)
                     .listRowInsets(
                         EdgeInsets(
                             top: ArchiveListConstants.rowInsetTop,

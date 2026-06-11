@@ -167,6 +167,8 @@ final class BottomBarButtonsAssembler {
         return .init(
             label: state.archivingState.isArchiving
                 ? String(localized: "Stop Recording") : String(localized: "Start Recording"),
+            accessibilityIdentifier: state.archivingState.isArchiving
+                ? ArchivingAccessibilityID.stopRecordingButton : ArchivingAccessibilityID.startRecordingButton,
             image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
             onTap: viewModel.onTap,
             content: {
@@ -180,6 +182,7 @@ final class BottomBarButtonsAssembler {
         let button = container.captionsFactory.makeCaptionsButton(viewModel: viewModel)
         return .init(
             label: String(localized: "Captions"),
+            accessibilityIdentifier: CaptionsAccessibilityID.toggleButton,
             image: viewModel.state.captionsEnabled
                 ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
                 : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
