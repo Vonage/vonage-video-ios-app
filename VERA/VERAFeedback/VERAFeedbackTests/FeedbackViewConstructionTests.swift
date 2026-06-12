@@ -22,13 +22,7 @@ struct FeedbackViewConstructionTests {
     func textFieldViewShowsErrorState() {
         let fieldVM = FeedbackFieldViewModel(
             maxChars: 3, title: "T", key: "T", type: .text, value: "", isRequired: true)
-        // showValidationErrors true should cause error branch to be available
-        let view = FeedbackTextFieldView(
-            feedbackFieldViewModel: fieldVM,
-            showValidationErrors: true,
-            fieldIndex: 0,
-            focusedFieldIndex: .constant(nil)
-        )
+        let view = FeedbackTextFieldViewTestHost(fieldVM: fieldVM)
 
         _ = view.body
         #expect(fieldVM.isValid == false)
@@ -46,5 +40,20 @@ struct FeedbackViewConstructionTests {
         _ = viewWithImage.body
 
         #expect(fieldVM.attachedImage != nil)
+    }
+}
+
+@MainActor
+private struct FeedbackTextFieldViewTestHost: View {
+    @FocusState private var focusedFieldIndex: Int?
+    let fieldVM: FeedbackFieldViewModel
+
+    var body: some View {
+        FeedbackTextFieldView(
+            feedbackFieldViewModel: fieldVM,
+            showValidationErrors: true,
+            fieldIndex: 0,
+            focusedFieldIndex: $focusedFieldIndex
+        )
     }
 }
