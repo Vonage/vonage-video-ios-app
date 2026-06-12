@@ -1,0 +1,19 @@
+VERA/VERACommonUI/VERACommonUI/UI/OutlinedButton.swift
+  s_151ba86e4d048f::t_78ca0491df2116 46-53,56,59-61,74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d93a441369be92aae9aabcbbf8d0841f3fb8050",
+  "prompts": {},
+  "sessions": {
+    "s_151ba86e4d048f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8069d2b-0ace-47f6-8ddc-6b80e75ea5b4",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
