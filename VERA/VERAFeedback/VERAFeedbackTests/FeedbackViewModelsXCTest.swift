@@ -1,17 +1,20 @@
 import XCTest
+
 @testable import VERAFeedback
 
 final class FeedbackViewModelsXCTest: XCTestCase {
 
     func testTextFieldRequiredEmpty_isInvalid() {
-        let vm = FeedbackFieldViewModel(maxChars: 10, title: "Title", key: "Title", type: .text, value: "", isRequired: true)
+        let vm = FeedbackFieldViewModel(
+            maxChars: 10, title: "Title", key: "Title", type: .text, value: "", isRequired: true)
 
         XCTAssertFalse(vm.isValid)
         XCTAssertEqual(vm.validationMessage, "Title is required")
     }
 
     func testTextFieldWhitespace_isInvalid() {
-        let vm = FeedbackFieldViewModel(maxChars: 10, title: "Name", key: "Name", type: .text, value: "   \n  ", isRequired: true)
+        let vm = FeedbackFieldViewModel(
+            maxChars: 10, title: "Name", key: "Name", type: .text, value: "   \n  ", isRequired: true)
 
         XCTAssertFalse(vm.isValid)
         XCTAssertEqual(vm.validationMessage, "Name is required")
@@ -25,7 +28,8 @@ final class FeedbackViewModelsXCTest: XCTestCase {
     }
 
     func testOptionalTextEmpty_isValid() {
-        let vm = FeedbackFieldViewModel(maxChars: nil, title: "Optional", key: "Optional", type: .text, value: "", isRequired: false)
+        let vm = FeedbackFieldViewModel(
+            maxChars: nil, title: "Optional", key: "Optional", type: .text, value: "", isRequired: false)
 
         XCTAssertTrue(vm.isValid)
         XCTAssertNil(vm.validationMessage)
