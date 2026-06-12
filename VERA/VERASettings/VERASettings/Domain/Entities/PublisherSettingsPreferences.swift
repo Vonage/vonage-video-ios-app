@@ -18,10 +18,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// The codec preference configuration (automatic or manual with ordered list).
     public var codecPreference: SettingsCodecPreference
 
-    /// The maximum audio bitrate in bits per second.
-    ///
-    /// `nil` means automatic mode, letting the SDK decide the audio bitrate.
-    public var maxAudioBitrate: Int32?
+    /// The maximum audio bitrate preference.
+    public var audioBitratePreference: SettingsAudioBitratePreference
 
     /// The video bitrate preset (default or custom).
     public var videoBitratePreset: SettingsVideoBitratePreset
@@ -53,7 +51,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - videoResolution: The video resolution. Defaults to `.medium`.
     ///   - videoFrameRate: The video frame rate. Defaults to `.fps30`.
     ///   - codecPreference: The codec preference. Defaults to `.automatic`.
-    ///   - maxAudioBitrate: The maximum audio bitrate in bps. Defaults to `nil` (SDK default).
+    ///   - audioBitratePreference: The maximum audio bitrate preference. Defaults to `.default`.
     ///   - videoBitratePreset: The video bitrate preset. Defaults to `.default`.
     ///   - maxVideoBitrate: The maximum video bitrate in bps. Defaults to 500,000.
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
@@ -65,7 +63,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
         codecPreference: SettingsCodecPreference = .automatic,
-        maxAudioBitrate: Int32? = nil,
+        audioBitratePreference: SettingsAudioBitratePreference = .default,
         videoBitratePreset: SettingsVideoBitratePreset = .default,
         maxVideoBitrate: Int32 = 500_000,
         publisherAudioFallbackEnabled: Bool = true,
@@ -77,7 +75,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
         self.codecPreference = codecPreference
-        self.maxAudioBitrate = maxAudioBitrate
+        self.audioBitratePreference = audioBitratePreference
         self.videoBitratePreset = videoBitratePreset
         self.maxVideoBitrate = maxVideoBitrate
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
@@ -95,7 +93,19 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         videoResolution = try container.decode(SettingsVideoResolution.self, forKey: .videoResolution)
         videoFrameRate = try container.decode(SettingsVideoFrameRate.self, forKey: .videoFrameRate)
-        maxAudioBitrate = try container.decodeIfPresent(Int32.self, forKey: .maxAudioBitrate)
+        if let audioBitratePreference = try container.decodeIfPresent(
+            SettingsAudioBitratePreference.self,
+            forKey: .audioBitratePreference
+        ) {
+            self.audioBitratePreference = audioBitratePreference
+        } else if let legacyMaxAudioBitrate = try container.decodeIfPresent(
+            Int32.self,
+            forKey: .legacyMaxAudioBitrate
+        ) {
+            self.audioBitratePreference = .custom(legacyMaxAudioBitrate)
+        } else {
+            self.audioBitratePreference = .default
+        }
         videoBitratePreset =
             try container.decodeIfPresent(SettingsVideoBitratePreset.self, forKey: .videoBitratePreset) ?? .default
         maxVideoBitrate = try container.decodeIfPresent(Int32.self, forKey: .maxVideoBitrate) ?? 0
@@ -127,9 +137,10 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case videoResolution
         case videoFrameRate
         case codecPreference
-        case maxAudioBitrate
+        case audioBitratePreference
         case videoBitratePreset
         case maxVideoBitrate
+        case legacyMaxAudioBitrate = "maxAudioBitrate"
         case publisherAudioFallbackEnabled
         case subscriberAudioFallbackEnabled
         case senderStatsEnabled
@@ -148,7 +159,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(videoResolution, forKey: .videoResolution)
         try container.encode(videoFrameRate, forKey: .videoFrameRate)
         try container.encode(codecPreference, forKey: .codecPreference)
-        try container.encode(maxAudioBitrate, forKey: .maxAudioBitrate)
+        try container.encode(audioBitratePreference, forKey: .audioBitratePreference)
         try container.encode(videoBitratePreset, forKey: .videoBitratePreset)
         try container.encode(maxVideoBitrate, forKey: .maxVideoBitrate)
         try container.encode(publisherAudioFallbackEnabled, forKey: .publisherAudioFallbackEnabled)
@@ -160,7 +171,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
         lhs.videoResolution == rhs.videoResolution && lhs.videoFrameRate == rhs.videoFrameRate
-            && lhs.codecPreference == rhs.codecPreference && lhs.maxAudioBitrate == rhs.maxAudioBitrate
+            && lhs.codecPreference == rhs.codecPreference
+            && lhs.audioBitratePreference == rhs.audioBitratePreference
             && lhs.videoBitratePreset == rhs.videoBitratePreset && lhs.maxVideoBitrate == rhs.maxVideoBitrate
             && lhs.publisherAudioFallbackEnabled == rhs.publisherAudioFallbackEnabled
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled

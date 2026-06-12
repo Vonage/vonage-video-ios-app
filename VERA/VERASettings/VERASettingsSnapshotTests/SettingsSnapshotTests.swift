@@ -277,13 +277,13 @@ struct SettingsSnapshotTests {
         var prefs = PublisherSettingsPreferences.default
         prefs.videoBitratePreset = .custom
         prefs.maxVideoBitrate = 2_000_000  // 2 Mbps
-        prefs.maxAudioBitrate = 128_000  // 128 kbps
+        prefs.audioBitratePreference = .custom(128_000)  // 128 kbps
         return prefs
     }
 
     private static func makeCustomAudioBitratePreferences() async -> PublisherSettingsPreferences {
         var prefs = PublisherSettingsPreferences.default
-        prefs.maxAudioBitrate = 128_000  // 128 kbps
+        prefs.audioBitratePreference = .custom(128_000)  // 128 kbps
         return prefs
     }
 

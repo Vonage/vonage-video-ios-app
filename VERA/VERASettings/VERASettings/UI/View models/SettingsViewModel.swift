@@ -62,9 +62,9 @@ public final class SettingsViewModel: ObservableObject {
         SettingsFormatter.formatBandwidth(customMaxVideoBitrate) ?? ""
     }
 
-    /// The maximum audio bitrate in bits per second. `nil` means the SDK decides.
+    /// The custom maximum audio bitrate in bits per second. `nil` means the SDK decides.
     public var maxAudioBitrate: Int32? {
-        settingsPreference.maxAudioBitrate
+        settingsPreference.audioBitratePreference.customValue
     }
 
     /// A human-readable formatted string of the current audio bitrate.
@@ -79,15 +79,20 @@ public final class SettingsViewModel: ObservableObject {
     /// The audio bitrate selection mode.
     public var audioBitrateMode: SettingsAudioBitrateMode {
         get {
-            settingsPreference.maxAudioBitrate == nil ? .default : .custom
+            switch settingsPreference.audioBitratePreference {
+            case .default:
+                .default
+            case .custom:
+                .custom
+            }
         }
         set {
             switch newValue {
             case .default:
-                settingsPreference.maxAudioBitrate = nil
+                settingsPreference.audioBitratePreference = .default
             case .custom:
-                if settingsPreference.maxAudioBitrate == nil {
-                    settingsPreference.maxAudioBitrate = AudioSettingsConstants.defaultAudioBitrate
+                if settingsPreference.audioBitratePreference.customValue == nil {
+                    settingsPreference.audioBitratePreference = .custom(AudioSettingsConstants.defaultAudioBitrate)
                 }
             }
         }
@@ -166,7 +171,7 @@ public final class SettingsViewModel: ObservableObject {
         let roundedValue = Int32(maxAudioBitrate)
         let minValue = Int32(AudioSettingsConstants.audioBitrateRange.lowerBound)
         let maxValue = Int32(AudioSettingsConstants.audioBitrateRange.upperBound)
-        settingsPreference.maxAudioBitrate = min(max(roundedValue, minValue), maxValue)
+        settingsPreference.audioBitratePreference = .custom(min(max(roundedValue, minValue), maxValue))
     }
 
     /// Loads the current settings preferences from the repository and starts

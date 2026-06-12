@@ -119,7 +119,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// - Parameter stats: The network media statistics to format.
     private func buildStatsText(_ stats: NetworkMediaStats) {
         Task { @MainActor in
-            let maxAudioBitrate = await settingsRepository.getPreferences().maxAudioBitrate
+            let maxAudioBitrate = await settingsRepository.getPreferences().audioBitratePreference.customValue
             self.statsText = await formatStats(stats, maxAudioBitrate: maxAudioBitrate)
         }
     }
