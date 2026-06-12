@@ -1,4 +1,4 @@
-import XCTest
+import Testing
 
 @testable import VERAFeedback
 
@@ -23,6 +23,58 @@ struct FeedbackViewModelsTests {
         #expect(vm.isValid == false)
         #expect(vm.validationMessage == "Name is required")
     }
+
+        // MARK: - Additional Feedback field & form tests
+
+        @Test("Text field with exactly max chars is valid")
+        func textExactlyMaxCharsIsValid() {
+            let vm = FeedbackFieldViewModel(maxChars: 3, title: "T", key: "T", type: .text, value: "abc", isRequired: true)
+
+            #expect(vm.isValid == true)
+            #expect(vm.validationMessage == nil)
+        }
+
+        @Test("Optional text field exceeding max chars is invalid")
+        func optionalTextExceedingMaxIsInvalid() {
+            let vm = FeedbackFieldViewModel(maxChars: 3, title: "Opt", key: "Opt", type: .text, value: "abcd", isRequired: false)
+
+            #expect(vm.isValid == false)
+        }
+
+        @Test("Text field with surrounding whitespace is considered non-empty")
+        func textWithSurroundingWhitespaceIsValid() {
+            let vm = FeedbackFieldViewModel(maxChars: nil, title: "Name", key: "Name", type: .text, value: "  Alice  ", isRequired: true)
+
+            #expect(vm.isValid == true)
+            #expect(vm.validationMessage == nil)
+        }
+
+        @Test("FeedbackFieldViewModel id equals key")
+        func fieldIdEqualsKey() {
+            let vm = FeedbackFieldViewModel(title: "Title", key: "MyKey", type: .text)
+            #expect(vm.id == "MyKey")
+        }
+
+        @Test("Optional image field without image is valid")
+        func optionalImageWithoutImageIsValid() {
+            let vm = FeedbackFieldViewModel(title: "Image", key: "Image", type: .image, isRequired: false)
+            #expect(vm.isValid == true)
+            #expect(vm.validationMessage == nil)
+        }
+
+        @Test("Form onSubmit sets validation flag when valid")
+        func formOnSubmitWhenValidSetsFlag() {
+            let form = FeedbackFormViewModel()
+            form.feedbackFields[0].value = "some title"
+            form.feedbackFields[1].value = "Reporter"
+            form.feedbackFields[2].value = "A description"
+
+            #expect(form.isValid == true)
+            #expect(form.showValidationErrors == false)
+            form.onSubmit()
+            #expect(form.showValidationErrors == true)
+            #expect(form.isValid == true)
+        }
 
     @Test("Text field exceeding max chars is invalid")
     func textExceedsMaxCharsIsInvalid() {
