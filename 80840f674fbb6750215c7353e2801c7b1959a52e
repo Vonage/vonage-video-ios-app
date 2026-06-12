@@ -1,0 +1,27 @@
+VERA/VERAFeedback/VERAFeedback/UI/View/FormFields/LimitedMultilineTextView.swift
+  s_4c8897a2e7cb07::t_a829a1dcc39100 211-226
+  s_4c8897a2e7cb07::t_0b3bffae651793 133
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackScreenshotCapturer.swift
+  s_4c8897a2e7cb07::t_cdf7b6d6fd3f0b 2,7,9-14,17-20,22-23,25-27,29-33,35-36,38-42,44-46
+VERA/VERAFeedback/VERAFeedback/Resources/Localizable.xcstrings
+  s_4c8897a2e7cb07::t_c05425489406dc 27-30
+VERA/VERAFeedback/VERAFeedback/UI/View/FormFields/FeedbackImageFieldView.swift
+  s_4c8897a2e7cb07::t_f65870df3c7603 33-37
+  s_4c8897a2e7cb07::t_1875534e2abb23 86-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "80840f674fbb6750215c7353e2801c7b1959a52e",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
