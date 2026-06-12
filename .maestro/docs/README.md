@@ -1,8 +1,14 @@
 # VERA E2E Testing
 
-VERA uses [Maestro](https://maestro.mobile.dev) for end-to-end UI testing. Flows are YAML-based and interact with the app through accessibility identifiers.
+> **This file is a pointer only.**
+> The canonical Maestro E2E guide has moved to [`docs/TESTING.md`](../../docs/TESTING.md).
+> Please refer to that document for all Maestro flows, `VERAE2E`, offline/online run instructions, log collection, and accessibility ID conventions.
 
-This guide is the source of truth for Maestro flows, `VERAE2E`, offline mocked runs, online runs, logs, and accessibility ID conventions.
+---
+
+<!-- Legacy content preserved below for git history continuity. See docs/TESTING.md for the up-to-date version. -->
+
+VERA uses [Maestro](https://maestro.mobile.dev) for end-to-end UI testing. Flows are YAML-based and interact with the app through accessibility identifiers.
 
 ## E2E Architecture
 
