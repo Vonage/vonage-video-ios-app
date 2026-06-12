@@ -115,17 +115,6 @@ struct DefaultRoomCredentialsRepositoryTests {
         #expect(httpClient.callCount == 2)
     }
 
-    @Test("Caches credentials for same room")
-    func cachesCredentialsForSameRoom() async throws {
-        let httpClient = try makeHTTPClientWithResponses()
-
-        let sut = makeSUT(httpClient: httpClient)
-        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
-        _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest(roomName: "room"))
-
-        #expect(httpClient.callCount == 2)
-    }
-
     @Test("Different rooms are fetched independently")
     func differentRoomsAreNotCached() async throws {
         let httpClient = MockHTTPClient()

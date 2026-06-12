@@ -39,6 +39,9 @@ final class MeetingRoomSDKContainer {
     let broadcastExtensionBundleId: String?
 
     private let initialPublisherSettings: PublisherSettings?
+    private let httpClientFactory: any MeetingRoomHTTPClientFactory
+    private let sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory
+    private let archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory
 
     init(
         baseURL: URL,
@@ -46,7 +49,13 @@ final class MeetingRoomSDKContainer {
         configuration: MeetingRoomConfiguration = .init(),
         publisherSettings: PublisherSettings? = nil,
         appGroupIdentifier: String? = nil,
-        broadcastExtensionBundleId: String? = nil
+        broadcastExtensionBundleId: String? = nil,
+        httpClientFactory: any MeetingRoomHTTPClientFactory =
+            DefaultMeetingRoomHTTPClientFactory(),
+        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
+            DefaultMeetingRoomSessionRepositoryFactory(),
+        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
+            DefaultMeetingRoomArchivingDataSourceFactory()
     ) {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
@@ -54,11 +63,15 @@ final class MeetingRoomSDKContainer {
         self.initialPublisherSettings = publisherSettings
         self.appGroupIdentifier = appGroupIdentifier
         self.broadcastExtensionBundleId = broadcastExtensionBundleId
+        self.httpClientFactory = httpClientFactory
+        self.sessionRepositoryFactory = sessionRepositoryFactory
+        self.archivingDataSourceFactory = archivingDataSourceFactory
     }
 
     // MARK: - Core Dependencies
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    lazy var httpClient: any HTTPClient = httpClientFactory(
+        HTTPClientContext(interceptor: OSLogHTTPClientInterceptor()))
 
     lazy var jsonDecoder = JSONDecoder()
 
@@ -96,12 +109,13 @@ final class MeetingRoomSDKContainer {
     }()
 
     lazy var sessionRepository: any SessionRepository = {
-        VonageSessionRepository(
-            sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry,
-            statsCollector: statsCollector
-        )
+        sessionRepositoryFactory(
+            MeetingRoomSessionRepositoryFactoryContext(
+                publisherSettings: initialPublisherSettings ?? .init(),
+                sessionFactory: sessionFactory,
+                publisherRepository: publisherRepository,
+                pluginRegistry: pluginRegistry,
+                statsCollector: statsCollector))
     }()
 
     lazy var advancedSettingsUseCase: any PublisherAdvancedSettingsUseCase = {
@@ -193,9 +207,13 @@ final class MeetingRoomSDKContainer {
     lazy var vonageArchivingPlugin = VonageArchivingPlugin(
         archivingStatusDataSource: archivingStatusDataSource)
 
-    lazy var archivingDataSource: any ArchivingDataSource = DefaultArchivingDataSource(
-        baseURL: baseURL,
-        httpClient: httpClient)
+    lazy var archivingDataSource: any ArchivingDataSource = {
+        archivingDataSourceFactory(
+            MeetingRoomArchivingDataSourceFactoryContext(
+                baseURL: baseURL,
+                httpClient: httpClient,
+                archivingStatusDataSource: archivingStatusDataSource))
+    }()
 
     lazy var archivesDataSource: any ArchivesDataSource = HTTPArchivesDataSource(
         baseURL: baseURL,
