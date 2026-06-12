@@ -8,7 +8,8 @@ struct FeedbackFieldViewModelTests {
 
     @Test("Required text field empty is invalid and returns message")
     func requiredTextEmptyIsInvalid() {
-        let vm = FeedbackFieldViewModel(maxChars: 10, title: "Title", key: "Title", type: .text, value: "", isRequired: true)
+        let vm = FeedbackFieldViewModel(
+            maxChars: 10, title: "Title", key: "Title", type: .text, value: "", isRequired: true)
 
         #expect(vm.isValid == false)
         #expect(vm.validationMessage == "Title is required")
@@ -16,7 +17,8 @@ struct FeedbackFieldViewModelTests {
 
     @Test("Required text field with only whitespace is invalid")
     func requiredTextWhitespaceIsInvalid() {
-        let vm = FeedbackFieldViewModel(maxChars: 10, title: "Name", key: "Name", type: .text, value: "   \n  ", isRequired: true)
+        let vm = FeedbackFieldViewModel(
+            maxChars: 10, title: "Name", key: "Name", type: .text, value: "   \n  ", isRequired: true)
 
         #expect(vm.isValid == false)
         #expect(vm.validationMessage == "Name is required")
@@ -40,7 +42,8 @@ struct FeedbackFieldViewModelTests {
 
     @Test("Optional text field empty is valid")
     func optionalTextEmptyIsValid() {
-        let vm = FeedbackFieldViewModel(maxChars: nil, title: "Optional", key: "Optional", type: .text, value: "", isRequired: false)
+        let vm = FeedbackFieldViewModel(
+            maxChars: nil, title: "Optional", key: "Optional", type: .text, value: "", isRequired: false)
 
         #expect(vm.isValid == true)
         #expect(vm.validationMessage == nil)
@@ -48,7 +51,8 @@ struct FeedbackFieldViewModelTests {
 
     @Test("Optional text field exceeding max chars is invalid")
     func optionalTextExceedingMaxIsInvalid() {
-        let vm = FeedbackFieldViewModel(maxChars: 3, title: "Opt", key: "Opt", type: .text, value: "abcd", isRequired: false)
+        let vm = FeedbackFieldViewModel(
+            maxChars: 3, title: "Opt", key: "Opt", type: .text, value: "abcd", isRequired: false)
 
         #expect(vm.isValid == false)
     }
