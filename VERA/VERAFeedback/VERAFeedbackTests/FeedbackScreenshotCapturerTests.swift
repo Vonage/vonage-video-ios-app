@@ -1,10 +1,11 @@
 import Testing
 
+@testable import VERAFeedback
+
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
-@testable import VERAFeedback
 
 @MainActor
 @Suite("Feedback screenshot capturer tests")
@@ -17,20 +18,20 @@ struct FeedbackScreenshotCapturerTests {
     }
 
     #if canImport(AppKit)
-    @Test("captureContentBehindModal handles visible window on macOS")
-    func captureVisibleWindowOnMacOS() {
-        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 120))
-        let window = NSWindow(
-            contentRect: contentView.frame,
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
-        window.contentView = contentView
-        window.makeKeyAndOrderFront(nil)
+        @Test("captureContentBehindModal handles visible window on macOS")
+        func captureVisibleWindowOnMacOS() {
+            let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 120))
+            let window = NSWindow(
+                contentRect: contentView.frame,
+                styleMask: [.borderless],
+                backing: .buffered,
+                defer: false
+            )
+            window.contentView = contentView
+            window.makeKeyAndOrderFront(nil)
 
-        _ = FeedbackScreenshotCapturer.captureContentBehindModal()
-        #expect(true)
-    }
+            _ = FeedbackScreenshotCapturer.captureContentBehindModal()
+            #expect(true)
+        }
     #endif
 }

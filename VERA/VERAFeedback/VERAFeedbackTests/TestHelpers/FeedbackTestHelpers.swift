@@ -1,12 +1,13 @@
 import Testing
 
+@testable import VERAFeedback
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
-@testable import VERAFeedback
 
 enum FeedbackTestHelpers {
 
@@ -18,21 +19,21 @@ enum FeedbackTestHelpers {
     }
 
     #if canImport(UIKit)
-    static func makeTestImage(size: CGSize = CGSize(width: 200, height: 120)) -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { context in
-            UIColor.systemBlue.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
+        static func makeTestImage(size: CGSize = CGSize(width: 200, height: 120)) -> UIImage {
+            let renderer = UIGraphicsImageRenderer(size: size)
+            return renderer.image { context in
+                UIColor.systemBlue.setFill()
+                context.fill(CGRect(origin: .zero, size: size))
+            }
         }
-    }
     #elseif canImport(AppKit)
-    static func makeTestImage(size: NSSize = NSSize(width: 200, height: 120)) -> NSImage {
-        let image = NSImage(size: size)
-        image.lockFocus()
-        NSColor.systemBlue.setFill()
-        NSRect(origin: .zero, size: size).fill()
-        image.unlockFocus()
-        return image
-    }
+        static func makeTestImage(size: NSSize = NSSize(width: 200, height: 120)) -> NSImage {
+            let image = NSImage(size: size)
+            image.lockFocus()
+            NSColor.systemBlue.setFill()
+            NSRect(origin: .zero, size: size).fill()
+            image.unlockFocus()
+            return image
+        }
     #endif
 }

@@ -6,7 +6,7 @@ import Testing
 @MainActor
 @Suite("Feedback View Construction Tests")
 struct FeedbackViewConstructionTests {
-    
+
     @Test("FeedbackSheetContent builds body")
     func sheetContentBuilds() {
         FeedbackViewTestHelpers.host(FeedbackSheetContent())

@@ -38,5 +38,3 @@ struct FeedbackFieldViewsTests {
         #expect(field.isValid == false)
     }
 }
-
-
