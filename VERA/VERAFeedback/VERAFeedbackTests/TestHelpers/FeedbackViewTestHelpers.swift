@@ -186,12 +186,17 @@ enum FeedbackViewTestHelpers {
             }
 
             private func performClick(on view: NSView) -> Bool {
+                if view.accessibilityPerformPress() {
+                    return true
+                }
                 if let button = view as? NSButton {
                     button.performClick(nil)
                     return true
                 }
-                if view.accessibilityPerformPress() {
-                    return true
+                if view.accessibilityRole() == .button {
+                    if view.accessibilityPerformPress() {
+                        return true
+                    }
                 }
                 if view.responds(to: #selector(NSView.mouseDown(with:))) {
                     let location = NSPoint(x: view.bounds.midX, y: view.bounds.midY)

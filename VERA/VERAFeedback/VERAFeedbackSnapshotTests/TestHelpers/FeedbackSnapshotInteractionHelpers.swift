@@ -87,6 +87,33 @@ enum FeedbackSnapshotInteractionHelpers {
             return true
         }
 
+        func tapSendButton() -> Bool {
+            if tapAccessibilityIdentifier("send_button") { return true }
+            if tapButton(labeled: String(localized: "Send")) { return true }
+            return tapFirstButton()
+        }
+
+        func tapAccessibilityIdentifier(_ identifier: String) -> Bool {
+            guard
+                let view = findViews(in: rootView, where: { $0.accessibilityIdentifier == identifier }).first
+            else {
+                return false
+            }
+            guard let control = view as? UIControl else { return false }
+            controlSendAction(control: control)
+            settle()
+            return true
+        }
+
+        func tapFirstButton() -> Bool {
+            guard let control = findViews(in: rootView, where: { $0 is UIButton }).first as? UIButton else {
+                return false
+            }
+            controlSendAction(control: control)
+            settle()
+            return true
+        }
+
         private func inputAccessoryView() -> UIView? {
             if let accessory = textInputs().first(where: { $0.isFirstResponder })?.inputAccessoryView {
                 return accessory

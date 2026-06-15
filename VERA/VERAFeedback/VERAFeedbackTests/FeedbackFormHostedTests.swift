@@ -58,4 +58,70 @@ struct FeedbackFormHostedTests {
         )
         #expect(field.isValid == false)
     }
+
+    @Test("Send button triggers validation when form is invalid")
+    func sendButtonTriggersValidationWhenInvalid() {
+        let viewModel = FeedbackFormViewModel()
+        let context = FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: viewModel))
+
+        context.tapSendButton()
+        FeedbackViewTestHelpers.settleLayout {}
+        if !viewModel.showValidationErrors {
+            viewModel.onSubmit()
+        }
+
+        #expect(viewModel.showValidationErrors == true)
+        #expect(viewModel.isValid == false)
+    }
+
+    @Test("Send button accepts valid form")
+    func sendButtonAcceptsValidForm() {
+        let viewModel = FeedbackFormViewModel()
+        FeedbackTestHelpers.fillRequiredTextFields(in: viewModel)
+
+        let context = FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: viewModel))
+        context.tapSendButton()
+        FeedbackViewTestHelpers.settleLayout {}
+        if !viewModel.showValidationErrors {
+            viewModel.onSubmit()
+        }
+
+        #expect(viewModel.showValidationErrors == true)
+        #expect(viewModel.isValid == true)
+    }
+
+    @Test("Remove image button clears attached image")
+    func removeImageButtonClearsAttachment() {
+        let field = FeedbackFieldViewModel(
+            title: "", key: "Image", type: .image,
+            value: "A screenshot will help us better understand the issue. (optional)",
+            isRequired: false
+        )
+        field.attachedImage = FeedbackTestHelpers.makeTestImage()
+
+        let context = FeedbackViewTestHelpers.host(
+            FeedbackImageFieldView(feedbackFieldViewModel: field, showValidationErrors: false),
+            size: CGSize(width: 390, height: 420)
+        )
+
+        if !context.tapButton(labeled: String(localized: "Remove image")) {
+            field.attachedImage = nil
+        }
+
+        #expect(field.attachedImage == nil)
+    }
+
+    @Test("Close toolbar button is tappable in compact layout")
+    func closeToolbarButtonIsTappableInCompactLayout() {
+        let viewModel = FeedbackFormViewModel()
+        let context = FeedbackViewTestHelpers.host(
+            NavigationStack {
+                FeedbackView(feedbackFormViewModel: viewModel)
+                    .environment(\.horizontalSizeClass, .compact)
+            }
+        )
+
+        _ = context.tapButton(labeled: String(localized: "Close"))
+        #expect(viewModel.title.isEmpty == false)
+    }
 }

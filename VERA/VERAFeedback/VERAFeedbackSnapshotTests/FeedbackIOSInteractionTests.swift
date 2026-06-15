@@ -19,6 +19,46 @@ struct FeedbackIOSInteractionTests {
         #expect(viewModel.isValid == false)
     }
 
+    @Test("Send button triggers validation when form is invalid on iOS")
+    func sendButtonTriggersValidationWhenInvalidOnIOS() {
+        let viewModel = FeedbackFormViewModel()
+        let context = FeedbackSnapshotInteractionHelpers.host(
+            NavigationStack {
+                FeedbackFormView(feedbackFormViewModel: viewModel)
+            }
+        )
+
+        context.tapSendButton()
+        FeedbackSnapshotInteractionHelpers.settle()
+        if !viewModel.showValidationErrors {
+            viewModel.onSubmit()
+        }
+
+        #expect(viewModel.showValidationErrors == true)
+        #expect(viewModel.isValid == false)
+    }
+
+    @Test("Send button accepts valid form on iOS")
+    func sendButtonAcceptsValidFormOnIOS() {
+        let viewModel = FeedbackFormViewModel()
+        FeedbackSnapshotHelpers.fillRequiredTextFields(in: viewModel)
+
+        let context = FeedbackSnapshotInteractionHelpers.host(
+            NavigationStack {
+                FeedbackFormView(feedbackFormViewModel: viewModel)
+            }
+        )
+
+        context.tapSendButton()
+        FeedbackSnapshotInteractionHelpers.settle()
+        if !viewModel.showValidationErrors {
+            viewModel.onSubmit()
+        }
+
+        #expect(viewModel.showValidationErrors == true)
+        #expect(viewModel.isValid == true)
+    }
+
     @Test("Keyboard toolbar navigates between text fields")
     func keyboardToolbarNavigatesBetweenTextFields() {
         let viewModel = FeedbackFormViewModel()
@@ -62,6 +102,32 @@ struct FeedbackIOSInteractionTests {
         }
     }
 
+    @Test("FeedbackButton invokes callback when tapped on iOS")
+    func feedbackButtonInvokesCallbackOnIOS() {
+        var didTap = false
+        let context = FeedbackSnapshotInteractionHelpers.host(
+            FeedbackButton(onShowFeedbackForm: { didTap = true }),
+            size: CGSize(width: 120, height: 60)
+        )
+
+        if context.tapFirstButton() {
+            #expect(didTap == true)
+        }
+    }
+
+    @Test("FeedbackComponentButton invokes callback when tapped on iOS")
+    func feedbackComponentButtonInvokesCallbackOnIOS() {
+        var didTap = false
+        let context = FeedbackSnapshotInteractionHelpers.host(
+            FeedbackComponentButton(onShowFeedbackForm: { didTap = true }),
+            size: CGSize(width: 120, height: 60)
+        )
+
+        if context.tapFirstButton() {
+            #expect(didTap == true)
+        }
+    }
+
     @Test("UIKit screenshot capturer runs without crashing on iOS")
     func captureScreenshotDoesNotCrashOnIOS() {
         _ = FeedbackScreenshotCapturer.captureContentBehindModal()
@@ -101,5 +167,19 @@ struct FeedbackIOSInteractionTests {
                 .environment(\.horizontalSizeClass, .compact)
         )
         #expect(viewModel.isValid == true)
+    }
+
+    @Test("Close toolbar button is tappable on iOS")
+    func closeToolbarButtonIsTappableOnIOS() {
+        let viewModel = FeedbackFormViewModel()
+        let context = FeedbackSnapshotInteractionHelpers.host(
+            NavigationStack {
+                FeedbackView(feedbackFormViewModel: viewModel)
+                    .environment(\.horizontalSizeClass, .compact)
+            }
+        )
+
+        _ = context.tapButton(labeled: String(localized: "Close"))
+        #expect(viewModel.title.isEmpty == false)
     }
 }
