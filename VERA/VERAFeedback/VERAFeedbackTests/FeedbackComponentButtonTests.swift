@@ -16,7 +16,8 @@ struct FeedbackComponentButtonTests {
             size: CGSize(width: 120, height: 60)
         )
 
-        _ = context.tapAccessibilityIdentifier("feedback_test_button")
+        _ =
+            context.tapAccessibilityIdentifier("feedback_test_button")
             || context.tapFirstButton()
             || context.pressAllButtonLikeElements()
 
@@ -34,7 +35,8 @@ struct FeedbackComponentButtonTests {
             size: CGSize(width: 120, height: 60)
         )
 
-        _ = context.tapAccessibilityIdentifier("feedback_test_button")
+        _ =
+            context.tapAccessibilityIdentifier("feedback_test_button")
             || context.tapFirstButton()
             || context.pressAllButtonLikeElements()
 
