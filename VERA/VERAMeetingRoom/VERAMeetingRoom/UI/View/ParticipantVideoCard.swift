@@ -53,6 +53,12 @@ enum ParticipantVideoCardConstants {
 
     /// Vertical padding of the name label
     static let nameLabelVerticalPadding: CGFloat = 4
+
+    /// Corner radius of the name label background
+    static let nameLabelCornerRadius: CGFloat = 8
+
+    /// Background opacity of the name label
+    static let nameLabelBackgroundOpacity: Double = 0.6
 }
 
 struct ParticipantVideoCard: View {
@@ -255,13 +261,22 @@ struct ParticipantVideoCardOverlays: View {
 }
 
 struct NameLabel: View {
+    @Environment(\.meetingRoomTheme) private var theme
     var name: String
+
     var body: some View {
         Text(name)
             .font(.caption)
-            .foregroundColor(.white)
+            .foregroundColor(theme.onAccent)
             .padding(.horizontal, ParticipantVideoCardConstants.nameLabelHorizontalPadding)
             .padding(.vertical, ParticipantVideoCardConstants.nameLabelVerticalPadding)
+            .background(
+                theme.accent.opacity(ParticipantVideoCardConstants.nameLabelBackgroundOpacity),
+                in: RoundedRectangle(
+                    cornerRadius: ParticipantVideoCardConstants.nameLabelCornerRadius,
+                    style: .continuous
+                )
+            )
             .lineLimit(1)
             .truncationMode(.tail)
     }
