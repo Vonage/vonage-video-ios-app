@@ -6,6 +6,12 @@ import Testing
 @MainActor
 @Suite("Feedback View Construction Tests")
 struct FeedbackViewConstructionTests {
+    
+    @Test("FeedbackSheetContent builds body")
+    func sheetContentBuilds() {
+        FeedbackViewTestHelpers.host(FeedbackSheetContent())
+        #expect(true)
+    }
 
     @Test("FeedbackFormView builds body without crashing")
     func formViewBuilds() {
@@ -19,7 +25,7 @@ struct FeedbackViewConstructionTests {
         let fieldVM = FeedbackFieldViewModel(
             maxChars: 3, title: "T", key: "T", type: .text, value: "", isRequired: true
         )
-        let view = FeedbackTextFieldViewTestHost(fieldVM: fieldVM)
+        let view = FeedbackTextFieldViewTestHost(fieldVM: fieldVM, showValidationErrors: true)
         FeedbackViewTestHelpers.host(view, size: CGSize(width: 390, height: 160))
         #expect(fieldVM.isValid == false)
     }
@@ -39,20 +45,5 @@ struct FeedbackViewConstructionTests {
         )
 
         #expect(fieldVM.attachedImage != nil)
-    }
-}
-
-@MainActor
-private struct FeedbackTextFieldViewTestHost: View {
-    @FocusState private var focusedFieldIndex: Int?
-    let fieldVM: FeedbackFieldViewModel
-
-    var body: some View {
-        FeedbackTextFieldView(
-            feedbackFieldViewModel: fieldVM,
-            showValidationErrors: true,
-            fieldIndex: 0,
-            focusedFieldIndex: $focusedFieldIndex
-        )
     }
 }
