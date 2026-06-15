@@ -119,7 +119,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// - Parameter stats: The network media statistics to format.
     private func buildStatsText(_ stats: NetworkMediaStats) {
         Task { @MainActor in
-            let maxAudioBitrate = await settingsRepository.getPreferences().maxAudioBitrate
+            let maxAudioBitrate = await settingsRepository.getPreferences().audioBitratePreference.customValue
             self.statsText = await formatStats(stats, maxAudioBitrate: maxAudioBitrate)
         }
     }
@@ -128,9 +128,9 @@ public final class StatsOverlayViewModel: ObservableObject {
     ///
     /// - Parameters:
     ///   - stats: The network media statistics.
-    ///   - maxAudioBitrate: The configured maximum audio bitrate.
+    ///   - maxAudioBitrate: The configured maximum audio bitrate, or `nil` for SDK default.
     /// - Returns: A formatted string with emoji icons and localized labels.
-    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32 = 0) async -> String {
+    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32? = nil) async -> String {
         var lines: [String] = []
 
         if let audioSend = stats.sentAudio {
@@ -157,7 +157,8 @@ public final class StatsOverlayViewModel: ObservableObject {
             lines.append(
                 "Pkts".localized(args: totalPacketsReceived.description, totalPacketsLost.description))
             lines.append("Bytes".localized(args: SettingsFormatter.formatBytes(totalBytesReceived)))
-            lines.append("Max Bitrate".localized(args: SettingsFormatter.formatBandwidth(maxAudioBitrate) ?? ""))
+            let maxBitrate = maxAudioBitrate.map { SettingsFormatter.formatBandwidth($0) ?? "" } ?? "Default".localized
+            lines.append("Max Bitrate".localized(args: maxBitrate))
         }
 
         let videoRecvStats = stats.subscriberStats.compactMap(\.receivedVideo)

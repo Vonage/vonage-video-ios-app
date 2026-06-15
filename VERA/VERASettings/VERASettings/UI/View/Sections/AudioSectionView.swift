@@ -5,13 +5,6 @@
 import SwiftUI
 import VERACommonUI
 
-private enum AudioConstatnts {
-    // OT SDK valid range: 6000 – 510 000 bps.
-    static let audioBitrateRange: ClosedRange<Double> = 6_000...510_000
-    static let audioBitrateStep: Double = 2_000
-    static let currentAudioBitrateStep: Double = 40_000
-}
-
 /// Audio section content: audio bitrate slider and fallback toggles.
 ///
 /// Returns `Section` blocks intended to be embedded inside a parent `Form`.
@@ -20,33 +13,45 @@ struct AudioSectionView: View {
     @ObservedObject var viewModel: SettingsViewModel
 
     // Local Double mirror of the Int32 bitrate so Slider can bind to it.
-    @State private var audioBitrateSlider: Double = AudioConstatnts.currentAudioBitrateStep
+    @State private var audioBitrateSlider = Double(AudioSettingsConstants.defaultAudioBitrate)
 
     var body: some View {
         Section {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Max Audio Bitrate".localized(args: viewModel.maxAudioBitrateFormatted))
-                    .font(.subheadline)
-
-                Slider(
-                    value: $audioBitrateSlider,
-                    in: AudioConstatnts.audioBitrateRange,
-                    step: AudioConstatnts.audioBitrateStep
-                )
-                .onChange(of: audioBitrateSlider) { newValue in
-                    viewModel.setMaxAudioBitrate(newValue)
-                }
-                .onAppear {
-                    audioBitrateSlider = Double(viewModel.maxAudioBitrate)
+                Picker("Audio Bitrate".localized, selection: $viewModel.audioBitrateMode) {
+                    ForEach(SettingsAudioBitrateMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
                 }
 
-                HStack {
-                    Text("6 kbps".localized)
-                    Spacer()
-                    Text("510 kbps".localized)
+                if viewModel.audioBitrateMode == .custom {
+                    Text("Max Audio Bitrate".localized(args: viewModel.maxAudioBitrateFormatted))
+                        .font(.subheadline)
+
+                    Slider(
+                        value: $audioBitrateSlider,
+                        in: AudioSettingsConstants.audioBitrateRange,
+                        step: AudioSettingsConstants.audioBitrateStep
+                    )
+                    .onChange(of: audioBitrateSlider) { newValue in
+                        viewModel.setMaxAudioBitrate(newValue)
+                    }
+                    .onAppear {
+                        audioBitrateSlider = Double(
+                            viewModel.maxAudioBitrate ?? AudioSettingsConstants.defaultAudioBitrate)
+                    }
+                    .onChange(of: viewModel.maxAudioBitrate) { newValue in
+                        audioBitrateSlider = Double(newValue ?? AudioSettingsConstants.defaultAudioBitrate)
+                    }
+
+                    HStack {
+                        Text("6 kbps".localized)
+                        Spacer()
+                        Text("510 kbps".localized)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
         } header: {
             Text("Audio Bitrate".localized)
