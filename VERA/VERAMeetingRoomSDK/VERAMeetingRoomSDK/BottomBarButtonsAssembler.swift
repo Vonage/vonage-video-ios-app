@@ -29,17 +29,21 @@ final class BottomBarButtonsAssembler {
     private let enabledFeatures: Set<MeetingRoomFeature>
 
     // Feature view models created during meeting room setup
-    var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
+    var videoEffectsViewModel: VideoEffectsViewModel?
     var archiveButtonViewModel: ArchiveButtonViewModel?
     var captionsButtonViewModel: CaptionsButtonViewModel?
     var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
     var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
+
+    // Last state used for rebuilding buttons when feature view models change
+    private var lastState: MeetingRoomButtonsState = .init(archivingState: .idle)
 
     // Bindings for sheet/overlay presentation
     var onShowChat: (() -> Void)?
     var onShowPickerView: (() -> Void)?
     var onShowSettings: (() -> Void)?
     var onShowFeedbackForm: (() -> Void)?
+    var onShowEffects: (() -> Void)?
 
     init(
         container: MeetingRoomSDKContainer,
@@ -57,6 +61,7 @@ final class BottomBarButtonsAssembler {
     /// - Parameter state: Current meeting room button state (e.g., archiving state).
     /// - Returns: Array of feature buttons to display in the bottom bar.
     func buildButtons(_ state: MeetingRoomButtonsState) -> [BottomBarButton] {
+        lastState = state
         var buttons: [BottomBarButton] = []
 
         if enabledFeatures.contains(.chat) {
@@ -64,7 +69,7 @@ final class BottomBarButtonsAssembler {
         }
 
         if enabledFeatures.contains(.backgroundEffects),
-            let viewModel = backgroundBlurButtonViewModel
+            let viewModel = videoEffectsViewModel
         {
             buttons.append(makeBackgroundEffectsButton(viewModel))
         }
@@ -128,18 +133,24 @@ final class BottomBarButtonsAssembler {
     }
 
     private func makeBackgroundEffectsButton(
-        _ viewModel: BackgroundBlurButtonViewModel
+        _ viewModel: VideoEffectsViewModel
     ) -> BottomBarButton {
-        let button = container.backgroundBlurFactory.makeMeetingBlurButton(viewModel: viewModel)
+        let button = container.backgroundEffectFactory.makeMeetingEffectsButton(
+            viewModel: viewModel,
+            onShowEffects: { [weak self] in
+                self?.onShowEffects?()
+            }
+        )
         return .init(
-            label: String(localized: "Blur"),
-            image: viewModel.currentVideoEffect.image,
-            onTap: {
-                viewModel.onTap()
+            label: String(localized: "Effects"),
+            image: viewModel.selectedEffect.image,
+            onTap: { [weak self] in
+                self?.onShowEffects?()
             },
             content: {
                 button
-            })
+            }
+        )
     }
 
     private func makeFeedbackReportButton() -> BottomBarButton {
@@ -274,8 +285,16 @@ final class BottomBarButtonsAssembler {
     }
 
 
+    /// Rebuilds buttons using the most recent state.
+    ///
+    /// Used when a feature view model's published properties change (e.g. selected video effect)
+    /// and the bottom bar needs to reflect the updated icon.
+    func rebuildButtons() -> [BottomBarButton] {
+        buildButtons(lastState)
+    }
+
     func cleanUp() {
-        backgroundBlurButtonViewModel = nil
+        videoEffectsViewModel = nil
         archiveButtonViewModel = nil
         captionsButtonViewModel = nil
         emojiButtonContainerViewModel = nil
@@ -284,6 +303,8 @@ final class BottomBarButtonsAssembler {
         onShowChat = nil
         onShowPickerView = nil
         onShowSettings = nil
+        onShowFeedbackForm = nil
+        onShowEffects = nil
     }
 }
 
