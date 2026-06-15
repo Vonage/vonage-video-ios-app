@@ -121,7 +121,7 @@ struct VonageSettingsPluginTests {
 
         // Change a setting
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await delay()
@@ -164,15 +164,15 @@ struct VonageSettingsPluginTests {
 
         // Trigger multiple rapid changes
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 50_000
+            prefs.audioBitratePreference = .custom(50_000)
         }
 
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 70_000
+            prefs.audioBitratePreference = .custom(70_000)
         }
 
         await delay()
@@ -197,7 +197,7 @@ struct VonageSettingsPluginTests {
 
         // Now change something
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await delay()
