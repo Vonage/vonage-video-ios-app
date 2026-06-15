@@ -9,7 +9,7 @@ class FeedbackFormViewModel: ObservableObject {
     enum Constants {
         static let maxStandardFieldChars = 100
         static let maxDescriptionChars = 1000
-        
+
         static let titleKey = String(localized: "Title")
         static let titleFieldText = String(localized: "When you noticed this issue, what where you trying to do?")
         static let nameKey = String(localized: "Name")
@@ -19,9 +19,10 @@ class FeedbackFormViewModel: ObservableObject {
         static let infoKey = String(localized: "Info")
         static let infoFieldText = String(localized: "Please do not include any sensitive information.")
         static let imageKey = String(localized: "Image")
-        static let imageFieldText = String(localized: "A screenshot will help us better understand the issue. (optional)")
-        
-        static let formTitle =  String(localized: "Report issue")
+        static let imageFieldText = String(
+            localized: "A screenshot will help us better understand the issue. (optional)")
+
+        static let formTitle = String(localized: "Report issue")
     }
 
     let title = Constants.formTitle
