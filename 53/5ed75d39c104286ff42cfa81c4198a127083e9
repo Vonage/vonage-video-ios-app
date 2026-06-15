@@ -1,0 +1,24 @@
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackFormView.swift
+  s_4c8897a2e7cb07::t_2842f84949c214 100-106,111-117
+  s_4c8897a2e7cb07::t_dc72005ea2aa82 151,155-159,162,166-170,173
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackFormFocusNavigation.swift
+  s_4c8897a2e7cb07::t_aa4f2c073b9bcf 1-43
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFormFocusNavigationTests.swift
+  s_4c8897a2e7cb07::t_7f3660cac77a5f 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "535ed75d39c104286ff42cfa81c4198a127083e9",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
