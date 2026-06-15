@@ -20,25 +20,116 @@ The reference app is also available for:
 All three share the same backend infrastructure and demonstrate consistent best practices across platforms.
 
 ## Why use it?
+The Vonage Video API Reference App for iOS provides developers an easy-to-set-up way to get started with using our APIs with the iOS SDK.
 
-- **Fast start** — deploy the open-source backend, export a few env vars, and run `tuist generate`.
-- **Extensible** — fork and extend for your use case; every feature follows the same Clean Architecture patterns.
-- **Secure by design** — open-source transparency with a production-grade information security architecture.
-- **Cross-platform consistency** — iOS, Android, and Web apps share the same backend and API contracts.
+The application is open-source, so you can not only get started quickly, but easily extend it with features needed for your use case. Any features already implemented in the Reference App use best practices for scalability and security.
 
-## Features
+As a commercial open-source project, you can also count on a solid information security architecture. While no packaged solution can guarantee absolute security, the transparency that comes with open-source software, combined with the proactive and responsive open-source community and vendors, provides significant advantages in addressing information security challenges compared to closed-source alternatives.
 
-| Feature | Preview |
-|---|---|
-| Landing page — create and join rooms | <img src="docs/assets/Welcome.png" height="120" alt="Landing page"> |
-| Waiting room — preview A/V settings and set display name | <img src="docs/assets/WaitingRoom.png" height="120" alt="Waiting room"> |
-| Post-call page — re-join or download archives | <img src="docs/assets/Goodbye.png" height="120" alt="Goodbye page"> |
-| Participant list with audio indicator | <img src="docs/assets/ParticipantList.png" height="120" alt="Participant list"> |
-| Live captions | <img src="docs/assets/captions.png" height="120" alt="Captions"> |
-| Emoji reactions | <img src="docs/assets/reactions.png" height="120" alt="Reactions"> |
-| Configurable feature flags | <img src="docs/assets/configFile.png" height="120" alt="Config file"> |
+This application provides features for common conferencing use cases, such as:
 
-Additional capabilities: up to 25 participants · active speaker detection · cloud recording · background blur · ShareLink · grid / active-speaker layouts · CallKit · ReplayKit screen sharing · advanced noise suppression.
+- <details>
+    <summary>A landing page for users to create and join meeting rooms.</summary>
+    <img src="docs/assets/Welcome.png" alt="Screenshot of landing page">
+  </details>
+
+- <details>
+    <summary>A waiting room for users to preview their audio and video device settings and set their name before entering a meeting room.</summary>
+    <img src="docs/assets/WaitingRoom.png" alt="Screenshot of waiting room">
+  </details>
+- <details>
+    <summary>A post-call page to navigate users to the landing page, re-enter the left room, and display archive(s), if any.</summary>
+    <img src="docs/assets/Goodbye.png" alt="Screenshot of goodbye page">
+  </details>
+
+- A video conferencing “room” supporting up to 25 participants and the following features:
+
+- <details>
+    <summary>
+      Configurable features: adapt the app to your specific use cases and roles.
+      Configuration is handled through a <em>app-config.json</em> file that can be moved to the <em>VERA/config</em> folder. When calling the <em>generate-app-config.py</em> python script in the <em>VERA/Scripts</em> folder, the parameters specified in the <em>app-config.json</em> file will regenerate the <em>AppConfig.swift</em> file of the <em>VERAConfiguration</em> module.
+    </summary>
+    <img src="docs/assets/configFile.png" alt="Screenshot of a config.json">
+</details>
+
+- <details>
+    <summary>Call participant list with audio on/off indicator.</summary>
+    <img src="docs/assets/ParticipantList.png" alt="Screenshot of participant list">
+  </details>
+  
+- ShareLink integration.
+
+- Active speaker detection.
+
+- Start, stop and download cloud-based session recording directly from the app.
+
+- Apply real-time background effects to the local video stream, including background blur and background replacement.
+
+- <details>
+  <summary>Display live captions for enhanced accessibility.</summary>
+    <img src="docs/assets/captions.png" alt="Screenshot of live captions feature">
+  </details>
+
+- <details>
+  <summary>Send and receive emoji reactions during a video session.</summary>
+    <img src="docs/assets/reactions.png" alt="Screenshot of reactions feature">
+  </details>
+
+- Layout manager with options to display active speaker, or all participants in a grid view.
+
+- The dynamic display adjusts to show new joiners, hide video tiles to conserve bandwidth, and show the “next” participant when someone previously speaking leaves.
+
+- CallKit: Helps iOS to coordinate the calling services with other apps.
+
+- Screen sharing, enabling participants to broadcast their device screen into a Vonage video call using Apple's ReplayKit framework.
+
+- In-call chat, allowing participants to exchange text messages during the video session.
+
+- Settings controls, allowing participants to preconfigure publisher options in the waiting room and adjust video resolution, codec preferences, publisher settings, and call statistics during the meeting.
+
+- Advanced noise suppression, helping reduce background noise from the local microphone during a call.
+
+- Audio route selection, allowing users to switch the call audio output between available routes such as speaker, Bluetooth, or other system-supported devices.
+
+## Project Architecture
+
+This reference app requires the user to deploy a backend and then use the backend API URL as the base URL in the <em>DependencyContainer.swift</em> file of the VERAApp module. You can find backend code and deploying instructions in the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app) repository.
+
+The backend communicates with the Vonage video platform using the Vonage Server SDK and is responsible for generating the session IDs and tokens used to connect to the video rooms by the Vonage Client SDK.
+
+## Module Overview
+
+The Vonage iOS reference app is built with a modular architecture. The app is organized into the following frameworks:
+
+
+- **VERAApp**: Main application target and composition root.
+- **VERACore**: Landing, waiting room, goodbye, and shared app flows.
+- **VERAMeetingRoom**: Main meeting room UI and call experience.
+- **VERAMeetingRoomSDK**: Prebuilt meeting room SDK exposed through `MeetingRoomBuilder`.
+- **VERADomain**: Shared protocols, entities, value types, and SDK-independent contracts.
+- **VERAConfiguration**: Generated app configuration model from `app-config.json`.
+- **VERACommonUI**: Shared SwiftUI components, resources, and theme assets.
+- **VERAVonage**: Vonage Video SDK adapter layer and active speaker tracking.
+- **VERAChat**: In-call chat UI, domain, and data layer.
+- **VERAArchiving**: Cloud recording controls and archive list UI.
+- **VERABackgroundEffects**: Background blur and video effect support.
+- **VERACaptions**: Live captions UI and captions state handling.
+- **VERAReactions**: Emoji reaction picker and floating reaction overlay.
+- **VERASettings**: In-call settings, publisher configuration, and stats UI.
+- **VERAScreenShare**: Screen sharing UI and credential storage support.
+- **VERAAudioEffects**: Advanced noise suppression integration.
+- **VERAFeedback**: Feedback UI and standalone demo support.
+- **VERAE2E**: Deterministic E2E mocks and test support for Maestro flows.
+- **VERALogger**: Shared logging abstractions and strategies.
+- **VERACocoaLumberjackLogger**: CocoaLumberjack-backed logger implementation.
+- **VERAVonageCallKitPlugin**: CallKit integration plugin.
+- **VERAVonageChatPlugin**: Chat signal integration plugin.
+- **VERAVonageArchivingPlugin**: Archiving SDK/backend integration plugin.
+- **VERAVonageCaptionsPlugin**: Captions integration plugin.
+- **VERAVonageReactionsPlugin**: Reactions signal integration plugin.
+- **VERAVonageSettingsPlugin**: Settings and network stats integration plugin.
+- **VERAVonageScreenSharePlugin**: Screen sharing integration plugin, including the broadcast extension target.
+
 
 ## Platforms & Requirements
 
