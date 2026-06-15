@@ -1,0 +1,41 @@
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFormHostedTests.swift
+  s_4c8897a2e7cb07::t_18716c1fefed98 1-61
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFieldViewModelTests.swift
+  s_4c8897a2e7cb07::t_bdfe8212b3e20d 90-100
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackScreenshotCapturerTests.swift
+  s_4c8897a2e7cb07::t_ff87f733401ff0 24-26,39-85
+  s_4c8897a2e7cb07::t_2ce0348e8741d8 29
+  s_4c8897a2e7cb07::t_1bd3d8528f62f1 21
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/TestHelpers/FeedbackSnapshotInteractionHelpers.swift
+  s_4c8897a2e7cb07::t_445b74067dc9b4 9
+  s_4c8897a2e7cb07::t_a2e25c2509e6b2 1-8,10-27,38-143
+  s_4c8897a2e7cb07::t_2f5ef8d29889cd 28-37
+VERA/VERAFeedback/VERAFeedbackTests/TestHelpers/FeedbackViewTestHelpers.swift
+  s_4c8897a2e7cb07::t_3fa739aafe4a43 67-70,72-101
+  s_4c8897a2e7cb07::t_1554f6c95d4a4d 15-53,55,65-66,71,119-123,125,136-149,155,158,160,169-182,186-188,192,195,206,218-227,230-235
+  s_4c8897a2e7cb07::t_edf7a951ad4d51 13-14,54,56-64,102-118,124,126-135,150-152,183-185,189-191,193-194,196-205,207-217,228,236-257
+  s_4c8897a2e7cb07::t_2d25bc0c9b3a42 153-154,156-157,159,161-167
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/FeedbackIOSInteractionTests.swift
+  s_4c8897a2e7cb07::t_d6104ff7bb269e 35
+  s_4c8897a2e7cb07::t_a83f37dd986e91 31-33,37,39-40
+  s_4c8897a2e7cb07::t_b5686d5b51ea17 36,38
+  s_4c8897a2e7cb07::t_0467f47127fbbd 1-10,21,51,61,104
+  s_4c8897a2e7cb07::t_68ea86171b589b 11-20,22-29,34,41-50,52-60,62-103
+  s_4c8897a2e7cb07::t_cec3f3d420e313 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "6e2e2fb264df1c595efcafa8003d03fc73690b57",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

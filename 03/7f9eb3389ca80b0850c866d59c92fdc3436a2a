@@ -1,0 +1,55 @@
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackPlatformTypesTests.swift
+  s_4c8897a2e7cb07::t_9afca9b4e98ac7 2-56,58-62
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackSheetContent.swift
+  s_4c8897a2e7cb07::t_9ff21451844b18 10
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFormViewModelTests.swift
+  s_4c8897a2e7cb07::t_4e41bbaf985322 39-40,46,49-50,52-54,56-57
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackComponentButtonTests.swift
+  s_4c8897a2e7cb07::t_6cdc26446d18cd 1-9,13,15-23
+  s_4c8897a2e7cb07::t_90fa3a0e862259 10-12,14
+VERA/VERAFeedback/VERAFeedbackTests/TestHelpers/FeedbackViewTestHelpers.swift
+  s_4c8897a2e7cb07::t_08fb0445caff4a 1-38
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackBundleTests.swift
+  s_4c8897a2e7cb07::t_43b8a67a9964d4 2-7,9-13
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackViewConstructionTests.swift
+  s_4c8897a2e7cb07::t_49a3d337632307 13,23,30-33,36-39
+  s_4c8897a2e7cb07::t_1c70fd196ea497 14,20-21
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackHostedViewTests.swift
+  s_4c8897a2e7cb07::t_aee34ff4164902 1-11,13-29,31-32,34-36,39-81,83-93,95-115
+  s_4c8897a2e7cb07::t_f7b7045a080c0b 12,30,33,37,94
+  s_4c8897a2e7cb07::t_185d05126bef2d 38
+  s_4c8897a2e7cb07::t_37ced57819eb58 82
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackScreenshotCapturerTests.swift
+  s_4c8897a2e7cb07::t_21e40f8c057707 1-2,7-16,34,36
+  s_4c8897a2e7cb07::t_8d57f100ec105c 3-6,17-19,21-31,35
+  s_4c8897a2e7cb07::t_8b4afe932d681c 20,32-33
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackExtrasTests.swift
+  s_4c8897a2e7cb07::t_249914d2da45ff 32,35
+VERA/VERAFeedback/Project.swift
+  s_4c8897a2e7cb07::t_61a8f72e69221f 21
+VERA/VERAFeedback/VERAFeedback/Wireframe/FeedbackFactory.swift
+  s_4c8897a2e7cb07::t_4265efa15dfc33 7
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/FeedbackFormFieldsSnapshotTests.swift
+  s_4c8897a2e7cb07::t_99c0aecf895d56 1-14,16-104
+  s_4c8897a2e7cb07::t_a154f8d68076a6 15
+VERA/VERAFeedback/VERAFeedbackTests/TestHelpers/FeedbackTestHelpers.swift
+  s_4c8897a2e7cb07::t_f7d0ccafb0a061 9-11,38
+  s_4c8897a2e7cb07::t_c305f20d104b64 12-37
+  s_4c8897a2e7cb07::t_1afeca17d2c763 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "037f9eb3389ca80b0850c866d59c92fdc3436a2a",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
