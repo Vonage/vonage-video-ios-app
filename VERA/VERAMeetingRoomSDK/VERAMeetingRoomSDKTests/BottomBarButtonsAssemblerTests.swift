@@ -97,7 +97,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        // Without setting backgroundBlurButtonViewModel, no blur button is produced
+        // Without setting backgroundEffectButtonViewModel, no effect button is produced
         let buttons = assembler.buildButtons(.init(archivingState: .idle))
         #expect(buttons.isEmpty)
     }
@@ -162,6 +162,25 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.count == 1)
         #expect(buttons.first?.label == String(localized: "Noise Suppression"))
         #expect(assembler.meetingNoiseSuppressionButtonViewModel != nil)
+    }
+
+    @Test("rebuildButtons uses last state from buildButtons")
+    @MainActor
+    func rebuildButtonsUsesLastState() {
+        let features: Set<MeetingRoomFeature> = [.chat]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+
+        // First build with a specific state
+        let initialButtons = assembler.buildButtons(.init(archivingState: .archiving("test-id")))
+        // Rebuild should produce the same result using the cached state
+        let rebuiltButtons = assembler.rebuildButtons()
+
+        #expect(rebuiltButtons.count == initialButtons.count)
+        #expect(rebuiltButtons.first?.label == initialButtons.first?.label)
     }
 
     // MARK: - Helpers

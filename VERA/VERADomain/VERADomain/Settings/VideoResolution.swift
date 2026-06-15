@@ -2,6 +2,8 @@
 //  Created by Vonage on 01/03/2026.
 //
 
+import CoreGraphics
+
 /// Video capture resolution options for publisher configuration.
 ///
 /// Maps to OpenTok's `OTCameraCaptureResolution` in VERAVonage and is derived from
@@ -27,4 +29,14 @@ public enum VideoResolution: Int {
 
     /// High 1080p resolution (1920x1080).
     case high1080p = 3
+
+    /// The expected capture dimensions for this resolution.
+    public var dimensions: CGSize {
+        switch self {
+        case .low: CGSize(width: 352, height: 288)
+        case .mediun: CGSize(width: 640, height: 480)
+        case .high: CGSize(width: 1280, height: 720)
+        case .high1080p: CGSize(width: 1920, height: 1080)
+        }
+    }
 }
