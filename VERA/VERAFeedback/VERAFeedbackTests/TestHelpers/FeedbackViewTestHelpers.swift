@@ -116,18 +116,23 @@ enum FeedbackViewTestHelpers {
 
         func tapButton(titled title: String) -> Bool {
             #if canImport(AppKit)
-                if let button = findView(in: rootView, where: {
-                    ($0 as? NSButton)?.title == title
-                }) as? NSButton {
+                if let button = findView(
+                    in: rootView,
+                    where: {
+                        ($0 as? NSButton)?.title == title
+                    }) as? NSButton
+                {
                     button.performClick(nil)
                     return true
                 }
                 return false
             #elseif canImport(UIKit)
                 guard
-                    let control = findView(in: rootView, where: {
-                        ($0 as? UIButton)?.title(for: .normal) == title
-                    }) as? UIButton
+                    let control = findView(
+                        in: rootView,
+                        where: {
+                            ($0 as? UIButton)?.title(for: .normal) == title
+                        }) as? UIButton
                 else {
                     return false
                 }
@@ -190,28 +195,30 @@ enum FeedbackViewTestHelpers {
                 }
                 if view.responds(to: #selector(NSView.mouseDown(with:))) {
                     let location = NSPoint(x: view.bounds.midX, y: view.bounds.midY)
-                    view.mouseDown(with: NSEvent.mouseEvent(
-                        with: .leftMouseDown,
-                        location: location,
-                        modifierFlags: [],
-                        timestamp: 0,
-                        windowNumber: view.window?.windowNumber ?? 0,
-                        context: nil,
-                        eventNumber: 0,
-                        clickCount: 1,
-                        pressure: 1
-                    )!)
-                    view.mouseUp(with: NSEvent.mouseEvent(
-                        with: .leftMouseUp,
-                        location: location,
-                        modifierFlags: [],
-                        timestamp: 0,
-                        windowNumber: view.window?.windowNumber ?? 0,
-                        context: nil,
-                        eventNumber: 0,
-                        clickCount: 1,
-                        pressure: 0
-                    )!)
+                    view.mouseDown(
+                        with: NSEvent.mouseEvent(
+                            with: .leftMouseDown,
+                            location: location,
+                            modifierFlags: [],
+                            timestamp: 0,
+                            windowNumber: view.window?.windowNumber ?? 0,
+                            context: nil,
+                            eventNumber: 0,
+                            clickCount: 1,
+                            pressure: 1
+                        )!)
+                    view.mouseUp(
+                        with: NSEvent.mouseEvent(
+                            with: .leftMouseUp,
+                            location: location,
+                            modifierFlags: [],
+                            timestamp: 0,
+                            windowNumber: view.window?.windowNumber ?? 0,
+                            context: nil,
+                            eventNumber: 0,
+                            clickCount: 1,
+                            pressure: 0
+                        )!)
                     return true
                 }
                 return false
