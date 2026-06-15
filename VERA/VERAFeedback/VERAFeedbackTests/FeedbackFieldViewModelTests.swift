@@ -87,4 +87,15 @@ struct FeedbackFieldViewModelTests {
         let vm = FeedbackFieldViewModel(title: "Title", key: "MyKey", type: .text)
         #expect(vm.id == "MyKey")
     }
+
+    @Test("Info field is always valid with no validation message")
+    func infoFieldIsAlwaysValid() {
+        let vm = FeedbackFieldViewModel(
+            title: "", key: "Info", type: .info,
+            value: "Please do not include any sensitive information.", isRequired: false
+        )
+
+        #expect(vm.isValid == true)
+        #expect(vm.validationMessage == nil)
+    }
 }
