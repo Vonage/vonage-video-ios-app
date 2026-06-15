@@ -97,12 +97,24 @@ struct FeedbackFormView: View {
                         Button(action: focusPrevious) {
                             Image(systemName: "chevron.up")
                         }
-                        .disabled(focusedFieldIndex == nil || isFirstTextFieldFocused)
+                        .disabled(
+                            focusedFieldIndex == nil
+                                || FeedbackFormFocusNavigation.isFirstTextFieldFocused(
+                                    focusedFieldIndex: focusedFieldIndex,
+                                    textFieldIndices: textFieldIndices
+                                )
+                        )
 
                         Button(action: focusNext) {
                             Image(systemName: "chevron.down")
                         }
-                        .disabled(focusedFieldIndex == nil || isLastTextFieldFocused)
+                        .disabled(
+                            focusedFieldIndex == nil
+                                || FeedbackFormFocusNavigation.isLastTextFieldFocused(
+                                    focusedFieldIndex: focusedFieldIndex,
+                                    textFieldIndices: textFieldIndices
+                                )
+                        )
 
                         Spacer()
 
@@ -136,37 +148,29 @@ struct FeedbackFormView: View {
     }
 
     private var textFieldIndices: [Int] {
-        feedbackFormViewModel.feedbackFields.indices.filter {
-            feedbackFormViewModel.feedbackFields[$0].type == .text
-        }
-    }
-
-    private var isFirstTextFieldFocused: Bool {
-        guard let focusedFieldIndex else { return false }
-        return focusedFieldIndex == textFieldIndices.first
-    }
-
-    private var isLastTextFieldFocused: Bool {
-        guard let focusedFieldIndex else { return false }
-        return focusedFieldIndex == textFieldIndices.last
+        FeedbackFormFocusNavigation.textFieldIndices(in: feedbackFormViewModel.feedbackFields)
     }
 
     private func focusPrevious() {
-        guard let focusedFieldIndex,
-            let currentIndex = textFieldIndices.firstIndex(of: focusedFieldIndex),
-            currentIndex > 0
+        guard
+            let newIndex = FeedbackFormFocusNavigation.focusPrevious(
+                focusedFieldIndex: focusedFieldIndex,
+                textFieldIndices: textFieldIndices
+            )
         else { return }
 
-        self.focusedFieldIndex = textFieldIndices[currentIndex - 1]
+        focusedFieldIndex = newIndex
     }
 
     private func focusNext() {
-        guard let focusedFieldIndex,
-            let currentIndex = textFieldIndices.firstIndex(of: focusedFieldIndex),
-            currentIndex < textFieldIndices.count - 1
+        guard
+            let newIndex = FeedbackFormFocusNavigation.focusNext(
+                focusedFieldIndex: focusedFieldIndex,
+                textFieldIndices: textFieldIndices
+            )
         else { return }
 
-        self.focusedFieldIndex = textFieldIndices[currentIndex + 1]
+        focusedFieldIndex = newIndex
     }
 }
 
