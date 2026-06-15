@@ -4,9 +4,8 @@
 
 public final class FeedbackFactory {
 
-    public init() {
+    public init() {}
 
-    }
     /// Creates the feedback button for the meeting room bottom bar.
     ///
     /// - Parameter onShowFeedbackForm: Closure fired when the button is tapped.

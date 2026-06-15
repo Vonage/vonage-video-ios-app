@@ -7,9 +7,7 @@ import SwiftUI
 public struct FeedbackSheetContent: View {
     @StateObject private var feedbackFormViewModel = FeedbackFormViewModel()
 
-    public init() {
-        // no-op
-    }
+    public init() {}
 
     public var body: some View {
         FeedbackView(feedbackFormViewModel: feedbackFormViewModel)

@@ -10,34 +10,33 @@ struct FeedbackViewConstructionTests {
     @Test("FeedbackFormView builds body without crashing")
     func formViewBuilds() {
         let vm = FeedbackFormViewModel()
-        let view = FeedbackFormView(feedbackFormViewModel: vm)
-
-        // Access body to force view construction
-        _ = view.body
-
-        #expect(true == true)
+        FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: vm))
+        #expect(true)
     }
 
     @Test("FeedbackTextFieldView shows error state when invalid")
     func textFieldViewShowsErrorState() {
         let fieldVM = FeedbackFieldViewModel(
-            maxChars: 3, title: "T", key: "T", type: .text, value: "", isRequired: true)
+            maxChars: 3, title: "T", key: "T", type: .text, value: "", isRequired: true
+        )
         let view = FeedbackTextFieldViewTestHost(fieldVM: fieldVM)
-
-        _ = view.body
+        FeedbackViewTestHelpers.host(view, size: CGSize(width: 390, height: 160))
         #expect(fieldVM.isValid == false)
     }
 
     @Test("FeedbackImageFieldView builds with and without attached image")
     func imageFieldViewBuildsWithAndWithoutImage() {
         let fieldVM = FeedbackFieldViewModel(title: "Image", key: "Image", type: .image, isRequired: false)
-        let viewNoImage = FeedbackImageFieldView(feedbackFieldViewModel: fieldVM, showValidationErrors: false)
-        _ = viewNoImage.body
+        FeedbackViewTestHelpers.host(
+            FeedbackImageFieldView(feedbackFieldViewModel: fieldVM, showValidationErrors: false),
+            size: CGSize(width: 390, height: 260)
+        )
 
-        // attach image and rebuild
         fieldVM.attachedImage = PlatformImage()
-        let viewWithImage = FeedbackImageFieldView(feedbackFieldViewModel: fieldVM, showValidationErrors: false)
-        _ = viewWithImage.body
+        FeedbackViewTestHelpers.host(
+            FeedbackImageFieldView(feedbackFieldViewModel: fieldVM, showValidationErrors: false),
+            size: CGSize(width: 390, height: 420)
+        )
 
         #expect(fieldVM.attachedImage != nil)
     }
