@@ -11,7 +11,7 @@ class FeedbackFormViewModel: ObservableObject {
         static let maxDescriptionChars = 1000
 
         static let titleKey = String(localized: "Title")
-        static let titleFieldText = String(localized: "When you noticed this issue, what where you trying to do?")
+        static let titleFieldText = String(localized: "When you noticed this issue, what were you trying to do?")
         static let nameKey = String(localized: "Name")
         static let nameFieldText = String(localized: "Tell us your name")
         static let descriptionKey = String(localized: "Description")
