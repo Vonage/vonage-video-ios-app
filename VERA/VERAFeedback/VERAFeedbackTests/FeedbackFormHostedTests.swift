@@ -3,6 +3,10 @@ import Testing
 
 @testable import VERAFeedback
 
+#if canImport(AppKit)
+    import AppKit
+#endif
+
 @MainActor
 @Suite("Feedback form hosted tests")
 struct FeedbackFormHostedTests {
@@ -124,4 +128,51 @@ struct FeedbackFormHostedTests {
         _ = context.tapButton(labeled: String(localized: "Close"))
         #expect(viewModel.title.isEmpty == false)
     }
+
+    #if canImport(AppKit)
+        @Test("Capture screenshot button attaches image on macOS sheet")
+        func captureScreenshotButtonAttachesImageOnMacOSSheet() {
+            let field = FeedbackFieldViewModel(
+                title: "", key: "Image", type: .image,
+                value: "A screenshot will help us better understand the issue. (optional)",
+                isRequired: false
+            )
+
+            let imageFieldView = FeedbackImageFieldView(feedbackFieldViewModel: field, showValidationErrors: false)
+            let hostingView = NSHostingView(rootView: imageFieldView)
+            hostingView.frame = NSRect(x: 0, y: 0, width: 390, height: 280)
+
+            let parentContent = NSView(frame: NSRect(x: 0, y: 0, width: 420, height: 320))
+            parentContent.wantsLayer = true
+            parentContent.layer?.backgroundColor = NSColor.systemGreen.cgColor
+
+            let parentWindow = NSWindow(
+                contentRect: parentContent.frame,
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            parentWindow.contentView = parentContent
+            parentWindow.makeKeyAndOrderFront(nil)
+
+            let sheetWindow = NSWindow(
+                contentRect: hostingView.frame,
+                styleMask: [.titled],
+                backing: .buffered,
+                defer: false
+            )
+            sheetWindow.contentView = hostingView
+            parentWindow.beginSheet(sheetWindow) { _ in }
+
+            let context = FeedbackViewTestHelpers.HostedViewContext(rootView: hostingView)
+            _ =
+                context.tapButton(labeled: String(localized: "Capture screenshot"))
+                || context.pressAllButtonLikeElements()
+
+            FeedbackViewTestHelpers.settleLayout {}
+            parentWindow.endSheet(sheetWindow)
+
+            #expect(field.attachedImage != nil)
+        }
+    #endif
 }

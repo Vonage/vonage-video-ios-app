@@ -307,8 +307,3 @@ final class BottomBarButtonsAssembler {
         onShowEffects = nil
     }
 }
-
-
-class FeedbackButtonViewModel {
-
-}

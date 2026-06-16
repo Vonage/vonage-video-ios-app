@@ -134,6 +134,38 @@ struct FeedbackIOSInteractionTests {
         #expect(true)
     }
 
+    @Test("UIKit screenshot capturer returns image when modal presented on iOS")
+    func captureScreenshotReturnsImageWhenModalPresentedOnIOS() async {
+        guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else {
+            #expect(true)
+            return
+        }
+
+        let rootController = UIViewController()
+        rootController.view.frame = CGRect(x: 0, y: 0, width: 320, height: 480)
+        rootController.view.backgroundColor = .systemGreen
+
+        let window = UIWindow(windowScene: scene)
+        window.frame = rootController.view.frame
+        window.rootViewController = rootController
+        window.makeKeyAndVisible()
+        rootController.view.setNeedsLayout()
+        rootController.view.layoutIfNeeded()
+
+        let modalController = UIViewController()
+        modalController.view.backgroundColor = .systemBackground
+        rootController.present(modalController, animated: false)
+
+        try? await Task.sleep(for: .milliseconds(50))
+        FeedbackSnapshotInteractionHelpers.settle()
+
+        let image = FeedbackScreenshotCapturer.captureContentBehindModal()
+        modalController.dismiss(animated: false)
+        window.isHidden = true
+
+        #expect(image != nil)
+    }
+
     @Test("FeedbackButton hosts on iOS")
     func feedbackButtonHostsOnIOS() {
         FeedbackSnapshotInteractionHelpers.host(
