@@ -1,6 +1,44 @@
 # Architecture
 
-The Vonage Video iOS Reference App is organized as a multi-module Xcode workspace managed entirely by [Tuist](https://tuist.dev). This document describes the module graph, the Clean Architecture layers used within each module, and the key design patterns.
+The Vonage Video iOS Reference App is organized as a multi-module Xcode workspace managed entirely by [Tuist](https://tuist.dev). This document describes the project architecture, module overview, Clean Architecture layers used within each module, and the key design patterns.
+
+## Project Architecture
+
+This reference app requires the user to deploy a backend and then use the backend API URL as the base URL in the `DependencyContainer.swift` file of the VERAApp module. You can find backend code and deployment instructions in the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app) repository.
+
+The backend communicates with the Vonage Video platform using the Vonage Server SDK and is responsible for generating the session IDs and tokens used to connect to video rooms through the Vonage Client SDK.
+
+## Module Overview
+
+The Vonage iOS reference app is built with a modular architecture. The app is organized into the following frameworks:
+
+- **VERAApp**: Main application target and composition root.
+- **VERACore**: Landing, waiting room, goodbye, and shared app flows.
+- **VERAMeetingRoom**: Main meeting room UI and call experience.
+- **VERAMeetingRoomSDK**: Prebuilt meeting room SDK exposed through `MeetingRoomBuilder`.
+- **VERADomain**: Shared protocols, entities, value types, and SDK-independent contracts.
+- **VERAConfiguration**: Generated app configuration model from `app-config.json`.
+- **VERACommonUI**: Shared SwiftUI components, resources, and theme assets.
+- **VERAVonage**: Vonage Video SDK adapter layer and active speaker tracking.
+- **VERAChat**: In-call chat UI, domain, and data layer.
+- **VERAArchiving**: Cloud recording controls and archive list UI.
+- **VERABackgroundEffects**: Background blur and video effect support.
+- **VERACaptions**: Live captions UI and captions state handling.
+- **VERAReactions**: Emoji reaction picker and floating reaction overlay.
+- **VERASettings**: In-call settings, publisher configuration, and stats UI.
+- **VERAScreenShare**: Screen sharing UI and credential storage support.
+- **VERAAudioEffects**: Advanced noise suppression integration.
+- **VERAFeedback**: Feedback UI and standalone demo support.
+- **VERAE2E**: Deterministic E2E mocks and test support for Maestro flows.
+- **VERALogger**: Shared logging abstractions and strategies.
+- **VERACocoaLumberjackLogger**: CocoaLumberjack-backed logger implementation.
+- **VERAVonageCallKitPlugin**: CallKit integration plugin.
+- **VERAVonageChatPlugin**: Chat signal integration plugin.
+- **VERAVonageArchivingPlugin**: Archiving SDK/backend integration plugin.
+- **VERAVonageCaptionsPlugin**: Captions integration plugin.
+- **VERAVonageReactionsPlugin**: Reactions signal integration plugin.
+- **VERAVonageSettingsPlugin**: Settings and network stats integration plugin.
+- **VERAVonageScreenSharePlugin**: Screen sharing integration plugin, including the broadcast extension target.
 
 ## Module Graph
 
