@@ -232,7 +232,39 @@ final class MeetingRoomSDKContainer {
 
     // MARK: - Background Effects Feature
 
-    lazy var backgroundBlurFactory = BackgroundBlurFactory()
+    lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+        bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+        storageProvider: DefaultBackgroundEffectsStorageProvider(
+            fileManager: .default,
+            searchPathDirectory: .cachesDirectory,
+            pathComponent: "video_backgrounds"
+        )
+    )
+
+    lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository(
+        storageProvider: DefaultBackgroundEffectsStorageProvider(
+            fileManager: .default,
+            searchPathDirectory: .documentDirectory,
+            pathComponent: "user_backgrounds"
+        )
+    )
+
+    lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
+
+    lazy var backgroundEffectFactory = BackgroundEffectFactory(
+        getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
+            backgroundEffectsRepository: backgroundEffectsRepository,
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        addBackgroundUseCase: DefaultAddBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
+        videoEffectRepository: videoEffectRepository
+    )
 
     // MARK: - Captions Feature
 

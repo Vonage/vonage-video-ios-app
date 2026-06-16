@@ -61,6 +61,7 @@ struct MeetingRoomComposedView: View {
     @State private var showPickerView = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var showEffects = false
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel)
@@ -98,10 +99,29 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .modifier(
+                BackgroundEffectsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.backgroundEffects),
+                    showEffects: $showEffects,
+                    videoEffectsViewModel: buttonsAssembler.videoEffectsViewModel
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                buttonsAssembler.onShowEffects = { showEffects = true }
             }
+            .onReceive(selectedEffectPublisher) { _ in
+                viewModel.extraButtons = buttonsAssembler.rebuildButtons()
+            }
+    }
+
+    /// Publisher that emits when the selected video effect changes (skipping the initial value).
+    private var selectedEffectPublisher: AnyPublisher<VideoEffect, Never> {
+        guard let vm = buttonsAssembler.videoEffectsViewModel else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return vm.$selectedEffect.dropFirst().eraseToAnyPublisher()
     }
 }

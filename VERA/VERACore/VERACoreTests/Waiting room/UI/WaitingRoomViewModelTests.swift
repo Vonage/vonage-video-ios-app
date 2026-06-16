@@ -58,6 +58,44 @@ struct WaitingRoomViewModelTests {
         }
     }
 
+    @Test("Given view model is loaded, when publisher is created, then onPublisherReady is called")
+    func loadUIShouldCallOnPublisherReady() async {
+        let sut = makeSUT()
+        var publisherReadyCalled = false
+        sut.onPublisherReady = {
+            publisherReadyCalled = true
+        }
+
+        sut.loadUI()
+        await delay()
+
+        #expect(publisherReadyCalled)
+    }
+
+    @Test("Given publisher is reset, when new publisher is created, then onPublisherReady is called again")
+    func onPublisherReadyCalledAfterReset() async {
+        let repo = makeMockCameraPreviewProviderRepository()
+        let sut = makeSUT(cameraPreviewProviderRepository: repo)
+        var callCount = 0
+        sut.onPublisherReady = {
+            callCount += 1
+        }
+
+        sut.loadUI()
+        await delay()
+
+        #expect(callCount == 1)
+
+        // resetPublisher nils out the publisher and emits didResetPublisher.
+        // The sink delivers on the next runloop (receive on main),
+        // so we set a new publisher after reset but before the delay.
+        repo.resetPublisher()
+        repo.publisher = .init()
+        await delay()
+
+        #expect(callCount == 2)
+    }
+
     @Test("Given initial state, when view model is loaded, then camera devices are available")
     func loadUIShouldLoadAvailableCameraDevices() async throws {
         let cameraDevicesRepository = makeMockCameraDevicesRepository()
