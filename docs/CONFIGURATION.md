@@ -1,6 +1,6 @@
 # Configuration
 
-The app is configured through two primary mechanisms: **feature flags** in `app-config.json` and **theme tokens** in `semantics.json`. Both are source files that drive code generation; the generated Swift files are committed and must be regenerated whenever the JSON changes.
+The app is configured through two primary mechanisms: **feature flags** in `app-config.json` and **theme tokens** in `semantics.json`. Both are source files that drive code generation; the generated outputs (for example `AppConfig.swift` and `SemanticColors.xcassets`) are committed where applicable and must be regenerated whenever the JSON changes.
 
 ## Feature Flags (`app-config.json`)
 
