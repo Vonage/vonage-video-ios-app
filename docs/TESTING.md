@@ -23,7 +23,7 @@ xcodebuild test \
   -destination "platform=macOS" \
   COMPILER_INDEX_STORE_ENABLE=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
 ```
-
+Note: `xcpretty` is optional. If it isn't installed, remove `| xcpretty`, or install it with `gem install xcpretty`.
 Replace `VERACoreTests` with any unit/integration scheme: `VERAMeetingRoomTests`, `VERAChatTests`, `VERADomainTests`, `VERAArchivingTests`, `VERAReactionsTests`, `VERASettingsTests`, `VERAScreenShareTests`, `VERAAudioEffectsTests`, `VERACommonUITests`, `VERAVonageTests`, `VERABackgroundEffectsTests`, `VERACaptionsTests`, `VERAVonageChatPluginTests`, `VERAVonageSettingsPluginTests`.
 
 ### Running Snapshot Tests (iOS Simulator required)
