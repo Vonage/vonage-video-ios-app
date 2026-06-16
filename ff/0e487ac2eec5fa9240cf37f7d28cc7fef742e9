@@ -1,0 +1,21 @@
+docs/ARCHITECTURE.md
+  s_bd9fc5c0fef8aa::t_97ef5a90dc140c 3-41
+README.md
+  s_bd9fc5c0fef8aa::t_97ef5a90dc140c 116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "ff0e487ac2eec5fa9240cf37f7d28cc7fef742e9",
+  "prompts": {},
+  "sessions": {
+    "s_bd9fc5c0fef8aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebb59-4fae-7843-98a3-d07ffa00dbf5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
