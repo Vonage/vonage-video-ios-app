@@ -36,7 +36,7 @@ xcodebuild test \
   -parallel-testing-enabled NO \
   CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
 ```
-
+Note: `xcpretty` is optional. If it isn't installed, remove `| xcpretty`, or install it with `gem install xcpretty`.
 Replace `VERACoreSnapshotTests` with any snapshot scheme: `VERAMeetingRoomSnapshotTests`, `VERAChatSnapshotTests`, `VERASettingsSnapshotTests`, `VERAAudioEffectsSnapshotTests`, `VERACaptionsSnapshotTests`, `VERAReactionsSnapshotTests`.
 
 Snapshot images live in `__Snapshots__` folders next to the test files. Record new reference images by setting `record: true` in the snapshot assertion.
