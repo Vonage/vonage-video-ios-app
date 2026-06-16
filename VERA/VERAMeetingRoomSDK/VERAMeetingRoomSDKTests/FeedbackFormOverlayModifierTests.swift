@@ -94,10 +94,9 @@ private struct OverlayTestBoxKey: EnvironmentKey {
     static let defaultValue: Box<Bool> = Box(false)
 }
 
-private extension EnvironmentValues {
-    var overlayTestBox: Box<Bool> {
+extension EnvironmentValues {
+    fileprivate var overlayTestBox: Box<Bool> {
         get { self[OverlayTestBoxKey.self] }
         set { self[OverlayTestBoxKey.self] = newValue }
     }
 }
-
