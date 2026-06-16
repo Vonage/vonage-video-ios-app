@@ -61,16 +61,12 @@ Use the provided install script (runs from the repo root). It installs Maestro C
 
 ### Folder Structure
 
-```text
-.maestro/
-├── config.yaml
-├── docs/
-│   └── README.md    ← pointer to this file
-└── flows/
-    ├── captions.yaml
-    ├── recording.yaml
-    └── ...
-```
+    .maestro/
+    ├── config.yaml
+    └── flows/
+        ├── captions.yaml
+        ├── recording.yaml
+        └── ...
 
 Flows live in `.maestro/flows` and are named by feature or behavior (e.g., `recording.yaml`).
 
