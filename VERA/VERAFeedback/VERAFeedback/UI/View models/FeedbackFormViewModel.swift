@@ -4,60 +4,60 @@
 
 import Combine
 
+enum FeedbackFormConstants {
+    static let maxStandardFieldChars = 100
+    static let maxDescriptionChars = 1000
+}
+
 class FeedbackFormViewModel: ObservableObject {
 
-    enum Constants {
-        static let maxStandardFieldChars = 100
-        static let maxDescriptionChars = 1000
+    static let titleKey = String(localized: "Title")
+    static let titleFieldText = String(localized: "When you noticed this issue, what were you trying to do?")
+    static let nameKey = String(localized: "Name")
+    static let nameFieldText = String(localized: "Tell us your name")
+    static let descriptionKey = String(localized: "Description")
+    static let descriptionFieldText = String(localized: "Describe your issue")
+    static let infoKey = String(localized: "Info")
+    static let infoFieldText = String(localized: "Please do not include any sensitive information.")
+    static let imageKey = String(localized: "Image")
+    static let imageFieldText = String(
+        localized: "A screenshot will help us better understand the issue. (optional)")
 
-        static let titleKey = String(localized: "Title")
-        static let titleFieldText = String(localized: "When you noticed this issue, what were you trying to do?")
-        static let nameKey = String(localized: "Name")
-        static let nameFieldText = String(localized: "Tell us your name")
-        static let descriptionKey = String(localized: "Description")
-        static let descriptionFieldText = String(localized: "Describe your issue")
-        static let infoKey = String(localized: "Info")
-        static let infoFieldText = String(localized: "Please do not include any sensitive information.")
-        static let imageKey = String(localized: "Image")
-        static let imageFieldText = String(
-            localized: "A screenshot will help us better understand the issue. (optional)")
+    static let formTitle = String(localized: "Report issue")
 
-        static let formTitle = String(localized: "Report issue")
-    }
-
-    let title = Constants.formTitle
+    let title = formTitle
     @Published var showValidationErrors = false
     @Published var feedbackFields = [
         FeedbackFieldViewModel(
-            maxChars: Constants.maxStandardFieldChars,
-            title: Constants.titleFieldText,
-            key: Constants.titleKey,
+            maxChars: FeedbackFormConstants.maxStandardFieldChars,
+            title: titleFieldText,
+            key: titleKey,
             type: .text
         ),
         FeedbackFieldViewModel(
-            maxChars: Constants.maxStandardFieldChars,
-            title: Constants.nameFieldText,
-            key: Constants.nameKey,
+            maxChars: FeedbackFormConstants.maxStandardFieldChars,
+            title: nameFieldText,
+            key: nameKey,
             type: .text
         ),
         FeedbackFieldViewModel(
-            maxChars: Constants.maxDescriptionChars,
-            title: Constants.descriptionFieldText,
-            key: Constants.descriptionKey,
+            maxChars: FeedbackFormConstants.maxDescriptionChars,
+            title: descriptionFieldText,
+            key: descriptionKey,
             type: .text
         ),
         FeedbackFieldViewModel(
             title: "",
-            key: Constants.infoKey,
+            key: infoKey,
             type: .info,
-            value: Constants.infoFieldText,
+            value: infoFieldText,
             isRequired: false
         ),
         FeedbackFieldViewModel(
             title: "",
-            key: Constants.imageKey,
+            key: imageKey,
             type: .image,
-            value: Constants.imageFieldText,
+            value: imageFieldText,
             isRequired: false
         ),
     ]
