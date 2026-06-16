@@ -1,0 +1,19 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/FeedbackFormOverlayModifierTests.swift
+  s_4c8897a2e7cb07::t_f4866a2e26a8b0 97-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "1efa5224880551c2429c657ab43a7a237c09890e",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFormHostedTests.swift
+  s_4c8897a2e7cb07::t_27babcb1ac7a20 6-9,131-177
+VERA/VERAFeedback/VERAFeedbackSnapshotTests/FeedbackIOSInteractionTests.swift
+  s_4c8897a2e7cb07::t_c6cbbdfb18a428 137-168
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "4fb27dcd03b51d487310956df9ae1747bea38d0d",
+  "prompts": {},
+  "sessions": {
+    "s_4c8897a2e7cb07": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "b38ce61d-ad01-477b-b52d-3b0b5960b7ac",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

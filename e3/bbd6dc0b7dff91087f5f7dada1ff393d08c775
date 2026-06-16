@@ -1,0 +1,16 @@
+docs/CONTRIBUTING.md
+  h_5ddc9d372ac6a1 1,6-15,18-20,24-25,27-31,34-89,91-92,94,97,99,101
+.github/copilot-instructions.md
+  h_5ddc9d372ac6a1 322-331
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e3bbd6dc0b7dff91087f5f7dada1ff393d08c775",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
