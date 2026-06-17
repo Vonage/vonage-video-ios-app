@@ -6,7 +6,16 @@ import UIKit
 
 @testable import VERAFeedback
 
+@MainActor
 enum FeedbackSnapshotHelpers {
+
+    static func makeFormViewModel() -> FeedbackFormViewModel {
+        FeedbackFormViewModel(
+            feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                feedbackReportDataSource: SnapshotFeedbackReportDataSource()
+            )
+        )
+    }
 
     static func makeTestImage(size: CGSize = CGSize(width: 200, height: 120)) -> UIImage {
         let renderer = UIGraphicsImageRenderer(size: size)
@@ -30,13 +39,6 @@ enum FeedbackSnapshotHelpers {
         imageField.attachedImage = makeTestImage()
     }
 
-    static func makeFormViewModel() -> FeedbackFormViewModel {
-        FeedbackFormViewModel(
-            feedbackReportUseCase: DefaultFeedbackReportUseCase(
-                feedbackReportDataSource: SnapshotFeedbackReportDataSource()
-            )
-        )
-    }
 }
 
 private final class SnapshotFeedbackReportDataSource: FeedbackReportDataSource {
