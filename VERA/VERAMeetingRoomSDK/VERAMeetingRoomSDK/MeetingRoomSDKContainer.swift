@@ -122,7 +122,7 @@ final class MeetingRoomSDKContainer {
                 pluginRegistry: pluginRegistry,
                 statsCollector: statsCollector))
     }()
-  
+
     lazy var advancedSettingsUseCase: any PublisherAdvancedSettingsUseCase = {
         if enabledFeatures.contains(.settings) {
             return DefaultAdvancedSettingsUseCase(publisherSettingsRepository: settingsRepository)

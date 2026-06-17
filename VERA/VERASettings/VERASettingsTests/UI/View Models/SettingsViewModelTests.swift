@@ -821,7 +821,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.audioBitratePreference == .custom(128_000))
         #expect(viewModel.audioBitrateMode == .custom)
     }
-   
+
     // MARK: - Dismiss & Logging Tests
 
     @Test("Dismiss does not persist logging when no changes made")
