@@ -12,6 +12,7 @@ import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -41,6 +42,7 @@ final class BottomBarButtonsAssembler {
     var onShowChat: (() -> Void)?
     var onShowPickerView: (() -> Void)?
     var onShowSettings: (() -> Void)?
+    var onShowFeedbackForm: (() -> Void)?
     var onShowEffects: (() -> Void)?
 
     init(
@@ -102,6 +104,10 @@ final class BottomBarButtonsAssembler {
             buttons.append(makeAudioEffectsButton())
         }
 
+        if enabledFeatures.contains(.feedback) {
+            buttons.append(makeFeedbackReportButton())
+        }
+
         return buttons
     }
 
@@ -140,6 +146,22 @@ final class BottomBarButtonsAssembler {
             image: viewModel.selectedEffect.image,
             onTap: { [weak self] in
                 self?.onShowEffects?()
+            },
+            content: {
+                button
+            }
+        )
+    }
+
+    private func makeFeedbackReportButton() -> BottomBarButton {
+        let button = container.feedbackFactory.makeMeetingRoomButton { [weak self] in
+            self?.onShowFeedbackForm?()
+        }
+        return .init(
+            label: String(localized: "Feedback"),
+            image: VERACommonUIAsset.Images.feedbackLine.swiftUIImage,
+            onTap: { [weak self] in
+                self?.onShowFeedbackForm?()
             },
             content: {
                 button
@@ -281,6 +303,7 @@ final class BottomBarButtonsAssembler {
         onShowChat = nil
         onShowPickerView = nil
         onShowSettings = nil
+        onShowFeedbackForm = nil
         onShowEffects = nil
     }
 }

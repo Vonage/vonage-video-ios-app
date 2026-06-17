@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import UIKit
 import VERASettings
 
 // MARK: - Settings Overlay Modifier
