@@ -23,6 +23,8 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var userName: String = ""
     @Published public var extraTrailingButtons: [ViewHolder] = []
 
+    public var onPublisherReady: (() -> Void)?
+
     public let roomName: RoomName
     weak var publisher: VERAPublisher?
 
@@ -246,6 +248,7 @@ extension WaitingRoomViewModel {
 
             observeAudioLevel(publisher)
             updateUIState()
+            onPublisherReady?()
 
         } catch {
             self.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)

@@ -74,10 +74,17 @@ private class VideoContainerView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: .zero)
+        clipsToBounds = true
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        videoView?.setNeedsLayout()
+        videoView?.layoutIfNeeded()
     }
 
     /// Replaces the current video view with a new one.

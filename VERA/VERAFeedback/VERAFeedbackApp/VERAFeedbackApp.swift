@@ -10,8 +10,7 @@ struct VERAFeedbackDemoApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                Text("VERAFeedback Demo")
-                    .font(.largeTitle)
+                FeedbackSheetContent()
             }
         }
     }

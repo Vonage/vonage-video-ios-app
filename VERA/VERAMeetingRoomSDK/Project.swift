@@ -26,6 +26,7 @@ let project = Project(
                 .project(target: "VERACore", path: "../VERACore"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
                 // Always-included plugins
                 .project(target: "VERAVonageCallKitPlugin", path: "../VERAVonageCallKitPlugin"),
                 // Feature modules

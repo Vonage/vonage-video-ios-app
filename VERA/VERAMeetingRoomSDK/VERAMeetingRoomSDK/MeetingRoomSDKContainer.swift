@@ -12,6 +12,7 @@ import VERAChat
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -39,6 +40,9 @@ final class MeetingRoomSDKContainer {
     let broadcastExtensionBundleId: String?
 
     private let initialPublisherSettings: PublisherSettings?
+    private let httpClientFactory: any MeetingRoomHTTPClientFactory
+    private let sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory
+    private let archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory
 
     init(
         baseURL: URL,
@@ -46,7 +50,13 @@ final class MeetingRoomSDKContainer {
         configuration: MeetingRoomConfiguration = .init(),
         publisherSettings: PublisherSettings? = nil,
         appGroupIdentifier: String? = nil,
-        broadcastExtensionBundleId: String? = nil
+        broadcastExtensionBundleId: String? = nil,
+        httpClientFactory: any MeetingRoomHTTPClientFactory =
+            DefaultMeetingRoomHTTPClientFactory(),
+        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
+            DefaultMeetingRoomSessionRepositoryFactory(),
+        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
+            DefaultMeetingRoomArchivingDataSourceFactory()
     ) {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
@@ -54,11 +64,15 @@ final class MeetingRoomSDKContainer {
         self.initialPublisherSettings = publisherSettings
         self.appGroupIdentifier = appGroupIdentifier
         self.broadcastExtensionBundleId = broadcastExtensionBundleId
+        self.httpClientFactory = httpClientFactory
+        self.sessionRepositoryFactory = sessionRepositoryFactory
+        self.archivingDataSourceFactory = archivingDataSourceFactory
     }
 
     // MARK: - Core Dependencies
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    lazy var httpClient: any HTTPClient = httpClientFactory(
+        HTTPClientContext(interceptor: OSLogHTTPClientInterceptor()))
 
     lazy var jsonDecoder = JSONDecoder()
 
@@ -100,14 +114,15 @@ final class MeetingRoomSDKContainer {
         if enabledFeatures.contains(.settings) {
             _ = sdkLoggingService
         }
-        return VonageSessionRepository(
-            sessionFactory: sessionFactory,
-            publisherRepository: publisherRepository,
-            pluginRegistry: pluginRegistry,
-            statsCollector: statsCollector
-        )
+        return sessionRepositoryFactory(
+            MeetingRoomSessionRepositoryFactoryContext(
+                publisherSettings: initialPublisherSettings ?? .init(),
+                sessionFactory: sessionFactory,
+                publisherRepository: publisherRepository,
+                pluginRegistry: pluginRegistry,
+                statsCollector: statsCollector))
     }()
-
+  
     lazy var advancedSettingsUseCase: any PublisherAdvancedSettingsUseCase = {
         if enabledFeatures.contains(.settings) {
             return DefaultAdvancedSettingsUseCase(publisherSettingsRepository: settingsRepository)
@@ -197,9 +212,13 @@ final class MeetingRoomSDKContainer {
     lazy var vonageArchivingPlugin = VonageArchivingPlugin(
         archivingStatusDataSource: archivingStatusDataSource)
 
-    lazy var archivingDataSource: any ArchivingDataSource = DefaultArchivingDataSource(
-        baseURL: baseURL,
-        httpClient: httpClient)
+    lazy var archivingDataSource: any ArchivingDataSource = {
+        archivingDataSourceFactory(
+            MeetingRoomArchivingDataSourceFactoryContext(
+                baseURL: baseURL,
+                httpClient: httpClient,
+                archivingStatusDataSource: archivingStatusDataSource))
+    }()
 
     lazy var archivesDataSource: any ArchivesDataSource = HTTPArchivesDataSource(
         baseURL: baseURL,
@@ -218,7 +237,39 @@ final class MeetingRoomSDKContainer {
 
     // MARK: - Background Effects Feature
 
-    lazy var backgroundBlurFactory = BackgroundBlurFactory()
+    lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+        bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+        storageProvider: DefaultBackgroundEffectsStorageProvider(
+            fileManager: .default,
+            searchPathDirectory: .cachesDirectory,
+            pathComponent: "video_backgrounds"
+        )
+    )
+
+    lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository(
+        storageProvider: DefaultBackgroundEffectsStorageProvider(
+            fileManager: .default,
+            searchPathDirectory: .documentDirectory,
+            pathComponent: "user_backgrounds"
+        )
+    )
+
+    lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
+
+    lazy var backgroundEffectFactory = BackgroundEffectFactory(
+        getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
+            backgroundEffectsRepository: backgroundEffectsRepository,
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        addBackgroundUseCase: DefaultAddBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+            userBackgroundRepository: userBackgroundRepository
+        ),
+        remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
+        videoEffectRepository: videoEffectRepository
+    )
 
     // MARK: - Captions Feature
 
@@ -318,6 +369,8 @@ final class MeetingRoomSDKContainer {
         logFileURLProvider: { [weak self] in
             self?.sdkLoggingService.getLogFileURLs() ?? []
         })
+
+    lazy var feedbackFactory = FeedbackFactory()
 
     // MARK: - Audio Effects Feature
 

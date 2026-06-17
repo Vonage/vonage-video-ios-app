@@ -802,12 +802,34 @@
         }
       }
     },
+    "HD 720p" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HD 720p"
+          }
+        }
+      }
+    },
     "High Quality" : {
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calidad Alta"
+          }
+        }
+      }
+    },
+    "Full HD 1080p" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full HD 1080p"
           }
         }
       }

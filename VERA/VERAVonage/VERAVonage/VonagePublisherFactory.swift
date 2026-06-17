@@ -113,9 +113,14 @@ public final class VonagePublisherFactory: PublisherFactory {
             otPublisher.degradationPreference = degradationPreference
         }
 
+        let initialDimensions =
+            settings.advancedSettings?.videoResolution?.dimensions
+            ?? VideoDimensions.initial
+
         let publisher = VonagePublisher(
             publisher: otPublisher,
-            transformerFactory: vonageTransformerFactory)
+            transformerFactory: vonageTransformerFactory,
+            initialDimensions: initialDimensions)
         otPublisher.delegate = publisher
         return publisher
     }

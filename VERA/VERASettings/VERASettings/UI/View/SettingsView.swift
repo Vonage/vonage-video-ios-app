@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 /// Adaptive settings dashboard.
 ///

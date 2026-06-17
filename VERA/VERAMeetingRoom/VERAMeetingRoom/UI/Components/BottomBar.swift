@@ -31,6 +31,7 @@ public enum BottomBarConstants {
 public struct BottomBarButton: Identifiable {
     public let id: String
     public let label: String
+    public let accessibilityIdentifier: String?
     public let image: Image
     public let content: () -> AnyView
     public let overlay: (() -> AnyView)?
@@ -38,12 +39,14 @@ public struct BottomBarButton: Identifiable {
 
     public init<Content: View>(
         label: String,
+        accessibilityIdentifier: String? = nil,
         image: Image,
         onTap: @escaping () -> Void,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.id = label
         self.label = label
+        self.accessibilityIdentifier = accessibilityIdentifier
         self.image = image
         self.onTap = onTap
         self.content = { AnyView(content()) }
@@ -52,6 +55,7 @@ public struct BottomBarButton: Identifiable {
 
     public init<Content: View, Overlay: View>(
         label: String,
+        accessibilityIdentifier: String? = nil,
         image: Image,
         onTap: @escaping () -> Void,
         @ViewBuilder content: @escaping () -> Content,
@@ -59,6 +63,7 @@ public struct BottomBarButton: Identifiable {
     ) {
         self.id = label
         self.label = label
+        self.accessibilityIdentifier = accessibilityIdentifier
         self.image = image
         self.onTap = onTap
         self.content = { AnyView(content()) }
@@ -238,11 +243,13 @@ struct BottomBar: View {
                                 }
                             }
                         }
+                        .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
                     }
                 } label: {
                     ButtonImage(image: Image(systemName: "ellipsis.circle"))
                         .accessibilityLabel("More options")
                 }
+                .accessibilityIdentifier(MeetingRoomAccessibilityID.moreOptionsButton)
             }
         }
     }
