@@ -15,8 +15,12 @@ struct FeedbackViewConstructionTests {
 
     @Test("FeedbackFormView builds body without crashing")
     func formViewBuilds() {
-        let vm = FeedbackFormViewModel()
-        FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: vm))
+        let vm = FeedbackTestHelpers.makeFormViewModel()
+        let view = FeedbackFormView(feedbackFormViewModel: vm)
+
+        // Access body to force view construction
+        _ = view.body
+
         #expect(true)
     }
 

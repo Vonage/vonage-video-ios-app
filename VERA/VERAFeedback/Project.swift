@@ -18,7 +18,8 @@ let project = Project(
             resources: ["VERAFeedback/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAFeedback")],
             dependencies: [
-                .project(target: "VERACommonUI", path: "../VERACommonUI")
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .project(target: "VERADomain", path: "../VERADomain"),
             ],
             settings: createBaseBuildSettings()
         ),

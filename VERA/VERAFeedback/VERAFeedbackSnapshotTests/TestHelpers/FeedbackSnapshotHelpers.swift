@@ -29,4 +29,20 @@ enum FeedbackSnapshotHelpers {
         }
         imageField.attachedImage = makeTestImage()
     }
+
+    static func makeFormViewModel() -> FeedbackFormViewModel {
+        FeedbackFormViewModel(
+            feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                feedbackReportDataSource: SnapshotFeedbackReportDataSource()
+            )
+        )
+    }
+}
+
+private final class SnapshotFeedbackReportDataSource: FeedbackReportDataSource {
+    func sendReport(
+        _ request: FeedbackReportDataSourceRequest
+    ) async throws -> FeedbackReportDataSourceResponse {
+        FeedbackReportDataSourceResponse(message: "", ticketUrl: "", screenshotIncluded: nil)
+    }
 }

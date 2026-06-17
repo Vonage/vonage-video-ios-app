@@ -38,6 +38,16 @@ struct FeedbackFormView: View {
                 .background(Color.feedbackFormBackground)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
+            if feedbackFormViewModel.isLoading {
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+
+                ProgressView()
+                    .controlSize(.large)
+                    .padding()
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
         }
     }
 
@@ -51,6 +61,7 @@ struct FeedbackFormView: View {
                 }
             }
         )
+        .disabled(feedbackFormViewModel.isLoading)
         .accessibilityIdentifier(Constants.sendAccessibilityId)
     }
 
