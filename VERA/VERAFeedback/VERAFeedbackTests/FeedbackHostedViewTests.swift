@@ -95,11 +95,12 @@ struct FeedbackHostedViewTests {
 
     @Test("FeedbackSheetContent hosts without crashing")
     func sheetContentHosts() {
-        FeedbackViewTestHelpers.host(FeedbackSheetContent(
-            feedbackReportUseCase: DefaultFeedbackReportUseCase(
-                feedbackReportDataSource: MockFeedbackReportDataSource()
-            )
-        ))
+        FeedbackViewTestHelpers.host(
+            FeedbackSheetContent(
+                feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                )
+            ))
         #expect(true)
     }
 }
