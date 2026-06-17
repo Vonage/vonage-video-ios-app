@@ -5,12 +5,6 @@
 import Foundation
 import VERADomain
 
-#if canImport(UIKit)
-    import UIKit
-#elseif canImport(AppKit)
-    import AppKit
-#endif
-
 private struct FeedbackReportDataRequest: Encodable {
     let title: String
     let name: String
@@ -55,7 +49,7 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
             )
         )
 
-        let userAgentHeader = ["User-Agent": "VeraNativeiOS/\(appVersion) ios \(await UIDevice.current.systemVersion)"]
+        let userAgentHeader = ["User-Agent": "VeraNativeiOS/\(appVersion)"]
         let data = try await httpClient.post(
             url,
             additionalHeaders: userAgentHeader,
