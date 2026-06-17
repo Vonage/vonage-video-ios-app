@@ -31,10 +31,6 @@ struct FeedbackExtrasTests {
         form.feedbackFields[idx].isRequired = true
         #expect(form.feedbackFields[idx].isValid == false)
 
-<<<<<<< Updated upstream
-        form.feedbackFields[idx].attachedImage = PlatformImage()
-        #expect(form.feedbackFields[idx].isValid == true)
-=======
         // image not attached -> invalid
         #expect(form.isValid == false)
 
@@ -42,6 +38,5 @@ struct FeedbackExtrasTests {
         form.feedbackFields[idx].attachedImage = PlatformImage()
         #expect(form.feedbackFields[idx].isValid == true)
         #expect(form.isValid == false)
->>>>>>> Stashed changes
     }
 }
