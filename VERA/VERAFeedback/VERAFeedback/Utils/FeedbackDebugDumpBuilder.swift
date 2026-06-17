@@ -5,9 +5,9 @@
 import Foundation
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 enum FeedbackDebugDumpBuilder {
@@ -32,35 +32,36 @@ enum FeedbackDebugDumpBuilder {
 
     private static func platformDebugInfo() -> String {
         #if canImport(UIKit)
-        """
-        iOS Version: \(UIDevice.current.systemVersion)
-        Device: Apple \(UIDevice.current.model)
-        """
+            """
+            iOS Version: \(UIDevice.current.systemVersion)
+            Device: Apple \(UIDevice.current.model)
+            """
         #elseif canImport(AppKit)
-        """
-        macOS Version: \(macOSVersionString())
-        Device: Apple \(Host.current().localizedName ?? "Mac")
-        """
+            """
+            macOS Version: \(macOSVersionString())
+            Device: Apple \(Host.current().localizedName ?? "Mac")
+            """
         #else
-        "Platform: Unknown"
+            "Platform: Unknown"
         #endif
     }
 
     #if canImport(AppKit)
-    private static func macOSVersionString() -> String {
-        let version = ProcessInfo.processInfo.operatingSystemVersion
-        return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
-    }
+        private static func macOSVersionString() -> String {
+            let version = ProcessInfo.processInfo.operatingSystemVersion
+            return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
+        }
     #endif
 
     private static func sessionDebugInfo(_ session: FeedbackSessionDebugInfo) -> String {
-        let creationTime = session.connectionCreationTime.map(connectionCreationTimeFormatter.string)
+        let creationTime =
+            session.connectionCreationTime.map(connectionCreationTimeFormatter.string)
             ?? "null"
 
         return """
-        Session: \(session.sessionId ?? "null")
-        Connection: \(session.connectionId ?? "null")
-        Connection creation time: \(creationTime)
-        """
+            Session: \(session.sessionId ?? "null")
+            Connection: \(session.connectionId ?? "null")
+            Connection creation time: \(creationTime)
+            """
     }
 }

@@ -14,10 +14,12 @@ public final class FeedbackFactory {
         httpClient: HTTPClient,
         feedbackReportDataSource: (any FeedbackReportDataSource)? = nil
     ) {
-        self.feedbackReportDataSource = feedbackReportDataSource ?? DefaultFeedbackReportDataSource(
-            baseURL: baseURL,
-            httpClient: httpClient
-        )
+        self.feedbackReportDataSource =
+            feedbackReportDataSource
+            ?? DefaultFeedbackReportDataSource(
+                baseURL: baseURL,
+                httpClient: httpClient
+            )
     }
 
     public func makeFeedbackReportUseCase() -> FeedbackReportUseCase {

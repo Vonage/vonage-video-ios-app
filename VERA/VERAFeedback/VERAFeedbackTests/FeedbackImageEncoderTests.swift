@@ -1,13 +1,14 @@
 import Foundation
 import Testing
 
+@testable import VERAFeedback
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
-@testable import VERAFeedback
 
 @Suite("Feedback Image Encoder Tests")
 struct FeedbackImageEncoderTests {
@@ -15,11 +16,11 @@ struct FeedbackImageEncoderTests {
     @Test("Large screenshot encodes under payload limit")
     func largeScreenshotEncodesUnderLimit() {
         #if canImport(UIKit)
-        let image = makeSolidImage(size: CGSize(width: 1_170, height: 2_532))
+            let image = makeSolidImage(size: CGSize(width: 1_170, height: 2_532))
         #elseif canImport(AppKit)
-        let image = makeSolidImage(size: NSSize(width: 1_170, height: 2_532))
+            let image = makeSolidImage(size: NSSize(width: 1_170, height: 2_532))
         #else
-        return
+            return
         #endif
 
         let base64 = FeedbackImageEncoder.encodeToBase64(image)
@@ -35,21 +36,21 @@ struct FeedbackImageEncoderTests {
     }
 
     #if canImport(UIKit)
-    private func makeSolidImage(size: CGSize) -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { context in
-            UIColor.systemBlue.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
+        private func makeSolidImage(size: CGSize) -> UIImage {
+            let renderer = UIGraphicsImageRenderer(size: size)
+            return renderer.image { context in
+                UIColor.systemBlue.setFill()
+                context.fill(CGRect(origin: .zero, size: size))
+            }
         }
-    }
     #elseif canImport(AppKit)
-    private func makeSolidImage(size: NSSize) -> NSImage {
-        let image = NSImage(size: size)
-        image.lockFocus()
-        NSColor.systemBlue.setFill()
-        NSRect(origin: .zero, size: size).fill()
-        image.unlockFocus()
-        return image
-    }
+        private func makeSolidImage(size: NSSize) -> NSImage {
+            let image = NSImage(size: size)
+            image.lockFocus()
+            NSColor.systemBlue.setFill()
+            NSRect(origin: .zero, size: size).fill()
+            image.unlockFocus()
+            return image
+        }
     #endif
 }

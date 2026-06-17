@@ -5,9 +5,9 @@
 import Foundation
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 enum FeedbackImageEncoder {
@@ -54,57 +54,57 @@ enum FeedbackImageEncoder {
     }
 
     #if canImport(UIKit)
-    private static func resize(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
-        let size = image.size
-        let longestSide = max(size.width, size.height)
-        guard longestSide > maxDimension else { return image }
+        private static func resize(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+            let size = image.size
+            let longestSide = max(size.width, size.height)
+            guard longestSide > maxDimension else { return image }
 
-        let scale = maxDimension / longestSide
-        let targetSize = CGSize(width: size.width * scale, height: size.height * scale)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
+            let scale = maxDimension / longestSide
+            let targetSize = CGSize(width: size.width * scale, height: size.height * scale)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
 
-        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
-        return renderer.image { _ in
-            image.draw(in: CGRect(origin: .zero, size: targetSize))
+            let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
+            return renderer.image { _ in
+                image.draw(in: CGRect(origin: .zero, size: targetSize))
+            }
         }
-    }
 
-    private static func jpegData(from image: UIImage, quality: CGFloat) -> Data? {
-        image.jpegData(compressionQuality: quality)
-    }
+        private static func jpegData(from image: UIImage, quality: CGFloat) -> Data? {
+            image.jpegData(compressionQuality: quality)
+        }
 
     #elseif canImport(AppKit)
-    private static func resize(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
-        let size = image.size
-        let longestSide = max(size.width, size.height)
-        guard longestSide > maxDimension else { return image }
+        private static func resize(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
+            let size = image.size
+            let longestSide = max(size.width, size.height)
+            guard longestSide > maxDimension else { return image }
 
-        let scale = maxDimension / longestSide
-        let targetSize = NSSize(width: size.width * scale, height: size.height * scale)
-        let targetImage = NSImage(size: targetSize)
-        targetImage.lockFocus()
-        image.draw(
-            in: NSRect(origin: .zero, size: targetSize),
-            from: NSRect(origin: .zero, size: size),
-            operation: .copy,
-            fraction: 1
-        )
-        targetImage.unlockFocus()
-        return targetImage
-    }
-
-    private static func jpegData(from image: NSImage, quality: CGFloat) -> Data? {
-        guard let tiffData = image.tiffRepresentation,
-            let bitmap = NSBitmapImageRep(data: tiffData)
-        else {
-            return nil
+            let scale = maxDimension / longestSide
+            let targetSize = NSSize(width: size.width * scale, height: size.height * scale)
+            let targetImage = NSImage(size: targetSize)
+            targetImage.lockFocus()
+            image.draw(
+                in: NSRect(origin: .zero, size: targetSize),
+                from: NSRect(origin: .zero, size: size),
+                operation: .copy,
+                fraction: 1
+            )
+            targetImage.unlockFocus()
+            return targetImage
         }
 
-        return bitmap.representation(
-            using: .jpeg,
-            properties: [.compressionFactor: quality]
-        )
-    }
+        private static func jpegData(from image: NSImage, quality: CGFloat) -> Data? {
+            guard let tiffData = image.tiffRepresentation,
+                let bitmap = NSBitmapImageRep(data: tiffData)
+            else {
+                return nil
+            }
+
+            return bitmap.representation(
+                using: .jpeg,
+                properties: [.compressionFactor: quality]
+            )
+        }
     #endif
 }

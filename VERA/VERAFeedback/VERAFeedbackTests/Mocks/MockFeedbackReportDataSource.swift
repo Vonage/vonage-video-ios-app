@@ -3,6 +3,7 @@
 //
 
 import Foundation
+
 @testable import VERAFeedback
 
 final class MockFeedbackReportDataSource: FeedbackReportDataSource {

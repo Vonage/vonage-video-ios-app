@@ -4,6 +4,7 @@
 
 import Foundation
 import Testing
+
 @testable import VERAFeedback
 
 @Suite("Feedback report use case tests")

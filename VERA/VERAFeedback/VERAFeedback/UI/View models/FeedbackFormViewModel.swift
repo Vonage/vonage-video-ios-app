@@ -103,7 +103,7 @@ class FeedbackFormViewModel: ObservableObject {
             isLoading = false
         }
         do {
-            feedbackResult =  try await feedbackReportUseCase(
+            feedbackResult = try await feedbackReportUseCase(
                 .init(
                     title: fieldValue(forKey: String(localized: "Title")),
                     name: fieldValue(forKey: String(localized: "Name")),
@@ -114,7 +114,7 @@ class FeedbackFormViewModel: ObservableObject {
             )
         } catch {
             print(error)
-            toast = .init(message: String(localized:"Something failed, please try again"), mode: .failure)
+            toast = .init(message: String(localized: "Something failed, please try again"), mode: .failure)
         }
     }
 
