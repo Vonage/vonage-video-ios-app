@@ -1,5 +1,6 @@
 import SwiftUI
 import Testing
+import VERATestHelpers
 
 @testable import VERAFeedback
 
@@ -9,7 +10,8 @@ struct FeedbackFactoryTests {
 
     @Test("makeMeetingRoomButton returns a hostable button")
     func makeMeetingRoomButtonReturnsHostableButton() {
-        let factory = FeedbackFactory()
+        let httpClient = MockHTTPClient()
+        let factory = FeedbackFactory(baseURL: URL("http://example.com")!, httpClient: httpClient)
         let button = factory.makeMeetingRoomButton(onShowFeedbackForm: {})
 
         FeedbackViewTestHelpers.host(button, size: CGSize(width: 120, height: 60))
@@ -18,7 +20,8 @@ struct FeedbackFactoryTests {
 
     @Test("makeMeetingRoomButton forwards tap when possible")
     func makeMeetingRoomButtonForwardsTapWhenPossible() {
-        let factory = FeedbackFactory()
+        let httpClient = MockHTTPClient()
+        let factory = FeedbackFactory(baseURL: URL("http://example.com")!, httpClient: httpClient)
         var didTap = false
         let button = factory.makeMeetingRoomButton(onShowFeedbackForm: { didTap = true })
 

@@ -9,7 +9,13 @@ struct FeedbackViewConstructionTests {
 
     @Test("FeedbackSheetContent builds body")
     func sheetContentBuilds() {
-        FeedbackViewTestHelpers.host(FeedbackSheetContent())
+        FeedbackViewTestHelpers.host(
+            FeedbackSheetContent(
+                feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                )
+            )
+        )
         #expect(true)
     }
 

@@ -3,6 +3,7 @@ import Testing
 
 @testable import VERAFeedback
 
+@MainActor
 @Suite("Feedback Debug Dump Builder Tests")
 struct FeedbackDebugDumpBuilderTests {
 
