@@ -61,6 +61,7 @@ struct MeetingRoomComposedView: View {
     @State private var showPickerView = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var showFeedbackForm = false
     @State private var showEffects = false
 
     var body: some View {
@@ -100,6 +101,12 @@ struct MeetingRoomComposedView: View {
                 )
             )
             .modifier(
+                FeedbackFormOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.feedback),
+                    showFeedbackForm: $showFeedbackForm
+                )
+            )
+            .modifier(
                 BackgroundEffectsOverlayModifier(
                     isEnabled: enabledFeatures.contains(.backgroundEffects),
                     showEffects: $showEffects,
@@ -110,6 +117,7 @@ struct MeetingRoomComposedView: View {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowPickerView = { showPickerView = true }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
             }
             .onReceive(selectedEffectPublisher) { _ in
