@@ -59,7 +59,7 @@ extension ToastItem {
                 .foregroundStyle(theme.primary)
         }
     }
-    
+
     public var view: ToastView {
         ToastView(item: self)
     }

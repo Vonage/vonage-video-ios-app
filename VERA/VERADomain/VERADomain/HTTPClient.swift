@@ -14,8 +14,8 @@ public protocol HTTPClient {
     ) async throws -> Data
 }
 
-public extension HTTPClient {
-    func post(
+extension HTTPClient {
+    public func post(
         _ url: URL,
         data: Data
     ) async throws -> Data {

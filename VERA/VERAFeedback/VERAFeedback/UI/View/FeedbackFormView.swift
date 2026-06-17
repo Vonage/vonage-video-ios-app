@@ -18,17 +18,17 @@ private enum FeedbackFormViewConstants {
 }
 
 struct FeedbackFormView: View {
-    
+
     private static let successTitle = String(localized: "Your Jira ticket has been created.")
     private static let closeButtonTitle = String(localized: "Close")
     private static let sendButtonTitle = String(localized: "Send")
     private static let doneButtonTitle = String(localized: "Done")
-    
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.meetingRoomTheme) private var theme
-    
+
     @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
-    
+
     @FocusState private var focusedFieldIndex: Int?
 
     // Triggers for scroll interaction
@@ -80,7 +80,7 @@ struct FeedbackFormView: View {
             verticalPadding: FeedbackFormViewConstants.bottomErroViewInset
         )
     }
-    
+
     private var closeButton: some View {
         FilledButton(
             text: Text(FeedbackFormView.closeButtonTitle),
@@ -198,7 +198,7 @@ struct FeedbackFormView: View {
 
         }
     }
-    
+
     @ViewBuilder
     private func feedbackSuccessView(result: FeedbackReportResult) -> some View {
         VStack(alignment: .leading, spacing: 16) {

@@ -45,7 +45,7 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
         _ request: FeedbackReportDataSourceRequest
     ) async throws -> FeedbackReportDataSourceResponse {
         let url = baseURL.appendingPathComponent("feedback/report")
-        
+
         let body = try JSONEncoder().encode(
             FeedbackReportDataRequest(
                 title: request.title,
@@ -54,8 +54,8 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
                 attachment: FeedbackImageEncoder.encodeToBase64(request.image)
             )
         )
-        
-        let userAgentHeader = ["User-Agent":"VeraNativeiOS/\(appVersion) ios \(await UIDevice.current.systemVersion)"]
+
+        let userAgentHeader = ["User-Agent": "VeraNativeiOS/\(appVersion) ios \(await UIDevice.current.systemVersion)"]
         let data = try await httpClient.post(
             url,
             additionalHeaders: userAgentHeader,

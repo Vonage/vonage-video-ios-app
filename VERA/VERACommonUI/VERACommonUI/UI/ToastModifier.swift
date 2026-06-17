@@ -70,24 +70,25 @@ public struct ToastModifier: ViewModifier {
     }
 }
 
-public extension View {
+extension View {
     /// Attach a toast to the view.
     ///
     /// Example:
     ///     .toast(toast: $viewModel.toast)
-    func toast(
+    public func toast(
         toast: Binding<ToastItem?>,
         visibleDuration: TimeInterval = 3,
         resetDelay: TimeInterval = 4.5,
         placement: Edge = .top,
         verticalPadding: CGFloat? = nil
     ) -> some View {
-        modifier(ToastModifier(
-            toast: toast,
-            visibleDuration: visibleDuration,
-            resetDelay: resetDelay,
-            placement: placement,
-            verticalPadding: verticalPadding
-        ))
+        modifier(
+            ToastModifier(
+                toast: toast,
+                visibleDuration: visibleDuration,
+                resetDelay: resetDelay,
+                placement: placement,
+                verticalPadding: verticalPadding
+            ))
     }
 }
