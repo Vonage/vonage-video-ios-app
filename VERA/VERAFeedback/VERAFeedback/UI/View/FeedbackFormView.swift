@@ -76,8 +76,6 @@ struct FeedbackFormView: View {
         }
         .toast(
             toast: $feedbackFormViewModel.toast,
-            visibleDuration: 3,
-            resetDelay: 4.5,
             placement: .bottom,
             verticalPadding: FeedbackFormViewConstants.bottomErroViewInset
         )

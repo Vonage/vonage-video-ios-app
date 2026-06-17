@@ -31,6 +31,7 @@ private struct FeedbackReportResponseData: Decodable {
 public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
     private let baseURL: URL
     private let httpClient: HTTPClient
+    private let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
 
     public init(
         baseURL: URL,
@@ -44,6 +45,7 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
         _ request: FeedbackReportDataSourceRequest
     ) async throws -> FeedbackReportDataSourceResponse {
         let url = baseURL.appendingPathComponent("feedback/report")
+        
         let body = try JSONEncoder().encode(
             FeedbackReportDataRequest(
                 title: request.title,
@@ -52,8 +54,13 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
                 attachment: FeedbackImageEncoder.encodeToBase64(request.image)
             )
         )
-
-        let data = try await httpClient.post(url, data: body)
+        
+        let userAgentHeader = ["User-Agent":"VeraNativeiOS/\(appVersion) ios \(await UIDevice.current.systemVersion)"]
+        let data = try await httpClient.post(
+            url,
+            additionalHeaders: userAgentHeader,
+            data: body
+        )
         let responseData = try JSONDecoder().decode(FeedbackReportResponse.self, from: data).feedbackData
 
         return FeedbackReportDataSourceResponse(

@@ -38,7 +38,7 @@ struct FeedbackFormViewModelTests {
 
     @Test("onSubmit sets validation flag when invalid")
     func onSubmitWhenInvalidSetsFlagOnly() {
-        let vm = FeedbackFormViewModel()
+        let vm = FeedbackTestHelpers.makeFormViewModel()
 
         #expect(vm.showValidationErrors == false)
         vm.onSubmit()
@@ -57,8 +57,6 @@ struct FeedbackFormViewModelTests {
         #expect(vm.showValidationErrors == true)
         #expect(vm.isValid == true)
     }
-<<<<<<< Updated upstream
-=======
 
     // MARK: - Extra coverage tests
 
@@ -158,5 +156,4 @@ struct FeedbackFormViewModelTests {
 
         #expect(fieldVM.attachedImage != nil)
     }
->>>>>>> Stashed changes
 }
