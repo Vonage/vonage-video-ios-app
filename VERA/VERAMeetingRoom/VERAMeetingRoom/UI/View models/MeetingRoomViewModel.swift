@@ -42,6 +42,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    private var speakingWhileMutedDetector: SpeakingWhileMutedDetector?
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -336,6 +337,23 @@ extension MeetingRoomViewModel {
         noiseSuppressionStatusDataSource.noiseSuppressionState
             .sink { [weak self] state in
                 self?.handleNoiseSuppressionChange(state)
+            }
+            .store(in: &cancellables)
+
+        let detector = SpeakingWhileMutedDetector(
+            isMicEnabled: sessionStatePublisher.map(\.isPublishingAudio).eraseToAnyPublisher(),
+            audioLevel: call.publisherAudioLevelPublisher
+        )
+        speakingWhileMutedDetector = detector
+
+        detector.isSpeakingWhileMuted
+            .filter { $0 }
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.toast = ToastItem(
+                        message: "You're muted. Tap the mic button to unmute.",
+                        mode: .warning)
+                }
             }
             .store(in: &cancellables)
     }

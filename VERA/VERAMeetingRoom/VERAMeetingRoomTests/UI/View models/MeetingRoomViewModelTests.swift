@@ -791,6 +791,52 @@ struct MeetingRoomViewModelTests {
         #expect(bobAfter.isPinned == true)
     }
 
+    // MARK: - Speaking While Muted Tests
+
+    @Test("Given mic is enabled and audio level is high, Then no warning toast is shown")
+    @MainActor
+    func noToastWhenMicIsOnAndAudioLevelIsHigh() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Mic is enabled (default is false in SessionState.initial) — enable it
+        mockCall._statePublisher.send(SessionState(isPublishingAudio: true, isPublishingVideo: false))
+
+        // Send loud audio samples
+        for _ in 0..<SpeakingWhileMutedDetector.triggerThreshold {
+            mockCall._publisherAudioLevel.send(0.8)
+        }
+
+        // Allow the Combine pipeline to flush
+        await Task.yield()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given mic is off and sustained loud audio, Then a warning toast appears")
+    @MainActor
+    func warningToastAppearsWhenMutedAndSustainedLoudAudio() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Mic is muted (SessionState.initial has isPublishingAudio == false by default)
+        // Send triggerThreshold loud audio samples to trigger detection
+        for _ in 0..<SpeakingWhileMutedDetector.triggerThreshold {
+            mockCall._publisherAudioLevel.send(0.8)
+        }
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message == "You're muted. Tap the mic button to unmute.")
+        #expect(toast??.mode == .warning)
+    }
+
     // MARK: SUT
 
     func makeSUT(
