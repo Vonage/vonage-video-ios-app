@@ -33,41 +33,43 @@ public struct BottomBarButton: Identifiable {
     public let label: String
     public let accessibilityIdentifier: String?
     public let image: Image
-    public let content: () -> AnyView
-    public let overlay: (() -> AnyView)?
-    public let onTap: () -> Void
+    public let isActive: Bool
+    public let accessory: BottomBarButtonAccessory?
+    public let action: () -> Void
 
-    public init<Content: View>(
+    public init(
+        id: String? = nil,
         label: String,
         accessibilityIdentifier: String? = nil,
         image: Image,
-        onTap: @escaping () -> Void,
-        @ViewBuilder content: @escaping () -> Content
+        isActive: Bool = false,
+        accessory: BottomBarButtonAccessory? = nil,
+        action: @escaping () -> Void
     ) {
-        self.id = label
+        self.id = id ?? label
         self.label = label
         self.accessibilityIdentifier = accessibilityIdentifier
         self.image = image
-        self.onTap = onTap
-        self.content = { AnyView(content()) }
-        self.overlay = nil
+        self.isActive = isActive
+        self.accessory = accessory
+        self.action = action
     }
 
-    public init<Content: View, Overlay: View>(
-        label: String,
-        accessibilityIdentifier: String? = nil,
-        image: Image,
-        onTap: @escaping () -> Void,
-        @ViewBuilder content: @escaping () -> Content,
-        @ViewBuilder overlay: @escaping () -> Overlay
+    @MainActor
+    public init(
+        _ presenter: any BottomItemPresentable,
+        isActive: Bool? = nil,
+        action: (() -> Void)? = nil
     ) {
-        self.id = label
-        self.label = label
-        self.accessibilityIdentifier = accessibilityIdentifier
-        self.image = image
-        self.onTap = onTap
-        self.content = { AnyView(content()) }
-        self.overlay = { AnyView(overlay()) }
+        self.init(
+            id: presenter.id,
+            label: presenter.label,
+            accessibilityIdentifier: presenter.accessibilityIdentifier,
+            image: presenter.image,
+            isActive: isActive ?? presenter.isActive,
+            accessory: presenter.accessory,
+            action: action ?? presenter.performAction
+        )
     }
 }
 
@@ -108,6 +110,7 @@ struct BottomBar: View {
 
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
+    private let isParticipantsListPresented: Bool
     private let participantsCount: Int
     private let allowMicrophoneControl: Bool
     private let allowCameraControl: Bool
@@ -119,6 +122,7 @@ struct BottomBar: View {
     init(
         isMicEnabled: Bool,
         isCameraEnabled: Bool,
+        isParticipantsListPresented: Bool = false,
         participantsCount: Int,
         allowMicrophoneControl: Bool,
         allowCameraControl: Bool,
@@ -129,6 +133,7 @@ struct BottomBar: View {
     ) {
         self.isMicEnabled = isMicEnabled
         self.isCameraEnabled = isCameraEnabled
+        self.isParticipantsListPresented = isParticipantsListPresented
         self.participantsCount = participantsCount
         self.currentLayout = currentLayout
         self.allowMicrophoneControl = allowMicrophoneControl
@@ -172,6 +177,7 @@ struct BottomBar: View {
                     if showParticipantList {
                         ParticipantsBadgeButton(
                             participantsCount: participantsCount,
+                            isActive: isParticipantsListPresented,
                             onToggleParticipants: actions.onToggleParticipants)
                     }
                     buildExtraButtons(availableWidth: geometry.size.width)
@@ -189,9 +195,8 @@ struct BottomBar: View {
     func calculateMaxExtraButtons(availableWidth: CGFloat) -> Int {
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
-        // Calculate base buttons count
         var baseButtonsCount = 1  // EndCallControlButton always present
         if allowMicrophoneControl {
             baseButtonsCount += 1
@@ -204,15 +209,12 @@ struct BottomBar: View {
             baseButtonsCount += 1
         }
 
-        // Calculate space needed for base buttons
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
-        // Calculate remaining width for extra buttons
         let remainingWidth = availableWidth - baseButtonsWidth
 
-        // How many extra buttons can fit?
-        return max(0, Int((remainingWidth + spacing) / (buttonWidth + spacing)))
+        return max(0, Int(remainingWidth / (buttonWidth + spacing)))
     }
 
     @ViewBuilder
@@ -225,32 +227,79 @@ struct BottomBar: View {
             if maxExtraButtons >= extraButtons.count {
                 // All buttons fit
                 ForEach(extraButtons) { button in
-                    button.content()
+                    buildInlineButton(button)
                 }
             } else {
-                // Need to use menu
-                Menu {
-                    ForEach(extraButtons) { button in
-                        Button(action: button.onTap) {
-                            HStack {
-                                button.image
-                                    .tint(theme.textSecondary)
-                                Text(button.label)
-                                    .tint(theme.textSecondary)
-                            }.overlay {
-                                if let overlay = button.overlay {
-                                    overlay()
-                                }
-                            }
-                        }
-                        .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
-                    }
-                } label: {
-                    ButtonImage(image: Image(systemName: "ellipsis.circle"))
-                        .accessibilityLabel("More options")
+                let inlineButtonsCount = max(0, maxExtraButtons - 1)
+                let inlineButtons = Array(extraButtons.prefix(inlineButtonsCount))
+                let overflowButtons = Array(extraButtons.dropFirst(inlineButtonsCount))
+
+                ForEach(inlineButtons) { button in
+                    buildInlineButton(button)
                 }
-                .accessibilityIdentifier(MeetingRoomAccessibilityID.moreOptionsButton)
+
+                buildOverflowMenu(buttons: overflowButtons)
             }
+        }
+    }
+
+    private func buildOverflowMenu(buttons: [BottomBarButton]) -> some View {
+        Menu {
+            ForEach(buttons) { button in
+                Button(action: button.action) {
+                    HStack {
+                        button.image
+                            .tint(theme.textSecondary)
+                        Text(button.label)
+                            .tint(theme.textSecondary)
+                    }
+                }
+                .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
+            }
+        } label: {
+            ButtonImage(image: Image(systemName: "ellipsis.circle"))
+                .accessibilityLabel("More options")
+        }
+        .accessibilityIdentifier(MeetingRoomAccessibilityID.moreOptionsButton)
+    }
+
+    @ViewBuilder
+    private func buildInlineButton(_ button: BottomBarButton) -> some View {
+        OngoingActivityControlImageButton(
+            isActive: button.isActive,
+            image: button.image,
+            action: button.action
+        )
+        .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
+        .accessory(button.accessory)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    fileprivate func accessory(_ accessory: BottomBarButtonAccessory?) -> some View {
+        if let accessory {
+            switch accessory.placement {
+            case .topTrailing:
+                overlay(alignment: .topTrailing) {
+                    accessory.content()
+                        .allowsHitTesting(accessory.allowsHitTesting)
+                }
+            case .center:
+                overlay(alignment: .center) {
+                    accessory.content()
+                        .allowsHitTesting(accessory.allowsHitTesting)
+                }
+            case .hiddenInteractionLayer:
+                overlay {
+                    accessory.content()
+                        .frame(width: 1, height: 1)
+                        .opacity(0.01)
+                        .allowsHitTesting(accessory.allowsHitTesting)
+                }
+            }
+        } else {
+            self
         }
     }
 }

@@ -27,16 +27,22 @@ struct ParticipantsBadgeButton: View {
     @Environment(\.meetingRoomTheme) private var theme
 
     private let participantsCount: Int
+    private let isActive: Bool
     private let onToggleParticipants: () -> Void
 
-    init(participantsCount: Int, onToggleParticipants: @escaping () -> Void) {
+    init(
+        participantsCount: Int,
+        isActive: Bool = false,
+        onToggleParticipants: @escaping () -> Void
+    ) {
         self.participantsCount = participantsCount
+        self.isActive = isActive
         self.onToggleParticipants = onToggleParticipants
     }
 
     var body: some View {
-        ControlImageButton(
-            isActive: true,
+        OngoingActivityControlImageButton(
+            isActive: isActive,
             image: VERACommonUIAsset.Images.group2Solid.swiftUIImage,
             action: onToggleParticipants
         )

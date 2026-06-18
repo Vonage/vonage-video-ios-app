@@ -113,10 +113,25 @@ struct MeetingRoomComposedView: View {
             )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
-                buttonsAssembler.onShowPickerView = { showPickerView = true }
+                buttonsAssembler.onShowPickerView = { showPickerView.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
                 buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
+            }
+            .onChange(of: showPickerView) { isPresented in
+                buttonsAssembler.setReactionsPickerPresented(isPresented)
+            }
+            .onChange(of: showChat) { isPresented in
+                buttonsAssembler.setChatPresented(isPresented)
+            }
+            .onChange(of: showSettings) { isPresented in
+                buttonsAssembler.setSettingsPresented(isPresented)
+            }
+            .onChange(of: showEffects) { isPresented in
+                buttonsAssembler.setEffectsPresented(isPresented)
+            }
+            .onChange(of: showFeedbackForm) { isPresented in
+                buttonsAssembler.setFeedbackFormPresented(isPresented)
             }
     }
 }

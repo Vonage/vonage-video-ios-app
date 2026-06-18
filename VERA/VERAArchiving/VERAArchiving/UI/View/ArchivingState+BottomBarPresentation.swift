@@ -6,20 +6,20 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
-public extension ArchivingState {
-    var bottomBarLabel: String {
+extension ArchivingState {
+    public var bottomBarLabel: String {
         isArchiving
             ? String(localized: "Stop Recording", bundle: .veraArchiving)
             : String(localized: "Start Recording", bundle: .veraArchiving)
     }
 
-    var bottomBarAccessibilityIdentifier: String {
+    public var bottomBarAccessibilityIdentifier: String {
         isArchiving
             ? ArchivingAccessibilityID.stopRecordingButton
             : ArchivingAccessibilityID.startRecordingButton
     }
 
-    var bottomBarImage: Image {
+    public var bottomBarImage: Image {
         isArchiving
             ? VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage
             : VERACommonUIAsset.Images.radioChecked2Solid.swiftUIImage

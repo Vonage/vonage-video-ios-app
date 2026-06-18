@@ -94,6 +94,7 @@ public struct MeetingRoomView: View {
                     BottomBar(
                         isMicEnabled: state.isMicEnabled,
                         isCameraEnabled: state.isCameraEnabled,
+                        isParticipantsListPresented: showParticipantsList,
                         participantsCount: state.participantsCount,
                         allowMicrophoneControl: state.allowMicrophoneControl,
                         allowCameraControl: state.allowCameraControl,

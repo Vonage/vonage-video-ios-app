@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import Testing
+import VERACommonUI
 
 @testable import VERAMeetingRoom
 
@@ -16,11 +17,13 @@ struct BottomBarCalculateMaxExtraButtonsTests {
     private func createBottomBar(
         allowMicrophoneControl: Bool = true,
         allowCameraControl: Bool = true,
-        showParticipantList: Bool = true
+        showParticipantList: Bool = true,
+        isParticipantsListPresented: Bool = false
     ) -> BottomBar {
-        BottomBar(
+        .init(
             isMicEnabled: true,
             isCameraEnabled: true,
+            isParticipantsListPresented: isParticipantsListPresented,
             participantsCount: 5,
             allowMicrophoneControl: allowMicrophoneControl,
             allowCameraControl: allowCameraControl,
@@ -28,6 +31,48 @@ struct BottomBarCalculateMaxExtraButtonsTests {
             currentLayout: .activeSpeaker,
             actions: .init()
         )
+    }
+
+    @Test("BottomBarButton stores shared inline and overflow presentation")
+    @MainActor
+    func bottomBarButtonStoresSharedPresentation() {
+        var didTap = false
+        let item = BottomBarActionItem(
+            id: "support-button",
+            label: "Support",
+            accessibilityIdentifier: "support-accessibility-id",
+            image: Image(systemName: "questionmark.circle"),
+            isActive: true,
+            action: {
+                didTap = true
+            }
+        )
+        let button = BottomBarButton(item)
+
+        #expect(button.id == "support-button")
+        #expect(button.label == "Support")
+        #expect(button.accessibilityIdentifier == "support-accessibility-id")
+        #expect(button.isActive)
+        #expect(button.accessory == nil)
+
+        button.action()
+        #expect(didTap)
+    }
+
+    @Test("BottomBarButton can override active presentation state")
+    @MainActor
+    func bottomBarButtonCanOverrideActivePresentationState() {
+        let item = BottomBarActionItem(
+            id: "sheet-button",
+            label: "Sheet",
+            image: .init(systemName: "square"),
+            isActive: false,
+            action: {}
+        )
+
+        let button = BottomBarButton(item, isActive: true)
+
+        #expect(button.isActive)
     }
 
     // MARK: - All Features Enabled
@@ -38,12 +83,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth  // 50
         let spacing = BottomBarConstants.buttonSpacing  // 8
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
 
         // All features enabled: 5 base buttons (Mic + Camera + Layout + Participants + EndCall)
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let result = bar.calculateMaxExtraButtons(availableWidth: baseButtonsWidth)
         #expect(result == 0)
@@ -55,12 +100,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth  // 50
         let spacing = BottomBarConstants.buttonSpacing  // 8
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
 
         // All features enabled: 5 base buttons
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // Add space for exactly one extra button
         let widthForOneExtra = baseButtonsWidth + buttonWidth + spacing
@@ -75,12 +120,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // All features enabled: 5 base buttons
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // Add space for 5 extra buttons
         let widthForFiveExtras = baseButtonsWidth + CGFloat(5) * (buttonWidth + spacing)
@@ -117,12 +162,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // Only 2 base buttons: Layout + EndCall
         let baseButtonsCount = 2
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // With minimal features, same width should fit more extra buttons
         let widthForThreeExtras = baseButtonsWidth + CGFloat(3) * (buttonWidth + spacing)
@@ -143,12 +188,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Mic + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 
@@ -166,12 +211,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Camera + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 
@@ -189,12 +234,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Participants + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 

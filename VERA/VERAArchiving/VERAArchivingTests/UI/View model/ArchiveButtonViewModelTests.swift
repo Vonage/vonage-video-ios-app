@@ -57,18 +57,42 @@ struct ArchiveButtonViewModelTests {
         #expect(state == .idle)
     }
 
-    @Test func bottomBarPresentationUsesIdleState() {
-        let state = ArchivingState.idle
+    @Test
+    @MainActor
+    func bottomItemPresentationUsesIdleState() {
+        let sut = makeSUT()
 
-        #expect(state.bottomBarLabel == String(localized: "Start Recording"))
-        #expect(state.bottomBarAccessibilityIdentifier == ArchivingAccessibilityID.startRecordingButton)
+        #expect(sut.id == "archive-button")
+        #expect(sut.label == String(localized: "Start Recording"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.startRecordingButton)
+        #expect(sut.isActive == false)
+        #expect(sut.accessory == nil)
+        _ = sut.image
     }
 
-    @Test func bottomBarPresentationUsesArchivingState() {
-        let state = ArchivingState.archiving("archive-id")
+    @Test
+    @MainActor
+    func bottomItemPresentationUsesArchivingState() {
+        let sut = makeSUT()
+        sut.state = .archiving("archive-id")
 
-        #expect(state.bottomBarLabel == String(localized: "Stop Recording"))
-        #expect(state.bottomBarAccessibilityIdentifier == ArchivingAccessibilityID.stopRecordingButton)
+        #expect(sut.id == "archive-button")
+        #expect(sut.label == String(localized: "Stop Recording"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.stopRecordingButton)
+        #expect(sut.isActive)
+        #expect(sut.accessory == nil)
+        _ = sut.image
+    }
+
+    @Test
+    @MainActor
+    func bottomItemPerformActionUsesButtonTap() {
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(showAlert: alertSpy.capture)
+
+        sut.performAction()
+
+        #expect(alertSpy.capturedAlert != nil)
     }
 
     @Test func setupOnlySubscribesOnce() async {

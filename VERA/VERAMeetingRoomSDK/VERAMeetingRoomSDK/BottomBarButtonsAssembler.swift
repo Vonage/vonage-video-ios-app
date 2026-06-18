@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import SwiftUI
 import VERAArchiving
 import VERAAudioEffects
 import VERABackgroundEffects
@@ -12,11 +11,8 @@ import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
-import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
-import VERAScreenShare
-import VERASettings
 
 /// Assembles bottom bar buttons based on runtime feature configuration.
 ///
@@ -27,13 +23,35 @@ final class BottomBarButtonsAssembler {
 
     private let container: MeetingRoomSDKContainer
     private let enabledFeatures: Set<MeetingRoomFeature>
+    private let buttonsDidChangeSubject = PassthroughSubject<Void, Never>()
+    private var noiseSuppressionCancellable: AnyCancellable?
+    private var isChatPresented = false
+    private var isReactionsPickerPresented = false
+    private var isSettingsPresented = false
+    private var isEffectsPresented = false
+    private var isFeedbackFormPresented = false
 
     // Feature view models created during meeting room setup
     var videoEffectsViewModel: VideoEffectsViewModel?
     var archiveButtonViewModel: ArchiveButtonViewModel?
     var captionsButtonViewModel: CaptionsButtonViewModel?
     var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
-    var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
+    var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel? {
+        didSet {
+            let didChange: Bool
+            switch (oldValue, meetingNoiseSuppressionButtonViewModel) {
+            case (let oldValue?, let newValue?):
+                didChange = oldValue !== newValue
+            case (nil, nil):
+                didChange = false
+            default:
+                didChange = true
+            }
+            guard didChange else { return }
+
+            bindNoiseSuppressionUpdates(meetingNoiseSuppressionButtonViewModel)
+        }
+    }
 
     // Bindings for sheet/overlay presentation
     var onShowChat: (() -> Void)?
@@ -43,20 +61,34 @@ final class BottomBarButtonsAssembler {
     var onShowEffects: (() -> Void)?
 
     var buttonsDidChange: AnyPublisher<Void, Never> {
-        let archiveUpdates = archiveButtonViewModel?.$state
+        let archiveUpdates =
+            archiveButtonViewModel?.$state
             .dropFirst()
             .map { _ in () }
             .eraseToAnyPublisher()
             ?? Empty().eraseToAnyPublisher()
 
-        let effectsUpdates = videoEffectsViewModel?.$selectedEffect
+        let effectsUpdates =
+            videoEffectsViewModel?.$selectedEffect
             .dropFirst()
             .map { _ in () }
             .eraseToAnyPublisher()
             ?? Empty().eraseToAnyPublisher()
 
-        return Publishers.Merge(archiveUpdates, effectsUpdates)
+        let captionsUpdates =
+            captionsButtonViewModel?.$state
+            .dropFirst()
+            .map { _ in () }
             .eraseToAnyPublisher()
+            ?? Empty().eraseToAnyPublisher()
+
+        return Publishers.MergeMany([
+            archiveUpdates,
+            effectsUpdates,
+            captionsUpdates,
+            buttonsDidChangeSubject.eraseToAnyPublisher(),
+        ])
+        .eraseToAnyPublisher()
     }
 
     init(
@@ -119,149 +151,68 @@ final class BottomBarButtonsAssembler {
 
     private func makeChatButton() -> BottomBarButton {
         let viewModel = container.chatBadgeButtonViewModel
-        return .init(
-            label: String(localized: "Chat"),
-            image: VERACommonUIAsset.Images.chat2Solid.swiftUIImage,
-            onTap: { [weak self] in
-                viewModel.chatDidOpen()
-                self?.onShowChat?()
-            },
-            content: {
-                ChatBadgeComponentButton(
-                    viewModel: viewModel,
-                    onShowChat: { [weak self] in
-                        viewModel.chatDidOpen()
-                        self?.onShowChat?()
-                    })
-            })
+        let item: any BottomItemPresentable = viewModel
+        return BottomBarButton(item, isActive: isChatPresented) { [weak self] in
+            viewModel.chatDidOpen()
+            self?.onShowChat?()
+        }
     }
 
     private func makeBackgroundEffectsButton(
         _ viewModel: VideoEffectsViewModel
     ) -> BottomBarButton {
-        let button = container.backgroundEffectFactory.makeMeetingEffectsButton(
-            viewModel: viewModel,
-            onShowEffects: { [weak self] in
-                self?.onShowEffects?()
-            }
-        )
-        return .init(
-            label: String(localized: "Effects"),
-            image: viewModel.selectedEffect.image,
-            onTap: { [weak self] in
-                self?.onShowEffects?()
-            },
-            content: {
-                button
-            }
-        )
+        let item: any BottomItemPresentable = viewModel
+        return BottomBarButton(item, isActive: isEffectsPresented || viewModel.isActive) { [weak self] in
+            self?.onShowEffects?()
+        }
     }
 
     private func makeFeedbackReportButton() -> BottomBarButton {
-        let button = container.feedbackFactory.makeMeetingRoomButton { [weak self] in
+        let item: any BottomItemPresentable = FeedbackBottomItemPresenter { [weak self] in
             self?.onShowFeedbackForm?()
         }
-        return .init(
-            label: String(localized: "Feedback"),
-            image: VERACommonUIAsset.Images.feedbackLine.swiftUIImage,
-            onTap: { [weak self] in
-                self?.onShowFeedbackForm?()
-            },
-            content: {
-                button
-            }
-        )
+        return BottomBarButton(item, isActive: isFeedbackFormPresented)
     }
 
     private func makeArchiveButton(
         _ viewModel: ArchiveButtonViewModel
     ) -> BottomBarButton {
-        let button = container.archivingFactory.makeArchivingButton(viewModel: viewModel)
-        return .init(
-            label: viewModel.state.bottomBarLabel,
-            accessibilityIdentifier: viewModel.state.bottomBarAccessibilityIdentifier,
-            image: viewModel.state.bottomBarImage,
-            onTap: viewModel.onTap
-        ) {
-            button
-        }
+        let item: any BottomItemPresentable = viewModel
+        return BottomBarButton(item)
     }
 
     private func makeCaptionsButton(
         _ viewModel: CaptionsButtonViewModel
     ) -> BottomBarButton {
-        let button = container.captionsFactory.makeCaptionsButton(viewModel: viewModel)
-        return .init(
-            label: String(localized: "Captions"),
-            accessibilityIdentifier: CaptionsAccessibilityID.toggleButton,
-            image: viewModel.state.captionsEnabled
-                ? VERACommonUIAsset.Images.closedCaptioningOffSolid.swiftUIImage
-                : VERACommonUIAsset.Images.closedCaptioningSolid.swiftUIImage,
-            onTap: {
-                viewModel.onTap()
-            },
-            content: {
-                button
-            })
+        let item: any BottomItemPresentable = viewModel
+        return BottomBarButton(item)
     }
 
     private func makeReactionsButton(
         _ viewModel: EmojiButtonContainerViewModel
     ) -> BottomBarButton {
-        let emojiButtonContainer = container.reactionsFactory.makeEmojiButtonContainer(
-            viewModel: viewModel)
-        return .init(
-            label: String(localized: "Reactions"),
-            image: VERACommonUIAsset.Images.emojiSolid.swiftUIImage,
-            onTap: { [weak self] in
-                self?.onShowPickerView?()
-            },
-            content: {
-                emojiButtonContainer
-            }
-        )
+        _ = viewModel
+        let item: any BottomItemPresentable = ReactionsBottomItemPresenter(
+            isPickerPresented: isReactionsPickerPresented
+        ) { [weak self] in
+            self?.onShowPickerView?()
+        }
+        return BottomBarButton(item)
     }
 
     private func makeScreenShareButton() -> BottomBarButton {
-        let actionTrigger = PassthroughSubject<Void, Never>()
         let extensionId =
             container.broadcastExtensionBundleId
             ?? (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
-        let button = ScreenShareFactory.make(broadcastExtensionBundleId: extensionId)
-        return .init(
-            label: String(localized: "Share Screen"),
-            image: VERACommonUIAsset.Images.screenShareSolid.swiftUIImage,
-            onTap: {
-                actionTrigger.send()
-            },
-            content: {
-                button
-            }
-        ) {
-            BroadcastPickerRepresentable(
-                preferredExtension: extensionId,
-                actionTrigger: actionTrigger
-            )
-            .frame(width: 1, height: 1)
-            .opacity(0.01)
-            .allowsHitTesting(false)
-        }
+        let item: any BottomItemPresentable = ScreenShareBottomItemPresenter(extensionId: extensionId)
+        return BottomBarButton(item)
     }
 
     private func makeSettingsButton() -> BottomBarButton {
-        let button = container.settingsFactory.makeMeetingRoomButton { [weak self] in
+        let item: any BottomItemPresentable = SettingsBottomItemPresenter { [weak self] in
             self?.onShowSettings?()
         }
-        return .init(
-            label: String(localized: "Settings"),
-            image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
-            onTap: { [weak self] in
-                self?.onShowSettings?()
-            },
-            content: {
-                button
-            }
-        )
+        return BottomBarButton(item, isActive: isSettingsPresented)
     }
 
     private func makeAudioEffectsButton() -> BottomBarButton {
@@ -272,17 +223,8 @@ final class BottomBarButtonsAssembler {
             viewModel = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
             meetingNoiseSuppressionButtonViewModel = viewModel
         }
-        let view = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton(viewModel: viewModel)
-        return .init(
-            label: String(localized: "Noise Suppression"),
-            image: VERACommonUIAsset.Images.noiseSuppressionDisabled.swiftUIImage,
-            onTap: {
-                viewModel.onTap()
-            },
-            content: {
-                view
-            }
-        )
+        let item: any BottomItemPresentable = viewModel
+        return BottomBarButton(item)
     }
 
     /// Rebuilds buttons using the most recent state.
@@ -291,6 +233,52 @@ final class BottomBarButtonsAssembler {
     /// and the bottom bar needs to reflect the updated icon.
     func rebuildButtons() -> [BottomBarButton] {
         buildButtons()
+    }
+
+    func setReactionsPickerPresented(_ isPresented: Bool) {
+        guard isReactionsPickerPresented != isPresented else { return }
+
+        isReactionsPickerPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setChatPresented(_ isPresented: Bool) {
+        guard isChatPresented != isPresented else { return }
+
+        isChatPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setSettingsPresented(_ isPresented: Bool) {
+        guard isSettingsPresented != isPresented else { return }
+
+        isSettingsPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setEffectsPresented(_ isPresented: Bool) {
+        guard isEffectsPresented != isPresented else { return }
+
+        isEffectsPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setFeedbackFormPresented(_ isPresented: Bool) {
+        guard isFeedbackFormPresented != isPresented else { return }
+
+        isFeedbackFormPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    private func bindNoiseSuppressionUpdates(_ viewModel: MeetingNoiseSuppressionViewModel?) {
+        noiseSuppressionCancellable = nil
+        guard let viewModel else { return }
+
+        noiseSuppressionCancellable = viewModel.$state
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.buttonsDidChangeSubject.send()
+            }
     }
 
     func cleanUp() {
@@ -305,5 +293,11 @@ final class BottomBarButtonsAssembler {
         onShowSettings = nil
         onShowFeedbackForm = nil
         onShowEffects = nil
+        noiseSuppressionCancellable = nil
+        isChatPresented = false
+        isReactionsPickerPresented = false
+        isSettingsPresented = false
+        isEffectsPresented = false
+        isFeedbackFormPresented = false
     }
 }
