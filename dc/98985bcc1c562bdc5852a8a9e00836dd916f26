@@ -1,0 +1,61 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_af84ea45cdf2b6::t_d52cf1d9a1f75a 357-359
+  s_af84ea45cdf2b6::t_6f1e0557d4f3b3 311
+  s_af84ea45cdf2b6::t_edd61595c1353c 407-408
+  s_af84ea45cdf2b6::t_29a362d29c86d3 410
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveButton.swift
+  s_af84ea45cdf2b6::t_d3d67a401dfa41 24,27
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_af84ea45cdf2b6::t_d9257578d23fa4 5,224
+  s_af84ea45cdf2b6::t_433e23d86726e5 223
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_af84ea45cdf2b6::t_771406699de374 110-111,127,164-165
+  s_af84ea45cdf2b6::t_0497a0520d07b5 112-126,166-181,235
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_af84ea45cdf2b6::t_b8e6d001c6880f 45-61
+  s_af84ea45cdf2b6::t_67cce5ce8f9c5d 181-183
+  s_af84ea45cdf2b6::t_f75a8281d4c63e 73,76,88,177,293
+  s_af84ea45cdf2b6::t_66a39147910d99 184-185,187
+  s_af84ea45cdf2b6::t_bf2e37503cd6e3 83,87,91,95
+  s_af84ea45cdf2b6::t_244c1b810a2b9d 186
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_af84ea45cdf2b6::t_7de65ed179459b 26,40,55,70,86,101,116,131,145,161,189-191,199
+  s_af84ea45cdf2b6::t_fecabcf2bfea29 167,169-186
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_af84ea45cdf2b6::t_a832136377d3f2 244,247-248,250-259,261,263-265,267-268,838,852
+  s_af84ea45cdf2b6::t_f6a27c9683abb7 260,266
+  s_af84ea45cdf2b6::t_df763be73ae1f4 5,245-246,249,262,837,853
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_af84ea45cdf2b6::t_c88248d9346ea9 61,64,68,71
+  s_af84ea45cdf2b6::t_3ec25bf279b7a6 63,70
+  s_af84ea45cdf2b6::t_a40f5ac4550d04 60,62,65-67,69,72-73
+VERA/VERAMeetingRoom/VERAMeetingRoom/Wireframe/MeetingRoomFactory.swift
+  s_af84ea45cdf2b6::t_4ae084ac544c44 5,50,69
+  s_af84ea45cdf2b6::t_cd7b171745fba5 49
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingState+BottomBarPresentation.swift
+  s_af84ea45cdf2b6::t_8bea5e2310e86c 1-27
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Resources/Localizable.xcstrings
+  s_af84ea45cdf2b6::t_4f637328d358e5 137
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_af84ea45cdf2b6::t_23f27c11f3473d 63-64,69,78-79,84
+  s_af84ea45cdf2b6::t_d778f90474c8ad 65-66,68,80-81,83
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_af84ea45cdf2b6::t_67967b8a0efb2d 72,89-95
+  s_af84ea45cdf2b6::t_c6e66687ad1d54 58,71,396
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "dc98985bcc1c562bdc5852a8a9e00836dd916f26",
+  "prompts": {},
+  "sessions": {
+    "s_af84ea45cdf2b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecaac-dd51-79f1-a4f5-4ee8a3a18f2e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
