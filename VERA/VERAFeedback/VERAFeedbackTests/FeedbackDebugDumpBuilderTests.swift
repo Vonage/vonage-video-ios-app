@@ -32,6 +32,19 @@ struct FeedbackDebugDumpBuilderTests {
         #expect(dump.contains("Connection creation time: null"))
     }
 
+    @Test("debugDump formats connection creation time as ISO8601")
+    func debugDumpFormatsConnectionCreationTime() {
+        let creationTime = Date(timeIntervalSince1970: 1_700_000_000.123)
+        let dump = FeedbackDebugDumpBuilder.debugDump(
+            session: FeedbackSessionDebugInfo(connectionCreationTime: creationTime)
+        )
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        #expect(dump.contains("Connection creation time: \(formatter.string(from: creationTime))"))
+    }
+
     @Test("FeedbackFormViewModel debugDump delegates to current session provider")
     func viewModelDebugDumpUsesProvider() {
         let viewModel = FeedbackTestHelpers.makeFormViewModel(

@@ -39,4 +39,34 @@ struct FeedbackFactoryTests {
             #expect(didTap == true)
         }
     }
+
+    @Test("makeFeedbackReportUseCase submits report through HTTP client")
+    func makeFeedbackReportUseCaseSubmitsReport() async throws {
+        let httpClient = MockHTTPClient()
+        let factory = FeedbackFactory(baseURL: URL(string: "http://example.com")!, httpClient: httpClient)
+        let useCase = factory.makeFeedbackReportUseCase()
+
+        let serverJSON: [String: Any] = [
+            "feedbackData": [
+                "message": "Ticket created",
+                "ticketUrl": "https://example.com/ticket/99",
+                "screenshotIncluded": false
+            ]
+        ]
+        httpClient.data = try JSONSerialization.data(withJSONObject: serverJSON)
+
+        let result = try await useCase(
+            .init(
+                title: "Broken audio",
+                name: "Sam",
+                issue: "No sound",
+                image: nil,
+                debugDump: ""
+            )
+        )
+
+        #expect(result.message == "Ticket created")
+        #expect(result.ticketUrl == "https://example.com/ticket/99")
+        #expect(httpClient.recordedURL.absoluteString == "http://example.com/feedback/report")
+    }
 }

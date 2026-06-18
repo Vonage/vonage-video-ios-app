@@ -13,12 +13,14 @@ import Testing
 enum FeedbackTestHelpers {
 
     static func makeFormViewModel(
+        feedbackReportUseCase: FeedbackReportUseCase? = nil,
         sessionDebugInfoProvider: @escaping () -> FeedbackSessionDebugInfo = { .empty }
     ) -> FeedbackFormViewModel {
         FeedbackFormViewModel(
-            feedbackReportUseCase: DefaultFeedbackReportUseCase(
-                feedbackReportDataSource: MockFeedbackReportDataSource()
-            ),
+            feedbackReportUseCase: feedbackReportUseCase
+                ?? DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                ),
             sessionDebugInfoProvider: sessionDebugInfoProvider
         )
     }
