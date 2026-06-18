@@ -41,9 +41,9 @@ struct ParticipantsBadgeButton: View {
     }
 
     var body: some View {
-        OngoingActivityControlImageButton(
-            isActive: isActive,
+        BottomBarInlineButton(
             image: VERACommonUIAsset.Images.group2Solid.swiftUIImage,
+            isActive: isActive,
             action: onToggleParticipants
         )
         .overlay(

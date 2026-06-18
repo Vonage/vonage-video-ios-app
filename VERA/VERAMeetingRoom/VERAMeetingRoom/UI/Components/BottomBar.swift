@@ -105,9 +105,6 @@ public struct MeetingRoomActions {
 }
 
 struct BottomBar: View {
-
-    @Environment(\.meetingRoomTheme) private var theme
-
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let isParticipantsListPresented: Bool
@@ -246,15 +243,12 @@ struct BottomBar: View {
     private func buildOverflowMenu(buttons: [BottomBarButton]) -> some View {
         Menu {
             ForEach(buttons) { button in
-                Button(action: button.action) {
-                    HStack {
-                        button.image
-                            .tint(theme.textSecondary)
-                        Text(button.label)
-                            .tint(theme.textSecondary)
-                    }
-                }
-                .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
+                BottomBarMenuItem(
+                    image: button.image,
+                    label: button.label,
+                    accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
+                    action: button.action
+                )
             }
         } label: {
             ButtonImage(image: Image(systemName: "ellipsis.circle"))
@@ -265,42 +259,13 @@ struct BottomBar: View {
 
     @ViewBuilder
     private func buildInlineButton(_ button: BottomBarButton) -> some View {
-        OngoingActivityControlImageButton(
-            isActive: button.isActive,
+        BottomBarInlineButton(
             image: button.image,
+            isActive: button.isActive,
+            accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
+            accessory: button.accessory,
             action: button.action
         )
-        .accessibilityIdentifier(button.accessibilityIdentifier ?? button.id)
-        .accessory(button.accessory)
-    }
-}
-
-extension View {
-    @ViewBuilder
-    fileprivate func accessory(_ accessory: BottomBarButtonAccessory?) -> some View {
-        if let accessory {
-            switch accessory.placement {
-            case .topTrailing:
-                overlay(alignment: .topTrailing) {
-                    accessory.content()
-                        .allowsHitTesting(accessory.allowsHitTesting)
-                }
-            case .center:
-                overlay(alignment: .center) {
-                    accessory.content()
-                        .allowsHitTesting(accessory.allowsHitTesting)
-                }
-            case .hiddenInteractionLayer:
-                overlay {
-                    accessory.content()
-                        .frame(width: 1, height: 1)
-                        .opacity(0.01)
-                        .allowsHitTesting(accessory.allowsHitTesting)
-                }
-            }
-        } else {
-            self
-        }
     }
 }
 
