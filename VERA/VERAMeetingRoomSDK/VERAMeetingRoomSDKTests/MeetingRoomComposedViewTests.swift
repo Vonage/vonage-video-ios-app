@@ -2,6 +2,7 @@
 //  Created by Vonage on 21/04/2026.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import Testing
@@ -219,7 +220,8 @@ struct MeetingRoomComposedViewTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: MeetingRoomConfiguration(),
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: { _ in }, roomName: "test-room"),
-            getExternalButtons: { _ in [] },
+            getExternalButtons: { [] },
+            externalButtonsUpdates: Empty().eraseToAnyPublisher(),
             noiseSuppressionStatusDataSource: makeMockNoiseSuppressionStatusDataSource(),
             pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource()
         )

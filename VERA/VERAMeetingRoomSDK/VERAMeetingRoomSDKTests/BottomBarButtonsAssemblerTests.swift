@@ -23,7 +23,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: []
         )
 
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.isEmpty)
     }
 
@@ -37,7 +37,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.count == 1)
         #expect(buttons.first?.label == "Chat")
     }
@@ -52,7 +52,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.count == 1)
         #expect(buttons.first?.label == String(localized: "Settings"))
     }
@@ -67,7 +67,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.count == 1)
         #expect(buttons.first?.label == String(localized: "Share Screen"))
     }
@@ -83,7 +83,7 @@ struct BottomBarButtonsAssemblerTests {
         )
 
         // Without setting archiveButtonViewModel, no archiving button is produced
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.isEmpty)
     }
 
@@ -98,7 +98,7 @@ struct BottomBarButtonsAssemblerTests {
         )
 
         // Without setting backgroundEffectButtonViewModel, no effect button is produced
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.isEmpty)
     }
 
@@ -113,7 +113,7 @@ struct BottomBarButtonsAssemblerTests {
         )
 
         // Without setting captionsButtonViewModel, no captions button is produced
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.isEmpty)
     }
 
@@ -128,7 +128,7 @@ struct BottomBarButtonsAssemblerTests {
         )
 
         // Without setting emojiButtonContainerViewModel, no reactions button is produced
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.isEmpty)
     }
 
@@ -142,7 +142,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         // chat + screenShare + settings = 3 buttons (no VM-dependent features)
         #expect(buttons.count == 3)
     }
@@ -158,15 +158,37 @@ struct BottomBarButtonsAssemblerTests {
         )
 
         // Audio effects creates its view model lazily in buildButtons
-        let buttons = assembler.buildButtons(.init(archivingState: .idle))
+        let buttons = assembler.buildButtons()
         #expect(buttons.count == 1)
         #expect(buttons.first?.label == String(localized: "Noise Suppression"))
         #expect(assembler.meetingNoiseSuppressionButtonViewModel != nil)
     }
 
-    @Test("rebuildButtons uses last state from buildButtons")
+    @Test("buttonsDidChange emits when archive button state changes")
     @MainActor
-    func rebuildButtonsUsesLastState() {
+    func buttonsDidChangeEmitsWhenArchiveButtonStateChanges() {
+        let features: Set<MeetingRoomFeature> = [.archiving]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        let (_, viewModel) = container.archivingFactory.makeArchivingButton { _ in }
+        assembler.archiveButtonViewModel = viewModel
+        var didEmitUpdate = false
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
+        }
+
+        viewModel.state = .archiving("archive-123")
+
+        #expect(didEmitUpdate)
+        cancellable.cancel()
+    }
+
+    @Test("rebuildButtons rebuilds current feature buttons")
+    @MainActor
+    func rebuildButtonsRebuildsCurrentFeatureButtons() {
         let features: Set<MeetingRoomFeature> = [.chat]
         let container = makeContainer(enabledFeatures: features)
         let assembler = BottomBarButtonsAssembler(
@@ -174,9 +196,7 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
 
-        // First build with a specific state
-        let initialButtons = assembler.buildButtons(.init(archivingState: .archiving("test-id")))
-        // Rebuild should produce the same result using the cached state
+        let initialButtons = assembler.buildButtons()
         let rebuiltButtons = assembler.rebuildButtons()
 
         #expect(rebuiltButtons.count == initialButtons.count)

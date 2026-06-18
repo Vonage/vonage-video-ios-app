@@ -57,6 +57,20 @@ struct ArchiveButtonViewModelTests {
         #expect(state == .idle)
     }
 
+    @Test func bottomBarPresentationUsesIdleState() {
+        let state = ArchivingState.idle
+
+        #expect(state.bottomBarLabel == String(localized: "Start Recording"))
+        #expect(state.bottomBarAccessibilityIdentifier == ArchivingAccessibilityID.startRecordingButton)
+    }
+
+    @Test func bottomBarPresentationUsesArchivingState() {
+        let state = ArchivingState.archiving("archive-id")
+
+        #expect(state.bottomBarLabel == String(localized: "Stop Recording"))
+        #expect(state.bottomBarAccessibilityIdentifier == ArchivingAccessibilityID.stopRecordingButton)
+    }
+
     @Test func setupOnlySubscribesOnce() async {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)

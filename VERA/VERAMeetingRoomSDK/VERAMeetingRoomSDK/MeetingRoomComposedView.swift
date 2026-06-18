@@ -3,9 +3,7 @@
 //
 
 import AVKit
-import Combine
 import SwiftUI
-import VERAArchiving
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
@@ -120,16 +118,5 @@ struct MeetingRoomComposedView: View {
                 buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
             }
-            .onReceive(selectedEffectPublisher) { _ in
-                viewModel.extraButtons = buttonsAssembler.rebuildButtons()
-            }
-    }
-
-    /// Publisher that emits when the selected video effect changes (skipping the initial value).
-    private var selectedEffectPublisher: AnyPublisher<VideoEffect, Never> {
-        guard let vm = buttonsAssembler.videoEffectsViewModel else {
-            return Empty().eraseToAnyPublisher()
-        }
-        return vm.$selectedEffect.dropFirst().eraseToAnyPublisher()
     }
 }

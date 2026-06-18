@@ -35,15 +35,29 @@ final class BottomBarButtonsAssembler {
     var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
     var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel?
 
-    // Last state used for rebuilding buttons when feature view models change
-    private var lastState: MeetingRoomButtonsState = .init(archivingState: .idle)
-
     // Bindings for sheet/overlay presentation
     var onShowChat: (() -> Void)?
     var onShowPickerView: (() -> Void)?
     var onShowSettings: (() -> Void)?
     var onShowFeedbackForm: (() -> Void)?
     var onShowEffects: (() -> Void)?
+
+    var buttonsDidChange: AnyPublisher<Void, Never> {
+        let archiveUpdates = archiveButtonViewModel?.$state
+            .dropFirst()
+            .map { _ in () }
+            .eraseToAnyPublisher()
+            ?? Empty().eraseToAnyPublisher()
+
+        let effectsUpdates = videoEffectsViewModel?.$selectedEffect
+            .dropFirst()
+            .map { _ in () }
+            .eraseToAnyPublisher()
+            ?? Empty().eraseToAnyPublisher()
+
+        return Publishers.Merge(archiveUpdates, effectsUpdates)
+            .eraseToAnyPublisher()
+    }
 
     init(
         container: MeetingRoomSDKContainer,
@@ -56,39 +70,29 @@ final class BottomBarButtonsAssembler {
     /// Builds the array of extra bottom bar buttons based on enabled features.
     ///
     /// Called by `MeetingRoomViewModel` via `getExternalButtons` closure
-    /// each time the meeting room state changes (e.g., archiving state updates).
+    /// each time the meeting room needs the current feature buttons.
     ///
-    /// - Parameter state: Current meeting room button state (e.g., archiving state).
     /// - Returns: Array of feature buttons to display in the bottom bar.
-    func buildButtons(_ state: MeetingRoomButtonsState) -> [BottomBarButton] {
-        lastState = state
+    func buildButtons() -> [BottomBarButton] {
         var buttons: [BottomBarButton] = []
 
         if enabledFeatures.contains(.chat) {
             buttons.append(makeChatButton())
         }
 
-        if enabledFeatures.contains(.backgroundEffects),
-            let viewModel = videoEffectsViewModel
-        {
+        if enabledFeatures.contains(.backgroundEffects), let viewModel = videoEffectsViewModel {
             buttons.append(makeBackgroundEffectsButton(viewModel))
         }
 
-        if enabledFeatures.contains(.archiving),
-            let viewModel = archiveButtonViewModel
-        {
-            buttons.append(makeArchiveButton(viewModel, state))
+        if enabledFeatures.contains(.archiving), let viewModel = archiveButtonViewModel {
+            buttons.append(makeArchiveButton(viewModel))
         }
 
-        if enabledFeatures.contains(.captions),
-            let viewModel = captionsButtonViewModel
-        {
+        if enabledFeatures.contains(.captions), let viewModel = captionsButtonViewModel {
             buttons.append(makeCaptionsButton(viewModel))
         }
 
-        if enabledFeatures.contains(.reactions),
-            let viewModel = emojiButtonContainerViewModel
-        {
+        if enabledFeatures.contains(.reactions), let viewModel = emojiButtonContainerViewModel {
             buttons.append(makeReactionsButton(viewModel))
         }
 
@@ -170,20 +174,17 @@ final class BottomBarButtonsAssembler {
     }
 
     private func makeArchiveButton(
-        _ viewModel: ArchiveButtonViewModel,
-        _ state: MeetingRoomButtonsState
+        _ viewModel: ArchiveButtonViewModel
     ) -> BottomBarButton {
         let button = container.archivingFactory.makeArchivingButton(viewModel: viewModel)
         return .init(
-            label: state.archivingState.isArchiving
-                ? String(localized: "Stop Recording") : String(localized: "Start Recording"),
-            accessibilityIdentifier: state.archivingState.isArchiving
-                ? ArchivingAccessibilityID.stopRecordingButton : ArchivingAccessibilityID.startRecordingButton,
-            image: VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage,
-            onTap: viewModel.onTap,
-            content: {
-                button
-            })
+            label: viewModel.state.bottomBarLabel,
+            accessibilityIdentifier: viewModel.state.bottomBarAccessibilityIdentifier,
+            image: viewModel.state.bottomBarImage,
+            onTap: viewModel.onTap
+        ) {
+            button
+        }
     }
 
     private func makeCaptionsButton(
@@ -284,13 +285,12 @@ final class BottomBarButtonsAssembler {
         )
     }
 
-
     /// Rebuilds buttons using the most recent state.
     ///
     /// Used when a feature view model's published properties change (e.g. selected video effect)
     /// and the bottom bar needs to reflect the updated icon.
     func rebuildButtons() -> [BottomBarButton] {
-        buildButtons(lastState)
+        buildButtons()
     }
 
     func cleanUp() {
