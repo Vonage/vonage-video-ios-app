@@ -143,16 +143,18 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// - Parameter publisher: The configured `OTPublisher` to wrap.
     public init(
         publisher: OTPublisher,
-        transformerFactory: VERATransformerFactory
+        transformerFactory: VERATransformerFactory,
+        initialDimensions: CGSize = .zero
     ) {
         otPublisher = publisher
         self.transformerFactory = transformerFactory
+        videoDimensions = initialDimensions
         participant = Participant(
             id: id,
             name: publisher.stream?.name ?? "",
             isMicEnabled: otPublisher.publishAudio,
             isCameraEnabled: otPublisher.publishVideo,
-            videoDimensions: VideoDimensions.initial,
+            videoDimensions: initialDimensions,
             isRemote: false,
             creationTime: date,
             isScreenshare: false,
@@ -160,6 +162,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
         otPublisher.audioLevelDelegate = self
+        observeAppDidBecomeActive()
     }
 
     deinit {
@@ -315,6 +318,16 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     open func updateVideoTransformers() {
         otPublisher.videoTransformers = videoTransformers.map(\.transformer)
         updateParticipant()
+    }
+
+    private func observeAppDidBecomeActive() {
+        NotificationCenter.default
+            .publisher(for: UIApplication.didBecomeActiveNotification)
+            .sink { [weak self] _ in
+                guard let self, !self.videoTransformers.isEmpty else { return }
+                self.updateVideoTransformers()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: Captions

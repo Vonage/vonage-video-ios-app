@@ -16,7 +16,7 @@ extension PublisherSettingsPreferences {
             videoResolution: videoResolution.vonageResolution,
             videoFrameRate: videoFrameRate.vonageFrameRate,
             preferredVideoCodecs: codecPreference.vonageCodecPreference,
-            maxAudioBitrate: maxAudioBitrate,
+            maxAudioBitrate: audioBitratePreference.customValue,
             videoBitratePreset: videoBitratePreset.vonageBitratePreset,
             maxVideoBitrate: videoBitratePreset == .custom ? maxVideoBitrate : nil,
             publisherAudioFallbackEnabled: publisherAudioFallbackEnabled,

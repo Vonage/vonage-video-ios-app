@@ -31,9 +31,14 @@ import VERAVonageCallKitPlugin
 #endif
 
 final class DependencyContainer {
-    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+    let httpClient: HTTPClient
+
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
+    }
+
+    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
     lazy var jsonDecoder = JSONDecoder()
 
@@ -101,14 +106,7 @@ final class DependencyContainer {
         userRepository: userRepository,
         advancedSettingsUseCase: advancedSettingsUseCase)
 
-    lazy var goodByePageFactory = GoodByePageFactory(
-        joinRoomUseCase: .init(
-            userRepository: userRepository,
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            advancedSettingsUseCase: advancedSettingsUseCase),
-        userRepository: userRepository)
-
-    // MARK: - Meeting Room SDK
+    lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
@@ -121,6 +119,7 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
+        if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
         if appConfig.meetingRoomSettings.allowScreenShare && !ProcessInfo.processInfo.isiOSAppOnMac {
             features.insert(.screenShare)
         }
@@ -158,7 +157,39 @@ final class DependencyContainer {
     // MARK: - Background effects feature (waiting room)
 
     #if BACKGROUND_EFFECTS_ENABLED
-        lazy var backgroundBlurFactory = BackgroundBlurFactory()
+        lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+            bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
+                fileManager: .default,
+                searchPathDirectory: .cachesDirectory,
+                pathComponent: "video_backgrounds"
+            )
+        )
+
+        lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository(
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
+                fileManager: .default,
+                searchPathDirectory: .documentDirectory,
+                pathComponent: "user_backgrounds"
+            )
+        )
+
+        lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
+
+        lazy var backgroundEffectFactory = BackgroundEffectFactory(
+            getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
+                backgroundEffectsRepository: backgroundEffectsRepository,
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            addBackgroundUseCase: DefaultAddBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
+            videoEffectRepository: videoEffectRepository
+        )
     #endif
 
     // MARK: - Settings feature (waiting room)

@@ -55,15 +55,16 @@ public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Iden
 extension SettingsVideoResolution {
     /// Human-readable label shown in the Settings UI.
     ///
-    /// Combines a localized quality label (Low/Medium/High) with the pixel dimensions.
+    /// Combines a localized quality label with the pixel dimensions.
     ///
-    /// - Returns: A formatted string like "Low (352x288)" or "High (1920x1080)".
+    /// - Returns: A formatted string like "Low (352x288)" or "HD 720p (1280x720)".
     public var displayName: String {
         let displayName =
             switch self {
             case .low: "Low"
             case .medium: "Medium"
-            case .high, .high1080p: "High"
+            case .high: "HD 720p"
+            case .high1080p: "Full HD 1080p"
             }
         return "\(displayName.localized) (\(dimensionString))"
     }

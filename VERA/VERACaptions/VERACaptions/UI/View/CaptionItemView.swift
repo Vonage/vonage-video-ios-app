@@ -33,6 +33,8 @@ struct CaptionItemView: View {
             .fixedSize(horizontal: false, vertical: true)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(caption.accessibilityLabel)
+            .accessibilityValue(String(caption.text.characters))
+            .accessibilityIdentifier(CaptionsAccessibilityID.captionItem)
     }
 }
 
