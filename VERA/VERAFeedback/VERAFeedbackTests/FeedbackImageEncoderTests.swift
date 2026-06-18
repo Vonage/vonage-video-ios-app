@@ -35,6 +35,23 @@ struct FeedbackImageEncoderTests {
         #expect(FeedbackImageEncoder.encodeToBase64(nil) == "")
     }
 
+    @Test("Small image encodes without exceeding payload limit")
+    func smallImageEncodesWithoutExceedingLimit() {
+        #if canImport(UIKit)
+            let image = makeSolidImage(size: CGSize(width: 320, height: 240))
+        #elseif canImport(AppKit)
+            let image = makeSolidImage(size: NSSize(width: 320, height: 240))
+        #else
+            return
+        #endif
+
+        let base64 = FeedbackImageEncoder.encodeToBase64(image)
+        let payload = Data(base64Encoded: base64)
+
+        #expect(!base64.isEmpty)
+        #expect(payload?.count ?? Int.max <= FeedbackImageEncoder.maxPayloadBytes)
+    }
+
     #if canImport(UIKit)
         private func makeSolidImage(size: CGSize) -> UIImage {
             let renderer = UIGraphicsImageRenderer(size: size)

@@ -194,6 +194,45 @@ final class URLSessionHTTPClientTests {
     }
 
     @Test
+    func post_withAdditionalHeaders_mergesHeadersIntoRequest() async throws {
+        let url = URL(string: "https://a-url.com")!
+        let (sut, spy) = makeSUT()
+        let requestBody = Data("request".utf8)
+        let expectedData = Data("ok".utf8)
+
+        spy.stub(url: url, statusCode: 200, data: expectedData)
+
+        let receivedData = try await sut.post(
+            url,
+            additionalHeaders: ["User-Agent": "VeraNativeiOS/1.0"],
+            data: requestBody
+        )
+
+        let request = try #require(spy.requestedRequests.last)
+        #expect(receivedData == expectedData)
+        #expect(request.value(forHTTPHeaderField: "User-Agent") == "VeraNativeiOS/1.0")
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+        #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+    }
+
+    @Test
+    func post_throughHTTPClientProtocol_usesEmptyAdditionalHeaders() async throws {
+        let url = URL(string: "https://a-url.com")!
+        let (sut, spy) = makeSUT()
+        let expectedData = Data("ok".utf8)
+
+        spy.stub(url: url, statusCode: 200, data: expectedData)
+
+        let client: HTTPClient = sut
+        let receivedData = try await client.post(url, data: Data("request".utf8))
+
+        let request = try #require(spy.requestedRequests.last)
+        #expect(receivedData == expectedData)
+        #expect(request.value(forHTTPHeaderField: "User-Agent") == nil)
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+    }
+
+    @Test
     func post_usesHTTPMethodPOST() async throws {
         let url = URL(string: "https://a-given-url.com")!
         let requestBody = Data("request body".utf8)

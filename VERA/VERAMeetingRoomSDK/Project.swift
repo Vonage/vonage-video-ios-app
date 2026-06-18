@@ -89,6 +89,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
             ],
             settings: createBaseBuildSettings()
         ),

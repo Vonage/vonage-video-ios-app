@@ -69,4 +69,28 @@ struct FeedbackFactoryTests {
         #expect(result.ticketUrl == "https://example.com/ticket/99")
         #expect(httpClient.recordedURL.absoluteString == "http://example.com/feedback/report")
     }
+
+    @Test("init uses injected feedback report data source when provided")
+    func initUsesInjectedFeedbackReportDataSource() async throws {
+        let dataSource = MockFeedbackReportDataSource()
+        let factory = FeedbackFactory(
+            baseURL: URL(string: "http://example.com")!,
+            httpClient: MockHTTPClient(),
+            feedbackReportDataSource: dataSource
+        )
+        let useCase = factory.makeFeedbackReportUseCase()
+
+        _ = try await useCase(
+            .init(
+                title: "Audio issue",
+                name: "Jamie",
+                issue: "Echo on call",
+                image: nil,
+                debugDump: "debug"
+            )
+        )
+
+        #expect(dataSource.lastRequest?.title == "Audio issue")
+        #expect(dataSource.lastRequest?.debugDump == "debug")
+    }
 }

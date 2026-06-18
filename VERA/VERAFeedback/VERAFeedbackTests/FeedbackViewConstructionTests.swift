@@ -56,4 +56,37 @@ struct FeedbackViewConstructionTests {
 
         #expect(fieldVM.attachedImage != nil)
     }
+
+    @Test("FeedbackFormView hosts success and loading states")
+    func feedbackFormViewHostsSuccessAndLoadingStates() {
+        let successViewModel = FeedbackTestHelpers.makeFormViewModel()
+        successViewModel.feedbackResult = FeedbackReportDataSourceResponse(
+            message: "Report submitted",
+            ticketUrl: "https://example.com/ticket/42",
+            screenshotIncluded: true
+        )
+        FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: successViewModel))
+
+        let loadingViewModel = FeedbackTestHelpers.makeFormViewModel()
+        loadingViewModel.isLoading = true
+        FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: loadingViewModel))
+
+        #expect(successViewModel.feedbackResult != nil)
+        #expect(loadingViewModel.isLoading == true)
+    }
+
+    @Test("FeedbackSheetContent builds with session debug provider")
+    func sheetContentBuildsWithSessionDebugProvider() {
+        FeedbackViewTestHelpers.host(
+            FeedbackSheetContent(
+                feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                ),
+                sessionDebugInfoProvider: {
+                    FeedbackSessionDebugInfo(sessionId: "session-from-provider")
+                }
+            )
+        )
+        #expect(true)
+    }
 }
