@@ -19,7 +19,7 @@ struct DefaultFeedbackReportDataSourceTests {
             "feedbackData": [
                 "message": "Report submitted",
                 "ticketUrl": "https://example.com/ticket/1",
-                "screenshotIncluded": false
+                "screenshotIncluded": false,
             ]
         ]
         let responseData = try JSONSerialization.data(withJSONObject: serverJSON)
@@ -68,7 +68,7 @@ struct DefaultFeedbackReportDataSourceTests {
             "feedbackData": [
                 "message": "OK",
                 "ticketUrl": "https://example.com/t/2",
-                "screenshotIncluded": true
+                "screenshotIncluded": true,
             ]
         ]
         httpClient.data = try JSONSerialization.data(withJSONObject: serverJSON)
@@ -115,7 +115,7 @@ struct DefaultFeedbackReportDataSourceTests {
             "feedbackData": [
                 "message": "OK",
                 "ticketUrl": "https://example.com/ticket/3",
-                "screenshotIncluded": true
+                "screenshotIncluded": true,
             ]
         ]
         httpClient.data = try JSONSerialization.data(withJSONObject: serverJSON)

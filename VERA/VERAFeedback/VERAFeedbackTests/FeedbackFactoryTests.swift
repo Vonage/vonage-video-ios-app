@@ -50,7 +50,7 @@ struct FeedbackFactoryTests {
             "feedbackData": [
                 "message": "Ticket created",
                 "ticketUrl": "https://example.com/ticket/99",
-                "screenshotIncluded": false
+                "screenshotIncluded": false,
             ]
         ]
         httpClient.data = try JSONSerialization.data(withJSONObject: serverJSON)
