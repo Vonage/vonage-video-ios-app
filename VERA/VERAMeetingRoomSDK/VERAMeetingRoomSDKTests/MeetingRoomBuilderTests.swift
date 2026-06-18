@@ -175,11 +175,12 @@ private final class HTTPClientFactoryStub: MeetingRoomHTTPClientFactory {
 }
 
 private final class HTTPClientStub: HTTPClient {
+    
     func get(_ url: URL) async throws -> Data {
         Data()
     }
 
-    func post(_ url: URL, data: Data) async throws -> Data {
+    func post(_ url: URL, additionalHeaders: [String : String], data: Data) async throws -> Data {
         Data()
     }
 }

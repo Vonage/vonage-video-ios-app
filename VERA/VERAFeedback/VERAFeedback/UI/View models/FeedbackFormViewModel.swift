@@ -113,7 +113,6 @@ class FeedbackFormViewModel: ObservableObject {
                 )
             )
         } catch {
-            print(error)
             toast = .init(message: String(localized: "Something failed, please try again"), mode: .failure)
         }
     }
