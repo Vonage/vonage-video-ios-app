@@ -1,0 +1,36 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/FeedbackSessionDebugInfoCurrentCallTests.swift
+  s_e95052ced398ee::t_6ee54e8fc4dba1 1,3-11,13-21,23-28
+  s_e95052ced398ee::t_431a65dbe5c4ed 2,12,22
+VERA/VERACommonUI/VERACommonUITests/ToastModifierTests.swift
+  s_e95052ced398ee::t_7c0959170cbb20 25-26
+  s_e95052ced398ee::t_f59aff65bfceac 1-24,27-44,46-112
+  s_e95052ced398ee::t_5c6806090e2ff8 45
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackViewConstructionTests.swift
+  s_e95052ced398ee::t_c04a76ce9f677e 59-91
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFactoryTests.swift
+  s_e95052ced398ee::t_0f392ecf02717d 72-95
+VERA/VERAVonage/VERAVonageTests/VonageSessionMetadataTests.swift
+  s_e95052ced398ee::t_ad5a547dcfcb2c 1-15
+VERA/VERACore/VERACoreTests/Common/Data/URLSession/URLSessionHTTPClientTests.swift
+  s_e95052ced398ee::t_58a68f081dab13 197-234
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_e95052ced398ee::t_a708d9d41879c8 92
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackImageEncoderTests.swift
+  s_e95052ced398ee::t_173a410bc8a022 38-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "f0fab4687f00497869f526b268d5be36ae45578c",
+  "prompts": {},
+  "sessions": {
+    "s_e95052ced398ee": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d49f360b-4cc4-4ed4-9136-b4bf29e0e22c",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
