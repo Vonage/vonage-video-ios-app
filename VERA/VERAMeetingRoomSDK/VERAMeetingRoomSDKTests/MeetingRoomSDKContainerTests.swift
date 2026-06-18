@@ -197,10 +197,10 @@ struct MeetingRoomSDKContainerTests {
 }
 
 private final class HTTPClientStub: HTTPClient {
-    func post(_ url: URL, additionalHeaders: [String : String], data: Data) async throws -> Data {
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
         Data()
     }
-    
+
     func get(_ url: URL) async throws -> Data {
         Data()
     }
