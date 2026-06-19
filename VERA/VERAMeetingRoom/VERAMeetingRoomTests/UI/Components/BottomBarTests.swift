@@ -67,9 +67,45 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         #expect(button.accessibilityIdentifier == "support-accessibility-id")
         #expect(button.isActive)
         #expect(button.accessory == nil)
+        #expect(button.overflowSelectionBehavior == .performActionBeforeDismiss)
+        if case .gridItem = button.overflowPresentation {
+            #expect(true)
+        } else {
+            #expect(false)
+        }
 
         button.action()
         #expect(didTap)
+    }
+
+    @Test("BottomBarButton can store dismiss before action behavior")
+    @MainActor
+    func bottomBarButtonCanStoreDismissBeforeActionBehavior() {
+        let button = BottomBarButton(
+            id: "settings-button",
+            label: "Settings",
+            image: Image(systemName: "gearshape"),
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: {}
+        )
+
+        #expect(button.overflowSelectionBehavior == .dismissBeforeAction)
+    }
+
+    @Test("BottomBarButton copies overflow selection behavior from presenter")
+    @MainActor
+    func bottomBarButtonCopiesOverflowSelectionBehaviorFromPresenter() {
+        let item = BottomBarActionItem(
+            id: "sheet-button",
+            label: "Sheet",
+            image: .init(systemName: "square"),
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: {}
+        )
+
+        let button = BottomBarButton(item)
+
+        #expect(button.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("BottomBarButton can override active presentation state")
@@ -127,6 +163,49 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         #expect(groups.inline.isEmpty)
         #expect(groups.overflow.map(\.id) == extraButtons.map(\.id))
+    }
+
+    @Test("Overflow sheet excludes header content buttons from grid")
+    func overflowSheetExcludesHeaderContentButtonsFromGrid() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let gridButton = BottomBarButton(
+            id: "settings-button",
+            label: "Settings",
+            image: Image(systemName: "gearshape"),
+            action: {}
+        )
+        let sheet = BottomBarOverflowSheet(buttons: [headerButton, gridButton], onSelect: { _ in })
+
+        #expect(sheet.headerItems.map(\.id) == ["reactions-button"])
+        #expect(sheet.gridButtons.map(\.id) == ["settings-button"])
+    }
+
+    @Test("Overflow sheet keeps grid button order after removing headers")
+    func overflowSheetKeepsGridButtonOrderAfterRemovingHeaders() {
+        let buttons = [
+            BottomBarButton(
+                id: "reactions-button",
+                label: "Reactions",
+                image: Image(systemName: "face.smiling"),
+                overflowPresentation: .headerContent { AnyView(Text("Emoji header")) },
+                action: {}
+            ),
+            BottomBarButton(id: "chat-button", label: "Chat", image: Image(systemName: "message"), action: {}),
+            BottomBarButton(
+                id: "settings-button", label: "Settings", image: Image(systemName: "gearshape"), action: {}),
+            BottomBarButton(id: "feedback-button", label: "Feedback", image: Image(systemName: "flag"), action: {}),
+        ]
+        let sheet = BottomBarOverflowSheet(buttons: buttons, onSelect: { _ in })
+
+        #expect(sheet.gridButtons.map(\.id) == ["chat-button", "settings-button", "feedback-button"])
     }
 
     // MARK: - All Features Enabled

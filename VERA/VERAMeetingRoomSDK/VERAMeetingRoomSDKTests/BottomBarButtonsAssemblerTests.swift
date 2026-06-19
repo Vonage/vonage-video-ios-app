@@ -44,6 +44,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.first?.id == "chat-button")
         #expect(buttons.first?.label == "Chat")
         #expect(buttons.first?.isActive == false)
+        #expect(buttons.first?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("Chat button is active when chat sheet is presented")
@@ -77,6 +78,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.count == 1)
         #expect(buttons.first?.id == "settings-button")
         #expect(buttons.first?.label == String(localized: "Settings"))
+        #expect(buttons.first?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("Settings button is active when settings sheet is presented")
@@ -111,6 +113,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.first?.id == "feedback-button")
         #expect(buttons.first?.label == String(localized: "Feedback"))
         #expect(buttons.first?.isActive == false)
+        #expect(buttons.first?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("Feedback button is active when feedback sheet is presented")
@@ -145,6 +148,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.first?.id == "screen-share-button")
         #expect(buttons.first?.label == String(localized: "Share Screen"))
         #expect(buttons.first?.accessory != nil)
+        #expect(buttons.first?.overflowSelectionBehavior == .performActionBeforeDismiss)
     }
 
     @Test("Archiving button requires pre-created view model")
@@ -196,6 +200,7 @@ struct BottomBarButtonsAssemblerTests {
 
         #expect(button?.id == "effects-button")
         #expect(button?.isActive == true)
+        #expect(button?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("Captions button requires pre-created view model")
@@ -245,6 +250,12 @@ struct BottomBarButtonsAssemblerTests {
         #expect(buttons.first?.id == "reactions-button")
         #expect(buttons.first?.label == String(localized: "Reactions"))
         #expect(buttons.first?.isActive == false)
+        #expect(buttons.first?.overflowSelectionBehavior == .performActionBeforeDismiss)
+        if let presentation = buttons.first?.overflowPresentation, case .headerContent = presentation {
+            #expect(true)
+        } else {
+            #expect(false)
+        }
     }
 
     @Test("Reactions button is active when picker overlay is presented")
@@ -263,6 +274,29 @@ struct BottomBarButtonsAssemblerTests {
 
         #expect(button?.id == "reactions-button")
         #expect(button?.isActive == true)
+    }
+
+    @Test("Reactions button remains present when exposing overflow header content")
+    @MainActor
+    func reactionsButtonRemainsPresentWhenExposingOverflowHeaderContent() {
+        let features: Set<MeetingRoomFeature> = [.reactions]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        assembler.emojiButtonContainerViewModel = container.reactionsFactory.makeEmojiButton().viewModel
+
+        let buttons = assembler.buildButtons()
+        let button = buttons.first
+
+        #expect(buttons.count == 1)
+        #expect(button?.id == "reactions-button")
+        if let presentation = button?.overflowPresentation, case .headerContent = presentation {
+            #expect(true)
+        } else {
+            #expect(false)
+        }
     }
 
     @Test("Multiple features produce multiple buttons")
@@ -333,6 +367,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(button?.label == String(localized: "Start Recording"))
         #expect(button?.accessibilityIdentifier == "archiving-start-recording-button")
         #expect(button?.isActive == false)
+        #expect(button?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("Archive button uses presenter metadata in archiving state")
@@ -354,6 +389,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(button?.label == String(localized: "Stop Recording"))
         #expect(button?.accessibilityIdentifier == "archiving-stop-recording-button")
         #expect(button?.isActive == true)
+        #expect(button?.overflowSelectionBehavior == .dismissBeforeAction)
     }
 
     @Test("buttonsDidChange emits when archive button state changes")

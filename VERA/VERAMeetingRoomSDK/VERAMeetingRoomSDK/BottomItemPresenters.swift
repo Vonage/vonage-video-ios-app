@@ -21,6 +21,7 @@ struct SettingsBottomItemPresenter: BottomItemPresentable {
     var image: Image { VERACommonUIAsset.Images.gearSolid.swiftUIImage }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? { nil }
+    var overflowSelectionBehavior: BottomBarOverflowSelectionBehavior { .dismissBeforeAction }
 
     func performAction() {
         onShowSettings()
@@ -37,6 +38,7 @@ struct FeedbackBottomItemPresenter: BottomItemPresentable {
     var image: Image { VERACommonUIAsset.Images.feedbackLine.swiftUIImage }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? { nil }
+    var overflowSelectionBehavior: BottomBarOverflowSelectionBehavior { .dismissBeforeAction }
 
     func performAction() {
         onShowFeedbackForm()
@@ -46,6 +48,7 @@ struct FeedbackBottomItemPresenter: BottomItemPresentable {
 @MainActor
 struct ReactionsBottomItemPresenter: BottomItemPresentable {
     let isPickerPresented: Bool
+    let viewModel: EmojiButtonContainerViewModel
     let onShowPickerView: () -> Void
 
     var id: String { "reactions-button" }
@@ -54,6 +57,11 @@ struct ReactionsBottomItemPresenter: BottomItemPresentable {
     var image: Image { VERACommonUIAsset.Images.emojiSolid.swiftUIImage }
     var isActive: Bool { isPickerPresented }
     var accessory: BottomBarButtonAccessory? { nil }
+    var overflowPresentation: BottomBarOverflowPresentation {
+        .headerContent {
+            AnyView(EmojiHorizontalPickerViewContainer(viewModel: viewModel.pickerViewModel))
+        }
+    }
 
     func performAction() {
         onShowPickerView()

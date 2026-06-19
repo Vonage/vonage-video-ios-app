@@ -7,6 +7,10 @@ import SwiftUI
 public struct BottomBarMenuItem: View {
     @Environment(\.meetingRoomTheme) private var theme
 
+    private var foregroundColor: Color {
+        isActive ? theme.onPrimary : theme.secondary
+    }
+
     private let image: Image
     private let label: String
     private let isActive: Bool
@@ -35,24 +39,24 @@ public struct BottomBarMenuItem: View {
             VStack(spacing: 8) {
                 image
                     .font(.title3)
-                    .foregroundStyle(theme.textSecondary)
+                    .foregroundStyle(foregroundColor)
                 Text(label)
                     .font(.callout)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                    .foregroundStyle(theme.textSecondary)
+                    .foregroundStyle(foregroundColor)
             }
             .frame(maxWidth: .infinity, minHeight: 88)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isActive ? theme.primary.opacity(0.24) : .clear)
+                    .fill(isActive ? theme.primary : theme.background)
             )
             .overlay {
                 if !isActive {
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(theme.border.opacity(0.7), lineWidth: 1)
+                        .stroke(.white, lineWidth: 1)
                 }
             }
         }

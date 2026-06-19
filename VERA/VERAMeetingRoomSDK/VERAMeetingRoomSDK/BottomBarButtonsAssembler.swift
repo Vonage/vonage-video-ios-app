@@ -152,7 +152,11 @@ final class BottomBarButtonsAssembler {
     private func makeChatButton() -> BottomBarButton {
         let viewModel = container.chatBadgeButtonViewModel
         let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item, isActive: isChatPresented) { [weak self] in
+        return BottomBarButton(
+            item,
+            isActive: isChatPresented,
+            overflowSelectionBehavior: .dismissBeforeAction
+        ) { [weak self] in
             viewModel.chatDidOpen()
             self?.onShowChat?()
         }
@@ -162,7 +166,11 @@ final class BottomBarButtonsAssembler {
         _ viewModel: VideoEffectsViewModel
     ) -> BottomBarButton {
         let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item, isActive: isEffectsPresented || viewModel.isActive) { [weak self] in
+        return BottomBarButton(
+            item,
+            isActive: isEffectsPresented || viewModel.isActive,
+            overflowSelectionBehavior: .dismissBeforeAction
+        ) { [weak self] in
             self?.onShowEffects?()
         }
     }
@@ -178,7 +186,7 @@ final class BottomBarButtonsAssembler {
         _ viewModel: ArchiveButtonViewModel
     ) -> BottomBarButton {
         let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item)
+        return BottomBarButton(item, overflowSelectionBehavior: .dismissBeforeAction)
     }
 
     private func makeCaptionsButton(
@@ -191,9 +199,9 @@ final class BottomBarButtonsAssembler {
     private func makeReactionsButton(
         _ viewModel: EmojiButtonContainerViewModel
     ) -> BottomBarButton {
-        _ = viewModel
         let item: any BottomItemPresentable = ReactionsBottomItemPresenter(
-            isPickerPresented: isReactionsPickerPresented
+            isPickerPresented: isReactionsPickerPresented,
+            viewModel: viewModel
         ) { [weak self] in
             self?.onShowPickerView?()
         }

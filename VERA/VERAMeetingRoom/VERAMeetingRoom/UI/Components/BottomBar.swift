@@ -35,6 +35,8 @@ public struct BottomBarButton: Identifiable {
     public let image: Image
     public let isActive: Bool
     public let accessory: BottomBarButtonAccessory?
+    public let overflowPresentation: BottomBarOverflowPresentation
+    public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
     public let action: () -> Void
 
     public init(
@@ -44,6 +46,8 @@ public struct BottomBarButton: Identifiable {
         image: Image,
         isActive: Bool = false,
         accessory: BottomBarButtonAccessory? = nil,
+        overflowPresentation: BottomBarOverflowPresentation = .gridItem,
+        overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
         action: @escaping () -> Void
     ) {
         self.id = id ?? label
@@ -52,6 +56,8 @@ public struct BottomBarButton: Identifiable {
         self.image = image
         self.isActive = isActive
         self.accessory = accessory
+        self.overflowPresentation = overflowPresentation
+        self.overflowSelectionBehavior = overflowSelectionBehavior
         self.action = action
     }
 
@@ -59,6 +65,7 @@ public struct BottomBarButton: Identifiable {
     public init(
         _ presenter: any BottomItemPresentable,
         isActive: Bool? = nil,
+        overflowSelectionBehavior: BottomBarOverflowSelectionBehavior? = nil,
         action: (() -> Void)? = nil
     ) {
         self.init(
@@ -68,6 +75,8 @@ public struct BottomBarButton: Identifiable {
             image: presenter.image,
             isActive: isActive ?? presenter.isActive,
             accessory: presenter.accessory,
+            overflowPresentation: presenter.overflowPresentation,
+            overflowSelectionBehavior: overflowSelectionBehavior ?? presenter.overflowSelectionBehavior,
             action: action ?? presenter.performAction
         )
     }
@@ -118,6 +127,7 @@ struct BottomBar: View {
     private let actions: MeetingRoomActions
     @Binding private var extraButtons: [BottomBarButton]
     @State private var isOverflowPresented = false
+    @State private var pendingOverflowAction: (() -> Void)?
 
     init(
         isMicEnabled: Bool,
@@ -191,7 +201,7 @@ struct BottomBar: View {
             .background(BottomBarBackground())
             .padding(.bottom, BottomBarConstants.containerPaddingBottom)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            .sheet(isPresented: $isOverflowPresented) {
+            .sheet(isPresented: $isOverflowPresented, onDismiss: performPendingOverflowAction) {
                 buildOverflowSheet(buttons: buttonGroups.overflow)
             }
             .onChange(of: buttonGroups.overflow.map(\.id)) { overflowButtonIds in
@@ -251,9 +261,22 @@ struct BottomBar: View {
     }
 
     private func handleOverflowButtonSelection(_ button: BottomBarButton) {
-        isOverflowPresented = false
-        DispatchQueue.main.async {
+        switch button.overflowSelectionBehavior {
+        case .performActionBeforeDismiss:
             button.action()
+            isOverflowPresented = false
+        case .dismissBeforeAction:
+            pendingOverflowAction = button.action
+            isOverflowPresented = false
+        }
+    }
+
+    private func performPendingOverflowAction() {
+        guard let action = pendingOverflowAction else { return }
+
+        pendingOverflowAction = nil
+        DispatchQueue.main.async {
+            action()
         }
     }
 

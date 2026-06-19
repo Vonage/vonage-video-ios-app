@@ -12,8 +12,15 @@ public protocol BottomItemPresentable {
     var image: Image { get }
     var isActive: Bool { get }
     var accessory: BottomBarButtonAccessory? { get }
+    var overflowPresentation: BottomBarOverflowPresentation { get }
+    var overflowSelectionBehavior: BottomBarOverflowSelectionBehavior { get }
 
     func performAction()
+}
+
+extension BottomItemPresentable {
+    public var overflowPresentation: BottomBarOverflowPresentation { .gridItem }
+    public var overflowSelectionBehavior: BottomBarOverflowSelectionBehavior { .performActionBeforeDismiss }
 }
 
 @MainActor
@@ -24,6 +31,8 @@ public struct BottomBarActionItem: BottomItemPresentable {
     public let image: Image
     public let isActive: Bool
     public let accessory: BottomBarButtonAccessory?
+    public let overflowPresentation: BottomBarOverflowPresentation
+    public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
 
     private let action: () -> Void
 
@@ -34,6 +43,8 @@ public struct BottomBarActionItem: BottomItemPresentable {
         image: Image,
         isActive: Bool = false,
         accessory: BottomBarButtonAccessory? = nil,
+        overflowPresentation: BottomBarOverflowPresentation = .gridItem,
+        overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
         action: @escaping () -> Void
     ) {
         self.id = id ?? label
@@ -42,12 +53,24 @@ public struct BottomBarActionItem: BottomItemPresentable {
         self.image = image
         self.isActive = isActive
         self.accessory = accessory
+        self.overflowPresentation = overflowPresentation
+        self.overflowSelectionBehavior = overflowSelectionBehavior
         self.action = action
     }
 
     public func performAction() {
         action()
     }
+}
+
+public enum BottomBarOverflowPresentation {
+    case gridItem
+    case headerContent(() -> AnyView)
+}
+
+public enum BottomBarOverflowSelectionBehavior: Equatable {
+    case performActionBeforeDismiss
+    case dismissBeforeAction
 }
 
 public struct BottomBarButtonAccessory {
