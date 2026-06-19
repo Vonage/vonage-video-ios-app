@@ -9,32 +9,57 @@ public struct BottomBarMenuItem: View {
 
     private let image: Image
     private let label: String
+    private let isActive: Bool
     private let accessibilityIdentifier: String?
+    private let accessory: BottomBarButtonAccessory?
     private let action: () -> Void
 
     public init(
         image: Image,
         label: String,
+        isActive: Bool = false,
         accessibilityIdentifier: String? = nil,
+        accessory: BottomBarButtonAccessory? = nil,
         action: @escaping () -> Void
     ) {
         self.image = image
         self.label = label
+        self.isActive = isActive
         self.accessibilityIdentifier = accessibilityIdentifier
+        self.accessory = accessory
         self.action = action
     }
 
     public var body: some View {
         Button(action: action) {
-            HStack {
+            VStack(spacing: 8) {
                 image
-                    .tint(theme.textSecondary)
+                    .font(.title3)
+                    .foregroundStyle(theme.textSecondary)
                 Text(label)
-                    .tint(theme.textSecondary)
+                    .font(.callout)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            .frame(maxWidth: .infinity, minHeight: 88)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isActive ? theme.primary.opacity(0.24) : .clear)
+            )
+            .overlay {
+                if !isActive {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(theme.border.opacity(0.7), lineWidth: 1)
+                }
             }
         }
+        .buttonStyle(.plain)
         .if(accessibilityIdentifier != nil) { view in
             view.accessibilityIdentifier(accessibilityIdentifier ?? "")
         }
+        .bottomBarButtonAccessory(accessory)
     }
 }

@@ -105,6 +105,8 @@ public struct MeetingRoomActions {
 }
 
 struct BottomBar: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let isMicEnabled: Bool
     private let isCameraEnabled: Bool
     private let isParticipantsListPresented: Bool
@@ -115,6 +117,7 @@ struct BottomBar: View {
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
     @Binding private var extraButtons: [BottomBarButton]
+    @State private var isOverflowPresented = false
 
     init(
         isMicEnabled: Bool,
@@ -142,6 +145,8 @@ struct BottomBar: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let buttonGroups = extraButtonGroups(availableWidth: geometry.size.width)
+
             HStack {
                 HStack(alignment: .center) {
                     if allowMicrophoneControl {
@@ -177,7 +182,7 @@ struct BottomBar: View {
                             isActive: isParticipantsListPresented,
                             onToggleParticipants: actions.onToggleParticipants)
                     }
-                    buildExtraButtons(availableWidth: geometry.size.width)
+                    buildExtraButtons(groups: buttonGroups)
                     EndCallControlButton(action: actions.onEndCall)
                 }
                 .padding(.horizontal, BottomBarConstants.containerPaddingHorizontal)
@@ -186,6 +191,14 @@ struct BottomBar: View {
             .background(BottomBarBackground())
             .padding(.bottom, BottomBarConstants.containerPaddingBottom)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .sheet(isPresented: $isOverflowPresented) {
+                buildOverflowSheet(buttons: buttonGroups.overflow)
+            }
+            .onChange(of: buttonGroups.overflow.map(\.id)) { overflowButtonIds in
+                if overflowButtonIds.isEmpty {
+                    isOverflowPresented = false
+                }
+            }
         }
     }
 
@@ -214,46 +227,56 @@ struct BottomBar: View {
         return max(0, Int(remainingWidth / (buttonWidth + spacing)))
     }
 
-    @ViewBuilder
-    private func buildExtraButtons(availableWidth: CGFloat) -> some View {
-        if extraButtons.isEmpty {
-            EmptyView()
-        } else {
-            let maxExtraButtons = calculateMaxExtraButtons(availableWidth: availableWidth)
+    func extraButtonGroups(availableWidth: CGFloat) -> (inline: [BottomBarButton], overflow: [BottomBarButton]) {
+        guard !extraButtons.isEmpty else {
+            return (inline: [], overflow: [])
+        }
 
-            if maxExtraButtons >= extraButtons.count {
-                // All buttons fit
-                ForEach(extraButtons) { button in
-                    buildInlineButton(button)
-                }
-            } else {
-                let inlineButtonsCount = max(0, maxExtraButtons - 1)
-                let inlineButtons = Array(extraButtons.prefix(inlineButtonsCount))
-                let overflowButtons = Array(extraButtons.dropFirst(inlineButtonsCount))
+        let maxExtraButtons = calculateMaxExtraButtons(availableWidth: availableWidth)
+        guard maxExtraButtons < extraButtons.count else {
+            return (inline: extraButtons, overflow: [])
+        }
 
-                ForEach(inlineButtons) { button in
-                    buildInlineButton(button)
-                }
+        let inlineButtonsCount = max(0, maxExtraButtons - 1)
+        let inlineButtons = Array(extraButtons.prefix(inlineButtonsCount))
+        let overflowButtons = Array(extraButtons.dropFirst(inlineButtonsCount))
 
-                buildOverflowMenu(buttons: overflowButtons)
-            }
+        return (inline: inlineButtons, overflow: overflowButtons)
+    }
+
+    private func buildOverflowSheet(buttons: [BottomBarButton]) -> some View {
+        BottomBarOverflowSheet(buttons: buttons, onSelect: handleOverflowButtonSelection)
+            .presentationDetents([.medium, .large])
+            .opaquePresentationBackground(theme.background)
+    }
+
+    private func handleOverflowButtonSelection(_ button: BottomBarButton) {
+        isOverflowPresented = false
+        DispatchQueue.main.async {
+            button.action()
         }
     }
 
-    private func buildOverflowMenu(buttons: [BottomBarButton]) -> some View {
-        Menu {
-            ForEach(buttons) { button in
-                BottomBarMenuItem(
-                    image: button.image,
-                    label: button.label,
-                    accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
-                    action: button.action
-                )
-            }
-        } label: {
-            ButtonImage(image: Image(systemName: "ellipsis.circle"))
-                .accessibilityLabel("More options")
+    @ViewBuilder
+    private func buildExtraButtons(groups: (inline: [BottomBarButton], overflow: [BottomBarButton])) -> some View {
+        ForEach(groups.inline) { button in
+            buildInlineButton(button)
         }
+
+        if !groups.overflow.isEmpty {
+            buildOverflowButton()
+        }
+    }
+
+    private func buildOverflowButton() -> some View {
+        BottomBarInlineButton(
+            image: Image(systemName: "ellipsis.circle"),
+            isActive: isOverflowPresented,
+            accessibilityIdentifier: MeetingRoomAccessibilityID.moreOptionsButton
+        ) {
+            isOverflowPresented.toggle()
+        }
+        .accessibilityLabel("More options")
         .accessibilityIdentifier(MeetingRoomAccessibilityID.moreOptionsButton)
     }
 

@@ -9,7 +9,7 @@ import VERACommonUI
 
 @testable import VERAMeetingRoom
 
-@Suite("BottomBar.calculateMaxExtraButtons Tests")
+@Suite("BottomBar Tests")
 struct BottomBarCalculateMaxExtraButtonsTests {
 
     // MARK: - Helper
@@ -18,7 +18,8 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         allowMicrophoneControl: Bool = true,
         allowCameraControl: Bool = true,
         showParticipantList: Bool = true,
-        isParticipantsListPresented: Bool = false
+        isParticipantsListPresented: Bool = false,
+        extraButtons: [BottomBarButton] = []
     ) -> BottomBar {
         .init(
             isMicEnabled: true,
@@ -29,8 +30,20 @@ struct BottomBarCalculateMaxExtraButtonsTests {
             allowCameraControl: allowCameraControl,
             showParticipantList: showParticipantList,
             currentLayout: .activeSpeaker,
-            actions: .init()
+            actions: .init(),
+            extraButtons: .constant(extraButtons)
         )
+    }
+
+    private func makeExtraButtons(count: Int) -> [BottomBarButton] {
+        (0..<count).map { index in
+            BottomBarButton(
+                id: "extra-button-\(index)",
+                label: "Extra \(index)",
+                image: Image(systemName: "square"),
+                action: {}
+            )
+        }
     }
 
     @Test("BottomBarButton stores shared inline and overflow presentation")
@@ -73,6 +86,47 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         let button = BottomBarButton(item, isActive: true)
 
         #expect(button.isActive)
+    }
+
+    @Test("Extra button groups keep all buttons inline when they fit")
+    func extraButtonGroupsKeepAllButtonsInlineWhenTheyFit() {
+        let extraButtons = makeExtraButtons(count: 3)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let groups = bar.extraButtonGroups(availableWidth: 2000)
+
+        #expect(groups.inline.map(\.id) == extraButtons.map(\.id))
+        #expect(groups.overflow.isEmpty)
+    }
+
+    @Test("Extra button groups reserve one slot for More when overflow is needed")
+    func extraButtonGroupsReserveOneSlotForMoreWhenOverflowIsNeeded() {
+        let extraButtons = makeExtraButtons(count: 4)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let buttonWidth = BottomBarConstants.buttonWidth
+        let spacing = BottomBarConstants.buttonSpacing
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
+        let baseButtonsCount = 5
+        let baseButtonsWidth =
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
+        let widthForThreeExtraSlots = baseButtonsWidth + CGFloat(3) * (buttonWidth + spacing)
+
+        let groups = bar.extraButtonGroups(availableWidth: widthForThreeExtraSlots)
+
+        #expect(groups.inline.map(\.id) == ["extra-button-0", "extra-button-1"])
+        #expect(groups.overflow.map(\.id) == ["extra-button-2", "extra-button-3"])
+    }
+
+    @Test("Extra button groups move every extra button to overflow when no extra slot fits")
+    func extraButtonGroupsMoveEveryExtraButtonToOverflowWhenNoExtraSlotFits() {
+        let extraButtons = makeExtraButtons(count: 3)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let groups = bar.extraButtonGroups(availableWidth: 10)
+
+        #expect(groups.inline.isEmpty)
+        #expect(groups.overflow.map(\.id) == extraButtons.map(\.id))
     }
 
     // MARK: - All Features Enabled
