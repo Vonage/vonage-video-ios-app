@@ -1,0 +1,34 @@
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFormViewModelTests.swift
+  s_e95052ced398ee::t_303cf081ad91fa 160-236
+  s_e95052ced398ee::t_a1d6d8915e6367 1
+VERA/VERAFeedback/VERAFeedbackTests/DefaultFeedbackReportDataSourceTests.swift
+  s_e95052ced398ee::t_4847456da09dd8 108-163
+  s_e95052ced398ee::t_b393a0324c67dd 7
+  s_e95052ced398ee::t_c2469016704a1f 103-107
+VERA/VERAFeedback/VERAFeedbackTests/TestHelpers/FeedbackTestHelpers.swift
+  s_e95052ced398ee::t_4929d0a367ad1a 16,20-23
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackDebugDumpBuilderTests.swift
+  s_e95052ced398ee::t_54c87119c0ebea 35-47
+VERA/VERAFeedback/Project.swift
+  s_e95052ced398ee::t_a4fb1f52b022b4 56-57
+VERA/VERAFeedback/VERAFeedbackTests/Mocks/MockFeedbackReportUseCase.swift
+  s_e95052ced398ee::t_c5bdf38f7ff7f7 1-32
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFactoryTests.swift
+  s_e95052ced398ee::t_1f3dd70351a8c3 42-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "c08ac5d8bae6b8be06de23044f0281ce66d9849c",
+  "prompts": {},
+  "sessions": {
+    "s_e95052ced398ee": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d49f360b-4cc4-4ed4-9136-b4bf29e0e22c",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
