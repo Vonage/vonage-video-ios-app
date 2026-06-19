@@ -8,6 +8,9 @@ import VERADomain
 import VERAVonage
 
 public final class E2ECallFacade: CallFacade {
+    public lazy var _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
+    public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
+
     private var cancellables = Set<AnyCancellable>()
     private let pluginNotifier: E2ECallPluginNotifier
 
