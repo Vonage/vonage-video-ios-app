@@ -46,7 +46,7 @@ struct BottomBarOverflowSheet: View {
                             accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
                             accessory: button.accessory
                         ) {
-                            onSelect(button)
+                            select(button)
                         }
                     }
                 }
@@ -72,6 +72,10 @@ struct BottomBarOverflowSheet: View {
             }
             return .init(id: button.id, content: content)
         }
+    }
+
+    func select(_ button: BottomBarButton) {
+        onSelect(button)
     }
 }
 

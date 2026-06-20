@@ -105,6 +105,28 @@ struct ChatBadgeButtonViewModelTests {
         #expect(count == 1)
     }
 
+    @Test func bottomItemPresentableExposesMetadataAndAction() async {
+        let repository = SpyChatMessagesRepository()
+        let sut = ChatBadgeButtonViewModel(chatMessagesObserver: repository)
+
+        repository.addMessage(makeMessage("Hello"))
+        _ = await sut.$unreadMessagesCount.values.first { $0 == 1 }
+
+        await MainActor.run {
+            #expect(sut.id == "chat-button")
+            #expect(sut.label == String(localized: "Chat", bundle: .veraChat))
+            #expect(sut.accessibilityIdentifier == nil)
+            #expect(sut.isActive == false)
+            #expect(sut.accessory == nil)
+
+            sut.performAction()
+        }
+
+        let count = await sut.$unreadMessagesCount.values.first { _ in true }
+
+        #expect(count == 0)
+    }
+
     // MARK: Helpers
 
     private func makeMessage(_ text: String) -> ChatMessage {

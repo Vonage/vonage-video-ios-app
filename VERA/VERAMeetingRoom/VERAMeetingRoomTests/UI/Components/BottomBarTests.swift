@@ -9,6 +9,14 @@ import VERACommonUI
 
 @testable import VERAMeetingRoom
 
+#if os(macOS)
+    import AppKit
+    private typealias HostingController<Content: View> = NSHostingController<Content>
+#else
+    import UIKit
+    private typealias HostingController<Content: View> = UIHostingController<Content>
+#endif
+
 @Suite("BottomBar Tests")
 struct BottomBarCalculateMaxExtraButtonsTests {
 
@@ -68,11 +76,13 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         #expect(button.isActive)
         #expect(button.accessory == nil)
         #expect(button.overflowSelectionBehavior == .performActionBeforeDismiss)
+        let isGridItem: Bool
         if case .gridItem = button.overflowPresentation {
-            #expect(true)
+            isGridItem = true
         } else {
-            #expect(false)
+            isGridItem = false
         }
+        #expect(isGridItem)
 
         button.action()
         #expect(didTap)
@@ -206,6 +216,74 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         let sheet = BottomBarOverflowSheet(buttons: buttons, onSelect: { _ in })
 
         #expect(sheet.gridButtons.map(\.id) == ["chat-button", "settings-button", "feedback-button"])
+    }
+
+    @Test("Overflow sheet selection forwards selected button")
+    func overflowSheetSelectionForwardsSelectedButton() {
+        let button = BottomBarButton(
+            id: "archive-button",
+            label: "Start Recording",
+            image: Image(systemName: "record.circle"),
+            action: {}
+        )
+        var selectedButtonId: String?
+        let sheet = BottomBarOverflowSheet(buttons: [button]) { selectedButton in
+            selectedButtonId = selectedButton.id
+        }
+
+        sheet.select(button)
+
+        #expect(selectedButtonId == "archive-button")
+    }
+
+    @Test("Overflow header content can be rendered")
+    func overflowHeaderContentCanBeRendered() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let sheet = BottomBarOverflowSheet(buttons: [headerButton], onSelect: { _ in })
+
+        let header = sheet.headerItems.first
+
+        #expect(header?.id == "reactions-button")
+        _ = header?.content()
+    }
+
+    @Test("Overflow sheet renders header and grid content")
+    @MainActor
+    func overflowSheetRendersHeaderAndGridContent() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let gridButton = BottomBarButton(
+            id: "chat-button",
+            label: "Chat",
+            image: Image(systemName: "message"),
+            action: {}
+        )
+
+        host(BottomBarOverflowSheet(buttons: [headerButton, gridButton], onSelect: { _ in }))
+    }
+
+    @Test("BottomBar renders base buttons and overflow trigger")
+    @MainActor
+    func bottomBarRendersBaseButtonsAndOverflowTrigger() {
+        let extraButtons = makeExtraButtons(count: 4)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        host(bar)
     }
 
     // MARK: - All Features Enabled
@@ -441,5 +519,18 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         let minimalResult = minimalFeaturesBar.calculateMaxExtraButtons(availableWidth: testWidth)
 
         #expect(minimalResult >= fullResult)
+    }
+
+    @discardableResult
+    @MainActor
+    private func host<V: View>(_ view: V) -> HostingController<V> {
+        let controller = HostingController(rootView: view)
+        controller.view.frame = CGRect(x: 0, y: 0, width: 430, height: 360)
+        #if os(macOS)
+            controller.view.layoutSubtreeIfNeeded()
+        #else
+            controller.view.layoutIfNeeded()
+        #endif
+        return controller
     }
 }

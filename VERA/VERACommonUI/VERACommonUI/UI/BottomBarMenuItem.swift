@@ -11,6 +11,10 @@ public struct BottomBarMenuItem: View {
         isActive ? theme.onPrimary : theme.secondary
     }
 
+    private var resolvedAccessibilityIdentifier: String {
+        accessibilityIdentifier ?? label
+    }
+
     private let image: Image
     private let label: String
     private let isActive: Bool
@@ -35,7 +39,7 @@ public struct BottomBarMenuItem: View {
     }
 
     public var body: some View {
-        Button(action: action) {
+        Button(action: performAction) {
             VStack(spacing: 8) {
                 image
                     .font(.title3)
@@ -59,11 +63,15 @@ public struct BottomBarMenuItem: View {
                         .stroke(.white, lineWidth: 1)
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityIdentifier(resolvedAccessibilityIdentifier)
         }
         .buttonStyle(.plain)
-        .if(accessibilityIdentifier != nil) { view in
-            view.accessibilityIdentifier(accessibilityIdentifier ?? "")
-        }
         .bottomBarButtonAccessory(accessory)
+    }
+
+    func performAction() {
+        action()
     }
 }
