@@ -35,26 +35,17 @@ public final class SpeakingWhileMutedDetector {
     /// Prevents flickering on brief noise bursts.
     static let triggerThreshold: Int = 3
 
+    private let isMicEnabled: AnyPublisher<Bool, Never>
+    private let audioLevel: AnyPublisher<Float, Never>
+    
     // MARK: - Output
-
+    
     /// Emits `true` when the user is speaking while muted, `false` otherwise.
     ///
     /// Distinct consecutive values only — subscribers will not receive repeated emissions
     /// of the same boolean.
-    public let isSpeakingWhileMuted: AnyPublisher<Bool, Never>
-
-    // MARK: - Init
-
-    /// Creates a new detector.
-    ///
-    /// - Parameters:
-    ///   - isMicEnabled: A publisher that emits `true` when the local microphone is active.
-    ///   - audioLevel: A publisher that emits the local publisher's audio level in [0.0, 1.0].
-    public init(
-        isMicEnabled: AnyPublisher<Bool, Never>,
-        audioLevel: AnyPublisher<Float, Never>
-    ) {
-        isSpeakingWhileMuted = Publishers.CombineLatest(isMicEnabled, audioLevel)
+    public lazy var isSpeakingWhileMuted: AnyPublisher<Bool, Never> = {
+        Publishers.CombineLatest(isMicEnabled, audioLevel)
             .scan(DetectionState()) { state, pair in
                 let (micEnabled, level) = pair
                 let isLoudWhileMuted = !micEnabled && level >= SpeakingWhileMutedDetector.audioLevelThreshold
@@ -69,6 +60,21 @@ public final class SpeakingWhileMutedDetector {
             .map(\.isSpeakingWhileMuted)
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }()
+
+    // MARK: - Init
+
+    /// Creates a new detector.
+    ///
+    /// - Parameters:
+    ///   - isMicEnabled: A publisher that emits `true` when the local microphone is active.
+    ///   - audioLevel: A publisher that emits the local publisher's audio level in [0.0, 1.0].
+    public init(
+        isMicEnabled: AnyPublisher<Bool, Never>,
+        audioLevel: AnyPublisher<Float, Never>
+    ) {
+        self.isMicEnabled = isMicEnabled
+        self.audioLevel = audioLevel
     }
 }
 
