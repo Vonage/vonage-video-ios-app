@@ -5,9 +5,9 @@
 import SwiftUI
 import VERADomain
 
+///
 /// Minimal meeting room UI shown while Picture-in-Picture is active.
 ///
-/// Mirrors Android's `PipMeetingRoomScreen` by showing only the active speaker video.
 struct PipMeetingRoomView: View {
     let state: MeetingRoomState
 
