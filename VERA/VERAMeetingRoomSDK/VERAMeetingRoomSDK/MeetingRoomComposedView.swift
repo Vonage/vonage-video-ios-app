@@ -16,6 +16,7 @@ import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
 import VERASettings
+import VERAVonage
 
 /// Layout constants for the composed meeting room view.
 enum MeetingRoomComposedConstants {
@@ -37,6 +38,7 @@ struct MeetingRoomComposedView: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
 
     let container: MeetingRoomSDKContainer
+    @ObservedObject var pictureInPictureManager: PictureInPictureManager
     let enabledFeatures: Set<MeetingRoomFeature>
     let buttonsAssembler: BottomBarButtonsAssembler
     let onAction: (MeetingRoomSDKAction) -> Void
@@ -63,8 +65,20 @@ struct MeetingRoomComposedView: View {
     @State private var showSettings = false
     @State private var showFeedbackForm = false
     @State private var showEffects = false
+    @State private var pictureInPictureCancellable: AnyCancellable?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
+        ZStack {
+            meetingRoomContent
+
+            #if DEBUG && !os(macOS)
+                PictureInPictureDebugOverlay(snapshot: pictureInPictureManager.debugSnapshot)
+            #endif
+        }
+    }
+
+    private var meetingRoomContent: some View {
         meetingRoomFactory.make(viewModel: viewModel)
             .modifier(
                 ChatSheetModifier(
@@ -123,6 +137,35 @@ struct MeetingRoomComposedView: View {
             .onReceive(selectedEffectPublisher) { _ in
                 viewModel.extraButtons = buttonsAssembler.rebuildButtons()
             }
+            .task {
+                await bindPictureInPictureIfNeeded()
+            }
+            .onChange(of: scenePhase) { phase in
+                #if !os(macOS)
+                    if phase == .background {
+                        pictureInPictureManager.requestPictureInPicture()
+                    }
+                #endif
+            }
+    }
+
+    private func bindPictureInPictureIfNeeded() async {
+        #if !os(macOS)
+            while viewModel.currentCall == nil {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled else { return }
+            }
+
+            guard pictureInPictureCancellable == nil,
+                let call = viewModel.currentCall as? VonageCall
+            else { return }
+
+            pictureInPictureCancellable = PictureInPictureBinder.bind(
+                manager: pictureInPictureManager,
+                viewModel: viewModel,
+                call: call
+            )
+        #endif
     }
 
     /// Publisher that emits when the selected video effect changes (skipping the initial value).

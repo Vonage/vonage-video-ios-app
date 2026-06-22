@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import OpenTok
 import SwiftUI
+import UIKit
 import VERACore
 import VERADomain
 
@@ -88,6 +89,9 @@ public class VonageSubscriber: NSObject {
     /// Whether audio was subscribed before entering hold.
     @Published public private(set) var wasSubscribedToAudio: Bool = false
 
+    private var isPictureInPictureRendererActive = false
+    private var pictureInPictureInlineView: AnyView?
+
     /// Tracks the number of views currently displaying this participant.
     /// Video is enabled when count > 0 and disabled when count reaches 0.
     @Atomic private var visibilityCount: Int = 0
@@ -166,6 +170,11 @@ public class VonageSubscriber: NSObject {
     /// - `onAppear`: Enables video subscription and schedules a delayed reinforcement
     /// - `onDisappear`: Disables video subscription
     private func updateParticipant() {
+        if isPictureInPictureRendererActive, let pictureInPictureInlineView {
+            updateParticipant(with: pictureInPictureInlineView, usesPictureInPictureRenderer: true)
+            return
+        }
+
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -209,6 +218,11 @@ public class VonageSubscriber: NSObject {
         // Do not attempt to unsubscribe video before the subscriber did connect
         // it will result in an inability to modify the video subscription later
         guard subscriberDidConnect else { return }
+
+        if isPictureInPictureRendererActive {
+            otSubscriber.subscribeToVideo = true
+            return
+        }
 
         otSubscriber.subscribeToVideo = visible
     }
@@ -265,6 +279,69 @@ public class VonageSubscriber: NSObject {
 
     func disableCaptions() {
         otSubscriber.subscribeToCaptions = false
+    }
+
+    // MARK: - Picture in Picture
+
+    func applyPictureInPictureRenderer(
+        _ renderer: PictureInPictureVideoRenderer,
+        inlineView: AnyView
+    ) {
+        isPictureInPictureRendererActive = true
+        pictureInPictureInlineView = inlineView
+        otSubscriber.videoRender = renderer
+        NotificationCenter.default.removeObserver(
+            otSubscriber,
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        updateParticipant(with: inlineView, usesPictureInPictureRenderer: true)
+        if subscriberDidConnect {
+            otSubscriber.subscribeToVideo = true
+        }
+    }
+
+    func clearPictureInPictureRenderer() {
+        isPictureInPictureRendererActive = false
+        pictureInPictureInlineView = nil
+        otSubscriber.videoRender = nil
+        updateParticipant()
+    }
+
+    private func updateParticipant(with view: AnyView, usesPictureInPictureRenderer: Bool) {
+        let name = stream.name ?? ""
+        participant = Participant(
+            id: id,
+            connectionId: stream.connection.connectionId,
+            name: name,
+            isMicEnabled: stream.hasAudio,
+            isCameraEnabled: stream.hasVideo,
+            videoDimensions: videoDimensions,
+            creationTime: date,
+            isScreenshare: isScreenshare,
+            audioLevel: audioLevel,
+            usesPictureInPictureRenderer: usesPictureInPictureRenderer,
+            view: view)
+
+        participant.onAppear = { [weak self] in
+            guard let self else { return }
+            self.visibilityCount += 1
+            self.disableTask?.cancel()
+            if self.visibilityCount > 0 {
+                self.setActiveSubscription(true)
+            }
+        }
+
+        participant.onDisappear = { [weak self] in
+            guard let self else { return }
+            self.visibilityCount = max(0, self.visibilityCount - 1)
+            self.disableTask?.cancel()
+            self.disableTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(SubscriberConstants.videoDisableDebounceNanoseconds))
+                guard let self, !Task.isCancelled, self.visibilityCount <= 0 else { return }
+                self.setActiveSubscription(false)
+            }
+        }
     }
 }
 

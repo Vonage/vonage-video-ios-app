@@ -442,16 +442,22 @@ public final class VonageCall: CallFacade {
             isNetworkStatsEnabled = false
             statsCollector.reset()
             try session.disconnect()
+            publisher.restoreDefaultVideoView()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
+            publisher.restoreDefaultVideoView()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)
             throw error
         }
+    }
+
+    func subscriber(for id: String) async -> VonageSubscriber? {
+        await callStateManager.getSubscriber(id: id)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {

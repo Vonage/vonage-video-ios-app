@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import OpenTok
 import SwiftUI
+import UIKit
 import VERACore
 import VERADomain
 
@@ -69,6 +70,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var wasPublishingAudio: Bool = false
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
+    private var isPictureInPictureRendererActive = false
+    private var pictureInPictureInlineView: AnyView?
     /// Holds the current list of video transformers.
     @Published open private(set) var videoTransformers: [VERATransformer] = []
     /// Holds the current list of audio transformers.
@@ -216,6 +219,23 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Keeps `participant` synchronized with `publishAudio`, `publishVideo`,
     /// `videoDimensions`, and the rendered `view`.
     private func updateParticipant() {
+        if isPictureInPictureRendererActive, let pictureInPictureInlineView {
+            participant = Participant(
+                id: id,
+                connectionId: stream?.connection.connectionId,
+                name: stream?.name ?? "",
+                isMicEnabled: otPublisher.publishAudio,
+                isCameraEnabled: otPublisher.publishVideo,
+                videoDimensions: videoDimensions,
+                isRemote: false,
+                creationTime: date,
+                isScreenshare: isScreenshare,
+                audioLevel: audioLevel,
+                usesPictureInPictureRenderer: true,
+                view: pictureInPictureInlineView)
+            return
+        }
+
         participant = Participant(
             id: id,
             connectionId: stream?.connection.connectionId,
@@ -228,6 +248,30 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             isScreenshare: isScreenshare,
             audioLevel: audioLevel,
             view: view)
+    }
+
+    // MARK: - Picture in Picture
+
+    func applyPictureInPictureRenderer(
+        _ renderer: PictureInPictureVideoRenderer,
+        inlineView: AnyView
+    ) {
+        isPictureInPictureRendererActive = true
+        pictureInPictureInlineView = inlineView
+        otPublisher.videoRender = renderer
+        NotificationCenter.default.removeObserver(
+            otPublisher,
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        updateParticipant()
+    }
+
+    func restoreDefaultVideoView() {
+        isPictureInPictureRendererActive = false
+        pictureInPictureInlineView = nil
+        otPublisher.videoRender = nil
+        updateParticipant()
     }
 
     /// Sets or clears hold mode on the publisher.

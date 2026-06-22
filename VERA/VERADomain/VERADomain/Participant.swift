@@ -42,6 +42,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let isScreenshare: Bool
     /// The current audio level of the participant (0.0 to 1.0).
     public let audioLevel: Float
+    /// Whether the participant is rendered with a custom PiP-capable video surface.
+    public let usesPictureInPictureRenderer: Bool
 
     /// Optional callback invoked when this participant’s view appears on screen.
     ///
@@ -76,6 +78,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         creationTime: Date,
         isScreenshare: Bool,
         audioLevel: Float = 0.0,
+        usesPictureInPictureRenderer: Bool = false,
         view: AnyView
     ) {
         self.id = id
@@ -88,6 +91,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.creationTime = creationTime
         self.isScreenshare = isScreenshare
         self.audioLevel = audioLevel
+        self.usesPictureInPictureRenderer = usesPictureInPictureRenderer
         self.view = view
     }
 
@@ -120,6 +124,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
             && lhs.creationTime == rhs.creationTime
             && lhs.isScreenshare == rhs.isScreenshare
             && lhs.audioLevel == rhs.audioLevel
+            && lhs.usesPictureInPictureRenderer == rhs.usesPictureInPictureRenderer
     }
 
     /// Hashes identity and core properties for set/dictionary usage.
@@ -137,6 +142,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         hasher.combine(creationTime)
         hasher.combine(isScreenshare)
         hasher.combine(audioLevel)
+        hasher.combine(usesPictureInPictureRenderer)
     }
 
     /// Aspect ratio to use for container sizing, with safe defaults.

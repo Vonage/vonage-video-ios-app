@@ -130,4 +130,8 @@ final actor CallStateManager {
     func getAllSubscribers() async -> [VonageSubscriber] {
         await subscribersRepository.all
     }
+
+    func getSubscriber(id: String) async -> VonageSubscriber? {
+        await subscribersRepository.getSubscriber(id: id)
+    }
 }

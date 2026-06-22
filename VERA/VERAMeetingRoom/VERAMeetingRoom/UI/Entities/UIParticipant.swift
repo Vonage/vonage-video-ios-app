@@ -46,6 +46,7 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var containerAspectRatio: Double { participant.containerAspectRatio }
     public var aspectRatio: Double { participant.aspectRatio }
     public var audioLevel: Float { participant.audioLevel }
+    public var usesPictureInPictureRenderer: Bool { participant.usesPictureInPictureRenderer }
     public var isProminent: Bool { participant.isScreenshare || isPinned }
     public var onAppear: (() -> Void)? { participant.onAppear }
     public var onDisappear: (() -> Void)? { participant.onDisappear }

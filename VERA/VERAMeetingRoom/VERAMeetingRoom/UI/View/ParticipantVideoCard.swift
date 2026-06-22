@@ -67,7 +67,20 @@ struct ParticipantVideoCard: View {
     let activeSpeakerId: String?
     var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
 
+    init(
+        participant: UIParticipant,
+        activeSpeakerId: String?
+    ) {
+        self.participant = participant
+        self.activeSpeakerId = activeSpeakerId
+    }
+
     var body: some View {
+        cardContent
+    }
+
+    @ViewBuilder
+    private var cardContent: some View {
         Group {
             if participant.isCameraEnabled {
                 ZStack {
@@ -108,6 +121,7 @@ struct ParticipantVideoCard: View {
                                     )
                                 } else {
                                     participant.view
+                                        .id("\(participant.id)-pip-\(participant.usesPictureInPictureRenderer)")
                                         .horizontallyFlipped(shouldFlipHorizontally)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
