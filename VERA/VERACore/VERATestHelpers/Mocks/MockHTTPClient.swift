@@ -37,11 +37,11 @@ public final class MockHTTPClient: HTTPClient {
         try await recordAndReturn(url: url, data: nil)
     }
 
-    public func post(_ url: URL, data: Data) async throws -> Data {
-        try await recordAndReturn(url: url, data: data)
+    public func post(_ url: URL, additionalHeaders: [String: String] = [:], data: Data) async throws -> Data {
+        try await recordAndReturn(url: url, additionalHeaders: additionalHeaders, data: data)
     }
 
-    private func recordAndReturn(url: URL, data: Data?) async throws -> Data {
+    private func recordAndReturn(url: URL, additionalHeaders: [String: String] = [:], data: Data?) async throws -> Data {
         callCount += 1
         recordedURL = url
         recordedURLs.append(url)
