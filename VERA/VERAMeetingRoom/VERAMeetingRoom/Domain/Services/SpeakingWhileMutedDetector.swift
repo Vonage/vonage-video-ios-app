@@ -37,9 +37,9 @@ public final class SpeakingWhileMutedDetector {
 
     private let isMicEnabled: AnyPublisher<Bool, Never>
     private let audioLevel: AnyPublisher<Float, Never>
-    
+
     // MARK: - Output
-    
+
     /// Emits `true` when the user is speaking while muted, `false` otherwise.
     ///
     /// Distinct consecutive values only — subscribers will not receive repeated emissions
