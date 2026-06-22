@@ -29,11 +29,11 @@ public final class SpeakingWhileMutedDetector {
 
     /// Minimum audio level considered significant enough to constitute "speaking".
     /// Matches the Android implementation and the existing `ActiveSpeakerTracker` minimum.
-    static let audioLevelThreshold: Float = 0.1
+    public static let audioLevelThreshold: Float = 0.1
 
     /// Number of consecutive loud-while-muted samples required before emitting `true`.
     /// Prevents flickering on brief noise bursts.
-    static let triggerThreshold: Int = 3
+    public static let triggerThreshold: Int = 3
 
     private let isMicEnabled: AnyPublisher<Bool, Never>
     private let audioLevel: AnyPublisher<Float, Never>

@@ -351,7 +351,7 @@ extension MeetingRoomViewModel {
             .sink { [weak self] _ in
                 Task { @MainActor [weak self] in
                     self?.toast = ToastItem(
-                        message: "You're muted. Tap the mic button to unmute.",
+                        message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
                         mode: .warning)
                 }
             }
@@ -364,9 +364,13 @@ extension MeetingRoomViewModel {
             self.archivingPublisher.value = archivingState
             switch archivingState {
             case .idle:
-                self.toast = .init(message: "Session recording stopped", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording stopped", bundle: .module),
+                    mode: .info)
             case .archiving:
-                self.toast = .init(message: "Session recording started", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording started", bundle: .module),
+                    mode: .info)
             }
 
             self.updateArchivingButtons()
@@ -378,15 +382,21 @@ extension MeetingRoomViewModel {
             guard let self else { return }
             switch event {
             case .didBeginReconnecting:
-                self.toast = .init(message: "Session did drop, started reconnection", mode: .warning)
+                self.toast = .init(
+                    message: String(localized: "Session did drop, started reconnection", bundle: .module),
+                    mode: .warning)
             case .didReconnect:
-                self.toast = .init(message: "Session did reconnect", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session did reconnect", bundle: .module),
+                    mode: .info)
             case .error(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .sessionFailure(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
-                self.toast = .init(message: "Session did disconnect", mode: .failure)
+                self.toast = .init(
+                    message: String(localized: "Session did disconnect", bundle: .module),
+                    mode: .failure)
                 self.scheduleDisconnection()
             default:
                 break
