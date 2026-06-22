@@ -56,7 +56,7 @@ struct MeetingRoomComposedView: View {
     // MARK: - Sheet/Overlay State
 
     @State private var showChat = false
-    @State private var showPickerView = false
+    @State private var showReactions = false
     @State private var showCaptions = false
     @State private var showSettings = false
     @State private var showFeedbackForm = false
@@ -74,7 +74,7 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 ReactionsOverlayModifier(
                     isEnabled: enabledFeatures.contains(.reactions),
-                    showPickerView: $showPickerView,
+                    showPickerView: $showReactions,
                     emojiPickerContainerViewModel: emojiPickerContainerViewModel,
                     floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
                     container: container
@@ -113,12 +113,12 @@ struct MeetingRoomComposedView: View {
             )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
-                buttonsAssembler.onShowPickerView = { showPickerView.toggle() }
+                buttonsAssembler.onShowReactions = { showReactions.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
                 buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
             }
-            .onChange(of: showPickerView) { isPresented in
+            .onChange(of: showReactions) { isPresented in
                 buttonsAssembler.setReactionsPickerPresented(isPresented)
             }
             .onChange(of: showChat) { isPresented in

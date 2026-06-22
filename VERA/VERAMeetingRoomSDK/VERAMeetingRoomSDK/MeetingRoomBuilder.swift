@@ -452,7 +452,7 @@ public final class MeetingRoomBuilder {
             await MediaPermissions.requestPermissionsIfNeeded()
 
             container.resetPublisher()
-            await effectsVM?.reapplyCurrentEffect()
+            effectsVM?.reapplyCurrentEffect()
         }
 
         let themedView =

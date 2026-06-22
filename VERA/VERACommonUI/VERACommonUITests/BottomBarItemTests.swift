@@ -98,10 +98,14 @@ struct BottomBarItemTests {
     @Test("BottomBarMenuItem renders inactive state")
     @MainActor
     func bottomBarMenuItemRendersInactiveState() {
+        let accessory = BottomBarButtonAccessory(placement: .topTrailing) {
+            Text("1")
+        }
         let item = BottomBarMenuItem(
             image: Image(systemName: "message"),
             label: "Chat",
             accessibilityIdentifier: "chat-button",
+            accessory: accessory,
             action: {}
         )
 
@@ -112,11 +116,15 @@ struct BottomBarItemTests {
     @Test("BottomBarMenuItem renders active state")
     @MainActor
     func bottomBarMenuItemRendersActiveState() {
+        let accessory = BottomBarButtonAccessory(placement: .topTrailing) {
+            Text("1")
+        }
         let item = BottomBarMenuItem(
             image: Image(systemName: "gearshape"),
             label: "Settings",
             isActive: true,
             accessibilityIdentifier: "settings-button",
+            accessory: accessory,
             action: {}
         )
 
@@ -205,6 +213,15 @@ struct BottomBarItemTests {
     @MainActor
     func opaquePresentationBackgroundModifierRenders() {
         host(Text("Sheet").opaquePresentationBackground(.red))
+    }
+
+    @Test("Drag indicator renders")
+    @MainActor
+    func dragIndicatorRenders() {
+        let item = DragIndicatorView()
+
+        _ = item.body
+        host(item)
     }
 
     @Test("Bottom bar accessory modifier renders all placements")

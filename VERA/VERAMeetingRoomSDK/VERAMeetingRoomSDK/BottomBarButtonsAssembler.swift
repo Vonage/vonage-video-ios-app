@@ -55,7 +55,7 @@ final class BottomBarButtonsAssembler {
 
     // Bindings for sheet/overlay presentation
     var onShowChat: (() -> Void)?
-    var onShowPickerView: (() -> Void)?
+    var onShowReactions: (() -> Void)?
     var onShowSettings: (() -> Void)?
     var onShowFeedbackForm: (() -> Void)?
     var onShowEffects: (() -> Void)?
@@ -82,10 +82,19 @@ final class BottomBarButtonsAssembler {
             .eraseToAnyPublisher()
             ?? Empty().eraseToAnyPublisher()
 
+        let chatUpdates =
+            enabledFeatures.contains(.chat)
+            ? container.chatBadgeButtonViewModel.$unreadMessagesCount
+                .dropFirst()
+                .map { _ in () }
+                .eraseToAnyPublisher()
+            : Empty().eraseToAnyPublisher()
+
         return Publishers.MergeMany([
             archiveUpdates,
             effectsUpdates,
             captionsUpdates,
+            chatUpdates,
             buttonsDidChangeSubject.eraseToAnyPublisher(),
         ])
         .eraseToAnyPublisher()
@@ -151,9 +160,8 @@ final class BottomBarButtonsAssembler {
 
     private func makeChatButton() -> BottomBarButton {
         let viewModel = container.chatBadgeButtonViewModel
-        let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(
-            item,
+        return .init(
+            viewModel,
             isActive: isChatPresented,
             overflowSelectionBehavior: .dismissBeforeAction
         ) { [weak self] in
@@ -165,9 +173,8 @@ final class BottomBarButtonsAssembler {
     private func makeBackgroundEffectsButton(
         _ viewModel: VideoEffectsViewModel
     ) -> BottomBarButton {
-        let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(
-            item,
+        .init(
+            viewModel,
             isActive: isEffectsPresented || viewModel.isActive,
             overflowSelectionBehavior: .dismissBeforeAction
         ) { [weak self] in
@@ -176,51 +183,49 @@ final class BottomBarButtonsAssembler {
     }
 
     private func makeFeedbackReportButton() -> BottomBarButton {
-        let item: any BottomItemPresentable = FeedbackBottomItemPresenter { [weak self] in
+        let item = FeedbackBottomItemPresenter { [weak self] in
             self?.onShowFeedbackForm?()
         }
-        return BottomBarButton(item, isActive: isFeedbackFormPresented)
+        return .init(item, isActive: isFeedbackFormPresented)
     }
 
     private func makeArchiveButton(
         _ viewModel: ArchiveButtonViewModel
     ) -> BottomBarButton {
-        let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item, overflowSelectionBehavior: .dismissBeforeAction)
+        .init(viewModel, overflowSelectionBehavior: .dismissBeforeAction)
     }
 
     private func makeCaptionsButton(
         _ viewModel: CaptionsButtonViewModel
     ) -> BottomBarButton {
-        let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item)
+        .init(viewModel)
     }
 
     private func makeReactionsButton(
         _ viewModel: EmojiButtonContainerViewModel
     ) -> BottomBarButton {
-        let item: any BottomItemPresentable = ReactionsBottomItemPresenter(
+        let item = ReactionsBottomItemPresenter(
             isPickerPresented: isReactionsPickerPresented,
             viewModel: viewModel
         ) { [weak self] in
-            self?.onShowPickerView?()
+            self?.onShowReactions?()
         }
-        return BottomBarButton(item)
+        return .init(item)
     }
 
     private func makeScreenShareButton() -> BottomBarButton {
         let extensionId =
             container.broadcastExtensionBundleId
             ?? (Bundle.main.bundleIdentifier ?? "com.vonage.VERA") + ".BroadcastExtension"
-        let item: any BottomItemPresentable = ScreenShareBottomItemPresenter(extensionId: extensionId)
-        return BottomBarButton(item)
+        let item = ScreenShareBottomItemPresenter(extensionId: extensionId)
+        return .init(item)
     }
 
     private func makeSettingsButton() -> BottomBarButton {
-        let item: any BottomItemPresentable = SettingsBottomItemPresenter { [weak self] in
+        let item = SettingsBottomItemPresenter { [weak self] in
             self?.onShowSettings?()
         }
-        return BottomBarButton(item, isActive: isSettingsPresented)
+        return .init(item, isActive: isSettingsPresented)
     }
 
     private func makeAudioEffectsButton() -> BottomBarButton {
@@ -231,8 +236,7 @@ final class BottomBarButtonsAssembler {
             viewModel = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
             meetingNoiseSuppressionButtonViewModel = viewModel
         }
-        let item: any BottomItemPresentable = viewModel
-        return BottomBarButton(item)
+        return .init(viewModel)
     }
 
     /// Rebuilds buttons using the most recent state.
@@ -297,7 +301,7 @@ final class BottomBarButtonsAssembler {
         meetingNoiseSuppressionButtonViewModel = nil
 
         onShowChat = nil
-        onShowPickerView = nil
+        onShowReactions = nil
         onShowSettings = nil
         onShowFeedbackForm = nil
         onShowEffects = nil

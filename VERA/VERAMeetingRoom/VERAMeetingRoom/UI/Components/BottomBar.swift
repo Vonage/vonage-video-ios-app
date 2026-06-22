@@ -257,6 +257,7 @@ struct BottomBar: View {
     private func buildOverflowSheet(buttons: [BottomBarButton]) -> some View {
         BottomBarOverflowSheet(buttons: buttons, onSelect: handleOverflowButtonSelection)
             .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
             .opaquePresentationBackground(theme.background)
     }
 

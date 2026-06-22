@@ -26,7 +26,11 @@ extension ChatBadgeButtonViewModel: BottomItemPresentable {
     }
 
     public var accessory: BottomBarButtonAccessory? {
-        nil
+        let unreadMessagesCount = self.unreadMessagesCount
+        guard unreadMessagesCount > 0 else { return nil }
+        return BottomBarButtonAccessory(placement: .topTrailing) {
+            BadgeView(badgeCount: unreadMessagesCount)
+        }
     }
 
     public func performAction() {

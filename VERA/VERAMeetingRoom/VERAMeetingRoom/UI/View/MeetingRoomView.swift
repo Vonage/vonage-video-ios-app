@@ -73,7 +73,6 @@ public struct MeetingRoomView: View {
             ScreenIdentifierContainer(MeetingRoomAccessibilityID.screen) {
                 MeetingRoomContent(
                     participants: state.participants,
-                    showBottomSheet: false,
                     layout: state.layout,
                     activeSpeakerId: state.activeSpeakerId
                 )

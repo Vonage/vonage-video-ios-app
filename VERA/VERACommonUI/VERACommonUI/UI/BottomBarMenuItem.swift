@@ -22,6 +22,15 @@ public struct BottomBarMenuItem: View {
     private let accessory: BottomBarButtonAccessory?
     private let action: () -> Void
 
+    private var iconContent: some View {
+        image
+            .font(.title3)
+            .foregroundStyle(foregroundColor)
+            .frame(width: 40, height: 32)
+            .padding(5)
+            .bottomBarButtonAccessory(accessory)
+    }
+
     public init(
         image: Image,
         label: String,
@@ -41,9 +50,7 @@ public struct BottomBarMenuItem: View {
     public var body: some View {
         Button(action: performAction) {
             VStack(spacing: 8) {
-                image
-                    .font(.title3)
-                    .foregroundStyle(foregroundColor)
+                iconContent
                 Text(label)
                     .font(.callout)
                     .lineLimit(1)
@@ -68,7 +75,6 @@ public struct BottomBarMenuItem: View {
             .accessibilityIdentifier(resolvedAccessibilityIdentifier)
         }
         .buttonStyle(.plain)
-        .bottomBarButtonAccessory(accessory)
     }
 
     func performAction() {

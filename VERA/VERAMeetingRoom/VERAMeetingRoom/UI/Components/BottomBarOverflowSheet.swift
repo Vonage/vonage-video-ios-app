@@ -15,10 +15,24 @@ private enum BottomBarOverflowSheetConstants {
     static let gridSpacing: CGFloat = 8
 }
 
+/// A bottom-sheet style overflow surface for meeting room bottom bar actions.
+///
+/// `BottomBarOverflowSheet` renders bottom bar actions that do not fit inline in
+/// the meeting room bottom bar. Buttons using a header overflow presentation are
+/// rendered above the grid, while regular actions are rendered as grid items.
+/// Selection is delegated through `onSelect` so the presenting bottom bar keeps
+/// control of dismissal and action timing.
 struct BottomBarOverflowSheet: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
     private let buttons: [BottomBarButton]
     private let onSelect: (BottomBarButton) -> Void
 
+    /// Creates an overflow sheet for the provided bottom bar buttons.
+    ///
+    /// - Parameters:
+    ///   - buttons: The bottom bar buttons to render in the overflow sheet.
+    ///   - onSelect: A callback invoked when a grid button is selected.
     init(
         buttons: [BottomBarButton],
         onSelect: @escaping (BottomBarButton) -> Void
@@ -28,32 +42,36 @@ struct BottomBarOverflowSheet: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: BottomBarOverflowSheetConstants.verticalPadding) {
-                ForEach(headerItems) { item in
-                    item.content()
-                }
+        VStack(spacing: 0) {
+            DragIndicatorView()
 
-                LazyVGrid(
-                    columns: BottomBarOverflowSheetConstants.columns,
-                    spacing: BottomBarOverflowSheetConstants.gridSpacing
-                ) {
-                    ForEach(gridButtons) { button in
-                        BottomBarMenuItem(
-                            image: button.image,
-                            label: button.label,
-                            isActive: button.isActive,
-                            accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
-                            accessory: button.accessory
-                        ) {
-                            select(button)
+            ScrollView {
+                VStack(spacing: BottomBarOverflowSheetConstants.verticalPadding) {
+                    ForEach(headerItems) { item in
+                        item.content()
+                    }
+
+                    LazyVGrid(
+                        columns: BottomBarOverflowSheetConstants.columns,
+                        spacing: BottomBarOverflowSheetConstants.gridSpacing
+                    ) {
+                        ForEach(gridButtons) { button in
+                            BottomBarMenuItem(
+                                image: button.image,
+                                label: button.label,
+                                isActive: button.isActive,
+                                accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
+                                accessory: button.accessory
+                            ) {
+                                select(button)
+                            }
                         }
                     }
                 }
             }
+            .padding(.horizontal, BottomBarOverflowSheetConstants.horizontalPadding)
+            .padding(.vertical, BottomBarOverflowSheetConstants.verticalPadding)
         }
-        .padding(.horizontal, BottomBarOverflowSheetConstants.horizontalPadding)
-        .padding(.vertical, BottomBarOverflowSheetConstants.verticalPadding)
     }
 
     var gridButtons: [BottomBarButton] {

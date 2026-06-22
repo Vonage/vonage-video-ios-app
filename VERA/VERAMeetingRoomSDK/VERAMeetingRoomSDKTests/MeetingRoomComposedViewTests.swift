@@ -103,7 +103,7 @@ struct MeetingRoomComposedViewTests {
     func onAppearSetsOnShowPickerView() async {
         let (sut, assembler) = makeSUTWithAssembler()
         await renderView(sut)
-        #expect(assembler.onShowPickerView != nil)
+        #expect(assembler.onShowReactions != nil)
     }
 
     @Test("onAppear sets buttonsAssembler.onShowSettings callback")

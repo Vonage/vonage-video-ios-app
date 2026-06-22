@@ -42,6 +42,20 @@ struct BottomBarOverflowSheetUITests {
         snapshot(sut, named: "HeaderAndGrid_Dark")
     }
 
+    @Test("BottomBarOverflowSheet - Landscape Scrollable")
+    func landscapeScrollable() throws {
+        let sut = makeSUT(buttons: [makeHeaderButton()] + makeScrollableGridButtons())
+
+        snapshot(sut, named: "LandscapeScrollable", width: 720, height: 260)
+    }
+
+    @Test("BottomBarOverflowSheet - Accessory")
+    func accessory() throws {
+        let sut = makeSUT(buttons: [makeChatButtonWithAccessory()] + Array(makeGridButtons().dropFirst()))
+
+        snapshot(sut, named: "Accessory")
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(buttons: [BottomBarButton]) -> some View {
@@ -87,15 +101,40 @@ struct BottomBarOverflowSheetUITests {
         ]
     }
 
+    private func makeScrollableGridButtons() -> [BottomBarButton] {
+        makeGridButtons() + [
+            .init(id: "captions-button", label: "Captions", image: Image(systemName: "captions.bubble"), action: {}),
+            .init(
+                id: "share-button", label: "Share Screen", image: Image(systemName: "square.and.arrow.up"), action: {}),
+            .init(
+                id: "effects-button", label: "Effects", image: Image(systemName: "circle.lefthalf.filled"), action: {}),
+            .init(id: "participants-button", label: "Participants", image: Image(systemName: "person.2"), action: {}),
+        ]
+    }
+
+    private func makeChatButtonWithAccessory() -> BottomBarButton {
+        .init(
+            id: "chat-button-with-accessory",
+            label: "Chat",
+            image: Image(systemName: "message"),
+            accessory: BottomBarButtonAccessory(placement: .topTrailing) {
+                BadgeView(badgeCount: 1)
+            },
+            action: {}
+        )
+    }
+
     private func snapshot(
         _ view: some View,
         named: String,
+        width: CGFloat = 390,
+        height: CGFloat = 360,
         line: UInt = #line,
         column: UInt = #column
     ) {
         assertSnapshot(
             of: view,
-            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 360)),
+            as: .image(precision: 0.99, layout: .fixed(width: width, height: height)),
             named: named,
             record: isRecording,
             testName: "\(snapshotPrefix)_\(named)",

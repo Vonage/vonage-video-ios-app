@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Testing
+import VERAChat
 import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
@@ -62,6 +63,61 @@ struct BottomBarButtonsAssemblerTests {
 
         #expect(button?.id == "chat-button")
         #expect(button?.isActive == true)
+    }
+
+    @Test("Chat button includes unread badge accessory and clears it on action")
+    @MainActor
+    func chatButtonIncludesUnreadBadgeAccessoryAndClearsItOnAction() async {
+        let features: Set<MeetingRoomFeature> = [.chat]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        let viewModel = container.chatBadgeButtonViewModel
+        var didShowChat = false
+        assembler.onShowChat = {
+            didShowChat = true
+        }
+
+        #expect(assembler.buildButtons().first?.accessory == nil)
+
+        container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
+        _ = await viewModel.$unreadMessagesCount.values.first { $0 == 1 }
+
+        let button = assembler.buildButtons().first
+
+        #expect(button?.id == "chat-button")
+        #expect(button?.accessory?.placement == .topTrailing)
+        #expect(button?.accessory?.allowsHitTesting == false)
+        _ = button?.accessory?.content()
+
+        button?.action()
+
+        #expect(didShowChat)
+        #expect(viewModel.unreadMessagesCount == 0)
+        #expect(assembler.buildButtons().first?.accessory == nil)
+    }
+
+    @Test("buttonsDidChange emits when chat unread count changes")
+    @MainActor
+    func buttonsDidChangeEmitsWhenChatUnreadCountChanges() async {
+        let features: Set<MeetingRoomFeature> = [.chat]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        var didEmitUpdate = false
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
+        }
+
+        container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
+        _ = await container.chatBadgeButtonViewModel.$unreadMessagesCount.values.first { $0 == 1 }
+
+        #expect(didEmitUpdate)
+        cancellable.cancel()
     }
 
     @Test("Settings feature produces one button")
@@ -544,5 +600,13 @@ struct BottomBarButtonsAssemblerTests {
         MeetingRoomSDKContainer(
             baseURL: Self.testBaseURL,
             enabledFeatures: enabledFeatures)
+    }
+
+    private func makeChatMessage(_ text: String) -> ChatMessage {
+        ChatMessage(
+            username: "User",
+            message: text,
+            date: Date()
+        )
     }
 }
