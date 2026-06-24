@@ -28,10 +28,10 @@ public final class SettingsFactory {
     private let statsDataSource: StatsDataSource
 
     /// Repository for SDK logging preferences.
-    private let loggingRepository: SDKLoggingRepository?
+    private let loggingRepository: any SDKLoggingRepository
 
-    /// Supplies URLs for shareable SDK log files.
-    private let logFileURLProvider: (() -> [URL])?
+    /// Use case for retrieving shareable SDK log file URLs.
+    private let getLogFileURLs: (any GetLogFileURLsUseCase)?
 
     /// Synchronous loader for SDK logging preferences, used to provide
     /// immediate initial state when creating view models.
@@ -42,21 +42,21 @@ public final class SettingsFactory {
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
-    ///   - loggingRepository: Repository for SDK logging preferences. Defaults to `nil`.
+    ///   - loggingRepository: Repository for SDK logging preferences. Defaults to ``NullSDKLoggingRepository``.
     ///   - loggingPreferencesLoader: Synchronous loader for logging preferences. Defaults to `nil`.
-    ///   - logFileURLProvider: Provider for shareable SDK log files. Defaults to `nil`.
+    ///   - getLogFileURLs: Use case for retrieving shareable SDK log file URLs. Defaults to `nil`.
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
-        loggingRepository: SDKLoggingRepository? = nil,
+        loggingRepository: any SDKLoggingRepository = NullSDKLoggingRepository(),
         loggingPreferencesLoader: (() -> SDKLoggingPreferences)? = nil,
-        logFileURLProvider: (() -> [URL])? = nil
+        getLogFileURLs: (any GetLogFileURLsUseCase)? = nil
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
         self.loggingRepository = loggingRepository
         self.loggingPreferencesLoader = loggingPreferencesLoader
-        self.logFileURLProvider = logFileURLProvider
+        self.getLogFileURLs = getLogFileURLs
     }
 
     // MARK: - Settings View
@@ -73,7 +73,7 @@ public final class SettingsFactory {
             repository: repository,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
-            logFileURLProvider: logFileURLProvider
+            getLogFileURLs: getLogFileURLs
         )
         return SettingsView(viewModel: viewModel)
     }
@@ -93,9 +93,7 @@ public final class SettingsFactory {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
                     viewModel: SettingsViewModel(
-                        repository: fallbackRepo,
-                        loggingRepository: nil,
-                        logFileURLProvider: nil
+                        repository: fallbackRepo
                     )
                 )
             }
@@ -131,7 +129,7 @@ public final class SettingsFactory {
             repository: repository,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
-            logFileURLProvider: logFileURLProvider
+            getLogFileURLs: getLogFileURLs
         )
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,

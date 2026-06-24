@@ -8,6 +8,8 @@ import Combine
 
 final actor MockSDKLoggingRepository: SDKLoggingRepository {
 
+    nonisolated let isSupported: Bool
+
     private nonisolated let subject: CurrentValueSubject<SDKLoggingPreferences, Never>
 
     nonisolated(unsafe) private(set) var saveCallCount = 0
@@ -18,8 +20,9 @@ final actor MockSDKLoggingRepository: SDKLoggingRepository {
         subject.eraseToAnyPublisher()
     }
 
-    init(initialPreferences: SDKLoggingPreferences = .default) {
+    init(initialPreferences: SDKLoggingPreferences = .default, isSupported: Bool = true) {
         self.subject = CurrentValueSubject(initialPreferences)
+        self.isSupported = isSupported
     }
 
     func getPreferences() async -> SDKLoggingPreferences {

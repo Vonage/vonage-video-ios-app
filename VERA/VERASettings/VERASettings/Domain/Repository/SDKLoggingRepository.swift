@@ -9,7 +9,13 @@ import Foundation
 ///
 /// Concrete implementations provide storage and observation for
 /// ``SDKLoggingPreferences`` values used by the Settings module.
+///
+/// When SDK logging is not available, inject ``NullSDKLoggingRepository``
+/// which returns `isSupported == false` and no-ops all mutations.
 public protocol SDKLoggingRepository: Sendable {
+    /// Whether SDK logging is supported in the current configuration.
+    var isSupported: Bool { get }
+
     /// Current preferences. Always emits the current value on subscribe.
     var preferencesPublisher: AnyPublisher<SDKLoggingPreferences, Never> { get }
 

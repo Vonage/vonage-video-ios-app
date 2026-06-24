@@ -366,9 +366,9 @@ final class MeetingRoomSDKContainer {
         loggingPreferencesLoader: {
             UserDefaultsSDKLoggingRepository.loadPreferencesSync()
         },
-        logFileURLProvider: { [weak self] in
+        getLogFileURLs: DefaultGetLogFileURLsUseCase(provider: { [weak self] in
             self?.sdkLoggingService.getLogFileURLs() ?? []
-        })
+        }))
 
     lazy var feedbackFactory = FeedbackFactory()
 

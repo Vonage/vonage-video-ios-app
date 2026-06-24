@@ -18,11 +18,19 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
 
     // MARK: - Properties
 
+    public nonisolated let isSupported = true
+
     /// The UserDefaults instance used for persistence.
     private let userDefaults: UserDefaults
 
     /// Subject that holds the current preferences and notifies observers of changes.
-    private nonisolated let subject: CurrentValueSubject<SDKLoggingPreferences, Never>
+    private nonisolated let subject = CurrentValueSubject<SDKLoggingPreferences, Never>(.default)
+
+    /// Encoder used to serialize preferences.
+    private let encoder = JSONEncoder()
+
+    /// Decoder used to deserialize preferences.
+    private let decoder = JSONDecoder()
 
     /// A publisher that emits the current preferences whenever they change.
     public nonisolated var preferencesPublisher: AnyPublisher<SDKLoggingPreferences, Never> {
@@ -36,7 +44,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     /// - Parameter userDefaults: The UserDefaults instance to use. Defaults to `.standard`.
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        self.subject = CurrentValueSubject(.default)
     }
 
     // MARK: - SDKLoggingRepository
@@ -56,7 +63,7 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     ///
     /// - Parameter preferences: The preferences to persist.
     public func save(_ preferences: SDKLoggingPreferences) async {
-        if let data = try? JSONEncoder().encode(preferences) {
+        if let data = try? encoder.encode(preferences) {
             userDefaults.set(data, forKey: Self.storeKey)
         }
         subject.send(preferences)
@@ -105,6 +112,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     /// - Returns: The decoded preferences, or `nil` if no data exists or decoding fails.
     private func load(from userDefaults: UserDefaults) -> SDKLoggingPreferences? {
         guard let data = userDefaults.data(forKey: Self.storeKey) else { return nil }
-        return try? JSONDecoder().decode(SDKLoggingPreferences.self, from: data)
+        return try? decoder.decode(SDKLoggingPreferences.self, from: data)
     }
 }

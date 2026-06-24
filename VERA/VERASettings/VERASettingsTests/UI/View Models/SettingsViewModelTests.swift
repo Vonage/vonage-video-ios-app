@@ -26,6 +26,12 @@ struct SettingsViewModelTests {
         viewModel.onDidSave = nil
     }
 
+    private func makeGetLogFileURLsUseCase(urls: [URL]) -> MockGetLogFileURLsUseCase {
+        let useCase = MockGetLogFileURLsUseCase()
+        useCase.urls = urls
+        return useCase
+    }
+
     // MARK: - Initialization Tests
 
     @Test("ViewModel initializes with default preferences")
@@ -516,9 +522,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: {
-                [URL(fileURLWithPath: "/tmp/test.log")]
-            }
+            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
         )
 
         viewModel.sendLogs()
@@ -533,7 +537,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: { [] }
+            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [])
         )
 
         viewModel.sendLogs()
@@ -548,7 +552,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: nil
+            getLogFileURLs: nil
         )
 
         viewModel.sendLogs()
@@ -563,9 +567,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: {
-                [URL(fileURLWithPath: "/tmp/test.log")]
-            }
+            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
         )
 
         #expect(viewModel.hasLogFiles == true)
@@ -577,7 +579,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: { [] }
+            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [])
         )
 
         #expect(viewModel.hasLogFiles == false)
@@ -602,7 +604,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            loggingRepository: nil
+            loggingRepository: MockSDKLoggingRepository(isSupported: false)
         )
 
         #expect(viewModel.hasLoggingSupport == false)
@@ -726,7 +728,7 @@ struct SettingsViewModelTests {
         ]
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: { logFileURLs }
+            getLogFileURLs: makeGetLogFileURLsUseCase(urls: logFileURLs)
         )
 
         #expect(viewModel.logFileURLs == logFileURLs)
@@ -738,7 +740,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            logFileURLProvider: nil
+            getLogFileURLs: nil
         )
 
         #expect(viewModel.logFileURLs.isEmpty)
@@ -850,7 +852,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            loggingRepository: nil
+            loggingRepository: MockSDKLoggingRepository(isSupported: false)
         )
 
         viewModel.isLoggingEnabled = true
@@ -1153,7 +1155,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            loggingRepository: nil
+            loggingRepository: MockSDKLoggingRepository(isSupported: false)
         )
 
         #expect(!viewModel.availableSections.contains(.logging))

@@ -69,13 +69,15 @@ struct SettingsFactoryTests {
         let statsDataSource = MockStatsDataSource()
         let loggingRepository = MockSDKLoggingRepository()
         let logURLs = [URL(fileURLWithPath: "/tmp/test.log")]
+        let getLogFileURLs = MockGetLogFileURLsUseCase()
+        getLogFileURLs.urls = logURLs
 
         let factory = SettingsFactory(
             repository: repository,
             statsDataSource: statsDataSource,
             loggingRepository: loggingRepository,
             loggingPreferencesLoader: { .default },
-            logFileURLProvider: { logURLs }
+            getLogFileURLs: getLogFileURLs
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
@@ -110,11 +112,13 @@ struct SettingsFactoryTests {
     @Test("makeMeetingRoomViewModels with log file provider exposes URLs")
     func makeMeetingRoomViewModelsWithLogFileProvider() {
         let expectedURLs = [URL(fileURLWithPath: "/tmp/sdk.log")]
+        let getLogFileURLs = MockGetLogFileURLsUseCase()
+        getLogFileURLs.urls = expectedURLs
         let factory = SettingsFactory(
             repository: MockSettingsRepository(),
             statsDataSource: MockStatsDataSource(),
             loggingRepository: MockSDKLoggingRepository(),
-            logFileURLProvider: { expectedURLs }
+            getLogFileURLs: getLogFileURLs
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
@@ -238,6 +242,8 @@ struct SettingsFactoryTests {
     @Test("Factory passes all dependencies to meeting room view models")
     func factoryPassesAllDependenciesToMeetingRoomViewModels() {
         let logURLs = [URL(fileURLWithPath: "/tmp/sdk.log")]
+        let getLogFileURLs = MockGetLogFileURLsUseCase()
+        getLogFileURLs.urls = logURLs
         let factory = SettingsFactory(
             repository: MockSettingsRepository(),
             statsDataSource: MockStatsDataSource(),
@@ -245,7 +251,7 @@ struct SettingsFactoryTests {
             loggingPreferencesLoader: {
                 SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn)
             },
-            logFileURLProvider: { logURLs }
+            getLogFileURLs: getLogFileURLs
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()

@@ -229,9 +229,9 @@ final class DependencyContainer {
             loggingPreferencesLoader: {
                 UserDefaultsSDKLoggingRepository.loadPreferencesSync()
             },
-            logFileURLProvider: { [weak self] in
+            getLogFileURLs: DefaultGetLogFileURLsUseCase(provider: { [weak self] in
                 self?.sdkLoggingService.getLogFileURLs() ?? []
-            })
+            }))
     #endif
 
     // MARK: - AudioEffects feature (waiting room)
