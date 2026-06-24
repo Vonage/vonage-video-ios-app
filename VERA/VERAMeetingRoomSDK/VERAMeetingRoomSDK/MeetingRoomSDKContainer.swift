@@ -338,7 +338,10 @@ final class MeetingRoomSDKContainer {
         repository: settingsRepository,
         statsDataSource: statsRepository)
 
-    lazy var feedbackFactory = FeedbackFactory()
+    lazy var feedbackFactory = FeedbackFactory(
+        baseURL: baseURL,
+        httpClient: httpClient
+    )
 
     // MARK: - Audio Effects Feature
 

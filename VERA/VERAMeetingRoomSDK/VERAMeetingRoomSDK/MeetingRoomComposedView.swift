@@ -12,6 +12,7 @@ import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -103,7 +104,8 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 FeedbackFormOverlayModifier(
                     isEnabled: enabledFeatures.contains(.feedback),
-                    showFeedbackForm: $showFeedbackForm
+                    showFeedbackForm: $showFeedbackForm,
+                    container: container
                 )
             )
             .modifier(
