@@ -73,7 +73,6 @@ public struct MeetingRoomView: View {
             ScreenIdentifierContainer(MeetingRoomAccessibilityID.screen) {
                 MeetingRoomContent(
                     participants: state.participants,
-                    showBottomSheet: false,
                     layout: state.layout,
                     activeSpeakerId: state.activeSpeakerId
                 )
@@ -94,6 +93,7 @@ public struct MeetingRoomView: View {
                     BottomBar(
                         isMicEnabled: state.isMicEnabled,
                         isCameraEnabled: state.isCameraEnabled,
+                        isParticipantsListPresented: showParticipantsList,
                         participantsCount: state.participantsCount,
                         allowMicrophoneControl: state.allowMicrophoneControl,
                         allowCameraControl: state.allowCameraControl,

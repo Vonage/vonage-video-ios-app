@@ -57,7 +57,8 @@ public struct SettingsView: View {
     ///   - statisticsViewModel: View model providing live network statistics during an active call.
     ///   - selectedSection: The initially selected section for iPad/Mac sidebar. Defaults to `.general`.
     public init(
-        viewModel: SettingsViewModel, statisticsViewModel: StatisticsViewModel,
+        viewModel: SettingsViewModel,
+        statisticsViewModel: StatisticsViewModel,
         selectedSection: SettingsSection = .general
     ) {
         self.viewModel = viewModel
