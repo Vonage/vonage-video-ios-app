@@ -1,0 +1,71 @@
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_1575e5b3901782::t_22363077d51523 217,236
+  s_1575e5b3901782::t_7d4f9aa5c3b81f 190,219,243,305-306,1032-1033
+  s_1575e5b3901782::t_8336089715acc2 188-189,191-216,218,220-235,237-242,244-267,303-304,307-329,1031
+  s_1575e5b3901782::t_4baa0735e056f0 186-187,268-302
+  s_1575e5b3901782::t_c7f7e584aa9b62 1034
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  s_1575e5b3901782::t_7d4f9aa5c3b81f 39-40,81-85
+  s_1575e5b3901782::t_0219dc4907e7a9 86-87
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_1575e5b3901782::t_22363077d51523 107-108,124-125,174-175,205,230-234,296-297,312-314,316-321
+  s_1575e5b3901782::t_02c2bfa8d92d45 299-305,308-311,315
+  s_1575e5b3901782::t_c04f7007270bbd 298
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/MicIndicatorTests.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 1-68
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Entities/UIParticipantTests.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 1-22
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_1575e5b3901782::t_8336089715acc2 77-80,82-85,90-91
+  s_1575e5b3901782::t_8317114c217ecd 12,138
+  s_1575e5b3901782::t_456562bc7004a9 124,141,467-477
+  s_1575e5b3901782::t_7f5387b6f84bf6 466
+  s_1575e5b3901782::t_c6d51e772ff966 86-89
+  s_1575e5b3901782::t_4baa0735e056f0 92-123,125-137,139-140,142-148,464-465,478-481
+  s_1575e5b3901782::t_22363077d51523 81
+  s_1575e5b3901782::t_9f870f60b1b68b 11
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_1575e5b3901782::t_baaca7a05b48cb 62
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_1575e5b3901782::t_baaca7a05b48cb 23-27
+VERA/VERAVonage/Project.swift
+  s_1575e5b3901782::t_3b76ae23d4d6df 35
+VERA/VERAVonage/VERAVonage/VonageSession.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 26-28,224-231,235
+  s_1575e5b3901782::t_baaca7a05b48cb 222-223,232-233
+  s_1575e5b3901782::t_674090bcda229a 234
+  s_1575e5b3901782::t_0edaa0278e74ad 236-237
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 152-154,557-564,567
+  s_1575e5b3901782::t_baaca7a05b48cb 554-556,565-566,568-569
+VERA/VERADomain/VERADomain/ParticipantForceMuting.swift
+  s_1575e5b3901782::t_baaca7a05b48cb 1-16,18-26
+  s_1575e5b3901782::t_7d4f9aa5c3b81f 17
+VERA/VERAVonage/VERAVonage/CallStateManager.swift
+  s_1575e5b3901782::t_baaca7a05b48cb 133-137
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_1575e5b3901782::t_22363077d51523 305
+  s_1575e5b3901782::t_baaca7a05b48cb 154-159,161-166,306-313
+  s_1575e5b3901782::t_8336089715acc2 160
+VERA/VERAVonage/VERAVonageTests/Spies/VonageSessionSpy.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 14,18,50-55
+  s_1575e5b3901782::t_817432416d1f7c 56
+VERA/VERACore/VERATestHelpers/Mocks/MockParticipant.swift
+  s_1575e5b3901782::t_02c2bfa8d92d45 16,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "eb352733d5773dbf1a5bf85dfe65823da8a1e454",
+  "prompts": {},
+  "sessions": {
+    "s_1575e5b3901782": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efef0-b729-79c3-ab28-50c33f3161a6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
