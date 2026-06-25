@@ -2,6 +2,7 @@
 //  Created by Vonage on 23/7/25.
 //
 
+import Combine
 import SwiftUI
 import VERACommonUI
 import VERADomain
@@ -45,7 +46,8 @@ public class MeetingRoomFactory {
     @MainActor
     public func make(
         roomName: RoomName,
-        getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        getExternalButtons: @escaping () -> [BottomBarButton],
+        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
         onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
@@ -64,6 +66,7 @@ public class MeetingRoomFactory {
             configuration: configuration,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
             getExternalButtons: getExternalButtons,
+            externalButtonsUpdates: externalButtonsUpdates,
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
             pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )
