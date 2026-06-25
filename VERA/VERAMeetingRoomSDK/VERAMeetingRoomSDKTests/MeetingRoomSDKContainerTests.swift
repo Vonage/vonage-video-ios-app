@@ -307,7 +307,10 @@ private final class CallFacadeStub: CallFacade {
     }
     func enableNetworkStats() {}
     func disableNetworkStats() {}
+    func enableSubscriberExtraStats() {}
+    func disableSubscriberExtraStats() {}
     func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
 }
 
 private final class ArchivingDataSourceStub: ArchivingDataSource {

@@ -561,5 +561,8 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func disableCaptions() async {}
     func enableNetworkStats() {}
     func disableNetworkStats() {}
+    func enableSubscriberExtraStats() {}
+    func disableSubscriberExtraStats() {}
     func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
+    func updateLivePublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async {}
 }

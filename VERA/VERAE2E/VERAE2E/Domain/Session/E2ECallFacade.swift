@@ -113,7 +113,13 @@ public final class E2ECallFacade: CallFacade {
         networkStatsSubject.send(.empty)
     }
 
+    public func enableSubscriberExtraStats() {}
+
+    public func disableSubscriberExtraStats() {}
+
     public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+
+    public func updateLivePublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async {}
 
     private func observeArchivingEvents() {
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStart)

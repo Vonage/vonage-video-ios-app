@@ -36,8 +36,12 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     var enableNetworkStatsCallCount = 0
     var disableNetworkStatsCallCount = 0
+    var enableSubscriberExtraStatsCallCount = 0
+    var disableSubscriberExtraStatsCallCount = 0
     var applyPublisherAdvancedSettingsCallCount = 0
     var lastAppliedSettings: PublisherAdvancedSettings?
+    var updateLivePublisherAdvancedSettingsCallCount = 0
+    var lastLiveSettings: PublisherAdvancedSettings?
 
     func connect() {}
     func disconnect() async throws {}
@@ -57,8 +61,21 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
         disableNetworkStatsCallCount += 1
     }
 
+    func enableSubscriberExtraStats() {
+        enableSubscriberExtraStatsCallCount += 1
+    }
+
+    func disableSubscriberExtraStats() {
+        disableSubscriberExtraStatsCallCount += 1
+    }
+
     func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {
         applyPublisherAdvancedSettingsCallCount += 1
         lastAppliedSettings = settings
+    }
+
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {
+        updateLivePublisherAdvancedSettingsCallCount += 1
+        lastLiveSettings = settings
     }
 }

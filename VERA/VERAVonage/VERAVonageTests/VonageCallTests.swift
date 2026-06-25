@@ -284,6 +284,30 @@ struct VonageCallTests {
     }
 
     @Test
+    func updateLivePublisherAdvancedSettings_updatesCurrentPublisherWithoutRecreation() async throws {
+        let publisherSpy = VonagePublisherSpy()
+        let session = VonageSessionSpy()
+        let sut = makeSUT(
+            session: session,
+            publisher: publisherSpy
+        )
+        sut.setup()
+        sut.connect()
+
+        let advancedSettings = PublisherAdvancedSettings(
+            videoBitratePreset: .customBitrate,
+            maxVideoBitrate: 1_500_000,
+            degradationPreference: .balanced
+        )
+
+        await sut.updateLivePublisherAdvancedSettings(advancedSettings)
+
+        #expect(publisherSpy.exposedOTPublisher.videoBitratePreset == .custom)
+        #expect(publisherSpy.exposedOTPublisher.maxVideoBitrate == 1_500_000)
+        #expect(publisherSpy.exposedOTPublisher.degradationPreference == .balanced)
+    }
+
+    @Test
     func applyPublisherAdvancedSettings_restoresCameraPosition() async throws {
         let publisherSpy = VonagePublisherSpy()
         publisherSpy.cameraPosition = .back

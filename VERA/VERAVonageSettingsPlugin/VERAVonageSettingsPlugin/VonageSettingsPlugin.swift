@@ -12,9 +12,9 @@ import VERAVonage
 ///
 /// `VonageSettingsPlugin` is a call-lifecycle plugin that:
 ///
-/// 1. **Stats relay** – Observes the `senderStatsEnabled` flag from
-///    ``PublisherSettingsRepository/preferencesPublisher`` and tells the
-///    ``CallFacade`` to enable or disable SDK-level network statistics collection.
+/// 1. **Stats relay** – Keeps SDK-level network statistics collection enabled so
+///    publisher stats remain available, and uses `senderStatsEnabled` to toggle
+///    the richer subscriber-only stats requests.
 /// 2. **Stats forwarding** – Subscribes to ``CallFacade/networkStatsPublisher``
 ///    and writes every update to the ``StatsWriter`` so that downstream view
 ///    models can display real-time metrics.
@@ -28,7 +28,8 @@ import VERAVonage
 /// ## Lifecycle
 /// ```
 /// callDidStart   ──► initObservers()
-///                       ├─ subscribe to senderStatsEnabled → enable/disable stats
+///                       ├─ enable network stats collection
+///                       ├─ subscribe to senderStatsEnabled → enable/disable subscriber extras
 ///                       ├─ subscribe to SDK-relevant prefs → applyPublisherSettings
 ///                       └─ subscribe to call.networkStatsPublisher → statsWriter
 ///
@@ -44,6 +45,10 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Tracks the in-flight publisher-settings Task so it can be cancelled if new
     /// settings arrive before the previous republish cycle finishes.
     private var applySettingsTask: Task<Void, Never>?
+    /// Tracks live publisher updates independently from publisher recreation.
+    private var updateLiveSettingsTask: Task<Void, Never>?
+    /// Invalidates live-update tasks whose repository emissions arrive out of order.
+    private var liveSettingsGeneration = 0
     /// Tracks the stats-forwarding Task so it can be cancelled on call end.
     private var statsTask: Task<Void, Never>?
 
@@ -81,6 +86,13 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Parameter userInfo: Contextual info passed by the plugin coordinator (unused).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
         initObservers()
+        call?.enableNetworkStats()
+        let currentPreferences = await settingsRepository.getPreferences()
+        if currentPreferences.senderStatsEnabled {
+            call?.enableSubscriberExtraStats()
+        } else {
+            call?.disableSubscriberExtraStats()
+        }
     }
 
     /// Called when the call ends and the Vonage session is disconnecting.
@@ -100,21 +112,18 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
             .sink { [weak self] isEnabled in
                 guard let self else { return }
                 if isEnabled {
-                    self.call?.enableNetworkStats()
+                    self.call?.enableSubscriberExtraStats()
                 } else {
-                    self.call?.disableNetworkStats()
+                    self.call?.disableSubscriberExtraStats()
                 }
             }
             .store(in: &cancellables)
 
-        // Observe SDK-relevant preference changes and trigger a republish.
-        // Maps to PublisherAdvancedSettings BEFORE removeDuplicates so that changes
-        // to fields not reflected in PublisherAdvancedSettings (e.g. senderStatsEnabled)
-        // do not trigger a spurious publisher recreation. dropFirst skips the initial
-        // value (settings are already applied at publisher creation time via JoinRoomUseCase).
+        // Observe settings that require recreating the publisher. Live-updatable
+        // fields are intentionally ignored by the duplicate comparison.
         settingsRepository.preferencesPublisher
             .map { $0.toPublisherAdvancedSettings() }
-            .removeDuplicates()
+            .removeDuplicates(by: { $0.hasEqualRepublishSettings(to: $1) })
             .dropFirst()
             .sink { [weak self] settings in
                 guard let self, let call = self.call else { return }
@@ -123,6 +132,26 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
                 self.applySettingsTask?.cancel()
                 self.applySettingsTask = Task { [weak call] in
                     try? await call?.applyPublisherAdvancedSettings(settings)
+                }
+            }
+            .store(in: &cancellables)
+
+        // Apply bitrate and degradation changes directly to the active publisher.
+        settingsRepository.preferencesPublisher
+            .map { $0.toPublisherAdvancedSettings() }
+            .removeDuplicates(by: { $0.hasEqualLiveSettings(to: $1) })
+            .dropFirst()
+            .sink { [weak self] settings in
+                guard let self, let call = self.call else { return }
+                self.liveSettingsGeneration += 1
+                let generation = self.liveSettingsGeneration
+                self.updateLiveSettingsTask?.cancel()
+                self.updateLiveSettingsTask = Task { [weak self, weak call] in
+                    guard let self,
+                        !Task.isCancelled,
+                        self.liveSettingsGeneration == generation
+                    else { return }
+                    await call?.updateLivePublisherAdvancedSettings(settings)
                 }
             }
             .store(in: &cancellables)
@@ -145,7 +174,28 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
         statsTask = nil
         applySettingsTask?.cancel()
         applySettingsTask = nil
+        liveSettingsGeneration += 1
+        updateLiveSettingsTask?.cancel()
+        updateLiveSettingsTask = nil
         cancellables.removeAll()
         await statsWriter.clearStats()
+    }
+}
+
+extension PublisherAdvancedSettings {
+    fileprivate func hasEqualLiveSettings(to other: Self) -> Bool {
+        videoBitratePreset == other.videoBitratePreset
+            && maxVideoBitrate == other.maxVideoBitrate
+            && degradationPreference == other.degradationPreference
+    }
+
+    fileprivate func hasEqualRepublishSettings(to other: Self) -> Bool {
+        videoResolution == other.videoResolution
+            && videoFrameRate == other.videoFrameRate
+            && preferredVideoCodecs == other.preferredVideoCodecs
+            && maxAudioBitrate == other.maxAudioBitrate
+            && publisherAudioFallbackEnabled == other.publisherAudioFallbackEnabled
+            && subscriberAudioFallbackEnabled == other.subscriberAudioFallbackEnabled
+            && opusDtxEnabled == other.opusDtxEnabled
     }
 }

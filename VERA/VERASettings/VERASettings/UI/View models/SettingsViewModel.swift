@@ -4,6 +4,8 @@
 
 import Combine
 import Foundation
+import SwiftUI
+import VERACommonUI
 import os.log
 
 /// Constants used throughout the settings system.
@@ -202,11 +204,10 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Reverts all settings to their default values and persists the changes.
     /// This resets both the local state and the persisted preferences.
-    public func resetToDefaults() {
-        Task { @MainActor in
-            await repository.reset()
-            setAsDefault()
-        }
+    @MainActor
+    public func resetToDefaults() async {
+        await repository.reset()
+        setAsDefault()
     }
 
     // MARK: - Private
@@ -258,5 +259,13 @@ public final class SettingsViewModel: ObservableObject {
     /// This only affects the local state, not the persisted values.
     private func setAsDefault() {
         settingsPreference = PublisherSettingsPreferences.default
+    }
+}
+
+struct SettingsDivider: View {
+    var body: some View {
+        Rectangle()
+            .fill(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
+            .frame(height: 1)
     }
 }
