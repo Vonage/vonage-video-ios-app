@@ -9,7 +9,21 @@ import Testing
 #endif
 
 
+@MainActor
 enum FeedbackTestHelpers {
+
+    static func makeFormViewModel(
+        feedbackReportUseCase: FeedbackReportUseCase? = nil,
+        sessionDebugInfoProvider: @escaping () -> FeedbackSessionDebugInfo = { .empty }
+    ) -> FeedbackFormViewModel {
+        FeedbackFormViewModel(
+            feedbackReportUseCase: feedbackReportUseCase
+                ?? DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                ),
+            sessionDebugInfoProvider: sessionDebugInfoProvider
+        )
+    }
 
     static func fillRequiredTextFields(in viewModel: FeedbackFormViewModel) {
         viewModel.feedbackFields[0].value = "Joining a video call with three participants"
