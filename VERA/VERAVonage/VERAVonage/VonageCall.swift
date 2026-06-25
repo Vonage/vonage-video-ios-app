@@ -149,6 +149,9 @@ public final class VonageCall: CallFacade {
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
 
+    /// Test seam used to resolve a participant stream without changing the public initializer.
+    var participantStreamResolver: ((String) async -> OTStream?)?
+
     /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
     ///
     /// - SeeAlso: ``assignPlugins(_:)``, `VonageSignalEmitter`, `VonagePluginCallHolder`, `VonageSignalHandler`
@@ -546,6 +549,22 @@ public final class VonageCall: CallFacade {
             self.publisher.publishAudio = !isMuted
             self.publisher.publishVideo = !isMuted
         }
+    }
+
+    // MARK: Participant moderation
+
+    public func forceMuteParticipant(id: String) async throws {
+        let stream: OTStream?
+        if let participantStreamResolver {
+            stream = await participantStreamResolver(id)
+        } else {
+            stream = await callStateManager.getSubscriber(id: id)?.stream
+        }
+
+        guard let stream else {
+            throw ParticipantForceMuteError.participantNotFound
+        }
+        try session.forceMute(stream: stream)
     }
 
     // MARK: Signals

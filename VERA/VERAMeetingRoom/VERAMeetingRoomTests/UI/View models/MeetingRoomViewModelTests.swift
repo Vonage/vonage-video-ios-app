@@ -185,6 +185,150 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func forceMuteActionIsAddedForEligibleRemoteParticipant() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1", name: "Arthur")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.canForceMute == true }
+        let participant = try #require(state?.participants.first)
+
+        participant.onForceMute?()
+        await delay()
+
+        #expect(call.forceMutedParticipantIDs == ["p1"])
+        #expect(sut.toast == .init(message: "Arthur was muted.", mode: .success))
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsAddedWithoutCheckingCapability() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participantsCount == 1 }
+
+        #expect(state?.participants.first?.canForceMute == true)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsNotAddedForMutedOrScreenShareParticipants() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [
+                    makeMockParticipant(id: "muted", isMicEnabled: false),
+                    makeMockParticipant(id: "screen", isScreenshare: true),
+                ],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.count == 2 }
+
+        #expect(state?.participants.allSatisfy { !$0.canForceMute } == true)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsNotAddedForLocalParticipant() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: makeMockParticipant(id: "local", isRemote: false),
+                participants: [],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.id == "local" }
+
+        #expect(state?.participants.first?.canForceMute == false)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteWithoutCurrentCallDoesNothing() async {
+        let sut = makeSUT()
+
+        sut.onForceMute(participantId: "p1", participantName: "Marvin")
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteFailureShowsErrorToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        call.forceMuteError = MockForceMuteError.requestFailed
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1", name: "Trillian")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.canForceMute == true }
+        let participant = try #require(state?.participants.first)
+
+        participant.onForceMute?()
+        await delay()
+
+        #expect(sut.toast?.mode == .failure)
+    }
+
+    @Test
+    @MainActor
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
@@ -883,4 +1027,8 @@ extension MeetingRoomViewState {
         if case .content(let state) = self { return state }
         return nil
     }
+}
+
+private enum MockForceMuteError: Swift.Error {
+    case requestFailed
 }

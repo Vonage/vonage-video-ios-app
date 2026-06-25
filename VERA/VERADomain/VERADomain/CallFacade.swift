@@ -263,7 +263,8 @@ public protocol CallFacade: AnyObject,
     CallArchivingPublisherProvider,
     CaptionsProvider,
     NetworkStatsProvider,
-    PublisherSettingsApplicable
+    PublisherSettingsApplicable,
+    ParticipantForceMuting
 {}
 
 /// Errors that can occur during call operations.

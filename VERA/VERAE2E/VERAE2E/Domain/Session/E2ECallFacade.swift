@@ -129,4 +129,5 @@ public final class E2ECallFacade: CallFacade {
             }
             .store(in: &cancellables)
     }
+    public func forceMuteParticipant(id: String) async throws {}
 }

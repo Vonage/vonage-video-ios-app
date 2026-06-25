@@ -151,6 +151,19 @@ public final class MeetingRoomViewModel: ObservableObject {
         }
     }
 
+    public func onForceMute(participantId: String, participantName: String) {
+        guard let participantForceMuting = currentCall else { return }
+
+        Task { @MainActor [weak self] in
+            do {
+                try await participantForceMuting.forceMuteParticipant(id: participantId)
+                self?.toast = .init(message: "\(participantName) was muted.", mode: .success)
+            } catch {
+                self?.toast = .init(message: error.localizedDescription, mode: .failure)
+            }
+        }
+    }
+
     public func endCall() {
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -288,6 +301,15 @@ extension MeetingRoomViewModel {
             canBePinned: pinnedIds.isRoomForPinning)
         uiParticipant.onTogglePin = { [weak self] in
             self?.onTogglePin(participantId: participant.id)
+        }
+        if currentCall != nil,
+            participant.isRemote,
+            !participant.isScreenshare,
+            participant.isMicEnabled
+        {
+            uiParticipant.onForceMute = { [weak self] in
+                self?.onForceMute(participantId: participant.id, participantName: participant.name)
+            }
         }
         return uiParticipant
     }

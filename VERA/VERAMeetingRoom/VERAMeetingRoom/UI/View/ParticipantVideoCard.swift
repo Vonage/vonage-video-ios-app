@@ -104,7 +104,8 @@ struct ParticipantVideoCard: View {
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
-                                        onTogglePin: participant.onTogglePin
+                                        onTogglePin: participant.onTogglePin,
+                                        onForceMute: participant.onForceMute
                                     )
                                 } else {
                                     participant.view
@@ -120,7 +121,8 @@ struct ParticipantVideoCard: View {
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
-                                        onTogglePin: participant.onTogglePin
+                                        onTogglePin: participant.onTogglePin,
+                                        onForceMute: participant.onForceMute
                                     )
                                 }
                             }
@@ -169,7 +171,8 @@ struct ParticipantVideoCard: View {
                                     isRemote: participant.isRemote,
                                     audioLevel: participant.audioLevel,
                                     isLocal: !participant.isRemote,
-                                    onTogglePin: participant.onTogglePin
+                                    onTogglePin: participant.onTogglePin,
+                                    onForceMute: participant.onForceMute
                                 )
                             }
                         }
@@ -199,6 +202,7 @@ struct ParticipantVideoCardOverlays: View {
     let audioLevel: Float
     let isLocal: Bool
     var onTogglePin: (() -> Void)?
+    var onForceMute: (() -> Void)?
 
     var body: some View {
         VStack {
@@ -223,7 +227,11 @@ struct ParticipantVideoCardOverlays: View {
                         audioLevel: audioLevel,
                         isMicEnabled: isMicEnabled)
                 } else {
-                    MicIndicator(isMicEnabled: isMicEnabled)
+                    MicIndicator(
+                        isMicEnabled: isMicEnabled,
+                        participantName: name,
+                        onForceMute: onForceMute
+                    )
                 }
             }
             Spacer()
@@ -285,8 +293,32 @@ struct NameLabel: View {
 struct MicIndicator: View {
     @Environment(\.meetingRoomTheme) private var theme
     var isMicEnabled: Bool
+    var participantName: String
+    var onForceMute: (() -> Void)?
+
+    var isForceMuteEnabled: Bool {
+        isMicEnabled && onForceMute != nil
+    }
+
+    var forceMuteAccessibilityLabel: String {
+        String(localized: "Mute \(participantName)")
+    }
 
     var body: some View {
+        if isForceMuteEnabled {
+            Button {
+                onForceMute?()
+            } label: {
+                indicator
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(forceMuteAccessibilityLabel)
+        } else {
+            indicator
+        }
+    }
+
+    private var indicator: some View {
         MicIndicatorImage(isMicEnabled: isMicEnabled)
             .foregroundColor(isMicEnabled ? .white : theme.error)
             .padding(ParticipantVideoCardConstants.indicatorPadding)
