@@ -347,7 +347,7 @@ extension MeetingRoomViewModel {
         speakingWhileMutedDetector = detector
 
         detector.isSpeakingWhileMuted
-            .filter { $0 }
+            .filter { $0 == true }
             .sink { [weak self] _ in
                 Task { @MainActor [weak self] in
                     self?.toast = ToastItem(
