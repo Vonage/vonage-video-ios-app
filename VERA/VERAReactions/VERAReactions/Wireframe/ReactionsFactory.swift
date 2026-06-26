@@ -53,6 +53,32 @@ public final class ReactionsFactory {
         return (view, viewModel)
     }
 
+    /// Creates a horizontal emoji picker view using an existing view model.
+    ///
+    /// Use this method when the picker is presented by another component
+    /// (e.g. a sheet) and the view model lifecycle is managed externally.
+    ///
+    /// - Parameter viewModel: The existing view model to use.
+    /// - Returns: A configured EmojiHorizontalPickerViewContainer view.
+    public func makeEmojiHorizontalPickerContainer(
+        viewModel: EmojiPickerContainerViewModel
+    ) -> EmojiHorizontalPickerViewContainer {
+        return EmojiHorizontalPickerViewContainer(viewModel: viewModel)
+    }
+
+    /// Creates a horizontal emoji picker component with its view model.
+    ///
+    /// - Returns: A tuple containing the configured view and its view model.
+    public func makeEmojiHorizontalPickerContainer()
+        -> (view: EmojiHorizontalPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
+    {
+        let viewModel = EmojiPickerContainerViewModel(
+            sendReactionUseCase: sendReactionUseCase
+        )
+        let view = EmojiHorizontalPickerViewContainer(viewModel: viewModel)
+        return (view, viewModel)
+    }
+
     /// Creates an emoji button with its container view model.
     ///
     /// The button shows a popover with the emoji picker when tapped.

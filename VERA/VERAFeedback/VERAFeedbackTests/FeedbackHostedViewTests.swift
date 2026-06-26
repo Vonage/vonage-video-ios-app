@@ -9,7 +9,7 @@ struct FeedbackHostedViewTests {
 
     @Test("FeedbackView hosts compact and regular layouts")
     func feedbackViewHostsBothLayouts() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
 
         FeedbackViewTestHelpers.host(
             FeedbackView(feedbackFormViewModel: viewModel)
@@ -27,14 +27,14 @@ struct FeedbackHostedViewTests {
 
     @Test("FeedbackFormView hosts filled and validation states")
     func feedbackFormViewHostsStates() {
-        let emptyViewModel = FeedbackFormViewModel()
+        let emptyViewModel = FeedbackTestHelpers.makeFormViewModel()
         FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: emptyViewModel))
 
-        let validationViewModel = FeedbackFormViewModel()
+        let validationViewModel = FeedbackTestHelpers.makeFormViewModel()
         validationViewModel.showValidationErrors = true
         FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: validationViewModel))
 
-        let filledViewModel = FeedbackFormViewModel()
+        let filledViewModel = FeedbackTestHelpers.makeFormViewModel()
         FeedbackTestHelpers.fillRequiredTextFields(in: filledViewModel)
         FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: filledViewModel))
 
@@ -65,7 +65,9 @@ struct FeedbackHostedViewTests {
     @Test("FeedbackImageFieldView hosts empty and preview states")
     func imageFieldViewHostsStates() {
         let emptyField = FeedbackFieldViewModel(
-            title: "", key: "Image", type: .image,
+            title: "",
+            key: "Image",
+            type: .image,
             value: "A screenshot will help us better understand the issue. (optional)",
             isRequired: false
         )
@@ -75,7 +77,9 @@ struct FeedbackHostedViewTests {
         )
 
         let previewField = FeedbackFieldViewModel(
-            title: "", key: "Image", type: .image,
+            title: "",
+            key: "Image",
+            type: .image,
             value: "A screenshot will help us better understand the issue. (optional)",
             isRequired: false
         )
@@ -91,7 +95,12 @@ struct FeedbackHostedViewTests {
 
     @Test("FeedbackSheetContent hosts without crashing")
     func sheetContentHosts() {
-        FeedbackViewTestHelpers.host(FeedbackSheetContent())
+        FeedbackViewTestHelpers.host(
+            FeedbackSheetContent(
+                feedbackReportUseCase: DefaultFeedbackReportUseCase(
+                    feedbackReportDataSource: MockFeedbackReportDataSource()
+                )
+            ))
         #expect(true)
     }
 }

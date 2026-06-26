@@ -2,6 +2,7 @@ import Testing
 
 @testable import VERAFeedback
 
+@MainActor
 @Suite("Feedback form focus navigation tests")
 struct FeedbackFormFocusNavigationTests {
 
@@ -9,7 +10,8 @@ struct FeedbackFormFocusNavigationTests {
 
     @Test("textFieldIndices returns only text field positions")
     func textFieldIndicesReturnsTextFieldsOnly() {
-        let fields = FeedbackFormViewModel().feedbackFields
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
+        let fields = viewModel.feedbackFields
         #expect(FeedbackFormFocusNavigation.textFieldIndices(in: fields) == [0, 1, 2])
     }
 
