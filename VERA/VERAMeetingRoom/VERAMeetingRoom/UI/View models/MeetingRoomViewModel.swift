@@ -11,14 +11,6 @@ public enum MeetingRoomViewState: Equatable {
     case content(MeetingRoomState)
 }
 
-public struct MeetingRoomButtonsState {
-    public let archivingState: ArchivingState
-
-    public init(archivingState: ArchivingState) {
-        self.archivingState = archivingState
-    }
-}
-
 public struct MeetingRoomOverlayState {
     public let captions: [CaptionItem]
 
@@ -64,7 +56,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
+    private var getExternalButtons: () -> [BottomBarButton]
 
     public init(
         roomName: RoomName,
@@ -77,7 +69,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         captionsStatusDataSource: CaptionsStatusDataSource,
         configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        getExternalButtons: @escaping () -> [BottomBarButton],
+        externalButtonsUpdates: AnyPublisher<Void, Never>,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
@@ -94,6 +87,13 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
+        externalButtonsUpdates
+            .sink { [weak self] in
+                Task { @MainActor [weak self] in
+                    self?.updateExtraButtons()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     @MainActor
@@ -372,8 +372,6 @@ extension MeetingRoomViewModel {
                     message: String(localized: "Session recording started", bundle: .module),
                     mode: .info)
             }
-
-            self.updateArchivingButtons()
         }
     }
 
@@ -423,13 +421,7 @@ extension MeetingRoomViewModel {
 
     @MainActor
     fileprivate func updateExtraButtons() {
-        updateArchivingButtons()
-    }
-
-    @MainActor
-    fileprivate func updateArchivingButtons() {
-        let archivingState = archivingPublisher.value
-        extraButtons = getExternalButtons(.init(archivingState: archivingState))
+        extraButtons = getExternalButtons()
     }
 
 }

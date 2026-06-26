@@ -8,13 +8,21 @@ import VERAFeedback
 struct FeedbackFormOverlayModifier: ViewModifier {
     let isEnabled: Bool
     @Binding var showFeedbackForm: Bool
+    let container: MeetingRoomSDKContainer
 
     func body(content: Content) -> some View {
         if isEnabled {
             content
                 .sheet(isPresented: $showFeedbackForm) {
-                    FeedbackSheetContent()
-                        .presentationDetents([.large])
+                    FeedbackSheetContent(
+                        feedbackReportUseCase: container.feedbackFactory.makeFeedbackReportUseCase(),
+                        sessionDebugInfoProvider: {
+                            FeedbackSessionDebugInfo.fromCurrentCall(
+                                in: container.sessionRepository
+                            )
+                        }
+                    )
+                    .presentationDetents([.large])
                 }
         } else {
             content

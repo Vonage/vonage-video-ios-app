@@ -176,6 +176,33 @@ struct CaptionsButtonViewModelTests {
         try await waitUntil { mocks.enableUseCase.callCount > 0 }
     }
 
+    @Test("Bottom item presentable exposes metadata and action")
+    func bottomItemPresentableExposesMetadataAndAction() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.setup()
+
+        #expect(sut.id == "captions-button")
+        #expect(sut.label == String(localized: "Captions", bundle: .veraCaptions))
+        #expect(sut.accessibilityIdentifier == CaptionsAccessibilityID.toggleButton)
+        #expect(sut.isActive == false)
+        _ = sut.image
+        #expect(sut.accessory == nil)
+
+        sut.performAction()
+
+        try await waitUntil { mocks.enableUseCase.callCount > 0 }
+
+        #expect(mocks.enableUseCase.callCount == 1)
+
+        mocks.statusDataSource.set(captionsState: .enabled("captions-123"))
+        try await waitUntil { sut.isActive }
+        _ = sut.image
+
+        sut.performAction()
+
+        #expect(mocks.disableUseCase.callCount == 1)
+    }
+
     // MARK: - Helpers
 
     private struct Mocks {

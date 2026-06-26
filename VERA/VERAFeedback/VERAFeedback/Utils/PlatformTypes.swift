@@ -7,10 +7,10 @@ import SwiftUI
 #if canImport(UIKit)
     import UIKit
 
-    typealias PlatformImage = UIImage
-    typealias PlatformView = UIView
+    public typealias PlatformImage = UIImage
+    public typealias PlatformView = UIView
 
-    enum PlatformImageFactory {
+    public enum PlatformImageFactory {
         static func image(from data: Data) -> PlatformImage? {
             UIImage(data: data)
         }
@@ -31,10 +31,10 @@ import SwiftUI
 #elseif canImport(AppKit)
     import AppKit
 
-    typealias PlatformImage = NSImage
-    typealias PlatformView = NSView
+    public typealias PlatformImage = NSImage
+    public typealias PlatformView = NSView
 
-    enum PlatformImageFactory {
+    public enum PlatformImageFactory {
         static func image(from data: Data) -> PlatformImage? {
             NSImage(data: data)
         }

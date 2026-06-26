@@ -13,7 +13,7 @@ struct FeedbackFormHostedTests {
 
     @Test("FeedbackFormView hosts with validation errors visible")
     func hostsWithValidationErrors() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         viewModel.showValidationErrors = true
         FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: viewModel))
         #expect(viewModel.isValid == false)
@@ -21,7 +21,7 @@ struct FeedbackFormHostedTests {
 
     @Test("FeedbackFormView hosts image field with validation error")
     func hostsImageFieldValidationError() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         if let imageIndex = viewModel.feedbackFields.firstIndex(where: { $0.type == .image }) {
             viewModel.feedbackFields[imageIndex].isRequired = true
         }
@@ -32,7 +32,7 @@ struct FeedbackFormHostedTests {
 
     @Test("FeedbackView close toolbar hosts in compact layout")
     func feedbackViewCompactHosts() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         FeedbackViewTestHelpers.host(
             FeedbackView(feedbackFormViewModel: viewModel)
                 .environment(\.horizontalSizeClass, .compact)
@@ -42,7 +42,7 @@ struct FeedbackFormHostedTests {
 
     @Test("FeedbackView sidebar hosts in regular layout")
     func feedbackViewRegularHosts() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         FeedbackViewTestHelpers.host(
             FeedbackView(feedbackFormViewModel: viewModel)
                 .environment(\.horizontalSizeClass, .regular),
@@ -65,7 +65,7 @@ struct FeedbackFormHostedTests {
 
     @Test("Send button triggers validation when form is invalid")
     func sendButtonTriggersValidationWhenInvalid() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         let context = FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: viewModel))
 
         context.tapSendButton()
@@ -80,7 +80,7 @@ struct FeedbackFormHostedTests {
 
     @Test("Send button accepts valid form")
     func sendButtonAcceptsValidForm() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         FeedbackTestHelpers.fillRequiredTextFields(in: viewModel)
 
         let context = FeedbackViewTestHelpers.host(FeedbackFormView(feedbackFormViewModel: viewModel))
@@ -117,7 +117,7 @@ struct FeedbackFormHostedTests {
 
     @Test("Close toolbar button is tappable in compact layout")
     func closeToolbarButtonIsTappableInCompactLayout() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackTestHelpers.makeFormViewModel()
         let context = FeedbackViewTestHelpers.host(
             NavigationStack {
                 FeedbackView(feedbackFormViewModel: viewModel)

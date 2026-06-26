@@ -2,6 +2,7 @@
 //  Created by Vonage on 29/7/25.
 //
 
+import Combine
 import Foundation
 import Testing
 import VERACommonUI
@@ -237,6 +238,32 @@ struct MeetingRoomViewModelTests {
         await delay()
 
         #expect(sut.currentCall == nil)
+    }
+
+    @Test
+    @MainActor
+    func externalButtonsUpdateRefreshesExtraButtons() async throws {
+        let externalButtonsUpdates = PassthroughSubject<Void, Never>()
+        var getExternalButtonsCallCount = 0
+        let sut = makeSUT(
+            externalButtonsUpdates: externalButtonsUpdates.eraseToAnyPublisher(),
+            getExternalButtons: {
+                getExternalButtonsCallCount += 1
+                return []
+            }
+        )
+
+        #expect(getExternalButtonsCallCount == 0)
+
+        await sut.loadUI()
+
+        let baselineCallCount = getExternalButtonsCallCount
+
+        externalButtonsUpdates.send(())
+
+        await delay()
+
+        #expect(getExternalButtonsCallCount == baselineCallCount + 1)
     }
 
     @Test
@@ -853,6 +880,8 @@ struct MeetingRoomViewModelTests {
         configuration: MeetingRoomConfiguration = MeetingRoomConfiguration(),
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
         pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
+        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
+        getExternalButtons: @escaping () -> [BottomBarButton] = { [] },
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -866,7 +895,8 @@ struct MeetingRoomViewModelTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: configuration,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: { _ in [] },
+            getExternalButtons: getExternalButtons,
+            externalButtonsUpdates: externalButtonsUpdates,
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
             pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )

@@ -82,6 +82,21 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         self.session = session
     }
 
+    /// The Vonage session identifier.
+    public var sessionId: String {
+        session.sessionId
+    }
+
+    /// The local connection identifier, available after the session connects.
+    public var connectionId: String? {
+        session.connection?.connectionId
+    }
+
+    /// The server-side creation time for the local connection.
+    public var connectionCreationTime: Date? {
+        session.connection?.creationTime
+    }
+
     /// Connects to the Vonage session using the provided token.
     ///
     /// - Parameter token: A valid Vonage token associated with the session.
