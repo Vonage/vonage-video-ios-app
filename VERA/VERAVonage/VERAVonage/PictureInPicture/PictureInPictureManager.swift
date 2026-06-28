@@ -22,6 +22,16 @@ public final class PictureInPictureManager: ObservableObject {
     /// target (the shared `videoRenderer` moves to the remote target in that case).
     private let publisherPreviewRenderer = PictureInPictureVideoRenderer()
 
+    /// Per-remote renderers that keep each remote tile alive after the shared `videoRenderer` moves
+    /// to another participant (active-speaker switching). Like the publisher, an `OTSubscriber`'s
+    /// default view cannot be revived after a custom `videoRender` was attached.
+    private var subscriberPreviewRenderers: [String: PictureInPictureVideoRenderer] = [:]
+
+    /// Timestamp of the last in-PiP active-speaker retarget, used to debounce rapid switching when
+    /// multiple participants talk over each other.
+    private var lastInPipRetargetAt: Date?
+    private static let minimumInPipRetargetInterval: TimeInterval = 1.5
+
     private let pipController = PictureInPictureController()
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
@@ -39,6 +49,7 @@ public final class PictureInPictureManager: ObservableObject {
             self.record(event: isActive ? "entered PiP" : "exited PiP")
             if !isActive {
                 self.wantsPictureInPicture = false
+                self.lastInPipRetargetAt = nil
             }
             self.publishDebugSnapshot()
         }
@@ -176,6 +187,8 @@ public final class PictureInPictureManager: ObservableObject {
     public func tearDown() {
         cancellables.removeAll()
         videoRenderer.stopPlaceholder()
+        subscriberPreviewRenderers.removeAll()
+        lastInPipRetargetAt = nil
         clearCurrentPipTarget()
         pipController.tearDown()
         call = nil
@@ -192,8 +205,10 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     private func updatePipTarget(for state: ParticipantsState) async {
+        pruneSubscriberPreviewRenderers(keeping: Set(state.participants.map(\.id)))
+
         if isInPictureInPicture || pipController.isInPictureInPicture {
-            updateActivePipTargetWhileInPictureInPicture(for: state)
+            await updateActivePipTargetWhileInPictureInPicture(for: state)
             return
         }
 
@@ -239,13 +254,32 @@ public final class PictureInPictureManager: ObservableObject {
         await switchPipTarget(to: targetId, state: state)
     }
 
-    /// While PiP is active we must not switch targets or reconfigure the controller (that would
-    /// disrupt the running PiP). We only keep the *current* target's placeholder in sync with its
-    /// camera state so turning the camera off mid-PiP shows the avatar instead of a frozen frame.
+    /// While PiP is active we follow the active speaker but must not tear down the running PiP
+    /// controller. When the active speaker changes we re-point the shared renderer at the new
+    /// participant (lightweight retarget, keeping the controller and its sample-buffer layer), and
+    /// when the current target stays put we only keep its placeholder in sync with its camera state.
     /// The manager is the single source of truth for the placeholder here: the renderer drops
-    /// incoming frames while the placeholder is active, so we must explicitly stop it when the
-    /// camera is re-enabled to let live video resume.
-    private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) {
+    /// incoming frames while the placeholder is active, so we explicitly stop it when the camera is
+    /// re-enabled to let live video resume.
+    private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) async {
+        let targetId = activeSpeakerPipTargetId(for: state)
+
+        if targetId != currentPipTargetId {
+            let now = Date()
+            if let last = lastInPipRetargetAt,
+                now.timeIntervalSince(last) < Self.minimumInPipRetargetInterval
+            {
+                record(event: "pip active-speaker retarget throttled (keep \(currentPipTargetId ?? "nil"))")
+                // Fall through to keep the current target's placeholder in sync.
+            } else {
+                lastInPipRetargetAt = now
+                record(
+                    event: "pip active-speaker retarget \(currentPipTargetId ?? "nil") -> \(targetId ?? "nil")")
+                await retargetPipRenderer(to: targetId, state: state, reconfigureController: false)
+                return
+            }
+        }
+
         guard let currentPipTargetId else {
             record(event: "pip target update skipped (in PiP, no target)")
             publishDebugSnapshot()
@@ -269,9 +303,50 @@ public final class PictureInPictureManager: ObservableObject {
         publishDebugSnapshot()
     }
 
+    /// PiP target while Picture-in-Picture is active: follow the detected active speaker.
+    ///
+    /// Falls back to the current target when there is no active speaker (avoids thrashing back to
+    /// the sticky default when everyone goes quiet), and finally to the standard sticky selection.
+    private func activeSpeakerPipTargetId(for state: ParticipantsState) -> String? {
+        if let activeId = state.activeParticipantId,
+            state.participants.contains(where: { $0.id == activeId && !$0.isScreenshare })
+        {
+            return activeId
+        }
+
+        if let currentPipTargetId,
+            currentPipTargetId == state.localParticipant?.id
+                || state.participants.contains(where: { $0.id == currentPipTargetId })
+        {
+            return currentPipTargetId
+        }
+
+        return pipTargetId(for: state)
+    }
+
     private func switchPipTarget(to targetId: String?, state: ParticipantsState) async {
+        await retargetPipRenderer(to: targetId, state: state, reconfigureController: true)
+    }
+
+    /// Points the shared renderer at `targetId`, detaching it from the previous target.
+    ///
+    /// - Parameter reconfigureController: when `true` (not in PiP) the PiP controller and its
+    ///   sample-buffer layer are torn down and rebuilt for the new target. When `false` (active
+    ///   speaker change *while in PiP*) the running controller and its buffer layer are preserved —
+    ///   only the renderer's stream source changes — so PiP keeps playing without interruption.
+    private func retargetPipRenderer(
+        to targetId: String?,
+        state: ParticipantsState,
+        reconfigureController: Bool
+    ) async {
         let previousTargetId = currentPipTargetId
-        invalidatePipConfiguration()
+
+        if reconfigureController {
+            invalidatePipConfiguration()
+        } else {
+            // Keep the controller/buffer layer; just stop the previous target's placeholder.
+            videoRenderer.stopPlaceholder()
+        }
 
         // When the publisher stops being the PiP target, hand its tile straight to the dedicated
         // preview renderer with a single `videoRender` reassignment. We deliberately skip
@@ -411,13 +486,31 @@ public final class PictureInPictureManager: ObservableObject {
         if call?.publisher.id == currentPipTargetId {
             call?.publisher.restoreDefaultVideoView()
         } else {
+            // Keep the remote tile alive via its dedicated preview renderer: an OTSubscriber's
+            // default view can't be revived after a custom videoRender, so reverting to it would
+            // leave a gray tile when this participant stops being the PiP/active-speaker target.
+            let previousTargetId = currentPipTargetId
+            let previewRenderer = subscriberPreviewRenderer(for: previousTargetId)
             Task { [weak self] in
                 guard let self, let call = self.call else { return }
-                if let subscriber = await call.subscriber(for: currentPipTargetId) {
-                    subscriber.clearPictureInPictureRenderer()
+                if let subscriber = await call.subscriber(for: previousTargetId) {
+                    subscriber.applyInlinePreviewRenderer(previewRenderer)
                 }
             }
         }
+    }
+
+    private func subscriberPreviewRenderer(for id: String) -> PictureInPictureVideoRenderer {
+        if let existing = subscriberPreviewRenderers[id] {
+            return existing
+        }
+        let renderer = PictureInPictureVideoRenderer()
+        subscriberPreviewRenderers[id] = renderer
+        return renderer
+    }
+
+    private func pruneSubscriberPreviewRenderers(keeping ids: Set<String>) {
+        subscriberPreviewRenderers = subscriberPreviewRenderers.filter { ids.contains($0.key) }
     }
 
     private func record(event: String, error: String? = nil) {

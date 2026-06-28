@@ -91,6 +91,10 @@ public class VonageSubscriber: NSObject {
 
     private var isPictureInPictureRendererActive = false
     private var pictureInPictureInlineView: AnyView?
+    /// Keeps the tile alive after the shared PiP renderer moves to another participant.
+    /// `OTSubscriber.view` cannot be revived once a custom `videoRender` has been attached, so we
+    /// keep rendering through this dedicated renderer instead of reverting to the (now dead) view.
+    private var inlinePreviewRenderer: PictureInPictureVideoRenderer?
 
     /// Tracks the number of views currently displaying this participant.
     /// Video is enabled when count > 0 and disabled when count reaches 0.
@@ -172,6 +176,14 @@ public class VonageSubscriber: NSObject {
     private func updateParticipant() {
         if isPictureInPictureRendererActive, let pictureInPictureInlineView {
             updateParticipant(with: pictureInPictureInlineView, usesPictureInPictureRenderer: true)
+            return
+        }
+
+        if let inlinePreviewRenderer {
+            updateParticipant(
+                with: AnyView(UIViewContainer(view: inlinePreviewRenderer)),
+                usesPictureInPictureRenderer: false
+            )
             return
         }
 
@@ -289,6 +301,7 @@ public class VonageSubscriber: NSObject {
     ) {
         isPictureInPictureRendererActive = true
         pictureInPictureInlineView = inlineView
+        inlinePreviewRenderer = nil
         otSubscriber.videoRender = renderer
         NotificationCenter.default.removeObserver(
             otSubscriber,
@@ -301,9 +314,26 @@ public class VonageSubscriber: NSObject {
         }
     }
 
+    /// Keeps the tile rendering after the shared PiP renderer moves to another participant.
+    ///
+    /// `OTSubscriber.view` cannot be revived once a custom `videoRender` was attached, so reverting
+    /// to it would blank the tile. We render through a dedicated renderer instead with a single
+    /// `videoRender` reassignment (no nil round-trip, which can stop frame delivery).
+    func applyInlinePreviewRenderer(_ renderer: PictureInPictureVideoRenderer) {
+        isPictureInPictureRendererActive = false
+        pictureInPictureInlineView = nil
+        inlinePreviewRenderer = renderer
+        otSubscriber.videoRender = renderer
+        updateParticipant()
+        if subscriberDidConnect {
+            otSubscriber.subscribeToVideo = true
+        }
+    }
+
     func clearPictureInPictureRenderer() {
         isPictureInPictureRendererActive = false
         pictureInPictureInlineView = nil
+        inlinePreviewRenderer = nil
         otSubscriber.videoRender = nil
         updateParticipant()
     }
