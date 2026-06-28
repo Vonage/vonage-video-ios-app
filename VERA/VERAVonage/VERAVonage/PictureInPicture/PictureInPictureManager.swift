@@ -18,6 +18,10 @@ public final class PictureInPictureManager: ObservableObject {
 
     let videoRenderer = PictureInPictureVideoRenderer()
 
+    /// Dedicated renderer that keeps the local tile alive when the publisher stops being the PiP
+    /// target (the shared `videoRenderer` moves to the remote target in that case).
+    private let publisherPreviewRenderer = PictureInPictureVideoRenderer()
+
     private let pipController = PictureInPictureController()
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
@@ -231,8 +235,10 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     private func switchPipTarget(to targetId: String?, state: ParticipantsState) async {
+        let previousTargetId = currentPipTargetId
         invalidatePipConfiguration()
         clearCurrentPipTarget()
+        keepPublisherRenderingIfNeeded(previousTargetId: previousTargetId, newTargetId: targetId)
         currentPipTargetId = targetId
         pipTargetParticipantId = nil
         pipTargetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
@@ -292,11 +298,12 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     /// Prefers the first joined remote; falls back to any remote with camera when the first has video off.
+    /// When there are no remote participants, falls back to the local participant so PiP works solo.
     private func pipTargetId(for state: ParticipantsState) -> String? {
         let remoteParticipants = sortedRemoteParticipants(in: state)
         guard !remoteParticipants.isEmpty else {
             stickyPipTargetId = nil
-            return nil
+            return state.localParticipant?.id
         }
 
         if stickyPipTargetId == nil || !remoteParticipants.contains(where: { $0.id == stickyPipTargetId }) {
@@ -330,6 +337,20 @@ public final class PictureInPictureManager: ObservableObject {
         }
 
         return state.participants.first(where: { $0.id == participantId })?.isCameraEnabled == true
+    }
+
+    /// When the publisher was the PiP target and we switch to a remote, keep the local tile
+    /// rendering through a dedicated renderer. The publisher's default `OTPublisher.view` cannot be
+    /// revived after a custom `videoRender` was attached, so reverting to it would blank the tile.
+    private func keepPublisherRenderingIfNeeded(previousTargetId: String?, newTargetId: String?) {
+        guard let call,
+            previousTargetId == call.publisher.id,
+            let newTargetId,
+            newTargetId != call.publisher.id
+        else { return }
+
+        call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
+        record(event: "publisher inline preview renderer attached")
     }
 
     private func clearCurrentPipTarget() {

@@ -72,6 +72,10 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var isOnHold: Bool = false
     private var isPictureInPictureRendererActive = false
     private var pictureInPictureInlineView: AnyView?
+    /// Renderer that keeps the local tile alive after the publisher stops being the PiP target.
+    /// `OTPublisher.view` cannot be revived once a custom `videoRender` has been assigned, so we
+    /// keep rendering through this renderer instead of reverting to the (now dead) default view.
+    private var inlinePreviewRenderer: PictureInPictureVideoRenderer?
     /// Holds the current list of video transformers.
     @Published open private(set) var videoTransformers: [VERATransformer] = []
     /// Holds the current list of audio transformers.
@@ -236,6 +240,22 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             return
         }
 
+        if let inlinePreviewRenderer {
+            participant = Participant(
+                id: id,
+                connectionId: stream?.connection.connectionId,
+                name: stream?.name ?? "",
+                isMicEnabled: otPublisher.publishAudio,
+                isCameraEnabled: otPublisher.publishVideo,
+                videoDimensions: videoDimensions,
+                isRemote: false,
+                creationTime: date,
+                isScreenshare: isScreenshare,
+                audioLevel: audioLevel,
+                view: AnyView(UIViewContainer(view: inlinePreviewRenderer)))
+            return
+        }
+
         participant = Participant(
             id: id,
             connectionId: stream?.connection.connectionId,
@@ -258,6 +278,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ) {
         isPictureInPictureRendererActive = true
         pictureInPictureInlineView = inlineView
+        inlinePreviewRenderer = nil
         otPublisher.videoRender = renderer
         NotificationCenter.default.removeObserver(
             otPublisher,
@@ -267,9 +288,24 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         updateParticipant()
     }
 
+    /// Keeps the local tile rendering after the publisher is no longer the PiP target.
+    ///
+    /// `OTPublisher.view` is backed by the SDK's default renderer; once a custom `videoRender`
+    /// has been attached it cannot be revived by clearing `videoRender`. Instead of reverting to
+    /// that dead view (which would show a blank/gray tile), we render the local preview through a
+    /// dedicated renderer so the meeting room keeps showing the local camera.
+    func applyInlinePreviewRenderer(_ renderer: PictureInPictureVideoRenderer) {
+        isPictureInPictureRendererActive = false
+        pictureInPictureInlineView = nil
+        inlinePreviewRenderer = renderer
+        otPublisher.videoRender = renderer
+        updateParticipant()
+    }
+
     func restoreDefaultVideoView() {
         isPictureInPictureRendererActive = false
         pictureInPictureInlineView = nil
+        inlinePreviewRenderer = nil
         otPublisher.videoRender = nil
         updateParticipant()
     }
