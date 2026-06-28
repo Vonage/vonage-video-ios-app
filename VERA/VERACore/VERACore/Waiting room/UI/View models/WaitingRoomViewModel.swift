@@ -26,6 +26,13 @@ public final class WaitingRoomViewModel: ObservableObject {
     public var onPublisherReady: (() -> Void)?
 
     public let roomName: RoomName
+
+    /// The room name to display in the UI.
+    /// When `roomName` is a session key (JWT), this extracts the human-readable room name from its payload.
+    public var displayRoomName: RoomName {
+        RoomIdentifier.from(roomName).displayName
+    }
+
     weak var publisher: VERAPublisher?
 
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
@@ -191,7 +198,7 @@ extension WaitingRoomViewModel {
         }
         state = .content(
             .init(
-                roomName: roomName,
+                roomName: displayRoomName,
                 isMicrophoneEnabled: isMicrophoneEnabled,
                 isCameraEnabled: isCameraEnabled,
                 allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,

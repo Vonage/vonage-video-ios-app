@@ -19,6 +19,16 @@ public class MockRoomCredentialsRepository: RoomCredentialsRepository {
     ) async throws -> RoomCredentialsResponse {
         response
     }
+
+    public func getCredentialsFromSessionKey(
+        _ request: SessionKeyCredentialsRequest
+    ) async throws -> RoomCredentialsResponse {
+        RoomCredentialsResponse(
+            sessionId: response.sessionId,
+            token: response.token,
+            apiKey: response.apiKey,
+            sessionKey: request.sessionKey)
+    }
 }
 
 public func makeMockRoomCredentialsRepository(

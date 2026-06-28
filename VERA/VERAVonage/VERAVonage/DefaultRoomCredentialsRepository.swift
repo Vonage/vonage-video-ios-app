@@ -65,4 +65,27 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
 
         return credentials
     }
+
+    public func getCredentialsFromSessionKey(
+        _ request: SessionKeyCredentialsRequest
+    ) async throws -> RoomCredentialsResponse {
+
+        let joinBody = try jsonEncoder.encode(
+            JoinSessionRequestBody(sessionKey: request.sessionKey))
+        let joinData = try await httpClient.post(
+            baseURL.appendingPathComponent("v2").appendingPathComponent("joinSession"),
+            data: joinBody)
+        let joinResponse = try jsonDecoder.decode(
+            TRPCResponse<JoinSessionResponse>.self, from: joinData)
+
+        let sessionId = SessionKeyParser.extractSessionId(from: request.sessionKey) ?? ""
+
+        let credentials = RoomCredentialsResponse(
+            sessionId: sessionId,
+            token: joinResponse.result.data.token,
+            apiKey: joinResponse.result.data.applicationId,
+            sessionKey: request.sessionKey)
+
+        return credentials
+    }
 }

@@ -54,6 +54,13 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     public let roomName: RoomName
     public let baseURL: URL
+
+    /// The room name to display in the UI.
+    /// When `roomName` is a session key (JWT), this extracts the human-readable name from its payload.
+    public var displayRoomName: RoomName {
+        RoomIdentifier.from(roomName).displayName
+    }
+
     private var initialised = false
     private var getExternalButtons: () -> [BottomBarButton]
 
@@ -253,8 +260,8 @@ extension MeetingRoomViewModel {
 
             guard let self else { return MeetingRoomState.initial }
             return MeetingRoomState(
-                roomName: self.roomName,
-                roomURL: baseURL.meetingRoomURL(roomName),
+                roomName: self.displayRoomName,
+                roomURL: baseURL.meetingRoomURL(displayRoomName),
                 isMicEnabled: sessionState.isPublishingAudio
                     && checkMicrophoneAuthorizationStatusUseCase().isAuthorized,
                 isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase().isAuthorized,
@@ -293,7 +300,10 @@ extension MeetingRoomViewModel {
     }
 
     fileprivate func connect() async throws -> CallFacade {
-        try await connectToRoomUseCase(roomName: roomName)
+        if SessionKeyParser.isSessionKey(roomName) {
+            return try await connectToRoomUseCase(sessionKey: roomName)
+        }
+        return try await connectToRoomUseCase(roomName: roomName)
     }
 
     fileprivate func addObservers(_ call: CallFacade) async {

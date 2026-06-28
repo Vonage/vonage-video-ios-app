@@ -84,6 +84,19 @@ public struct RoomCredentialsRequest {
     }
 }
 
+/// Request to join a session using an existing session key (JWT).
+///
+/// When a deep link contains a session key, we skip `createSession` and use the key
+/// directly with `joinSession`.
+public struct SessionKeyCredentialsRequest {
+    public let sessionKey: String
+
+    public init(sessionKey: String) {
+        self.sessionKey = sessionKey
+    }
+}
+
 public protocol RoomCredentialsRepository {
     func getRoomCredentials(_ request: RoomCredentialsRequest) async throws -> RoomCredentialsResponse
+    func getCredentialsFromSessionKey(_ request: SessionKeyCredentialsRequest) async throws -> RoomCredentialsResponse
 }

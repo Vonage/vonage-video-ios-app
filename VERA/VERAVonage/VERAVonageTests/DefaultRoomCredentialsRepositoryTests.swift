@@ -157,6 +157,70 @@ struct DefaultRoomCredentialsRepositoryTests {
         }
     }
 
+    // MARK: - getCredentialsFromSessionKey
+
+    @Test("getCredentialsFromSessionKey calls only joinSession")
+    func getCredentialsFromSessionKeyCallsOnlyJoinSession() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeJoinSessionJSONResponse(token: "token-abc", applicationId: "app-42")
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        let sessionKey = makeTestSessionKey()
+        _ = try await sut.getCredentialsFromSessionKey(.init(sessionKey: sessionKey))
+
+        #expect(httpClient.callCount == 1)
+        let url = try #require(httpClient.recordedURLs.first)
+        #expect(url.lastPathComponent == "joinSession")
+    }
+
+    @Test("getCredentialsFromSessionKey returns correct token and apiKey")
+    func getCredentialsFromSessionKeyReturnsCorrectCredentials() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeJoinSessionJSONResponse(token: "token-abc", applicationId: "app-42")
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        let sessionKey = makeTestSessionKey()
+        let credentials = try await sut.getCredentialsFromSessionKey(.init(sessionKey: sessionKey))
+
+        #expect(credentials.token == "token-abc")
+        #expect(credentials.apiKey == "app-42")
+        #expect(credentials.sessionKey == sessionKey)
+    }
+
+    @Test("getCredentialsFromSessionKey extracts sessionId from JWT")
+    func getCredentialsFromSessionKeyExtractsSessionId() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeJoinSessionJSONResponse()
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        let sessionKey = makeTestSessionKey(sessionId: "1_MX4xTest")
+        let credentials = try await sut.getCredentialsFromSessionKey(.init(sessionKey: sessionKey))
+
+        #expect(credentials.sessionId == "1_MX4xTest")
+    }
+
+    @Test("getCredentialsFromSessionKey sends sessionKey in request body")
+    func getCredentialsFromSessionKeySendsSessionKey() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeJoinSessionJSONResponse()
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        let sessionKey = makeTestSessionKey()
+        _ = try await sut.getCredentialsFromSessionKey(.init(sessionKey: sessionKey))
+
+        let body = try #require(httpClient.recordedDataSequence.first)
+        let json = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+        #expect(json?["sessionKey"] as? String == sessionKey)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -193,5 +257,25 @@ struct DefaultRoomCredentialsRepositoryTests {
                 applicationId: applicationId),
         ]
         return httpClient
+    }
+
+    private func makeTestSessionKey(
+        sessionId: String = "1_MX4x",
+        roomName: String = "solutions"
+    ) -> String {
+        let header = Data("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".utf8).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let payload = Data("{\"sessionId\":\"\(sessionId)\",\"roomName\":\"\(roomName)\",\"iat\":1776844771}".utf8)
+            .base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        let signature = Data("test-signature-data".utf8).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        return "\(header).\(payload).\(signature)"
     }
 }

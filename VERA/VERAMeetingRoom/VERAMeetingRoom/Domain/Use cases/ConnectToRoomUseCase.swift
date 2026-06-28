@@ -19,6 +19,14 @@ public protocol ConnectToRoomUseCase {
     /// - Returns: A connected ``CallFacade`` ready for use.
     /// - Throws: Errors resolving credentials or creating the session.
     func callAsFunction(roomName: RoomName) async throws -> CallFacade
+
+    /// Connects to a room using a session key (JWT) and returns a configured, connected call façade.
+    ///
+    /// This skips the `createSession` step and joins directly using the provided session key.
+    /// - Parameter sessionKey: The JWT session key from a deep link.
+    /// - Returns: A connected ``CallFacade`` ready for use.
+    /// - Throws: Errors resolving credentials or creating the session.
+    func callAsFunction(sessionKey: String) async throws -> CallFacade
 }
 
 /// Default implementation of ``ConnectToRoomUseCase``.
@@ -66,6 +74,21 @@ public final class DefaultConnectToRoomUseCase: ConnectToRoomUseCase {
     /// - Throws: Errors from credentials fetching or session creation.
     public func callAsFunction(roomName: RoomName) async throws -> CallFacade {
         let result = try await roomCredentialsRepository.getRoomCredentials(.init(roomName: roomName))
+        return try await getConnectedCall(result.asRoomCredentials(with: roomName))
+    }
+
+    /// Connects to a room using a session key (JWT), skipping `createSession`.
+    ///
+    /// Extracts the room name from the JWT payload for display purposes,
+    /// then joins the session directly using `joinSession`.
+    ///
+    /// - Parameter sessionKey: The JWT session key from a deep link.
+    /// - Returns: A connected ``CallFacade`` ready for interaction.
+    /// - Throws: Errors from credentials fetching or session creation.
+    public func callAsFunction(sessionKey: String) async throws -> CallFacade {
+        let result = try await roomCredentialsRepository.getCredentialsFromSessionKey(
+            .init(sessionKey: sessionKey))
+        let roomName = SessionKeyParser.extractRoomName(from: sessionKey) ?? "meeting"
         return try await getConnectedCall(result.asRoomCredentials(with: roomName))
     }
 
