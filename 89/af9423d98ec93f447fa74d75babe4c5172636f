@@ -1,0 +1,37 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureManager.swift
+  s_cab2c5ae078c98::t_516283d4e8f9dd 242-244,248-258,260-261,265-271
+  s_cab2c5ae078c98::t_8434b7b9dab3f5 178
+  s_cab2c5ae078c98::t_cdfccf01410ea5 208-210,217,219-223
+  s_cab2c5ae078c98::t_4d03efda65137f 348
+  s_cab2c5ae078c98::t_1ae7f946399eae 388-397
+  s_cab2c5ae078c98::t_2a6de47fe6e07f 196
+  s_cab2c5ae078c98::t_14c2ad08b68d2e 160-161
+  s_cab2c5ae078c98::t_a57d01b99d0610 303-307
+  s_cab2c5ae078c98::t_4dbefd1da3de03 275-291
+  s_cab2c5ae078c98::t_2e34923a0b1f16 245-247,259,262-264
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  s_cab2c5ae078c98::t_b3d618f0835bf9 196-309
+  s_cab2c5ae078c98::t_2d698e46fb4423 19-28
+  s_cab2c5ae078c98::t_c5f1ec2254ff23 110-114
+  s_cab2c5ae078c98::t_6418712aef0b47 54-106
+  s_cab2c5ae078c98::t_2dde6f8d248fac 115
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_cab2c5ae078c98::t_9f4be161a02e3c 68-70
+  s_cab2c5ae078c98::t_c707d5cdcf806a 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "89af9423d98ec93f447fa74d75babe4c5172636f",
+  "prompts": {},
+  "sessions": {
+    "s_cab2c5ae078c98": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6e03f497-ed0a-4471-9ec7-92ead9cbf958",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
