@@ -48,7 +48,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor @Published public var extraButtons: [BottomBarButton] = []
     @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
     @MainActor @Published public var isArchiving = false
-    @MainActor @Published public var isInPictureInPicture = false
 
     /// Tracks the fallback disconnection task so it can be cancelled on normal call end.
     @MainActor private var disconnectionTask: Task<Void, Never>?

@@ -102,9 +102,6 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
     func pictureInPictureControllerIsPictureInPicturePossibleDidChange(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        PictureInPictureDiagnostics.log(
-            "[PiP] delegate possible=\(pictureInPictureController.isPictureInPicturePossible)"
-        )
         onPictureInPicturePossibleDidChange?()
     }
 
@@ -141,7 +138,6 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
-        PictureInPictureDiagnostics.error("[PiP] failed to start: \(error.localizedDescription)")
         isInPictureInPicture = false
         onPictureInPictureFailed?(error)
         onPictureInPictureStateDidChange?(false)

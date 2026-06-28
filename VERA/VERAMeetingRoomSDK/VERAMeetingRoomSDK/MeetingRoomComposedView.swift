@@ -65,17 +65,11 @@ struct MeetingRoomComposedView: View {
     @State private var showSettings = false
     @State private var showFeedbackForm = false
     @State private var showEffects = false
-    @State private var pictureInPictureCancellable: AnyCancellable?
+    @State private var isPictureInPictureBound = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        ZStack {
-            meetingRoomContent
-
-            #if DEBUG && !os(macOS)
-                PictureInPictureDebugOverlay(snapshot: pictureInPictureManager.debugSnapshot)
-            #endif
-        }
+        meetingRoomContent
     }
 
     private var meetingRoomContent: some View {
@@ -156,15 +150,15 @@ struct MeetingRoomComposedView: View {
                 guard !Task.isCancelled else { return }
             }
 
-            guard pictureInPictureCancellable == nil,
+            guard !isPictureInPictureBound,
                 let call = viewModel.currentCall as? VonageCall
             else { return }
 
-            pictureInPictureCancellable = PictureInPictureBinder.bind(
+            PictureInPictureBinder.bind(
                 manager: pictureInPictureManager,
-                viewModel: viewModel,
                 call: call
             )
+            isPictureInPictureBound = true
         #endif
     }
 

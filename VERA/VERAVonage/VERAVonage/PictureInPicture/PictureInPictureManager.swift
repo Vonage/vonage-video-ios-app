@@ -9,12 +9,18 @@ import UIKit
 import VERADomain
 
 /// Coordinates Picture-in-Picture for an active Vonage call.
+///
+/// iOS PiP is anchored to an already-mounted `activeVideoCallSourceView`, not to a separate
+/// background-only screen like Android's PiP UI-mode flow. The manager therefore attaches the
+/// shared PiP renderer to the participant tile that is already visible in the meeting room before
+/// the app backgrounds. Preview renderers keep tiles alive when the shared renderer moves to a new
+/// active speaker because OpenTok's default views do not reliably recover after `videoRender` has
+/// been replaced.
 @MainActor
 public final class PictureInPictureManager: ObservableObject {
     @Published public private(set) var isInPictureInPicture = false
     @Published public private(set) var canStartPictureInPicture = false
     @Published public private(set) var pipTargetParticipantId: String?
-    @Published public private(set) var debugSnapshot = PictureInPictureDebugSnapshot()
 
     let videoRenderer = PictureInPictureVideoRenderer()
 
@@ -46,37 +52,28 @@ public final class PictureInPictureManager: ObservableObject {
         pipController.onPictureInPictureStateDidChange = { [weak self] isActive in
             guard let self else { return }
             self.isInPictureInPicture = isActive
-            self.record(event: isActive ? "entered PiP" : "exited PiP")
             if !isActive {
                 self.wantsPictureInPicture = false
                 self.lastInPipRetargetAt = nil
             }
-            self.publishDebugSnapshot()
         }
         pipController.onPictureInPicturePossibleDidChange = { [weak self] in
             guard let self else { return }
             self.canStartPictureInPicture = self.pipController.canStartPictureInPicture
-            self.record(event: "possible=\(self.canStartPictureInPicture)")
             if self.canStartPictureInPicture && self.wantsPictureInPicture {
                 self.startPictureInPictureIfPossible()
             }
-            self.publishDebugSnapshot()
         }
-        pipController.onPictureInPictureFailed = { [weak self] error in
-            self?.record(event: "failed to start", error: error.localizedDescription)
+        pipController.onPictureInPictureFailed = { [weak self] _ in
             self?.wantsPictureInPicture = false
-            self?.publishDebugSnapshot()
         }
-        publishDebugSnapshot()
     }
 
     public func bind(to call: VonageCall) {
         guard self.call == nil else {
-            record(event: "bind skipped (already bound)")
             return
         }
         self.call = call
-        record(event: "bound to call")
 
         call.participantsPublisher
             // Drop high-frequency audio-level churn: only react when something that can change the
@@ -99,8 +96,6 @@ public final class PictureInPictureManager: ObservableObject {
                 self?.tearDown()
             }
             .store(in: &cancellables)
-
-        publishDebugSnapshot()
     }
 
     /// Inline video surface for the PiP target — shown in the participant tile and used as the PiP source.
@@ -123,11 +118,9 @@ public final class PictureInPictureManager: ObservableObject {
 
     public func configurePictureInPicture(sourceView: UIView, videoFrame: CGRect) {
         guard pipController.isPictureInPictureSupported else {
-            record(event: "configure blocked: not supported", error: "PiP unsupported on this device")
             return
         }
         guard videoFrame.width > 1, videoFrame.height > 1 else {
-            record(event: "configure deferred: zero bounds \(videoFrame)")
             return
         }
 
@@ -142,51 +135,37 @@ public final class PictureInPictureManager: ObservableObject {
                 pipTargetCameraEnabled,
                 wantsPictureInPicture || videoRenderer.renderedFrameCount > 0
             {
-                record(event: "reconfiguring stale PiP controller")
                 _ = pipController.reconfigure(
                     with: sourceView,
                     videoRenderer: videoRenderer,
                     videoFrame: videoFrame
                 )
             } else {
-                record(event: "configure skipped (already configured)")
-                publishDebugSnapshot()
                 return
             }
         }
 
         canStartPictureInPicture = pipController.canStartPictureInPicture
-        record(
-            event: "configured \(Int(videoFrame.width))x\(Int(videoFrame.height)) possible=\(canStartPictureInPicture)")
 
         if wantsPictureInPicture {
             startPictureInPictureIfPossible()
         }
-        publishDebugSnapshot()
     }
 
     public func requestPictureInPicture() {
         wantsPictureInPicture = true
-        record(event: "request PiP frames=\(videoRenderer.renderedFrameCount)")
-        publishDebugSnapshot()
         startPictureInPictureIfPossible()
     }
 
     public func startPictureInPictureIfPossible() {
         guard currentPipTargetId != nil else {
-            record(event: "start blocked: no pip target")
-            publishDebugSnapshot()
             return
         }
 
         guard pipController.canStartPictureInPicture else {
-            record(event: "start blocked: not possible yet frames=\(videoRenderer.renderedFrameCount)")
-            publishDebugSnapshot()
             return
         }
-        record(event: "starting PiP")
         pipController.startPictureInPicture()
-        publishDebugSnapshot()
     }
 
     public func tearDown() {
@@ -205,8 +184,6 @@ public final class PictureInPictureManager: ObservableObject {
         pipTargetParticipantId = nil
         wantsPictureInPicture = false
         cachedInlineView = nil
-        record(event: "torn down")
-        publishDebugSnapshot()
     }
 
     private func updatePipTarget(for state: ParticipantsState) async {
@@ -225,15 +202,12 @@ public final class PictureInPictureManager: ObservableObject {
             pipTargetCameraEnabled = targetCameraEnabled
 
             if cameraWasEnabled && !targetCameraEnabled {
-                record(event: "pip target camera disabled — showing placeholder")
                 videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
                 canStartPictureInPicture = pipController.canStartPictureInPicture
-                publishDebugSnapshot()
                 return
             }
 
             if !cameraWasEnabled && targetCameraEnabled, let targetId {
-                record(event: "pip target camera re-enabled — refreshing PiP pipeline")
                 videoRenderer.stopPlaceholder()
                 await refreshPipPipeline(targetId: targetId, state: state)
                 return
@@ -251,8 +225,6 @@ public final class PictureInPictureManager: ObservableObject {
             currentTargetHasCamera,
             targetId != currentPipTargetId
         {
-            record(event: "pip target update deferred (pending PiP)")
-            publishDebugSnapshot()
             return
         }
 
@@ -274,20 +246,15 @@ public final class PictureInPictureManager: ObservableObject {
             if let last = lastInPipRetargetAt,
                 now.timeIntervalSince(last) < Self.minimumInPipRetargetInterval
             {
-                record(event: "pip active-speaker retarget throttled (keep \(currentPipTargetId ?? "nil"))")
                 // Fall through to keep the current target's placeholder in sync.
             } else {
                 lastInPipRetargetAt = now
-                record(
-                    event: "pip active-speaker retarget \(currentPipTargetId ?? "nil") -> \(targetId ?? "nil")")
                 await retargetPipRenderer(to: targetId, state: state, reconfigureController: false)
                 return
             }
         }
 
         guard let currentPipTargetId else {
-            record(event: "pip target update skipped (in PiP, no target)")
-            publishDebugSnapshot()
             return
         }
 
@@ -296,16 +263,13 @@ public final class PictureInPictureManager: ObservableObject {
         pipTargetCameraEnabled = cameraEnabled
 
         if cameraWasEnabled, !cameraEnabled {
-            record(event: "pip target camera disabled in PiP — showing placeholder")
             videoRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
         } else if !cameraWasEnabled, cameraEnabled {
-            record(event: "pip target camera re-enabled in PiP — resuming live video")
             videoRenderer.stopPlaceholder()
         } else if !cameraEnabled {
             videoRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
         }
 
-        publishDebugSnapshot()
     }
 
     /// PiP target while Picture-in-Picture is active: follow the detected active speaker.
@@ -364,7 +328,6 @@ public final class PictureInPictureManager: ObservableObject {
             newTargetId != call.publisher.id
         {
             call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
-            record(event: "publisher inline preview renderer attached")
         } else {
             clearCurrentPipTarget()
         }
@@ -374,8 +337,6 @@ public final class PictureInPictureManager: ObservableObject {
         pipTargetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
 
         guard let targetId, let call else {
-            record(event: "no pip target")
-            publishDebugSnapshot()
             return
         }
 
@@ -385,8 +346,6 @@ public final class PictureInPictureManager: ObservableObject {
         } else {
             videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
         }
-        record(event: "pip target switched \(targetId) camera=\(pipTargetCameraEnabled)")
-        publishDebugSnapshot()
     }
 
     private func refreshPipPipeline(targetId: String, state: ParticipantsState) async {
@@ -395,7 +354,6 @@ public final class PictureInPictureManager: ObservableObject {
 
         guard let call else { return }
         await applyPipRenderer(to: targetId, call: call, forceReattach: true)
-        publishDebugSnapshot()
     }
 
     private func applyPipRenderer(
@@ -416,7 +374,6 @@ public final class PictureInPictureManager: ObservableObject {
             }
             subscriber.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
         } else {
-            record(event: "pip target missing stream \(targetId)", error: "subscriber not found")
             return
         }
 
@@ -546,25 +503,5 @@ public final class PictureInPictureManager: ObservableObject {
 
     private func pruneSubscriberPreviewRenderers(keeping ids: Set<String>) {
         subscriberPreviewRenderers = subscriberPreviewRenderers.filter { ids.contains($0.key) }
-    }
-
-    private func record(event: String, error: String? = nil) {
-        PictureInPictureDiagnostics.log("[PiP] \(event)")
-        if let error {
-            PictureInPictureDiagnostics.error("[PiP] \(error)")
-        }
-        debugSnapshot.lastEvent = event
-        debugSnapshot.lastError = error
-    }
-
-    private func publishDebugSnapshot() {
-        debugSnapshot.isBound = call != nil
-        debugSnapshot.pipTargetId = pipTargetParticipantId
-        debugSnapshot.isControllerConfigured = pipController.isConfigured
-        debugSnapshot.isSupported = pipController.isPictureInPictureSupported
-        debugSnapshot.isPossible = pipController.canStartPictureInPicture
-        debugSnapshot.isInPictureInPicture = isInPictureInPicture
-        debugSnapshot.renderedFrameCount = videoRenderer.renderedFrameCount
-        debugSnapshot.wantsPictureInPicture = wantsPictureInPicture
     }
 }
