@@ -221,6 +221,20 @@ struct DefaultRoomCredentialsRepositoryTests {
         #expect(json?["sessionKey"] as? String == sessionKey)
     }
 
+    @Test("getCredentialsFromSessionKey throws when sessionId cannot be extracted")
+    func getCredentialsFromSessionKeyThrowsForInvalidSessionKey() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeJoinSessionJSONResponse()
+        ]
+
+        let sut = makeSUT(httpClient: httpClient)
+        let malformedSessionKey = "notajwt"
+        await #expect(throws: DefaultRoomCredentialsRepository.Error.invalidSessionKey) {
+            _ = try await sut.getCredentialsFromSessionKey(.init(sessionKey: malformedSessionKey))
+        }
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(

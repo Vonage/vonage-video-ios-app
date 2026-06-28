@@ -8,7 +8,7 @@ import Foundation
 ///
 /// When a user opens a deep link, the path component after `/room/` can be:
 /// - A plain room name (e.g., `heart-of-gold`)
-/// - A session key JWT (e.g., `******
+/// - A session key JWT (e.g., `******`)
 ///
 /// The session key already contains room credentials, so it can skip the `createSession` step
 /// and proceed directly to `joinSession`.

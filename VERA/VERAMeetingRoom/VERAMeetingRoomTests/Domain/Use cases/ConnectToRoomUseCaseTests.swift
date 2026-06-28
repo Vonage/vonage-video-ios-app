@@ -62,7 +62,7 @@ struct ConnectToRoomUseCaseTests {
     }
 
     @Test
-    func connectWithSessionKeySkipsCreateSession() async throws {
+    func connectWithSessionKeyCallsCreateSession() async throws {
         let sessionRepository = makeMockSessionRepository()
         sessionRepository.currentCall = MockCall()
         let sessionKeyHolder = DefaultSessionKeyHolder()

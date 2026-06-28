@@ -23,6 +23,10 @@ import VERADomain
 /// ### Fetching Credentials
 /// - ``getRoomCredentials(_:)``
 public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
+    public enum Error: Swift.Error {
+        case invalidSessionKey
+    }
+
     private let httpClient: HTTPClient
     private let jsonDecoder: JSONDecoder
     private let jsonEncoder: JSONEncoder
@@ -78,7 +82,9 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
         let joinResponse = try jsonDecoder.decode(
             TRPCResponse<JoinSessionResponse>.self, from: joinData)
 
-        let sessionId = SessionKeyParser.extractSessionId(from: request.sessionKey) ?? ""
+        guard let sessionId = SessionKeyParser.extractSessionId(from: request.sessionKey) else {
+            throw Error.invalidSessionKey
+        }
 
         let credentials = RoomCredentialsResponse(
             sessionId: sessionId,
