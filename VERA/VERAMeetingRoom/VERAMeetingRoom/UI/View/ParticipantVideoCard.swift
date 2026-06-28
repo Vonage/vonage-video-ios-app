@@ -65,7 +65,9 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-    var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
+    var shouldFlipHorizontally: Bool {
+        participant.isRemote && !participant.isScreenshare && participant.isCameraEnabled
+    }
 
     init(
         participant: UIParticipant,
@@ -82,7 +84,7 @@ struct ParticipantVideoCard: View {
     @ViewBuilder
     private var cardContent: some View {
         Group {
-            if participant.isCameraEnabled {
+            if participant.isCameraEnabled || participant.usesPictureInPictureRenderer {
                 ZStack {
                     Rectangle()
                         .fill(

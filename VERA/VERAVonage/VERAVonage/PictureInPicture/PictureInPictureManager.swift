@@ -157,8 +157,8 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     public func startPictureInPictureIfPossible() {
-        guard pipTargetCameraEnabled else {
-            record(event: "start blocked: pip target camera off")
+        guard currentPipTargetId != nil else {
+            record(event: "start blocked: no pip target")
             publishDebugSnapshot()
             return
         }
@@ -175,6 +175,7 @@ public final class PictureInPictureManager: ObservableObject {
 
     public func tearDown() {
         cancellables.removeAll()
+        videoRenderer.stopPlaceholder()
         clearCurrentPipTarget()
         pipController.tearDown()
         call = nil
@@ -192,8 +193,7 @@ public final class PictureInPictureManager: ObservableObject {
 
     private func updatePipTarget(for state: ParticipantsState) async {
         if isInPictureInPicture || pipController.isInPictureInPicture {
-            record(event: "pip target update skipped (in PiP)")
-            publishDebugSnapshot()
+            updateActivePipTargetWhileInPictureInPicture(for: state)
             return
         }
 
@@ -205,17 +205,22 @@ public final class PictureInPictureManager: ObservableObject {
             pipTargetCameraEnabled = targetCameraEnabled
 
             if cameraWasEnabled && !targetCameraEnabled {
-                record(event: "pip target camera disabled — resetting PiP controller")
-                videoRenderer.prepareForPipRefresh()
-                pipController.tearDown()
-                canStartPictureInPicture = false
+                record(event: "pip target camera disabled — showing placeholder")
+                videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+                canStartPictureInPicture = pipController.canStartPictureInPicture
                 publishDebugSnapshot()
                 return
             }
 
             if !cameraWasEnabled && targetCameraEnabled, let targetId {
                 record(event: "pip target camera re-enabled — refreshing PiP pipeline")
+                videoRenderer.stopPlaceholder()
                 await refreshPipPipeline(targetId: targetId, state: state)
+                return
+            }
+
+            if !targetCameraEnabled {
+                videoRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
             }
             return
         }
@@ -234,11 +239,56 @@ public final class PictureInPictureManager: ObservableObject {
         await switchPipTarget(to: targetId, state: state)
     }
 
+    /// While PiP is active we must not switch targets or reconfigure the controller (that would
+    /// disrupt the running PiP). We only keep the *current* target's placeholder in sync with its
+    /// camera state so turning the camera off mid-PiP shows the avatar instead of a frozen frame.
+    /// The manager is the single source of truth for the placeholder here: the renderer drops
+    /// incoming frames while the placeholder is active, so we must explicitly stop it when the
+    /// camera is re-enabled to let live video resume.
+    private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) {
+        guard let currentPipTargetId else {
+            record(event: "pip target update skipped (in PiP, no target)")
+            publishDebugSnapshot()
+            return
+        }
+
+        let cameraWasEnabled = pipTargetCameraEnabled
+        let cameraEnabled = isCameraEnabled(participantId: currentPipTargetId, in: state)
+        pipTargetCameraEnabled = cameraEnabled
+
+        if cameraWasEnabled, !cameraEnabled {
+            record(event: "pip target camera disabled in PiP — showing placeholder")
+            videoRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
+        } else if !cameraWasEnabled, cameraEnabled {
+            record(event: "pip target camera re-enabled in PiP — resuming live video")
+            videoRenderer.stopPlaceholder()
+        } else if !cameraEnabled {
+            videoRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
+        }
+
+        publishDebugSnapshot()
+    }
+
     private func switchPipTarget(to targetId: String?, state: ParticipantsState) async {
         let previousTargetId = currentPipTargetId
         invalidatePipConfiguration()
-        clearCurrentPipTarget()
-        keepPublisherRenderingIfNeeded(previousTargetId: previousTargetId, newTargetId: targetId)
+
+        // When the publisher stops being the PiP target, hand its tile straight to the dedicated
+        // preview renderer with a single `videoRender` reassignment. We deliberately skip
+        // clearCurrentPipTarget()'s restoreDefaultVideoView() here: setting OTPublisher.videoRender
+        // to nil and immediately reassigning it can leave the publisher not delivering frames to
+        // the new renderer, freezing the local self-view.
+        if let call,
+            previousTargetId == call.publisher.id,
+            let newTargetId = targetId,
+            newTargetId != call.publisher.id
+        {
+            call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
+            record(event: "publisher inline preview renderer attached")
+        } else {
+            clearCurrentPipTarget()
+        }
+
         currentPipTargetId = targetId
         pipTargetParticipantId = nil
         pipTargetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
@@ -250,6 +300,11 @@ public final class PictureInPictureManager: ObservableObject {
         }
 
         await applyPipRenderer(to: targetId, call: call)
+        if pipTargetCameraEnabled {
+            videoRenderer.stopPlaceholder()
+        } else {
+            videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+        }
         record(event: "pip target switched \(targetId) camera=\(pipTargetCameraEnabled)")
         publishDebugSnapshot()
     }
@@ -290,6 +345,7 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     private func invalidatePipConfiguration() {
+        videoRenderer.stopPlaceholder()
         videoRenderer.prepareForPipRefresh()
         pipController.tearDown()
         canStartPictureInPicture = false
@@ -329,6 +385,16 @@ public final class PictureInPictureManager: ObservableObject {
             .sorted { $0.creationTime < $1.creationTime }
     }
 
+    private func participantName(for participantId: String?, in state: ParticipantsState) -> String {
+        guard let participantId else { return "" }
+
+        if state.localParticipant?.id == participantId {
+            return state.localParticipant?.name ?? ""
+        }
+
+        return state.participants.first(where: { $0.id == participantId })?.name ?? ""
+    }
+
     private func isCameraEnabled(participantId: String?, in state: ParticipantsState) -> Bool {
         guard let participantId else { return false }
 
@@ -337,20 +403,6 @@ public final class PictureInPictureManager: ObservableObject {
         }
 
         return state.participants.first(where: { $0.id == participantId })?.isCameraEnabled == true
-    }
-
-    /// When the publisher was the PiP target and we switch to a remote, keep the local tile
-    /// rendering through a dedicated renderer. The publisher's default `OTPublisher.view` cannot be
-    /// revived after a custom `videoRender` was attached, so reverting to it would blank the tile.
-    private func keepPublisherRenderingIfNeeded(previousTargetId: String?, newTargetId: String?) {
-        guard let call,
-            previousTargetId == call.publisher.id,
-            let newTargetId,
-            newTargetId != call.publisher.id
-        else { return }
-
-        call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
-        record(event: "publisher inline preview renderer attached")
     }
 
     private func clearCurrentPipTarget() {
