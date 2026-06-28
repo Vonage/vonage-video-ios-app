@@ -1,0 +1,20 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureManager.swift
+  s_cab2c5ae078c98::t_01b6246a019c07 508-537
+  s_cab2c5ae078c98::t_22cd79dc15c723 82-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "bc2e00bcaa2d8551ac5dc65afe576de6ef77013b",
+  "prompts": {},
+  "sessions": {
+    "s_cab2c5ae078c98": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6e03f497-ed0a-4471-9ec7-92ead9cbf958",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
