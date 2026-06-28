@@ -79,6 +79,11 @@ public final class PictureInPictureManager: ObservableObject {
         record(event: "bound to call")
 
         call.participantsPublisher
+            // Drop high-frequency audio-level churn: only react when something that can change the
+            // PiP target/placeholder changes (participant set, camera states, active speaker, local
+            // camera). Without this, every audio-level emission spawns a @MainActor task and these
+            // pile up faster than they drain, starving the main actor (frozen video, dead buttons).
+            .removeDuplicates { Self.pipSignature(for: $0) == Self.pipSignature(for: $1) }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 Task { @MainActor [weak self] in
@@ -498,6 +503,36 @@ public final class PictureInPictureManager: ObservableObject {
                 }
             }
         }
+    }
+
+    /// A compact, `Equatable` snapshot of everything that can affect the PiP target or placeholder.
+    /// Used to coalesce participant-state emissions and ignore audio-level-only updates.
+    private struct PipSignature: Equatable {
+        let localId: String?
+        let localCameraEnabled: Bool
+        let activeParticipantId: String?
+        let remotes: [Remote]
+
+        struct Remote: Equatable {
+            let id: String
+            let cameraEnabled: Bool
+            let isScreenshare: Bool
+        }
+    }
+
+    private static func pipSignature(for state: ParticipantsState) -> PipSignature {
+        PipSignature(
+            localId: state.localParticipant?.id,
+            localCameraEnabled: state.localParticipant?.isCameraEnabled ?? false,
+            activeParticipantId: state.activeParticipantId,
+            remotes: state.participants.map {
+                PipSignature.Remote(
+                    id: $0.id,
+                    cameraEnabled: $0.isCameraEnabled,
+                    isScreenshare: $0.isScreenshare
+                )
+            }
+        )
     }
 
     private func subscriberPreviewRenderer(for id: String) -> PictureInPictureVideoRenderer {
