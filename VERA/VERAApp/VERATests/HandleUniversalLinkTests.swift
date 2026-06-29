@@ -81,14 +81,15 @@ struct HandleUniversalLinkTests {
 
     private func makeTestSessionKey() -> String {
         let header = Data("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".utf8).base64URLEncoded
-        let payload = Data("{\"sessionId\":\"1_MX4x\",\"roomName\":\"solutions\",\"iat\":1776844771}".utf8).base64URLEncoded
+        let payload = Data("{\"sessionId\":\"1_MX4x\",\"roomName\":\"solutions\",\"iat\":1776844771}".utf8)
+            .base64URLEncoded
         let signature = Data("test-signature".utf8).base64URLEncoded
         return "\(header).\(payload).\(signature)"
     }
 }
 
-private extension Data {
-    var base64URLEncoded: String {
+extension Data {
+    fileprivate var base64URLEncoded: String {
         base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "/", with: "_")

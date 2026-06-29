@@ -62,7 +62,8 @@ public enum SessionKeyParser {
     }
 
     private static func base64URLDecode(_ string: String) -> Data? {
-        var base64 = string
+        var base64 =
+            string
             .replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
 
@@ -77,7 +78,8 @@ public enum SessionKeyParser {
 
     private static func isBase64URLEncoded(_ string: String) -> Bool {
         guard !string.isEmpty else { return false }
-        let allowedCharacters = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=")
+        let allowedCharacters = CharacterSet(
+            charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=")
         return string.unicodeScalars.allSatisfy { allowedCharacters.contains($0) }
     }
 }

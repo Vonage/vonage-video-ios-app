@@ -135,10 +135,12 @@ struct SessionKeyParserTests {
     }
 
     private func makeJWT(payload: [String: Any]) -> String {
-        let header = base64URLEncode(try! JSONSerialization.data(
-            withJSONObject: ["alg": "HS256", "typ": "JWT"]))
-        let payloadData = base64URLEncode(try! JSONSerialization.data(
-            withJSONObject: payload))
+        let header = base64URLEncode(
+            try! JSONSerialization.data(
+                withJSONObject: ["alg": "HS256", "typ": "JWT"]))
+        let payloadData = base64URLEncode(
+            try! JSONSerialization.data(
+                withJSONObject: payload))
         let signature = base64URLEncode(Data("fake-signature-bytes".utf8))
         return "\(header).\(payloadData).\(signature)"
     }
