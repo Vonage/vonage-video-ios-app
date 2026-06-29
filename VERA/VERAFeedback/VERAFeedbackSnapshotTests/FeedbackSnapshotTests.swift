@@ -116,7 +116,7 @@ struct FeedbackSnapshotTests {
         horizontalSizeClass: UserInterfaceSizeClass = .compact,
         formState: FeedbackFormSnapshotState? = nil
     ) -> AnyView {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
 
         switch formState {
         case .validationErrors:

@@ -253,6 +253,31 @@ struct NoiseSuppressionButtonViewModelTests {
         #expect(sut.state == .enabled)
     }
 
+    @Test
+    func bottomItemPresentableExposesMetadataAndAction() async {
+        let enableUseCase = EnableUseCaseSpy()
+        let disableUseCase = DisableUseCaseSpy()
+        let sut = makeSUT(disableUseCase: disableUseCase, enableUseCase: enableUseCase)
+
+        #expect(sut.id == "noise-suppression-button")
+        #expect(sut.label == String(localized: "Noise Suppression", bundle: .veraAudioEffects))
+        #expect(sut.accessibilityIdentifier == nil)
+        #expect(sut.isActive == false)
+        #expect(sut.accessory == nil)
+
+        sut.performAction()
+        await Task.yield()
+
+        #expect(sut.isActive)
+        #expect(enableUseCase.callCount == 1)
+
+        sut.performAction()
+        await Task.yield()
+
+        #expect(sut.isActive == false)
+        #expect(disableUseCase.callCount == 1)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(

@@ -11,14 +11,6 @@ public enum MeetingRoomViewState: Equatable {
     case content(MeetingRoomState)
 }
 
-public struct MeetingRoomButtonsState {
-    public let archivingState: ArchivingState
-
-    public init(archivingState: ArchivingState) {
-        self.archivingState = archivingState
-    }
-}
-
 public struct MeetingRoomOverlayState {
     public let captions: [CaptionItem]
 
@@ -42,6 +34,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    private var speakingWhileMutedDetector: SpeakingWhileMutedDetector?
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -63,7 +56,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
+    private var getExternalButtons: () -> [BottomBarButton]
 
     public init(
         roomName: RoomName,
@@ -76,7 +69,8 @@ public final class MeetingRoomViewModel: ObservableObject {
         captionsStatusDataSource: CaptionsStatusDataSource,
         configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        getExternalButtons: @escaping () -> [BottomBarButton],
+        externalButtonsUpdates: AnyPublisher<Void, Never>,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
@@ -93,6 +87,13 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
+        externalButtonsUpdates
+            .sink { [weak self] in
+                Task { @MainActor [weak self] in
+                    self?.updateExtraButtons()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     @MainActor
@@ -338,6 +339,23 @@ extension MeetingRoomViewModel {
                 self?.handleNoiseSuppressionChange(state)
             }
             .store(in: &cancellables)
+
+        let detector = SpeakingWhileMutedDetector(
+            isMicEnabled: sessionStatePublisher.map(\.isPublishingAudio).eraseToAnyPublisher(),
+            audioLevel: call.publisherAudioLevelPublisher
+        )
+        speakingWhileMutedDetector = detector
+
+        detector.isSpeakingWhileMuted
+            .filter { $0 == true }
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.toast = ToastItem(
+                        message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
+                        mode: .warning)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {
@@ -346,12 +364,14 @@ extension MeetingRoomViewModel {
             self.archivingPublisher.value = archivingState
             switch archivingState {
             case .idle:
-                self.toast = .init(message: "Session recording stopped", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording stopped", bundle: .module),
+                    mode: .info)
             case .archiving:
-                self.toast = .init(message: "Session recording started", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording started", bundle: .module),
+                    mode: .info)
             }
-
-            self.updateArchivingButtons()
         }
     }
 
@@ -360,15 +380,21 @@ extension MeetingRoomViewModel {
             guard let self else { return }
             switch event {
             case .didBeginReconnecting:
-                self.toast = .init(message: "Session did drop, started reconnection", mode: .warning)
+                self.toast = .init(
+                    message: String(localized: "Session did drop, started reconnection", bundle: .module),
+                    mode: .warning)
             case .didReconnect:
-                self.toast = .init(message: "Session did reconnect", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session did reconnect", bundle: .module),
+                    mode: .info)
             case .error(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .sessionFailure(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
-                self.toast = .init(message: "Session did disconnect", mode: .failure)
+                self.toast = .init(
+                    message: String(localized: "Session did disconnect", bundle: .module),
+                    mode: .failure)
                 self.scheduleDisconnection()
             default:
                 break
@@ -395,13 +421,7 @@ extension MeetingRoomViewModel {
 
     @MainActor
     fileprivate func updateExtraButtons() {
-        updateArchivingButtons()
-    }
-
-    @MainActor
-    fileprivate func updateArchivingButtons() {
-        let archivingState = archivingPublisher.value
-        extraButtons = getExternalButtons(.init(archivingState: archivingState))
+        extraButtons = getExternalButtons()
     }
 
 }

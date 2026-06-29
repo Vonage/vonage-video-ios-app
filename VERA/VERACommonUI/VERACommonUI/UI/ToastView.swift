@@ -40,6 +40,7 @@ public struct ToastView: View {
         .background(
             GlassBackground()
         )
+        .accessibilityIdentifier("toast-\(item.mode.accessibilityName)")
     }
 }
 extension ToastItem {
@@ -58,6 +59,10 @@ extension ToastItem {
             VERACommonUIAsset.Images.checkCircleLine.swiftUIImage
                 .foregroundStyle(theme.primary)
         }
+    }
+
+    public var view: ToastView {
+        ToastView(item: self)
     }
 }
 

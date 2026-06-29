@@ -35,11 +35,21 @@ public struct OngoingActivityControlImageButton: View {
     @Environment(\.meetingRoomTheme) private var theme
     private let isActive: Bool
     private let image: Image
+    private let accessibilityIdentifier: String?
+    private let accessory: BottomBarButtonAccessory?
     private let action: () -> Void
 
-    public init(isActive: Bool, image: Image, action: @escaping () -> Void = {}) {
+    public init(
+        isActive: Bool,
+        image: Image,
+        accessibilityIdentifier: String? = nil,
+        accessory: BottomBarButtonAccessory? = nil,
+        action: @escaping () -> Void = {}
+    ) {
         self.isActive = isActive
         self.image = image
+        self.accessibilityIdentifier = accessibilityIdentifier
+        self.accessory = accessory
         self.action = action
     }
 
@@ -65,6 +75,10 @@ public struct OngoingActivityControlImageButton: View {
                 )
         }
         .buttonStyle(PlainButtonStyle())
+        .if(accessibilityIdentifier != nil) { view in
+            view.accessibilityIdentifier(accessibilityIdentifier ?? "")
+        }
+        .bottomBarButtonAccessory(accessory)
     }
 }
 

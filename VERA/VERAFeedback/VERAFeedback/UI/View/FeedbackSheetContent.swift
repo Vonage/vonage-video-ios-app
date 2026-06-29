@@ -5,9 +5,19 @@
 import SwiftUI
 
 public struct FeedbackSheetContent: View {
-    @StateObject private var feedbackFormViewModel = FeedbackFormViewModel()
+    @StateObject private var feedbackFormViewModel: FeedbackFormViewModel
 
-    public init() {}
+    public init(
+        feedbackReportUseCase: FeedbackReportUseCase,
+        sessionDebugInfoProvider: @escaping () -> FeedbackSessionDebugInfo = { .empty }
+    ) {
+        _feedbackFormViewModel = StateObject(
+            wrappedValue: FeedbackFormViewModel(
+                feedbackReportUseCase: feedbackReportUseCase,
+                sessionDebugInfoProvider: sessionDebugInfoProvider
+            )
+        )
+    }
 
     public var body: some View {
         FeedbackView(feedbackFormViewModel: feedbackFormViewModel)

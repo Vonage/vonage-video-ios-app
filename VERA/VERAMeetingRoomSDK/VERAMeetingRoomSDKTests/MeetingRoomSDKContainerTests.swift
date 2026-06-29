@@ -197,11 +197,11 @@ struct MeetingRoomSDKContainerTests {
 }
 
 private final class HTTPClientStub: HTTPClient {
-    func get(_ url: URL) async throws -> Data {
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
         Data()
     }
 
-    func post(_ url: URL, data: Data) async throws -> Data {
+    func get(_ url: URL) async throws -> Data {
         Data()
     }
 }
@@ -276,6 +276,8 @@ private final class SessionRepositoryStub: SessionRepository {
 }
 
 private final class CallFacadeStub: CallFacade {
+    let publisherAudioLevelPublisher: AnyPublisher<Float, Never> = Just(0.0).eraseToAnyPublisher()
+
     var participantsPublisher = Just(ParticipantsState.empty).eraseToAnyPublisher()
     var eventsPublisher = Just(SessionEvent.idle).eraseToAnyPublisher()
     var statePublisher = Just(SessionState(isPublishingAudio: true, isPublishingVideo: true)).eraseToAnyPublisher()

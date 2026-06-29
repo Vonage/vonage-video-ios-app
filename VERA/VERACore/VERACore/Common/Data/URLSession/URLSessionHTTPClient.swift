@@ -24,13 +24,14 @@ public final class URLSessionHTTPClient: HTTPClient {
         return try await perform(request)
     }
 
-    public func post(_ url: URL, data: Data) async throws -> Data {
+    public func post(_ url: URL, additionalHeaders: [String: String] = [:], data: Data) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = data
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
+        additionalHeaders.forEach { request.setValue($1, forHTTPHeaderField: $0) }
         return try await perform(request)
     }
 
