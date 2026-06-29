@@ -30,8 +30,10 @@ public class WaitingRoomFactory {
         roomName: RoomName,
         onActionHandler: @escaping ActionHandler
     ) -> (some View, viewModel: WaitingRoomViewModel) {
+        let displayRoomName = RoomIdentifier.from(roomName).displayName
         let viewModel = WaitingRoomViewModel(
             roomName: roomName,
+            displayRoomName: displayRoomName,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             cameraDevicesRepository: cameraDevicesRepository,
             joinRoomUseCase: .init(

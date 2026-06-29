@@ -26,12 +26,8 @@ public final class WaitingRoomViewModel: ObservableObject {
     public var onPublisherReady: (() -> Void)?
 
     public let roomName: RoomName
-
-    /// The room name to display in the UI.
-    /// When `roomName` is a session key (JWT), this extracts the human-readable room name from its payload.
-    public var displayRoomName: RoomName {
-        RoomIdentifier.from(roomName).displayName
-    }
+    /// The human-readable room name to display in the UI.
+    public let displayRoomName: RoomName
 
     weak var publisher: VERAPublisher?
 
@@ -59,6 +55,7 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     public init(
         roomName: RoomName,
+        displayRoomName: RoomName,
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         joinRoomUseCase: JoinRoomUseCase,
@@ -70,6 +67,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         waitingRoomNavigation: WaitingRoomDestination
     ) {
         self.roomName = roomName
+        self.displayRoomName = displayRoomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.joinRoomUseCase = joinRoomUseCase

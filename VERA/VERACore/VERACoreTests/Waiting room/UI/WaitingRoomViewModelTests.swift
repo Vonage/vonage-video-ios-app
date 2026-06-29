@@ -267,6 +267,7 @@ struct WaitingRoomViewModelTests {
 
     func makeSUT(
         roomName: RoomName = "heart-of-gold",
+        displayRoomName: RoomName? = nil,
         cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
         cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
         userRepository: UserRepository = makeMockUserRepository(),
@@ -280,6 +281,7 @@ struct WaitingRoomViewModelTests {
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
+            displayRoomName: displayRoomName ?? roomName,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             cameraDevicesRepository: cameraDevicesRepository,
             joinRoomUseCase: .init(
