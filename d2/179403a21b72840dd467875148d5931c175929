@@ -1,0 +1,24 @@
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatsOverlayViewModelTests.swift"
+  s_13227bcac0de5e::t_4e804751baf61f 20,25-38,41-60
+  s_13227bcac0de5e::t_83378afaca8959 61
+VERA/VERAFeedback/VERAFeedbackApp/VERAFeedbackApp.swift
+  s_13227bcac0de5e::t_454a8b1ba3e624 12-52,54,56-73,76-89
+VERA/VERACaptions/VERACaptionsTests/Data/DefaultCaptionsDataSourceTests.swift
+  s_13227bcac0de5e::t_6c71b871495953 89-96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d2179403a21b72840dd467875148d5931c175929",
+  "prompts": {},
+  "sessions": {
+    "s_13227bcac0de5e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1379-df17-7ee2-9e4a-d919edc48de4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
