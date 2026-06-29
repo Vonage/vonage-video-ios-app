@@ -954,6 +954,173 @@ struct MeetingRoomViewModelTests {
         #expect(updatedState?.archivingState == .idle)
     }
 
+    // MARK: - Session Event Tests
+
+    @Test("Given session begins reconnecting, Then a warning toast is shown")
+    @MainActor
+    func didBeginReconnectingShowsWarningToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.didBeginReconnecting)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .warning)
+    }
+
+    @Test("Given session reconnects, Then an info toast is shown")
+    @MainActor
+    func didReconnectShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.didReconnect)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given a session error occurs, Then a failure toast with the error description is shown")
+    @MainActor
+    func sessionErrorShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let testError = NSError(
+            domain: "TestDomain", code: 42, userInfo: [NSLocalizedDescriptionKey: "Something broke"])
+        mockCall._eventsPublisher.send(.error(testError))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message == "Something broke")
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given a session failure occurs, Then a failure toast with the error description is shown")
+    @MainActor
+    func sessionFailureShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let testError = NSError(
+            domain: "TestDomain", code: 99, userInfo: [NSLocalizedDescriptionKey: "Session lost"])
+        mockCall._eventsPublisher.send(.sessionFailure(testError))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message == "Session lost")
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given session disconnects unexpectedly, Then a failure toast is shown")
+    @MainActor
+    func disconnectedShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.disconnected)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given session disconnects unexpectedly, Then disconnect use case is called after timeout")
+    @MainActor
+    func disconnectedSchedulesDisconnection() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            disconnectRoomUseCase: disconnectRoomUseCase
+        )
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.disconnected)
+
+        // Wait for toast to appear (confirms event was handled)
+        _ = await sut.$toast.values.first { $0 != nil }
+
+        // The disconnection is scheduled with a 6-second timeout.
+        // We verify it was scheduled by waiting slightly longer.
+        try await Task.sleep(for: .seconds(7))
+
+        #expect(disconnectRoomUseCase.recordedActions == [.disconnect])
+    }
+
+    @Test("Given an idle event, Then no toast is shown")
+    @MainActor
+    func idleEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.idle)
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given a connected event, Then no toast is shown")
+    @MainActor
+    func connectedEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Reset toast (loadUI may have triggered connected already)
+        sut.toast = nil
+
+        mockCall._eventsPublisher.send(.connected)
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given a streamReceived event, Then no toast is shown")
+    @MainActor
+    func streamReceivedEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.streamReceived(streamId: "stream-1"))
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
     // MARK: SUT
 
     func makeSUT(
