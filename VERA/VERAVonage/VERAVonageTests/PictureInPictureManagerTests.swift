@@ -3,8 +3,12 @@
 //
 
 import Foundation
+import OpenTok
 import Testing
 import UIKit
+import VERACore
+import VERADomain
+import VERATestHelpers
 
 @testable import VERAVonage
 
@@ -109,10 +113,6 @@ struct PictureInPictureManagerTests {
 
 // MARK: - Helpers
 
-import OpenTok
-import VERACore
-import VERADomain
-import VERATestHelpers
 
 @MainActor
 private func makeSUT() -> VonageCall {
