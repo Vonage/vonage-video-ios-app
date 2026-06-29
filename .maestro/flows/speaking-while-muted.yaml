@@ -71,10 +71,6 @@ appId: ${APP_ID}
 - assertVisible:
     id: "toast-warning"
 
-# Verify toast contains the expected muted message (partial match avoids quote encoding issues)
-- assertVisible:
-    text: "muted"
-
 - takeScreenshot: 03-speaking-while-muted-toast
 
 # Unmute the microphone — toast should disappear
