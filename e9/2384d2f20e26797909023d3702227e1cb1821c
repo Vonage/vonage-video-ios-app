@@ -1,0 +1,26 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_cab2c5ae078c98::t_3a346d7fcc81b6 135-137,141
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_cab2c5ae078c98::t_fa1e48ba3aa4ed 123-127
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  s_cab2c5ae078c98::t_0901845681916a 47-49
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  s_cab2c5ae078c98::t_9120b2053c46c3 29
+  s_cab2c5ae078c98::t_6a30750b798bd2 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "e92384d2f20e26797909023d3702227e1cb1821c",
+  "prompts": {},
+  "sessions": {
+    "s_cab2c5ae078c98": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6e03f497-ed0a-4471-9ec7-92ead9cbf958",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

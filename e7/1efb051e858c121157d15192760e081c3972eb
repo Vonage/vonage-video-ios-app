@@ -1,0 +1,20 @@
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/PipMeetingRoomView.swift
+  s_e863cf93529570::t_2c2f24fedc4b1e 33
+  s_e863cf93529570::t_22199483d10d0a 1-32,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "e71efb051e858c121157d15192760e081c3972eb",
+  "prompts": {},
+  "sessions": {
+    "s_e863cf93529570": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cce3e265-3ef8-467c-8406-a4a1a4a69809",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
