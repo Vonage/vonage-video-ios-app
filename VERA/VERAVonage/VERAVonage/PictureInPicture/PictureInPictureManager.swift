@@ -38,6 +38,13 @@ public final class PictureInPictureManager: ObservableObject {
     private var lastInPipRetargetAt: Date?
     private static let minimumInPipRetargetInterval: TimeInterval = 1.5
 
+    /// Tracks the last source view we successfully (re)configured `pipController` with so we can
+    /// detect when SwiftUI has replaced the underlying `PictureInPictureVideoContainerView` (e.g.
+    /// after a participant grid reflow). The view is held weakly because its lifetime is owned by
+    /// the meeting room view hierarchy.
+    private weak var lastConfiguredSourceView: UIView?
+    private weak var pendingSourceView: UIView?
+    private var pendingVideoFrame: CGRect = .zero
     private let pipController = PictureInPictureController()
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
@@ -55,6 +62,7 @@ public final class PictureInPictureManager: ObservableObject {
             if !isActive {
                 self.wantsPictureInPicture = false
                 self.lastInPipRetargetAt = nil
+                self.reconfigureForPendingSourceViewIfNeeded()
             }
         }
         pipController.onPictureInPicturePossibleDidChange = { [weak self] in
@@ -124,22 +132,40 @@ public final class PictureInPictureManager: ObservableObject {
             return
         }
 
+        pendingSourceView = sourceView
+        pendingVideoFrame = videoFrame
         let configured = pipController.configureIfNeeded(
             with: sourceView,
             videoRenderer: videoRenderer,
             videoFrame: videoFrame
         )
 
-        if !configured {
+        if configured {
+            lastConfiguredSourceView = sourceView
+        } else {
+            let sourceViewChanged = sourceView !== lastConfiguredSourceView
             if pipController.isConfigured,
-                pipTargetCameraEnabled,
-                wantsPictureInPicture || videoRenderer.renderedFrameCount > 0
+                !pipController.isInPictureInPicture,
+                sourceViewChanged
             {
-                _ = pipController.reconfigure(
+                if pipController.reconfigure(
                     with: sourceView,
                     videoRenderer: videoRenderer,
                     videoFrame: videoFrame
-                )
+                ) {
+                    lastConfiguredSourceView = sourceView
+                }
+            } else if pipController.isConfigured,
+                pipTargetCameraEnabled,
+                wantsPictureInPicture || videoRenderer.renderedFrameCount > 0
+            {
+                if pipController.reconfigure(
+                    with: sourceView,
+                    videoRenderer: videoRenderer,
+                    videoFrame: videoFrame
+                ) {
+                    lastConfiguredSourceView = sourceView
+                }
             } else {
                 return
             }
@@ -149,6 +175,25 @@ public final class PictureInPictureManager: ObservableObject {
 
         if wantsPictureInPicture {
             startPictureInPictureIfPossible()
+        }
+    }
+
+    private func reconfigureForPendingSourceViewIfNeeded() {
+        guard let pendingSourceView,
+            pendingSourceView !== lastConfiguredSourceView,
+            pendingVideoFrame.width > 1,
+            pendingVideoFrame.height > 1,
+            pipController.isConfigured,
+            !pipController.isInPictureInPicture
+        else { return }
+
+        if pipController.reconfigure(
+            with: pendingSourceView,
+            videoRenderer: videoRenderer,
+            videoFrame: pendingVideoFrame
+        ) {
+            lastConfiguredSourceView = pendingSourceView
+            canStartPictureInPicture = pipController.canStartPictureInPicture
         }
     }
 
@@ -184,6 +229,9 @@ public final class PictureInPictureManager: ObservableObject {
         pipTargetParticipantId = nil
         wantsPictureInPicture = false
         cachedInlineView = nil
+        lastConfiguredSourceView = nil
+        pendingSourceView = nil
+        pendingVideoFrame = .zero
     }
 
     private func updatePipTarget(for state: ParticipantsState) async {
@@ -388,6 +436,7 @@ public final class PictureInPictureManager: ObservableObject {
         canStartPictureInPicture = false
         cachedInlineView = nil
         pipConfigurationToken = UUID()
+        lastConfiguredSourceView = nil
     }
 
     /// Prefers the first joined remote; falls back to any remote with camera when the first has video off.
