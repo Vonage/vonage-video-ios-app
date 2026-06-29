@@ -132,11 +132,13 @@ struct MeetingRoomComposedView: View {
                 viewModel.extraButtons = buttonsAssembler.rebuildButtons()
             }
             .task {
-                await bindPictureInPictureIfNeeded()
+                if enabledFeatures.contains(.pictureInPicture) {
+                    await bindPictureInPictureIfNeeded()
+                }
             }
             .onChange(of: scenePhase) { phase in
                 #if !os(macOS)
-                    if phase == .background {
+                    if enabledFeatures.contains(.pictureInPicture), phase == .background {
                         pictureInPictureManager.requestPictureInPicture()
                     }
                 #endif

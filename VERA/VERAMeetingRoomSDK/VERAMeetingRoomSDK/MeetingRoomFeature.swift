@@ -44,4 +44,7 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
 
     /// Feedback form
     case feedback
+
+    /// Picture-in-Picture when the app moves to the background during a call.
+    case pictureInPicture
 }
