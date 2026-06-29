@@ -235,7 +235,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
                 creationTime: date,
                 isScreenshare: isScreenshare,
                 audioLevel: audioLevel,
-                usesPictureInPictureRenderer: true,
                 view: pictureInPictureInlineView)
             return
         }

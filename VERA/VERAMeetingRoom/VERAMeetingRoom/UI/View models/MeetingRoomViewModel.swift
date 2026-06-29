@@ -45,6 +45,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     @MainActor private var disconnectionTask: Task<Void, Never>?
 
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(.activeSpeaker)
+    private let pictureInPictureTargetPublisher = CurrentValueSubject<String?, Never>(nil)
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(.initial)
     private let callStatePublisher = CurrentValueSubject<CallState, Never>(.idle)
     private let archivingPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
@@ -163,6 +164,17 @@ public final class MeetingRoomViewModel: ObservableObject {
             }
         }
     }
+
+    /// Keeps UI-only PiP target flags in sync with the active Picture-in-Picture target participant.
+    @MainActor
+    public func bindPictureInPictureTargetParticipantId(_ publisher: AnyPublisher<String?, Never>) {
+        publisher
+            .removeDuplicates()
+            .sink { [weak self] participantId in
+                self?.pictureInPictureTargetPublisher.send(participantId)
+            }
+            .store(in: &cancellables)
+    }
 }
 
 extension MeetingRoomViewModel {
@@ -183,12 +195,15 @@ extension MeetingRoomViewModel {
     }
 
     fileprivate func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
-        let sortedParticipantsPublisher = Publishers.CombineLatest3(
+        let sortedParticipantsPublisher = Publishers.CombineLatest4(
             participantsPublisher.removeDuplicates(),
             layoutPublisher,
-            pinnedParticipantsDataSource.pinnedParticipantIds
+            pinnedParticipantsDataSource.pinnedParticipantIds,
+            pictureInPictureTargetPublisher
         )
-        .map { [weak self] participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
+        .map {
+            [weak self] participantsState, layout, pinnedIds, pictureInPictureTargetId
+                -> MeetingRoomParticipantsState in
             guard let self else {
                 return MeetingRoomParticipantsState(
                     participants: [],
@@ -205,11 +220,19 @@ extension MeetingRoomViewModel {
             }
 
             let uiParticipants = participantsState.participants.map { participant in
-                self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
+                self.mapToUIParticipant(
+                    participant,
+                    pinnedIds: activePinnedIds,
+                    pictureInPictureTargetId: pictureInPictureTargetId
+                )
             }
 
             let localUIParticipant = participantsState.localParticipant.map { participant in
-                UIParticipant(participant: participant)
+                self.mapToUIParticipant(
+                    participant,
+                    pinnedIds: activePinnedIds,
+                    pictureInPictureTargetId: pictureInPictureTargetId
+                )
             }
 
             var sortedParticipants: [UIParticipant]
@@ -280,11 +303,13 @@ extension MeetingRoomViewModel {
 
     fileprivate func mapToUIParticipant(
         _ participant: Participant,
-        pinnedIds: Set<String>
+        pinnedIds: Set<String>,
+        pictureInPictureTargetId: String?
     ) -> UIParticipant {
         var uiParticipant = UIParticipant(
             participant: participant,
             isPinned: pinnedIds.contains(participant.id),
+            isPictureInPictureTarget: pictureInPictureTargetId == participant.id,
             canBePinned: pinnedIds.isRoomForPinning)
         uiParticipant.onTogglePin = { [weak self] in
             self?.onTogglePin(participantId: participant.id)

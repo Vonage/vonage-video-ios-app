@@ -84,7 +84,7 @@ struct ParticipantVideoCard: View {
     @ViewBuilder
     private var cardContent: some View {
         Group {
-            if participant.isCameraEnabled || participant.usesPictureInPictureRenderer {
+            if participant.isCameraEnabled || participant.isPictureInPictureTarget {
                 ZStack {
                     Rectangle()
                         .fill(
@@ -123,7 +123,7 @@ struct ParticipantVideoCard: View {
                                     )
                                 } else {
                                     participant.view
-                                        .id("\(participant.id)-pip-\(participant.usesPictureInPictureRenderer)")
+                                        .id("\(participant.id)-pip-\(participant.isPictureInPictureTarget)")
                                         .horizontallyFlipped(shouldFlipHorizontally)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()

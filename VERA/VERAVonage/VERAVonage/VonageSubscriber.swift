@@ -175,15 +175,12 @@ public class VonageSubscriber: NSObject {
     /// - `onDisappear`: Disables video subscription
     private func updateParticipant() {
         if isPictureInPictureRendererActive, let pictureInPictureInlineView {
-            updateParticipant(with: pictureInPictureInlineView, usesPictureInPictureRenderer: true)
+            updateParticipant(with: pictureInPictureInlineView)
             return
         }
 
         if let inlinePreviewRenderer {
-            updateParticipant(
-                with: AnyView(UIViewContainer(view: inlinePreviewRenderer)),
-                usesPictureInPictureRenderer: false
-            )
+            updateParticipant(with: AnyView(UIViewContainer(view: inlinePreviewRenderer)))
             return
         }
 
@@ -308,7 +305,7 @@ public class VonageSubscriber: NSObject {
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
-        updateParticipant(with: inlineView, usesPictureInPictureRenderer: true)
+        updateParticipant(with: inlineView)
         if subscriberDidConnect {
             otSubscriber.subscribeToVideo = true
         }
@@ -338,7 +335,7 @@ public class VonageSubscriber: NSObject {
         updateParticipant()
     }
 
-    private func updateParticipant(with view: AnyView, usesPictureInPictureRenderer: Bool) {
+    private func updateParticipant(with view: AnyView) {
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -350,7 +347,6 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: audioLevel,
-            usesPictureInPictureRenderer: usesPictureInPictureRenderer,
             view: view)
 
         participant.onAppear = { [weak self] in

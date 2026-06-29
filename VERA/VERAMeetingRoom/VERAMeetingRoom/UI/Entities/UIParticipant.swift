@@ -14,6 +14,8 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public let participant: Participant
     /// Whether this participant is pinned in the UI.
     public let isPinned: Bool
+    /// Whether this participant is the current Picture-in-Picture target tile.
+    public let isPictureInPictureTarget: Bool
     /// Whether this participant can be pinned.
     public let canBePinned: Bool
     /// Whether this participant can be pinned or unpinned.
@@ -24,10 +26,12 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public init(
         participant: Participant,
         isPinned: Bool = false,
+        isPictureInPictureTarget: Bool = false,
         canBePinned: Bool = false
     ) {
         self.participant = participant
         self.isPinned = isPinned
+        self.isPictureInPictureTarget = isPictureInPictureTarget
         self.canBePinned = canBePinned
     }
 
@@ -46,7 +50,6 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var containerAspectRatio: Double { participant.containerAspectRatio }
     public var aspectRatio: Double { participant.aspectRatio }
     public var audioLevel: Float { participant.audioLevel }
-    public var usesPictureInPictureRenderer: Bool { participant.usesPictureInPictureRenderer }
     public var isProminent: Bool { participant.isScreenshare || isPinned }
     public var onAppear: (() -> Void)? { participant.onAppear }
     public var onDisappear: (() -> Void)? { participant.onDisappear }
@@ -54,7 +57,9 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     // MARK: - Equatable
 
     public static func == (lhs: UIParticipant, rhs: UIParticipant) -> Bool {
-        lhs.participant == rhs.participant && lhs.isPinned == rhs.isPinned && lhs.canBePinned == rhs.canBePinned
+        lhs.participant == rhs.participant && lhs.isPinned == rhs.isPinned
+            && lhs.isPictureInPictureTarget == rhs.isPictureInPictureTarget
+            && lhs.canBePinned == rhs.canBePinned
     }
 
     // MARK: - Hashable
@@ -62,6 +67,7 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(participant)
         hasher.combine(isPinned)
+        hasher.combine(isPictureInPictureTarget)
         hasher.combine(canBePinned)
     }
 }

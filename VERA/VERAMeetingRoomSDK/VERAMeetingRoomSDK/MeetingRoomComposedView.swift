@@ -170,7 +170,8 @@ struct MeetingRoomComposedView: View {
 
             PictureInPictureBinder.bind(
                 manager: pictureInPictureManager,
-                call: call
+                call: call,
+                viewModel: viewModel
             )
             isPictureInPictureBound = true
         #endif
