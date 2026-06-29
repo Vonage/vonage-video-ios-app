@@ -1,0 +1,22 @@
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_1575e5b3901782::t_62744533ebcc48 155,159
+VERA/VERADomain/VERADomain/ParticipantForceMuting.swift
+  s_1575e5b3901782::t_3a7a6dd547b2ac 13,15
+  s_1575e5b3901782::t_2d7feeb4b27def 14,16-19,23,29-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "29b1f3bd860114abd6f12fce5eb3f6f6a3cc4d8f",
+  "prompts": {},
+  "sessions": {
+    "s_1575e5b3901782": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efef0-b729-79c3-ab28-50c33f3161a6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
