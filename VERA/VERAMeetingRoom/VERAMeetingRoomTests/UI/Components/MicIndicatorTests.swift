@@ -18,6 +18,7 @@ struct MicIndicatorTests {
     func enabledMicrophoneWithActionIsInteractive() {
         var actionCount = 0
         let sut = MicIndicator(
+            participantID: "arthur",
             isMicEnabled: true,
             participantName: "Arthur",
             onForceMute: { actionCount += 1 }
@@ -25,6 +26,18 @@ struct MicIndicatorTests {
 
         #expect(sut.isForceMuteEnabled)
         #expect(sut.forceMuteAccessibilityLabel == "Mute Arthur")
+        #expect(
+            MeetingRoomAccessibilityID.participantForceMuteButton("arthur")
+                == "participant-force-mute-arthur"
+        )
+        #expect(
+            MeetingRoomAccessibilityID.participantCard("arthur")
+                == "participant-card-arthur"
+        )
+        #expect(
+            MeetingRoomAccessibilityID.participantMicEnabled("arthur")
+                == "participant-mic-arthur-enabled"
+        )
         _ = host(sut)
         sut.onForceMute?()
         #expect(actionCount == 1)
@@ -33,6 +46,7 @@ struct MicIndicatorTests {
     @Test
     func enabledMicrophoneWithoutActionIsOnlyAnIndicator() {
         let sut = MicIndicator(
+            participantID: "ford",
             isMicEnabled: true,
             participantName: "Ford",
             onForceMute: nil
@@ -45,12 +59,17 @@ struct MicIndicatorTests {
     @Test
     func mutedMicrophoneNeverExposesForceMuteAction() {
         let sut = MicIndicator(
+            participantID: "trillian",
             isMicEnabled: false,
             participantName: "Trillian",
             onForceMute: {}
         )
 
         #expect(!sut.isForceMuteEnabled)
+        #expect(
+            MeetingRoomAccessibilityID.participantMicDisabled("trillian")
+                == "participant-mic-trillian-disabled"
+        )
         _ = host(sut)
     }
 

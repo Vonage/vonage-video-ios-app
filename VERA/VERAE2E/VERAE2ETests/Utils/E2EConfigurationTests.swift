@@ -26,6 +26,44 @@ struct E2EConfigurationTests {
         #expect(!E2EConfiguration.isEnabled)
     }
 
+    @Test("Scenario uses default when no value is configured")
+    func scenarioUsesDefaultWhenNoValueIsConfigured() {
+        UserDefaults.standard.removeObject(forKey: E2EConfiguration.scenarioArgument)
+        UserDefaults.standard.removeObject(forKey: E2EConfiguration.forceMuteScenarioArgument)
+
+        #expect(E2EConfiguration.scenario.name == "default")
+    }
+
+    @Test(
+        "Scenario reads supported values from user defaults",
+        arguments: [
+            "captions",
+            "force-mute",
+            "recording",
+        ])
+    func scenarioReadsSupportedValuesFromUserDefaults(scenarioName: String) {
+        UserDefaults.standard.set(scenarioName, forKey: E2EConfiguration.scenarioArgument)
+        defer { UserDefaults.standard.removeObject(forKey: E2EConfiguration.scenarioArgument) }
+
+        #expect(E2EConfiguration.scenario.name == scenarioName)
+    }
+
+    @Test("Scenario uses default for unsupported value")
+    func scenarioUsesDefaultForUnsupportedValue() {
+        UserDefaults.standard.set("unsupported", forKey: E2EConfiguration.scenarioArgument)
+        defer { UserDefaults.standard.removeObject(forKey: E2EConfiguration.scenarioArgument) }
+
+        #expect(E2EConfiguration.scenario.name == "default")
+    }
+
+    @Test("Scenario keeps force mute fallback for deprecated argument")
+    func scenarioKeepsForceMuteFallbackForDeprecatedArgument() {
+        UserDefaults.standard.set("1", forKey: E2EConfiguration.forceMuteScenarioArgument)
+        defer { UserDefaults.standard.removeObject(forKey: E2EConfiguration.forceMuteScenarioArgument) }
+
+        #expect(E2EConfiguration.scenario.name == "force-mute")
+    }
+
     @Test("Failed endpoint reads supported endpoint from user defaults")
     func failedEndpointReadsSupportedEndpointFromUserDefaults() {
         UserDefaults.standard.set(

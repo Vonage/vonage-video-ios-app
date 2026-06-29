@@ -97,6 +97,7 @@ struct ParticipantVideoCard: View {
                                         .clipped()
 
                                     ParticipantVideoCardOverlays(
+                                        participantID: participant.id,
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
@@ -114,6 +115,7 @@ struct ParticipantVideoCard: View {
                                         .clipped()
 
                                     ParticipantVideoCardOverlays(
+                                        participantID: participant.id,
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
@@ -164,6 +166,7 @@ struct ParticipantVideoCard: View {
                                     .clipped()
 
                                 ParticipantVideoCardOverlays(
+                                    participantID: participant.id,
                                     isMicEnabled: participant.isMicEnabled,
                                     name: participant.name,
                                     isPinned: participant.isPinned,
@@ -188,12 +191,14 @@ struct ParticipantVideoCard: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius))
         .shadow(radius: ParticipantVideoCardConstants.shadowRadius)
+        .accessibilityAnchor(MeetingRoomAccessibilityID.participantCard(participant.id))
         .animation(.easeInOut(duration: 0.25), value: participant.aspectRatio)
     }
 }
 
 struct ParticipantVideoCardOverlays: View {
 
+    let participantID: String
     let isMicEnabled: Bool
     let name: String
     let isPinned: Bool
@@ -223,11 +228,19 @@ struct ParticipantVideoCardOverlays: View {
                 }
                 Spacer()
                 if isLocal {
-                    AudioLevelIndicatorView(
-                        audioLevel: audioLevel,
-                        isMicEnabled: isMicEnabled)
+                    ZStack {
+                        AudioLevelIndicatorView(
+                            audioLevel: audioLevel,
+                            isMicEnabled: isMicEnabled)
+                    }
+                    .microphoneStateAccessibilityAnchor(
+                        participantID: participantID,
+                        isMicEnabled: isMicEnabled
+                    )
+                    .accessibilityElement(children: .contain)
                 } else {
                     MicIndicator(
+                        participantID: participantID,
                         isMicEnabled: isMicEnabled,
                         participantName: name,
                         onForceMute: onForceMute
@@ -292,6 +305,7 @@ struct NameLabel: View {
 
 struct MicIndicator: View {
     @Environment(\.meetingRoomTheme) private var theme
+    var participantID: String
     var isMicEnabled: Bool
     var participantName: String
     var onForceMute: (() -> Void)?
@@ -305,17 +319,26 @@ struct MicIndicator: View {
     }
 
     var body: some View {
-        if isForceMuteEnabled {
-            Button {
-                onForceMute?()
-            } label: {
+        ZStack {
+            if isForceMuteEnabled {
+                Button {
+                    onForceMute?()
+                } label: {
+                    indicator
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(forceMuteAccessibilityLabel)
+                .accessibilityIdentifier(MeetingRoomAccessibilityID.participantForceMuteButton(participantID))
+            } else {
                 indicator
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(forceMuteAccessibilityLabel)
-        } else {
-            indicator
+
         }
+        .microphoneStateAccessibilityAnchor(
+            participantID: participantID,
+            isMicEnabled: isMicEnabled
+        )
+        .accessibilityElement(children: .contain)
     }
 
     private var indicator: some View {
@@ -327,6 +350,24 @@ struct MicIndicator: View {
             .frame(
                 width: ParticipantVideoCardConstants.indicatorSize,
                 height: ParticipantVideoCardConstants.indicatorSize)
+    }
+}
+
+extension View {
+    fileprivate func microphoneStateAccessibilityAnchor(
+        participantID: String,
+        isMicEnabled: Bool
+    ) -> some View {
+        accessibilityAnchor(
+            isMicEnabled
+                ? MeetingRoomAccessibilityID.participantMicEnabled(participantID)
+                : MeetingRoomAccessibilityID.participantMicDisabled(participantID),
+            label: isMicEnabled ? "Microphone enabled" : "Microphone disabled",
+            size: CGSize(
+                width: ParticipantVideoCardConstants.indicatorSize,
+                height: ParticipantVideoCardConstants.indicatorSize
+            )
+        )
     }
 }
 

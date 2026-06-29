@@ -68,7 +68,7 @@ struct E2ECallFacadeTests {
 
     @Test("Call facade disables captions")
     func callFacadeDisablesCaptions() async {
-        let sut = E2ECallFacade()
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "captions"))
         var captionEmissions = [[CaptionItem]]()
         let cancellable = sut.captionsPublisher.sink { captions in
             captionEmissions.append(captions)
@@ -80,6 +80,80 @@ struct E2ECallFacadeTests {
         #expect(!sut.areCaptionsEnabled)
         #expect(captionEmissions.last?.isEmpty == true)
         cancellable.cancel()
+    }
+
+    @Test("Default scenario does not emit deterministic captions")
+    func defaultScenarioDoesNotEmitDeterministicCaptions() async {
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "default"))
+        var captionEmissions = [[CaptionItem]]()
+        let cancellable = sut.captionsPublisher.sink { captions in
+            captionEmissions.append(captions)
+        }
+
+        await sut.enableCaptions()
+
+        #expect(sut.areCaptionsEnabled)
+        #expect(captionEmissions.last?.isEmpty == true)
+        cancellable.cancel()
+    }
+
+    @Test("Captions scenario emits deterministic captions")
+    func captionsScenarioEmitsDeterministicCaptions() async {
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "captions"))
+        var captionEmissions = [[CaptionItem]]()
+        let cancellable = sut.captionsPublisher.sink { captions in
+            captionEmissions.append(captions)
+        }
+
+        await sut.enableCaptions()
+
+        let caption = captionEmissions.last?.first
+        #expect(caption?.speakerName == "Test User")
+        #expect(caption?.text == "E2E captions are enabled")
+        #expect(caption?.isMe == true)
+        cancellable.cancel()
+    }
+
+    @Test("Force mute scenario publishes a local publisher and an active remote participant")
+    func forceMuteScenarioPublishesLocalPublisherAndRemoteParticipant() {
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "force-mute"))
+        var states = [ParticipantsState]()
+        let cancellable = sut.participantsPublisher.sink { states.append($0) }
+
+        let localParticipant = states.last?.localParticipant
+        let participant = states.last?.participants.first
+
+        #expect(localParticipant?.id == ForceMuteE2EFixture.localPublisherID)
+        #expect(localParticipant?.name == ForceMuteE2EFixture.localPublisherName)
+        #expect(localParticipant?.isRemote == false)
+        #expect(localParticipant?.isMicEnabled == true)
+        #expect(localParticipant?.isCameraEnabled == false)
+        #expect(participant?.id == ForceMuteE2EFixture.participantID)
+        #expect(participant?.name == ForceMuteE2EFixture.participantName)
+        #expect(participant?.isRemote == true)
+        #expect(participant?.isMicEnabled == true)
+        cancellable.cancel()
+    }
+
+    @Test("Force mute updates the remote participant microphone state")
+    func forceMuteUpdatesParticipantMicrophoneState() async throws {
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "force-mute"))
+        var states = [ParticipantsState]()
+        let cancellable = sut.participantsPublisher.sink { states.append($0) }
+
+        try await sut.forceMuteParticipant(id: ForceMuteE2EFixture.participantID)
+
+        #expect(states.last?.participants.first?.isMicEnabled == false)
+        cancellable.cancel()
+    }
+
+    @Test("Force mute reports an unknown participant")
+    func forceMuteReportsUnknownParticipant() async {
+        let sut = E2ECallFacade(scenario: E2ETestScenarioRegistry.scenario(named: "force-mute"))
+
+        await #expect(throws: ParticipantForceMuteError.participantNotFound) {
+            try await sut.forceMuteParticipant(id: "missing")
+        }
     }
 }
 

@@ -96,4 +96,44 @@ struct E2EBackendStoreTests {
         #expect(firstItem["status"] as? String == "available")
         #expect((firstItem["url"] as? String)?.isEmpty == false)
     }
+
+    @Test("Recording scenario keeps deterministic archive lifecycle")
+    func recordingScenarioKeepsDeterministicArchiveLifecycle() async throws {
+        let sut = E2EHTTPClient(
+            store: E2EBackendStore(scenario: E2ETestScenarioRegistry.scenario(named: "recording")),
+            interceptor: HTTPClientInterceptorSpy())
+
+        let startArchive = try await postJSON(
+            sut,
+            endpoint: .startArchive,
+            body: ["sessionKey": "recording-session-key"])
+        let archiveId = try #require(startArchive["id"] as? String)
+        #expect(startArchive["status"] as? String == "started")
+
+        let stopArchive = try await postJSON(
+            sut,
+            endpoint: .stopArchive,
+            body: ["sessionKey": "recording-session-key", "archiveId": archiveId])
+        #expect(stopArchive["status"] as? String == "available")
+
+        let archivesResponse = try await postJSON(
+            sut,
+            endpoint: .searchArchives,
+            body: ["sessionKey": "recording-session-key"])
+        #expect((archivesResponse["count"] as? Int ?? 0) >= 1)
+    }
+
+    @Test("Captions scenario returns a valid captions id")
+    func captionsScenarioReturnsValidCaptionsId() async throws {
+        let sut = E2EHTTPClient(
+            store: E2EBackendStore(scenario: E2ETestScenarioRegistry.scenario(named: "captions")),
+            interceptor: HTTPClientInterceptorSpy())
+
+        let captions = try await postJSON(
+            sut,
+            endpoint: .ensureCaptionsEnabled,
+            body: ["sessionKey": "captions-session-key"])
+
+        #expect(captions["captionsId"] as? String == "e2e-captions-deterministic")
+    }
 }
