@@ -1,0 +1,19 @@
+VERA/Scripts/regenerateSigningConfig.sh
+  s_1575e5b3901782::t_d630999f003999 18-20,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d6c1f771a924f8248b547c85e971040cd14138a9",
+  "prompts": {},
+  "sessions": {
+    "s_1575e5b3901782": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efef0-b729-79c3-ab28-50c33f3161a6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
