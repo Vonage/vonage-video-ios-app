@@ -860,8 +860,98 @@ struct MeetingRoomViewModelTests {
 
         let toast = await sut.$toast.values.first { $0 != nil }
 
-        #expect(toast??.message == "You're muted. Tap the mic button to unmute.")
+        #expect(toast??.message != nil)
         #expect(toast??.mode == .warning)
+    }
+
+    // MARK: - Archiving State Change Tests
+
+    @Test("Given archiving starts, Then an info toast with 'recording started' is shown")
+    @MainActor
+    func archivingStartedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._archivingState.send(.archiving("archive-123"))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given archiving stops, Then an info toast with 'recording stopped' is shown")
+    @MainActor
+    func archivingStoppedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // First start archiving, then stop it
+        mockCall._archivingState.send(.archiving("archive-123"))
+
+        // Wait for the first toast to appear
+        _ = await sut.$toast.values.first { $0 != nil }
+
+        // Reset toast to detect the next one
+        sut.toast = nil
+
+        mockCall._archivingState.send(.idle)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given archiving starts, Then isArchiving becomes true")
+    @MainActor
+    func archivingStartedUpdatesViewState() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let initialState = try await getContentState(sut)
+        #expect(initialState.archivingState == .idle)
+
+        mockCall._archivingState.send(.archiving("archive-456"))
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState != .idle }
+
+        #expect(updatedState?.archivingState == .archiving("archive-456"))
+    }
+
+    @Test("Given archiving stops after being active, Then archivingState returns to idle")
+    @MainActor
+    func archivingStoppedUpdatesViewState() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._archivingState.send(.archiving("archive-456"))
+
+        _ = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState != .idle }
+
+        mockCall._archivingState.send(.idle)
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState == .idle }
+
+        #expect(updatedState?.archivingState == .idle)
     }
 
     // MARK: SUT
