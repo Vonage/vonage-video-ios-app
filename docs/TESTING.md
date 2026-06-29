@@ -39,7 +39,13 @@ xcodebuild test \
 Note: `xcpretty` is optional. If it isn't installed, remove `| xcpretty`, or install it with `gem install xcpretty`.
 Replace `VERACoreSnapshotTests` with any snapshot scheme: `VERAMeetingRoomSnapshotTests`, `VERAChatSnapshotTests`, `VERASettingsSnapshotTests`, `VERAAudioEffectsSnapshotTests`, `VERACaptionsSnapshotTests`, `VERAReactionsSnapshotTests`.
 
-Snapshot images live in `__Snapshots__` folders next to the test files. Record new reference images by setting `record: true` in the snapshot assertion.
+Snapshot images live in `__Snapshots__` folders next to the test files. They are tracked with Git LFS. Because the repo's `.lfsconfig` sets `skipSmudge = true` (so regular clones and SwiftPM resolution do not attempt LFS downloads), you must pull the images explicitly before running snapshot tests:
+
+```bash
+git lfs pull
+```
+
+Record new reference images by setting `record: true` in the snapshot assertion.
 
 ### Test Helpers
 
