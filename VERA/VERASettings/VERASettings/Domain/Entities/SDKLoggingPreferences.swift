@@ -22,17 +22,17 @@ public struct SDKLoggingPreferences: Codable, Equatable, Sendable {
     public var pendingLogCleanup: Bool
 
     /// The default SDK logging preferences.
-    public static let `default` = SDKLoggingPreferences()
+    public static var `default` = SDKLoggingPreferences()
 
     /// Creates a new SDK logging preferences value.
     ///
     /// - Parameters:
-    ///   - isLoggingEnabled: Whether SDK logging is enabled. Defaults to `false`.
+    ///   - isLoggingEnabled: Whether SDK logging is enabled. Defaults to `true`.
     ///   - logLevel: The configured SDK log level. Defaults to `.debug`.
     ///   - pendingLogCleanup: Whether log files should be cleared on next launch. Defaults to `false`.
     public init(
-        isLoggingEnabled: Bool = false,
-        logLevel: SDKLogLevel = .debug,
+        isLoggingEnabled: Bool = true,
+        logLevel: SDKLogLevel = .error,
         pendingLogCleanup: Bool = false
     ) {
         self.isLoggingEnabled = isLoggingEnabled

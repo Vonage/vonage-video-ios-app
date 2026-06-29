@@ -9,7 +9,7 @@ import Foundation
 ///
 /// Each value is encoded as a single JSON blob under the key
 /// ``UserDefaultsSDKLoggingRepository/storeKey``.
-public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
+public final class UserDefaultsSDKLoggingRepository: SDKLoggingRepository, @unchecked Sendable {
 
     // MARK: - Constants
 
@@ -17,9 +17,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     static let storeKey = "com.vonage.vera.sdkLoggingPreferences"
 
     // MARK: - Properties
-
-    public nonisolated let isSupported = true
-
     /// The UserDefaults instance used for persistence.
     private let userDefaults: UserDefaults
 
@@ -38,10 +35,6 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     }
 
     // MARK: - Init
-
-    /// Creates a new UserDefaults-backed SDK logging repository.
-    ///
-    /// - Parameter userDefaults: The UserDefaults instance to use. Defaults to `.standard`.
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
@@ -76,33 +69,22 @@ public actor UserDefaultsSDKLoggingRepository: SDKLoggingRepository {
     }
 
     /// Loads preferences from UserDefaults synchronously.
-    ///
-    /// This is safe to call from any context because `UserDefaults` is thread-safe
-    /// and only `let` properties are accessed.
-    ///
-    /// - Parameter userDefaults: The UserDefaults instance to read from. Defaults to `.standard`.
     /// - Returns: The decoded preferences, or ``SDKLoggingPreferences/default`` if none exist.
-    public static func loadPreferencesSync(
-        from userDefaults: UserDefaults = .standard
-    ) -> SDKLoggingPreferences {
-        guard let data = userDefaults.data(forKey: storeKey) else { return .default }
-        return (try? JSONDecoder().decode(SDKLoggingPreferences.self, from: data)) ?? .default
+    public func loadPreferencesSync() -> SDKLoggingPreferences {
+        guard let data = userDefaults.data(forKey: UserDefaultsSDKLoggingRepository.storeKey) else { return .default }
+        return (try? decoder.decode(SDKLoggingPreferences.self, from: data)) ?? .default
     }
 
     /// Persists preferences to UserDefaults synchronously.
     ///
     /// Used at app startup to clear the ``SDKLoggingPreferences/pendingLogCleanup``
-    /// flag before the actor is available.
-    ///
     /// - Parameters:
     ///   - preferences: The preferences to persist.
-    ///   - userDefaults: The UserDefaults instance to write to. Defaults to `.standard`.
-    public static func savePreferencesSync(
+    public func savePreferencesSync(
         _ preferences: SDKLoggingPreferences,
-        to userDefaults: UserDefaults = .standard
     ) {
-        if let data = try? JSONEncoder().encode(preferences) {
-            userDefaults.set(data, forKey: storeKey)
+        if let data = try? encoder.encode(preferences) {
+            userDefaults.set(data, forKey: UserDefaultsSDKLoggingRepository.storeKey)
         }
     }
 

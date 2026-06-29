@@ -51,8 +51,8 @@ struct SettingsViewModelTests {
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
-        #expect(viewModel.isLoggingEnabled == false)
-        #expect(viewModel.sdkLogLevel == .debug)
+        #expect(viewModel.isLoggingEnabled == true)
+        #expect(viewModel.sdkLogLevel == .error)
         #expect(viewModel.hasLogFiles == false)
         #expect(viewModel.isPresented == true)
     }
@@ -489,14 +489,13 @@ struct SettingsViewModelTests {
 
     @Test("Logging preferences persist across ViewModel instances")
     func loggingPreferencesPersistAcrossViewModelInstances() async throws {
-        let userDefaults = UserDefaults.ephemeral()
         let settingsRepo = MockSettingsRepository()
-        let loggingRepo = UserDefaultsSDKLoggingRepository(userDefaults: userDefaults)
+        let loggingRepo = UserDefaultsSDKLoggingRepository()
 
         let vm1 = SettingsViewModel(
             repository: settingsRepo,
             loggingRepository: loggingRepo,
-            initialLoggingPreferences: UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+            initialLoggingPreferences: loggingRepo.loadPreferencesSync()
         )
         await vm1.setup()
 
@@ -507,7 +506,7 @@ struct SettingsViewModelTests {
         let vm2 = SettingsViewModel(
             repository: settingsRepo,
             loggingRepository: loggingRepo,
-            initialLoggingPreferences: UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+            initialLoggingPreferences: loggingRepo.loadPreferencesSync()
         )
 
         #expect(vm2.isLoggingEnabled == true)
@@ -552,7 +551,6 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: nil
         )
 
         viewModel.sendLogs()
@@ -583,31 +581,6 @@ struct SettingsViewModelTests {
         )
 
         #expect(viewModel.hasLogFiles == false)
-    }
-
-    @Test("hasLoggingSupport returns true when logging repository is set")
-    @MainActor
-    func hasLoggingSupportReturnsTrueWithRepo() {
-        let repository = MockSettingsRepository()
-        let loggingRepository = MockSDKLoggingRepository()
-        let viewModel = SettingsViewModel(
-            repository: repository,
-            loggingRepository: loggingRepository
-        )
-
-        #expect(viewModel.hasLoggingSupport == true)
-    }
-
-    @Test("hasLoggingSupport returns false when logging repository is nil")
-    @MainActor
-    func hasLoggingSupportReturnsFalseWithoutRepo() {
-        let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(
-            repository: repository,
-            loggingRepository: MockSDKLoggingRepository(isSupported: false)
-        )
-
-        #expect(viewModel.hasLoggingSupport == false)
     }
 
     // MARK: - Reset Tests
@@ -724,7 +697,7 @@ struct SettingsViewModelTests {
     func logFileProviderExposesURLs() {
         let repository = MockSettingsRepository()
         let logFileURLs = [
-            URL(fileURLWithPath: "/Users/iujie/Documents/demos/vonage-video-ios-app/VERA/logs/sdk.log")
+            URL(fileURLWithPath: "/path/to/logs/sdk.log")
         ]
         let viewModel = SettingsViewModel(
             repository: repository,
@@ -739,8 +712,7 @@ struct SettingsViewModelTests {
     func logFileURLsReturnsEmptyWhenProviderIsNil() {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
-            repository: repository,
-            getLogFileURLs: nil
+            repository: repository
         )
 
         #expect(viewModel.logFileURLs.isEmpty)
@@ -852,7 +824,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            loggingRepository: MockSDKLoggingRepository(isSupported: false)
+            loggingRepository: MockSDKLoggingRepository()
         )
 
         viewModel.isLoggingEnabled = true
@@ -1135,42 +1107,6 @@ struct SettingsViewModelTests {
 
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 2_000_000)
-    }
-
-    // MARK: - Available Sections Tests
-
-    @Test("availableSections includes logging when logging is supported")
-    func availableSectionsIncludesLoggingWhenSupported() {
-        let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(
-            repository: repository,
-            loggingRepository: MockSDKLoggingRepository()
-        )
-
-        #expect(viewModel.availableSections.contains(.logging))
-    }
-
-    @Test("availableSections excludes logging when logging is not supported")
-    func availableSectionsExcludesLoggingWhenNotSupported() {
-        let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(
-            repository: repository,
-            loggingRepository: MockSDKLoggingRepository(isSupported: false)
-        )
-
-        #expect(!viewModel.availableSections.contains(.logging))
-    }
-
-    @Test("availableSections always includes non-logging sections")
-    func availableSectionsAlwaysIncludesNonLoggingSections() {
-        let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
-
-        let sections = viewModel.availableSections
-        #expect(sections.contains(.general))
-        #expect(sections.contains(.video))
-        #expect(sections.contains(.audio))
-        #expect(sections.contains(.stats))
     }
 
     // MARK: - Dismiss Logging Persistence Tests

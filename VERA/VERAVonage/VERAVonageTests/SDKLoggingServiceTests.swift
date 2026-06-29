@@ -31,19 +31,13 @@ struct SDKLoggingServiceTests {
 
     // MARK: - Init
 
-    @Test("SDKLoggingDirectoryProvider returns Caches/VERASDKLogs directory")
-    func defaultDirectoryProvider() {
-        let dir = SDKLoggingDirectoryProvider.defaultDirectory()
-
-        #expect(dir.lastPathComponent == SDKLoggingService.defaultLogsDirectoryName)
-        #expect(dir.pathComponents.contains("Caches"))
-    }
-
     @Test("Uses provided logs directory")
     func usesProvidedLogsDirectory() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         let logFile = logsDir.appendingPathComponent("sdk-log-current.log")
         try createFile(at: logFile, contents: "test log entry")
@@ -59,7 +53,9 @@ struct SDKLoggingServiceTests {
     func getLogFileURLsReturnsEmptyWhenNoFiles() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         #expect(service.getLogFileURLs().isEmpty)
     }
@@ -68,7 +64,9 @@ struct SDKLoggingServiceTests {
     func getLogFileURLsReturnsFilesFromDirectory() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         try createFile(
             at: logsDir.appendingPathComponent("sdk-log-current.log"),
@@ -89,7 +87,9 @@ struct SDKLoggingServiceTests {
     func clearLogFilesRemovesAllFiles() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         try createFile(
             at: logsDir.appendingPathComponent("sdk-log-current.log"),
@@ -111,7 +111,9 @@ struct SDKLoggingServiceTests {
     func clearLogFilesDoesNotCrashWhenEmpty() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         // Should not throw or crash
         service.clearLogFiles()
@@ -122,7 +124,9 @@ struct SDKLoggingServiceTests {
     func clearLogFilesDoesNotCrashWhenDirectoryMissing() {
         let logsDir = makeLogsDirectory()
         // Don't create the directory — it should handle this gracefully
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.clearLogFiles()
         #expect(service.getLogFileURLs().isEmpty)
@@ -132,10 +136,14 @@ struct SDKLoggingServiceTests {
 
     @Test("Default constants have expected values")
     func defaultConstantsHaveExpectedValues() {
-        #expect(SDKLoggingService.defaultLogsDirectoryName == "VERASDKLogs")
-        #expect(SDKLoggingService.currentFileName == "sdk-log-current.log")
-        #expect(SDKLoggingService.defaultMaxFileCount == 5)
-        #expect(SDKLoggingService.defaultMaxFileSize == 2 * 1024 * 1024)
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+
+        #expect(factory.defaultLogsDirectoryName == "VERASDKLogs")
+        #expect(factory.currentFileName == "sdk-log-current.log")
+        #expect(factory.defaultMaxFileCount == 5)
+        #expect(factory.defaultMaxFileSize == 2 * 1024 * 1024)
     }
 
     // MARK: - mapToOTCLevel
@@ -181,14 +189,16 @@ struct SDKLoggingServiceTests {
     func configureEnabledCreatesLogFile() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 2)
         // Clean up stderr capture immediately
         service.configure(enabled: false, logLevel: 0)
 
         // The startup marker should have been written
-        let logFile = logsDir.appendingPathComponent(SDKLoggingService.currentFileName)
+        let logFile = logsDir.appendingPathComponent(factory.currentFileName)
         #expect(FileManager.default.fileExists(atPath: logFile.path))
 
         if let contents = try? String(contentsOf: logFile, encoding: .utf8) {
@@ -200,7 +210,9 @@ struct SDKLoggingServiceTests {
     func configureDisabledWhenNotConfigured() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         // Should not crash
         service.configure(enabled: false, logLevel: 0)
@@ -211,7 +223,9 @@ struct SDKLoggingServiceTests {
     func configureEnabledThenDisabled() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 1)
 
@@ -230,12 +244,14 @@ struct SDKLoggingServiceTests {
     func configureWritesLogLevelInMarker() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 3)
         service.configure(enabled: false, logLevel: 0)
 
-        let logFile = logsDir.appendingPathComponent(SDKLoggingService.currentFileName)
+        let logFile = logsDir.appendingPathComponent(factory.currentFileName)
         if let contents = try? String(contentsOf: logFile, encoding: .utf8) {
             #expect(contents.contains("level: 3"))
         }
@@ -245,21 +261,25 @@ struct SDKLoggingServiceTests {
     func getLogFileURLsUsesActiveStrategy() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 2)
         let urls = service.getLogFileURLs()
         service.configure(enabled: false, logLevel: 0)
 
         #expect(!urls.isEmpty)
-        #expect(urls.contains { $0.lastPathComponent == SDKLoggingService.currentFileName })
+        #expect(urls.contains { $0.lastPathComponent == factory.currentFileName })
     }
 
     @Test("clearLogFiles after configure removes log files")
     func clearLogFilesAfterConfigureRemovesFiles() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 2)
         #expect(!service.getLogFileURLs().isEmpty)
@@ -274,7 +294,9 @@ struct SDKLoggingServiceTests {
     func configureMultipleTimesWithDifferentLevels() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         // First configure
         service.configure(enabled: true, logLevel: 1)
@@ -297,7 +319,9 @@ struct SDKLoggingServiceTests {
     func getLogFileURLsUsesFallbackStrategy() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         // Create a file in the logs directory without configuring the service
         try createFile(
@@ -314,7 +338,9 @@ struct SDKLoggingServiceTests {
     func clearLogFilesUsesFallbackStrategy() throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         try createFile(
             at: logsDir.appendingPathComponent("sdk-log-current.log"),
@@ -330,7 +356,9 @@ struct SDKLoggingServiceTests {
     func clearLogFilesWithActiveStrategy() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.configure(enabled: true, logLevel: 2)
         #expect(!service.getLogFileURLs().isEmpty)
@@ -347,7 +375,9 @@ struct SDKLoggingServiceTests {
     func concurrentAccessDoesNotCrash() async throws {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         try createFile(
             at: logsDir.appendingPathComponent("sdk-log-current.log"),
@@ -374,12 +404,14 @@ struct SDKLoggingServiceTests {
         for level in 0...4 {
             let logsDir = makeLogsDirectory()
             defer { cleanup(logsDir) }
-            let service = SDKLoggingService(logsDirectory: logsDir)
+            let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+            let fileStrategy = factory.makeStrategy()
+            let service = SDKLoggingService(fileStrategy: fileStrategy)
 
             service.configure(enabled: true, logLevel: level)
             service.configure(enabled: false, logLevel: 0)
 
-            let logFile = logsDir.appendingPathComponent(SDKLoggingService.currentFileName)
+            let logFile = logsDir.appendingPathComponent(factory.currentFileName)
             let exists = FileManager.default.fileExists(atPath: logFile.path)
             #expect(exists, "Log file should exist for level \(level)")
         }
@@ -389,7 +421,9 @@ struct SDKLoggingServiceTests {
     func getLogFileURLsEmptyAfterClearNoConfig() {
         let logsDir = makeLogsDirectory()
         defer { cleanup(logsDir) }
-        let service = SDKLoggingService(logsDirectory: logsDir)
+        let factory = SDKFileLogStrategyFactory(logsDirectory: logsDir)
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
 
         service.clearLogFiles()
         #expect(service.getLogFileURLs().isEmpty)

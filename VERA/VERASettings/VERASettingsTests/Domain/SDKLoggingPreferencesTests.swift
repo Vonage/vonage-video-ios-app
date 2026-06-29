@@ -14,8 +14,8 @@ struct SDKLoggingPreferencesTests {
     func defaultInitializerUsesExpectedDefaults() {
         let prefs = SDKLoggingPreferences()
 
-        #expect(prefs.isLoggingEnabled == false)
-        #expect(prefs.logLevel == .debug)
+        #expect(prefs.isLoggingEnabled == true)
+        #expect(prefs.logLevel == .error)
         #expect(prefs.pendingLogCleanup == false)
     }
 

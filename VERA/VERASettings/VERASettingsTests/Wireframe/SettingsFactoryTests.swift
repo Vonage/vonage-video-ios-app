@@ -63,35 +63,6 @@ struct SettingsFactoryTests {
 
     // MARK: - Logging Dependencies
 
-    @Test("Factory initializes with logging dependencies")
-    func factoryInitializesWithLoggingDependencies() {
-        let repository = MockSettingsRepository()
-        let statsDataSource = MockStatsDataSource()
-        let loggingRepository = MockSDKLoggingRepository()
-        let logURLs = [URL(fileURLWithPath: "/tmp/test.log")]
-        let getLogFileURLs = MockGetLogFileURLsUseCase()
-        getLogFileURLs.urls = logURLs
-
-        let factory = SettingsFactory(
-            repository: repository,
-            statsDataSource: statsDataSource,
-            loggingRepository: loggingRepository,
-            loggingPreferencesLoader: { .default },
-            getLogFileURLs: getLogFileURLs
-        )
-
-        let (viewModel, _) = factory.makeMeetingRoomViewModels()
-        #expect(viewModel.hasLoggingSupport == true)
-    }
-
-    @Test("Factory without logging dependencies creates view model without logging support")
-    func factoryWithoutLoggingCreatesViewModelWithoutLogging() {
-        let factory = makeFactory()
-
-        let (viewModel, _) = factory.makeMeetingRoomViewModels()
-        #expect(viewModel.hasLoggingSupport == false)
-    }
-
     @Test("makeMeetingRoomViewModels with logging prefs loader provides initial state")
     func makeMeetingRoomViewModelsWithLoggingPrefsLoader() {
         let loggingRepository = MockSDKLoggingRepository()
@@ -138,30 +109,8 @@ struct SettingsFactoryTests {
         )
 
         let view = factory.makeSettingsView()
-        #expect(view.viewModel.hasLoggingSupport == true)
         #expect(view.viewModel.isLoggingEnabled == true)
         #expect(view.viewModel.sdkLogLevel == .error)
-    }
-
-    @Test("makeSettingsView creates view without logging when not configured")
-    func makeSettingsViewWithoutLogging() {
-        let factory = makeFactory()
-
-        let view = factory.makeSettingsView()
-        #expect(view.viewModel.hasLoggingSupport == false)
-    }
-
-    @Test("makeMeetingRoomSettingsView creates view with statistics")
-    func makeMeetingRoomSettingsViewCreatesView() {
-        let factory = SettingsFactory(
-            repository: MockSettingsRepository(),
-            statsDataSource: MockStatsDataSource(),
-            loggingRepository: MockSDKLoggingRepository(),
-            loggingPreferencesLoader: { .default }
-        )
-
-        let view = factory.makeMeetingRoomSettingsView()
-        #expect(view.viewModel.hasLoggingSupport == true)
     }
 
     @Test("makeMeetingRoomButton creates button with action")
@@ -221,8 +170,8 @@ struct SettingsFactoryTests {
         )
 
         let view = factory.makeSettingsView()
-        #expect(view.viewModel.isLoggingEnabled == false)
-        #expect(view.viewModel.sdkLogLevel == .debug)
+        #expect(view.viewModel.isLoggingEnabled == true)
+        #expect(view.viewModel.sdkLogLevel == .error)
     }
 
     @Test("makeMeetingRoomViewModels uses default logging preferences when loader is nil")
@@ -235,8 +184,8 @@ struct SettingsFactoryTests {
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
-        #expect(viewModel.isLoggingEnabled == false)
-        #expect(viewModel.sdkLogLevel == .debug)
+        #expect(viewModel.isLoggingEnabled == true)
+        #expect(viewModel.sdkLogLevel == .error)
     }
 
     @Test("Factory passes all dependencies to meeting room view models")
@@ -255,7 +204,6 @@ struct SettingsFactoryTests {
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
-        #expect(viewModel.hasLoggingSupport == true)
         #expect(viewModel.isLoggingEnabled == true)
         #expect(viewModel.sdkLogLevel == .warn)
         #expect(viewModel.logFileURLs == logURLs)

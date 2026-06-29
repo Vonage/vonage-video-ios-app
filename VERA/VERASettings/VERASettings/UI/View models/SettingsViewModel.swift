@@ -115,30 +115,15 @@ public final class SettingsViewModel: ObservableObject {
         settingsPreference.senderStatsEnabled
     }
 
-    /// Whether SDK logging support is configured.
-    /// When `false`, the logging UI section should be hidden.
-    public var hasLoggingSupport: Bool {
-        loggingRepository.isSupported
-    }
-
     /// Current log file URLs returned by the injected use case.
     public var logFileURLs: [URL] {
-        getLogFileURLs?() ?? []
+        getLogFileURLs()
     }
 
     /// Whether the logging configuration has been modified from its initial state.
     /// Used by the UI to show a restart-required note.
     public var loggingSettingsChanged: Bool {
-        loggingRepository.isSupported
-            && (isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel)
-    }
-
-    /// The settings sections to display, filtered by feature availability.
-    /// Excludes the logging section when SDK logging is not configured.
-    public var availableSections: [SettingsSection] {
-        SettingsSection.allCases.filter { section in
-            section != .logging || hasLoggingSupport
-        }
+        isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel
     }
 
     /// Whether any log files are currently available to share.
@@ -168,10 +153,10 @@ public final class SettingsViewModel: ObservableObject {
     private let repository: PublisherSettingsRepository
 
     /// Repository for reading and writing SDK logging preferences.
-    private let loggingRepository: any SDKLoggingRepository
+    private let loggingRepository: SDKLoggingRepository
 
     /// Use case for retrieving shareable SDK log file URLs.
-    private let getLogFileURLs: (any GetLogFileURLsUseCase)?
+    private let getLogFileURLs: GetLogFileURLsUseCase
 
     /// Tracks the original persisted logging toggle to decide cleanup behavior.
     private var initialLoggingEnabled: Bool = false
@@ -203,7 +188,7 @@ public final class SettingsViewModel: ObservableObject {
     /// - Parameters:
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
-    ///   - loggingRepository: Repository for SDK logging preferences. Defaults to ``NullSDKLoggingRepository``.
+    ///   - loggingRepository: Repository for SDK logging preferences..
     ///   - initialLoggingPreferences: Synchronously loaded logging preferences for immediate UI state. Defaults to `.default`.
     ///   - getLogFileURLs: Use case for retrieving shareable log file URLs. Defaults to `nil`.
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
@@ -211,9 +196,11 @@ public final class SettingsViewModel: ObservableObject {
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
         autoSaveDebounce: TimeInterval = 0.3,
-        loggingRepository: any SDKLoggingRepository = NullSDKLoggingRepository(),
+        loggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(),
         initialLoggingPreferences: SDKLoggingPreferences = .default,
-        getLogFileURLs: (any GetLogFileURLsUseCase)? = nil
+        getLogFileURLs: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(provider: {
+            return []
+        })
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
@@ -267,13 +254,11 @@ public final class SettingsViewModel: ObservableObject {
 
         settingsPreference = await repository.getPreferences()
 
-        if loggingRepository.isSupported {
-            let loggingPreferences = await loggingRepository.getPreferences()
-            isLoggingEnabled = loggingPreferences.isLoggingEnabled
-            sdkLogLevel = loggingPreferences.logLevel
-            initialLoggingEnabled = loggingPreferences.isLoggingEnabled
-            initialLogLevel = loggingPreferences.logLevel
-        }
+        let loggingPreferences = await loggingRepository.getPreferences()
+        isLoggingEnabled = loggingPreferences.isLoggingEnabled
+        sdkLogLevel = loggingPreferences.logLevel
+        initialLoggingEnabled = loggingPreferences.isLoggingEnabled
+        initialLogLevel = loggingPreferences.logLevel
         startAutoSave()
     }
 
@@ -323,8 +308,6 @@ public final class SettingsViewModel: ObservableObject {
             }
             .store(in: &autoSaveCancellables)
 
-        guard loggingRepository.isSupported else { return }
-
         $isLoggingEnabled
             .dropFirst()
             .removeDuplicates()
@@ -370,8 +353,6 @@ public final class SettingsViewModel: ObservableObject {
     /// level has changed, sets ``SDKLoggingPreferences/pendingLogCleanup``
     /// so that log files are cleared on the next app launch.
     private func persistLoggingState() async {
-        guard loggingRepository.isSupported else { return }
-
         let loggingToggleChanged = isLoggingEnabled != initialLoggingEnabled
         let logLevelChanged = sdkLogLevel != initialLogLevel
 

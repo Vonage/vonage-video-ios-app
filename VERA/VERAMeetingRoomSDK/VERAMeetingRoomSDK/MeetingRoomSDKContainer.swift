@@ -342,14 +342,16 @@ final class MeetingRoomSDKContainer {
         UserDefaultsSDKLoggingRepository()
 
     lazy var sdkLoggingService: SDKLoggingService = {
-        let service = SDKLoggingService(
-            logsDirectory: SDKLoggingDirectoryProvider.defaultDirectory())
-        var prefs = UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+        let factory = SDKFileLogStrategyFactory()
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
+
+        var prefs = sdkLoggingRepository.loadPreferencesSync()
 
         if prefs.pendingLogCleanup {
             service.clearLogFiles()
             prefs.pendingLogCleanup = false
-            UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs)
+            sdkLoggingRepository.savePreferencesSync(prefs)
         }
 
         service.configure(
@@ -364,7 +366,7 @@ final class MeetingRoomSDKContainer {
         statsDataSource: statsRepository,
         loggingRepository: sdkLoggingRepository,
         loggingPreferencesLoader: {
-            UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+            self.sdkLoggingRepository.loadPreferencesSync()
         },
         getLogFileURLs: DefaultGetLogFileURLsUseCase(provider: { [weak self] in
             self?.sdkLoggingService.getLogFileURLs() ?? []

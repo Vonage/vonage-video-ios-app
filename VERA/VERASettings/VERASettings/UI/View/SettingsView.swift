@@ -108,9 +108,7 @@ public struct SettingsView: View {
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
-                if viewModel.hasLoggingSupport {
-                    LoggingSectionView(viewModel: viewModel)
-                }
+                LoggingSectionView(viewModel: viewModel)
                 GeneralSectionView(viewModel: viewModel)
             }
             .navigationTitle("Settings".localized)
@@ -143,11 +141,6 @@ public struct SettingsView: View {
         .navigationSplitViewStyle(.balanced)
     }
 
-    /// The sections to show based on available features.
-    private var availableSections: [SettingsSection] {
-        viewModel.availableSections
-    }
-
     // MARK: - Sidebar
 
     /// Sidebar list showing all available settings sections.
@@ -155,7 +148,7 @@ public struct SettingsView: View {
     /// Displays section icons and names. Selected section drives the detail pane content.
     /// Changes are auto-saved; a Close button dismisses the sheet.
     private var sidebar: some View {
-        List(availableSections, selection: $selectedSection) { section in
+        List(SettingsSection.allCases, selection: $selectedSection) { section in
             Label(section.displayName, systemImage: section.iconName)
         }
         .navigationTitle("Settings".localized)

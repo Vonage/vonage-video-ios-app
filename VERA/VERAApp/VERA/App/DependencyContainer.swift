@@ -201,24 +201,37 @@ final class DependencyContainer {
             return repository
         }()
 
-        lazy var sdkLoggingRepository: SDKLoggingRepository =
-            UserDefaultsSDKLoggingRepository()
+
+        #if DEBUG
+            let defaultLogLevel: SDKLogLevel = .debug
+        #else
+            let defaultLogLevel: SDKLogLevel = .error
+        #endif
+
+        lazy var sdkLoggingRepository: SDKLoggingRepository = {
+            SDKLoggingPreferences.default = SDKLoggingPreferences(
+                logLevel: self.defaultLogLevel
+            )
+            return UserDefaultsSDKLoggingRepository()
+        }()
 
         lazy var sdkLoggingService: SDKLoggingService = {
-            let service = SDKLoggingService(
-                logsDirectory: SDKLoggingDirectoryProvider.defaultDirectory())
-            var prefs = UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+
+            let factory = SDKFileLogStrategyFactory()
+            let fileStrategy = factory.makeStrategy()
+            let service = SDKLoggingService(fileStrategy: fileStrategy)
+
+            var prefs = sdkLoggingRepository.loadPreferencesSync()
 
             if prefs.pendingLogCleanup {
                 service.clearLogFiles()
                 prefs.pendingLogCleanup = false
-                UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs)
+                sdkLoggingRepository.savePreferencesSync(prefs)
             }
 
             service.configure(
                 enabled: prefs.isLoggingEnabled,
-                logLevel: prefs.logLevel.rawValue
-            )
+                logLevel: prefs.logLevel.rawValue)
             return service
         }()
 
@@ -227,7 +240,7 @@ final class DependencyContainer {
             statsDataSource: InMemoryStatsRepository(),
             loggingRepository: sdkLoggingRepository,
             loggingPreferencesLoader: {
-                UserDefaultsSDKLoggingRepository.loadPreferencesSync()
+                self.sdkLoggingRepository.loadPreferencesSync()
             },
             getLogFileURLs: DefaultGetLogFileURLsUseCase(provider: { [weak self] in
                 self?.sdkLoggingService.getLogFileURLs() ?? []

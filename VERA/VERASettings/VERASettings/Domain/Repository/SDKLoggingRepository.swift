@@ -9,13 +9,7 @@ import Foundation
 ///
 /// Concrete implementations provide storage and observation for
 /// ``SDKLoggingPreferences`` values used by the Settings module.
-///
-/// When SDK logging is not available, inject ``NullSDKLoggingRepository``
-/// which returns `isSupported == false` and no-ops all mutations.
 public protocol SDKLoggingRepository: Sendable {
-    /// Whether SDK logging is supported in the current configuration.
-    var isSupported: Bool { get }
-
     /// Current preferences. Always emits the current value on subscribe.
     var preferencesPublisher: AnyPublisher<SDKLoggingPreferences, Never> { get }
 
@@ -27,4 +21,12 @@ public protocol SDKLoggingRepository: Sendable {
 
     /// Resets all SDK logging preferences to their default values.
     func reset() async
+
+    /// Loads preferences synchronously.
+    func loadPreferencesSync() -> SDKLoggingPreferences
+
+    /// Saves preferences synchronously.
+    func savePreferencesSync(
+        _ preferences: SDKLoggingPreferences,
+    )
 }

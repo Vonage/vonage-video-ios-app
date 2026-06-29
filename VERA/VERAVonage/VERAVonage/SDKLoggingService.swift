@@ -1,5 +1,5 @@
 //
-//  Created by Copilot on 21/5/26.
+//  Created by Vonage on 21/5/26.
 //
 
 import Foundation
@@ -8,21 +8,6 @@ import VERALogger
 /// Sets the SDK log level. 0 = disabled, 1 = error, 2 = warn, 3 = info, 4 = debug.
 @_silgen_name("otc_log_enable")
 private func otc_log_enable(_ level: Int32)
-
-/// Resolves the default logs directory for SDK logging.
-///
-/// Isolated here so that `SDKLoggingService.init` stays a pure assignment
-/// and callers don't need to know the file-system layout.
-public enum SDKLoggingDirectoryProvider {
-    /// Returns `<Caches>/VERASDKLogs/`.
-    public static func defaultDirectory(
-        fileManager: FileManager = .default
-    ) -> URL {
-        let cachesDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        return cachesDirectory.appendingPathComponent(
-            SDKLoggingService.defaultLogsDirectoryName, isDirectory: true)
-    }
-}
 
 /// Manages Vonage Video SDK log capture to file.
 ///
@@ -33,21 +18,9 @@ public enum SDKLoggingDirectoryProvider {
 /// pipe so that every message is both forwarded to the original stderr (keeping the
 /// Xcode console working) and written to rotating log files managed by a
 /// ``FileLogStrategy`` in rolling mode.
-///
-/// `@unchecked Sendable` is required because the dispatch-source event handler
-/// runs on a GCD utility queue while properties are guarded by `NSLock` and
-/// POSIX file descriptor operations that the compiler cannot verify.
 public final class SDKLoggingService: @unchecked Sendable {
-    public static let defaultLogsDirectoryName = "VERASDKLogs"
-    public static let currentFileName = "sdk-log-current.log"
-    public static let defaultMaxFileCount = 5
-    public static let defaultMaxFileSize: UInt64 = 2 * 1024 * 1024
-    public static let archivePrefix = "sdk-log-"
 
-    private let logsDirectory: URL
-    private let lock = NSLock()
-
-    private var fileStrategy: FileLogStrategy?
+    private let fileStrategy: FileLogStrategy
 
     // stderr capture state
     private var savedStderrFd: Int32 = -1
@@ -57,8 +30,8 @@ public final class SDKLoggingService: @unchecked Sendable {
     /// Creates the service.
     ///
     /// - Parameter logsDirectory: The directory where log files are stored.
-    public init(logsDirectory: URL) {
-        self.logsDirectory = logsDirectory
+    public init(fileStrategy: FileLogStrategy) {
+        self.fileStrategy = fileStrategy
     }
 
     /// Configures SDK logging.
@@ -70,64 +43,30 @@ public final class SDKLoggingService: @unchecked Sendable {
     ///     the SDK outputs.
     public func configure(enabled: Bool, logLevel: Int) {
         if enabled {
-            let logFileURL = logsDirectory.appendingPathComponent(Self.currentFileName)
-            let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
-                .logsDirectory(logsDirectory)
-                .archivePrefix(Self.archivePrefix)
-                .maxFileSize(Self.defaultMaxFileSize)
-                .rotationPolicy(.rolling(maxFileCount: Self.defaultMaxFileCount))
-                .minLevel(.verbose)
-                .build()
-            fileStrategy = strategy
-
             // Write a startup marker so a log file exists immediately.
             let marker = LogEvent(
                 level: .info, tag: "SDKLogging", message: "SDK file logging started (level: \(logLevel))")
-            strategy.log(marker)
+            fileStrategy.log(marker)
 
-            startStderrCapture(strategy: strategy)
+            startStderrCapture(strategy: fileStrategy)
 
             let otcLevel = Self.mapToOTCLevel(rawValue: logLevel)
             otc_log_enable(otcLevel)
         } else {
             stopStderrCapture()
-            fileStrategy = nil
             otc_log_enable(0)
         }
     }
 
     /// Deletes all existing log files.
     public func clearLogFiles() {
-        lock.lock()
-        let strategy = fileStrategy
-        lock.unlock()
+        fileStrategy.deleteAllLogFiles()
 
-        if let strategy {
-            strategy.deleteAllLogFiles()
-        } else {
-            makeFallbackStrategy().deleteAllLogFiles()
-        }
     }
 
     /// Returns URLs for all current log files.
     public func getLogFileURLs() -> [URL] {
-        lock.lock()
-        let strategy = fileStrategy
-        lock.unlock()
-
-        if let strategy {
-            return strategy.allLogFileURLs()
-        }
-
-        return makeFallbackStrategy().allLogFileURLs()
-    }
-
-    private func makeFallbackStrategy() -> FileLogStrategy {
-        FileLogStrategy.Builder(fileURL: logsDirectory.appendingPathComponent(Self.currentFileName))
-            .logsDirectory(logsDirectory)
-            .archivePrefix(Self.archivePrefix)
-            .rotationPolicy(.rolling(maxFileCount: Self.defaultMaxFileCount))
-            .build()
+        return fileStrategy.allLogFileURLs()
     }
 
     // MARK: - stderr Capture

@@ -7,9 +7,6 @@ import Combine
 @testable import VERASettings
 
 final actor MockSDKLoggingRepository: SDKLoggingRepository {
-
-    nonisolated let isSupported: Bool
-
     private nonisolated let subject: CurrentValueSubject<SDKLoggingPreferences, Never>
 
     nonisolated(unsafe) private(set) var saveCallCount = 0
@@ -20,9 +17,8 @@ final actor MockSDKLoggingRepository: SDKLoggingRepository {
         subject.eraseToAnyPublisher()
     }
 
-    init(initialPreferences: SDKLoggingPreferences = .default, isSupported: Bool = true) {
+    init(initialPreferences: SDKLoggingPreferences = .default) {
         self.subject = CurrentValueSubject(initialPreferences)
-        self.isSupported = isSupported
     }
 
     func getPreferences() async -> SDKLoggingPreferences {
@@ -46,4 +42,15 @@ final actor MockSDKLoggingRepository: SDKLoggingRepository {
         update(&preferences)
         await save(preferences)
     }
+
+    nonisolated func loadPreferencesSync() -> VERASettings.SDKLoggingPreferences {
+        subject.value
+    }
+
+    nonisolated func savePreferencesSync(_ preferences: VERASettings.SDKLoggingPreferences) {
+        saveCallCount += 1
+        lastSavedPreferences = preferences
+        subject.send(preferences)
+    }
+
 }

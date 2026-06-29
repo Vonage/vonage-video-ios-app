@@ -34,25 +34,76 @@
         }
     }
 
+    // MARK: - Mock SDKLoggingRepository
+
+    final class PreviewSDKLoggingRepository: SDKLoggingRepository {
+        func loadPreferencesSync() -> SDKLoggingPreferences {
+            return subject.value
+        }
+
+        func savePreferencesSync(_ preferences: SDKLoggingPreferences) {
+            subject.send(preferences)
+        }
+
+        private nonisolated let subject = CurrentValueSubject<SDKLoggingPreferences, Never>(.default)
+
+        // Conforming to the Publisher requirement
+        var preferencesPublisher: AnyPublisher<SDKLoggingPreferences, Never> {
+            subject.eraseToAnyPublisher()
+        }
+
+        func save(_ preferences: SDKLoggingPreferences) async {
+            subject.send(preferences)
+        }
+
+        func getPreferences() async -> SDKLoggingPreferences {
+            subject.value
+        }
+
+        func reset() async {
+            subject.send(.default)
+        }
+    }
+
+    // MARK: - Mock GetLogFileURLsUseCase
+    final class PreviewGetLogFileURLsUseCase: GetLogFileURLsUseCase {
+
+        var urls: [URL] = []
+
+        func callAsFunction() -> [URL] {
+            urls
+        }
+    }
+
+
     // MARK: - Preview Instances
 
     extension SettingsViewModel {
 
         static var preview: SettingsViewModel {
-            SettingsViewModel(repository: PreviewSettingsRepository())
+            SettingsViewModel(
+                repository: PreviewSettingsRepository(),
+                loggingRepository: PreviewSDKLoggingRepository(),
+                getLogFileURLs: PreviewGetLogFileURLsUseCase())
         }
 
         static var previewWithStatsEnabled: SettingsViewModel {
             let repo = PreviewSettingsRepository()
             var prefs = PublisherSettingsPreferences.default
             prefs.senderStatsEnabled = true
-            return SettingsViewModel(repository: repo, settingsPreference: prefs)
+            return SettingsViewModel(
+                repository: repo,
+                settingsPreference: prefs,
+                loggingRepository: PreviewSDKLoggingRepository(),
+                getLogFileURLs: PreviewGetLogFileURLsUseCase())
         }
 
         static var previewWithLoggingEnabled: SettingsViewModel {
             SettingsViewModel(
                 repository: PreviewSettingsRepository(),
-                initialLoggingPreferences: SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug)
+                loggingRepository: PreviewSDKLoggingRepository(),
+                initialLoggingPreferences: SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug),
+                getLogFileURLs: PreviewGetLogFileURLsUseCase()
             )
         }
     }

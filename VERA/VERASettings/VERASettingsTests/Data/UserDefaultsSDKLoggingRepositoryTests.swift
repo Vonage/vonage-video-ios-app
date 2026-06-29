@@ -67,29 +67,29 @@ struct UserDefaultsSDKLoggingRepositoryTests {
 
     @Test("savePreferencesSync persists preferences synchronously")
     func savePreferencesSyncPersistsPreferences() throws {
-        let userDefaults = UserDefaults.ephemeral()
+        let sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository()
         let prefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .info, pendingLogCleanup: true)
 
-        UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs, to: userDefaults)
+        sdkLoggingRepository.savePreferencesSync(prefs)
 
-        let loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        let loaded = sdkLoggingRepository.loadPreferencesSync()
         #expect(loaded == prefs)
     }
 
     @Test("savePreferencesSync clears pendingLogCleanup flag")
     func savePreferencesSyncClearsPendingCleanupFlag() throws {
-        let userDefaults = UserDefaults.ephemeral()
+        let sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository()
         var prefs = SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug, pendingLogCleanup: true)
 
-        UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs, to: userDefaults)
+        sdkLoggingRepository.savePreferencesSync(prefs)
 
-        var loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        var loaded = sdkLoggingRepository.loadPreferencesSync()
         #expect(loaded.pendingLogCleanup == true)
 
         prefs.pendingLogCleanup = false
-        UserDefaultsSDKLoggingRepository.savePreferencesSync(prefs, to: userDefaults)
+        sdkLoggingRepository.savePreferencesSync(prefs)
 
-        loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        loaded = sdkLoggingRepository.loadPreferencesSync()
         #expect(loaded.pendingLogCleanup == false)
     }
 
@@ -150,16 +150,18 @@ struct UserDefaultsSDKLoggingRepositoryTests {
     @Test("loadPreferencesSync returns defaults when UserDefaults is empty")
     func loadPreferencesSyncReturnsDefaultsWhenEmpty() {
         let userDefaults = UserDefaults.ephemeral()
-        let loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        let sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(userDefaults: userDefaults)
+        let loaded = sdkLoggingRepository.loadPreferencesSync()
         #expect(loaded == .default)
     }
 
     @Test("loadPreferencesSync returns defaults with corrupted data")
     func loadPreferencesSyncReturnsDefaultsWithCorruptedData() {
         let userDefaults = UserDefaults.ephemeral()
+        let sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(userDefaults: userDefaults)
         userDefaults.set(Data("not json".utf8), forKey: "com.vonage.vera.sdkLoggingPreferences")
 
-        let loaded = UserDefaultsSDKLoggingRepository.loadPreferencesSync(from: userDefaults)
+        let loaded = sdkLoggingRepository.loadPreferencesSync()
         #expect(loaded == .default)
     }
 
