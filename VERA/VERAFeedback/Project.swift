@@ -18,7 +18,8 @@ let project = Project(
             resources: ["VERAFeedback/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAFeedback")],
             dependencies: [
-                .project(target: "VERACommonUI", path: "../VERACommonUI")
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .project(target: "VERADomain", path: "../VERADomain"),
             ],
             settings: createBaseBuildSettings()
         ),
@@ -52,7 +53,8 @@ let project = Project(
             deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAFeedbackTests/**"],
             dependencies: [
-                .target(name: "VERAFeedback")
+                .target(name: "VERAFeedback"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ],
             settings: createBaseBuildSettings()
         ),

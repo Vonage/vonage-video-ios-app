@@ -8,7 +8,7 @@ struct FeedbackExtrasTests {
 
     @Test("Form default shape contains expected keys and count")
     func formDefaultsContainExpectedFields() {
-        let form = FeedbackFormViewModel()
+        let form = FeedbackTestHelpers.makeFormViewModel()
 
         #expect(form.feedbackFields.count == 5)
 
@@ -22,7 +22,7 @@ struct FeedbackExtrasTests {
 
     @Test("Making image field required makes form invalid until image attached")
     func imageRequiredToggleMakesFormInvalidUntilAttached() {
-        let form = FeedbackFormViewModel()
+        let form = FeedbackTestHelpers.makeFormViewModel()
 
         let imageFieldIndex = form.feedbackFields.firstIndex { $0.type == .image }
         #expect(imageFieldIndex != nil)
@@ -31,7 +31,12 @@ struct FeedbackExtrasTests {
         form.feedbackFields[idx].isRequired = true
         #expect(form.feedbackFields[idx].isValid == false)
 
+        // image not attached -> invalid
+        #expect(form.isValid == false)
+
+        // attach an image -> image field valid (form still invalid until text fields filled)
         form.feedbackFields[idx].attachedImage = PlatformImage()
         #expect(form.feedbackFields[idx].isValid == true)
+        #expect(form.isValid == false)
     }
 }

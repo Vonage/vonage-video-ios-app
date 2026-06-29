@@ -6,6 +6,7 @@ import SwiftUI
 import VERACommonUI
 
 public struct BackgroundEffectScreenButton: View {
+    @Environment(\.meetingRoomTheme) private var theme
 
     @ObservedObject var viewModel: VideoEffectsViewModel
 
@@ -21,6 +22,7 @@ public struct BackgroundEffectScreenButton: View {
         .sheet(isPresented: $viewModel.isSheetPresented) {
             VideoEffectsSheet(viewModel: viewModel)
                 .presentationDetents([.medium, .large])
+                .opaquePresentationBackground(theme.background)
         }
     }
 }
