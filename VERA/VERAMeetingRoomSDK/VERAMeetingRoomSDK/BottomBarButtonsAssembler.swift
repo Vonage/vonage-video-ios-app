@@ -110,8 +110,8 @@ final class BottomBarButtonsAssembler {
 
     /// Builds the array of extra bottom bar buttons based on enabled features.
     ///
-    /// Called by `MeetingRoomViewModel` via `getExternalButtons` closure
-    /// each time the meeting room needs the current feature buttons.
+    /// Called by the meeting room UI provider each time the meeting room needs
+    /// the current feature buttons.
     ///
     /// - Returns: Array of feature buttons to display in the bottom bar.
     func buildButtons() -> [BottomBarButton] {

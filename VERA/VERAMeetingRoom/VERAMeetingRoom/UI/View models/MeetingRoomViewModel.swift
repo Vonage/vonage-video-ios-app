@@ -34,6 +34,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    private let uiProvider: any MeetingRoomUIProvider
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -55,7 +56,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private var getExternalButtons: () -> [BottomBarButton]
 
     public init(
         roomName: RoomName,
@@ -68,8 +68,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         captionsStatusDataSource: CaptionsStatusDataSource,
         configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping () -> [BottomBarButton],
-        externalButtonsUpdates: AnyPublisher<Void, Never>,
+        uiProvider: any MeetingRoomUIProvider,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
@@ -82,17 +81,54 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.configuration = configuration
         self.meetingRoomNavigation = meetingRoomNavigation
-        self.getExternalButtons = getExternalButtons
+        self.uiProvider = uiProvider
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
-        externalButtonsUpdates
+        uiProvider.updates
             .sink { [weak self] in
                 Task { @MainActor [weak self] in
                     self?.updateExtraButtons()
                 }
             }
             .store(in: &cancellables)
+    }
+
+    @available(*, deprecated, message: "Use init(..., uiProvider:, ...) instead.")
+    public convenience init(
+        roomName: RoomName,
+        baseURL: URL,
+        connectToRoomUseCase: ConnectToRoomUseCase,
+        disconnectRoomUseCase: DisconnectRoomUseCase,
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
+        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
+        currentCallParticipantsRepository: CurrentCallParticipantsRepository,
+        captionsStatusDataSource: CaptionsStatusDataSource,
+        configuration: MeetingRoomConfiguration,
+        meetingRoomNavigation: MeetingRoomDestination,
+        getExternalButtons: @escaping @MainActor () -> [BottomBarButton],
+        externalButtonsUpdates: AnyPublisher<Void, Never>,
+        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    ) {
+        self.init(
+            roomName: roomName,
+            baseURL: baseURL,
+            connectToRoomUseCase: connectToRoomUseCase,
+            disconnectRoomUseCase: disconnectRoomUseCase,
+            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
+            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
+            currentCallParticipantsRepository: currentCallParticipantsRepository,
+            captionsStatusDataSource: captionsStatusDataSource,
+            configuration: configuration,
+            meetingRoomNavigation: meetingRoomNavigation,
+            uiProvider: DefaultMeetingRoomUIProvider(
+                bottomBarButtons: getExternalButtons,
+                updates: externalButtonsUpdates
+            ),
+            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
+            pinnedParticipantsDataSource: pinnedParticipantsDataSource
+        )
     }
 
     @MainActor
@@ -393,7 +429,7 @@ extension MeetingRoomViewModel {
 
     @MainActor
     fileprivate func updateExtraButtons() {
-        extraButtons = getExternalButtons()
+        extraButtons = uiProvider.bottomBarButtons()
     }
 
 }

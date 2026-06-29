@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import SwiftUI
 import Testing
 import VERACommonUI
 import VERADomain
@@ -238,6 +239,55 @@ struct MeetingRoomViewModelTests {
         await delay()
 
         #expect(sut.currentCall == nil)
+    }
+
+    @Test
+    @MainActor
+    func uiProviderButtonsAreLoadedOnLoadUI() async throws {
+        let sut = makeSUT(
+            uiProvider: DefaultMeetingRoomUIProvider(bottomBarButtons: {
+                [
+                    BottomBarButton(
+                        id: "custom-button",
+                        label: "Custom",
+                        image: Image(systemName: "star"),
+                        action: {}
+                    )
+                ]
+            })
+        )
+
+        await sut.loadUI()
+
+        #expect(sut.extraButtons.map(\.id) == ["custom-button"])
+    }
+
+    @Test
+    @MainActor
+    func uiProviderUpdatesRefreshExtraButtons() async throws {
+        let updates = PassthroughSubject<Void, Never>()
+        var bottomBarButtonsCallCount = 0
+        let sut = makeSUT(
+            uiProvider: DefaultMeetingRoomUIProvider(
+                bottomBarButtons: {
+                    bottomBarButtonsCallCount += 1
+                    return []
+                },
+                updates: updates.eraseToAnyPublisher()
+            )
+        )
+
+        #expect(bottomBarButtonsCallCount == 0)
+
+        await sut.loadUI()
+
+        let baselineCallCount = bottomBarButtonsCallCount
+
+        updates.send(())
+
+        await delay()
+
+        #expect(bottomBarButtonsCallCount == baselineCallCount + 1)
     }
 
     @Test
@@ -835,7 +885,8 @@ struct MeetingRoomViewModelTests {
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
         pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
         externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
-        getExternalButtons: @escaping () -> [BottomBarButton] = { [] },
+        getExternalButtons: @escaping @MainActor () -> [BottomBarButton] = { [] },
+        uiProvider: (any MeetingRoomUIProvider)? = nil,
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -849,8 +900,11 @@ struct MeetingRoomViewModelTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: configuration,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: getExternalButtons,
-            externalButtonsUpdates: externalButtonsUpdates,
+            uiProvider: uiProvider
+                ?? DefaultMeetingRoomUIProvider(
+                    bottomBarButtons: getExternalButtons,
+                    updates: externalButtonsUpdates
+                ),
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
             pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )

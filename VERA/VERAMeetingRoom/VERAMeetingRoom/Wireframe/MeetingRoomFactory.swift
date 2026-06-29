@@ -46,8 +46,7 @@ public class MeetingRoomFactory {
     @MainActor
     public func make(
         roomName: RoomName,
-        getExternalButtons: @escaping () -> [BottomBarButton],
-        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider(),
         onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(
@@ -65,12 +64,29 @@ public class MeetingRoomFactory {
             captionsStatusDataSource: captionsStatusDataSource,
             configuration: configuration,
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
-            getExternalButtons: getExternalButtons,
-            externalButtonsUpdates: externalButtonsUpdates,
+            uiProvider: uiProvider,
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
             pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )
         return (make(viewModel: viewModel), viewModel)
+    }
+
+    @available(*, deprecated, message: "Use make(roomName:uiProvider:onActionHandler:) instead.")
+    @MainActor
+    public func make(
+        roomName: RoomName,
+        getExternalButtons: @escaping @MainActor () -> [BottomBarButton],
+        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
+        onActionHandler: @escaping ActionHandler
+    ) -> (view: some View, viewModel: MeetingRoomViewModel) {
+        make(
+            roomName: roomName,
+            uiProvider: DefaultMeetingRoomUIProvider(
+                bottomBarButtons: getExternalButtons,
+                updates: externalButtonsUpdates
+            ),
+            onActionHandler: onActionHandler
+        )
     }
 
     @MainActor

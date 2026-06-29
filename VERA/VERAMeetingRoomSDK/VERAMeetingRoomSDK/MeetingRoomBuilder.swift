@@ -71,6 +71,7 @@ public final class MeetingRoomBuilder {
     var _appGroupIdentifier: String?
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
+    var _uiProvider: (any MeetingRoomUIProvider)?
     var _sessionKeyHolder: SessionKeyHolder?
     var _httpClientFactory: any MeetingRoomHTTPClientFactory =
         DefaultMeetingRoomHTTPClientFactory()
@@ -113,6 +114,9 @@ public final class MeetingRoomBuilder {
 
     /// The currently configured theme. Visible for testing.
     var currentTheme: MeetingRoomTheme? { _theme }
+
+    /// The currently configured UI provider. Visible for testing.
+    var currentUIProvider: (any MeetingRoomUIProvider)? { _uiProvider }
 
     /// The currently configured custom HTTP client factory. Visible for testing.
     var currentHTTPClientFactory: any MeetingRoomHTTPClientFactory {
@@ -242,6 +246,19 @@ public final class MeetingRoomBuilder {
         return self
     }
 
+    /// Sets a provider for host-driven meeting room UI additions.
+    ///
+    /// The first supported surface is the list of extra bottom bar buttons.
+    /// When omitted, the SDK supplies its default feature buttons.
+    ///
+    /// - Parameter provider: The UI provider used by the meeting room.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func uiProvider(_ provider: any MeetingRoomUIProvider) -> MeetingRoomBuilder {
+        _uiProvider = provider
+        return self
+    }
+
     /// Sets an external session key holder for sharing the session key JWT.
     ///
     /// When provided, the builder uses this holder instead of creating its own.
@@ -335,6 +352,13 @@ public final class MeetingRoomBuilder {
             container: container,
             enabledFeatures: _enabledFeatures
         )
+        let defaultUIProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [weak buttonsAssembler] in
+                buttonsAssembler?.buildButtons() ?? []
+            },
+            updates: buttonsAssembler.buttonsDidChange
+        )
+        let uiProvider = _uiProvider ?? defaultUIProvider
 
         // 3. Create alert presenter bridge
         let alertPresenter = AlertPresenter()
@@ -404,10 +428,7 @@ public final class MeetingRoomBuilder {
         // 4. Create the meeting room view + view model via factory
         let (_, meetingRoomViewModel) = container.meetingRoomFactory.make(
             roomName: roomName,
-            getExternalButtons: { [weak buttonsAssembler] in
-                buttonsAssembler?.buildButtons() ?? []
-            },
-            externalButtonsUpdates: buttonsAssembler.buttonsDidChange,
+            uiProvider: uiProvider,
             onActionHandler: { [weak self, weak alertPresenter, weak buttonsAssembler] action in
                 switch action {
                 case .presentAlert(let alertItem):
