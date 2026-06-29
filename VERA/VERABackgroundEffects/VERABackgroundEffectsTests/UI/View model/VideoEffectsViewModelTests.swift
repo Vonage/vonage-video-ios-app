@@ -356,6 +356,25 @@ struct VideoEffectsViewModelTests {
         #expect(sut.errorMessage != nil)
     }
 
+    @Test("Bottom item presentable exposes metadata and action")
+    func bottomItemPresentableExposesMetadataAndAction() {
+        let sut = makeSUT()
+
+        #expect(sut.id == "effects-button")
+        #expect(sut.label.isEmpty == false)
+        #expect(sut.accessibilityIdentifier == nil)
+        #expect(sut.isActive == false)
+        #expect(sut.accessory == nil)
+
+        sut.performAction()
+
+        #expect(sut.isSheetPresented)
+
+        sut.selectEffect(.blurLow)
+
+        #expect(sut.isActive)
+    }
+
     // MARK: - Test Helpers
 
     private enum TestError: Error {

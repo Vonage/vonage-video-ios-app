@@ -308,6 +308,7 @@ public final class MeetingRoomBuilder {
     /// - Precondition: `baseURL` and `roomName` must be set.
     /// - Returns: A ``MeetingRoomPrebuilt`` containing the composed view and view model.
     @MainActor
+    // swiftlint:disable:next cyclomatic_complexity
     public func build() -> MeetingRoomPrebuilt {
         let onAction = _onAction ?? { _ in }
 
@@ -353,11 +354,9 @@ public final class MeetingRoomBuilder {
 
         // Archiving
         if _enabledFeatures.contains(.archiving) {
-            let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
-                showAlert: { [weak alertPresenter] alertItem in
-                    alertPresenter?.present(alertItem)
-                }
-            )
+            let (_, archiveVM) = container.archivingFactory.makeArchivingButton { [weak alertPresenter] alertItem in
+                alertPresenter?.present(alertItem)
+            }
             archiveVM.setup()
             buttonsAssembler.archiveButtonViewModel = archiveVM
         }
@@ -405,10 +404,10 @@ public final class MeetingRoomBuilder {
         // 4. Create the meeting room view + view model via factory
         let (_, meetingRoomViewModel) = container.meetingRoomFactory.make(
             roomName: roomName,
-            getExternalButtons: { [weak buttonsAssembler] state in
-                buttonsAssembler?.buildButtons(state) ?? []
+            getExternalButtons: { [weak buttonsAssembler] in
+                buttonsAssembler?.buildButtons() ?? []
             },
-
+            externalButtonsUpdates: buttonsAssembler.buttonsDidChange,
             onActionHandler: { [weak self, weak alertPresenter, weak buttonsAssembler] action in
                 switch action {
                 case .presentAlert(let alertItem):
@@ -454,7 +453,7 @@ public final class MeetingRoomBuilder {
             await MediaPermissions.requestPermissionsIfNeeded()
 
             container.resetPublisher()
-            await effectsVM?.reapplyCurrentEffect()
+            effectsVM?.reapplyCurrentEffect()
         }
 
         let themedView =

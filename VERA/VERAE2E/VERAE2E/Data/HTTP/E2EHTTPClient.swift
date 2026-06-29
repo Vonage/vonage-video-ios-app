@@ -22,7 +22,7 @@ public final class E2EHTTPClient: HTTPClient {
         try await respond(to: url, method: "GET", requestBody: nil)
     }
 
-    public func post(_ url: URL, data: Data) async throws -> Data {
+    public func post(_ url: URL, additionalHeaders: [String: String] = [:], data: Data) async throws -> Data {
         try await respond(to: url, method: "POST", requestBody: data)
     }
 

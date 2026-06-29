@@ -8,18 +8,15 @@ import VERADomain
 struct MeetingRoomContent: View {
 
     let participants: [UIParticipant]
-    let showBottomSheet: Bool
     let layout: MeetingRoomLayout
     let activeSpeakerId: String?
 
     init(
         participants: [UIParticipant],
-        showBottomSheet: Bool,
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
     ) {
         self.participants = participants
-        self.showBottomSheet = showBottomSheet
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
     }
@@ -42,7 +39,6 @@ struct MeetingRoomContent: View {
 #Preview {
     MeetingRoomContent(
         participants: [],
-        showBottomSheet: false,
         layout: .grid,
         activeSpeakerId: nil)
 }

@@ -80,7 +80,16 @@ private struct OverlayTestHost: View {
 
     var body: some View {
         Color.clear
-            .modifier(FeedbackFormOverlayModifier(isEnabled: isEnabled, showFeedbackForm: $showFeedbackForm))
+            .modifier(
+                FeedbackFormOverlayModifier(
+                    isEnabled: isEnabled,
+                    showFeedbackForm: $showFeedbackForm,
+                    container: MeetingRoomSDKContainer(
+                        baseURL: URL(string: "https://api.example.com")!,
+                        enabledFeatures: [.screenShare, .feedback]
+                    )
+                )
+            )
             .onAppear { box.value = showFeedbackForm }
     }
 }

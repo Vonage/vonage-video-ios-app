@@ -4,19 +4,31 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
+
+private enum FeedbackFormViewConstants {
+    static let topSuccessViewInset: CGFloat = 50
+    static let topScrollInset: CGFloat = 15
+    static let bottomScrollInset: CGFloat = 70
+    static let horizontalPadding: CGFloat = 16
+    static let verticalPadding: CGFloat = 12
+    static let bottomErroViewInset: CGFloat = 20
+    static let bottomListId = "bottomListId"
+    static let sendAccessibilityId = "send_button"
+}
 
 struct FeedbackFormView: View {
 
-    private enum Constants {
-        static let topScrollInset: CGFloat = 15
-        static let bottomScrollInset: CGFloat = 70
-        static let horizontalPadding: CGFloat = 16
-        static let verticalPadding: CGFloat = 12
-        static let bottomListId = "bottomListId"
-        static let sendAccessibilityId = "send_button"
-    }
+    private static let successTitle = String(localized: "Your Jira ticket has been created.")
+    private static let closeButtonTitle = String(localized: "Close")
+    private static let sendButtonTitle = String(localized: "Send")
+    private static let doneButtonTitle = String(localized: "Done")
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.meetingRoomTheme) private var theme
 
     @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
+
     @FocusState private var focusedFieldIndex: Int?
 
     // Triggers for scroll interaction
@@ -25,25 +37,64 @@ struct FeedbackFormView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            feedbackFieldsList
-                .modifier(
-                    FeedbackScrollContentInset(
-                        topInset: Constants.topScrollInset,
-                        bottomInset: Constants.bottomScrollInset
+            if let feedbackResult = feedbackFormViewModel.feedbackResult {
+                VStack {
+                    feedbackSuccessView(result: feedbackResult)
+                    Spacer()
+                    closeButton
+                        .padding(.horizontal, FeedbackFormViewConstants.horizontalPadding)
+                        .padding(.vertical, FeedbackFormViewConstants.verticalPadding)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .ignoresSafeArea(.keyboard, edges: .bottom)
+                }
+                .padding(.top, FeedbackFormViewConstants.topSuccessViewInset)
+            } else {
+                feedbackFieldsList
+                    .modifier(
+                        FeedbackScrollContentInset(
+                            topInset: FeedbackFormViewConstants.topScrollInset,
+                            bottomInset: FeedbackFormViewConstants.bottomScrollInset
+                        )
                     )
-                )
-            sendButton
-                .padding(.horizontal, Constants.horizontalPadding)
-                .padding(.vertical, Constants.verticalPadding)
-                .background(Color.feedbackFormBackground)
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .ignoresSafeArea(.keyboard, edges: .bottom)
+                sendButton
+                    .padding(.horizontal, FeedbackFormViewConstants.horizontalPadding)
+                    .padding(.vertical, FeedbackFormViewConstants.verticalPadding)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .ignoresSafeArea(.keyboard, edges: .bottom)
+            }
+
+            if feedbackFormViewModel.isLoading {
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+
+                ProgressView()
+                    .controlSize(.large)
+                    .padding()
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
         }
+        .toast(
+            toast: $feedbackFormViewModel.toast,
+            placement: .bottom,
+            verticalPadding: FeedbackFormViewConstants.bottomErroViewInset
+        )
+    }
+
+    private var closeButton: some View {
+        FilledButton(
+            text: Text(FeedbackFormView.closeButtonTitle),
+            onAction: {
+                dismiss()
+            }
+        )
+        .disabled(feedbackFormViewModel.isLoading)
+        .accessibilityIdentifier(FeedbackFormViewConstants.sendAccessibilityId)
     }
 
     private var sendButton: some View {
         FilledButton(
-            text: Text(String(localized: "Send")),
+            text: Text(FeedbackFormView.sendButtonTitle),
             onAction: {
                 feedbackFormViewModel.onSubmit()
                 if !feedbackFormViewModel.isValid {
@@ -51,7 +102,8 @@ struct FeedbackFormView: View {
                 }
             }
         )
-        .accessibilityIdentifier(Constants.sendAccessibilityId)
+        .disabled(feedbackFormViewModel.isLoading)
+        .accessibilityIdentifier(FeedbackFormViewConstants.sendAccessibilityId)
     }
 
     private var feedbackFieldsList: some View {
@@ -85,7 +137,7 @@ struct FeedbackFormView: View {
                 }
                 Color.clear.frame(height: 1)
                     .feedbackFieldListRowStyle()
-                    .id(Constants.bottomListId)
+                    .id(FeedbackFormViewConstants.bottomListId)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -118,7 +170,7 @@ struct FeedbackFormView: View {
 
                         Spacer()
 
-                        Button(String(localized: "Done")) {
+                        Button(FeedbackFormView.doneButtonTitle) {
                             focusedFieldIndex = nil
                         }
                     }
@@ -132,7 +184,7 @@ struct FeedbackFormView: View {
             }
             .onChange(of: imagePickedTrigger) { _ in
                 withAnimation {
-                    proxy.scrollTo(Constants.bottomListId, anchor: .top)
+                    proxy.scrollTo(FeedbackFormViewConstants.bottomListId, anchor: .top)
                 }
             }
             .onChange(of: didValidateTrigger) { _ in
@@ -144,6 +196,15 @@ struct FeedbackFormView: View {
                 }
             }
 
+        }
+    }
+
+    @ViewBuilder
+    private func feedbackSuccessView(result: FeedbackReportResult) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(FeedbackFormView.successTitle)
+            Link("\(result.ticketUrl)", destination: URL(string: result.ticketUrl)!)
+                .foregroundStyle(theme.primary)
         }
     }
 

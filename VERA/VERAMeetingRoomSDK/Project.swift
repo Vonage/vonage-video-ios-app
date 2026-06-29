@@ -44,6 +44,7 @@ let project = Project(
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
                 .project(target: "VERAVonageScreenSharePlugin", path: "../VERAVonageScreenSharePlugin"),
                 .project(target: "VERAAudioEffects", path: "../VERAAudioEffects"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
                 .vonageVideoTransformersSDK,
             ],
             settings: createBaseBuildSettings()
@@ -89,6 +90,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
             ],
             settings: createBaseBuildSettings()
         ),

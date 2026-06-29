@@ -412,6 +412,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 mkdir -p test-reports
 
 if maestro test \
+    --config .maestro/config.yaml \
     --env APP_ID="$APP_ID" \
     --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
     "$FLOW_TARGET"; then

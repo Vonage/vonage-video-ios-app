@@ -14,6 +14,7 @@ public final class MockHTTPClient: HTTPClient {
     public var callCount = 0
     public var recordedURL: URL!
     public var recordedURLs: [URL] = []
+    public var recordedHeaders: [String: String] = [:]
     public var recordedData: Data?
     public var recordedDataSequence: [Data] = []
 
@@ -49,6 +50,10 @@ public final class MockHTTPClient: HTTPClient {
         if let data {
             recordedData = data
             recordedDataSequence.append(data)
+        }
+
+        additionalHeaders.forEach { (key, value) in
+            recordedHeaders = [key: value]
         }
 
         if delaySeconds > 0 {

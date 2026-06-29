@@ -10,7 +10,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("FeedbackFormView hosts and exposes send control on iOS")
     func feedbackFormViewHostsOnIOS() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         FeedbackSnapshotInteractionHelpers.host(
             NavigationStack {
                 FeedbackFormView(feedbackFormViewModel: viewModel)
@@ -21,7 +21,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Send button triggers validation when form is invalid on iOS")
     func sendButtonTriggersValidationWhenInvalidOnIOS() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         let context = FeedbackSnapshotInteractionHelpers.host(
             NavigationStack {
                 FeedbackFormView(feedbackFormViewModel: viewModel)
@@ -40,7 +40,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Send button accepts valid form on iOS")
     func sendButtonAcceptsValidFormOnIOS() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         FeedbackSnapshotHelpers.fillRequiredTextFields(in: viewModel)
 
         let context = FeedbackSnapshotInteractionHelpers.host(
@@ -61,7 +61,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Keyboard toolbar navigates between text fields")
     func keyboardToolbarNavigatesBetweenTextFields() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         let context = FeedbackSnapshotInteractionHelpers.host(
             NavigationStack {
                 FeedbackFormView(feedbackFormViewModel: viewModel)
@@ -82,7 +82,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Keyboard toolbar Done dismisses the focused field")
     func keyboardToolbarDoneDismissesFocus() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         let context = FeedbackSnapshotInteractionHelpers.host(
             NavigationStack {
                 FeedbackFormView(feedbackFormViewModel: viewModel)
@@ -178,7 +178,9 @@ struct FeedbackIOSInteractionTests {
     @Test("FeedbackImageFieldView hosts with preview on iOS")
     func imageFieldHostsWithPreviewOnIOS() {
         let field = FeedbackFieldViewModel(
-            title: "", key: "Image", type: .image,
+            title: "",
+            key: "Image",
+            type: .image,
             value: "A screenshot will help us better understand the issue. (optional)",
             isRequired: false
         )
@@ -192,7 +194,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Filled FeedbackView hosts on iOS")
     func filledFeedbackViewHostsOnIOS() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         FeedbackSnapshotHelpers.fillRequiredTextFields(in: viewModel)
         FeedbackSnapshotInteractionHelpers.host(
             FeedbackView(feedbackFormViewModel: viewModel)
@@ -203,7 +205,7 @@ struct FeedbackIOSInteractionTests {
 
     @Test("Close toolbar button is tappable on iOS")
     func closeToolbarButtonIsTappableOnIOS() {
-        let viewModel = FeedbackFormViewModel()
+        let viewModel = FeedbackSnapshotHelpers.makeFormViewModel()
         let context = FeedbackSnapshotInteractionHelpers.host(
             NavigationStack {
                 FeedbackView(feedbackFormViewModel: viewModel)

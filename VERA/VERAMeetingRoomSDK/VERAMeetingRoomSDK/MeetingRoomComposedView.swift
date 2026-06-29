@@ -3,15 +3,14 @@
 //
 
 import AVKit
-import Combine
 import SwiftUI
-import VERAArchiving
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -60,7 +59,7 @@ struct MeetingRoomComposedView: View {
     // MARK: - Sheet/Overlay State
 
     @State private var showChat = false
-    @State private var showPickerView = false
+    @State private var showReactions = false
     @State private var showCaptions = false
     @State private var showSettings = false
     @State private var showFeedbackForm = false
@@ -84,7 +83,7 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 ReactionsOverlayModifier(
                     isEnabled: enabledFeatures.contains(.reactions),
-                    showPickerView: $showPickerView,
+                    showPickerView: $showReactions,
                     emojiPickerContainerViewModel: emojiPickerContainerViewModel,
                     floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
                     container: container
@@ -111,7 +110,8 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 FeedbackFormOverlayModifier(
                     isEnabled: enabledFeatures.contains(.feedback),
-                    showFeedbackForm: $showFeedbackForm
+                    showFeedbackForm: $showFeedbackForm,
+                    container: container
                 )
             )
             .modifier(
@@ -123,13 +123,25 @@ struct MeetingRoomComposedView: View {
             )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
-                buttonsAssembler.onShowPickerView = { showPickerView = true }
+                buttonsAssembler.onShowReactions = { showReactions.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
                 buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
             }
-            .onReceive(selectedEffectPublisher) { _ in
-                viewModel.extraButtons = buttonsAssembler.rebuildButtons()
+            .onChange(of: showReactions) { isPresented in
+                buttonsAssembler.setReactionsPickerPresented(isPresented)
+            }
+            .onChange(of: showChat) { isPresented in
+                buttonsAssembler.setChatPresented(isPresented)
+            }
+            .onChange(of: showSettings) { isPresented in
+                buttonsAssembler.setSettingsPresented(isPresented)
+            }
+            .onChange(of: showEffects) { isPresented in
+                buttonsAssembler.setEffectsPresented(isPresented)
+            }
+            .onChange(of: showFeedbackForm) { isPresented in
+                buttonsAssembler.setFeedbackFormPresented(isPresented)
             }
             .task {
                 if enabledFeatures.contains(.pictureInPicture) {
@@ -162,13 +174,5 @@ struct MeetingRoomComposedView: View {
             )
             isPictureInPictureBound = true
         #endif
-    }
-
-    /// Publisher that emits when the selected video effect changes (skipping the initial value).
-    private var selectedEffectPublisher: AnyPublisher<VideoEffect, Never> {
-        guard let vm = buttonsAssembler.videoEffectsViewModel else {
-            return Empty().eraseToAnyPublisher()
-        }
-        return vm.$selectedEffect.dropFirst().eraseToAnyPublisher()
     }
 }

@@ -123,7 +123,7 @@ private struct EmojiPickerViewContent: View {
             ForEach(emojis) { emoji in
                 EmojiItemView(
                     emoji: emoji,
-                    isHighlighted: showsHighlight && highlightedEmojiId == emoji.id.uuidString,
+                    isHighlighted: isHighlighted(emoji),
                     highlightDuration: highlightDuration
                 )
                 .onTapGesture {
@@ -131,6 +131,10 @@ private struct EmojiPickerViewContent: View {
                 }
             }
         }
+    }
+
+    private func isHighlighted(_ emoji: UIEmojiReaction) -> Bool {
+        showsHighlight && highlightedEmojiId == emoji.id.uuidString
     }
 
     private func handleEmojiTap(_ emoji: UIEmojiReaction) {
