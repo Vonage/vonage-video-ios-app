@@ -2,7 +2,9 @@
 //  Created by Vonage on 16/4/26.
 //
 
+import Combine
 import Foundation
+import SwiftUI
 import Testing
 import VERAArchiving
 import VERABackgroundEffects
@@ -176,11 +178,82 @@ struct MeetingRoomBuilderTests {
         #expect(builder.currentEnabledFeatures == [.reactions])
     }
 
+    @Test("Combined UI provider returns SDK buttons when no custom provider is set")
+    @MainActor
+    func combinedUIProviderReturnsSDKButtonsWhenNoCustomProviderIsSet() {
+        let sdkProvider = DefaultMeetingRoomUIProvider {
+            [makeButton(id: "sdk")]
+        }
+
+        let provider = MeetingRoomBuilder.makeCombinedUIProvider(
+            sdkProvider: sdkProvider,
+            customProvider: nil
+        )
+
+        #expect(provider.bottomBarButtons().map(\.id) == ["sdk"])
+    }
+
+    @Test("Combined UI provider appends custom buttons after SDK buttons")
+    @MainActor
+    func combinedUIProviderAppendsCustomButtonsAfterSDKButtons() {
+        let sdkProvider = DefaultMeetingRoomUIProvider {
+            [makeButton(id: "sdk")]
+        }
+        let customProvider = DefaultMeetingRoomUIProvider {
+            [makeButton(id: "custom")]
+        }
+
+        let provider = MeetingRoomBuilder.makeCombinedUIProvider(
+            sdkProvider: sdkProvider,
+            customProvider: customProvider
+        )
+
+        #expect(provider.bottomBarButtons().map(\.id) == ["sdk", "custom"])
+    }
+
+    @Test("Combined UI provider emits SDK and custom updates")
+    func combinedUIProviderEmitsSDKAndCustomUpdates() {
+        let sdkUpdates = PassthroughSubject<Void, Never>()
+        let customUpdates = PassthroughSubject<Void, Never>()
+        let sdkProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [] },
+            updates: sdkUpdates.eraseToAnyPublisher()
+        )
+        let customProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [] },
+            updates: customUpdates.eraseToAnyPublisher()
+        )
+        let provider = MeetingRoomBuilder.makeCombinedUIProvider(
+            sdkProvider: sdkProvider,
+            customProvider: customProvider
+        )
+        var updateCount = 0
+        let cancellable = provider.updates.sink {
+            updateCount += 1
+        }
+
+        sdkUpdates.send(())
+        customUpdates.send(())
+
+        #expect(updateCount == 2)
+        cancellable.cancel()
+    }
+
     func makeMeetingRoomBuilder(
         testBaseURL: URL = URL(string: "https://api.example.com")!,
         testRoomName: String = "test-room"
     ) -> MeetingRoomBuilder {
         MeetingRoomBuilder(baseURL: testBaseURL, roomName: testRoomName)
+    }
+
+    @MainActor
+    private func makeButton(id: String) -> BottomBarButton {
+        BottomBarButton(
+            id: id,
+            label: id,
+            image: Image(systemName: "star"),
+            action: {}
+        )
     }
 }
 

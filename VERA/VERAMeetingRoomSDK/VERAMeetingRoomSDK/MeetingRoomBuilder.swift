@@ -3,6 +3,7 @@
 //
 
 import AVKit
+import Combine
 import Foundation
 import SwiftUI
 import VERAArchiving
@@ -248,8 +249,8 @@ public final class MeetingRoomBuilder {
 
     /// Sets a provider for host-driven meeting room UI additions.
     ///
-    /// The first supported surface is the list of extra bottom bar buttons.
-    /// When omitted, the SDK supplies its default feature buttons.
+    /// The first supported surface is additional bottom bar buttons. Provided
+    /// buttons are appended after the SDK feature buttons.
     ///
     /// - Parameter provider: The UI provider used by the meeting room.
     /// - Returns: The builder for chaining.
@@ -352,13 +353,16 @@ public final class MeetingRoomBuilder {
             container: container,
             enabledFeatures: _enabledFeatures
         )
-        let defaultUIProvider = DefaultMeetingRoomUIProvider(
+        let sdkUIProvider = DefaultMeetingRoomUIProvider(
             bottomBarButtons: { [weak buttonsAssembler] in
                 buttonsAssembler?.buildButtons() ?? []
             },
             updates: buttonsAssembler.buttonsDidChange
         )
-        let uiProvider = _uiProvider ?? defaultUIProvider
+        let uiProvider = Self.makeCombinedUIProvider(
+            sdkProvider: sdkUIProvider,
+            customProvider: _uiProvider
+        )
 
         // 3. Create alert presenter bridge
         let alertPresenter = AlertPresenter()
@@ -490,6 +494,26 @@ public final class MeetingRoomBuilder {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
+    }
+
+    static func makeCombinedUIProvider(
+        sdkProvider: any MeetingRoomUIProvider,
+        customProvider: (any MeetingRoomUIProvider)?
+    ) -> any MeetingRoomUIProvider {
+        guard let customProvider else {
+            return sdkProvider
+        }
+
+        return DefaultMeetingRoomUIProvider(
+            bottomBarButtons: {
+                sdkProvider.bottomBarButtons() + customProvider.bottomBarButtons()
+            },
+            updates: Publishers.Merge(
+                sdkProvider.updates,
+                customProvider.updates
+            )
+            .eraseToAnyPublisher()
+        )
     }
 
     // MARK: - Top Trailing Buttons
