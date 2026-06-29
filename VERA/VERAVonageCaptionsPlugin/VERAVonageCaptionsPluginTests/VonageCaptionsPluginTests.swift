@@ -298,6 +298,11 @@ private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
 /// Mock call facade that publishes events for deterministic testing.
 private final class MockCallFacade: CallFacade, @unchecked Sendable {
 
+    nonisolated(unsafe) let _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
+    nonisolated var publisherAudioLevelPublisher: AnyPublisher<Float, Never> {
+        _publisherAudioLevelPublisher.eraseToAnyPublisher()
+    }
+
     nonisolated(unsafe) let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     nonisolated var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         _networkStatsPublisher.eraseToAnyPublisher()

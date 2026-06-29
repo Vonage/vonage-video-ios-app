@@ -1,0 +1,107 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting (mic starts enabled by default)
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room-mic-on
+
+# Verify mic is currently enabled
+- assertVisible:
+    id: "meeting-room-mic-enabled"
+
+# Mute the microphone — E2E mock will start simulating loud audio
+- tapOn:
+    id: "meeting-room-mic-enabled"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify mic is now disabled
+- assertVisible:
+    id: "meeting-room-mic-disabled"
+
+- takeScreenshot: 02-mic-muted
+
+# Wait for the speaking-while-muted warning toast to appear
+- extendedWaitUntil:
+    visible:
+      id: "toast-warning"
+    timeout: 10000
+
+- assertVisible:
+    id: "toast-warning"
+
+# Verify toast contains the expected muted message (partial match avoids quote encoding issues)
+- assertVisible:
+    text: "muted"
+
+- takeScreenshot: 03-speaking-while-muted-toast
+
+# Unmute the microphone — toast should disappear
+- tapOn:
+    id: "meeting-room-mic-disabled"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify mic is enabled again
+- assertVisible:
+    id: "meeting-room-mic-enabled"
+
+# Toast should no longer be visible (auto-dismissed or state reset)
+- assertNotVisible:
+    id: "toast-warning"
+
+- takeScreenshot: 04-unmuted-no-toast
+
+# End call
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+- takeScreenshot: 05-goodbye
