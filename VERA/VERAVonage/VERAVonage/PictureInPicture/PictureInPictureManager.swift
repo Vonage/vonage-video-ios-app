@@ -173,9 +173,7 @@ public final class PictureInPictureManager: ObservableObject {
         videoRenderer.stopPlaceholder()
         subscriberPreviewRenderers.removeAll()
         lastInPipRetargetAt = nil
-        if let currentPipTargetId, call?.publisher.id == currentPipTargetId {
-            call?.publisher.restoreDefaultVideoView()
-        }
+        clearCurrentPipTarget()
         pipController.tearDown()
         call = nil
         currentPipTargetId = nil
@@ -331,7 +329,7 @@ public final class PictureInPictureManager: ObservableObject {
         {
             call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
         } else {
-            await clearCurrentPipTarget()
+            clearCurrentPipTarget()
         }
 
         currentPipTargetId = targetId
@@ -444,18 +442,22 @@ public final class PictureInPictureManager: ObservableObject {
         return state.participants.first(where: { $0.id == participantId })?.isCameraEnabled == true
     }
 
-    private func clearCurrentPipTarget() async {
-        guard let currentPipTargetId, let call else { return }
+    private func clearCurrentPipTarget() {
+        guard let currentPipTargetId else { return }
 
-        if call.publisher.id == currentPipTargetId {
-            call.publisher.restoreDefaultVideoView()
+        if call?.publisher.id == currentPipTargetId {
+            call?.publisher.restoreDefaultVideoView()
         } else {
             // Keep the remote tile alive via its dedicated preview renderer: an OTSubscriber's
             // default view can't be revived after a custom videoRender, so reverting to it would
             // leave a gray tile when this participant stops being the PiP/active-speaker target.
-            let previewRenderer = subscriberPreviewRenderer(for: currentPipTargetId)
-            if let subscriber = await call.subscriber(for: currentPipTargetId) {
-                subscriber.applyInlinePreviewRenderer(previewRenderer)
+            let previousTargetId = currentPipTargetId
+            let previewRenderer = subscriberPreviewRenderer(for: previousTargetId)
+            Task { [weak self] in
+                guard let self, let call = self.call else { return }
+                if let subscriber = await call.subscriber(for: previousTargetId) {
+                    subscriber.applyInlinePreviewRenderer(previewRenderer)
+                }
             }
         }
     }
