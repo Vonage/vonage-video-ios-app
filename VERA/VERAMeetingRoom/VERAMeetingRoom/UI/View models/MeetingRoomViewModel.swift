@@ -152,11 +152,11 @@ public final class MeetingRoomViewModel: ObservableObject {
     }
 
     public func onForceMute(participantId: String, participantName: String) {
-        guard let participantForceMuting = currentCall else { return }
+        guard let currentCall else { return }
 
         Task { @MainActor [weak self] in
             do {
-                try await participantForceMuting.forceMuteParticipant(id: participantId)
+                try await currentCall.forceMuteParticipant(id: participantId)
                 self?.toast = .init(message: "\(participantName) was muted.", mode: .success)
             } catch {
                 self?.toast = .init(message: error.localizedDescription, mode: .failure)
