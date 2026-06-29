@@ -8,6 +8,9 @@ import VERADomain
 import VERAVonage
 
 public final class E2ECallFacade: CallFacade {
+    public lazy var _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
+    public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
+
     private var cancellables = Set<AnyCancellable>()
     private let pluginNotifier: E2ECallPluginNotifier
 
@@ -79,10 +82,17 @@ public final class E2ECallFacade: CallFacade {
 
     public func toggleLocalAudio() {
         let current = stateSubject.value
+        let newIsPublishingAudio = !current.isPublishingAudio
         stateSubject.send(
             .init(
-                isPublishingAudio: !current.isPublishingAudio,
+                isPublishingAudio: newIsPublishingAudio,
                 isPublishingVideo: current.isPublishingVideo))
+
+        if !newIsPublishingAudio {
+            simulateSpeakingWhileMuted()
+        } else {
+            stopSpeakingWhileMutedSimulation()
+        }
     }
 
     public func muteLocalMedia(_ isMuted: Bool) {
@@ -128,5 +138,29 @@ public final class E2ECallFacade: CallFacade {
                 self?.archivingStateSubject.send(.idle)
             }
             .store(in: &cancellables)
+    }
+
+    // MARK: - Speaking While Muted Simulation
+
+    private var speakingWhileMutedTimer: Timer?
+
+    /// Simulates sustained loud audio levels while the mic is muted.
+    /// This triggers the `SpeakingWhileMutedDetector` in E2E mode so the
+    /// warning toast can be validated by Maestro flows.
+    private func simulateSpeakingWhileMuted() {
+        stopSpeakingWhileMutedSimulation()
+        // Emit loud audio samples every 0.3s to trigger the detector's hysteresis
+        speakingWhileMutedTimer = Timer.scheduledTimer(
+            withTimeInterval: 0.3,
+            repeats: true
+        ) { [weak self] _ in
+            self?._publisherAudioLevelPublisher.send(0.5)
+        }
+    }
+
+    private func stopSpeakingWhileMutedSimulation() {
+        speakingWhileMutedTimer?.invalidate()
+        speakingWhileMutedTimer = nil
+        _publisherAudioLevelPublisher.send(0.0)
     }
 }
