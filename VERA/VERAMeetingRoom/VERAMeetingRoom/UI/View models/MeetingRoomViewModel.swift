@@ -25,6 +25,7 @@ public final class MeetingRoomViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private let connectToRoomUseCase: ConnectToRoomUseCase
+    private let connectWithSessionKeyUseCase: ConnectWithSessionKeyUseCase
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let disconnectRoomUseCase: DisconnectRoomUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
@@ -68,6 +69,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         roomName: RoomName,
         baseURL: URL,
         connectToRoomUseCase: ConnectToRoomUseCase,
+        connectWithSessionKeyUseCase: ConnectWithSessionKeyUseCase,
         disconnectRoomUseCase: DisconnectRoomUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
@@ -83,6 +85,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.roomName = roomName
         self.baseURL = baseURL
         self.connectToRoomUseCase = connectToRoomUseCase
+        self.connectWithSessionKeyUseCase = connectWithSessionKeyUseCase
         self.disconnectRoomUseCase = disconnectRoomUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
@@ -301,7 +304,7 @@ extension MeetingRoomViewModel {
 
     fileprivate func connect() async throws -> CallFacade {
         if SessionKeyParser.isSessionKey(roomName) {
-            return try await connectToRoomUseCase(sessionKey: roomName)
+            return try await connectWithSessionKeyUseCase(sessionKey: roomName)
         }
         return try await connectToRoomUseCase(roomName: roomName)
     }

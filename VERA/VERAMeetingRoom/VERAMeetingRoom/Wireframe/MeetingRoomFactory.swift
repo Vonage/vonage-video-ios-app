@@ -58,6 +58,11 @@ public class MeetingRoomFactory {
                 roomCredentialsRepository: roomCredentialsRepository,
                 sessionKeyWriter: sessionKeyHolder
             ),
+            connectWithSessionKeyUseCase: DefaultConnectWithSessionKeyUseCase(
+                sessionRepository: sessionRepository,
+                roomCredentialsRepository: roomCredentialsRepository,
+                sessionKeyWriter: sessionKeyHolder
+            ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),

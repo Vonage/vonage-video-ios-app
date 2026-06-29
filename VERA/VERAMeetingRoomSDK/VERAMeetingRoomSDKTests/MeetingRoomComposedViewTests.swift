@@ -211,6 +211,11 @@ struct MeetingRoomComposedViewTests {
                 roomCredentialsRepository: makeMockRoomCredentialsRepository(),
                 sessionKeyWriter: DefaultSessionKeyHolder()
             ),
+            connectWithSessionKeyUseCase: DefaultConnectWithSessionKeyUseCase(
+                sessionRepository: makeMockSessionRepository(),
+                roomCredentialsRepository: makeMockRoomCredentialsRepository(),
+                sessionKeyWriter: DefaultSessionKeyHolder()
+            ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
                 sessionRepository: makeMockSessionRepository()
             ),

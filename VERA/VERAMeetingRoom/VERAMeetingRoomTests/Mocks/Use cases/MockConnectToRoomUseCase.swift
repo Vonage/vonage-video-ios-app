@@ -15,7 +15,6 @@ public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {
 public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
     public enum Actions: Equatable {
         case connect(String)
-        case connectWithSessionKey(String)
     }
 
     public var recordedActions: [Actions] = []
@@ -26,13 +25,6 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
         roomName: RoomName
     ) async throws -> any CallFacade {
         recordedActions.append(.connect(roomName))
-        return call
-    }
-
-    public func callAsFunction(
-        sessionKey: String
-    ) async throws -> any CallFacade {
-        recordedActions.append(.connectWithSessionKey(sessionKey))
         return call
     }
 }
@@ -48,12 +40,6 @@ public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
 
     public func callAsFunction(
         roomName: RoomName
-    ) async throws -> any CallFacade {
-        throw Error.errorMock
-    }
-
-    public func callAsFunction(
-        sessionKey: String
     ) async throws -> any CallFacade {
         throw Error.errorMock
     }

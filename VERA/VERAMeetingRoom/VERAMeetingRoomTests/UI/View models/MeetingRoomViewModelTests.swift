@@ -824,6 +824,7 @@ struct MeetingRoomViewModelTests {
         roomName: String = "a_room_name",
         baseURL: URL = .init(string: "https://example.com")!,
         connectToRoomUseCase: ConnectToRoomUseCase = makeMockConnectToRoomUseCase(),
+        connectWithSessionKeyUseCase: ConnectWithSessionKeyUseCase = makeMockConnectWithSessionKeyUseCase(),
         disconnectRoomUseCase: DisconnectRoomUseCase = makeMockDisconnectRoomUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
@@ -842,6 +843,7 @@ struct MeetingRoomViewModelTests {
             roomName: roomName,
             baseURL: baseURL,
             connectToRoomUseCase: connectToRoomUseCase,
+            connectWithSessionKeyUseCase: connectWithSessionKeyUseCase,
             disconnectRoomUseCase: disconnectRoomUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
