@@ -17,12 +17,47 @@ struct StatsOverlayViewModelTests {
 
     // MARK: - Initialization Tests
 
-    @Test("Initial state should be inactive with empty stats")
+    @Test("Initial state before setup should be inactive with empty stats")
     func testInitialState() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+
+        #expect(viewModel.isActive == false)
+        #expect(viewModel.statsText == "")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe default active overlay preference")
+    func testSetupObservesDefaultActiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
+
+        await delay()
+
+        #expect(viewModel.isActive == true)
+        #expect(viewModel.statsText == "Waiting for stats…")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe initial inactive overlay preference")
+    func testSetupObservesInitialInactiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository(
+            initialPreferences: PublisherSettingsPreferences(statsOverlayEnabled: false)
+        )
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await delay()
 
         #expect(viewModel.isActive == false)
         #expect(viewModel.statsText == "")
