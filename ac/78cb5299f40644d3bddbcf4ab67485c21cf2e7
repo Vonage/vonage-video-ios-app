@@ -1,0 +1,76 @@
+VERA/VERAVonage/VERAVonage/CallStateManager.swift
+  s_e863cf93529570::t_238552f556b364 133-136
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_e863cf93529570::t_80409c4e99c5f4 442
+VERA/VERAApp/Project.swift
+  s_e863cf93529570::t_083c1623a1ab5f 22
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_e863cf93529570::t_88cf1bf56885bb 173-177
+  s_e863cf93529570::t_a128e138b23d08 286-289,291,298,306
+  s_e863cf93529570::t_2adba28d6c582f 290
+  s_e863cf93529570::t_b924f55e40966a 93
+  s_e863cf93529570::t_bca5ba1ade58b2 283-285,292,302-304,307-310,312-322,324-345
+  s_e863cf93529570::t_bf70482a2aaff8 9
+  s_e863cf93529570::t_8b3de533a121a5 92,94
+  s_e863cf93529570::t_2d38caaad51292 299-301
+  s_e863cf93529570::t_4709c65b99de29 305
+  s_e863cf93529570::t_b73df6f9a59089 222-226
+  s_e863cf93529570::t_923f1041f8bb40 293-297
+  s_e863cf93529570::t_910bc611fa638b 311,323
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_e863cf93529570::t_980af04f78651d 70
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/PictureInPictureSupport.swift
+  s_e863cf93529570::t_e61673ce5a67d0 1-8,15-16,19-20,22-23
+  s_e863cf93529570::t_cde1392077b884 9-14,17-18,21
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_e863cf93529570::t_be81fd5300b207 51
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_e863cf93529570::t_bf532f914580ea 70-71,73-77,79-83
+  s_e863cf93529570::t_22ccc19719ae27 124
+  s_e863cf93529570::t_2d3d31b41e1ff1 72
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_e863cf93529570::t_e4b6827b8c8664 445,451,459-460
+VERA/VERADomain/VERADomain/Participant.swift
+  s_e863cf93529570::t_286026ec9815e5 81,94
+  s_e863cf93529570::t_75c66edaf3f663 145
+  s_e863cf93529570::t_3fe311ae672c5a 45-46
+  s_e863cf93529570::t_ced87b77d22010 127
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomContent.swift
+  s_e863cf93529570::t_d90de090350224 28-37
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomScreen.swift
+  s_e863cf93529570::t_7143bc8ff705d9 75-82
+  s_e863cf93529570::t_b0e2f9d3aeae08 28
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_e863cf93529570::t_f186e1e2499b85 68
+  s_e863cf93529570::t_363738a3cb828a 41,72-81,145
+  s_e863cf93529570::t_efe87059bf9880 69
+  s_e863cf93529570::t_0de9dcb9753891 140-141,149-162,164-167
+  s_e863cf93529570::t_bb3abe9735b993 142-144,146-148
+  s_e863cf93529570::t_5234f7cd4e0e72 163
+  s_e863cf93529570::t_3b0b314f1db267 19
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  s_e863cf93529570::t_a42e0f4dac8ca7 222-238
+  s_e863cf93529570::t_1e3f0e4103e3e1 253-254,261,268-270,273-276
+  s_e863cf93529570::t_02919c71663658 255-260,267,271-272
+  s_e863cf93529570::t_0a1a44033a23bb 262-266
+  s_e863cf93529570::t_20eda620aed481 9
+  s_e863cf93529570::t_d43c5ca3904664 73-74
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_e863cf93529570::t_589b9f0b936311 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "ac78cb5299f40644d3bddbcf4ab67485c21cf2e7",
+  "prompts": {},
+  "sessions": {
+    "s_e863cf93529570": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cce3e265-3ef8-467c-8406-a4a1a4a69809",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

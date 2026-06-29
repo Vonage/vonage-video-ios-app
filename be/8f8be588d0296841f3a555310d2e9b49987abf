@@ -1,0 +1,23 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKApp/VERAMeetingRoomSDKApp.entitlements
+  s_e863cf93529570::t_22e092b51dd611 1-8
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/PictureInPicture/PictureInPictureBinder.swift
+  s_e863cf93529570::t_77e26c11166f14 20-24
+  s_e863cf93529570::t_798542c279d595 1-5,7-19,25-26
+  s_e863cf93529570::t_b03bfda3b75a1b 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "be8f8be588d0296841f3a555310d2e9b49987abf",
+  "prompts": {},
+  "sessions": {
+    "s_e863cf93529570": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "cce3e265-3ef8-467c-8406-a4a1a4a69809",
+        "model": "default"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_cab2c5ae078c98::t_7ea8321de058ab 94-97
+  s_cab2c5ae078c98::t_5c936cf9b6ab72 304,317-332,336
+  s_cab2c5ae078c98::t_99e5bc1780bf04 182-189
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureManager.swift
+  s_cab2c5ae078c98::t_8186f15ca225a7 25-34
+  s_cab2c5ae078c98::t_059ea6e1e87ed7 190-191
+  s_cab2c5ae078c98::t_e28825d6c5c570 268-280
+  s_cab2c5ae078c98::t_1ad39df42d2327 328-341,343-349
+  s_cab2c5ae078c98::t_c1aaa658fcbeda 257-260,262-267,281-282,306-324
+  s_cab2c5ae078c98::t_094d881e6b4dc3 325,489-493,496-497,503-514
+  s_cab2c5ae078c98::t_de03cd07982218 52
+  s_cab2c5ae078c98::t_2cc77572b29bb2 208-209
+  s_cab2c5ae078c98::t_86b11e6e4208d6 211
+  s_cab2c5ae078c98::t_1852408288effa 326
+  s_cab2c5ae078c98::t_a052b7e90db13b 515
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "cc666cbbe8188aeb7c591898acb8c230a0a42bbf",
+  "prompts": {},
+  "sessions": {
+    "s_cab2c5ae078c98": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "6e03f497-ed0a-4471-9ec7-92ead9cbf958",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
