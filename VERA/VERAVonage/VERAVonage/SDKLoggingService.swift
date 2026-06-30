@@ -50,8 +50,7 @@ public final class SDKLoggingService: @unchecked Sendable {
 
             startStderrCapture(strategy: fileStrategy)
 
-            let otcLevel = Self.mapToOTCLevel(rawValue: logLevel)
-            otc_log_enable(otcLevel)
+            otc_log_enable(logLevel.toOTCLevel)
         } else {
             stopStderrCapture()
             otc_log_enable(0)
@@ -138,15 +137,16 @@ public final class SDKLoggingService: @unchecked Sendable {
         capturePipe?.fileHandleForWriting.closeFile()
         capturePipe = nil
     }
+}
 
-    // MARK: - Level Mapping
-
+// MARK: - Level Mapping
+extension Int {
     /// Maps SDKLogLevel raw value to the OTC log level expected by `otc_log_enable`.
     ///
     /// - Parameter rawValue: The raw value from ``SDKLogLevel`` (0 = verbose … 4 = error).
     /// - Returns: The corresponding OTC level (4 = debug … 1 = error, default = 4).
-    static func mapToOTCLevel(rawValue: Int) -> Int32 {
-        switch rawValue {
+    public var toOTCLevel: Int32 {
+        switch self {
         case 0: return 4  // verbose → debug (most permissive SDK level)
         case 1: return 4  // debug
         case 2: return 3  // info

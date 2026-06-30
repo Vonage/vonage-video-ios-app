@@ -146,41 +146,41 @@ struct SDKLoggingServiceTests {
         #expect(factory.defaultMaxFileSize == 2 * 1024 * 1024)
     }
 
-    // MARK: - mapToOTCLevel
+    // MARK: - toOTCLevel
 
-    @Test("mapToOTCLevel maps verbose (0) to debug OTC level (4)")
+    @Test("toOTCLevel maps verbose (0) to debug OTC level (4)")
     func mapToOTCLevelVerbose() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 0) == 4)
+        #expect(0.toOTCLevel == 4)
     }
 
-    @Test("mapToOTCLevel maps debug (1) to debug OTC level (4)")
+    @Test("toOTCLevel maps debug (1) to debug OTC level (4)")
     func mapToOTCLevelDebug() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 1) == 4)
+        #expect(1.toOTCLevel == 4)
     }
 
-    @Test("mapToOTCLevel maps info (2) to info OTC level (3)")
+    @Test("toOTCLevel maps info (2) to info OTC level (3)")
     func mapToOTCLevelInfo() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 2) == 3)
+        #expect(2.toOTCLevel == 3)
     }
 
-    @Test("mapToOTCLevel maps warn (3) to warn OTC level (2)")
+    @Test("toOTCLevel maps warn (3) to warn OTC level (2)")
     func mapToOTCLevelWarn() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 3) == 2)
+        #expect(3.toOTCLevel == 2)
     }
 
-    @Test("mapToOTCLevel maps error (4) to error OTC level (1)")
+    @Test("toOTCLevel maps error (4) to error OTC level (1)")
     func mapToOTCLevelError() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 4) == 1)
+        #expect(4.toOTCLevel == 1)
     }
 
-    @Test("mapToOTCLevel maps unknown negative value to debug OTC level (4)")
+    @Test("toOTCLevel maps unknown negative value to debug OTC level (4)")
     func mapToOTCLevelUnknownNegative() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: -1) == 4)
+        #expect((-1).toOTCLevel == 4)
     }
 
-    @Test("mapToOTCLevel maps unknown large value to debug OTC level (4)")
+    @Test("toOTCLevel maps unknown large value to debug OTC level (4)")
     func mapToOTCLevelUnknownLarge() {
-        #expect(SDKLoggingService.mapToOTCLevel(rawValue: 99) == 4)
+        #expect(99.toOTCLevel == 4)
     }
 
     // MARK: - configure
