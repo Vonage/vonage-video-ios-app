@@ -361,16 +361,15 @@ final class MeetingRoomSDKContainer {
         return service
     }()
 
+    lazy var getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+        provider: sdkLoggingService.getLogFileURLs)
+
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
         statsDataSource: statsRepository,
         loggingRepository: sdkLoggingRepository,
-        loggingPreferencesLoader: {
-            self.sdkLoggingRepository.loadPreferencesSync()
-        },
-        getLogFileURLs: DefaultGetLogFileURLsUseCase(provider: { [weak self] in
-            self?.sdkLoggingService.getLogFileURLs() ?? []
-        }))
+        loggingPreferencesLoader: sdkLoggingRepository.loadPreferencesSync,
+        getLogFileURLs: getLogFileURLsUseCase)
 
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
