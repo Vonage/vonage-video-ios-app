@@ -40,6 +40,7 @@ public struct ToastView: View {
         .background(
             GlassBackground()
         )
+        .accessibilityIdentifier("toast-\(item.mode.accessibilityName)")
     }
 }
 extension ToastItem {

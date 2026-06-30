@@ -31,6 +31,10 @@ public class MockCall: CallFacade {
     public var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
+    public let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     public var recordedActions: [CallActions] = []
 
     public var isMuted: Bool = false

@@ -276,6 +276,8 @@ private final class SessionRepositoryStub: SessionRepository {
 }
 
 private final class CallFacadeStub: CallFacade {
+    let publisherAudioLevelPublisher: AnyPublisher<Float, Never> = Just(0.0).eraseToAnyPublisher()
+
     var participantsPublisher = Just(ParticipantsState.empty).eraseToAnyPublisher()
     var eventsPublisher = Just(SessionEvent.idle).eraseToAnyPublisher()
     var statePublisher = Just(SessionState(isPublishingAudio: true, isPublishingVideo: true)).eraseToAnyPublisher()
