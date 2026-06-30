@@ -10,10 +10,10 @@ import Foundation
 /// SDK logging for a session.
 public struct SDKLoggingPreferences: Codable, Equatable, Sendable {
     /// Whether SDK logging is enabled.
-    public var isLoggingEnabled: Bool
+    public let isLoggingEnabled: Bool
 
     /// Minimum severity level to emit when logging is enabled.
-    public var logLevel: SDKLogLevel
+    public let logLevel: SDKLogLevel
 
     /// When `true`, log files should be cleared on the next app launch
     /// before SDK logging is configured. This flag is set when the user
