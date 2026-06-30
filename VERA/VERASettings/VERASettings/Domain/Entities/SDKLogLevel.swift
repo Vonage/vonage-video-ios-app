@@ -49,6 +49,14 @@ public enum SDKLogLevel: Int, Codable, Sendable, CaseIterable, Identifiable, Com
         }
     }
 
+    public static var `default`: SDKLogLevel {
+        #if DEBUG
+            return .debug
+        #else
+            return .error
+        #endif
+    }
+
     public static func < (lhs: SDKLogLevel, rhs: SDKLogLevel) -> Bool {
         lhs.rawValue < rhs.rawValue
     }

@@ -201,16 +201,9 @@ final class DependencyContainer {
             return repository
         }()
 
-
-        #if DEBUG
-            let defaultLogLevel: SDKLogLevel = .debug
-        #else
-            let defaultLogLevel: SDKLogLevel = .error
-        #endif
-
         lazy var sdkLoggingRepository: SDKLoggingRepository = {
             SDKLoggingPreferences.default = SDKLoggingPreferences(
-                logLevel: self.defaultLogLevel
+                logLevel: SDKLogLevel.default
             )
             return UserDefaultsSDKLoggingRepository()
         }()
