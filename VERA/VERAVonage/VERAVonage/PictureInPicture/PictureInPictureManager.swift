@@ -4,10 +4,10 @@
 
 import Combine
 import Foundation
+import OSLog
 import SwiftUI
 import UIKit
 import VERADomain
-import OSLog
 
 /// Coordinates Picture-in-Picture for an active Vonage call.
 ///
@@ -20,7 +20,7 @@ import OSLog
 @MainActor
 public final class PictureInPictureManager: ObservableObject {
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
-    
+
     @Published public private(set) var isInPictureInPicture = false
     @Published public private(set) var canStartPictureInPicture = false
     @Published public private(set) var pipTargetParticipantId: String?
@@ -169,7 +169,7 @@ public final class PictureInPictureManager: ObservableObject {
             startPictureInPictureIfPossible()
         }
     }
-    
+
     private func tryReconfiguration(sourceView: UIView, videoFrame: CGRect) {
         do {
             try pipController.reconfigure(

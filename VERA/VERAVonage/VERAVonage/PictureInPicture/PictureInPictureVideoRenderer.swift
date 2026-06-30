@@ -9,7 +9,11 @@ import UIKit
 
 /// Custom `OTVideoRender` that displays inline video and feeds frames into PiP.
 final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
-    let inlineDisplayLayer = AVSampleBufferDisplayLayer()
+    lazy var inlineDisplayLayer: AVSampleBufferDisplayLayer = {
+        let layer = AVSampleBufferDisplayLayer()
+        layer.videoGravity = .resizeAspect
+        return layer
+    }()
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
 
@@ -28,13 +32,16 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        inlineDisplayLayer.videoGravity = .resizeAspect
-        layer.addSublayer(inlineDisplayLayer)
+        setup()
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setup() {
+        layer.addSublayer(inlineDisplayLayer)
     }
 
     override func layoutSubviews() {

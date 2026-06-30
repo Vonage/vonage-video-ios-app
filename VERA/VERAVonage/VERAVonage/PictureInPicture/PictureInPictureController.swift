@@ -9,7 +9,7 @@ import UIKit
 /// Wraps `AVPictureInPictureController` for Vonage video calls.
 @MainActor
 final class PictureInPictureController: NSObject {
-    
+
     enum ConfigurationError: Error {
         case pictureInPictureAlreadyActive
         case missingPipController
