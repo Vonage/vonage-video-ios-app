@@ -11,7 +11,7 @@ struct VERAFeedbackDemoApp: App {
         WindowGroup {
             NavigationStack {
                 FeedbackSheetContent(
-                  feedbackReportUseCase: NullFeedbackReportUseCase()
+                    feedbackReportUseCase: NullFeedbackReportUseCase()
                 )
             }
         }
