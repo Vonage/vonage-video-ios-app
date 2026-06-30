@@ -115,6 +115,15 @@ public protocol ParticipantsPublisherProvider: AnyObject {
     var participantsPublisher: AnyPublisher<ParticipantsState, Never> { get }
 }
 
+/// Provides a publisher that emits the local publisher's real-time audio level.
+///
+/// Implementers relay the raw audio level from the local ``VonagePublisher`` so that
+/// consumers can detect speaking-while-muted conditions without coupling to the SDK layer.
+public protocol PublisherAudioLevelProvider: AnyObject {
+    /// A publisher that emits the local publisher's audio level in the range [0.0, 1.0], never fails.
+    var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { get }
+}
+
 /// Provides a publisher that emits session-level events and errors.
 ///
 /// Use this publisher to react to errors and notable session events (e.g., signals).
@@ -284,7 +293,8 @@ public protocol CallFacade: AnyObject,
     CaptionsProvider,
     NetworkStatsProvider,
     PublisherSettingsApplicable,
-    SubscriberExtraStatsToggleable
+    SubscriberExtraStatsToggleable,
+    PublisherAudioLevelProvider
 {}
 
 /// Errors that can occur during call operations.

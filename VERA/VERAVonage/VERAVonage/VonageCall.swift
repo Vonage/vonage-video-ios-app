@@ -99,6 +99,16 @@ public final class VonageCall: CallFacade {
         }
         .eraseToAnyPublisher()
 
+    private let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+
+    /// A publisher that emits the local publisher's real-time audio level in [0.0, 1.0], never fails.
+    ///
+    /// Relays the smoothed audio level from the active ``VonagePublisher``. The subject is kept in sync
+    /// via ``setupPublisherObservation(_:)`` so that publisher replacements during
+    /// ``applyPublisherAdvancedSettings(_:)`` are handled transparently.
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     /// Captions cleanup timer to clear captions after a certain period of inactivity.
     private var captionCleanupTimer: Timer?
 
@@ -310,6 +320,12 @@ public final class VonageCall: CallFacade {
                 Task { [weak self] in
                     await self?.updateParticipantsState(newState)
                 }
+            }
+            .store(in: &publisherCancellables)
+
+        publisher.audioLevelPublisher
+            .sink { [weak self] level in
+                self?._publisherAudioLevel.value = level
             }
             .store(in: &publisherCancellables)
     }

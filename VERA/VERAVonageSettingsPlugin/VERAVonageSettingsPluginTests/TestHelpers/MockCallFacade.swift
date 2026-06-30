@@ -30,6 +30,10 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
         _networkStatsPublisher.eraseToAnyPublisher()
 
+    let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     var isMuted: Bool = false
     var isOnHold: Bool = false
     var areCaptionsEnabled = false
