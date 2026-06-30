@@ -201,12 +201,7 @@ final class DependencyContainer {
             return repository
         }()
 
-        lazy var sdkLoggingRepository: SDKLoggingRepository = {
-            SDKLoggingPreferences.default = SDKLoggingPreferences(
-                logLevel: SDKLogLevel.default
-            )
-            return UserDefaultsSDKLoggingRepository()
-        }()
+        lazy var sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository()
 
         lazy var sdkLoggingService: SDKLoggingService = {
 

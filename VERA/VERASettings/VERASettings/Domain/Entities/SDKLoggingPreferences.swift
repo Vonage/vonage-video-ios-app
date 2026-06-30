@@ -32,7 +32,7 @@ public struct SDKLoggingPreferences: Codable, Equatable, Sendable {
     ///   - pendingLogCleanup: Whether log files should be cleared on next launch. Defaults to `false`.
     public init(
         isLoggingEnabled: Bool = true,
-        logLevel: SDKLogLevel = .error,
+        logLevel: SDKLogLevel = SDKLogLevel.default,
         pendingLogCleanup: Bool = false
     ) {
         self.isLoggingEnabled = isLoggingEnabled
