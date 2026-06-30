@@ -163,11 +163,12 @@ final class BottomBarButtonsAssembler {
         return .init(
             viewModel,
             isActive: isChatPresented,
-            overflowSelectionBehavior: .dismissBeforeAction
-        ) { [weak self] in
-            viewModel.chatDidOpen()
-            self?.onShowChat?()
-        }
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: { [weak self] in
+                viewModel.chatDidOpen()
+                self?.onShowChat?()
+            }
+        )
     }
 
     private func makeBackgroundEffectsButton(
@@ -176,10 +177,11 @@ final class BottomBarButtonsAssembler {
         .init(
             viewModel,
             isActive: isEffectsPresented || viewModel.isActive,
-            overflowSelectionBehavior: .dismissBeforeAction
-        ) { [weak self] in
-            self?.onShowEffects?()
-        }
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: { [weak self] in
+                self?.onShowEffects?()
+            }
+        )
     }
 
     private func makeFeedbackReportButton() -> BottomBarButton {

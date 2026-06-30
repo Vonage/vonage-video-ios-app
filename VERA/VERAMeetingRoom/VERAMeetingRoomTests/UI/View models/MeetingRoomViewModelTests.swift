@@ -292,6 +292,25 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func defaultUIProviderBottomBarContentIsNil() {
+        let provider = DefaultMeetingRoomUIProvider()
+
+        #expect(provider.bottomBarContent(context: makeBottomBarContext()) == nil)
+    }
+
+    @Test
+    @MainActor
+    func configurableUIProviderReturnsBottomBarContent() {
+        let provider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [] },
+            bottomBarContent: { _ in AnyView(Text("Custom bottom bar")) }
+        )
+
+        #expect(provider.bottomBarContent(context: makeBottomBarContext()) != nil)
+    }
+
+    @Test
+    @MainActor
     func externalButtonsUpdateRefreshesExtraButtons() async throws {
         let externalButtonsUpdates = PassthroughSubject<Void, Never>()
         var getExternalButtonsCallCount = 0
@@ -929,6 +948,41 @@ struct MeetingRoomViewModelTests {
             .first { _ in true } ?? { throw Error.nilValue }()
 
         return contentState
+    }
+
+    @MainActor
+    func makeBottomBarContext(
+        state: MeetingRoomState = .initial,
+        actions: MeetingRoomActions = .init(),
+        buttons: [BottomBarButton] = []
+    ) -> MeetingRoomBottomBarContext {
+        MeetingRoomBottomBarContext(
+            state: state,
+            actions: actions,
+            buttons: buttons,
+            controls: makeBottomBarControls()
+        )
+    }
+
+    @MainActor
+    func makeBottomBarControls() -> MeetingRoomBottomBarControls {
+        MeetingRoomBottomBarControls(
+            microphone: makeControl(id: "microphone", image: "mic"),
+            camera: makeControl(id: "camera", image: "video"),
+            participants: makeControl(id: "participants", image: "person.2"),
+            layout: makeControl(id: "layout", image: "rectangle.grid.2x2"),
+            endCall: makeControl(id: "end-call", image: "phone.down.fill")
+        )
+    }
+
+    @MainActor
+    func makeControl(id: String, image: String) -> MeetingRoomBottomBarControl {
+        MeetingRoomBottomBarControl(
+            id: id,
+            label: id,
+            image: Image(systemName: image),
+            action: {}
+        )
     }
 }
 

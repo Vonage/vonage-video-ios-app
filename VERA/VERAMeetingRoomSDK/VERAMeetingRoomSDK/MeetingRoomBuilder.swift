@@ -3,7 +3,6 @@
 //
 
 import AVKit
-import Combine
 import Foundation
 import SwiftUI
 import VERAArchiving
@@ -247,10 +246,12 @@ public final class MeetingRoomBuilder {
         return self
     }
 
-    /// Sets a provider for host-driven meeting room UI additions.
+    /// Sets a provider for host-driven meeting room UI customization.
     ///
-    /// The first supported surface is additional bottom bar buttons. Provided
-    /// buttons are appended after the SDK feature buttons.
+    /// `bottomBarButtons()` is additive: provided buttons are appended after the
+    /// SDK feature buttons in the built-in bottom bar. `bottomBarContent(context:)`
+    /// can replace the full bottom bar; custom content receives SDK controls,
+    /// state, actions, and the presentation handler through its context.
     ///
     /// - Parameter provider: The UI provider used by the meeting room.
     /// - Returns: The builder for chaining.
@@ -359,7 +360,7 @@ public final class MeetingRoomBuilder {
             },
             updates: buttonsAssembler.buttonsDidChange
         )
-        let uiProvider = Self.makeCombinedUIProvider(
+        let uiProvider = MeetingRoomUIProviderCombiner.combine(
             sdkProvider: sdkUIProvider,
             customProvider: _uiProvider
         )
@@ -462,6 +463,7 @@ public final class MeetingRoomBuilder {
         let composedView = MeetingRoomComposedView(
             meetingRoomFactory: container.meetingRoomFactory,
             viewModel: meetingRoomViewModel,
+            uiProvider: uiProvider,
             container: container,
             enabledFeatures: _enabledFeatures,
             buttonsAssembler: buttonsAssembler,
@@ -494,26 +496,6 @@ public final class MeetingRoomBuilder {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
-    }
-
-    static func makeCombinedUIProvider(
-        sdkProvider: any MeetingRoomUIProvider,
-        customProvider: (any MeetingRoomUIProvider)?
-    ) -> any MeetingRoomUIProvider {
-        guard let customProvider else {
-            return sdkProvider
-        }
-
-        return DefaultMeetingRoomUIProvider(
-            bottomBarButtons: {
-                sdkProvider.bottomBarButtons() + customProvider.bottomBarButtons()
-            },
-            updates: Publishers.Merge(
-                sdkProvider.updates,
-                customProvider.updates
-            )
-            .eraseToAnyPublisher()
-        )
     }
 
     // MARK: - Top Trailing Buttons

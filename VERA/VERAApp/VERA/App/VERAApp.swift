@@ -34,8 +34,8 @@ struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
 
     #if DEBUG
-        @StateObject private var qaMeetingRoomUIProvider = QAMeetingRoomUIProvider()
-        @State private var isQAMeetingRoomButtonsMenuPresented = false
+        @StateObject private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
+        @State private var isMeetingRoomCustomizationMenuPresented = false
     #endif
 
     var dependencyContainer: DependencyContainer = {
@@ -97,8 +97,8 @@ struct VERAApp: App {
             }
             .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
             #if DEBUG
-                .sheet(isPresented: $isQAMeetingRoomButtonsMenuPresented) {
-                    QAMeetingRoomButtonsMenu(provider: qaMeetingRoomUIProvider)
+                .sheet(isPresented: $isMeetingRoomCustomizationMenuPresented) {
+                    MeetingRoomCustomizationMenu(provider: meetingRoomCustomizationProvider)
                 }
             #endif
         }
@@ -170,7 +170,7 @@ struct VERAApp: App {
                 .toolbar(.visible, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        qaMeetingRoomButtonsMenuTrigger
+                        meetingRoomCustomizationMenuTrigger
                     }
                 }
             #endif
@@ -221,16 +221,16 @@ struct VERAApp: App {
     }
 
     #if DEBUG
-        private var qaMeetingRoomButtonsMenuTrigger: some View {
+        private var meetingRoomCustomizationMenuTrigger: some View {
             Button {
-                isQAMeetingRoomButtonsMenuPresented = true
+                isMeetingRoomCustomizationMenuPresented = true
             } label: {
                 Image(systemName: "slider.horizontal.3")
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityIdentifier("qa-bottom-bar-buttons-menu-trigger")
+            .accessibilityIdentifier("meeting-room-customization-menu-trigger")
         }
     #endif
 
@@ -292,7 +292,7 @@ struct VERAApp: App {
                 .archivingDataSourceFactory(E2EMeetingRoomArchivingDataSourceFactory())
         }
         #if DEBUG
-            builder.uiProvider(qaMeetingRoomUIProvider)
+            builder.uiProvider(meetingRoomCustomizationProvider)
         #endif
 
         let result = builder.build()
