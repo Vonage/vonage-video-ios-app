@@ -149,7 +149,7 @@ struct MeetingRoomBuilderTests {
         let allFeatures = Set(MeetingRoomFeature.allCases)
         let builder = makeMeetingRoomBuilder()
             .enabledFeatures(allFeatures)
-        #expect(builder.currentEnabledFeatures.count == 10)
+        #expect(builder.currentEnabledFeatures.count == 11)
     }
 
     @Test("Overwriting enabled features replaces the set")

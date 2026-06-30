@@ -55,7 +55,7 @@ struct MeetingRoomFeatureTests {
     @Test("Full feature set contains all features")
     func fullFeatureSet() {
         let features = Set(MeetingRoomFeature.allCases)
-        #expect(features.count == 10)
+        #expect(features.count == 11)
         for feature in MeetingRoomFeature.allCases {
             #expect(features.contains(feature))
         }
