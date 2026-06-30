@@ -59,14 +59,16 @@ public final class PictureInPictureManager: ObservableObject {
     private var pipConfigurationToken = UUID()
 
     public init() {
-        pipController.onPictureInPictureStateDidChange = { [weak self] isActive in
+        pipController.onPictureInPictureStateDidStart = { [weak self] in
             guard let self else { return }
-            self.isInPictureInPicture = isActive
-            if !isActive {
-                self.wantsPictureInPicture = false
-                self.lastInPipRetargetAt = nil
-                self.reconfigureForPendingSourceViewIfNeeded()
-            }
+            self.isInPictureInPicture = true
+        }
+        pipController.onPictureInPictureStateDidStop = { [weak self] in
+            guard let self else { return }
+            self.isInPictureInPicture = false
+            self.wantsPictureInPicture = false
+            self.lastInPipRetargetAt = nil
+            self.reconfigureForPendingSourceViewIfNeeded()
         }
         pipController.onPictureInPicturePossibleDidChange = { [weak self] in
             guard let self else { return }

@@ -21,7 +21,8 @@ final class PictureInPictureController: NSObject {
     private(set) var isInPictureInPicture = false
     var isConfigured: Bool { pipController != nil }
     var onPictureInPicturePossibleDidChange: (() -> Void)?
-    var onPictureInPictureStateDidChange: ((Bool) -> Void)?
+    var onPictureInPictureStateDidStart: (() -> Void)?
+    var onPictureInPictureStateDidStop: (() -> Void)?
     var onPictureInPictureFailed: ((Error) -> Void)?
 
     var isPictureInPictureSupported: Bool {
@@ -112,7 +113,7 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         isInPictureInPicture = true
-        onPictureInPictureStateDidChange?(true)
+        onPictureInPictureStateDidStart?()
     }
 
     func pictureInPictureControllerDidStartPictureInPicture(
@@ -127,7 +128,7 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
         _ pictureInPictureController: AVPictureInPictureController
     ) {
         isInPictureInPicture = false
-        onPictureInPictureStateDidChange?(false)
+        onPictureInPictureStateDidStop?()
     }
 
     func pictureInPictureController(
@@ -143,6 +144,6 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
     ) {
         isInPictureInPicture = false
         onPictureInPictureFailed?(error)
-        onPictureInPictureStateDidChange?(false)
+        onPictureInPictureStateDidStop?()
     }
 }
