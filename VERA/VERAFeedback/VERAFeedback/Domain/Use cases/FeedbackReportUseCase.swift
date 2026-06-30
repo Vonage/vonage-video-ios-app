@@ -52,3 +52,13 @@ public final class DefaultFeedbackReportUseCase: FeedbackReportUseCase {
         return try await feedbackReportDataSource.sendReport(dataSourceRequest)
     }
 }
+
+public final class NullFeedbackReportUseCase: FeedbackReportUseCase {
+    public init() {}
+
+    public func callAsFunction(
+        _ request: FeedbackReportRequest
+    ) async throws -> FeedbackReportResult {
+        .init(message: "", ticketUrl: "", screenshotIncluded: nil)
+    }
+}
