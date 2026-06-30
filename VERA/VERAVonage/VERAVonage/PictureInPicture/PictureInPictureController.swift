@@ -9,6 +9,12 @@ import UIKit
 /// Wraps `AVPictureInPictureController` for Vonage video calls.
 @MainActor
 final class PictureInPictureController: NSObject {
+    
+    enum ConfigurationError: Error {
+        case pictureInPictureAlreadyActive
+        case missingPipController
+    }
+
     private var pipController: AVPictureInPictureController?
     private let sampleBufferVideoCallView = PictureInPictureSampleBufferView()
 
@@ -26,14 +32,13 @@ final class PictureInPictureController: NSObject {
         pipController?.isPictureInPicturePossible ?? false
     }
 
-    @discardableResult
     func configureIfNeeded(
         with sourceView: UIView,
         videoRenderer: PictureInPictureVideoRenderer,
         videoFrame: CGRect
-    ) -> Bool {
-        guard !isInPictureInPicture else { return false }
-        guard pipController == nil else { return false }
+    ) throws {
+        guard !isInPictureInPicture else { throw ConfigurationError.pictureInPictureAlreadyActive }
+        guard pipController == nil else { throw ConfigurationError.missingPipController }
 
         videoRenderer.pipBufferDisplayLayer = sampleBufferVideoCallView.sampleBufferDisplayLayer
         videoRenderer.pipBufferDisplayLayer?.frame = videoFrame
@@ -64,7 +69,6 @@ final class PictureInPictureController: NSObject {
         pipController = AVPictureInPictureController(contentSource: contentSource)
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
-        return true
     }
 
     func startPictureInPicture() {
@@ -86,15 +90,14 @@ final class PictureInPictureController: NSObject {
     }
 
     /// Tears down and creates a fresh PiP controller for the same source view.
-    @discardableResult
     func reconfigure(
         with sourceView: UIView,
         videoRenderer: PictureInPictureVideoRenderer,
         videoFrame: CGRect
-    ) -> Bool {
-        guard !isInPictureInPicture else { return false }
+    ) throws {
+        guard !isInPictureInPicture else { throw ConfigurationError.pictureInPictureAlreadyActive }
         tearDown()
-        return configureIfNeeded(with: sourceView, videoRenderer: videoRenderer, videoFrame: videoFrame)
+        try configureIfNeeded(with: sourceView, videoRenderer: videoRenderer, videoFrame: videoFrame)
     }
 }
 

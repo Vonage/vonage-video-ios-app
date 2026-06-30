@@ -7,6 +7,7 @@ import Foundation
 import SwiftUI
 import UIKit
 import VERADomain
+import OSLog
 
 /// Coordinates Picture-in-Picture for an active Vonage call.
 ///
@@ -18,6 +19,8 @@ import VERADomain
 /// been replaced.
 @MainActor
 public final class PictureInPictureManager: ObservableObject {
+    private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
+    
     @Published public private(set) var isInPictureInPicture = false
     @Published public private(set) var canStartPictureInPicture = false
     @Published public private(set) var pipTargetParticipantId: String?
@@ -134,38 +137,25 @@ public final class PictureInPictureManager: ObservableObject {
 
         pendingSourceView = sourceView
         pendingVideoFrame = videoFrame
-        let configured = pipController.configureIfNeeded(
-            with: sourceView,
-            videoRenderer: videoRenderer,
-            videoFrame: videoFrame
-        )
-
-        if configured {
+        do {
+            try pipController.configureIfNeeded(
+                with: sourceView,
+                videoRenderer: videoRenderer,
+                videoFrame: videoFrame
+            )
             lastConfiguredSourceView = sourceView
-        } else {
+        } catch {
             let sourceViewChanged = sourceView !== lastConfiguredSourceView
             if pipController.isConfigured,
                 !pipController.isInPictureInPicture,
                 sourceViewChanged
             {
-                if pipController.reconfigure(
-                    with: sourceView,
-                    videoRenderer: videoRenderer,
-                    videoFrame: videoFrame
-                ) {
-                    lastConfiguredSourceView = sourceView
-                }
+                tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else if pipController.isConfigured,
                 pipTargetCameraEnabled,
                 wantsPictureInPicture || videoRenderer.renderedFrameCount > 0
             {
-                if pipController.reconfigure(
-                    with: sourceView,
-                    videoRenderer: videoRenderer,
-                    videoFrame: videoFrame
-                ) {
-                    lastConfiguredSourceView = sourceView
-                }
+                tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else {
                 return
             }
@@ -175,6 +165,19 @@ public final class PictureInPictureManager: ObservableObject {
 
         if wantsPictureInPicture {
             startPictureInPictureIfPossible()
+        }
+    }
+    
+    private func tryReconfiguration(sourceView: UIView, videoFrame: CGRect) {
+        do {
+            try pipController.reconfigure(
+                with: sourceView,
+                videoRenderer: videoRenderer,
+                videoFrame: videoFrame
+            )
+            lastConfiguredSourceView = sourceView
+        } catch {
+            Self.logger.error("\(error.localizedDescription)")
         }
     }
 
@@ -187,13 +190,16 @@ public final class PictureInPictureManager: ObservableObject {
             !pipController.isInPictureInPicture
         else { return }
 
-        if pipController.reconfigure(
-            with: pendingSourceView,
-            videoRenderer: videoRenderer,
-            videoFrame: pendingVideoFrame
-        ) {
+        do {
+            try pipController.reconfigure(
+                with: pendingSourceView,
+                videoRenderer: videoRenderer,
+                videoFrame: pendingVideoFrame
+            )
             lastConfiguredSourceView = pendingSourceView
             canStartPictureInPicture = pipController.canStartPictureInPicture
+        } catch {
+            Self.logger.error("\(error.localizedDescription)")
         }
     }
 
