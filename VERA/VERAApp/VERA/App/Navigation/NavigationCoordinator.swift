@@ -41,7 +41,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-        var backgroundBlurButtonViewModel: BackgroundBlurButtonViewModel?
+        var videoEffectsViewModel: VideoEffectsViewModel?
     #endif
 
     #if AUDIOEFFECTS_ENABLED
@@ -102,7 +102,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         #endif
 
         #if BACKGROUND_EFFECTS_ENABLED
-            backgroundBlurButtonViewModel = nil
+            videoEffectsViewModel = nil
         #endif
 
         #if AUDIOEFFECTS_ENABLED

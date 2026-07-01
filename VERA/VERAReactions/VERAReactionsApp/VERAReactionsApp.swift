@@ -21,6 +21,7 @@ struct VERAReactionsApp: App {
 struct DemoReactionsView: View {
 
     @StateObject private var buttonViewModel: EmojiButtonContainerViewModel
+    @StateObject private var horizontalPickerViewModel: EmojiPickerContainerViewModel
     @StateObject private var overlayViewModel: FloatingEmojisOverlayViewModel
 
     init() {
@@ -29,6 +30,11 @@ struct DemoReactionsView: View {
 
         _buttonViewModel = StateObject(
             wrappedValue: EmojiButtonContainerViewModel(
+                sendReactionUseCase: useCase
+            )
+        )
+        _horizontalPickerViewModel = StateObject(
+            wrappedValue: EmojiPickerContainerViewModel(
                 sendReactionUseCase: useCase
             )
         )
@@ -70,8 +76,13 @@ struct DemoReactionsView: View {
     }
 
     private var bottomBar: some View {
-        EmojiButtonContainer(viewModel: buttonViewModel)
-            .padding(.bottom, 32)
+        VStack(spacing: 32) {
+            EmojiButtonContainer(viewModel: buttonViewModel)
+
+            EmojiHorizontalPickerViewContainer(viewModel: horizontalPickerViewModel)
+                .padding(.horizontal, 24)
+        }
+        .padding(.bottom, 32)
     }
 }
 

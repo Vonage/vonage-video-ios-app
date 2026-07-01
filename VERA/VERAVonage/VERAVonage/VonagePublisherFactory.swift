@@ -65,6 +65,7 @@ public final class VonagePublisherFactory: PublisherFactory {
     private func makeOTPublisher(_ settings: PublisherSettings) throws -> OTPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
+        publisherSettings.allowAudioCaptureWhileMuted = true
         // All OTPublisherSettings properties must be set BEFORE OTPublisher is initialised.
         if let frameRate = settings.advancedSettings?.videoFrameRate?.otFrameRate {
             publisherSettings.cameraFrameRate = frameRate
@@ -113,9 +114,14 @@ public final class VonagePublisherFactory: PublisherFactory {
             otPublisher.degradationPreference = degradationPreference
         }
 
+        let initialDimensions =
+            settings.advancedSettings?.videoResolution?.dimensions
+            ?? VideoDimensions.initial
+
         let publisher = VonagePublisher(
             publisher: otPublisher,
-            transformerFactory: vonageTransformerFactory)
+            transformerFactory: vonageTransformerFactory,
+            initialDimensions: initialDimensions)
         otPublisher.delegate = publisher
         return publisher
     }

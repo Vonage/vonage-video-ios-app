@@ -2,6 +2,7 @@
 //  Created by Vonage on 29/7/25.
 //
 
+import Combine
 import Foundation
 import Testing
 import VERACommonUI
@@ -237,6 +238,32 @@ struct MeetingRoomViewModelTests {
         await delay()
 
         #expect(sut.currentCall == nil)
+    }
+
+    @Test
+    @MainActor
+    func externalButtonsUpdateRefreshesExtraButtons() async throws {
+        let externalButtonsUpdates = PassthroughSubject<Void, Never>()
+        var getExternalButtonsCallCount = 0
+        let sut = makeSUT(
+            externalButtonsUpdates: externalButtonsUpdates.eraseToAnyPublisher(),
+            getExternalButtons: {
+                getExternalButtonsCallCount += 1
+                return []
+            }
+        )
+
+        #expect(getExternalButtonsCallCount == 0)
+
+        await sut.loadUI()
+
+        let baselineCallCount = getExternalButtonsCallCount
+
+        externalButtonsUpdates.send(())
+
+        await delay()
+
+        #expect(getExternalButtonsCallCount == baselineCallCount + 1)
     }
 
     @Test
@@ -791,6 +818,309 @@ struct MeetingRoomViewModelTests {
         #expect(bobAfter.isPinned == true)
     }
 
+    // MARK: - Speaking While Muted Tests
+
+    @Test("Given mic is enabled and audio level is high, Then no warning toast is shown")
+    @MainActor
+    func noToastWhenMicIsOnAndAudioLevelIsHigh() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Mic is enabled (default is false in SessionState.initial) — enable it
+        mockCall._statePublisher.send(SessionState(isPublishingAudio: true, isPublishingVideo: false))
+
+        // Send loud audio samples
+        for _ in 0..<SpeakingWhileMutedDetector.triggerThreshold {
+            mockCall._publisherAudioLevel.send(0.8)
+        }
+
+        // Allow the Combine pipeline to flush
+        await Task.yield()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given mic is off and sustained loud audio, Then a warning toast appears")
+    @MainActor
+    func warningToastAppearsWhenMutedAndSustainedLoudAudio() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Mic is muted (SessionState.initial has isPublishingAudio == false by default)
+        // Send triggerThreshold loud audio samples to trigger detection
+        for _ in 0..<SpeakingWhileMutedDetector.triggerThreshold {
+            mockCall._publisherAudioLevel.send(0.8)
+        }
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .warning)
+    }
+
+    // MARK: - Archiving State Change Tests
+
+    @Test("Given archiving starts, Then an info toast with 'recording started' is shown")
+    @MainActor
+    func archivingStartedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._archivingState.send(.archiving("archive-123"))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given archiving stops, Then an info toast with 'recording stopped' is shown")
+    @MainActor
+    func archivingStoppedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // First start archiving, then stop it
+        mockCall._archivingState.send(.archiving("archive-123"))
+
+        // Wait for the first toast to appear
+        _ = await sut.$toast.values.first { $0 != nil }
+
+        // Reset toast to detect the next one
+        sut.toast = nil
+
+        mockCall._archivingState.send(.idle)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given archiving starts, Then isArchiving becomes true")
+    @MainActor
+    func archivingStartedUpdatesViewState() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let initialState = try await getContentState(sut)
+        #expect(initialState.archivingState == .idle)
+
+        mockCall._archivingState.send(.archiving("archive-456"))
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState != .idle }
+
+        #expect(updatedState?.archivingState == .archiving("archive-456"))
+    }
+
+    @Test("Given archiving stops after being active, Then archivingState returns to idle")
+    @MainActor
+    func archivingStoppedUpdatesViewState() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._archivingState.send(.archiving("archive-456"))
+
+        _ = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState != .idle }
+
+        mockCall._archivingState.send(.idle)
+
+        let updatedState = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.archivingState == .idle }
+
+        #expect(updatedState?.archivingState == .idle)
+    }
+
+    // MARK: - Session Event Tests
+
+    @Test("Given session begins reconnecting, Then a warning toast is shown")
+    @MainActor
+    func didBeginReconnectingShowsWarningToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.didBeginReconnecting)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .warning)
+    }
+
+    @Test("Given session reconnects, Then an info toast is shown")
+    @MainActor
+    func didReconnectShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.didReconnect)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .info)
+    }
+
+    @Test("Given a session error occurs, Then a failure toast with the error description is shown")
+    @MainActor
+    func sessionErrorShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let testError = NSError(
+            domain: "TestDomain", code: 42, userInfo: [NSLocalizedDescriptionKey: "Something broke"])
+        mockCall._eventsPublisher.send(.error(testError))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message == "Something broke")
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given a session failure occurs, Then a failure toast with the error description is shown")
+    @MainActor
+    func sessionFailureShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let testError = NSError(
+            domain: "TestDomain", code: 99, userInfo: [NSLocalizedDescriptionKey: "Session lost"])
+        mockCall._eventsPublisher.send(.sessionFailure(testError))
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message == "Session lost")
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given session disconnects unexpectedly, Then a failure toast is shown")
+    @MainActor
+    func disconnectedShowsFailureToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.disconnected)
+
+        let toast = await sut.$toast.values.first { $0 != nil }
+
+        #expect(toast??.message != nil)
+        #expect(toast??.mode == .failure)
+    }
+
+    @Test("Given session disconnects unexpectedly, Then disconnect use case is called after timeout")
+    @MainActor
+    func disconnectedSchedulesDisconnection() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+        let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
+
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            disconnectRoomUseCase: disconnectRoomUseCase
+        )
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.disconnected)
+
+        // Wait for toast to appear (confirms event was handled)
+        _ = await sut.$toast.values.first { $0 != nil }
+
+        // The disconnection is scheduled with a 6-second timeout.
+        // We verify it was scheduled by waiting slightly longer.
+        try await Task.sleep(for: .seconds(7))
+
+        #expect(disconnectRoomUseCase.recordedActions == [.disconnect])
+    }
+
+    @Test("Given an idle event, Then no toast is shown")
+    @MainActor
+    func idleEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.idle)
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given a connected event, Then no toast is shown")
+    @MainActor
+    func connectedEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        // Reset toast (loadUI may have triggered connected already)
+        sut.toast = nil
+
+        mockCall._eventsPublisher.send(.connected)
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("Given a streamReceived event, Then no toast is shown")
+    @MainActor
+    func streamReceivedEventDoesNotShowToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.streamReceived(streamId: "stream-1"))
+
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -807,6 +1137,8 @@ struct MeetingRoomViewModelTests {
         configuration: MeetingRoomConfiguration = MeetingRoomConfiguration(),
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource = makeMockNoiseSuppressionStatusDataSource(),
         pinnedParticipantsDataSource: PinnedParticipantsDataSource = DefaultPinnedParticipantsDataSource(),
+        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
+        getExternalButtons: @escaping () -> [BottomBarButton] = { [] },
         actionHandler: ActionHandler? = nil
     ) -> MeetingRoomViewModel {
         MeetingRoomViewModel(
@@ -820,7 +1152,8 @@ struct MeetingRoomViewModelTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: configuration,
             meetingRoomNavigation: MockMeetingRoomNavigation(actionHandler, roomName: roomName),
-            getExternalButtons: { _ in [] },
+            getExternalButtons: getExternalButtons,
+            externalButtonsUpdates: externalButtonsUpdates,
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
             pinnedParticipantsDataSource: pinnedParticipantsDataSource
         )

@@ -4,8 +4,10 @@
 
 import Foundation
 import Testing
+import VERAArchiving
 import VERABackgroundEffects
 import VERACommonUI
+import VERACore
 import VERADomain
 import VERAMeetingRoom
 
@@ -121,12 +123,33 @@ struct MeetingRoomBuilderTests {
         #expect(builder.currentTheme == nil)
     }
 
+    @Test("Builder defaults to real dependency factories")
+    func builderDefaultsToRealDependencyFactories() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentHTTPClientFactory is DefaultMeetingRoomHTTPClientFactory)
+        #expect(builder.currentSessionRepositoryFactory is DefaultMeetingRoomSessionRepositoryFactory)
+        #expect(
+            builder.currentArchivingDataSourceFactory is DefaultMeetingRoomArchivingDataSourceFactory)
+    }
+
+    @Test("Builder stores custom dependency factories")
+    func builderStoresCustomDependencyFactories() {
+        let builder = makeMeetingRoomBuilder()
+            .httpClientFactory(HTTPClientFactoryStub())
+            .sessionRepositoryFactory(SessionRepositoryFactoryStub())
+            .archivingDataSourceFactory(ArchivingDataSourceFactoryStub())
+
+        #expect(builder.currentHTTPClientFactory is HTTPClientFactoryStub)
+        #expect(builder.currentSessionRepositoryFactory is SessionRepositoryFactoryStub)
+        #expect(builder.currentArchivingDataSourceFactory is ArchivingDataSourceFactoryStub)
+    }
+
     @Test("Builder can set all features at once")
     func builderCanSetAllFeatures() {
         let allFeatures = Set(MeetingRoomFeature.allCases)
         let builder = makeMeetingRoomBuilder()
             .enabledFeatures(allFeatures)
-        #expect(builder.currentEnabledFeatures.count == 9)
+        #expect(builder.currentEnabledFeatures.count == 10)
     }
 
     @Test("Overwriting enabled features replaces the set")
@@ -142,5 +165,64 @@ struct MeetingRoomBuilderTests {
         testRoomName: String = "test-room"
     ) -> MeetingRoomBuilder {
         MeetingRoomBuilder(baseURL: testBaseURL, roomName: testRoomName)
+    }
+}
+
+private final class HTTPClientFactoryStub: MeetingRoomHTTPClientFactory {
+    func callAsFunction(_ context: HTTPClientContext) -> any HTTPClient {
+        HTTPClientStub()
+    }
+}
+
+private final class HTTPClientStub: HTTPClient {
+
+    func get(_ url: URL) async throws -> Data {
+        Data()
+    }
+
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
+        Data()
+    }
+}
+
+private final class SessionRepositoryFactoryStub: MeetingRoomSessionRepositoryFactory {
+    func callAsFunction(
+        _ context: MeetingRoomSessionRepositoryFactoryContext
+    ) -> any SessionRepository {
+        SessionRepositoryStub()
+    }
+}
+
+private final class ArchivingDataSourceFactoryStub:
+    MeetingRoomArchivingDataSourceFactory
+{
+    func callAsFunction(
+        _ context: MeetingRoomArchivingDataSourceFactoryContext
+    ) -> any ArchivingDataSource {
+        ArchivingDataSourceStub()
+    }
+}
+
+private final class SessionRepositoryStub: SessionRepository {
+    var currentCall: (any CallFacade)?
+
+    func createSession(_ credentials: RoomCredentials) async throws -> any CallFacade {
+        fatalError("Not used")
+    }
+
+    func clearSession() {}
+}
+
+private final class ArchivingDataSourceStub: ArchivingDataSource {
+    func startArchiving(
+        _ request: StartArchivingDataSourceRequest
+    ) async throws -> StartArchivingDataSourceResponse {
+        fatalError("Not used")
+    }
+
+    func stopArchiving(
+        _ request: StopArchivingDataSourceRequest
+    ) async throws -> StopArchivingDataSourceResponse {
+        fatalError("Not used")
     }
 }

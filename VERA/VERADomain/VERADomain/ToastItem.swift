@@ -6,6 +6,16 @@ import Foundation
 
 public enum ToastMode {
     case warning, info, failure, success
+
+    /// A stable string used for accessibility identifiers.
+    public var accessibilityName: String {
+        switch self {
+        case .warning: "warning"
+        case .info: "info"
+        case .failure: "failure"
+        case .success: "success"
+        }
+    }
 }
 
 public struct ToastItem: Equatable {

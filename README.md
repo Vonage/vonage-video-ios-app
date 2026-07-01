@@ -8,18 +8,16 @@ If you're new to Vonage, you can [sign up for a Vonage API account](https://dash
 
 ## What is it?
 
-The Vonage Video API Reference App for iOS is an open-source video conferencing reference application for the [Vonage Video API](https://developer.vonage.com/en/video/client-sdks/web/overview) using the iOS SDK.
-
-The Reference App demonstrates the best practices for integrating the [Vonage Video API](https://developer.vonage.com/en/video/client-sdks/web/overview) with your application for various use cases, from one-to-one and multi-participant video calling to CallKit integration and more.
+The Vonage Video API Reference App for iOS is an open-source video conferencing reference application built with the [Vonage Video API](https://developer.vonage.com/en/video/client-sdks/web/overview) and iOS SDK. It demonstrates best practices for integrating the Vonage Video API for use cases ranging from one-to-one calls to multi-participant conferencing with CallKit, screen sharing, captions, and more.
 
 ## Cross-Platform Support
 
-Looking to build on other platforms? The Vonage Video API Reference App is also available for:
+The reference app is also available for:
 
 - **Web (React)**: [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app)
 - **Android**: [vonage-video-android-app](https://github.com/Vonage/vonage-video-android-app)
 
-These reference apps share the same backend infrastructure and demonstrate consistent best practices across all platforms, making it easy to build unified video experiences for your users.
+All three share the same backend infrastructure and demonstrate consistent best practices across platforms.
 
 ## Why use it?
 The Vonage Video API Reference App for iOS provides developers an easy-to-set-up way to get started with using our APIs with the iOS SDK.
@@ -65,7 +63,7 @@ This application provides features for common conferencing use cases, such as:
 
 - Start, stop and download cloud-based session recording directly from the app.
 
-- Apply a real-time background blur effect to the local video stream during a call.
+- Apply real-time background effects to the local video stream, including background blur and background replacement.
 
 - <details>
   <summary>Display live captions for enhanced accessibility.</summary>
@@ -85,336 +83,57 @@ This application provides features for common conferencing use cases, such as:
 
 - Screen sharing, enabling participants to broadcast their device screen into a Vonage video call using Apple's ReplayKit framework.
 
+- In-call chat, allowing participants to exchange text messages during the video session.
 
-## Project Architecture
+- Settings controls, allowing participants to preconfigure publisher options in the waiting room and adjust video resolution, codec preferences, publisher settings, and call statistics during the meeting.
 
-This reference app requires the user to deploy a backend and then use the backend API URL as the base URL in the <em>DependencyContainer.swift</em> file of the VERAApp module. You can find backend code and deploying instructions in the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app) repository.
+- Advanced noise suppression, helping reduce background noise from the local microphone during a call.
 
-The backend communicates with the Vonage video platform using the Vonage Server SDK and is responsible for generating the session IDs and tokens used to connect to the video rooms by the Vonage Client SDK.
+- Audio route selection, allowing users to switch the call audio output between available routes such as speaker, Bluetooth, or other system-supported devices.
 
-## Module Overview
 
-The Vonage iOS reference app is built with a modular architecture. The app is organized into the following frameworks:
+## Platforms & Requirements
 
+| Requirement | Version |
+|---|---|
+| iOS deployment target | 16.0+ |
+| Xcode | 26 |
+| Tuist | latest |
+| SwiftLint | latest |
+| SwiftFormat (swift-format) | latest |
+| Git LFS | any |
+| Java | 17 (Maestro E2E only) |
 
-- **VERAApp**: Main application target and composition root
-- **VERACore**: UI and business logic of the main views
-- **VERAChat**: Meeting room chat
-- **VERAVonageChatPlugin**: Adapts the chat to the plugin interfaces
-- **VERAVonageCallKitPlugin**: CallKit adapter plugin
-- **VERADomain**: Shared domain models and entities
-- **VERAConfiguration**: Holds the app configuration specification
-- **VERACommonUI**: Shared UI components and resources
-- **VERAVonage**: Vonage Video SDK integration
+Core framework modules also target **macOS 14.6+** to enable fast unit-test runs without a simulator.
 
-## Platforms supported
+This app has been tested with **Vonage Video SDK 2.32** and **2.33**. Use the latest available SDK version where possible.
 
-The current minimum deployment target for the reference app is iOS 16+. Some of the mentioned modules are universal, which allows fast testing against macOS targets and platform reusability. For this last point it would be required to adapt the non universal modules to the desired platform.
+## Documentation
 
-### Vonage Video SDK Compatibility
+| Guide | Description |
+|---|---|
+| [Getting Started](docs/GETTING_STARTED.md) | Prerequisites, environment setup, and first run |
+| [Architecture](docs/ARCHITECTURE.md) | Project architecture, module overview, Clean Architecture layers, DI, and key patterns |
+| [Configuration](docs/CONFIGURATION.md) | Feature flags, theme tokens, signing, and SDK version |
+| [Testing](docs/TESTING.md) | Unit, snapshot, and Maestro E2E tests |
+| [Localization](docs/LOCALIZATION.md) | Adding languages and working with String Catalogs |
+| [Code Style](docs/CODE_STYLE.md) | SwiftLint, swift-format, and style guidelines |
+| [Contributing](docs/CONTRIBUTING.md) | How to open issues, submit PRs, and branching conventions |
+| [Known Issues](docs/KNOWN_ISSUES.md) | Current known issues and workarounds |
 
-This reference app has been tested with **Vonage Video SDK 2.32** and **2.33**. We strongly recommend using the latest available SDK version to take advantage of the newest features and avoid potential issues with older, untested releases.
+## Contributing
 
-The SDK version is declared in the Tuist package dependencies file (`VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift`) and can be adjusted there if needed.
+Read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) before opening a pull request. In short: open an issue first for anything beyond a minor bug fix, keep PRs small and focused, and ensure CI passes.
 
-## Requirements
-
-- **Xcode 26**
-- **Tuist**
-- **SwiftLint**
-- **SwiftFormat**
-- **Git LFS**
-- **Java 17** (required for Maestro UI testing)
-
-## Running Locally
-
-First follow the steps to create the Vonage account, application and backend set up and deployment at the [vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app?tab=readme-ov-file#running-locally) URL.
-
-Make sure you have all the required dependencies installed on your computer, or install them:
-
-`brew install swiftlint`
-`brew install swiftformat`
-`brew install --formula tuist`
-`brew install git-lfs`
-
-After cloning the repository pull the large files by executing `git lfs pull` in the command line inside the repository folder.
-
-
-After that specify the `DEVELOPMENT_TEAM`, `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION` and `BASE_API_URL` by exporting the following environment variables and then running `generateEnvironmentConstants.sh` and `regenerateSigningConfig.sh` from within the `{SRC_ROOT}/VERA` folder.
-
-You can find the `DEVELOPMENT_TEAM` ID in the top right corner of the `Certificates, Identifiers & Profiles` page from your Apple developer account.
-
-```
-export BASE_API_URL=https://api.example.net/
-export DEVELOPMENT_TEAM=AB0C12DE34
-export MARKETING_VERSION=1.1
-export CURRENT_PROJECT_VERSION=1
-```
-
-Then run:
-
-```
-./Scripts/generateEnvironmentConstants.sh
-./Scripts/regenerateSigningConfig.sh
-```
-
-Once you have [Tuist](https://docs.tuist.dev/en/guides/quick-start/install-tuist) installed, generate a new XCWorkspace by executing `tuist generate` from within the VERA folder.
-
-Tuist will generate and launch a new Xcode workspace based on the <em>Project.swift</em> definitions. Every module has one <em>Project.swift</em> file where all the targets, SPM dependencies and project details are declared using the Tuist DSL. This unlocks dynamic project generation based on configuration files, simplified merging conflict resolution and some other nice features.
-
-Run the VERA app target in Xcode.
-
-*If you find that Xcode caches an Xcode workspace you can reset the tuist cache by executing
-
-```bash
-tuist clean
-```
-
-*To edit the Tuist DSL `project.swift` files easily run:
-
-```bash
-tuist edit
-```
-
-## Feature configuration
-
-You can fork the repository and start modifying it for your needs. Or you also can modify the <em>app-config.json</em> file of the VERA/Config folder and then run the VERA/Scripts/generate-app-config.py python script. This will generate a Swift file with all the flags to customize the features of the app. 
-
-Note that some of the features declared in the JSON file are not yet implemented.
-
-Once the <em>app-config.json</em> is configured the <em>Tuist generate</em> command will read the json file and configure the project by only adding the required modules.
-
-## Theme customization
-
-You can customize the app colors by editing the <em>semantics.json</em> file light and dark color scheme values and then by executing the <em>generate-app-theme.py</em> Script in the VERA/Scripts folder. This will generate the xcasset resources with the specified RGB values in the <em>VERACommonUI</em> module.
-
-## Multi-Language Support
-
-The app is fully prepared for internationalization using Xcode's **String Catalogs** (`.xcstrings`). All user-facing strings are localized through this mechanism, making it straightforward to add support for new languages.
-
-### Adding a new language
-
-1. Open the root `Project.swift` and add the desired locale code to the `defaultKnownRegions` property:
-
-    ```swift
-    defaultKnownRegions: ["en", "es", /* add new locale here */]
-    ```
-
-2. Build the project. Because the `SWIFT_EMIT_LOC_STRINGS` build flag is enabled across all modules, each String Catalog is **automatically updated** during compilation with any new localizable strings.
-
-3. Open the generated `.xcstrings` catalog and provide translations for the new locale.
-
-> **Note:** Since `SWIFT_EMIT_LOC_STRINGS` is active, you don't need to manually register new strings — the build system detects them and keeps the catalogs in sync automatically.
-
-## Testing
-
-### Unit, Integration & Snapshot Tests
-
-This project uses the <em>Swift Testing</em> framework for the unit, integration and snapshot tests. 
-
-Tuist will generate the testing schemes for all the modules, then for testing you could execute the tests by running the <em>tuist test</em> command or by executing them with `⌘U` in the selected testing target in Xcode.
-
-You can also edit the snapshot test images by recording new screenshots in the snapshot testing files.
-
-### E2E Testing with Maestro
-
-VERA uses [Maestro](https://maestro.mobile.dev) for end-to-end UI testing. Tests are YAML-based and interact with the app through accessibility identifiers.
-
-#### Installation
-
-Use the provided install script (installs Maestro CLI + Java 17):
-
-```bash
-./scripts/install-maestro.sh
-```
-
-#### Folder Structure
-
-```
-.maestro/
-├── config.yaml          # Global configuration (appId, simulator device)
-└── flows/               # Test flows (YAML files)
-    └── launch-app.yaml  # P0: Launch app and validate landing screen
-```
-
-Test flows follow the naming convention `XX-feature-name-e2e.yaml` where `XX` is a sequential number.
-
-#### Running Tests
-
-```bash
-# Run all tests (cleans DerivedData, builds, boots simulator, runs flows)
-./scripts/run-maestro-tests.sh
-
-# Run a single flow by name
-./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml
-
-# Run a single flow by path
-./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml
-
-# Run with a specific simulator
-SIMULATOR_DEVICE="iPhone 17 Pro" ./scripts/run-maestro-tests.sh
-
-# Run a single flow directly with Maestro CLI (skips build)
-maestro test .maestro/flows/launch-app.yaml
-```
-
-#### Writing Tests with Accessibility IDs
-
-Tests target elements using accessibility identifiers. See the full ID reference in [`.github/instructions/e2e-maestro.instructions.md`](.github/instructions/e2e-maestro.instructions.md).
-
-##### Example 1: Validate the landing screen
-
-```yaml
-appId: com.vonage.VERA
----
-# E2E Test: Launch App
-# Priority: P0
-
-- launchApp:
-    clearState: true
-
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "landing-screen"
-
-- takeScreenshot: landing-screen
-```
-
-##### Example 2: Complete meeting flow
-
-```yaml
-appId: com.vonage.VERA
----
-# E2E Test: Create Room → Join → Leave → Goodbye
-# Priority: P0
-
-- launchApp:
-    clearState: true
-- waitForAnimationToEnd:
-    timeout: 5000
-- assertVisible:
-    id: "landing-screen"
-
-- tapOn:
-    id: "landing-create-room-button"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "waiting-room-screen"
-- tapOn:
-    id: "waiting-room-name-field"
-- inputText: "Test User"
-- hideKeyboard
-
-- tapOn:
-    id: "waiting-room-join-button"
-- extendedWaitUntil:
-    visible:
-        id: "meeting-room-screen"
-    timeout: 15000
-
-- tapOn:
-    id: "meeting-room-leave-button"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "goodbye-screen"
-- takeScreenshot: goodbye-screen
-```
-
-#### Adding Accessibility IDs in SwiftUI
-
-For Maestro to find elements, accessibility identifiers must be applied correctly:
-
-##### Screen anchors (invisible element inside a ZStack)
-
-```swift
-public var body: some View {
-    ZStack {
-        // Accessibility anchor for Maestro E2E tests
-        Color.clear
-            .frame(width: 1, height: 1)
-            .accessibilityElement()
-            .accessibilityIdentifier("landing-screen")
-
-        // Your actual content
-        Group { ... }
-    }
-}
-```
-
-##### Buttons (pass `accessibilityID` parameter)
-
-```swift
-// Button component with accessibilityID support
-public struct FilledButton: View {
-    public let text: Text
-    public let accessibilityID: String?
-    public let onAction: () -> Void
-
-    public var body: some View {
-        Button { onAction() } label: { text }
-            .if(accessibilityID != nil) { view in
-                view.accessibilityIdentifier(accessibilityID!)
-            }
-    }
-}
-
-// Usage
-FilledButton(
-    text: Text("Join meeting"),
-    accessibilityID: "waiting-room-join-button",
-    onAction: onJoinRoom
-)
-```
-
-##### Text fields (apply directly to the TextField)
-
-```swift
-TextField("", text: $userName)
-    .accessibilityIdentifier("waiting-room-name-field")
-```
-
-> **Important:** Do not apply `.accessibilityIdentifier()` to container views (`Group`, `VStack`, `NavigationView`) — Maestro won't find them. Use the invisible anchor pattern for screens and apply IDs directly to interactive elements.
-
-#### Useful Links
-
-- [Maestro Documentation](https://maestro.mobile.dev)
-- [Maestro CLI Commands](https://maestro.mobile.dev/api-reference/commands)
-- [Maestro Studio (interactive recorder)](https://maestro.mobile.dev/getting-started/maestro-studio)
-
-## Code style
-
-We use Swift Lint to format and fix the code linting. Check if the code follows the linting rules by running the <em>./Scripts/format.sh</em> or <em>./Scripts/format.sh --fix</em> for fixing the formatting in the command line.
-
-## Code of Conduct
-
-Please read our [Code of Conduct](CODE_OF_CONDUCT.md).
-
-## Getting Involved
-
-If you wish to contribute to this project, read how in [Contributing](./docs/CONTRIBUTING.md).
-
-## Known Issues
-
-We track known issues in [Known Issues](./docs/KNOWN_ISSUES.md). Please refer to it for details.
-
-## Report Issues
-
-If you have any issues, feel free to open an issue or reach out to support via [support@api.vonage.com](support@api.vonage.com).
+Please also read our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Getting Help
 
-We love to hear from you so if you have questions, comments or find a bug in the project, let us know! You can either:
-
-* Open an issue on this repository
-* Tweet at us! We're [@VonageDev on Twitter](https://twitter.com/VonageDev)
-* Or [join the Vonage Developer Community Slack](https://developer.vonage.com/community/slack)
+- Open an issue on this repository
+- Tweet at us: [@VonageDev on Twitter](https://twitter.com/VonageDev)
+- [Join the Vonage Developer Community Slack](https://developer.vonage.com/community/slack)
+- Email support: [support@api.vonage.com](mailto:support@api.vonage.com)
 
 ## Further Reading
 
-* Check out the Developer Documentation at <https://developer.vonage.com>
+- Developer documentation: <https://developer.vonage.com>

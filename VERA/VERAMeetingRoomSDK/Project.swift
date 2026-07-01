@@ -26,6 +26,7 @@ let project = Project(
                 .project(target: "VERACore", path: "../VERACore"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
                 // Always-included plugins
                 .project(target: "VERAVonageCallKitPlugin", path: "../VERAVonageCallKitPlugin"),
                 // Feature modules
@@ -43,6 +44,7 @@ let project = Project(
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
                 .project(target: "VERAVonageScreenSharePlugin", path: "../VERAVonageScreenSharePlugin"),
                 .project(target: "VERAAudioEffects", path: "../VERAAudioEffects"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
                 .vonageVideoTransformersSDK,
             ],
             settings: createBaseBuildSettings()
@@ -87,6 +89,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
+                .project(target: "VERAFeedback", path: "../VERAFeedback"),
             ],
             settings: createBaseBuildSettings()
         ),

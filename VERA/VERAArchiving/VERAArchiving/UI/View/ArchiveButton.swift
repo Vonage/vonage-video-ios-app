@@ -21,15 +21,10 @@ struct ArchiveButton: View {
     var body: some View {
         OngoingActivityControlImageButton(
             isActive: state.isArchiving,
-            image: state.isArchiving
-                ? VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage
-                : VERACommonUIAsset.Images.radioChecked2Solid.swiftUIImage,
+            image: state.bottomBarImage,
             action: action
         )
-        .accessibilityIdentifier(
-            state.isArchiving
-                ? ArchivingAccessibilityID.stopRecordingButton
-                : ArchivingAccessibilityID.startRecordingButton)
+        .accessibilityIdentifier(state.bottomBarAccessibilityIdentifier)
     }
 }
 

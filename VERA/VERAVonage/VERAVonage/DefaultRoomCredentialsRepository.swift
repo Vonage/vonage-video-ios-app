@@ -27,7 +27,6 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
     private let jsonDecoder: JSONDecoder
     private let jsonEncoder: JSONEncoder
     private let baseURL: URL
-    private var cache: [String: RoomCredentialsResponse] = [:]
 
     public init(
         baseURL: URL,
@@ -42,9 +41,6 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
     }
 
     public func getRoomCredentials(_ request: RoomCredentialsRequest) async throws -> RoomCredentialsResponse {
-        if let cached = cache[request.roomName] {
-            return cached
-        }
 
         let createBody = try jsonEncoder.encode(CreateSessionRequestBody(roomName: request.roomName))
         let createData = try await httpClient.post(
@@ -66,8 +62,6 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
             token: joinResponse.result.data.token,
             apiKey: createResponse.result.data.applicationId,
             sessionKey: createResponse.result.data.sessionKey)
-
-        cache[request.roomName] = credentials
 
         return credentials
     }

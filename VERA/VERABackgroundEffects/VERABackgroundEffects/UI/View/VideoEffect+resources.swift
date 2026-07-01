@@ -14,7 +14,7 @@ extension VideoEffect {
         case .none: VERACommonUIAsset.Images.removeLine.swiftUIImage
         case .blurLow: VERACommonUIAsset.Images.blurLine.swiftUIImage
         case .blurHigh: VERACommonUIAsset.Images.blurSolid.swiftUIImage
-        case .backgroundImage: VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
+        case .backgroundImage: VERACommonUIAsset.Images.gallerySolid.swiftUIImage
         }
     }
 

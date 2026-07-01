@@ -60,13 +60,13 @@ public final class ArchiveButtonViewModel: ObservableObject {
                 message:
                     String(
                         localized: "start.recording.message",
-                        bundle: .veraArchiving),
-                onConfirm: { [weak self] in
-                    Task { @MainActor in
-                        await self?.startArchiving()
-                    }
+                        bundle: .veraArchiving)
+            ) { [weak self] in
+                Task { @MainActor in
+                    await self?.startArchiving()
                 }
-            ))
+            }
+        )
     }
 
     private func showStopRecordingConfirmation(archiveID: String) {
@@ -75,13 +75,13 @@ public final class ArchiveButtonViewModel: ObservableObject {
                 title:
                     String(localized: "Stop Recording?", bundle: .veraArchiving),
                 message:
-                    String(localized: "stop.recording.message", bundle: .veraArchiving),
-                onConfirm: { [weak self] in
-                    Task { @MainActor in
-                        await self?.stopArchiving(withID: archiveID)
-                    }
+                    String(localized: "stop.recording.message", bundle: .veraArchiving)
+            ) { [weak self] in
+                Task { @MainActor in
+                    await self?.stopArchiving(withID: archiveID)
                 }
-            ))
+            }
+        )
     }
 
     @MainActor
