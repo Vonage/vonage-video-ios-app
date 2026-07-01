@@ -62,18 +62,23 @@ struct MeetingRoomCustomizationButtonPresenter: BottomItemPresentable {
     func performAction() {}
 }
 
+@MainActor
 final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIProvider {
     @Published private(set) var items: [MeetingRoomCustomizationButtonItem] = []
     @Published private(set) var isCustomBottomBarEnabled = false
 
     private let updatesSubject = PassthroughSubject<Void, Never>()
+    private let updatesPublisher: AnyPublisher<Void, Never>
     private var nextButtonNumber = 1
 
-    var updates: AnyPublisher<Void, Never> {
-        updatesSubject.eraseToAnyPublisher()
+    nonisolated var updates: AnyPublisher<Void, Never> {
+        updatesPublisher
     }
 
-    @MainActor
+    init() {
+        updatesPublisher = updatesSubject.eraseToAnyPublisher()
+    }
+
     func bottomBarButtons() -> [BottomBarButton] {
         items.map { item in
             let presenter = MeetingRoomCustomizationButtonPresenter(item: item)
@@ -92,39 +97,32 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         }
     }
 
-    @MainActor
     func bottomBarContent(context: MeetingRoomBottomBarContext) -> AnyView? {
         guard isCustomBottomBarEnabled else { return nil }
 
         return AnyView(MeetingRoomCustomizationBottomBar(context: context))
     }
 
-    @MainActor
     func addButton() {
         addToggleButton()
     }
 
-    @MainActor
     func addToggleButton() {
         addButton(kind: .toggle)
     }
 
-    @MainActor
     func addDialogButton() {
         addButton(kind: .dialog)
     }
 
-    @MainActor
     func addOverlayButton() {
         addButton(kind: .overlay)
     }
 
-    @MainActor
     func addSheetButton() {
         addButton(kind: .sheet)
     }
 
-    @MainActor
     private func addButton(kind: MeetingRoomCustomizationButtonKind) {
         useSDKBottomBar()
 
@@ -139,7 +137,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     func removeLastButton() {
         guard !items.isEmpty else { return }
 
@@ -148,7 +145,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     func clearButtons() {
         guard !items.isEmpty else { return }
 
@@ -157,7 +153,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     func handleButtonAction(id: String) {
         guard let index = items.firstIndex(where: { $0.id == id }) else { return }
 
@@ -170,7 +165,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     func dismissPresentation(sourceButtonId: String) {
         guard let index = items.firstIndex(where: { $0.id == sourceButtonId }),
             items[index].isActive
@@ -180,7 +174,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     func setCustomBottomBarEnabled(_ isEnabled: Bool) {
         guard isCustomBottomBarEnabled != isEnabled else { return }
 
@@ -188,12 +181,10 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         updatesSubject.send()
     }
 
-    @MainActor
     private func useSDKBottomBar() {
         isCustomBottomBarEnabled = false
     }
 
-    @MainActor
     private func presentationRequest(for id: String) -> MeetingRoomPresentationRequest? {
         guard let item = items.first(where: { $0.id == id }) else { return nil }
 
@@ -209,7 +200,6 @@ final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIPro
         }
     }
 
-    @MainActor
     private func makePresentationRequest(
         for item: MeetingRoomCustomizationButtonItem,
         style: MeetingRoomPresentationRequest.Style
