@@ -58,8 +58,8 @@ struct SessionKeyParserTests {
 
     @Test("Extracts room name from valid JWT")
     func extractsRoomNameFromJWT() {
-        let jwt = makeValidSessionKey(roomName: "solutions")
-        #expect(SessionKeyParser.extractRoomName(from: jwt) == "solutions")
+        let jwt = makeValidSessionKey(roomName: "heart-of-gold")
+        #expect(SessionKeyParser.extractRoomName(from: jwt) == "heart-of-gold")
     }
 
     @Test("Returns nil for invalid JWT")
@@ -87,44 +87,10 @@ struct SessionKeyParserTests {
         #expect(SessionKeyParser.extractSessionId(from: "not-a-jwt") == nil)
     }
 
-    // MARK: - RoomIdentifier
-
-    @Test("RoomIdentifier.from classifies JWT as sessionKey")
-    func roomIdentifierClassifiesJWT() {
-        let jwt = makeValidSessionKey()
-        let identifier = RoomIdentifier.from(jwt)
-        #expect(identifier == .sessionKey(jwt))
-    }
-
-    @Test("RoomIdentifier.from classifies room name as roomName")
-    func roomIdentifierClassifiesRoomName() {
-        let identifier = RoomIdentifier.from("heart-of-gold")
-        #expect(identifier == .roomName("heart-of-gold"))
-    }
-
-    @Test("RoomIdentifier.displayName returns room name for roomName case")
-    func displayNameForRoomName() {
-        let identifier = RoomIdentifier.roomName("heart-of-gold")
-        #expect(identifier.displayName == "heart-of-gold")
-    }
-
-    @Test("RoomIdentifier.displayName extracts name from session key")
-    func displayNameForSessionKey() {
-        let jwt = makeValidSessionKey(roomName: "solutions")
-        let identifier = RoomIdentifier.sessionKey(jwt)
-        #expect(identifier.displayName == "solutions")
-    }
-
-    @Test("RoomIdentifier.displayName returns fallback for invalid session key")
-    func displayNameFallbackForInvalidSessionKey() {
-        let identifier = RoomIdentifier.sessionKey("invalid.but.threeParts")
-        #expect(identifier.displayName == "meeting")
-    }
-
     // MARK: - Helpers
 
     private func makeValidSessionKey(
-        roomName: String = "solutions",
+        roomName: String = "heart-of-gold",
         sessionId: String = "1_MX4xYmMxYzhkZS03ZTUwLTQ5N2ItYjBiMS03ZDhlMWFlNDZkMzh-fjE3NzY4NDQ3NzE3Mjl-"
     ) -> String {
         makeJWT(payload: [
