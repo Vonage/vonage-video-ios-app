@@ -1,0 +1,31 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_9d51cd27e66458::t_e0efeca6176af9 441
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_9d51cd27e66458::t_6291b9533f1e1a 40,154,172
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/PictureInPicture/PictureInPictureBinder.swift
+  s_9d51cd27e66458::t_37a5963057f66e 10,14,18,20
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureParticipantSelector.swift
+  s_9d51cd27e66458::t_84446a14c188db 1-129
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureRenderRouter.swift
+  s_9d51cd27e66458::t_b0daf4681e166e 1-130
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_9d51cd27e66458::t_a982d6ab9357cd 15,17-21,23,30-31,89-92,118,141,154,173,194,223-224,226,241,248-249,256,262,268,273-276,292,296,316,320,322,324,349,352-358,363,371,373,379,390-399,408-409,418
+VERA/VERAVonage/VERAVonageTests/PictureInPictureSessionOrchestratorTests.swift
+  s_9d51cd27e66458::t_4ed6fc5a63cbe2 15,17,23,34,45,57,67,79,91,103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "3cbfb34d34d17ef47f347c08049f8e7f88e1067c",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

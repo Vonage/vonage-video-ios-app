@@ -1,0 +1,24 @@
+sonar-project.properties
+  s_e33af213fb3c6b::t_6532f68cf4f9ac 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "12884c5b66856570be961aa817637aa9c7289d8e",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_e33af213fb3c6b": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "432bbc4f-7adc-4364-806a-7108759e1a38",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
