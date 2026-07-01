@@ -246,7 +246,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
 
         let targetId = participantSelector.pipTargetId(for: state)
-        let targetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
+        let targetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(
+            participantId: targetId, in: state)
 
         if targetId == currentPipTargetId {
             let cameraWasEnabled = pipTargetCameraEnabled
@@ -313,7 +314,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
 
         let cameraWasEnabled = pipTargetCameraEnabled
-        let cameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: currentPipTargetId, in: state)
+        let cameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(
+            participantId: currentPipTargetId, in: state)
         pipTargetCameraEnabled = cameraEnabled
 
         if cameraWasEnabled, !cameraEnabled {
