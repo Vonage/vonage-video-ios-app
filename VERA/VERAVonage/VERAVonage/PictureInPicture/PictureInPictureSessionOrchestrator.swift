@@ -12,29 +12,23 @@ import VERADomain
 /// Coordinates Picture-in-Picture for an active Vonage call.
 ///
 /// iOS PiP is anchored to an already-mounted `activeVideoCallSourceView`, not to a separate
-/// background-only screen like Android's PiP UI-mode flow. The manager therefore attaches the
+/// background-only screen like Android's PiP UI-mode flow. The orchestrator therefore attaches the
 /// shared PiP renderer to the participant tile that is already visible in the meeting room before
-/// the app backgrounds. Preview renderers keep tiles alive when the shared renderer moves to a new
-/// active speaker because OpenTok's default views do not reliably recover after `videoRender` has
-/// been replaced.
+/// the app backgrounds.
+///
+/// It owns the AVKit source-view lifecycle and the published UI state, and delegates the two other
+/// concerns: ``PictureInPictureParticipantSelector`` decides *which* participant to follow, and
+/// ``PictureInPictureRenderRouter`` moves the renderers so tiles stay alive as the target changes.
 @MainActor
-public final class PictureInPictureManager: ObservableObject {
+public final class PictureInPictureSessionOrchestrator: ObservableObject {
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
 
     @Published public private(set) var isInPictureInPicture = false
     @Published public private(set) var canStartPictureInPicture = false
     @Published public private(set) var pipTargetParticipantId: String?
 
-    let videoRenderer = PictureInPictureVideoRenderer()
-
-    /// Dedicated renderer that keeps the local tile alive when the publisher stops being the PiP
-    /// target (the shared `videoRenderer` moves to the remote target in that case).
-    private let publisherPreviewRenderer = PictureInPictureVideoRenderer()
-
-    /// Per-remote renderers that keep each remote tile alive after the shared `videoRenderer` moves
-    /// to another participant (active-speaker switching). Like the publisher, an `OTSubscriber`'s
-    /// default view cannot be revived after a custom `videoRender` was attached.
-    private var subscriberPreviewRenderers: [String: PictureInPictureVideoRenderer] = [:]
+    private let participantSelector = PictureInPictureParticipantSelector()
+    private let renderRouter = PictureInPictureRenderRouter()
 
     /// Timestamp of the last in-PiP active-speaker retarget, used to debounce rapid switching when
     /// multiple participants talk over each other.
@@ -52,7 +46,6 @@ public final class PictureInPictureManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
     private var currentPipTargetId: String?
-    private var stickyPipTargetId: String?
     private var pipTargetCameraEnabled = false
     private var wantsPictureInPicture = false
     private var cachedInlineView: AnyView?
@@ -93,7 +86,10 @@ public final class PictureInPictureManager: ObservableObject {
             // PiP target/placeholder changes (participant set, camera states, active speaker, local
             // camera). Without this, every audio-level emission spawns a @MainActor task and these
             // pile up faster than they drain, starving the main actor (frozen video, dead buttons).
-            .removeDuplicates { Self.pipSignature(for: $0) == Self.pipSignature(for: $1) }
+            .removeDuplicates {
+                PictureInPictureParticipantSelector.signature(for: $0)
+                    == PictureInPictureParticipantSelector.signature(for: $1)
+            }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 Task { @MainActor [weak self] in
@@ -119,7 +115,7 @@ public final class PictureInPictureManager: ObservableObject {
 
         let inlineView = AnyView(
             PictureInPictureInlineVideoView(
-                renderer: videoRenderer,
+                renderer: renderRouter.videoRenderer,
                 configurationToken: pipConfigurationToken
             ) { [weak self] view, frame in
                 self?.configurePictureInPicture(sourceView: view, videoFrame: frame)
@@ -142,7 +138,7 @@ public final class PictureInPictureManager: ObservableObject {
         do {
             try pipController.configureIfNeeded(
                 with: sourceView,
-                videoRenderer: videoRenderer,
+                videoRenderer: renderRouter.videoRenderer,
                 videoFrame: videoFrame
             )
             lastConfiguredSourceView = sourceView
@@ -155,7 +151,7 @@ public final class PictureInPictureManager: ObservableObject {
                 tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else if pipController.isConfigured,
                 pipTargetCameraEnabled,
-                wantsPictureInPicture || videoRenderer.renderedFrameCount > 0
+                wantsPictureInPicture || renderRouter.videoRenderer.renderedFrameCount > 0
             {
                 tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else {
@@ -174,7 +170,7 @@ public final class PictureInPictureManager: ObservableObject {
         do {
             try pipController.reconfigure(
                 with: sourceView,
-                videoRenderer: videoRenderer,
+                videoRenderer: renderRouter.videoRenderer,
                 videoFrame: videoFrame
             )
             lastConfiguredSourceView = sourceView
@@ -195,7 +191,7 @@ public final class PictureInPictureManager: ObservableObject {
         do {
             try pipController.reconfigure(
                 with: pendingSourceView,
-                videoRenderer: videoRenderer,
+                videoRenderer: renderRouter.videoRenderer,
                 videoFrame: pendingVideoFrame
             )
             lastConfiguredSourceView = pendingSourceView
@@ -223,16 +219,13 @@ public final class PictureInPictureManager: ObservableObject {
 
     public func tearDown() {
         cancellables.removeAll()
-        videoRenderer.stopPlaceholder()
-        subscriberPreviewRenderers.removeAll()
         lastInPipRetargetAt = nil
-        if let currentPipTargetId, call?.publisher.id == currentPipTargetId {
-            call?.publisher.restoreDefaultVideoView()
-        }
+        renderRouter.restorePublisherIfTarget(currentPipTargetId, call: call)
+        renderRouter.reset()
         pipController.tearDown()
+        participantSelector.reset()
         call = nil
         currentPipTargetId = nil
-        stickyPipTargetId = nil
         pipTargetCameraEnabled = false
         isInPictureInPicture = false
         canStartPictureInPicture = false
@@ -245,39 +238,42 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     private func updatePipTarget(for state: ParticipantsState) async {
-        pruneSubscriberPreviewRenderers(keeping: Set(state.participants.map(\.id)))
+        renderRouter.pruneSubscriberPreviewRenderers(keeping: Set(state.participants.map(\.id)))
 
         if isInPictureInPicture || pipController.isInPictureInPicture {
             await updateActivePipTargetWhileInPictureInPicture(for: state)
             return
         }
 
-        let targetId = pipTargetId(for: state)
-        let targetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
+        let targetId = participantSelector.pipTargetId(for: state)
+        let targetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
         if targetId == currentPipTargetId {
             let cameraWasEnabled = pipTargetCameraEnabled
             pipTargetCameraEnabled = targetCameraEnabled
 
             if cameraWasEnabled && !targetCameraEnabled {
-                videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+                renderRouter.videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
                 canStartPictureInPicture = pipController.canStartPictureInPicture
                 return
             }
 
             if !cameraWasEnabled && targetCameraEnabled, let targetId {
-                videoRenderer.stopPlaceholder()
+                renderRouter.videoRenderer.stopPlaceholder()
                 await refreshPipPipeline(targetId: targetId, state: state)
                 return
             }
 
             if !targetCameraEnabled {
-                videoRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
+                renderRouter.videoRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
             }
             return
         }
 
-        let currentTargetHasCamera = isCameraEnabled(participantId: currentPipTargetId, in: state)
+        let currentTargetHasCamera = PictureInPictureParticipantSelector.isCameraEnabled(
+            participantId: currentPipTargetId,
+            in: state
+        )
         if wantsPictureInPicture,
             currentPipTargetId != nil,
             currentTargetHasCamera,
@@ -293,11 +289,11 @@ public final class PictureInPictureManager: ObservableObject {
     /// controller. When the active speaker changes we re-point the shared renderer at the new
     /// participant (lightweight retarget, keeping the controller and its sample-buffer layer), and
     /// when the current target stays put we only keep its placeholder in sync with its camera state.
-    /// The manager is the single source of truth for the placeholder here: the renderer drops
+    /// The orchestrator is the single source of truth for the placeholder here: the renderer drops
     /// incoming frames while the placeholder is active, so we explicitly stop it when the camera is
     /// re-enabled to let live video resume.
     private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) async {
-        let targetId = activeSpeakerPipTargetId(for: state)
+        let targetId = participantSelector.activeSpeakerPipTargetId(for: state, currentPipTargetId: currentPipTargetId)
 
         if targetId != currentPipTargetId {
             let now = Date()
@@ -317,38 +313,16 @@ public final class PictureInPictureManager: ObservableObject {
         }
 
         let cameraWasEnabled = pipTargetCameraEnabled
-        let cameraEnabled = isCameraEnabled(participantId: currentPipTargetId, in: state)
+        let cameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: currentPipTargetId, in: state)
         pipTargetCameraEnabled = cameraEnabled
 
         if cameraWasEnabled, !cameraEnabled {
-            videoRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
+            renderRouter.videoRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
         } else if !cameraWasEnabled, cameraEnabled {
-            videoRenderer.stopPlaceholder()
+            renderRouter.videoRenderer.stopPlaceholder()
         } else if !cameraEnabled {
-            videoRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
+            renderRouter.videoRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
         }
-
-    }
-
-    /// PiP target while Picture-in-Picture is active: follow the detected active speaker.
-    ///
-    /// Falls back to the current target when there is no active speaker (avoids thrashing back to
-    /// the sticky default when everyone goes quiet), and finally to the standard sticky selection.
-    private func activeSpeakerPipTargetId(for state: ParticipantsState) -> String? {
-        if let activeId = state.activeParticipantId,
-            state.participants.contains(where: { $0.id == activeId && !$0.isScreenshare })
-        {
-            return activeId
-        }
-
-        if let currentPipTargetId,
-            currentPipTargetId == state.localParticipant?.id
-                || state.participants.contains(where: { $0.id == currentPipTargetId })
-        {
-            return currentPipTargetId
-        }
-
-        return pipTargetId(for: state)
     }
 
     private func switchPipTarget(to targetId: String?, state: ParticipantsState) async {
@@ -372,27 +346,21 @@ public final class PictureInPictureManager: ObservableObject {
             invalidatePipConfiguration()
         } else {
             // Keep the controller/buffer layer; just stop the previous target's placeholder.
-            videoRenderer.stopPlaceholder()
+            renderRouter.videoRenderer.stopPlaceholder()
         }
 
-        // When the publisher stops being the PiP target, hand its tile straight to the dedicated
-        // preview renderer with a single `videoRender` reassignment. We deliberately skip
-        // clearCurrentPipTarget()'s restoreDefaultVideoView() here: setting OTPublisher.videoRender
-        // to nil and immediately reassigning it can leave the publisher not delivering frames to
-        // the new renderer, freezing the local self-view.
-        if let call,
-            previousTargetId == call.publisher.id,
-            let newTargetId = targetId,
-            newTargetId != call.publisher.id
-        {
-            call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
-        } else {
-            await clearCurrentPipTarget()
+        let handedOff = renderRouter.handlePublisherHandoff(
+            previousTargetId: previousTargetId,
+            newTargetId: targetId,
+            call: call
+        )
+        if !handedOff {
+            await renderRouter.clearTarget(currentPipTargetId, call: call)
         }
 
         currentPipTargetId = targetId
         pipTargetParticipantId = nil
-        pipTargetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
+        pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
         guard let targetId, let call else {
             return
@@ -400,15 +368,15 @@ public final class PictureInPictureManager: ObservableObject {
 
         await applyPipRenderer(to: targetId, call: call)
         if pipTargetCameraEnabled {
-            videoRenderer.stopPlaceholder()
+            renderRouter.videoRenderer.stopPlaceholder()
         } else {
-            videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+            renderRouter.videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
         }
     }
 
     private func refreshPipPipeline(targetId: String, state: ParticipantsState) async {
         invalidatePipConfiguration()
-        pipTargetCameraEnabled = isCameraEnabled(participantId: targetId, in: state)
+        pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
         guard let call else { return }
         await applyPipRenderer(to: targetId, call: call, forceReattach: true)
@@ -419,19 +387,16 @@ public final class PictureInPictureManager: ObservableObject {
         call: VonageCall,
         forceReattach: Bool = false
     ) async {
-        let inlineView = makeInlineVideoView()
-
-        if call.publisher.id == targetId {
-            if forceReattach {
-                call.publisher.restoreDefaultVideoView()
-            }
-            call.publisher.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
-        } else if let subscriber = await call.subscriber(for: targetId) {
-            if forceReattach {
-                subscriber.clearPictureInPictureRenderer()
-            }
-            subscriber.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
-        } else {
+        do {
+            try await renderRouter.applyRenderer(
+                to: targetId,
+                call: call,
+                inlineView: makeInlineVideoView(),
+                forceReattach: forceReattach
+            )
+        } catch {
+            // No stream for this target yet (e.g. subscriber not created): leave target state as-is;
+            // the next participant-state emission retries once the stream exists.
             return
         }
 
@@ -440,8 +405,8 @@ public final class PictureInPictureManager: ObservableObject {
     }
 
     private func invalidatePipConfiguration() {
-        videoRenderer.stopPlaceholder()
-        videoRenderer.prepareForPipRefresh()
+        renderRouter.videoRenderer.stopPlaceholder()
+        renderRouter.videoRenderer.prepareForPipRefresh()
         pipController.tearDown()
         canStartPictureInPicture = false
         cachedInlineView = nil
@@ -449,114 +414,7 @@ public final class PictureInPictureManager: ObservableObject {
         lastConfiguredSourceView = nil
     }
 
-    /// Prefers the first joined remote; falls back to any remote with camera when the first has video off.
-    /// When there are no remote participants, falls back to the local participant so PiP works solo.
-    private func pipTargetId(for state: ParticipantsState) -> String? {
-        let remoteParticipants = sortedRemoteParticipants(in: state)
-        guard !remoteParticipants.isEmpty else {
-            stickyPipTargetId = nil
-            return state.localParticipant?.id
-        }
-
-        if stickyPipTargetId == nil || !remoteParticipants.contains(where: { $0.id == stickyPipTargetId }) {
-            stickyPipTargetId = remoteParticipants.first?.id
-        }
-
-        guard let stickyPipTargetId,
-            let stickyParticipant = remoteParticipants.first(where: { $0.id == stickyPipTargetId })
-        else {
-            return remoteParticipants.first?.id
-        }
-
-        if stickyParticipant.isCameraEnabled {
-            return stickyParticipant.id
-        }
-
-        return remoteParticipants.first(where: { $0.isCameraEnabled })?.id ?? stickyParticipant.id
-    }
-
-    private func sortedRemoteParticipants(in state: ParticipantsState) -> [Participant] {
-        state.participants
-            .filter { !$0.isScreenshare }
-            .sorted { $0.creationTime < $1.creationTime }
-    }
-
     private func participantName(for participantId: String?, in state: ParticipantsState) -> String {
-        guard let participantId else { return "" }
-
-        if state.localParticipant?.id == participantId {
-            return state.localParticipant?.name ?? ""
-        }
-
-        return state.participants.first(where: { $0.id == participantId })?.name ?? ""
-    }
-
-    private func isCameraEnabled(participantId: String?, in state: ParticipantsState) -> Bool {
-        guard let participantId else { return false }
-
-        if state.localParticipant?.id == participantId {
-            return state.localParticipant?.isCameraEnabled == true
-        }
-
-        return state.participants.first(where: { $0.id == participantId })?.isCameraEnabled == true
-    }
-
-    private func clearCurrentPipTarget() async {
-        guard let currentPipTargetId, let call else { return }
-
-        if call.publisher.id == currentPipTargetId {
-            call.publisher.restoreDefaultVideoView()
-        } else {
-            // Keep the remote tile alive via its dedicated preview renderer: an OTSubscriber's
-            // default view can't be revived after a custom videoRender, so reverting to it would
-            // leave a gray tile when this participant stops being the PiP/active-speaker target.
-            let previewRenderer = subscriberPreviewRenderer(for: currentPipTargetId)
-            if let subscriber = await call.subscriber(for: currentPipTargetId) {
-                subscriber.applyInlinePreviewRenderer(previewRenderer)
-            }
-        }
-    }
-
-    /// A compact, `Equatable` snapshot of everything that can affect the PiP target or placeholder.
-    /// Used to coalesce participant-state emissions and ignore audio-level-only updates.
-    private struct PipSignature: Equatable {
-        let localId: String?
-        let localCameraEnabled: Bool
-        let activeParticipantId: String?
-        let remotes: [Remote]
-
-        struct Remote: Equatable {
-            let id: String
-            let cameraEnabled: Bool
-            let isScreenshare: Bool
-        }
-    }
-
-    private static func pipSignature(for state: ParticipantsState) -> PipSignature {
-        PipSignature(
-            localId: state.localParticipant?.id,
-            localCameraEnabled: state.localParticipant?.isCameraEnabled ?? false,
-            activeParticipantId: state.activeParticipantId,
-            remotes: state.participants.map {
-                PipSignature.Remote(
-                    id: $0.id,
-                    cameraEnabled: $0.isCameraEnabled,
-                    isScreenshare: $0.isScreenshare
-                )
-            }
-        )
-    }
-
-    private func subscriberPreviewRenderer(for id: String) -> PictureInPictureVideoRenderer {
-        if let existing = subscriberPreviewRenderers[id] {
-            return existing
-        }
-        let renderer = PictureInPictureVideoRenderer()
-        subscriberPreviewRenderers[id] = renderer
-        return renderer
-    }
-
-    private func pruneSubscriberPreviewRenderers(keeping ids: Set<String>) {
-        subscriberPreviewRenderers = subscriberPreviewRenderers.filter { ids.contains($0.key) }
+        PictureInPictureParticipantSelector.participantName(for: participantId, in: state)
     }
 }

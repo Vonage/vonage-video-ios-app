@@ -7,17 +7,17 @@ import Foundation
 import VERAMeetingRoom
 import VERAVonage
 
-/// Wires ``PictureInPictureManager`` to the active call and meeting room UI state.
+/// Wires ``PictureInPictureSessionOrchestrator`` to the active call and meeting room UI state.
 @MainActor
 enum PictureInPictureBinder {
     static func bind(
-        manager: PictureInPictureManager,
+        orchestrator: PictureInPictureSessionOrchestrator,
         call: VonageCall,
         viewModel: MeetingRoomViewModel
     ) {
-        manager.bind(to: call)
+        orchestrator.bind(to: call)
         viewModel.bindPictureInPictureTargetParticipantId(
-            manager.$pipTargetParticipantId.eraseToAnyPublisher()
+            orchestrator.$pipTargetParticipantId.eraseToAnyPublisher()
         )
     }
 }

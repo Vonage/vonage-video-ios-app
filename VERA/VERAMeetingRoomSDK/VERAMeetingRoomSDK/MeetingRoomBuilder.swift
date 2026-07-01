@@ -438,7 +438,7 @@ public final class MeetingRoomBuilder {
             meetingRoomFactory: container.meetingRoomFactory,
             viewModel: meetingRoomViewModel,
             container: container,
-            pictureInPictureManager: PictureInPictureManager(),
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: _enabledFeatures,
             buttonsAssembler: buttonsAssembler,
             onAction: onAction,

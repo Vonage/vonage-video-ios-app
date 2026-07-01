@@ -37,7 +37,7 @@ struct MeetingRoomComposedView: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
 
     let container: MeetingRoomSDKContainer
-    @ObservedObject var pictureInPictureManager: PictureInPictureManager
+    @ObservedObject var pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator
     let enabledFeatures: Set<MeetingRoomFeature>
     let buttonsAssembler: BottomBarButtonsAssembler
     let onAction: (MeetingRoomSDKAction) -> Void
@@ -151,7 +151,7 @@ struct MeetingRoomComposedView: View {
             .onChange(of: scenePhase) { phase in
                 #if !os(macOS)
                     if enabledFeatures.contains(.pictureInPicture), phase == .background {
-                        pictureInPictureManager.requestPictureInPicture()
+                        pictureInPictureOrchestrator.requestPictureInPicture()
                     }
                 #endif
             }
@@ -169,7 +169,7 @@ struct MeetingRoomComposedView: View {
             else { return }
 
             PictureInPictureBinder.bind(
-                manager: pictureInPictureManager,
+                orchestrator: pictureInPictureOrchestrator,
                 call: call,
                 viewModel: viewModel
             )

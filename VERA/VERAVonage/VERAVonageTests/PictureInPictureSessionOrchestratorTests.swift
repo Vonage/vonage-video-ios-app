@@ -12,15 +12,15 @@ import VERATestHelpers
 
 @testable import VERAVonage
 
-@Suite("PictureInPictureManager tests")
+@Suite("PictureInPictureSessionOrchestrator tests")
 @MainActor
-struct PictureInPictureManagerTests {
+struct PictureInPictureOrchestratorTests {
 
     // MARK: - Initial State
 
     @Test("Initial state has PiP inactive and no target")
     func initialState() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
 
         #expect(sut.isInPictureInPicture == false)
         #expect(sut.canStartPictureInPicture == false)
@@ -31,7 +31,7 @@ struct PictureInPictureManagerTests {
 
     @Test("requestPictureInPicture without a target does not start PiP")
     func requestPipWithoutTarget() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
 
         sut.requestPictureInPicture()
 
@@ -42,7 +42,7 @@ struct PictureInPictureManagerTests {
 
     @Test("startPictureInPictureIfPossible without a target is a no-op")
     func startPipWithoutTarget() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
 
         sut.startPictureInPictureIfPossible()
 
@@ -54,7 +54,7 @@ struct PictureInPictureManagerTests {
 
     @Test("configurePictureInPicture with zero-size frame is a no-op")
     func configureWithZeroFrame() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
         let view = UIView()
 
         sut.configurePictureInPicture(sourceView: view, videoFrame: .zero)
@@ -64,7 +64,7 @@ struct PictureInPictureManagerTests {
 
     @Test("configurePictureInPicture with 1x1 frame is a no-op")
     func configureWithTinyFrame() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
         let view = UIView()
 
         sut.configurePictureInPicture(sourceView: view, videoFrame: CGRect(x: 0, y: 0, width: 1, height: 1))
@@ -76,7 +76,7 @@ struct PictureInPictureManagerTests {
 
     @Test("tearDown resets all published state")
     func tearDownResetsState() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
         sut.requestPictureInPicture()
 
         sut.tearDown()
@@ -88,7 +88,7 @@ struct PictureInPictureManagerTests {
 
     @Test("tearDown can be called multiple times safely")
     func tearDownIdempotent() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
 
         sut.tearDown()
         sut.tearDown()
@@ -100,7 +100,7 @@ struct PictureInPictureManagerTests {
 
     @Test("bind to same call twice is idempotent")
     func bindIdempotent() {
-        let sut = PictureInPictureManager()
+        let sut = PictureInPictureSessionOrchestrator()
         let call = makeSUT()
 
         sut.bind(to: call)
