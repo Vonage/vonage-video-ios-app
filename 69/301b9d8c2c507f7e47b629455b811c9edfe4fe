@@ -1,0 +1,34 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomUIProviderCombinerTests.swift
+  s_5f1f0b0dd10941::t_34617d61145a83 82-124,153-176
+  s_5f1f0b0dd10941::t_a357c035ae3897 177
+VERA/VERAApp/VERATests/MeetingRoomCustomizationMenuTests.swift
+  s_5f1f0b0dd10941::t_8c1d2d8542881e 57-71,84-98
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View/MeetingRoomViewTests.swift
+  s_5f1f0b0dd10941::t_d4c4cca0fa11e5 67-121
+VERA/VERAApp/VERATests/MeetingRoomCustomizationBottomBarTests.swift
+  s_5f1f0b0dd10941::t_9aa1f096e20d94 31-54,94-102,105-108,115-116,119,128-129,136-138
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  s_5f1f0b0dd10941::t_ddb131d7344af6 155-182
+VERA/VERAApp/VERATests/MeetingRoomCustomizationProviderTests.swift
+  s_5f1f0b0dd10941::t_4dc2d16bbac9d5 26-32
+  s_5f1f0b0dd10941::t_7efba1631c54c3 23-25,33-46,74-94,130-144,162-176,197-210,251-281,333-346
+  s_5f1f0b0dd10941::t_14fc9dbd59b357 347
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/MeetingRoomUIProviderPublicAPITests.swift
+  s_5f1f0b0dd10941::t_5931a19acd5cda 84-121,196-222
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "69301b9d8c2c507f7e47b629455b811c9edfe4fe",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
