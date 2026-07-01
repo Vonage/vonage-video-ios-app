@@ -64,6 +64,61 @@ struct MeetingRoomViewTests {
         #expect(controls.participants?.isActive == false)
     }
 
+    @Test("Bottom bar controls forward actions through wrapped meeting room actions")
+    @MainActor
+    func bottomBarControlsForwardActionsThroughWrappedMeetingRoomActions() {
+        var selectedActions: [String] = []
+        let view = MeetingRoomView(
+            state: makeState(),
+            actions: MeetingRoomActions(
+                onToggleMic: {
+                    selectedActions.append("microphone")
+                },
+                onToggleCamera: {
+                    selectedActions.append("camera")
+                },
+                onEndCall: {
+                    selectedActions.append("end-call")
+                },
+                onToggleLayout: {
+                    selectedActions.append("layout")
+                }
+            )
+        )
+        let controls = view.bottomBarControls
+
+        controls.microphone.action()
+        controls.camera.action()
+        controls.layout.action()
+        controls.participants?.action()
+        controls.endCall.action()
+
+        #expect(selectedActions == ["microphone", "camera", "layout", "end-call"])
+    }
+
+    @Test("Bottom bar controls expose accessibility identifiers")
+    @MainActor
+    func bottomBarControlsExposeAccessibilityIdentifiers() {
+        let disabledControls = makeControls(
+            state: makeState(
+                isMicEnabled: false,
+                isCameraEnabled: false
+            )
+        )
+        let enabledControls = makeControls(
+            state: makeState(
+                isMicEnabled: true,
+                isCameraEnabled: true
+            )
+        )
+
+        #expect(disabledControls.microphone.accessibilityIdentifier == MeetingRoomAccessibilityID.micDisabled)
+        #expect(disabledControls.camera.accessibilityIdentifier == MeetingRoomAccessibilityID.cameraDisabled)
+        #expect(enabledControls.microphone.accessibilityIdentifier == MeetingRoomAccessibilityID.micEnabled)
+        #expect(enabledControls.camera.accessibilityIdentifier == MeetingRoomAccessibilityID.cameraEnabled)
+        #expect(enabledControls.endCall.accessibilityIdentifier == MeetingRoomAccessibilityID.endCallButton)
+    }
+
     @Test("Bottom bar context exposes presentation handler")
     @MainActor
     func bottomBarContextExposesPresentationHandler() {

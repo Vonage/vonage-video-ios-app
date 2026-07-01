@@ -152,6 +152,34 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         #expect(presentedRequest?.style == .sheet)
     }
 
+    @Test("BottomBar performs extra button action without presentation request")
+    @MainActor
+    func bottomBarPerformsExtraButtonActionWithoutPresentationRequest() {
+        var didPerformAction = false
+        var presentationCount = 0
+        let button = BottomBarButton(
+            id: "plain-button",
+            label: "Plain",
+            image: Image(systemName: "square"),
+            presentationRequest: { nil },
+            action: {
+                didPerformAction = true
+            }
+        )
+        let bar = createBottomBar(
+            presentationHandler: MeetingRoomPresentationHandler(
+                present: { _ in
+                    presentationCount += 1
+                }
+            )
+        )
+
+        bar.performExtraButton(button)
+
+        #expect(didPerformAction)
+        #expect(presentationCount == 0)
+    }
+
     @Test("BottomBarButton copies overflow selection behavior from presenter")
     @MainActor
     func bottomBarButtonCopiesOverflowSelectionBehaviorFromPresenter() {

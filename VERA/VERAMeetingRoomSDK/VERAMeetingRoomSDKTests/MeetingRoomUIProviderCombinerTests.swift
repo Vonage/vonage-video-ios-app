@@ -79,6 +79,49 @@ struct MeetingRoomUIProviderCombinerTests {
         #expect(provider.bottomBarButtons().map(\.id) == ["sdk", "custom"])
     }
 
+    @Test("Custom bottom bar content does not remove SDK buttons")
+    func customBottomBarContentDoesNotRemoveSDKButtons() {
+        let sdkProvider = DefaultMeetingRoomUIProvider {
+            [makeButton(id: "sdk")]
+        }
+        let customProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [] },
+            bottomBarContent: { _ in
+                AnyView(Text("Custom bottom bar"))
+            }
+        )
+
+        let provider = MeetingRoomUIProviderCombiner.combine(
+            sdkProvider: sdkProvider,
+            customProvider: customProvider
+        )
+
+        #expect(provider.bottomBarContent(context: makeBottomBarContext()) != nil)
+        #expect(provider.bottomBarButtons().map(\.id) == ["sdk"])
+    }
+
+    @Test("Uses only SDK updates when no custom provider is set")
+    func usesOnlySDKUpdatesWhenNoCustomProviderIsSet() {
+        let sdkUpdates = PassthroughSubject<Void, Never>()
+        let sdkProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [] },
+            updates: sdkUpdates.eraseToAnyPublisher()
+        )
+        let provider = MeetingRoomUIProviderCombiner.combine(
+            sdkProvider: sdkProvider,
+            customProvider: nil
+        )
+        var updateCount = 0
+        let cancellable = provider.updates.sink {
+            updateCount += 1
+        }
+
+        sdkUpdates.send(())
+
+        #expect(updateCount == 1)
+        cancellable.cancel()
+    }
+
     @Test("Emits SDK and custom updates")
     func emitsSDKAndCustomUpdates() {
         let sdkUpdates = PassthroughSubject<Void, Never>()
@@ -105,6 +148,31 @@ struct MeetingRoomUIProviderCombinerTests {
 
         #expect(updateCount == 2)
         cancellable.cancel()
+    }
+
+    @Test("Custom content keeps combined buttons available in context")
+    func customContentKeepsCombinedButtonsAvailableInContext() {
+        var receivedButtonIds: [String] = []
+        let sdkProvider = DefaultMeetingRoomUIProvider {
+            [makeButton(id: "sdk")]
+        }
+        let customProvider = DefaultMeetingRoomUIProvider(
+            bottomBarButtons: { [makeButton(id: "custom")] },
+            bottomBarContent: { context in
+                receivedButtonIds = context.buttons.map(\.id)
+                return AnyView(Text("Custom bottom bar"))
+            }
+        )
+        let provider = MeetingRoomUIProviderCombiner.combine(
+            sdkProvider: sdkProvider,
+            customProvider: customProvider
+        )
+        let combinedButtons = provider.bottomBarButtons()
+
+        _ = provider.bottomBarContent(context: makeBottomBarContext(buttons: combinedButtons))
+
+        #expect(combinedButtons.map(\.id) == ["sdk", "custom"])
+        #expect(receivedButtonIds == ["sdk", "custom"])
     }
 
     private func makeButton(id: String) -> BottomBarButton {

@@ -20,6 +20,30 @@ struct MeetingRoomCustomizationProviderTests {
         #expect(sut.bottomBarButtons().isEmpty)
     }
 
+    @Test("Button kinds expose labels and system images")
+    func buttonKindsExposeLabelsAndSystemImages() {
+        #expect(MeetingRoomCustomizationButtonKind.allCases.map(\.label) == ["Toggle", "Dialog", "Overlay", "Sheet"])
+        #expect(
+            MeetingRoomCustomizationButtonKind.allCases.map(\.systemImageName) == [
+                "switch.2",
+                "exclamationmark.bubble.fill",
+                "rectangle.on.rectangle",
+                "rectangle.bottomhalf.inset.filled",
+            ])
+    }
+
+    @Test("Button item exposes stable display metadata")
+    func buttonItemExposesStableDisplayMetadata() {
+        let item = MeetingRoomCustomizationButtonItem(
+            id: "custom-7",
+            label: "Dialog 7",
+            kind: .dialog,
+            isActive: true)
+
+        #expect(item.accessibilityIdentifier == "meeting-room-custom-button-custom-7")
+        #expect(item.systemImageName == "exclamationmark.bubble.fill")
+    }
+
     @Test("Add button appends button and emits update")
     func addButtonAppendsButtonAndEmitsUpdate() {
         let sut = MeetingRoomCustomizationProvider()
@@ -45,6 +69,27 @@ struct MeetingRoomCustomizationProviderTests {
 
         #expect(sut.items.map(\.kind) == [.dialog, .overlay, .sheet])
         #expect(sut.bottomBarButtons().map(\.label) == ["Dialog 1", "Overlay 2", "Sheet 3"])
+    }
+
+    @Test("Add typed buttons emit updates and use SDK bottom bar")
+    func addTypedButtonsEmitUpdatesAndUseSDKBottomBar() {
+        let sut = MeetingRoomCustomizationProvider()
+        sut.setCustomBottomBarEnabled(true)
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.addToggleButton()
+        sut.addDialogButton()
+        sut.addOverlayButton()
+        sut.addSheetButton()
+
+        #expect(!sut.isCustomBottomBarEnabled)
+        #expect(sut.items.map(\.kind) == [.toggle, .dialog, .overlay, .sheet])
+        #expect(sut.bottomBarContent(context: makeBottomBarContext()) == nil)
+        #expect(updateCount == 4)
+        cancellable.cancel()
     }
 
     @Test("Add button uses SDK bottom bar")
@@ -82,6 +127,21 @@ struct MeetingRoomCustomizationProviderTests {
         cancellable.cancel()
     }
 
+    @Test("Remove last button does not emit update when empty")
+    func removeLastButtonDoesNotEmitUpdateWhenEmpty() {
+        let sut = MeetingRoomCustomizationProvider()
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.removeLastButton()
+
+        #expect(sut.bottomBarButtons().isEmpty)
+        #expect(updateCount == 0)
+        cancellable.cancel()
+    }
+
     @Test("Clear buttons removes all buttons and emits update")
     func clearButtonsRemovesAllButtonsAndEmitsUpdate() {
         let sut = MeetingRoomCustomizationProvider()
@@ -96,6 +156,21 @@ struct MeetingRoomCustomizationProviderTests {
 
         #expect(sut.bottomBarButtons().isEmpty)
         #expect(updateCount == 1)
+        cancellable.cancel()
+    }
+
+    @Test("Clear buttons does not emit update when empty")
+    func clearButtonsDoesNotEmitUpdateWhenEmpty() {
+        let sut = MeetingRoomCustomizationProvider()
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.clearButtons()
+
+        #expect(sut.bottomBarButtons().isEmpty)
+        #expect(updateCount == 0)
         cancellable.cancel()
     }
 
@@ -116,6 +191,20 @@ struct MeetingRoomCustomizationProviderTests {
         let updatedButton = sut.bottomBarButtons()[0]
         #expect(updatedButton.isActive)
         #expect(updateCount == 1)
+        cancellable.cancel()
+    }
+
+    @Test("Missing button action does not emit update")
+    func missingButtonActionDoesNotEmitUpdate() {
+        let sut = MeetingRoomCustomizationProvider()
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.handleButtonAction(id: "missing")
+
+        #expect(updateCount == 0)
         cancellable.cancel()
     }
 
@@ -157,6 +246,37 @@ struct MeetingRoomCustomizationProviderTests {
         #expect(!sut.bottomBarButtons()[0].isActive)
         #expect(updateCount == 1)
         cancellable.cancel()
+    }
+
+    @Test("Presentation dismiss ignores missing or inactive buttons")
+    func presentationDismissIgnoresMissingOrInactiveButtons() {
+        let sut = MeetingRoomCustomizationProvider()
+        sut.addOverlayButton()
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.dismissPresentation(sourceButtonId: "missing")
+        sut.dismissPresentation(sourceButtonId: "custom-1")
+
+        #expect(!sut.bottomBarButtons()[0].isActive)
+        #expect(updateCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("Presentation request on dismiss deactivates source button")
+    func presentationRequestOnDismissDeactivatesSourceButton() async {
+        let sut = MeetingRoomCustomizationProvider()
+        sut.addDialogButton()
+        let button = sut.bottomBarButtons()[0]
+        button.action()
+        let request = button.presentationRequest?()
+        await Task.yield()
+
+        request?.onDismiss?()
+
+        #expect(!sut.bottomBarButtons()[0].isActive)
     }
 
     @Test("Generated presentation requests use configured styles")
@@ -207,6 +327,21 @@ struct MeetingRoomCustomizationProviderTests {
 
         #expect(!sut.isCustomBottomBarEnabled)
         #expect(updateCount == 1)
+        cancellable.cancel()
+    }
+
+    @Test("Setting custom bottom bar to current value does not emit update")
+    func settingCustomBottomBarToCurrentValueDoesNotEmitUpdate() {
+        let sut = MeetingRoomCustomizationProvider()
+        var updateCount = 0
+        let cancellable = sut.updates.sink {
+            updateCount += 1
+        }
+
+        sut.setCustomBottomBarEnabled(false)
+
+        #expect(!sut.isCustomBottomBarEnabled)
+        #expect(updateCount == 0)
         cancellable.cancel()
     }
 

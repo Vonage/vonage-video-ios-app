@@ -54,6 +54,21 @@ struct MeetingRoomCustomizationMenuTests {
         _ = sut.body
     }
 
+    @Test("Add button row executes configured action")
+    func addButtonRowExecutesConfiguredAction() {
+        var actionCount = 0
+        let sut = MeetingRoomCustomizationAddButtonRow(
+            title: "Add overlay button",
+            systemImage: MeetingRoomCustomizationButtonKind.overlay.systemImageName
+        ) {
+            actionCount += 1
+        }
+
+        sut.action()
+
+        #expect(actionCount == 1)
+    }
+
     @Test("Custom bar screen builds and binding updates provider")
     func customBarScreenBuildsAndBindingUpdatesProvider() {
         let provider = MeetingRoomCustomizationProvider()
@@ -65,5 +80,20 @@ struct MeetingRoomCustomizationMenuTests {
 
         sut.customBottomBarBinding.wrappedValue = false
         #expect(!provider.isCustomBottomBarEnabled)
+    }
+
+    @Test("Custom bar binding keeps redundant updates quiet")
+    func customBarBindingKeepsRedundantUpdatesQuiet() {
+        let provider = MeetingRoomCustomizationProvider()
+        let sut = MeetingRoomCustomizationBottomBarCustomBarView(provider: provider)
+        var updateCount = 0
+        let cancellable = provider.updates.sink {
+            updateCount += 1
+        }
+
+        sut.customBottomBarBinding.wrappedValue = false
+
+        #expect(updateCount == 0)
+        cancellable.cancel()
     }
 }

@@ -81,6 +81,44 @@ struct MeetingRoomUIProviderPublicAPITests {
         #expect(dismissedId == "overlay-request")
     }
 
+    @Test("Presentation handler default closures are no-ops")
+    @MainActor
+    func presentationHandlerDefaultClosuresAreNoOps() {
+        let sut = MeetingRoomPresentationHandler()
+
+        sut.present(
+            MeetingRoomPresentationRequest(
+                id: "dialog-request",
+                style: .dialog,
+                title: "Dialog"
+            )
+        )
+        sut.dismiss("dialog-request")
+    }
+
+    @Test("Bottom bar control stores configured values")
+    @MainActor
+    func bottomBarControlStoresConfiguredValues() {
+        var actionCount = 0
+        let sut = MeetingRoomBottomBarControl(
+            id: "microphone",
+            label: "Microphone",
+            image: Image(systemName: "mic"),
+            isActive: true,
+            accessibilityIdentifier: "meeting-room-microphone"
+        ) {
+            actionCount += 1
+        }
+
+        sut.action()
+
+        #expect(sut.id == "microphone")
+        #expect(sut.label == "Microphone")
+        #expect(sut.isActive)
+        #expect(sut.accessibilityIdentifier == "meeting-room-microphone")
+        #expect(actionCount == 1)
+    }
+
     @Test("Bottom bar controls expose configured values and actions")
     @MainActor
     func bottomBarControlsExposeConfiguredValuesAndActions() {
@@ -155,6 +193,33 @@ struct MeetingRoomUIProviderPublicAPITests {
         #expect(context.buttons.map(\.id) == ["custom-button"])
         #expect(context.controls.participants == nil)
         #expect(context.controls.endCall.id == "end-call")
+    }
+
+    @Test("Bottom bar context keeps presentation handler")
+    @MainActor
+    func bottomBarContextKeepsPresentationHandler() {
+        var dismissedId: String?
+        let context = MeetingRoomBottomBarContext(
+            state: .initial,
+            actions: .init(),
+            buttons: [],
+            controls: MeetingRoomBottomBarControls(
+                microphone: makeControl(id: "microphone"),
+                camera: makeControl(id: "camera"),
+                participants: nil,
+                layout: makeControl(id: "layout"),
+                endCall: makeControl(id: "end-call")
+            ),
+            presentationHandler: MeetingRoomPresentationHandler(
+                dismiss: { id in
+                    dismissedId = id
+                }
+            )
+        )
+
+        context.presentationHandler.dismiss("sheet-request")
+
+        #expect(dismissedId == "sheet-request")
     }
 
     @Test("Default provider can be configured with buttons updates and custom content")
