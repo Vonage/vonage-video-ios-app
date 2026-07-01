@@ -1,0 +1,23 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_5f1f0b0dd10941::t_37bd438b1d0028 28-30,39-59,63,286-329,342-344
+  s_5f1f0b0dd10941::t_238dce487ee20d 27,90-96
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_5f1f0b0dd10941::t_b6a09a4b46be70 8,474-495,518-563,647-670
+  s_5f1f0b0dd10941::t_2e93729795513c 671
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "719af88b8c4b639e49861f7195d1631b93f3911a",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
