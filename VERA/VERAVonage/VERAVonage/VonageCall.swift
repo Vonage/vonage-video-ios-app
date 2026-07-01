@@ -307,6 +307,11 @@ public final class VonageCall: CallFacade {
     }
 
     private func setupPublisherObservation(_ publisher: VonagePublisher) {
+        publisher.onMuteForced = { [weak self] in
+            self?.updateMediaState()
+            self?._eventsPublisher.send(.muteForced)
+        }
+
         publisher.$participant
             .sink { [weak self] participant in
                 guard let self = self else { return }

@@ -91,6 +91,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     var onStreamDestroyed: (() -> Void)?
     /// Called when the publisher encounters an error.
     var onError: ((Error) -> Void)?
+    /// Called when a moderator force-mutes this publisher.
+    var onMuteForced: (() -> Void)?
 
     /// Controls local audio publishing.
     ///
@@ -260,6 +262,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         onStreamCreated = nil
         onStreamDestroyed = nil
         onError = nil
+        onMuteForced = nil
     }
 
     // MARK: OTPublisherKitDelegate
@@ -283,6 +286,13 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Use to trigger teardown or UI updates.
     public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         onStreamDestroyed?()
+    }
+
+    /// Vonage publisher delegate callback when this local publisher is force-muted by a moderator.
+    public func muteForced(_ publisher: OTPublisherKit) {
+        publishAudio = false
+        updateParticipant()
+        onMuteForced?()
     }
 
     // MARK: Transformers

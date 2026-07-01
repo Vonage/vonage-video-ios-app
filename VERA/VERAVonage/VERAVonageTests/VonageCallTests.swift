@@ -146,6 +146,30 @@ struct VonageCallTests {
         }
     }
 
+    @Test
+    func publisherMuteForcedUpdatesLocalStateAndPublishesEvent() async throws {
+        let publisherSpy = VonagePublisherSpy()
+        let sut = makeSUT(publisher: publisherSpy)
+        sut.setup()
+        sut.connect()
+
+        publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
+
+        let state = await sut.statePublisher.values.first { !$0.isPublishingAudio }
+        let event = await sut.eventsPublisher.values.first { event in
+            if case .muteForced = event { return true }
+            return false
+        }
+
+        #expect(publisherSpy.publishAudio == false)
+        #expect(state?.isPublishingAudio == false)
+        if case .muteForced = event {
+            #expect(true)
+        } else {
+            Issue.record("Expected muteForced event")
+        }
+    }
+
     // MARK: - Network Stats Tests
 
     @Test

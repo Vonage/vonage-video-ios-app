@@ -18,7 +18,7 @@ appId: ${APP_ID}
 - tapOn:
     id: "room-name-input"
 
-- inputText: "force-mute-room"
+- inputText: "force-mute-list-room"
 
 - tapOn:
     id: "join-waiting-room-button"
@@ -43,22 +43,7 @@ appId: ${APP_ID}
 - assertVisible:
     id: "meeting-room-screen"
 
-- takeScreenshot: 01-meeting-room-opened
-
-- extendedWaitUntil:
-    visible: "Moderator"
-    timeout: 5000
-
-- assertVisible:
-    id: "participant-card-e2e-local-publisher"
-
-- assertVisible:
-    id: "participant-mic-e2e-local-publisher-enabled"
-
-- assertNotVisible:
-    id: "participant-force-mute-e2e-local-publisher"
-
-- takeScreenshot: 02-local-publisher-visible
+- takeScreenshot: 01-list-meeting-room-opened
 
 - extendedWaitUntil:
     visible: "Remote Participant"
@@ -70,19 +55,33 @@ appId: ${APP_ID}
 - assertVisible:
     id: "participant-mic-e2e-remote-participant-enabled"
 
-- assertVisible:
-    id: "participant-force-mute-e2e-remote-participant"
+- tapOn:
+    id: "meeting-room-participants-button"
 
-- takeScreenshot: 03-remote-force-mute-available
+- extendedWaitUntil:
+    visible:
+      id: "participants-list-screen"
+    timeout: 5000
+
+- assertVisible: "Remote Participant"
+
+- assertVisible:
+    id: "participant-list-force-mute-e2e-remote-participant"
+
+- takeScreenshot: 02-list-force-mute-available
 
 - tapOn:
-    id: "participant-force-mute-e2e-remote-participant"
+    id: "participant-list-force-mute-e2e-remote-participant"
+
+- assertVisible: "Mute Remote Participant for everyone in the call? Only Remote Participant can unmute themselves."
+
+- tapOn: "Mute"
 
 - extendedWaitUntil:
     visible: "Remote Participant was muted."
     timeout: 5000
 
-- takeScreenshot: 04-force-mute-success-toast
+- takeScreenshot: 03-list-force-mute-success-toast
 
 - extendedWaitUntil:
     visible:
@@ -90,17 +89,6 @@ appId: ${APP_ID}
     timeout: 5000
 
 - assertNotVisible:
-    id: "participant-force-mute-e2e-remote-participant"
+    id: "participant-list-force-mute-e2e-remote-participant"
 
-- takeScreenshot: 05-force-mute-completed
-
-- tapOn:
-    id: "meeting-room-end-call-button"
-
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "goodbye-screen"
-
-- takeScreenshot: 06-goodbye-screen
+- takeScreenshot: 04-list-force-mute-completed

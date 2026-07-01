@@ -309,6 +309,7 @@ struct MicIndicator: View {
     var isMicEnabled: Bool
     var participantName: String
     var onForceMute: (() -> Void)?
+    var forceMuteAccessibilityIdentifier: String?
 
     var isForceMuteEnabled: Bool {
         isMicEnabled && onForceMute != nil
@@ -328,7 +329,10 @@ struct MicIndicator: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(forceMuteAccessibilityLabel)
-                .accessibilityIdentifier(MeetingRoomAccessibilityID.participantForceMuteButton(participantID))
+                .accessibilityIdentifier(
+                    forceMuteAccessibilityIdentifier
+                        ?? MeetingRoomAccessibilityID.participantForceMuteButton(participantID)
+                )
             } else {
                 indicator
             }

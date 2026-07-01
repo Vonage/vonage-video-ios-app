@@ -1,5 +1,7 @@
 import SwiftUI
 import Testing
+import VERACore
+import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
@@ -29,6 +31,10 @@ struct MicIndicatorTests {
         #expect(
             MeetingRoomAccessibilityID.participantForceMuteButton("arthur")
                 == "participant-force-mute-arthur"
+        )
+        #expect(
+            MeetingRoomAccessibilityID.participantListForceMuteButton("arthur")
+                == "participant-list-force-mute-arthur"
         )
         #expect(
             MeetingRoomAccessibilityID.participantCard("arthur")
@@ -71,6 +77,23 @@ struct MicIndicatorTests {
                 == "participant-mic-trillian-disabled"
         )
         _ = host(sut)
+    }
+
+    @Test
+    func participantsListRowUsesInteractiveMicIndicatorForForceMute() {
+        var actionCount = 0
+        var participant = UIParticipant(participant: makeMockParticipant(id: "zaphod", name: "Zaphod"))
+        participant.onForceMute = { actionCount += 1 }
+
+        let sut = ParticipantRowView(participant: participant)
+        let indicator = sut.micIndicator
+
+        #expect(indicator.isForceMuteEnabled)
+        #expect(indicator.forceMuteAccessibilityLabel == "Mute Zaphod")
+        #expect(indicator.forceMuteAccessibilityIdentifier == "participant-list-force-mute-zaphod")
+        _ = host(sut)
+        indicator.onForceMute?()
+        #expect(actionCount == 1)
     }
 
     @discardableResult
