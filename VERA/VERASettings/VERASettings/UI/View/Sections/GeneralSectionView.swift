@@ -54,7 +54,7 @@ struct GeneralSectionView: View {
         } footer: {
             VStack(alignment: .leading, spacing: 8) {
                 if isInActiveCall {
-                    Text("Cannot be changed during an active call".localized)
+                    ActiveCallWarningText()
                 } else {
                     Text("Restores all settings to their default values.".localized)
                 }

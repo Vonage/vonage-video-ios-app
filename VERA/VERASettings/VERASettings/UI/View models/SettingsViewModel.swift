@@ -4,8 +4,6 @@
 
 import Combine
 import Foundation
-import SwiftUI
-import VERACommonUI
 import os.log
 
 /// Constants used throughout the settings system.
@@ -259,13 +257,5 @@ public final class SettingsViewModel: ObservableObject {
     /// This only affects the local state, not the persisted values.
     private func setAsDefault() {
         settingsPreference = PublisherSettingsPreferences.default
-    }
-}
-
-struct SettingsDivider: View {
-    var body: some View {
-        Rectangle()
-            .fill(VERACommonUIAsset.SemanticColors.border.swiftUIColor)
-            .frame(height: 1)
     }
 }

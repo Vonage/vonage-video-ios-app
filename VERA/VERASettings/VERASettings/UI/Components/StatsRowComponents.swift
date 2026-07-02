@@ -89,6 +89,7 @@ struct ExpandableParticipantHeaderRow<TrailingContent: View>: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                     .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: isExpanded)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

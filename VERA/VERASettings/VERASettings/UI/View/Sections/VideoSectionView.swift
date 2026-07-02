@@ -57,22 +57,16 @@ struct VideoSectionView: View {
             codecContent
             SettingsDivider()
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
             frameRateContent
             SettingsDivider()
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
             resolutionContent
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
         }
     }
@@ -100,11 +94,7 @@ struct VideoSectionView: View {
         } header: {
             Text("Preferred Video Codec".localized)
         } footer: {
-            if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-            } else {
-                Text(viewModel.codecMode.footerDescription)
-            }
+            ActiveCallFooter(isInActiveCall: isInActiveCall, description: viewModel.codecMode.footerDescription)
         }
         #if os(iOS)
             .environment(\.editMode, .constant(.active))
@@ -115,7 +105,7 @@ struct VideoSectionView: View {
             Text("Frame Rate".localized)
         } footer: {
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
+                ActiveCallWarningText()
             }
         }
 
@@ -125,7 +115,7 @@ struct VideoSectionView: View {
             Text("Resolution".localized)
         } footer: {
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
+                ActiveCallWarningText()
             }
         }
     }
@@ -275,6 +265,7 @@ struct VideoSectionView: View {
         default: ""
         }
     }
+
 }
 
 // MARK: - Previews

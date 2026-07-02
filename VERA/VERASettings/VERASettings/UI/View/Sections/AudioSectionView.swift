@@ -41,29 +41,21 @@ struct AudioSectionView: View {
             audioBitrateContent
             SettingsDivider()
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
             opusDtxContent
             SettingsDivider()
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
             publisherFallbackContent
             SettingsDivider()
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
             subscriberFallbackContent
             if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
         }
     }
@@ -80,7 +72,7 @@ struct AudioSectionView: View {
                     "Controls the maximum audio encoding bitrate sent to the session. Higher values improve quality but use more bandwidth."
                         .localized)
                 if isInActiveCall {
-                    Text("Cannot be changed during an active call".localized)
+                    ActiveCallWarningText()
                 }
             }
         }
@@ -90,13 +82,11 @@ struct AudioSectionView: View {
         } header: {
             Text("Discontinuous Transmission".localized)
         } footer: {
-            if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-            } else {
-                Text(
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
                     "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
-                        .localized)
-            }
+                    .localized)
         }
 
         Section {
@@ -104,13 +94,11 @@ struct AudioSectionView: View {
         } header: {
             Text("Publisher Fallback".localized)
         } footer: {
-            if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-            } else {
-                Text(
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
                     "When enabled, your video stops rendering on other devices during poor network conditions to preserve audio."
-                        .localized)
-            }
+                    .localized)
         }
 
         Section {
@@ -118,14 +106,11 @@ struct AudioSectionView: View {
         } header: {
             Text("Subscriber Fallback".localized)
         } footer: {
-            if isInActiveCall {
-                Text("Cannot be changed during an active call".localized)
-            } else {
-                Text(
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
                     "When enabled, you receive audio only from other participants during poor network conditions."
-                        .localized
-                )
-            }
+                    .localized)
         }
     }
 

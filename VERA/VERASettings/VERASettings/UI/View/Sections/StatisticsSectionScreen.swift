@@ -37,9 +37,7 @@ struct StatisticsSectionScreen: View {
         Section {
             statsToggleContent
             if statisticsViewModel != nil {
-                Text("Cannot be changed during an active call".localized)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                ActiveCallWarningText()
             }
         } header: {
             Text("Stats".localized)
