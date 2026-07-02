@@ -52,46 +52,20 @@ public struct MeetingRoomPresentationRequest: Identifiable {
     ///   - sourceButtonId: Optional identifier of the source button or control.
     ///   - onDismiss: Closure called when the SDK dismisses the presentation.
     ///   - content: Custom SwiftUI content for the presentation.
-    public init<Content: View>(
-        id: String = UUID().uuidString,
-        style: Style,
-        title: String,
-        message: String? = nil,
-        sourceButtonId: String? = nil,
-        onDismiss: (@MainActor () -> Void)? = nil,
-        @ViewBuilder content: () -> Content
-    ) {
-        self.id = id
-        self.style = style
-        self.title = title
-        self.message = message
-        self.content = AnyView(content())
-        self.sourceButtonId = sourceButtonId
-        self.onDismiss = onDismiss
-    }
-
-    /// Creates a presentation request using the SDK default content for the requested style.
-    ///
-    /// - Parameters:
-    ///   - id: Stable request identifier. Defaults to a generated UUID string.
-    ///   - style: Requested presentation style.
-    ///   - title: User-facing title.
-    ///   - message: Optional user-facing message.
-    ///   - sourceButtonId: Optional identifier of the source button or control.
-    ///   - onDismiss: Closure called when the SDK dismisses the presentation.
     public init(
         id: String = UUID().uuidString,
         style: Style,
         title: String,
         message: String? = nil,
         sourceButtonId: String? = nil,
-        onDismiss: (@MainActor () -> Void)? = nil
+        onDismiss: (@MainActor () -> Void)? = nil,
+        content: AnyView? = nil
     ) {
         self.id = id
         self.style = style
         self.title = title
         self.message = message
-        self.content = nil
+        self.content = content
         self.sourceButtonId = sourceButtonId
         self.onDismiss = onDismiss
     }
