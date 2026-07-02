@@ -669,6 +669,76 @@ struct BottomBarButtonsAssemblerTests {
         cancellable.cancel()
     }
 
+    @Test("setChatPresented does not emit when value is unchanged")
+    @MainActor
+    func setChatPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.chat]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setChatPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setChatPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setSettingsPresented does not emit when value is unchanged")
+    @MainActor
+    func setSettingsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.settings]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setSettingsPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setSettingsPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setEffectsPresented does not emit when value is unchanged")
+    @MainActor
+    func setEffectsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.backgroundEffects]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setEffectsPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setEffectsPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setFeedbackFormPresented does not emit when value is unchanged")
+    @MainActor
+    func setFeedbackFormPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.feedback]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setFeedbackFormPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setFeedbackFormPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setReactionsPickerPresented does not emit when value is unchanged")
+    @MainActor
+    func setReactionsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.reactions]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setReactionsPickerPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setReactionsPickerPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
     @Test("rebuildButtons rebuilds current feature buttons")
     @MainActor
     func rebuildButtonsRebuildsCurrentFeatureButtons() {

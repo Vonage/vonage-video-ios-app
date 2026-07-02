@@ -1190,6 +1190,39 @@ struct MeetingRoomViewModelTests {
         #expect(sut.toast == nil)
     }
 
+    // MARK: - Deprecated init
+
+    @Test("Deprecated convenience init wraps getExternalButtons in DefaultMeetingRoomUIProvider")
+    @MainActor
+    func deprecatedConvenienceInitWrapsExternalButtonsInProvider() async {
+        let updates = PassthroughSubject<Void, Never>()
+        var callCount = 0
+
+        let sut = MeetingRoomViewModel(
+            roomName: "test-room",
+            baseURL: URL(string: "https://example.com")!,
+            connectToRoomUseCase: makeMockConnectToRoomUseCase(),
+            disconnectRoomUseCase: makeMockDisconnectRoomUseCase(),
+            checkMicrophoneAuthorizationStatusUseCase: makeMockCheckMicrophoneAuthorizationStatusUseCase(),
+            checkCameraAuthorizationStatusUseCase: makeMockCheckCameraAuthorizationStatusUseCase(),
+            currentCallParticipantsRepository: makeMockCurrentCallParticipantsRepository(),
+            captionsStatusDataSource: NullCaptionsStatusDataSource(),
+            configuration: MeetingRoomConfiguration(),
+            meetingRoomNavigation: MockMeetingRoomNavigation(nil, roomName: "test-room"),
+            getExternalButtons: {
+                callCount += 1
+                return []
+            },
+            externalButtonsUpdates: updates.eraseToAnyPublisher(),
+            noiseSuppressionStatusDataSource: makeMockNoiseSuppressionStatusDataSource(),
+            pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource()
+        )
+
+        await sut.loadUI()
+
+        #expect(callCount > 0)
+    }
+
     // MARK: SUT
 
     func makeSUT(
