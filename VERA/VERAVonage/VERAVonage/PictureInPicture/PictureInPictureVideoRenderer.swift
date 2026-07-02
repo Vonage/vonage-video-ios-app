@@ -17,6 +17,11 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
 
+    /// Horizontally mirrors live video frames. Set for the local front camera so the self-view
+    /// matches the mirrored preview used elsewhere (e.g. the waiting room); remote video and the
+    /// back camera stay un-mirrored. Applied to the pixels, so the placeholder avatar is unaffected.
+    var isMirrored = false
+
     private let frameLock = NSLock()
     private let accelerator = YUVToARGBAccelerator()
 
@@ -164,7 +169,7 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         )
         guard result == kCVReturnSuccess, let pixelBuffer else { return nil }
 
-        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer)
+        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: isMirrored)
         return createSampleBuffer(from: pixelBuffer)
     }
 
