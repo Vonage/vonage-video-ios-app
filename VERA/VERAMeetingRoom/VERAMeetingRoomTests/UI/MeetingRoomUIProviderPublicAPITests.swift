@@ -43,10 +43,9 @@ struct MeetingRoomUIProviderPublicAPITests {
         let request = MeetingRoomPresentationRequest(
             id: "sheet-request",
             style: .sheet,
-            title: "Sheet"
-        ) {
-            Text("Custom")
-        }
+            title: "Sheet",
+            content: AnyView(Text("Custom"))
+        )
 
         #expect(request.id == "sheet-request")
         #expect(request.style == .sheet)
