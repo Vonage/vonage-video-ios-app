@@ -22,6 +22,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
     @Published public var extraTrailingButtons: [ViewHolder] = []
+    @Published public var showSpeakerTestDialog: Bool = false
 
     public var onPublisherReady: (() -> Void)?
 
@@ -37,6 +38,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     private let userRepository: UserRepository
     private let waitingRoomNavigation: WaitingRoomDestination
+    private let speakerTestService: SpeakerTestService
 
     private var availableCameraDevices: [UICameraDevice] = []
 
@@ -60,7 +62,8 @@ public final class WaitingRoomViewModel: ObservableObject {
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         userRepository: UserRepository,
-        waitingRoomNavigation: WaitingRoomDestination
+        waitingRoomNavigation: WaitingRoomDestination,
+        speakerTestService: SpeakerTestService
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
@@ -72,6 +75,11 @@ public final class WaitingRoomViewModel: ObservableObject {
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
         self.userRepository = userRepository
         self.waitingRoomNavigation = waitingRoomNavigation
+        self.speakerTestService = speakerTestService
+    }
+
+    public func testSpeaker() {
+        speakerTestService.playTestSound()
     }
 
     public func loadUI() {

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Constants used by the settings factory for configuring view models.
 private enum SettingsConstants {
@@ -27,17 +28,23 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Service used to play a test tone through the device's current audio output.
+    private let speakerTestService: SpeakerTestService
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - speakerTestService: Service that plays a test tone to verify audio output.
     public init(
         repository: PublisherSettingsRepository,
-        statsDataSource: StatsDataSource
+        statsDataSource: StatsDataSource,
+        speakerTestService: SpeakerTestService
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
+        self.speakerTestService = speakerTestService
     }
 
     // MARK: - Settings View
@@ -50,7 +57,7 @@ public final class SettingsFactory {
     /// - Returns: A configured settings view.
     @MainActor
     public func makeSettingsView() -> SettingsView {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, speakerTestService: speakerTestService)
         return SettingsView(viewModel: viewModel)
     }
 
@@ -99,7 +106,7 @@ public final class SettingsFactory {
     /// - Returns: A tuple of the settings view model and the statistics view model.
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(repository: repository, speakerTestService: speakerTestService)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository

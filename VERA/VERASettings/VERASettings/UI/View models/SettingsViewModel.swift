@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERADomain
 import os.log
 
 /// Constants used throughout the settings system.
@@ -29,6 +30,9 @@ public final class SettingsViewModel: ObservableObject {
     /// Controls whether the settings view is currently presented.
     /// Set to `false` to dismiss the settings sheet.
     @Published public var isPresented: Bool = true
+
+    /// Controls visibility of the speaker test confirmation dialog.
+    @Published public var showSpeakerTestDialog: Bool = false
 
     /// The current publisher settings preferences being edited.
     /// Changes are auto-persisted after a short debounce.
@@ -108,6 +112,9 @@ public final class SettingsViewModel: ObservableObject {
     /// The repository responsible for persisting and retrieving publisher settings.
     private let repository: PublisherSettingsRepository
 
+    /// The service used to play a test tone through the current audio output.
+    private let speakerTestService: SpeakerTestService
+
     /// Cancellable for the auto-save subscription.
     private var autoSaveCancellable: AnyCancellable?
 
@@ -138,15 +145,22 @@ public final class SettingsViewModel: ObservableObject {
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
     public init(
         repository: PublisherSettingsRepository,
+        speakerTestService: SpeakerTestService = NullSpeakerTestService(),
         settingsPreference: PublisherSettingsPreferences = .default,
         autoSaveDebounce: TimeInterval = 0.3
     ) {
         self.repository = repository
+        self.speakerTestService = speakerTestService
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
     }
 
     // MARK: - Actions
+
+    /// Plays a short test tone through the current audio output route.
+    public func testSpeaker() {
+        speakerTestService.playTestSound()
+    }
 
     /// Reorders the codec list by moving items from source indices to a destination index.
     ///

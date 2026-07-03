@@ -333,10 +333,14 @@ final class MeetingRoomSDKContainer {
     lazy var vonageSettingsPlugin = VonageSettingsPlugin(
         settingsRepository: settingsRepository,
         statsWriter: statsRepository)
+    
+    lazy var defaultSpeakerTestService = DefaultSpeakerTestService()
 
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository)
+        statsDataSource: statsRepository,
+        speakerTestService: defaultSpeakerTestService
+    )
 
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,

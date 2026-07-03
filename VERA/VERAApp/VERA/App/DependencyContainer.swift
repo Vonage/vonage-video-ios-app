@@ -104,9 +104,12 @@ final class DependencyContainer {
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository,
-        advancedSettingsUseCase: advancedSettingsUseCase)
+        advancedSettingsUseCase: advancedSettingsUseCase,
+        speakerTestService: speakerTestService)
 
     lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
+
+    lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
@@ -203,7 +206,8 @@ final class DependencyContainer {
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: InMemoryStatsRepository())
+            statsDataSource: InMemoryStatsRepository(),
+            speakerTestService: speakerTestService)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

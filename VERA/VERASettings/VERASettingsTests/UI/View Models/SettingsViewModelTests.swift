@@ -737,4 +737,29 @@ struct SettingsViewModelTests {
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 2_000_000)
     }
+
+    // MARK: - Speaker Test
+
+    @Test("testSpeaker calls the service exactly once")
+    func testSpeakerCallsServiceOnce() {
+        let service = MockSpeakerTestService()
+        let viewModel = SettingsViewModel(repository: MockSettingsRepository(), speakerTestService: service)
+
+        viewModel.testSpeaker()
+
+        #expect(service.playTestSoundCallCount == 1)
+    }
+
+    @Test("showSpeakerTestDialog can be toggled on and off")
+    func showSpeakerTestDialogToggles() {
+        let viewModel = SettingsViewModel(repository: MockSettingsRepository())
+
+        #expect(viewModel.showSpeakerTestDialog == false)
+
+        viewModel.showSpeakerTestDialog = true
+        #expect(viewModel.showSpeakerTestDialog == true)
+
+        viewModel.showSpeakerTestDialog = false
+        #expect(viewModel.showSpeakerTestDialog == false)
+    }
 }

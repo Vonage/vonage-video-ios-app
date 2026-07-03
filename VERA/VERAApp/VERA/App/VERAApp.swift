@@ -146,6 +146,15 @@ struct VERAApp: App {
             waitingRoomViewModel = result.viewModel
             waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
 
+            let speakerTestButton = ViewHolder(id: "SpeakerTest") { [weak waitingRoomViewModel] in
+                Button {
+                    waitingRoomViewModel?.showSpeakerTestDialog = true
+                } label: {
+                    Image(systemName: "speaker.wave.2.circle")
+                }
+            }
+            waitingRoomViewModel.extraTrailingButtons.append(speakerTestButton)
+
             #if BACKGROUND_EFFECTS_ENABLED
                 waitingRoomViewModel.onPublisherReady = { [weak navigationCoordinator] in
                     navigationCoordinator?.videoEffectsViewModel?.reapplyCurrentEffect()
