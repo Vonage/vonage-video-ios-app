@@ -150,8 +150,16 @@ struct MeetingRoomComposedView: View {
             }
             .onChange(of: scenePhase) { phase in
                 #if !os(macOS)
-                    if enabledFeatures.contains(.pictureInPicture), phase == .background {
+                    guard enabledFeatures.contains(.pictureInPicture) else { return }
+                    switch phase {
+                    case .background:
                         pictureInPictureOrchestrator.requestPictureInPicture()
+                    case .active:
+                        // Returning via the app icon doesn't trigger iOS's PiP restore flow (tapping
+                        // the window does), so dismiss the lingering PiP window explicitly.
+                        pictureInPictureOrchestrator.stopPictureInPicture()
+                    default:
+                        break
                     }
                 #endif
             }

@@ -76,6 +76,13 @@ final class PictureInPictureController: NSObject {
         pipController?.startPictureInPicture()
     }
 
+    /// Re-points the running PiP sample-buffer layer at a different renderer's feed (used when the
+    /// PiP target changes between renderers while PiP stays active — e.g. publisher ↔ remote).
+    func attachFeed(to videoRenderer: PictureInPictureVideoRenderer) {
+        guard isConfigured else { return }
+        videoRenderer.pipBufferDisplayLayer = sampleBufferVideoCallView.sampleBufferDisplayLayer
+    }
+
     func stopPictureInPicture() {
         pipController?.stopPictureInPicture()
     }

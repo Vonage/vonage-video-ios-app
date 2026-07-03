@@ -138,10 +138,12 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         do {
             try pipController.configureIfNeeded(
                 with: sourceView,
-                videoRenderer: renderRouter.videoRenderer,
+                videoRenderer: renderRouter.activePipRenderer,
                 videoFrame: videoFrame
             )
             lastConfiguredSourceView = sourceView
+            Self.logger.debug(
+                "configure ok; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
         } catch {
             let sourceViewChanged = sourceView !== lastConfiguredSourceView
             if pipController.isConfigured,
@@ -151,7 +153,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
                 tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else if pipController.isConfigured,
                 pipTargetCameraEnabled,
-                wantsPictureInPicture || renderRouter.videoRenderer.renderedFrameCount > 0
+                wantsPictureInPicture || renderRouter.activePipRenderer.renderedFrameCount > 0
             {
                 tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
             } else {
@@ -170,7 +172,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         do {
             try pipController.reconfigure(
                 with: sourceView,
-                videoRenderer: renderRouter.videoRenderer,
+                videoRenderer: renderRouter.activePipRenderer,
                 videoFrame: videoFrame
             )
             lastConfiguredSourceView = sourceView
@@ -191,7 +193,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         do {
             try pipController.reconfigure(
                 with: pendingSourceView,
-                videoRenderer: renderRouter.videoRenderer,
+                videoRenderer: renderRouter.activePipRenderer,
                 videoFrame: pendingVideoFrame
             )
             lastConfiguredSourceView = pendingSourceView
@@ -202,25 +204,41 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     }
 
     public func requestPictureInPicture() {
+        let message =
+            "requestPictureInPicture; target=\(currentPipTargetId ?? "nil") "
+            + "canStart=\(pipController.canStartPictureInPicture) configured=\(pipController.isConfigured)"
+        Self.logger.debug("\(message, privacy: .public)")
         wantsPictureInPicture = true
         startPictureInPictureIfPossible()
     }
 
     public func startPictureInPictureIfPossible() {
         guard currentPipTargetId != nil else {
+            Self.logger.debug("start bail; no target")
             return
         }
 
         guard pipController.canStartPictureInPicture else {
+            Self.logger.debug("start bail; controller cannot start yet")
             return
         }
+        Self.logger.debug("startPictureInPicture invoked")
         pipController.startPictureInPicture()
+    }
+
+    /// Dismisses the PiP window when the app returns to the foreground by a route other than tapping
+    /// the PiP window (e.g. the app icon). Tapping the window triggers iOS's own restore flow, but
+    /// foregrounding via the icon does not, so without this the window lingers over the full-screen
+    /// app. A no-op when PiP is not running.
+    public func stopPictureInPicture() {
+        Self.logger.debug("stopPictureInPicture; inPiP=\(self.isInPictureInPicture, privacy: .public)")
+        wantsPictureInPicture = false
+        pipController.stopPictureInPicture()
     }
 
     public func tearDown() {
         cancellables.removeAll()
         lastInPipRetargetAt = nil
-        renderRouter.restorePublisherIfTarget(currentPipTargetId, call: call)
         renderRouter.reset()
         pipController.tearDown()
         participantSelector.reset()
@@ -248,25 +266,30 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         let targetId = participantSelector.pipTargetId(for: state)
         let targetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(
             participantId: targetId, in: state)
+        let targetMessage =
+            "updatePipTarget target=\(targetId ?? "nil") "
+            + "current=\(currentPipTargetId ?? "nil") cameraOn=\(targetCameraEnabled) "
+            + "participants=\(state.participants.count)"
+        Self.logger.debug("\(targetMessage, privacy: .public)")
 
         if targetId == currentPipTargetId {
             let cameraWasEnabled = pipTargetCameraEnabled
             pipTargetCameraEnabled = targetCameraEnabled
 
             if cameraWasEnabled && !targetCameraEnabled {
-                renderRouter.videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+                renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
                 canStartPictureInPicture = pipController.canStartPictureInPicture
                 return
             }
 
             if !cameraWasEnabled && targetCameraEnabled, let targetId {
-                renderRouter.videoRenderer.stopPlaceholder()
+                renderRouter.activePipRenderer.stopPlaceholder()
                 await refreshPipPipeline(targetId: targetId, state: state)
                 return
             }
 
             if !targetCameraEnabled {
-                renderRouter.videoRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
+                renderRouter.activePipRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
             }
             return
         }
@@ -319,11 +342,11 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         pipTargetCameraEnabled = cameraEnabled
 
         if cameraWasEnabled, !cameraEnabled {
-            renderRouter.videoRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
+            renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
         } else if !cameraWasEnabled, cameraEnabled {
-            renderRouter.videoRenderer.stopPlaceholder()
+            renderRouter.activePipRenderer.stopPlaceholder()
         } else if !cameraEnabled {
-            renderRouter.videoRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
+            renderRouter.activePipRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
         }
     }
 
@@ -343,22 +366,20 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         reconfigureController: Bool
     ) async {
         let previousTargetId = currentPipTargetId
+        let previousRenderer = renderRouter.activePipRenderer
+        let retargetMessage =
+            "retarget \(previousTargetId ?? "nil") -> \(targetId ?? "nil") "
+            + "reconfigureController=\(reconfigureController)"
+        Self.logger.debug("\(retargetMessage, privacy: .public)")
 
         if reconfigureController {
             invalidatePipConfiguration()
         } else {
             // Keep the controller/buffer layer; just stop the previous target's placeholder.
-            renderRouter.videoRenderer.stopPlaceholder()
+            previousRenderer.stopPlaceholder()
         }
 
-        let handedOff = renderRouter.handlePublisherHandoff(
-            previousTargetId: previousTargetId,
-            newTargetId: targetId,
-            call: call
-        )
-        if !handedOff {
-            await renderRouter.clearTarget(currentPipTargetId, call: call)
-        }
+        await renderRouter.clearTarget(previousTargetId, call: call)
 
         currentPipTargetId = targetId
         pipTargetParticipantId = nil
@@ -369,18 +390,33 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
 
         await applyPipRenderer(to: targetId, call: call)
+
+        // While PiP keeps running, the sample-buffer layer must follow the active renderer when the
+        // target moved between the publisher's permanent renderer and the shared remote renderer.
+        if !reconfigureController, renderRouter.activePipRenderer !== previousRenderer {
+            previousRenderer.pipBufferDisplayLayer = nil
+            pipController.attachFeed(to: renderRouter.activePipRenderer)
+        }
+
         if pipTargetCameraEnabled {
-            renderRouter.videoRenderer.stopPlaceholder()
+            renderRouter.activePipRenderer.stopPlaceholder()
         } else {
-            renderRouter.videoRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
+            renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
         }
     }
 
+    /// The current target's camera came back on. The publisher's permanent renderer resumes on its
+    /// own (its pipeline is never rewired), so only remote targets rebuild their attachment. The
+    /// controller is kept alive in both cases so `canStartPictureInPicture` survives camera flaps.
     private func refreshPipPipeline(targetId: String, state: ParticipantsState) async {
-        invalidatePipConfiguration()
         pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
         guard let call else { return }
+        if call.publisher.id == targetId {
+            return
+        }
+
+        invalidatePipConfiguration()
         await applyPipRenderer(to: targetId, call: call, forceReattach: true)
     }
 
@@ -393,22 +429,35 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             try await renderRouter.applyRenderer(
                 to: targetId,
                 call: call,
-                inlineView: makeInlineVideoView(),
+                inlineView: { makeInlineVideoView() },
                 forceReattach: forceReattach
             )
+            Self.logger.debug("applyPipRenderer attached target=\(targetId, privacy: .public)")
         } catch {
             // No stream for this target yet (e.g. subscriber not created): leave target state as-is;
             // the next participant-state emission retries once the stream exists.
+            Self.logger.debug("applyPipRenderer no stream for \(targetId, privacy: .public)")
             return
         }
 
         currentPipTargetId = targetId
         pipTargetParticipantId = targetId
+
+        // The publisher's renderer is embedded in the tile directly (no SwiftUI inline wrapper), so
+        // it reports source-view readiness itself; configure PiP from it as soon as it is on screen.
+        if call.publisher.id == targetId {
+            let renderer = renderRouter.activePipRenderer
+            renderer.onSourceViewReady = { [weak self] view, frame in
+                self?.configurePictureInPicture(sourceView: view, videoFrame: frame)
+            }
+            renderer.notifySourceViewReadyIfEligible()
+        }
     }
 
     private func invalidatePipConfiguration() {
-        renderRouter.videoRenderer.stopPlaceholder()
-        renderRouter.videoRenderer.prepareForPipRefresh()
+        renderRouter.activePipRenderer.stopPlaceholder()
+        renderRouter.activePipRenderer.prepareForPipRefresh()
+        renderRouter.activePipRenderer.resetSourceViewReadyNotification()
         pipController.tearDown()
         canStartPictureInPicture = false
         cachedInlineView = nil

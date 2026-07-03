@@ -4,11 +4,14 @@
 
 import AVFoundation
 import Foundation
+import OSLog
 import OpenTok
 import UIKit
 
 /// Custom `OTVideoRender` that displays inline video and feeds frames into PiP.
 final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
+    private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
+
     lazy var inlineDisplayLayer: AVSampleBufferDisplayLayer = {
         let layer = AVSampleBufferDisplayLayer()
         layer.videoGravity = .resizeAspect
@@ -16,6 +19,13 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     }()
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
+
+    /// Invoked once when this view is mounted in a window with a usable size, so it can serve as the
+    /// `activeVideoCallSourceView` for PiP when the renderer itself is embedded in the participant
+    /// tile (the permanently-attached local publisher renderer). Reset via
+    /// ``resetSourceViewReadyNotification()`` when the PiP controller needs reconfiguring.
+    var onSourceViewReady: ((UIView, CGRect) -> Void)?
+    private var didNotifySourceViewReady = false
 
     /// Horizontally mirrors live video frames. Set for the local front camera so the self-view
     /// matches the mirrored preview used elsewhere (e.g. the waiting room); remote video and the
@@ -52,6 +62,32 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     override func layoutSubviews() {
         super.layoutSubviews()
         inlineDisplayLayer.frame = bounds
+        notifySourceViewReadyIfEligible()
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        notifySourceViewReadyIfEligible()
+    }
+
+    /// Fires ``onSourceViewReady`` when this view is in a window with a usable size. Safe to call
+    /// repeatedly; delivers at most once until ``resetSourceViewReadyNotification()``.
+    func notifySourceViewReadyIfEligible() {
+        guard !didNotifySourceViewReady,
+            onSourceViewReady != nil,
+            window != nil,
+            bounds.width > 1,
+            bounds.height > 1
+        else { return }
+
+        didNotifySourceViewReady = true
+        Self.logger.debug("renderer.sourceViewReady \(String(describing: self.bounds.size), privacy: .public)")
+        onSourceViewReady?(self, bounds)
+    }
+
+    /// Allows ``onSourceViewReady`` to fire again after the PiP controller was torn down.
+    func resetSourceViewReadyNotification() {
+        didNotifySourceViewReady = false
     }
 
     /// Resets PiP buffer wiring after camera toggles or controller teardown.
@@ -137,6 +173,15 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         else { return }
 
         renderedFrameCount += 1
+        // Sparse heartbeat (~every 4s at 30fps) to tell "frames stopped arriving" apart from
+        // "frames arrive but don't display" when diagnosing frozen video.
+        if renderedFrameCount == 1 || renderedFrameCount % 120 == 0 {
+            let message =
+                "renderer.frame #\(renderedFrameCount) "
+                + "\(Int(format.imageWidth))x\(Int(format.imageHeight)) "
+                + "pipLayer=\(pipBufferDisplayLayer != nil)"
+            Self.logger.debug("\(message, privacy: .public)")
+        }
         enqueue(sampleBuffer, to: inlineDisplayLayer)
         if let pipBufferDisplayLayer {
             enqueue(sampleBuffer, to: pipBufferDisplayLayer)
@@ -144,7 +189,9 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     }
 
     private func enqueue(_ sampleBuffer: CMSampleBuffer, to layer: AVSampleBufferDisplayLayer) {
-        if layer.requiresFlushToResumeDecoding {
+        // A failed layer silently drops every subsequent enqueue; only a flush revives it.
+        // `requiresFlushToResumeDecoding` does not cover the `.failed` state.
+        if layer.status == .failed || layer.requiresFlushToResumeDecoding {
             layer.flush()
         }
         layer.enqueue(sampleBuffer)

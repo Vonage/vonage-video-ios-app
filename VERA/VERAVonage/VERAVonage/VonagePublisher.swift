@@ -70,12 +70,15 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     @Published public private(set) var wasPublishingAudio: Bool = false
     /// Whether the publisher is currently on hold.
     @Published public private(set) var isOnHold: Bool = false
-    private var isPictureInPictureRendererActive = false
-    private var pictureInPictureInlineView: AnyView?
-    /// Renderer that keeps the local tile alive after the publisher stops being the PiP target.
-    /// `OTPublisher.view` cannot be revived once a custom `videoRender` has been assigned, so we
-    /// keep rendering through this renderer instead of reverting to the (now dead) default view.
-    private var inlinePreviewRenderer: PictureInPictureVideoRenderer?
+    /// Permanent renderer for the local self-view during a call.
+    ///
+    /// Attached exactly once in ``setup()`` (i.e. at publish time, after the waiting room stopped
+    /// using `OTPublisher.view`) and never swapped for the rest of the call. The meeting-room tile
+    /// always embeds this renderer, and PiP taps its frames via `pipBufferDisplayLayer` — so there
+    /// is no `videoRender` rewiring mid-call, which is what froze the local tile (the SDK's default
+    /// view dies on redirect and frame delivery can stall on reattach).
+    let inlineVideoRenderer = PictureInPictureVideoRenderer()
+    private var isInlineRendererAttached = false
     /// Holds the current list of video transformers.
     @Published open private(set) var videoTransformers: [VERATransformer] = []
     /// Holds the current list of audio transformers.
@@ -120,7 +123,10 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Maps Vonage’s camera position to the app’s `CameraPosition` abstraction.
     public var cameraPosition: CameraPosition {
         get { otPublisher.cameraPosition == .front ? .front : .back }
-        set { otPublisher.cameraPosition = newValue == .front ? .front : .back }
+        set {
+            otPublisher.cameraPosition = newValue == .front ? .front : .back
+            updateInlineRendererMirroring()
+        }
     }
 
     /// Switches camera to a specific device by ID.
@@ -135,6 +141,13 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         default:
             break
         }
+        updateInlineRendererMirroring()
+    }
+
+    /// Keeps the self-view mirrored for the front camera (matching the waiting-room preview
+    /// convention) and un-mirrored for the back camera.
+    private func updateInlineRendererMirroring() {
+        inlineVideoRenderer.isMirrored = otPublisher.cameraPosition == .front
     }
 
     /// Current scale behaviour.
@@ -183,6 +196,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// - Important: Call after the publisher has a stream to ensure KVO publishers are available.
     func setup() {
+        attachInlineRendererIfNeeded()
+
         stream?
             .publisher(for: \.videoDimensions)
             .removeDuplicates()
@@ -223,38 +238,6 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Keeps `participant` synchronized with `publishAudio`, `publishVideo`,
     /// `videoDimensions`, and the rendered `view`.
     private func updateParticipant() {
-        if isPictureInPictureRendererActive, let pictureInPictureInlineView {
-            participant = Participant(
-                id: id,
-                connectionId: stream?.connection.connectionId,
-                name: stream?.name ?? "",
-                isMicEnabled: otPublisher.publishAudio,
-                isCameraEnabled: otPublisher.publishVideo,
-                videoDimensions: videoDimensions,
-                isRemote: false,
-                creationTime: date,
-                isScreenshare: isScreenshare,
-                audioLevel: audioLevel,
-                view: pictureInPictureInlineView)
-            return
-        }
-
-        if let inlinePreviewRenderer {
-            participant = Participant(
-                id: id,
-                connectionId: stream?.connection.connectionId,
-                name: stream?.name ?? "",
-                isMicEnabled: otPublisher.publishAudio,
-                isCameraEnabled: otPublisher.publishVideo,
-                videoDimensions: videoDimensions,
-                isRemote: false,
-                creationTime: date,
-                isScreenshare: isScreenshare,
-                audioLevel: audioLevel,
-                view: AnyView(UIViewContainer(view: inlinePreviewRenderer)))
-            return
-        }
-
         participant = Participant(
             id: id,
             connectionId: stream?.connection.connectionId,
@@ -266,45 +249,32 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: audioLevel,
-            view: view)
+            view: isInlineRendererAttached ? AnyView(UIViewContainer(view: inlineVideoRenderer)) : view)
     }
 
     // MARK: - Picture in Picture
 
-    func applyPictureInPictureRenderer(
-        _ renderer: PictureInPictureVideoRenderer,
-        inlineView: AnyView
-    ) {
-        isPictureInPictureRendererActive = true
-        pictureInPictureInlineView = inlineView
-        inlinePreviewRenderer = nil
-        otPublisher.videoRender = renderer
+    /// Attaches the permanent local renderer. Called once from ``setup()`` (publish time); the
+    /// waiting room uses `OTPublisher.view` before this point and the publisher is recreated for
+    /// each call, so the default view is never needed again afterwards.
+    private func attachInlineRendererIfNeeded() {
+        guard !isInlineRendererAttached, !isScreenshare else { return }
+        isInlineRendererAttached = true
+        updateInlineRendererMirroring()
+        otPublisher.videoRender = inlineVideoRenderer
+        // The SDK pauses its capture pipeline on resign-active by default, which would blank PiP;
+        // during a call the local video must keep flowing in the background.
         NotificationCenter.default.removeObserver(
             otPublisher,
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
-        updateParticipant()
     }
 
-    /// Keeps the local tile rendering after the publisher is no longer the PiP target.
-    ///
-    /// `OTPublisher.view` is backed by the SDK's default renderer; once a custom `videoRender`
-    /// has been attached it cannot be revived by clearing `videoRender`. Instead of reverting to
-    /// that dead view (which would show a blank/gray tile), we render the local preview through a
-    /// dedicated renderer so the meeting room keeps showing the local camera.
-    func applyInlinePreviewRenderer(_ renderer: PictureInPictureVideoRenderer) {
-        isPictureInPictureRendererActive = false
-        pictureInPictureInlineView = nil
-        inlinePreviewRenderer = renderer
-        otPublisher.videoRender = renderer
-        updateParticipant()
-    }
-
+    /// Detaches the renderer at end of call, right before the publisher is destroyed.
     func restoreDefaultVideoView() {
-        isPictureInPictureRendererActive = false
-        pictureInPictureInlineView = nil
-        inlinePreviewRenderer = nil
+        guard isInlineRendererAttached else { return }
+        isInlineRendererAttached = false
         otPublisher.videoRender = nil
         updateParticipant()
     }

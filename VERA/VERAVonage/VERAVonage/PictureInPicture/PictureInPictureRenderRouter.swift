@@ -22,35 +22,40 @@ final class PictureInPictureRenderRouter {
         case targetStreamNotFound(String)
     }
 
-    /// The renderer that feeds the AVKit PiP sample-buffer layer. Moves between targets.
+    /// Shared renderer that attaches to whichever *remote* participant is the PiP target.
     let videoRenderer = PictureInPictureVideoRenderer()
 
-    /// Keeps the local tile alive when the publisher stops being the PiP target (the shared
-    /// `videoRenderer` moves to the remote target in that case).
-    private let publisherPreviewRenderer = PictureInPictureVideoRenderer()
+    /// The renderer currently feeding the PiP sample-buffer layer: the publisher's own permanent
+    /// renderer when the local participant is the target, the shared `videoRenderer` for remotes.
+    /// The controller, placeholders, and frame checks must all go through this.
+    private(set) var activePipRenderer: PictureInPictureVideoRenderer
 
     /// Per-remote renderers that keep each remote tile alive after the shared `videoRenderer` moves
     /// to another participant (active-speaker switching).
     private var subscriberPreviewRenderers: [String: PictureInPictureVideoRenderer] = [:]
 
-    /// Attaches the shared renderer to `targetId`'s stream.
+    init() {
+        activePipRenderer = videoRenderer
+    }
+
+    /// Routes the PiP feed to `targetId`'s stream.
     ///
-    /// - Parameter forceReattach: detach any existing custom renderer from the target first, so a
-    ///   stale pipeline is fully rebuilt (used when the target's camera comes back on).
+    /// The local publisher renders through its own permanent renderer, so targeting it only selects
+    /// that renderer as the PiP feed — no `videoRender` rewiring. Remotes attach the shared
+    /// `videoRenderer` as before.
+    ///
+    /// - Parameter forceReattach: detach any existing custom renderer from a *remote* target first,
+    ///   so a stale pipeline is fully rebuilt (used when the target's camera comes back on).
     /// - Throws: ``RoutingError/targetStreamNotFound(_:)`` when no publisher or subscriber matches
     ///   `targetId`, so the caller can leave its target state untouched.
     func applyRenderer(
         to targetId: String,
         call: VonageCall,
-        inlineView: AnyView,
+        inlineView: () -> AnyView,
         forceReattach: Bool = false
     ) async throws {
         if call.publisher.id == targetId {
-            if forceReattach {
-                call.publisher.restoreDefaultVideoView()
-            }
-            videoRenderer.isMirrored = call.publisher.cameraPosition == .front
-            call.publisher.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
+            activePipRenderer = call.publisher.inlineVideoRenderer
             return
         }
 
@@ -63,67 +68,41 @@ final class PictureInPictureRenderRouter {
             // flip and mirrors here instead, so the inline tile and the PiP window — which bypasses
             // SwiftUI — stay identical.
             videoRenderer.isMirrored = true
-            subscriber.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
+            activePipRenderer = videoRenderer
+            subscriber.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView())
             return
         }
 
         throw RoutingError.targetStreamNotFound(targetId)
     }
 
-    /// Hands the publisher's tile straight to its dedicated preview renderer with a single
-    /// `videoRender` reassignment when it stops being the PiP target. We deliberately avoid the
-    /// `restoreDefaultVideoView()` path here: setting `OTPublisher.videoRender` to nil and
-    /// immediately reassigning it can leave the publisher not delivering frames, freezing the local
-    /// self-view.
-    ///
-    /// - Returns: `true` when the handoff applied (publisher was the previous target and is no
-    ///   longer the target), so the caller can skip the generic clear path.
-    func handlePublisherHandoff(
-        previousTargetId: String?,
-        newTargetId: String?,
-        call: VonageCall?
-    ) -> Bool {
-        guard let call,
-            previousTargetId == call.publisher.id,
-            let newTargetId,
-            newTargetId != call.publisher.id
-        else {
-            return false
-        }
-
-        publisherPreviewRenderer.isMirrored = call.publisher.cameraPosition == .front
-        call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
-        return true
-    }
-
-    /// Detaches the shared renderer from the current target, keeping that tile alive: the publisher
-    /// reverts to its default view, a remote is handed to its per-participant preview renderer.
+    /// Detaches the PiP feed from the current target, keeping that tile alive: the publisher keeps
+    /// rendering through its permanent renderer (nothing to do), a remote is handed to its
+    /// per-participant preview renderer.
     func clearTarget(_ currentPipTargetId: String?, call: VonageCall?) async {
         guard let currentPipTargetId, let call else { return }
 
         if call.publisher.id == currentPipTargetId {
-            call.publisher.restoreDefaultVideoView()
-        } else {
-            let previewRenderer = subscriberPreviewRenderer(for: currentPipTargetId)
-            if let subscriber = await call.subscriber(for: currentPipTargetId) {
-                subscriber.applyInlinePreviewRenderer(previewRenderer)
-            }
+            return
         }
-    }
 
-    /// Reverts the publisher to its default view on teardown when it is the current target.
-    func restorePublisherIfTarget(_ currentPipTargetId: String?, call: VonageCall?) {
-        guard let currentPipTargetId, call?.publisher.id == currentPipTargetId else { return }
-        call?.publisher.restoreDefaultVideoView()
+        let previewRenderer = subscriberPreviewRenderer(for: currentPipTargetId)
+        if let subscriber = await call.subscriber(for: currentPipTargetId) {
+            subscriber.applyInlinePreviewRenderer(previewRenderer)
+        }
     }
 
     func pruneSubscriberPreviewRenderers(keeping ids: Set<String>) {
         subscriberPreviewRenderers = subscriberPreviewRenderers.filter { ids.contains($0.key) }
     }
 
-    /// Resets shared state for teardown: stops the placeholder and drops all preview renderers.
+    /// Resets shared state for teardown: stops placeholders, detaches the publisher's renderer from
+    /// the PiP feed, and drops all preview renderers.
     func reset() {
+        activePipRenderer.stopPlaceholder()
+        activePipRenderer.onSourceViewReady = nil
         videoRenderer.stopPlaceholder()
+        activePipRenderer = videoRenderer
         subscriberPreviewRenderers.removeAll()
     }
 
