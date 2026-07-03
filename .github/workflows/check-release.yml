@@ -1,9 +1,6 @@
 name: Verify Release
 
 on:
-  push:
-    branches:
-      - vzaphod/VIDSOL-987_APICM_AUTO   # temporal — remove after testing
   workflow_dispatch:
     inputs:
       version:
