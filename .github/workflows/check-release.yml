@@ -1,10 +1,9 @@
-# .github/workflows/check-release.yml
 name: Verify Release
 
 on:
   push:
     branches:
-      - vzaphod/VIDSOL-987_APICM_AUTO # temporary — remove after testing
+      - vzaphod/VIDSOL-987_APICM_AUTO   # temporal — remove after testing
   workflow_dispatch:
     inputs:
       version:
@@ -18,7 +17,12 @@ on:
 jobs:
   verify-release:
     runs-on: ubuntu-latest
+    # Skip if triggered by push with no inputs
+    if: github.event_name == 'workflow_dispatch'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check release tag exists
         run: |
           TAG=$(gh release view "${{ inputs.version }}" \
@@ -36,11 +40,9 @@ jobs:
             -q '.object.type')
 
           if [ "$TAG_TYPE" == "tag" ]; then
-            # Annotated tag — resolve to actual commit
             TAG_SHA=$(gh api repos/${{ inputs.repo }}/git/tags/$TAG_OBJ_SHA \
               -q '.object.sha')
           else
-            # Lightweight tag — SHA is already the commit
             TAG_SHA=$TAG_OBJ_SHA
           fi
 
