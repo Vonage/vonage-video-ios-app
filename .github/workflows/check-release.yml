@@ -1,0 +1,40 @@
+# .github/workflows/check-release.yml
+name: Verify Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to verify (e.g. 1.3.0)"
+        required: true
+      repo:
+        description: "Repo to verify"
+        required: true
+        default: "Vonage/vonage-video-ios-app"
+
+jobs:
+  verify-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check release tag exists
+        run: |
+          TAG=$(gh release view "${{ inputs.version }}" \
+            --repo "${{ inputs.repo }}" \
+            --json tagName -q '.tagName')
+          echo "✅ Tag found: $TAG"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check main branch matches tag
+        run: |
+          TAG_SHA=$(gh api repos/${{ inputs.repo }}/git/refs/tags/${{ inputs.version }} \
+            -q '.object.sha')
+          MAIN_SHA=$(gh api repos/${{ inputs.repo }}/commits/main \
+            -q '.sha')
+          if [ "$TAG_SHA" != "$MAIN_SHA" ]; then
+            echo "❌ main ($MAIN_SHA) does not match tag ($TAG_SHA)"
+            exit 1
+          fi
+          echo "✅ main branch matches tag"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
