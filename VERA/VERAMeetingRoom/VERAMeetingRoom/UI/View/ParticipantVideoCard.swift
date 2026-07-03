@@ -65,11 +65,8 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-    /// The PiP target mirrors in its own renderer (so the PiP window, which bypasses SwiftUI, matches
-    /// the tile), so it opts out of this SwiftUI flip to avoid mirroring twice.
     var shouldFlipHorizontally: Bool {
         participant.isRemote && !participant.isScreenshare && participant.isCameraEnabled
-            && !participant.isPictureInPictureTarget
     }
 
     init(

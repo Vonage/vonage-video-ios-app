@@ -4,7 +4,6 @@
 
 import Foundation
 import SwiftUI
-import VERADomain
 
 /// Routes the shared Picture-in-Picture renderer onto whichever participant is the current PiP
 /// target, and keeps every other tile alive with a dedicated preview renderer.
@@ -49,7 +48,6 @@ final class PictureInPictureRenderRouter {
             if forceReattach {
                 call.publisher.restoreDefaultVideoView()
             }
-            videoRenderer.isMirrored = call.publisher.cameraPosition == .front
             call.publisher.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
             return
         }
@@ -58,11 +56,6 @@ final class PictureInPictureRenderRouter {
             if forceReattach {
                 subscriber.clearPictureInPictureRenderer()
             }
-            // The app mirrors remote camera tiles in the meeting room (see
-            // ParticipantVideoCard.shouldFlipHorizontally). The PiP target opts out of that SwiftUI
-            // flip and mirrors here instead, so the inline tile and the PiP window — which bypasses
-            // SwiftUI — stay identical.
-            videoRenderer.isMirrored = true
             subscriber.applyPictureInPictureRenderer(videoRenderer, inlineView: inlineView)
             return
         }
@@ -91,7 +84,6 @@ final class PictureInPictureRenderRouter {
             return false
         }
 
-        publisherPreviewRenderer.isMirrored = call.publisher.cameraPosition == .front
         call.publisher.applyInlinePreviewRenderer(publisherPreviewRenderer)
         return true
     }
