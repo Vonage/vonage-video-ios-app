@@ -36,7 +36,14 @@ final class YUVToARGBAccelerator {
         )
     }
 
-    func convertFrameVImageYUV(_ frame: OTVideoFrame, to pixelBufferRef: CVPixelBuffer?) -> vImage_Error {
+    /// - Parameter mirrored: horizontally flips the output so the local front camera matches the
+    ///   mirrored-preview convention. Reflecting the pixels (rather than transforming the layer)
+    ///   keeps it independent of the display layer's frame/geometry.
+    func convertFrameVImageYUV(
+        _ frame: OTVideoFrame,
+        to pixelBufferRef: CVPixelBuffer?,
+        mirrored: Bool = false
+    ) -> vImage_Error {
         guard let pixelBufferRef else {
             return vImage_Error(kvImageInvalidParameter)
         }
@@ -98,6 +105,14 @@ final class YUVToARGBAccelerator {
             255,
             vImage_Flags(kvImageNoFlags)
         )
+
+        if mirrored {
+            _ = vImageHorizontalReflect_ARGB8888(
+                &destinationImageBuffer,
+                &destinationImageBuffer,
+                vImage_Flags(kvImageNoFlags)
+            )
+        }
 
         CVPixelBufferUnlockBaseAddress(pixelBufferRef, [])
 
