@@ -23,6 +23,9 @@ import OpenTok
 /// Internally, it delegates to `OTSession` and forwards Vonage delegate events to your
 /// closures so you can compose higher-level behaviors elsewhere (e.g., in your call façade).
 open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
+    /// Test seam for exercising force-mute success and failure without a live SDK session.
+    var forceMuteStreamOperation: ((OTStream) -> OTError?)?
+
     private let session: OTSession
 
     /// Called when the session successfully connects.
@@ -212,6 +215,22 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         session.unsubscribe(subscriber.otSubscriber, error: &error)
 
         if let error = error {
+            throw error
+        }
+    }
+
+    /// Forces the publisher of the provided stream to mute audio.
+    open func forceMute(stream: OTStream) throws {
+        let error: OTError?
+        if let forceMuteStreamOperation {
+            error = forceMuteStreamOperation(stream)
+        } else {
+            var sdkError: OTError?
+            session.forceMuteStream(stream, error: &sdkError)
+            error = sdkError
+        }
+
+        if let error {
             throw error
         }
     }

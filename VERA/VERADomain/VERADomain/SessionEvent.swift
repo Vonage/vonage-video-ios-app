@@ -12,6 +12,7 @@ public enum SessionEvent {
     case didReconnect
     case streamReceived(streamId: String)
     case streamDropped(streamId: String)
+    case muteForced
     case error(_ error: Swift.Error)
     case sessionFailure(_ error: Swift.Error)
 }
