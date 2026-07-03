@@ -42,6 +42,13 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let isScreenshare: Bool
     /// The current audio level of the participant (0.0 to 1.0).
     public let audioLevel: Float
+    /// Identity of the object backing ``view`` (a renderer or SDK video view), so that equality
+    /// tracks *which rendering surface* is shown. `AnyView` itself has no identity and is excluded
+    /// from `Equatable`/`Hashable` — including it would defeat duplicate-filtering of
+    /// high-frequency updates — but without this token, view swaps would be invisible to
+    /// `removeDuplicates()` and the UI could keep rendering a stale (dead or black) video view.
+    /// `nil` (e.g. placeholders, tests) compares equal to `nil`: only backed surfaces are tracked.
+    public let viewIdentity: ObjectIdentifier?
 
     /// Optional callback invoked when this participant’s view appears on screen.
     ///
@@ -64,6 +71,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     ///   - creationTime: Creation timestamp.
     ///   - isScreenshare: `true` if the participant is screensharing.
     ///   - view: SwiftUI-compatible video view.
+    ///   - viewBackingObject: The renderer or SDK view instance that `view` wraps; its identity
+    ///     makes view swaps visible to equality-based duplicate filtering.
     ///   - audioLevel: Current audio level (0.0 to 1.0). Defaults to 0.0.
     public init(
         id: String,
@@ -76,7 +85,8 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         creationTime: Date,
         isScreenshare: Bool,
         audioLevel: Float = 0.0,
-        view: AnyView
+        view: AnyView,
+        backedBy viewBackingObject: AnyObject? = nil
     ) {
         self.id = id
         self.connectionId = connectionId
@@ -89,6 +99,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         self.isScreenshare = isScreenshare
         self.audioLevel = audioLevel
         self.view = view
+        self.viewIdentity = viewBackingObject.map(ObjectIdentifier.init)
     }
 
     /// Returns a copy of this participant with an empty view.
@@ -120,6 +131,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
             && lhs.creationTime == rhs.creationTime
             && lhs.isScreenshare == rhs.isScreenshare
             && lhs.audioLevel == rhs.audioLevel
+            && lhs.viewIdentity == rhs.viewIdentity
     }
 
     /// Hashes identity and core properties for set/dictionary usage.
@@ -137,6 +149,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
         hasher.combine(creationTime)
         hasher.combine(isScreenshare)
         hasher.combine(audioLevel)
+        hasher.combine(viewIdentity)
     }
 
     /// Aspect ratio to use for container sizing, with safe defaults.

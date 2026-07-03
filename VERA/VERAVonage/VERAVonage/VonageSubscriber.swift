@@ -91,6 +91,9 @@ public class VonageSubscriber: NSObject {
 
     private var isPictureInPictureRendererActive = false
     private var pictureInPictureInlineView: AnyView?
+    /// The shared PiP renderer backing `pictureInPictureInlineView`, kept so the participant's
+    /// `viewIdentity` reflects the actual rendering surface.
+    private var pictureInPictureRenderer: PictureInPictureVideoRenderer?
     /// Keeps the tile alive after the shared PiP renderer moves to another participant.
     /// `OTSubscriber.view` cannot be revived once a custom `videoRender` has been attached, so we
     /// keep rendering through this dedicated renderer instead of reverting to the (now dead) view.
@@ -126,7 +129,8 @@ public class VonageSubscriber: NSObject {
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: subscriber.view!)))
+            view: AnyView(UIViewContainer(view: subscriber.view!)),
+            backedBy: subscriber.view)
         super.init()
     }
 
@@ -175,12 +179,13 @@ public class VonageSubscriber: NSObject {
     /// - `onDisappear`: Disables video subscription
     private func updateParticipant() {
         if isPictureInPictureRendererActive, let pictureInPictureInlineView {
-            updateParticipant(with: pictureInPictureInlineView)
+            updateParticipant(with: pictureInPictureInlineView, backedBy: pictureInPictureRenderer)
             return
         }
 
         if let inlinePreviewRenderer {
-            updateParticipant(with: AnyView(UIViewContainer(view: inlinePreviewRenderer)))
+            updateParticipant(
+                with: AnyView(UIViewContainer(view: inlinePreviewRenderer)), backedBy: inlinePreviewRenderer)
             return
         }
 
@@ -195,7 +200,8 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: otSubscriber.view!)))
+            view: AnyView(UIViewContainer(view: otSubscriber.view!)),
+            backedBy: otSubscriber.view)
 
         participant.onAppear = { [weak self] in
             guard let self else { return }
@@ -298,6 +304,7 @@ public class VonageSubscriber: NSObject {
     ) {
         isPictureInPictureRendererActive = true
         pictureInPictureInlineView = inlineView
+        pictureInPictureRenderer = renderer
         inlinePreviewRenderer = nil
         otSubscriber.videoRender = renderer
         NotificationCenter.default.removeObserver(
@@ -305,7 +312,7 @@ public class VonageSubscriber: NSObject {
             name: UIApplication.willResignActiveNotification,
             object: nil
         )
-        updateParticipant(with: inlineView)
+        updateParticipant(with: inlineView, backedBy: renderer)
         if subscriberDidConnect {
             otSubscriber.subscribeToVideo = true
         }
@@ -319,6 +326,7 @@ public class VonageSubscriber: NSObject {
     func applyInlinePreviewRenderer(_ renderer: PictureInPictureVideoRenderer) {
         isPictureInPictureRendererActive = false
         pictureInPictureInlineView = nil
+        pictureInPictureRenderer = nil
         inlinePreviewRenderer = renderer
         otSubscriber.videoRender = renderer
         updateParticipant()
@@ -330,12 +338,13 @@ public class VonageSubscriber: NSObject {
     func clearPictureInPictureRenderer() {
         isPictureInPictureRendererActive = false
         pictureInPictureInlineView = nil
+        pictureInPictureRenderer = nil
         inlinePreviewRenderer = nil
         otSubscriber.videoRender = nil
         updateParticipant()
     }
 
-    private func updateParticipant(with view: AnyView) {
+    private func updateParticipant(with view: AnyView, backedBy viewBackingObject: AnyObject?) {
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -347,7 +356,8 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: audioLevel,
-            view: view)
+            view: view,
+            backedBy: viewBackingObject)
 
         participant.onAppear = { [weak self] in
             guard let self else { return }

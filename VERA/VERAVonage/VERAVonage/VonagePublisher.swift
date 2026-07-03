@@ -179,7 +179,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: false,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: publisher.view!)))
+            view: AnyView(UIViewContainer(view: publisher.view!)),
+            backedBy: publisher.view)
         super.init()
         otPublisher.audioLevelDelegate = self
         observeAppDidBecomeActive()
@@ -249,7 +250,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: audioLevel,
-            view: isInlineRendererAttached ? AnyView(UIViewContainer(view: inlineVideoRenderer)) : view)
+            view: isInlineRendererAttached ? AnyView(UIViewContainer(view: inlineVideoRenderer)) : view,
+            backedBy: isInlineRendererAttached ? inlineVideoRenderer : otPublisher.view)
     }
 
     // MARK: - Picture in Picture
