@@ -1,0 +1,47 @@
+appId: ${APP_ID}
+---
+# JWT encodes: { "sessionId": "1_MX4x", "roomName": "heart-of-gold", "iat": 1776844771 }
+# Mirrors the JWT construction in HandleUniversalLinkTests.makeTestSessionKey()
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Open deep link with a session-key JWT — room name is extracted from the JWT payload
+- openLink: "${DEEP_LINK_TEST_URL}/room/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiIxX01YNHgiLCJyb29tTmFtZSI6ImhlYXJ0LW9mLWdvbGQiLCJpYXQiOjE3NzY4NDQ3NzF9.dGVzdC1zaWduYXR1cmU"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Deep link bypasses the landing page — waiting room should be visible immediately
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Verify the room name decoded from the JWT payload is displayed
+- assertVisible:
+    text: "heart-of-gold"
+
+- takeScreenshot: 01-waiting-room-from-session-key-deep-link
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 02-meeting-room-from-session-key-deep-link
