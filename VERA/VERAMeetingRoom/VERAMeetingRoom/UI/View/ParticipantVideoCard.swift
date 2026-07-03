@@ -15,8 +15,10 @@ enum ParticipantVideoCardConstants {
     /// Background opacity for card fills
     static let backgroundOpacity: Double = 0.8
 
-    /// Padding around the avatar initials
-    static let avatarPadding: CGFloat = 24
+    /// Avatar circle diameter as a fraction of the card height for camera-off tiles. Matches the
+    /// circle ratio drawn by the PiP placeholder renderer so target and non-target camera-off
+    /// tiles look identical.
+    static let avatarHeightFraction: CGFloat = 0.55
 
     /// Corner radius of the card
     static let cornerRadius: CGFloat = 8
@@ -87,7 +89,7 @@ struct ParticipantVideoCard: View {
     @ViewBuilder
     private var cardContent: some View {
         Group {
-            if participant.isCameraEnabled || participant.isPictureInPictureTarget {
+            if participant.isCameraEnabled {
                 ZStack {
                     Rectangle()
                         .fill(
@@ -147,6 +149,16 @@ struct ParticipantVideoCard: View {
                 }
             } else {
                 ZStack {
+                    // The PiP target's video surface stays mounted (covered by the initials card
+                    // below): it is the AVKit PiP source view and must live in the hierarchy, but
+                    // the tile always presents the native initials card so camera-off participants
+                    // look identical whether or not PiP is targeting them. The PiP window itself
+                    // shows the renderer-drawn placeholder instead.
+                    if participant.isPictureInPictureTarget {
+                        participant.view
+                            .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
+                    }
+
                     Rectangle()
                         .fill(
                             theme.vGray4.opacity(
@@ -167,18 +179,21 @@ struct ParticipantVideoCard: View {
                         )
                         .overlay {
                             ZStack {
-                                Rectangle()
-                                    .fill(
-                                        theme.vGray4.opacity(
-                                            ParticipantVideoCardConstants.backgroundOpacity
-                                        )
-                                    )
-                                    .overlay(
-                                        AvatarInitials(state: .init(userName: participant.name))
-                                            .padding(ParticipantVideoCardConstants.avatarPadding)
-                                    )
-                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                                    .clipped()
+                                // The avatar is sized as a fixed fraction of the card, NOT via a
+                                // second background rectangle shaped by `participant.aspectRatio`:
+                                // that rectangle stacked a second translucent gray (shifting the
+                                // card's background depending on how much it covered) and made the
+                                // avatar size depend on stale video dimensions, so a participant who
+                                // joined camera-off looked different from one who turned their
+                                // camera off mid-call.
+                                GeometryReader { geometry in
+                                    let diameter =
+                                        geometry.size.height
+                                        * ParticipantVideoCardConstants.avatarHeightFraction
+                                    AvatarInitials(state: .init(userName: participant.name))
+                                        .frame(width: diameter, height: diameter)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
 
                                 ParticipantVideoCardOverlays(
                                     isMicEnabled: participant.isMicEnabled,

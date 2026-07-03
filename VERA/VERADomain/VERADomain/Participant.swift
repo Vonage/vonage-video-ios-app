@@ -170,9 +170,12 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
 
     /// The raw aspect ratio derived from the video dimensions.
     ///
-    /// Returns `16:9` if height is zero to avoid division by zero.
+    /// Returns `16:9` when the camera is off or height is zero: `videoDimensions` keeps the last
+    /// live value after video is disabled, and without this a camera-off tile would lay out at the
+    /// stale (often portrait) ratio — shrinking and letterboxing the avatar placeholder — instead
+    /// of matching the 16:9 used when a participant joins with video off.
     public var aspectRatio: Double {
-        guard videoDimensions.height > 0 else { return 16.0 / 9.0 }
+        guard isCameraEnabled, videoDimensions.height > 0 else { return 16.0 / 9.0 }
         return Double(videoDimensions.width / videoDimensions.height)
     }
 
