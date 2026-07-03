@@ -73,6 +73,7 @@ struct MeetingRoomComposedView: View {
 
     private var meetingRoomContent: some View {
         meetingRoomFactory.make(viewModel: viewModel)
+            .background(pictureInPictureAnchor)
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),
@@ -163,6 +164,20 @@ struct MeetingRoomComposedView: View {
                     }
                 #endif
             }
+    }
+
+    /// Stable, invisible PiP anchor spanning the meeting room content: the PiP window morphs
+    /// from/to this area instead of a single participant tile, and PiP is configurable as soon as
+    /// the room is on screen — independent of any tile's mount timing.
+    @ViewBuilder
+    private var pictureInPictureAnchor: some View {
+        #if !os(macOS)
+            if enabledFeatures.contains(.pictureInPicture) {
+                PictureInPictureAnchorView { view, frame in
+                    pictureInPictureOrchestrator.configurePictureInPicture(sourceView: view, videoFrame: frame)
+                }
+            }
+        #endif
     }
 
     private func bindPictureInPictureIfNeeded() async {

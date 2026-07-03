@@ -100,7 +100,6 @@ final class PictureInPictureRenderRouter {
     /// the PiP feed, and drops all preview renderers.
     func reset() {
         activePipRenderer.stopPlaceholder()
-        activePipRenderer.onSourceViewReady = nil
         videoRenderer.stopPlaceholder()
         activePipRenderer = videoRenderer
         subscriberPreviewRenderers.removeAll()

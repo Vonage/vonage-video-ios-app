@@ -20,13 +20,6 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
 
-    /// Invoked once when this view is mounted in a window with a usable size, so it can serve as the
-    /// `activeVideoCallSourceView` for PiP when the renderer itself is embedded in the participant
-    /// tile (the permanently-attached local publisher renderer). Reset via
-    /// ``resetSourceViewReadyNotification()`` when the PiP controller needs reconfiguring.
-    var onSourceViewReady: ((UIView, CGRect) -> Void)?
-    private var didNotifySourceViewReady = false
-
     /// Horizontally mirrors live video frames. Set for the local front camera so the self-view
     /// matches the mirrored preview used elsewhere (e.g. the waiting room); remote video and the
     /// back camera stay un-mirrored. Applied to the pixels, so the placeholder avatar is unaffected.
@@ -62,41 +55,6 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     override func layoutSubviews() {
         super.layoutSubviews()
         inlineDisplayLayer.frame = bounds
-        notifySourceViewReadyIfEligible()
-    }
-
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        notifySourceViewReadyIfEligible()
-    }
-
-    /// Fires ``onSourceViewReady`` when this view is in a window with a usable size. Safe to call
-    /// repeatedly; delivers at most once until ``resetSourceViewReadyNotification()``.
-    func notifySourceViewReadyIfEligible() {
-        guard !didNotifySourceViewReady,
-            onSourceViewReady != nil,
-            window != nil,
-            bounds.width > 1,
-            bounds.height > 1
-        else { return }
-
-        didNotifySourceViewReady = true
-        Self.logger.debug("renderer.sourceViewReady \(String(describing: self.bounds.size), privacy: .public)")
-        onSourceViewReady?(self, bounds)
-    }
-
-    /// Allows ``onSourceViewReady`` to fire again after the PiP controller was torn down.
-    func resetSourceViewReadyNotification() {
-        didNotifySourceViewReady = false
-    }
-
-    /// Resets PiP buffer wiring after camera toggles or controller teardown.
-    func prepareForPipRefresh() {
-        flush(layer: inlineDisplayLayer)
-        if let pipBufferDisplayLayer {
-            flush(layer: pipBufferDisplayLayer)
-        }
-        pipBufferDisplayLayer = nil
     }
 
     // MARK: - Placeholder
@@ -106,6 +64,7 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     func startPlaceholder(name: String) {
         if isPlaceholderActive, placeholderName == name { return }
 
+        Self.logger.debug("renderer.startPlaceholder")
         isPlaceholderActive = true
         placeholderName = name
         placeholderPixelBuffer = makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize)
@@ -129,6 +88,7 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
 
     func stopPlaceholder() {
         guard isPlaceholderActive else { return }
+        Self.logger.debug("renderer.stopPlaceholder")
         isPlaceholderActive = false
         placeholderName = nil
         placeholderPixelBuffer = nil

@@ -105,15 +105,4 @@ struct PictureInPictureVideoRendererTests {
 
         #expect(sut.isPlaceholderActive == false)
     }
-
-    // MARK: - prepareForPipRefresh
-
-    @Test("prepareForPipRefresh clears pip buffer layer")
-    func prepareForPipRefreshClearsBuffer() {
-        let sut = PictureInPictureVideoRenderer()
-
-        sut.prepareForPipRefresh()
-
-        #expect(sut.pipBufferDisplayLayer == nil)
-    }
 }
