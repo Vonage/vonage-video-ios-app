@@ -1,0 +1,35 @@
+.maestro/flows/deep-link-plain-room.yaml
+  s_9fbe6ec0607322::t_35671698ea6e13 7-15
+  s_9fbe6ec0607322::t_a2fbdc38b18748 20
+  s_9fbe6ec0607322::t_c3bf904e91308f 1-6,16-19,21-45
+.maestro/flows/deep-link-session-key.yaml
+  s_9fbe6ec0607322::t_6aa1068362ee1f 1-8,18-21,23-47
+  s_9fbe6ec0607322::t_90c36c6f891d18 9-17
+  s_9fbe6ec0607322::t_35011a06117ad9 22
+scripts/run-maestro-tests.sh
+  s_9fbe6ec0607322::t_eb40e2836cf2ca 368-377
+  s_9fbe6ec0607322::t_120673c96f2f39 394
+  s_9fbe6ec0607322::t_70cd3e61dcb8f3 382-388
+  s_9fbe6ec0607322::t_69da0f38ba2fd1 393,395-398
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "b47591012468dd1e6024df21d3b728c831029004",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_9fbe6ec0607322": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "dec886e0-657e-4679-a4fd-53bda7d15abf",
+        "model": "claude-sonnet-4.6"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
