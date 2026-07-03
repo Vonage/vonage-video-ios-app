@@ -294,6 +294,7 @@ public protocol CallFacade: AnyObject,
     NetworkStatsProvider,
     PublisherSettingsApplicable,
     SubscriberExtraStatsToggleable,
+    ParticipantForceMuting,
     PublisherAudioLevelProvider
 {}
 

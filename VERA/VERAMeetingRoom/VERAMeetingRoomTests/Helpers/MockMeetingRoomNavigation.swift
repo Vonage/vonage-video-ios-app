@@ -50,6 +50,22 @@ public struct MockMeetingRoomNavigation: MeetingRoomDestination {
         actionHandler?(.presentAlert(alert))
     }
 
+    public func presentForceMuteConfirmation(
+        message: String,
+        confirmTitle: String,
+        cancelTitle: String,
+        onConfirm: @escaping () -> Void
+    ) {
+        let alert = AlertItem(
+            title: message,
+            message: "",
+            okAction: confirmTitle,
+            cancelAction: cancelTitle,
+            onConfirm: onConfirm
+        )
+        actionHandler?(.presentAlert(alert))
+    }
+
     public func goToSettings() {
         actionHandler?(.navigateToSettings)
     }
