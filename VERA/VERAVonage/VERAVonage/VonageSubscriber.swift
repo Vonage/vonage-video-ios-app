@@ -89,15 +89,16 @@ public class VonageSubscriber: NSObject {
     /// Whether audio was subscribed before entering hold.
     @Published public private(set) var wasSubscribedToAudio: Bool = false
 
-    private var isPictureInPictureRendererActive = false
-    private var pictureInPictureInlineView: AnyView?
-    /// The shared PiP renderer backing `pictureInPictureInlineView`, kept so the participant's
-    /// `viewIdentity` reflects the actual rendering surface.
-    private var pictureInPictureRenderer: PictureInPictureVideoRenderer?
-    /// Keeps the tile alive after the shared PiP renderer moves to another participant.
-    /// `OTSubscriber.view` cannot be revived once a custom `videoRender` has been attached, so we
-    /// keep rendering through this dedicated renderer instead of reverting to the (now dead) view.
-    private var inlinePreviewRenderer: PictureInPictureVideoRenderer?
+    /// Permanent renderer for this participant's video, attached once at creation and never
+    /// rewired. The tile always embeds it, and PiP taps its frames via `pipBufferDisplayLayer`
+    /// when this participant is the target — so there is no mid-call `videoRender` swap (which
+    /// kills the SDK's default view and can stall frame delivery) and no view change for the UI
+    /// to propagate.
+    let inlineVideoRenderer = PictureInPictureVideoRenderer()
+
+    /// `true` while this participant is the PiP target. Keeps the video subscription alive even
+    /// when the tile is hidden, so the PiP window keeps receiving frames.
+    private var isPictureInPictureTargetStream = false
 
     /// Tracks the number of views currently displaying this participant.
     /// Video is enabled when count > 0 and disabled when count reaches 0.
@@ -119,6 +120,20 @@ public class VonageSubscriber: NSObject {
         self.stream = stream
         id = stream.streamId
         isScreenshare = stream.videoType == .screen
+
+        // Attach the permanent renderer BEFORE the first participant snapshot is built, so every
+        // view the UI ever sees for this participant is already the final one. Remote camera video
+        // is mirrored in pixels (matching the app's mirrored-tile convention and the PiP window);
+        // screen shares are never mirrored.
+        inlineVideoRenderer.isMirrored = stream.videoType != .screen
+        subscriber.videoRender = inlineVideoRenderer
+        // The SDK pauses rendering on resign-active by default; PiP needs frames in the background.
+        NotificationCenter.default.removeObserver(
+            subscriber,
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+
         participant = Participant(
             id: stream.streamId,
             connectionId: stream.connection.connectionId,
@@ -129,8 +144,7 @@ public class VonageSubscriber: NSObject {
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: subscriber.view!)),
-            backedBy: subscriber.view)
+            view: AnyView(UIViewContainer(view: inlineVideoRenderer)))
         super.init()
     }
 
@@ -178,17 +192,6 @@ public class VonageSubscriber: NSObject {
     /// - `onAppear`: Enables video subscription and schedules a delayed reinforcement
     /// - `onDisappear`: Disables video subscription
     private func updateParticipant() {
-        if isPictureInPictureRendererActive, let pictureInPictureInlineView {
-            updateParticipant(with: pictureInPictureInlineView, backedBy: pictureInPictureRenderer)
-            return
-        }
-
-        if let inlinePreviewRenderer {
-            updateParticipant(
-                with: AnyView(UIViewContainer(view: inlinePreviewRenderer)), backedBy: inlinePreviewRenderer)
-            return
-        }
-
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -200,8 +203,7 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: otSubscriber.view!)),
-            backedBy: otSubscriber.view)
+            view: AnyView(UIViewContainer(view: inlineVideoRenderer)))
 
         participant.onAppear = { [weak self] in
             guard let self else { return }
@@ -234,12 +236,27 @@ public class VonageSubscriber: NSObject {
         // it will result in an inability to modify the video subscription later
         guard subscriberDidConnect else { return }
 
-        if isPictureInPictureRendererActive {
+        if isPictureInPictureTargetStream {
             otSubscriber.subscribeToVideo = true
             return
         }
 
         otSubscriber.subscribeToVideo = visible
+    }
+
+    /// Marks this participant as the PiP target (or releases it).
+    ///
+    /// While targeted, the video subscription is forced on regardless of tile visibility so the
+    /// PiP window keeps receiving frames (e.g. while the app is backgrounded and no tile is
+    /// rendered). Releasing restores visibility-driven subscription.
+    func setPictureInPictureTarget(_ isTarget: Bool) {
+        isPictureInPictureTargetStream = isTarget
+        guard subscriberDidConnect else { return }
+        if isTarget {
+            otSubscriber.subscribeToVideo = true
+        } else if visibilityCount <= 0 {
+            otSubscriber.subscribeToVideo = false
+        }
     }
 
     /// Enables or disables audio subscription.
@@ -296,89 +313,6 @@ public class VonageSubscriber: NSObject {
         otSubscriber.subscribeToCaptions = false
     }
 
-    // MARK: - Picture in Picture
-
-    func applyPictureInPictureRenderer(
-        _ renderer: PictureInPictureVideoRenderer,
-        inlineView: AnyView
-    ) {
-        isPictureInPictureRendererActive = true
-        pictureInPictureInlineView = inlineView
-        pictureInPictureRenderer = renderer
-        inlinePreviewRenderer = nil
-        otSubscriber.videoRender = renderer
-        NotificationCenter.default.removeObserver(
-            otSubscriber,
-            name: UIApplication.willResignActiveNotification,
-            object: nil
-        )
-        updateParticipant(with: inlineView, backedBy: renderer)
-        if subscriberDidConnect {
-            otSubscriber.subscribeToVideo = true
-        }
-    }
-
-    /// Keeps the tile rendering after the shared PiP renderer moves to another participant.
-    ///
-    /// `OTSubscriber.view` cannot be revived once a custom `videoRender` was attached, so reverting
-    /// to it would blank the tile. We render through a dedicated renderer instead with a single
-    /// `videoRender` reassignment (no nil round-trip, which can stop frame delivery).
-    func applyInlinePreviewRenderer(_ renderer: PictureInPictureVideoRenderer) {
-        isPictureInPictureRendererActive = false
-        pictureInPictureInlineView = nil
-        pictureInPictureRenderer = nil
-        inlinePreviewRenderer = renderer
-        otSubscriber.videoRender = renderer
-        updateParticipant()
-        if subscriberDidConnect {
-            otSubscriber.subscribeToVideo = true
-        }
-    }
-
-    func clearPictureInPictureRenderer() {
-        isPictureInPictureRendererActive = false
-        pictureInPictureInlineView = nil
-        pictureInPictureRenderer = nil
-        inlinePreviewRenderer = nil
-        otSubscriber.videoRender = nil
-        updateParticipant()
-    }
-
-    private func updateParticipant(with view: AnyView, backedBy viewBackingObject: AnyObject?) {
-        let name = stream.name ?? ""
-        participant = Participant(
-            id: id,
-            connectionId: stream.connection.connectionId,
-            name: name,
-            isMicEnabled: stream.hasAudio,
-            isCameraEnabled: stream.hasVideo,
-            videoDimensions: videoDimensions,
-            creationTime: date,
-            isScreenshare: isScreenshare,
-            audioLevel: audioLevel,
-            view: view,
-            backedBy: viewBackingObject)
-
-        participant.onAppear = { [weak self] in
-            guard let self else { return }
-            self.visibilityCount += 1
-            self.disableTask?.cancel()
-            if self.visibilityCount > 0 {
-                self.setActiveSubscription(true)
-            }
-        }
-
-        participant.onDisappear = { [weak self] in
-            guard let self else { return }
-            self.visibilityCount = max(0, self.visibilityCount - 1)
-            self.disableTask?.cancel()
-            self.disableTask = Task { @MainActor [weak self] in
-                try? await Task.sleep(for: .milliseconds(SubscriberConstants.videoDisableDebounceNanoseconds))
-                guard let self, !Task.isCancelled, self.visibilityCount <= 0 else { return }
-                self.setActiveSubscription(false)
-            }
-        }
-    }
 }
 
 // MARK: - OTSubscriberDelegate

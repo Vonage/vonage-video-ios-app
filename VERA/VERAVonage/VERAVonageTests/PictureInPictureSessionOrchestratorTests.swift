@@ -50,28 +50,6 @@ struct PictureInPictureOrchestratorTests {
         #expect(sut.canStartPictureInPicture == false)
     }
 
-    // MARK: - configurePictureInPicture
-
-    @Test("configurePictureInPicture with zero-size frame is a no-op")
-    func configureWithZeroFrame() {
-        let sut = PictureInPictureSessionOrchestrator()
-        let view = UIView()
-
-        sut.configurePictureInPicture(sourceView: view, videoFrame: .zero)
-
-        #expect(sut.canStartPictureInPicture == false)
-    }
-
-    @Test("configurePictureInPicture with 1x1 frame is a no-op")
-    func configureWithTinyFrame() {
-        let sut = PictureInPictureSessionOrchestrator()
-        let view = UIView()
-
-        sut.configurePictureInPicture(sourceView: view, videoFrame: CGRect(x: 0, y: 0, width: 1, height: 1))
-
-        #expect(sut.canStartPictureInPicture == false)
-    }
-
     // MARK: - tearDown
 
     @Test("tearDown resets all published state")

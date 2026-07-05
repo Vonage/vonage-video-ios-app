@@ -11,12 +11,14 @@ import VERADomain
 
 /// Coordinates Picture-in-Picture for an active Vonage call.
 ///
-/// The AVKit controller is configured once against a stable room-level anchor view
-/// (``PictureInPictureAnchorView``) and never torn down mid-call; what PiP *shows* is a separate
-/// concern — the sample-buffer feed follows the current target's renderer via
-/// ``PictureInPictureRenderRouter``. This keeps `canStartPictureInPicture` true from shortly after
-/// joining through retargets and camera toggles, independent of any participant tile's mount
-/// timing. ``PictureInPictureParticipantSelector`` decides *which* participant to follow.
+/// Every participant owns a permanent renderer (attached at stream creation, never rewired), so
+/// retargeting PiP is a single cheap operation: point the PiP sample-buffer feed at the target's
+/// renderer. The AVKit controller itself is anchored once to the room-level
+/// ``PictureInPictureAnchorView`` and never re-anchored to tiles: tiles are demolished by layout
+/// changes and SwiftUI identity resets, and AVKit silently refuses to start (or permanently drops
+/// `isPictureInPicturePossible`) when its source view leaves the window — only the room view is
+/// mounted for the whole call. ``PictureInPictureParticipantSelector`` decides *which* participant
+/// to follow.
 @MainActor
 public final class PictureInPictureSessionOrchestrator: ObservableObject {
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
@@ -26,27 +28,30 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     @Published public private(set) var pipTargetParticipantId: String?
 
     private let participantSelector = PictureInPictureParticipantSelector()
-    private let renderRouter = PictureInPictureRenderRouter()
+    private let pipController = PictureInPictureController()
 
     /// Timestamp of the last in-PiP active-speaker retarget, used to debounce rapid switching when
     /// multiple participants talk over each other.
     private var lastInPipRetargetAt: Date?
     private static let minimumInPipRetargetInterval: TimeInterval = 1.5
 
-    /// Tracks the last source view we successfully (re)configured `pipController` with so we can
-    /// detect when SwiftUI has replaced the underlying `PictureInPictureVideoContainerView` (e.g.
-    /// after a participant grid reflow). The view is held weakly because its lifetime is owned by
-    /// the meeting room view hierarchy.
+    /// The current target's renderer: feeds the PiP window, hosts the camera-off placeholder, and
+    /// its view is the controller's anchor.
+    private var activePipRenderer: PictureInPictureVideoRenderer?
+
+    /// The source view the controller is currently configured with, to detect when SwiftUI has
+    /// replaced the room anchor view instance. Weak: owned by the room hierarchy.
     private weak var lastConfiguredSourceView: UIView?
-    private weak var pendingSourceView: UIView?
-    private var pendingVideoFrame: CGRect = .zero
-    private let pipController = PictureInPictureController()
+
+    /// Room-level anchor registered by the meeting room UI; mounted for the whole call.
+    private weak var anchorView: UIView?
+    private var anchorFrame: CGRect = .zero
+
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
     private var currentPipTargetId: String?
     private var pipTargetCameraEnabled = false
     private var wantsPictureInPicture = false
-    private var cachedInlineView: AnyView?
 
     public init() {
         pipController.onPictureInPictureStateDidStart = { [weak self] in
@@ -58,7 +63,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             self.isInPictureInPicture = false
             self.wantsPictureInPicture = false
             self.lastInPipRetargetAt = nil
-            self.reconfigureForPendingSourceViewIfNeeded()
         }
         pipController.onPictureInPicturePossibleDidChange = { [weak self] in
             guard let self else { return }
@@ -102,99 +106,15 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
                 self?.tearDown()
             }
             .store(in: &cancellables)
-
-        // The PiP controller anchors to a stable room-level view (`PictureInPictureAnchorView`,
-        // mounted with the meeting room and delivered via `configurePictureInPicture`), never to a
-        // participant tile: tiles mount on SwiftUI's schedule — seconds late, or not at all while
-        // backgrounding — and anchoring to one also makes the morph animation originate from that
-        // tile regardless of who PiP is showing. What PiP *shows* is decoupled from the anchor —
-        // the sample-buffer feed follows `activePipRenderer` as the target changes.
     }
 
-    /// Inline video surface shown in a remote PiP target's tile. Purely a display surface — the PiP
-    /// controller is anchored to the room-level anchor view, so this view's mount timing never
-    /// gates PiP startability. Cached so retargets hand every tile the same view value.
-    public func makeInlineVideoView() -> AnyView {
-        if let cachedInlineView {
-            return cachedInlineView
-        }
-
-        let inlineView = AnyView(PictureInPictureInlineVideoView(renderer: renderRouter.videoRenderer))
-        cachedInlineView = inlineView
-        return inlineView
-    }
-
-    public func configurePictureInPicture(sourceView: UIView, videoFrame: CGRect) {
-        guard pipController.isPictureInPictureSupported else {
-            return
-        }
-        guard videoFrame.width > 1, videoFrame.height > 1 else {
-            return
-        }
-
-        pendingSourceView = sourceView
-        pendingVideoFrame = videoFrame
-        do {
-            try pipController.configureIfNeeded(
-                with: sourceView,
-                videoRenderer: renderRouter.activePipRenderer,
-                videoFrame: videoFrame
-            )
-            lastConfiguredSourceView = sourceView
-            Self.logger.debug(
-                "configure ok; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
-        } catch {
-            // Each anchor instance configures at most once, so reaching here means SwiftUI replaced
-            // the anchor view mid-call and the already-configured controller must re-anchor. While
-            // PiP is active, reconfiguring is deferred to `reconfigureForPendingSourceViewIfNeeded`
-            // (the pending source view was recorded above).
-            guard pipController.isConfigured,
-                !pipController.isInPictureInPicture,
-                sourceView !== lastConfiguredSourceView
-            else { return }
-            tryReconfiguration(sourceView: sourceView, videoFrame: videoFrame)
-        }
-
-        canStartPictureInPicture = pipController.canStartPictureInPicture
-
-        if wantsPictureInPicture {
-            startPictureInPictureIfPossible()
-        }
-    }
-
-    private func tryReconfiguration(sourceView: UIView, videoFrame: CGRect) {
-        do {
-            try pipController.reconfigure(
-                with: sourceView,
-                videoRenderer: renderRouter.activePipRenderer,
-                videoFrame: videoFrame
-            )
-            lastConfiguredSourceView = sourceView
-        } catch {
-            Self.logger.error("\(error.localizedDescription)")
-        }
-    }
-
-    private func reconfigureForPendingSourceViewIfNeeded() {
-        guard let pendingSourceView,
-            pendingSourceView !== lastConfiguredSourceView,
-            pendingVideoFrame.width > 1,
-            pendingVideoFrame.height > 1,
-            pipController.isConfigured,
-            !pipController.isInPictureInPicture
-        else { return }
-
-        do {
-            try pipController.reconfigure(
-                with: pendingSourceView,
-                videoRenderer: renderRouter.activePipRenderer,
-                videoFrame: pendingVideoFrame
-            )
-            lastConfiguredSourceView = pendingSourceView
-            canStartPictureInPicture = pipController.canStartPictureInPicture
-        } catch {
-            Self.logger.error("\(error.localizedDescription)")
-        }
+    /// Registers the room-level anchor and configures the controller against it, making PiP
+    /// startable from the moment the room is on screen.
+    public func registerAnchor(sourceView: UIView, videoFrame: CGRect) {
+        anchorView = sourceView
+        anchorFrame = videoFrame
+        Self.logger.debug("anchor registered \(String(describing: videoFrame.size), privacy: .public)")
+        configureController(sourceView: sourceView, videoFrame: videoFrame)
     }
 
     public func requestPictureInPicture() {
@@ -203,6 +123,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             + "canStart=\(pipController.canStartPictureInPicture) configured=\(pipController.isConfigured)"
         Self.logger.debug("\(message, privacy: .public)")
         wantsPictureInPicture = true
+        ensureControllerReady()
         startPictureInPictureIfPossible()
 
         // AVKit can silently swallow a start issued exactly at the background transition (no
@@ -244,7 +165,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     public func tearDown() {
         cancellables.removeAll()
         lastInPipRetargetAt = nil
-        renderRouter.reset()
+        activePipRenderer?.stopPlaceholder()
+        activePipRenderer = nil
         pipController.tearDown()
         participantSelector.reset()
         call = nil
@@ -254,15 +176,12 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         canStartPictureInPicture = false
         pipTargetParticipantId = nil
         wantsPictureInPicture = false
-        cachedInlineView = nil
         lastConfiguredSourceView = nil
-        pendingSourceView = nil
-        pendingVideoFrame = .zero
     }
 
-    private func updatePipTarget(for state: ParticipantsState) async {
-        renderRouter.pruneSubscriberPreviewRenderers(keeping: Set(state.participants.map(\.id)))
+    // MARK: - Target selection
 
+    private func updatePipTarget(for state: ParticipantsState) async {
         if isInPictureInPicture || pipController.isInPictureInPicture {
             await updateActivePipTargetWhileInPictureInPicture(for: state)
             return
@@ -278,24 +197,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         Self.logger.debug("\(targetMessage, privacy: .public)")
 
         if targetId == currentPipTargetId {
-            let cameraWasEnabled = pipTargetCameraEnabled
-            pipTargetCameraEnabled = targetCameraEnabled
-
-            if cameraWasEnabled && !targetCameraEnabled {
-                renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
-                canStartPictureInPicture = pipController.canStartPictureInPicture
-                return
-            }
-
-            if !cameraWasEnabled && targetCameraEnabled, let targetId {
-                renderRouter.activePipRenderer.stopPlaceholder()
-                await refreshPipPipeline(targetId: targetId, state: state)
-                return
-            }
-
-            if !targetCameraEnabled {
-                renderRouter.activePipRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
-            }
+            syncPlaceholder(cameraEnabled: targetCameraEnabled, targetId: targetId, state: state)
             return
         }
 
@@ -314,13 +216,9 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         await retargetPipRenderer(to: targetId, state: state)
     }
 
-    /// While PiP is active we follow the active speaker but must not tear down the running PiP
-    /// controller. When the active speaker changes we re-point the shared renderer at the new
-    /// participant (lightweight retarget, keeping the controller and its sample-buffer layer), and
-    /// when the current target stays put we only keep its placeholder in sync with its camera state.
-    /// The orchestrator is the single source of truth for the placeholder here: the renderer drops
-    /// incoming frames while the placeholder is active, so we explicitly stop it when the camera is
-    /// re-enabled to let live video resume.
+    /// While PiP is active we follow the active speaker but must not disturb the running PiP
+    /// window: retargets move only the sample-buffer feed, and when the target stays put we keep
+    /// its placeholder in sync with its camera state.
     private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) async {
         let targetId = participantSelector.activeSpeakerPipTargetId(for: state, currentPipTargetId: currentPipTargetId)
 
@@ -341,42 +239,52 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             return
         }
 
-        let cameraWasEnabled = pipTargetCameraEnabled
         let cameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(
             participantId: currentPipTargetId, in: state)
+        syncPlaceholder(cameraEnabled: cameraEnabled, targetId: currentPipTargetId, state: state)
+    }
+
+    /// Keeps the camera-off placeholder in step with the target's camera state. The orchestrator
+    /// is the single source of truth here: the renderer drops incoming frames while the
+    /// placeholder is active, so it is explicitly stopped when the camera is re-enabled — and with
+    /// permanent renderers there is nothing to rebuild, frames resume on the existing pipeline.
+    private func syncPlaceholder(cameraEnabled: Bool, targetId: String?, state: ParticipantsState) {
+        let cameraWasEnabled = pipTargetCameraEnabled
         pipTargetCameraEnabled = cameraEnabled
 
+        guard let activePipRenderer else { return }
+
         if cameraWasEnabled, !cameraEnabled {
-            renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: currentPipTargetId, in: state))
+            activePipRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
         } else if !cameraWasEnabled, cameraEnabled {
-            renderRouter.activePipRenderer.stopPlaceholder()
+            activePipRenderer.stopPlaceholder()
         } else if !cameraEnabled {
-            renderRouter.activePipRenderer.updatePlaceholderName(participantName(for: currentPipTargetId, in: state))
+            activePipRenderer.updatePlaceholderName(participantName(for: targetId, in: state))
         }
     }
 
-    /// Points the PiP feed at `targetId`, detaching it from the previous target.
+    // MARK: - Retargeting
+
+    /// Points the PiP feed and anchor at `targetId`'s permanent renderer.
     ///
-    /// The PiP controller itself is never torn down here: it stays anchored to the local tile's
-    /// renderer (configured in `bind(to:)`), so `canStartPictureInPicture` survives retargets and
-    /// PiP keeps playing without interruption when the target changes mid-PiP. Only the
-    /// sample-buffer feed moves between renderers.
-    private func retargetPipRenderer(
-        to targetId: String?,
-        state: ParticipantsState
-    ) async {
+    /// Nothing on the OpenTok side is rewired — renderers are attached to their streams for life.
+    /// Retargeting moves the sample-buffer feed, re-anchors the controller to the new target's
+    /// tile view (deferred to PiP stop while PiP is running — AVKit forbids reconfiguring an
+    /// active controller), and keeps the target's video subscription alive while its tile is
+    /// hidden.
+    private func retargetPipRenderer(to targetId: String?, state: ParticipantsState) async {
         let previousTargetId = currentPipTargetId
-        let previousRenderer = renderRouter.activePipRenderer
+        let previousRenderer = activePipRenderer
         Self.logger.debug(
             "retarget \(previousTargetId ?? "nil", privacy: .public) -> \(targetId ?? "nil", privacy: .public)")
 
-        previousRenderer.stopPlaceholder()
-        await renderRouter.clearTarget(previousTargetId, call: call)
+        previousRenderer?.stopPlaceholder()
+        if let previousTargetId, let call, previousTargetId != call.publisher.id {
+            await call.subscriber(for: previousTargetId)?.setPictureInPictureTarget(false)
+        }
 
-        // The target is committed by applyPipRenderer only on a successful attach. Pre-committing
-        // it here would make a failed attach (subscriber not ready yet) look like success to the
-        // next emission — updatePipTarget's same-target branch would then swallow every retry and
-        // the participant would never actually host the PiP renderer.
+        // The target is committed only when its renderer is resolved; a failed resolution leaves
+        // it unset so the next participant-state emission retries the switch.
         currentPipTargetId = nil
         pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
@@ -385,64 +293,107 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             return
         }
 
-        await applyPipRenderer(to: targetId, call: call)
-        guard currentPipTargetId == targetId else {
+        let renderer: PictureInPictureVideoRenderer?
+        if call.publisher.id == targetId {
+            renderer = call.publisher.inlineVideoRenderer
+        } else if let subscriber = await call.subscriber(for: targetId) {
+            subscriber.setPictureInPictureTarget(true)
+            renderer = subscriber.inlineVideoRenderer
+        } else {
+            renderer = nil
+        }
+
+        guard let renderer else {
+            Self.logger.debug("retarget: no stream for \(targetId, privacy: .public); will retry")
             pipTargetParticipantId = nil
             return
         }
 
-        // The sample-buffer feed follows the active renderer when the target moved between the
-        // publisher's permanent renderer and the shared remote renderer.
-        if renderRouter.activePipRenderer !== previousRenderer {
-            previousRenderer.pipBufferDisplayLayer = nil
-        }
-        pipController.attachFeed(to: renderRouter.activePipRenderer)
-
-        if pipTargetCameraEnabled {
-            renderRouter.activePipRenderer.stopPlaceholder()
-        } else {
-            renderRouter.activePipRenderer.startPlaceholder(name: participantName(for: targetId, in: state))
-        }
-    }
-
-    /// The current target's camera came back on. The publisher's permanent renderer resumes on its
-    /// own (its pipeline is never rewired), so only remote targets rebuild their attachment. The
-    /// controller is never torn down, so `canStartPictureInPicture` survives camera flaps.
-    private func refreshPipPipeline(targetId: String, state: ParticipantsState) async {
-        pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
-
-        guard let call else { return }
-        if call.publisher.id == targetId {
-            return
-        }
-
-        await applyPipRenderer(to: targetId, call: call, forceReattach: true)
-        guard currentPipTargetId == targetId else { return }
-        pipController.attachFeed(to: renderRouter.activePipRenderer)
-    }
-
-    private func applyPipRenderer(
-        to targetId: String,
-        call: VonageCall,
-        forceReattach: Bool = false
-    ) async {
-        do {
-            try await renderRouter.applyRenderer(
-                to: targetId,
-                call: call,
-                inlineView: { makeInlineVideoView() },
-                forceReattach: forceReattach
-            )
-            Self.logger.debug("applyPipRenderer attached target=\(targetId, privacy: .public)")
-        } catch {
-            // No stream for this target yet (e.g. subscriber not created): leave target state as-is;
-            // the next participant-state emission retries once the stream exists.
-            Self.logger.debug("applyPipRenderer no stream for \(targetId, privacy: .public)")
-            return
-        }
-
+        activePipRenderer = renderer
         currentPipTargetId = targetId
         pipTargetParticipantId = targetId
+
+        if previousRenderer !== renderer {
+            previousRenderer?.pipBufferDisplayLayer = nil
+        }
+        pipController.attachFeed(to: renderer)
+
+        if pipTargetCameraEnabled {
+            renderer.stopPlaceholder()
+        } else {
+            renderer.startPlaceholder(name: participantName(for: targetId, in: state))
+        }
+    }
+
+    // MARK: - Anchoring
+
+    /// A misbehaving controller at background time (unmounted anchor after the room was replaced,
+    /// or AVKit stuck reporting not-possible) is rebuilt against the registered anchor as a last
+    /// resort; the async `possibleDidChange` then auto-starts while `wantsPictureInPicture` holds.
+    private func ensureControllerReady() {
+        guard pipController.isConfigured else { return }
+        let anchorMounted = pipController.sourceView?.window != nil
+        if anchorMounted, pipController.canStartPictureInPicture {
+            return
+        }
+
+        guard let anchorView else { return }
+        Self.logger.debug(
+            "controller not ready (anchorMounted=\(anchorMounted, privacy: .public)); rebuilding")
+        do {
+            try pipController.reconfigure(with: anchorView, videoFrame: anchorFrame)
+            lastConfiguredSourceView = anchorView
+            if let activePipRenderer {
+                pipController.attachFeed(to: activePipRenderer)
+            }
+            canStartPictureInPicture = pipController.canStartPictureInPicture
+        } catch {
+            Self.logger.error("controller rebuild failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private func configureController(sourceView: UIView, videoFrame: CGRect) {
+        guard pipController.isPictureInPictureSupported else {
+            return
+        }
+        guard videoFrame.width > 1, videoFrame.height > 1 else {
+            return
+        }
+
+        do {
+            try pipController.configureIfNeeded(with: sourceView, videoFrame: videoFrame)
+            lastConfiguredSourceView = sourceView
+            Self.logger.debug(
+                "configure ok; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
+        } catch {
+            // Already configured: only a replaced room anchor view (SwiftUI recreated it) requires
+            // rebuilding, and never while PiP is active.
+            guard pipController.isConfigured,
+                !pipController.isInPictureInPicture,
+                sourceView !== lastConfiguredSourceView
+            else { return }
+            do {
+                try pipController.reconfigure(with: sourceView, videoFrame: videoFrame)
+                lastConfiguredSourceView = sourceView
+                Self.logger.debug(
+                    "reanchored; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
+            } catch {
+                Self.logger.error("reanchor failed: \(error.localizedDescription, privacy: .public)")
+                return
+            }
+        }
+
+        // The feed follows the current target; wire it if a target already exists (the anchor can
+        // register before or after the first retarget).
+        if let activePipRenderer {
+            pipController.attachFeed(to: activePipRenderer)
+        }
+
+        canStartPictureInPicture = pipController.canStartPictureInPicture
+
+        if wantsPictureInPicture {
+            startPictureInPictureIfPossible()
+        }
     }
 
     private func participantName(for participantId: String?, in state: ParticipantsState) -> String {

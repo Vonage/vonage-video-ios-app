@@ -166,15 +166,15 @@ struct MeetingRoomComposedView: View {
             }
     }
 
-    /// Stable, invisible PiP anchor spanning the meeting room content: the PiP window morphs
-    /// from/to this area instead of a single participant tile, and PiP is configurable as soon as
-    /// the room is on screen — independent of any tile's mount timing.
+    /// Stable, always-mounted PiP anchor spanning the meeting room content. The PiP window morphs
+    /// from/to this area; anchoring to individual tiles is deliberately avoided (layout changes
+    /// and SwiftUI identity resets demolish tiles, which breaks AVKit's ability to start PiP).
     @ViewBuilder
     private var pictureInPictureAnchor: some View {
         #if !os(macOS)
             if enabledFeatures.contains(.pictureInPicture) {
                 PictureInPictureAnchorView { view, frame in
-                    pictureInPictureOrchestrator.configurePictureInPicture(sourceView: view, videoFrame: frame)
+                    pictureInPictureOrchestrator.registerAnchor(sourceView: view, videoFrame: frame)
                 }
             }
         #endif
