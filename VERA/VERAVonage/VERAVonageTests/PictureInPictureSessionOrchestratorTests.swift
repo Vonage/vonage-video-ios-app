@@ -38,18 +38,6 @@ struct PictureInPictureOrchestratorTests {
         #expect(sut.isInPictureInPicture == false)
     }
 
-    // MARK: - startPictureInPictureIfPossible
-
-    @Test("startPictureInPictureIfPossible without a target is a no-op")
-    func startPipWithoutTarget() {
-        let sut = PictureInPictureSessionOrchestrator()
-
-        sut.startPictureInPictureIfPossible()
-
-        #expect(sut.isInPictureInPicture == false)
-        #expect(sut.canStartPictureInPicture == false)
-    }
-
     // MARK: - tearDown
 
     @Test("tearDown resets all published state")

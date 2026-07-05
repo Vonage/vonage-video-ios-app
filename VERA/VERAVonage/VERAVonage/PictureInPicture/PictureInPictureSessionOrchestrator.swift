@@ -43,10 +43,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     /// replaced the room anchor view instance. Weak: owned by the room hierarchy.
     private weak var lastConfiguredSourceView: UIView?
 
-    /// Room-level anchor registered by the meeting room UI; mounted for the whole call.
-    private weak var anchorView: UIView?
-    private var anchorFrame: CGRect = .zero
-
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
     private var currentPipTargetId: String?
@@ -111,10 +107,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     /// Registers the room-level anchor and configures the controller against it, making PiP
     /// startable from the moment the room is on screen.
     public func registerAnchor(sourceView: UIView, videoFrame: CGRect) {
-        anchorView = sourceView
-        anchorFrame = videoFrame
         Self.logger.debug("anchor registered \(String(describing: videoFrame.size), privacy: .public)")
-        configureController(sourceView: sourceView, videoFrame: videoFrame)
+        configureController(sourceView: sourceView)
     }
 
     public func requestPictureInPicture() {
@@ -123,7 +117,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             + "canStart=\(pipController.canStartPictureInPicture) configured=\(pipController.isConfigured)"
         Self.logger.debug("\(message, privacy: .public)")
         wantsPictureInPicture = true
-        ensureControllerReady()
         startPictureInPictureIfPossible()
 
         // AVKit can silently swallow a start issued exactly at the background transition (no
@@ -138,7 +131,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
     }
 
-    public func startPictureInPictureIfPossible() {
+    private func startPictureInPictureIfPossible() {
         guard currentPipTargetId != nil else {
             Self.logger.debug("start bail; no target")
             return
@@ -327,61 +320,14 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
     // MARK: - Anchoring
 
-    /// A misbehaving controller at background time (unmounted anchor after the room was replaced,
-    /// or AVKit stuck reporting not-possible) is rebuilt against the registered anchor as a last
-    /// resort; the async `possibleDidChange` then auto-starts while `wantsPictureInPicture` holds.
-    private func ensureControllerReady() {
-        guard pipController.isConfigured else { return }
-        let anchorMounted = pipController.sourceView?.window != nil
-        if anchorMounted, pipController.canStartPictureInPicture {
-            return
-        }
+    private func configureController(sourceView: UIView) {
+        guard pipController.isPictureInPictureSupported,
+            !pipController.isInPictureInPicture,
+            !pipController.isConfigured || sourceView !== lastConfiguredSourceView
+        else { return }
 
-        guard let anchorView else { return }
-        Self.logger.debug(
-            "controller not ready (anchorMounted=\(anchorMounted, privacy: .public)); rebuilding")
-        do {
-            try pipController.reconfigure(with: anchorView, videoFrame: anchorFrame)
-            lastConfiguredSourceView = anchorView
-            if let activePipRenderer {
-                pipController.attachFeed(to: activePipRenderer)
-            }
-            canStartPictureInPicture = pipController.canStartPictureInPicture
-        } catch {
-            Self.logger.error("controller rebuild failed: \(error.localizedDescription, privacy: .public)")
-        }
-    }
-
-    private func configureController(sourceView: UIView, videoFrame: CGRect) {
-        guard pipController.isPictureInPictureSupported else {
-            return
-        }
-        guard videoFrame.width > 1, videoFrame.height > 1 else {
-            return
-        }
-
-        do {
-            try pipController.configureIfNeeded(with: sourceView, videoFrame: videoFrame)
-            lastConfiguredSourceView = sourceView
-            Self.logger.debug(
-                "configure ok; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
-        } catch {
-            // Already configured: only a replaced room anchor view (SwiftUI recreated it) requires
-            // rebuilding, and never while PiP is active.
-            guard pipController.isConfigured,
-                !pipController.isInPictureInPicture,
-                sourceView !== lastConfiguredSourceView
-            else { return }
-            do {
-                try pipController.reconfigure(with: sourceView, videoFrame: videoFrame)
-                lastConfiguredSourceView = sourceView
-                Self.logger.debug(
-                    "reanchored; canStart=\(self.pipController.canStartPictureInPicture, privacy: .public)")
-            } catch {
-                Self.logger.error("reanchor failed: \(error.localizedDescription, privacy: .public)")
-                return
-            }
-        }
+        pipController.configure(with: sourceView)
+        lastConfiguredSourceView = sourceView
 
         // The feed follows the current target; wire it if a target already exists (the anchor can
         // register before or after the first retarget).

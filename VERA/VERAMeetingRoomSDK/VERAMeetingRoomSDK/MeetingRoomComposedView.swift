@@ -191,11 +191,7 @@ struct MeetingRoomComposedView: View {
                 let call = viewModel.currentCall as? VonageCall
             else { return }
 
-            PictureInPictureBinder.bind(
-                orchestrator: pictureInPictureOrchestrator,
-                call: call,
-                viewModel: viewModel
-            )
+            pictureInPictureOrchestrator.bind(to: call)
             isPictureInPictureBound = true
         #endif
     }

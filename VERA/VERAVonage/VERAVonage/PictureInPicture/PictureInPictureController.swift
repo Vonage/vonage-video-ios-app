@@ -10,18 +10,8 @@ import UIKit
 @MainActor
 final class PictureInPictureController: NSObject {
 
-    enum ConfigurationError: Error {
-        case pictureInPictureAlreadyActive
-        case missingPipController
-    }
-
     private var pipController: AVPictureInPictureController?
     private let sampleBufferVideoCallView = PictureInPictureSampleBufferView()
-
-    /// The view the controller is currently anchored to. AVKit silently ignores `start` when this
-    /// view has left the window (e.g. its tile was unmounted by a layout change), so callers check
-    /// it before starting and re-anchor if needed.
-    private(set) weak var sourceView: UIView?
 
     private(set) var isInPictureInPicture = false
     var isConfigured: Bool { pipController != nil }
@@ -38,12 +28,11 @@ final class PictureInPictureController: NSObject {
         pipController?.isPictureInPicturePossible ?? false
     }
 
-    func configureIfNeeded(
-        with sourceView: UIView,
-        videoFrame: CGRect
-    ) throws {
-        guard !isInPictureInPicture else { throw ConfigurationError.pictureInPictureAlreadyActive }
-        guard pipController == nil else { throw ConfigurationError.missingPipController }
+    /// Builds a fresh AVKit controller anchored to `sourceView`, replacing any previous one. The
+    /// PiP feed must be (re)attached afterwards via ``attachFeed(to:)``. Must not be called while
+    /// PiP is active.
+    func configure(with sourceView: UIView) {
+        tearDown()
 
         let pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
         pipVideoCallViewController.preferredContentSize = CGSize(width: 640, height: 480)
@@ -71,7 +60,6 @@ final class PictureInPictureController: NSObject {
         pipController = AVPictureInPictureController(contentSource: contentSource)
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
-        self.sourceView = sourceView
     }
 
     func startPictureInPicture() {
@@ -92,7 +80,6 @@ final class PictureInPictureController: NSObject {
     func tearDown() {
         pipController?.delegate = nil
         pipController = nil
-        sourceView = nil
         isInPictureInPicture = false
         let layer = sampleBufferVideoCallView.sampleBufferDisplayLayer
         if layer.requiresFlushToResumeDecoding {
@@ -100,16 +87,6 @@ final class PictureInPictureController: NSObject {
         }
     }
 
-    /// Tears down and creates a fresh PiP controller anchored to `sourceView`. The feed must be
-    /// re-attached afterwards via ``attachFeed(to:)``.
-    func reconfigure(
-        with sourceView: UIView,
-        videoFrame: CGRect
-    ) throws {
-        guard !isInPictureInPicture else { throw ConfigurationError.pictureInPictureAlreadyActive }
-        tearDown()
-        try configureIfNeeded(with: sourceView, videoFrame: videoFrame)
-    }
 }
 
 extension PictureInPictureController: AVPictureInPictureControllerDelegate {

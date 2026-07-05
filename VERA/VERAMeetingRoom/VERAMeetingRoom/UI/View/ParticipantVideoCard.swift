@@ -125,7 +125,6 @@ struct ParticipantVideoCard: View {
                                     // the local back camera not), so the tile, the PiP window, and
                                     // every other surface agree without any SwiftUI transform.
                                     participant.view
-                                        .id("\(participant.id)-pip-\(participant.isPictureInPictureTarget)")
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
 
@@ -145,16 +144,6 @@ struct ParticipantVideoCard: View {
                 }
             } else {
                 ZStack {
-                    // The PiP target's video surface stays mounted (covered by the initials card
-                    // below): it is the AVKit PiP source view and must live in the hierarchy, but
-                    // the tile always presents the native initials card so camera-off participants
-                    // look identical whether or not PiP is targeting them. The PiP window itself
-                    // shows the renderer-drawn placeholder instead.
-                    if participant.isPictureInPictureTarget {
-                        participant.view
-                            .aspectRatio(ParticipantVideoCardConstants.containerAspectRatio, contentMode: .fit)
-                    }
-
                     Rectangle()
                         .fill(
                             theme.vGray4.opacity(
