@@ -189,9 +189,7 @@ extension MeetingRoomViewModel {
             layoutPublisher,
             pinnedParticipantsDataSource.pinnedParticipantIds
         )
-        .map {
-            [weak self] participantsState, layout, pinnedIds
-                -> MeetingRoomParticipantsState in
+        .map { [weak self] participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
             guard let self else {
                 return MeetingRoomParticipantsState(
                     participants: [],
@@ -212,7 +210,7 @@ extension MeetingRoomViewModel {
             }
 
             let localUIParticipant = participantsState.localParticipant.map { participant in
-                self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
+                UIParticipant(participant: participant)
             }
 
             var sortedParticipants: [UIParticipant]

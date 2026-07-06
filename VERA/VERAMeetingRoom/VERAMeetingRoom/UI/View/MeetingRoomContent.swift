@@ -22,16 +22,14 @@ struct MeetingRoomContent: View {
     }
 
     var body: some View {
-        Group {
-            if layout == .grid {
-                AdaptiveGridLayout(
-                    participants: participants,
-                    activeSpeakerId: activeSpeakerId)
-            } else {
-                ActiveSpeakerLayout(
-                    participants: participants,
-                    activeSpeakerId: activeSpeakerId)
-            }
+        if layout == .grid {
+            AdaptiveGridLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
+        } else {
+            ActiveSpeakerLayout(
+                participants: participants,
+                activeSpeakerId: activeSpeakerId)
         }
     }
 }
