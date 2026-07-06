@@ -15,9 +15,7 @@ enum ParticipantVideoCardConstants {
     /// Background opacity for card fills
     static let backgroundOpacity: Double = 0.8
 
-    /// Avatar circle diameter as a fraction of the card height for camera-off tiles. Matches the
-    /// circle ratio drawn by the PiP placeholder renderer so target and non-target camera-off
-    /// tiles look identical.
+    /// Avatar height as a fraction of the card height for camera-off tiles.
     static let avatarHeightFraction: CGFloat = 0.55
 
     /// Corner radius of the card

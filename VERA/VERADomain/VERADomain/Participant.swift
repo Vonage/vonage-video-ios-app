@@ -42,6 +42,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     public let isScreenshare: Bool
     /// The current audio level of the participant (0.0 to 1.0).
     public let audioLevel: Float
+
     /// Optional callback invoked when this participant’s view appears on screen.
     ///
     /// Use to enable video subscription for remote participants when visible.
@@ -156,12 +157,9 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
 
     /// The raw aspect ratio derived from the video dimensions.
     ///
-    /// Returns `16:9` when the camera is off or height is zero: `videoDimensions` keeps the last
-    /// live value after video is disabled, and without this a camera-off tile would lay out at the
-    /// stale (often portrait) ratio — shrinking and letterboxing the avatar placeholder — instead
-    /// of matching the 16:9 used when a participant joins with video off.
+    /// Returns `16:9` if height is zero to avoid division by zero.
     public var aspectRatio: Double {
-        guard isCameraEnabled, videoDimensions.height > 0 else { return 16.0 / 9.0 }
+        guard videoDimensions.height > 0 else { return 16.0 / 9.0 }
         return Double(videoDimensions.width / videoDimensions.height)
     }
 
