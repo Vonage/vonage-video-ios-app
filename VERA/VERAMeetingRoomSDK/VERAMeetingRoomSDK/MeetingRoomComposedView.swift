@@ -3,15 +3,14 @@
 //
 
 import AVKit
-import Combine
 import SwiftUI
-import VERAArchiving
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
@@ -58,9 +57,11 @@ struct MeetingRoomComposedView: View {
     // MARK: - Sheet/Overlay State
 
     @State private var showChat = false
-    @State private var showPickerView = false
+    @State private var showReactions = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var showFeedbackForm = false
+    @State private var showEffects = false
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel)
@@ -74,7 +75,7 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 ReactionsOverlayModifier(
                     isEnabled: enabledFeatures.contains(.reactions),
-                    showPickerView: $showPickerView,
+                    showPickerView: $showReactions,
                     emojiPickerContainerViewModel: emojiPickerContainerViewModel,
                     floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
                     container: container
@@ -98,10 +99,41 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .modifier(
+                FeedbackFormOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.feedback),
+                    showFeedbackForm: $showFeedbackForm,
+                    container: container
+                )
+            )
+            .modifier(
+                BackgroundEffectsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.backgroundEffects),
+                    showEffects: $showEffects,
+                    videoEffectsViewModel: buttonsAssembler.videoEffectsViewModel
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
-                buttonsAssembler.onShowPickerView = { showPickerView = true }
+                buttonsAssembler.onShowReactions = { showReactions.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
+                buttonsAssembler.onShowEffects = { showEffects = true }
+            }
+            .onChange(of: showReactions) { isPresented in
+                buttonsAssembler.setReactionsPickerPresented(isPresented)
+            }
+            .onChange(of: showChat) { isPresented in
+                buttonsAssembler.setChatPresented(isPresented)
+            }
+            .onChange(of: showSettings) { isPresented in
+                buttonsAssembler.setSettingsPresented(isPresented)
+            }
+            .onChange(of: showEffects) { isPresented in
+                buttonsAssembler.setEffectsPresented(isPresented)
+            }
+            .onChange(of: showFeedbackForm) { isPresented in
+                buttonsAssembler.setFeedbackFormPresented(isPresented)
             }
     }
 }

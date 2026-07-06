@@ -59,7 +59,7 @@ public class VonageSubscriber: NSObject {
     /// The stream’s display name if available.
     var name: String { otSubscriber.stream?.name ?? "" }
     /// The underlying Vonage stream.
-    private let stream: OTStream
+    let stream: OTStream
     /// The stream’s creation timestamp.
     var date: Date { stream.creationTime }
 

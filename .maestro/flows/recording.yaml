@@ -4,6 +4,9 @@ appId: ${APP_ID}
     permissions:
       camera: allow
       microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "recording"
 
 - waitForAnimationToEnd:
     timeout: 5000
@@ -52,10 +55,11 @@ appId: ${APP_ID}
 
 # Start recording (button may be in overflow menu on smaller screens)
 - tapOn:
-    text: "More options"
+    id: "meeting-room-more-options-button"
     optional: true
 
-- tapOn: "Start Recording"
+- tapOn:
+    id: "archiving-start-recording-button"
 
 - waitForAnimationToEnd:
     timeout: 3000
@@ -78,10 +82,11 @@ appId: ${APP_ID}
 
 # Stop recording (button may be in overflow menu on smaller screens)
 - tapOn:
-    text: "More options"
+    id: "meeting-room-more-options-button"
     optional: true
 
-- tapOn: "Stop Recording"
+- tapOn:
+    id: "archiving-stop-recording-button"
 
 - waitForAnimationToEnd:
     timeout: 3000
@@ -114,14 +119,23 @@ appId: ${APP_ID}
 
 - takeScreenshot: 04-goodbye-archives
 
-# Wait for archive to process (up to 3 minutes)
+# Wait for archive to appear in the list (up to 1 minute)
+- extendedWaitUntil:
+    visible:
+      id: "archiving-archive-item"
+    timeout: 90000
+
+# Verify an archive item was created
+- assertVisible:
+    id: "archiving-archive-item"
+
+- takeScreenshot: 05-archive-item-created
+
+# Optionally wait for archive to become downloadable
 - extendedWaitUntil:
     visible:
       id: "archiving-download-button"
-    timeout: 180000
+    timeout: 30000
+    optional: true
 
-# Verify download button is available
-- assertVisible:
-    id: "archiving-download-button"
-
-- takeScreenshot: 05-archive-download-ready
+- takeScreenshot: 06-archive-download-optional

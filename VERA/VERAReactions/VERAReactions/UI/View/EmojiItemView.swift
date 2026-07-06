@@ -47,13 +47,16 @@ struct EmojiItemView: View {
     /// Duration of the highlight animation in seconds
     var highlightDuration: Double = EmojiItemConstants.highlightDuration
 
+    /// Color used for the highlight background
+    var highlightColor: Color = .white
+
     var body: some View {
         Text(emoji.emoji)
             .font(.system(size: EmojiItemConstants.fontSize))
             .frame(width: EmojiItemConstants.cellSize, height: EmojiItemConstants.cellSize)
             .background(
                 RoundedRectangle(cornerRadius: EmojiItemConstants.highlightCornerRadius)
-                    .fill(Color.white.opacity(isHighlighted ? EmojiItemConstants.highlightOpacity : 0))
+                    .fill(highlightColor.opacity(isHighlighted ? EmojiItemConstants.highlightOpacity : 0))
             )
             .accessibilityLabel(emoji.name)
             .animation(.easeInOut(duration: highlightDuration), value: isHighlighted)

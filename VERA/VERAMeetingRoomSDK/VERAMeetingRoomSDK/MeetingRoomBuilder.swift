@@ -5,13 +5,16 @@
 import AVKit
 import Foundation
 import SwiftUI
+import VERAArchiving
 import VERABackgroundEffects
 import VERACaptions
 import VERACommonUI
+import VERACore
 import VERADomain
 import VERAMeetingRoom
 import VERAReactions
 import VERASettings
+import VERAVonage
 
 /// The result of building a meeting room with ``MeetingRoomBuilder``.
 ///
@@ -69,6 +72,12 @@ public final class MeetingRoomBuilder {
     var _broadcastExtensionBundleId: String?
     var _theme: MeetingRoomTheme?
     var _sessionKeyHolder: SessionKeyHolder?
+    var _httpClientFactory: any MeetingRoomHTTPClientFactory =
+        DefaultMeetingRoomHTTPClientFactory()
+    var _sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
+        DefaultMeetingRoomSessionRepositoryFactory()
+    var _archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
+        DefaultMeetingRoomArchivingDataSourceFactory()
 
     /// Creates a new meeting room builder.
     public init(
@@ -104,6 +113,21 @@ public final class MeetingRoomBuilder {
 
     /// The currently configured theme. Visible for testing.
     var currentTheme: MeetingRoomTheme? { _theme }
+
+    /// The currently configured custom HTTP client factory. Visible for testing.
+    var currentHTTPClientFactory: any MeetingRoomHTTPClientFactory {
+        _httpClientFactory
+    }
+
+    /// The currently configured custom session repository factory. Visible for testing.
+    var currentSessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory {
+        _sessionRepositoryFactory
+    }
+
+    /// The currently configured custom archiving data source factory. Visible for testing.
+    var currentArchivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory {
+        _archivingDataSourceFactory
+    }
 
     /// Sets the base URL for API requests (room credentials, archiving, captions).
     ///
@@ -232,6 +256,50 @@ public final class MeetingRoomBuilder {
         return self
     }
 
+    /// Sets a custom HTTP client factory for meeting room backend requests.
+    ///
+    /// - Parameter factory: The HTTP client factory to use instead of the SDK default.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func httpClientFactory(
+        _ factory: any MeetingRoomHTTPClientFactory
+    ) -> MeetingRoomBuilder {
+        _httpClientFactory = factory
+        return self
+    }
+
+    /// Sets a factory that can replace the SDK session repository.
+    ///
+    /// The SDK still builds its default repository and passes it to the factory,
+    /// allowing hosts to wrap it or replace it.
+    ///
+    /// - Parameter factory: Closure that receives publisher settings, plugins,
+    ///   and the default repository.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func sessionRepositoryFactory(
+        _ factory: any MeetingRoomSessionRepositoryFactory
+    ) -> MeetingRoomBuilder {
+        _sessionRepositoryFactory = factory
+        return self
+    }
+
+    /// Sets a factory that can replace the SDK archiving data source.
+    ///
+    /// The SDK still builds its default data source and passes it to the factory,
+    /// allowing hosts to wrap it or replace it.
+    ///
+    /// - Parameter factory: Closure that receives the default data source and
+    ///   archiving status data source.
+    /// - Returns: The builder for chaining.
+    @discardableResult
+    public func archivingDataSourceFactory(
+        _ factory: any MeetingRoomArchivingDataSourceFactory
+    ) -> MeetingRoomBuilder {
+        _archivingDataSourceFactory = factory
+        return self
+    }
+
     /// Builds the meeting room with all configured features and dependencies.
     ///
     /// This method creates the complete dependency graph, registers plugins,
@@ -240,6 +308,7 @@ public final class MeetingRoomBuilder {
     /// - Precondition: `baseURL` and `roomName` must be set.
     /// - Returns: A ``MeetingRoomPrebuilt`` containing the composed view and view model.
     @MainActor
+    // swiftlint:disable:next cyclomatic_complexity
     public func build() -> MeetingRoomPrebuilt {
         let onAction = _onAction ?? { _ in }
 
@@ -250,7 +319,10 @@ public final class MeetingRoomBuilder {
             configuration: _configuration,
             publisherSettings: _publisherSettings,
             appGroupIdentifier: _appGroupIdentifier,
-            broadcastExtensionBundleId: _broadcastExtensionBundleId
+            broadcastExtensionBundleId: _broadcastExtensionBundleId,
+            httpClientFactory: _httpClientFactory,
+            sessionRepositoryFactory: _sessionRepositoryFactory,
+            archivingDataSourceFactory: _archivingDataSourceFactory
         )
 
         // Use external session key holder if provided
@@ -271,22 +343,20 @@ public final class MeetingRoomBuilder {
 
         // Background Effects
         if _enabledFeatures.contains(.backgroundEffects) {
-            let (_, blurVM) = container.backgroundBlurFactory.makeBlurButton(
+            let (_, effectsVM) = container.backgroundEffectFactory.makeEffectsButton(
                 getCurrentPublisher: container.publisherRepository.getPublisher
             )
             if let initialEffect = _publisherSettings.initialVideoEffect {
-                blurVM.apply(initialEffect)
+                effectsVM.selectEffect(initialEffect)
             }
-            buttonsAssembler.backgroundBlurButtonViewModel = blurVM
+            buttonsAssembler.videoEffectsViewModel = effectsVM
         }
 
         // Archiving
         if _enabledFeatures.contains(.archiving) {
-            let (_, archiveVM) = container.archivingFactory.makeArchivingButton(
-                showAlert: { [weak alertPresenter] alertItem in
-                    alertPresenter?.present(alertItem)
-                }
-            )
+            let (_, archiveVM) = container.archivingFactory.makeArchivingButton { [weak alertPresenter] alertItem in
+                alertPresenter?.present(alertItem)
+            }
             archiveVM.setup()
             buttonsAssembler.archiveButtonViewModel = archiveVM
         }
@@ -334,10 +404,10 @@ public final class MeetingRoomBuilder {
         // 4. Create the meeting room view + view model via factory
         let (_, meetingRoomViewModel) = container.meetingRoomFactory.make(
             roomName: roomName,
-            getExternalButtons: { [weak buttonsAssembler] state in
-                buttonsAssembler?.buildButtons(state) ?? []
+            getExternalButtons: { [weak buttonsAssembler] in
+                buttonsAssembler?.buildButtons() ?? []
             },
-
+            externalButtonsUpdates: buttonsAssembler.buttonsDidChange,
             onActionHandler: { [weak self, weak alertPresenter, weak buttonsAssembler] action in
                 switch action {
                 case .presentAlert(let alertItem):
@@ -377,11 +447,12 @@ public final class MeetingRoomBuilder {
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
             emojiPickerContainerViewModel: emojiPickerContainerViewModel,
             statsOverlayViewModel: statsOverlayViewModel
-        ).task { [weak container = container] in
+        ).task { [weak container, weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
             guard let container else { return }
             await MediaPermissions.requestPermissionsIfNeeded()
 
             container.resetPublisher()
+            effectsVM?.reapplyCurrentEffect()
         }
 
         let themedView =

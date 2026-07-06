@@ -6,14 +6,9 @@ import SwiftUI
 import VERADomain
 
 public class GoodByePageFactory {
-    private let joinRoomUseCase: JoinRoomUseCase
     private let userRepository: UserRepository
 
-    public init(
-        joinRoomUseCase: JoinRoomUseCase,
-        userRepository: UserRepository
-    ) {
-        self.joinRoomUseCase = joinRoomUseCase
+    public init(userRepository: UserRepository) {
         self.userRepository = userRepository
     }
 
@@ -25,7 +20,6 @@ public class GoodByePageFactory {
     ) -> (view: some View, viewModel: GoodByeViewModel) {
         let viewModel = GoodByeViewModel(
             roomName: roomName,
-            joinRoomUseCase: joinRoomUseCase,
             userRepository: userRepository,
             goodByeNavigation: .init(
                 onReenter: onReenter,

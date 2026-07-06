@@ -319,6 +319,16 @@ This creates a new VERA feature module with the standard layer structure, `Proje
 - `main` receives periodic batch merges from `develop`
 - Jira ticket format: `VIDSOL-NNN`
 
+## Contributing Guidance
+
+Before proposing non-trivial changes, review `docs/CONTRIBUTING.md` and align work with its expectations.
+
+- Prefer small, single-concern changes and PRs.
+- Link work to a discussed issue for anything beyond a minor bug fix.
+- Add or update tests for new or changed logic.
+- Avoid introducing new dependencies without prior discussion.
+- Be prepared to explain and maintain any submitted change, including AI-assisted code.
+
 ## Repositories & Documentation
 
 | Resource | Link |
@@ -326,4 +336,11 @@ This creates a new VERA feature module with the standard layer structure, `Proje
 | iOS App | [github.com/Vonage/vonage-video-ios-app](https://github.com/Vonage/vonage-video-ios-app) |
 | Android App | [github.com/Vonage/vonage-video-android-app](https://github.com/Vonage/vonage-video-android-app) |
 | Backend + Web Frontend | [github.com/Vonage/vonage-video-react-app](https://github.com/Vonage/vonage-video-react-app) |
-| Architecture & Contributing | [`docs/`](docs/) — contributing guide, known issues, and design documentation |
+| Getting Started | [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) — prerequisites, setup, and first run |
+| Architecture | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — module graph, layers, DI, and patterns |
+| Configuration | [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) — feature flags, theme, signing, SDK version |
+| Testing | [`docs/TESTING.md`](docs/TESTING.md) — unit, snapshot, and Maestro E2E tests |
+| Localization | [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) — adding languages and String Catalogs |
+| Code Style | [`docs/CODE_STYLE.md`](docs/CODE_STYLE.md) — SwiftLint, swift-format, guidelines |
+| Contributing | [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — issues, PRs, and branching conventions |
+| Known Issues | [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) — current known issues and workarounds |

@@ -36,7 +36,9 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.videoResolution == .medium)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
         #expect(viewModel.settingsPreference.codecPreference.mode == .automatic)
-        #expect(viewModel.maxAudioBitrate == 40_000)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .default)
+        #expect(viewModel.maxAudioBitrate == nil)
+        #expect(viewModel.audioBitrateMode == .default)
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
@@ -55,7 +57,7 @@ struct SettingsViewModelTests {
                 mode: .manual,
                 orderedCodecs: [.vp8, .h264, .vp9]
             ),
-            maxAudioBitrate: 128_000,
+            audioBitratePreference: .custom(128_000),
             videoBitratePreset: .custom,
             maxVideoBitrate: 2_000_000,
             publisherAudioFallbackEnabled: false,
@@ -72,7 +74,8 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.videoFrameRate == .fps15)
         #expect(viewModel.settingsPreference.codecPreference.mode == .manual)
         #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.vp8, .h264, .vp9])
-        #expect(viewModel.maxAudioBitrate == 128_000)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(128_000))
+        #expect(viewModel.audioBitrateMode == .custom)
         #expect(viewModel.videoBitratePreset == .custom)
         #expect(viewModel.customMaxVideoBitrate == 2_000_000)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == false)
@@ -121,14 +124,14 @@ struct SettingsViewModelTests {
 
         await awaitAutoSave(on: viewModel) {
             viewModel.settingsPreference.videoResolution = .high
-            viewModel.settingsPreference.maxAudioBitrate = 128_000
+            viewModel.settingsPreference.audioBitratePreference = .custom(128_000)
             viewModel.settingsPreference.senderStatsEnabled = true
         }
 
         // Verify persistence
         #expect(repository.saveCallCount == 1)
         #expect(repository.lastSavedPreferences?.videoResolution == .high)
-        #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
+        #expect(repository.lastSavedPreferences?.audioBitratePreference == .custom(128_000))
         #expect(repository.lastSavedPreferences?.senderStatsEnabled == true)
     }
 
@@ -210,7 +213,6 @@ struct SettingsViewModelTests {
         #expect(repository.saveCallCount == 0)
     }
 
-
     @Test("Dismiss sets isPresented to false")
     func dismissSetsIsPresentedToFalse() async {
         let repository = MockSettingsRepository()
@@ -230,7 +232,7 @@ struct SettingsViewModelTests {
 
         // Make a change but don't wait for auto-save debounce
         viewModel.settingsPreference.videoResolution = .high
-        viewModel.settingsPreference.maxAudioBitrate = 128_000
+        viewModel.settingsPreference.audioBitratePreference = .custom(128_000)
 
         // Dismiss immediately (before debounce fires)
         await viewModel.dismiss()
@@ -238,7 +240,7 @@ struct SettingsViewModelTests {
         // Verify changes were saved despite quick dismissal
         #expect(repository.saveCallCount >= 1)
         #expect(repository.lastSavedPreferences?.videoResolution == .high)
-        #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
+        #expect(repository.lastSavedPreferences?.audioBitratePreference == .custom(128_000))
         #expect(viewModel.isPresented == false)
     }
 
@@ -305,7 +307,7 @@ struct SettingsViewModelTests {
         let customPrefs = PublisherSettingsPreferences(
             videoResolution: .high,
             videoFrameRate: .fps15,
-            maxAudioBitrate: 128_000,
+            audioBitratePreference: .custom(128_000),
             senderStatsEnabled: true
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
@@ -326,7 +328,7 @@ struct SettingsViewModelTests {
         #expect(repository.resetCallCount == 1)
         #expect(viewModel.settingsPreference.videoResolution == .medium)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
-        #expect(viewModel.maxAudioBitrate == 40_000)
+        #expect(viewModel.maxAudioBitrate == nil)
         #expect(viewModel.videoBitratePreset == .default)
         #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
         #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
@@ -367,15 +369,17 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(repository: repository)
 
-        viewModel.settingsPreference.maxAudioBitrate = 40_000
+        #expect(viewModel.maxAudioBitrateFormatted == "Default")
+
+        viewModel.settingsPreference.audioBitratePreference = .custom(40_000)
         let formatted1 = viewModel.maxAudioBitrateFormatted
         #expect(formatted1 == "40.0 kbps")
 
-        viewModel.settingsPreference.maxAudioBitrate = 128_000
+        viewModel.settingsPreference.audioBitratePreference = .custom(128_000)
         let formatted2 = viewModel.maxAudioBitrateFormatted
         #expect(formatted2 == "128.0 kbps")
 
-        viewModel.settingsPreference.maxAudioBitrate = 1_000_000
+        viewModel.settingsPreference.audioBitratePreference = .custom(1_000_000)
         let formatted3 = viewModel.maxAudioBitrateFormatted
         #expect(formatted3 == "1.0 Mbps")
 
@@ -406,6 +410,104 @@ struct SettingsViewModelTests {
         _ = viewModel
     }
 
+    // MARK: - Sorting & Bitrate Setters
+
+    @Test("sortingCodec reorders codec list")
+    func sortingCodecReordersCodecs() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
+        viewModel.sortingCodec(source: IndexSet(integer: 2), destination: 0)
+
+        #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.vp9, .vp8, .h264])
+    }
+
+    @Test("setMaxVideorate updates maximum video bitrate")
+    func setMaxVideorateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxVideorate(2_500_000)
+
+        #expect(viewModel.settingsPreference.maxVideoBitrate == 2_500_000)
+    }
+
+    @Test("setMaxAudioBitrate updates maximum audio bitrate")
+    func setMaxAudioBitrateSetsValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.setMaxAudioBitrate(96_000)
+
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(96_000))
+    }
+
+    @Test("audioBitrateMode updates audio bitrate preference")
+    func audioBitrateModeUpdatesPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.audioBitrateMode = .custom
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(40_000))
+        #expect(viewModel.audioBitrateMode == .custom)
+
+        viewModel.audioBitrateMode = .default
+        #expect(viewModel.settingsPreference.audioBitratePreference == .default)
+        #expect(viewModel.maxAudioBitrate == nil)
+        #expect(viewModel.audioBitrateMode == .default)
+    }
+
+    @Test("Default audio bitrate preference bridges to nil")
+    func defaultAudioBitratePreferenceBridgesToNil() {
+        let preferences = PublisherSettingsPreferences(audioBitratePreference: .default)
+
+        let advancedSettings = preferences.toPublisherAdvancedSettings()
+
+        #expect(advancedSettings.maxAudioBitrate == nil)
+    }
+
+    @Test("Custom audio bitrate preference bridges to value")
+    func customAudioBitratePreferenceBridgesToValue() {
+        let preferences = PublisherSettingsPreferences(audioBitratePreference: .custom(96_000))
+
+        let advancedSettings = preferences.toPublisherAdvancedSettings()
+
+        #expect(advancedSettings.maxAudioBitrate == 96_000)
+    }
+
+    @Test("audioBitrateMode custom preserves existing custom bitrate")
+    func audioBitrateModeCustomPreservesExistingValue() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.audioBitratePreference = .custom(128_000)
+        viewModel.audioBitrateMode = .custom
+
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(128_000))
+        #expect(viewModel.audioBitrateMode == .custom)
+    }
+
+    @Test("codecMode reflects preference mode")
+    func codecModeReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        #expect(viewModel.codecMode == .automatic)
+
+        viewModel.settingsPreference.codecPreference.mode = .manual
+        #expect(viewModel.codecMode == .manual)
+    }
+
+    @Test("orderedCodecs reflects preference codecs")
+    func orderedCodecsReflectsPreference() {
+        let repository = MockSettingsRepository()
+        let viewModel = SettingsViewModel(repository: repository)
+
+        viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9]
+        #expect(viewModel.orderedCodecs == [.h264, .vp9])
+    }
+
     // MARK: - State Mutation Tests
 
     @Test("Modifying properties updates values correctly")
@@ -426,8 +528,8 @@ struct SettingsViewModelTests {
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp8]
         #expect(viewModel.settingsPreference.codecPreference.orderedCodecs == [.h264, .vp8])
 
-        viewModel.settingsPreference.maxAudioBitrate = 256_000
-        #expect(viewModel.maxAudioBitrate == 256_000)
+        viewModel.settingsPreference.audioBitratePreference = .custom(256_000)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(256_000))
 
         viewModel.settingsPreference.videoBitratePreset = .bandwidthSaver
         #expect(viewModel.videoBitratePreset == .bandwidthSaver)
@@ -585,15 +687,15 @@ struct SettingsViewModelTests {
 
         // Set to 64 kbps
         viewModel.setMaxAudioBitrate(64_000.0)
-        #expect(viewModel.maxAudioBitrate == 64_000)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(64_000))
 
         // Set to 128 kbps
         viewModel.setMaxAudioBitrate(128_000.0)
-        #expect(viewModel.maxAudioBitrate == 128_000)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(128_000))
 
         // Set to zero
         viewModel.setMaxAudioBitrate(0.0)
-        #expect(viewModel.maxAudioBitrate == 0)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(6_000))
     }
 
     @Test("setMaxAudioBitrate converts Double to Int32")
@@ -603,7 +705,7 @@ struct SettingsViewModelTests {
 
         // Fractional value should be truncated
         viewModel.setMaxAudioBitrate(96_123.45)
-        #expect(viewModel.maxAudioBitrate == 96_123)
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(96_123))
     }
 
     @Test("setMaxAudioBitrate triggers auto-save after setup")
@@ -617,7 +719,7 @@ struct SettingsViewModelTests {
         }
 
         #expect(repository.saveCallCount == 1)
-        #expect(repository.lastSavedPreferences?.maxAudioBitrate == 128_000)
+        #expect(repository.lastSavedPreferences?.audioBitratePreference == .custom(128_000))
     }
 
     @Test("setMaxVideorate triggers auto-save after setup")

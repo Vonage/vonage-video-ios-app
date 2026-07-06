@@ -1,6 +1,8 @@
 appId: ${APP_ID}
 ---
-- launchApp
+- launchApp:
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
 
 - waitForAnimationToEnd:
     timeout: 5000

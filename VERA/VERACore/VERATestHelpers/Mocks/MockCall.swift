@@ -31,11 +31,17 @@ public class MockCall: CallFacade {
     public var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
+    public let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     public var recordedActions: [CallActions] = []
 
     public var isMuted: Bool = false
     public var isOnHold: Bool = false
     public var areCaptionsEnabled = false
+    public var forceMutedParticipantIDs: [String] = []
+    public var forceMuteError: Swift.Error?
 
     public enum CallActions: String {
         case connect
@@ -74,6 +80,13 @@ public class MockCall: CallFacade {
     public func muteLocalMedia(_ isMuted: Bool) {
         self.isMuted = isMuted
         recordedActions.append(.muteLocalMedia)
+    }
+
+    public func forceMuteParticipant(id: String) async throws {
+        if let forceMuteError {
+            throw forceMuteError
+        }
+        forceMutedParticipantIDs.append(id)
     }
 
     public func setOnHold(_ isOnHold: Bool) {

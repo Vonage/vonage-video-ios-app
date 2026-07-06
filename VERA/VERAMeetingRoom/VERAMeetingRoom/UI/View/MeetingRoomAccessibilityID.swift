@@ -9,5 +9,28 @@ enum MeetingRoomAccessibilityID {
     static let micDisabled = "meeting-room-mic-disabled"
     static let cameraEnabled = "meeting-room-camera-enabled"
     static let cameraDisabled = "meeting-room-camera-disabled"
+    static let moreOptionsButton = "meeting-room-more-options-button"
+    static let participantsButton = "meeting-room-participants-button"
+    static let participantsListScreen = "participants-list-screen"
     static let recordingIndicator = "archiving-recording-indicator"
+
+    static func participantCard(_ participantID: String) -> String {
+        "participant-card-\(participantID)"
+    }
+
+    static func participantForceMuteButton(_ participantID: String) -> String {
+        "participant-force-mute-\(participantID)"
+    }
+
+    static func participantListForceMuteButton(_ participantID: String) -> String {
+        "participant-list-force-mute-\(participantID)"
+    }
+
+    static func participantMicEnabled(_ participantID: String) -> String {
+        "participant-mic-\(participantID)-enabled"
+    }
+
+    static func participantMicDisabled(_ participantID: String) -> String {
+        "participant-mic-\(participantID)-disabled"
+    }
 }

@@ -46,37 +46,40 @@ public struct ParticipantsListView: View {
     }
 
     public var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                meetingURLSection
+        ScreenIdentifierContainer(MeetingRoomAccessibilityID.participantsListScreen) {
+            NavigationStack {
+                VStack(spacing: 0) {
+                    meetingURLSection
 
-                Divider()
-                    .padding(.horizontal)
+                    Divider()
+                        .padding(.horizontal)
 
-                participantsList
-            }
-            .navigationTitle(String(localized: "Participants (\(participantsCount))"))
-            #if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
+                    participantsList
+                }
+                .navigationTitle(String(localized: "Participants (\(participantsCount))"))
                 #if os(iOS)
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(action: onDismiss) {
-                            Image(systemName: "xmark")
-                        }.tint(theme.textSecondary)
-                    }
-                #else
-                    ToolbarItem(placement: .primaryAction) {
-                        Button(action: onDismiss) {
-                            Image(systemName: "xmark")
-                        }
-                    }
+                    .navigationBarTitleDisplayMode(.inline)
                 #endif
+                .toolbar {
+                    #if os(iOS)
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(action: onDismiss) {
+                                Image(systemName: "xmark")
+                            }.tint(theme.textSecondary)
+                        }
+                    #else
+                        ToolbarItem(placement: .primaryAction) {
+                            Button(action: onDismiss) {
+                                Image(systemName: "xmark")
+                            }
+                        }
+                    #endif
+                }
             }
         }
         .tint(theme.textSecondary)
         .presentationDetents([.medium, .large])
+        .opaquePresentationBackground(theme.background)
         .presentationDragIndicator(.visible)
     }
 
@@ -171,10 +174,18 @@ struct ParticipantRowView: View {
                 .accessibilityLabel(participant.isPinned ? "Unpin" : "Pin")
             }
 
-            MicIndicatorImage(isMicEnabled: participant.isMicEnabled)
-                .font(.caption)
-                .foregroundColor(theme.textSecondary)
+            micIndicator
         }
+    }
+
+    var micIndicator: MicIndicator {
+        .init(
+            participantID: participant.id,
+            isMicEnabled: participant.isMicEnabled,
+            participantName: participant.name,
+            onForceMute: participant.onForceMute,
+            forceMuteAccessibilityIdentifier: MeetingRoomAccessibilityID.participantListForceMuteButton(participant.id)
+        )
     }
 }
 
