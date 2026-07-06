@@ -118,10 +118,6 @@ struct ParticipantVideoCard: View {
                                         onTogglePin: participant.onTogglePin
                                     )
                                 } else {
-                                    // Mirroring is applied to the pixels inside each participant's
-                                    // permanent renderer (remote cameras mirrored, screen shares and
-                                    // the local back camera not), so the tile, the PiP window, and
-                                    // every other surface agree without any SwiftUI transform.
                                     participant.view
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()

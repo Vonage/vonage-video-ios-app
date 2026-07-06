@@ -156,8 +156,6 @@ struct MeetingRoomComposedView: View {
                     case .background:
                         pictureInPictureOrchestrator.requestPictureInPicture()
                     case .active:
-                        // Returning via the app icon doesn't trigger iOS's PiP restore flow (tapping
-                        // the window does), so dismiss the lingering PiP window explicitly.
                         pictureInPictureOrchestrator.stopPictureInPicture()
                     default:
                         break
