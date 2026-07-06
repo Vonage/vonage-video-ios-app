@@ -164,7 +164,6 @@ public final class MeetingRoomViewModel: ObservableObject {
             }
         }
     }
-
 }
 
 extension MeetingRoomViewModel {

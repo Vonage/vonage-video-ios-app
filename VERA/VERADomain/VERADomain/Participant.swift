@@ -62,10 +62,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     ///   - isRemote: `true` if remote; `false` if local publisher. Defaults to `true`.
     ///   - creationTime: Creation timestamp.
     ///   - isScreenshare: `true` if the participant is screensharing.
-    ///   - view: SwiftUI-compatible video view. Expected to be stable for the participant's
-    ///     lifetime (renderers are attached at creation and never swapped); `view` is excluded
-    ///     from `Equatable`, so mid-call view replacements would be invisible to
-    ///     `removeDuplicates()` downstream.
+    ///   - view: SwiftUI-compatible video view.
     ///   - audioLevel: Current audio level (0.0 to 1.0). Defaults to 0.0.
     public init(
         id: String,
