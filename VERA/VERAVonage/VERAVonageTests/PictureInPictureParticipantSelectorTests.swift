@@ -154,7 +154,7 @@ struct PictureInPictureParticipantSelectorTests {
         #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "gone") == "a")
     }
 
-    // MARK: - Signature
+    // MARK: - ParticipantSignature
 
     @Test("Audio-level-only changes produce equal signatures")
     func audioLevelChangesCoalesced() {

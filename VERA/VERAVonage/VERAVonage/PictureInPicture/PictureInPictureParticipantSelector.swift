@@ -92,7 +92,7 @@ final class PictureInPictureParticipantSelector {
 
     /// A compact, `Equatable` snapshot of everything that can affect the PiP target or placeholder.
     /// Used to coalesce participant-state emissions and ignore audio-level-only updates.
-    struct Signature: Equatable {
+    struct ParticipantSignature: Equatable {
         let localId: String?
         let localCameraEnabled: Bool
         let activeParticipantId: String?
@@ -105,13 +105,13 @@ final class PictureInPictureParticipantSelector {
         }
     }
 
-    static func signature(for state: ParticipantsState) -> Signature {
-        Signature(
+    static func signature(for state: ParticipantsState) -> ParticipantSignature {
+        ParticipantSignature(
             localId: state.localParticipant?.id,
             localCameraEnabled: state.localParticipant?.isCameraEnabled ?? false,
             activeParticipantId: state.activeParticipantId,
             remotes: state.participants.map {
-                Signature.Remote(
+                ParticipantSignature.Remote(
                     id: $0.id,
                     cameraEnabled: $0.isCameraEnabled,
                     isScreenshare: $0.isScreenshare
