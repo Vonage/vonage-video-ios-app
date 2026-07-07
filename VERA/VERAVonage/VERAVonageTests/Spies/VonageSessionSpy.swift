@@ -11,9 +11,11 @@ class VonageSessionSpy: VonageSession {
     var disconnectCalled = false
     var unpublishCalled = false
     var publishCalled = false
+    var forceMuteError: Swift.Error?
 
     var recordedTokens: [String] = []
     var unpublishedPublishers: [VonagePublisher] = []
+    var forceMutedStreams: [OTStream] = []
 
     init() {
         super.init(
@@ -44,5 +46,12 @@ class VonageSessionSpy: VonageSession {
 
     override func publish(publisher: VonagePublisher) throws {
         publishCalled = true
+    }
+
+    override func forceMute(stream: OTStream) throws {
+        if let forceMuteError {
+            throw forceMuteError
+        }
+        forceMutedStreams.append(stream)
     }
 }

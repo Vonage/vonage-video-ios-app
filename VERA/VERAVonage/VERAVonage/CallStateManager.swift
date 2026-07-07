@@ -140,6 +140,7 @@ final actor CallStateManager {
         await subscribersRepository.all
     }
 
+    /// Returns the subscriber associated with a participant identifier.
     func getSubscriber(id: String) async -> VonageSubscriber? {
         await subscribersRepository.getSubscriber(id: id)
     }

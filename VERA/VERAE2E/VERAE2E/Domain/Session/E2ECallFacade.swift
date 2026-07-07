@@ -12,6 +12,7 @@ public final class E2ECallFacade: CallFacade {
     public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
 
     private var cancellables = Set<AnyCancellable>()
+    private let scenario: any E2ETestScenario
     private let pluginNotifier: E2ECallPluginNotifier
 
     private let networkStatsSubject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
@@ -20,7 +21,7 @@ public final class E2ECallFacade: CallFacade {
     private let eventsSubject = CurrentValueSubject<SessionEvent, Never>(.idle)
     public lazy var eventsPublisher = eventsSubject.eraseToAnyPublisher()
 
-    private let participantsSubject = CurrentValueSubject<ParticipantsState, Never>(.empty)
+    private let participantsSubject: CurrentValueSubject<ParticipantsState, Never>
     public lazy var participantsPublisher = participantsSubject.eraseToAnyPublisher()
 
     private let stateSubject: CurrentValueSubject<SessionState, Never>
@@ -42,8 +43,10 @@ public final class E2ECallFacade: CallFacade {
     public init(
         publisherSettings: PublisherSettings = .init(),
         plugins: [any VonagePlugin] = [],
-        credentials: RoomCredentials? = nil
+        credentials: RoomCredentials? = nil,
+        scenario: any E2ETestScenario = E2EConfiguration.scenario
     ) {
+        self.scenario = scenario
         pluginNotifier = E2ECallPluginNotifier(
             plugins: plugins,
             callParams: E2ECallParamsBuilder.callParams(from: credentials))
@@ -51,6 +54,9 @@ public final class E2ECallFacade: CallFacade {
             .init(
                 isPublishingAudio: publisherSettings.publishAudio,
                 isPublishingVideo: publisherSettings.publishVideo))
+        participantsSubject = CurrentValueSubject<ParticipantsState, Never>(
+            scenario.fixture.participantsState
+        )
         pluginNotifier.assign(call: self)
         observeArchivingEvents()
     }
@@ -109,7 +115,8 @@ public final class E2ECallFacade: CallFacade {
 
     public func enableCaptions() async {
         areCaptionsEnabled = true
-        captionsSubject.send(E2ECallCaptionsFactory.enabledCaptions())
+        captionsSubject.send(
+            hasDeterministicCaptions ? E2ECallCaptionsFactory.enabledCaptions() : [])
     }
 
     public func disableCaptions() async {
@@ -125,6 +132,14 @@ public final class E2ECallFacade: CallFacade {
 
     public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
 
+    private var hasDeterministicCaptions: Bool {
+        guard let captionsFixture = scenario.fixture as? any E2ECaptionsScenarioFixture else {
+            return false
+        }
+
+        return captionsFixture.mode == .deterministic
+    }
+
     private func observeArchivingEvents() {
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStart)
             .sink { [weak self] notification in
@@ -138,6 +153,37 @@ public final class E2ECallFacade: CallFacade {
                 self?.archivingStateSubject.send(.idle)
             }
             .store(in: &cancellables)
+    }
+
+    public func forceMuteParticipant(id: String) async throws {
+        let currentState = participantsSubject.value
+        guard let participant = currentState.participants.first(where: { $0.id == id }) else {
+            throw ParticipantForceMuteError.participantNotFound
+        }
+
+        let mutedParticipant = Participant(
+            id: participant.id,
+            connectionId: participant.connectionId,
+            name: participant.name,
+            isMicEnabled: false,
+            isCameraEnabled: participant.isCameraEnabled,
+            videoDimensions: participant.videoDimensions,
+            isRemote: participant.isRemote,
+            creationTime: participant.creationTime,
+            isScreenshare: participant.isScreenshare,
+            audioLevel: participant.audioLevel,
+            view: participant.view
+        )
+        let participants = currentState.participants.map {
+            $0.id == id ? mutedParticipant : $0
+        }
+        participantsSubject.send(
+            ParticipantsState(
+                localParticipant: currentState.localParticipant,
+                participants: participants,
+                activeParticipantId: currentState.activeParticipantId
+            )
+        )
     }
 
     // MARK: - Speaking While Muted Simulation

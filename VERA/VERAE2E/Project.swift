@@ -21,28 +21,6 @@ let project = Project(
                 .project(target: "VERAVonage", path: "../VERAVonage"),
             ],
             settings: createBaseBuildSettings()
-        ),
-        .target(
-            name: "VERAE2ETests",
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "com.vonage.VERAE2ETests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
-            sources: ["VERAE2ETests/**"],
-            dependencies: [
-                .target(name: "VERAE2E"),
-                .project(target: "VERATestHelpers", path: "../VERACore"),
-            ],
-            settings: createBaseBuildSettings()
-        ),
-    ],
-    schemes: [
-        .scheme(
-            name: "VERAE2ETests",
-            shared: true,
-            buildAction: .buildAction(targets: ["VERAE2ETests"]),
-            testAction: .targets(["VERAE2ETests"], configuration: .debug),
-            runAction: .runAction(configuration: .debug)
         )
     ]
 )
