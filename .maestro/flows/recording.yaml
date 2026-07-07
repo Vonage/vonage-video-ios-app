@@ -6,6 +6,7 @@ appId: ${APP_ID}
       microphone: allow
     arguments:
       VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "recording"
 
 - waitForAnimationToEnd:
     timeout: 5000

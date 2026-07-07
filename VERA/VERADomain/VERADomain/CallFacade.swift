@@ -273,6 +273,7 @@ public protocol CallFacade: AnyObject,
     CaptionsProvider,
     NetworkStatsProvider,
     PublisherSettingsApplicable,
+    ParticipantForceMuting,
     PublisherAudioLevelProvider
 {}
 
