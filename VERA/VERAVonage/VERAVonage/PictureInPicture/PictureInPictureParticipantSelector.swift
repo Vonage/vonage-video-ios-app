@@ -24,26 +24,21 @@ final class PictureInPictureParticipantSelector {
     /// When there are no remote participants, falls back to the local participant so PiP works solo.
     func pipTargetId(for state: ParticipantsState) -> String? {
         let remoteParticipants = sortedRemoteParticipants(in: state)
-        guard !remoteParticipants.isEmpty else {
+        guard let firstRemote = remoteParticipants.first else {
             stickyPipTargetId = nil
             return state.localParticipant?.id
         }
 
-        if stickyPipTargetId == nil || !remoteParticipants.contains(where: { $0.id == stickyPipTargetId }) {
-            stickyPipTargetId = remoteParticipants.first?.id
-        }
-
-        guard let stickyPipTargetId,
-            let stickyParticipant = remoteParticipants.first(where: { $0.id == stickyPipTargetId })
-        else {
-            return remoteParticipants.first?.id
-        }
+        let stickyParticipant = remoteParticipants.first { $0.id == stickyPipTargetId } ?? firstRemote
+        stickyPipTargetId = stickyParticipant.id
 
         if stickyParticipant.isCameraEnabled {
             return stickyParticipant.id
         }
 
-        return remoteParticipants.first(where: { $0.isCameraEnabled })?.id ?? stickyParticipant.id
+        // Camera-off sticky yields to a camera-enabled remote without losing its sticky status, so
+        // selection snaps back when its camera returns.
+        return remoteParticipants.first(where: \.isCameraEnabled)?.id ?? stickyParticipant.id
     }
 
     /// PiP target while Picture-in-Picture is active: follow the detected active speaker.
@@ -76,23 +71,21 @@ final class PictureInPictureParticipantSelector {
     // MARK: - Participant lookups
 
     static func participantName(for participantId: String?, in state: ParticipantsState) -> String {
-        guard let participantId else { return "" }
-
-        if state.localParticipant?.id == participantId {
-            return state.localParticipant?.name ?? ""
-        }
-
-        return state.participants.first(where: { $0.id == participantId })?.name ?? ""
+        participant(withId: participantId, in: state)?.name ?? ""
     }
 
     static func isCameraEnabled(participantId: String?, in state: ParticipantsState) -> Bool {
-        guard let participantId else { return false }
+        participant(withId: participantId, in: state)?.isCameraEnabled == true
+    }
 
-        if state.localParticipant?.id == participantId {
-            return state.localParticipant?.isCameraEnabled == true
+    private static func participant(withId participantId: String?, in state: ParticipantsState) -> Participant? {
+        guard let participantId else { return nil }
+
+        if let localParticipant = state.localParticipant, localParticipant.id == participantId {
+            return localParticipant
         }
 
-        return state.participants.first(where: { $0.id == participantId })?.isCameraEnabled == true
+        return state.participants.first { $0.id == participantId }
     }
 
     // MARK: - Change coalescing
