@@ -4,6 +4,9 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAAudioDiagnostics",
     options: defaultProjectOptions(),
+    packages: [
+        .swiftSnapshotTesting
+    ],
     targets: [
         // MARK: - Framework Target
         .target(
@@ -35,6 +38,21 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
+
+        // MARK: - Snapshot Tests Target
+        .target(
+            name: "VERAAudioDiagnosticsSnapshotTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.vonage.VERAAudioDiagnosticsSnapshotTests",
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            sources: ["VERAAudioDiagnosticsSnapshotTests/**"],
+            dependencies: [
+                .target(name: "VERAAudioDiagnostics"),
+                .swiftSnapshotTesting,
+            ],
+            settings: createBaseBuildSettings()
+        ),
     ],
     schemes: [
         .scheme(
@@ -43,6 +61,13 @@ let project = Project(
             buildAction: .buildAction(targets: ["VERAAudioDiagnosticsTests"]),
             testAction: .targets(["VERAAudioDiagnosticsTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        )
+        ),
+        .scheme(
+            name: "VERAAudioDiagnosticsSnapshotTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERAAudioDiagnosticsSnapshotTests"]),
+            testAction: .targets(["VERAAudioDiagnosticsSnapshotTests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
+        ),
     ]
 )
