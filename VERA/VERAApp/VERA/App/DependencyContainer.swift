@@ -30,6 +30,10 @@ import VERAVonageCallKitPlugin
     import VERAAudioEffects
 #endif
 
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
+
 final class DependencyContainer {
 
     let httpClient: HTTPClient
@@ -104,12 +108,15 @@ final class DependencyContainer {
         cameraPreviewProviderRepository: cameraPreviewProviderRepository,
         cameraDevicesRepository: cameraDevicesRepository,
         userRepository: userRepository,
-        advancedSettingsUseCase: advancedSettingsUseCase,
-        speakerTestService: speakerTestService)
+        advancedSettingsUseCase: advancedSettingsUseCase)
 
     lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
-    lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
+    #if AUDIODIAGNOSTICS_ENABLED
+        lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
+
+        lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(speakerTestService: speakerTestService)
+    #endif
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
@@ -128,6 +135,7 @@ final class DependencyContainer {
         }
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
         if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
+        if appConfig.audioSettings.allowAudioDiagnostics { features.insert(.audioDiagnostics) }
         features.insert(.callKit)
         return features
     }
@@ -206,8 +214,7 @@ final class DependencyContainer {
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: InMemoryStatsRepository(),
-            speakerTestService: speakerTestService)
+            statsDataSource: InMemoryStatsRepository())
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

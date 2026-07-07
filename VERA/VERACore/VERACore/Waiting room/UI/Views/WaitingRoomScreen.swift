@@ -35,16 +35,6 @@ public struct WaitingRoomScreen: View {
             .onAppear {
                 viewModel.loadUI()
             }
-            .confirmationDialog(
-                "Test Speaker",
-                isPresented: $viewModel.showSpeakerTestDialog,
-                titleVisibility: .visible
-            ) {
-                Button("Play Sound") { viewModel.testSpeaker() }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("A short tone will play through your current audio output.")
-            }
         case .loading: Text("Loading", bundle: .veraCore)
         }
     }

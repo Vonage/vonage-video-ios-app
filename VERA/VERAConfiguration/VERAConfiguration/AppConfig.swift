@@ -30,15 +30,18 @@ public struct AppConfig {
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
+        public let allowAudioDiagnostics: Bool
 
         public init(
             allowAdvancedNoiseSuppression: Bool = true,
             allowAudioOnJoin: Bool = true,
-            allowMicrophoneControl: Bool = true
+            allowMicrophoneControl: Bool = true,
+            allowAudioDiagnostics: Bool = true
         ) {
             self.allowAdvancedNoiseSuppression = allowAdvancedNoiseSuppression
             self.allowAudioOnJoin = allowAudioOnJoin
             self.allowMicrophoneControl = allowMicrophoneControl
+            self.allowAudioDiagnostics = allowAudioDiagnostics
         }
     }
 

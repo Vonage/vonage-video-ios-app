@@ -12,26 +12,10 @@ import VERADomain
 @Suite("Settings ViewModel Tests")
 struct SettingsViewModelTests {
 
-    /// Waits deterministically for the auto-save pipeline to complete.
-    /// Sets the `onDidSave` callback, executes `perform`, then suspends
-    /// until `persistCurrentState()` finishes and invokes the callback.
-    private func awaitAutoSave(
-        on viewModel: SettingsViewModel,
-        while perform: () -> Void
-    ) async {
-        await withCheckedContinuation { continuation in
-            viewModel.onDidSave = { continuation.resume() }
-            perform()
-        }
-        viewModel.onDidSave = nil
-    }
-
-    // MARK: - Initialization Tests
-
     @Test("ViewModel initializes with default preferences")
     func initializesWithDefaults() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         #expect(viewModel.settingsPreference.videoResolution == .medium)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
@@ -67,7 +51,7 @@ struct SettingsViewModelTests {
             opusDtxEnabled: true
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
         await viewModel.setup()
 
         #expect(viewModel.settingsPreference.videoResolution == .high)
@@ -90,7 +74,7 @@ struct SettingsViewModelTests {
     @Test("Setup ignores subsequent calls to prevent re-initialization")
     func setupIgnoresSubsequentCalls() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
 
         // First setup
         await viewModel.setup()
@@ -119,7 +103,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save persists changes after setup")
     func autoSavePersistsAfterSetup() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -141,7 +125,7 @@ struct SettingsViewModelTests {
         var initialPrefs = PublisherSettingsPreferences.default
         initialPrefs.opusDtxEnabled = false
         let repository = MockSettingsRepository(initialPreferences: initialPrefs)
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -155,7 +139,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save with custom bitrate preset persists custom value")
     func autoSaveWithCustomBitrate() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -170,7 +154,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save with non-custom bitrate preset saves zero for maxVideoBitrate")
     func autoSaveWithNonCustomBitrate() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -185,7 +169,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save persists codec preference correctly")
     func autoSavePersistsCodecPreference() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -201,7 +185,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save does not persist before setup")
     func autoSaveDoesNotPersistBeforeSetup() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
 
         // Modify without calling setup
         viewModel.settingsPreference.videoResolution = .high
@@ -216,7 +200,7 @@ struct SettingsViewModelTests {
     @Test("Dismiss sets isPresented to false")
     func dismissSetsIsPresentedToFalse() async {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
         await viewModel.setup()
 
         await viewModel.dismiss()
@@ -227,7 +211,7 @@ struct SettingsViewModelTests {
     @Test("Dismiss saves pending changes before closing")
     func dismissSavesPendingChanges() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.3)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.3)
         await viewModel.setup()
 
         // Make a change but don't wait for auto-save debounce
@@ -247,7 +231,7 @@ struct SettingsViewModelTests {
     @Test("Dismiss sanitizes settings before saving")
     func dismissSanitizesBeforeSaving() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.3)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.3)
         await viewModel.setup()
 
         // Set default preset but with a custom bitrate (invalid state)
@@ -265,7 +249,7 @@ struct SettingsViewModelTests {
     @Test("Dismiss handles save errors gracefully without crashing")
     func dismissHandlesSaveErrorsGracefully() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.3)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.3)
         await viewModel.setup()
 
         // Make changes
@@ -286,7 +270,7 @@ struct SettingsViewModelTests {
     @Test("Auto-save handles repository errors gracefully")
     func autoSaveHandlesErrorsGracefully() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         // Make save fail
@@ -311,7 +295,7 @@ struct SettingsViewModelTests {
             senderStatsEnabled: true
         )
         let repository = MockSettingsRepository(initialPreferences: customPrefs)
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
         await viewModel.setup()
 
         // Verify custom values loaded
@@ -342,7 +326,7 @@ struct SettingsViewModelTests {
     @Test("Dismiss saves pending changes in addition to auto-save")
     func dismissSavesAfterAutoSave() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         // Modify values and wait for auto-save
@@ -367,7 +351,7 @@ struct SettingsViewModelTests {
     @Test("Audio bitrate formatted returns correct string")
     func audioBitrateFormatted() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         #expect(viewModel.maxAudioBitrateFormatted == "Default")
 
@@ -391,7 +375,7 @@ struct SettingsViewModelTests {
     @Test("Video bitrate formatted returns correct string")
     func videoBitrateFormatted() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.settingsPreference.maxVideoBitrate = 500_000
         let formatted1 = viewModel.videoBitrateFormatted
@@ -415,7 +399,7 @@ struct SettingsViewModelTests {
     @Test("sortingCodec reorders codec list")
     func sortingCodecReordersCodecs() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
         viewModel.sortingCodec(source: IndexSet(integer: 2), destination: 0)
@@ -426,7 +410,7 @@ struct SettingsViewModelTests {
     @Test("setMaxVideorate updates maximum video bitrate")
     func setMaxVideorateSetsValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.setMaxVideorate(2_500_000)
 
@@ -436,7 +420,7 @@ struct SettingsViewModelTests {
     @Test("setMaxAudioBitrate updates maximum audio bitrate")
     func setMaxAudioBitrateSetsValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.setMaxAudioBitrate(96_000)
 
@@ -446,7 +430,7 @@ struct SettingsViewModelTests {
     @Test("audioBitrateMode updates audio bitrate preference")
     func audioBitrateModeUpdatesPreference() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.audioBitrateMode = .custom
         #expect(viewModel.settingsPreference.audioBitratePreference == .custom(40_000))
@@ -479,7 +463,7 @@ struct SettingsViewModelTests {
     @Test("audioBitrateMode custom preserves existing custom bitrate")
     func audioBitrateModeCustomPreservesExistingValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.settingsPreference.audioBitratePreference = .custom(128_000)
         viewModel.audioBitrateMode = .custom
@@ -491,7 +475,7 @@ struct SettingsViewModelTests {
     @Test("codecMode reflects preference mode")
     func codecModeReflectsPreference() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         #expect(viewModel.codecMode == .automatic)
 
@@ -502,7 +486,7 @@ struct SettingsViewModelTests {
     @Test("orderedCodecs reflects preference codecs")
     func orderedCodecsReflectsPreference() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.h264, .vp9]
         #expect(viewModel.orderedCodecs == [.h264, .vp9])
@@ -513,7 +497,7 @@ struct SettingsViewModelTests {
     @Test("Modifying properties updates values correctly")
     func propertyMutations() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Test all property mutations
         viewModel.settingsPreference.videoResolution = .high
@@ -561,7 +545,7 @@ struct SettingsViewModelTests {
     @Test("codecMode returns the current codec preference mode")
     func codecModeReturnsCorrectValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Default is automatic
         #expect(viewModel.codecMode == .automatic)
@@ -574,7 +558,7 @@ struct SettingsViewModelTests {
     @Test("orderedCodecs returns the codec preference list")
     func orderedCodecsReturnsCorrectValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Default order
         let defaultOrder = viewModel.orderedCodecs
@@ -589,7 +573,7 @@ struct SettingsViewModelTests {
     @Test("videoBitratePreset returns the current preset")
     func videoBitratePresetReturnsCorrectValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Default preset
         #expect(viewModel.videoBitratePreset == .default)
@@ -606,7 +590,7 @@ struct SettingsViewModelTests {
     @Test("customMaxVideoBitrate returns the current video bitrate")
     func customMaxVideoBitrateReturnsCorrectValue() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Default value
         #expect(viewModel.customMaxVideoBitrate == 500_000)
@@ -621,7 +605,7 @@ struct SettingsViewModelTests {
     @Test("sortingCodec reorders codec list correctly")
     func sortingCodecReordersCorrectly() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Set initial order
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
@@ -639,7 +623,7 @@ struct SettingsViewModelTests {
     @Test("sortingCodec handles multiple items")
     func sortingCodecHandlesMultipleItems() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         viewModel.settingsPreference.codecPreference.orderedCodecs = [.vp8, .h264, .vp9]
 
@@ -655,7 +639,7 @@ struct SettingsViewModelTests {
     @Test("setMaxVideorate updates video bitrate correctly")
     func setMaxVideorateUpdatesCorrectly() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Set to 1.5 Mbps
         viewModel.setMaxVideorate(1_500_000.0)
@@ -673,7 +657,7 @@ struct SettingsViewModelTests {
     @Test("setMaxVideorate converts Double to Int32")
     func setMaxVideorateConvertsDoubleToInt32() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Fractional value should be truncated
         viewModel.setMaxVideorate(1_234_567.89)
@@ -683,7 +667,7 @@ struct SettingsViewModelTests {
     @Test("setMaxAudioBitrate updates audio bitrate correctly")
     func setMaxAudioBitrateUpdatesCorrectly() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Set to 64 kbps
         viewModel.setMaxAudioBitrate(64_000.0)
@@ -701,7 +685,7 @@ struct SettingsViewModelTests {
     @Test("setMaxAudioBitrate converts Double to Int32")
     func setMaxAudioBitrateConvertsDoubleToInt32() {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = makeViewModel(repository: repository)
 
         // Fractional value should be truncated
         viewModel.setMaxAudioBitrate(96_123.45)
@@ -711,7 +695,7 @@ struct SettingsViewModelTests {
     @Test("setMaxAudioBitrate triggers auto-save after setup")
     func setMaxAudioBitrateTriggersSave() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -725,7 +709,7 @@ struct SettingsViewModelTests {
     @Test("setMaxVideorate triggers auto-save after setup")
     func setMaxVideorateTriggersSave() async throws {
         let repository = MockSettingsRepository()
-        let viewModel = SettingsViewModel(repository: repository, autoSaveDebounce: 0.05)
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
         await viewModel.setup()
 
         await awaitAutoSave(on: viewModel) {
@@ -738,28 +722,28 @@ struct SettingsViewModelTests {
         #expect(repository.lastSavedPreferences?.maxVideoBitrate == 2_000_000)
     }
 
-    // MARK: - Speaker Test
-
-    @Test("testSpeaker calls the service exactly once")
-    func testSpeakerCallsServiceOnce() {
-        let service = MockSpeakerTestService()
-        let viewModel = SettingsViewModel(repository: MockSettingsRepository(), speakerTestService: service)
-
-        viewModel.testSpeaker()
-
-        #expect(service.playTestSoundCallCount == 1)
+    /// Helper to create a SettingsViewModel with required dependencies.
+    private func makeViewModel(
+        repository: PublisherSettingsRepository = MockSettingsRepository(),
+        autoSaveDebounce: TimeInterval = 0.3
+    ) -> SettingsViewModel {
+        SettingsViewModel(
+            repository: repository,
+            autoSaveDebounce: autoSaveDebounce
+        )
     }
 
-    @Test("showSpeakerTestDialog can be toggled on and off")
-    func showSpeakerTestDialogToggles() {
-        let viewModel = SettingsViewModel(repository: MockSettingsRepository())
-
-        #expect(viewModel.showSpeakerTestDialog == false)
-
-        viewModel.showSpeakerTestDialog = true
-        #expect(viewModel.showSpeakerTestDialog == true)
-
-        viewModel.showSpeakerTestDialog = false
-        #expect(viewModel.showSpeakerTestDialog == false)
+    /// Waits deterministically for the auto-save pipeline to complete.
+    /// Sets the `onDidSave` callback, executes `perform`, then suspends
+    /// until `persistCurrentState()` finishes and invokes the callback.
+    private func awaitAutoSave(
+        on viewModel: SettingsViewModel,
+        while perform: () -> Void
+    ) async {
+        await withCheckedContinuation { continuation in
+            viewModel.onDidSave = { continuation.resume() }
+            perform()
+        }
+        viewModel.onDidSave = nil
     }
 }

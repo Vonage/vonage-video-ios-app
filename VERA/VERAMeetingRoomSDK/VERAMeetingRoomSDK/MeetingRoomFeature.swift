@@ -39,6 +39,9 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
     /// Advanced noise suppression for the microphone.
     case audioEffects
 
+    /// Audio output testing and diagnostics.
+    case audioDiagnostics
+
     /// CallKit integration.
     case callKit
 

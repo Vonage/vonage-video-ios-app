@@ -12,20 +12,17 @@ public class WaitingRoomFactory {
     private let cameraDevicesRepository: CameraDevicesRepository
     private let userRepository: UserRepository
     private let advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
-    private let speakerTestService: SpeakerTestService
 
     public init(
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         userRepository: UserRepository,
         advancedSettingsUseCase: PublisherAdvancedSettingsUseCase,
-        speakerTestService: SpeakerTestService
     ) {
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.cameraDevicesRepository = cameraDevicesRepository
         self.userRepository = userRepository
         self.advancedSettingsUseCase = advancedSettingsUseCase
-        self.speakerTestService = speakerTestService
     }
 
     @MainActor
@@ -46,8 +43,8 @@ public class WaitingRoomFactory {
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository,
-            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName),
-            speakerTestService: speakerTestService)
+            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName)
+        )
         return (make(viewModel: viewModel), viewModel)
     }
 

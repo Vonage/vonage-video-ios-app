@@ -39,14 +39,17 @@
     extension SettingsViewModel {
 
         static var preview: SettingsViewModel {
-            SettingsViewModel(repository: PreviewSettingsRepository(), speakerTestService: NullSpeakerTestService())
+            SettingsViewModel(repository: PreviewSettingsRepository())
         }
 
         static var previewWithStatsEnabled: SettingsViewModel {
             let repo = PreviewSettingsRepository()
             var prefs = PublisherSettingsPreferences.default
             prefs.senderStatsEnabled = true
-            return SettingsViewModel(repository: repo, speakerTestService: NullSpeakerTestService(), settingsPreference: prefs)
+            return SettingsViewModel(
+                repository: repo,
+                settingsPreference: prefs
+            )
         }
     }
 #endif

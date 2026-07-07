@@ -2,6 +2,7 @@
 //  Created by Vonage on 03/07/26.
 //
 
+import Combine
 import Foundation
 
 /// A service that plays a short test tone through the current audio output.
@@ -11,4 +12,10 @@ import Foundation
 public protocol SpeakerTestService: Sendable {
     /// Plays a short test tone through the current audio output route.
     func playTestSound()
+
+    /// Stops the currently playing test sound.
+    func stopTestSound()
+
+    /// Publisher that emits audio level updates (0.0 to 1.0) while playing test sound.
+    var audioLevelPublisher: AnyPublisher<Float, Never> { get }
 }

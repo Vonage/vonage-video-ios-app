@@ -42,8 +42,7 @@ struct SettingsFactoryTests {
         )
         let factory = SettingsFactory(
             repository: repository,
-            statsDataSource: MockStatsDataSource(),
-            speakerTestService: MockSpeakerTestService()
+            statsDataSource: MockStatsDataSource()
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
@@ -58,6 +57,6 @@ struct SettingsFactoryTests {
         repository: MockSettingsRepository = MockSettingsRepository(),
         statsDataSource: MockStatsDataSource = MockStatsDataSource()
     ) -> SettingsFactory {
-        SettingsFactory(repository: repository, statsDataSource: statsDataSource, speakerTestService: MockSpeakerTestService())
+        SettingsFactory(repository: repository, statsDataSource: statsDataSource)
     }
 }

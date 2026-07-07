@@ -93,26 +93,6 @@ struct AudioSectionView: View {
                 "When enabled, you receive audio only from other participants during poor network conditions.".localized
             )
         }
-
-        Section {
-            Button("Test Speaker".localized) {
-                viewModel.showSpeakerTestDialog = true
-            }
-        } header: {
-            Text("Speaker Test".localized)
-        } footer: {
-            Text("Play a short tone to verify your current audio output is working.".localized)
-        }
-        .confirmationDialog(
-            "Test Speaker".localized,
-            isPresented: $viewModel.showSpeakerTestDialog,
-            titleVisibility: .visible
-        ) {
-            Button("Play Sound".localized) { viewModel.testSpeaker() }
-            Button("Cancel".localized, role: .cancel) {}
-        } message: {
-            Text("A short tone will play through your current audio output.".localized)
-        }
     }
 }
 

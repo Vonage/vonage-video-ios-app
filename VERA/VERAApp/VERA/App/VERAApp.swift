@@ -29,6 +29,10 @@ import VERAVonage
     import VERAAudioEffects
 #endif
 
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -146,15 +150,6 @@ struct VERAApp: App {
             waitingRoomViewModel = result.viewModel
             waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
 
-            let speakerTestButton = ViewHolder(id: "SpeakerTest") { [weak waitingRoomViewModel] in
-                Button {
-                    waitingRoomViewModel?.showSpeakerTestDialog = true
-                } label: {
-                    Image(systemName: "speaker.wave.2.circle")
-                }
-            }
-            waitingRoomViewModel.extraTrailingButtons.append(speakerTestButton)
-
             #if BACKGROUND_EFFECTS_ENABLED
                 waitingRoomViewModel.onPublisherReady = { [weak navigationCoordinator] in
                     navigationCoordinator?.videoEffectsViewModel?.reapplyCurrentEffect()
@@ -206,6 +201,12 @@ struct VERAApp: App {
         #if SETTINGS_ENABLED
             let settingsButton = settingsFactory.makeWaitingRoomButton()
             buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+        #endif
+
+        #if AUDIODIAGNOSTICS_ENABLED
+            // Audio Diagnostics button
+            let audioDiagnosticsButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomButton()
+            buttons.append(ViewHolder(id: "AudioDiagnostics", content: { audioDiagnosticsButton }))
         #endif
 
         return buttons

@@ -263,31 +263,6 @@ struct WaitingRoomViewModelTests {
         #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
-    // MARK: - Speaker Test
-
-    @Test("testSpeaker calls the service exactly once")
-    func testSpeakerCallsServiceOnce() {
-        let service = MockSpeakerTestService()
-        let sut = makeSUT(speakerTestService: service)
-
-        sut.testSpeaker()
-
-        #expect(service.playTestSoundCallCount == 1)
-    }
-
-    @Test("showSpeakerTestDialog can be toggled on and off")
-    func showSpeakerTestDialogToggles() {
-        let sut = makeSUT()
-
-        #expect(sut.showSpeakerTestDialog == false)
-
-        sut.showSpeakerTestDialog = true
-        #expect(sut.showSpeakerTestDialog == true)
-
-        sut.showSpeakerTestDialog = false
-        #expect(sut.showSpeakerTestDialog == false)
-    }
-
     // MARK: SUT
 
     func makeSUT(
@@ -301,8 +276,7 @@ struct WaitingRoomViewModelTests {
             makePublisherAdvancedSettingsUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
             makeMockCheckCameraAuthorizationStatusUseCase(),
-        actionHandler: ActionHandler? = nil,
-        speakerTestService: SpeakerTestService = MockSpeakerTestService()
+        actionHandler: ActionHandler? = nil
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
@@ -318,7 +292,7 @@ struct WaitingRoomViewModelTests {
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             userRepository: userRepository,
-            waitingRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName),
-            speakerTestService: speakerTestService)
+            waitingRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName)
+        )
     }
 }
