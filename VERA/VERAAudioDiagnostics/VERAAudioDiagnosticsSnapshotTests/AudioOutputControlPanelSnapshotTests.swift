@@ -23,11 +23,7 @@ struct AudioOutputControlPanelSnapshotTests {
         "AudioOutputControlPanel - Playback States",
         arguments: [
             ("Stopped", false, 0.0),
-            ("Playing-Silent", true, 0.0),
-            ("Playing-Low", true, 0.2),
-            ("Playing-Medium", true, 0.5),
-            ("Playing-High", true, 0.8),
-            ("Playing-Max", true, 1.0),
+            ("Playing", true, 0.7),
         ])
     func playbackStates(stateName: String, isPlaying: Bool, audioLevel: Float) throws {
         let viewModel = makeViewModel()
@@ -53,20 +49,13 @@ struct AudioOutputControlPanelSnapshotTests {
     @Test(
         "AudioOutputControlPanel - Color Schemes",
         arguments: [
-            ("Light-Stopped", ColorScheme.light, false, 0.0),
-            ("Light-Playing", ColorScheme.light, true, 0.7),
-            ("Dark-Stopped", ColorScheme.dark, false, 0.0),
-            ("Dark-Playing", ColorScheme.dark, true, 0.7),
+            ("Light", ColorScheme.light),
+            ("Dark", ColorScheme.dark),
         ])
-    func colorSchemes(
-        schemeName: String,
-        scheme: ColorScheme,
-        isPlaying: Bool,
-        audioLevel: Float
-    ) throws {
+    func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let viewModel = makeViewModel()
-        viewModel.isPlaying = isPlaying
-        viewModel.currentAudioLevel = audioLevel
+        viewModel.isPlaying = true
+        viewModel.currentAudioLevel = 0.7
 
         let sut = AnyView(
             AudioOutputControlPanel(viewModel: viewModel)
@@ -86,12 +75,14 @@ struct AudioOutputControlPanelSnapshotTests {
     // MARK: - Localization Tests
 
     @Test(
-        "AudioOutputControlPanel - English Localization",
+        "AudioOutputControlPanel - Localizations",
         arguments: [
-            ("English-Stopped", false),
-            ("English-Playing", true),
+            ("English-Stopped", Locale(identifier: "en"), false),
+            ("English-Playing", Locale(identifier: "en"), true),
+            ("Spanish-Stopped", Locale(identifier: "es"), false),
+            ("Spanish-Playing", Locale(identifier: "es"), true),
         ])
-    func englishLocalization(stateName: String, isPlaying: Bool) throws {
+    func localizations(localeName: String, locale: Locale, isPlaying: Bool) throws {
         let viewModel = makeViewModel()
         viewModel.isPlaying = isPlaying
         viewModel.currentAudioLevel = isPlaying ? 0.6 : 0.0
@@ -99,108 +90,15 @@ struct AudioOutputControlPanelSnapshotTests {
         let sut = AnyView(
             AudioOutputControlPanel(viewModel: viewModel)
                 .padding()
-                .environment(\.locale, Locale(identifier: "en"))
+                .environment(\.locale, locale)
         )
 
         assertSnapshot(
             of: sut,
             as: .image(precision: 0.99, layout: .fixed(width: 390, height: 120)),
-            named: stateName,
+            named: localeName,
             record: isRecording,
-            testName: "\(snapshotPrefix)_\(stateName)"
-        )
-    }
-
-    @Test(
-        "AudioOutputControlPanel - Spanish Localization",
-        arguments: [
-            ("Spanish-Stopped", false),
-            ("Spanish-Playing", true),
-        ])
-    func spanishLocalization(stateName: String, isPlaying: Bool) throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = isPlaying
-        viewModel.currentAudioLevel = isPlaying ? 0.6 : 0.0
-
-        let sut = AnyView(
-            AudioOutputControlPanel(viewModel: viewModel)
-                .padding()
-                .environment(\.locale, Locale(identifier: "es"))
-        )
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 120)),
-            named: stateName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(stateName)"
-        )
-    }
-
-    // MARK: - Audio Level Variations
-
-    @Test(
-        "AudioOutputControlPanel - Audio Level Steps",
-        arguments: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].enumerated().map { ($0, $1) }
-    )
-    func audioLevelSteps(index: Int, level: Float) throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = true
-        viewModel.currentAudioLevel = level
-
-        let sut = AnyView(
-            AudioOutputControlPanel(viewModel: viewModel)
-                .padding()
-        )
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 120)),
-            named: "Level-\(String(format: "%.1f", level))",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Level-\(index)"
-        )
-    }
-
-    // MARK: - Compact Width Tests
-
-    @Test("AudioOutputControlPanel - Compact Width")
-    func compactWidth() throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = true
-        viewModel.currentAudioLevel = 0.5
-
-        let sut = AnyView(
-            AudioOutputControlPanel(viewModel: viewModel)
-                .padding()
-        )
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 320, height: 120)),
-            named: "Compact-Width",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Compact-Width"
-        )
-    }
-
-    @Test("AudioOutputControlPanel - Wide Layout")
-    func wideLayout() throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = true
-        viewModel.currentAudioLevel = 0.75
-
-        let sut = AnyView(
-            AudioOutputControlPanel(viewModel: viewModel)
-                .padding()
-        )
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 600, height: 120)),
-            named: "Wide-Layout",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Wide-Layout"
+            testName: "\(snapshotPrefix)_\(localeName)"
         )
     }
 

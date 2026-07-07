@@ -4,26 +4,19 @@ Snapshot tests for the VERAAudioDiagnostics module, validating the visual appear
 
 ## What is Tested
 
-### AudioDiagnosticsDialog
-- Device layouts (iPhone 13, iPhone 13 Pro Max, iPhone SE)
-- Color schemes (Light and Dark mode)
-- Playback states (Stopped, Playing with different audio levels)
-- Localizations (English and Spanish)
-- iPad layouts (iPad Pro 11", iPad Pro 12.9")
-- Compact width and standard height variations
+### AudioDiagnosticsDialog (10 snapshots)
+- iPhone color schemes (Light, Dark)
+- iPad color schemes (Light, Dark)
+- Playback states (Stopped, Playing)
+- Localizations: English and Spanish in both stopped and playing states
 
-### AudioOutputControlPanel
-- Playback states with various audio levels (0.0 to 1.0)
-- Color schemes in both stopped and playing states
-- English and Spanish localization
-- Audio level step variations
-- Compact width and wide layout
+### AudioOutputControlPanel (8 snapshots)
+- Playback states (Stopped, Playing)
+- Color schemes (Light, Dark)
+- Localizations: English and Spanish in both stopped and playing states
 
-### AudioDiagnosticsWaitingRoomButton
-- Color schemes (Light and Dark mode)
-- Default size
-- In horizontal stack layout
-- Different background colors
+### AudioDiagnosticsWaitingRoomButton (2 snapshots)
+- Color schemes (Light, Dark)
 
 ## Running Snapshot Tests
 
@@ -39,7 +32,7 @@ xcodebuild test \
 ```
 
 ### Recording new snapshots
-1. Open `AudioDiagnosticsDialogSnapshotTests.swift`
+1. Open the test file you want to update
 2. Set `isRecording = true` in the test suite
 3. Run the tests
 4. Set `isRecording = false` back
@@ -48,17 +41,17 @@ xcodebuild test \
 ## Snapshot Storage
 
 Snapshots are stored in `__Snapshots__/` subdirectories:
-- `__Snapshots__/AudioDiagnosticsDialogSnapshotTests/`
-- `__Snapshots__/AudioOutputControlPanelSnapshotTests/`
-- `__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/`
+- `__Snapshots__/AudioDiagnosticsDialogSnapshotTests/` (10 PNGs)
+- `__Snapshots__/AudioOutputControlPanelSnapshotTests/` (8 PNGs)
+- `__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/` (2 PNGs)
 
 ## Test Configuration
 
 All snapshot tests use:
 - **Precision**: 0.99 (allows for minor rendering differences)
-- **Device configs**: iPhone 13, iPhone SE, iPad Pro 11", iPad Pro 12.9"
-- **Fixed layouts**: Used for component-specific tests
-- **Device layouts**: Used for full-screen dialog tests
+- **iPhone device**: iPhone 13 (following project convention)
+- **iPad device**: iPad Pro 12.9" (following project convention)
+- **Fixed layouts**: Used for AudioOutputControlPanel and button tests
 
 ## Mocks
 
@@ -69,4 +62,4 @@ All snapshot tests use:
 
 ## CI Integration
 
-Snapshot tests should be run on CI with a fixed iOS Simulator version to ensure consistent snapshots across all environments. Any snapshot failures indicate visual regressions that must be reviewed.
+Snapshot tests should be run on CI with a fixed iOS Simulator version (iPhone 17) to ensure consistent snapshots across all environments. Any snapshot failures indicate visual regressions that must be reviewed.

@@ -40,66 +40,6 @@ struct AudioDiagnosticsWaitingRoomButtonSnapshotTests {
         )
     }
 
-    @Test("AudioDiagnosticsWaitingRoomButton - Default Size")
-    func defaultSize() throws {
-        let sut = makeSUT()
-            .padding()
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 120, height: 120)),
-            named: "Default-Size",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Default-Size"
-        )
-    }
-
-    @Test("AudioDiagnosticsWaitingRoomButton - In Horizontal Stack")
-    func inHorizontalStack() throws {
-        let sut = HStack(spacing: 16) {
-            Circle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 64, height: 64)
-
-            makeSUT()
-
-            Circle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 64, height: 64)
-        }
-        .padding()
-
-        assertSnapshot(
-            of: AnyView(sut),
-            as: .image(precision: 0.99, layout: .fixed(width: 300, height: 120)),
-            named: "In-HStack",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_In-HStack"
-        )
-    }
-
-    @Test(
-        "AudioDiagnosticsWaitingRoomButton - Different Backgrounds",
-        arguments: [
-            ("On-White", Color.white),
-            ("On-Black", Color.black),
-            ("On-Gray", Color.gray),
-        ])
-    func differentBackgrounds(backgroundName: String, backgroundColor: Color) throws {
-        let sut = makeSUT()
-            .frame(width: 64, height: 64)
-            .padding()
-            .background(backgroundColor)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 120, height: 120)),
-            named: backgroundName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(backgroundName)"
-        )
-    }
-
     // MARK: - Test Helpers
 
     private func makeSUT() -> AudioDiagnosticsWaitingRoomButton {

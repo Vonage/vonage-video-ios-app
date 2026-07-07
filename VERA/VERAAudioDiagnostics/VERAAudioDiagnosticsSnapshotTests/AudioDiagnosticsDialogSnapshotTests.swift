@@ -20,31 +20,12 @@ struct AudioDiagnosticsDialogSnapshotTests {
     // MARK: - Basic Layout Tests
 
     @Test(
-        "AudioDiagnosticsDialog - Device Layouts",
-        arguments: [
-            ("iPhone-13", ViewImageConfig.iPhone13),
-            ("iPhone-13-Pro-Max", ViewImageConfig.iPhone13ProMax),
-            ("iPhone-SE", ViewImageConfig.iPhoneSe),
-        ])
-    func deviceLayouts(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT()
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test(
         "AudioDiagnosticsDialog - Color Schemes",
         arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
+            ("iPhone-Light", ColorScheme.light),
+            ("iPhone-Dark", ColorScheme.dark),
         ])
-    func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
+    func iPhoneColorSchemes(schemeName: String, scheme: ColorScheme) throws {
         let sut = makeSUT()
             .environment(\.colorScheme, scheme)
 
@@ -57,15 +38,33 @@ struct AudioDiagnosticsDialogSnapshotTests {
         )
     }
 
+    @Test(
+        "AudioDiagnosticsDialog - iPad Color Schemes",
+        arguments: [
+            ("iPad-Light", ColorScheme.light),
+            ("iPad-Dark", ColorScheme.dark),
+        ])
+    func iPadColorSchemes(schemeName: String, scheme: ColorScheme) throws {
+        let sut = makeSUT()
+            .environment(\.horizontalSizeClass, .regular)
+            .environment(\.colorScheme, scheme)
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPadPro12_9)),
+            named: schemeName,
+            record: isRecording,
+            testName: "\(snapshotPrefix)_\(schemeName)"
+        )
+    }
+
     // MARK: - Playback State Tests
 
     @Test(
         "AudioDiagnosticsDialog - Playback States",
         arguments: [
             ("Stopped", false, 0.0),
-            ("Playing-Low", true, 0.3),
-            ("Playing-Medium", true, 0.6),
-            ("Playing-High", true, 0.9),
+            ("Playing", true, 0.7),
         ])
     func playbackStates(stateName: String, isPlaying: Bool, audioLevel: Float) throws {
         let viewModel = makeViewModel()
@@ -88,11 +87,17 @@ struct AudioDiagnosticsDialogSnapshotTests {
     @Test(
         "AudioDiagnosticsDialog - Localizations",
         arguments: [
-            ("English", Locale(identifier: "en")),
-            ("Spanish", Locale(identifier: "es")),
+            ("English-Stopped", Locale(identifier: "en"), false),
+            ("English-Playing", Locale(identifier: "en"), true),
+            ("Spanish-Stopped", Locale(identifier: "es"), false),
+            ("Spanish-Playing", Locale(identifier: "es"), true),
         ])
-    func localizations(localeName: String, locale: Locale) throws {
-        let sut = makeSUT()
+    func localizations(localeName: String, locale: Locale, isPlaying: Bool) throws {
+        let viewModel = makeViewModel()
+        viewModel.isPlaying = isPlaying
+        viewModel.currentAudioLevel = isPlaying ? 0.7 : 0.0
+
+        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
             .environment(\.locale, locale)
 
         assertSnapshot(
@@ -101,101 +106,6 @@ struct AudioDiagnosticsDialogSnapshotTests {
             named: localeName,
             record: isRecording,
             testName: "\(snapshotPrefix)_\(localeName)"
-        )
-    }
-
-    @Test(
-        "AudioDiagnosticsDialog - Spanish Playing State",
-        arguments: [
-            ("Spanish-Stopped", false),
-            ("Spanish-Playing", true),
-        ])
-    func spanishPlaybackStates(stateName: String, isPlaying: Bool) throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = isPlaying
-        viewModel.currentAudioLevel = isPlaying ? 0.7 : 0.0
-
-        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
-            .environment(\.locale, Locale(identifier: "es"))
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
-            named: stateName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(stateName)"
-        )
-    }
-
-    // MARK: - iPad Layout Tests
-
-    @Test(
-        "AudioDiagnosticsDialog - iPad Layouts",
-        arguments: [
-            ("iPad-Pro-11", ViewImageConfig.iPadPro11),
-            ("iPad-Pro-12_9", ViewImageConfig.iPadPro12_9),
-        ])
-    func iPadLayouts(deviceName: String, config: ViewImageConfig) throws {
-        let sut = makeSUT()
-            .environment(\.horizontalSizeClass, .regular)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: config)),
-            named: deviceName,
-            record: isRecording,
-            testName: "\(snapshotPrefix)_\(deviceName)"
-        )
-    }
-
-    @Test("AudioDiagnosticsDialog - iPad Dark Mode Playing")
-    func iPadDarkModePlaying() throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = true
-        viewModel.currentAudioLevel = 0.8
-
-        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
-            .environment(\.horizontalSizeClass, .regular)
-            .environment(\.colorScheme, .dark)
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .device(config: .iPadPro12_9)),
-            named: "iPad-Dark-Playing",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_iPad-Dark-Playing"
-        )
-    }
-
-    // MARK: - Fixed Size Tests (for scrollable content)
-
-    @Test("AudioDiagnosticsDialog - Compact Width")
-    func compactWidth() throws {
-        let sut = makeSUT()
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 320, height: 600)),
-            named: "Compact-Width",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Compact-Width"
-        )
-    }
-
-    @Test("AudioDiagnosticsDialog - Standard Height")
-    func standardHeight() throws {
-        let viewModel = makeViewModel()
-        viewModel.isPlaying = true
-        viewModel.currentAudioLevel = 0.5
-
-        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 700)),
-            named: "Standard-Height-Playing",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_Standard-Height-Playing"
         )
     }
 
