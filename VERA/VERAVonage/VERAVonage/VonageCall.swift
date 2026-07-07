@@ -463,13 +463,13 @@ public final class VonageCall: CallFacade {
             isNetworkStatsEnabled = false
             statsCollector.reset()
             try session.disconnect()
-            publisher.restoreDefaultVideoView()
+            publisher.detachInlineRenderer()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
-            publisher.restoreDefaultVideoView()
+            publisher.detachInlineRenderer()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)

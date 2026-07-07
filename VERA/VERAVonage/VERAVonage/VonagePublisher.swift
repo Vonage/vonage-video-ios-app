@@ -272,7 +272,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     }
 
     /// Detaches the renderer at end of call, right before the publisher is destroyed.
-    func restoreDefaultVideoView() {
+    func detachInlineRenderer() {
         guard isInlineRendererAttached else { return }
         isInlineRendererAttached = false
         otPublisher.videoRender = nil

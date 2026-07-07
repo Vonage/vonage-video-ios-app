@@ -17,12 +17,15 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         layer.videoGravity = .resizeAspect
         return layer
     }()
+    /// The PiP window's display layer while this renderer's participant is the PiP target — wired
+    /// by `PictureInPictureController.attachFeed(to:)`, cleared by the orchestrator on retarget.
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
 
-    /// Horizontally mirrors live video frames. Set for the local front camera so the self-view
-    /// matches the mirrored preview used elsewhere (e.g. the waiting room); remote video and the
-    /// back camera stay un-mirrored. Applied to the pixels, so the placeholder avatar is unaffected.
+    /// Horizontally mirrors live video frames, applied to the pixels so every surface fed by this
+    /// renderer (tile and PiP window) agrees. Set once at attach: `true` for remote cameras
+    /// (matching the app's mirrored-tile convention) and for the local front camera; `false` for
+    /// screen shares and the local back camera. The placeholder avatar is unaffected.
     var isMirrored = false
 
     private let frameLock = NSLock()
@@ -30,8 +33,9 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
 
     // MARK: - Placeholder (camera-off avatar)
 
-    /// Size of the generated avatar placeholder. 16:9 matches `Participant.aspectRatio`'s
-    /// camera-off fallback so the tile lays out identically to a video tile.
+    /// Canvas size of the generated avatar placeholder shown in the PiP window (16:9, matching the
+    /// window's aspect). Its 0.55 circle ratio matches the tile's camera-off avatar
+    /// (`ParticipantVideoCardConstants.avatarHeightFraction`) so the two surfaces read alike.
     private static let placeholderSize = CGSize(width: 640, height: 360)
     private var placeholderTimer: DispatchSourceTimer?
     private var placeholderName: String?
@@ -59,8 +63,10 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
 
     // MARK: - Placeholder
 
-    /// Starts feeding an avatar placeholder (initials on the participant's color) into the inline
-    /// and PiP layers. Used when the target participant has their camera off so PiP stays available.
+    /// Starts feeding an avatar placeholder (initials on the participant's color) so the PiP
+    /// window has content while the target's camera is off. Only the PiP window displays it — the
+    /// meeting-room tile shows the SwiftUI initials card instead (its renderer view is not even
+    /// mounted while the camera is off).
     func startPlaceholder(name: String) {
         if isPlaceholderActive, placeholderName == name { return }
 
@@ -155,12 +161,6 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
             layer.flush()
         }
         layer.enqueue(sampleBuffer)
-    }
-
-    private func flush(layer: AVSampleBufferDisplayLayer) {
-        if layer.requiresFlushToResumeDecoding {
-            layer.flush()
-        }
     }
 
     private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
@@ -294,7 +294,9 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         (initials as NSString).draw(in: textRect, withAttributes: attributes)
     }
 
-    /// Mirrors `String.getParticipantColor()` so the PiP avatar matches the meeting room palette.
+    /// Duplicates the palette of `String.getParticipantColor()` (VERACore/VERACommonUI): those
+    /// extensions are internal to their modules and return SwiftUI `Color`, so they cannot be used
+    /// here. If the app palette changes, this must change with it.
     private static func participantColor(for name: String) -> UIColor {
         let colors: [UIColor] = [
             UIColor(red: 0.96, green: 0.26, blue: 0.21, alpha: 1),
@@ -312,7 +314,8 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         return colors[asciiSum % colors.count]
     }
 
-    /// Mirrors `String.getInitials()` so the PiP avatar shows the same initials as the meeting room.
+    /// Duplicates `String.getInitials()` (VERACommonUI, not a dependency of this module) so the
+    /// PiP avatar shows the same initials as the meeting room. Keep the logic in sync.
     private static func initials(from name: String) -> String {
         let parts = name.trimmingCharacters(in: .whitespacesAndNewlines)
             .components(separatedBy: .whitespacesAndNewlines)

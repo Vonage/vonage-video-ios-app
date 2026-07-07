@@ -45,7 +45,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private weak var call: VonageCall?
-    private var currentPipTargetId: String?
     private var pipTargetCameraEnabled = false
     private var wantsPictureInPicture = false
 
@@ -67,7 +66,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
                 self.startPictureInPictureIfPossible()
             }
         }
-        pipController.onPictureInPictureFailed = { [weak self] _ in
+        pipController.onPictureInPictureFailed = { [weak self] error in
+            Self.logger.error("PiP failed to start: \(error.localizedDescription, privacy: .public)")
             self?.wantsPictureInPicture = false
         }
     }
@@ -98,7 +98,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         call.callState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                guard state == .disconnected || state == .idle else { return }
+                guard state == .disconnected else { return }
                 self?.tearDown()
             }
             .store(in: &cancellables)
@@ -113,7 +113,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
     public func requestPictureInPicture() {
         let message =
-            "requestPictureInPicture; target=\(currentPipTargetId ?? "nil") "
+            "requestPictureInPicture; target=\(pipTargetParticipantId ?? "nil") "
             + "canStart=\(pipController.canStartPictureInPicture) configured=\(pipController.isConfigured)"
         Self.logger.debug("\(message, privacy: .public)")
         wantsPictureInPicture = true
@@ -132,7 +132,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     }
 
     private func startPictureInPictureIfPossible() {
-        guard currentPipTargetId != nil else {
+        guard pipTargetParticipantId != nil else {
             Self.logger.debug("start bail; no target")
             return
         }
@@ -163,7 +163,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         pipController.tearDown()
         participantSelector.reset()
         call = nil
-        currentPipTargetId = nil
         pipTargetCameraEnabled = false
         isInPictureInPicture = false
         canStartPictureInPicture = false
@@ -185,24 +184,12 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             participantId: targetId, in: state)
         let targetMessage =
             "updatePipTarget target=\(targetId ?? "nil") "
-            + "current=\(currentPipTargetId ?? "nil") cameraOn=\(targetCameraEnabled) "
+            + "current=\(pipTargetParticipantId ?? "nil") cameraOn=\(targetCameraEnabled) "
             + "participants=\(state.participants.count)"
         Self.logger.debug("\(targetMessage, privacy: .public)")
 
-        if targetId == currentPipTargetId {
+        if targetId == pipTargetParticipantId {
             syncPlaceholder(cameraEnabled: targetCameraEnabled, targetId: targetId, state: state)
-            return
-        }
-
-        let currentTargetHasCamera = PictureInPictureParticipantSelector.isCameraEnabled(
-            participantId: currentPipTargetId,
-            in: state
-        )
-        if wantsPictureInPicture,
-            currentPipTargetId != nil,
-            currentTargetHasCamera,
-            targetId != currentPipTargetId
-        {
             return
         }
 
@@ -213,9 +200,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     /// window: retargets move only the sample-buffer feed, and when the target stays put we keep
     /// its placeholder in sync with its camera state.
     private func updateActivePipTargetWhileInPictureInPicture(for state: ParticipantsState) async {
-        let targetId = participantSelector.activeSpeakerPipTargetId(for: state, currentPipTargetId: currentPipTargetId)
+        let targetId = participantSelector.activeSpeakerPipTargetId(
+            for: state, currentPipTargetId: pipTargetParticipantId)
 
-        if targetId != currentPipTargetId {
+        if targetId != pipTargetParticipantId {
             let now = Date()
             if let last = lastInPipRetargetAt,
                 now.timeIntervalSince(last) < Self.minimumInPipRetargetInterval
@@ -228,13 +216,13 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             }
         }
 
-        guard let currentPipTargetId else {
+        guard let currentTargetId = pipTargetParticipantId else {
             return
         }
 
         let cameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(
-            participantId: currentPipTargetId, in: state)
-        syncPlaceholder(cameraEnabled: cameraEnabled, targetId: currentPipTargetId, state: state)
+            participantId: currentTargetId, in: state)
+        syncPlaceholder(cameraEnabled: cameraEnabled, targetId: currentTargetId, state: state)
     }
 
     /// Keeps the camera-off placeholder in step with the target's camera state. The orchestrator
@@ -266,7 +254,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     /// active controller), and keeps the target's video subscription alive while its tile is
     /// hidden.
     private func retargetPipRenderer(to targetId: String?, state: ParticipantsState) async {
-        let previousTargetId = currentPipTargetId
+        let previousTargetId = pipTargetParticipantId
         let previousRenderer = activePipRenderer
         Self.logger.debug(
             "retarget \(previousTargetId ?? "nil", privacy: .public) -> \(targetId ?? "nil", privacy: .public)")
@@ -278,11 +266,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         // The target is committed only when its renderer is resolved; a failed resolution leaves
         // it unset so the next participant-state emission retries the switch.
-        currentPipTargetId = nil
+        pipTargetParticipantId = nil
         pipTargetCameraEnabled = PictureInPictureParticipantSelector.isCameraEnabled(participantId: targetId, in: state)
 
         guard let targetId, let call else {
-            pipTargetParticipantId = nil
             return
         }
 
@@ -298,12 +285,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         guard let renderer else {
             Self.logger.debug("retarget: no stream for \(targetId, privacy: .public); will retry")
-            pipTargetParticipantId = nil
             return
         }
 
         activePipRenderer = renderer
-        currentPipTargetId = targetId
         pipTargetParticipantId = targetId
 
         if previousRenderer !== renderer {
