@@ -1,0 +1,67 @@
+//
+//  Created by Vonage on 07/07/26.
+//
+
+import Combine
+import Testing
+
+@testable import VERAAudioDiagnostics
+
+@Suite("NullSpeakerTestService tests")
+struct NullSpeakerTestServiceTests {
+
+    @Test("playTestSound does not crash")
+    func playTestSoundDoesNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.playTestSound()
+        // Test passes if no crash occurs
+    }
+
+    @Test("stopTestSound does not crash")
+    func stopTestSoundDoesNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.stopTestSound()
+        // Test passes if no crash occurs
+    }
+
+    @Test("audioLevelPublisher never emits values")
+    func audioLevelPublisherNeverEmits() async {
+        let sut = NullSpeakerTestService()
+        var receivedValues: [Float] = []
+
+        let cancellable = sut.audioLevelPublisher
+            .sink { value in
+                receivedValues.append(value)
+            }
+
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        #expect(receivedValues.isEmpty)
+
+        cancellable.cancel()
+    }
+
+    @Test("can be initialized")
+    func canBeInitialized() {
+        let sut = NullSpeakerTestService()
+        #expect(sut.audioLevelPublisher is AnyPublisher<Float, Never>)
+    }
+
+    @Test("multiple calls to playTestSound do not crash")
+    func multiplePlayTestSoundCallsDoNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.playTestSound()
+        sut.playTestSound()
+        sut.playTestSound()
+        // Test passes if no crash occurs
+    }
+
+    @Test("multiple calls to stopTestSound do not crash")
+    func multipleStopTestSoundCallsDoNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.stopTestSound()
+        sut.stopTestSound()
+        sut.stopTestSound()
+        // Test passes if no crash occurs
+    }
+}
