@@ -1,0 +1,19 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_9d51cd27e66458::t_0b02a2e3489537 133,158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e57f5d0c43322c61f0e90a5c4e6844b29f85f837",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
