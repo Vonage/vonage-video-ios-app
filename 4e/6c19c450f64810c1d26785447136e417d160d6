@@ -1,0 +1,20 @@
+VERA/VERADomain/VERADomain/Participant.swift
+  s_9d51cd27e66458::t_db7049b2250dde 45
+  s_9d51cd27e66458::t_a5e6a8c1a56e29 160,162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "4e6c19c450f64810c1d26785447136e417d160d6",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

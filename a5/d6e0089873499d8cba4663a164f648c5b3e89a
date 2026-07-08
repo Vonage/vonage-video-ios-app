@@ -1,0 +1,21 @@
+VERA/VERADomain/VERADomain/Participant.swift
+  s_9d51cd27e66458::t_640559ada440ab 45-51,74-75,88-89,102,134,152
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  s_9d51cd27e66458::t_2f32e124ab1f28 182-183,253-254
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a5d6e0089873499d8cba4663a164f648c5b3e89a",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
