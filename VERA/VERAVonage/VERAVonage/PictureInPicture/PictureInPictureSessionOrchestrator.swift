@@ -260,7 +260,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             "retarget \(previousTargetId ?? "nil", privacy: .public) -> \(targetId ?? "nil", privacy: .public)")
 
         previousRenderer?.stopPlaceholder()
-        if let previousTargetId, let call, previousTargetId != call.publisher.id {
+        if let previousTargetId, let call {
             await call.subscriber(for: previousTargetId)?.setPictureInPictureTarget(false)
         }
 
@@ -273,20 +273,13 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             return
         }
 
-        let renderer: PictureInPictureVideoRenderer?
-        if call.publisher.id == targetId {
-            renderer = call.publisher.inlineVideoRenderer
-        } else if let subscriber = await call.subscriber(for: targetId) {
-            subscriber.setPictureInPictureTarget(true)
-            renderer = subscriber.inlineVideoRenderer
-        } else {
-            renderer = nil
-        }
-
-        guard let renderer else {
+        // PiP only ever follows remote participants, so the target always resolves to a subscriber.
+        guard let subscriber = await call.subscriber(for: targetId) else {
             Self.logger.debug("retarget: no stream for \(targetId, privacy: .public); will retry")
             return
         }
+        subscriber.setPictureInPictureTarget(true)
+        let renderer = subscriber.inlineVideoRenderer
 
         activePipRenderer = renderer
         pipTargetParticipantId = targetId

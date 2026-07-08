@@ -15,12 +15,12 @@ struct PictureInPictureParticipantSelectorTests {
 
     // MARK: - pipTargetId
 
-    @Test("Solo call targets the local participant")
-    func soloTargetsLocal() {
+    @Test("Solo call has no PiP target (local is never shown in PiP)")
+    func soloYieldsNoTarget() {
         let sut = PictureInPictureParticipantSelector()
         let state = makeState(local: makeParticipant(id: "local", isRemote: false), remotes: [])
 
-        #expect(sut.pipTargetId(for: state) == "local")
+        #expect(sut.pipTargetId(for: state) == nil)
     }
 
     @Test("No participants at all yields no target")
@@ -86,15 +86,17 @@ struct PictureInPictureParticipantSelectorTests {
         #expect(sut.pipTargetId(for: state) == "a")
     }
 
-    @Test("Screenshares are never targeted")
+    @Test("Screenshares are never targeted; a real remote is chosen instead")
     func screensharesExcluded() {
         let sut = PictureInPictureParticipantSelector()
         let state = makeState(
-            local: makeParticipant(id: "local", isRemote: false),
-            remotes: [makeParticipant(id: "share", isScreenshare: true, joinedAt: 1)]
+            remotes: [
+                makeParticipant(id: "share", isScreenshare: true, joinedAt: 1),
+                makeParticipant(id: "camera", joinedAt: 2),
+            ]
         )
 
-        #expect(sut.pipTargetId(for: state) == "local")
+        #expect(sut.pipTargetId(for: state) == "camera")
     }
 
     @Test("reset forgets the sticky target")
