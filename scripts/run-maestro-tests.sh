@@ -30,11 +30,17 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 #   ./scripts/run-maestro-tests.sh --online-mode .maestro/flows/launch-app.yaml
 FLOW_ARG=""
 VERA_E2E_MOCKS_VALUE=1
+MOCK_ONLY_MARKER="# vera-runner: mock-only"
 
 print_usage() {
     echo -e "${YELLOW}Usage:${NC}"
     echo -e "  ./scripts/run-maestro-tests.sh [--online-mode] [flow-name.yaml]"
     echo -e "  ./scripts/run-maestro-tests.sh [flow-name.yaml] [--online-mode]"
+}
+
+is_mock_only_flow() {
+    local flow="$1"
+    [ -f "$flow" ] && grep -q "^$MOCK_ONLY_MARKER" "$flow"
 }
 
 for arg in "$@"; do
@@ -79,6 +85,12 @@ if [ "$VERA_E2E_MOCKS_VALUE" -eq 1 ]; then
     echo -e "${BLUE}▶ E2E mocks enabled${NC}\n"
 else
     echo -e "${BLUE}▶ Online mode enabled: using real services${NC}\n"
+fi
+
+if [ "$VERA_E2E_MOCKS_VALUE" -eq 0 ] && [ -f "$FLOW_TARGET" ] && is_mock_only_flow "$FLOW_TARGET"; then
+    echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$FLOW_TARGET")${NC}"
+    echo -e "${GREEN}✅ No online Maestro tests to run for this flow.${NC}"
+    exit 0
 fi
 
 # ============================================================================
@@ -411,15 +423,69 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 
 mkdir -p test-reports
 
-if maestro test \
-    --config .maestro/config.yaml \
-    --env APP_ID="$APP_ID" \
-    --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
-    "$FLOW_TARGET"; then
-    TEST_RESULT=0
-else
-    TEST_RESULT=$?
+capture_simulator_logs() {
     xcrun simctl spawn "$SIMULATOR_ID" log show --style syslog --last 30m > test-reports/os-simulator.log || true
+}
+
+run_maestro_flow() {
+    local flow="$1"
+    local flow_name
+    flow_name=$(basename "$flow")
+
+    echo -e "${BLUE}▶ Running flow: $flow_name${NC}"
+
+    if maestro test \
+        --config .maestro/config.yaml \
+        --env APP_ID="$APP_ID" \
+        --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
+        "$flow"; then
+        return 0
+    else
+        local flow_result=$?
+        capture_simulator_logs
+        return "$flow_result"
+    fi
+}
+
+TEST_RESULT=0
+SKIPPED_FLOWS=0
+
+if [ "$VERA_E2E_MOCKS_VALUE" -eq 0 ]; then
+    if [ -d "$FLOW_TARGET" ]; then
+        for flow in $(find "$FLOW_TARGET" \( -name "*.yaml" -o -name "*.yml" \) | sort); do
+            if is_mock_only_flow "$flow"; then
+                echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$flow")${NC}"
+                SKIPPED_FLOWS=$((SKIPPED_FLOWS + 1))
+                continue
+            fi
+
+            FLOW_RESULT=0
+            run_maestro_flow "$flow" || FLOW_RESULT=$?
+            if [ "$FLOW_RESULT" -ne 0 ]; then
+                TEST_RESULT="$FLOW_RESULT"
+            fi
+        done
+    elif is_mock_only_flow "$FLOW_TARGET"; then
+        echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$FLOW_TARGET")${NC}"
+        SKIPPED_FLOWS=$((SKIPPED_FLOWS + 1))
+    else
+        FLOW_RESULT=0
+        run_maestro_flow "$FLOW_TARGET" || FLOW_RESULT=$?
+        if [ "$FLOW_RESULT" -ne 0 ]; then
+            TEST_RESULT="$FLOW_RESULT"
+        fi
+    fi
+else
+    if maestro test \
+        --config .maestro/config.yaml \
+        --env APP_ID="$APP_ID" \
+        --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
+        "$FLOW_TARGET"; then
+        TEST_RESULT=0
+    else
+        TEST_RESULT=$?
+        capture_simulator_logs
+    fi
 fi
 
 echo ""
@@ -429,6 +495,10 @@ if [ $TEST_RESULT -eq 0 ]; then
     echo -e "${GREEN}✅ All Maestro tests passed!${NC}"
 else
     echo -e "${RED}❌ Some tests failed (exit code: $TEST_RESULT)${NC}"
+fi
+
+if [ "$SKIPPED_FLOWS" -gt 0 ]; then
+    echo -e "${YELLOW}⏭️  Mock-only flows skipped in online mode: $SKIPPED_FLOWS${NC}"
 fi
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"

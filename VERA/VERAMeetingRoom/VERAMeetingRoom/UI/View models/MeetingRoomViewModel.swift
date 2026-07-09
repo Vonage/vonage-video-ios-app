@@ -19,6 +19,34 @@ public struct MeetingRoomOverlayState {
     }
 }
 
+public struct ForceMuteConfirmation: Identifiable, Equatable {
+    public let participantId: String
+    public let participantName: String
+
+    public init(participantId: String, participantName: String) {
+        self.participantId = participantId
+        self.participantName = participantName
+    }
+
+    public var id: String { participantId }
+
+    public var message: String {
+        let messageFormat = String(
+            localized: "Mute %@ for everyone in the call? Only %@ can unmute themselves.",
+            bundle: .module
+        )
+        return String(format: messageFormat, participantName, participantName)
+    }
+
+    public static var cancelButtonTitle: String {
+        String(localized: "Cancel", bundle: .module)
+    }
+
+    public static var muteButtonTitle: String {
+        String(localized: "Mute", bundle: .module)
+    }
+}
+
 public final class MeetingRoomViewModel: ObservableObject {
 
     private static let disconnectionTimeoutInSeconds = 6
@@ -188,6 +216,44 @@ public final class MeetingRoomViewModel: ObservableObject {
         }
     }
 
+    public func onForceMute(participantId: String, participantName: String) {
+        guard currentCall != nil else { return }
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let confirmation = ForceMuteConfirmation(
+                participantId: participantId,
+                participantName: participantName
+            )
+            meetingRoomNavigation.presentForceMuteConfirmation(
+                message: confirmation.message,
+                confirmTitle: ForceMuteConfirmation.muteButtonTitle,
+                cancelTitle: ForceMuteConfirmation.cancelButtonTitle
+            ) { [weak self] in
+                self?.forceMute(
+                    participantId: confirmation.participantId,
+                    participantName: confirmation.participantName
+                )
+            }
+        }
+    }
+
+    private func forceMute(participantId: String, participantName: String) {
+        Task { @MainActor [weak self] in
+            guard let self, let currentCall = self.currentCall else { return }
+            do {
+                try await currentCall.forceMuteParticipant(id: participantId)
+                let messageFormat = String(localized: "%@ was muted.", bundle: .module)
+                self.toast = .init(
+                    message: String(format: messageFormat, participantName),
+                    mode: .success
+                )
+            } catch {
+                self.toast = .init(message: error.localizedDescription, mode: .failure)
+            }
+        }
+    }
+
     public func endCall() {
         Task { @MainActor [weak self] in
             guard let self else { return }
@@ -326,6 +392,15 @@ extension MeetingRoomViewModel {
         uiParticipant.onTogglePin = { [weak self] in
             self?.onTogglePin(participantId: participant.id)
         }
+        if currentCall != nil,
+            participant.isRemote,
+            !participant.isScreenshare,
+            participant.isMicEnabled
+        {
+            uiParticipant.onForceMute = { [weak self] in
+                self?.onForceMute(participantId: participant.id, participantName: participant.name)
+            }
+        }
         return uiParticipant
     }
 
@@ -423,6 +498,10 @@ extension MeetingRoomViewModel {
                 self.toast = .init(
                     message: String(localized: "Session did reconnect", bundle: .module),
                     mode: .info)
+            case .muteForced:
+                self.toast = .init(
+                    message: String(localized: "You were muted by the host.", bundle: .module),
+                    mode: .warning)
             case .error(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .sessionFailure(let error):
