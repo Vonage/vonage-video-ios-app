@@ -25,7 +25,7 @@
             ScreenIdentifierContainer(AudioDiagnosticsAccessibilityID.screen) {
                 VStack {
                     DragIndicatorView()
-                    
+
                     ScrollView {
                         VStack(spacing: 24) {
                             // Instructions
@@ -33,12 +33,12 @@
                                 Image(systemName: "speaker.wave.2.circle.fill")
                                     .font(.system(size: 48))
                                     .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-                                
+
                                 Text("Audio Output Test", bundle: .module)
                                     .font(.title2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(VERACommonUIAsset.SemanticColors.onBackground.swiftUIColor)
-                                
+
                                 Text(
                                     "Select your audio output device and tap Play to verify it is working correctly.",
                                     bundle: .module
@@ -49,7 +49,7 @@
                                 .padding(.horizontal)
                             }
                             .padding(.top, 16)
-                            
+
                             // Audio control panel
                             AudioOutputControlPanel(viewModel: viewModel)
                                 .padding(.horizontal, 4)

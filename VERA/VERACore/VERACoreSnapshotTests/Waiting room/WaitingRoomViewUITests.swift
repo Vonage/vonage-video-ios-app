@@ -98,7 +98,8 @@ class WaitingRoomViewUITests {
     // MARK: - Test Helpers
 
     private func makeSUT(includeAudioOutputTestButton: Bool = false) -> WaitingRoomView {
-        let audioOutputButton: AnyView? = includeAudioOutputTestButton
+        let audioOutputButton: AnyView? =
+            includeAudioOutputTestButton
             ? AnyView(
                 Button(action: {}) {
                     Label {
