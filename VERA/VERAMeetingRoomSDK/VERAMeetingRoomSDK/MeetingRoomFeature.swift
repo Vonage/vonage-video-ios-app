@@ -41,4 +41,7 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
 
     /// CallKit integration.
     case callKit
+
+    /// Feedback form
+    case feedback
 }

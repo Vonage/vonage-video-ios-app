@@ -23,7 +23,7 @@ struct GetRoomNameTests {
         ])
     func extractValidRoomName(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "heart-of-gold")
+        #expect(roomName?.roomName == "heart-of-gold")
     }
 
     @Test(
@@ -34,7 +34,7 @@ struct GetRoomNameTests {
         ])
     func extractRoomNameEvenIfPathHasExtraElements(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "heart-of-gold")
+        #expect(roomName?.roomName == "heart-of-gold")
     }
 
     @Test(
@@ -45,7 +45,7 @@ struct GetRoomNameTests {
         ])
     func extractRoomNameWithNumbersAndDashes(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "room-123-test")
+        #expect(roomName?.roomName == "room-123-test")
     }
 
     @Test(
@@ -56,7 +56,7 @@ struct GetRoomNameTests {
         ])
     func extractRoomNameWithUnderscores(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "my_room_name")
+        #expect(roomName?.roomName == "my_room_name")
     }
 
     @Test(
@@ -67,7 +67,7 @@ struct GetRoomNameTests {
         ])
     func extractSingleCharacterRoomName(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "a")
+        #expect(roomName?.roomName == "a")
     }
 
     // MARK: - Invalid Host Tests
@@ -127,7 +127,7 @@ struct GetRoomNameTests {
         ])
     func extractRoomNameIgnoringQueryParameters(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "heart-of-gold")
+        #expect(roomName?.roomName == "heart-of-gold")
     }
 
     @Test(
@@ -138,7 +138,7 @@ struct GetRoomNameTests {
         ])
     func extractRoomNameIgnoringFragments(_ url: URL) async throws {
         let roomName = url.getRoomIdentifier(from: vonageBaseURL)
-        #expect(roomName == "heart-of-gold")
+        #expect(roomName?.roomName == "heart-of-gold")
     }
 
     // MARK: - Edge Cases

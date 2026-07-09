@@ -1,0 +1,110 @@
+# vera-runner: mock-only
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "force-mute"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "force-mute-card-room"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+- tapOn:
+    id: "username-input"
+
+- inputText: "Moderator"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-card-meeting-room-opened
+
+- extendedWaitUntil:
+    visible: "Moderator"
+    timeout: 5000
+
+- assertVisible:
+    id: "participant-card-e2e-local-publisher"
+
+- assertVisible:
+    id: "participant-mic-e2e-local-publisher-enabled"
+
+- assertNotVisible:
+    id: "participant-force-mute-e2e-local-publisher"
+
+- takeScreenshot: 02-card-local-publisher-visible
+
+- extendedWaitUntil:
+    visible: "Remote Participant"
+    timeout: 5000
+
+- assertVisible:
+    id: "participant-card-e2e-remote-participant"
+
+- assertVisible:
+    id: "participant-mic-e2e-remote-participant-enabled"
+
+- assertVisible:
+    id: "participant-force-mute-e2e-remote-participant"
+
+- takeScreenshot: 03-card-remote-force-mute-available
+
+- tapOn:
+    id: "participant-force-mute-e2e-remote-participant"
+
+- assertVisible: "Mute Remote Participant for everyone in the call? Only Remote Participant can unmute themselves."
+
+- tapOn: "Mute"
+
+- extendedWaitUntil:
+    visible: "Remote Participant was muted."
+    timeout: 5000
+
+- takeScreenshot: 04-card-force-mute-success-toast
+
+- extendedWaitUntil:
+    visible:
+      id: "participant-mic-e2e-remote-participant-disabled"
+    timeout: 5000
+
+- assertNotVisible:
+    id: "participant-force-mute-e2e-remote-participant"
+
+- takeScreenshot: 05-card-force-mute-completed
+
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+- takeScreenshot: 06-card-goodbye-screen

@@ -6,8 +6,8 @@ import SwiftUI
 import VERACommonUI
 
 public struct ChatScreen: View {
-
     @Environment(\.meetingRoomTheme) private var theme
+
     @ObservedObject var viewModel: ChatPanelViewModel
     let onDismiss: () -> Void
 
@@ -50,6 +50,7 @@ public struct ChatScreen: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .opaquePresentationBackground(theme.background)
         .presentationDragIndicator(.visible)
     }
 }

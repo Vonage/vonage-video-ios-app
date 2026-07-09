@@ -57,6 +57,44 @@ struct ArchiveButtonViewModelTests {
         #expect(state == .idle)
     }
 
+    @Test
+    @MainActor
+    func bottomItemPresentationUsesIdleState() {
+        let sut = makeSUT()
+
+        #expect(sut.id == "archive-button")
+        #expect(sut.label == String(localized: "Start Recording"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.startRecordingButton)
+        #expect(sut.isActive == false)
+        #expect(sut.accessory == nil)
+        _ = sut.image
+    }
+
+    @Test
+    @MainActor
+    func bottomItemPresentationUsesArchivingState() {
+        let sut = makeSUT()
+        sut.state = .archiving("archive-id")
+
+        #expect(sut.id == "archive-button")
+        #expect(sut.label == String(localized: "Stop Recording"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.stopRecordingButton)
+        #expect(sut.isActive)
+        #expect(sut.accessory == nil)
+        _ = sut.image
+    }
+
+    @Test
+    @MainActor
+    func bottomItemPerformActionUsesButtonTap() {
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(showAlert: alertSpy.capture)
+
+        sut.performAction()
+
+        #expect(alertSpy.capturedAlert != nil)
+    }
+
     @Test func setupOnlySubscribesOnce() async {
         let dataSource = ArchivingStatusDataSourceSpy()
         let sut = makeSUT(archivingStatusDataSource: dataSource)

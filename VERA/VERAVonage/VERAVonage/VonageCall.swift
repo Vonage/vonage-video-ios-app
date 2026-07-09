@@ -99,6 +99,16 @@ public final class VonageCall: CallFacade {
         }
         .eraseToAnyPublisher()
 
+    private let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+
+    /// A publisher that emits the local publisher's real-time audio level in [0.0, 1.0], never fails.
+    ///
+    /// Relays the smoothed audio level from the active ``VonagePublisher``. The subject is kept in sync
+    /// via ``setupPublisherObservation(_:)`` so that publisher replacements during
+    /// ``applyPublisherAdvancedSettings(_:)`` are handled transparently.
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     /// Captions cleanup timer to clear captions after a certain period of inactivity.
     private var captionCleanupTimer: Timer?
 
@@ -148,6 +158,9 @@ public final class VonageCall: CallFacade {
     private let activeSpeakerTracker = ActiveSpeakerTracker()
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
+
+    /// Test seam used to resolve a participant stream without changing the public initializer.
+    var participantStreamResolver: ((String) async -> OTStream?)?
 
     /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
     ///
@@ -294,6 +307,11 @@ public final class VonageCall: CallFacade {
     }
 
     private func setupPublisherObservation(_ publisher: VonagePublisher) {
+        publisher.onMuteForced = { [weak self] in
+            self?.updateMediaState()
+            self?._eventsPublisher.send(.muteForced)
+        }
+
         publisher.$participant
             .sink { [weak self] participant in
                 guard let self = self else { return }
@@ -309,6 +327,12 @@ public final class VonageCall: CallFacade {
                 Task { [weak self] in
                     await self?.updateParticipantsState(newState)
                 }
+            }
+            .store(in: &publisherCancellables)
+
+        publisher.audioLevelPublisher
+            .sink { [weak self] level in
+                self?._publisherAudioLevel.value = level
             }
             .store(in: &publisherCancellables)
     }
@@ -546,6 +570,22 @@ public final class VonageCall: CallFacade {
             self.publisher.publishAudio = !isMuted
             self.publisher.publishVideo = !isMuted
         }
+    }
+
+    // MARK: Participant moderation
+
+    public func forceMuteParticipant(id: String) async throws {
+        let stream: OTStream?
+        if let participantStreamResolver {
+            stream = await participantStreamResolver(id)
+        } else {
+            stream = await callStateManager.getSubscriber(id: id)?.stream
+        }
+
+        guard let stream else {
+            throw ParticipantForceMuteError.participantNotFound
+        }
+        try session.forceMute(stream: stream)
     }
 
     // MARK: Signals

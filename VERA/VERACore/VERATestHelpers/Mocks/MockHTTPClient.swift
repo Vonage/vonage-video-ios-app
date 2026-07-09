@@ -14,6 +14,7 @@ public final class MockHTTPClient: HTTPClient {
     public var callCount = 0
     public var recordedURL: URL!
     public var recordedURLs: [URL] = []
+    public var recordedHeaders: [String: String] = [:]
     public var recordedData: Data?
     public var recordedDataSequence: [Data] = []
 
@@ -37,17 +38,22 @@ public final class MockHTTPClient: HTTPClient {
         try await recordAndReturn(url: url, data: nil)
     }
 
-    public func post(_ url: URL, data: Data) async throws -> Data {
-        try await recordAndReturn(url: url, data: data)
+    public func post(_ url: URL, additionalHeaders: [String: String] = [:], data: Data) async throws -> Data {
+        try await recordAndReturn(url: url, additionalHeaders: additionalHeaders, data: data)
     }
 
-    private func recordAndReturn(url: URL, data: Data?) async throws -> Data {
+    private func recordAndReturn(url: URL, additionalHeaders: [String: String] = [:], data: Data?) async throws -> Data
+    {
         callCount += 1
         recordedURL = url
         recordedURLs.append(url)
         if let data {
             recordedData = data
             recordedDataSequence.append(data)
+        }
+
+        additionalHeaders.forEach { (key, value) in
+            recordedHeaders = [key: value]
         }
 
         if delaySeconds > 0 {

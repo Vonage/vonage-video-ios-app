@@ -6,6 +6,8 @@ appId: ${APP_ID}
     permissions:
       camera: allow
       microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
 
 - waitForAnimationToEnd:
     timeout: 5000
