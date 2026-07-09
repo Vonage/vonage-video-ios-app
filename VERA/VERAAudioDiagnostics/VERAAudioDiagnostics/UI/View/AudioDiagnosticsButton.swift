@@ -23,9 +23,6 @@
         /// Controls the presentation state of the view sheet.
         @State private var showView = false
 
-        /// Accessibility identifier for the audio diagnostics button.
-        public static let accessibilityID = "WaitingRoom.AudioOutputTestButton"
-
         /// Creates a new waiting room audio diagnostics button.
         ///
         /// - Parameter makeView: Optional closure that creates the view.
@@ -43,7 +40,7 @@
                     Image(systemName: "speaker.wave.2.fill")
                 }
             }
-            .accessibilityIdentifier(Self.accessibilityID)
+            .accessibilityIdentifier(AudioDiagnosticsAccessibilityID.waitingRoomButton)
             .sheet(isPresented: $showView) {
                 makeView?()
             }

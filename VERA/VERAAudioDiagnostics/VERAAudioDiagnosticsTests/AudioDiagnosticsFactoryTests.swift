@@ -119,9 +119,9 @@
             #expect(type(of: button1) == type(of: button2))
         }
 
-        @Test("AudioDiagnosticsButton has correct accessibility identifier")
+        @Test("AudioDiagnosticsButton uses correct accessibility identifier from enum")
         func audioDiagnosticsButtonHasCorrectAccessibilityID() {
-            #expect(AudioDiagnosticsButton.accessibilityID == "WaitingRoom.AudioOutputTestButton")
+            #expect(AudioDiagnosticsAccessibilityID.waitingRoomButton == "WaitingRoom.AudioOutputTestButton")
         }
 
         // MARK: - Meeting Room Button Tests

@@ -22,40 +22,42 @@
         }
 
         public var body: some View {
-            VStack {
-                DragIndicatorView()
-
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Instructions
-                        VStack(spacing: 8) {
-                            Image(systemName: "speaker.wave.2.circle.fill")
-                                .font(.system(size: 48))
-                                .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-
-                            Text("Audio Output Test", bundle: .module)
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(VERACommonUIAsset.SemanticColors.onBackground.swiftUIColor)
-
-                            Text(
-                                "Select your audio output device and tap Play to verify it is working correctly.",
-                                bundle: .module
-                            )
-                            .font(.body)
-                            .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+            ScreenIdentifierContainer(AudioDiagnosticsAccessibilityID.screen) {
+                VStack {
+                    DragIndicatorView()
+                    
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Instructions
+                            VStack(spacing: 8) {
+                                Image(systemName: "speaker.wave.2.circle.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                                
+                                Text("Audio Output Test", bundle: .module)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(VERACommonUIAsset.SemanticColors.onBackground.swiftUIColor)
+                                
+                                Text(
+                                    "Select your audio output device and tap Play to verify it is working correctly.",
+                                    bundle: .module
+                                )
+                                .font(.body)
+                                .foregroundColor(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            }
+                            .padding(.top, 16)
+                            
+                            // Audio control panel
+                            AudioOutputControlPanel(viewModel: viewModel)
+                                .padding(.horizontal, 4)
                         }
-                        .padding(.top, 16)
-
-                        // Audio control panel
-                        AudioOutputControlPanel(viewModel: viewModel)
-                            .padding(.horizontal, 4)
+                        .padding(.bottom, 8)
                     }
-                    .padding(.bottom, 8)
+                    .background(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
                 }
-                .background(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
             }
             .onDisappear {
                 viewModel.stopSpeaker()

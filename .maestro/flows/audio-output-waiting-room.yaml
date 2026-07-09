@@ -1,0 +1,98 @@
+# Audio Output Test Feature E2E Test
+#
+# Tests the audio output testing functionality in the Waiting Room:
+# 1. Navigate to Waiting Room
+# 2. Open Audio Output Test sheet
+# 3. Interact with Play/Stop button
+# 4. Close sheet and return to Waiting Room
+#
+# Requires: AUDIODIAGNOSTICS_ENABLED feature flag in app-config.json
+
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "audiotest"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Verify Audio Output Test button is visible in Waiting Room
+- assertVisible:
+    id: "WaitingRoom.AudioOutputTestButton"
+
+- takeScreenshot: 01-waiting-room-with-audio-button
+
+# Open Audio Output Test sheet by tapping the Audio button
+- tapOn:
+    id: "WaitingRoom.AudioOutputTestButton"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify Audio Output Test screen is visible inside the sheet
+- assertVisible:
+    id: "audio-output-test-screen"
+
+- takeScreenshot: 02-audio-output-test-sheet-opened
+
+# Verify Play button is visible
+- assertVisible:
+    id: "audio-output-play-button"
+
+# Tap Play to start audio test
+- tapOn:
+    id: "audio-output-play-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify level bar is visible (indicates playback UI is active)
+- assertVisible:
+    id: "audio-output-level-bar"
+
+- takeScreenshot: 03-audio-output-playing
+
+# Tap again to stop playback
+- tapOn:
+    id: "audio-output-play-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: 04-audio-output-stopped
+
+# Close the sheet by swiping down
+- swipe:
+    direction: DOWN
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify we're back in the Waiting Room
+- assertVisible:
+    id: "waiting-room-screen"
+
+- takeScreenshot: 05-back-to-waiting-room

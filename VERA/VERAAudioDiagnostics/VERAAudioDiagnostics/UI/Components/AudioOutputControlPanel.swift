@@ -19,6 +19,7 @@
     /// This component is designed for use in VERAMeetingRoomSDK and can be used
     /// in Settings, Waiting Room, or any pre-call/in-call context.
     public struct AudioOutputControlPanel: View {
+
         @ObservedObject var viewModel: AudioOutputControlViewModel
 
         public init(viewModel: AudioOutputControlViewModel) {
@@ -39,9 +40,11 @@
                     PlayStopButton(isPlaying: viewModel.isPlaying) {
                         viewModel.togglePlayback()
                     }
+                    .accessibilityIdentifier(AudioDiagnosticsAccessibilityID.playButton)
 
                     AudioLevelBar(level: viewModel.currentAudioLevel)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier(AudioDiagnosticsAccessibilityID.levelBar)
                 }
             }
             .padding(12)

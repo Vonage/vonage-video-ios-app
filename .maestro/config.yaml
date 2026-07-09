@@ -1,4 +1,5 @@
 appId: com.vonage.VERA
 platform:
   ios:
+    # Enable modal view support so Maestro can find accessibility IDs inside sheets
     snapshotKeyHonorModalViews: false

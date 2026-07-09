@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERAAudioDiagnostics
 import VERACommonUI
 
 @MainActor
@@ -11,7 +12,7 @@ struct AudioDiagnosticsBottomItemPresenter: BottomItemPresentable {
 
     var id: String { "audio-diagnostics-button" }
     var label: String { String(localized: "Audio Test", bundle: .module) }
-    var accessibilityIdentifier: String? { nil }
+    var accessibilityIdentifier: String? { AudioDiagnosticsAccessibilityID.meetingRoomButton }
     var image: Image { Image(systemName: "speaker.wave.2.fill") }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? { nil }
