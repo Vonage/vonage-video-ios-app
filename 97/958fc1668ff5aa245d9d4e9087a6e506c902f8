@@ -1,0 +1,31 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_9d51cd27e66458::t_d838e1b7fdbe56 108-117,120-122,132
+  s_9d51cd27e66458::t_9447f453f19dd0 263-264
+  s_9d51cd27e66458::t_fa748a26385f13 223-233
+  s_9d51cd27e66458::t_062f00b611786a 353
+  s_9d51cd27e66458::t_a3039204fa6d55 398-402,406,411-414
+  s_9d51cd27e66458::t_2540c651fac98a 377,380,382-385,388,392-393,395,416-418,421,432,442-443
+VERA/VERADomain/VERADomain/Participant.swift
+  s_9d51cd27e66458::t_1b0612fbc37d55 173-176,178
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_9d51cd27e66458::t_3f5b87456be55b 182-196
+  s_9d51cd27e66458::t_aed8ab2b0a5326 92
+  s_9d51cd27e66458::t_58e3895c4b88a6 18-21
+  s_9d51cd27e66458::t_95fc22725f2165 152-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "97958fc1668ff5aa245d9d4e9087a6e506c902f8",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

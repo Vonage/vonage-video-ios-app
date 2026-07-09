@@ -1,0 +1,22 @@
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomContent.swift
+  s_9d51cd27e66458::t_3b9bfd1fcc8190 25-32
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_9d51cd27e66458::t_750bad0182aebb 213
+  s_9d51cd27e66458::t_f3a6e269cf525c 192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1e3326fedbbe5f6161efa2f9d83bd2f6c14deb8b",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

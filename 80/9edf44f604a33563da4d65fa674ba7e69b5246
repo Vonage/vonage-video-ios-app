@@ -1,0 +1,22 @@
+VERA/VERAVonage/VERAVonageTests/PictureInPictureParticipantSelectorTests.swift
+  s_9d51cd27e66458::t_73841482031c7f 1-217
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureParticipantSelector.swift
+  s_9d51cd27e66458::t_c438cab2240ab4 27,32-33,39-41
+  s_9d51cd27e66458::t_3a3d178b94e551 74,78-82,84-85,88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "809edf44f604a33563da4d65fa674ba7e69b5246",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
