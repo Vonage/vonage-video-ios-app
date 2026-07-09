@@ -56,9 +56,51 @@ struct HandleUniversalLinkTests {
             "Expected \(expectedRoutes) but got \(spy.navigationRoutes) for URL: \(urlString)")
     }
 
+    // MARK: - Session Key Deep Link
+
+    @MainActor
+    @Test(
+        "Session key JWT in URL path navigates to waiting room",
+        arguments: [
+            ("https://video.vonage.com/room", AppRoute.waitingRoom("heart-of-gold")),
+            ("https://video.vonage.com/waiting-room", AppRoute.waitingRoom("heart-of-gold")),
+        ])
+    func sessionKeyDeepLink(
+        urlString: String,
+        expectedRoute: AppRoute
+    ) {
+        // Construct a JWT-like token at runtime
+        let sessionKey = makeTestSessionKey()
+        let urlString = "\(urlString)/\(sessionKey)"
+        let targetURL = URL(string: urlString)!
+        let spy = NavigationCoordinatorSpy()
+
+        let sut = makeSUT(navigator: spy)
+        sut(targetURL)
+
+        #expect(spy.navigationRoutes == [expectedRoute])
+    }
+
     // MARK: - SUT Factory
 
     func makeSUT(navigator: Navigator) -> HandleUniversalLink {
         HandleUniversalLink(baseURL: baseURL, navigator: navigator)
+    }
+
+    private func makeTestSessionKey() -> String {
+        let header = Data("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".utf8).base64URLEncoded
+        let payload = Data("{\"sessionId\":\"1_MX4x\",\"roomName\":\"heart-of-gold\",\"iat\":1776844771}".utf8)
+            .base64URLEncoded
+        let signature = Data("test-signature".utf8).base64URLEncoded
+        return "\(header).\(payload).\(signature)"
+    }
+}
+
+extension Data {
+    fileprivate var base64URLEncoded: String {
+        base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 }

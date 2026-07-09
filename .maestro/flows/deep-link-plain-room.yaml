@@ -1,0 +1,50 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Open deep link — routes directly to waiting room, bypassing landing page interaction
+- openLink: "${DEEP_LINK_TEST_URL}/room/testroom"
+
+# Handle system dialog "Open in VERA?" if it appears
+- runFlow: helpers/dismiss_deeplink_dialog.yaml
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Deep link bypasses the landing page — waiting room should be visible immediately
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Verify the room name extracted from the deep link is displayed
+- assertVisible:
+    text: "testroom"
+
+- takeScreenshot: 01-waiting-room-from-deep-link
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 02-meeting-room-from-deep-link
