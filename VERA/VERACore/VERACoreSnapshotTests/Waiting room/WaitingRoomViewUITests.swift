@@ -38,6 +38,13 @@ class WaitingRoomViewUITests {
         snapshot(sut, named: "Default")
     }
 
+    @Test("Waiting room View - With Audio Output Test Button")
+    func withAudioOutputTestButton() throws {
+        let sut = makeSUT(includeAudioOutputTestButton: true)
+
+        snapshot(sut, named: "WithAudioOutputButton")
+    }
+
     @Test(
         "Waiting room View - Size Classes",
         arguments: [
@@ -72,13 +79,46 @@ class WaitingRoomViewUITests {
         )
     }
 
+    @Test(
+        "Waiting room View - With Audio Output Button Color Schemes",
+        arguments: [("Light", ColorScheme.light), ("Dark", ColorScheme.dark)])
+    func audioOutputButtonColorSchemes(schemeName: String, scheme: ColorScheme) throws {
+        let sut = makeSUT(includeAudioOutputTestButton: true)
+            .environment(\.colorScheme, scheme)
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
+            named: schemeName,
+            record: isRecording,
+            testName: "\(snapshotPrefix)_AudioOutput_\(schemeName)"
+        )
+    }
+
     // MARK: - Test Helpers
 
-    private func makeSUT() -> WaitingRoomView {
-        WaitingRoomView(
-            state: makeWaitingRoomState(publisher: publisher),
+    private func makeSUT(includeAudioOutputTestButton: Bool = false) -> WaitingRoomView {
+        let audioOutputButton: AnyView? = includeAudioOutputTestButton
+            ? AnyView(
+                Button(action: {}) {
+                    Label {
+                        Text("Audio")
+                    } icon: {
+                        Image(systemName: "speaker.wave.2.fill")
+                    }
+                }
+            )
+            : nil
+
+        return WaitingRoomView(
+            state: makeWaitingRoomState(
+                publisher: publisher,
+                allowAudioOutputTest: includeAudioOutputTestButton
+            ),
             userName: .constant("Trillian"),
+            toolbarButtons: .constant([]),
             extraTrailingButtons: .constant([]),
+            audioOutputTestButton: audioOutputButton,
             onJoinRoom: {},
             onMicrophoneToggle: {},
             onCameraToggle: {}

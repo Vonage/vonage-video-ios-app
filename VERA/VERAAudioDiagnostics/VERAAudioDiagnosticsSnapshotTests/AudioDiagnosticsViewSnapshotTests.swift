@@ -8,9 +8,9 @@ import Testing
 
 @testable import VERAAudioDiagnostics
 
-@Suite("AudioDiagnosticsDialog Snapshot Tests")
+@Suite("AudioDiagnosticsView Snapshot Tests")
 @MainActor
-struct AudioDiagnosticsDialogSnapshotTests {
+struct AudioDiagnosticsViewSnapshotTests {
 
     // MARK: - Test Configuration
 
@@ -20,7 +20,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
     // MARK: - Basic Layout Tests
 
     @Test(
-        "AudioDiagnosticsDialog - Color Schemes",
+        "AudioDiagnosticsView - Color Schemes",
         arguments: [
             ("iPhone-Light", ColorScheme.light),
             ("iPhone-Dark", ColorScheme.dark),
@@ -39,7 +39,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
     }
 
     @Test(
-        "AudioDiagnosticsDialog - iPad Color Schemes",
+        "AudioDiagnosticsView - iPad Color Schemes",
         arguments: [
             ("iPad-Light", ColorScheme.light),
             ("iPad-Dark", ColorScheme.dark),
@@ -61,7 +61,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
     // MARK: - Playback State Tests
 
     @Test(
-        "AudioDiagnosticsDialog - Playback States",
+        "AudioDiagnosticsView - Playback States",
         arguments: [
             ("Stopped", false, 0.0),
             ("Playing", true, 0.7),
@@ -71,7 +71,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
         viewModel.isPlaying = isPlaying
         viewModel.currentAudioLevel = audioLevel
 
-        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
+        let sut = AnyView(AudioDiagnosticsView(viewModel: viewModel))
 
         assertSnapshot(
             of: sut,
@@ -85,7 +85,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
     // MARK: - Localization Tests
 
     @Test(
-        "AudioDiagnosticsDialog - Localizations",
+        "AudioDiagnosticsView - Localizations",
         arguments: [
             ("English-Stopped", Locale(identifier: "en"), false),
             ("English-Playing", Locale(identifier: "en"), true),
@@ -97,7 +97,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
         viewModel.isPlaying = isPlaying
         viewModel.currentAudioLevel = isPlaying ? 0.7 : 0.0
 
-        let sut = AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
+        let sut = AnyView(AudioDiagnosticsView(viewModel: viewModel))
             .environment(\.locale, locale)
 
         assertSnapshot(
@@ -113,7 +113,7 @@ struct AudioDiagnosticsDialogSnapshotTests {
 
     private func makeSUT() -> AnyView {
         let viewModel = makeViewModel()
-        return AnyView(AudioDiagnosticsDialog(viewModel: viewModel))
+        return AnyView(AudioDiagnosticsView(viewModel: viewModel))
     }
 
     private func makeViewModel() -> AudioOutputControlViewModel {

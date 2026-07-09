@@ -14,6 +14,7 @@ public struct WaitingRoomState: Equatable {
     public let allowCameraControl: Bool
     public let cameras: [UICameraDevice]
     public let audioLevel: Float
+    public let allowAudioOutputTest: Bool
     public weak var publisher: VERAPublisher?
 
     public init(
@@ -24,6 +25,7 @@ public struct WaitingRoomState: Equatable {
         allowCameraControl: Bool,
         cameras: [UICameraDevice],
         audioLevel: Float = 0.0,
+        allowAudioOutputTest: Bool = false,
         publisher: VERAPublisher?
     ) {
         self.roomName = roomName
@@ -33,6 +35,7 @@ public struct WaitingRoomState: Equatable {
         self.allowCameraControl = allowCameraControl
         self.cameras = cameras
         self.audioLevel = audioLevel
+        self.allowAudioOutputTest = allowAudioOutputTest
         self.publisher = publisher
     }
 
@@ -53,6 +56,7 @@ public struct WaitingRoomState: Equatable {
             && lhs.allowMicrophoneControl == rhs.allowMicrophoneControl
             && lhs.allowCameraControl == rhs.allowCameraControl
             && lhs.audioLevel == rhs.audioLevel
+            && lhs.allowAudioOutputTest == rhs.allowAudioOutputTest
             && lhs.publisher === rhs.publisher
     }
 }
@@ -64,7 +68,9 @@ public struct WaitingRoomView: View {
 
     let state: WaitingRoomState
     var userName: Binding<String>
+    @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioOutputTestButton: AnyView?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -76,7 +82,9 @@ public struct WaitingRoomView: View {
                     HorizontalWaitingRoomContentView(
                         state: state,
                         userName: userName,
+                        toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
+                        audioOutputTestButton: audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -84,7 +92,9 @@ public struct WaitingRoomView: View {
                     VerticalWaitingRoomContentView(
                         state: state,
                         userName: userName,
+                        toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
+                        audioOutputTestButton: audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -92,7 +102,9 @@ public struct WaitingRoomView: View {
                     HorizontalWaitingRoomContentView(
                         state: state,
                         userName: userName,
+                        toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
+                        audioOutputTestButton: audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -107,7 +119,9 @@ struct HorizontalWaitingRoomContentView: View {
 
     let state: WaitingRoomState
     var userName: Binding<String>
+    @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioOutputTestButton: AnyView?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -117,7 +131,9 @@ struct HorizontalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
+                toolbarButtons: _toolbarButtons,
                 extraTrailingButtons: _extraTrailingButtons,
+                audioOutputTestButton: audioOutputTestButton,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -135,7 +151,9 @@ struct HorizontalWaitingRoomContentView: View {
 struct VerticalWaitingRoomContentView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
+    @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioOutputTestButton: AnyView?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -145,7 +163,9 @@ struct VerticalWaitingRoomContentView: View {
             VideoPreviewView(
                 state: state,
                 userName: userName,
+                toolbarButtons: _toolbarButtons,
                 extraTrailingButtons: _extraTrailingButtons,
+                audioOutputTestButton: audioOutputTestButton,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -162,7 +182,9 @@ struct VerticalWaitingRoomContentView: View {
 struct VideoPreviewView: View {
     let state: WaitingRoomState
     let userName: Binding<String>
+    @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
+    let audioOutputTestButton: AnyView?
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
 
@@ -174,6 +196,7 @@ struct VideoPreviewView: View {
             WaitingRoomUserPreviewView(
                 state: state,
                 userName: userName,
+                toolbarButtons: _toolbarButtons,
                 extraTrailingButtons: _extraTrailingButtons,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
@@ -206,6 +229,11 @@ struct VideoPreviewView: View {
                             VERACommonUIAsset.Images.videoLine.swiftUIImage
                         }
                     }
+                }
+
+                // Audio Output Test button, same visual style as the Camera selector.
+                if state.allowAudioOutputTest, let audioOutputTestButton {
+                    audioOutputTestButton
                 }
             }
             .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
@@ -277,7 +305,9 @@ struct PrepareToJoinRoom: View {
             ],
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
+        toolbarButtons: .constant([]),
         extraTrailingButtons: .constant([]),
+        audioOutputTestButton: nil,
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}
@@ -298,7 +328,9 @@ struct PrepareToJoinRoom: View {
             ],
             publisher: nil),
         userName: .constant("Zaphod Beeblebrox"),
+        toolbarButtons: .constant([]),
         extraTrailingButtons: .constant([]),
+        audioOutputTestButton: nil,
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

@@ -13,7 +13,7 @@
     /// from any screen (Waiting Room, Meeting Room, etc.).
     ///
     /// Matches the style of other bottom sheets like VideoEffectsSheet.
-    public struct AudioDiagnosticsDialog: View {
+    public struct AudioDiagnosticsView: View {
 
         @ObservedObject var viewModel: AudioOutputControlViewModel
 
@@ -66,9 +66,9 @@
     // MARK: - Previews
 
     #if DEBUG
-        struct AudioDiagnosticsDialog_Previews: PreviewProvider {
+        struct AudioDiagnosticsView_Previews: PreviewProvider {
             static var previews: some View {
-                AudioDiagnosticsDialog(
+                AudioDiagnosticsView(
                     viewModel: AudioOutputControlViewModel(speakerTestService: NullSpeakerTestService())
                 )
                 .preferredColorScheme(.dark)

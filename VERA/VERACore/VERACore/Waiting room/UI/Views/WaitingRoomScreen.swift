@@ -22,7 +22,9 @@ public struct WaitingRoomScreen: View {
             WaitingRoomView(
                 state: state,
                 userName: $viewModel.userName,
-                extraTrailingButtons: $viewModel.extraTrailingButtons
+                toolbarButtons: $viewModel.toolbarButtons,
+                extraTrailingButtons: $viewModel.extraTrailingButtons,
+                audioOutputTestButton: viewModel.audioOutputTestButton
             ) {
                 Task {
                     await viewModel.joinRoom()
@@ -34,6 +36,13 @@ public struct WaitingRoomScreen: View {
             }
             .onAppear {
                 viewModel.loadUI()
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    ForEach(viewModel.toolbarButtons) { holder in
+                        holder.content()
+                    }
+                }
             }
         case .loading: Text("Loading", bundle: .veraCore)
         }

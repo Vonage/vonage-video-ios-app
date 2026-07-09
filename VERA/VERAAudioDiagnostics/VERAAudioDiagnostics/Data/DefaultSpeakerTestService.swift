@@ -4,6 +4,10 @@
 
 import AVFoundation
 import Combine
+import os.log
+
+/// Logger for audio diagnostics operations.
+private let logger = Logger(subsystem: "VERAAudioDiagnostics", category: "SpeakerTest")
 
 /// Default implementation of ``SpeakerTestService`` that plays a short tone
 /// through the device's current audio output route using `AVAudioPlayer`.
@@ -116,7 +120,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
                 )
                 try audioSession.setActive(true)
             } catch {
-                print("Failed to reconfigure audio session: \(error)")
+                logger.error("Failed to reconfigure audio session: \(error.localizedDescription)")
             }
 
             // Create new player and start playback
@@ -207,7 +211,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
                 )
                 try audioSession.setActive(true)
             } catch {
-                print("Failed to configure audio session: \(error)")
+                logger.error("Failed to configure audio session: \(error.localizedDescription)")
             }
         #endif
 
@@ -278,7 +282,7 @@ extension DefaultSpeakerTestService: AVAudioPlayerDelegate {
     }
 
     public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        print("Audio player decode error: \(error?.localizedDescription ?? "unknown")")
+        logger.error("Audio player decode error: \(error?.localizedDescription ?? "unknown")")
         stopMonitoring()
     }
 }

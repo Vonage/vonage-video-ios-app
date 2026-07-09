@@ -8,29 +8,29 @@
 
     /// Closure that creates and returns a configured audio diagnostics view with presentation modifiers.
     ///
-    /// Used by ``AudioDiagnosticsWaitingRoomButton`` to lazily instantiate the dialog
+    /// Used by ``AudioDiagnosticsWaitingRoomButton`` to lazily instantiate the view
     /// when the user taps the button.
     public typealias OnLaunchAudioDiagnostics = () -> AnyView
 
     /// Circular speaker button shown in the waiting room's trailing button row.
     ///
-    /// Tapping opens the ``AudioDiagnosticsDialog`` in a sheet modal presentation.
+    /// Tapping opens the ``AudioDiagnosticsView`` in a sheet modal presentation.
     /// Uses ``CircularControlImageButton`` from VERACommonUI for consistent styling.
     ///
-    /// The button creates the dialog lazily via the `makeDialog` closure,
+    /// The button creates the view lazily via the `makeView` closure,
     /// ensuring resources are allocated only when needed.
     public struct AudioDiagnosticsWaitingRoomButton: View {
 
-        /// Closure for creating the audio diagnostics dialog when the button is tapped.
+        /// Closure for creating the audio diagnostics view when the button is tapped.
         /// If `nil`, the button will show the sheet but with no content.
         private let makeDialog: OnLaunchAudioDiagnostics?
 
-        /// Controls the presentation state of the dialog sheet.
+        /// Controls the presentation state of the view sheet.
         @State private var showDialog = false
 
         /// Creates a new waiting room audio diagnostics button.
         ///
-        /// - Parameter makeDialog: Optional closure that creates the dialog view.
+        /// - Parameter makeDialog: Optional closure that creates the view.
         ///                         Typically provided by ``AudioDiagnosticsFactory``.
         public init(makeDialog: OnLaunchAudioDiagnostics? = nil) {
             self.makeDialog = makeDialog
@@ -54,7 +54,7 @@
         #Preview {
             AudioDiagnosticsWaitingRoomButton {
                 AnyView(
-                    AudioDiagnosticsDialog(
+                    AudioDiagnosticsView(
                         viewModel: AudioOutputControlViewModel(speakerTestService: NullSpeakerTestService())
                     )
                     .presentationDetents([.medium, .large])

@@ -49,29 +49,29 @@
             #expect(viewModel1 !== viewModel2)
         }
 
-        // MARK: - Dialog Creation Tests
+        // MARK: - View Creation Tests
 
-        @Test("makeDialog creates AudioDiagnosticsDialog")
-        func makeDialogCreatesDialog() {
+        @Test("makeView creates AudioDiagnosticsView")
+        func makeViewCreatesView() {
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-            let dialog = sut.makeDialog()
+            let view = sut.makeView()
 
-            #expect(dialog is AudioDiagnosticsDialog)
+            #expect(view is AudioDiagnosticsView)
         }
 
-        @Test("makeConfiguredDialog returns AnyView")
-        func makeConfiguredDialogReturnsAnyView() {
+        @Test("makeConfiguredView returns AnyView")
+        func makeConfiguredViewReturnsAnyView() {
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-            let configuredDialog = sut.makeConfiguredDialog()
+            let configuredView = sut.makeConfiguredView()
 
-            #expect(configuredDialog is AnyView)
+            #expect(configuredView is AnyView)
         }
 
-        // MARK: - Waiting Room Button Tests
+        // MARK: - Waiting Room Circular Button Tests
 
         @Test("makeWaitingRoomButton creates button")
         func makeWaitingRoomButtonCreatesButton() {
@@ -83,16 +83,45 @@
             #expect(button is AudioDiagnosticsWaitingRoomButton)
         }
 
-        @Test("makeWaitingRoomButton provides dialog closure")
-        func makeWaitingRoomButtonProvidesDialogClosure() {
+        @Test("makeWaitingRoomButton provides view closure")
+        func makeWaitingRoomButtonProvidesViewClosure() {
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
             let button = sut.makeWaitingRoomButton()
 
-            // Access the makeDialog closure through reflection or by creating the dialog
+            // Access the makeDialog closure through reflection or by creating the view
             // For now, just verify the button was created
             #expect(button is AudioDiagnosticsWaitingRoomButton)
+        }
+
+        // MARK: - Waiting Room Selector Button Tests
+
+        @Test("makeWaitingRoomSelectorButton creates AudioDiagnosticsButton")
+        func makeWaitingRoomSelectorButtonCreatesButton() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
+
+            let button = sut.makeWaitingRoomSelectorButton()
+
+            #expect(button is AudioDiagnosticsButton)
+        }
+
+        @Test("makeWaitingRoomSelectorButton creates independent instances")
+        func makeWaitingRoomSelectorButtonCreatesIndependentInstances() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
+
+            let button1 = sut.makeWaitingRoomSelectorButton()
+            let button2 = sut.makeWaitingRoomSelectorButton()
+
+            // SwiftUI Views are value types, verify they can be created independently
+            #expect(type(of: button1) == type(of: button2))
+        }
+
+        @Test("AudioDiagnosticsButton has correct accessibility identifier")
+        func audioDiagnosticsButtonHasCorrectAccessibilityID() {
+            #expect(AudioDiagnosticsButton.accessibilityID == "WaitingRoom.AudioOutputTestButton")
         }
 
         // MARK: - Meeting Room Button Tests
@@ -108,7 +137,7 @@
             }
 
             #expect(button is AudioDiagnosticsMeetingRoomButton)
-            #expect(callbackInvoked == false) // Not invoked yet
+            #expect(callbackInvoked == false)  // Not invoked yet
         }
 
         // MARK: - Service Integration Tests

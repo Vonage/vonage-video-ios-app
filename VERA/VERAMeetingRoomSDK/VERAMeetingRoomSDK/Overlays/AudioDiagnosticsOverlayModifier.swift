@@ -12,7 +12,7 @@ struct AudioDiagnosticsOverlayModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showAudioDiagnostics) {
-                container.audioDiagnosticsFactory.makeConfiguredDialog()
+                container.audioDiagnosticsFactory.makeView()
             }
     }
 }

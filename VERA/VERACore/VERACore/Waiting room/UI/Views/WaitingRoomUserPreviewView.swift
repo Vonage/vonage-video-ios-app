@@ -5,10 +5,28 @@
 import SwiftUI
 import VERACommonUI
 
+/// A type-erased wrapper for SwiftUI views with a stable identifier.
+///
+/// Used by the waiting room to hold heterogeneous button views in arrays
+/// like `toolbarButtons` and `extraTrailingButtons`. The wrapper provides
+/// a stable `id` for `ForEach` enumeration and a closure to lazily create
+/// the wrapped view content.
+///
+/// ## Usage
+/// ```swift
+/// let holder = ViewHolder(id: "settings") {
+///     SettingsToolbarButton { ... }
+/// }
+/// ```
 public struct ViewHolder: Identifiable {
     public let id: String
     public let content: () -> AnyView
 
+    /// Creates a new view holder.
+    ///
+    /// - Parameters:
+    ///   - id: A stable identifier for this view holder, used by `ForEach`.
+    ///   - content: A closure that creates the wrapped view content.
     public init<Content: View>(
         id: String,
         @ViewBuilder content: @escaping () -> Content
@@ -23,6 +41,7 @@ struct WaitingRoomUserPreviewView: View {
 
     private let state: WaitingRoomState
     private let userName: Binding<String>
+    @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
     private let onMicrophoneToggle: () -> Void
     private let onCameraToggle: () -> Void
@@ -30,12 +49,14 @@ struct WaitingRoomUserPreviewView: View {
     init(
         state: WaitingRoomState,
         userName: Binding<String>,
+        toolbarButtons: Binding<[ViewHolder]> = .constant([]),
         extraTrailingButtons: Binding<[ViewHolder]> = .constant([]),
         onMicrophoneToggle: @escaping () -> Void,
         onCameraToggle: @escaping () -> Void
     ) {
         self.state = state
         self.userName = userName
+        self._toolbarButtons = toolbarButtons
         self._extraTrailingButtons = extraTrailingButtons
         self.onMicrophoneToggle = onMicrophoneToggle
         self.onCameraToggle = onCameraToggle
@@ -47,20 +68,6 @@ struct WaitingRoomUserPreviewView: View {
                 PublisherVideoView(videoView: publisher.view)
             } else {
                 PublisherVideoView(videoView: nil)
-            }
-
-            if !extraTrailingButtons.isEmpty {
-                HStack {
-                    Spacer()
-                    VStack {
-                        ForEach(extraTrailingButtons) {
-                            $0.content()
-                                .padding(.leading, 2)
-                        }
-                    }
-                }.frame(maxWidth: .infinity, alignment: .topTrailing)
-                    .padding(.top, 8)
-                    .padding(.trailing, 8)
             }
 
             VStack {
