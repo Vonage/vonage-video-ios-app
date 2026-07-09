@@ -22,12 +22,14 @@ echo -e "${BLUE}   🎭 VERA Maestro UI Test Runner${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # Parse optional flow argument
-# Usage: ./scripts/run-maestro-tests.sh [flow-name.yaml]
+# Usage: ./scripts/run-maestro-tests.sh [flow-name.yaml] [device-name]
 # Examples:
 #   ./scripts/run-maestro-tests.sh                                    # Run all flows
 #   ./scripts/run-maestro-tests.sh join-with-camera-mic-allowed.yaml  # Run single flow by name
 #   ./scripts/run-maestro-tests.sh .maestro/flows/launch-app.yaml     # Run single flow by path
+#   ./scripts/run-maestro-tests.sh deep-link-plain-room.yaml "iPhone 16"  # Run flow on specific device
 FLOW_ARG="$1"
+DEVICE_ARG="$2"
 if [ -n "$FLOW_ARG" ]; then
     if [ -f "$FLOW_ARG" ]; then
         FLOW_TARGET="$FLOW_ARG"
@@ -116,8 +118,10 @@ APP_ID="com.vonage.VERA"
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
 
-# Auto-detect simulator: use env var, or find best available iPhone
-if [ -n "$SIMULATOR_DEVICE" ]; then
+# Auto-detect simulator: use arg, env var, or find best available iPhone
+if [ -n "$DEVICE_ARG" ]; then
+    DEVICE="$DEVICE_ARG"
+elif [ -n "$SIMULATOR_DEVICE" ]; then
     DEVICE="$SIMULATOR_DEVICE"
 else
     echo -e "${BLUE}🔍 Auto-detecting simulator...${NC}"

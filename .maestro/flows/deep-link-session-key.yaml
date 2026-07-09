@@ -16,6 +16,9 @@ appId: ${APP_ID}
 # Open deep link with a session-key JWT — room name is extracted from the JWT payload
 - openLink: "${DEEP_LINK_TEST_URL}/room/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiIxX01YNHgiLCJyb29tTmFtZSI6ImhlYXJ0LW9mLWdvbGQiLCJpYXQiOjE3NzY4NDQ3NzF9.dGVzdC1zaWduYXR1cmU"
 
+# Handle system dialog "Open in VERA?" if it appears
+- runFlow: helpers/dismiss_deeplink_dialog.yaml
+
 - waitForAnimationToEnd:
     timeout: 5000
 

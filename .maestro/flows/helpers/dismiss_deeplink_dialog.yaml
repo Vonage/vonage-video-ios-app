@@ -1,0 +1,7 @@
+# Helper: Dismiss "Open in App" system dialog
+# Usage: - runFlow: helpers/dismiss_deeplink_dialog.yaml
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Open"
+    optional: true

@@ -14,6 +14,9 @@ appId: ${APP_ID}
 # Open deep link — routes directly to waiting room, bypassing landing page interaction
 - openLink: "${DEEP_LINK_TEST_URL}/room/testroom"
 
+# Handle system dialog "Open in VERA?" if it appears
+- runFlow: helpers/dismiss_deeplink_dialog.yaml
+
 - waitForAnimationToEnd:
     timeout: 5000
 
