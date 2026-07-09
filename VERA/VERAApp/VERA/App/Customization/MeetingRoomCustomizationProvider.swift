@@ -63,21 +63,15 @@ struct MeetingRoomCustomizationButtonPresenter: BottomItemPresentable {
 }
 
 @MainActor
-final class MeetingRoomCustomizationProvider: ObservableObject, MeetingRoomUIProvider {
+final class MeetingRoomCustomizationProvider: ObservableObject, @MainActor MeetingRoomUIProvider {
     @Published private(set) var items: [MeetingRoomCustomizationButtonItem] = []
     @Published private(set) var isCustomBottomBarEnabled = false
 
     private let updatesSubject = PassthroughSubject<Void, Never>()
-    private let updatesPublisher: AnyPublisher<Void, Never>
+    public var updates: AnyPublisher<Void, Never> {
+        updatesSubject.eraseToAnyPublisher()
+    }
     private var nextButtonNumber = 1
-
-    nonisolated var updates: AnyPublisher<Void, Never> {
-        updatesPublisher
-    }
-
-    init() {
-        updatesPublisher = updatesSubject.eraseToAnyPublisher()
-    }
 
     func bottomBarButtons() -> [BottomBarButton] {
         items.map { item in

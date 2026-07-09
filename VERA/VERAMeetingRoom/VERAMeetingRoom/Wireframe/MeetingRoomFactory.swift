@@ -80,29 +80,6 @@ public class MeetingRoomFactory {
         return (make(viewModel: viewModel, uiProvider: uiProvider), viewModel)
     }
 
-    /// Creates a meeting room using legacy external button closures.
-    ///
-    /// Prefer `make(roomName:uiProvider:onActionHandler:)` so hosts can provide
-    /// additive bottom bar buttons and optional custom bottom bar content from a
-    /// single provider object.
-    @available(*, deprecated, message: "Use make(roomName:uiProvider:onActionHandler:) instead.")
-    @MainActor
-    public func make(
-        roomName: RoomName,
-        getExternalButtons: @escaping @MainActor () -> [BottomBarButton],
-        externalButtonsUpdates: AnyPublisher<Void, Never> = Empty().eraseToAnyPublisher(),
-        onActionHandler: @escaping ActionHandler
-    ) -> (view: some View, viewModel: MeetingRoomViewModel) {
-        make(
-            roomName: roomName,
-            uiProvider: DefaultMeetingRoomUIProvider(
-                bottomBarButtons: getExternalButtons,
-                updates: externalButtonsUpdates
-            ),
-            onActionHandler: onActionHandler
-        )
-    }
-
     /// Creates a meeting room screen for an existing view model using the default UI provider.
     @MainActor
     public func make(viewModel: MeetingRoomViewModel) -> some View {

@@ -28,6 +28,8 @@ private enum MeetingRoomViewConstants {
     static let barFadeDuration: Double = 0.3
     /// Duration of the bar toggle animation.
     static let barToggleDuration: Double = 0.4
+    /// Presentation spacing
+    static let presentantionContentSpacing: CGFloat = 16
 }
 
 public struct ViewGenerator: Identifiable {
@@ -349,7 +351,7 @@ public struct MeetingRoomView: View {
         if let content = request.content {
             content
         } else {
-            VStack(spacing: 12) {
+            VStack(spacing: MeetingRoomViewConstants.presentantionContentSpacing) {
                 Text(request.title)
                     .font(.headline)
                 if let message = request.message {

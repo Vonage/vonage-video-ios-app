@@ -114,6 +114,13 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
+    }
+
+    @MainActor
+    public func loadUI() async {
+        guard !initialised else { return }
+        initialised = true
+
         uiProvider.updates
             .sink { [weak self] in
                 Task { @MainActor [weak self] in
@@ -121,49 +128,6 @@ public final class MeetingRoomViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-    }
-
-    @available(*, deprecated, message: "Use init(..., uiProvider:, ...) instead.")
-    public convenience init(
-        roomName: RoomName,
-        baseURL: URL,
-        connectToRoomUseCase: ConnectToRoomUseCase,
-        disconnectRoomUseCase: DisconnectRoomUseCase,
-        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
-        checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
-        currentCallParticipantsRepository: CurrentCallParticipantsRepository,
-        captionsStatusDataSource: CaptionsStatusDataSource,
-        configuration: MeetingRoomConfiguration,
-        meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping @MainActor () -> [BottomBarButton],
-        externalButtonsUpdates: AnyPublisher<Void, Never>,
-        noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: PinnedParticipantsDataSource
-    ) {
-        self.init(
-            roomName: roomName,
-            baseURL: baseURL,
-            connectToRoomUseCase: connectToRoomUseCase,
-            disconnectRoomUseCase: disconnectRoomUseCase,
-            checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
-            checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
-            currentCallParticipantsRepository: currentCallParticipantsRepository,
-            captionsStatusDataSource: captionsStatusDataSource,
-            configuration: configuration,
-            meetingRoomNavigation: meetingRoomNavigation,
-            uiProvider: DefaultMeetingRoomUIProvider(
-                bottomBarButtons: getExternalButtons,
-                updates: externalButtonsUpdates
-            ),
-            noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-            pinnedParticipantsDataSource: pinnedParticipantsDataSource
-        )
-    }
-
-    @MainActor
-    public func loadUI() async {
-        guard !initialised else { return }
-        initialised = true
 
         do {
             await MediaPermissions.requestPermissionsIfNeeded()
