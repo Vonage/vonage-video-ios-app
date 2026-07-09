@@ -20,6 +20,11 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var canTogglePinState: Bool { (canBePinned || isPinned) && participant.isRemote }
     /// Toggle the pin state
     public var onTogglePin: (() -> Void)?
+    /// Force-mutes this participant when moderation is available.
+    public var onForceMute: (() -> Void)?
+
+    /// Whether the participant exposes a force-mute action.
+    public var canForceMute: Bool { onForceMute != nil }
 
     public init(
         participant: Participant,

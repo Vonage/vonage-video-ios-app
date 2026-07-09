@@ -185,6 +185,241 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func forceMuteActionRequestsConfirmationForEligibleRemoteParticipant() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        var presentedAlert: AlertItem?
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            actionHandler: { action in
+                if case .presentAlert(let alert) = action {
+                    presentedAlert = alert
+                }
+            })
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1", name: "Arthur")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.canForceMute == true }
+        let participant = try #require(state?.participants.first)
+
+        participant.onForceMute?()
+        await delay()
+
+        #expect(call.forceMutedParticipantIDs.isEmpty)
+        let alert = try #require(presentedAlert)
+        #expect(alert.title == "Mute Arthur for everyone in the call? Only Arthur can unmute themselves.")
+        #expect(alert.message == "")
+        #expect(alert.okAction == "Mute")
+        #expect(alert.cancelAction == "Cancel")
+        #expect(alert.onConfirm != nil)
+        #expect(sut.toast == nil)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteConfirmationUsesLocalizedText() {
+        let sut = ForceMuteConfirmation(participantId: "p1", participantName: "Arthur")
+
+        #expect(sut.id == "p1")
+        #expect(sut.message == "Mute Arthur for everyone in the call? Only Arthur can unmute themselves.")
+        #expect(ForceMuteConfirmation.cancelButtonTitle == "Cancel")
+        #expect(ForceMuteConfirmation.muteButtonTitle == "Mute")
+    }
+
+    @Test
+    @MainActor
+    func confirmingForceMuteExecutesActionAndShowsSuccessToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        var presentedAlert: AlertItem?
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            actionHandler: { action in
+                if case .presentAlert(let alert) = action {
+                    presentedAlert = alert
+                }
+            })
+
+        await sut.loadUI()
+        sut.onForceMute(participantId: "p1", participantName: "Arthur")
+        await delay()
+
+        try #require(presentedAlert).onConfirm?()
+        await delay()
+
+        #expect(call.forceMutedParticipantIDs == ["p1"])
+        #expect(sut.toast == .init(message: "Arthur was muted.", mode: .success))
+    }
+
+    @Test
+    @MainActor
+    func dismissingForceMuteConfirmationDoesNotExecuteAction() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        var presentedAlert: AlertItem?
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            actionHandler: { action in
+                if case .presentAlert(let alert) = action {
+                    presentedAlert = alert
+                }
+            })
+
+        await sut.loadUI()
+        sut.onForceMute(participantId: "p1", participantName: "Arthur")
+        await delay()
+
+        #expect(presentedAlert != nil)
+        #expect(call.forceMutedParticipantIDs.isEmpty)
+        #expect(sut.toast == nil)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsAddedWithoutCheckingCapability() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participantsCount == 1 }
+
+        #expect(state?.participants.first?.canForceMute == true)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsNotAddedForMutedOrScreenShareParticipants() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [
+                    makeMockParticipant(id: "muted", isMicEnabled: false),
+                    makeMockParticipant(id: "screen", isScreenshare: true),
+                ],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.count == 2 }
+
+        #expect(state?.participants.allSatisfy { !$0.canForceMute } == true)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteActionIsNotAddedForLocalParticipant() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        connectToRoomUseCase.call = call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: makeMockParticipant(id: "local", isRemote: false),
+                participants: [],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.id == "local" }
+
+        #expect(state?.participants.first?.canForceMute == false)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteWithoutCurrentCallDoesNothing() async {
+        var didPresentAlert = false
+        let sut = makeSUT(actionHandler: { action in
+            if case .presentAlert = action {
+                didPresentAlert = true
+            }
+        })
+
+        sut.onForceMute(participantId: "p1", participantName: "Marvin")
+        await delay()
+
+        #expect(sut.toast == nil)
+        #expect(!didPresentAlert)
+    }
+
+    @Test
+    @MainActor
+    func forceMuteFailureShowsErrorToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = MockCall()
+        call.forceMuteError = MockForceMuteError.requestFailed
+        connectToRoomUseCase.call = call
+        var presentedAlert: AlertItem?
+        let sut = makeSUT(
+            connectToRoomUseCase: connectToRoomUseCase,
+            actionHandler: { action in
+                if case .presentAlert(let alert) = action {
+                    presentedAlert = alert
+                }
+            })
+
+        await sut.loadUI()
+        call._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeMockParticipant(id: "p1", name: "Trillian")],
+                activeParticipantId: nil
+            )
+        )
+
+        let state = await sut.$state.values
+            .compactMap(\.contentState)
+            .first { $0.participants.first?.canForceMute == true }
+        let participant = try #require(state?.participants.first)
+
+        participant.onForceMute?()
+        await delay()
+        #expect(call.forceMutedParticipantIDs.isEmpty)
+
+        try #require(presentedAlert).onConfirm?()
+        await delay()
+
+        #expect(sut.toast?.mode == .failure)
+    }
+
+    @Test
+    @MainActor
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
@@ -1105,6 +1340,22 @@ struct MeetingRoomViewModelTests {
         #expect(sut.toast == nil)
     }
 
+    @Test("Given a muteForced event, Then a warning toast is shown")
+    @MainActor
+    func muteForcedEventShowsWarningToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._eventsPublisher.send(.muteForced)
+
+        let toast = await sut.$toast.values.first { $0?.message == "You were muted by the host." }
+
+        #expect(toast == ToastItem(message: "You were muted by the host.", mode: .warning))
+    }
+
     @Test("Given a streamReceived event, Then no toast is shown")
     @MainActor
     func streamReceivedEventDoesNotShowToast() async throws {
@@ -1186,4 +1437,8 @@ extension MeetingRoomViewState {
         if case .content(let state) = self { return state }
         return nil
     }
+}
+
+private enum MockForceMuteError: Swift.Error {
+    case requestFailed
 }

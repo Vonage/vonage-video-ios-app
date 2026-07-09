@@ -8,7 +8,8 @@ import Testing
 import VERACore
 import VERADomain
 import VERATestHelpers
-import VERAVonage
+
+@testable import VERAVonage
 
 @Suite("Vonage Call tests")
 @MainActor
@@ -70,6 +71,102 @@ struct VonageCallTests {
         // Should be an error
         default:
             Issue.record("Expected error event, got: \(String(describing: event))")
+        }
+    }
+
+    // MARK: - Participant moderation tests
+
+    @Test
+    func forceMuteParticipantThrowsWhenParticipantDoesNotExist() async {
+        let sut = makeSUT()
+
+        await #expect(throws: ParticipantForceMuteError.participantNotFound) {
+            try await sut.forceMuteParticipant(id: "missing-participant")
+        }
+        #expect(
+            ParticipantForceMuteError.participantNotFound.localizedDescription
+                == "The participant is no longer in the call."
+        )
+    }
+
+    @Test
+    func forceMuteParticipantForwardsResolvedStreamToSession() async throws {
+        let stream = makeOpaqueStream()
+        let session = VonageSessionSpy()
+        let sut = makeSUT(session: session)
+        sut.participantStreamResolver = { id in
+            #expect(id == "participant-id")
+            return stream
+        }
+
+        try await sut.forceMuteParticipant(id: "participant-id")
+
+        #expect(session.forceMutedStreams.count == 1)
+        #expect(session.forceMutedStreams.first === stream)
+    }
+
+    @Test
+    func forceMuteParticipantPropagatesSessionError() async {
+        let stream = makeOpaqueStream()
+        let session = VonageSessionSpy()
+        session.forceMuteError = ForceMuteTestError.requestFailed
+        let sut = makeSUT(session: session)
+        sut.participantStreamResolver = { _ in stream }
+
+        await #expect(throws: ForceMuteTestError.requestFailed) {
+            try await sut.forceMuteParticipant(id: "participant-id")
+        }
+    }
+
+    @Test
+    func forceMuteSessionSucceedsWhenOperationReturnsNoError() throws {
+        let stream = makeOpaqueStream()
+        let sut = makeBaseSession()
+        sut.forceMuteStreamOperation = { receivedStream in
+            #expect(receivedStream === stream)
+            return nil
+        }
+
+        try sut.forceMute(stream: stream)
+    }
+
+    @Test
+    func forceMuteSessionThrowsOperationError() {
+        let stream = makeOpaqueStream()
+        let expectedError = OTError(
+            domain: OT_SESSION_ERROR_DOMAIN,
+            code: 1540,
+            userInfo: nil
+        )
+        let sut = makeBaseSession()
+        sut.forceMuteStreamOperation = { _ in expectedError }
+
+        #expect(throws: OTError.self) {
+            try sut.forceMute(stream: stream)
+        }
+    }
+
+    @Test
+    func publisherMuteForcedUpdatesLocalStateAndPublishesEvent() async throws {
+        let publisherSpy = VonagePublisherSpy()
+        let sut = makeSUT(publisher: publisherSpy)
+        sut.setup()
+        sut.connect()
+
+        publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
+
+        let state = await sut.statePublisher.values.first { !$0.isPublishingAudio }
+        let event = await sut.eventsPublisher.values.first { event in
+            if case .muteForced = event { return true }
+            return false
+        }
+
+        #expect(publisherSpy.publishAudio == false)
+        #expect(state?.isPublishingAudio == false)
+        if case .muteForced = event {
+            #expect(true)
+        } else {
+            Issue.record("Expected muteForced event")
         }
     }
 
@@ -388,4 +485,22 @@ struct VonageCallTests {
             statsCollector: statsCollector
         )
     }
+
+    private func makeOpaqueStream() -> OTStream {
+        OTStream()
+    }
+
+    private func makeBaseSession() -> VonageSession {
+        VonageSession(
+            session: OTSession(
+                applicationId: "applicationId",
+                sessionId: "sessionId",
+                delegate: nil
+            )!
+        )
+    }
+}
+
+private enum ForceMuteTestError: Swift.Error, Equatable {
+    case requestFailed
 }
