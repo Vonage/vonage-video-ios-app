@@ -19,16 +19,36 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     }()
     /// The PiP window's display layer while this renderer's participant is the PiP target — wired
     /// by `PictureInPictureController.attachFeed(to:)`, cleared by the orchestrator on retarget.
-    var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
+    /// Written on the main actor, read on OpenTok's video thread — guarded by `frameLock`.
+    var pipBufferDisplayLayer: AVSampleBufferDisplayLayer? {
+        get { withFrameLock { _pipBufferDisplayLayer } }
+        set { withFrameLock { _pipBufferDisplayLayer = newValue } }
+    }
+    private var _pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
+
     private(set) var renderedFrameCount = 0
 
     /// Horizontally mirrors frames at the pixel level so the tile and PiP window agree. Only the
     /// local publisher sets this `true` (front camera, selfie-preview convention); remote
     /// subscribers never mirror, so their video — and any text they show — stays true-orientation.
-    var isMirrored = false
+    /// Written on the main actor, read on the video thread — guarded by `frameLock`.
+    var isMirrored: Bool {
+        get { withFrameLock { _isMirrored } }
+        set { withFrameLock { _isMirrored = newValue } }
+    }
+    private var _isMirrored = false
 
     private let frameLock = NSLock()
     private let accelerator = YUVToARGBAccelerator()
+
+    /// Runs `body` while holding `frameLock`. All cross-thread fields (`_pipBufferDisplayLayer`,
+    /// `_isMirrored`, `_isPlaceholderActive`) are read/written only under this lock; the video-thread
+    /// hot path holds it for its whole critical section and touches the raw `_` fields directly.
+    private func withFrameLock<T>(_ body: () -> T) -> T {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+        return body()
+    }
 
     /// Reused pool for the BGRA destination buffers so a live frame doesn't allocate a fresh
     /// `CVPixelBuffer` every time. Recreated only when the frame dimensions change; the pool
@@ -46,7 +66,13 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     private var placeholderTimer: DispatchSourceTimer?
     private var placeholderName: String?
     private var placeholderPixelBuffer: CVPixelBuffer?
-    private(set) var isPlaceholderActive = false
+
+    /// Written on the main actor (start/stop), read on the video thread — guarded by `frameLock`.
+    private(set) var isPlaceholderActive: Bool {
+        get { withFrameLock { _isPlaceholderActive } }
+        set { withFrameLock { _isPlaceholderActive = newValue } }
+    }
+    private var _isPlaceholderActive = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -112,29 +138,30 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         frameLock.lock()
         defer { frameLock.unlock() }
 
-        guard isPlaceholderActive,
+        guard _isPlaceholderActive,
             let placeholderPixelBuffer,
             let sampleBuffer = createSampleBuffer(from: placeholderPixelBuffer)
         else { return }
 
         renderedFrameCount += 1
         enqueue(sampleBuffer, to: inlineDisplayLayer)
-        if let pipBufferDisplayLayer {
-            enqueue(sampleBuffer, to: pipBufferDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
         }
     }
 
     func renderVideoFrame(_ frame: OTVideoFrame) {
         guard let format = frame.format, format.pixelFormat == .I420 else { return }
 
-        // While the avatar placeholder is active the manager is the source of truth for the
-        // camera state. Drop incoming frames (including trailing frames delivered right after a
-        // camera-off) so they can't cancel the placeholder or freeze PiP on a stale frame. The
-        // manager explicitly stops the placeholder when the camera is re-enabled.
-        if isPlaceholderActive { return }
-
         frameLock.lock()
         defer { frameLock.unlock() }
+
+        // While the avatar placeholder is active the orchestrator is the source of truth for the
+        // camera state. Drop incoming frames (including trailing frames delivered right after a
+        // camera-off) so they can't cancel the placeholder or freeze PiP on a stale frame. The
+        // orchestrator explicitly stops the placeholder when the camera is re-enabled. Checked
+        // under `frameLock` so the placeholder start/stop on the main actor can't race this read.
+        if _isPlaceholderActive { return }
 
         guard
             let sampleBuffer = createSampleBuffer(
@@ -151,12 +178,12 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
             let message =
                 "renderer.frame #\(renderedFrameCount) "
                 + "\(Int(format.imageWidth))x\(Int(format.imageHeight)) "
-                + "pipLayer=\(pipBufferDisplayLayer != nil)"
+                + "pipLayer=\(_pipBufferDisplayLayer != nil)"
             Self.logger.debug("\(message, privacy: .public)")
         }
         enqueue(sampleBuffer, to: inlineDisplayLayer)
-        if let pipBufferDisplayLayer {
-            enqueue(sampleBuffer, to: pipBufferDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
         }
     }
 
@@ -171,7 +198,7 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
 
     private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
         guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
-        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: isMirrored)
+        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: _isMirrored)
         return createSampleBuffer(from: pixelBuffer)
     }
 
