@@ -45,55 +45,53 @@ final class YUVToARGBAccelerator {
         to pixelBufferRef: CVPixelBuffer?,
         mirrored: Bool = false
     ) -> vImage_Error {
-        guard let pixelBufferRef else {
+        guard let pixelBufferRef, let format = frame.format, let planes = frame.planes else {
             return vImage_Error(kvImageInvalidParameter)
         }
 
-        let width = frame.format?.imageWidth ?? 0
-        let height = frame.format?.imageHeight ?? 0
-        let subsampledWidth = frame.format!.imageWidth / 2
-        let subsampledHeight = frame.format!.imageHeight / 2
-        let planeSize = calculatePlaneSize(forFrame: frame)
+        let width = Int(format.imageWidth)
+        let height = Int(format.imageHeight)
+        let subsampledWidth = width / 2
+        let subsampledHeight = height / 2
 
-        let yPlane = UnsafeMutablePointer<GLubyte>.allocate(capacity: planeSize.ySize)
-        let uPlane = UnsafeMutablePointer<GLubyte>.allocate(capacity: planeSize.uSize)
-        let vPlane = UnsafeMutablePointer<GLubyte>.allocate(capacity: planeSize.vSize)
+        // Each plane's real row stride, which can exceed the visible width when the SDK pads rows
+        // for alignment (e.g. widths not a multiple of 16). Falling back to a tightly-packed stride.
+        let yStride = format.bytesPerRow.object(at: 0) as? Int ?? width
+        let uStride = format.bytesPerRow.object(at: 1) as? Int ?? subsampledWidth
+        let vStride = format.bytesPerRow.object(at: 2) as? Int ?? subsampledWidth
 
-        memcpy(yPlane, frame.planes?.pointer(at: 0), planeSize.ySize)
-        memcpy(uPlane, frame.planes?.pointer(at: 1), planeSize.uSize)
-        memcpy(vPlane, frame.planes?.pointer(at: 2), planeSize.vSize)
-
-        let yStride = frame.format?.bytesPerRow.object(at: 0) as? Int ?? 0
-        let uStride = frame.format?.bytesPerRow.object(at: 1) as? Int ?? 0
-        let vStride = frame.format?.bytesPerRow.object(at: 2) as? Int ?? 0
-
+        // Point vImage directly at the SDK's frame planes (valid for the duration of this callback)
+        // using each plane's real stride. This avoids a per-frame allocate + memcpy of all three
+        // planes, and — by honoring the source stride instead of assuming stride == width — reads
+        // padded rows correctly rather than over-reading a tightly-packed copy.
         var yPlaneBuffer = vImage_Buffer(
-            data: yPlane,
+            data: planes.pointer(at: 0),
             height: vImagePixelCount(height),
             width: vImagePixelCount(width),
             rowBytes: yStride
         )
         var uPlaneBuffer = vImage_Buffer(
-            data: uPlane,
+            data: planes.pointer(at: 1),
             height: vImagePixelCount(subsampledHeight),
             width: vImagePixelCount(subsampledWidth),
             rowBytes: uStride
         )
         var vPlaneBuffer = vImage_Buffer(
-            data: vPlane,
+            data: planes.pointer(at: 2),
             height: vImagePixelCount(subsampledHeight),
             width: vImagePixelCount(subsampledWidth),
             rowBytes: vStride
         )
 
-        CVPixelBufferLockBaseAddress(pixelBufferRef, .readOnly)
+        CVPixelBufferLockBaseAddress(pixelBufferRef, [])
         let pixelBufferData = CVPixelBufferGetBaseAddress(pixelBufferRef)
         let rowBytes = CVPixelBufferGetBytesPerRow(pixelBufferRef)
-        var destinationImageBuffer = vImage_Buffer()
-        destinationImageBuffer.data = pixelBufferData
-        destinationImageBuffer.height = vImagePixelCount(height)
-        destinationImageBuffer.width = vImagePixelCount(width)
-        destinationImageBuffer.rowBytes = rowBytes
+        var destinationImageBuffer = vImage_Buffer(
+            data: pixelBufferData,
+            height: vImagePixelCount(height),
+            width: vImagePixelCount(width),
+            rowBytes: rowBytes
+        )
 
         var permuteMap: [UInt8] = [3, 2, 1, 0]
         let convertError = vImageConvert_420Yp8_Cb8_Cr8ToARGB8888(
@@ -117,18 +115,6 @@ final class YUVToARGBAccelerator {
 
         CVPixelBufferUnlockBaseAddress(pixelBufferRef, [])
 
-        yPlane.deallocate()
-        uPlane.deallocate()
-        vPlane.deallocate()
-
         return convertError
-    }
-
-    private func calculatePlaneSize(forFrame frame: OTVideoFrame) -> (ySize: Int, uSize: Int, vSize: Int) {
-        guard let frameFormat = frame.format else {
-            return (0, 0, 0)
-        }
-        let baseSize = Int(frameFormat.imageWidth * frameFormat.imageHeight) * MemoryLayout<GLubyte>.size
-        return (baseSize, baseSize / 4, baseSize / 4)
     }
 }

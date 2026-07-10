@@ -30,6 +30,13 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     private let frameLock = NSLock()
     private let accelerator = YUVToARGBAccelerator()
 
+    /// Reused pool for the BGRA destination buffers so a live frame doesn't allocate a fresh
+    /// `CVPixelBuffer` every time. Recreated only when the frame dimensions change; the pool
+    /// recycles buffers once the enqueued sample buffer is released.
+    private var pixelBufferPool: CVPixelBufferPool?
+    private var poolWidth = 0
+    private var poolHeight = 0
+
     // MARK: - Placeholder (camera-off avatar)
 
     /// Canvas size of the generated avatar placeholder shown in the PiP window (16:9, matching the
@@ -163,20 +170,42 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     }
 
     private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
-        let pixelAttributes: NSDictionary = [kCVPixelBufferIOSurfacePropertiesKey as String: [:]]
-        var pixelBuffer: CVPixelBuffer?
-        let result = CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            width,
-            height,
-            kCVPixelFormatType_32BGRA,
-            pixelAttributes as CFDictionary,
-            &pixelBuffer
-        )
-        guard result == kCVReturnSuccess, let pixelBuffer else { return nil }
-
+        guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
         _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: isMirrored)
         return createSampleBuffer(from: pixelBuffer)
+    }
+
+    /// Returns a BGRA pixel buffer from a size-matched pool, (re)creating the pool only when the
+    /// frame dimensions change. Called under `frameLock`, so the pool state needs no extra locking.
+    private func dequeuePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
+        if pixelBufferPool == nil || width != poolWidth || height != poolHeight {
+            let attributes: [String: Any] = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferIOSurfacePropertiesKey as String: [:],
+            ]
+            var pool: CVPixelBufferPool?
+            guard
+                CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes as CFDictionary, &pool)
+                    == kCVReturnSuccess
+            else {
+                return nil
+            }
+            pixelBufferPool = pool
+            poolWidth = width
+            poolHeight = height
+        }
+
+        guard let pixelBufferPool else { return nil }
+        var pixelBuffer: CVPixelBuffer?
+        guard
+            CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
+                == kCVReturnSuccess
+        else {
+            return nil
+        }
+        return pixelBuffer
     }
 
     private func createSampleBuffer(from pixelBuffer: CVPixelBuffer) -> CMSampleBuffer? {
