@@ -36,9 +36,10 @@ final class YUVToARGBAccelerator {
         )
     }
 
-    /// - Parameter mirrored: horizontally flips the output so the local front camera matches the
-    ///   mirrored-preview convention. Reflecting the pixels (rather than transforming the layer)
-    ///   keeps it independent of the display layer's frame/geometry.
+    /// - Parameter mirrored: horizontally reflects the output. Used only for the local publisher's
+    ///   self-view (front-camera selfie convention); remote streams are never mirrored. Reflecting
+    ///   the pixels (rather than transforming the layer) keeps every surface fed by the renderer
+    ///   — the tile and the PiP window — consistent.
     func convertFrameVImageYUV(
         _ frame: OTVideoFrame,
         to pixelBufferRef: CVPixelBuffer?,

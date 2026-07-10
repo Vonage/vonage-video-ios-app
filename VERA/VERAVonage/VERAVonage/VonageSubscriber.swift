@@ -120,12 +120,7 @@ public class VonageSubscriber: NSObject {
         self.stream = stream
         id = stream.streamId
         isScreenshare = stream.videoType == .screen
-
-        // Attach the permanent renderer BEFORE the first participant snapshot is built, so every
-        // view the UI ever sees for this participant is already the final one. Remote camera video
-        // is mirrored in pixels (matching the app's mirrored-tile convention and the PiP window);
-        // screen shares are never mirrored.
-        inlineVideoRenderer.isMirrored = stream.videoType != .screen
+        
         subscriber.videoRender = inlineVideoRenderer
         // The SDK pauses rendering on resign-active by default; PiP needs frames in the background.
         NotificationCenter.default.removeObserver(

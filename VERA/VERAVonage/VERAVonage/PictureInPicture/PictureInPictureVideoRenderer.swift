@@ -22,10 +22,9 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
     private(set) var renderedFrameCount = 0
 
-    /// Horizontally mirrors live video frames, applied to the pixels so every surface fed by this
-    /// renderer (tile and PiP window) agrees. Set once at attach: `true` for remote cameras
-    /// (matching the app's mirrored-tile convention) and for the local front camera; `false` for
-    /// screen shares and the local back camera. The placeholder avatar is unaffected.
+    /// Horizontally mirrors frames at the pixel level so the tile and PiP window agree. Only the
+    /// local publisher sets this `true` (front camera, selfie-preview convention); remote
+    /// subscribers never mirror, so their video — and any text they show — stays true-orientation.
     var isMirrored = false
 
     private let frameLock = NSLock()
