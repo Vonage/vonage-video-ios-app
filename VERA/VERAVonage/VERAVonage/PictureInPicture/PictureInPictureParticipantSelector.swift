@@ -21,12 +21,12 @@ final class PictureInPictureParticipantSelector {
     }
 
     /// Prefers the first joined remote; falls back to any remote with camera when the first has video off.
-    /// PiP only ever follows remote participants, so with no remotes there is no target.
+    /// When there are no remote participants, falls back to the local participant so PiP works solo.
     func pipTargetId(for state: ParticipantsState) -> String? {
         let remoteParticipants = sortedRemoteParticipants(in: state)
         guard let firstRemote = remoteParticipants.first else {
             stickyPipTargetId = nil
-            return nil
+            return state.localParticipant?.id
         }
 
         let stickyParticipant = remoteParticipants.first { $0.id == stickyPipTargetId } ?? firstRemote
@@ -53,7 +53,8 @@ final class PictureInPictureParticipantSelector {
         }
 
         if let currentPipTargetId,
-            state.participants.contains(where: { $0.id == currentPipTargetId })
+            currentPipTargetId == state.localParticipant?.id
+                || state.participants.contains(where: { $0.id == currentPipTargetId })
         {
             return currentPipTargetId
         }
@@ -79,6 +80,11 @@ final class PictureInPictureParticipantSelector {
 
     private static func participant(withId participantId: String?, in state: ParticipantsState) -> Participant? {
         guard let participantId else { return nil }
+
+        if let localParticipant = state.localParticipant, localParticipant.id == participantId {
+            return localParticipant
+        }
+
         return state.participants.first { $0.id == participantId }
     }
 
@@ -87,6 +93,8 @@ final class PictureInPictureParticipantSelector {
     /// A compact, `Equatable` snapshot of everything that can affect the PiP target or placeholder.
     /// Used to coalesce participant-state emissions and ignore audio-level-only updates.
     struct ParticipantSignature: Equatable {
+        let localId: String?
+        let localCameraEnabled: Bool
         let activeParticipantId: String?
         let remotes: [Remote]
 
@@ -99,6 +107,8 @@ final class PictureInPictureParticipantSelector {
 
     static func signature(for state: ParticipantsState) -> ParticipantSignature {
         ParticipantSignature(
+            localId: state.localParticipant?.id,
+            localCameraEnabled: state.localParticipant?.isCameraEnabled ?? false,
             activeParticipantId: state.activeParticipantId,
             remotes: state.participants.map {
                 ParticipantSignature.Remote(
