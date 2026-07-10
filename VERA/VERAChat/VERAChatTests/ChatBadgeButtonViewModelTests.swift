@@ -25,6 +25,9 @@ struct ChatBadgeButtonViewModelTests {
         let repository = SpyChatMessagesRepository()
         let sut = ChatBadgeButtonViewModel(chatMessagesObserver: repository)
 
+        // Wait for Combine subscription to be established
+        _ = await sut.$unreadMessagesCount.values.first { _ in true }
+
         repository.addMessage(makeMessage("Hello"))
 
         let count = await sut.$unreadMessagesCount.values.first { $0 > 0 }

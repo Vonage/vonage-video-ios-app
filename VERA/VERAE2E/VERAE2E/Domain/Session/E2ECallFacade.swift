@@ -130,7 +130,13 @@ public final class E2ECallFacade: CallFacade {
         networkStatsSubject.send(.empty)
     }
 
+    public func enableSubscriberExtraStats() {}
+
+    public func disableSubscriberExtraStats() {}
+
     public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+
+    public func updateLivePublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async {}
 
     private var hasDeterministicCaptions: Bool {
         guard let captionsFixture = scenario.fixture as? any E2ECaptionsScenarioFixture else {
