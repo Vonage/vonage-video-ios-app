@@ -1,0 +1,41 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVonagePublisher.swift
+  s_9d51cd27e66458::t_d36d9cf4310911 1-47,49-84
+  s_9d51cd27e66458::t_b125ab9a92893f 48
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_9d51cd27e66458::t_494a54fe757f3f 280-281
+  s_9d51cd27e66458::t_c56146d2e86988 264-266
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_9d51cd27e66458::t_0238bc2286cd8d 83-84
+VERA/VERAVonage/VERAVonage/VonageSubscriberFactory.swift
+  s_9d51cd27e66458::t_a01d435c720b26 14-19,25-28
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_9d51cd27e66458::t_5f8c9de2f90273 206-207
+  s_9d51cd27e66458::t_9e2817f89cd410 156
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_9d51cd27e66458::t_6447270ace3458 51-52
+VERA/VERAVonage/VERAVonage/VonagePublisherFactory.swift
+  s_9d51cd27e66458::t_fc1bcf1bc7bbb4 125-134
+  s_9d51cd27e66458::t_f4a7f7726e8112 30-31,38-39,43
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVonageSubscriber.swift
+  s_9d51cd27e66458::t_a62949ce2ebe39 1-62
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  s_9d51cd27e66458::t_c2c904966dee32 118,220,232
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_9d51cd27e66458::t_d5380ccc409e02 68,94,122,164-170,176,188,216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.11",
+  "base_commit_sha": "622f7bb8cbbf08c2aa426c43b10ec4ec1da38acd",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
