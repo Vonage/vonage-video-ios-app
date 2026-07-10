@@ -83,8 +83,12 @@ public struct MeetingRoomPresentationHandler {
     ///
     /// Both closures default to no-ops so contexts can be built in tests and previews.
     public init(
-        present: @escaping @MainActor (MeetingRoomPresentationRequest) -> Void = { _ in },
-        dismiss: @escaping @MainActor (String) -> Void = { _ in }
+        present: @escaping @MainActor (MeetingRoomPresentationRequest) -> Void = { _ in
+            // No-op: default closure for tests and previews where presentation is not required
+        },
+        dismiss: @escaping @MainActor (String) -> Void = { _ in
+            // No-op: default closure for tests and previews where dismiss is not required
+        }
     ) {
         self.present = present
         self.dismiss = dismiss
