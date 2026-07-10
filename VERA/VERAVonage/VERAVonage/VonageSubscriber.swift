@@ -120,7 +120,7 @@ public class VonageSubscriber: NSObject {
         self.stream = stream
         id = stream.streamId
         isScreenshare = stream.videoType == .screen
-        
+
         subscriber.videoRender = inlineVideoRenderer
         // The SDK pauses rendering on resign-active by default; PiP needs frames in the background.
         NotificationCenter.default.removeObserver(
