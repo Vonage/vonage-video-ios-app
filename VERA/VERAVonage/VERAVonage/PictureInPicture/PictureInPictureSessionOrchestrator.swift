@@ -261,7 +261,9 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         previousRenderer?.stopPlaceholder()
         if let previousTargetId, let call, previousTargetId != call.publisher.id {
-            await call.subscriber(for: previousTargetId)?.setPictureInPictureTarget(false)
+            let previousSubscriber =
+                await call.subscriber(for: previousTargetId) as? PictureInPictureVonageSubscriber
+            previousSubscriber?.setPictureInPictureTarget(false)
         }
 
         // The target is committed only when its renderer is resolved; a failed resolution leaves
@@ -275,8 +277,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         let renderer: PictureInPictureVideoRenderer?
         if call.publisher.id == targetId {
-            renderer = call.publisher.inlineVideoRenderer
-        } else if let subscriber = await call.subscriber(for: targetId) {
+            renderer = (call.publisher as? PictureInPictureVonagePublisher)?.inlineVideoRenderer
+        } else if let subscriber = await call.subscriber(for: targetId) as? PictureInPictureVonageSubscriber {
             subscriber.setPictureInPictureTarget(true)
             renderer = subscriber.inlineVideoRenderer
         } else {

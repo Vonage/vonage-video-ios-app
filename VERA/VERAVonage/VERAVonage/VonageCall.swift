@@ -153,7 +153,7 @@ public final class VonageCall: CallFacade {
     /// Repository used to recreate the publisher with new settings during ``applyPublisherAdvancedSettings(_:)``.
     private let publisherRepository: PublisherRepository
 
-    private let subscriberFactory = VonageSubscriberFactory()
+    private let subscriberFactory: VonageSubscriberFactory
 
     private let activeSpeakerTracker = ActiveSpeakerTracker()
     private lazy var callStateManager = CallStateManager(
@@ -203,6 +203,8 @@ public final class VonageCall: CallFacade {
         self.publisher = publisher
         self.publisherRepository = publisherRepository
         self.statsCollector = statsCollector
+        self.subscriberFactory = VonageSubscriberFactory(
+            isPictureInPictureEnabled: publisher is PictureInPictureVonagePublisher)
     }
 
     /// Sets up the call by configuring session handlers and initializing observers.
@@ -471,13 +473,11 @@ public final class VonageCall: CallFacade {
             isNetworkStatsEnabled = false
             statsCollector.reset()
             try session.disconnect()
-            publisher.detachInlineRenderer()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
-            publisher.detachInlineRenderer()
             publisher.cleanUp()
             session.cleanUp()
             updateCallState(to: .disconnected)

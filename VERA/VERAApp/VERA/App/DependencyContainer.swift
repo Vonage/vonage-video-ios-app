@@ -48,7 +48,8 @@ final class DependencyContainer {
 
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
         checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
+        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
+        isPictureInPictureEnabled: appConfig.meetingRoomSettings.allowPictureInPicture
     )
 
     lazy var appConfig = AppConfig()

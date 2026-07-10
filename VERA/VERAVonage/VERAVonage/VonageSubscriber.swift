@@ -65,7 +65,7 @@ public class VonageSubscriber: NSObject {
     var date: Date { stream.creationTime }
 
     /// True once the subscriber is connected; prevents premature subscription toggles.
-    @Atomic private var subscriberDidConnect = false
+    @Atomic var subscriberDidConnect = false
 
     /// Called when the subscriber encounters an error.
     var onError: (() -> Void)?
@@ -89,20 +89,9 @@ public class VonageSubscriber: NSObject {
     /// Whether audio was subscribed before entering hold.
     @Published public private(set) var wasSubscribedToAudio: Bool = false
 
-    /// Permanent renderer for this participant's video, attached once at creation and never
-    /// rewired. The tile always embeds it, and PiP taps its frames via `pipBufferDisplayLayer`
-    /// when this participant is the target — so there is no mid-call `videoRender` swap (which
-    /// kills the SDK's default view and can stall frame delivery) and no view change for the UI
-    /// to propagate.
-    let inlineVideoRenderer = PictureInPictureVideoRenderer()
-
-    /// `true` while this participant is the PiP target. Keeps the video subscription alive even
-    /// when the tile is hidden, so the PiP window keeps receiving frames.
-    private var isPictureInPictureTargetStream = false
-
     /// Tracks the number of views currently displaying this participant.
     /// Video is enabled when count > 0 and disabled when count reaches 0.
-    @Atomic private var visibilityCount: Int = 0
+    @Atomic var visibilityCount: Int = 0
 
     /// A delayed task that disables video subscription after visibility changes.
     /// Uses debouncing to handle rapid layout transitions gracefully.
@@ -120,15 +109,6 @@ public class VonageSubscriber: NSObject {
         self.stream = stream
         id = stream.streamId
         isScreenshare = stream.videoType == .screen
-
-        subscriber.videoRender = inlineVideoRenderer
-        // The SDK pauses rendering on resign-active by default; PiP needs frames in the background.
-        NotificationCenter.default.removeObserver(
-            subscriber,
-            name: UIApplication.willResignActiveNotification,
-            object: nil
-        )
-
         participant = Participant(
             id: stream.streamId,
             connectionId: stream.connection.connectionId,
@@ -139,7 +119,7 @@ public class VonageSubscriber: NSObject {
             creationTime: stream.creationTime,
             isScreenshare: stream.videoType == .screen,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: inlineVideoRenderer)))
+            view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
     }
 
@@ -181,12 +161,19 @@ public class VonageSubscriber: NSObject {
         updateParticipant()
     }
 
+    /// The view that renders this subscriber's video. The base uses OpenTok's native GL view;
+    /// `PictureInPictureVonageSubscriber` overrides it with a custom renderer that also feeds the
+    /// PiP window. Overridable so PiP-specific rendering needs no changes to `updateParticipant`.
+    func makeVideoView() -> UIView {
+        otSubscriber.view!
+    }
+
     /// Rebuilds the participant model from current stream state and wires visibility handlers.
     ///
     /// Visibility-driven subscription:
     /// - `onAppear`: Enables video subscription and schedules a delayed reinforcement
     /// - `onDisappear`: Disables video subscription
-    private func updateParticipant() {
+    func updateParticipant() {
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -198,7 +185,7 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: inlineVideoRenderer)))
+            view: AnyView(UIViewContainer(view: makeVideoView())))
 
         participant.onAppear = { [weak self] in
             guard let self else { return }
@@ -226,32 +213,12 @@ public class VonageSubscriber: NSObject {
     /// - Parameter visible: `true` to subscribe to video; `false` to unsubscribe.
     ///
     /// - Important: No-ops until the subscriber is connected to avoid SDK limitations.
-    private func setActiveSubscription(_ visible: Bool) {
+    func setActiveSubscription(_ visible: Bool) {
         // Do not attempt to unsubscribe video before the subscriber did connect
         // it will result in an inability to modify the video subscription later
         guard subscriberDidConnect else { return }
 
-        if isPictureInPictureTargetStream {
-            otSubscriber.subscribeToVideo = true
-            return
-        }
-
         otSubscriber.subscribeToVideo = visible
-    }
-
-    /// Marks this participant as the PiP target (or releases it).
-    ///
-    /// While targeted, the video subscription is forced on regardless of tile visibility so the
-    /// PiP window keeps receiving frames (e.g. while the app is backgrounded and no tile is
-    /// rendered). Releasing restores visibility-driven subscription.
-    func setPictureInPictureTarget(_ isTarget: Bool) {
-        isPictureInPictureTargetStream = isTarget
-        guard subscriberDidConnect else { return }
-        if isTarget {
-            otSubscriber.subscribeToVideo = true
-        } else if visibilityCount <= 0 {
-            otSubscriber.subscribeToVideo = false
-        }
     }
 
     /// Enables or disables audio subscription.
@@ -307,7 +274,6 @@ public class VonageSubscriber: NSObject {
     func disableCaptions() {
         otSubscriber.subscribeToCaptions = false
     }
-
 }
 
 // MARK: - OTSubscriberDelegate

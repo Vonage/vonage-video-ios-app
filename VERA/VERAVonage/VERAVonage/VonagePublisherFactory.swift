@@ -27,16 +27,20 @@ public final class VonagePublisherFactory: PublisherFactory {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
 
+    private let isPictureInPictureEnabled: Bool
+
     /// This factory returns the specific Vonage audio or video transformers
     lazy var vonageTransformerFactory = VonageTransformerFactory()
 
     /// Creates a new `VonagePublisherFactory`.
     public init(
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
-        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
+        isPictureInPictureEnabled: Bool = false
     ) {
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
+        self.isPictureInPictureEnabled = isPictureInPictureEnabled
     }
 
     /// Builds a `VERAPublisher` backed by `VonagePublisher`.
@@ -118,10 +122,16 @@ public final class VonagePublisherFactory: PublisherFactory {
             settings.advancedSettings?.videoResolution?.dimensions
             ?? VideoDimensions.initial
 
-        let publisher = VonagePublisher(
-            publisher: otPublisher,
-            transformerFactory: vonageTransformerFactory,
-            initialDimensions: initialDimensions)
+        let publisher =
+            isPictureInPictureEnabled
+            ? PictureInPictureVonagePublisher(
+                publisher: otPublisher,
+                transformerFactory: vonageTransformerFactory,
+                initialDimensions: initialDimensions)
+            : VonagePublisher(
+                publisher: otPublisher,
+                transformerFactory: vonageTransformerFactory,
+                initialDimensions: initialDimensions)
         otPublisher.delegate = publisher
         return publisher
     }
