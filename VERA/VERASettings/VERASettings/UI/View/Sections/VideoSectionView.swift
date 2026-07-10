@@ -127,6 +127,7 @@ struct VideoSectionView: View {
                 Text(preset.displayName).tag(preset)
             }
         }
+        .accessibilityIdentifier(SettingsAccessibilityID.videoBitratePicker)
 
         if viewModel.videoBitratePreset == .custom {
             VStack(alignment: .leading, spacing: VideoUIConstants.spaceBetweenComponents) {
@@ -166,6 +167,7 @@ struct VideoSectionView: View {
                 Text(preference.displayName).tag(preference)
             }
         }
+        .accessibilityIdentifier(SettingsAccessibilityID.videoDegradationPicker)
     }
 
     @ViewBuilder
@@ -175,6 +177,7 @@ struct VideoSectionView: View {
                 title: "Mode".localized,
                 value: viewModel.codecMode.displayName
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.codecModeLocked)
 
             if viewModel.codecMode == .manual {
                 VStack(alignment: .leading, spacing: 10) {
@@ -190,6 +193,7 @@ struct VideoSectionView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier(SettingsAccessibilityID.codecModePicker)
 
             if viewModel.codecMode == .manual {
                 manualCodecList
@@ -228,12 +232,14 @@ struct VideoSectionView: View {
                 title: "Frame Rate".localized,
                 value: viewModel.settingsPreference.videoFrameRate.displayName
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.frameRateLocked)
         } else {
             Picker("Frame Rate".localized, selection: $viewModel.settingsPreference.videoFrameRate) {
                 ForEach(SettingsVideoFrameRate.allCases) { fps in
                     Text(fps.displayName).tag(fps)
                 }
             }
+            .accessibilityIdentifier(SettingsAccessibilityID.frameRatePicker)
         }
     }
 
@@ -244,12 +250,14 @@ struct VideoSectionView: View {
                 title: "Resolution".localized,
                 value: viewModel.settingsPreference.videoResolution.displayName
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.resolutionLocked)
         } else {
             Picker("Resolution".localized, selection: $viewModel.settingsPreference.videoResolution) {
                 ForEach(SettingsVideoResolution.allCases) { res in
                     Text(res.displayName).tag(res)
                 }
             }
+            .accessibilityIdentifier(SettingsAccessibilityID.resolutionPicker)
         }
     }
 

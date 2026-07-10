@@ -165,6 +165,7 @@ public struct SettingsView: View {
                 }
             }
         }
+        .accessibilityIdentifier(SettingsAccessibilityID.screen)
     }
 
     // MARK: - Regular (iPad / Mac)
@@ -181,6 +182,7 @@ public struct SettingsView: View {
             detailView(for: selectedSection ?? .general)
         }
         .navigationSplitViewStyle(.balanced)
+        .accessibilityIdentifier(SettingsAccessibilityID.screen)
     }
 
     // MARK: - Sidebar

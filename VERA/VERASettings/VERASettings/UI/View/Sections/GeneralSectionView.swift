@@ -37,6 +37,7 @@ struct GeneralSectionView: View {
     private var compactBody: some View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
+                .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
             if !isInActiveCall {
                 SettingsDivider()
                 content
@@ -47,6 +48,7 @@ struct GeneralSectionView: View {
     private var regularBody: some View {
         Section {
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
+                .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
             if !isInActiveCall {
                 content
             }
@@ -88,6 +90,7 @@ struct GeneralSectionView: View {
             .background(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .accessibilityHint("Restores every setting to its default value.".localized)
+            .accessibilityIdentifier(SettingsAccessibilityID.resetDefaultsButton)
         }
     }
 }

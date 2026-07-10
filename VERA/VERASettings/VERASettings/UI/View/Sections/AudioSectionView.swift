@@ -121,6 +121,7 @@ struct AudioSectionView: View {
                 title: "Audio Bitrate".localized,
                 value: viewModel.maxAudioBitrateFormatted
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.audioBitrateLocked)
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 Picker("Audio Bitrate".localized, selection: $viewModel.audioBitrateMode) {
@@ -128,6 +129,7 @@ struct AudioSectionView: View {
                         Text(mode.displayName).tag(mode)
                     }
                 }
+                .accessibilityIdentifier(SettingsAccessibilityID.audioBitratePicker)
 
                 if viewModel.audioBitrateMode == .custom {
                     Text("Max Audio Bitrate".localized(args: viewModel.maxAudioBitrateFormatted))
@@ -168,8 +170,10 @@ struct AudioSectionView: View {
                 title: "Enable Opus Dtx".localized,
                 value: viewModel.settingsPreference.opusDtxEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.opusDtxLocked)
         } else {
             Toggle("Enable Opus Dtx".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
+                .accessibilityIdentifier(SettingsAccessibilityID.opusDtxToggle)
         }
     }
 
@@ -180,11 +184,13 @@ struct AudioSectionView: View {
                 title: "Publisher Audio Fallback".localized,
                 value: viewModel.settingsPreference.publisherAudioFallbackEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.publisherFallbackLocked)
         } else {
             Toggle(
                 "Publisher Audio Fallback".localized,
                 isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.publisherFallbackToggle)
         }
     }
 
@@ -195,11 +201,13 @@ struct AudioSectionView: View {
                 title: "Subscriber Audio Fallback".localized,
                 value: viewModel.settingsPreference.subscriberAudioFallbackEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.subscriberFallbackLocked)
         } else {
             Toggle(
                 "Subscriber Audio Fallback".localized,
                 isOn: $viewModel.settingsPreference.subscriberAudioFallbackEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.subscriberFallbackToggle)
         }
     }
 }
