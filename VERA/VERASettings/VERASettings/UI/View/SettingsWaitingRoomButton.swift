@@ -41,6 +41,7 @@ public struct SettingsWaitingRoomButton: View {
             image: VERACommonUIAsset.Images.gearSolid.swiftUIImage,
             action: { showSettings = true }
         )
+        .accessibilityIdentifier("waiting-room-settings-button")
         .sheet(isPresented: $showSettings) {
             makeSettingsView?()
                 .presentationDetents([.large])

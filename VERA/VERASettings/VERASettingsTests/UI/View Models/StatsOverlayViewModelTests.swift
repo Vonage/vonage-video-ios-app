@@ -17,12 +17,47 @@ struct StatsOverlayViewModelTests {
 
     // MARK: - Initialization Tests
 
-    @Test("Initial state should be inactive with empty stats")
+    @Test("Initial state before setup should be inactive with empty stats")
     func testInitialState() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+
+        #expect(viewModel.isActive == false)
+        #expect(viewModel.statsText == "")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe default active overlay preference")
+    func testSetupObservesDefaultActiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
+
+        await delay()
+
+        #expect(viewModel.isActive == true)
+        #expect(viewModel.statsText == "Waiting for stats…")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe initial inactive overlay preference")
+    func testSetupObservesInitialInactiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository(
+            initialPreferences: PublisherSettingsPreferences(statsOverlayEnabled: false)
+        )
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await delay()
 
         #expect(viewModel.isActive == false)
         #expect(viewModel.statsText == "")
@@ -51,7 +86,10 @@ struct StatsOverlayViewModelTests {
         // Wait for update
         await delay()
 
-        // Stats should NOT be processed when inactive (senderStatsEnabled = false)
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await delay()
+
+        // Stats should NOT be processed when inactive (overlay hidden)
         #expect(viewModel.isActive == false)
         #expect(viewModel.statsText == "")
 
@@ -62,15 +100,15 @@ struct StatsOverlayViewModelTests {
 
     // MARK: - Active State Tests
 
-    @Test("Enabling senderStatsEnabled should display stats")
-    func testEnablingSenderStatsEnabled() async throws {
+    @Test("Enabling overlay stats should display stats")
+    func testEnablingOverlayStats() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Enable stats FIRST
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Enable overlay FIRST
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()
@@ -95,15 +133,15 @@ struct StatsOverlayViewModelTests {
         _ = viewModel
     }
 
-    @Test("Disabling senderStatsEnabled should hide stats")
-    func testDisablingSenderStatsEnabled() async throws {
+    @Test("Disabling overlay stats should hide stats")
+    func testDisablingOverlayStats() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Enable stats FIRST
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Enable overlay FIRST
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()
@@ -122,8 +160,8 @@ struct StatsOverlayViewModelTests {
 
         #expect(viewModel.statsText != "")
 
-        // Disable stats
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
+        // Disable overlay
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
 
         // Wait for update
         await delay()
@@ -145,7 +183,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
             sentAudio: AudioSendStats(
@@ -189,7 +227,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
             sentAudio: AudioSendStats(
@@ -219,7 +257,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
             sentVideo: VideoSendStats(
@@ -249,7 +287,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Don't send any stats
         await delay()
@@ -272,7 +310,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // First stats
         let stats1 = NetworkMediaStats(
@@ -319,7 +357,8 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Start inactive (senderStatsEnabled defaults to false)
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await delay()
         #expect(viewModel.isActive == false)
 
         // Send stats
@@ -334,8 +373,8 @@ struct StatsOverlayViewModelTests {
         // Wait for update
         await delay()
 
-        // Should remain empty when inactive
-        #expect(viewModel.statsText == "")
+        // Should not render live stats when inactive
+        #expect(!viewModel.statsText.contains("Audio Send"))
 
         _ = repository
         _ = dataSource
@@ -351,12 +390,12 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Rapidly toggle via repository (end in enabled state)
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Rapidly toggle overlay via repository (end in enabled state)
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()

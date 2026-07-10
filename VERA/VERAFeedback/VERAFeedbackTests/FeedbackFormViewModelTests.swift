@@ -161,13 +161,15 @@ struct FeedbackFormViewModelTests {
     // MARK: - Submit flow tests
 
     @Test("onSubmit sets feedbackResult when report succeeds")
-    func onSubmitSetsFeedbackResultOnSuccess() async {
+    func onSubmitSetsFeedbackResultOnSuccess() async throws {
         let useCase = MockFeedbackReportUseCase()
         let viewModel = FeedbackTestHelpers.makeFormViewModel(feedbackReportUseCase: useCase)
         FeedbackTestHelpers.fillRequiredTextFields(in: viewModel)
 
         viewModel.onSubmit()
-        try? await Task.sleep(for: .milliseconds(100))
+        try await waitUntil {
+            viewModel.feedbackResult != nil && viewModel.isLoading == false
+        }
 
         #expect(viewModel.feedbackResult?.message == "Report submitted")
         #expect(viewModel.feedbackResult?.ticketUrl == "https://example.com/ticket/1")
@@ -176,14 +178,16 @@ struct FeedbackFormViewModelTests {
     }
 
     @Test("onSubmit shows failure toast when report fails")
-    func onSubmitShowsFailureToastOnError() async {
+    func onSubmitShowsFailureToastOnError() async throws {
         let useCase = MockFeedbackReportUseCase()
         useCase.error = URLError(.badServerResponse)
         let viewModel = FeedbackTestHelpers.makeFormViewModel(feedbackReportUseCase: useCase)
         FeedbackTestHelpers.fillRequiredTextFields(in: viewModel)
 
         viewModel.onSubmit()
-        try? await Task.sleep(for: .milliseconds(100))
+        try await waitUntil {
+            viewModel.toast != nil && viewModel.isLoading == false
+        }
 
         #expect(viewModel.feedbackResult == nil)
         #expect(viewModel.toast?.mode == .failure)
@@ -191,7 +195,7 @@ struct FeedbackFormViewModelTests {
     }
 
     @Test("onSubmit passes trimmed values, image, and session debug dump to use case")
-    func onSubmitPassesTrimmedValuesImageAndDebugDump() async {
+    func onSubmitPassesTrimmedValuesImageAndDebugDump() async throws {
         let useCase = MockFeedbackReportUseCase()
         let viewModel = FeedbackTestHelpers.makeFormViewModel(
             feedbackReportUseCase: useCase,
@@ -209,7 +213,9 @@ struct FeedbackFormViewModelTests {
         viewModel.feedbackFields[4].attachedImage = FeedbackTestHelpers.makeTestImage()
 
         viewModel.onSubmit()
-        try? await Task.sleep(for: .milliseconds(100))
+        try await waitUntil {
+            useCase.lastRequest != nil
+        }
 
         #expect(useCase.lastRequest?.title == "Screen share failed")
         #expect(useCase.lastRequest?.name == "Alex")
@@ -220,18 +226,46 @@ struct FeedbackFormViewModelTests {
     }
 
     @Test("onSubmit toggles loading state while report is in flight")
-    func onSubmitTogglesLoadingState() async {
+    func onSubmitTogglesLoadingState() async throws {
         let useCase = MockFeedbackReportUseCase()
         useCase.delayNanoseconds = 200_000_000
         let viewModel = FeedbackTestHelpers.makeFormViewModel(feedbackReportUseCase: useCase)
         FeedbackTestHelpers.fillRequiredTextFields(in: viewModel)
 
         viewModel.onSubmit()
-        try? await Task.sleep(for: .milliseconds(50))
+        try await waitUntil {
+            viewModel.isLoading
+        }
         #expect(viewModel.isLoading == true)
 
-        try? await Task.sleep(for: .milliseconds(250))
+        try await waitUntil {
+            viewModel.feedbackResult != nil && viewModel.isLoading == false
+        }
         #expect(viewModel.isLoading == false)
         #expect(viewModel.feedbackResult != nil)
+    }
+
+    private func waitUntil(
+        timeout: Duration = .seconds(1),
+        interval: Duration = .milliseconds(10),
+        condition: @MainActor @escaping () -> Bool
+    ) async throws {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: timeout)
+
+        while clock.now < deadline {
+            if condition() {
+                return
+            }
+            try await Task.sleep(for: interval)
+        }
+
+        if !condition() {
+            throw WaitError.timedOut
+        }
+    }
+
+    private enum WaitError: Error {
+        case timedOut
     }
 }

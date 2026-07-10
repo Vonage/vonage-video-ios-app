@@ -177,6 +177,11 @@ struct SettingsFormatterTests {
 
     // MARK: - qualityLabel Tests
 
+    @Test("qualityLabel with 1 layer returns High")
+    func qualityLabelSingleLayer() {
+        #expect(SettingsFormatter.qualityLabel(index: 0, count: 1) == "High Quality")
+    }
+
     @Test("qualityLabel with 2 layers returns Low and High")
     func qualityLabelTwoLayers() {
         #expect(SettingsFormatter.qualityLabel(index: 0, count: 2) == "Low Quality")
