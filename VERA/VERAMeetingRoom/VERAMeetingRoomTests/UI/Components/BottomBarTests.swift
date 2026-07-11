@@ -27,7 +27,8 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         allowCameraControl: Bool = true,
         showParticipantList: Bool = true,
         isParticipantsListPresented: Bool = false,
-        extraButtons: [BottomBarButton] = []
+        extraButtons: [BottomBarButton] = [],
+        presentationHandler: MeetingRoomPresentationHandler = .init()
     ) -> BottomBar {
         .init(
             isMicEnabled: true,
@@ -39,6 +40,7 @@ struct BottomBarCalculateMaxExtraButtonsTests {
             showParticipantList: showParticipantList,
             currentLayout: .activeSpeaker,
             actions: .init(),
+            presentationHandler: presentationHandler,
             extraButtons: .constant(extraButtons)
         )
     }
@@ -100,6 +102,82 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         )
 
         #expect(button.overflowSelectionBehavior == .dismissBeforeAction)
+    }
+
+    @Test("BottomBarButton keeps nil presentation request by default")
+    @MainActor
+    func bottomBarButtonKeepsNilPresentationRequestByDefault() {
+        let button = BottomBarButton(
+            id: "plain-button",
+            label: "Plain",
+            image: Image(systemName: "square"),
+            action: {}
+        )
+
+        #expect(button.presentationRequest?() == nil)
+    }
+
+    @Test("BottomBar performs extra button action and presentation request")
+    @MainActor
+    func bottomBarPerformsExtraButtonActionAndPresentationRequest() {
+        var didPerformAction = false
+        var presentedRequest: MeetingRoomPresentationRequest?
+        let button = BottomBarButton(
+            id: "sheet-button",
+            label: "Sheet",
+            image: Image(systemName: "square"),
+            presentationRequest: {
+                MeetingRoomPresentationRequest(
+                    id: "sheet-request",
+                    style: .sheet,
+                    title: "Sheet"
+                )
+            },
+            action: {
+                didPerformAction = true
+            }
+        )
+        let bar = createBottomBar(
+            presentationHandler: MeetingRoomPresentationHandler(
+                present: { request in
+                    presentedRequest = request
+                }
+            )
+        )
+
+        bar.performExtraButton(button)
+
+        #expect(didPerformAction)
+        #expect(presentedRequest?.id == "sheet-request")
+        #expect(presentedRequest?.style == .sheet)
+    }
+
+    @Test("BottomBar performs extra button action without presentation request")
+    @MainActor
+    func bottomBarPerformsExtraButtonActionWithoutPresentationRequest() {
+        var didPerformAction = false
+        var presentationCount = 0
+        let button = BottomBarButton(
+            id: "plain-button",
+            label: "Plain",
+            image: Image(systemName: "square"),
+            presentationRequest: { nil },
+            action: {
+                didPerformAction = true
+            }
+        )
+        let bar = createBottomBar(
+            presentationHandler: MeetingRoomPresentationHandler(
+                present: { _ in
+                    presentationCount += 1
+                }
+            )
+        )
+
+        bar.performExtraButton(button)
+
+        #expect(didPerformAction)
+        #expect(presentationCount == 0)
     }
 
     @Test("BottomBarButton copies overflow selection behavior from presenter")

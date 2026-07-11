@@ -74,12 +74,14 @@ struct MeetingRoomBuilderTests {
             .configuration(.init(allowMicrophoneControl: false))
             .enabledFeatures([.chat, .archiving])
             .onAction { _ in }
+            .uiProvider(DefaultMeetingRoomUIProvider())
             .appGroupIdentifier("group.com.test")
             .broadcastExtensionBundleId("com.test.broadcast")
 
         #expect(builder.currentBaseURL == testBaseURL)
         #expect(builder.currentRoomName == testRoomName)
         #expect(builder.currentEnabledFeatures == [.chat, .archiving])
+        #expect(builder.currentUIProvider != nil)
     }
 
     @Test("Builder stores appGroupIdentifier")
@@ -121,6 +123,20 @@ struct MeetingRoomBuilderTests {
     func builderDefaultsToNilTheme() {
         let builder = makeMeetingRoomBuilder()
         #expect(builder.currentTheme == nil)
+    }
+
+    @Test("Builder defaults to nil UI provider")
+    func builderDefaultsToNilUIProvider() {
+        let builder = makeMeetingRoomBuilder()
+        #expect(builder.currentUIProvider == nil)
+    }
+
+    @Test("Builder stores UI provider")
+    func builderStoresUIProvider() {
+        let builder = makeMeetingRoomBuilder()
+            .uiProvider(DefaultMeetingRoomUIProvider())
+
+        #expect(builder.currentUIProvider is DefaultMeetingRoomUIProvider)
     }
 
     @Test("Builder defaults to real dependency factories")

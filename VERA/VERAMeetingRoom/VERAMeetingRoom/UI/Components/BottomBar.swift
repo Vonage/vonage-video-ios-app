@@ -6,20 +6,32 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+/// Shared layout constants used by the meeting room bottom bar.
 public enum BottomBarConstants {
+    /// The fixed height used for each bottom bar button.
     public static let buttonHeight: CGFloat = 50
+
+    /// The horizontal spacing between adjacent bottom bar buttons.
     public static let buttonSpacing: CGFloat = 8
+
+    /// The horizontal padding inside the bottom bar container.
     public static let containerPaddingHorizontal: CGFloat = 8
+
+    /// The vertical padding inside the bottom bar container.
     public static let containerPaddingVertical: CGFloat = 6
+
+    /// The external bottom padding below the bottom bar content.
     public static let containerPaddingBottom: CGFloat = 2
+
+    /// The corner radius used by the bottom bar container background.
     public static let cornerRadius: CGFloat = 16
 
-    /// Height of the visible bottom bar (button + internal vertical padding)
+    /// Height of the visible bottom bar, including button height and internal vertical padding.
     public static var contentHeight: CGFloat {
         buttonHeight + (containerPaddingVertical * 2)
     }
 
-    /// Total height including external bottom padding
+    /// Total height reserved for the bottom bar, including external bottom padding.
     public static var totalHeight: CGFloat {
         contentHeight + containerPaddingBottom
     }
@@ -28,17 +40,55 @@ public enum BottomBarConstants {
     static var buttonWidth: CGFloat { buttonHeight }
 }
 
+/// A host-provided button that can be appended to the SDK bottom bar.
 public struct BottomBarButton: Identifiable {
+    /// Stable identifier used by SwiftUI and overflow handling.
     public let id: String
+
+    /// User-facing label shown in overflow UI and accessibility contexts.
     public let label: String
+
+    /// Optional accessibility identifier applied to the rendered button.
     public let accessibilityIdentifier: String?
+
+    /// Icon rendered for the button.
     public let image: Image
+
+    /// Whether the button should be rendered as active.
     public let isActive: Bool
+
+    /// Optional accessory rendered with the button, such as a badge.
     public let accessory: BottomBarButtonAccessory?
+
+    /// Preferred representation when the button is moved into overflow.
     public let overflowPresentation: BottomBarOverflowPresentation
+
+    /// Defines whether overflow UI is dismissed before or after the action runs.
     public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
+
+    /// Optional request for SDK-managed presentation after `action` runs.
+    ///
+    /// Return a request when the button should ask the meeting room to present a
+    /// dialog, overlay, or sheet. Return `nil` to keep presentation fully owned by
+    /// the button action.
+    public let presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)?
+
+    /// Action executed when the user taps the button.
     public let action: () -> Void
 
+    /// Creates a bottom bar button from explicit values.
+    ///
+    /// - Parameters:
+    ///   - id: Stable identifier. Defaults to `label` when omitted.
+    ///   - label: User-facing button label.
+    ///   - accessibilityIdentifier: Optional identifier for UI automation.
+    ///   - image: Icon rendered for the button.
+    ///   - isActive: Whether the button should be rendered as active.
+    ///   - accessory: Optional accessory rendered with the button.
+    ///   - overflowPresentation: Preferred overflow representation.
+    ///   - overflowSelectionBehavior: Overflow dismissal behavior.
+    ///   - presentationRequest: Optional SDK-managed presentation request.
+    ///   - action: Action executed when the button is tapped.
     public init(
         id: String? = nil,
         label: String,
@@ -48,6 +98,7 @@ public struct BottomBarButton: Identifiable {
         accessory: BottomBarButtonAccessory? = nil,
         overflowPresentation: BottomBarOverflowPresentation = .gridItem,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
+        presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)? = nil,
         action: @escaping () -> Void
     ) {
         self.id = id ?? label
@@ -58,14 +109,24 @@ public struct BottomBarButton: Identifiable {
         self.accessory = accessory
         self.overflowPresentation = overflowPresentation
         self.overflowSelectionBehavior = overflowSelectionBehavior
+        self.presentationRequest = presentationRequest
         self.action = action
     }
 
+    /// Creates a bottom bar button by adapting a `BottomItemPresentable`.
+    ///
+    /// - Parameters:
+    ///   - presenter: Presenter that supplies shared button display values.
+    ///   - isActive: Optional active-state override.
+    ///   - overflowSelectionBehavior: Optional overflow behavior override.
+    ///   - presentationRequest: Optional SDK-managed presentation request.
+    ///   - action: Optional action override. Defaults to `presenter.performAction`.
     @MainActor
     public init(
         _ presenter: any BottomItemPresentable,
         isActive: Bool? = nil,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior? = nil,
+        presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)? = nil,
         action: (() -> Void)? = nil
     ) {
         self.init(
@@ -77,22 +138,43 @@ public struct BottomBarButton: Identifiable {
             accessory: presenter.accessory,
             overflowPresentation: presenter.overflowPresentation,
             overflowSelectionBehavior: overflowSelectionBehavior ?? presenter.overflowSelectionBehavior,
+            presentationRequest: presentationRequest,
             action: action ?? presenter.performAction
         )
     }
 }
 
+/// Actions exposed by the meeting room for custom UI surfaces.
 public struct MeetingRoomActions {
-    let onShare: (String) -> Void
-    let onRetry: () -> Void
-    let onToggleMic: () -> Void
-    let onToggleCamera: () -> Void
-    let onCameraSwitch: () -> Void
-    let onEndCall: () -> Void
-    let onToggleParticipants: () -> Void
-    let onToggleLayout: () -> Void
+    /// Shares the current meeting URL or room identifier.
+    public let onShare: (String) -> Void
 
-    init(
+    /// Retries the current meeting room connection flow.
+    public let onRetry: () -> Void
+
+    /// Toggles the local microphone state.
+    public let onToggleMic: () -> Void
+
+    /// Toggles the local camera state.
+    public let onToggleCamera: () -> Void
+
+    /// Switches between available local cameras.
+    public let onCameraSwitch: () -> Void
+
+    /// Ends the current call.
+    public let onEndCall: () -> Void
+
+    /// Toggles the SDK participant list presentation.
+    public let onToggleParticipants: () -> Void
+
+    /// Toggles the SDK meeting layout.
+    public let onToggleLayout: () -> Void
+
+    /// Creates a collection of meeting room actions.
+    ///
+    /// Parameters default to no-op closures so tests and previews can provide
+    /// only the actions they need.
+    public init(
         onShare: @escaping (String) -> Void = { _ in },
         onRetry: @escaping () -> Void = {},
         onToggleMic: @escaping () -> Void = {},
@@ -125,6 +207,7 @@ struct BottomBar: View {
     private let showParticipantList: Bool
     private let currentLayout: MeetingRoomLayout
     private let actions: MeetingRoomActions
+    private let presentationHandler: MeetingRoomPresentationHandler
     @Binding private var extraButtons: [BottomBarButton]
     @State private var isOverflowPresented = false
     @State private var pendingOverflowAction: (() -> Void)?
@@ -139,6 +222,7 @@ struct BottomBar: View {
         showParticipantList: Bool,
         currentLayout: MeetingRoomLayout,
         actions: MeetingRoomActions,
+        presentationHandler: MeetingRoomPresentationHandler = .init(),
         extraButtons: Binding<[BottomBarButton]> = .constant([])
     ) {
         self.isMicEnabled = isMicEnabled
@@ -150,6 +234,7 @@ struct BottomBar: View {
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.actions = actions
+        self.presentationHandler = presentationHandler
         self._extraButtons = extraButtons
     }
 
@@ -264,10 +349,12 @@ struct BottomBar: View {
     private func handleOverflowButtonSelection(_ button: BottomBarButton) {
         switch button.overflowSelectionBehavior {
         case .performActionBeforeDismiss:
-            button.action()
+            performExtraButton(button)
             isOverflowPresented = false
         case .dismissBeforeAction:
-            pendingOverflowAction = button.action
+            pendingOverflowAction = {
+                performExtraButton(button)
+            }
             isOverflowPresented = false
         }
     }
@@ -278,6 +365,15 @@ struct BottomBar: View {
         pendingOverflowAction = nil
         DispatchQueue.main.async {
             action()
+        }
+    }
+
+    @MainActor
+    func performExtraButton(_ button: BottomBarButton) {
+        button.action()
+
+        if let request = button.presentationRequest?() {
+            presentationHandler.present(request)
         }
     }
 
@@ -311,7 +407,9 @@ struct BottomBar: View {
             isActive: button.isActive,
             accessibilityIdentifier: button.accessibilityIdentifier ?? button.id,
             accessory: button.accessory,
-            action: button.action
+            action: {
+                performExtraButton(button)
+            }
         )
     }
 }

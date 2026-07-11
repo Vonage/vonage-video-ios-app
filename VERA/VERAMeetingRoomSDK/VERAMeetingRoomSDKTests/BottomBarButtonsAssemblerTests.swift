@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Testing
+import VERABackgroundEffects
 import VERAChat
 import VERADomain
 import VERAMeetingRoom
@@ -470,6 +471,28 @@ struct BottomBarButtonsAssemblerTests {
         cancellable.cancel()
     }
 
+    @Test("buttonsDidChange emits when archive view model is assigned after subscription")
+    @MainActor
+    func buttonsDidChangeEmitsWhenArchiveViewModelIsAssignedAfterSubscription() {
+        let features: Set<MeetingRoomFeature> = [.archiving]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        var didEmitUpdate = false
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
+        }
+        let (_, viewModel) = container.archivingFactory.makeArchivingButton { _ in }
+
+        assembler.archiveButtonViewModel = viewModel
+        viewModel.state = .archiving("archive-123")
+
+        #expect(didEmitUpdate)
+        cancellable.cancel()
+    }
+
     @Test("buttonsDidChange emits when captions button state changes")
     @MainActor
     func buttonsDidChangeEmitsWhenCaptionsButtonStateChanges() {
@@ -487,6 +510,52 @@ struct BottomBarButtonsAssemblerTests {
         }
 
         viewModel.state = .enabled("captions-123")
+
+        #expect(didEmitUpdate)
+        cancellable.cancel()
+    }
+
+    @Test("buttonsDidChange emits when captions view model is assigned after subscription")
+    @MainActor
+    func buttonsDidChangeEmitsWhenCaptionsViewModelIsAssignedAfterSubscription() {
+        let features: Set<MeetingRoomFeature> = [.captions]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        var didEmitUpdate = false
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
+        }
+        let (_, viewModel) = container.captionsFactory.makeCaptionsButton()
+
+        assembler.captionsButtonViewModel = viewModel
+        viewModel.state = .enabled("captions-123")
+
+        #expect(didEmitUpdate)
+        cancellable.cancel()
+    }
+
+    @Test("buttonsDidChange emits when effects view model is assigned after subscription")
+    @MainActor
+    func buttonsDidChangeEmitsWhenEffectsViewModelIsAssignedAfterSubscription() {
+        let features: Set<MeetingRoomFeature> = [.backgroundEffects]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        var didEmitUpdate = false
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
+        }
+        let viewModel = container.backgroundEffectFactory.makeViewModel {
+            MockVERAPublisher()
+        }
+
+        assembler.videoEffectsViewModel = viewModel
+        viewModel.selectEffect(.blurHigh)
 
         #expect(didEmitUpdate)
         cancellable.cancel()
@@ -572,6 +641,101 @@ struct BottomBarButtonsAssemblerTests {
         viewModel.state = .enabled
 
         #expect(didEmitUpdate)
+        cancellable.cancel()
+    }
+
+    @Test("cleanUp cancels view model update bindings")
+    @MainActor
+    func cleanUpCancelsViewModelUpdateBindings() {
+        let features: Set<MeetingRoomFeature> = [.archiving]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        let (_, viewModel) = container.archivingFactory.makeArchivingButton { _ in }
+        assembler.archiveButtonViewModel = viewModel
+        var emittedUpdatesCount = 0
+        let cancellable = assembler.buttonsDidChange.sink {
+            emittedUpdatesCount += 1
+        }
+
+        viewModel.state = .archiving("archive-123")
+        assembler.cleanUp()
+        viewModel.state = .idle
+
+        #expect(emittedUpdatesCount == 1)
+        #expect(assembler.buildButtons().isEmpty)
+        cancellable.cancel()
+    }
+
+    @Test("setChatPresented does not emit when value is unchanged")
+    @MainActor
+    func setChatPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.chat]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setChatPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setChatPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setSettingsPresented does not emit when value is unchanged")
+    @MainActor
+    func setSettingsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.settings]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setSettingsPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setSettingsPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setEffectsPresented does not emit when value is unchanged")
+    @MainActor
+    func setEffectsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.backgroundEffects]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setEffectsPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setEffectsPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setFeedbackFormPresented does not emit when value is unchanged")
+    @MainActor
+    func setFeedbackFormPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.feedback]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setFeedbackFormPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setFeedbackFormPresented(true)
+        #expect(emitCount == 0)
+        cancellable.cancel()
+    }
+
+    @Test("setReactionsPickerPresented does not emit when value is unchanged")
+    @MainActor
+    func setReactionsPresentedDoesNotEmitWhenValueIsUnchanged() {
+        let features: Set<MeetingRoomFeature> = [.reactions]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: features)
+        assembler.setReactionsPickerPresented(true)
+        var emitCount = 0
+        let cancellable = assembler.buttonsDidChange.sink { emitCount += 1 }
+        assembler.setReactionsPickerPresented(true)
+        #expect(emitCount == 0)
         cancellable.cancel()
     }
 
