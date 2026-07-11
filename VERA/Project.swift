@@ -425,6 +425,11 @@ let project = Project(
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,
                     "NSCameraReactionEffectGesturesEnabledDefault": false,
+                    "CFBundleURLTypes": .array([
+                        .dictionary([
+                            "CFBundleURLSchemes": .array([.string("vera"), .string("https")])
+                        ])
+                    ]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],

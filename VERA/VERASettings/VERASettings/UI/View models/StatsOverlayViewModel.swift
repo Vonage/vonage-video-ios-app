@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import VERADomain
 
-/// Shows a floating stats overlay when the user has enabled sender stats.
+/// Shows a floating stats overlay when the user has enabled the overlay toggle.
 ///
 /// Observes ``PublisherSettingsRepository/preferencesPublisher`` to toggle visibility,
 /// and ``StatsDataSource/statsPublisher`` to display real-time network metrics.
@@ -15,7 +15,6 @@ public final class StatsOverlayViewModel: ObservableObject {
     // MARK: - Published state
 
     /// Controls whether the stats overlay is currently visible.
-    /// Automatically set based on the `senderStatsEnabled` preference.
     @Published public var isActive: Bool = false
 
     /// The formatted text to display in the stats overlay.
@@ -24,7 +23,7 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     // MARK: - Properties
 
-    /// Repository providing settings preferences including the stats toggle.
+    /// Repository providing settings preferences including the overlay toggle.
     private let settingsRepository: PublisherSettingsRepository
 
     /// Data source providing real-time network statistics.
@@ -43,7 +42,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// Creates a new stats overlay view model.
     ///
     /// - Parameters:
-    ///   - settingsRepository: Used to observe `senderStatsEnabled`.
+    ///   - settingsRepository: Used to observe `statsOverlayEnabled`.
     ///   - statsDataSource: Provides real-time network stats.
     ///   - statsUpdateInterval: Minimum seconds between UI updates. Defaults to `0` (no throttling).
     ///                          Use values like `2.0` to make rapidly changing stats readable.
@@ -72,10 +71,10 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     // MARK: - Private
 
-    /// Observes the settings repository for changes to the sender stats toggle.
+    /// Observes the settings repository for changes to the overlay visibility toggle.
     private func observeSettings() {
         settingsRepository.preferencesPublisher
-            .map(\.senderStatsEnabled)
+            .map(\.statsOverlayEnabled)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isEnabled in

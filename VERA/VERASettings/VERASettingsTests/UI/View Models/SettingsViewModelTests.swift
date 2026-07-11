@@ -303,10 +303,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.videoFrameRate == .fps15)
 
         // Reset to defaults
-        viewModel.resetToDefaults()
-
-        // Wait for update
-        await delay()
+        await viewModel.resetToDefaults()
 
         // Verify reset
         #expect(repository.resetCallCount == 1)
@@ -319,6 +316,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
+        #expect(repository.lastSavedPreferences == nil)
     }
 
     // MARK: - Dismiss Tests

@@ -22,42 +22,59 @@ private enum VideoConstants {
 struct VideoSectionView: View {
 
     @ObservedObject var viewModel: SettingsViewModel
+    private let isInActiveCall: Bool
+    private let isCompactLayout: Bool
     @State private var sliderValue: Double = VideoConstants.currentVideoBitrateStep
 
+    init(
+        viewModel: SettingsViewModel,
+        isInActiveCall: Bool = false,
+        isCompactLayout: Bool = false
+    ) {
+        self.viewModel = viewModel
+        self.isInActiveCall = isInActiveCall
+        self.isCompactLayout = isCompactLayout
+    }
+
     var body: some View {
+        if isCompactLayout {
+            compactBody
+        } else {
+            regularBody
+        }
+    }
+
+    @ViewBuilder
+    private var compactBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            bitrateContent
+            SettingsDivider()
+            degradationContent
+            SettingsDivider()
+            Text("Preferred Video Codec".localized)
+                .font(.headline)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+            codecContent
+            SettingsDivider()
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+            frameRateContent
+            SettingsDivider()
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+            resolutionContent
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var regularBody: some View {
         Section {
-            Picker("Bitrate Preset".localized, selection: $viewModel.settingsPreference.videoBitratePreset) {
-                ForEach(SettingsVideoBitratePreset.allCases) { preset in
-                    Text(preset.displayName).tag(preset)
-                }
-            }
-
-            if viewModel.videoBitratePreset == .custom {
-                VStack(alignment: .leading, spacing: VideoUIConstants.spaceBetweenComponents) {
-                    Text("Max Video Bitrate".localized(args: viewModel.videoBitrateFormatted))
-                        .font(.subheadline)
-
-                    Slider(
-                        value: $sliderValue,
-                        in: VideoConstants.videoBitrateRange,
-                        step: VideoConstants.videoBitrateStep
-                    )
-                    .onChange(of: sliderValue) { newValue in
-                        viewModel.setMaxVideorate(newValue)
-                    }
-                    .onAppear {
-                        sliderValue = Double(viewModel.customMaxVideoBitrate)
-                    }
-
-                    HStack {
-                        Text("5 kbps".localized)
-                        Spacer()
-                        Text("10 Mbps".localized)
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-            }
+            bitrateContent
         } header: {
             Text("Bitrate".localized)
         } footer: {
@@ -65,69 +82,182 @@ struct VideoSectionView: View {
         }
 
         Section {
+            degradationContent
+        } header: {
+            Text("Degradation Preference".localized)
+        } footer: {
+            Text(viewModel.settingsPreference.degradationPreference.footerDescription)
+        }
+
+        Section {
+            codecContent
+        } header: {
+            Text("Preferred Video Codec".localized)
+        } footer: {
+            ActiveCallFooter(isInActiveCall: isInActiveCall, description: viewModel.codecMode.footerDescription)
+        }
+        #if os(iOS)
+            .environment(\.editMode, .constant(.active))
+        #endif
+        Section {
+            frameRateContent
+        } header: {
+            Text("Frame Rate".localized)
+        } footer: {
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+        }
+
+        Section {
+            resolutionContent
+        } header: {
+            Text("Resolution".localized)
+        } footer: {
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var bitrateContent: some View {
+        Picker("Bitrate Preset".localized, selection: $viewModel.settingsPreference.videoBitratePreset) {
+            ForEach(SettingsVideoBitratePreset.allCases) { preset in
+                Text(preset.displayName).tag(preset)
+            }
+        }
+        .accessibilityIdentifier(SettingsAccessibilityID.videoBitratePicker)
+
+        if viewModel.videoBitratePreset == .custom {
+            VStack(alignment: .leading, spacing: VideoUIConstants.spaceBetweenComponents) {
+                Text("Max Video Bitrate".localized(args: viewModel.videoBitrateFormatted))
+                    .font(.subheadline)
+
+                Slider(
+                    value: $sliderValue,
+                    in: VideoConstants.videoBitrateRange,
+                    step: VideoConstants.videoBitrateStep
+                )
+                .onChange(of: sliderValue) { newValue in
+                    viewModel.setMaxVideorate(newValue)
+                }
+                .onAppear {
+                    sliderValue = Double(viewModel.customMaxVideoBitrate)
+                }
+
+                HStack {
+                    Text("5 kbps".localized)
+                    Spacer()
+                    Text("10 Mbps".localized)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var degradationContent: some View {
+        Picker(
+            "Degradation Preference".localized,
+            selection: $viewModel.settingsPreference.degradationPreference
+        ) {
+            ForEach(SettingsDegradationPreference.allCases) { preference in
+                Text(preference.displayName).tag(preference)
+            }
+        }
+        .accessibilityIdentifier(SettingsAccessibilityID.videoDegradationPicker)
+    }
+
+    @ViewBuilder
+    private var codecContent: some View {
+        if isInActiveCall {
+            LockedValueSection(
+                title: "Mode".localized,
+                value: viewModel.codecMode.displayName
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.codecModeLocked)
+
+            if viewModel.codecMode == .manual {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(viewModel.orderedCodecs) { codec in
+                        codecRow(codec)
+                    }
+                }
+            }
+        } else {
             Picker("Mode".localized, selection: $viewModel.settingsPreference.codecPreference.mode) {
                 ForEach(SettingsCodecMode.allCases) { mode in
                     Text(mode.displayName).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier(SettingsAccessibilityID.codecModePicker)
 
             if viewModel.codecMode == .manual {
-                ForEach(viewModel.orderedCodecs) { codec in
-                    HStack {
-                        VERACommonUIAsset.Images.menuSolid.swiftUIImage
-                            .foregroundStyle(.secondary)
-                        Text(codec.displayName)
-                        Spacer()
-                        Text(priorityLabel(for: codec))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .onMove { source, destination in
-                    viewModel.sortingCodec(
-                        source: source,
-                        destination: destination
-                    )
-                }
+                manualCodecList
             }
-        } header: {
-            Text("Codec".localized)
-        } footer: {
-            Text(viewModel.codecMode.footerDescription)
         }
-        #if os(iOS)
-            .environment(\.editMode, .constant(.active))
-        #endif
-        Section("Frame Rate".localized) {
+    }
+
+    @ViewBuilder
+    private var manualCodecList: some View {
+        ManualCodecReorderView(
+            orderedCodecs: viewModel.orderedCodecs,
+            priorityLabel: priorityLabel(for:),
+            onMove: viewModel.sortingCodec(source:destination:)
+        )
+    }
+
+    @ViewBuilder
+    private func codecRow(_ codec: SettingsVideoCodec) -> some View {
+        HStack {
+            VERACommonUIAsset.Images.menuSolid.swiftUIImage
+                .foregroundStyle(.secondary)
+            Text(codec.displayName)
+            Spacer()
+            Text(priorityLabel(for: codec))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 8)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var frameRateContent: some View {
+        if isInActiveCall {
+            LockedValueSection(
+                title: "Frame Rate".localized,
+                value: viewModel.settingsPreference.videoFrameRate.displayName
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.frameRateLocked)
+        } else {
             Picker("Frame Rate".localized, selection: $viewModel.settingsPreference.videoFrameRate) {
                 ForEach(SettingsVideoFrameRate.allCases) { fps in
                     Text(fps.displayName).tag(fps)
                 }
             }
+            .accessibilityIdentifier(SettingsAccessibilityID.frameRatePicker)
         }
+    }
 
-        Section("Resolution".localized) {
+    @ViewBuilder
+    private var resolutionContent: some View {
+        if isInActiveCall {
+            LockedValueSection(
+                title: "Resolution".localized,
+                value: viewModel.settingsPreference.videoResolution.displayName
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.resolutionLocked)
+        } else {
             Picker("Resolution".localized, selection: $viewModel.settingsPreference.videoResolution) {
                 ForEach(SettingsVideoResolution.allCases) { res in
                     Text(res.displayName).tag(res)
                 }
             }
-        }
-
-        Section {
-            Picker(
-                "Degradation Preference".localized,
-                selection: $viewModel.settingsPreference.degradationPreference
-            ) {
-                ForEach(SettingsDegradationPreference.allCases) { preference in
-                    Text(preference.displayName).tag(preference)
-                }
-            }
-        } header: {
-            Text("Degradation Preference".localized)
-        } footer: {
-            Text(viewModel.settingsPreference.degradationPreference.footerDescription)
+            .accessibilityIdentifier(SettingsAccessibilityID.resolutionPicker)
         }
     }
 
@@ -143,6 +273,7 @@ struct VideoSectionView: View {
         default: ""
         }
     }
+
 }
 
 // MARK: - Previews
@@ -150,7 +281,14 @@ struct VideoSectionView: View {
 #if DEBUG
     #Preview("Video Section") {
         Form {
-            VideoSectionView(viewModel: .preview)
+            VideoSectionView(viewModel: .preview, isCompactLayout: true)
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    #Preview("Video Section - Active Call") {
+        Form {
+            VideoSectionView(viewModel: .preview, isInActiveCall: true, isCompactLayout: true)
         }
         .preferredColorScheme(.dark)
     }

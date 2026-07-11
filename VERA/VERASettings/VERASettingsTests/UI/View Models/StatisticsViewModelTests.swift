@@ -203,6 +203,43 @@ struct StatisticsViewModelTests {
         _ = viewModel
     }
 
+    @Test("Expansion state is preserved across stats updates")
+    func preservesExpansionStateAcrossStatsUpdates() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatisticsViewModel(
+            statsDataSource: dataSource,
+            settingsRepository: repository
+        )
+        viewModel.setup()
+
+        await delay()
+
+        viewModel.isPublisherExpanded = true
+        viewModel.expandedSubscribers.insert("conn-1")
+
+        let updatedStats = NetworkMediaStats(
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "conn-1",
+                    subscriberName: "Ada",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 100,
+                        packetsLost: 2,
+                        bytesReceived: 1_000,
+                        timestamp: Date().timeIntervalSince1970
+                    )
+                )
+            ]
+        )
+        await dataSource.updateStats(updatedStats)
+
+        await delay()
+
+        #expect(viewModel.isPublisherExpanded == true)
+        #expect(viewModel.expandedSubscribers.contains("conn-1"))
+    }
+
     // MARK: - Combined Updates Tests
 
     @Test("ViewModel handles simultaneous stats and settings updates")

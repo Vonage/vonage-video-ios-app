@@ -11,18 +11,125 @@ import VERACommonUI
 struct AudioSectionView: View {
 
     @ObservedObject var viewModel: SettingsViewModel
+    private let isInActiveCall: Bool
+    private let isCompactLayout: Bool
 
     // Local Double mirror of the Int32 bitrate so Slider can bind to it.
     @State private var audioBitrateSlider = Double(AudioSettingsConstants.defaultAudioBitrate)
 
+    init(
+        viewModel: SettingsViewModel,
+        isInActiveCall: Bool = false,
+        isCompactLayout: Bool = false
+    ) {
+        self.viewModel = viewModel
+        self.isInActiveCall = isInActiveCall
+        self.isCompactLayout = isCompactLayout
+    }
+
     var body: some View {
+        if isCompactLayout {
+            compactBody
+        } else {
+            regularBody
+        }
+    }
+
+    @ViewBuilder
+    private var compactBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            audioBitrateContent
+            SettingsDivider()
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+            opusDtxContent
+            SettingsDivider()
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+            publisherFallbackContent
+            SettingsDivider()
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+            subscriberFallbackContent
+            if isInActiveCall {
+                ActiveCallWarningText()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var regularBody: some View {
         Section {
+            audioBitrateContent
+        } header: {
+            Text("Audio Bitrate".localized)
+        } footer: {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(
+                    "Controls the maximum audio encoding bitrate sent to the session. Higher values improve quality but use more bandwidth."
+                        .localized)
+                if isInActiveCall {
+                    ActiveCallWarningText()
+                }
+            }
+        }
+
+        Section {
+            opusDtxContent
+        } header: {
+            Text("Discontinuous Transmission".localized)
+        } footer: {
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
+                    "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
+                    .localized)
+        }
+
+        Section {
+            publisherFallbackContent
+        } header: {
+            Text("Publisher Fallback".localized)
+        } footer: {
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
+                    "When enabled, your video stops rendering on other devices during poor network conditions to preserve audio."
+                    .localized)
+        }
+
+        Section {
+            subscriberFallbackContent
+        } header: {
+            Text("Subscriber Fallback".localized)
+        } footer: {
+            ActiveCallFooter(
+                isInActiveCall: isInActiveCall,
+                description:
+                    "When enabled, you receive audio only from other participants during poor network conditions."
+                    .localized)
+        }
+    }
+
+    @ViewBuilder
+    private var audioBitrateContent: some View {
+        if isInActiveCall {
+            LockedValueSection(
+                title: "Audio Bitrate".localized,
+                value: viewModel.maxAudioBitrateFormatted
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.audioBitrateLocked)
+        } else {
             VStack(alignment: .leading, spacing: 8) {
                 Picker("Audio Bitrate".localized, selection: $viewModel.audioBitrateMode) {
                     ForEach(SettingsAudioBitrateMode.allCases) { mode in
                         Text(mode.displayName).tag(mode)
                     }
                 }
+                .accessibilityIdentifier(SettingsAccessibilityID.audioBitratePicker)
 
                 if viewModel.audioBitrateMode == .custom {
                     Text("Max Audio Bitrate".localized(args: viewModel.maxAudioBitrateFormatted))
@@ -53,45 +160,54 @@ struct AudioSectionView: View {
                     .foregroundStyle(.secondary)
                 }
             }
-        } header: {
-            Text("Audio Bitrate".localized)
-        } footer: {
-            Text(
-                "Controls the maximum audio encoding bitrate sent to the session. Higher values improve quality but use more bandwidth."
-                    .localized)
         }
+    }
 
-        Section {
+    @ViewBuilder
+    private var opusDtxContent: some View {
+        if isInActiveCall {
+            LockedToggleRow(
+                title: "Enable Opus Dtx".localized,
+                value: viewModel.settingsPreference.opusDtxEnabled
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.opusDtxLocked)
+        } else {
             Toggle("Enable Opus Dtx".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
-        } header: {
-            Text("Discontinuous Transmission".localized)
-        } footer: {
-            Text(
-                "Enabling Opus DTX can reduce bandwidth usage in streams that have long periods of silence."
-                    .localized)
+                .accessibilityIdentifier(SettingsAccessibilityID.opusDtxToggle)
         }
+    }
 
-        Section {
+    @ViewBuilder
+    private var publisherFallbackContent: some View {
+        if isInActiveCall {
+            LockedToggleRow(
+                title: "Publisher Audio Fallback".localized,
+                value: viewModel.settingsPreference.publisherAudioFallbackEnabled
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.publisherFallbackLocked)
+        } else {
             Toggle(
-                "Publisher Audio Fallback".localized, isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled)
-        } header: {
-            Text("Publisher Fallback".localized)
-        } footer: {
-            Text(
-                "When enabled, your video stops rendering on other devices during poor network conditions to preserve audio."
-                    .localized)
+                "Publisher Audio Fallback".localized,
+                isOn: $viewModel.settingsPreference.publisherAudioFallbackEnabled
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.publisherFallbackToggle)
         }
+    }
 
-        Section {
+    @ViewBuilder
+    private var subscriberFallbackContent: some View {
+        if isInActiveCall {
+            LockedToggleRow(
+                title: "Subscriber Audio Fallback".localized,
+                value: viewModel.settingsPreference.subscriberAudioFallbackEnabled
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.subscriberFallbackLocked)
+        } else {
             Toggle(
                 "Subscriber Audio Fallback".localized,
-                isOn: $viewModel.settingsPreference.subscriberAudioFallbackEnabled)
-        } header: {
-            Text("Subscriber Fallback".localized)
-        } footer: {
-            Text(
-                "When enabled, you receive audio only from other participants during poor network conditions.".localized
+                isOn: $viewModel.settingsPreference.subscriberAudioFallbackEnabled
             )
+            .accessibilityIdentifier(SettingsAccessibilityID.subscriberFallbackToggle)
         }
     }
 }
@@ -101,7 +217,14 @@ struct AudioSectionView: View {
 #if DEBUG
     #Preview {
         Form {
-            AudioSectionView(viewModel: .preview)
+            AudioSectionView(viewModel: .preview, isCompactLayout: true)
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    #Preview("Audio Section - Active Call") {
+        Form {
+            AudioSectionView(viewModel: .preview, isInActiveCall: true, isCompactLayout: true)
         }
         .preferredColorScheme(.dark)
     }

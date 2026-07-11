@@ -25,6 +25,10 @@ final class BottomBarButtonsAssembler {
     private let container: MeetingRoomSDKContainer
     private let enabledFeatures: Set<MeetingRoomFeature>
     private let buttonsDidChangeSubject = PassthroughSubject<Void, Never>()
+    private let chatUpdates: AnyPublisher<Void, Never>
+    private var archiveCancellable: AnyCancellable?
+    private var captionsCancellable: AnyCancellable?
+    private var effectsCancellable: AnyCancellable?
     private var noiseSuppressionCancellable: AnyCancellable?
     private var isChatPresented = false
     private var isReactionsPickerPresented = false
@@ -34,22 +38,31 @@ final class BottomBarButtonsAssembler {
     private var isAudioDiagnosticsPresented = false
 
     // Feature view models created during meeting room setup
-    var videoEffectsViewModel: VideoEffectsViewModel?
-    var archiveButtonViewModel: ArchiveButtonViewModel?
-    var captionsButtonViewModel: CaptionsButtonViewModel?
+    var videoEffectsViewModel: VideoEffectsViewModel? {
+        didSet {
+            guard hasChanged(from: oldValue, to: videoEffectsViewModel) else { return }
+
+            bindEffectsUpdates(videoEffectsViewModel)
+        }
+    }
+    var archiveButtonViewModel: ArchiveButtonViewModel? {
+        didSet {
+            guard hasChanged(from: oldValue, to: archiveButtonViewModel) else { return }
+
+            bindArchiveUpdates(archiveButtonViewModel)
+        }
+    }
+    var captionsButtonViewModel: CaptionsButtonViewModel? {
+        didSet {
+            guard hasChanged(from: oldValue, to: captionsButtonViewModel) else { return }
+
+            bindCaptionsUpdates(captionsButtonViewModel)
+        }
+    }
     var emojiButtonContainerViewModel: EmojiButtonContainerViewModel?
     var meetingNoiseSuppressionButtonViewModel: MeetingNoiseSuppressionViewModel? {
         didSet {
-            let didChange: Bool
-            switch (oldValue, meetingNoiseSuppressionButtonViewModel) {
-            case (let oldValue?, let newValue?):
-                didChange = oldValue !== newValue
-            case (nil, nil):
-                didChange = false
-            default:
-                didChange = true
-            }
-            guard didChange else { return }
+            guard hasChanged(from: oldValue, to: meetingNoiseSuppressionButtonViewModel) else { return }
 
             bindNoiseSuppressionUpdates(meetingNoiseSuppressionButtonViewModel)
         }
@@ -64,39 +77,7 @@ final class BottomBarButtonsAssembler {
     var onShowAudioDiagnostics: (() -> Void)?
 
     var buttonsDidChange: AnyPublisher<Void, Never> {
-        let archiveUpdates =
-            archiveButtonViewModel?.$state
-            .dropFirst()
-            .map { _ in () }
-            .eraseToAnyPublisher()
-            ?? Empty().eraseToAnyPublisher()
-
-        let effectsUpdates =
-            videoEffectsViewModel?.$selectedEffect
-            .dropFirst()
-            .map { _ in () }
-            .eraseToAnyPublisher()
-            ?? Empty().eraseToAnyPublisher()
-
-        let captionsUpdates =
-            captionsButtonViewModel?.$state
-            .dropFirst()
-            .map { _ in () }
-            .eraseToAnyPublisher()
-            ?? Empty().eraseToAnyPublisher()
-
-        let chatUpdates =
-            enabledFeatures.contains(.chat)
-            ? container.chatBadgeButtonViewModel.$unreadMessagesCount
-                .dropFirst()
-                .map { _ in () }
-                .eraseToAnyPublisher()
-            : Empty().eraseToAnyPublisher()
-
         return Publishers.MergeMany([
-            archiveUpdates,
-            effectsUpdates,
-            captionsUpdates,
             chatUpdates,
             buttonsDidChangeSubject.eraseToAnyPublisher(),
         ])
@@ -109,12 +90,19 @@ final class BottomBarButtonsAssembler {
     ) {
         self.container = container
         self.enabledFeatures = enabledFeatures
+        self.chatUpdates =
+            enabledFeatures.contains(.chat)
+            ? container.chatBadgeButtonViewModel.$unreadMessagesCount
+                .dropFirst()
+                .map { _ in () }
+                .eraseToAnyPublisher()
+            : Empty().eraseToAnyPublisher()
     }
 
     /// Builds the array of extra bottom bar buttons based on enabled features.
     ///
-    /// Called by `MeetingRoomViewModel` via `getExternalButtons` closure
-    /// each time the meeting room needs the current feature buttons.
+    /// Called by the meeting room UI provider each time the meeting room needs
+    /// the current feature buttons.
     ///
     /// - Returns: Array of feature buttons to display in the bottom bar.
     func buildButtons() -> [BottomBarButton] {
@@ -170,11 +158,12 @@ final class BottomBarButtonsAssembler {
         return .init(
             viewModel,
             isActive: isChatPresented,
-            overflowSelectionBehavior: .dismissBeforeAction
-        ) { [weak self] in
-            viewModel.chatDidOpen()
-            self?.onShowChat?()
-        }
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: { [weak self] in
+                viewModel.chatDidOpen()
+                self?.onShowChat?()
+            }
+        )
     }
 
     private func makeBackgroundEffectsButton(
@@ -183,10 +172,11 @@ final class BottomBarButtonsAssembler {
         .init(
             viewModel,
             isActive: isEffectsPresented || viewModel.isActive,
-            overflowSelectionBehavior: .dismissBeforeAction
-        ) { [weak self] in
-            self?.onShowEffects?()
-        }
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: { [weak self] in
+                self?.onShowEffects?()
+            }
+        )
     }
 
     private func makeFeedbackReportButton() -> BottomBarButton {
@@ -312,6 +302,50 @@ final class BottomBarButtonsAssembler {
             .sink { [weak self] _ in
                 self?.buttonsDidChangeSubject.send()
             }
+    }
+
+    private func bindArchiveUpdates(_ viewModel: ArchiveButtonViewModel?) {
+        archiveCancellable = nil
+        guard let viewModel else { return }
+
+        archiveCancellable = viewModel.$state
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.buttonsDidChangeSubject.send()
+            }
+    }
+
+    private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
+        captionsCancellable = nil
+        guard let viewModel else { return }
+
+        captionsCancellable = viewModel.$state
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.buttonsDidChangeSubject.send()
+            }
+    }
+
+    private func bindEffectsUpdates(_ viewModel: VideoEffectsViewModel?) {
+        effectsCancellable = nil
+        guard let viewModel else { return }
+
+        effectsCancellable = viewModel.$selectedEffect
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.buttonsDidChangeSubject.send()
+            }
+    }
+
+    private func hasChanged<Object: AnyObject>(from oldValue: Object?, to newValue: Object?) -> Bool {
+        switch (oldValue, newValue) {
+        case (let oldValue?, let newValue?):
+            oldValue !== newValue
+        case (nil, nil):
+            false
+        default:
+            true
+        }
     }
 
     func cleanUp() {
