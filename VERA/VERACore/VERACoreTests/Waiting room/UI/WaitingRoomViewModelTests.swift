@@ -316,11 +316,14 @@ struct WaitingRoomViewModelTests {
     @Test("Given audioOutputTestButton is assigned, when accessed, then it should contain the assigned value")
     func audioOutputTestButtonCanBeAssignedExternally() {
         let sut = makeSUT()
-        let testButton = AnyView(Text("Audio Test"))
+        let testButton = ViewHolder(id: "audioTest") {
+            Text("Audio Test")
+        }
 
         sut.audioOutputTestButton = testButton
 
         #expect(sut.audioOutputTestButton != nil)
+        #expect(sut.audioOutputTestButton?.id == "audioTest")
     }
 
     // MARK: SUT

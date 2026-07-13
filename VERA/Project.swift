@@ -285,11 +285,11 @@ private func createDependencies() -> [TargetDependency] {
         ])
     }
 
-    // VERAAudioDiagnostics is always included because VERACore depends on it for SpeakerTestService
-    // The UI button is conditionally shown based on AUDIODIAGNOSTICS_ENABLED flag
-    dependencies.append(contentsOf: [
-        .project(target: "VERAAudioDiagnostics", path: "VERAAudioDiagnostics")
-    ])
+    if isAudioDiagnosticsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAAudioDiagnostics", path: "VERAAudioDiagnostics")
+        ])
+    }
 
     if isFeedbackEnabled() {
         dependencies.append(contentsOf: [

@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import SwiftUI
 import VERAConfiguration
 import VERADomain
 
@@ -24,10 +23,7 @@ public final class WaitingRoomViewModel: ObservableObject {
     @Published public var userName: String = ""
     @Published public var toolbarButtons: [ViewHolder] = []
     @Published public var extraTrailingButtons: [ViewHolder] = []
-
-    /// Optional audio output test button to display near camera/mic controls.
-    /// Set by VERAApp when audio diagnostics feature is enabled.
-    public var audioOutputTestButton: AnyView?
+    @Published public var audioOutputTestButton: ViewHolder?
 
     public var onPublisherReady: (() -> Void)?
 
@@ -205,7 +201,9 @@ extension WaitingRoomViewModel {
                 cameras: availableCameraDevices,
                 audioLevel: currentAudioLevel,
                 allowAudioOutputTest: AppConfig.audioSettings.allowAudioDiagnostics,
-                publisher: publisher))
+                publisher: publisher
+            )
+        )
     }
 
     fileprivate func makeUICameraDevice(
@@ -282,6 +280,7 @@ extension WaitingRoomViewModel {
                 allowCameraControl: currentState.allowCameraControl,
                 cameras: currentState.cameras,
                 audioLevel: level,
+                allowAudioOutputTest: currentState.allowAudioOutputTest,
                 publisher: currentState.publisher))
     }
 

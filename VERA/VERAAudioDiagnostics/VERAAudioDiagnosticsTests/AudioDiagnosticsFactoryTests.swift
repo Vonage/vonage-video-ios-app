@@ -13,17 +13,6 @@
     @MainActor
     struct AudioDiagnosticsFactoryTests {
 
-        // MARK: - Initialization Tests
-
-        @Test("initializes with speaker test service")
-        func initializesWithService() {
-            let service = MockSpeakerTestService()
-            let sut = AudioDiagnosticsFactory(speakerTestService: service)
-
-            // Test passes if initialization succeeds
-            #expect(sut is AudioDiagnosticsFactory)
-        }
-
         // MARK: - View Model Creation Tests
 
         @Test("makeViewModel creates new view model")
@@ -33,7 +22,6 @@
 
             let viewModel = sut.makeViewModel()
 
-            #expect(viewModel is AudioOutputControlViewModel)
             #expect(viewModel.isPlaying == false)
             #expect(viewModel.currentAudioLevel == 0.0)
         }
@@ -49,63 +37,38 @@
             #expect(viewModel1 !== viewModel2)
         }
 
-        // MARK: - View Creation Tests
-
-        @Test("makeView creates AudioDiagnosticsView")
-        func makeViewCreatesView() {
+        @Test("makeViewModel view models are properly configured")
+        func makeViewModelViewModelsAreProperlyConfigured() async {
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-            let view = sut.makeView()
+            let viewModel = sut.makeViewModel()
 
-            #expect(view is AudioDiagnosticsView)
+            // Test that the view model is properly initialized with the service
+            viewModel.testSpeaker()
+            service.emitAudioLevel(0.7)
+
+            // Give time for publisher to emit
+            try? await Task.sleep(nanoseconds: 10_000_000)
+
+            #expect(viewModel.currentAudioLevel == 0.7)
+            #expect(service.playTestSoundCallCount == 1)
         }
 
-        @Test("makeConfiguredView returns AnyView")
-        func makeConfiguredViewReturnsAnyView() {
+        // MARK: - Configured View Tests
+
+        @Test("makeConfiguredView creates view with presentation modifiers")
+        func makeConfiguredViewCreatesViewWithPresentationModifiers() {
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
             let configuredView = sut.makeConfiguredView()
 
+            // Verify that the view is wrapped in AnyView
             #expect(configuredView is AnyView)
         }
 
-        // MARK: - Waiting Room Circular Button Tests
-
-        @Test("makeWaitingRoomButton creates button")
-        func makeWaitingRoomButtonCreatesButton() {
-            let service = MockSpeakerTestService()
-            let sut = AudioDiagnosticsFactory(speakerTestService: service)
-
-            let button = sut.makeWaitingRoomButton()
-
-            #expect(button is AudioDiagnosticsWaitingRoomButton)
-        }
-
-        @Test("makeWaitingRoomButton provides view closure")
-        func makeWaitingRoomButtonProvidesViewClosure() {
-            let service = MockSpeakerTestService()
-            let sut = AudioDiagnosticsFactory(speakerTestService: service)
-
-            let button = sut.makeWaitingRoomButton()
-
-            // Access the makeDialog closure through reflection or by creating the view
-            // For now, just verify the button was created
-            #expect(button is AudioDiagnosticsWaitingRoomButton)
-        }
-
         // MARK: - Waiting Room Selector Button Tests
-
-        @Test("makeWaitingRoomSelectorButton creates AudioDiagnosticsButton")
-        func makeWaitingRoomSelectorButtonCreatesButton() {
-            let service = MockSpeakerTestService()
-            let sut = AudioDiagnosticsFactory(speakerTestService: service)
-
-            let button = sut.makeWaitingRoomSelectorButton()
-
-            #expect(button is AudioDiagnosticsButton)
-        }
 
         @Test("makeWaitingRoomSelectorButton creates independent instances")
         func makeWaitingRoomSelectorButtonCreatesIndependentInstances() {
@@ -119,9 +82,48 @@
             #expect(type(of: button1) == type(of: button2))
         }
 
+        @Test("makeWaitingRoomSelectorButton creates functional button")
+        func makeWaitingRoomSelectorButtonCreatesFunctionalButton() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
+
+            let button = sut.makeWaitingRoomSelectorButton()
+
+            // Verify button type is correct
+            #expect(button is AudioDiagnosticsButton)
+        }
+
         @Test("AudioDiagnosticsButton uses correct accessibility identifier from enum")
         func audioDiagnosticsButtonHasCorrectAccessibilityID() {
             #expect(AudioDiagnosticsAccessibilityID.waitingRoomButton == "WaitingRoom.AudioOutputTestButton")
+        }
+
+        // MARK: - Waiting Room Circular Button Tests
+
+        @Test("makeWaitingRoomButton creates circular button")
+        func makeWaitingRoomButtonCreatesCircularButton() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
+
+            let button = sut.makeWaitingRoomButton()
+
+            // Verify button type is correct
+            #expect(button is AudioDiagnosticsWaitingRoomButton)
+        }
+
+        @Test("makeWaitingRoomButton with deallocated factory falls back gracefully")
+        func makeWaitingRoomButtonFallsBackGracefully() {
+            var sut: AudioDiagnosticsFactory? = AudioDiagnosticsFactory(
+                speakerTestService: MockSpeakerTestService()
+            )
+
+            let button = sut!.makeWaitingRoomButton()
+
+            // Deallocate the factory
+            sut = nil
+
+            // Button should still be valid (value type)
+            #expect(button is AudioDiagnosticsWaitingRoomButton)
         }
 
         // MARK: - Meeting Room Button Tests
@@ -136,8 +138,18 @@
                 callbackInvoked = true
             }
 
-            #expect(button is AudioDiagnosticsMeetingRoomButton)
             #expect(callbackInvoked == false)  // Not invoked yet
+            #expect(button is AudioDiagnosticsMeetingRoomButton)
+        }
+
+        @Test("makeMeetingRoomButton creates button with nil callback")
+        func makeMeetingRoomButtonCreatesButtonWithNilCallback() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
+
+            let button = sut.makeMeetingRoomButton(onShowDialog: {})
+
+            #expect(button is AudioDiagnosticsMeetingRoomButton)
         }
 
         // MARK: - Service Integration Tests
@@ -166,27 +178,52 @@
 
             #expect(service.playTestSoundCallCount == 2)
         }
-    }
 
-    // MARK: - Mock Speaker Test Service
+        @Test("factory maintains service reference across multiple calls")
+        func factoryMaintainsServiceReference() {
+            let service = MockSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-    @MainActor
-    private final class MockSpeakerTestService: SpeakerTestService {
-        private let audioLevelSubject = PassthroughSubject<Float, Never>()
+            // Create multiple components
+            let viewModel1 = sut.makeViewModel()
+            let viewModel2 = sut.makeViewModel()
+            let button1 = sut.makeWaitingRoomButton()
+            let button2 = sut.makeWaitingRoomSelectorButton()
 
-        var audioLevelPublisher: AnyPublisher<Float, Never> {
-            audioLevelSubject.eraseToAnyPublisher()
+            // Test that all components work with the same service
+            viewModel1.testSpeaker()
+            viewModel2.testSpeaker()
+
+            #expect(service.playTestSoundCallCount == 2)
         }
 
-        private(set) var playTestSoundCallCount = 0
-        private(set) var stopTestSoundCallCount = 0
+        // MARK: - Accessibility Tests
 
-        func playTestSound() {
-            playTestSoundCallCount += 1
+        @Test("accessibility identifiers are properly defined")
+        func accessibilityIdentifiersAreProperlyDefined() {
+            #expect(AudioDiagnosticsAccessibilityID.screen == "audio-output-test-screen")
+            #expect(AudioDiagnosticsAccessibilityID.playButton == "audio-output-play-button")
+            #expect(AudioDiagnosticsAccessibilityID.levelBar == "audio-output-level-bar")
+            #expect(AudioDiagnosticsAccessibilityID.waitingRoomButton == "WaitingRoom.AudioOutputTestButton")
+            #expect(AudioDiagnosticsAccessibilityID.meetingRoomButton == "MeetingRoom.AudioDiagnosticsButton")
         }
 
-        func stopTestSound() {
-            stopTestSoundCallCount += 1
+        // MARK: - Error Handling Tests
+
+        @Test("factory works with null speaker test service")
+        func factoryWorksWithNullSpeakerTestService() {
+            let nullService = NullSpeakerTestService()
+            let sut = AudioDiagnosticsFactory(speakerTestService: nullService)
+
+            let viewModel = sut.makeViewModel()
+
+            // Should not crash with null service
+            viewModel.testSpeaker()
+            viewModel.stopSpeaker()
+            viewModel.togglePlayback()
+
+            #expect(viewModel.isPlaying == true)
+            #expect(viewModel.currentAudioLevel == 0.0)
         }
     }
 #endif

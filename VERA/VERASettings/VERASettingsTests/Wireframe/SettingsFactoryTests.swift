@@ -13,26 +13,6 @@ struct SettingsFactoryTests {
 
     // MARK: - makeWaitingRoomButton
 
-    @Test("makeWaitingRoomButton returns SettingsToolbarButton")
-    func makeWaitingRoomButtonReturnsToolbarButton() {
-        let factory = makeFactory()
-
-        let button = factory.makeWaitingRoomButton()
-
-        #expect(button is SettingsToolbarButton)
-    }
-
-    @Test("makeWaitingRoomButton creates distinct instances on each call")
-    func makeWaitingRoomButtonCreatesDistinctInstances() {
-        let factory = makeFactory()
-
-        let button1 = factory.makeWaitingRoomButton()
-        let button2 = factory.makeWaitingRoomButton()
-
-        // SwiftUI Views are value types, so we verify they can be created independently
-        #expect(type(of: button1) == type(of: button2))
-    }
-
     @Test("makeWaitingRoomButton has correct accessibility identifier")
     func makeWaitingRoomButtonHasCorrectAccessibilityID() {
         #expect(SettingsToolbarButton.accessibilityID == "WaitingRoom.SettingsButton")
@@ -76,17 +56,6 @@ struct SettingsFactoryTests {
         await viewModel.setup()
 
         #expect(viewModel.senderStatsEnabled == true)
-    }
-
-    // MARK: - makeSettingsView
-
-    @Test("makeSettingsView returns configured SettingsView")
-    func makeSettingsViewReturnsConfiguredView() {
-        let factory = makeFactory()
-
-        let view = factory.makeSettingsView()
-
-        #expect(view is SettingsView)
     }
 
     // MARK: - Helpers

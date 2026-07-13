@@ -70,7 +70,7 @@ public struct WaitingRoomView: View {
     var userName: Binding<String>
     @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
-    let audioOutputTestButton: AnyView?
+    @Binding var audioOutputTestButton: ViewHolder?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -84,7 +84,7 @@ public struct WaitingRoomView: View {
                         userName: userName,
                         toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
-                        audioOutputTestButton: audioOutputTestButton,
+                        audioOutputTestButton: _audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -94,7 +94,7 @@ public struct WaitingRoomView: View {
                         userName: userName,
                         toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
-                        audioOutputTestButton: audioOutputTestButton,
+                        audioOutputTestButton: _audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -104,7 +104,7 @@ public struct WaitingRoomView: View {
                         userName: userName,
                         toolbarButtons: _toolbarButtons,
                         extraTrailingButtons: _extraTrailingButtons,
-                        audioOutputTestButton: audioOutputTestButton,
+                        audioOutputTestButton: _audioOutputTestButton,
                         onJoinRoom: onJoinRoom,
                         onMicrophoneToggle: onMicrophoneToggle,
                         onCameraToggle: onCameraToggle)
@@ -121,7 +121,7 @@ struct HorizontalWaitingRoomContentView: View {
     var userName: Binding<String>
     @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
-    let audioOutputTestButton: AnyView?
+    @Binding var audioOutputTestButton: ViewHolder?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -133,7 +133,7 @@ struct HorizontalWaitingRoomContentView: View {
                 userName: userName,
                 toolbarButtons: _toolbarButtons,
                 extraTrailingButtons: _extraTrailingButtons,
-                audioOutputTestButton: audioOutputTestButton,
+                audioOutputTestButton: _audioOutputTestButton,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -153,7 +153,7 @@ struct VerticalWaitingRoomContentView: View {
     let userName: Binding<String>
     @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
-    let audioOutputTestButton: AnyView?
+    @Binding var audioOutputTestButton: ViewHolder?
     let onJoinRoom: () -> Void
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
@@ -165,7 +165,7 @@ struct VerticalWaitingRoomContentView: View {
                 userName: userName,
                 toolbarButtons: _toolbarButtons,
                 extraTrailingButtons: _extraTrailingButtons,
-                audioOutputTestButton: audioOutputTestButton,
+                audioOutputTestButton: _audioOutputTestButton,
                 onMicrophoneToggle: onMicrophoneToggle,
                 onCameraToggle: onCameraToggle
             )
@@ -184,7 +184,7 @@ struct VideoPreviewView: View {
     let userName: Binding<String>
     @Binding var toolbarButtons: [ViewHolder]
     @Binding var extraTrailingButtons: [ViewHolder]
-    let audioOutputTestButton: AnyView?
+    @Binding var audioOutputTestButton: ViewHolder?
     let onMicrophoneToggle: () -> Void
     let onCameraToggle: () -> Void
 
@@ -231,9 +231,8 @@ struct VideoPreviewView: View {
                     }
                 }
 
-                // Audio Output Test button, same visual style as the Camera selector.
-                if state.allowAudioOutputTest, let audioOutputTestButton {
-                    audioOutputTestButton
+                if state.allowAudioOutputTest, let audioButton = audioOutputTestButton {
+                    audioButton.content()
                 }
             }
             .tint(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
@@ -307,7 +306,7 @@ struct PrepareToJoinRoom: View {
         userName: .constant("Zaphod Beeblebrox"),
         toolbarButtons: .constant([]),
         extraTrailingButtons: .constant([]),
-        audioOutputTestButton: nil,
+        audioOutputTestButton: .constant(nil),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}
@@ -330,7 +329,7 @@ struct PrepareToJoinRoom: View {
         userName: .constant("Zaphod Beeblebrox"),
         toolbarButtons: .constant([]),
         extraTrailingButtons: .constant([]),
-        audioOutputTestButton: nil,
+        audioOutputTestButton: .constant(nil),
         onJoinRoom: {},
         onMicrophoneToggle: {},
         onCameraToggle: {}

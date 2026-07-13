@@ -38,17 +38,6 @@
 
         // MARK: - View
 
-        /// Creates an ``AudioDiagnosticsView`` backed by a fresh view model.
-        ///
-        /// This view can be presented from any screen (Waiting Room, Meeting Room, Settings).
-        ///
-        /// - Returns: A configured audio diagnostics view.
-        @MainActor
-        public func makeView() -> AudioDiagnosticsView {
-            let viewModel = makeViewModel()
-            return AudioDiagnosticsView(viewModel: viewModel)
-        }
-
         /// Creates an ``AudioDiagnosticsView`` with all presentation modifiers applied.
         ///
         /// This method ensures consistent presentation style across all usage contexts.
@@ -135,6 +124,17 @@
             onShowDialog: @escaping OnShowAudioDiagnostics
         ) -> AudioDiagnosticsMeetingRoomButton {
             AudioDiagnosticsMeetingRoomButton(onShowDialog: onShowDialog)
+        }
+
+        /// Creates an ``AudioDiagnosticsView`` backed by a fresh view model.
+        ///
+        /// This view can be presented from any screen (Waiting Room, Meeting Room, Settings).
+        ///
+        /// - Returns: A configured audio diagnostics view.
+        @MainActor
+        private func makeView() -> AudioDiagnosticsView {
+            let viewModel = makeViewModel()
+            return AudioDiagnosticsView(viewModel: viewModel)
         }
     }
 

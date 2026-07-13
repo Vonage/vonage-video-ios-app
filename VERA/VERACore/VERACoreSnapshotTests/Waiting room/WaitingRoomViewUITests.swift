@@ -98,9 +98,9 @@ class WaitingRoomViewUITests {
     // MARK: - Test Helpers
 
     private func makeSUT(includeAudioOutputTestButton: Bool = false) -> WaitingRoomView {
-        let audioOutputButton: AnyView? =
+        let audioOutputButton: ViewHolder? =
             includeAudioOutputTestButton
-            ? AnyView(
+            ? ViewHolder(id: "audioTest") {
                 Button(action: {}) {
                     Label {
                         Text("Audio")
@@ -108,7 +108,7 @@ class WaitingRoomViewUITests {
                         Image(systemName: "speaker.wave.2.fill")
                     }
                 }
-            )
+            }
             : nil
 
         return WaitingRoomView(
@@ -119,7 +119,7 @@ class WaitingRoomViewUITests {
             userName: .constant("Trillian"),
             toolbarButtons: .constant([]),
             extraTrailingButtons: .constant([]),
-            audioOutputTestButton: audioOutputButton,
+            audioOutputTestButton: .constant(audioOutputButton),
             onJoinRoom: {},
             onMicrophoneToggle: {},
             onCameraToggle: {}

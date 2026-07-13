@@ -24,7 +24,7 @@ public struct WaitingRoomScreen: View {
                 userName: $viewModel.userName,
                 toolbarButtons: $viewModel.toolbarButtons,
                 extraTrailingButtons: $viewModel.extraTrailingButtons,
-                audioOutputTestButton: viewModel.audioOutputTestButton
+                audioOutputTestButton: $viewModel.audioOutputTestButton
             ) {
                 Task {
                     await viewModel.joinRoom()

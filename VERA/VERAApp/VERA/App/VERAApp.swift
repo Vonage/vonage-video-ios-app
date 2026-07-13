@@ -165,7 +165,9 @@ struct VERAApp: App {
                 // Create audio output test button (same visual style as the Camera selector)
                 // to be displayed next to the Camera selector in the waiting room.
                 let audioButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomSelectorButton()
-                waitingRoomViewModel.audioOutputTestButton = AnyView(audioButton)
+                waitingRoomViewModel.audioOutputTestButton = ViewHolder(id: "audioOutputTest") {
+                    audioButton
+                }
             #endif
 
             #if BACKGROUND_EFFECTS_ENABLED

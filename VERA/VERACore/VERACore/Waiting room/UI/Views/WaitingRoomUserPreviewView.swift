@@ -70,6 +70,20 @@ struct WaitingRoomUserPreviewView: View {
                 PublisherVideoView(videoView: nil)
             }
 
+            if !extraTrailingButtons.isEmpty {
+                HStack {
+                    Spacer()
+                    VStack {
+                        ForEach(extraTrailingButtons) {
+                            $0.content()
+                                .padding(.leading, 2)
+                        }
+                    }
+                }.frame(maxWidth: .infinity, alignment: .topTrailing)
+                    .padding(.top, 8)
+                    .padding(.trailing, 8)
+            }
+
             VStack {
 
                 Spacer()

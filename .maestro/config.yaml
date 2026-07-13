@@ -1,5 +1,5 @@
 appId: com.vonage.VERA
 platform:
   ios:
-    # Enable modal view support so Maestro can find accessibility IDs inside sheets
+    # When snapshotKeyHonorModalViews: false, Maestro does not limit the snapshot only to the modal.
     snapshotKeyHonorModalViews: false

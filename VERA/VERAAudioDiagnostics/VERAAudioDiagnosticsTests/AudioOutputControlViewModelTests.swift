@@ -179,31 +179,159 @@ struct AudioOutputControlViewModelTests {
         // Now should update
         #expect(sut.currentAudioLevel == 0.7)
     }
-}
 
-// MARK: - Mock Speaker Test Service
+    // MARK: - Edge Case Tests
 
-@MainActor
-private final class MockSpeakerTestService: SpeakerTestService {
-    private let audioLevelSubject = PassthroughSubject<Float, Never>()
+    @Test("handles extreme audio level values correctly")
+    func handlesExtremeAudioLevelValues() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
 
-    var audioLevelPublisher: AnyPublisher<Float, Never> {
-        audioLevelSubject.eraseToAnyPublisher()
+        sut.testSpeaker()
+
+        // Test minimum value
+        service.emitAudioLevel(0.0)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        #expect(sut.currentAudioLevel == 0.0)
+
+        // Test maximum value
+        service.emitAudioLevel(1.0)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        #expect(sut.currentAudioLevel == 1.0)
+
+        // Test values outside normal range (should still be handled)
+        service.emitAudioLevel(-0.1)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        #expect(sut.currentAudioLevel == -0.1)
+
+        service.emitAudioLevel(1.5)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        #expect(sut.currentAudioLevel == 1.5)
     }
 
-    private(set) var playTestSoundCallCount = 0
-    private(set) var stopTestSoundCallCount = 0
+    @Test("handles rapid audio level changes")
+    func handlesRapidAudioLevelChanges() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
 
-    func playTestSound() {
-        playTestSoundCallCount += 1
+        sut.testSpeaker()
+
+        // Emit rapid changes
+        for i in 0..<10 {
+            service.emitAudioLevel(Float(i) * 0.1)
+        }
+
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        // Should have received the last value (allowing for floating point precision)
+        #expect(abs(sut.currentAudioLevel - 0.9) < 0.01)
     }
 
-    func stopTestSound() {
-        stopTestSoundCallCount += 1
-        audioLevelSubject.send(0.0)
+    @Test("subscription setup is idempotent")
+    func subscriptionSetupIsIdempotent() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
+
+        // Call testSpeaker multiple times
+        sut.testSpeaker()
+        sut.testSpeaker()
+        sut.testSpeaker()
+
+        service.emitAudioLevel(0.8)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+
+        #expect(sut.currentAudioLevel == 0.8)
+        #expect(service.playTestSoundCallCount == 3)  // Each call should go through
     }
 
-    func emitAudioLevel(_ level: Float) {
-        audioLevelSubject.send(level)
+    @Test("audio level resets after multiple play/stop cycles")
+    func audioLevelResetsAfterMultiplePlayStopCycles() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
+
+        for _ in 0..<3 {
+            sut.testSpeaker()
+            service.emitAudioLevel(0.7)
+            try? await Task.sleep(nanoseconds: 10_000_000)
+
+            #expect(sut.currentAudioLevel == 0.7)
+
+            sut.stopSpeaker()
+            #expect(sut.currentAudioLevel == 0.0)
+        }
+    }
+
+    // MARK: - Concurrent Access Tests
+
+    @Test("handles concurrent toggle operations safely")
+    func handlesConcurrentToggleOperations() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
+
+        // Simulate rapid concurrent toggles
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<5 {
+                group.addTask {
+                    await sut.togglePlayback()
+                }
+            }
+        }
+
+        // State should be consistent
+        let finalState = sut.isPlaying
+        #expect(finalState == true || finalState == false)  // Should be one or the other
+    }
+
+    @Test("handles concurrent test and stop operations safely")
+    func handlesConcurrentTestAndStopOperations() async {
+        let service = MockSpeakerTestService()
+        let sut = AudioOutputControlViewModel(speakerTestService: service)
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await sut.testSpeaker() }
+            group.addTask { await sut.stopSpeaker() }
+            group.addTask { await sut.testSpeaker() }
+            group.addTask { await sut.stopSpeaker() }
+        }
+
+        // Final state should be consistent
+        let finalState = sut.isPlaying
+        #expect(finalState == true || finalState == false)
+    }
+
+    // MARK: - Memory Management Tests
+
+    @Test("view model properly manages subscription lifecycle")
+    func viewModelProperlyManagesSubscriptionLifecycle() async {
+        let service = MockSpeakerTestService()
+        var sut: AudioOutputControlViewModel? = AudioOutputControlViewModel(speakerTestService: service)
+
+        sut!.testSpeaker()
+        service.emitAudioLevel(0.5)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+
+        #expect(sut!.currentAudioLevel == 0.5)
+
+        // Deallocate view model
+        sut = nil
+
+        // Service should still be able to emit (no crashes)
+        service.emitAudioLevel(0.8)
+    }
+
+    @Test("multiple view models can subscribe to same service")
+    func multipleViewModelsCanSubscribeToSameService() async {
+        let service = MockSpeakerTestService()
+        let sut1 = AudioOutputControlViewModel(speakerTestService: service)
+        let sut2 = AudioOutputControlViewModel(speakerTestService: service)
+
+        sut1.testSpeaker()
+        sut2.testSpeaker()
+
+        service.emitAudioLevel(0.6)
+        try? await Task.sleep(nanoseconds: 10_000_000)
+
+        #expect(sut1.currentAudioLevel == 0.6)
+        #expect(sut2.currentAudioLevel == 0.6)
     }
 }

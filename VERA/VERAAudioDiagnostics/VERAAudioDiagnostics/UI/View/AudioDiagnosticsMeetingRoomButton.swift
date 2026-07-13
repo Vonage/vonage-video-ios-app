@@ -52,7 +52,7 @@
     #if DEBUG
         #Preview {
             AudioDiagnosticsMeetingRoomButton {
-                print("Audio diagnostics tapped")
+
             }
             .padding()
             .preferredColorScheme(.dark)
