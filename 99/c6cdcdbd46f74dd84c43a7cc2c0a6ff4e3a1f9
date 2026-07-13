@@ -1,7 +1,19 @@
+"VERA/VERADomain/VERADomainTests/Session Keys/SessionKeyParserTests.swift"
+  s_9d51cd27e66458::t_f52283b500cc4b 105-106,108-109
 ---
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.6.13",
   "base_commit_sha": "99c6cdcdbd46f74dd84c43a7cc2c0a6ff4e3a1f9",
-  "prompts": {}
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
 }
