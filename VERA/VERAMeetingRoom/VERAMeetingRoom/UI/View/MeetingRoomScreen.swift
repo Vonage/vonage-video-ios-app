@@ -24,7 +24,20 @@ public struct MeetingRoomScreen: View {
             VStack {
                 if case .content(let state) = viewModel.state {
                     ZStack {
-                        meetingRoomContent(state: state)
+                        MeetingRoomView(
+                            state: state,
+                            actions: .init(
+                                onShare: { _ in },
+                                onRetry: {},
+                                onToggleMic: viewModel.onToggleMic,
+                                onToggleCamera: viewModel.onToggleCamera,
+                                onCameraSwitch: viewModel.onCameraSwitch,
+                                onEndCall: viewModel.endCall,
+                                onToggleParticipants: {},
+                                onToggleLayout: viewModel.onToggleLayout),
+                            extraButtons: $viewModel.extraButtons,
+                            extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
+                        )
 
                         if state.callState == .disconnecting {
                             LoaderModalView()
@@ -48,23 +61,5 @@ public struct MeetingRoomScreen: View {
         .task {
             await viewModel.loadUI()
         }
-    }
-
-    @ViewBuilder
-    private func meetingRoomContent(state: MeetingRoomState) -> some View {
-        MeetingRoomView(
-            state: state,
-            actions: .init(
-                onShare: { _ in },
-                onRetry: {},
-                onToggleMic: viewModel.onToggleMic,
-                onToggleCamera: viewModel.onToggleCamera,
-                onCameraSwitch: viewModel.onCameraSwitch,
-                onEndCall: viewModel.endCall,
-                onToggleParticipants: {},
-                onToggleLayout: viewModel.onToggleLayout),
-            extraButtons: $viewModel.extraButtons,
-            extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
-        )
     }
 }
