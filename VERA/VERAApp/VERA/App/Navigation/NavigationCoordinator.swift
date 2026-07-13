@@ -29,7 +29,11 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var isInMeeting = false
     @Published var currentMeetingRoomRequest: NewRoomRequest?
     @Published var alertItem: AlertItem?
-
+    // SPIKE: Okta auth state — sourced from OktaAuthManager
+    @Published var isAuthenticated: Bool = false
+    // Cancellables for binding to OktaAuthManager
+    private var cancellables = Set<AnyCancellable>()
+    
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
@@ -112,6 +116,15 @@ open class NavigationCoordinator: ObservableObject, Navigator {
         logNavigation("Returned to landing page")
     }
 
+    // MARK: - Okta
+    
+    func bindAuth(_ authManager: OktaAuthManager) {
+        authManager.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.isAuthenticated, on: self)
+            .store(in: &cancellables)
+    }
+    
     // MARK: - Private Helpers
 
     private func navigateToSettings() {

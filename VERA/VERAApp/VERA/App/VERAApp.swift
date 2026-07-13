@@ -12,6 +12,7 @@ import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
+import OktaOidc
 
 #if ARCHIVING_ENABLED
     import VERAArchiving
@@ -32,7 +33,9 @@ import VERAVonage
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
-
+    // SPIKE: Okta auth manager — shared across the app
+    @StateObject private var authManager = OktaAuthManager()
+    
     var dependencyContainer: DependencyContainer = {
         let httpClient = AppHTTPClientProvider(
             isE2EEnabled: E2EConfiguration.isEnabled
@@ -51,25 +54,29 @@ struct VERAApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationCoordinator.path) {
-                makeLandingPage()
-                    .navigationDestination(for: AppRoute.self) { destination in
-                        switch destination {
-                        case .waitingRoom(let roomName):
-                            if navigationCoordinator.isInMeeting {
-                                LoaderModalView()
-                            } else {
-                                makeWaitingRoom(roomName: roomName)
+                if navigationCoordinator.isAuthenticated {
+                    makeLandingPage()
+                        .navigationDestination(for: AppRoute.self) { destination in
+                            switch destination {
+                            case .waitingRoom(let roomName):
+                                if navigationCoordinator.isInMeeting {
+                                    LoaderModalView()
+                                } else {
+                                    makeWaitingRoom(roomName: roomName)
+                                }
+                            case .goodbye(let roomName):
+                                makeGoodbyePage(roomName: roomName)
+                            case .meetingRoom:
+                                fatalError("Should not be able to navigate to meeting room from landing")
+                            case .landing:
+                                fatalError("Should not be able to navigate to landing")
+                            case .settings:
+                                fatalError("Should not be able to navigate to settings")
                             }
-                        case .goodbye(let roomName):
-                            makeGoodbyePage(roomName: roomName)
-                        case .meetingRoom:
-                            fatalError("Should not be able to navigate to meeting room from landing")
-                        case .landing:
-                            fatalError("Should not be able to navigate to landing")
-                        case .settings:
-                            fatalError("Should not be able to navigate to settings")
                         }
-                    }
+                } else {
+                    LoginView()
+                }
             }
             .fullScreenCover(isPresented: $navigationCoordinator.isInMeeting) {
                 if let newRoomRequest = navigationCoordinator.currentMeetingRoomRequest {
@@ -86,9 +93,14 @@ struct VERAApp: App {
                 }
             }
             .environmentObject(navigationCoordinator)
+            .environmentObject(authManager) // SPIKE: inject auth manager
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
             .onOpenURL { url in
                 handleUniversalLink(url)
+            }
+            .onAppear {
+                // SPIKE: bind auth state to coordinator
+                navigationCoordinator.bindAuth(authManager)
             }
             .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
         }

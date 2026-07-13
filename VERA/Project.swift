@@ -205,6 +205,14 @@ private func createPackages() -> [Package] {
         packages.append(.vonageVideoTransformersSDK)
     }
 
+    // OKTA Spike
+    packages.append(
+        .remote(
+            url: "https://github.com/okta/okta-oidc-ios.git",
+            requirement: .upToNextMajor(from: "3.11.7")
+        )
+    )
+
     return packages
 }
 
@@ -227,6 +235,8 @@ private func createDependencies() -> [TargetDependency] {
         // SDK module handles meeting room dependency wiring and all feature modules
         .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
         .project(target: "VERAE2E", path: "VERAE2E"),
+        // SPIKE: Okta OIDC
+        .package(product: "OktaOidc"),
     ]
 
     // The following dependencies are still needed directly by VERAApp
@@ -393,6 +403,16 @@ let project = Project(
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,
                     "NSCameraReactionEffectGesturesEnabledDefault": false,
+                    // SPIKE: Okta custom URL scheme — routes com.vonage.VERA://callback
+                    // back to the app after ASWebAuthenticationSession redirect
+                    "CFBundleURLTypes": .array([
+                        .dictionary([
+                            "CFBundleURLName": .string("com.vonage.VERA"),
+                            "CFBundleURLSchemes": .array([
+                                .string("com.vonage.VERA")
+                            ])
+                        ])
+                    ]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],
