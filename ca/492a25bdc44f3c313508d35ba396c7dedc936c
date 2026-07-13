@@ -1,0 +1,19 @@
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_9d51cd27e66458::t_bbb41f1944269a 290-291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "ca492a25bdc44f3c313508d35ba396c7dedc936c",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
