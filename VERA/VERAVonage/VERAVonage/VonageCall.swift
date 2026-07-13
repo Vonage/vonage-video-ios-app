@@ -287,11 +287,8 @@ public final class VonageCall: CallFacade {
         guard !publisher.hasSession else { return }
         do {
             try session.publish(publisher: publisher)
-            // Capture the participant AFTER setup(): setup attaches the permanent inline renderer
-            // and rebuilds `participant` around it. Capturing before would seed the UI with the
-            // SDK's default view — which dies the moment the renderer attaches — and the corrected
-            // view would then be dropped by downstream `removeDuplicates()` (view is excluded from
-            // `Participant` equality), freezing the local tile.
+            // In PiP mode, read `participant` only after setup(), which swaps in the renderer view.
+            // Reading it before would freeze the local tile.
             publisher.setup()
             publisherParticipant = publisher.participant
             setupPublisherObservation(publisher)
