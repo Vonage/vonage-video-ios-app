@@ -14,24 +14,86 @@ enum StatsConstants {
 /// composes ``StatisticsSectionView`` (pure toggle) with ``StatsLiveSection``
 /// (live metrics table).
 ///
-/// When ``statisticsViewModel`` is provided (meeting room) and stats are enabled,
-/// a live table of audio/video send/receive metrics is shown below the toggle.
-/// When ``statisticsViewModel`` is `nil` (waiting room), only the toggle appears.
+/// When ``statisticsViewModel`` is provided (meeting room), the live publisher and
+/// subscriber stats sections are shown below the toggles.
+/// When ``statisticsViewModel`` is `nil` (waiting room), only the toggles appear.
 struct StatisticsSectionScreen: View {
 
     @ObservedObject var viewModel: SettingsViewModel
     var statisticsViewModel: StatisticsViewModel?
+    var isCompactLayout: Bool = false
+    var showsSectionHeaders: Bool = true
 
     var body: some View {
-        StatisticsSectionView(
-            senderStatsEnabled: $viewModel.settingsPreference.senderStatsEnabled
+        if isCompactLayout {
+            compactBody
+        } else {
+            regularBody
+        }
+    }
+
+    @ViewBuilder
+    private var compactBody: some View {
+        Section {
+            statsToggleContent
+            if statisticsViewModel != nil {
+                ActiveCallWarningText()
+            }
+        } header: {
+            Text("Stats".localized)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+        }
+
+        if let statisticsViewModel {
+            Section {
+                ParticipantsStatsSection(
+                    settingsViewModel: viewModel,
+                    statsViewModel: statisticsViewModel
+                )
+            } header: {
+                Text("Participant stats".localized)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var statsToggleContent: some View {
+        if statisticsViewModel != nil {
+            LockedToggleRow(
+                title: "Enable extra stats for subscribers".localized,
+                value: viewModel.settingsPreference.senderStatsEnabled
+            )
+        } else {
+            Toggle(
+                "Enable extra stats for subscribers".localized,
+                isOn: $viewModel.settingsPreference.senderStatsEnabled
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var overlayToggleContent: some View {
+        Toggle("Show Overlay Stats".localized, isOn: $viewModel.settingsPreference.statsOverlayEnabled)
+    }
+
+    @ViewBuilder
+    private var regularBody: some View {
+        StatisticsSectionContent(
+            senderStatsEnabled: $viewModel.settingsPreference.senderStatsEnabled,
+            showsSectionHeader: showsSectionHeaders,
+            isSenderStatsDisabled: statisticsViewModel != nil
         )
 
         if let statisticsViewModel {
-            StatsLiveSection(
-                settingsViewModel: viewModel,
-                statsViewModel: statisticsViewModel
-            )
+            Section {
+                ParticipantsStatsSection(
+                    settingsViewModel: viewModel,
+                    statsViewModel: statisticsViewModel
+                )
+            } header: {
+                Text("Participant stats".localized)
+            }
         }
     }
 }
@@ -40,81 +102,62 @@ struct StatisticsSectionScreen: View {
 
 /// Pure presentation component for the stats toggle.
 /// Contains no ViewModel references — receives only a binding.
-struct StatisticsSectionView: View {
+struct StatisticsSectionContent: View {
 
     @Binding var senderStatsEnabled: Bool
+    let showsSectionHeader: Bool
+    let isSenderStatsDisabled: Bool
 
     var body: some View {
         Section {
-            Toggle("Enable Stats".localized, isOn: $senderStatsEnabled)
+            statsToggleContent
         } header: {
-            Text("Real-Time Stats".localized)
-        } footer: {
-            Text(
-                "When enabled, real-time network metrics are displayed for the publisher and each subscriber."
-                    .localized)
-        }
-    }
-}
-
-// MARK: - StatsLiveSection
-
-/// Dedicated subview that holds `@ObservedObject` references to both view models,
-/// so SwiftUI re-renders whenever `senderStatsEnabled` or `stats` change.
-///
-/// `StatisticsSectionScreen` cannot hold `statisticsViewModel` as `@ObservedObject`
-/// because it is optional; extracting it here avoids that limitation.
-private struct StatsLiveSection: View {
-
-    @ObservedObject var settingsViewModel: SettingsViewModel
-    @ObservedObject var statsViewModel: StatisticsViewModel
-
-    var body: some View {
-        if settingsViewModel.senderStatsEnabled {
-            realTimeStatsContent.onAppear {
-                statsViewModel.setup()
+            if showsSectionHeader {
+                Text("Stats".localized)
             }
-        } else {
-            DisabledStatsView()
         }
     }
 
     @ViewBuilder
-    private var realTimeStatsContent: some View {
-        Section {
-            PublisherStatsSection(
-                stats: statsViewModel.stats,
-                isExpanded: $statsViewModel.isPublisherExpanded,
-                maxAudioBitrateFormatted: settingsViewModel.maxAudioBitrateFormatted
+    private var statsToggleContent: some View {
+        if isSenderStatsDisabled {
+            LockedToggleRow(
+                title: "Enable extra stats for subscribers".localized,
+                value: senderStatsEnabled
             )
-            SubscribersStatsSection(
-                subscribers: statsViewModel.stats.subscriberStats,
-                expandedSubscribers: $statsViewModel.expandedSubscribers
-            )
-        } header: {
-            Text("Participants".localized)
+        } else {
+            Toggle("Enable extra stats for subscribers".localized, isOn: $senderStatsEnabled)
         }
     }
+
 }
 
-// MARK: - DisabledStatsView
+// MARK: - ParticipantsStatsSection
 
-/// Placeholder shown when stats are disabled, prompting the user to enable them.
-private struct DisabledStatsView: View {
+/// Dedicated subview that holds `@ObservedObject` references to both view models,
+/// so SwiftUI re-renders only the participant details when expansion state changes.
+///
+/// `StatisticsSectionScreen` cannot hold `statisticsViewModel` as `@ObservedObject`
+/// because it is optional; extracting it here avoids that limitation.
+private struct ParticipantsStatsSection: View {
 
+    @ObservedObject var settingsViewModel: SettingsViewModel
+    @ObservedObject var statsViewModel: StatisticsViewModel
+
+    @ViewBuilder
     var body: some View {
-        Section {
-            VStack(spacing: 12) {
-                VERACommonUIAsset.Images.chartSolid.swiftUIImage
-                    .foregroundStyle(.secondary)
-                Text("Enable Stats above to see real-time metrics.".localized)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+        PublisherStatsSection(
+            stats: statsViewModel.stats,
+            isExpanded: $statsViewModel.isPublisherExpanded,
+            maxAudioBitrateFormatted: settingsViewModel.maxAudioBitrateFormatted
+        )
+        .onAppear {
+            statsViewModel.setup()
         }
+        SubscribersStatsSection(
+            subscribers: statsViewModel.stats.subscriberStats,
+            expandedSubscribers: $statsViewModel.expandedSubscribers
+        )
     }
 }
 
@@ -125,7 +168,8 @@ private struct DisabledStatsView: View {
         Form {
             StatisticsSectionScreen(
                 viewModel: .preview,
-                statisticsViewModel: nil
+                statisticsViewModel: nil,
+                showsSectionHeaders: true
             )
         }
         .preferredColorScheme(.dark)
@@ -135,7 +179,8 @@ private struct DisabledStatsView: View {
         Form {
             StatisticsSectionScreen(
                 viewModel: .previewWithStatsEnabled,
-                statisticsViewModel: .placeholder
+                statisticsViewModel: .placeholder,
+                showsSectionHeaders: true
             )
         }
         .preferredColorScheme(.dark)
@@ -145,7 +190,8 @@ private struct DisabledStatsView: View {
         Form {
             StatisticsSectionScreen(
                 viewModel: .preview,
-                statisticsViewModel: .placeholder
+                statisticsViewModel: .placeholder,
+                showsSectionHeaders: true
             )
         }
         .preferredColorScheme(.dark)

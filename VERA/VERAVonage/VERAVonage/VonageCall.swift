@@ -119,6 +119,7 @@ public final class VonageCall: CallFacade {
 
     /// Tracks whether network stats collection is currently active.
     private var isNetworkStatsEnabled = false
+    private var isSubscriberExtraStatsEnabled = false
 
     /// A publisher that emits aggregated network statistics, never fails.
     ///
@@ -818,6 +819,27 @@ public final class VonageCall: CallFacade {
         await updateParticipantsState(state)
     }
 
+    /// Applies live-updatable publisher settings to the current publisher without recreating it.
+    ///
+    /// This is used for settings that Vonage can mutate on the active `OTPublisher`
+    /// instance in place during a call.
+    @MainActor
+    public func updateLivePublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async {
+        guard _callState.value == .connected else { return }
+
+        if let videoBitratePreset = advancedSettings.videoBitratePreset {
+            publisher.otPublisher.videoBitratePreset = videoBitratePreset.otBitratePreset
+        }
+
+        if let maxVideoBitrate = advancedSettings.maxVideoBitrate {
+            publisher.otPublisher.maxVideoBitrate = maxVideoBitrate
+        }
+
+        if let degradationPreference = advancedSettings.degradationPreference {
+            publisher.otPublisher.degradationPreference = degradationPreference.otDegradationPreference
+        }
+    }
+
     // MARK: Network Stats
 
     /// Starts collecting network statistics from the SDK.
@@ -839,6 +861,32 @@ public final class VonageCall: CallFacade {
                 self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
             }
         }
+    }
+
+    /// Requests the extra subscriber-only stats without affecting publisher stats.
+    ///
+    /// This keeps the shared network stats pipeline alive while selectively
+    /// enriching subscriber metrics with RTC stats reports.
+    public func enableSubscriberExtraStats() {
+        guard !isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            for subscriber in subscribers {
+                self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
+            }
+        }
+    }
+
+    /// Stops requesting extra subscriber-only RTC stats.
+    ///
+    /// The underlying network stats collection remains active so publisher
+    /// metrics continue to flow for the Participant Stats UI.
+    public func disableSubscriberExtraStats() {
+        guard isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = false
     }
 
     /// Stops collecting network statistics and clears cached data.

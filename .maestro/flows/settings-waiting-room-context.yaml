@@ -1,0 +1,93 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Open Settings from Waiting Room
+- tapOn:
+    id: "waiting-room-settings-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Assert all editable controls are visible in Waiting Room context
+# Video Section - Always Editable (visible at top)
+- assertVisible:
+    id: "settings-video-bitrate-picker"
+
+- assertVisible:
+    id: "settings-video-degradation-picker"
+
+# Video Section - Context-Dependent (editable in Waiting Room)
+- assertVisible:
+    id: "settings-codec-mode-picker"
+
+- assertVisible:
+    id: "settings-frame-rate-picker"
+
+- assertVisible:
+    id: "settings-resolution-picker"
+
+# Screenshot: Video section with all controls editable
+- takeScreenshot: 01-settings-waiting-room-video-section
+
+# Scroll to reveal Audio Section
+- swipe:
+    direction: "UP"
+    duration: 500
+
+# Audio Section - Context-Dependent (editable in Waiting Room)
+- assertVisible:
+    id: "settings-audio-bitrate-picker"
+
+- assertVisible:
+    id: "settings-opus-dtx-toggle"
+
+- assertVisible:
+    id: "settings-publisher-fallback-toggle"
+
+- assertVisible:
+    id: "settings-subscriber-fallback-toggle"
+
+# Screenshot: Audio section with all controls editable
+- takeScreenshot: 02-settings-waiting-room-audio-section
+
+# Scroll to reveal General Section
+- swipe:
+    direction: "UP"
+    duration: 500
+
+# General Section
+- assertVisible:
+    id: "settings-overlay-stats-toggle"
+
+- assertVisible:
+    id: "settings-reset-defaults-button"
+
+# Screenshot: General section with reset button visible
+- takeScreenshot: 03-settings-waiting-room-general-section

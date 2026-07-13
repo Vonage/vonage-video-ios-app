@@ -35,6 +35,7 @@ struct MeetingRoomComposedView: View {
 
     let meetingRoomFactory: MeetingRoomFactory
     @ObservedObject var viewModel: MeetingRoomViewModel
+    let uiProvider: any MeetingRoomUIProvider
 
     let container: MeetingRoomSDKContainer
     @ObservedObject var pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator
@@ -68,11 +69,7 @@ struct MeetingRoomComposedView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        meetingRoomContent
-    }
-
-    private var meetingRoomContent: some View {
-        meetingRoomFactory.make(viewModel: viewModel)
+        meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
             .background(pictureInPictureAnchor)
             .modifier(
                 ChatSheetModifier(

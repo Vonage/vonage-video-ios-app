@@ -194,6 +194,9 @@ enum SettingsFormatter {
     ///   - count: The total number of layers.
     /// - Returns: A localized label: "Low Quality", "Medium Quality", or "High Quality".
     static func qualityLabel(index: Int, count: Int) -> String {
+        if count == 1 {
+            return "High Quality".localized
+        }
         if count == 2 {
             return index == 0 ? "Low Quality".localized : "High Quality".localized
         }

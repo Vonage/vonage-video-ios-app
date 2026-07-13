@@ -62,6 +62,7 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    private let uiProvider: any MeetingRoomUIProvider
     private var speakingWhileMutedDetector: SpeakingWhileMutedDetector?
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
@@ -84,7 +85,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private var getExternalButtons: () -> [BottomBarButton]
 
     public init(
         roomName: RoomName,
@@ -97,8 +97,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         captionsStatusDataSource: CaptionsStatusDataSource,
         configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping () -> [BottomBarButton],
-        externalButtonsUpdates: AnyPublisher<Void, Never>,
+        uiProvider: any MeetingRoomUIProvider,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
@@ -111,23 +110,24 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.configuration = configuration
         self.meetingRoomNavigation = meetingRoomNavigation
-        self.getExternalButtons = getExternalButtons
+        self.uiProvider = uiProvider
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
-        externalButtonsUpdates
-            .sink { [weak self] in
-                Task { @MainActor [weak self] in
-                    self?.updateExtraButtons()
-                }
-            }
-            .store(in: &cancellables)
     }
 
     @MainActor
     public func loadUI() async {
         guard !initialised else { return }
         initialised = true
+
+        uiProvider.updates
+            .sink { [weak self] in
+                Task { @MainActor [weak self] in
+                    self?.updateExtraButtons()
+                }
+            }
+            .store(in: &cancellables)
 
         do {
             await MediaPermissions.requestPermissionsIfNeeded()
@@ -500,7 +500,7 @@ extension MeetingRoomViewModel {
 
     @MainActor
     fileprivate func updateExtraButtons() {
-        extraButtons = getExternalButtons()
+        extraButtons = uiProvider.bottomBarButtons()
     }
 
 }
