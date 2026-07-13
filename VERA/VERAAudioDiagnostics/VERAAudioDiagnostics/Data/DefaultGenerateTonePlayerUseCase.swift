@@ -12,6 +12,10 @@ import Foundation
 /// audio player generation, separate from playback management.
 public struct DefaultGenerateTonePlayerUseCase: GenerateTonePlayerUseCase {
 
+    /// Creates a new instance of the tone player use case.
+    ///
+    /// This initializer is intentionally empty as the use case is stateless and
+    /// generates audio data programmatically without requiring any dependencies.
     public init() {}
 
     /// Creates an AVAudioPlayer that plays a 1-second 440Hz sine wave tone.
