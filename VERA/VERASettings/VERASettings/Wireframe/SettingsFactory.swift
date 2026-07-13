@@ -66,10 +66,10 @@ public final class SettingsFactory {
     /// lazily via an internal closure, falling back to a fresh repository if the factory
     /// is deallocated.
     ///
-    /// - Returns: A configured ``SettingsToolbarButton`` for the waiting room.
+    /// - Returns: A configured ``SettingsWaitingRoomButton`` for the waiting room.
     @MainActor
-    public func makeWaitingRoomButton() -> SettingsToolbarButton {
-        SettingsToolbarButton(makeSettingsView: { [weak self] in
+    public func makeWaitingRoomButton() -> SettingsWaitingRoomButton {
+        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
             guard let self else {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
