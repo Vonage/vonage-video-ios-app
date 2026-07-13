@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import OSLog
 import VERAChat
 import VERAVonage
 
@@ -20,6 +21,8 @@ import VERAVonage
 /// - Important: Set `channel` before sending messages; otherwise throws ``VonageChatPlugin/Error/missingChannel``.
 /// - SeeAlso: ``VonagePlugin``, ``VonageSignalHandler``, ``VonageSignalEmitter``, ``VonageSignal``, ``OutgoingSignal``
 public final class VonageChatPlugin: VonagePlugin, VonageSignalHandler, VonageSignalEmitter {
+
+    private static let logger = Logger(subsystem: "com.vonage.vera", category: "Chat")
 
     /// Supported signal types for this plugin.
     public enum SignalType: String {
@@ -62,7 +65,7 @@ public final class VonageChatPlugin: VonagePlugin, VonageSignalHandler, VonageSi
             let chatMessage = try signal.toChatMessage()
             repository.addMessage(chatMessage)
         } catch {
-            print(error.localizedDescription)
+            Self.logger.error("\(error.localizedDescription, privacy: .public)")
         }
     }
 
