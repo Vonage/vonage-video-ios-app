@@ -63,6 +63,21 @@
     /// The native picker handles Speaker, Receiver, AirPlay, Bluetooth automatically.
     private struct AudioRoutePickerRow: UIViewRepresentable {
 
+        /// Creates the UIView hierarchy for the audio route picker row.
+        ///
+        /// This method constructs a custom container view that overlays UI elements
+        /// on top of an invisible `AVRoutePickerView` to create a cohesive design
+        /// while maintaining native audio routing functionality.
+        ///
+        /// - Parameter context: The representable context (unused in this implementation)
+        /// - Returns: A configured container view with:
+        ///   - Speaker icon on the left
+        ///   - "Audio Output" label in the center
+        ///   - AirPlay icon on the right
+        ///   - Invisible `AVRoutePickerView` covering the entire area for touch handling
+        ///
+        /// The `AVRoutePickerView` is made invisible by setting its tint colors to clear,
+        /// but it still handles user interactions and presents the native audio routing sheet.
         func makeUIView(context: Context) -> UIView {
             let container = UIView()
             container.backgroundColor = .clear
@@ -127,6 +142,15 @@
             return container
         }
 
+        /// Updates the UIView when SwiftUI state changes.
+        ///
+        /// This method is intentionally empty as the `AudioRoutePickerRow` is stateless
+        /// and doesn't need to respond to external state changes. The `AVRoutePickerView`
+        /// automatically updates its internal state when the system audio route changes.
+        ///
+        /// - Parameters:
+        ///   - uiView: The container view created by `makeUIView(context:)`
+        ///   - context: The representable context (unused in this implementation)
         func updateUIView(_ uiView: UIView, context: Context) {}
     }
 
