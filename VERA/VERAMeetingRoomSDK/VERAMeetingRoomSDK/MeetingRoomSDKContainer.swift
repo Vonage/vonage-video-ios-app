@@ -81,7 +81,7 @@ final class MeetingRoomSDKContainer {
     lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
         checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
         checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
-        isPictureInPictureEnabled: true
+        isPictureInPictureEnabled: configuration.allowPictureInPicture
     )
 
     lazy var publisherRepository: any PublisherRepository = {
