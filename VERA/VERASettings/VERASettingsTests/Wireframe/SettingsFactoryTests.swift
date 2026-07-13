@@ -15,7 +15,7 @@ struct SettingsFactoryTests {
 
     @Test("makeWaitingRoomButton has correct accessibility identifier")
     func makeWaitingRoomButtonHasCorrectAccessibilityID() {
-        #expect(SettingsToolbarButton.accessibilityID == "WaitingRoom.SettingsButton")
+        #expect(SettingsAccessibilityID.waitingRoomSettingsButton == "waiting-room-settings-button")
     }
 
     // MARK: - makeMeetingRoomViewModels

@@ -15,7 +15,7 @@ struct AudioDiagnosticsViewSnapshotTests {
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
-    private let snapshotPrefix = "AudioDiagnosticsDialog"
+    private let snapshotPrefix = "AudioDiagnosticsView"
 
     // MARK: - Basic Layout Tests
 

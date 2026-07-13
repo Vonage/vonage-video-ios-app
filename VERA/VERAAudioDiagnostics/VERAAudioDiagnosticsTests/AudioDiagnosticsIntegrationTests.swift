@@ -56,7 +56,6 @@
             let viewModel1 = factory.makeViewModel()
             let viewModel2 = factory.makeViewModel()
             let waitingRoomButton = factory.makeWaitingRoomButton()
-            let selectorButton = factory.makeWaitingRoomSelectorButton()
             let meetingRoomButton = factory.makeMeetingRoomButton {}
 
             // All components should use the same service
@@ -74,7 +73,6 @@
 
             // All components should be properly created
             #expect(waitingRoomButton is AudioDiagnosticsWaitingRoomButton)
-            #expect(selectorButton is AudioDiagnosticsButton)
             #expect(meetingRoomButton is AudioDiagnosticsMeetingRoomButton)
         }
 
@@ -287,11 +285,9 @@
 
             // Components should be creatable
             let waitingRoomButton = factory.makeWaitingRoomButton()
-            let selectorButton = factory.makeWaitingRoomSelectorButton()
             let meetingRoomButton = factory.makeMeetingRoomButton {}
 
             #expect(waitingRoomButton is AudioDiagnosticsWaitingRoomButton)
-            #expect(selectorButton is AudioDiagnosticsButton)
             #expect(meetingRoomButton is AudioDiagnosticsMeetingRoomButton)
         }
     }

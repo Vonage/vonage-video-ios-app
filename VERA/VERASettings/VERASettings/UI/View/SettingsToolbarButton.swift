@@ -5,10 +5,12 @@
 import SwiftUI
 import VERACommonUI
 
+/// Closure that creates and returns a configured ``SettingsView``
+public typealias OnLaunchView = () -> SettingsView
+
 /// Icon-only settings button for display in the navigation toolbar.
 ///
-/// Unlike ``SettingsWaitingRoomButton`` (a circular icon button with background),
-/// this button renders only the `gearshape.fill` SF Symbol with no circular
+/// This button renders only the `gearshape.fill` SF Symbol with no circular
 /// background, border, or fill color. Designed for use in SwiftUI's `.toolbar`
 /// modifier where minimal, icon-only buttons are preferred.
 ///
@@ -35,9 +37,6 @@ public struct SettingsToolbarButton: View {
     /// Controls the presentation state of the settings sheet.
     @State private var showSettings = false
 
-    /// Accessibility identifier for the settings toolbar button.
-    public static let accessibilityID = "WaitingRoom.SettingsButton"
-
     /// Creates a new toolbar settings button.
     ///
     /// - Parameter makeSettingsView: Optional closure that creates the settings view.
@@ -52,7 +51,7 @@ public struct SettingsToolbarButton: View {
                 .font(.title2)
                 .foregroundColor(.primary)
         }
-        .accessibilityIdentifier(Self.accessibilityID)
+        .accessibilityIdentifier(SettingsAccessibilityID.waitingRoomSettingsButton)
         .sheet(isPresented: $showSettings) {
             makeSettingsView?()
                 .presentationDetents([.large])
@@ -82,27 +81,5 @@ public struct SettingsToolbarButton: View {
         }
         .frame(width: 80, height: 80)
         .preferredColorScheme(.dark)
-    }
-
-    #Preview("Comparison") {
-        VStack(spacing: 40) {
-            VStack(spacing: 8) {
-                SettingsToolbarButton {
-                    SettingsView(viewModel: .preview)
-                }
-                Text("Toolbar Style")
-                    .font(.caption)
-            }
-
-            VStack(spacing: 8) {
-                SettingsWaitingRoomButton {
-                    SettingsView(viewModel: .preview)
-                }
-                Text("Circular Style")
-                    .font(.caption)
-            }
-        }
-        .padding()
-        .background(Color.gray)
     }
 #endif

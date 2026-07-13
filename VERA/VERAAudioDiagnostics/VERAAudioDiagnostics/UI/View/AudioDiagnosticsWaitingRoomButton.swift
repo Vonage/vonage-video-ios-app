@@ -1,21 +1,18 @@
 //
-//  Created by Vonage on 06/07/26.
+//  Created by Vonage on 08/07/26.
 //
 
 #if canImport(UIKit)
     import SwiftUI
     import VERACommonUI
 
-    /// Closure that creates and returns a configured audio diagnostics view with presentation modifiers.
-    ///
-    /// Used by ``AudioDiagnosticsWaitingRoomButton`` to lazily instantiate the view
-    /// when the user taps the button.
     public typealias OnLaunchAudioDiagnostics = () -> AnyView
 
-    /// Circular speaker button shown in the waiting room's trailing button row.
+    /// Selector-styled button shown next to the Camera selector in the waiting room.
     ///
-    /// Tapping opens the ``AudioDiagnosticsView`` in a sheet modal presentation.
-    /// Uses ``CircularControlImageButton`` from VERACommonUI for consistent styling.
+    /// Unlike ``AudioDiagnosticsWaitingRoomButton`` (a circular icon button), this button
+    /// matches the text + icon `Label` style used by the Camera selector, with no dropdown
+    /// menu. Tapping opens the ``AudioDiagnosticsView`` directly in a sheet.
     ///
     /// The button creates the view lazily via the `makeView` closure,
     /// ensuring resources are allocated only when needed.
@@ -23,27 +20,31 @@
 
         /// Closure for creating the audio diagnostics view when the button is tapped.
         /// If `nil`, the button will show the sheet but with no content.
-        private let makeDialog: OnLaunchAudioDiagnostics?
+        private let makeView: OnLaunchAudioDiagnostics?
 
         /// Controls the presentation state of the view sheet.
-        @State private var showDialog = false
+        @State private var showView = false
 
         /// Creates a new waiting room audio diagnostics button.
         ///
-        /// - Parameter makeDialog: Optional closure that creates the view.
-        ///                         Typically provided by ``AudioDiagnosticsFactory``.
-        public init(makeDialog: OnLaunchAudioDiagnostics? = nil) {
-            self.makeDialog = makeDialog
+        /// - Parameter makeView: Optional closure that creates the view.
+        ///                       Typically provided by ``AudioDiagnosticsFactory``.
+        public init(makeView: OnLaunchAudioDiagnostics? = nil) {
+            self.makeView = makeView
         }
 
         public var body: some View {
-            CircularControlImageButton(
-                isActive: true,
-                image: Image(systemName: "speaker.wave.2.fill"),
-                action: { showDialog = true }
-            )
-            .sheet(isPresented: $showDialog) {
-                makeDialog?()
+            Button(action: { showView = true }) {
+                Label {
+                    Text("Audio", bundle: .module)
+                        .adaptiveFont(.bodyBase)
+                } icon: {
+                    VERACommonUIAsset.Images.audioMidLine.swiftUIImage
+                }
+            }
+            .accessibilityIdentifier(AudioDiagnosticsAccessibilityID.waitingRoomButton)
+            .sheet(isPresented: $showView) {
+                makeView?()
             }
         }
     }
@@ -62,6 +63,7 @@
                     .opaquePresentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
                 )
             }
+            .padding()
             .preferredColorScheme(.dark)
         }
     #endif

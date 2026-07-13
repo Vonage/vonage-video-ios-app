@@ -75,8 +75,8 @@
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-            let button1 = sut.makeWaitingRoomSelectorButton()
-            let button2 = sut.makeWaitingRoomSelectorButton()
+            let button1 = sut.makeWaitingRoomButton()
+            let button2 = sut.makeWaitingRoomButton()
 
             // SwiftUI Views are value types, verify they can be created independently
             #expect(type(of: button1) == type(of: button2))
@@ -87,10 +87,10 @@
             let service = MockSpeakerTestService()
             let sut = AudioDiagnosticsFactory(speakerTestService: service)
 
-            let button = sut.makeWaitingRoomSelectorButton()
+            let button = sut.makeWaitingRoomButton()
 
             // Verify button type is correct
-            #expect(button is AudioDiagnosticsButton)
+            #expect(button is AudioDiagnosticsWaitingRoomButton)
         }
 
         @Test("AudioDiagnosticsButton uses correct accessibility identifier from enum")
@@ -173,24 +173,6 @@
             let viewModel1 = sut.makeViewModel()
             let viewModel2 = sut.makeViewModel()
 
-            viewModel1.testSpeaker()
-            viewModel2.testSpeaker()
-
-            #expect(service.playTestSoundCallCount == 2)
-        }
-
-        @Test("factory maintains service reference across multiple calls")
-        func factoryMaintainsServiceReference() {
-            let service = MockSpeakerTestService()
-            let sut = AudioDiagnosticsFactory(speakerTestService: service)
-
-            // Create multiple components
-            let viewModel1 = sut.makeViewModel()
-            let viewModel2 = sut.makeViewModel()
-            let button1 = sut.makeWaitingRoomButton()
-            let button2 = sut.makeWaitingRoomSelectorButton()
-
-            // Test that all components work with the same service
             viewModel1.testSpeaker()
             viewModel2.testSpeaker()
 

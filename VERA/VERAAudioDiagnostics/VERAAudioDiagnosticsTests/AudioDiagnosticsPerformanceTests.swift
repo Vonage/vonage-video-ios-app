@@ -43,7 +43,6 @@
             for _ in 0..<50 {
                 _ = factory.makeViewModel()
                 _ = factory.makeWaitingRoomButton()
-                _ = factory.makeWaitingRoomSelectorButton()
                 _ = factory.makeMeetingRoomButton {}
             }
 

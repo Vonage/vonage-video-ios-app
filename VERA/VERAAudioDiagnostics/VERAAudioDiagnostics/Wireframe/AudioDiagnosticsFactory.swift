@@ -67,35 +67,7 @@
         /// - Returns: A configured waiting room audio diagnostics button with circular style.
         @MainActor
         public func makeWaitingRoomButton() -> AudioDiagnosticsWaitingRoomButton {
-            AudioDiagnosticsWaitingRoomButton(makeDialog: { [weak self] in
-                guard let self else {
-                    // Fallback to null service if factory is deallocated
-                    let fallbackViewModel = AudioOutputControlViewModel(
-                        speakerTestService: NullSpeakerTestService()
-                    )
-                    return AnyView(
-                        AudioDiagnosticsView(viewModel: fallbackViewModel)
-                            .presentationDetents([.medium, .large])
-                            .presentationDragIndicator(.hidden)
-                            .opaquePresentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
-                    )
-                }
-                return self.makeConfiguredView()
-            })
-        }
-
-        // MARK: - Waiting Room Selector Button
-
-        /// Creates the text + icon button shown next to the Camera selector in the waiting room.
-        ///
-        /// Unlike ``makeWaitingRoomButton()`` (a circular icon button), this button matches
-        /// the `Label` style used by the Camera selector, with no dropdown menu.
-        /// Falls back to a null service if the factory is deallocated.
-        ///
-        /// - Returns: A configured waiting room audio diagnostics button with label style.
-        @MainActor
-        public func makeWaitingRoomSelectorButton() -> AudioDiagnosticsButton {
-            AudioDiagnosticsButton(makeView: { [weak self] in
+            .init(makeView: { [weak self] in
                 guard let self else {
                     // Fallback to null service if factory is deallocated
                     let fallbackViewModel = AudioOutputControlViewModel(
@@ -123,7 +95,7 @@
         public func makeMeetingRoomButton(
             onShowDialog: @escaping OnShowAudioDiagnostics
         ) -> AudioDiagnosticsMeetingRoomButton {
-            AudioDiagnosticsMeetingRoomButton(onShowDialog: onShowDialog)
+            .init(onShowDialog: onShowDialog)
         }
 
         /// Creates an ``AudioDiagnosticsView`` backed by a fresh view model.
@@ -134,7 +106,7 @@
         @MainActor
         private func makeView() -> AudioDiagnosticsView {
             let viewModel = makeViewModel()
-            return AudioDiagnosticsView(viewModel: viewModel)
+            return .init(viewModel: viewModel)
         }
     }
 

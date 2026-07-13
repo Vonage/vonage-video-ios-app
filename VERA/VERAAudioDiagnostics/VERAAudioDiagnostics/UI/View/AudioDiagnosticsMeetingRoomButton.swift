@@ -51,11 +51,9 @@
 
     #if DEBUG
         #Preview {
-            AudioDiagnosticsMeetingRoomButton {
-
-            }
-            .padding()
-            .preferredColorScheme(.dark)
+            AudioDiagnosticsMeetingRoomButton()
+                .padding()
+                .preferredColorScheme(.dark)
         }
     #endif
 

@@ -1,26 +1,26 @@
 //
-//  Created by Vonage on 5/3/26.
+//  Created by Vonage on 08/07/26.
 //
 
 import SnapshotTesting
 import SwiftUI
 import Testing
 
-@testable import VERASettings
+@testable import VERAAudioDiagnostics
 
-@Suite("SettingsMeetingRoomButton Snapshot Tests")
+@Suite("AudioDiagnosticsMeetingRoomButton Snapshot Tests")
 @MainActor
-struct SettingsMeetingRoomButtonSnapshotTests {
+struct AudioDiagnosticsMeetingRoomButtonSnapshotTests {
 
     // MARK: - Test Configuration
 
     private let isRecording = false  // Set to true to record new snapshots
-    private let snapshotPrefix = "SettingsMeetingRoomButton"
+    private let snapshotPrefix = "AudioDiagnosticsMeetingRoomButton"
 
     // MARK: - Color Scheme Tests
 
     @Test(
-        "SettingsMeetingRoomButton - Color Schemes",
+        "AudioDiagnosticsMeetingRoomButton - Color Schemes",
         arguments: [
             ("Light", ColorScheme.light),
             ("Dark", ColorScheme.dark),
@@ -41,7 +41,7 @@ struct SettingsMeetingRoomButtonSnapshotTests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT() -> SettingsMeetingRoomButton {
-        SettingsMeetingRoomButton(onShowSettings: {})
+    private func makeSUT() -> AudioDiagnosticsMeetingRoomButton {
+        AudioDiagnosticsMeetingRoomButton()
     }
 }

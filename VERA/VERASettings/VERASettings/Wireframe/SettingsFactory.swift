@@ -68,8 +68,9 @@ public final class SettingsFactory {
     ///
     /// - Returns: A configured ``SettingsWaitingRoomButton`` for the waiting room.
     @MainActor
-    public func makeWaitingRoomButton() -> SettingsWaitingRoomButton {
-        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
+    public func makeWaitingRoomButton() -> SettingsToolbarButton {
+        SettingsToolbarButton(makeSettingsView: {
+            [weak self] in
             guard let self else {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
@@ -77,7 +78,8 @@ public final class SettingsFactory {
                 )
             }
             return self.makeSettingsView()
-        })
+        }
+        )
     }
 
     // MARK: - Meeting Room Button

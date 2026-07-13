@@ -164,7 +164,7 @@ struct VERAApp: App {
             #if AUDIODIAGNOSTICS_ENABLED
                 // Create audio output test button (same visual style as the Camera selector)
                 // to be displayed next to the Camera selector in the waiting room.
-                let audioButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomSelectorButton()
+                let audioButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomButton()
                 waitingRoomViewModel.audioOutputTestButton = ViewHolder(id: "audioOutputTest") {
                     audioButton
                 }

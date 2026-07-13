@@ -242,7 +242,7 @@ struct StatsOverlayViewModelTests {
         let text = viewModel.statsText
 
         // Should contain audio info
-        #expect(text.contains("opus"))
+        #expect(text.contains("(opus)"))
         #expect(text.contains("100"))
 
         _ = repository
