@@ -269,4 +269,41 @@ struct DefaultSpeakerTestServiceTests {
         // Should handle concurrent access without crashing
         #expect(mockUseCase.callCount >= 1)
     }
+
+    // MARK: - AVAudioPlayerDelegate Tests
+
+    @Test("audioPlayerDidFinishPlaying does not crash with successful or failed flag")
+    func audioPlayerDidFinishPlayingDoesNotCrash() throws {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+
+        sut.audioPlayerDidFinishPlaying(player, successfully: true)
+        sut.audioPlayerDidFinishPlaying(player, successfully: false)
+    }
+
+    @Test("audioPlayerDecodeErrorDidOccur does not crash with or without an error")
+    func audioPlayerDecodeErrorDidOccurDoesNotCrash() throws {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+
+        sut.audioPlayerDecodeErrorDidOccur(player, error: nil)
+        sut.audioPlayerDecodeErrorDidOccur(player, error: NSError(domain: "TestDomain", code: -1))
+    }
+
+    @Test("audioPlayerDidFinishPlaying emits zero level through publisher")
+    func audioPlayerDidFinishPlayingEmitsZeroLevel() async throws {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+
+        sut.playTestSound()
+
+        var receivedLevels: [Float] = []
+        let cancellable = sut.audioLevelPublisher.sink { receivedLevels.append($0) }
+
+        sut.audioPlayerDidFinishPlaying(player, successfully: true)
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        #expect(receivedLevels.contains(0.0))
+        cancellable.cancel()
+    }
 }
