@@ -4,7 +4,6 @@
 
 import Combine
 import Foundation
-import VERADomain
 import os.log
 
 /// Constants used throughout the settings system.
