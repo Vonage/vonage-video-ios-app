@@ -16,7 +16,10 @@ public struct DefaultGenerateTonePlayerUseCase: GenerateTonePlayerUseCase {
     ///
     /// This initializer is intentionally empty as the use case is stateless and
     /// generates audio data programmatically without requiring any dependencies.
-    public init() {}
+    public init() {
+        // Intentionally empty: this use case is stateless and generates audio data
+        // programmatically without requiring any injected dependencies.
+    }
 
     /// Creates an AVAudioPlayer that plays a 1-second 440Hz sine wave tone.
     public func callAsFunction() -> AVAudioPlayer? {

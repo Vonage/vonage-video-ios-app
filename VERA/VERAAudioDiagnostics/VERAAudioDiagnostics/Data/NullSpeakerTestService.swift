@@ -29,19 +29,25 @@ public struct NullSpeakerTestService: SpeakerTestService {
     ///
     /// This initializer is intentionally empty as no setup or dependencies
     /// are required for a no-op implementation.
-    public init() {}
+    public init() {
+        // Intentionally empty: no setup or dependencies are required for a no-op implementation.
+    }
 
     /// No-op implementation that safely ignores the play request.
     ///
     /// This method can be called multiple times without side effects and
     /// will never produce audio output or throw exceptions.
-    public func playTestSound() {}
+    public func playTestSound() {
+        // Intentionally empty: no-op implementation produces no audio output.
+    }
 
     /// No-op implementation that safely ignores the stop request.
     ///
     /// This method can be called multiple times without side effects,
     /// even if no sound is currently playing.
-    public func stopTestSound() {}
+    public func stopTestSound() {
+        // Intentionally empty: no-op implementation has nothing to stop.
+    }
 
     /// Returns an empty publisher that never emits audio level values.
     ///

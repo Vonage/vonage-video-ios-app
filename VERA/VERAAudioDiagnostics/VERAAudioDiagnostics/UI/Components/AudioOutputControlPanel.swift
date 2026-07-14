@@ -151,7 +151,10 @@
         /// - Parameters:
         ///   - uiView: The container view created by `makeUIView(context:)`
         ///   - context: The representable context (unused in this implementation)
-        func updateUIView(_ uiView: UIView, context: Context) {}
+        func updateUIView(_ uiView: UIView, context: Context) {
+            // Intentionally empty: AVRoutePickerView manages its own state internally
+            // and requires no updates from SwiftUI after initial configuration.
+        }
     }
 
     // MARK: - Play/Stop Button
