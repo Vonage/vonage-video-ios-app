@@ -192,6 +192,19 @@ jobs:
             -resultBundlePath DerivedData/VERAFeedbackTests-macOS.xcresult \
             $XCODE_COMMON_FLAGS | xcpretty
 
+      - name: Run VERAAudioDiagnosticsTests (macOS)
+        id: audiodiagnostics-tests-macos
+        run: |
+          echo "🧪 Running VERAAudioDiagnosticsTests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioDiagnosticsTests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAAudioDiagnosticsTests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
+
       - name: Preboot iOS Simulator
         run: |
           set -euo pipefail
@@ -742,6 +755,7 @@ jobs:
             DerivedData/VERAScreenShareTests-macOS.xcresult
             DerivedData/VERASettingsTests-macOS.xcresult
             DerivedData/VERAFeedbackTests-macOS.xcresult
+            DerivedData/VERAAudioDiagnosticsTests-macOS.xcresult
             DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
             DerivedData/VERAVonageTests-iOS.xcresult
             DerivedData/VERACoreSnapshotTests-iOS.xcresult
