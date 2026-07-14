@@ -17,7 +17,7 @@ public class WaitingRoomFactory {
         cameraPreviewProviderRepository: CameraPreviewProviderRepository,
         cameraDevicesRepository: CameraDevicesRepository,
         userRepository: UserRepository,
-        advancedSettingsUseCase: PublisherAdvancedSettingsUseCase,
+        advancedSettingsUseCase: PublisherAdvancedSettingsUseCase
     ) {
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
         self.cameraDevicesRepository = cameraDevicesRepository
@@ -43,8 +43,7 @@ public class WaitingRoomFactory {
             checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
             userRepository: userRepository,
-            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName)
-        )
+            waitingRoomNavigation: WaitingRoomNavigation(actionHandler: onActionHandler, roomName: roomName))
         return (make(viewModel: viewModel), viewModel)
     }
 

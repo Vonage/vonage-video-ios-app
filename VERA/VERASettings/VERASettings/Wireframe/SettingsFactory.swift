@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERADomain
 
 /// Constants used by the settings factory for configuring view models.
 private enum SettingsConstants {
