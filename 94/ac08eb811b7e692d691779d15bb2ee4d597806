@@ -1,0 +1,21 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  s_9d51cd27e66458::t_dc4a05c6127e98 25-27
+VERA/VERAVonage/VERAVonage/PictureInPicture/YUVToARGBAccelerator.swift
+  s_9d51cd27e66458::t_9c046a44e22b3a 39-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.11",
+  "base_commit_sha": "94ac08eb811b7e692d691779d15bb2ee4d597806",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
