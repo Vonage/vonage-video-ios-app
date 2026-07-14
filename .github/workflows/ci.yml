@@ -235,6 +235,31 @@ jobs:
             -parallel-testing-enabled NO \
             $XCODE_COMMON_FLAGS | xcpretty
 
+      - name: Run VERAAudioDiagnosticsSnapshotTests (iOS Simulator)
+        id: audiodiagnostics-snapshot-tests
+        timeout-minutes: 15
+        run: |
+          echo "📸 Building VERAAudioDiagnosticsSnapshotTests on iOS Simulator"
+          xcodebuild build-for-testing \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioDiagnosticsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
+
+          echo "📸 Running VERAAudioDiagnosticsSnapshotTests on iOS Simulator"
+          xcodebuild test-without-building \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAAudioDiagnosticsSnapshotTests \
+            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAAudioDiagnosticsSnapshotTests-iOS.xcresult \
+            -parallel-testing-enabled NO \
+            $XCODE_COMMON_FLAGS | xcpretty
+
       - name: Run VERAAudioEffectsTests (iOS Simulator)
         id: audioeffects-tests-ios
         timeout-minutes: 15
@@ -782,6 +807,7 @@ jobs:
             DerivedData/VERAFeedbackTests-macOS.xcresult
             DerivedData/VERAAudioDiagnosticsTests-macOS.xcresult
             DerivedData/VERAAudioDiagnosticsTests-iOS.xcresult
+            DerivedData/VERAAudioDiagnosticsSnapshotTests-iOS.xcresult
             DerivedData/VERAVonageScreenSharePluginTests-iOS.xcresult
             DerivedData/VERAVonageTests-iOS.xcresult
             DerivedData/VERACoreSnapshotTests-iOS.xcresult
