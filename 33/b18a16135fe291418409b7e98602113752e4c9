@@ -1,0 +1,20 @@
+.github/workflows/ci.yml
+  s_83569f883eb176::t_98c0dc3d17a141 758
+  s_83569f883eb176::t_5ecd15ee9cd7ae 195-207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "33b18a16135fe291418409b7e98602113752e4c9",
+  "prompts": {},
+  "sessions": {
+    "s_83569f883eb176": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "caff5221-b085-4891-8c80-0e9e98e5461e",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
