@@ -2,6 +2,7 @@
 //  Created by Vonage on 29/6/26.
 //
 
+import AVFoundation
 import Foundation
 import Testing
 import UIKit
@@ -104,5 +105,30 @@ struct PictureInPictureVideoRendererTests {
         sut.updatePlaceholderName("Alice")
 
         #expect(sut.isPlaceholderActive == false)
+    }
+
+    // MARK: - Placeholder rendering
+
+    @Test("Active placeholder renders frames to the inline and PiP layers")
+    func placeholderRendersFrames() async {
+        let sut = PictureInPictureVideoRenderer()
+        sut.pipBufferDisplayLayer = AVSampleBufferDisplayLayer()
+
+        sut.startPlaceholder(name: "Zaphod")
+        // The placeholder timer enqueues a drawn avatar frame every 200ms; wait for a couple ticks.
+        try? await Task.sleep(for: .milliseconds(500))
+        sut.stopPlaceholder()
+
+        #expect(sut.renderedFrameCount > 0)
+    }
+
+    @Test("Renderer lays out its inline display layer to its bounds")
+    func layoutUpdatesInlineLayer() {
+        let sut = PictureInPictureVideoRenderer()
+        sut.frame = CGRect(x: 0, y: 0, width: 320, height: 180)
+
+        sut.layoutSubviews()
+
+        #expect(sut.inlineDisplayLayer.frame == sut.bounds)
     }
 }
