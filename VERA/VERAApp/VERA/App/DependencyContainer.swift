@@ -46,11 +46,17 @@ final class DependencyContainer {
 
     lazy var userDefaults = UserDefaults(suiteName: EnvironmentConstants.veraAppGroupIdentifier) ?? .standard
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
-        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),
-        isPictureInPictureEnabled: appConfig.meetingRoomSettings.allowPictureInPicture
-    )
+    lazy var publisherFactory: any PublisherFactory = {
+        let camera = DefaultCheckCameraAuthorizationStatusUseCase()
+        let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
+        return appConfig.meetingRoomSettings.allowPictureInPicture
+            ? PictureInPictureVonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+            : VonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+    }()
 
     lazy var appConfig = AppConfig()
 

@@ -41,10 +41,9 @@ final class PictureInPictureParticipantSelector {
         return remoteParticipants.first(where: \.isCameraEnabled)?.id ?? stickyParticipant.id
     }
 
-    /// PiP target while Picture-in-Picture is active: follow the detected active speaker.
-    ///
-    /// Falls back to the current target when there is no active speaker (avoids thrashing back to
-    /// the sticky default when everyone goes quiet), and finally to the standard sticky selection.
+    /// PiP target while active: follow the active speaker. When nobody is speaking, keep the current
+    /// remote target; but if PiP is on the local participant (solo call), switch to the first remote
+    /// that joins instead of waiting for them to speak.
     func activeSpeakerPipTargetId(for state: ParticipantsState, currentPipTargetId: String?) -> String? {
         if let activeId = state.activeParticipantId,
             state.participants.contains(where: { $0.id == activeId && !$0.isScreenshare })
@@ -53,8 +52,7 @@ final class PictureInPictureParticipantSelector {
         }
 
         if let currentPipTargetId,
-            currentPipTargetId == state.localParticipant?.id
-                || state.participants.contains(where: { $0.id == currentPipTargetId })
+            state.participants.contains(where: { $0.id == currentPipTargetId })
         {
             return currentPipTargetId
         }

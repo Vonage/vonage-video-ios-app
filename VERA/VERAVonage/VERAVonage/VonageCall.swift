@@ -204,8 +204,10 @@ public final class VonageCall: CallFacade {
         self.publisher = publisher
         self.publisherRepository = publisherRepository
         self.statsCollector = statsCollector
-        self.subscriberFactory = VonageSubscriberFactory(
-            isPictureInPictureEnabled: publisher is PictureInPictureVonagePublisher)
+        self.subscriberFactory =
+            publisher is PictureInPictureVonagePublisher
+            ? PictureInPictureVonageSubscriberFactory()
+            : VonageSubscriberFactory()
     }
 
     /// Sets up the call by configuring session handlers and initializing observers.

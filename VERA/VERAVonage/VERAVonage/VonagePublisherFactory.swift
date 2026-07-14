@@ -16,7 +16,12 @@ import VERADomain
 /// ``VERAPublisher``.
 ///
 /// - SeeAlso: ``VonagePublisher``, ``VERAPublisher``, ``PublisherSettings``
-public final class VonagePublisherFactory: PublisherFactory {
+/// Creates local publishers that render through OpenTok's native view.
+///
+/// Subclass and override ``makePublisher(_:transformerFactory:initialDimensions:)`` to vary the
+/// publisher family; see ``PictureInPictureVonagePublisherFactory``. The composition root picks the
+/// concrete factory, so the PiP-vs-native choice is made once rather than branched on a flag.
+public class VonagePublisherFactory: PublisherFactory {
 
     /// Errors that can occur while creating an Vonage publisher.
     enum Error: Swift.Error {
@@ -27,20 +32,16 @@ public final class VonagePublisherFactory: PublisherFactory {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
 
-    private let isPictureInPictureEnabled: Bool
-
     /// This factory returns the specific Vonage audio or video transformers
     lazy var vonageTransformerFactory = VonageTransformerFactory()
 
     /// Creates a new `VonagePublisherFactory`.
     public init(
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
-        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
-        isPictureInPictureEnabled: Bool = false
+        checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
     ) {
         self.checkCameraAuthorizationStatusUseCase = checkCameraAuthorizationStatusUseCase
         self.checkMicrophoneAuthorizationStatusUseCase = checkMicrophoneAuthorizationStatusUseCase
-        self.isPictureInPictureEnabled = isPictureInPictureEnabled
     }
 
     /// Builds a `VERAPublisher` backed by `VonagePublisher`.
@@ -122,18 +123,37 @@ public final class VonagePublisherFactory: PublisherFactory {
             settings.advancedSettings?.videoResolution?.dimensions
             ?? VideoDimensions.initial
 
-        let publisher =
-            isPictureInPictureEnabled
-            ? PictureInPictureVonagePublisher(
-                publisher: otPublisher,
-                transformerFactory: vonageTransformerFactory,
-                initialDimensions: initialDimensions)
-            : VonagePublisher(
-                publisher: otPublisher,
-                transformerFactory: vonageTransformerFactory,
-                initialDimensions: initialDimensions)
+        let publisher = makePublisher(
+            otPublisher,
+            transformerFactory: vonageTransformerFactory,
+            initialDimensions: initialDimensions)
         otPublisher.delegate = publisher
         return publisher
+    }
+
+    func makePublisher(
+        _ otPublisher: OTPublisher,
+        transformerFactory: VERATransformerFactory,
+        initialDimensions: CGSize
+    ) -> VonagePublisher {
+        VonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: transformerFactory,
+            initialDimensions: initialDimensions)
+    }
+}
+
+/// Creates local publishers that render through the PiP-capable custom renderer.
+public final class PictureInPictureVonagePublisherFactory: VonagePublisherFactory {
+    override func makePublisher(
+        _ otPublisher: OTPublisher,
+        transformerFactory: VERATransformerFactory,
+        initialDimensions: CGSize
+    ) -> VonagePublisher {
+        PictureInPictureVonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: transformerFactory,
+            initialDimensions: initialDimensions)
     }
 }
 

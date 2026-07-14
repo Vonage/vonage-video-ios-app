@@ -154,6 +154,25 @@ struct PictureInPictureParticipantSelectorTests {
         #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "gone") == "a")
     }
 
+    @Test("First remote joining while PiP shows the local participant takes over immediately")
+    func firstRemoteReplacesLocalTarget() {
+        let sut = PictureInPictureParticipantSelector()
+        let local = makeParticipant(id: "local", isRemote: false)
+        let state = makeState(local: local, remotes: [makeParticipant(id: "remote", joinedAt: 1)])
+
+        // No active speaker yet — the newly joined remote must still win over the local self-view.
+        #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "local") == "remote")
+    }
+
+    @Test("Solo call keeps the local participant as the in-PiP target")
+    func soloCallKeepsLocalTargetInPip() {
+        let sut = PictureInPictureParticipantSelector()
+        let local = makeParticipant(id: "local", isRemote: false)
+        let state = makeState(local: local, remotes: [])
+
+        #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "local") == "local")
+    }
+
     // MARK: - ParticipantSignature
 
     @Test("Audio-level-only changes produce equal signatures")
