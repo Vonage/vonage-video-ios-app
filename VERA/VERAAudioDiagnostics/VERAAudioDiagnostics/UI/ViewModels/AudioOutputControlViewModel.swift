@@ -33,10 +33,6 @@ public final class AudioOutputControlViewModel: ObservableObject {
     /// - Parameter speakerTestService: Service responsible for playing test tones and monitoring audio levels.
     public nonisolated init(speakerTestService: SpeakerTestService) {
         self.speakerTestService = speakerTestService
-
-        // Note: audioLevelCancellable is left nil here and will be set up
-        // when the view model is first used on the MainActor.
-        // The subscription is established lazily to avoid actor isolation issues.
     }
 
     /// Sets up the audio level subscription. Should be called from the MainActor.

@@ -23,13 +23,40 @@ struct DefaultSpeakerTestServiceTests {
 
     // MARK: - Basic Functionality Tests
 
-    @Test("playTestSound does not crash when use case returns nil")
+    @Test("playTestSound does not crash when use case throws")
     func playTestSoundWithNilPlayerDoesNotCrash() {
         let mockUseCase = MockGenerateTonePlayerUseCase(shouldReturnNil: true)
         let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
 
         sut.playTestSound()
         // No assertion needed — test passes if no crash occurs.
+    }
+
+    @Test("playTestSound does not start monitoring when use case throws")
+    func playTestSoundDoesNotStartMonitoringWhenUseCaseThrows() async throws {
+        let mockUseCase = MockGenerateTonePlayerUseCase(shouldReturnNil: true)
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+        var receivedLevels: [Float] = []
+        let cancellable = sut.audioLevelPublisher.sink { receivedLevels.append($0) }
+
+        sut.playTestSound()
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        // stopMonitoring emits 0.0 when use case throws — no other levels should appear
+        let nonZeroLevels = receivedLevels.filter { $0 > 0.0 }
+        #expect(nonZeroLevels.isEmpty)
+        cancellable.cancel()
+    }
+
+    @Test("use case is called exactly once even when it throws")
+    func useCaseIsCalledOnceEvenWhenItThrows() {
+        let mockUseCase = MockGenerateTonePlayerUseCase(shouldReturnNil: true)
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+        sut.playTestSound()
+
+        #expect(mockUseCase.callCount == 1)
     }
 
     @Test("playTestSound invokes the use case exactly once")
@@ -54,6 +81,100 @@ struct DefaultSpeakerTestServiceTests {
         // Use case should only be called once - player is reused
         #expect(mockUseCase.callCount == 1)
     }
+
+    // MARK: - Audio Route Observation Tests
+
+    @Test("startObservingAudioRoutes does not crash when called independently")
+    func startObservingAudioRoutesDoesNotCrash() {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        sut.startObservingAudioRoutes()
+        // Test passes if no crash occurs
+    }
+
+    @Test("stopObservingAudioRoutes does not crash when called independently")
+    func stopObservingAudioRoutesDoesNotCrash() {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        sut.stopObservingAudioRoutes()
+        // Test passes if no crash occurs
+    }
+
+    @Test("startObservingAudioRoutes and stopObservingAudioRoutes can be called repeatedly")
+    func observingAudioRoutesCanBeCalledRepeatedly() {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+
+        for _ in 0..<5 {
+            sut.startObservingAudioRoutes()
+            sut.stopObservingAudioRoutes()
+        }
+        // Test passes if no crash occurs
+    }
+
+    @Test("playTestSound automatically starts observing audio routes")
+    func playTestSoundStartsObservingAudioRoutes() async throws {
+        let mockUseCase = MockGenerateTonePlayerUseCase()
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+        // playTestSound should internally call startObservingAudioRoutes
+        sut.playTestSound()
+
+        #expect(mockUseCase.callCount == 1)
+    }
+
+    @Test("stopTestSound automatically stops observing audio routes")
+    func stopTestSoundStopsObservingAudioRoutes() {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+
+        sut.playTestSound()
+        // stopTestSound calls stopObservingAudioRoutes internally
+        sut.stopTestSound()
+        // Test passes if no crash occurs
+    }
+
+    #if os(iOS)
+        @Test("startObservingAudioRoutes reacts to newDeviceAvailable route change when playing")
+        func startObservingAudioRoutesReactsToNewDeviceWhenPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()  // sets isPlaying = true and registers observer
+            let callCountAfterPlay = mockUseCase.callCount
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                ]
+            )
+
+            // Allow time for the 0.1s async dispatch + processing
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // Player is reused, so use case is still called only once
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
+        @Test("startObservingAudioRoutes does not restart playback when not playing")
+        func startObservingAudioRoutesDoesNotRestartWhenNotPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.startObservingAudioRoutes()
+            // isPlaying is false — route change should be ignored
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            #expect(mockUseCase.callCount == 0)
+        }
+    #endif
 
     @Test("stopTestSound can be called safely without starting playback")
     func stopTestSoundSafelyCalledWithoutPlayback() {
@@ -275,7 +396,7 @@ struct DefaultSpeakerTestServiceTests {
     @Test("audioPlayerDidFinishPlaying does not crash with successful or failed flag")
     func audioPlayerDidFinishPlayingDoesNotCrash() throws {
         let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
-        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+        let player = try DefaultGenerateTonePlayerUseCase()()
 
         sut.audioPlayerDidFinishPlaying(player, successfully: true)
         sut.audioPlayerDidFinishPlaying(player, successfully: false)
@@ -284,7 +405,7 @@ struct DefaultSpeakerTestServiceTests {
     @Test("audioPlayerDecodeErrorDidOccur does not crash with or without an error")
     func audioPlayerDecodeErrorDidOccurDoesNotCrash() throws {
         let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
-        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+        let player = try DefaultGenerateTonePlayerUseCase()()
 
         sut.audioPlayerDecodeErrorDidOccur(player, error: nil)
         sut.audioPlayerDecodeErrorDidOccur(player, error: NSError(domain: "TestDomain", code: -1))
@@ -293,7 +414,7 @@ struct DefaultSpeakerTestServiceTests {
     @Test("audioPlayerDidFinishPlaying emits zero level through publisher")
     func audioPlayerDidFinishPlayingEmitsZeroLevel() async throws {
         let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
-        let player = try #require(DefaultGenerateTonePlayerUseCase()())
+        let player = try DefaultGenerateTonePlayerUseCase()()
 
         sut.playTestSound()
 

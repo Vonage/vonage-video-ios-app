@@ -13,7 +13,7 @@ struct AudioDiagnosticsBottomItemPresenter: BottomItemPresentable {
     var id: String { "audio-diagnostics-button" }
     var label: String { String(localized: "Audio Test", bundle: .module) }
     var accessibilityIdentifier: String? { AudioDiagnosticsAccessibilityID.meetingRoomButton }
-    var image: Image { Image(systemName: "speaker.wave.2.fill") }
+    var image: Image { VERACommonUIAsset.Images.audioMaxSolid.swiftUIImage }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? { nil }
     var overflowSelectionBehavior: BottomBarOverflowSelectionBehavior { .dismissBeforeAction }

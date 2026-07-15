@@ -20,16 +20,16 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCaseReturnsPlayer() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player = sut()
+        let player = try sut()
 
-        #expect(player != nil)
+        #expect(player.duration > 0)
     }
 
     @Test("DefaultGenerateTonePlayerUseCase returns configured AVAudioPlayer")
     func defaultGenerateTonePlayerUseCaseReturnsConfiguredPlayer() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player = try #require(sut())
+        let player = try sut()
 
         // Verify player is configured correctly
         #expect(player.duration > 0.0)
@@ -41,8 +41,8 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCaseCreatesConsistentDuration() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player1 = try #require(sut())
-        let player2 = try #require(sut())
+        let player1 = try sut()
+        let player2 = try sut()
 
         // Both players should have the same duration (1 second)
         #expect(abs(player1.duration - player2.duration) < 0.01)
@@ -54,8 +54,8 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCaseCreatesIndependentPlayers() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player1 = try #require(sut())
-        let player2 = try #require(sut())
+        let player1 = try sut()
+        let player2 = try sut()
 
         // Players should be different instances
         #expect(player1 !== player2)
@@ -65,7 +65,7 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCasePlayerCanBePrepared() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player = try #require(sut())
+        let player = try sut()
 
         #expect(player.prepareToPlay() == true)
     }
@@ -74,7 +74,7 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCaseSupportsMeteringWhenEnabled() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player = try #require(sut())
+        let player = try sut()
         player.isMeteringEnabled = true
 
         // Should not crash when accessing metering
@@ -86,7 +86,7 @@ struct GenerateTonePlayerUseCaseTests {
     func defaultGenerateTonePlayerUseCaseCreatesWAVCompatiblePlayer() throws {
         let sut = DefaultGenerateTonePlayerUseCase()
 
-        let player = try #require(sut())
+        let player = try sut()
 
         // Verify the format is compatible (should not crash on these checks)
         #expect(player.numberOfChannels > 0)
@@ -101,7 +101,7 @@ struct GenerateTonePlayerUseCaseTests {
         let sut = DefaultGenerateTonePlayerUseCase()
         let startTime = CFAbsoluteTimeGetCurrent()
 
-        let _ = sut()
+        let _ = try sut()
 
         let elapsed = CFAbsoluteTimeGetCurrent() - startTime
         // Should create player in less than 100ms
@@ -114,31 +114,51 @@ struct GenerateTonePlayerUseCaseTests {
 
         // Create multiple players to test for memory issues
         for _ in 0..<10 {
-            let player = sut()
-            #expect(player != nil)
+            let player = try sut()
+            #expect(player.duration > 0)
         }
         // If we get here without crashes, we're likely not leaking
     }
 
     // MARK: - Mock Use Case Tests (Using unified mock from DefaultSpeakerTestServiceTests)
 
-    @Test("Mock use case returns nil when configured to do so")
-    func mockUseCaseReturnsNilWhenConfigured() throws {
+    @Test("Mock use case throws TonePlayerGenerationError.audioDataGenerationFailed when configured to fail")
+    func mockUseCaseThrowsWhenConfigured() throws {
         let sut = MockGenerateTonePlayerUseCase(shouldReturnNil: true)
 
-        let result = sut()
-
-        #expect(result == nil)
+        #expect(throws: TonePlayerGenerationError.audioDataGenerationFailed) {
+            try sut()
+        }
         #expect(sut.callCount == 1)
+    }
+
+    @Test("Mock use case throws TonePlayerGenerationError when shouldFailOnGenerate is true")
+    func mockUseCaseThrowsWhenShouldFailOnGenerate() {
+        let sut = MockGenerateTonePlayerUseCase()
+        sut.shouldFailOnGenerate = true
+
+        #expect(throws: TonePlayerGenerationError.audioDataGenerationFailed) {
+            try sut()
+        }
+    }
+
+    @Test("TonePlayerGenerationError cases are equatable")
+    func tonePlayerGenerationErrorEquatable() {
+        #expect(TonePlayerGenerationError.audioDataGenerationFailed == .audioDataGenerationFailed)
+        #expect(
+            TonePlayerGenerationError.playerInitializationFailed(underlyingError: "err")
+                == .playerInitializationFailed(underlyingError: "err"))
+        #expect(
+            TonePlayerGenerationError.audioDataGenerationFailed != .playerInitializationFailed(underlyingError: "err"))
     }
 
     @Test("Mock use case returns player when configured normally")
     func mockUseCaseReturnsPlayerWhenConfigured() throws {
         let sut = MockGenerateTonePlayerUseCase()
 
-        let result = sut()
+        let result = try sut()
 
-        #expect(result != nil)
+        #expect(result.duration > 0)
         #expect(sut.callCount == 1)
     }
 
@@ -148,13 +168,13 @@ struct GenerateTonePlayerUseCaseTests {
 
         #expect(sut.callCount == 0)
 
-        _ = sut()
+        _ = try sut()
         #expect(sut.callCount == 1)
 
-        _ = sut()
+        _ = try sut()
         #expect(sut.callCount == 2)
 
-        _ = sut()
+        _ = try sut()
         #expect(sut.callCount == 3)
     }
 }

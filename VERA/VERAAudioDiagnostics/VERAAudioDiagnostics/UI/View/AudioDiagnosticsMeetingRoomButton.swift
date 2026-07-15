@@ -39,7 +39,7 @@
         public var body: some View {
             OngoingActivityControlImageButton(
                 isActive: false,
-                image: Image(systemName: "speaker.wave.2.fill"),
+                image: VERACommonUIAsset.Images.audioMaxSolid.swiftUIImage,
                 action: {
                     onShowDialog?()
                 }

@@ -16,6 +16,14 @@ public protocol SpeakerTestService: Sendable {
     /// Stops the currently playing test sound.
     func stopTestSound()
 
+    /// Starts listening for audio route changes.
+    ///
+    /// Call this to enable automatic playback restart when the audio output device changes.
+    func startObservingAudioRoutes()
+
+    /// Stops listening for audio route changes.
+    func stopObservingAudioRoutes()
+
     /// Publisher that emits audio level updates (0.0 to 1.0) while playing test sound.
     var audioLevelPublisher: AnyPublisher<Float, Never> { get }
 }

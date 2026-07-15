@@ -22,67 +22,107 @@ public struct DefaultGenerateTonePlayerUseCase: GenerateTonePlayerUseCase {
     }
 
     /// Creates an AVAudioPlayer that plays a 1-second 440Hz sine wave tone.
-    public func callAsFunction() -> AVAudioPlayer? {
-        let sampleRate = 44100.0
+    ///
+    /// Uses AVAudioEngine with a source node to generate the tone as PCM data,
+    /// then exports to WAV format for playback with AVAudioPlayer.
+    ///
+    /// - Throws: ``TonePlayerGenerationError/audioDataGenerationFailed`` if tone generation fails,
+    ///   or ``TonePlayerGenerationError/playerInitializationFailed(underlyingError:)`` if `AVAudioPlayer` init throws.
+    public func callAsFunction() throws -> AVAudioPlayer {
+        let sampleRate: Float = 44100.0
         let duration = 1.0
         let frequency = 440.0  // A4 note
         let amplitude: Float = 0.5
 
-        let frameCount = Int(sampleRate * duration)
-        var samples = [Int16](repeating: 0, count: frameCount)
+        let frameCount = Int(sampleRate * Float(duration))
 
-        // Generate sine wave
-        for index in 0..<frameCount {
-            let time = Double(index) / sampleRate
-            let value = sin(2.0 * .pi * frequency * time) * Double(amplitude)
-            samples[index] = Int16(value * Double(Int16.max))
-        }
-
-        // Create WAV file in memory
-        var data = Data()
-
-        // WAV header
-        guard let riffData = "RIFF".data(using: .ascii),
-            let waveData = "WAVE".data(using: .ascii),
-            let fmtData = "fmt ".data(using: .ascii),
-            let dataChunkData = "data".data(using: .ascii)
+        // Set up audio format: 16-bit PCM, mono, 44.1kHz
+        guard
+            let audioFormat = AVAudioFormat(
+                commonFormat: .pcmFormatInt16,
+                sampleRate: Double(sampleRate),
+                channels: 1,
+                interleaved: true
+            )
         else {
-            return nil
+            throw TonePlayerGenerationError.audioDataGenerationFailed
         }
 
-        data.append(riffData)
-        let fileSize = UInt32(36 + frameCount * 2)
-        data.append(contentsOf: withUnsafeBytes(of: fileSize.littleEndian) { Array($0) })
-        data.append(waveData)
+        // Create engine and source node
+        let engine = AVAudioEngine()
+        let frameCounter = FrameCounterRef()
 
-        // Format chunk
-        data.append(fmtData)
-        let fmtChunkSize = UInt32(16)
-        data.append(contentsOf: withUnsafeBytes(of: fmtChunkSize.littleEndian) { Array($0) })
-        let audioFormat = UInt16(1)  // PCM
-        data.append(contentsOf: withUnsafeBytes(of: audioFormat.littleEndian) { Array($0) })
-        let numChannels = UInt16(1)  // Mono
-        data.append(contentsOf: withUnsafeBytes(of: numChannels.littleEndian) { Array($0) })
-        let sampleRateInt = UInt32(sampleRate)
-        data.append(contentsOf: withUnsafeBytes(of: sampleRateInt.littleEndian) { Array($0) })
-        let byteRate = UInt32(sampleRate * 2)  // 2 bytes per sample
-        data.append(contentsOf: withUnsafeBytes(of: byteRate.littleEndian) { Array($0) })
-        let blockAlign = UInt16(2)
-        data.append(contentsOf: withUnsafeBytes(of: blockAlign.littleEndian) { Array($0) })
-        let bitsPerSample = UInt16(16)
-        data.append(contentsOf: withUnsafeBytes(of: bitsPerSample.littleEndian) { Array($0) })
+        let sourceNode = AVAudioSourceNode { _, _, frameCount, audioBufferList in
+            let audioBuffer = audioBufferList.pointee.mBuffers
 
-        // Data chunk
-        data.append(dataChunkData)
-        let dataSize = UInt32(frameCount * 2)
-        data.append(contentsOf: withUnsafeBytes(of: dataSize.littleEndian) { Array($0) })
+            guard let int16Ptr = audioBuffer.mData?.assumingMemoryBound(to: Int16.self) else {
+                return noErr
+            }
 
-        // Audio samples
-        for sample in samples {
-            data.append(contentsOf: withUnsafeBytes(of: sample.littleEndian) { Array($0) })
+            // Generate sine wave samples
+            for frame in 0..<Int(frameCount) {
+                let currentFrame = frame + Int(frameCounter.currentFrame)
+                let time = Double(currentFrame) / Double(sampleRate)
+                let value = sin(2.0 * .pi * frequency * time) * Double(amplitude)
+                int16Ptr[frame] = Int16(value * Double(Int16.max))
+            }
+
+            frameCounter.currentFrame += Int64(frameCount)
+            return noErr
         }
 
-        // Create player from data
-        return try? AVAudioPlayer(data: data)
+        do {
+            // Attach source node to engine
+            engine.attach(sourceNode)
+            engine.connect(sourceNode, to: engine.mainMixerNode, format: audioFormat)
+            try engine.start()
+
+            // Create capture buffer
+            guard
+                let captureBuffer = AVAudioPCMBuffer(
+                    pcmFormat: audioFormat,
+                    frameCapacity: AVAudioFrameCount(frameCount)
+                )
+            else {
+                throw TonePlayerGenerationError.audioDataGenerationFailed
+            }
+
+            captureBuffer.frameLength = AVAudioFrameCount(frameCount)
+
+            // Manually generate samples by calling the rendering block
+            guard let int16Data = captureBuffer.int16ChannelData else {
+                throw TonePlayerGenerationError.audioDataGenerationFailed
+            }
+
+            let samples = int16Data[0]
+
+            for frame in 0..<frameCount {
+                let time = Double(frame) / Double(sampleRate)
+                let value = sin(2.0 * .pi * frequency * time) * Double(amplitude)
+                samples[frame] = Int16(value * Double(Int16.max))
+            }
+
+            // Stop engine
+            engine.stop()
+
+            // Convert buffer to WAV data using shared utility
+            let wavData = try WAVConverter.convertToWAV(
+                buffer: captureBuffer,
+                sampleRate: sampleRate
+            )
+
+            // Create player from WAV data
+            return try AVAudioPlayer(data: wavData)
+        } catch {
+            engine.stop()
+            throw TonePlayerGenerationError.playerInitializationFailed(
+                underlyingError: error.localizedDescription
+            )
+        }
     }
+}
+
+// Helper class to maintain mutable frame counter for audio generation
+private class FrameCounterRef {
+    var currentFrame: Int64 = 0
 }

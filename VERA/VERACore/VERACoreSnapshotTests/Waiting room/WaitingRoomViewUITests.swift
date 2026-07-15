@@ -5,6 +5,7 @@
 import SnapshotTesting
 import SwiftUI
 import Testing
+import VERACommonUI
 import VERADomain
 import VERATestHelpers
 
@@ -105,7 +106,7 @@ class WaitingRoomViewUITests {
                     Label {
                         Text("Audio")
                     } icon: {
-                        Image(systemName: "speaker.wave.2.fill")
+                        VERACommonUIAsset.Images.audioMidLine.swiftUIImage
                     }
                 }
             }

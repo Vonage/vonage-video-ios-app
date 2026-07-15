@@ -24,6 +24,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     private var player: AVAudioPlayer?
     private var levelTimer: Timer?
     private var isPlaying: Bool = false
+    private var isObservingAudioRoutes: Bool = false
     private let generateTonePlayerUseCase: GenerateTonePlayerUseCase
 
     private let audioLevelSubject = PassthroughSubject<Float, Never>()
@@ -36,20 +37,42 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     ) {
         self.generateTonePlayerUseCase = generateTonePlayerUseCase
         super.init()
-        #if os(iOS)
-            // Listen for audio route changes
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(handleRouteChange),
-                name: AVAudioSession.routeChangeNotification,
-                object: nil
-            )
-        #endif
     }
 
     deinit {
         #if os(iOS)
-            NotificationCenter.default.removeObserver(self)
+            if isObservingAudioRoutes {
+                NotificationCenter.default.removeObserver(self)
+            }
+        #endif
+    }
+
+    /// Starts listening for audio route changes.
+    ///
+    /// Registers an observer that automatically restarts playback when the audio
+    /// output device changes (e.g. headphones connected, Bluetooth device selected).
+    /// On macOS this method has no effect.
+    public func startObservingAudioRoutes() {
+        #if os(iOS)
+            if !isObservingAudioRoutes {
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(handleRouteChange),
+                    name: AVAudioSession.routeChangeNotification,
+                    object: nil
+                )
+                isObservingAudioRoutes = true
+            }
+        #endif
+    }
+
+    /// Stops listening for audio route changes.
+    ///
+    /// Marks the observer as inactive. Actual removal happens in `deinit`.
+    /// On macOS this method has no effect.
+    public func stopObservingAudioRoutes() {
+        #if os(iOS)
+            isObservingAudioRoutes = false
         #endif
     }
 
@@ -81,10 +104,12 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
 
     public func playTestSound() {
         isPlaying = true
+        startObservingAudioRoutes()
         startAudioAndMonitoring()
     }
 
     public func stopTestSound() {
+        stopObservingAudioRoutes()
         stopMonitoring()
         player?.stop()
     }
@@ -120,11 +145,22 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         #endif
 
         if player == nil {
-            player = generateTonePlayerUseCase()
-            player?.delegate = self
-            player?.isMeteringEnabled = true
-            player?.numberOfLoops = -1  // Loop continuously
-            player?.prepareToPlay()
+            do {
+                let newPlayer = try generateTonePlayerUseCase()
+                newPlayer.delegate = self
+                newPlayer.isMeteringEnabled = true
+                newPlayer.numberOfLoops = -1  // Loop continuously
+                newPlayer.prepareToPlay()
+                newPlayer.play()
+                player = newPlayer
+            } catch {
+                logger.error("Failed to generate tone player: \(error.localizedDescription)")
+                stopMonitoring()
+                return
+            }
+        } else {
+            // Reuse existing player - restart playback
+            player?.currentTime = 0
             player?.play()
         }
 

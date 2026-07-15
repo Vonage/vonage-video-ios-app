@@ -64,4 +64,30 @@ struct NullSpeakerTestServiceTests {
         sut.stopTestSound()
         // Test passes if no crash occurs
     }
+
+    // MARK: - Audio Route Observation Tests
+
+    @Test("startObservingAudioRoutes does not crash")
+    func startObservingAudioRoutesDoesNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.startObservingAudioRoutes()
+        // Test passes if no crash occurs
+    }
+
+    @Test("stopObservingAudioRoutes does not crash")
+    func stopObservingAudioRoutesDoesNotCrash() {
+        let sut = NullSpeakerTestService()
+        sut.stopObservingAudioRoutes()
+        // Test passes if no crash occurs
+    }
+
+    @Test("startObservingAudioRoutes and stopObservingAudioRoutes can be called repeatedly")
+    func audioRoutesObservationCanBeCalledRepeatedly() {
+        let sut = NullSpeakerTestService()
+        for _ in 0..<5 {
+            sut.startObservingAudioRoutes()
+            sut.stopObservingAudioRoutes()
+        }
+        // Test passes if no crash occurs
+    }
 }

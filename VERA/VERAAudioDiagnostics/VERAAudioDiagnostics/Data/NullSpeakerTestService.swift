@@ -49,6 +49,19 @@ public struct NullSpeakerTestService: SpeakerTestService {
         // Intentionally empty: no-op implementation has nothing to stop.
     }
 
+    /// No-op implementation that ignores route observation requests.
+    ///
+    /// In environments where this service is used (previews, tests without audio),
+    /// audio route changes are not relevant.
+    public func startObservingAudioRoutes() {
+        // Intentionally empty: no-op implementation does not observe audio routes.
+    }
+
+    /// No-op implementation that ignores route observation stop requests.
+    public func stopObservingAudioRoutes() {
+        // Intentionally empty: no-op implementation does not observe audio routes.
+    }
+
     /// Returns an empty publisher that never emits audio level values.
     ///
     /// The returned publisher immediately completes without emitting any values,

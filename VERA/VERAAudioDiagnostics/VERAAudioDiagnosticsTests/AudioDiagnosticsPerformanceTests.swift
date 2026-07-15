@@ -60,7 +60,7 @@
 
             // Generate multiple players
             for _ in 0..<10 {
-                _ = useCase()
+                _ = try? useCase()
             }
 
             let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime

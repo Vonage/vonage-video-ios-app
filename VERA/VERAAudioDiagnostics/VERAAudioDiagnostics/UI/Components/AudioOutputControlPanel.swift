@@ -83,7 +83,7 @@
             container.backgroundColor = .clear
 
             let iconView = UIImageView(
-                image: UIImage(systemName: "speaker.wave.2")?
+                image: VERACommonUIAsset.Images.audioMaxSolid.image
                     .withConfiguration(UIImage.SymbolConfiguration(pointSize: 16, weight: .medium))
             )
             iconView.translatesAutoresizingMaskIntoConstraints = false

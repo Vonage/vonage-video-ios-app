@@ -42,6 +42,16 @@ final class MockSpeakerTestService: SpeakerTestService {
         audioLevelSubject.send(0.0)
     }
 
+    /// Simulates stopping audio route observation.
+    func startObservingAudioRoutes() {
+        // Not used for snapthot testing
+    }
+
+    /// Simulates starting audio route observation.
+    func stopObservingAudioRoutes() {
+        // Not used for snapthot testing
+    }
+
     // MARK: - Test Helpers
 
     /// Emits a simulated audio level value.

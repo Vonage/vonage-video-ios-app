@@ -30,7 +30,7 @@
                         VStack(spacing: 24) {
                             // Instructions
                             VStack(spacing: 8) {
-                                Image(systemName: "speaker.wave.2.circle.fill")
+                                VERACommonUIAsset.Images.audioMaxSolid.swiftUIImage
                                     .font(.system(size: 48))
                                     .foregroundColor(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
 
