@@ -47,7 +47,7 @@ public struct SettingsToolbarButton: View {
 
     public var body: some View {
         Button(action: { showSettings = true }) {
-            Image(systemName: "gearshape.fill")
+            VERACommonUIAsset.Images.gearSolid.swiftUIImage
                 .font(.title2)
                 .foregroundColor(.primary)
         }

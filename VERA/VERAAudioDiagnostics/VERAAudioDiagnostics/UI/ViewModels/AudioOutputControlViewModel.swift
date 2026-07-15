@@ -31,7 +31,7 @@ public final class AudioOutputControlViewModel: ObservableObject {
     /// Creates a new audio output control view model.
     ///
     /// - Parameter speakerTestService: Service responsible for playing test tones and monitoring audio levels.
-    public nonisolated init(speakerTestService: SpeakerTestService) {
+    public init(speakerTestService: SpeakerTestService) {
         self.speakerTestService = speakerTestService
     }
 

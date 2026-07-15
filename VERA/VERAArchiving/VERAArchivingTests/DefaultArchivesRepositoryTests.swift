@@ -107,13 +107,6 @@ struct DefaultArchivesRepositoryTests {
 
         #expect(values.count == 3)
 
-        // Debug: let's verify what we actually got
-        print("Debug - values[0].count: \(values[0].count)")
-        if values[0].count >= 2 {
-            print("Debug - values[0][0].status: \(values[0][0].status)")
-            print("Debug - values[0][1].status: \(values[0][1].status)")
-        }
-
         // First call - mixed states
         // Find archives by ID to ensure correct matching
         if let archive1 = values[0].first(where: { $0.id == archive1Id }),
