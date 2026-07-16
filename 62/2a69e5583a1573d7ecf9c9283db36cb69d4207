@@ -1,0 +1,21 @@
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageChatPlugin.swift
+  s_9d51cd27e66458::t_018466207922d2 6,25-26,68
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/VonageSendChatMessageUseCaseTests.swift
+  s_9d51cd27e66458::t_9ab06989a6de46 66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "622a69e5583a1573d7ecf9c9283db36cb69d4207",
+  "prompts": {},
+  "sessions": {
+    "s_9d51cd27e66458": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8f0c1958-8bb2-4b9d-b0a4-ba77e248bfb7",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
