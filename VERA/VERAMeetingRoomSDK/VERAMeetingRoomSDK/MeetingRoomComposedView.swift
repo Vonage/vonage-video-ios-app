@@ -22,6 +22,8 @@ enum MeetingRoomComposedConstants {
     static var overlayBottomPadding: CGFloat {
         BottomBarConstants.totalHeight + 4
     }
+    
+    static let anchorViewHeight: CGFloat = 200
 }
 
 /// A self-contained meeting room view with all feature overlays, sheets, and bottom bar buttons.
@@ -70,7 +72,10 @@ struct MeetingRoomComposedView: View {
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
-            .background(pictureInPictureAnchor)
+            .background(
+                pictureInPictureAnchor
+                    .frame(height: MeetingRoomComposedConstants.anchorViewHeight)
+            )
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),
