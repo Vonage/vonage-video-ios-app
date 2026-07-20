@@ -65,3 +65,52 @@ struct StatsRow: View {
         }
     }
 }
+
+/// Expandable participant header with a fully controlled tap target.
+struct ExpandableParticipantHeaderRow<TrailingContent: View>: View {
+
+    let title: String
+    let icon: String
+    let isExpanded: Bool
+    let onToggle: () -> Void
+    @ViewBuilder let trailingContent: () -> TrailingContent
+
+    var body: some View {
+        Button(action: onToggle) {
+            HStack(spacing: 8) {
+                Label(title, systemImage: icon)
+                    .fontWeight(.semibold)
+
+                trailingContent()
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: isExpanded)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+extension ExpandableParticipantHeaderRow where TrailingContent == EmptyView {
+    init(
+        title: String,
+        icon: String,
+        isExpanded: Bool,
+        onToggle: @escaping () -> Void
+    ) {
+        self.init(
+            title: title,
+            icon: icon,
+            isExpanded: isExpanded,
+            onToggle: onToggle,
+            trailingContent: { EmptyView() }
+        )
+    }
+}

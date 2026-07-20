@@ -12,11 +12,14 @@ private enum MeetingRoomScreenConstants {
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
+    private let uiProvider: any MeetingRoomUIProvider
 
     public init(
-        viewModel: MeetingRoomViewModel
+        viewModel: MeetingRoomViewModel,
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
     ) {
         self.viewModel = viewModel
+        self.uiProvider = uiProvider
     }
 
     public var body: some View {
@@ -35,6 +38,9 @@ public struct MeetingRoomScreen: View {
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
                                 onToggleLayout: viewModel.onToggleLayout),
+                            bottomBarContent: { context in
+                                uiProvider.bottomBarContent(context: context)
+                            },
                             extraButtons: $viewModel.extraButtons,
                             extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
                         )

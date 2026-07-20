@@ -2,7 +2,6 @@
 //  Created by Vonage on 21/04/2026.
 //
 
-import Combine
 import Foundation
 import SwiftUI
 import Testing
@@ -70,6 +69,23 @@ struct MeetingRoomComposedViewTests {
         #expect(sut.statsOverlayViewModel == nil)
     }
 
+    @Test("MeetingRoomComposedView stores provided UI provider")
+    @MainActor
+    func storesUIProvider() {
+        let provider = DefaultMeetingRoomUIProvider(bottomBarButtons: {
+            [
+                BottomBarButton(
+                    label: "Custom",
+                    image: Image(systemName: "star.fill"),
+                    action: {}
+                )
+            ]
+        })
+        let sut = makeSUT(uiProvider: provider)
+
+        #expect(sut.uiProvider.bottomBarButtons().map(\.label) == ["Custom"])
+    }
+
     // MARK: - Container Feature Reflection
 
     @Test("Container with chat feature reports chat as enabled")
@@ -119,7 +135,8 @@ struct MeetingRoomComposedViewTests {
     @MainActor
     private func makeSUT(
         enabledFeatures: Set<MeetingRoomFeature> = [],
-        container: MeetingRoomSDKContainer? = nil
+        container: MeetingRoomSDKContainer? = nil,
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
     ) -> MeetingRoomComposedView {
         let actualContainer = container ?? makeContainer(enabledFeatures: enabledFeatures)
         let assembler = BottomBarButtonsAssembler(container: actualContainer, enabledFeatures: enabledFeatures)
@@ -128,6 +145,7 @@ struct MeetingRoomComposedViewTests {
         return MeetingRoomComposedView(
             meetingRoomFactory: factory,
             viewModel: viewModel,
+            uiProvider: uiProvider,
             container: actualContainer,
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
@@ -152,6 +170,7 @@ struct MeetingRoomComposedViewTests {
         let view = MeetingRoomComposedView(
             meetingRoomFactory: factory,
             viewModel: viewModel,
+            uiProvider: DefaultMeetingRoomUIProvider(),
             container: container,
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
@@ -220,8 +239,7 @@ struct MeetingRoomComposedViewTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: MeetingRoomConfiguration(),
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: { _ in }, roomName: "test-room"),
-            getExternalButtons: { [] },
-            externalButtonsUpdates: Empty().eraseToAnyPublisher(),
+            uiProvider: DefaultMeetingRoomUIProvider(),
             noiseSuppressionStatusDataSource: makeMockNoiseSuppressionStatusDataSource(),
             pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource()
         )

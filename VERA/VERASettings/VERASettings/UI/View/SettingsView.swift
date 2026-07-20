@@ -18,6 +18,16 @@ import VERACommonUI
 /// Sections are defined in ``SettingsSection``.
 public struct SettingsView: View {
 
+    /// Context used to decide whether the settings are editable during an active call.
+    public enum CallContext {
+        case waitingRoom
+        case activeCall
+
+        var isInActiveCall: Bool {
+            self == .activeCall
+        }
+    }
+
     /// Environment action to dismiss the current presentation.
     @Environment(\.dismiss) private var dismiss
 
@@ -30,6 +40,9 @@ public struct SettingsView: View {
     /// View model for real-time statistics (placeholder when not in a meeting).
     @ObservedObject private var statisticsViewModel: StatisticsViewModel
 
+    /// Whether the screen is being shown while a call is already active.
+    private let callContext: CallContext
+
     /// Currently selected section in the sidebar (iPad/Mac only).
     @State private var selectedSection: SettingsSection?
 
@@ -39,14 +52,23 @@ public struct SettingsView: View {
         statisticsViewModel !== StatisticsViewModel.placeholder
     }
 
+    private var currentStatisticsViewModel: StatisticsViewModel? {
+        hasStatisticsViewModel ? statisticsViewModel : nil
+    }
+
     /// Creates a settings view without real-time stats (waiting room).
     ///
     /// - Parameters:
     ///   - viewModel: The settings view model managing state and actions.
     ///   - selectedSection: The initially selected section for iPad/Mac sidebar. Defaults to `.general`.
-    public init(viewModel: SettingsViewModel, selectedSection: SettingsSection = .general) {
+    public init(
+        viewModel: SettingsViewModel,
+        selectedSection: SettingsSection = .general,
+        callContext: CallContext = .waitingRoom
+    ) {
         self.viewModel = viewModel
         self.statisticsViewModel = StatisticsViewModel.placeholder
+        self.callContext = callContext
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -59,10 +81,12 @@ public struct SettingsView: View {
     public init(
         viewModel: SettingsViewModel,
         statisticsViewModel: StatisticsViewModel,
-        selectedSection: SettingsSection = .general
+        selectedSection: SettingsSection = .general,
+        callContext: CallContext = .activeCall
     ) {
         self.viewModel = viewModel
         self.statisticsViewModel = statisticsViewModel
+        self.callContext = callContext
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -89,13 +113,45 @@ public struct SettingsView: View {
     private var compactLayout: some View {
         NavigationStack {
             Form {
-                VideoSectionView(viewModel: viewModel)
-                AudioSectionView(viewModel: viewModel)
+                Section {
+                    VideoSectionView(
+                        viewModel: viewModel,
+                        isInActiveCall: callContext.isInActiveCall,
+                        isCompactLayout: true
+                    )
+                } header: {
+                    Text("Video".localized)
+                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                }
+
+                Section {
+                    AudioSectionView(
+                        viewModel: viewModel,
+                        isInActiveCall: callContext.isInActiveCall,
+                        isCompactLayout: true
+                    )
+                } header: {
+                    Text("Audio".localized)
+                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                }
+
                 StatisticsSectionScreen(
                     viewModel: viewModel,
-                    statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
+                    statisticsViewModel: currentStatisticsViewModel,
+                    isCompactLayout: true
                 )
-                GeneralSectionView(viewModel: viewModel)
+
+                Section {
+                    GeneralSectionView(
+                        viewModel: viewModel,
+                        isInActiveCall: callContext.isInActiveCall,
+                        statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled,
+                        isCompactLayout: true
+                    )
+                } header: {
+                    Text("General".localized)
+                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                }
             }
             .navigationTitle("Settings".localized)
             .toolbar {
@@ -109,6 +165,7 @@ public struct SettingsView: View {
                 }
             }
         }
+        .accessibilityIdentifier(SettingsAccessibilityID.screen)
     }
 
     // MARK: - Regular (iPad / Mac)
@@ -125,6 +182,7 @@ public struct SettingsView: View {
             detailView(for: selectedSection ?? .general)
         }
         .navigationSplitViewStyle(.balanced)
+        .accessibilityIdentifier(SettingsAccessibilityID.screen)
     }
 
     // MARK: - Sidebar
@@ -164,15 +222,21 @@ public struct SettingsView: View {
         Form {
             switch section {
             case .general:
-                GeneralSectionView(viewModel: viewModel)
+                GeneralSectionView(
+                    viewModel: viewModel,
+                    isInActiveCall: callContext.isInActiveCall,
+                    statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled
+                )
             case .video:
-                VideoSectionView(viewModel: viewModel)
+                VideoSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
             case .audio:
-                AudioSectionView(viewModel: viewModel)
+                AudioSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
             case .stats:
                 StatisticsSectionScreen(
                     viewModel: viewModel,
-                    statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
+                    statisticsViewModel: currentStatisticsViewModel,
+                    isCompactLayout: false,
+                    showsSectionHeaders: false
                 )
             }
         }
@@ -192,7 +256,8 @@ public struct SettingsView: View {
     #Preview("iPhone - Meeting Room") {
         SettingsView(
             viewModel: .preview,
-            statisticsViewModel: .placeholder
+            statisticsViewModel: .placeholder,
+            callContext: .activeCall
         )
         .preferredColorScheme(.dark)
     }
@@ -206,7 +271,8 @@ public struct SettingsView: View {
     #Preview("iPad - Meeting Room") {
         SettingsView(
             viewModel: .preview,
-            statisticsViewModel: .placeholder
+            statisticsViewModel: .placeholder,
+            callContext: .activeCall
         )
         .environment(\.horizontalSizeClass, .regular)
         .preferredColorScheme(.dark)

@@ -14,25 +14,25 @@ struct SubscribersStatsSection: View {
     var body: some View {
         if !subscribers.isEmpty {
             ForEach(subscribers) { subscriber in
-                DisclosureGroup(
-                    isExpanded: Binding(
-                        get: { expandedSubscribers.contains(subscriber.id) },
-                        set: { expanded in
-                            if expanded {
-                                expandedSubscribers.insert(subscriber.id)
-                            } else {
+                Group {
+                    ExpandableParticipantHeaderRow(
+                        title: subscriber.subscriberName.isEmpty
+                            ? "Subscriber".localized
+                            : subscriber.subscriberName,
+                        icon: "arrow.down.circle",
+                        isExpanded: expandedSubscribers.contains(subscriber.id),
+                        onToggle: {
+                            if expandedSubscribers.contains(subscriber.id) {
                                 expandedSubscribers.remove(subscriber.id)
+                            } else {
+                                expandedSubscribers.insert(subscriber.id)
                             }
                         }
                     )
-                ) {
-                    SubscriberStatsContent(subscriber: subscriber)
-                } label: {
-                    let name =
-                        subscriber.subscriberName.isEmpty
-                        ? "Subscriber".localized : subscriber.subscriberName
-                    Label(name, systemImage: "arrow.down.circle")
-                        .fontWeight(.semibold)
+
+                    if expandedSubscribers.contains(subscriber.id) {
+                        SubscriberStatsContent(subscriber: subscriber)
+                    }
                 }
             }
         }

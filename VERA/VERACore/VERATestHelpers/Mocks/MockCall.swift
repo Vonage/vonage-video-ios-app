@@ -108,5 +108,11 @@ public class MockCall: CallFacade {
 
     public func disableNetworkStats() {}
 
-    public func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
+    public func enableSubscriberExtraStats() {}
+
+    public func disableSubscriberExtraStats() {}
+
+    public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+
+    public func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
 }

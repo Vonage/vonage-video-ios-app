@@ -34,6 +34,7 @@ struct MeetingRoomComposedView: View {
 
     let meetingRoomFactory: MeetingRoomFactory
     @ObservedObject var viewModel: MeetingRoomViewModel
+    let uiProvider: any MeetingRoomUIProvider
 
     let container: MeetingRoomSDKContainer
     let enabledFeatures: Set<MeetingRoomFeature>
@@ -64,7 +65,7 @@ struct MeetingRoomComposedView: View {
     @State private var showEffects = false
 
     var body: some View {
-        meetingRoomFactory.make(viewModel: viewModel)
+        meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),

@@ -13,20 +13,15 @@ struct PublisherStatsSection: View {
     let maxAudioBitrateFormatted: String?
 
     var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
-            StatsSectionHeader("Audio".localized)
-            publisherAudioGroup
-            StatsSectionHeader("Video".localized)
-            publisherVideoGroup
-            StatsSectionHeader("Network".localized)
-            publisherTransportGroup
-        } label: {
-            let name =
-                stats.publisherName.isEmpty
-                ? "Publisher".localized : stats.publisherName
-            HStack(spacing: 6) {
-                Label(name, systemImage: "arrow.up.circle")
-                    .fontWeight(.semibold)
+        Group {
+            ExpandableParticipantHeaderRow(
+                title: stats.publisherName.isEmpty ? "Publisher".localized : stats.publisherName,
+                icon: "arrow.up.circle",
+                isExpanded: isExpanded,
+                onToggle: {
+                    isExpanded.toggle()
+                }
+            ) {
                 Text("You".localized)
                     .font(.caption2)
                     .fontWeight(.medium)
@@ -36,7 +31,21 @@ struct PublisherStatsSection: View {
                     .background(Color.accentColor.opacity(0.12))
                     .clipShape(Capsule())
             }
+
+            if isExpanded {
+                publisherDetails
+            }
         }
+    }
+
+    @ViewBuilder
+    private var publisherDetails: some View {
+        StatsSectionHeader("Audio".localized)
+        publisherAudioGroup
+        StatsSectionHeader("Video".localized)
+        publisherVideoGroup
+        StatsSectionHeader("Network".localized)
+        publisherTransportGroup
     }
 
     @ViewBuilder
@@ -63,14 +72,12 @@ struct PublisherStatsSection: View {
     @ViewBuilder
     private var publisherVideoLayersGroup: some View {
         let layers = SettingsFormatter.sortedByResolution(stats.sentVideo?.videoLayers ?? [])
-        if layers.count > 1 {
+        if !layers.isEmpty {
             StatsSectionHeader("Simulcast")
             ForEach(Array(layers.enumerated()), id: \.offset) { index, layer in
                 StatsSubHeader(SettingsFormatter.qualityLabel(index: index, count: layers.count))
                 videoLayerRows(layer)
             }
-        } else if let layer = layers.first {
-            videoLayerRows(layer)
         }
     }
 
