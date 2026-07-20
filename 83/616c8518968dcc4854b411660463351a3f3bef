@@ -1,0 +1,14 @@
+.github/workflows/cm-ticket-create.yml
+  h_5ddc9d372ac6a1 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "83616c8518968dcc4854b411660463351a3f3bef",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
