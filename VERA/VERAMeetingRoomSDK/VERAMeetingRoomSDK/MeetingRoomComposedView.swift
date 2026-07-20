@@ -22,7 +22,7 @@ enum MeetingRoomComposedConstants {
     static var overlayBottomPadding: CGFloat {
         BottomBarConstants.totalHeight + 4
     }
-    
+
     static let anchorViewHeight: CGFloat = 200
 }
 
