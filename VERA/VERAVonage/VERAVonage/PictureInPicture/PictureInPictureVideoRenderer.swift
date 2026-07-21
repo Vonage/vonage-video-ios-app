@@ -38,6 +38,17 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     }
     private var _isMirrored = false
 
+    /// When `true`, landscape frames are rotated to portrait for the PiP window. Set only for the
+    /// local publisher's renderer: while the app is backgrounded in PiP, the SDK's capture reverts
+    /// to sensor-native landscape (face sideways), and this rotation restores an upright self-view.
+    /// Remote streams arrive correctly oriented and must never be rotated.
+    /// Written on the main actor, read on the video thread — guarded by `frameLock`.
+    var pipForcesPortrait: Bool {
+        get { withFrameLock { _pipForcesPortrait } }
+        set { withFrameLock { _pipForcesPortrait = newValue } }
+    }
+    private var _pipForcesPortrait = false
+
     private let frameLock = NSLock()
     private let accelerator = YUVToARGBAccelerator()
 
@@ -56,6 +67,11 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     private var pixelBufferPool: CVPixelBufferPool?
     private var poolWidth = 0
     private var poolHeight = 0
+
+    /// Separate pool for the portrait-rotated buffers fed to the PiP window (landscape frames only).
+    private var rotatedPixelBufferPool: CVPixelBufferPool?
+    private var rotatedPoolWidth = 0
+    private var rotatedPoolHeight = 0
 
     // MARK: - Placeholder (camera-off avatar)
 
@@ -163,13 +179,11 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         // under `frameLock` so the placeholder start/stop on the main actor can't race this read.
         if _isPlaceholderActive { return }
 
-        guard
-            let sampleBuffer = createSampleBuffer(
-                from: frame,
-                width: Int(format.imageWidth),
-                height: Int(format.imageHeight)
-            )
-        else { return }
+        let width = Int(format.imageWidth)
+        let height = Int(format.imageHeight)
+        guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return }
+        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: _isMirrored)
+        guard let sampleBuffer = createSampleBuffer(from: pixelBuffer) else { return }
 
         renderedFrameCount += 1
         // Sparse heartbeat (~every 4s at 30fps) to tell "frames stopped arriving" apart from
@@ -183,7 +197,14 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         }
         enqueue(sampleBuffer, to: inlineDisplayLayer)
         if let _pipBufferDisplayLayer {
-            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
+            // Local self-view only: rotate landscape (sensor-native, face-sideways) frames so the
+            // PiP window always shows the local participant portrait-upright. Remote streams pass
+            // through untouched; the inline tile is untouched for everyone.
+            let pipSampleBuffer =
+                _pipForcesPortrait
+                ? (portraitPiPSampleBuffer(from: pixelBuffer) ?? sampleBuffer)
+                : sampleBuffer
+            enqueue(pipSampleBuffer, to: _pipBufferDisplayLayer)
         }
     }
 
@@ -196,10 +217,52 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         layer.enqueue(sampleBuffer)
     }
 
-    private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
-        guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
-        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: _isMirrored)
-        return createSampleBuffer(from: pixelBuffer)
+    /// Rotates a landscape frame 90° so the PiP window is always portrait; returns `nil` when the
+    /// frame is already portrait (or square), so the caller reuses the unrotated buffer. Called
+    /// under `frameLock`.
+    ///
+    /// - Note: if you'd prefer the face rotated the other way in landscape, change the accelerator's
+    ///   rotate direction (90° clockwise → counter-clockwise).
+    private func portraitPiPSampleBuffer(from pixelBuffer: CVPixelBuffer) -> CMSampleBuffer? {
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        guard width > height else { return nil }
+
+        guard let rotated = dequeueRotatedPixelBuffer(width: height, height: width) else { return nil }
+        _ = accelerator.rotate90Clockwise(pixelBuffer, to: rotated)
+        return createSampleBuffer(from: rotated)
+    }
+
+    /// Dequeues a portrait-dimension BGRA buffer from a dedicated pool. Called under `frameLock`.
+    private func dequeueRotatedPixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
+        if rotatedPixelBufferPool == nil || width != rotatedPoolWidth || height != rotatedPoolHeight {
+            let attributes: [String: Any] = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferIOSurfacePropertiesKey as String: [:],
+            ]
+            var pool: CVPixelBufferPool?
+            guard
+                CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes as CFDictionary, &pool)
+                    == kCVReturnSuccess
+            else {
+                return nil
+            }
+            rotatedPixelBufferPool = pool
+            rotatedPoolWidth = width
+            rotatedPoolHeight = height
+        }
+
+        guard let rotatedPixelBufferPool else { return nil }
+        var pixelBuffer: CVPixelBuffer?
+        guard
+            CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, rotatedPixelBufferPool, &pixelBuffer)
+                == kCVReturnSuccess
+        else {
+            return nil
+        }
+        return pixelBuffer
     }
 
     /// Returns a BGRA pixel buffer from a size-matched pool, (re)creating the pool only when the
