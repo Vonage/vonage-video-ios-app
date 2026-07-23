@@ -102,20 +102,13 @@ struct SessionKeyParserTests {
 
     private func makeJWT(payload: [String: Any]) -> String {
         let header = base64URLEncode(
-            safeJSONSerialization(["alg": "HS256", "typ": "JWT"]))
+            (try? JSONSerialization.data(
+                withJSONObject: ["alg": "HS256", "typ": "JWT"])) ?? Data())
         let payloadData = base64URLEncode(
-            safeJSONSerialization(payload))
+            (try? JSONSerialization.data(
+                withJSONObject: payload)) ?? Data())
         let signature = base64URLEncode(Data("fake-signature-bytes".utf8))
         return "\(header).\(payloadData).\(signature)"
-    }
-
-    private func safeJSONSerialization(_ object: [String: Any]) -> Data {
-        do {
-            return try JSONSerialization.data(withJSONObject: object)
-        } catch {
-            // In tests, this should never fail with valid objects
-            fatalError("Failed to serialize JSON in tests: \(error)")
-        }
     }
 
     private func base64URLEncode(_ data: Data) -> String {

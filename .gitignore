@@ -87,3 +87,11 @@ slather-report/
 setUpInfoPlist.sh
 VERA.entitlements
 EnvironmentConstants.swift
+
+
+# Kiro
+.kiro/specs/
+.kiro/steering/
+.kiro/settings/
+.kiro/settings.json
+.kiro/skills/
