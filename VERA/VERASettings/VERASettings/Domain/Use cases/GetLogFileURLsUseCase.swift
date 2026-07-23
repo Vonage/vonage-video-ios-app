@@ -11,8 +11,8 @@ import Foundation
 ///
 /// ## Usage
 /// ```swift
-/// let getLogFileURLs: GetLogFileURLsUseCase = ...
-/// let urls = getLogFileURLs()
+/// let getLogFileURLsUseCase: GetLogFileURLsUseCase = ...
+/// let urls = getLogFileURLsUseCase()
 /// ```
 public protocol GetLogFileURLsUseCase {
     /// Returns the URLs of available log files.
@@ -21,22 +21,22 @@ public protocol GetLogFileURLsUseCase {
 }
 
 /// Default implementation of ``GetLogFileURLsUseCase`` that retrieves
-/// log file URLs from a provider closure.
+/// log file URLs from a ``LogFileURLDataSource``.
 ///
 /// This bridges the gap between the Settings module and the SDK logging
 /// service, which lives in a different module (`VERAVonage`).
 public final class DefaultGetLogFileURLsUseCase: GetLogFileURLsUseCase {
 
-    private let provider: () -> [URL]
+    private let dataSource: LogFileURLDataSource
 
-    /// Creates a new use case with the given URL provider.
+    /// Creates a new use case with the given data source.
     ///
-    /// - Parameter provider: A closure that returns the current log file URLs.
-    public init(provider: @escaping () -> [URL]) {
-        self.provider = provider
+    /// - Parameter dataSource: The data source that provides log file URLs.
+    public init(dataSource: LogFileURLDataSource) {
+        self.dataSource = dataSource
     }
 
     public func callAsFunction() -> [URL] {
-        provider()
+        dataSource.getLogFileURLs()
     }
 }

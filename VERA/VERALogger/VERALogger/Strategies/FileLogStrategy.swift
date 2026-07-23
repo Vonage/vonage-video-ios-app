@@ -16,6 +16,13 @@ import Foundation
 ///
 /// Thread-safe: uses `NSLock` to serialize file I/O.
 ///
+/// Delegates formatting, rotation, archive management, and file inventory to
+/// dedicated collaborators:
+/// - ``LogEventFormatter`` — formats log events into strings.
+/// - ``LogFileRotator`` — enforces rotation when the file exceeds ``maxFileSize``.
+/// - ``LogFileArchiveManager`` — creates and prunes archive files.
+/// - ``LogFileInventory`` — lists managed log files.
+///
 /// Use ``Builder`` for convenient construction:
 /// ```swift
 /// let strategy = FileLogStrategy.Builder(fileURL: logsDir.appending(component: "app.log"))
@@ -58,50 +65,48 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     private let fileURL: URL
     private let logsDirectory: URL
-    private let maxFileSize: UInt64
     private let rotationPolicy: RotationPolicy
     private let minLevel: LogLevel
-    private let dateFormatter: DateFormatter
-    private let fileNameDateFormatter: DateFormatter
     private let fileManager: FileManager
     private let lock = NSLock()
-    private let archivePrefix: String
+
+    // Collaborators
+    private let formatter: LogEventFormatter
+    private let rotator: LogFileRotator
+    private let inventory: LogFileInventory
 
     // MARK: - Initialisation
 
-    /// Creates a file logging strategy with all dependencies provided explicitly.
+    /// Creates a file logging strategy with pre-built collaborators.
     ///
     /// Prefer using ``Builder`` for convenient construction with sensible defaults.
     ///
     /// - Parameters:
     ///   - fileURL: URL of the active log file.
     ///   - logsDirectory: Directory containing log files.
-    ///   - archivePrefix: Prefix for archive file names (e.g. `"sdk-log-"`).
-    ///   - maxFileSize: Maximum file size in bytes before rotation.
     ///   - rotationPolicy: How to handle a full file.
     ///   - minLevel: Minimum log level written to file.
-    ///   - dateFormatter: Formatter for log line timestamps.
-    ///   - fileNameDateFormatter: Formatter for archive file name timestamps.
+    ///   - formatter: Formatter for log event output.
+    ///   - rotator: Rotator that enforces file size limits.
+    ///   - inventory: Inventory of managed log files.
     ///   - fileManager: File manager instance for file I/O.
     public init(
         fileURL: URL,
         logsDirectory: URL,
-        archivePrefix: String,
-        maxFileSize: UInt64,
         rotationPolicy: RotationPolicy,
         minLevel: LogLevel,
-        dateFormatter: DateFormatter,
-        fileNameDateFormatter: DateFormatter,
+        formatter: LogEventFormatter,
+        rotator: LogFileRotator,
+        inventory: LogFileInventory,
         fileManager: FileManager = .default
     ) {
         self.fileURL = fileURL
         self.logsDirectory = logsDirectory
-        self.archivePrefix = archivePrefix
-        self.maxFileSize = maxFileSize
         self.rotationPolicy = rotationPolicy
         self.minLevel = minLevel
-        self.dateFormatter = dateFormatter
-        self.fileNameDateFormatter = fileNameDateFormatter
+        self.formatter = formatter
+        self.rotator = rotator
+        self.inventory = inventory
         self.fileManager = fileManager
     }
 
@@ -207,15 +212,41 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
             fileNameDateFormatter.dateFormat = FileLogStrategy.archiveDateFormat
             fileNameDateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
-            return FileLogStrategy(
+            let formatter = LogEventFormatter(dateFormatter: dateFormatter)
+
+            let inventory = LogFileInventory(
                 fileURL: fileURL,
                 logsDirectory: logsDirectory,
                 archivePrefix: archivePrefix,
+                archiveSuffix: FileLogStrategy.archiveSuffix,
+                fileManager: _fileManager
+            )
+
+            let archiveManager = LogFileArchiveManager(
+                logsDirectory: logsDirectory,
+                archivePrefix: archivePrefix,
+                archiveSuffix: FileLogStrategy.archiveSuffix,
+                fileNameDateFormatter: fileNameDateFormatter,
+                fileManager: _fileManager,
+                inventory: inventory
+            )
+
+            let rotator = LogFileRotator(
+                fileURL: fileURL,
                 maxFileSize: _maxFileSize,
                 rotationPolicy: _rotationPolicy,
+                archiveManager: archiveManager,
+                fileManager: _fileManager
+            )
+
+            return FileLogStrategy(
+                fileURL: fileURL,
+                logsDirectory: logsDirectory,
+                rotationPolicy: _rotationPolicy,
                 minLevel: _minLevel,
-                dateFormatter: dateFormatter,
-                fileNameDateFormatter: fileNameDateFormatter,
+                formatter: formatter,
+                rotator: rotator,
+                inventory: inventory,
                 fileManager: _fileManager
             )
         }
@@ -229,7 +260,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     public func log(_ event: LogEvent) {
         guard shouldLog(event) else { return }
-        let line = formatEvent(event) + "\n"
+        let line = formatter.format(event) + "\n"
         writeData(line)
     }
 
@@ -264,7 +295,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
             return []
 
         case .rolling:
-            return managedLogFileURLs(sortedNewestFirst: true)
+            return inventory.managedLogFileURLs(sortedNewestFirst: true)
         }
     }
 
@@ -278,7 +309,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
             try? fileManager.removeItem(at: fileURL)
 
         case .rolling:
-            for url in managedLogFileURLs(sortedNewestFirst: false) {
+            for url in inventory.managedLogFileURLs(sortedNewestFirst: false) {
                 try? fileManager.removeItem(at: url)
             }
         }
@@ -286,18 +317,9 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     // MARK: - Formatting
 
-    private func formattedTimestamp(_ timestamp: Date) -> String {
-        dateFormatter.string(from: timestamp)
-    }
-
     /// Formats a log event into a human-readable log line.
     internal func formatEvent(_ event: LogEvent) -> String {
-        let time = formattedTimestamp(event.timestamp)
-        var line = "\(time) [\(event.thread)] [\(event.level)] \(event.tag): \(event.message)"
-        if let error = event.error {
-            line += "\n\(error)"
-        }
-        return line
+        formatter.format(event)
     }
 
     // MARK: - File Operations
@@ -310,7 +332,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
         do {
             try ensureFileExists()
-            rotateIfNeeded(appendingByteCount: UInt64(data.count))
+            rotator.rotateIfNeeded(appendingByteCount: UInt64(data.count))
 
             let handle = try FileHandle(forWritingTo: fileURL)
             defer { try? handle.close() }
@@ -328,118 +350,5 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
         if !fileManager.fileExists(atPath: fileURL.path) {
             fileManager.createFile(atPath: fileURL.path, contents: nil)
         }
-    }
-
-    private func rotateIfNeeded(appendingByteCount: UInt64) {
-        guard
-            let attributes = try? fileManager.attributesOfItem(atPath: fileURL.path),
-            let fileSize = attributes[.size] as? UInt64
-        else {
-            return
-        }
-
-        let (updatedSize, didOverflow) = fileSize.addingReportingOverflow(appendingByteCount)
-        guard didOverflow || updatedSize > maxFileSize else { return }
-
-        switch rotationPolicy {
-        case .truncate:
-            try? Data().write(to: fileURL)
-
-        case .rolling:
-            let archiveURL = logsDirectory.appendingPathComponent(archiveFileName(for: Date()))
-            do {
-                if fileManager.fileExists(atPath: archiveURL.path) {
-                    try fileManager.removeItem(at: archiveURL)
-                }
-                try fileManager.moveItem(at: fileURL, to: archiveURL)
-                fileManager.createFile(atPath: fileURL.path, contents: nil)
-                pruneArchivedFiles()
-            } catch {
-                // Silently ignore — logging should never crash the app.
-            }
-        }
-    }
-
-    // MARK: - Rolling helpers
-
-    private func pruneArchivedFiles() {
-        guard case .rolling(let maxFileCount) = rotationPolicy else { return }
-        let clamped = max(1, maxFileCount)
-        let files = managedLogFileURLs(sortedNewestFirst: false)
-        let excessCount = files.count - clamped
-        guard excessCount > 0 else { return }
-
-        let archiveCandidates = files.filter { $0.lastPathComponent != fileURL.lastPathComponent }
-        for url in archiveCandidates.prefix(excessCount) {
-            try? fileManager.removeItem(at: url)
-        }
-    }
-
-    private func managedLogFileURLs(sortedNewestFirst: Bool) -> [URL] {
-        guard
-            let urls = try? fileManager.contentsOfDirectory(
-                at: logsDirectory,
-                includingPropertiesForKeys: [.contentModificationDateKey],
-                options: [.skipsHiddenFiles]
-            )
-        else {
-            return []
-        }
-
-        return
-            urls
-            .filter(isManagedLogFile)
-            .sorted { lhs, rhs in
-                let leftDate = modificationDate(for: lhs)
-                let rightDate = modificationDate(for: rhs)
-
-                if leftDate == rightDate {
-                    return lhs.lastPathComponent < rhs.lastPathComponent
-                }
-
-                return sortedNewestFirst ? leftDate > rightDate : leftDate < rightDate
-            }
-    }
-
-    private func modificationDate(for url: URL) -> Date {
-        let resourceValues = try? url.resourceValues(forKeys: [.contentModificationDateKey])
-        return resourceValues?.contentModificationDate ?? .distantPast
-    }
-
-    private func isManagedLogFile(_ url: URL) -> Bool {
-        let fileName = url.lastPathComponent
-        if fileName == fileURL.lastPathComponent {
-            return true
-        }
-
-        guard
-            fileName.hasPrefix(archivePrefix),
-            fileName.hasSuffix(Self.archiveSuffix)
-        else {
-            return false
-        }
-
-        let timestamp = String(
-            fileName
-                .dropFirst(archivePrefix.count)
-                .dropLast(Self.archiveSuffix.count)
-        )
-
-        return isTimestampFileName(timestamp)
-    }
-
-    private func isTimestampFileName(_ value: String) -> Bool {
-        guard value.count == 18 else { return false }
-        for (index, character) in value.enumerated() {
-            if index == 8 {
-                guard character == "-" else { return false }
-            } else if !character.isNumber {
-                return false
-            }
-        }
-        return true
-    }
-    private func archiveFileName(for date: Date) -> String {
-        "\(archivePrefix)\(fileNameDateFormatter.string(from: date))\(Self.archiveSuffix)"
     }
 }

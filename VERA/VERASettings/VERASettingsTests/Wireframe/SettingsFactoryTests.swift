@@ -89,7 +89,7 @@ struct SettingsFactoryTests {
             repository: MockSettingsRepository(),
             statsDataSource: MockStatsDataSource(),
             loggingRepository: MockSDKLoggingRepository(),
-            getLogFileURLs: getLogFileURLs
+            getLogFileURLsUseCase: getLogFileURLs
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
@@ -200,7 +200,7 @@ struct SettingsFactoryTests {
             loggingPreferencesLoader: {
                 SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn)
             },
-            getLogFileURLs: getLogFileURLs
+            getLogFileURLsUseCase: getLogFileURLs
         )
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()

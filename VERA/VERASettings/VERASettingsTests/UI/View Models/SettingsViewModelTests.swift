@@ -521,7 +521,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
+            getLogFileURLsUseCase: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
         )
 
         viewModel.sendLogs()
@@ -536,7 +536,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [])
+            getLogFileURLsUseCase: makeGetLogFileURLsUseCase(urls: [])
         )
 
         viewModel.sendLogs()
@@ -565,7 +565,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
+            getLogFileURLsUseCase: makeGetLogFileURLsUseCase(urls: [URL(fileURLWithPath: "/tmp/test.log")])
         )
 
         #expect(viewModel.hasLogFiles == true)
@@ -577,7 +577,7 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: makeGetLogFileURLsUseCase(urls: [])
+            getLogFileURLsUseCase: makeGetLogFileURLsUseCase(urls: [])
         )
 
         #expect(viewModel.hasLogFiles == false)
@@ -701,7 +701,7 @@ struct SettingsViewModelTests {
         ]
         let viewModel = SettingsViewModel(
             repository: repository,
-            getLogFileURLs: makeGetLogFileURLsUseCase(urls: logFileURLs)
+            getLogFileURLsUseCase: makeGetLogFileURLsUseCase(urls: logFileURLs)
         )
 
         #expect(viewModel.logFileURLs == logFileURLs)

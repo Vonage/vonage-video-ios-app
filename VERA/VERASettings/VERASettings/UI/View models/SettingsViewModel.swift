@@ -117,7 +117,7 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Current log file URLs returned by the injected use case.
     public var logFileURLs: [URL] {
-        getLogFileURLs()
+        getLogFileURLsUseCase()
     }
 
     /// Whether the logging configuration has been modified from its initial state.
@@ -156,7 +156,7 @@ public final class SettingsViewModel: ObservableObject {
     private let loggingRepository: SDKLoggingRepository
 
     /// Use case for retrieving shareable SDK log file URLs.
-    private let getLogFileURLs: GetLogFileURLsUseCase
+    private let getLogFileURLsUseCase: GetLogFileURLsUseCase
 
     /// Tracks the original persisted logging toggle to decide cleanup behavior.
     private var initialLoggingEnabled: Bool = false
@@ -190,7 +190,7 @@ public final class SettingsViewModel: ObservableObject {
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
     ///   - loggingRepository: Repository for SDK logging preferences..
     ///   - initialLoggingPreferences: Synchronously loaded logging preferences for immediate UI state. Defaults to `.default`.
-    ///   - getLogFileURLs: Use case for retrieving shareable log file URLs. Defaults to `nil`.
+    ///   - getLogFileURLsUseCase: Use case for retrieving shareable log file URLs. Defaults to a null data source.
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
     public init(
         repository: PublisherSettingsRepository,
@@ -198,15 +198,14 @@ public final class SettingsViewModel: ObservableObject {
         autoSaveDebounce: TimeInterval = 0.3,
         loggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(),
         initialLoggingPreferences: SDKLoggingPreferences = .default,
-        getLogFileURLs: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(provider: {
-            return []
-        })
+        getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+            dataSource: NullLogFileURLDataSource())
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
         self.loggingRepository = loggingRepository
-        self.getLogFileURLs = getLogFileURLs
+        self.getLogFileURLsUseCase = getLogFileURLsUseCase
         self.isLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
         self.sdkLogLevel = initialLoggingPreferences.logLevel
         self.initialLoggingEnabled = initialLoggingPreferences.isLoggingEnabled

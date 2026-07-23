@@ -31,7 +31,7 @@ public final class SettingsFactory {
     private let loggingRepository: SDKLoggingRepository
 
     /// Use case for retrieving shareable SDK log file URLs.
-    private let getLogFileURLs: GetLogFileURLsUseCase
+    private let getLogFileURLsUseCase: GetLogFileURLsUseCase
 
     /// Synchronous loader for SDK logging preferences, used to provide
     /// immediate initial state when creating view models.
@@ -44,21 +44,20 @@ public final class SettingsFactory {
     ///   - statsDataSource: Source of real-time network statistics.
     ///   - loggingRepository: Repository for SDK logging preferences.
     ///   - loggingPreferencesLoader: Synchronous loader for logging preferences. Defaults to `nil`.
-    ///   - getLogFileURLs: Use case for retrieving shareable SDK log file URLs. Defaults to `nil`.
+    ///   - getLogFileURLsUseCase: Use case for retrieving shareable SDK log file URLs. Defaults to a null data source.
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
         loggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(),
         loggingPreferencesLoader: (() -> SDKLoggingPreferences)? = nil,
-        getLogFileURLs: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(provider: {
-            return []
-        })
+        getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+            dataSource: NullLogFileURLDataSource())
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
         self.loggingRepository = loggingRepository
         self.loggingPreferencesLoader = loggingPreferencesLoader
-        self.getLogFileURLs = getLogFileURLs
+        self.getLogFileURLsUseCase = getLogFileURLsUseCase
     }
 
     // MARK: - Settings View
@@ -75,7 +74,7 @@ public final class SettingsFactory {
             repository: repository,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
-            getLogFileURLs: getLogFileURLs
+            getLogFileURLsUseCase: getLogFileURLsUseCase
         )
         return SettingsView(viewModel: viewModel)
     }
@@ -131,7 +130,7 @@ public final class SettingsFactory {
             repository: repository,
             loggingRepository: loggingRepository,
             initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
-            getLogFileURLs: getLogFileURLs
+            getLogFileURLsUseCase: getLogFileURLsUseCase
         )
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,

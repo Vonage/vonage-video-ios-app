@@ -4,27 +4,54 @@
 
 import SwiftUI
 
-/// Logging section content: SDK logging toggle, level, and log sharing action.
-struct LoggingSectionView: View {
+/// Coordinator that observes the ``SettingsViewModel`` and maps its state
+/// to bindings consumed by ``LoggingSectionView`` (stateless presentation).
+///
+/// Follows the Screen / View two-tier pattern used elsewhere in VERASettings
+/// (see ``StatisticsSectionScreen`` for reference).
+struct LoggingSectionScreen: View {
 
     @ObservedObject var viewModel: SettingsViewModel
 
     var body: some View {
-        Section {
-            Toggle("Enable SDK Logging".localized, isOn: $viewModel.isLoggingEnabled)
+        LoggingSectionView(
+            isLoggingEnabled: $viewModel.isLoggingEnabled,
+            sdkLogLevel: $viewModel.sdkLogLevel,
+            loggingSettingsChanged: viewModel.loggingSettingsChanged,
+            onSendLogs: { viewModel.sendLogs() }
+        )
+    }
+}
 
-            Picker("Log Level".localized, selection: $viewModel.sdkLogLevel) {
+// MARK: - LoggingSectionView
+
+/// Pure presentation component for the logging section.
+/// Contains no ViewModel references — receives only bindings and values.
+struct LoggingSectionView: View {
+
+    @Binding var isLoggingEnabled: Bool
+    @Binding var sdkLogLevel: SDKLogLevel
+    var loggingSettingsChanged: Bool
+    var onSendLogs: (() -> Void)?
+
+    var body: some View {
+        Section {
+            Toggle("Enable SDK Logging".localized, isOn: $isLoggingEnabled)
+
+            Picker("Log Level".localized, selection: $sdkLogLevel) {
                 ForEach(SDKLogLevel.allCases) { level in
                     Text(level.displayName).tag(level)
                 }
             }
-            .disabled(!viewModel.isLoggingEnabled)
+            .disabled(!isLoggingEnabled)
 
             #if canImport(UIKit)
-                Button("Send Logs".localized) {
-                    viewModel.sendLogs()
+                if let onSendLogs {
+                    Button("Send Logs".localized) {
+                        onSendLogs()
+                    }
+                    .disabled(!isLoggingEnabled)
                 }
-                .disabled(!viewModel.isLoggingEnabled)
             #endif
         } header: {
             Text("Logging".localized)
@@ -33,7 +60,7 @@ struct LoggingSectionView: View {
                 Text(
                     "When enabled, Vonage SDK logs are saved to files that can be shared for troubleshooting."
                         .localized)
-                if viewModel.loggingSettingsChanged {
+                if loggingSettingsChanged {
                     Text(
                         "Please close and reopen the app for SDK logging changes to take effect."
                             .localized
@@ -48,9 +75,33 @@ struct LoggingSectionView: View {
 // MARK: - Previews
 
 #if DEBUG
-    #Preview {
+    #Preview("Via Screen") {
         Form {
-            LoggingSectionView(viewModel: .previewWithLoggingEnabled)
+            LoggingSectionScreen(viewModel: .previewWithLoggingEnabled)
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    #Preview("Pure View - Enabled") {
+        Form {
+            LoggingSectionView(
+                isLoggingEnabled: .constant(true),
+                sdkLogLevel: .constant(.debug),
+                loggingSettingsChanged: false,
+                onSendLogs: {}
+            )
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    #Preview("Pure View - Changed") {
+        Form {
+            LoggingSectionView(
+                isLoggingEnabled: .constant(true),
+                sdkLogLevel: .constant(.warn),
+                loggingSettingsChanged: true,
+                onSendLogs: {}
+            )
         }
         .preferredColorScheme(.dark)
     }

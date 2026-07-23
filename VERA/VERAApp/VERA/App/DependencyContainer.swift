@@ -224,14 +224,14 @@ final class DependencyContainer {
         }()
 
         lazy var getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
-            provider: sdkLoggingService.getLogFileURLs)
+            dataSource: SDKLogFileURLDataSource(provider: sdkLoggingService.getLogFileURLs))
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
             statsDataSource: InMemoryStatsRepository(),
             loggingRepository: sdkLoggingRepository,
             loggingPreferencesLoader: sdkLoggingRepository.loadPreferencesSync,
-            getLogFileURLs: getLogFileURLsUseCase)
+            getLogFileURLsUseCase: getLogFileURLsUseCase)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

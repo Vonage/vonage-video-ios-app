@@ -528,15 +528,38 @@ struct FileLogStrategyTests {
         fndf.dateFormat = FileLogStrategy.archiveDateFormat
         fndf.locale = Locale(identifier: "en_US_POSIX")
 
-        let strategy = FileLogStrategy(
+        let formatter = LogEventFormatter(dateFormatter: df)
+
+        let inventory = LogFileInventory(
             fileURL: logFileURL,
             logsDirectory: logsDir,
             archivePrefix: "test-",
+            archiveSuffix: ".log"
+        )
+
+        let archiveManager = LogFileArchiveManager(
+            logsDirectory: logsDir,
+            archivePrefix: "test-",
+            archiveSuffix: ".log",
+            fileNameDateFormatter: fndf,
+            inventory: inventory
+        )
+
+        let rotator = LogFileRotator(
+            fileURL: logFileURL,
             maxFileSize: 500,
             rotationPolicy: .rolling(maxFileCount: 3),
+            archiveManager: archiveManager
+        )
+
+        let strategy = FileLogStrategy(
+            fileURL: logFileURL,
+            logsDirectory: logsDir,
+            rotationPolicy: .rolling(maxFileCount: 3),
             minLevel: .debug,
-            dateFormatter: df,
-            fileNameDateFormatter: fndf
+            formatter: formatter,
+            rotator: rotator,
+            inventory: inventory
         )
 
         strategy.log(makeEvent(level: .info, message: "direct init"))

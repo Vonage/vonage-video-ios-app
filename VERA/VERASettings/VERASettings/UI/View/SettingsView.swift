@@ -109,7 +109,7 @@ public struct SettingsView: View {
                     viewModel: viewModel,
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
-                LoggingSectionView(viewModel: viewModel)
+                LoggingSectionScreen(viewModel: viewModel)
                 GeneralSectionView(viewModel: viewModel)
             }
             .navigationTitle("Settings".localized)
@@ -190,7 +190,7 @@ public struct SettingsView: View {
                     statisticsViewModel: hasStatisticsViewModel ? statisticsViewModel : nil
                 )
             case .logging:
-                LoggingSectionView(viewModel: viewModel)
+                LoggingSectionScreen(viewModel: viewModel)
             }
         }
         .id(section)

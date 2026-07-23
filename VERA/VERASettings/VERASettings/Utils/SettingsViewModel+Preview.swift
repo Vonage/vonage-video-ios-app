@@ -84,7 +84,7 @@
             SettingsViewModel(
                 repository: PreviewSettingsRepository(),
                 loggingRepository: PreviewSDKLoggingRepository(),
-                getLogFileURLs: PreviewGetLogFileURLsUseCase())
+                getLogFileURLsUseCase: PreviewGetLogFileURLsUseCase())
         }
 
         static var previewWithStatsEnabled: SettingsViewModel {
@@ -95,7 +95,7 @@
                 repository: repo,
                 settingsPreference: prefs,
                 loggingRepository: PreviewSDKLoggingRepository(),
-                getLogFileURLs: PreviewGetLogFileURLsUseCase())
+                getLogFileURLsUseCase: PreviewGetLogFileURLsUseCase())
         }
 
         static var previewWithLoggingEnabled: SettingsViewModel {
@@ -103,7 +103,7 @@
                 repository: PreviewSettingsRepository(),
                 loggingRepository: PreviewSDKLoggingRepository(),
                 initialLoggingPreferences: SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .debug),
-                getLogFileURLs: PreviewGetLogFileURLsUseCase()
+                getLogFileURLsUseCase: PreviewGetLogFileURLsUseCase()
             )
         }
     }
