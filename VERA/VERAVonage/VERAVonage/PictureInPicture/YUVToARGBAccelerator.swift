@@ -14,31 +14,6 @@ final class YUVToARGBAccelerator {
         _ = configureYpCbCrToARGBInfo()
     }
 
-    /// Rotates a BGRA pixel buffer 90° clockwise into `dest`, which must have its width/height
-    /// swapped relative to `source`. Locks both buffers. Change the rotation constant to `3` for
-    /// counter-clockwise.
-    func rotate90Clockwise(_ source: CVPixelBuffer, to dest: CVPixelBuffer) -> vImage_Error {
-        CVPixelBufferLockBaseAddress(source, .readOnly)
-        CVPixelBufferLockBaseAddress(dest, [])
-        defer {
-            CVPixelBufferUnlockBaseAddress(source, .readOnly)
-            CVPixelBufferUnlockBaseAddress(dest, [])
-        }
-
-        var src = vImage_Buffer(
-            data: CVPixelBufferGetBaseAddress(source),
-            height: vImagePixelCount(CVPixelBufferGetHeight(source)),
-            width: vImagePixelCount(CVPixelBufferGetWidth(source)),
-            rowBytes: CVPixelBufferGetBytesPerRow(source))
-        var dst = vImage_Buffer(
-            data: CVPixelBufferGetBaseAddress(dest),
-            height: vImagePixelCount(CVPixelBufferGetHeight(dest)),
-            width: vImagePixelCount(CVPixelBufferGetWidth(dest)),
-            rowBytes: CVPixelBufferGetBytesPerRow(dest))
-        var backColor: [UInt8] = [0, 0, 0, 0]
-        return vImageRotate90_ARGB8888(&src, &dst, UInt8(1), &backColor, vImage_Flags(kvImageNoFlags))
-    }
-
     private func configureYpCbCrToARGBInfo() -> vImage_Error {
         var pixelRange = vImage_YpCbCrPixelRange(
             Yp_bias: 0,

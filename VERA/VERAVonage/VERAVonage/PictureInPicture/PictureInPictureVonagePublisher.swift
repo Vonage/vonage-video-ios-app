@@ -63,9 +63,6 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
         guard !isInlineRendererAttached, !isScreenshare else { return }
         isInlineRendererAttached = true
         updateInlineRendererMirroring()
-        // Local self-view only: keep the PiP window portrait-upright even though backgrounded
-        // capture delivers sensor-native landscape frames. Remote renderers never set this.
-        inlineVideoRenderer.pipForcesPortrait = true
         otPublisher.videoRender = inlineVideoRenderer
         // The SDK pauses its capture pipeline on resign-active by default, which would blank PiP;
         // during a call the local video must keep flowing in the background.
