@@ -6,8 +6,7 @@ import Combine
 
 @testable import VERAAudioDiagnostics
 
-@MainActor
-public final class MockSpeakerTestService: SpeakerTestService {
+public final class MockSpeakerTestService: SpeakerTestService, @unchecked Sendable {
     private let audioLevelSubject = PassthroughSubject<Float, Never>()
 
     public var audioLevelPublisher: AnyPublisher<Float, Never> {

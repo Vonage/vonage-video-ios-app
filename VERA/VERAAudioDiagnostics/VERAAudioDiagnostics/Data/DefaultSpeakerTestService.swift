@@ -15,7 +15,11 @@ import os.log
 /// Listens to audio route changes and automatically restarts playback when the route changes,
 /// ensuring audio plays through the newly selected output device.
 ///
-/// Pass a custom `audioPlayerFactory` in tests to avoid requiring real audio hardware.
+/// Configures the shared `AVAudioSession` to match the configuration used by CallKit and the
+/// Vonage Video SDK (`OTDefaultAudioDeviceIOS`) so that audio intensity remains consistent
+/// between the waiting room and the meeting room.
+///
+/// - SeeAlso: ``AudioDiagnosticsConstants``
 public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unchecked Sendable {
 
     /// Logger for audio diagnostics operations.
@@ -42,7 +46,11 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     deinit {
         #if os(iOS)
             if isObservingAudioRoutes {
-                NotificationCenter.default.removeObserver(self)
+                NotificationCenter.default.removeObserver(
+                    self,
+                    name: AVAudioSession.routeChangeNotification,
+                    object: nil
+                )
             }
         #endif
     }
@@ -93,7 +101,9 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
             switch reason {
             case .newDeviceAvailable, .oldDeviceUnavailable, .override, .categoryChange:
                 // Restart playback on the new route
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + AudioDiagnosticsConstants.RouteChange.restartDelay
+                ) { [weak self] in
                     self?.restartPlayback()
                 }
             default:
@@ -125,31 +135,15 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         stopMonitoring()
         player?.stop()
 
-        #if os(iOS)
-            // Configure audio session (iOS only)
-            // Use .playAndRecord with .defaultToSpeaker to ensure speaker is an option
-            do {
-                let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(
-                    .playAndRecord,
-                    mode: .voiceChat,  // voiceChat mode works better with AVRoutePickerView
-                    options: [
-                        .allowBluetoothA2DP,
-                        .defaultToSpeaker,  // Makes speaker the default, but allows route changes
-                    ]
-                )
-                try audioSession.setActive(true)
-            } catch {
-                logger.error("Failed to configure audio session: \(error.localizedDescription)")
-            }
-        #endif
+        configureAudioSession()
 
         if player == nil {
             do {
                 let newPlayer = try generateTonePlayerUseCase()
                 newPlayer.delegate = self
                 newPlayer.isMeteringEnabled = true
-                newPlayer.numberOfLoops = -1  // Loop continuously
+                newPlayer.numberOfLoops = AudioDiagnosticsConstants.AudioPlayback.infiniteLoops
+                newPlayer.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
                 newPlayer.prepareToPlay()
                 newPlayer.play()
                 player = newPlayer
@@ -161,6 +155,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         } else {
             // Reuse existing player - restart playback
             player?.currentTime = 0
+            player?.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
             player?.play()
         }
 
@@ -168,9 +163,59 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         startMonitoring()
     }
 
+    /// Configures the shared `AVAudioSession` to match the configuration used by CallKit and
+    /// the Vonage Video SDK (`OTDefaultAudioDeviceIOS`).
+    ///
+    /// This ensures that the audio session category, mode, sample rate, and buffer duration
+    /// remain consistent when transitioning between the waiting room and the meeting room,
+    /// so audio intensity does not change.
+    private func configureAudioSession() {
+        #if os(iOS)
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(
+                    .playAndRecord,
+                    mode: .videoChat,
+                    options: [
+                        .allowBluetoothHFP,
+                        .allowBluetoothA2DP,
+                    ]
+                )
+
+                // Match Vonage SDK sample rate, input channels and buffer duration exactly
+                try audioSession.setPreferredSampleRate(
+                    AudioDiagnosticsConstants.AudioSessionConfig.sampleRate
+                )
+                try audioSession.setPreferredInputNumberOfChannels(
+                    AudioDiagnosticsConstants.AudioSessionConfig.inputNumberOfChannels
+                )
+                try audioSession.setPreferredIOBufferDuration(
+                    AudioDiagnosticsConstants.AudioSessionConfig.ioBufferDuration
+                )
+
+                try audioSession.setActive(true)
+
+                // Manual audio route selection for speaker preference
+                // (replaces the removed .defaultToSpeaker option)
+                let currentRoute = audioSession.currentRoute
+                let hasOnlyEarpiece = currentRoute.outputs.allSatisfy {
+                    $0.portType == .builtInReceiver
+                }
+                if currentRoute.outputs.isEmpty || hasOnlyEarpiece {
+                    try audioSession.overrideOutputAudioPort(.speaker)
+                }
+            } catch {
+                logger.error("Failed to configure audio session: \(error.localizedDescription)")
+            }
+        #endif
+    }
+
     private func startMonitoring() {
-        // Update levels every 0.05 seconds (50ms) for smooth animation
-        levelTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+        // Update levels every 50ms for smooth animation
+        levelTimer = Timer.scheduledTimer(
+            withTimeInterval: AudioDiagnosticsConstants.LevelMetering.updateInterval,
+            repeats: true
+        ) { [weak self] _ in
             self?.updateAudioLevel()
         }
     }
@@ -179,7 +224,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         isPlaying = false
         levelTimer?.invalidate()
         levelTimer = nil
-        audioLevelSubject.send(0.0)
+        audioLevelSubject.send(AudioDiagnosticsConstants.AudioPlayback.silentAudioLevel)
     }
 
     private func updateAudioLevel() {
@@ -191,14 +236,24 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
         // Update metering
         player.updateMeters()
 
-        // Get average power for channel 0 (mono or left channel)
+        // Get average power for the mono / left channel.
         // Range: -160 dB (silence) to 0 dB (max)
-        let averagePower = player.averagePower(forChannel: 0)
+        let averagePower = player.averagePower(
+            forChannel: AudioDiagnosticsConstants.LevelMetering.meteringChannel
+        )
 
         // Convert dB to linear scale (0.0 to 1.0)
-        // Use -50 dB as minimum threshold for better visual feedback
-        let minDb: Float = -50.0
-        let normalizedLevel = max(0.0, min(1.0, (averagePower - minDb) / (0 - minDb)))
+        // Use minDecibels as minimum threshold for better visual feedback
+        let minDb = AudioDiagnosticsConstants.LevelMetering.minDecibels
+        let maxDb = AudioDiagnosticsConstants.LevelMetering.maxDecibels
+        let range = maxDb - minDb
+        let normalizedLevel = max(
+            AudioDiagnosticsConstants.AudioPlayback.silentAudioLevel,
+            min(
+                AudioDiagnosticsConstants.AudioPlayback.maxVolume,
+                (averagePower - minDb) / range
+            )
+        )
 
         audioLevelSubject.send(normalizedLevel)
     }

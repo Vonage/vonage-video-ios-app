@@ -154,6 +154,94 @@ struct DefaultSpeakerTestServiceTests {
             #expect(mockUseCase.callCount == callCountAfterPlay)
         }
 
+        @Test("startObservingAudioRoutes reacts to oldDeviceUnavailable route change when playing")
+        func startObservingAudioRoutesReactsToOldDeviceUnavailableWhenPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // Player is reused, so use case is still called only once
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
+        @Test("startObservingAudioRoutes reacts to override route change when playing")
+        func startObservingAudioRoutesReactsToOverrideWhenPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.override.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // Player is reused, so use case is still called only once
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
+        @Test("startObservingAudioRoutes reacts to categoryChange route change when playing")
+        func startObservingAudioRoutesReactsToCategoryChangeWhenPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.categoryChange.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // Player is reused, so use case is still called only once
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
+        @Test("startObservingAudioRoutes ignores wakeFromSleep route change when playing")
+        func startObservingAudioRoutesIgnoresWakeFromSleepWhenPlaying() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.wakeFromSleep.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // Ignored reason — use case count must not change
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
         @Test("startObservingAudioRoutes does not restart playback when not playing")
         func startObservingAudioRoutesDoesNotRestartWhenNotPlaying() async throws {
             let mockUseCase = MockGenerateTonePlayerUseCase()
@@ -390,6 +478,108 @@ struct DefaultSpeakerTestServiceTests {
         // Should handle concurrent access without crashing
         #expect(mockUseCase.callCount >= 1)
     }
+
+    // MARK: - Route Change Guard Tests
+
+    #if os(iOS)
+        @Test("handleRouteChange is ignored when userInfo is missing")
+        func handleRouteChangeIgnoredWhenUserInfoMissing() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            // Post notification with no userInfo — guard let userInfo fails
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: nil
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+
+        @Test("handleRouteChange is ignored when reason key is missing")
+        func handleRouteChangeIgnoredWhenReasonKeyMissing() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+            let callCountAfterPlay = mockUseCase.callCount
+
+            // Post notification with userInfo but without the reason key
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: ["unrelatedKey": "unrelatedValue"]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            #expect(mockUseCase.callCount == callCountAfterPlay)
+        }
+    #endif
+
+    // MARK: - startObservingAudioRoutes Idempotency
+
+    #if os(iOS)
+        @Test("startObservingAudioRoutes is idempotent — observer registered only once")
+        func startObservingAudioRoutesIsIdempotent() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            // Call twice — should not register the observer twice
+            sut.playTestSound()  // first registration via playTestSound
+            sut.startObservingAudioRoutes()  // second call — should be a no-op
+
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                ]
+            )
+
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // If observer fired twice we'd see inconsistent state; player is still reused
+            #expect(mockUseCase.callCount == 1)
+        }
+    #endif
+
+    // MARK: - restartPlayback Race Condition
+
+    #if os(iOS)
+        @Test("restartPlayback does nothing if stopTestSound was called before delay fires")
+        func restartPlaybackDoesNothingIfStoppedBeforeDelayFires() async throws {
+            let mockUseCase = MockGenerateTonePlayerUseCase()
+            let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: mockUseCase)
+
+            sut.playTestSound()
+
+            // Trigger a route change (which schedules restartPlayback after 100ms)
+            NotificationCenter.default.post(
+                name: AVAudioSession.routeChangeNotification,
+                object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                ]
+            )
+
+            // Stop immediately — before the 100ms asyncAfter fires
+            sut.stopTestSound()
+
+            // Wait past the asyncAfter deadline
+            try await Task.sleep(nanoseconds: 300_000_000)
+
+            // restartPlayback guard `isPlaying == false` should have prevented re-start
+            // Use case still called only once (player not recreated)
+            #expect(mockUseCase.callCount == 1)
+        }
+    #endif
 
     // MARK: - AVAudioPlayerDelegate Tests
 

@@ -10,8 +10,7 @@ import VERAAudioDiagnostics
 ///
 /// This mock provides controllable audio level streams without requiring actual audio hardware,
 /// making it ideal for snapshot tests where visual appearance is validated.
-@MainActor
-final class MockSpeakerTestService: SpeakerTestService {
+final class MockSpeakerTestService: SpeakerTestService, @unchecked Sendable {
 
     // MARK: - Properties
 

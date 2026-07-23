@@ -29,10 +29,10 @@ public struct DefaultGenerateTonePlayerUseCase: GenerateTonePlayerUseCase {
     /// - Throws: ``TonePlayerGenerationError/audioDataGenerationFailed`` if tone generation fails,
     ///   or ``TonePlayerGenerationError/playerInitializationFailed(underlyingError:)`` if `AVAudioPlayer` init throws.
     public func callAsFunction() throws -> AVAudioPlayer {
-        let sampleRate: Float = 44100.0
-        let duration = 1.0
-        let frequency = 440.0  // A4 note
-        let amplitude: Float = 0.5
+        let sampleRate = AudioDiagnosticsConstants.ToneGeneration.sampleRate
+        let duration = AudioDiagnosticsConstants.ToneGeneration.duration
+        let frequency = AudioDiagnosticsConstants.ToneGeneration.frequency
+        let amplitude = AudioDiagnosticsConstants.ToneGeneration.amplitude
 
         let frameCount = Int(sampleRate * Float(duration))
 
@@ -41,7 +41,7 @@ public struct DefaultGenerateTonePlayerUseCase: GenerateTonePlayerUseCase {
             let audioFormat = AVAudioFormat(
                 commonFormat: .pcmFormatInt16,
                 sampleRate: Double(sampleRate),
-                channels: 1,
+                channels: AudioDiagnosticsConstants.ToneGeneration.channelCount,
                 interleaved: true
             )
         else {

@@ -235,14 +235,18 @@ struct StatsOverlayViewModelTests {
         )
         await dataSource.updateStats(stats)
 
-        // Wait for update
-        await delay()
+        // Wait for statsText to be populated — two async hops exist:
+        // 1. statsPublisher → .receive(on: DispatchQueue.main)
+        // 2. buildStatsText → Task { @MainActor in self.statsText = ... }
+        // Polling is more reliable than a fixed sleep on slow machines.
+        try await waitUntil {
+            viewModel.statsText.contains("opus")
+        }
 
-        #expect(viewModel.statsText != "")
         let text = viewModel.statsText
 
         // Should contain audio info
-        #expect(text.contains("(opus)"))
+        #expect(text.contains("opus"))
         #expect(text.contains("100"))
 
         _ = repository

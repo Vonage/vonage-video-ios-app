@@ -11,7 +11,6 @@ import Testing
 @testable import VERAAudioDiagnostics
 
 @Suite("MockSpeakerTestService tests")
-@MainActor
 struct MockSpeakerTestServiceTests {
 
     // MARK: - Initialization Tests
