@@ -12,7 +12,7 @@ struct SettingsBottomItemPresenter: BottomItemPresentable {
 
     var id: String { "settings-button" }
     var label: String { String(localized: "Settings", bundle: .veraSettings) }
-    var accessibilityIdentifier: String? { nil }
+    var accessibilityIdentifier: String? { "meeting-room-settings-button" }
     var image: Image { VERACommonUIAsset.Images.gearSolid.swiftUIImage }
     var isActive: Bool { false }
     var accessory: BottomBarButtonAccessory? { nil }

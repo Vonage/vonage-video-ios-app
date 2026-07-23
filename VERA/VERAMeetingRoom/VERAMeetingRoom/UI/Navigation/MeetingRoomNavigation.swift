@@ -16,6 +16,13 @@ public protocol MeetingRoomDestination {
 
     func presentMicrophonePermissionAlert()
 
+    func presentForceMuteConfirmation(
+        message: String,
+        confirmTitle: String,
+        cancelTitle: String,
+        onConfirm: @escaping () -> Void
+    )
+
     func goToSettings()
 }
 
@@ -61,6 +68,22 @@ public struct MeetingRoomNavigation: MeetingRoomDestination {
         let alert = AlertItem.microphonePermissionAlert {
             goToSettings()
         }
+        actionHandler(.presentAlert(alert))
+    }
+
+    public func presentForceMuteConfirmation(
+        message: String,
+        confirmTitle: String,
+        cancelTitle: String,
+        onConfirm: @escaping () -> Void
+    ) {
+        let alert = AlertItem(
+            title: message,
+            message: "",
+            okAction: confirmTitle,
+            cancelAction: cancelTitle,
+            onConfirm: onConfirm
+        )
         actionHandler(.presentAlert(alert))
     }
 

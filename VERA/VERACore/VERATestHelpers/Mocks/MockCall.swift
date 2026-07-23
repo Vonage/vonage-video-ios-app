@@ -40,6 +40,8 @@ public class MockCall: CallFacade {
     public var isMuted: Bool = false
     public var isOnHold: Bool = false
     public var areCaptionsEnabled = false
+    public var forceMutedParticipantIDs: [String] = []
+    public var forceMuteError: Swift.Error?
 
     public enum CallActions: String {
         case connect
@@ -80,6 +82,13 @@ public class MockCall: CallFacade {
         recordedActions.append(.muteLocalMedia)
     }
 
+    public func forceMuteParticipant(id: String) async throws {
+        if let forceMuteError {
+            throw forceMuteError
+        }
+        forceMutedParticipantIDs.append(id)
+    }
+
     public func setOnHold(_ isOnHold: Bool) {
         self.isOnHold = isOnHold
         recordedActions.append(.setOnHold)
@@ -99,5 +108,11 @@ public class MockCall: CallFacade {
 
     public func disableNetworkStats() {}
 
-    public func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
+    public func enableSubscriberExtraStats() {}
+
+    public func disableSubscriberExtraStats() {}
+
+    public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+
+    public func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
 }

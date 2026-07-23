@@ -158,6 +158,129 @@ struct NetworkStatsCollectorTests {
         cancellable.cancel()
     }
 
+    @Test("Publisher combines and sorts video layers from all destinations")
+    func publisherCombinesAndSortsVideoLayers() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(width: 1280, height: 720, bitrate: 1_500_000),
+                    makeVideoLayer(width: 320, height: 180, bitrate: 150_000),
+                ]
+            ),
+            MockVideoSendStats(
+                packetsSent: 300,
+                packetsLost: 15,
+                bytesSent: 3000,
+                timestamp: 3.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 500_000)
+                ]
+            ),
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.map(\.width) == [320, 640, 1280])
+        #expect(receivedStats?.sentVideo?.packetsSent == 200)
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher deduplicates video layers and keeps latest sample")
+    func publisherDeduplicatesVideoLayers() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 400_000)
+                ]
+            ),
+            MockVideoSendStats(
+                packetsSent: 300,
+                packetsLost: 15,
+                bytesSent: 3000,
+                timestamp: 3.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 500_000)
+                ]
+            ),
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.count == 1)
+        #expect(layers?.first?.bitrate == 500_000)
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher keeps layers with the same resolution and different scalability modes")
+    func publisherKeepsLayersWithDifferentScalabilityModes() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2_000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(
+                        width: 640,
+                        height: 360,
+                        bitrate: 400_000,
+                        scalabilityMode: "L1T1"
+                    ),
+                    makeVideoLayer(
+                        width: 640,
+                        height: 360,
+                        bitrate: 500_000,
+                        scalabilityMode: "L1T2"
+                    ),
+                ]
+            )
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.count == 2)
+        #expect(layers?.map(\.scalabilityMode) == ["L1T1", "L1T2"])
+
+        cancellable.cancel()
+    }
+
     // MARK: - Subscriber Audio Stats Tests
 
     @Test("Subscriber audio stats update correctly")
@@ -633,5 +756,23 @@ struct NetworkStatsCollectorTests {
         #expect(receivedStats?.subscriberStats.isEmpty == true)
 
         cancellable.cancel()
+    }
+
+    private func makeVideoLayer(
+        width: Int32,
+        height: Int32,
+        bitrate: Int64,
+        scalabilityMode: String? = nil
+    ) -> OTPublisherKitVideoLayerStats {
+        OTPublisherKitVideoLayerStats(
+            width: width,
+            height: height,
+            encodedFrameRate: 30,
+            bitrate: bitrate,
+            totalBitrate: bitrate,
+            scalabilityMode: scalabilityMode,
+            qualityLimitationReason: .none,
+            codec: "VP8"
+        )
     }
 }

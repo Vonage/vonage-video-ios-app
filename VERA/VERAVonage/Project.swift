@@ -33,6 +33,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAVonage"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
+                .project(target: "VERAMeetingRoom", path: "../VERAMeetingRoom"),
             ],
             settings: createBaseBuildSettings()
         ),

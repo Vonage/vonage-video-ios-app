@@ -36,6 +36,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Whether sender statistics should be displayed for debugging purposes.
     public var senderStatsEnabled: Bool
 
+    /// Whether the stats overlay should be visible in the meeting room.
+    public var statsOverlayEnabled: Bool
+
     /// The degradation preference policy for adapting frame rate and resolution.
     public var degradationPreference: SettingsDegradationPreference
 
@@ -57,6 +60,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
+    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
     public init(
@@ -69,6 +73,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         publisherAudioFallbackEnabled: Bool = true,
         subscriberAudioFallbackEnabled: Bool = true,
         senderStatsEnabled: Bool = false,
+        statsOverlayEnabled: Bool = true,
         degradationPreference: SettingsDegradationPreference = .notSet,
         opusDtxEnabled: Bool = true
     ) {
@@ -81,6 +86,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.senderStatsEnabled = senderStatsEnabled
+        self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
     }
@@ -119,6 +125,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             subscriberAudioFallbackEnabled = legacy
         }
         senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
+        statsOverlayEnabled = try container.decodeIfPresent(Bool.self, forKey: .statsOverlayEnabled) ?? true
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
@@ -144,6 +151,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case publisherAudioFallbackEnabled
         case subscriberAudioFallbackEnabled
         case senderStatsEnabled
+        case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
         /// Old key kept for migration only.
@@ -165,6 +173,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(publisherAudioFallbackEnabled, forKey: .publisherAudioFallbackEnabled)
         try container.encode(subscriberAudioFallbackEnabled, forKey: .subscriberAudioFallbackEnabled)
         try container.encode(senderStatsEnabled, forKey: .senderStatsEnabled)
+        try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
     }
@@ -177,6 +186,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.publisherAudioFallbackEnabled == rhs.publisherAudioFallbackEnabled
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled
             && lhs.senderStatsEnabled == rhs.senderStatsEnabled
+            && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
     }

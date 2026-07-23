@@ -34,6 +34,7 @@ struct ParticipantsBadgeButton: View {
             BadgeView(badgeCount: participantsCount),
             alignment: .topTrailing
         )
+        .accessibilityIdentifier(MeetingRoomAccessibilityID.participantsButton)
     }
 }
 

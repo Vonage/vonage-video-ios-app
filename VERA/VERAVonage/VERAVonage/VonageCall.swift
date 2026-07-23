@@ -119,6 +119,7 @@ public final class VonageCall: CallFacade {
 
     /// Tracks whether network stats collection is currently active.
     private var isNetworkStatsEnabled = false
+    private var isSubscriberExtraStatsEnabled = false
 
     /// A publisher that emits aggregated network statistics, never fails.
     ///
@@ -158,6 +159,9 @@ public final class VonageCall: CallFacade {
     private let activeSpeakerTracker = ActiveSpeakerTracker()
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
+
+    /// Test seam used to resolve a participant stream without changing the public initializer.
+    var participantStreamResolver: ((String) async -> OTStream?)?
 
     /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
     ///
@@ -304,6 +308,11 @@ public final class VonageCall: CallFacade {
     }
 
     private func setupPublisherObservation(_ publisher: VonagePublisher) {
+        publisher.onMuteForced = { [weak self] in
+            self?.updateMediaState()
+            self?._eventsPublisher.send(.muteForced)
+        }
+
         publisher.$participant
             .sink { [weak self] participant in
                 guard let self = self else { return }
@@ -564,6 +573,22 @@ public final class VonageCall: CallFacade {
         }
     }
 
+    // MARK: Participant moderation
+
+    public func forceMuteParticipant(id: String) async throws {
+        let stream: OTStream?
+        if let participantStreamResolver {
+            stream = await participantStreamResolver(id)
+        } else {
+            stream = await callStateManager.getSubscriber(id: id)?.stream
+        }
+
+        guard let stream else {
+            throw ParticipantForceMuteError.participantNotFound
+        }
+        try session.forceMute(stream: stream)
+    }
+
     // MARK: Signals
 
     private var callParams: [String: String] {
@@ -786,6 +811,27 @@ public final class VonageCall: CallFacade {
         await updateParticipantsState(state)
     }
 
+    /// Applies live-updatable publisher settings to the current publisher without recreating it.
+    ///
+    /// This is used for settings that Vonage can mutate on the active `OTPublisher`
+    /// instance in place during a call.
+    @MainActor
+    public func updateLivePublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async {
+        guard _callState.value == .connected else { return }
+
+        if let videoBitratePreset = advancedSettings.videoBitratePreset {
+            publisher.otPublisher.videoBitratePreset = videoBitratePreset.otBitratePreset
+        }
+
+        if let maxVideoBitrate = advancedSettings.maxVideoBitrate {
+            publisher.otPublisher.maxVideoBitrate = maxVideoBitrate
+        }
+
+        if let degradationPreference = advancedSettings.degradationPreference {
+            publisher.otPublisher.degradationPreference = degradationPreference.otDegradationPreference
+        }
+    }
+
     // MARK: Network Stats
 
     /// Starts collecting network statistics from the SDK.
@@ -807,6 +853,32 @@ public final class VonageCall: CallFacade {
                 self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
             }
         }
+    }
+
+    /// Requests the extra subscriber-only stats without affecting publisher stats.
+    ///
+    /// This keeps the shared network stats pipeline alive while selectively
+    /// enriching subscriber metrics with RTC stats reports.
+    public func enableSubscriberExtraStats() {
+        guard !isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            for subscriber in subscribers {
+                self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
+            }
+        }
+    }
+
+    /// Stops requesting extra subscriber-only RTC stats.
+    ///
+    /// The underlying network stats collection remains active so publisher
+    /// metrics continue to flow for the Participant Stats UI.
+    public func disableSubscriberExtraStats() {
+        guard isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = false
     }
 
     /// Stops collecting network statistics and clears cached data.

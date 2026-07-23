@@ -30,11 +30,23 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 #   ./scripts/run-maestro-tests.sh --online-mode .maestro/flows/launch-app.yaml
 FLOW_ARG=""
 VERA_E2E_MOCKS_VALUE=1
+MOCK_ONLY_MARKER="# vera-runner: mock-only"
+# Derive a vera:// URL for deep link E2E tests.
+# openLink with https:// opens Safari on the simulator; the custom vera:// scheme
+# routes directly to the app. The host is preserved so HandleUniversalLink can
+# still match it against baseURL (host-only comparison, scheme-agnostic).
+DEEP_LINK_TEST_URL=$(echo "${BASE_API_URL%/}" | sed 's|^https://|vera://|')
+echo -e "${BLUE}Deep link test URL: $DEEP_LINK_TEST_URL${NC}\n"
 
 print_usage() {
     echo -e "${YELLOW}Usage:${NC}"
     echo -e "  ./scripts/run-maestro-tests.sh [--online-mode] [flow-name.yaml]"
     echo -e "  ./scripts/run-maestro-tests.sh [flow-name.yaml] [--online-mode]"
+}
+
+is_mock_only_flow() {
+    local flow="$1"
+    [ -f "$flow" ] && grep -q "^$MOCK_ONLY_MARKER" "$flow"
 }
 
 for arg in "$@"; do
@@ -79,6 +91,12 @@ if [ "$VERA_E2E_MOCKS_VALUE" -eq 1 ]; then
     echo -e "${BLUE}▶ E2E mocks enabled${NC}\n"
 else
     echo -e "${BLUE}▶ Online mode enabled: using real services${NC}\n"
+fi
+
+if [ "$VERA_E2E_MOCKS_VALUE" -eq 0 ] && [ -f "$FLOW_TARGET" ] && is_mock_only_flow "$FLOW_TARGET"; then
+    echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$FLOW_TARGET")${NC}"
+    echo -e "${GREEN}✅ No online Maestro tests to run for this flow.${NC}"
+    exit 0
 fi
 
 # ============================================================================
@@ -152,8 +170,10 @@ APP_ID="com.vonage.VERA"
 WORKSPACE="VERA/VERA.xcworkspace"
 BUILD_DIR="DerivedData"
 
-# Auto-detect simulator: use env var, or find best available iPhone
-if [ -n "$SIMULATOR_DEVICE" ]; then
+# Auto-detect simulator: use arg, env var, or find best available iPhone
+if [ -n "$DEVICE_ARG" ]; then
+    DEVICE="$DEVICE_ARG"
+elif [ -n "$SIMULATOR_DEVICE" ]; then
     DEVICE="$SIMULATOR_DEVICE"
 else
     echo -e "${BLUE}🔍 Auto-detecting simulator...${NC}"
@@ -401,9 +421,26 @@ xcrun simctl privacy "$SIMULATOR_ID" grant camera "$APP_ID"
 xcrun simctl privacy "$SIMULATOR_ID" grant microphone "$APP_ID"
 echo -e "${GREEN}✓ Permissions granted${NC}\n"
 
+# Prime the LaunchServices URL-scheme database by briefly launching the app.
+# Without this, xcrun simctl openurl (used by Maestro for deep-link tests) can
+# return error 115 ("no app registered for scheme") immediately after installation
+# because the simulator's LS cache hasn't been populated yet.
+echo -e "${YELLOW}🔗 Priming URL scheme registry...${NC}"
+xcrun simctl launch "$SIMULATOR_ID" "$APP_ID" 2>/dev/null || true
+sleep 2
+xcrun simctl terminate "$SIMULATOR_ID" "$APP_ID" 2>/dev/null || true
+echo -e "${GREEN}✓ URL scheme registry primed${NC}\n"
+
 # ============================================================================
 # 7. Run Maestro Tests
 # ============================================================================
+
+# Derive a vera:// URL for deep link E2E tests.
+# openLink with https:// opens Safari on the simulator; the custom vera:// scheme
+# routes directly to the app. The host is preserved so HandleUniversalLink can
+# still match it against baseURL (host-only comparison, scheme-agnostic).
+DEEP_LINK_TEST_URL=$(echo "${BASE_API_URL%/}" | sed 's|^https://|vera://|')
+echo -e "${BLUE}Deep link test URL: $DEEP_LINK_TEST_URL${NC}\n"
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}   🧪 Running Maestro UI Tests${NC}"
@@ -411,15 +448,71 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 
 mkdir -p test-reports
 
-if maestro test \
-    --config .maestro/config.yaml \
-    --env APP_ID="$APP_ID" \
-    --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
-    "$FLOW_TARGET"; then
-    TEST_RESULT=0
-else
-    TEST_RESULT=$?
+capture_simulator_logs() {
     xcrun simctl spawn "$SIMULATOR_ID" log show --style syslog --last 30m > test-reports/os-simulator.log || true
+}
+
+run_maestro_flow() {
+    local flow="$1"
+    local flow_name
+    flow_name=$(basename "$flow")
+
+    echo -e "${BLUE}▶ Running flow: $flow_name${NC}"
+
+    if maestro test \
+        --config .maestro/config.yaml \
+        --env APP_ID="$APP_ID" \
+        --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
+        --env DEEP_LINK_TEST_URL="$DEEP_LINK_TEST_URL" \
+        "$flow"; then
+        return 0
+    else
+        local flow_result=$?
+        capture_simulator_logs
+        return "$flow_result"
+    fi
+}
+
+TEST_RESULT=0
+SKIPPED_FLOWS=0
+
+if [ "$VERA_E2E_MOCKS_VALUE" -eq 0 ]; then
+    if [ -d "$FLOW_TARGET" ]; then
+        for flow in $(find "$FLOW_TARGET" \( -name "*.yaml" -o -name "*.yml" \) | sort); do
+            if is_mock_only_flow "$flow"; then
+                echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$flow")${NC}"
+                SKIPPED_FLOWS=$((SKIPPED_FLOWS + 1))
+                continue
+            fi
+
+            FLOW_RESULT=0
+            run_maestro_flow "$flow" || FLOW_RESULT=$?
+            if [ "$FLOW_RESULT" -ne 0 ]; then
+                TEST_RESULT="$FLOW_RESULT"
+            fi
+        done
+    elif is_mock_only_flow "$FLOW_TARGET"; then
+        echo -e "${YELLOW}⏭️  Skipping mock-only flow in online mode: $(basename "$FLOW_TARGET")${NC}"
+        SKIPPED_FLOWS=$((SKIPPED_FLOWS + 1))
+    else
+        FLOW_RESULT=0
+        run_maestro_flow "$FLOW_TARGET" || FLOW_RESULT=$?
+        if [ "$FLOW_RESULT" -ne 0 ]; then
+            TEST_RESULT="$FLOW_RESULT"
+        fi
+    fi
+else
+    if maestro test \
+        --config .maestro/config.yaml \
+        --env APP_ID="$APP_ID" \
+        --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
+        --env DEEP_LINK_TEST_URL="$DEEP_LINK_TEST_URL" \
+        "$FLOW_TARGET"; then
+        TEST_RESULT=0
+    else
+        TEST_RESULT=$?
+        capture_simulator_logs
+    fi
 fi
 
 echo ""
@@ -429,6 +522,10 @@ if [ $TEST_RESULT -eq 0 ]; then
     echo -e "${GREEN}✅ All Maestro tests passed!${NC}"
 else
     echo -e "${RED}❌ Some tests failed (exit code: $TEST_RESULT)${NC}"
+fi
+
+if [ "$SKIPPED_FLOWS" -gt 0 ]; then
+    echo -e "${YELLOW}⏭️  Mock-only flows skipped in online mode: $SKIPPED_FLOWS${NC}"
 fi
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"

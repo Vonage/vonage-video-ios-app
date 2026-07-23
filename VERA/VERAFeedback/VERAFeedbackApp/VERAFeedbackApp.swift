@@ -10,7 +10,9 @@ struct VERAFeedbackDemoApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                FeedbackSheetContent(feedbackReportUseCase: NullFeedbackReportUseCase())
+                FeedbackSheetContent(
+                    feedbackReportUseCase: NullFeedbackReportUseCase()
+                )
             }
         }
     }

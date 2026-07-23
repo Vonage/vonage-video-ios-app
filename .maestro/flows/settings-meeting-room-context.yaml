@@ -1,0 +1,117 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+# Open Settings from Meeting Room
+# The settings button is in the overflow menu
+# First tap the more-options button to reveal the menu
+- tapOn:
+    id: "meeting-room-more-options-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Now tap the settings button from the overflow menu
+- tapOn:
+    id: "meeting-room-settings-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Assert editable controls are visible in Meeting Room context
+# Video section controls (visible at top)
+- assertVisible:
+    id: "settings-video-bitrate-picker"
+
+- assertVisible:
+    id: "settings-video-degradation-picker"
+
+# Assert locked controls in Video section
+- assertVisible:
+    id: "settings-codec-mode-locked"
+
+- assertVisible:
+    id: "settings-frame-rate-locked"
+
+- assertVisible:
+    id: "settings-resolution-locked"
+
+# Screenshot: Video section with some controls locked
+- takeScreenshot: 01-settings-meeting-room-video-section
+
+# Scroll to reveal audio section locked controls
+- swipe:
+    direction: "UP"
+    duration: 500
+
+- assertVisible:
+    id: "settings-audio-bitrate-locked"
+
+- assertVisible:
+    id: "settings-opus-dtx-locked"
+
+- assertVisible:
+    id: "settings-publisher-fallback-locked"
+
+- assertVisible:
+    id: "settings-subscriber-fallback-locked"
+
+# Screenshot: Audio section with all controls locked
+- takeScreenshot: 02-settings-meeting-room-audio-section-locked
+
+# Scroll more to reveal General section
+- swipe:
+    direction: "UP"
+    duration: 500
+
+# General section - overlay stats toggle is always editable
+- assertVisible:
+    id: "settings-overlay-stats-toggle"
+
+# Assert Reset to Defaults button is NOT visible in Meeting Room context
+- assertNotVisible:
+    id: "settings-reset-defaults-button"
+
+# Screenshot: General section without reset button
+- takeScreenshot: 03-settings-meeting-room-general-section

@@ -117,26 +117,16 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         guard let first = stats.first else { return }
         lastPublisherName = publisher.name ?? ""
 
-        let layers = first.videoLayers.map { layer in
-            VideoLayerStats(
-                width: layer.width,
-                height: layer.height,
-                encodedFrameRate: layer.encodedFrameRate,
-                bitrate: layer.bitrate,
-                totalBitrate: layer.totalBitrate,
-                codec: layer.codec,
-                scalabilityMode: layer.scalabilityMode,
-                qualityLimitationReason: mapQualityLimitation(layer.qualityLimitationReason)
-            )
-        }
+        let layers = mergedVideoLayers(from: stats)
+        let primaryLayer = first.videoLayers.first
 
         lastVideoSend = VideoSendStats(
             packetsSent: first.videoPacketsSent,
             packetsLost: first.videoPacketsLost,
             bytesSent: first.videoBytesSent,
             timestamp: first.timestamp,
-            videoCodec: layers.first?.codec,
-            videoFrameRate: layers.first?.encodedFrameRate ?? 0,
+            videoCodec: primaryLayer?.codec ?? layers.first?.codec,
+            videoFrameRate: primaryLayer?.encodedFrameRate ?? layers.first?.encodedFrameRate ?? 0,
             startTime: first.startTime,
             videoLayers: layers
         )
@@ -337,6 +327,53 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         case .codecChange: .codec
         case .resolutionChange: .resolution
         default: .none
+        }
+    }
+
+    private struct VideoLayerKey: Hashable {
+        let width: Int32
+        let height: Int32
+        let scalabilityMode: String
+    }
+
+    private func mergedVideoLayers(
+        from stats: [OTPublisherKitVideoNetworkStats]
+    ) -> [VideoLayerStats] {
+        var layersByKey: [VideoLayerKey: (timestamp: Double, layer: VideoLayerStats)] = [:]
+
+        for videoStats in stats {
+            for layer in videoStats.videoLayers {
+                let key = VideoLayerKey(
+                    width: layer.width,
+                    height: layer.height,
+                    scalabilityMode: layer.scalabilityMode ?? ""
+                )
+                if let existing = layersByKey[key], existing.timestamp > videoStats.timestamp {
+                    continue
+                }
+                layersByKey[key] = (
+                    videoStats.timestamp,
+                    VideoLayerStats(
+                        width: layer.width,
+                        height: layer.height,
+                        encodedFrameRate: layer.encodedFrameRate,
+                        bitrate: layer.bitrate,
+                        totalBitrate: layer.totalBitrate,
+                        codec: layer.codec,
+                        scalabilityMode: layer.scalabilityMode,
+                        qualityLimitationReason: mapQualityLimitation(layer.qualityLimitationReason)
+                    )
+                )
+            }
+        }
+
+        return layersByKey.values.map(\.layer).sorted {
+            let lhsPixels = Int64($0.width) * Int64($0.height)
+            let rhsPixels = Int64($1.width) * Int64($1.height)
+            if lhsPixels != rhsPixels {
+                return lhsPixels < rhsPixels
+            }
+            return ($0.scalabilityMode ?? "") < ($1.scalabilityMode ?? "")
         }
     }
 

@@ -21,7 +21,7 @@ struct BottomItemPresentersTests {
 
         #expect(sut.id == "settings-button")
         #expect(sut.label == String(localized: "Settings"))
-        #expect(sut.accessibilityIdentifier == nil)
+        #expect(sut.accessibilityIdentifier != nil)
         #expect(sut.isActive == false)
         #expect(sut.accessory == nil)
         #expect(sut.overflowSelectionBehavior == .dismissBeforeAction)

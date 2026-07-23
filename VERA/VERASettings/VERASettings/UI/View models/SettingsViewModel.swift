@@ -276,11 +276,10 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Reverts all settings to their default values and persists the changes.
     /// This resets both the local state and the persisted preferences.
-    public func resetToDefaults() {
-        Task { @MainActor in
-            await repository.reset()
-            setAsDefault()
-        }
+    @MainActor
+    public func resetToDefaults() async {
+        await repository.reset()
+        setAsDefault()
     }
 
     // MARK: - Private

@@ -35,6 +35,4 @@ public final class MockArchivingDataSource: ArchivingDataSource {
 
         return stopResponse ?? .init(archiveId: "123")
     }
-
-
 }

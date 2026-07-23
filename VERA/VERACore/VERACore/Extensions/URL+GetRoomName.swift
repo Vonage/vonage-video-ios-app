@@ -3,12 +3,13 @@
 //
 
 import Foundation
+import VERADomain
 
 extension URL {
-    /// Extracts the room name from a meeting URL
+    /// Extracts the room identifier from a meeting URL
     /// - Parameter baseURL: The base domain URL
-    /// - Returns: The room name or nil if not valid
-    public func getRoomName(from baseURL: URL) -> String? {
+    /// - Returns: The room identifier or nil if not valid
+    public func getRoomIdentifier(from baseURL: URL) -> RoomIdentifier? {
 
         let selfHost = self.host?.lowercased()
         let baseHost = baseURL.host?.lowercased()
@@ -31,20 +32,36 @@ extension URL {
             return nil
         }
 
-        let roomName = pathComponents[roomIndex + 1]
+        let roomDescriptor = pathComponents[roomIndex + 1]
+
+        if roomDescriptor.isJWT {
+            return SessionKeyRoomIdentifier(sessionKey: roomDescriptor)
+        }
 
         // Validate room name
-        guard !roomName.isEmpty,
-            roomName != "/",
-            !roomName.hasPrefix("."),  // No hidden files
-            !roomName.contains("/"),  // No additional slashes
-            !roomName.contains("?"),  // No query params (shouldn't happen with pathComponents)
-            !roomName.contains("#"),  // No fragments (shouldn't happen with pathComponents)
-            roomName.allSatisfy({ $0.isASCII })  // ASCII only
+        guard !roomDescriptor.isEmpty,
+            roomDescriptor != "/",
+            !roomDescriptor.hasPrefix("."),  // No hidden files
+            !roomDescriptor.contains("/"),  // No additional slashes
+            !roomDescriptor.contains("?"),  // No query params (shouldn't happen with pathComponents)
+            !roomDescriptor.contains("#"),  // No fragments (shouldn't happen with pathComponents)
+            roomDescriptor.allSatisfy({ $0.isASCII })  // ASCII only
         else {
             return nil
         }
 
-        return roomName
+        return PlainRoomIdentifier(roomName: roomDescriptor)
+    }
+}
+
+extension String {
+    var isJWT: Bool {
+        let parts = split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.count == 3 else { return false }
+
+        let base64URLCharacters = CharacterSet.alphanumerics.union(.init(charactersIn: "-_"))
+        return parts.allSatisfy {
+            !$0.isEmpty && CharacterSet(charactersIn: String($0)).isSubset(of: base64URLCharacters)
+        }
     }
 }

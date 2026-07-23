@@ -7,11 +7,14 @@ import Foundation
 public actor E2EBackendStore {
     public static let shared = E2EBackendStore()
 
+    private let scenario: any E2ETestScenario
     private var sessionsByKey: [String: E2ESession] = [:]
     private var sessionKeyByRoomName: [String: String] = [:]
     private var archivesBySessionKey: [String: [E2EArchive]] = [:]
 
-    public init() {}
+    public init(scenario: any E2ETestScenario = E2EConfiguration.scenario) {
+        self.scenario = scenario
+    }
 
     func response(for endpoint: E2EEndpoint, requestBody: Data?) async throws -> Data {
         switch endpoint {
@@ -132,9 +135,18 @@ public actor E2EBackendStore {
     }
 
     private func ensureCaptionsEnabled() -> Data {
-        E2EHTTPResponseBuilder.envelope([
-            "captionsId": "e2e-captions-\(UUID().uuidString.lowercased())"
+        let captionsId =
+            captionsFixtureMode == .deterministic
+            ? "e2e-captions-deterministic"
+            : "e2e-captions-\(UUID().uuidString.lowercased())"
+
+        return E2EHTTPResponseBuilder.envelope([
+            "captionsId": captionsId
         ])
+    }
+
+    private var captionsFixtureMode: E2EFixtureMode? {
+        (scenario.fixture as? any E2ECaptionsScenarioFixture)?.mode
     }
 
     private func downloadableArchives(for sessionKey: String) -> [E2EArchive] {

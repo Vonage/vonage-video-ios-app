@@ -33,6 +33,11 @@ import VERAVonage
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
 
+    #if DEBUG
+        @StateObject private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
+        @State private var isMeetingRoomCustomizationMenuPresented = false
+    #endif
+
     var dependencyContainer: DependencyContainer = {
         let httpClient = AppHTTPClientProvider(
             isE2EEnabled: E2EConfiguration.isEnabled
@@ -91,6 +96,11 @@ struct VERAApp: App {
                 handleUniversalLink(url)
             }
             .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            #if DEBUG
+                .sheet(isPresented: $isMeetingRoomCustomizationMenuPresented) {
+                    MeetingRoomCustomizationMenu(provider: meetingRoomCustomizationProvider)
+                }
+            #endif
         }
     }
 
@@ -156,6 +166,14 @@ struct VERAApp: App {
         }
 
         return waitingRoomFactory.make(viewModel: waitingRoomViewModel)
+            #if DEBUG
+                .toolbar(.visible, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        meetingRoomCustomizationMenuTrigger
+                    }
+                }
+            #endif
             .onDisappear {
                 // Required if the user goes back to the landing page
                 dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
@@ -201,6 +219,20 @@ struct VERAApp: App {
 
         return buttons
     }
+
+    #if DEBUG
+        private var meetingRoomCustomizationMenuTrigger: some View {
+            Button {
+                isMeetingRoomCustomizationMenuPresented = true
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("meeting-room-customization-menu-trigger")
+        }
+    #endif
 
     /// Creates the meeting room using the SDK builder, replacing ~200 lines
     /// of manual dependency wiring, plugin registration, and overlay composition.
@@ -259,6 +291,9 @@ struct VERAApp: App {
                 .sessionRepositoryFactory(E2EMeetingRoomSessionRepositoryFactory())
                 .archivingDataSourceFactory(E2EMeetingRoomArchivingDataSourceFactory())
         }
+        #if DEBUG
+            builder.uiProvider(meetingRoomCustomizationProvider)
+        #endif
 
         let result = builder.build()
         navigationCoordinator.meetingRoomViewModel = result.viewModel
