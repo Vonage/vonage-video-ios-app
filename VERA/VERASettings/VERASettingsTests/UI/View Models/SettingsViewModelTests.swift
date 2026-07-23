@@ -52,7 +52,7 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.isLoggingEnabled == true)
-        #expect(viewModel.sdkLogLevel == .error)
+        #expect(viewModel.sdkLogLevel == .debug)
         #expect(viewModel.hasLogFiles == false)
         #expect(viewModel.isPresented == true)
     }

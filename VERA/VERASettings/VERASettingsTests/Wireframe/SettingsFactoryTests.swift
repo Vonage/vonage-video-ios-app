@@ -171,7 +171,7 @@ struct SettingsFactoryTests {
 
         let view = factory.makeSettingsView()
         #expect(view.viewModel.isLoggingEnabled == true)
-        #expect(view.viewModel.sdkLogLevel == .error)
+        #expect(view.viewModel.sdkLogLevel == .debug)
     }
 
     @Test("makeMeetingRoomViewModels uses default logging preferences when loader is nil")
@@ -185,7 +185,7 @@ struct SettingsFactoryTests {
 
         let (viewModel, _) = factory.makeMeetingRoomViewModels()
         #expect(viewModel.isLoggingEnabled == true)
-        #expect(viewModel.sdkLogLevel == .error)
+        #expect(viewModel.sdkLogLevel == .debug)
     }
 
     @Test("Factory passes all dependencies to meeting room view models")
