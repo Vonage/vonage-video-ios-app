@@ -1,0 +1,14 @@
+VERA/Project.swift
+  h_5ddc9d372ac6a1 208,211-212,238-239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "454e770c91eb1434730cf725f308676b8022eb71",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
