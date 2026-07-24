@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct LoginView: View {
     @EnvironmentObject var authManager: OktaAuthManager
@@ -10,14 +11,12 @@ struct LoginView: View {
     var body: some View {
         VStack(spacing: 24) {
             // SPIKE: Using SF Symbol as safe fallback
-            // Replace with actual VERA logo asset once confirmed
             Image(systemName: "video.circle.fill")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 80)
-                .foregroundColor(.blue)
 
-            Text("Sign in to VERA")
+            Text("Log in to VERA")
                 .font(.title2)
                 .fontWeight(.semibold)
 
@@ -28,8 +27,8 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
-
-            Button {
+            
+            FilledButton(text: Text("Sign in with Okta"), image: Image(systemName: "lock.shield")) {
                 Task {
                     let window = UIApplication.shared
                         .connectedScenes
@@ -38,13 +37,6 @@ struct LoginView: View {
                         .first(where: { $0.isKeyWindow })
                     await authManager.signIn(from: window)
                 }
-            } label: {
-                Label("Sign in with Okta", systemImage: "lock.shield")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
             }
             .padding(.horizontal, 32)
         }

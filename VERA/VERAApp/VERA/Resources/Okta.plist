@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict>
-    <key>issuer_url</key>
-    <string>https://launchpadtest.vonage.com</string>
-    <key>client_id</key>
-    <string>0oa2riw7qgnnUp8nO0h8</string>
-    <key>redirect_uri</key>
-    <string>https://meet.vonagenetworks.net/api/auth/callback/okta</string>
-    <key>logout_redirect_uri</key>
-    <string>https://meet.vonagenetworks.net</string>
-    <key>scope</key>
-    <string>openid profile offline_access</string>
-  </dict>
+<dict>
+	<key>issuer_url</key>
+	<string>https://login.okta.vonage.com</string>
+	<key>client_id</key>
+	<string>0oakkpqg8jPFmRxun0i7</string>
+	<key>redirect_uri</key>
+	<string>https://meet.vonagenetworks.net/api/auth/callback/okta</string>
+	<key>logout_redirect_uri</key>
+	<string>https://meet.vonagenetworks.net</string>
+	<key>scope</key>
+	<string>openid profile offline_access</string>
+</dict>
 </plist>
