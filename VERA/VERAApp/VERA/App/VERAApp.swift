@@ -12,7 +12,6 @@ import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
-import OktaOidc
 
 #if ARCHIVING_ENABLED
     import VERAArchiving
@@ -54,7 +53,7 @@ struct VERAApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationCoordinator.path) {
-                if navigationCoordinator.isAuthenticated {
+                if authManager.isAuthenticated {
                     makeLandingPage()
                         .navigationDestination(for: AppRoute.self) { destination in
                             switch destination {
@@ -96,7 +95,15 @@ struct VERAApp: App {
             .environmentObject(authManager) // SPIKE: inject auth manager
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
             .onOpenURL { url in
-                handleUniversalLink(url)
+                // Handle both Universal Links and Okta callback
+                if url.scheme == "com.vonage.VERA" {
+                    // Okta redirect — OktaOidc handles this internally
+                    // via its ASWebAuthenticationSession; no explicit
+                    // handling needed here for the PKCE flow.
+                    // Leave this comment as a marker for the spike review.
+                } else {
+                    handleUniversalLink(url)
+                }
             }
             .onAppear {
                 // SPIKE: bind auth state to coordinator

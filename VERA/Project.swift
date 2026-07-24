@@ -205,11 +205,11 @@ private func createPackages() -> [Package] {
         packages.append(.vonageVideoTransformersSDK)
     }
 
-    // OKTA Spike
+    // SPIKE: Okta Mobile Swift (replaces legacy okta-oidc-ios)
     packages.append(
         .remote(
-            url: "https://github.com/okta/okta-oidc-ios.git",
-            requirement: .upToNextMajor(from: "3.11.7")
+            url: "https://github.com/okta/okta-mobile-swift.git",
+            requirement: .upToNextMajor(from: "2.1.5")
         )
     )
 
@@ -235,8 +235,8 @@ private func createDependencies() -> [TargetDependency] {
         // SDK module handles meeting room dependency wiring and all feature modules
         .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
         .project(target: "VERAE2E", path: "VERAE2E"),
-        // SPIKE: Okta OIDC
-        .package(product: "OktaOidc"),
+        // SPIKE: Okta BrowserSignin (from okta-mobile-swift)
+        .package(product: "BrowserSignin"),
     ]
 
     // The following dependencies are still needed directly by VERAApp

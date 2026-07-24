@@ -1,9 +1,11 @@
 //
 //  Created by Vonage on 13/07/2026.
 //
+// VERA — Okta Auth Spike (okta-mobile-swift)
 
 import Foundation
-import OktaOidc
+import AuthFoundation
+import BrowserSignin
 import UIKit
 
 @MainActor
@@ -16,98 +18,68 @@ final class OktaAuthManager: ObservableObject {
     @Published var userEmail: String?
     @Published var error: String?
 
-    // MARK: - Private
-
-    private let oktaOidc: OktaOidc
-    private var stateManager: OktaOidcStateManager?
-
     // MARK: - Init
 
     init() {
-        // Reads from Okta.plist automatically
-        guard let oidc = try? OktaOidc() else {
-            fatalError("[OktaAuthManager] Failed to initialise OktaOidc — check Okta.plist")
-        }
-        self.oktaOidc = oidc
-        restoreSession()
+        //restoreSession()
     }
 
     // MARK: - Session Restoration (cold launch)
 
     private func restoreSession() {
-        guard let manager = OktaOidcStateManager
-            .readFromSecureStorage(for: oktaOidc.configuration) else {
-            isAuthenticated = false
-            return
+        // Credential.default is non-nil if a token was previously stored
+        if let credential = Credential.default {
+            accessToken = credential.token.accessToken
+            userEmail = credential.userInfo?.email
+            isAuthenticated = true
         }
-        stateManager = manager
-        accessToken = manager.accessToken
-        isAuthenticated = manager.accessToken != nil
     }
 
     // MARK: - Sign In
 
-    func signIn(from viewController: UIViewController) {
+    func signIn(from window: UIWindow?) async {
         error = nil
-        oktaOidc.signInWithBrowser(from: viewController) { [weak self] manager, err in
-            guard let self else { return }
-            if let err {
-                self.error = err.localizedDescription
-                return
-            }
-            guard let manager else { return }
-
-            // Persist to Keychain
-            manager.writeToSecureStorage()
-
-            self.stateManager = manager
-            self.accessToken = manager.accessToken
-            self.isAuthenticated = true
-
-            // Optionally fetch user info
-            manager.getUser { response, _ in
-                if let email = response?["email"] as? String {
-                    Task { @MainActor in self.userEmail = email }
-                }
-            }
+        do {
+            // BrowserSignin.shared reads Okta.plist automatically
+            // Opens ASWebAuthenticationSession — no UIViewController needed
+            guard let token = try await BrowserSignin.shared?.signIn(from: window) else { return }
+            let credential = try Credential.store(token)
+            accessToken = credential.token.accessToken
+            userEmail = credential.userInfo?.email
+            print(accessToken, userEmail ?? "")
+            isAuthenticated = true
+        } catch {
+            print(error.localizedDescription)
+            self.error = error.localizedDescription
         }
     }
 
     // MARK: - Sign Out
 
-    func signOut(from viewController: UIViewController) {
-        guard let manager = stateManager else { return }
-
-        // Revoke tokens + clear session + remove from Keychain
-        let options: OktaSignOutOptions = .allOptions
-        oktaOidc.signOut(
-            authStateManager: manager,
-            from: viewController,
-            progressHandler: { _ in },
-            completionHandler: { [weak self] success, _ in
-                guard let self else { return }
-                if success {
-                    self.stateManager = nil
-                    self.accessToken = nil
-                    self.userEmail = nil
-                    self.isAuthenticated = false
-                } else {
-                    self.error = "Sign out failed — please try again"
-                }
-            }
-        )
+    func signOut(from window: UIWindow?) async {
+        guard let credential = Credential.default else { return }
+        do {
+            // Revokes tokens + clears Keychain + ends Okta browser session
+            try await BrowserSignin.shared?.signOut(from: window, credential: credential)
+            try credential.remove()
+            accessToken = nil
+            userEmail = nil
+            isAuthenticated = false
+        } catch {
+            self.error = error.localizedDescription
+        }
     }
 
     // MARK: - Token Refresh
 
-    func renewTokensIfNeeded() {
-        stateManager?.renew { [weak self] _, err in
-            if let err {
-                Task { @MainActor in
-                    self?.error = err.localizedDescription
-                    self?.isAuthenticated = false
-                }
-            }
+    func renewIfNeeded() async {
+        guard let credential = Credential.default else { return }
+        do {
+            try await credential.refreshIfNeeded()
+            accessToken = credential.token.accessToken
+        } catch {
+            self.error = error.localizedDescription
+            isAuthenticated = false
         }
     }
 }

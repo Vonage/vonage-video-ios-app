@@ -2,15 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
-    <key>issuer</key>
-    <string>https://login.okta.vonage.com</string>
-    <key>clientId</key>
+    <key>issuer_url</key>
+    <string>https://launchpadtest.vonage.com</string>
+    <key>client_id</key>
     <string>0oa2riw7qgnnUp8nO0h8</string>
-    <key>redirectUri</key>
-    <string>com.vonage.VERA://callback</string>
-    <key>logoutRedirectUri</key>
-    <string>com.vonage.VERA://logout</string>
-    <key>scopes</key>
+    <key>redirect_uri</key>
+    <string>https://meet.vonagenetworks.net/api/auth/callback/okta</string>
+    <key>logout_redirect_uri</key>
+    <string>https://meet.vonagenetworks.net</string>
+    <key>scope</key>
     <string>openid profile offline_access</string>
   </dict>
 </plist>
