@@ -1,0 +1,28 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/YUVToARGBAccelerator.swift
+  s_514d36addd0530::t_1aabccbb7a90b2 17-41
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  s_514d36addd0530::t_45f8a34301ef0f 207
+  s_514d36addd0530::t_0fe1519e003b0c 71-75
+  s_514d36addd0530::t_bd59716d59ceea 220-265
+  s_514d36addd0530::t_0cbd2664e2e784 182-186
+  s_514d36addd0530::t_3ec8e3aaa05836 41-51
+  s_514d36addd0530::t_3dcd3f1e7f769d 200-206
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVonagePublisher.swift
+  s_514d36addd0530::t_e7e3519fc82591 66-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "0459e4bfdc350c5ccb8f878dad6a2419737ae77f",
+  "prompts": {},
+  "sessions": {
+    "s_514d36addd0530": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2419a37-25ac-487f-bb3c-bd34c8764069",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
