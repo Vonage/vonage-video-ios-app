@@ -1,0 +1,387 @@
+//
+//  Created by Vonage on 21/6/26.
+//
+
+import AVFoundation
+import Foundation
+import OSLog
+import OpenTok
+import UIKit
+
+/// Custom `OTVideoRender` that displays inline video and feeds frames into PiP.
+final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
+    private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
+
+    lazy var inlineDisplayLayer: AVSampleBufferDisplayLayer = {
+        let layer = AVSampleBufferDisplayLayer()
+        layer.videoGravity = .resizeAspect
+        return layer
+    }()
+    /// The PiP window's display layer while this renderer's participant is the PiP target — wired
+    /// by `PictureInPictureController.attachFeed(to:)`, cleared by the orchestrator on retarget.
+    /// Written on the main actor, read on OpenTok's video thread — guarded by `frameLock`.
+    var pipBufferDisplayLayer: AVSampleBufferDisplayLayer? {
+        get { withFrameLock { _pipBufferDisplayLayer } }
+        set { withFrameLock { _pipBufferDisplayLayer = newValue } }
+    }
+    private var _pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
+
+    private(set) var renderedFrameCount = 0
+
+    /// Horizontally mirrors frames at the pixel level so the tile and PiP window agree. Only the
+    /// local publisher sets this `true` (front camera, selfie-preview convention); remote
+    /// subscribers never mirror, so their video — and any text they show — stays true-orientation.
+    /// Written on the main actor, read on the video thread — guarded by `frameLock`.
+    var isMirrored: Bool {
+        get { withFrameLock { _isMirrored } }
+        set { withFrameLock { _isMirrored = newValue } }
+    }
+    private var _isMirrored = false
+
+    private let frameLock = NSLock()
+    private let accelerator = YUVToARGBAccelerator()
+
+    /// Runs `body` while holding `frameLock`. All cross-thread fields (`_pipBufferDisplayLayer`,
+    /// `_isMirrored`, `_isPlaceholderActive`) are read/written only under this lock; the video-thread
+    /// hot path holds it for its whole critical section and touches the raw `_` fields directly.
+    private func withFrameLock<T>(_ body: () -> T) -> T {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+        return body()
+    }
+
+    /// Reused pool for the BGRA destination buffers so a live frame doesn't allocate a fresh
+    /// `CVPixelBuffer` every time. Recreated only when the frame dimensions change; the pool
+    /// recycles buffers once the enqueued sample buffer is released.
+    private var pixelBufferPool: CVPixelBufferPool?
+    private var poolWidth = 0
+    private var poolHeight = 0
+
+    // MARK: - Placeholder (camera-off avatar)
+
+    /// Canvas size of the generated avatar placeholder shown in the PiP window (16:9, matching the
+    /// window's aspect). Its 0.55 circle ratio matches the tile's camera-off avatar
+    /// (`ParticipantVideoCardConstants.avatarHeightFraction`) so the two surfaces read alike.
+    private static let placeholderSize = CGSize(width: 640, height: 360)
+    private var placeholderTimer: DispatchSourceTimer?
+    private var placeholderName: String?
+    private var placeholderPixelBuffer: CVPixelBuffer?
+
+    /// Written on the main actor (start/stop), read on the video thread — guarded by `frameLock`.
+    private(set) var isPlaceholderActive: Bool {
+        get { withFrameLock { _isPlaceholderActive } }
+        set { withFrameLock { _isPlaceholderActive = newValue } }
+    }
+    private var _isPlaceholderActive = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setup()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setup() {
+        layer.addSublayer(inlineDisplayLayer)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        inlineDisplayLayer.frame = bounds
+    }
+
+    // MARK: - Placeholder
+
+    /// Starts feeding an avatar placeholder (initials on the participant's color) so the PiP
+    /// window has content while the target's camera is off. Only the PiP window displays it — the
+    /// meeting-room tile shows the SwiftUI initials card instead (its renderer view is not even
+    /// mounted while the camera is off).
+    func startPlaceholder(name: String) {
+        if isPlaceholderActive, placeholderName == name { return }
+
+        Self.logger.debug("renderer.startPlaceholder")
+        isPlaceholderActive = true
+        placeholderName = name
+        placeholderPixelBuffer = makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize)
+
+        placeholderTimer?.cancel()
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: .milliseconds(200))
+        timer.setEventHandler { [weak self] in
+            self?.enqueuePlaceholderFrame()
+        }
+        placeholderTimer = timer
+        timer.resume()
+    }
+
+    /// Refreshes the placeholder image when the participant's name changes.
+    func updatePlaceholderName(_ name: String) {
+        guard isPlaceholderActive, placeholderName != name else { return }
+        placeholderName = name
+        placeholderPixelBuffer = makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize)
+    }
+
+    func stopPlaceholder() {
+        guard isPlaceholderActive else { return }
+        Self.logger.debug("renderer.stopPlaceholder")
+        isPlaceholderActive = false
+        placeholderName = nil
+        placeholderPixelBuffer = nil
+        placeholderTimer?.cancel()
+        placeholderTimer = nil
+    }
+
+    private func enqueuePlaceholderFrame() {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+
+        guard _isPlaceholderActive,
+            let placeholderPixelBuffer,
+            let sampleBuffer = createSampleBuffer(from: placeholderPixelBuffer)
+        else { return }
+
+        renderedFrameCount += 1
+        enqueue(sampleBuffer, to: inlineDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
+        }
+    }
+
+    func renderVideoFrame(_ frame: OTVideoFrame) {
+        guard let format = frame.format, format.pixelFormat == .I420 else { return }
+
+        frameLock.lock()
+        defer { frameLock.unlock() }
+
+        // While the avatar placeholder is active the orchestrator is the source of truth for the
+        // camera state. Drop incoming frames (including trailing frames delivered right after a
+        // camera-off) so they can't cancel the placeholder or freeze PiP on a stale frame. The
+        // orchestrator explicitly stops the placeholder when the camera is re-enabled. Checked
+        // under `frameLock` so the placeholder start/stop on the main actor can't race this read.
+        if _isPlaceholderActive { return }
+
+        guard
+            let sampleBuffer = createSampleBuffer(
+                from: frame,
+                width: Int(format.imageWidth),
+                height: Int(format.imageHeight)
+            )
+        else { return }
+
+        renderedFrameCount += 1
+        // Sparse heartbeat (~every 4s at 30fps) to tell "frames stopped arriving" apart from
+        // "frames arrive but don't display" when diagnosing frozen video.
+        if renderedFrameCount == 1 || renderedFrameCount % 120 == 0 {
+            let message =
+                "renderer.frame #\(renderedFrameCount) "
+                + "\(Int(format.imageWidth))x\(Int(format.imageHeight)) "
+                + "pipLayer=\(_pipBufferDisplayLayer != nil)"
+            Self.logger.debug("\(message, privacy: .public)")
+        }
+        enqueue(sampleBuffer, to: inlineDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
+        }
+    }
+
+    private func enqueue(_ sampleBuffer: CMSampleBuffer, to layer: AVSampleBufferDisplayLayer) {
+        // A failed layer silently drops every subsequent enqueue; only a flush revives it.
+        // `requiresFlushToResumeDecoding` does not cover the `.failed` state.
+        if layer.status == .failed || layer.requiresFlushToResumeDecoding {
+            layer.flush()
+        }
+        layer.enqueue(sampleBuffer)
+    }
+
+    private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
+        guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
+        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: _isMirrored)
+        return createSampleBuffer(from: pixelBuffer)
+    }
+
+    /// Returns a BGRA pixel buffer from a size-matched pool, (re)creating the pool only when the
+    /// frame dimensions change. Called under `frameLock`, so the pool state needs no extra locking.
+    private func dequeuePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
+        if pixelBufferPool == nil || width != poolWidth || height != poolHeight {
+            let attributes: [String: Any] = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferIOSurfacePropertiesKey as String: [:],
+            ]
+            var pool: CVPixelBufferPool?
+            guard
+                CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes as CFDictionary, &pool)
+                    == kCVReturnSuccess
+            else {
+                return nil
+            }
+            pixelBufferPool = pool
+            poolWidth = width
+            poolHeight = height
+        }
+
+        guard let pixelBufferPool else { return nil }
+        var pixelBuffer: CVPixelBuffer?
+        guard
+            CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
+                == kCVReturnSuccess
+        else {
+            return nil
+        }
+        return pixelBuffer
+    }
+
+    private func createSampleBuffer(from pixelBuffer: CVPixelBuffer) -> CMSampleBuffer? {
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
+
+        var sampleBuffer: CMSampleBuffer?
+        let now = CMTimeMakeWithSeconds(CACurrentMediaTime(), preferredTimescale: 1000)
+        var timingInfo = CMSampleTimingInfo(
+            duration: CMTimeMake(value: 1, timescale: 1000),
+            presentationTimeStamp: now,
+            decodeTimeStamp: now
+        )
+
+        var formatDescription: CMFormatDescription?
+        CMVideoFormatDescriptionCreateForImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: pixelBuffer,
+            formatDescriptionOut: &formatDescription
+        )
+
+        guard let formatDescription else { return nil }
+
+        let status = CMSampleBufferCreateReadyWithImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: pixelBuffer,
+            formatDescription: formatDescription,
+            sampleTiming: &timingInfo,
+            sampleBufferOut: &sampleBuffer
+        )
+
+        guard status == noErr else { return nil }
+        return sampleBuffer
+    }
+
+    // MARK: - Placeholder drawing
+
+    private func makePlaceholderPixelBuffer(name: String, size: CGSize) -> CVPixelBuffer? {
+        let width = Int(size.width)
+        let height = Int(size.height)
+        let attributes: NSDictionary = [
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:],
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+        ]
+
+        var pixelBuffer: CVPixelBuffer?
+        let result = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            width,
+            height,
+            kCVPixelFormatType_32BGRA,
+            attributes as CFDictionary,
+            &pixelBuffer
+        )
+        guard result == kCVReturnSuccess, let pixelBuffer else { return nil }
+
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
+
+        guard
+            let context = CGContext(
+                data: CVPixelBufferGetBaseAddress(pixelBuffer),
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer),
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+                    | CGBitmapInfo.byteOrder32Little.rawValue
+            )
+        else { return nil }
+
+        // Flip into UIKit's top-left coordinate space so text/ellipses draw upright.
+        context.translateBy(x: 0, y: CGFloat(height))
+        context.scaleBy(x: 1, y: -1)
+
+        UIGraphicsPushContext(context)
+        drawPlaceholder(name: name, size: size)
+        UIGraphicsPopContext()
+
+        return pixelBuffer
+    }
+
+    private func drawPlaceholder(name: String, size: CGSize) {
+        UIColor(white: 0.13, alpha: 1).setFill()
+        UIRectFill(CGRect(origin: .zero, size: size))
+
+        let diameter = min(size.width, size.height) * 0.55
+        let circleRect = CGRect(
+            x: (size.width - diameter) / 2,
+            y: (size.height - diameter) / 2,
+            width: diameter,
+            height: diameter
+        )
+        Self.participantColor(for: name).setFill()
+        UIBezierPath(ovalIn: circleRect).fill()
+
+        let initials = Self.initials(from: name)
+        guard !initials.isEmpty else { return }
+
+        let font = UIFont.systemFont(ofSize: diameter * 0.4, weight: .regular)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.white,
+        ]
+        let textSize = (initials as NSString).size(withAttributes: attributes)
+        let textRect = CGRect(
+            x: circleRect.midX - textSize.width / 2,
+            y: circleRect.midY - textSize.height / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+        (initials as NSString).draw(in: textRect, withAttributes: attributes)
+    }
+
+    /// Duplicates the palette of `String.getParticipantColor()` (VERACore/VERACommonUI): those
+    /// extensions are internal to their modules and return SwiftUI `Color`, so they cannot be used
+    /// here. If the app palette changes, this must change with it.
+    private static func participantColor(for name: String) -> UIColor {
+        let colors: [UIColor] = [
+            UIColor(red: 0.96, green: 0.26, blue: 0.21, alpha: 1),
+            UIColor(red: 0.38, green: 0.49, blue: 0.54, alpha: 1),
+            UIColor(red: 0.61, green: 0.15, blue: 0.69, alpha: 1),
+            UIColor(red: 0.40, green: 0.23, blue: 0.72, alpha: 1),
+            UIColor(red: 0.25, green: 0.32, blue: 0.71, alpha: 1),
+            UIColor(red: 0.13, green: 0.58, blue: 0.95, alpha: 1),
+            UIColor(red: 1.00, green: 0.34, blue: 0.13, alpha: 1),
+            UIColor(red: 0.00, green: 0.74, blue: 0.83, alpha: 1),
+            UIColor(red: 1.00, green: 0.76, blue: 0.03, alpha: 1),
+            UIColor(red: 0.30, green: 0.69, blue: 0.31, alpha: 1),
+        ]
+        let asciiSum = name.unicodeScalars.map { Int($0.value) }.reduce(0, +)
+        return colors[asciiSum % colors.count]
+    }
+
+    /// Duplicates `String.getInitials()` (VERACommonUI, not a dependency of this module) so the
+    /// PiP avatar shows the same initials as the meeting room. Keep the logic in sync.
+    private static func initials(from name: String) -> String {
+        let parts = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .compactMap { $0.first }
+            .filter { $0.isLetter || $0.isNumber }
+
+        switch parts.count {
+        case 0: return ""
+        case 1: return String(parts[0]).uppercased()
+        default: return "\(parts.first!)\(parts.last!)".uppercased()
+        }
+    }
+}
