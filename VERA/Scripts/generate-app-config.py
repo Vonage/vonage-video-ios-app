@@ -107,6 +107,7 @@ public struct AppConfig {{
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowFeedback: Bool
+        public let allowPictureInPicture: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
@@ -119,6 +120,7 @@ public struct AppConfig {{
             allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowFeedback: Bool = {bool_str(meeting['allowFeedback'])},
+            allowPictureInPicture: Bool = {bool_str(meeting['allowPictureInPicture'])},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
             defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
             showParticipantList: Bool = {bool_str(meeting['showParticipantList'])},
@@ -130,6 +132,7 @@ public struct AppConfig {{
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
             self.allowFeedback = allowFeedback
+            self.allowPictureInPicture = allowPictureInPicture
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList

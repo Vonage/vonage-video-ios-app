@@ -26,6 +26,7 @@ struct MeetingRoomFeatureTests {
         #expect(allFeatures.contains(.audioEffects))
         #expect(allFeatures.contains(.callKit))
         #expect(allFeatures.contains(.feedback))
+        #expect(allFeatures.contains(.pictureInPicture))
     }
 
     @Test("Features are Hashable and can be stored in a Set")

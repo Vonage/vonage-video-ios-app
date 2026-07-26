@@ -68,6 +68,7 @@ let project = Project(
                     "UIBackgroundModes": .array(["audio", "voip"]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAMeetingRoomSDKApp/**"],
+            entitlements: "VERAMeetingRoomSDKApp/VERAMeetingRoomSDKApp.entitlements",
             scripts: [.swiftLint(targetName: "VERAMeetingRoomSDKApp")],
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),

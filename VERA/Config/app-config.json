@@ -22,6 +22,7 @@
     "allowDeviceSelection": true,
     "allowEmojis": true,
     "allowFeedback": true,
+    "allowPictureInPicture": true,
     "allowScreenShare": true,
     "allowSettings": true,
     "defaultLayoutMode": "activespeaker",
