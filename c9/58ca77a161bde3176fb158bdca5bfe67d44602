@@ -1,0 +1,20 @@
+.github/workflows/ci.yml
+  s_8182ef13ee7f5d::t_7696bd725cafd8 29-34,40
+  s_8182ef13ee7f5d::t_5fa8f8278d2c0c 35-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c958ca77a161bde3176fb158bdca5bfe67d44602",
+  "prompts": {},
+  "sessions": {
+    "s_8182ef13ee7f5d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "dfc1253d-b961-45a3-9a67-7a70bcf94998",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
