@@ -217,7 +217,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// Keeps `participant` synchronized with `publishAudio`, `publishVideo`,
     /// `videoDimensions`, and the rendered `view`.
-    private func updateParticipant() {
+    func updateParticipant() {
         participant = Participant(
             id: id,
             connectionId: stream?.connection.connectionId,

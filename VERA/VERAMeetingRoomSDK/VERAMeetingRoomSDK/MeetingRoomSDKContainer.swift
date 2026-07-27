@@ -78,10 +78,17 @@ final class MeetingRoomSDKContainer {
 
     var sessionKeyHolder: SessionKeyHolder = DefaultSessionKeyHolder()
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
-        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
-    )
+    lazy var publisherFactory: any PublisherFactory = {
+        let camera = DefaultCheckCameraAuthorizationStatusUseCase()
+        let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
+        return configuration.allowPictureInPicture
+            ? PictureInPictureVonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+            : VonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+    }()
 
     lazy var publisherRepository: any PublisherRepository = {
         DefaultPublisherRepository(publisherFactory: publisherFactory)

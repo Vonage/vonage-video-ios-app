@@ -63,7 +63,7 @@ struct VonageSendChatMessageUseCaseTests {
         let decoder = JSONDecoder()
         let result = try decoder.decode(
             VonageChatMessage.self,
-            from: data.data(using: .utf8)!)
+            from: Data(data.utf8))
 
         return .init(
             username: result.participantName,

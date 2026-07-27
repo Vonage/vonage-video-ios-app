@@ -9,6 +9,7 @@ import UIKit
 import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
+import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
@@ -147,6 +148,7 @@ struct MeetingRoomComposedViewTests {
             viewModel: viewModel,
             uiProvider: uiProvider,
             container: actualContainer,
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
             onAction: { _ in },
@@ -172,6 +174,7 @@ struct MeetingRoomComposedViewTests {
             viewModel: viewModel,
             uiProvider: DefaultMeetingRoomUIProvider(),
             container: container,
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
             onAction: { _ in },

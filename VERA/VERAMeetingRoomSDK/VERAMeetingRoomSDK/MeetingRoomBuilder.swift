@@ -465,6 +465,7 @@ public final class MeetingRoomBuilder {
             viewModel: meetingRoomViewModel,
             uiProvider: uiProvider,
             container: container,
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: _enabledFeatures,
             buttonsAssembler: buttonsAssembler,
             onAction: onAction,
