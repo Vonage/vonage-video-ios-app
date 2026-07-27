@@ -1,0 +1,14 @@
+Package.swift
+  h_5ddc9d372ac6a1 124-131,252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "01c24bc23ac4d7ad62511ea00b7c564db755794d",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
