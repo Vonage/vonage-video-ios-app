@@ -1,0 +1,26 @@
+.github/workflows/ci.yml
+  s_878a4967571cda::t_c3c76358dddc6f 132-134
+  s_878a4967571cda::t_fb1db72a4733a5 78-80,82,85,89
+  s_878a4967571cda::t_f275a30c40db93 97-99,101-102,104,108,111-113,115,118,122-123
+VERA/Workspace.swift
+  s_878a4967571cda::t_ea9e8e9ead144a 2
+  s_878a4967571cda::t_b3bf6b4e087f27 7-9
+.github/copilot-instructions.md
+  s_878a4967571cda::t_3f6545f3aabb5e 56-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "61e3915a5888345ec0afbe9d7c40ed748fa987c4",
+  "prompts": {},
+  "sessions": {
+    "s_878a4967571cda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f0f0e19-5b61-4c97-8920-493424200536",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
