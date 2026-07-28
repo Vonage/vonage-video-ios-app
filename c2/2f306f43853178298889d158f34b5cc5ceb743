@@ -1,0 +1,19 @@
+scratch/git-ai-demo.md
+  s_0d44d814755d00::t_5fb5d864fe343b 9-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.12",
+  "base_commit_sha": "c22f306f43853178298889d158f34b5cc5ceb743",
+  "prompts": {},
+  "sessions": {
+    "s_0d44d814755d00": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1785257932581611000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
