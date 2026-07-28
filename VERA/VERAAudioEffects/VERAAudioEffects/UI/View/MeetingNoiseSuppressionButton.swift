@@ -30,7 +30,6 @@ struct MeetingNoiseSuppressionButton: View {
     }
 }
 
-
 #if DEBUG
     #Preview("Disabled") {
         MeetingNoiseSuppressionButton(

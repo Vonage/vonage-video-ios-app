@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERAArchiving
+import VERAAudioDiagnostics
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
@@ -34,6 +35,7 @@ final class BottomBarButtonsAssembler {
     private var isSettingsPresented = false
     private var isEffectsPresented = false
     private var isFeedbackFormPresented = false
+    private var isAudioDiagnosticsPresented = false
 
     // Feature view models created during meeting room setup
     var videoEffectsViewModel: VideoEffectsViewModel? {
@@ -72,6 +74,7 @@ final class BottomBarButtonsAssembler {
     var onShowSettings: (() -> Void)?
     var onShowFeedbackForm: (() -> Void)?
     var onShowEffects: (() -> Void)?
+    var onShowAudioDiagnostics: (() -> Void)?
 
     var buttonsDidChange: AnyPublisher<Void, Never> {
         return Publishers.MergeMany([
@@ -139,6 +142,10 @@ final class BottomBarButtonsAssembler {
 
         if enabledFeatures.contains(.feedback) {
             buttons.append(makeFeedbackReportButton())
+        }
+
+        if enabledFeatures.contains(.audioDiagnostics) {
+            buttons.append(makeAudioDiagnosticsButton())
         }
 
         return buttons
@@ -229,6 +236,13 @@ final class BottomBarButtonsAssembler {
         return .init(viewModel)
     }
 
+    private func makeAudioDiagnosticsButton() -> BottomBarButton {
+        let item = AudioDiagnosticsBottomItemPresenter { [weak self] in
+            self?.onShowAudioDiagnostics?()
+        }
+        return .init(item, isActive: isAudioDiagnosticsPresented)
+    }
+
     /// Rebuilds buttons using the most recent state.
     ///
     /// Used when a feature view model's published properties change (e.g. selected video effect)
@@ -269,6 +283,13 @@ final class BottomBarButtonsAssembler {
         guard isFeedbackFormPresented != isPresented else { return }
 
         isFeedbackFormPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setAudioDiagnosticsPresented(_ isPresented: Bool) {
+        guard isAudioDiagnosticsPresented != isPresented else { return }
+
+        isAudioDiagnosticsPresented = isPresented
         buttonsDidChangeSubject.send()
     }
 
@@ -339,14 +360,13 @@ final class BottomBarButtonsAssembler {
         onShowSettings = nil
         onShowFeedbackForm = nil
         onShowEffects = nil
-        archiveCancellable = nil
-        captionsCancellable = nil
-        effectsCancellable = nil
+        onShowAudioDiagnostics = nil
         noiseSuppressionCancellable = nil
         isChatPresented = false
         isReactionsPickerPresented = false
         isSettingsPresented = false
         isEffectsPresented = false
         isFeedbackFormPresented = false
+        isAudioDiagnosticsPresented = false
     }
 }

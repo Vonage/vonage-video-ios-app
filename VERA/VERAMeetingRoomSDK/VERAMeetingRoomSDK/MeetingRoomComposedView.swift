@@ -4,6 +4,7 @@
 
 import AVKit
 import SwiftUI
+import VERAAudioDiagnostics
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
@@ -67,6 +68,7 @@ struct MeetingRoomComposedView: View {
     @State private var showSettings = false
     @State private var showFeedbackForm = false
     @State private var showEffects = false
+    @State private var showAudioDiagnostics = false
     @State private var isPictureInPictureBound = false
     @Environment(\.scenePhase) private var scenePhase
 
@@ -124,12 +126,19 @@ struct MeetingRoomComposedView: View {
                     videoEffectsViewModel: buttonsAssembler.videoEffectsViewModel
                 )
             )
+            .modifier(
+                AudioDiagnosticsOverlayModifier(
+                    showAudioDiagnostics: $showAudioDiagnostics,
+                    container: container
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowReactions = { showReactions.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
                 buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
                 buttonsAssembler.onShowEffects = { showEffects = true }
+                buttonsAssembler.onShowAudioDiagnostics = { showAudioDiagnostics = true }
             }
             .onChange(of: showReactions) { isPresented in
                 buttonsAssembler.setReactionsPickerPresented(isPresented)
@@ -145,6 +154,9 @@ struct MeetingRoomComposedView: View {
             }
             .onChange(of: showFeedbackForm) { isPresented in
                 buttonsAssembler.setFeedbackFormPresented(isPresented)
+            }
+            .onChange(of: showAudioDiagnostics) { isPresented in
+                buttonsAssembler.setAudioDiagnosticsPresented(isPresented)
             }
             .task {
                 if enabledFeatures.contains(.pictureInPicture) {

@@ -46,7 +46,10 @@
             let repo = PreviewSettingsRepository()
             var prefs = PublisherSettingsPreferences.default
             prefs.senderStatsEnabled = true
-            return SettingsViewModel(repository: repo, settingsPreference: prefs)
+            return SettingsViewModel(
+                repository: repo,
+                settingsPreference: prefs
+            )
         }
     }
 #endif
