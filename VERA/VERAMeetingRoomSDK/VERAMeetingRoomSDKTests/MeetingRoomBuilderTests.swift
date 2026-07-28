@@ -16,6 +16,8 @@ import VERAMeetingRoom
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
+    private let currentNumberOfFeatures = 12
+
     let testBaseURL = URL(string: "https://api.example.com")!
     let testRoomName: String = "test-room"
 
@@ -165,7 +167,7 @@ struct MeetingRoomBuilderTests {
         let allFeatures = Set(MeetingRoomFeature.allCases)
         let builder = makeMeetingRoomBuilder()
             .enabledFeatures(allFeatures)
-        #expect(builder.currentEnabledFeatures.count == 11)
+        #expect(builder.currentEnabledFeatures.count == currentNumberOfFeatures)
     }
 
     @Test("Overwriting enabled features replaces the set")

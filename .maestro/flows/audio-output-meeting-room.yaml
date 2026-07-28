@@ -1,0 +1,144 @@
+# Audio Output Test Feature E2E Test - Meeting Room
+#
+# Tests the audio output testing functionality from the Meeting Room:
+# 1. Navigate to Meeting Room
+# 2. Open More Options menu
+# 3. Open Audio Output Test sheet
+# 4. Interact with Play/Stop button
+# 5. Close sheet and return to Meeting Room
+# 6. End call
+#
+# Requires: AUDIODIAGNOSTICS_ENABLED feature flag in app-config.json
+
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "audiotest"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room
+
+# Open More Options menu (Audio Test button is usually in overflow on smaller screens)
+- tapOn:
+    id: "meeting-room-more-options-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: 02-more-options-menu
+
+# Scroll down in the overflow sheet until Audio Test button is visible
+- scrollUntilVisible:
+    element:
+      id: "MeetingRoom.AudioDiagnosticsButton"
+    direction: DOWN
+    timeout: 5000
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: 03-more-options-scrolled
+
+# Tap Audio Test button from overflow menu
+- tapOn:
+    id: "MeetingRoom.AudioDiagnosticsButton"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify Audio Output Test screen is visible inside the sheet
+- assertVisible:
+    id: "audio-output-test-screen"
+
+- takeScreenshot: 04-audio-output-test-sheet
+
+# Verify Play button is visible
+- assertVisible:
+    id: "audio-output-play-button"
+
+# Tap Play to start audio test
+- tapOn:
+    id: "audio-output-play-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify level bar is visible (indicates playback UI is active)
+- assertVisible:
+    id: "audio-output-level-bar"
+
+- takeScreenshot: 05-audio-output-playing
+
+# Tap again to stop playback
+- tapOn:
+    id: "audio-output-play-button"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: 06-audio-output-stopped
+
+# Close the sheet by swiping down
+- swipe:
+    direction: DOWN
+    duration: 500
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify we're back in the Meeting Room
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 07-back-to-meeting-room
+
+# End call
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+- takeScreenshot: 08-goodbye-screen
