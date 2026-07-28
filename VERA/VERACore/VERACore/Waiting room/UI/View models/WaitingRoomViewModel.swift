@@ -21,7 +21,9 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
+    @Published public var toolbarButtons: [ViewHolder] = []
     @Published public var extraTrailingButtons: [ViewHolder] = []
+    @Published public var audioOutputTestButton: ViewHolder?
 
     public var onPublisherReady: (() -> Void)?
 
@@ -60,7 +62,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         userRepository: UserRepository,
-        waitingRoomNavigation: WaitingRoomDestination
+        waitingRoomNavigation: WaitingRoomDestination,
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
@@ -198,7 +200,10 @@ extension WaitingRoomViewModel {
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
                 cameras: availableCameraDevices,
                 audioLevel: currentAudioLevel,
-                publisher: publisher))
+                allowAudioOutputTest: AppConfig.audioSettings.allowAudioDiagnostics,
+                publisher: publisher
+            )
+        )
     }
 
     fileprivate func makeUICameraDevice(
@@ -275,6 +280,7 @@ extension WaitingRoomViewModel {
                 allowCameraControl: currentState.allowCameraControl,
                 cameras: currentState.cameras,
                 audioLevel: level,
+                allowAudioOutputTest: currentState.allowAudioOutputTest,
                 publisher: currentState.publisher))
     }
 

@@ -43,7 +43,10 @@ struct ChatBadgeButtonViewModelTests {
         repository.addMessage(makeMessage("World"))
         repository.addMessage(makeMessage("Test"))
 
-        let count = await sut.$unreadMessagesCount.values.first { $0 == 3 }
+        // Give time for the publisher to process on main queue
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        let count = await MainActor.run { sut.unreadMessagesCount }
 
         #expect(count == 3)
     }

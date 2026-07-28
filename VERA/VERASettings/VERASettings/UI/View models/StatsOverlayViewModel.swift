@@ -37,6 +37,14 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// Set of Combine subscriptions managed by this view model.
     private var cancellables = Set<AnyCancellable>()
 
+    /// Latest max audio bitrate cached from the preferences stream.
+    ///
+    /// Cached synchronously so `buildStatsText(_:)` does not need to `await`
+    /// the settings repository actor. That async hop was the source of a race
+    /// where two in-flight stats updates could complete out of order and let
+    /// an older snapshot overwrite a newer one.
+    private var maxAudioBitrate: Int32?
+
     // MARK: - Init
 
     /// Creates a new stats overlay view model.
@@ -71,14 +79,19 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     // MARK: - Private
 
-    /// Observes the settings repository for changes to the overlay visibility toggle.
+    /// Observes the settings repository for changes to the overlay visibility toggle
+    /// and caches values used by the stats formatting pipeline.
     private func observeSettings() {
         settingsRepository.preferencesPublisher
-            .map(\.statsOverlayEnabled)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] isEnabled in
+            .sink { [weak self] preferences in
                 guard let self else { return }
+
+                self.maxAudioBitrate = preferences.audioBitratePreference.customValue
+
+                let isEnabled = preferences.statsOverlayEnabled
+                guard self.isActive != isEnabled else { return }
 
                 self.isActive = isEnabled
 
@@ -108,19 +121,9 @@ public final class StatsOverlayViewModel: ObservableObject {
             .sink { [weak self] stats in
                 guard let self, self.isActive else { return }
 
-                self.buildStatsText(stats)
+                self.statsText = self.formatStats(stats, maxAudioBitrate: self.maxAudioBitrate)
             }
             .store(in: &cancellables)
-    }
-
-    /// Builds the stats text from the latest statistics snapshot.
-    ///
-    /// - Parameter stats: The network media statistics to format.
-    private func buildStatsText(_ stats: NetworkMediaStats) {
-        Task { @MainActor in
-            let maxAudioBitrate = await settingsRepository.getPreferences().audioBitratePreference.customValue
-            self.statsText = await formatStats(stats, maxAudioBitrate: maxAudioBitrate)
-        }
     }
 
     /// Formats network statistics into a human-readable multi-line string.
@@ -129,7 +132,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     ///   - stats: The network media statistics.
     ///   - maxAudioBitrate: The configured maximum audio bitrate, or `nil` for SDK default.
     /// - Returns: A formatted string with emoji icons and localized labels.
-    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32? = nil) async -> String {
+    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32? = nil) -> String {
         var lines: [String] = []
 
         if let audioSend = stats.sentAudio {

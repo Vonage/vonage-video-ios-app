@@ -235,10 +235,14 @@ struct StatsOverlayViewModelTests {
         )
         await dataSource.updateStats(stats)
 
-        // Wait for update
-        await delay()
+        // Wait for statsText to be populated — two async hops exist:
+        // 1. statsPublisher → .receive(on: DispatchQueue.main)
+        // 2. buildStatsText → Task { @MainActor in self.statsText = ... }
+        // Polling is more reliable than a fixed sleep on slow machines.
+        try await waitUntil {
+            viewModel.statsText.contains("opus")
+        }
 
-        #expect(viewModel.statsText != "")
         let text = viewModel.statsText
 
         // Should contain audio info
@@ -415,6 +419,98 @@ struct StatsOverlayViewModelTests {
         // Final state should be active with stats
         #expect(viewModel.isActive == true)
         #expect(viewModel.statsText != "")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    // MARK: - Ordering / bitrate regression tests
+
+    /// Regression: rapid consecutive stats emissions must preserve order so that
+    /// `statsText` reflects the most recent snapshot. A previous implementation
+    /// used a fire-and-forget `Task { @MainActor in await ... }` inside the sink,
+    /// which allowed an older snapshot to overwrite a newer one when the two
+    /// tasks resumed out of order from the repository actor.
+    @Test("StatsText reflects the latest snapshot after rapid stats updates")
+    func testStatsTextReflectsLatestOfRapidUpdates() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await delay()
+
+        // Fire several updates back-to-back without awaiting between them.
+        // The last one must win.
+        for iteration in 1...20 {
+            await dataSource.updateStats(
+                NetworkMediaStats(
+                    sentAudio: AudioSendStats(
+                        packetsSent: Int64(iteration),
+                        packetsLost: 0,
+                        bytesSent: 1000,
+                        timestamp: 1000,
+                        audioCodec: "opus"
+                    )
+                )
+            )
+        }
+
+        try await waitUntil {
+            viewModel.statsText.contains("\n") && viewModel.statsText.contains("opus")
+        }
+
+        let text = viewModel.statsText
+        // Latest snapshot had packetsSent == 20. Older snapshots (1...19) must not
+        // linger as the final value.
+        #expect(text.contains(" 20 "), "Expected latest packets '20' in text, got: \(text)")
+        #expect(!text.contains(" 19 "))
+        #expect(!text.contains(" 1 "))
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    /// Regression: a change to `audioBitratePreference` must be reflected in the
+    /// next stats emission without requiring any extra async hop. This exercises
+    /// the synchronous preference cache that replaced the previous
+    /// `await settingsRepository.getPreferences()` inside the stats sink.
+    @Test("StatsText picks up updated audioBitratePreference on next stats emission")
+    func testStatsTextReflectsUpdatedAudioBitratePreference() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await repository.updatePreferences {
+            $0.statsOverlayEnabled = true
+            $0.audioBitratePreference = .custom(128_000)
+        }
+        await delay()
+
+        let stats = NetworkMediaStats(
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "sub-1",
+                    subscriberName: "Sub",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 100,
+                        packetsLost: 1,
+                        bytesReceived: 5000,
+                        timestamp: 1000
+                    )
+                )
+            ]
+        )
+        await dataSource.updateStats(stats)
+
+        try await waitUntil { viewModel.statsText.contains("kbps") }
+
+        #expect(viewModel.statsText.contains("128.0 kbps"))
+        #expect(!viewModel.statsText.contains("Default"))
 
         _ = repository
         _ = dataSource

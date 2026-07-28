@@ -72,15 +72,18 @@ public struct AppConfig {{
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
+        public let allowAudioDiagnostics: Bool
 
         public init(
             allowAdvancedNoiseSuppression: Bool = {bool_str(audio['allowAdvancedNoiseSuppression'])},
             allowAudioOnJoin: Bool = {bool_str(audio['allowAudioOnJoin'])},
-            allowMicrophoneControl: Bool = {bool_str(audio['allowMicrophoneControl'])}
+            allowMicrophoneControl: Bool = {bool_str(audio['allowMicrophoneControl'])},
+            allowAudioDiagnostics: Bool = {bool_str(audio['allowAudioDiagnostics'])}
         ) {{
             self.allowAdvancedNoiseSuppression = allowAdvancedNoiseSuppression
             self.allowAudioOnJoin = allowAudioOnJoin
             self.allowMicrophoneControl = allowMicrophoneControl
+            self.allowAudioDiagnostics = allowAudioDiagnostics
         }}
     }}
 

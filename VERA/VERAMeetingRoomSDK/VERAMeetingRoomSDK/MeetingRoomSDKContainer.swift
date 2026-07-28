@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import VERAArchiving
+import VERAAudioDiagnostics
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
@@ -341,9 +342,16 @@ final class MeetingRoomSDKContainer {
         settingsRepository: settingsRepository,
         statsWriter: statsRepository)
 
+    lazy var defaultSpeakerTestService = DefaultSpeakerTestService()
+
+    lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(
+        speakerTestService: defaultSpeakerTestService
+    )
+
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository)
+        statsDataSource: statsRepository
+    )
 
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,

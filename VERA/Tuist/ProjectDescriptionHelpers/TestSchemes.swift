@@ -58,6 +58,9 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowFeedback") {
             targets.append(testableTarget("VERAFeedbackTests", in: "VERAFeedback"))
         }
+        if isFeatureEnabled("audioSettings", "allowAudioDiagnostics") {
+            targets.append(testableTarget("VERAAudioDiagnosticsTests", in: "VERAAudioDiagnostics"))
+        }
         return targets
     }
 
@@ -88,6 +91,9 @@ public enum VERATestSchemes {
         }
         if isFeatureEnabled("videoSettings", "allowBackgroundEffects") {
             targets.append(testableTarget("VERABackgroundEffectsTests", in: "VERABackgroundEffects"))
+        }
+        if isFeatureEnabled("audioSettings", "allowAudioDiagnostics") {
+            targets.append(testableTarget("VERAAudioDiagnosticsTests", in: "VERAAudioDiagnostics"))
         }
         return targets
     }
@@ -123,6 +129,9 @@ public enum VERATestSchemes {
         }
         if isFeatureEnabled("meetingRoomSettings", "allowFeedback") {
             targets.append(testableTarget("VERAFeedbackSnapshotTests", in: "VERAFeedback"))
+        }
+        if isFeatureEnabled("audioSettings", "allowAudioDiagnostics") {
+            targets.append(testableTarget("VERAAudioDiagnosticsSnapshotTests", in: "VERAAudioDiagnostics"))
         }
         return targets
     }
