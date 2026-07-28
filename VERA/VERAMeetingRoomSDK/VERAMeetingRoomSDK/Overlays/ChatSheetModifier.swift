@@ -7,6 +7,8 @@ import SwiftUI
 // MARK: - Chat Sheet Modifier
 
 struct ChatSheetModifier: ViewModifier {
+    @Environment(\.meetingRoomTheme) private var theme
+    
     let isEnabled: Bool
     @Binding var showChat: Bool
     let container: MeetingRoomSDKContainer
@@ -24,6 +26,7 @@ struct ChatSheetModifier: ViewModifier {
                         showChat = false
                     }
                     result.view
+                        .opaquePresentationBackground(theme.background)
                 }
         } else {
             content

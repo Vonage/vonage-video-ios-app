@@ -6,6 +6,8 @@ import SwiftUI
 import VERAFeedback
 
 struct FeedbackFormOverlayModifier: ViewModifier {
+    @Environment(\.meetingRoomTheme) private var theme
+    
     let isEnabled: Bool
     @Binding var showFeedbackForm: Bool
     let container: MeetingRoomSDKContainer
@@ -23,6 +25,7 @@ struct FeedbackFormOverlayModifier: ViewModifier {
                         }
                     )
                     .presentationDetents([.large])
+                    .opaquePresentationBackground(theme.background)
                 }
         } else {
             content

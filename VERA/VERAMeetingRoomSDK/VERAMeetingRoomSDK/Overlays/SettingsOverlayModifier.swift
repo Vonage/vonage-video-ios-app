@@ -9,6 +9,8 @@ import VERASettings
 // MARK: - Settings Overlay Modifier
 
 struct SettingsOverlayModifier: ViewModifier {
+    @Environment(\.meetingRoomTheme) private var theme
+    
     let isEnabled: Bool
     @Binding var showSettings: Bool
     let statsOverlayViewModel: StatsOverlayViewModel?
@@ -20,6 +22,7 @@ struct SettingsOverlayModifier: ViewModifier {
                 .sheet(isPresented: $showSettings) {
                     SettingsSheetContent(factory: container.settingsFactory)
                         .presentationDetents([.large])
+                        .opaquePresentationBackground(theme.background)
                 }
                 .overlay {
                     if let statsViewModel = statsOverlayViewModel {
