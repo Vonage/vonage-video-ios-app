@@ -1,0 +1,19 @@
+VERA/Tuist/ProjectDescriptionHelpers/TestSchemes.swift
+  s_878a4967571cda::t_0b2a6642878fa1 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4e999b41738706071839113adb7a5ff789cb4c2f",
+  "prompts": {},
+  "sessions": {
+    "s_878a4967571cda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f0f0e19-5b61-4c97-8920-493424200536",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
