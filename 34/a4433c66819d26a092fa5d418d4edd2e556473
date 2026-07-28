@@ -1,0 +1,287 @@
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 33,38-39,44
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 15-16,20,60
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsAccessibilityID.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-24
+VERA/Project.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 177-195,287-293,354-357
+  s_8182ef13ee7f5d::t_4c69ed7cc3ca44 358-359
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Domain/SpeakerTestService.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-29
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/AudioDiagnosticsOverlayModifier.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-18
+VERA/VERASettings/VERASettings/Utils/SettingsViewModel+Preview.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 49-52
+VERA/VERASettings/VERASettings/UI/View/SettingsToolbarButton.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-85
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 49
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 18,54,77,106,128,142,157,172,188,203,214,234,252,273,298,327,352,376,400,411,421,431,464,476,487,498,546,559,574,591,606,624,640,658,668,686,696,710,722-746
+.maestro/flows/audio-output-waiting-room.yaml
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-98
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/ViewModels/AudioOutputControlViewModel.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-77
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Resources/Localizable.xcstrings
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-132
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomAccessibilityID.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 5-13
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/DefaultSpeakerTestServiceTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-620
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/AudioDiagnosticsViewSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-123
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsMeetingRoomButton.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-60
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 266-328,342,358-359
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 7,71,129-134,141,158-159
+  s_8182ef13ee7f5d::t_2251c4a98b5deb 160
+VERA/VERASettings/VERASettingsTests/TestHelpers/Utils.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 5-6,10-39
+Package.resolved
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 17
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/AudioDiagnosticsConstants.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-88
+.github/workflows/ci.yml
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 195-207,213-262,808-810
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomUserPreviewView.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 8-20,25-29,44,52,59
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 42-44
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsMeetingRoomButtonSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 11,20,23,25-26,28-31,35-36,38,44-45
+.maestro/config.yaml
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 4
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsWaitingRoomButton.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-71
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/AudioOutputControlPanelSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-111
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 14-20
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatsOverlayViewModelTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 238-244,427-513,515-518
+  s_8182ef13ee7f5d::t_fbd82ab6cdc14b 514
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockGenerateTonePlayerUseCase.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-76
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 8,345-350,353-354
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/DefaultSpeakerTestService.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-274
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/Components/AudioOutputControlPanel.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-257
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsPerformanceTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-347
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 32-35,161,164-172,199-216
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/GenerateTonePlayerUseCaseTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-199
+VERA/Scripts/generate-app-config.py
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 75,80-81,86
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsIntegrationTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-294
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 8,38,77,147-150,239-245,289-295,363,370
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/DefaultGenerateTonePlayerUseCase.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-128
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomScreen.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 25-27,40-45
+  s_8182ef13ee7f5d::t_dd88699c9fdbfc 46
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 40-47,82-83,88,91-95,124,135
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Domain/GenerateTonePlayerUseCase.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-35
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsView.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-81
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 24,26,65,203-206,283
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/TestHelpers/MockSpeakerTestService.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-71
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Resources/Localizable.xcstrings
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 4-15,57-65
+VERA/VERAChat/VERAChatTests/ChatBadgeButtonViewModelTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 46-49
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/AudioDiagnosticsWaitingRoomButtonSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-90
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/MockSpeakerTestServiceTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-309
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/WaitingRoomViewUITests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 8,42-48,83-98,101-119,121,123
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/AudioDiagnosticsMeetingRoomButtonSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-47
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomView.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 17,28,38,59,71,73,85,87,95,97,105,107,122,124,134,136,154,156,166,168,185,187,199,233-236,307,309,330,332
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomStateTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 89-173
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsFactoryTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-211
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 59,61-62,64-68,70-72,80-81
+VERA/Config/app-config.json
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 11-12
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsToolbarButtonSnapshotTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-53
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/AudioDiagnosticsBottomItemPresenter.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-24
+VERA/VERAArchiving/VERAArchivingTests/DefaultArchivesRepositoryTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 111-121,124-133
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioOutputControlViewModelTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-337
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 33-36,122-127,150
+VERA/VERAAudioDiagnostics/Project.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-73
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Wireframe/AudioDiagnosticsFactory.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-113
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockSpeakerTestService.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-41
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/NullSpeakerTestServiceTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-93
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelAudioLevelTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-167
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 19-20,170
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/Mocks/WaitingRoomMockData.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 17-18,27
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/WAVConverterTests.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-262
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 47
+.maestro/flows/audio-output-meeting-room.yaml
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-144
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Domain/WAVConverter.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-62
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/NullSpeakerTestService.swift
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-72
+"VERA/VERACore/VERACoreTests/Waiting room/UI/ViewHolderAudioOutputTestButtonTests.swift"
+  s_8182ef13ee7f5d::t_18c1c82a59e6d4 1-40
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_English-Playing.English-Playing.png
+  s_8182ef13ee7f5d::t_43e793f608f679 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_English-Stopped.English-Stopped.png
+  s_8182ef13ee7f5d::t_7cf1b2a710a2c5 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_Playing.Playing.png
+  s_8182ef13ee7f5d::t_7349a2b81bff0e 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_Spanish-Playing.Spanish-Playing.png
+  s_8182ef13ee7f5d::t_563cd10de78f8a 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_Spanish-Stopped.Spanish-Stopped.png
+  s_8182ef13ee7f5d::t_cda8ed6c830cf6 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_Stopped.Stopped.png
+  s_8182ef13ee7f5d::t_4344d95da63aa7 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_iPad-Dark.iPad-Dark.png
+  s_8182ef13ee7f5d::t_4738b5af816684 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_iPad-Light.iPad-Light.png
+  s_8182ef13ee7f5d::t_250cd5b489d097 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_iPhone-Dark.iPhone-Dark.png
+  s_8182ef13ee7f5d::t_c92cc5a2d5bd7a 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsDialogSnapshotTests/AudioDiagnosticsDialog_iPhone-Light.iPhone-Light.png
+  s_8182ef13ee7f5d::t_e7d390da897acc 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsMeetingRoomButtonSnapshotTests/AudioDiagnosticsMeetingRoomButton_Dark.Dark.png
+  s_8182ef13ee7f5d::t_f4ec0830226541 2-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsMeetingRoomButtonSnapshotTests/AudioDiagnosticsMeetingRoomButton_Light.Light.png
+  s_8182ef13ee7f5d::t_09621eb9313f2a 2-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_English-Playing.English-Playing.png
+  s_8182ef13ee7f5d::t_b1d57f3bcb2261 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_English-Stopped.English-Stopped.png
+  s_8182ef13ee7f5d::t_64d5f3d4c8887f 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_Playing.Playing.png
+  s_8182ef13ee7f5d::t_1a0bc2023f754b 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_Spanish-Playing.Spanish-Playing.png
+  s_8182ef13ee7f5d::t_7095d99f4e7e11 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_Spanish-Stopped.Spanish-Stopped.png
+  s_8182ef13ee7f5d::t_30d486324ddea1 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_Stopped.Stopped.png
+  s_8182ef13ee7f5d::t_001f59cdfefabf 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_iPad-Dark.iPad-Dark.png
+  s_8182ef13ee7f5d::t_84c1baa6e190a2 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_iPad-Light.iPad-Light.png
+  s_8182ef13ee7f5d::t_98609730351af1 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_iPhone-Dark.iPhone-Dark.png
+  s_8182ef13ee7f5d::t_61c496fbf2f5c5 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsDialog_iPhone-Light.iPhone-Light.png
+  s_8182ef13ee7f5d::t_ee79fe2081c368 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_English-Playing.English-Playing.png
+  s_8182ef13ee7f5d::t_447ccf787ed3ea 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_English-Stopped.English-Stopped.png
+  s_8182ef13ee7f5d::t_daac5827c3390a 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_Playing.Playing.png
+  s_8182ef13ee7f5d::t_3811cee857c249 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_Spanish-Playing.Spanish-Playing.png
+  s_8182ef13ee7f5d::t_4a890bebf3c57b 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_Spanish-Stopped.Spanish-Stopped.png
+  s_8182ef13ee7f5d::t_91895e3d10db53 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_Stopped.Stopped.png
+  s_8182ef13ee7f5d::t_fda0a658bd1504 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_iPad-Dark.iPad-Dark.png
+  s_8182ef13ee7f5d::t_05af9bff4410aa 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_iPad-Light.iPad-Light.png
+  s_8182ef13ee7f5d::t_345580b9a91bce 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_iPhone-Dark.iPhone-Dark.png
+  s_8182ef13ee7f5d::t_e49a91cffb0cb3 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsViewSnapshotTests/AudioDiagnosticsView_iPhone-Light.iPhone-Light.png
+  s_8182ef13ee7f5d::t_d83c730d16ee07 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/AudioDiagnosticsWaitingRoomButton_Dark.Dark.png
+  s_8182ef13ee7f5d::t_7d0e719ddd1856 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/AudioDiagnosticsWaitingRoomButton_Light.Light.png
+  s_8182ef13ee7f5d::t_9e3fa0dda6ece4 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/AudioDiagnosticsWaitingRoomButton_comparison_dark.comparison_dark.png
+  s_8182ef13ee7f5d::t_e58be0ba912ff2 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioDiagnosticsWaitingRoomButtonSnapshotTests/AudioDiagnosticsWaitingRoomButton_comparison_light.comparison_light.png
+  s_8182ef13ee7f5d::t_2593529f171799 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Dark.Dark.png
+  s_8182ef13ee7f5d::t_7254e08f269b08 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_English-Playing.English-Playing.png
+  s_8182ef13ee7f5d::t_9ec5ac0c1f6398 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_English-Stopped.English-Stopped.png
+  s_8182ef13ee7f5d::t_20f823fec05542 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Light.Light.png
+  s_8182ef13ee7f5d::t_b4fca4ea0bd4a4 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Playing.Playing.png
+  s_8182ef13ee7f5d::t_76c88092279dfe 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Spanish-Playing.Spanish-Playing.png
+  s_8182ef13ee7f5d::t_aa5a4fe24fb76c 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Spanish-Stopped.Spanish-Stopped.png
+  s_8182ef13ee7f5d::t_8967e998257b7f 1-3
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/__Snapshots__/AudioOutputControlPanelSnapshotTests/AudioOutputControlPanel_Stopped.Stopped.png
+  s_8182ef13ee7f5d::t_1034b275dc3261 1-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_AudioOutput_Dark.Dark.png"
+  s_8182ef13ee7f5d::t_38b6701b7df614 1-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_AudioOutput_Light.Light.png"
+  s_8182ef13ee7f5d::t_8c74b80549d56d 1-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_Dark.Dark.png"
+  s_8182ef13ee7f5d::t_6997540e49dee2 2-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_Default.Default.png"
+  s_8182ef13ee7f5d::t_c34eca9b76a542 2-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_Light.Light.png"
+  s_8182ef13ee7f5d::t_84ce96c9447c57 2-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_WithAudioOutputButton.WithAudioOutputButton.png"
+  s_8182ef13ee7f5d::t_203592b4ffb0a3 1-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_iPad.iPad.png"
+  s_8182ef13ee7f5d::t_b15d4e8b31151c 2-3
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/__Snapshots__/WaitingRoomViewUITests/WaitingRoom_iPhoneLandscape.iPhoneLandscape.png"
+  s_8182ef13ee7f5d::t_ecd52d84dec544 2-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsMeetingRoomButtonSnapshotTests/SettingsMeetingRoomButton_Dark.Dark.png
+  s_8182ef13ee7f5d::t_4f239badd6c19e 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsMeetingRoomButtonSnapshotTests/SettingsMeetingRoomButton_Light.Light.png
+  s_8182ef13ee7f5d::t_f4a6d48a160525 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsToolbarButtonSnapshotTests/SettingsToolbarButton_Dark.Dark.png
+  s_8182ef13ee7f5d::t_9b792a44edef70 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsToolbarButtonSnapshotTests/SettingsToolbarButton_Light.Light.png
+  s_8182ef13ee7f5d::t_6687374274b71e 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "34a4433c66819d26a092fa5d418d4edd2e556473",
+  "prompts": {},
+  "sessions": {
+    "s_8182ef13ee7f5d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "dfc1253d-b961-45a3-9a67-7a70bcf94998",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
