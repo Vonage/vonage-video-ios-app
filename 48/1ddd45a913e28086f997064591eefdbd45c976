@@ -1,17 +1,7 @@
+---
 {
   "schema_version": "authorship/3.0.0",
-  "prompts": {
-    "kiro-ide": {
-      "session_id": "kiro-ide-session",
-      "workspace_folder": "/Users/jsanmartin/Documents/Workspace/iOS/vonage-video-ios-app",
-      "tool": "kiro",
-      "commit": "481ddd45a913e28086f997064591eefdbd45c976",
-      "timestamp": "2026-07-28T22:13:57Z",
-      "modified_files": [
-        ".maestro/flows/speaking-while-muted.yaml"
-      ],
-      "prompt": "Analyze maestro.log and os-simulator.log to identify why the speaking-while-muted E2E test failed and fix the flaky flow",
-      "summary": "Fix flaky speaking-while-muted Maestro flow: remove waitForAnimationToEnd steps that burned the toast lifetime budget, remove redundant assertVisible racing the auto-dismiss, replace assertNotVisible with extendedWaitUntil notVisible for deterministic wait"
-    }
-  }
+  "git_ai_version": "1.4.12",
+  "base_commit_sha": "481ddd45a913e28086f997064591eefdbd45c976",
+  "prompts": {}
 }
