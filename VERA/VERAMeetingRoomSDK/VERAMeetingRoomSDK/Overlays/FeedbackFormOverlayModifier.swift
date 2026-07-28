@@ -7,7 +7,7 @@ import VERAFeedback
 
 struct FeedbackFormOverlayModifier: ViewModifier {
     @Environment(\.meetingRoomTheme) private var theme
-    
+
     let isEnabled: Bool
     @Binding var showFeedbackForm: Bool
     let container: MeetingRoomSDKContainer

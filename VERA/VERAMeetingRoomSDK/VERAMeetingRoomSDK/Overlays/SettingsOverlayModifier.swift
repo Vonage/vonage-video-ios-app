@@ -10,7 +10,7 @@ import VERASettings
 
 struct SettingsOverlayModifier: ViewModifier {
     @Environment(\.meetingRoomTheme) private var theme
-    
+
     let isEnabled: Bool
     @Binding var showSettings: Bool
     let statsOverlayViewModel: StatsOverlayViewModel?

@@ -20,6 +20,8 @@ public typealias OnLaunchView = () -> SettingsView
 /// ensuring resources are allocated only when needed.
 public struct SettingsWaitingRoomButton: View {
 
+    @Environment(\.meetingRoomTheme) private var theme
+
     /// Closure for creating the settings view when the button is tapped.
     /// If `nil`, the button will show the sheet but with no content.
     private let makeSettingsView: OnLaunchView?
@@ -45,6 +47,7 @@ public struct SettingsWaitingRoomButton: View {
         .sheet(isPresented: $showSettings) {
             makeSettingsView?()
                 .presentationDetents([.large])
+                .opaquePresentationBackground(theme.background)
         }
     }
 }
