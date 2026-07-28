@@ -8,7 +8,7 @@ import Testing
 
 @testable import VERASettings
 
-@Suite("Settings Meeting Room Button Snapshot Tests")
+@Suite("SettingsMeetingRoomButton Snapshot Tests")
 @MainActor
 struct SettingsMeetingRoomButtonSnapshotTests {
 
@@ -17,68 +17,31 @@ struct SettingsMeetingRoomButtonSnapshotTests {
     private let isRecording = false  // Set to true to record new snapshots
     private let snapshotPrefix = "SettingsMeetingRoomButton"
 
-    // MARK: - Both Buttons Comparison
+    // MARK: - Color Scheme Tests
 
     @Test(
-        "Both Buttons Comparison",
+        "SettingsMeetingRoomButton - Color Schemes",
         arguments: [
-            ("comparison_light", ColorScheme.light),
-            ("comparison_dark", ColorScheme.dark),
+            ("Light", ColorScheme.light),
+            ("Dark", ColorScheme.dark),
         ])
-    func bothButtonsComparison(
-        comparisonName: String,
-        colorScheme: ColorScheme
-    ) async throws {
-        let sut = ZStack {
-            Color.gray
-                .ignoresSafeArea()
-
-            VStack(spacing: 40) {
-                VStack(spacing: 12) {
-                    SettingsWaitingRoomButton {
-                        SettingsView(viewModel: .preview)
-                    }
-                    Text("Waiting Room")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                }
-
-                VStack(spacing: 12) {
-                    SettingsMeetingRoomButton {
-                        // Empty action for testing
-                    }
-                    Text("Meeting Room")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                }
-            }
-        }
-        .environment(\.colorScheme, colorScheme)
+    func colorSchemes(schemeName: String, scheme: ColorScheme) throws {
+        let sut = makeSUT()
+            .environment(\.colorScheme, scheme)
+            .padding()
 
         assertSnapshot(
             of: AnyView(sut),
-            as: .image(precision: 0.99, layout: .fixed(width: 300, height: 400)),
-            named: comparisonName,
+            as: .image(precision: 0.99, layout: .fixed(width: 150, height: 60)),
+            named: schemeName,
             record: isRecording,
-            testName: "\(snapshotPrefix)_\(comparisonName)"
+            testName: "\(snapshotPrefix)_\(schemeName)"
         )
     }
 
     // MARK: - Test Helpers
 
-    private func makeSUT(
-        colorScheme: ColorScheme = .dark
-    ) -> some View {
-        ZStack {
-            Color.gray
-                .ignoresSafeArea()
-
-            VStack {
-                Spacer()
-                SettingsMeetingRoomButton()
-                    .padding(.bottom, 16)
-            }
-        }
-        .environment(\.colorScheme, colorScheme)
+    private func makeSUT() -> SettingsMeetingRoomButton {
+        SettingsMeetingRoomButton(onShowSettings: {})
     }
 }

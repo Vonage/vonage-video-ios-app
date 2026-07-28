@@ -56,15 +56,20 @@ public final class SettingsFactory {
 
     // MARK: - Waiting Room Button
 
-    /// Creates the circular gear button for the waiting room.
+    /// Creates the settings button for the waiting room navigation toolbar.
     ///
-    /// Provides a closure that creates a basic ``SettingsView`` when tapped.
-    /// Falls back to a fresh repository if the factory is deallocated.
+    /// Returns a ``SettingsToolbarButton`` with icon-only design (gear icon without
+    /// circular background or border), suitable for display in SwiftUI's `.toolbar` modifier.
     ///
-    /// - Returns: A configured waiting room settings button.
+    /// Tapping the button presents the ``SettingsView`` in a sheet. The view is created
+    /// lazily via an internal closure, falling back to a fresh repository if the factory
+    /// is deallocated.
+    ///
+    /// - Returns: A configured ``SettingsWaitingRoomButton`` for the waiting room.
     @MainActor
-    public func makeWaitingRoomButton() -> SettingsWaitingRoomButton {
-        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
+    public func makeWaitingRoomButton() -> SettingsToolbarButton {
+        SettingsToolbarButton(makeSettingsView: {
+            [weak self] in
             guard let self else {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
@@ -72,7 +77,8 @@ public final class SettingsFactory {
                 )
             }
             return self.makeSettingsView()
-        })
+        }
+        )
     }
 
     // MARK: - Meeting Room Button
