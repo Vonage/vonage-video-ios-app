@@ -1,0 +1,27 @@
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  s_8182ef13ee7f5d::t_bbe5343b5f1acc 167,210,245
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackFormView.swift
+  s_8182ef13ee7f5d::t_bbe5343b5f1acc 144
+VERA/VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift
+  s_8182ef13ee7f5d::t_08e0a04ae270f8 57-58
+VERA/VERAChat/VERAChat/UI/View/ChatPanel.swift
+  s_8182ef13ee7f5d::t_fb9c38e7f49188 45
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/ChatSheetModifier.swift
+  s_8182ef13ee7f5d::t_bbe5343b5f1acc 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c2c507031eb4e4fb39d7fe6bab33606190eb3475",
+  "prompts": {},
+  "sessions": {
+    "s_8182ef13ee7f5d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "dfc1253d-b961-45a3-9a67-7a70bcf94998",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
