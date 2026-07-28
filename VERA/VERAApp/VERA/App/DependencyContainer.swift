@@ -46,10 +46,17 @@ final class DependencyContainer {
 
     lazy var userDefaults = UserDefaults(suiteName: EnvironmentConstants.veraAppGroupIdentifier) ?? .standard
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
-        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
-    )
+    lazy var publisherFactory: any PublisherFactory = {
+        let camera = DefaultCheckCameraAuthorizationStatusUseCase()
+        let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
+        return appConfig.meetingRoomSettings.allowPictureInPicture
+            ? PictureInPictureVonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+            : VonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+    }()
 
     lazy var appConfig = AppConfig()
 
@@ -120,6 +127,11 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
         if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
+        #if !os(macOS)
+            if appConfig.meetingRoomSettings.allowPictureInPicture {
+                features.insert(.pictureInPicture)
+            }
+        #endif
         if appConfig.meetingRoomSettings.allowScreenShare && !ProcessInfo.processInfo.isiOSAppOnMac {
             features.insert(.screenShare)
         }

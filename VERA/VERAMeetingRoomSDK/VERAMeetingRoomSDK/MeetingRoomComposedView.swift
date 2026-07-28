@@ -15,12 +15,15 @@ import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
 import VERASettings
+import VERAVonage
 
 /// Layout constants for the composed meeting room view.
 enum MeetingRoomComposedConstants {
     static var overlayBottomPadding: CGFloat {
         BottomBarConstants.totalHeight + 4
     }
+
+    static let anchorViewHeight: CGFloat = 200
 }
 
 /// A self-contained meeting room view with all feature overlays, sheets, and bottom bar buttons.
@@ -37,6 +40,7 @@ struct MeetingRoomComposedView: View {
     let uiProvider: any MeetingRoomUIProvider
 
     let container: MeetingRoomSDKContainer
+    @ObservedObject var pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator
     let enabledFeatures: Set<MeetingRoomFeature>
     let buttonsAssembler: BottomBarButtonsAssembler
     let onAction: (MeetingRoomSDKAction) -> Void
@@ -63,9 +67,15 @@ struct MeetingRoomComposedView: View {
     @State private var showSettings = false
     @State private var showFeedbackForm = false
     @State private var showEffects = false
+    @State private var isPictureInPictureBound = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
+            .background(
+                pictureInPictureAnchor
+                    .frame(height: MeetingRoomComposedConstants.anchorViewHeight)
+            )
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),
@@ -136,5 +146,53 @@ struct MeetingRoomComposedView: View {
             .onChange(of: showFeedbackForm) { isPresented in
                 buttonsAssembler.setFeedbackFormPresented(isPresented)
             }
+            .task {
+                if enabledFeatures.contains(.pictureInPicture) {
+                    await bindPictureInPictureIfNeeded()
+                }
+            }
+            .onChange(of: scenePhase) { phase in
+                #if !os(macOS)
+                    guard enabledFeatures.contains(.pictureInPicture) else { return }
+                    switch phase {
+                    case .background:
+                        pictureInPictureOrchestrator.requestPictureInPicture()
+                    case .active:
+                        pictureInPictureOrchestrator.stopPictureInPicture()
+                    default:
+                        break
+                    }
+                #endif
+            }
+    }
+
+    /// Stable, always-mounted PiP anchor spanning the meeting room content. The PiP window morphs
+    /// from/to this area; anchoring to individual tiles is deliberately avoided (layout changes
+    /// and SwiftUI identity resets demolish tiles, which breaks AVKit's ability to start PiP).
+    @ViewBuilder
+    private var pictureInPictureAnchor: some View {
+        #if !os(macOS)
+            if enabledFeatures.contains(.pictureInPicture) {
+                PictureInPictureAnchorView { view, frame in
+                    pictureInPictureOrchestrator.registerAnchor(sourceView: view, videoFrame: frame)
+                }
+            }
+        #endif
+    }
+
+    private func bindPictureInPictureIfNeeded() async {
+        #if !os(macOS)
+            while viewModel.currentCall == nil {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled else { return }
+            }
+
+            guard !isPictureInPictureBound,
+                let call = viewModel.currentCall as? VonageCall
+            else { return }
+
+            pictureInPictureOrchestrator.bind(to: call)
+            isPictureInPictureBound = true
+        #endif
     }
 }

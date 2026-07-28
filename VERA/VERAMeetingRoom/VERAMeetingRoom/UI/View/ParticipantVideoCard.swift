@@ -15,8 +15,8 @@ enum ParticipantVideoCardConstants {
     /// Background opacity for card fills
     static let backgroundOpacity: Double = 0.8
 
-    /// Padding around the avatar initials
-    static let avatarPadding: CGFloat = 24
+    /// Avatar height as a fraction of the card height for camera-off tiles.
+    static let avatarHeightFraction: CGFloat = 0.55
 
     /// Corner radius of the card
     static let cornerRadius: CGFloat = 8
@@ -65,9 +65,20 @@ struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-    var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
+    init(
+        participant: UIParticipant,
+        activeSpeakerId: String?
+    ) {
+        self.participant = participant
+        self.activeSpeakerId = activeSpeakerId
+    }
 
     var body: some View {
+        cardContent
+    }
+
+    @ViewBuilder
+    private var cardContent: some View {
         Group {
             if participant.isCameraEnabled {
                 ZStack {
@@ -110,7 +121,6 @@ struct ParticipantVideoCard: View {
                                     )
                                 } else {
                                     participant.view
-                                        .horizontallyFlipped(shouldFlipHorizontally)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
 
@@ -152,18 +162,21 @@ struct ParticipantVideoCard: View {
                         )
                         .overlay {
                             ZStack {
-                                Rectangle()
-                                    .fill(
-                                        theme.vGray4.opacity(
-                                            ParticipantVideoCardConstants.backgroundOpacity
-                                        )
-                                    )
-                                    .overlay(
-                                        AvatarInitials(state: .init(userName: participant.name))
-                                            .padding(ParticipantVideoCardConstants.avatarPadding)
-                                    )
-                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                                    .clipped()
+                                // The avatar is sized as a fixed fraction of the card, NOT via a
+                                // second background rectangle shaped by `participant.aspectRatio`:
+                                // that rectangle stacked a second translucent gray (shifting the
+                                // card's background depending on how much it covered) and made the
+                                // avatar size depend on stale video dimensions, so a participant who
+                                // joined camera-off looked different from one who turned their
+                                // camera off mid-call.
+                                GeometryReader { geometry in
+                                    let diameter =
+                                        geometry.size.height
+                                        * ParticipantVideoCardConstants.avatarHeightFraction
+                                    AvatarInitials(state: .init(userName: participant.name))
+                                        .frame(width: diameter, height: diameter)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
 
                                 ParticipantVideoCardOverlays(
                                     participantID: participant.id,
