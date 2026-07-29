@@ -26,6 +26,18 @@ jobs:
           chmod +x scripts/format.sh
           ./scripts/format.sh --check
 
+  spm-build:
+    runs-on: macos-26
+    needs: [format-check]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build SPM package (VERAMeetingRoomSDK) for iOS
+        run: |
+          xcodebuild build \
+            -scheme VERAMeetingRoomSDK \
+            -destination "generic/platform=iOS Simulator" | xcpretty
+
   unit-tests:
     runs-on: macos-26
     needs: [format-check]
