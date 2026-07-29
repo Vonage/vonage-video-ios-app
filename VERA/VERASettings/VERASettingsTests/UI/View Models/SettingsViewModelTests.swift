@@ -1213,6 +1213,7 @@ struct SettingsViewModelTests {
         await delay()
 
         #expect(loggingRepository.saveCallCount == 0)
+    }
 
     /// Helper to create a SettingsViewModel with required dependencies.
     private func makeViewModel(
@@ -1225,7 +1226,7 @@ struct SettingsViewModelTests {
         )
     }
 
-     private func makeGetLogFileURLsUseCase(urls: [URL]) -> MockGetLogFileURLsUseCase {
+    private func makeGetLogFileURLsUseCase(urls: [URL]) -> MockGetLogFileURLsUseCase {
         let useCase = MockGetLogFileURLsUseCase()
         useCase.urls = urls
         return useCase

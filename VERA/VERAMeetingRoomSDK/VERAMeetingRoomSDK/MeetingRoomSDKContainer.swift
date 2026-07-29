@@ -384,11 +384,6 @@ final class MeetingRoomSDKContainer {
         speakerTestService: defaultSpeakerTestService
     )
 
-    lazy var settingsFactory = SettingsFactory(
-        repository: settingsRepository,
-        statsDataSource: statsRepository
-    )
-
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
         httpClient: httpClient
