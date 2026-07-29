@@ -1,0 +1,20 @@
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationMenu.swift
+  s_8182ef13ee7f5d::t_7c80f1c5d6938a 6,9,32,35,77,169,247
+  s_8182ef13ee7f5d::t_a0039075b41b38 40,78,84,170,211,248
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f5a51b0ec9fb3b1cf631f0e425a884db5be3343b",
+  "prompts": {},
+  "sessions": {
+    "s_8182ef13ee7f5d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "dfc1253d-b961-45a3-9a67-7a70bcf94998",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
