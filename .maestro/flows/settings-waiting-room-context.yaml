@@ -56,10 +56,6 @@ appId: ${APP_ID}
 # Screenshot: Video section with all controls editable
 - takeScreenshot: 01-settings-waiting-room-video-section
 
-# Scroll to reveal Audio Section
-- swipe:
-    direction: "UP"
-    duration: 500
 
 # Audio Section - Context-Dependent (editable in Waiting Room)
 - assertVisible:

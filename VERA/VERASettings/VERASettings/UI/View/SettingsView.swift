@@ -155,7 +155,6 @@ public struct SettingsView: View {
                     isCompactLayout: true
                 )
                 LoggingSectionScreen(viewModel: viewModel)
-                GeneralSectionView(viewModel: viewModel)
 
                 Section {
                     GeneralSectionView(
