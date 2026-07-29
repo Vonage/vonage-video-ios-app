@@ -1,0 +1,31 @@
+VERA/VERACommonUI/VERACommonUI/UI/BottomBarMenuItem.swift
+  s_af84ea45cdf2b6::t_fc24c3b97f8135 1-40
+VERA/VERACommonUI/VERACommonUI/UI/BottomBarInlineButton.swift
+  s_af84ea45cdf2b6::t_9436322c7c924c 1-37
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_af84ea45cdf2b6::t_a997f516c530a5 262,264
+  s_af84ea45cdf2b6::t_8ab21f0cde979a 246-251,265-266
+VERA/VERACommonUI/VERACommonUI/UI/OngoingActivityControlButton.swift
+  s_af84ea45cdf2b6::t_8644b9d0da6717 78-79
+  s_af84ea45cdf2b6::t_c93b7c5cca3d3f 38-39,42-48,51-52,80-81
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/ParticipantsBadgeButton.swift
+  s_af84ea45cdf2b6::t_c930fb2b74e62c 44,46
+VERA/VERACommonUI/VERACommonUI/UI/BottomBarButtonAccessory+View.swift
+  s_af84ea45cdf2b6::t_348a6a43ba48d6 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "32611f8cf85d6cdcc2824261bc9b4ed57efa2e44",
+  "prompts": {},
+  "sessions": {
+    "s_af84ea45cdf2b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecaac-dd51-79f1-a4f5-4ee8a3a18f2e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

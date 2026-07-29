@@ -1,0 +1,58 @@
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/BottomBarOverflowSheetUITests.swift
+  s_af84ea45cdf2b6::t_3dc9c9eb62144a 58-59,67
+  s_af84ea45cdf2b6::t_6367c4b138dabb 1-17,19-52,54-57,61-66,68,70-71,74-85,87-106
+  s_af84ea45cdf2b6::t_1aabd8dee4bc24 53,69,72-73
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_af84ea45cdf2b6::t_030967546ddba1 130,204,269,271-279
+  s_af84ea45cdf2b6::t_38ec6f9e0106d4 38,49,59,78
+  s_af84ea45cdf2b6::t_0c0714ede53ea7 39,50,60,68,79,264-265,267-268,270
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_af84ea45cdf2b6::t_4ef9edd418ea01 255-256,258,279-294,296-297,299
+  s_af84ea45cdf2b6::t_96c4eb1c13d2c3 370,392
+  s_af84ea45cdf2b6::t_2d94cd0dd9ac56 254,295
+  s_af84ea45cdf2b6::t_0510021044e375 257,298
+  s_af84ea45cdf2b6::t_f8f6ee34f0e157 47,81,116,151,203,253
+VERA/VERACommonUI/VERACommonUI/UI/BottomBarMenuItem.swift
+  s_af84ea45cdf2b6::t_d8c80f110b01b1 42,47,54,59
+VERA/VERAReactions/VERAReactions/UI/View/EmojiHorizontalPickerView.swift
+  s_af84ea45cdf2b6::t_18a24ca717667e 1-8,15-42,45-63,73-77,82-108
+  s_af84ea45cdf2b6::t_1011fe3136953d 9-14,43-44,64-72,78-81
+VERA/VERAReactions/VERAReactionsSnapshotTests/EmojiHorizontalPickerViewContainerUITests.swift
+  s_af84ea45cdf2b6::t_2674d6c5fc2cfc 1-15,17-94
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBarOverflowSheet.swift
+  s_af84ea45cdf2b6::t_36ddfc5a809cc0 32-50,58-80
+VERA/VERACommonUI/VERACommonUI/UI/BottomItemPresentable.swift
+  s_af84ea45cdf2b6::t_beccf071483826 16,23,35,47,57,69-73
+  s_af84ea45cdf2b6::t_cbef2e14ce2136 15,21-22,24-25,34,46,56,66-68
+VERA/VERAReactions/VERAReactions/Wireframe/ReactionsFactory.swift
+  s_af84ea45cdf2b6::t_f7bbe4b27d49de 56-81
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomItemPresenters.swift
+  s_af84ea45cdf2b6::t_e7efdc8d2993d3 24,41
+  s_af84ea45cdf2b6::t_2e40ef4bd0cf7d 51,60-64
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_af84ea45cdf2b6::t_251e11e6da202a 189
+  s_af84ea45cdf2b6::t_ef04cc0db8721a 155-159,169-173
+  s_af84ea45cdf2b6::t_4fa56f7668a2b4 203-204
+VERA/VERAReactions/VERAReactions/UI/View/EmojiHorizontalPickerViewContainer.swift
+  s_af84ea45cdf2b6::t_e723786d7da2a7 1-50
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  s_af84ea45cdf2b6::t_bd3039c39e90c5 74
+  s_af84ea45cdf2b6::t_4b3b0b8a5843f3 70,81-108
+  s_af84ea45cdf2b6::t_8ed663f05dc1e4 71-73,75,168-203,205-208
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "5b7f487afe463dd4db93c5b86b38781751d679b4",
+  "prompts": {},
+  "sessions": {
+    "s_af84ea45cdf2b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecaac-dd51-79f1-a4f5-4ee8a3a18f2e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

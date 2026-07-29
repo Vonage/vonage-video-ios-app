@@ -1,0 +1,23 @@
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/GenerateTonePlayerUseCaseTests.swift
+  s_32cef095852d28::t_d0e5939a820268 107-109
+  s_32cef095852d28::t_dbb9cb129bc1d2 112-114
+  s_32cef095852d28::t_da7990ebf050a8 110-111
+  s_32cef095852d28::t_1cb4687c2f3414 104-106
+  s_32cef095852d28::t_2b5a1e5bd607de 115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "19989558fdf0aa428bc43478229b943bb165ca81",
+  "prompts": {},
+  "sessions": {
+    "s_32cef095852d28": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "520b6ee5-f630-4efd-8ccc-77d6c9291345",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+VERA/VERACommonUI/VERACommonUI/UI/BottomBarMenuItem.swift
+  s_af84ea45cdf2b6::t_6a88436d57ad92 12,14,20,22,27,29,35,37-38,40-56,59,63
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBarOverflowSheet.swift
+  s_af84ea45cdf2b6::t_f8e3e2f709538f 31-44,50
+  s_af84ea45cdf2b6::t_b455a7c9868433 1-30,45-49,51-65
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  s_af84ea45cdf2b6::t_7cf26f53cb976a 21-22,33-34,38-48,91-129
+  s_af84ea45cdf2b6::t_96c3a2d9eeac74 12
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_af84ea45cdf2b6::t_0161c0117ba09f 195,245-256
+  s_af84ea45cdf2b6::t_5a51040793e55f 148,185,197
+  s_af84ea45cdf2b6::t_ac282db45db701 120,149,196,198-201,230-233,235-238,240-242,244,260-277,279
+  s_af84ea45cdf2b6::t_6187dd64f89212 194
+  s_af84ea45cdf2b6::t_cea096e8552aae 108-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "ce9002d109570aad011d239b30a37d2b9ecacdcb",
+  "prompts": {},
+  "sessions": {
+    "s_af84ea45cdf2b6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecaac-dd51-79f1-a4f5-4ee8a3a18f2e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

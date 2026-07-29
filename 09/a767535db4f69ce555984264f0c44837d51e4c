@@ -1,0 +1,233 @@
+prebuilt/Sources/Settings/Data/Vonage/VonageSettingsPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-11
+prebuilt/Sources/MeetingRoomUI/MeetingRoomTheme.swift
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1-3,5-11,23
+  s_bfcab3b1b814f7::t_055f40822ca383 4,12-22
+prebuilt/PrebuiltApp/PrebuiltApp/ContentView.swift
+  s_bfcab3b1b814f7::t_b027a7f9f246de 1-12
+prebuilt/Sources/ScreenShare/Wireframe/ScreenShareFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/MeetingRoom/MeetingRoomFactory.swift
+  s_bfcab3b1b814f7::t_8e93c08a330ddb 1-4,6-41
+  s_bfcab3b1b814f7::t_fac5abb03b8430 5
+prebuilt/Sources/MeetingRoomCore/URLSessionHTTPClient.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 1-28
+prebuilt/Sources/MeetingRoomDomain/MeetingRoomFeature.swift
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-10
+prebuilt/Sources/MeetingRoomDomain/RoomName+Validation.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 1-30
+prebuilt/Tests/MeetingRoomCoreTests/MeetingRoomCoreTests.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 2,9-54
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1,3-8,55
+prebuilt/Sources/MeetingRoomDomain/SessionState.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-7
+prebuilt/Tests/MeetingRoomDomainTests/MeetingRoomFeatureTests.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 9-21
+  s_bfcab3b1b814f7::t_fbddd7670320b1 22-45
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-8
+prebuilt/Sources/MeetingRoomDomain/PublisherSettings.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-84
+prebuilt/Sources/Captions/Data/Vonage/VonageCaptionsPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-11
+prebuilt/Sources/BackgroundEffects/UI/BackgroundEffectsView.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/Reactions/Data/Vonage/VonageReactionsPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-11
+prebuilt/Sources/Archiving/Wireframe/ArchivingFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/Captions/UI/CaptionsView.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/Archiving/Data/Vonage/VonageArchivingPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-11
+prebuilt/Tests/VonageTestHelpers/MockVonagePlugin.swift
+  s_bfcab3b1b814f7::t_0aeeaa1f7f825c 4-14,16-19
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1-3,15,20-21
+prebuilt/Tests/MeetingRoomTests/MeetingRoomTests.swift
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1,3-5,19
+  s_bfcab3b1b814f7::t_fac5abb03b8430 2,9,17-18
+  s_bfcab3b1b814f7::t_8e93c08a330ddb 6-8,10-16
+prebuilt/Tests/VonageAdapterTests/VonageAdapterTests.swift
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1-5,8-9
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 6-7
+prebuilt/Sources/Reactions/UI/ReactionsView.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/Chat/Domain/ChatFeature.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/Settings/Wireframe/SettingsFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Tests/MeetingRoomConfigurationTests/AppConfigTests.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 15
+  s_bfcab3b1b814f7::t_4e22f10c39d2fe 6-11,18-19
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-5,12-14,16-17,20-23
+prebuilt/Sources/MeetingRoomDomain/SessionRepository.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-6
+prebuilt/Sources/Archiving/Domain/ArchivingFeature.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/MeetingRoomSDK/MeetingRoomSDK.swift
+  s_bfcab3b1b814f7::t_5412a64c6ab57d 20-23
+  s_bfcab3b1b814f7::t_0a9f5fcd886847 60-62,69-71,75-76,86,90,161,163-179,293-297,301,309,330-343
+  s_bfcab3b1b814f7::t_695c05217bb44b 6-7,10-18,66-68,72-74,84-85,87-89,91-94,109-110,138-160,162,298-300
+  s_bfcab3b1b814f7::t_055f40822ca383 3,35,38-59,224-230,246-281,286-287,306-308,310-314,316-321
+  s_bfcab3b1b814f7::t_9630b0da222e59 33-34,36-37,282-285
+  s_bfcab3b1b814f7::t_dce11e969460a9 65,78,180-189,191-199,202-218,315,322-323,325-329
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-2,4-5,19,24-32,219-223,231-245,288-292,302-305,344-345
+  s_bfcab3b1b814f7::t_11d266a0730bdc 63,79-83,95-108
+  s_bfcab3b1b814f7::t_8952d539a5ceea 8-9,64,77,111-137,190,200-201,324
+prebuilt/Sources/ScreenShare/Domain/ScreenShareFeature.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/Settings/Domain/SettingsFeature.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/Reactions/Domain/ReactionsFeature.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/MeetingRoomDomain/MeetingRoomLayout.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-4
+prebuilt/Tests/MeetingRoomSDKTests/MeetingRoomSDKTests.swift
+  s_bfcab3b1b814f7::t_54be7d4c7d389a 2,27-36,44-70
+  s_bfcab3b1b814f7::t_32d64b2ead4382 37,39
+  s_bfcab3b1b814f7::t_591f6cd9c51eff 43
+  s_bfcab3b1b814f7::t_80dd8b5a032751 38,40-42
+  s_bfcab3b1b814f7::t_055f40822ca383 18-24
+  s_bfcab3b1b814f7::t_11d266a0730bdc 71-94
+  s_bfcab3b1b814f7::t_afa0af8c23e10f 1,3-4,14-17,25-26,126
+  s_bfcab3b1b814f7::t_ccdf371b3b3d7b 5-13,95-125
+prebuilt/Sources/MeetingRoomDomain/Participant.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-21
+prebuilt/Sources/MeetingRoomDomain/VERAPublisher.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-7
+prebuilt/Sources/MeetingRoomDomain/MeetingRoomFeatureDescriptor.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/README.md
+  s_bfcab3b1b814f7::t_7563356fd407e6 49-64
+  s_bfcab3b1b814f7::t_b387a9cfe35338 1-48
+prebuilt/Sources/Chat/Wireframe/ChatFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/Chat/Data/Vonage/VonageChatPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-11
+prebuilt/Sources/Settings/UI/SettingsView.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/ScreenShare/UI/ScreenShareView.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/MeetingRoomDomain/FeatureEntities.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-47
+prebuilt/Sources/AudioEffects/Data/Vonage/AudioEffectsTransformer.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-4,6-8
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 5
+prebuilt/Sources/MeetingRoomDomain/SessionEvent.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-7
+prebuilt/Sources/Reactions/Wireframe/ReactionsFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/MeetingRoomCore/TryCreatingANewRoomUseCase.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 1-22
+prebuilt/Sources/Captions/Wireframe/CaptionsFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/MeetingRoomCore/MeetingRoomLogger.swift
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1-17
+prebuilt/Sources/CallKitPlugin/CallKitPlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-16
+prebuilt/Sources/MeetingRoomConfiguration/Resources/app-config.json
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1,29-30
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 2-28
+prebuilt/Sources/Captions/Domain/CaptionsFeature.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Package.swift
+  s_bfcab3b1b814f7::t_0a46ce2b679e0b 5
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-4,7-11,13-30,33-41,54-55,142-144,161-162,169-170,178,195,199-200,205-208,236-238
+  s_bfcab3b1b814f7::t_afa0af8c23e10f 209-210,232
+  s_bfcab3b1b814f7::t_a08c82e4b7421b 12
+  s_bfcab3b1b814f7::t_b30f0eda239fec 146,150-151,154-156,160
+  s_bfcab3b1b814f7::t_a8132aafda5607 77
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 31-32,42-53,56-65,71-76,78-82,123,132-135,137-138,141,145,147-148,157-159,171-173,179-191,193-194,196-198,201-204,211-226,228-231,233-235
+  s_bfcab3b1b814f7::t_af4ffcdd3f9883 6,66-70,83-122,124-131,136,139-140,149,152-153,163-168,174-177,192,227
+prebuilt/Scripts/validate-external-integration.sh
+  s_bfcab3b1b814f7::t_12d283172ed406 1-68
+prebuilt/Sources/MeetingRoomDomain/SessionError.swift
+  s_bfcab3b1b814f7::t_11d266a0730bdc 1
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 3-7
+  s_bfcab3b1b814f7::t_8243924a1775d6 2
+prebuilt/Sources/MeetingRoomDomain/RoomCredentials.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-33
+prebuilt/PrebuiltApp/PrebuiltApp/PrebuiltAppApp.swift
+  s_bfcab3b1b814f7::t_b027a7f9f246de 1-10
+prebuilt/Sources/MeetingRoomDomain/CallFacade.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-11
+prebuilt/Sources/AudioEffects/Wireframe/AudioEffectsFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/MeetingRoomDomain/HTTPClient.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-29
+prebuilt/Tests/MeetingRoomTestHelpers/MockSessionRepository.swift
+  s_bfcab3b1b814f7::t_d0f72151ce30fb 1-3
+prebuilt/Sources/MeetingRoomDomain/Permissions.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-10
+prebuilt/Theme/semantics.json
+  s_bfcab3b1b814f7::t_b387a9cfe35338 1-28
+prebuilt/Sources/MeetingRoomDomain/RoomName.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-15
+prebuilt/Sources/MeetingRoomDomain/PublisherRepository.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-5
+prebuilt/Sources/VonageAdapter/VonageAdapter.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-24,26-32
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 25
+prebuilt/Sources/Chat/UI/ChatView.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/ScreenShare/Data/Vonage/VonageScreenSharePlugin.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1,3-22,27-29
+  s_bfcab3b1b814f7::t_11d266a0730bdc 2,23-26
+prebuilt/Sources/BackgroundEffects/Domain/BackgroundEffectsFeature.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/AudioEffects/Domain/AudioEffectsFeature.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/AudioEffects/UI/AudioEffectsView.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+prebuilt/Sources/MeetingRoomCore/RoomNameGenerator.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 1-12,15-23,34-59
+  s_bfcab3b1b814f7::t_8243924a1775d6 13-14,24-33
+prebuilt/Sources/BackgroundEffects/Wireframe/BackgroundEffectsFactory.swift
+  s_bfcab3b1b814f7::t_f693badb9901d3 1-9
+prebuilt/Sources/MeetingRoomCore/TryJoinRoomUseCase.swift
+  s_bfcab3b1b814f7::t_fbddd7670320b1 1-17
+prebuilt/Sources/Archiving/UI/ArchivingView.swift
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 3
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-2,4-7
+prebuilt/Sources/MeetingRoomDomain/SpeakerInfo.swift
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 1-9
+prebuilt/Sources/BackgroundEffects/Data/Vonage/BackgroundEffectsTransformer.swift
+  s_bfcab3b1b814f7::t_a8132aafda5607 1-4,6-8
+  s_bfcab3b1b814f7::t_facdf0f0d1757e 5
+prebuilt/Sources/MeetingRoomConfiguration/AppConfig.swift
+  s_bfcab3b1b814f7::t_e8ff8391da1373 120-124
+  s_bfcab3b1b814f7::t_e7070d6aabcbed 1-4,10,95-97,102,115-119,125-147,156-158
+  s_bfcab3b1b814f7::t_073cf4acce3c8d 5-9,11-94,98-101,103-114,148-155
+prebuilt/Package.resolved
+  s_bfcab3b1b814f7::t_5c504b3d0879b7 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "09a767535db4f69ce555984264f0c44837d51e4c",
+  "prompts": {},
+  "sessions": {
+    "s_bfcab3b1b814f7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa0f3-8bfe-76b2-830b-834b689de13f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

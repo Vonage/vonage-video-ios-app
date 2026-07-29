@@ -1,0 +1,35 @@
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_fcb650412c4db8::t_81c8ba24763ce1 77,452,487,532,690,694,698,708
+  s_fcb650412c4db8::t_73f57fe1cb2792 39,456,461-476
+  s_fcb650412c4db8::t_aa322269801420 60,127,134,235,243,310,374,378,382,443,484,531,722
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  s_fcb650412c4db8::t_aa322269801420 280,286
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  s_fcb650412c4db8::t_33cf46ee76a08d 21-22,54,66,78,97-98,140,143,162,174-175
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences+Bridge.swift
+  s_fcb650412c4db8::t_b0b640e321382b 19
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  s_fcb650412c4db8::t_aa322269801420 36,125,152
+  s_fcb650412c4db8::t_81c8ba24763ce1 385,407
+  s_fcb650412c4db8::t_4a8c4024772bef 422-424
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  s_fcb650412c4db8::t_571c36955d4fa6 122
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_fcb650412c4db8::t_9e2c825305feb1 65,67,82-87,92,94-95,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fae0fbb99f7c13d7f5454cbd86618bcbced378b7",
+  "prompts": {},
+  "sessions": {
+    "s_fcb650412c4db8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb684-e783-7df1-af8f-c67d058f66ef",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

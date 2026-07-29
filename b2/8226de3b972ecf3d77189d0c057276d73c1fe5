@@ -1,0 +1,28 @@
+.maestro/flows/create-new-room.yaml
+  h_2499cc15b3806e 8-10,20-22,36-38
+.maestro/flows/waiting-room-controls-enabled.yaml
+  h_2499cc15b3806e 8-10,22-24,45-47
+.maestro/flows/github-repo-link.yaml
+  h_2499cc15b3806e 5-7
+.maestro/flows/goodbye-view-landing-page.yaml
+  h_2499cc15b3806e 8-10,22-24,36-38,47-49,66-68
+.maestro/flows/recording.yaml
+  h_2499cc15b3806e 8-10,22-24,43-45,63-65,89-91,102-104
+.maestro/flows/waiting-room-controls-disabled.yaml
+  h_2499cc15b3806e 8-10,22-24,65-67
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  h_2499cc15b3806e 8-10,25-27,42-44
+.maestro/flows/goodbye-reenter-room.yaml
+  h_2499cc15b3806e 8-10,22-24,36-38,47-49,66-68,77-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b28226de3b972ecf3d77189d0c057276d73c1fe5",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

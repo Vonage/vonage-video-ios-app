@@ -1,0 +1,19 @@
+.maestro/flows/speaking-while-muted.yaml
+  s_2f2de25cca9ee0::t_bc530a816879c4 52-58,76,84-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.12",
+  "base_commit_sha": "1918ec62538ee7c0b45a6792ded1c15f7425cf1c",
+  "prompts": {},
+  "sessions": {
+    "s_2f2de25cca9ee0": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1785277444792576000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

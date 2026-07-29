@@ -1,0 +1,20 @@
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_b6b4ccdab8f99a::t_154c686fb7abe9 56-57,59-61,272-278
+  s_b6b4ccdab8f99a::t_f8ebb8526f7b42 263,265,269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9e24555a85378146b01fefd9359b4a800c710d1f",
+  "prompts": {},
+  "sessions": {
+    "s_b6b4ccdab8f99a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb06c-322a-7bd2-b1dc-f7f1fdfa948e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

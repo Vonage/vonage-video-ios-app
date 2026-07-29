@@ -1,0 +1,22 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_5f1f0b0dd10941::t_08c76b6cf8c7bb 6,252-253,356,362-365,499-516
+  s_5f1f0b0dd10941::t_1ded1021a04e6e 517-518
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_5f1f0b0dd10941::t_6b29ac7638a00e 5,7,181-241,248-257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "17402854a537c2ebb9303c0dc23be5ad5c1ad1f0",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/ImageCropUtilsTests.swift
+  h_2499cc15b3806e 5,7,11
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffectsSheet.swift
+  h_2499cc15b3806e 109-111,144,148,150-152,162-165,175,177-180,205-206,209,212-224,228-248
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  h_2499cc15b3806e 61-98
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/VideoEffectsSheetSnapshotTests.swift
+  h_2499cc15b3806e 1-169
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  h_2499cc15b3806e 26-27,251
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  e3d699307277e350 146-147,270
+  h_2499cc15b3806e 37-39,44,62,132-136,141-142,263-269
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomStateTests.swift"
+  h_2499cc15b3806e 1-89
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultUserBackgroundRepositoryTests.swift
+  h_2499cc15b3806e 7,95-101
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  e3d699307277e350 184-185
+  h_2499cc15b3806e 100,167-183
+VERA/VERAVonage/VERAVonageTests/VonagePublisherBackgroundRestoreTests.swift
+  h_2499cc15b3806e 1-73
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  h_2499cc15b3806e 146-147,151,157,165,323-330
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffect+resources.swift
+  h_2499cc15b3806e 17
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomView.swift"
+  h_2499cc15b3806e 56
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  h_2499cc15b3806e 6,21,23,65,67,69-70,72-79,82-84,99,101-107,111-114,121
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  h_2499cc15b3806e 64,102-108,113,115-125
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultUserBackgroundRepository.swift
+  h_2499cc15b3806e 62-63
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 768-778,789-795
+VERA/VERAApp/VERA/App/VERAApp.swift
+  h_2499cc15b3806e 101,141-147,164,170,213
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/VideoEffectsViewModelTests.swift"
+  h_2499cc15b3806e 192,194-196,198,212-215,217-218,220,223,226-227,231,237-247,249-254,256,259-262,264-285,287-289,291-292,294,297-303,305-307,309-310,312,442,444-446
+VERA/VERASettings/VERASettings/UI/Entities/SettingsVideoResolution.swift
+  h_2499cc15b3806e 58,60,66-67
+VERA/VERAVonage/VERAVonage/UIViewContainer.swift
+  h_2499cc15b3806e 77,84-87
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/PhotoItemDataLoader.swift
+  h_2499cc15b3806e 2,6,9-13,15-17
+VERA/VERABackgroundEffects/VERABackgroundEffects/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 24-43,83-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "cfe9b09677fe05d0e712290db1c77ef30a067a0f",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

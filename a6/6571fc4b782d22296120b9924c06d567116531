@@ -1,0 +1,32 @@
+VERA/VERASettings/VERASettings/UI/View/Sections/AudioSectionView.swift
+  s_be051c64e934bf::t_8029980938d3f6 85-86,97
+  s_be051c64e934bf::t_4567b3d88ca070 87,98-99,101,109-110
+  s_be051c64e934bf::t_8d9246e3a40035 44,49,54,58,75
+  s_be051c64e934bf::t_12a156fb51f904 111
+VERA/VERASettings/VERASettings/UI/View/Sections/VideoSectionView.swift
+  s_be051c64e934bf::t_8d9246e3a40035 60,65,69,108,118
+  s_be051c64e934bf::t_8029980938d3f6 97
+  s_be051c64e934bf::t_4567b3d88ca070 268
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  s_be051c64e934bf::t_8d9246e3a40035 57
+VERA/VERASettings/VERASettings/UI/View/Sections/ActiveCallFooter.swift
+  s_be051c64e934bf::t_97c0c76524fe00 1-18
+VERA/VERASettings/VERASettings/UI/View/Sections/StatisticsSectionScreen.swift
+  s_be051c64e934bf::t_8d9246e3a40035 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "a66571fc4b782d22296120b9924c06d567116531",
+  "prompts": {},
+  "sessions": {
+    "s_be051c64e934bf": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "93625551-47f1-4f19-bba5-fd2f1ed155e1",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

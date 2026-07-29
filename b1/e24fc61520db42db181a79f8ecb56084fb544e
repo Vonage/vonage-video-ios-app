@@ -1,0 +1,31 @@
+VERA/VERAApp/VERA/App/QA/QAMeetingRoomUIProvider.swift
+  s_5f1f0b0dd10941::t_e6896b7a9f757e 1-92
+VERA/VERAApp/VERA/App/QA/QAMeetingRoomButtonsMenu.swift
+  s_5f1f0b0dd10941::t_656d62951bf1b7 14-27,30-34,36-37,39-48,50-56,58,60-78,81-82,88
+  s_5f1f0b0dd10941::t_7815d44ce1bfa1 1-13,28-29,35,38,49,57,59,79-80,83-87,89-91
+VERA/VERAApp/VERATests/QAMeetingRoomUIProviderTests.swift
+  s_5f1f0b0dd10941::t_73ea34016e1ece 1-92
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_5f1f0b0dd10941::t_c9f85f9558eb39 170,229-232
+  s_5f1f0b0dd10941::t_d4228122c25368 225,227,233
+  s_5f1f0b0dd10941::t_609cf0d1ee8bda 226,228
+  s_5f1f0b0dd10941::t_6cc10778d507f7 36-40,99-103,294-296
+  s_5f1f0b0dd10941::t_9dfb277eae6364 169,171-176,223-224,234-235
+  s_5f1f0b0dd10941::t_72db0e5e26d2f3 236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "b1e24fc61520db42db181a79f8ecb56084fb544e",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

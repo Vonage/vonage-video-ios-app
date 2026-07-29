@@ -1,0 +1,30 @@
+.maestro/flows/recording.yaml
+  s_43abc85b87dc37::t_58855e4b66466f 130-138
+VERA/VERACore/VERACore/Common/Data/URLSession/URLSessionHTTPClient.swift
+  s_43abc85b87dc37::t_bc20af484acb7f 216
+  s_43abc85b87dc37::t_7367128294bd37 40,50,63,76,82-89,93-94,97,101-143,147-153,155-156,172,180,187,193-211,234-244,252
+  s_43abc85b87dc37::t_7593b399ebad6f 220
+scripts/run-maestro-tests.sh
+  s_43abc85b87dc37::t_434928a43df69e 382
+VERA/VERACore/VERACoreTests/Common/Data/URLSession/URLSessionHTTPClientTests.swift
+  s_43abc85b87dc37::t_f71e2a5a190df0 117-124
+  s_43abc85b87dc37::t_71511fb76e0711 66,99,130-131,139-147,245,256,262,279,288-297,301,304-315,478,481-483
+  s_43abc85b87dc37::t_1d6ffb8915ff78 326,330,338-339,342-343
+  s_43abc85b87dc37::t_d32deae3503a8b 106-116,125-126,316-325,327-329,331-337,340-341,344-345
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "615a34ac93e5a84d3d3b7e98807b85bfcae4ac7e",
+  "prompts": {},
+  "sessions": {
+    "s_43abc85b87dc37": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e92dd-a5da-76f3-ba06-bc2393e57d92",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

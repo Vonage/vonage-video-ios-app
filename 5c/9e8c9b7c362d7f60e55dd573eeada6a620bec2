@@ -1,0 +1,19 @@
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsPerformanceTests.swift
+  s_83569f883eb176::t_7da262535a3f8a 68-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5c9e8c9b7c362d7f60e55dd573eeada6a620bec2",
+  "prompts": {},
+  "sessions": {
+    "s_83569f883eb176": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "caff5221-b085-4891-8c80-0e9e98e5461e",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

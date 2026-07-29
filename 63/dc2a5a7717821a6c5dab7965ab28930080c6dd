@@ -1,0 +1,58 @@
+"VERA/VERACore/VERACore/Waiting room/Wireframe/WaitingRoomFactory.swift"
+  s_52ab9fcdd827c9::t_6fe6c41427c701 15,21-22,28,49-50
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_52ab9fcdd827c9::t_5ce2314731cd5d 740-764
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  s_52ab9fcdd827c9::t_5095f892465602 45-46,61
+VERA/VERADomain/VERADomain/SpeakerTestService.swift
+  s_52ab9fcdd827c9::t_01194ac0d80961 1-14
+VERA/VERACore/VERATestHelpers/Mocks/MockSpeakerTestService.swift
+  s_52ab9fcdd827c9::t_fb1b68c39f7f8f 1-16
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomScreen.swift"
+  s_52ab9fcdd827c9::t_799a9ab35ccee4 39,43-44,46
+  s_52ab9fcdd827c9::t_a10270fde90c62 38,40-42,45,47
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_52ab9fcdd827c9::t_01b42d6283a803 6,31-33,39,42-43,47,60,109
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_52ab9fcdd827c9::t_601d4b24a74b24 107-108,112-113,209-210
+VERA/VERACore/VERACore/Common/Data/Default/DefaultSpeakerTestService.swift
+  s_52ab9fcdd827c9::t_bedd67a05e0a64 20
+  s_52ab9fcdd827c9::t_4caa8fb2209b7f 1-19,21-42
+VERA/VERASettings/VERASettings/Utils/NullSpeakerTestService.swift
+  s_52ab9fcdd827c9::t_a65de083c522a3 1-12
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_52ab9fcdd827c9::t_fa453decbe4cc0 149-157
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_52ab9fcdd827c9::t_f2724899814187 7,34-36,115-116,153,160-163
+  s_52ab9fcdd827c9::t_5231697358599a 148
+  s_52ab9fcdd827c9::t_bd52aa0ea43fc4 117
+  s_52ab9fcdd827c9::t_e9524eb0e92c85 164
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  s_52ab9fcdd827c9::t_b6d379db5ca1d4 266-290,305,321-322
+VERA/VERASettings/VERASettingsTests/TestHelpers/MockSpeakerTestService.swift
+  s_52ab9fcdd827c9::t_f7929603dfe062 1-13
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_52ab9fcdd827c9::t_5476d726d8496a 25,41,65-66,78-82
+VERA/VERASettings/VERASettings/Utils/SettingsViewModel+Preview.swift
+  s_52ab9fcdd827c9::t_a190112df90c75 42,49
+VERA/VERASettings/VERASettings/UI/View/Sections/AudioSectionView.swift
+  s_52ab9fcdd827c9::t_16921ec1ed3b53 96-115
+VERA/VERACore/VERACoreTests/Common/Data/DefaultSpeakerTestServiceTests.swift
+  s_52ab9fcdd827c9::t_a767c598f2dd01 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "63dc2a5a7717821a6c5dab7965ab28930080c6dd",
+  "prompts": {},
+  "sessions": {
+    "s_52ab9fcdd827c9": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "5643cf3d-aee2-46e9-bc0e-28f49385b11d",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

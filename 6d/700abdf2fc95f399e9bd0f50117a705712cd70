@@ -1,0 +1,21 @@
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_be051c64e934bf::t_c07d4bfc0e4f6b 1193-1225
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_be051c64e934bf::t_c07d4bfc0e4f6b 672-741
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "6d700abdf2fc95f399e9bd0f50117a705712cd70",
+  "prompts": {},
+  "sessions": {
+    "s_be051c64e934bf": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "93625551-47f1-4f19-bba5-fd2f1ed155e1",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

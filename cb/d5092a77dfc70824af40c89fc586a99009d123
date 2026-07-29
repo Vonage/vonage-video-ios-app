@@ -1,0 +1,19 @@
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationProvider.swift
+  s_5f1f0b0dd10941::t_9034f3c5933879 65,71,74-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "cbd5092a77dfc70824af40c89fc586a99009d123",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

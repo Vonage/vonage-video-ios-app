@@ -1,0 +1,19 @@
+sonar-project.properties
+  s_1575e5b3901782::t_39989182690a19 57,77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "d0de830ce886e53e3fe25cd0fe3a6d68ec20ec4c",
+  "prompts": {},
+  "sessions": {
+    "s_1575e5b3901782": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efef0-b729-79c3-ab28-50c33f3161a6",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

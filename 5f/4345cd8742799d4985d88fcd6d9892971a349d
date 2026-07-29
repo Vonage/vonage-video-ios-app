@@ -1,0 +1,81 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_5f1f0b0dd10941::t_6617b8dbddeebf 251-254
+  s_5f1f0b0dd10941::t_9bee9903a03a65 466
+  s_5f1f0b0dd10941::t_ac485a3e32c004 363
+  s_5f1f0b0dd10941::t_eb576ed45a1781 249
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/MeetingRoomUIProvider.swift
+  s_5f1f0b0dd10941::t_30d8eb85def51b 9,13,16,19-21,23,26,29,32,35,40,43-44,55-72,82-99,101,103,106-107,111-119,220,234-235,241
+  s_5f1f0b0dd10941::t_879d9d48a07259 121,123,126,129,132,135,139,149-154,156-165,167,178,181,184-185,187,190-201,217,233,240
+  s_5f1f0b0dd10941::t_eb576ed45a1781 138,155
+  s_5f1f0b0dd10941::t_e5fbbe7fbeed70 6,203,205,208,214,221,230-232,236-239,242-244,257,262-266,268-271,277,297-298,301,310,312-315
+  s_5f1f0b0dd10941::t_c5434524fd6cec 11
+  s_5f1f0b0dd10941::t_c546e7761b8f36 284-286
+  s_5f1f0b0dd10941::t_6b9a25827c49b2 169,172,188-189
+  s_5f1f0b0dd10941::t_10f9f338643e43 8,10,12,14-15,17-18,22,24-25,27-28,30-31,33-34,36-39,41-42,45-54,73-81,100,102,104-105,108-110,120,122,124-125,127-128,130-131,133-134,136-137,140-148,166,168,170-171,173-177,179-180,182-183,186,202,204,206-207,209-213,215-216,218-219,222-229,251,254,258-261,267,278-279,282,289-294,305,311
+  s_5f1f0b0dd10941::t_3d84457a695b13 245,247-249
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  s_5f1f0b0dd10941::t_b6cde23cbaf08d 30-31,43,107-153
+  s_5f1f0b0dd10941::t_2abcf4cfbb904c 154
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_5f1f0b0dd10941::t_be7f9b68ba2379 166-167,170-171,180-181,183-184
+  s_5f1f0b0dd10941::t_7a447e509ef9c1 168-169,182
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomView.swift
+  s_5f1f0b0dd10941::t_328066fddaca8a 101-107
+  s_5f1f0b0dd10941::t_2aa73efb70631e 446
+  s_5f1f0b0dd10941::t_46d01bb18d1d4b 457-458
+  s_5f1f0b0dd10941::t_f2af3d58adc3fe 410-411,425-426
+  s_5f1f0b0dd10941::t_37610ed0c62235 59-61,140-142,145,151-153,155-156,158-169,295-324,326-342,344-368,378-379,394
+  s_5f1f0b0dd10941::t_670c88468f701d 62,143-144,154,157,325,343
+  s_5f1f0b0dd10941::t_7cebe26da10ca7 377,398-399,401-409,412-424,427-439,441-445,447-451,453-456,459-463,465-473
+  s_5f1f0b0dd10941::t_dd03e15f351619 400,440,452,464
+  s_5f1f0b0dd10941::t_7a447e509ef9c1 148
+  s_5f1f0b0dd10941::t_a1790579713f9d 146-147,149-150
+  s_5f1f0b0dd10941::t_f1873f769e035c 51,67,73,100,369-376,380-393,395-397
+  s_5f1f0b0dd10941::t_a4897a680635f6 474
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_5f1f0b0dd10941::t_23de5c3a839baa 72-88,138-139,148,173
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_5f1f0b0dd10941::t_a9969f82e92bf9 37-38,100-101,173,224,226,233,295
+VERA/VERAApp/VERA/Resources/Localizable.xcstrings
+  s_5f1f0b0dd10941::t_a9969f82e92bf9 5,9,37,41,105
+  s_5f1f0b0dd10941::t_d6a725207b50a3 13,29,45-57,64-69,109
+  s_5f1f0b0dd10941::t_35bdcb9fe193bd 21
+  s_5f1f0b0dd10941::t_7ed4e57c45dc5e 12
+  s_5f1f0b0dd10941::t_d3b3e25548d8da 22-24,26-28
+  s_5f1f0b0dd10941::t_2d2eb30bfa8424 30-32
+  s_5f1f0b0dd10941::t_e6d4b2a8c24075 42-44
+  s_5f1f0b0dd10941::t_bff479eb177168 70-72
+  s_5f1f0b0dd10941::t_815f17e879bcd3 106-108
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_5f1f0b0dd10941::t_82c3306a5243ee 37,68
+VERA/VERAMeetingRoom/VERAMeetingRoom/Wireframe/MeetingRoomFactory.swift
+  s_5f1f0b0dd10941::t_c1df92068b40cf 80,109-111,116,118-121
+  s_5f1f0b0dd10941::t_4a629434a24ed7 10,23,48-54,83-87,106,112-115
+  s_5f1f0b0dd10941::t_549677d9afc0f4 117
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomScreen.swift
+  s_5f1f0b0dd10941::t_37997e399c3df6 15,18-19,22,41-43
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_5f1f0b0dd10941::t_7c61f603115c39 294,962-984,986
+  s_5f1f0b0dd10941::t_d15430882e6f21 293,295-311,952-961,985
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_5f1f0b0dd10941::t_cdebfe462fba23 74,101,112,129,141,210,225,237,352,355-357,371-379,410-412
+  s_5f1f0b0dd10941::t_787c39f3160e45 9,11,13-14,16-17,19-20,22-23,25-26,29,34,43,45,47-48,50-51,53-54,56-57,59-60,62-63,65-66,68-73,75-76,79-91,116-123,147,149,152,154-155,157-158,160-161,163-164,166-167,169-170,173-176
+  s_5f1f0b0dd10941::t_a31959d82978df 150,153,156,159,162,165,168,171,177
+  s_5f1f0b0dd10941::t_13ef4acfe26c41 172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.5",
+  "base_commit_sha": "5f4345cd8742799d4985d88fcd6d9892971a349d",
+  "prompts": {},
+  "sessions": {
+    "s_5f1f0b0dd10941": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1305-61ae-7752-b211-a063e969f45c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/MeetingBackgroundEffectScreenButtonSnapshotTests.swift
+  s_51d3a11a59a857::t_693b13f0dd5709 5,52,57,60,63,65,80-82
+  s_51d3a11a59a857::t_bd83cf414a7c49 55,59,62
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_51d3a11a59a857::t_16e805937e408b 189
+  s_51d3a11a59a857::t_b08c2775a8488c 181,185,188
+  s_51d3a11a59a857::t_034170b4b0ee4e 191
+VERA/VERABackgroundEffects/VERABackgroundEffects/Data/DefaultUserBackgroundRepository.swift
+  s_51d3a11a59a857::t_b8a04c55193692 5,19,23,26-28,37,52,65,69-72,75-111
+  s_51d3a11a59a857::t_5173dea71148ba 31
+VERA/VERABackgroundEffects/VERABackgroundEffects/Wireframe/BackgroundEffectFactory.swift
+  s_51d3a11a59a857::t_7e6c362d826793 5,16,23,29,64
+.github/workflows/maestro.yml
+  h_2499cc15b3806e 13
+VERA/VERADomain/VERADomain/VideoEffects/UserBackgroundRepository.swift
+  s_51d3a11a59a857::t_e2a0c7084863cd 5,26-27
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/VideoEffectsViewModelTests.swift"
+  s_51d3a11a59a857::t_f6058fc7fe0c05 196-211
+  s_51d3a11a59a857::t_c5e83bc41a8839 136-137,141,146-156,448-449
+  s_51d3a11a59a857::t_bd83cf414a7c49 372,376,379
+  s_51d3a11a59a857::t_0e6d1c3787c65a 380
+  s_51d3a11a59a857::t_6fd58e4899dbd7 193,428-430
+  s_51d3a11a59a857::t_45e1930019e2ad 387,412,416-420,434,441-445
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/AddBackgroundUseCase.swift
+  s_51d3a11a59a857::t_8b541baa4cf8da 22
+  s_51d3a11a59a857::t_cb7fb4642c1b51 9-13,21
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/VideoEffectsSheetSnapshotTests.swift
+  s_51d3a11a59a857::t_0e6d1c3787c65a 131
+  s_51d3a11a59a857::t_bd83cf414a7c49 123,127,130
+  s_51d3a11a59a857::t_5ccd9276790eea 5,133,158-160
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/DeleteBackgroundUseCase.swift
+  s_51d3a11a59a857::t_cb7fb4642c1b51 9,11-13
+  s_51d3a11a59a857::t_16e805937e408b 8,10,17,21
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  s_51d3a11a59a857::t_941e53faf6c679 48
+  s_51d3a11a59a857::t_9002b387e5fef4 5,30,37,47,49-52
+  s_51d3a11a59a857::t_b08c2775a8488c 58,83
+  s_51d3a11a59a857::t_16e805937e408b 102-109,111-112
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/GetBackgroundsUseCase.swift
+  s_51d3a11a59a857::t_cb7fb4642c1b51 9-15,17-21,34
+  s_51d3a11a59a857::t_fe2a4c5db6826e 8,16,37
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/Data/DefaultUserBackgroundRepositoryTests.swift
+  s_51d3a11a59a857::t_0124b11b3fc8ba 5,54-63,70-82,126-131
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_51d3a11a59a857::t_16e805937e408b 245
+  s_51d3a11a59a857::t_35da36c12e4286 247
+  s_51d3a11a59a857::t_b08c2775a8488c 237,241,244
+VERA/VERABackgroundEffects/VERABackgroundEffectsSnapshotTests/BackgroundEffectScreenButtonSnapshotTests.swift
+  s_51d3a11a59a857::t_c3337e212d82fe 5,44,49,52,55,57,72-74
+  s_51d3a11a59a857::t_bd83cf414a7c49 47,51,54
+  s_51d3a11a59a857::t_14ec4d8782aa45 25-28,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8352e7ce4a55b8458d622b8aa0deffab771f5278",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_51d3a11a59a857": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e913b-3d45-7f72-9894-b6d41cd04209",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
