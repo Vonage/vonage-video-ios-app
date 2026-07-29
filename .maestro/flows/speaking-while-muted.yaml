@@ -49,12 +49,15 @@ appId: ${APP_ID}
 - assertVisible:
     id: "meeting-room-mic-enabled"
 
-# Mute the microphone — E2E mock will start simulating loud audio
+# Mute the microphone — E2E mock will start simulating loud audio.
+# Toast lifetime is ~4.5s (ToastModifier: visibleDuration=3s + resetDelay=1.5s)
+# and SpeakingWhileMutedDetector only emits once due to `removeDuplicates`,
+# so the steps around the toast check must NOT burn that budget.
+# We skip `waitForAnimationToEnd` after the tap because the meeting room has
+# continuous video/UI animation and it would exhaust its full timeout every
+# time. `assertVisible` already retries and re-checks the hierarchy.
 - tapOn:
     id: "meeting-room-mic-enabled"
-
-- waitForAnimationToEnd:
-    timeout: 2000
 
 # Verify mic is now disabled
 - assertVisible:
@@ -68,25 +71,22 @@ appId: ${APP_ID}
       id: "toast-warning"
     timeout: 10000
 
-- assertVisible:
-    id: "toast-warning"
-
 - takeScreenshot: 03-speaking-while-muted-toast
 
-# Unmute the microphone — toast should disappear
+# Unmute the microphone — toast will auto-dismiss on its own timer
 - tapOn:
     id: "meeting-room-mic-disabled"
-
-- waitForAnimationToEnd:
-    timeout: 5000
 
 # Verify mic is enabled again
 - assertVisible:
     id: "meeting-room-mic-enabled"
 
-# Toast should no longer be visible (auto-dismissed or state reset)
-- assertNotVisible:
-    id: "toast-warning"
+# Toast auto-dismisses ~4.5s after first appearing. Wait explicitly for it
+# instead of relying on Maestro's default assertNotVisible retry window.
+- extendedWaitUntil:
+    notVisible:
+      id: "toast-warning"
+    timeout: 6000
 
 - takeScreenshot: 04-unmuted-no-toast
 
