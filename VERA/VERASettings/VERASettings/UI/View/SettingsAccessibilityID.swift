@@ -46,4 +46,5 @@ enum SettingsAccessibilityID {
 
     static let overlayStatsToggle = "settings-overlay-stats-toggle"
     static let resetDefaultsButton = "settings-reset-defaults-button"
+    static let waitingRoomSettingsButton = "waiting-room-settings-button"
 }

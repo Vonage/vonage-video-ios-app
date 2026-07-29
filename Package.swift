@@ -121,6 +121,15 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .target(
+            name: "VERAFeedback",
+            dependencies: [
+                "VERACommonUI",
+                "VERADomain",
+            ],
+            path: "VERA/VERAFeedback/VERAFeedback",
+            resources: [.process("Resources")]
+        ),  
+        .target(
             name: "VERAReactions",
             dependencies: ["VERACommonUI"],
             path: "VERA/VERAReactions/VERAReactions",
@@ -240,6 +249,7 @@ let package = Package(
                 "VERAScreenShare",
                 "VERAVonageScreenSharePlugin",
                 "VERAAudioEffects",
+                "VERAFeedback",
                 .product(
                     name: "VonageClientSDKVideoTransformers",
                     package: "vonage-client-sdk-video-transformers"

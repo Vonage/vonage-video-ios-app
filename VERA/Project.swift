@@ -174,6 +174,25 @@ private func isAdvancedNoiseSuppressionEnabled() -> Bool {
     return audioSettings["allowAdvancedNoiseSuppression"] as! Bool
 }
 
+/// Returns whether Audio Diagnostics is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "audioSettings": {
+///     "allowAudioDiagnostics": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `audioSettings.allowAudioDiagnostics` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isAudioDiagnosticsEnabled() -> Bool {
+    let config = readAppConfig()
+    let audioSettings = config["audioSettings"] as! [String: Any]
+    return audioSettings["allowAudioDiagnostics"] as! Bool
+}
+
 /// Returns whether Feedback is enabled according to `app-config.json`.
 ///
 /// Expects the JSON shape:
@@ -265,6 +284,13 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAAudioEffects", path: "VERAAudioEffects")
         ])
     }
+
+    if isAudioDiagnosticsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAAudioDiagnostics", path: "VERAAudioDiagnostics")
+        ])
+    }
+
     if isFeedbackEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAFeedback", path: "VERAFeedback")
@@ -323,6 +349,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["AUDIOEFFECTS_ENABLED"] = "1"
         flags.append("AUDIOEFFECTS_ENABLED")
         print("AudioEffects feature enabled in build settings.")
+    }
+
+    if isAudioDiagnosticsEnabled() {
+        baseSettings["AUDIODIAGNOSTICS_ENABLED"] = "1"
+        flags.append("AUDIODIAGNOSTICS_ENABLED")
+        print("AudioDiagnostics feature enabled in build settings.")
     }
 
     if isFeedbackEnabled() {

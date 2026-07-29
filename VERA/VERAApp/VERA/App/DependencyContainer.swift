@@ -30,6 +30,10 @@ import VERAVonageCallKitPlugin
     import VERAAudioEffects
 #endif
 
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
+
 final class DependencyContainer {
 
     let httpClient: HTTPClient
@@ -115,6 +119,12 @@ final class DependencyContainer {
 
     lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
+    #if AUDIODIAGNOSTICS_ENABLED
+        lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
+
+        lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(speakerTestService: speakerTestService)
+    #endif
+
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
     /// Replaces compile-time `#if FEATURE_ENABLED` flags for meeting room features
@@ -137,6 +147,7 @@ final class DependencyContainer {
         }
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
         if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
+        if appConfig.audioSettings.allowAudioDiagnostics { features.insert(.audioDiagnostics) }
         features.insert(.callKit)
         return features
     }

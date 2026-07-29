@@ -12,6 +12,13 @@ import VERADomain
 @MainActor
 struct SettingsFactoryTests {
 
+    // MARK: - makeWaitingRoomButton
+
+    @Test("makeWaitingRoomButton has correct accessibility identifier")
+    func makeWaitingRoomButtonHasCorrectAccessibilityID() {
+        #expect(SettingsAccessibilityID.waitingRoomSettingsButton == "waiting-room-settings-button")
+    }
+
     // MARK: - makeMeetingRoomViewModels
 
     @Test("makeMeetingRoomViewModels returns properly initialized view models")

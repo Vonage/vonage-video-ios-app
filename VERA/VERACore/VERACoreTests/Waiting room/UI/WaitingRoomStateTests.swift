@@ -86,4 +86,89 @@ struct WaitingRoomStateTests {
 
         #expect(stateA == stateB)
     }
+
+    // MARK: - allowAudioOutputTest Tests
+
+    @Test("allowAudioOutputTest defaults to false")
+    func allowAudioOutputTestDefaultsToFalse() {
+        let state = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            publisher: nil
+        )
+
+        #expect(state.allowAudioOutputTest == false)
+    }
+
+    @Test("allowAudioOutputTest can be set to true")
+    func allowAudioOutputTestCanBeSetToTrue() {
+        let state = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            allowAudioOutputTest: true,
+            publisher: nil
+        )
+
+        #expect(state.allowAudioOutputTest == true)
+    }
+
+    @Test("States with different allowAudioOutputTest should not be equal")
+    func statesWithDifferentAllowAudioOutputTestShouldNotBeEqual() {
+        let stateA = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            allowAudioOutputTest: true,
+            publisher: nil
+        )
+        let stateB = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            allowAudioOutputTest: false,
+            publisher: nil
+        )
+
+        #expect(stateA != stateB)
+    }
+
+    @Test("States with same allowAudioOutputTest should be equal")
+    func statesWithSameAllowAudioOutputTestShouldBeEqual() {
+        let stateA = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            allowAudioOutputTest: true,
+            publisher: nil
+        )
+        let stateB = WaitingRoomState(
+            roomName: "room",
+            isMicrophoneEnabled: true,
+            isCameraEnabled: true,
+            allowMicrophoneControl: true,
+            allowCameraControl: true,
+            cameras: [],
+            allowAudioOutputTest: true,
+            publisher: nil
+        )
+
+        #expect(stateA == stateB)
+    }
 }

@@ -29,6 +29,10 @@ import VERAVonage
     import VERAAudioEffects
 #endif
 
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -154,7 +158,17 @@ struct VERAApp: App {
                 }
             }
             waitingRoomViewModel = result.viewModel
+            waitingRoomViewModel.toolbarButtons = makeWaitingRoomToolbarButtons()
             waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
+
+            #if AUDIODIAGNOSTICS_ENABLED
+                // Create audio output test button (same visual style as the Camera selector)
+                // to be displayed next to the Camera selector in the waiting room.
+                let audioButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomButton()
+                waitingRoomViewModel.audioOutputTestButton = ViewHolder(id: "audioOutputTest") {
+                    audioButton
+                }
+            #endif
 
             #if BACKGROUND_EFFECTS_ENABLED
                 waitingRoomViewModel.onPublisherReady = { [weak navigationCoordinator] in
@@ -182,6 +196,24 @@ struct VERAApp: App {
             }
     }
 
+    /// Creates toolbar buttons for the top-right corner of the waiting room.
+    /// Currently includes only the Settings button with icon-only design.
+    /// These buttons use a plain icon design without circular backgrounds.
+    private func makeWaitingRoomToolbarButtons() -> [ViewHolder] {
+        var buttons: [ViewHolder] = []
+
+        #if SETTINGS_ENABLED
+            // Settings button with icon-only design (no circular background).
+            // Presents the in-app SettingsView as a sheet.
+            let settingsButton = settingsFactory.makeWaitingRoomButton()
+            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+        #endif
+
+        return buttons
+    }
+
+    /// Creates trailing buttons for the waiting room (Background Effects, Audio Effects).
+    /// These buttons use circular backgrounds and are positioned below the toolbar.
     private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
         var buttons: [ViewHolder] = []
 
@@ -210,11 +242,6 @@ struct VERAApp: App {
                 viewModel: audioViewModel
             )
             buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
-        #endif
-
-        #if SETTINGS_ENABLED
-            let settingsButton = settingsFactory.makeWaitingRoomButton()
-            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
         #endif
 
         return buttons
