@@ -164,6 +164,7 @@ public struct SettingsView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
         }
         .accessibilityIdentifier(SettingsAccessibilityID.screen)
     }
@@ -206,6 +207,7 @@ public struct SettingsView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
     }
 
     // MARK: - Detail
@@ -240,6 +242,7 @@ public struct SettingsView: View {
                 )
             }
         }
+        .scrollContentBackground(.hidden)
         .id(section)
         .navigationTitle(section.displayName)
     }
