@@ -254,6 +254,11 @@ jobs:
           tuist generate --no-open
           cd ..
 
+      - name: List signing identities (diagnostic)
+        run: |
+          echo "🔑 Code-signing identities available to the archive:"
+          security find-identity -v -p codesigning || true
+
       - name: Build archive
         run: |
             echo "Building archive with build number: ${{ steps.buildnumber.outputs.BUILD_NUMBER }}"
