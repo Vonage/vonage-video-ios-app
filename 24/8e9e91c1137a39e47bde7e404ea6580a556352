@@ -1,0 +1,14 @@
+sonar-project.properties
+  h_5ddc9d372ac6a1 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "248e9e91c1137a39e47bde7e404ea6580a556352",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
