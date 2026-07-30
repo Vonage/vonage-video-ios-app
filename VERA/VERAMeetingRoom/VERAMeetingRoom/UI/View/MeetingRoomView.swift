@@ -28,6 +28,8 @@ private enum MeetingRoomViewConstants {
     static let barFadeDuration: Double = 0.3
     /// Duration of the bar toggle animation.
     static let barToggleDuration: Double = 0.4
+    /// Presentation spacing
+    static let presentantionContentSpacing: CGFloat = 16
 }
 
 public struct ViewGenerator: Identifiable {
@@ -48,6 +50,7 @@ public struct MeetingRoomView: View {
 
     private let state: MeetingRoomState
     private let actions: MeetingRoomActions
+    private let bottomBarContent: @MainActor (MeetingRoomBottomBarContext) -> AnyView?
     @Binding private var extraButtons: [BottomBarButton]
     @Binding private var extraTopTrailingButtons: [ViewGenerator]
 
@@ -55,25 +58,30 @@ public struct MeetingRoomView: View {
     @State private var isNavigationBarVisible = true
     @State private var showParticipantsList = false
     @State private var urlToShare: URL?
+    @State private var activeDialogRequest: MeetingRoomPresentationRequest?
+    @State private var activeOverlayRequest: MeetingRoomPresentationRequest?
+    @State private var activeSheetRequest: MeetingRoomPresentationRequest?
+    @State private var lastPresentedSheetRequest: MeetingRoomPresentationRequest?
 
     public init(
         state: MeetingRoomState,
         actions: MeetingRoomActions,
+        bottomBarContent: @escaping @MainActor (MeetingRoomBottomBarContext) -> AnyView? = { _ in nil },
         extraButtons: Binding<[BottomBarButton]> = .constant([]),
         extraTopTrailingButtons: Binding<[ViewGenerator]> = .constant([])
     ) {
         self.state = state
         self.actions = actions
+        self.bottomBarContent = bottomBarContent
         self._extraButtons = extraButtons
         self._extraTopTrailingButtons = extraTopTrailingButtons
     }
 
     public var body: some View {
         NavigationView {
-            ZStack {
+            ScreenIdentifierContainer(MeetingRoomAccessibilityID.screen) {
                 MeetingRoomContent(
                     participants: state.participants,
-                    showBottomSheet: false,
                     layout: state.layout,
                     activeSpeakerId: state.activeSpeakerId
                 )
@@ -91,24 +99,14 @@ public struct MeetingRoomView: View {
 
                 VStack(alignment: .center) {
                     Spacer()
-                    BottomBar(
-                        isMicEnabled: state.isMicEnabled,
-                        isCameraEnabled: state.isCameraEnabled,
-                        participantsCount: state.participantsCount,
-                        allowMicrophoneControl: state.allowMicrophoneControl,
-                        allowCameraControl: state.allowCameraControl,
-                        showParticipantList: state.showParticipantList,
-                        currentLayout: state.layout,
-                        actions: wrappedActions,
-                        extraButtons: _extraButtons
-                    )
-                    .opacity(isBottomBarVisible ? 1.0 : 0.0)
-                    .animation(
-                        .easeInOut(duration: MeetingRoomViewConstants.barFadeDuration), value: isBottomBarVisible
-                    )
-                    .onTapGesture {
-                        showBars()
-                    }
+                    bottomBar
+                        .opacity(isBottomBarVisible ? 1.0 : 0.0)
+                        .animation(
+                            .easeInOut(duration: MeetingRoomViewConstants.barFadeDuration), value: isBottomBarVisible
+                        )
+                        .onTapGesture {
+                            showBars()
+                        }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -139,6 +137,36 @@ public struct MeetingRoomView: View {
                     meetingURL: state.roomURL
                 ) {
                     showParticipantsList = false
+                }
+            }
+            .sheet(
+                item: $activeSheetRequest,
+                onDismiss: {
+                    lastPresentedSheetRequest?.onDismiss?()
+                    lastPresentedSheetRequest = nil
+                    activeSheetRequest = nil
+                },
+                content: { request in
+                    presentationContent(for: request)
+                }
+            )
+            .alert(item: $activeDialogRequest) { request in
+                Alert(
+                    title: Text(request.title),
+                    message: request.message.map { Text($0) },
+                    dismissButton: .default(Text("OK")) {
+                        request.onDismiss?()
+                        activeDialogRequest = nil
+                    }
+                )
+            }
+            .dismissibleOverlay(
+                isPresented: activeOverlayRequestBinding,
+                alignment: .bottom,
+                edgePadding: BottomBarConstants.totalHeight + 4
+            ) {
+                if let request = activeOverlayRequest {
+                    presentationContent(for: request)
                 }
             }
             #if !os(macOS)
@@ -222,6 +250,7 @@ public struct MeetingRoomView: View {
                     durationSeconds: MeetingRoomViewConstants.recordingPulseDuration
                 )
         }
+        .accessibilityIdentifier(MeetingRoomAccessibilityID.recordingIndicator)
     }
 
     private var noiseSuppressionIndicator: some View {
@@ -263,6 +292,186 @@ public struct MeetingRoomView: View {
 
     private func onBottomBarInteraction() {
         showBars()
+    }
+
+    private var presentationHandler: MeetingRoomPresentationHandler {
+        MeetingRoomPresentationHandler(
+            present: { request in
+                present(request)
+            },
+            dismiss: { id in
+                dismissPresentation(id: id)
+            }
+        )
+    }
+
+    private var activeOverlayRequestBinding: Binding<Bool> {
+        Binding(
+            get: { activeOverlayRequest != nil },
+            set: { isPresented in
+                guard !isPresented else { return }
+                activeOverlayRequest?.onDismiss?()
+                activeOverlayRequest = nil
+            }
+        )
+    }
+
+    @MainActor
+    private func present(_ request: MeetingRoomPresentationRequest) {
+        switch request.style {
+        case .dialog:
+            activeDialogRequest = request
+        case .overlay:
+            activeOverlayRequest = request
+        case .sheet:
+            lastPresentedSheetRequest = request
+            activeSheetRequest = request
+        }
+    }
+
+    @MainActor
+    private func dismissPresentation(id: String) {
+        if activeDialogRequest?.id == id {
+            activeDialogRequest?.onDismiss?()
+            activeDialogRequest = nil
+        }
+        if activeOverlayRequest?.id == id {
+            activeOverlayRequest?.onDismiss?()
+            activeOverlayRequest = nil
+        }
+        if activeSheetRequest?.id == id {
+            activeSheetRequest?.onDismiss?()
+            activeSheetRequest = nil
+            lastPresentedSheetRequest = nil
+        }
+    }
+
+    @ViewBuilder
+    private func presentationContent(for request: MeetingRoomPresentationRequest) -> some View {
+        if let content = request.content {
+            content
+        } else {
+            VStack(spacing: MeetingRoomViewConstants.presentantionContentSpacing) {
+                Text(request.title)
+                    .font(.headline)
+                if let message = request.message {
+                    Text(message)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                }
+                Button("Dismiss") {
+                    dismissPresentation(id: request.id)
+                }
+            }
+            .padding(24)
+            .background(theme.background)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding()
+        }
+    }
+
+    @ViewBuilder
+    private var bottomBar: some View {
+        if let customBottomBarContent = bottomBarContent(
+            MeetingRoomBottomBarContext(
+                state: state,
+                actions: wrappedActions,
+                buttons: extraButtons,
+                controls: bottomBarControls,
+                presentationHandler: presentationHandler
+            )
+        ) {
+            customBottomBarContent
+        } else {
+            BottomBar(
+                isMicEnabled: state.isMicEnabled,
+                isCameraEnabled: state.isCameraEnabled,
+                isParticipantsListPresented: showParticipantsList,
+                participantsCount: state.participantsCount,
+                allowMicrophoneControl: state.allowMicrophoneControl,
+                allowCameraControl: state.allowCameraControl,
+                showParticipantList: state.showParticipantList,
+                currentLayout: state.layout,
+                actions: wrappedActions,
+                presentationHandler: presentationHandler,
+                extraButtons: _extraButtons
+            )
+        }
+    }
+
+    var bottomBarControls: MeetingRoomBottomBarControls {
+        MeetingRoomBottomBarControls(
+            microphone: microphoneControl,
+            camera: cameraControl,
+            participants: participantsControl,
+            layout: layoutControl,
+            endCall: endCallControl
+        )
+    }
+
+    var microphoneControl: MeetingRoomBottomBarControl {
+        MeetingRoomBottomBarControl(
+            id: "microphone",
+            label: "Microphone",
+            image: state.isMicEnabled
+                ? VERACommonUIAsset.Images.microphone2Solid.swiftUIImage
+                : VERACommonUIAsset.Images.micMuteSolid.swiftUIImage,
+            isActive: state.isMicEnabled,
+            accessibilityIdentifier: state.isMicEnabled
+                ? MeetingRoomAccessibilityID.micEnabled
+                : MeetingRoomAccessibilityID.micDisabled,
+            action: wrappedActions.onToggleMic
+        )
+    }
+
+    var cameraControl: MeetingRoomBottomBarControl {
+        MeetingRoomBottomBarControl(
+            id: "camera",
+            label: "Camera",
+            image: state.isCameraEnabled
+                ? VERACommonUIAsset.Images.videoSolid.swiftUIImage
+                : VERACommonUIAsset.Images.videoOffSolid.swiftUIImage,
+            isActive: state.isCameraEnabled,
+            accessibilityIdentifier: state.isCameraEnabled
+                ? MeetingRoomAccessibilityID.cameraEnabled
+                : MeetingRoomAccessibilityID.cameraDisabled,
+            action: wrappedActions.onToggleCamera
+        )
+    }
+
+    var participantsControl: MeetingRoomBottomBarControl? {
+        guard state.showParticipantList else { return nil }
+
+        return MeetingRoomBottomBarControl(
+            id: "participants",
+            label: "Participants",
+            image: VERACommonUIAsset.Images.group2Solid.swiftUIImage,
+            isActive: showParticipantsList,
+            action: wrappedActions.onToggleParticipants
+        )
+    }
+
+    var layoutControl: MeetingRoomBottomBarControl {
+        MeetingRoomBottomBarControl(
+            id: "layout",
+            label: "Layout",
+            image: state.layout == .grid
+                ? VERACommonUIAsset.Images.appsSolid.swiftUIImage
+                : VERACommonUIAsset.Images.layout2Solid.swiftUIImage,
+            isActive: true,
+            action: wrappedActions.onToggleLayout
+        )
+    }
+
+    var endCallControl: MeetingRoomBottomBarControl {
+        MeetingRoomBottomBarControl(
+            id: "end-call",
+            label: "End call",
+            image: Image(systemName: "phone.down.fill"),
+            isActive: true,
+            accessibilityIdentifier: MeetingRoomAccessibilityID.endCallButton,
+            action: wrappedActions.onEndCall
+        )
     }
 
     private var wrappedActions: MeetingRoomActions {

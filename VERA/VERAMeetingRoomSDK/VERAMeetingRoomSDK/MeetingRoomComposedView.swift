@@ -3,25 +3,28 @@
 //
 
 import AVKit
-import Combine
 import SwiftUI
-import VERAArchiving
+import VERAAudioDiagnostics
 import VERAAudioEffects
 import VERABackgroundEffects
 import VERACaptions
 import VERAChat
 import VERACommonUI
 import VERADomain
+import VERAFeedback
 import VERAMeetingRoom
 import VERAReactions
 import VERAScreenShare
 import VERASettings
+import VERAVonage
 
 /// Layout constants for the composed meeting room view.
 enum MeetingRoomComposedConstants {
     static var overlayBottomPadding: CGFloat {
         BottomBarConstants.totalHeight + 4
     }
+
+    static let anchorViewHeight: CGFloat = 200
 }
 
 /// A self-contained meeting room view with all feature overlays, sheets, and bottom bar buttons.
@@ -35,8 +38,10 @@ struct MeetingRoomComposedView: View {
 
     let meetingRoomFactory: MeetingRoomFactory
     @ObservedObject var viewModel: MeetingRoomViewModel
+    let uiProvider: any MeetingRoomUIProvider
 
     let container: MeetingRoomSDKContainer
+    @ObservedObject var pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator
     let enabledFeatures: Set<MeetingRoomFeature>
     let buttonsAssembler: BottomBarButtonsAssembler
     let onAction: (MeetingRoomSDKAction) -> Void
@@ -58,12 +63,21 @@ struct MeetingRoomComposedView: View {
     // MARK: - Sheet/Overlay State
 
     @State private var showChat = false
-    @State private var showPickerView = false
+    @State private var showReactions = false
     @State private var showCaptions = false
     @State private var showSettings = false
+    @State private var showFeedbackForm = false
+    @State private var showEffects = false
+    @State private var showAudioDiagnostics = false
+    @State private var isPictureInPictureBound = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        meetingRoomFactory.make(viewModel: viewModel)
+        meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
+            .background(
+                pictureInPictureAnchor
+                    .frame(height: MeetingRoomComposedConstants.anchorViewHeight)
+            )
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),
@@ -74,7 +88,7 @@ struct MeetingRoomComposedView: View {
             .modifier(
                 ReactionsOverlayModifier(
                     isEnabled: enabledFeatures.contains(.reactions),
-                    showPickerView: $showPickerView,
+                    showPickerView: $showReactions,
                     emojiPickerContainerViewModel: emojiPickerContainerViewModel,
                     floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
                     container: container
@@ -98,10 +112,99 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .modifier(
+                FeedbackFormOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.feedback),
+                    showFeedbackForm: $showFeedbackForm,
+                    container: container
+                )
+            )
+            .modifier(
+                BackgroundEffectsOverlayModifier(
+                    isEnabled: enabledFeatures.contains(.backgroundEffects),
+                    showEffects: $showEffects,
+                    videoEffectsViewModel: buttonsAssembler.videoEffectsViewModel
+                )
+            )
+            .modifier(
+                AudioDiagnosticsOverlayModifier(
+                    showAudioDiagnostics: $showAudioDiagnostics,
+                    container: container
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
-                buttonsAssembler.onShowPickerView = { showPickerView = true }
+                buttonsAssembler.onShowReactions = { showReactions.toggle() }
                 buttonsAssembler.onShowSettings = { showSettings = true }
+                buttonsAssembler.onShowFeedbackForm = { showFeedbackForm = true }
+                buttonsAssembler.onShowEffects = { showEffects = true }
+                buttonsAssembler.onShowAudioDiagnostics = { showAudioDiagnostics = true }
             }
+            .onChange(of: showReactions) { isPresented in
+                buttonsAssembler.setReactionsPickerPresented(isPresented)
+            }
+            .onChange(of: showChat) { isPresented in
+                buttonsAssembler.setChatPresented(isPresented)
+            }
+            .onChange(of: showSettings) { isPresented in
+                buttonsAssembler.setSettingsPresented(isPresented)
+            }
+            .onChange(of: showEffects) { isPresented in
+                buttonsAssembler.setEffectsPresented(isPresented)
+            }
+            .onChange(of: showFeedbackForm) { isPresented in
+                buttonsAssembler.setFeedbackFormPresented(isPresented)
+            }
+            .onChange(of: showAudioDiagnostics) { isPresented in
+                buttonsAssembler.setAudioDiagnosticsPresented(isPresented)
+            }
+            .task {
+                if enabledFeatures.contains(.pictureInPicture) {
+                    await bindPictureInPictureIfNeeded()
+                }
+            }
+            .onChange(of: scenePhase) { phase in
+                #if !os(macOS)
+                    guard enabledFeatures.contains(.pictureInPicture) else { return }
+                    switch phase {
+                    case .background:
+                        pictureInPictureOrchestrator.requestPictureInPicture()
+                    case .active:
+                        pictureInPictureOrchestrator.stopPictureInPicture()
+                    default:
+                        break
+                    }
+                #endif
+            }
+    }
+
+    /// Stable, always-mounted PiP anchor spanning the meeting room content. The PiP window morphs
+    /// from/to this area; anchoring to individual tiles is deliberately avoided (layout changes
+    /// and SwiftUI identity resets demolish tiles, which breaks AVKit's ability to start PiP).
+    @ViewBuilder
+    private var pictureInPictureAnchor: some View {
+        #if !os(macOS)
+            if enabledFeatures.contains(.pictureInPicture) {
+                PictureInPictureAnchorView { view, frame in
+                    pictureInPictureOrchestrator.registerAnchor(sourceView: view, videoFrame: frame)
+                }
+            }
+        #endif
+    }
+
+    private func bindPictureInPictureIfNeeded() async {
+        #if !os(macOS)
+            while viewModel.currentCall == nil {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard !Task.isCancelled else { return }
+            }
+
+            guard !isPictureInPictureBound,
+                let call = viewModel.currentCall as? VonageCall
+            else { return }
+
+            pictureInPictureOrchestrator.bind(to: call)
+            isPictureInPictureBound = true
+        #endif
     }
 }

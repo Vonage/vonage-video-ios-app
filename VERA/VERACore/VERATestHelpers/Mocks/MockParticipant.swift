@@ -13,6 +13,7 @@ public func makeMockParticipant(
     isMicEnabled: Bool = true,
     isCameraEnabled: Bool = true,
     videoDimensions: CGSize = .init(width: 640, height: 480),
+    isRemote: Bool = true,
     creationTime: Date = Date(timeIntervalSince1970: 1_754_638_879),
     isScreenshare: Bool = false,
     view: AnyView = AnyView(EmptyView())
@@ -24,6 +25,7 @@ public func makeMockParticipant(
         isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,
         videoDimensions: videoDimensions,
+        isRemote: isRemote,
         creationTime: creationTime,
         isScreenshare: isScreenshare,
         view: view)

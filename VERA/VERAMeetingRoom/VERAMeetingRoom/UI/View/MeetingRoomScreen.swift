@@ -12,12 +12,14 @@ private enum MeetingRoomScreenConstants {
 
 public struct MeetingRoomScreen: View {
     @ObservedObject var viewModel: MeetingRoomViewModel
-    @State var showToast = false
+    private let uiProvider: any MeetingRoomUIProvider
 
     public init(
-        viewModel: MeetingRoomViewModel
+        viewModel: MeetingRoomViewModel,
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
     ) {
         self.viewModel = viewModel
+        self.uiProvider = uiProvider
     }
 
     public var body: some View {
@@ -36,6 +38,9 @@ public struct MeetingRoomScreen: View {
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
                                 onToggleLayout: viewModel.onToggleLayout),
+                            bottomBarContent: { context in
+                                uiProvider.bottomBarContent(context: context)
+                            },
                             extraButtons: $viewModel.extraButtons,
                             extraTopTrailingButtons: $viewModel.extraTopTrailingButtons
                         )
@@ -51,44 +56,16 @@ public struct MeetingRoomScreen: View {
                 }
             }
 
-            GeometryReader { geometry in
-                VStack {
-                    if showToast, let toast = viewModel.toast {
-                        toast.view
-                            .padding(.top, geometry.safeAreaInsets.top)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    }
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity)
+            GeometryReader { _ in
+                VStack { Spacer() }
+                    .frame(maxWidth: .infinity)
             }
             .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: viewModel.toast) { newToast in
-            if newToast != nil {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    showToast = true
-                }
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        showToast = false
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak viewModel] in
-                        viewModel?.toast = nil
-                    }
-                }
-            }
-        }
+        .toast(toast: $viewModel.toast, placement: .top, verticalPadding: 8)
         .task {
             await viewModel.loadUI()
         }
-    }
-}
-
-extension ToastItem {
-    var view: ToastView {
-        ToastView(item: self)
     }
 }

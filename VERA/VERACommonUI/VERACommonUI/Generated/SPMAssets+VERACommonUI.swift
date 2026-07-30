@@ -54,6 +54,8 @@ public enum VERACommonUIAsset: Sendable {
     public static let endCallSolid = VERACommonUIImages(name: "end-call-solid")
     public static let enterLine = VERACommonUIImages(name: "enter-line")
     public static let errorLine = VERACommonUIImages(name: "error-line")
+    public static let feedbackLine = VERACommonUIImages(name: "feedback-line")
+    public static let gallerySolid = VERACommonUIImages(name: "gallery-solid")
     public static let gearLine = VERACommonUIImages(name: "gear-line")
     public static let gearSolid = VERACommonUIImages(name: "gear-solid")
     public static let group2Solid = VERACommonUIImages(name: "group-2-solid")

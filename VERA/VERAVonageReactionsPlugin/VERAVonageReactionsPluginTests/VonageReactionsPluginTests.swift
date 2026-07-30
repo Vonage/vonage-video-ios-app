@@ -543,11 +543,14 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
+    let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> = _publisherAudioLevel.eraseToAnyPublisher()
+
     var isMuted: Bool = false
     var isOnHold: Bool = false
     var areCaptionsEnabled: Bool = false
 
-    let _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
     func connect() {}
@@ -561,5 +564,8 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func disableCaptions() async {}
     func enableNetworkStats() {}
     func disableNetworkStats() {}
+    func enableSubscriberExtraStats() {}
+    func disableSubscriberExtraStats() {}
     func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
+    func updateLivePublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async {}
 }

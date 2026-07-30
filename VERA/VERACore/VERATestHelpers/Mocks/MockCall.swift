@@ -28,14 +28,20 @@ public class MockCall: CallFacade {
     public var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
-    public var _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    public var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
+
+    public let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
 
     public var recordedActions: [CallActions] = []
 
     public var isMuted: Bool = false
     public var isOnHold: Bool = false
     public var areCaptionsEnabled = false
+    public var forceMutedParticipantIDs: [String] = []
+    public var forceMuteError: Swift.Error?
 
     public enum CallActions: String {
         case connect
@@ -76,6 +82,13 @@ public class MockCall: CallFacade {
         recordedActions.append(.muteLocalMedia)
     }
 
+    public func forceMuteParticipant(id: String) async throws {
+        if let forceMuteError {
+            throw forceMuteError
+        }
+        forceMutedParticipantIDs.append(id)
+    }
+
     public func setOnHold(_ isOnHold: Bool) {
         self.isOnHold = isOnHold
         recordedActions.append(.setOnHold)
@@ -95,5 +108,11 @@ public class MockCall: CallFacade {
 
     public func disableNetworkStats() {}
 
-    public func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
+    public func enableSubscriberExtraStats() {}
+
+    public func disableSubscriberExtraStats() {}
+
+    public func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+
+    public func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
 }

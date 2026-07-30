@@ -33,7 +33,7 @@ struct UserDefaultsSettingsRepositoryTests {
             videoResolution: .high,
             videoFrameRate: .fps15,
             codecPreference: SettingsCodecPreference(mode: .manual, orderedCodecs: [.vp8, .h264]),
-            maxAudioBitrate: 128_000,
+            audioBitratePreference: .custom(128_000),
             videoBitratePreset: .custom,
             maxVideoBitrate: 2_000_000,
             publisherAudioFallbackEnabled: false,
@@ -89,6 +89,29 @@ struct UserDefaultsSettingsRepositoryTests {
         cancellable.cancel()
     }
 
+    @Test("setup() seeds publisher with persisted preferences")
+    func setupSeedsPublisherWithPersistedPreferences() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+
+        let customPreferences = PublisherSettingsPreferences(
+            videoResolution: .high,
+            senderStatsEnabled: true
+        )
+        let data = try JSONEncoder().encode(customPreferences)
+        userDefaults.set(data, forKey: "com.vonage.vera.publisherSettingsPreferences")
+
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        await repository.setup()
+
+        var receivedPreferences: PublisherSettingsPreferences?
+        let cancellable = repository.preferencesPublisher
+            .sink { receivedPreferences = $0 }
+
+        #expect(receivedPreferences == customPreferences)
+
+        cancellable.cancel()
+    }
+
     // MARK: - Save Tests
 
     @Test("save() encodes and stores in UserDefaults")
@@ -99,7 +122,7 @@ struct UserDefaultsSettingsRepositoryTests {
         let customPreferences = PublisherSettingsPreferences(
             videoResolution: .low,
             videoFrameRate: .fps7,
-            maxAudioBitrate: 64_000,
+            audioBitratePreference: .custom(64_000),
             senderStatsEnabled: true
         )
 
@@ -126,7 +149,7 @@ struct UserDefaultsSettingsRepositoryTests {
         // Save with opusDtxEnabled = false
         let customPreferences = PublisherSettingsPreferences(
             videoResolution: .medium,
-            maxAudioBitrate: 40_000,
+            audioBitratePreference: .custom(40_000),
             opusDtxEnabled: false
         )
         await repository.save(customPreferences)
@@ -359,7 +382,7 @@ struct UserDefaultsSettingsRepositoryTests {
 
         // Multiple saves
         for i in 0..<5 {
-            let prefs = PublisherSettingsPreferences(maxAudioBitrate: Int32(i * 1000))
+            let prefs = PublisherSettingsPreferences(audioBitratePreference: .custom(Int32(i * 1000)))
             await repository.save(prefs)
             await delay()
         }
@@ -381,7 +404,7 @@ struct UserDefaultsSettingsRepositoryTests {
             // Concurrent writes
             for i in 0..<10 {
                 group.addTask {
-                    let prefs = PublisherSettingsPreferences(maxAudioBitrate: Int32(i * 1000))
+                    let prefs = PublisherSettingsPreferences(audioBitratePreference: .custom(Int32(i * 1000)))
                     await repository.save(prefs)
                 }
             }
@@ -396,7 +419,9 @@ struct UserDefaultsSettingsRepositoryTests {
 
         // Repository should still be in valid state
         let finalPreferences = await repository.getPreferences()
-        #expect(finalPreferences.videoResolution == .medium || finalPreferences.maxAudioBitrate >= 0)
+        #expect(
+            finalPreferences.videoResolution == .medium
+                || (finalPreferences.audioBitratePreference.customValue ?? 0) >= 0)
     }
 
     // MARK: - Edge Cases

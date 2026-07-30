@@ -1,0 +1,103 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting (mic starts enabled by default)
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room-mic-on
+
+# Verify mic is currently enabled
+- assertVisible:
+    id: "meeting-room-mic-enabled"
+
+# Mute the microphone — E2E mock will start simulating loud audio.
+# Toast lifetime is ~4.5s (ToastModifier: visibleDuration=3s + resetDelay=1.5s)
+# and SpeakingWhileMutedDetector only emits once due to `removeDuplicates`,
+# so the steps around the toast check must NOT burn that budget.
+# We skip `waitForAnimationToEnd` after the tap because the meeting room has
+# continuous video/UI animation and it would exhaust its full timeout every
+# time. `assertVisible` already retries and re-checks the hierarchy.
+- tapOn:
+    id: "meeting-room-mic-enabled"
+
+# Verify mic is now disabled
+- assertVisible:
+    id: "meeting-room-mic-disabled"
+
+- takeScreenshot: 02-mic-muted
+
+# Wait for the speaking-while-muted warning toast to appear
+- extendedWaitUntil:
+    visible:
+      id: "toast-warning"
+    timeout: 10000
+
+- takeScreenshot: 03-speaking-while-muted-toast
+
+# Unmute the microphone — toast will auto-dismiss on its own timer
+- tapOn:
+    id: "meeting-room-mic-disabled"
+
+# Verify mic is enabled again
+- assertVisible:
+    id: "meeting-room-mic-enabled"
+
+# Toast auto-dismisses ~4.5s after first appearing. Wait explicitly for it
+# instead of relying on Maestro's default assertNotVisible retry window.
+- extendedWaitUntil:
+    notVisible:
+      id: "toast-warning"
+    timeout: 6000
+
+- takeScreenshot: 04-unmuted-no-toast
+
+# End call
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+- takeScreenshot: 05-goodbye

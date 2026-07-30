@@ -56,15 +56,20 @@ public final class SettingsFactory {
 
     // MARK: - Waiting Room Button
 
-    /// Creates the circular gear button for the waiting room.
+    /// Creates the settings button for the waiting room navigation toolbar.
     ///
-    /// Provides a closure that creates a basic ``SettingsView`` when tapped.
-    /// Falls back to a fresh repository if the factory is deallocated.
+    /// Returns a ``SettingsToolbarButton`` with icon-only design (gear icon without
+    /// circular background or border), suitable for display in SwiftUI's `.toolbar` modifier.
     ///
-    /// - Returns: A configured waiting room settings button.
+    /// Tapping the button presents the ``SettingsView`` in a sheet. The view is created
+    /// lazily via an internal closure, falling back to a fresh repository if the factory
+    /// is deallocated.
+    ///
+    /// - Returns: A configured ``SettingsWaitingRoomButton`` for the waiting room.
     @MainActor
-    public func makeWaitingRoomButton() -> SettingsWaitingRoomButton {
-        SettingsWaitingRoomButton(makeSettingsView: { [weak self] in
+    public func makeWaitingRoomButton() -> SettingsToolbarButton {
+        SettingsToolbarButton(makeSettingsView: {
+            [weak self] in
             guard let self else {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
@@ -72,7 +77,8 @@ public final class SettingsFactory {
                 )
             }
             return self.makeSettingsView()
-        })
+        }
+        )
     }
 
     // MARK: - Meeting Room Button
@@ -84,15 +90,27 @@ public final class SettingsFactory {
     /// live audio/video network metrics.
     @MainActor
     public func makeMeetingRoomSettingsView() -> SettingsView {
+        let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
+        return .init(
+            viewModel: viewModel,
+            statisticsViewModel: statisticsViewModel
+        )
+    }
+
+    /// Creates the view models for the meeting room settings without building the view.
+    ///
+    /// Used by ``SettingsSheetContent`` to own the view models via `@StateObject`,
+    /// ensuring they survive parent re-renders while the sheet is presented.
+    ///
+    /// - Returns: A tuple of the settings view model and the statistics view model.
+    @MainActor
+    public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
         let viewModel = SettingsViewModel(repository: repository)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository
         )
-        return .init(
-            viewModel: viewModel,
-            statisticsViewModel: statisticsViewModel
-        )
+        return (viewModel, statisticsViewModel)
     }
 
     /// Creates the gear button for the meeting room bottom bar.

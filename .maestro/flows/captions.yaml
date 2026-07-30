@@ -1,0 +1,109 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "captions"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room
+
+# Captions button may be in overflow menu on smaller screens
+- tapOn:
+    id: "meeting-room-more-options-button"
+    optional: true
+
+- tapOn:
+    id: "captions-toggle-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- extendedWaitUntil:
+    visible:
+      id: "captions-overlay"
+    timeout: 5000
+
+- extendedWaitUntil:
+    visible:
+      id: "captions-caption-item"
+    timeout: 5000
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      text: "You: E2E captions are enabled"
+    timeout: 5000
+    optional: true
+
+- takeScreenshot: 02-captions-enabled
+
+# Hide captions (button may be in overflow menu on smaller screens)
+- tapOn:
+    id: "meeting-room-more-options-button"
+    optional: true
+
+- tapOn:
+    id: "captions-toggle-button"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertNotVisible:
+    id: "captions-overlay"
+
+- assertNotVisible:
+    id: "captions-caption-item"
+
+- takeScreenshot: 03-captions-hidden
+
+# End call and optionally verify goodbye screen
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "goodbye-screen"
+    optional: true
+
+- takeScreenshot: 04-goodbye-optional

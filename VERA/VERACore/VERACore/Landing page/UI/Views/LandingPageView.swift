@@ -25,13 +25,7 @@ public struct LandingPageView: View {
     }
 
     public var body: some View {
-        ZStack {
-            // Accessibility anchor for Maestro E2E tests
-            Color.clear
-                .frame(width: 1, height: 1)
-                .accessibilityElement()
-                .accessibilityIdentifier("landing-screen")
-
+        ScreenIdentifierContainer(LandingPageAccessibilityID.screen) {
             Group {
                 if verticalSizeClass == .compact {
                     HorizontalLandingContentView(

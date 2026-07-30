@@ -99,6 +99,16 @@ public final class VonageCall: CallFacade {
         }
         .eraseToAnyPublisher()
 
+    private let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+
+    /// A publisher that emits the local publisher's real-time audio level in [0.0, 1.0], never fails.
+    ///
+    /// Relays the smoothed audio level from the active ``VonagePublisher``. The subject is kept in sync
+    /// via ``setupPublisherObservation(_:)`` so that publisher replacements during
+    /// ``applyPublisherAdvancedSettings(_:)`` are handled transparently.
+    public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
+
     /// Captions cleanup timer to clear captions after a certain period of inactivity.
     private var captionCleanupTimer: Timer?
 
@@ -109,6 +119,7 @@ public final class VonageCall: CallFacade {
 
     /// Tracks whether network stats collection is currently active.
     private var isNetworkStatsEnabled = false
+    private var isSubscriberExtraStatsEnabled = false
 
     /// A publisher that emits aggregated network statistics, never fails.
     ///
@@ -143,11 +154,14 @@ public final class VonageCall: CallFacade {
     /// Repository used to recreate the publisher with new settings during ``applyPublisherAdvancedSettings(_:)``.
     private let publisherRepository: PublisherRepository
 
-    private let subscriberFactory = VonageSubscriberFactory()
+    private let subscriberFactory: VonageSubscriberFactory
 
     private let activeSpeakerTracker = ActiveSpeakerTracker()
     private lazy var callStateManager = CallStateManager(
         activeSpeakerTracker: activeSpeakerTracker)
+
+    /// Test seam used to resolve a participant stream without changing the public initializer.
+    var participantStreamResolver: ((String) async -> OTStream?)?
 
     /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
     ///
@@ -190,6 +204,10 @@ public final class VonageCall: CallFacade {
         self.publisher = publisher
         self.publisherRepository = publisherRepository
         self.statsCollector = statsCollector
+        self.subscriberFactory =
+            publisher is PictureInPictureVonagePublisher
+            ? PictureInPictureVonageSubscriberFactory()
+            : VonageSubscriberFactory()
     }
 
     /// Sets up the call by configuring session handlers and initializing observers.
@@ -272,8 +290,10 @@ public final class VonageCall: CallFacade {
         guard !publisher.hasSession else { return }
         do {
             try session.publish(publisher: publisher)
-            publisherParticipant = publisher.participant
+            // In PiP mode, read `participant` only after setup(), which swaps in the renderer view.
+            // Reading it before would freeze the local tile.
             publisher.setup()
+            publisherParticipant = publisher.participant
             setupPublisherObservation(publisher)
         } catch {
             _eventsPublisher.send(.error(error))
@@ -294,6 +314,11 @@ public final class VonageCall: CallFacade {
     }
 
     private func setupPublisherObservation(_ publisher: VonagePublisher) {
+        publisher.onMuteForced = { [weak self] in
+            self?.updateMediaState()
+            self?._eventsPublisher.send(.muteForced)
+        }
+
         publisher.$participant
             .sink { [weak self] participant in
                 guard let self = self else { return }
@@ -309,6 +334,12 @@ public final class VonageCall: CallFacade {
                 Task { [weak self] in
                     await self?.updateParticipantsState(newState)
                 }
+            }
+            .store(in: &publisherCancellables)
+
+        publisher.audioLevelPublisher
+            .sink { [weak self] level in
+                self?._publisherAudioLevel.value = level
             }
             .store(in: &publisherCancellables)
     }
@@ -389,6 +420,7 @@ public final class VonageCall: CallFacade {
             // Cancel subscriber sinks before cleanup to prevent $participant
             // from re-adding the participant to the repository.
             self.subscriberCancellables[stream.streamId] = nil
+            self.statsCollector.removeSubscriber(connectionId: stream.connection.connectionId)
             let (_, state) = await callStateManager.removeSubscriber(id: stream.streamId)
             // There is no need to do a session unsubscribe if the stream has been destroyed
             await self.updateParticipantsState(state)
@@ -451,6 +483,10 @@ public final class VonageCall: CallFacade {
             updateCallState(to: .disconnected)
             throw error
         }
+    }
+
+    func subscriber(for id: String) async -> VonageSubscriber? {
+        await callStateManager.getSubscriber(id: id)
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
@@ -545,6 +581,22 @@ public final class VonageCall: CallFacade {
             self.publisher.publishAudio = !isMuted
             self.publisher.publishVideo = !isMuted
         }
+    }
+
+    // MARK: Participant moderation
+
+    public func forceMuteParticipant(id: String) async throws {
+        let stream: OTStream?
+        if let participantStreamResolver {
+            stream = await participantStreamResolver(id)
+        } else {
+            stream = await callStateManager.getSubscriber(id: id)?.stream
+        }
+
+        guard let stream else {
+            throw ParticipantForceMuteError.participantNotFound
+        }
+        try session.forceMute(stream: stream)
     }
 
     // MARK: Signals
@@ -769,6 +821,27 @@ public final class VonageCall: CallFacade {
         await updateParticipantsState(state)
     }
 
+    /// Applies live-updatable publisher settings to the current publisher without recreating it.
+    ///
+    /// This is used for settings that Vonage can mutate on the active `OTPublisher`
+    /// instance in place during a call.
+    @MainActor
+    public func updateLivePublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async {
+        guard _callState.value == .connected else { return }
+
+        if let videoBitratePreset = advancedSettings.videoBitratePreset {
+            publisher.otPublisher.videoBitratePreset = videoBitratePreset.otBitratePreset
+        }
+
+        if let maxVideoBitrate = advancedSettings.maxVideoBitrate {
+            publisher.otPublisher.maxVideoBitrate = maxVideoBitrate
+        }
+
+        if let degradationPreference = advancedSettings.degradationPreference {
+            publisher.otPublisher.degradationPreference = degradationPreference.otDegradationPreference
+        }
+    }
+
     // MARK: Network Stats
 
     /// Starts collecting network statistics from the SDK.
@@ -790,6 +863,32 @@ public final class VonageCall: CallFacade {
                 self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
             }
         }
+    }
+
+    /// Requests the extra subscriber-only stats without affecting publisher stats.
+    ///
+    /// This keeps the shared network stats pipeline alive while selectively
+    /// enriching subscriber metrics with RTC stats reports.
+    public func enableSubscriberExtraStats() {
+        guard !isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            for subscriber in subscribers {
+                self.statsCollector.requestRtcStats(from: subscriber.otSubscriber)
+            }
+        }
+    }
+
+    /// Stops requesting extra subscriber-only RTC stats.
+    ///
+    /// The underlying network stats collection remains active so publisher
+    /// metrics continue to flow for the Participant Stats UI.
+    public func disableSubscriberExtraStats() {
+        guard isSubscriberExtraStatsEnabled else { return }
+        isSubscriberExtraStatsEnabled = false
     }
 
     /// Stops collecting network statistics and clears cached data.

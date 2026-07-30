@@ -7,10 +7,14 @@ on:
     branches: [develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   maestro-tests:
     name: Run Maestro UI Tests
-    runs-on: macos-26
+    runs-on: macos-26-xlarge
     timeout-minutes: 60
 
     steps:
@@ -61,7 +65,7 @@ jobs:
           cd VERA
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
-          export MARKETING_VERSION=1.2
+          export MARKETING_VERSION=1.0
           export CURRENT_PROJECT_VERSION=${{ github.run_number }}
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
@@ -78,7 +82,7 @@ jobs:
         env:
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
-          MARKETING_VERSION: "1.2"
+          MARKETING_VERSION: "1.0"
           CURRENT_PROJECT_VERSION: ${{ github.run_number }}
           XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
 

@@ -86,7 +86,8 @@ struct NetworkStatsCollectorTests {
                 packetsSent: 100,
                 packetsLost: 5,
                 bytesSent: 1000,
-                timestamp: 1.0
+                timestamp: 1.0,
+                startTime: 0.5
             )
         ]
 
@@ -98,6 +99,7 @@ struct NetworkStatsCollectorTests {
         #expect(receivedStats?.sentAudio?.packetsLost == 5)
         #expect(receivedStats?.sentAudio?.bytesSent == 1000)
         #expect(receivedStats?.sentAudio?.timestamp == 1.0)
+        #expect(receivedStats?.sentAudio?.startTime == 0.5)
 
         cancellable.cancel()
     }
@@ -125,7 +127,7 @@ struct NetworkStatsCollectorTests {
 
     // MARK: - Publisher Video Stats Tests
 
-    @Test("Publisher video stats update correctly")
+    @Test("Publisher video stats update correctly with frame rate and start time")
     func publisherVideoStatsUpdateCorrectly() async {
         let sut = NetworkStatsCollector()
         var receivedStats: NetworkMediaStats?
@@ -138,7 +140,8 @@ struct NetworkStatsCollectorTests {
                 packetsSent: 200,
                 packetsLost: 10,
                 bytesSent: 2000,
-                timestamp: 2.0
+                timestamp: 2.0,
+                startTime: 1.0
             )
         ]
 
@@ -150,6 +153,130 @@ struct NetworkStatsCollectorTests {
         #expect(receivedStats?.sentVideo?.packetsLost == 10)
         #expect(receivedStats?.sentVideo?.bytesSent == 2000)
         #expect(receivedStats?.sentVideo?.timestamp == 2.0)
+        #expect(receivedStats?.sentVideo?.startTime == 1.0)
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher combines and sorts video layers from all destinations")
+    func publisherCombinesAndSortsVideoLayers() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(width: 1280, height: 720, bitrate: 1_500_000),
+                    makeVideoLayer(width: 320, height: 180, bitrate: 150_000),
+                ]
+            ),
+            MockVideoSendStats(
+                packetsSent: 300,
+                packetsLost: 15,
+                bytesSent: 3000,
+                timestamp: 3.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 500_000)
+                ]
+            ),
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.map(\.width) == [320, 640, 1280])
+        #expect(receivedStats?.sentVideo?.packetsSent == 200)
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher deduplicates video layers and keeps latest sample")
+    func publisherDeduplicatesVideoLayers() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 400_000)
+                ]
+            ),
+            MockVideoSendStats(
+                packetsSent: 300,
+                packetsLost: 15,
+                bytesSent: 3000,
+                timestamp: 3.0,
+                videoLayers: [
+                    makeVideoLayer(width: 640, height: 360, bitrate: 500_000)
+                ]
+            ),
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.count == 1)
+        #expect(layers?.first?.bitrate == 500_000)
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher keeps layers with the same resolution and different scalability modes")
+    func publisherKeepsLayersWithDifferentScalabilityModes() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 200,
+                packetsLost: 10,
+                bytesSent: 2_000,
+                timestamp: 2.0,
+                videoLayers: [
+                    makeVideoLayer(
+                        width: 640,
+                        height: 360,
+                        bitrate: 400_000,
+                        scalabilityMode: "L1T1"
+                    ),
+                    makeVideoLayer(
+                        width: 640,
+                        height: 360,
+                        bitrate: 500_000,
+                        scalabilityMode: "L1T2"
+                    ),
+                ]
+            )
+        ]
+
+        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        let layers = receivedStats?.sentVideo?.videoLayers
+        #expect(layers?.count == 2)
+        #expect(layers?.map(\.scalabilityMode) == ["L1T1", "L1T2"])
 
         cancellable.cancel()
     }
@@ -175,17 +302,19 @@ struct NetworkStatsCollectorTests {
 
         await delay()
 
-        #expect(receivedStats?.receivedAudio?.packetsReceived == 150)
-        #expect(receivedStats?.receivedAudio?.packetsLost == 7)
-        #expect(receivedStats?.receivedAudio?.bytesReceived == 1500)
-        #expect(receivedStats?.receivedAudio?.timestamp == 3.0)
+        // Backward-compat: subscriber populates subscriberStats
+        #expect(receivedStats?.subscriberStats.count == 1)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.packetsReceived == 150)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.packetsLost == 7)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.bytesReceived == 1500)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.timestamp == 3.0)
 
         cancellable.cancel()
     }
 
     // MARK: - Subscriber Video Stats Tests
 
-    @Test("Subscriber video stats update correctly")
+    @Test("Subscriber video stats update with resolution and codec")
     func subscriberVideoStatsUpdateCorrectly() async {
         let sut = NetworkStatsCollector()
         var receivedStats: NetworkMediaStats?
@@ -197,61 +326,42 @@ struct NetworkStatsCollectorTests {
             packetsReceived: 250,
             packetsLost: 12,
             bytesReceived: 2500,
-            timestamp: 4.0
+            timestamp: 4.0,
+            width: 1280,
+            height: 720,
+            decodedFrameRate: 30.0,
+            bitrate: 1_500_000,
+            codec: "VP8",
+            freezeCount: 2,
+            totalFreezesDuration: 500
         )
 
         sut.subscriber(dummySubscriber, videoNetworkStatsUpdated: videoStats)
 
         await delay()
 
-        #expect(receivedStats?.receivedVideo?.packetsReceived == 250)
-        #expect(receivedStats?.receivedVideo?.packetsLost == 12)
-        #expect(receivedStats?.receivedVideo?.bytesReceived == 2500)
-        #expect(receivedStats?.receivedVideo?.timestamp == 4.0)
+        // Per-subscriber stats
+        #expect(receivedStats?.subscriberStats.count == 1)
+        let sub = receivedStats?.subscriberStats.first
+        #expect(sub?.receivedVideo?.packetsReceived == 250)
+        #expect(sub?.receivedVideo?.packetsLost == 12)
+        #expect(sub?.receivedVideo?.bytesReceived == 2500)
+        #expect(sub?.receivedVideo?.timestamp == 4.0)
+
+        #expect(sub?.receivedVideo?.width == 1280)
+        #expect(sub?.receivedVideo?.height == 720)
+        #expect(sub?.receivedVideo?.decodedFrameRate == 30.0)
+        #expect(sub?.receivedVideo?.bitrate == 1_500_000)
+        #expect(sub?.receivedVideo?.freezeCount == 2)
+        #expect(sub?.receivedVideo?.totalFreezesDuration == 500)
+
+        // Per-subscriber retains the codec
+        #expect(sub?.receivedVideo?.codec == "VP8")
 
         cancellable.cancel()
     }
 
-    // MARK: - RTC Stats Tests for Codec Extraction
-
-    @Test("Publisher RTC stats extracts video codec")
-    func publisherRtcStatsExtractsVideoCodec() async {
-        let sut = NetworkStatsCollector()
-        var receivedStats: NetworkMediaStats?
-        let cancellable = sut.statsPublisher.sink { stats in
-            receivedStats = stats
-        }
-
-        // First add video stats
-        let videoStats = [
-            MockVideoSendStats(
-                packetsSent: 100,
-                packetsLost: 5,
-                bytesSent: 1000,
-                timestamp: 1.0
-            )
-        ]
-        sut.publisher(MockPublisher(), videoNetworkStatsUpdated: videoStats)
-
-        await delay()
-
-        // Then send RTC stats with codec info
-        let rtcStats = MockPublisherRtcStats(
-            jsonArrayOfReports: """
-                [
-                    {"type": "codec", "id": "codec-1", "mimeType": "video/VP8"},
-                    {"type": "outbound-rtp", "kind": "video", "codecId": "codec-1"}
-                ]
-                """)
-
-        sut.publisher(MockPublisher(), rtcStatsReport: [rtcStats])
-
-        await delay()
-
-        #expect(receivedStats?.sentVideo?.videoCodec == "VP8")
-
-        cancellable.cancel()
-    }
+    // MARK: - RTC Stats Tests for Audio Codec Extraction
 
     @Test("Publisher RTC stats extracts audio codec")
     func publisherRtcStatsExtractsAudioCodec() async {
@@ -312,17 +422,17 @@ struct NetworkStatsCollectorTests {
         cancellable.cancel()
     }
 
-    // MARK: - Subscriber RTC Stats for Bandwidth Extraction
+    // MARK: - Remove Subscriber Tests
 
-    @Test("Subscriber RTC stats extracts bandwidth correctly")
-    func subscriberRtcStatsExtractsBandwidth() async {
+    @Test("Remove subscriber clears per-subscriber stats")
+    func removeSubscriberClearsStats() async {
         let sut = NetworkStatsCollector()
         var receivedStats: NetworkMediaStats?
         let cancellable = sut.statsPublisher.sink { stats in
             receivedStats = stats
         }
 
-        // First add audio stats
+        // Add subscriber stats (dummySubscriber has connectionId "")
         let audioStats = MockAudioReceiveStats(
             packetsReceived: 100,
             packetsLost: 5,
@@ -333,35 +443,14 @@ struct NetworkStatsCollectorTests {
 
         await delay()
 
-        // Simulate RTC stats callback with bandwidth
-        let jsonString = """
-            [
-                {"type": "candidate-pair", "availableIncomingBitrate": 500000.0}
-            ]
-            """
-        sut.subscriber(dummySubscriber, rtcStatsReport: jsonString)
+        #expect(receivedStats?.subscriberStats.count == 1)
+
+        // Remove the subscriber
+        sut.removeSubscriber(connectionId: "")
 
         await delay()
 
-        #expect(receivedStats?.receivedAudio?.estimatedBandwidth == 500_000)
-
-        cancellable.cancel()
-    }
-
-    @Test("Subscriber RTC stats handles malformed JSON")
-    func subscriberRtcStatsHandlesMalformedJson() async {
-        let sut = NetworkStatsCollector()
-        var receivedStats: NetworkMediaStats?
-        let cancellable = sut.statsPublisher.sink { stats in
-            receivedStats = stats
-        }
-
-        sut.subscriber(dummySubscriber, rtcStatsReport: "invalid json")
-
-        await delay()
-
-        // Should not crash
-        #expect(receivedStats == .empty || receivedStats != nil)
+        #expect(receivedStats?.subscriberStats.isEmpty == true)
 
         cancellable.cancel()
     }
@@ -424,12 +513,266 @@ struct NetworkStatsCollectorTests {
 
         await delay()
 
-        // Verify all stats are aggregated
+        // Verify all stats are present
         #expect(receivedStats?.sentAudio?.packetsSent == 100)
         #expect(receivedStats?.sentVideo?.packetsSent == 200)
-        #expect(receivedStats?.receivedAudio?.packetsReceived == 150)
-        #expect(receivedStats?.receivedVideo?.packetsReceived == 250)
+
+        // Per-subscriber stats
+        #expect(receivedStats?.subscriberStats.count == 1)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.packetsReceived == 150)
+        #expect(receivedStats?.subscriberStats.first?.receivedVideo?.packetsReceived == 250)
 
         cancellable.cancel()
+    }
+
+    @Test("Subscriber RTC stats extracts audio and video codecs")
+    func subscriberRtcStatsExtractsCodecs() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        // First add subscriber audio and video stats so there are existing entries to update.
+        let audioStats = MockAudioReceiveStats(
+            packetsReceived: 100,
+            packetsLost: 5,
+            bytesReceived: 1000,
+            timestamp: 1.0
+        )
+        sut.subscriber(dummySubscriber, audioNetworkStatsUpdated: audioStats)
+
+        let videoStats = MockVideoReceiveStats(
+            packetsReceived: 200,
+            packetsLost: 10,
+            bytesReceived: 2000,
+            timestamp: 2.0
+        )
+        sut.subscriber(dummySubscriber, videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        // Then send RTC stats with both audio and video codec info.
+        sut.subscriber(
+            dummySubscriber,
+            rtcStatsReport: """
+                [
+                    {"type": "codec", "id": "codec-1", "mimeType": "audio/opus"},
+                    {"type": "codec", "id": "codec-2", "mimeType": "video/VP8"},
+                    {"type": "inbound-rtp", "kind": "audio", "codecId": "codec-1"},
+                    {"type": "inbound-rtp", "kind": "video", "codecId": "codec-2"}
+                ]
+                """)
+
+        await delay()
+
+        let subscriber = receivedStats?.subscriberStats.first
+        #expect(subscriber?.receivedAudio?.audioCodec == "opus")
+        #expect(subscriber?.receivedAudio?.packetsReceived == 100)
+        #expect(subscriber?.receivedVideo?.codec == "VP8")
+        #expect(subscriber?.receivedVideo?.packetsReceived == 200)
+
+        cancellable.cancel()
+    }
+
+    // MARK: - Publisher Name Tests
+
+    @Test("Publisher name is captured from video stats delegate")
+    func publisherNameIsCapturedFromVideoStats() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let publisher = MockPublisher(name: "Alice")
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 100,
+                packetsLost: 0,
+                bytesSent: 500,
+                timestamp: 1.0
+            )
+        ]
+        sut.publisher(publisher, videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        #expect(receivedStats?.publisherName == "Alice")
+
+        cancellable.cancel()
+    }
+
+    @Test("Publisher name defaults to empty when nil")
+    func publisherNameDefaultsToEmpty() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let publisher = MockPublisher()
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 100,
+                packetsLost: 0,
+                bytesSent: 500,
+                timestamp: 1.0
+            )
+        ]
+        sut.publisher(publisher, videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        #expect(receivedStats?.publisherName == "")
+
+        cancellable.cancel()
+    }
+
+    @Test("Reset clears publisher name")
+    func resetClearsPublisherName() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let publisher = MockPublisher(name: "Bob")
+
+        let videoStats = [
+            MockVideoSendStats(
+                packetsSent: 100,
+                packetsLost: 0,
+                bytesSent: 500,
+                timestamp: 1.0
+            )
+        ]
+        sut.publisher(publisher, videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        #expect(receivedStats?.publisherName == "Bob")
+
+        sut.reset()
+
+        await delay()
+
+        #expect(receivedStats?.publisherName == "")
+
+        cancellable.cancel()
+    }
+
+    // MARK: - Aggregation Tests
+
+    @Test("Single subscriber audio stats are in subscriberStats")
+    func singleSubscriberAudioInSubscriberStats() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let audioStats = MockAudioReceiveStats(
+            packetsReceived: 300,
+            packetsLost: 15,
+            bytesReceived: 3000,
+            timestamp: 5.0
+        )
+        sut.subscriber(dummySubscriber, audioNetworkStatsUpdated: audioStats)
+
+        await delay()
+
+        #expect(receivedStats?.subscriberStats.count == 1)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.packetsReceived == 300)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.packetsLost == 15)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.bytesReceived == 3000)
+        #expect(receivedStats?.subscriberStats.first?.receivedAudio?.timestamp == 5.0)
+
+        cancellable.cancel()
+    }
+
+    @Test("Single subscriber video stats are in subscriberStats")
+    func singleSubscriberVideoInSubscriberStats() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        let videoStats = MockVideoReceiveStats(
+            packetsReceived: 500,
+            packetsLost: 20,
+            bytesReceived: 5000,
+            timestamp: 6.0,
+            width: 1920,
+            height: 1080,
+            decodedFrameRate: 60.0,
+            bitrate: 3_000_000,
+            freezeCount: 1,
+            totalFreezesDuration: 200
+        )
+        sut.subscriber(dummySubscriber, videoNetworkStatsUpdated: videoStats)
+
+        await delay()
+
+        #expect(receivedStats?.subscriberStats.count == 1)
+        let sub = receivedStats?.subscriberStats.first
+        #expect(sub?.receivedVideo?.packetsReceived == 500)
+        #expect(sub?.receivedVideo?.packetsLost == 20)
+        #expect(sub?.receivedVideo?.bytesReceived == 5000)
+        #expect(sub?.receivedVideo?.width == 1920)
+        #expect(sub?.receivedVideo?.height == 1080)
+        #expect(sub?.receivedVideo?.decodedFrameRate == 60.0)
+        #expect(sub?.receivedVideo?.bitrate == 3_000_000)
+        #expect(sub?.receivedVideo?.freezeCount == 1)
+        #expect(sub?.receivedVideo?.totalFreezesDuration == 200)
+
+        cancellable.cancel()
+    }
+
+    @Test("No subscriber stats when only publisher stats")
+    func noSubscriberStatsWhenOnlyPublisher() async {
+        let sut = NetworkStatsCollector()
+        var receivedStats: NetworkMediaStats?
+        let cancellable = sut.statsPublisher.sink { stats in
+            receivedStats = stats
+        }
+
+        // Only add publisher stats, no subscribers
+        let audioStats = [
+            MockAudioSendStats(
+                packetsSent: 100,
+                packetsLost: 5,
+                bytesSent: 1000,
+                timestamp: 1.0
+            )
+        ]
+        sut.publisher(MockPublisher(), audioNetworkStatsUpdated: audioStats)
+
+        await delay()
+
+        #expect(receivedStats?.subscriberStats.isEmpty == true)
+
+        cancellable.cancel()
+    }
+
+    private func makeVideoLayer(
+        width: Int32,
+        height: Int32,
+        bitrate: Int64,
+        scalabilityMode: String? = nil
+    ) -> OTPublisherKitVideoLayerStats {
+        OTPublisherKitVideoLayerStats(
+            width: width,
+            height: height,
+            encodedFrameRate: 30,
+            bitrate: bitrate,
+            totalBitrate: bitrate,
+            scalabilityMode: scalabilityMode,
+            qualityLimitationReason: .none,
+            codec: "VP8"
+        )
     }
 }

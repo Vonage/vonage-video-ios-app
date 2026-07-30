@@ -18,8 +18,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// The codec preference configuration (automatic or manual with ordered list).
     public var codecPreference: SettingsCodecPreference
 
-    /// The maximum audio bitrate in bits per second.
-    public var maxAudioBitrate: Int32
+    /// The maximum audio bitrate preference.
+    public var audioBitratePreference: SettingsAudioBitratePreference
 
     /// The video bitrate preset (default or custom).
     public var videoBitratePreset: SettingsVideoBitratePreset
@@ -36,6 +36,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Whether sender statistics should be displayed for debugging purposes.
     public var senderStatsEnabled: Bool
 
+    /// Whether the stats overlay should be visible in the meeting room.
+    public var statsOverlayEnabled: Bool
+
     /// The degradation preference policy for adapting frame rate and resolution.
     public var degradationPreference: SettingsDegradationPreference
 
@@ -51,36 +54,39 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     ///   - videoResolution: The video resolution. Defaults to `.medium`.
     ///   - videoFrameRate: The video frame rate. Defaults to `.fps30`.
     ///   - codecPreference: The codec preference. Defaults to `.automatic`.
-    ///   - maxAudioBitrate: The maximum audio bitrate in bps. Defaults to 40,000.
+    ///   - audioBitratePreference: The maximum audio bitrate preference. Defaults to `.default`.
     ///   - videoBitratePreset: The video bitrate preset. Defaults to `.default`.
     ///   - maxVideoBitrate: The maximum video bitrate in bps. Defaults to 500,000.
     ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
+    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
-    ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `false`.
+    ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
         codecPreference: SettingsCodecPreference = .automatic,
-        maxAudioBitrate: Int32 = 40_000,
+        audioBitratePreference: SettingsAudioBitratePreference = .default,
         videoBitratePreset: SettingsVideoBitratePreset = .default,
         maxVideoBitrate: Int32 = 500_000,
         publisherAudioFallbackEnabled: Bool = true,
         subscriberAudioFallbackEnabled: Bool = true,
         senderStatsEnabled: Bool = false,
+        statsOverlayEnabled: Bool = true,
         degradationPreference: SettingsDegradationPreference = .notSet,
         opusDtxEnabled: Bool = true
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
         self.codecPreference = codecPreference
-        self.maxAudioBitrate = maxAudioBitrate
+        self.audioBitratePreference = audioBitratePreference
         self.videoBitratePreset = videoBitratePreset
         self.maxVideoBitrate = maxVideoBitrate
         self.publisherAudioFallbackEnabled = publisherAudioFallbackEnabled
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.senderStatsEnabled = senderStatsEnabled
+        self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
     }
@@ -93,7 +99,19 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         videoResolution = try container.decode(SettingsVideoResolution.self, forKey: .videoResolution)
         videoFrameRate = try container.decode(SettingsVideoFrameRate.self, forKey: .videoFrameRate)
-        maxAudioBitrate = try container.decode(Int32.self, forKey: .maxAudioBitrate)
+        if let audioBitratePreference = try container.decodeIfPresent(
+            SettingsAudioBitratePreference.self,
+            forKey: .audioBitratePreference
+        ) {
+            self.audioBitratePreference = audioBitratePreference
+        } else if let legacyMaxAudioBitrate = try container.decodeIfPresent(
+            Int32.self,
+            forKey: .legacyMaxAudioBitrate
+        ) {
+            self.audioBitratePreference = .custom(legacyMaxAudioBitrate)
+        } else {
+            self.audioBitratePreference = .default
+        }
         videoBitratePreset =
             try container.decodeIfPresent(SettingsVideoBitratePreset.self, forKey: .videoBitratePreset) ?? .default
         maxVideoBitrate = try container.decodeIfPresent(Int32.self, forKey: .maxVideoBitrate) ?? 0
@@ -107,6 +125,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             subscriberAudioFallbackEnabled = legacy
         }
         senderStatsEnabled = try container.decodeIfPresent(Bool.self, forKey: .senderStatsEnabled) ?? false
+        statsOverlayEnabled = try container.decodeIfPresent(Bool.self, forKey: .statsOverlayEnabled) ?? true
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
@@ -125,12 +144,14 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case videoResolution
         case videoFrameRate
         case codecPreference
-        case maxAudioBitrate
+        case audioBitratePreference
         case videoBitratePreset
         case maxVideoBitrate
+        case legacyMaxAudioBitrate = "maxAudioBitrate"
         case publisherAudioFallbackEnabled
         case subscriberAudioFallbackEnabled
         case senderStatsEnabled
+        case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
         /// Old key kept for migration only.
@@ -146,23 +167,26 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(videoResolution, forKey: .videoResolution)
         try container.encode(videoFrameRate, forKey: .videoFrameRate)
         try container.encode(codecPreference, forKey: .codecPreference)
-        try container.encode(maxAudioBitrate, forKey: .maxAudioBitrate)
+        try container.encode(audioBitratePreference, forKey: .audioBitratePreference)
         try container.encode(videoBitratePreset, forKey: .videoBitratePreset)
         try container.encode(maxVideoBitrate, forKey: .maxVideoBitrate)
         try container.encode(publisherAudioFallbackEnabled, forKey: .publisherAudioFallbackEnabled)
         try container.encode(subscriberAudioFallbackEnabled, forKey: .subscriberAudioFallbackEnabled)
         try container.encode(senderStatsEnabled, forKey: .senderStatsEnabled)
+        try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
         lhs.videoResolution == rhs.videoResolution && lhs.videoFrameRate == rhs.videoFrameRate
-            && lhs.codecPreference == rhs.codecPreference && lhs.maxAudioBitrate == rhs.maxAudioBitrate
+            && lhs.codecPreference == rhs.codecPreference
+            && lhs.audioBitratePreference == rhs.audioBitratePreference
             && lhs.videoBitratePreset == rhs.videoBitratePreset && lhs.maxVideoBitrate == rhs.maxVideoBitrate
             && lhs.publisherAudioFallbackEnabled == rhs.publisherAudioFallbackEnabled
             && lhs.subscriberAudioFallbackEnabled == rhs.subscriberAudioFallbackEnabled
             && lhs.senderStatsEnabled == rhs.senderStatsEnabled
+            && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
     }

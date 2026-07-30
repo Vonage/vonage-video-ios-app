@@ -9,6 +9,7 @@ import UIKit
 import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
+import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
@@ -69,6 +70,23 @@ struct MeetingRoomComposedViewTests {
         #expect(sut.statsOverlayViewModel == nil)
     }
 
+    @Test("MeetingRoomComposedView stores provided UI provider")
+    @MainActor
+    func storesUIProvider() {
+        let provider = DefaultMeetingRoomUIProvider(bottomBarButtons: {
+            [
+                BottomBarButton(
+                    label: "Custom",
+                    image: Image(systemName: "star.fill"),
+                    action: {}
+                )
+            ]
+        })
+        let sut = makeSUT(uiProvider: provider)
+
+        #expect(sut.uiProvider.bottomBarButtons().map(\.label) == ["Custom"])
+    }
+
     // MARK: - Container Feature Reflection
 
     @Test("Container with chat feature reports chat as enabled")
@@ -102,7 +120,7 @@ struct MeetingRoomComposedViewTests {
     func onAppearSetsOnShowPickerView() async {
         let (sut, assembler) = makeSUTWithAssembler()
         await renderView(sut)
-        #expect(assembler.onShowPickerView != nil)
+        #expect(assembler.onShowReactions != nil)
     }
 
     @Test("onAppear sets buttonsAssembler.onShowSettings callback")
@@ -118,7 +136,8 @@ struct MeetingRoomComposedViewTests {
     @MainActor
     private func makeSUT(
         enabledFeatures: Set<MeetingRoomFeature> = [],
-        container: MeetingRoomSDKContainer? = nil
+        container: MeetingRoomSDKContainer? = nil,
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
     ) -> MeetingRoomComposedView {
         let actualContainer = container ?? makeContainer(enabledFeatures: enabledFeatures)
         let assembler = BottomBarButtonsAssembler(container: actualContainer, enabledFeatures: enabledFeatures)
@@ -127,7 +146,9 @@ struct MeetingRoomComposedViewTests {
         return MeetingRoomComposedView(
             meetingRoomFactory: factory,
             viewModel: viewModel,
+            uiProvider: uiProvider,
             container: actualContainer,
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
             onAction: { _ in },
@@ -151,7 +172,9 @@ struct MeetingRoomComposedViewTests {
         let view = MeetingRoomComposedView(
             meetingRoomFactory: factory,
             viewModel: viewModel,
+            uiProvider: DefaultMeetingRoomUIProvider(),
             container: container,
+            pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: enabledFeatures,
             buttonsAssembler: assembler,
             onAction: { _ in },
@@ -219,7 +242,7 @@ struct MeetingRoomComposedViewTests {
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             configuration: MeetingRoomConfiguration(),
             meetingRoomNavigation: MeetingRoomNavigation(actionHandler: { _ in }, roomName: "test-room"),
-            getExternalButtons: { _ in [] },
+            uiProvider: DefaultMeetingRoomUIProvider(),
             noiseSuppressionStatusDataSource: makeMockNoiseSuppressionStatusDataSource(),
             pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource()
         )

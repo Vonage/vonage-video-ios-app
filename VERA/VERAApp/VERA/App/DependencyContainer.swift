@@ -30,10 +30,19 @@ import VERAVonageCallKitPlugin
     import VERAAudioEffects
 #endif
 
-final class DependencyContainer {
-    lazy var baseURL: URL = EnvironmentConstants.baseURL
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
 
-    lazy var httpClient: any HTTPClient = URLSessionHTTPClient()
+final class DependencyContainer {
+
+    let httpClient: HTTPClient
+
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
+    }
+
+    lazy var baseURL: URL = EnvironmentConstants.baseURL
 
     lazy var jsonDecoder = JSONDecoder()
 
@@ -41,10 +50,17 @@ final class DependencyContainer {
 
     lazy var userDefaults = UserDefaults(suiteName: EnvironmentConstants.veraAppGroupIdentifier) ?? .standard
 
-    lazy var publisherFactory: any PublisherFactory = VonagePublisherFactory(
-        checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
-        checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase()
-    )
+    lazy var publisherFactory: any PublisherFactory = {
+        let camera = DefaultCheckCameraAuthorizationStatusUseCase()
+        let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
+        return appConfig.meetingRoomSettings.allowPictureInPicture
+            ? PictureInPictureVonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+            : VonagePublisherFactory(
+                checkCameraAuthorizationStatusUseCase: camera,
+                checkMicrophoneAuthorizationStatusUseCase: microphone)
+    }()
 
     lazy var appConfig = AppConfig()
 
@@ -59,8 +75,27 @@ final class DependencyContainer {
     }()
 
     lazy var cameraPreviewProviderRepository: any CameraPreviewProviderRepository = {
-        DefaultCameraPreviewProviderRepository(publisherFactory: publisherFactory)
+        #if SETTINGS_ENABLED
+            let adapter = publisherAdvancedSettingsAdapter
+            return DefaultCameraPreviewProviderRepository(
+                publisherFactory: publisherFactory,
+                advancedSettingsProvider: { adapter.get() }
+            )
+        #else
+            return DefaultCameraPreviewProviderRepository(publisherFactory: publisherFactory)
+        #endif
     }()
+
+    #if SETTINGS_ENABLED
+        lazy var publisherAdvancedSettingsAdapter: PublisherAdvancedSettingsAdapter = {
+            let adapter = PublisherAdvancedSettingsAdapter()
+            adapter.onChange = { [weak self] in
+                self?.cameraPreviewProviderRepository.resetPublisher()
+            }
+            adapter.setup(with: settingsRepository.preferencesPublisher)
+            return adapter
+        }()
+    #endif
 
     lazy var userRepository: any UserRepository = {
         UserDefaultsUserRepository(userDefaults: userDefaults)
@@ -82,14 +117,13 @@ final class DependencyContainer {
         userRepository: userRepository,
         advancedSettingsUseCase: advancedSettingsUseCase)
 
-    lazy var goodByePageFactory = GoodByePageFactory(
-        joinRoomUseCase: .init(
-            userRepository: userRepository,
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
-            advancedSettingsUseCase: advancedSettingsUseCase),
-        userRepository: userRepository)
+    lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
-    // MARK: - Meeting Room SDK
+    #if AUDIODIAGNOSTICS_ENABLED
+        lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
+
+        lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(speakerTestService: speakerTestService)
+    #endif
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
@@ -102,9 +136,18 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
-        if appConfig.meetingRoomSettings.allowScreenShare { features.insert(.screenShare) }
+        if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
+        #if !os(macOS)
+            if appConfig.meetingRoomSettings.allowPictureInPicture {
+                features.insert(.pictureInPicture)
+            }
+        #endif
+        if appConfig.meetingRoomSettings.allowScreenShare && !ProcessInfo.processInfo.isiOSAppOnMac {
+            features.insert(.screenShare)
+        }
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
         if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
+        if appConfig.audioSettings.allowAudioDiagnostics { features.insert(.audioDiagnostics) }
         features.insert(.callKit)
         return features
     }
@@ -137,14 +180,49 @@ final class DependencyContainer {
     // MARK: - Background effects feature (waiting room)
 
     #if BACKGROUND_EFFECTS_ENABLED
-        lazy var backgroundBlurFactory = BackgroundBlurFactory()
+        lazy var backgroundEffectsRepository: BackgroundEffectsRepository = DefaultBackgroundEffectsRepository(
+            bundle: .init(for: DefaultBackgroundEffectsRepository.self),
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
+                fileManager: .default,
+                searchPathDirectory: .cachesDirectory,
+                pathComponent: "video_backgrounds"
+            )
+        )
+
+        lazy var userBackgroundRepository: UserBackgroundRepository = DefaultUserBackgroundRepository(
+            storageProvider: DefaultBackgroundEffectsStorageProvider(
+                fileManager: .default,
+                searchPathDirectory: .documentDirectory,
+                pathComponent: "user_backgrounds"
+            )
+        )
+
+        lazy var videoEffectRepository: VideoEffectRepository = DefaultVideoEffectRepository()
+
+        lazy var backgroundEffectFactory = BackgroundEffectFactory(
+            getBackgroundsUseCase: DefaultGetBackgroundsUseCase(
+                backgroundEffectsRepository: backgroundEffectsRepository,
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            addBackgroundUseCase: DefaultAddBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            deleteBackgroundUseCase: DefaultDeleteBackgroundUseCase(
+                userBackgroundRepository: userBackgroundRepository
+            ),
+            remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
+            videoEffectRepository: videoEffectRepository
+        )
     #endif
 
     // MARK: - Settings feature (waiting room)
 
     #if SETTINGS_ENABLED
-        lazy var settingsRepository: PublisherSettingsRepository =
-            UserDefaultsSettingsRepository()
+        lazy var settingsRepository: PublisherSettingsRepository = {
+            let repository = UserDefaultsSettingsRepository()
+            Task { await repository.setup() }
+            return repository
+        }()
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,

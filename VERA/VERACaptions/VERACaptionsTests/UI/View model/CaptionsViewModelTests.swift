@@ -176,7 +176,9 @@ struct CaptionsViewModelTests {
 
         observer.send([CaptionItem(speakerName: "Alice", text: "Hello")])
 
-        try await Task.sleep(nanoseconds: 100_000_000)
+        // Yield to allow main actor to process any pending updates
+        await Task.yield()
+        await Task.yield()
 
         #expect(sut.captions.isEmpty)
     }
@@ -198,7 +200,9 @@ struct CaptionsViewModelTests {
             CaptionItem(speakerName: "Bob", text: "New message"),
         ])
 
-        try await Task.sleep(nanoseconds: 100_000_000)
+        // Yield to allow main actor to process (should not update since cancelled)
+        await Task.yield()
+        await Task.yield()
 
         #expect(sut.captions.count == 1)
         #expect(sut.captions[0].text == expectedText(speaker: "Alice", text: "Hello"))
@@ -229,7 +233,9 @@ struct CaptionsViewModelTests {
         sut.cancelObservers()
 
         observer.send([CaptionItem(speakerName: "Bob", text: "Ignored")])
-        try await Task.sleep(nanoseconds: 100_000_000)
+        // Yield to allow main actor to process (should not update since cancelled)
+        await Task.yield()
+        await Task.yield()
         #expect(sut.captions.count == 1)
 
         sut.initObservers()
@@ -301,26 +307,45 @@ struct CaptionsViewModelTests {
         return (viewModel, observer)
     }
 
+    /// Waits for a condition to become true by yielding to the main actor's run loop.
+    ///
+    /// Instead of polling with sleeps, this yields control back to the main actor
+    /// multiple times, allowing pending work (like Combine sink closures) to execute.
+    /// This is deterministic and avoids race conditions under varying system loads.
     private func waitUntil(
         timeout: TimeInterval = 0.5,
-        _ condition: @escaping @Sendable () -> Bool
+        _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
-        while !condition() {
+        var iterations = 0
+        let maxIterations = 100  // Safety limit
+
+        while iterations < maxIterations {
+            // Check condition on MainActor
+            if await condition() {
+                return
+            }
+
             guard Date() < deadline else {
                 throw WaitTimeoutError()
             }
-            try await Task.sleep(nanoseconds: 10_000_000)
+
+            // Yield to allow MainActor work to process
+            await Task.yield()
+            iterations += 1
         }
+
+        throw WaitTimeoutError()
     }
 }
 
 // MARK: - Test Doubles
 
+/// Mock observer that publishes captions for deterministic testing.
 private final class MockCaptionsObserver: CaptionsObserver, @unchecked Sendable {
-    private let subject = CurrentValueSubject<[CaptionItem], Never>([])
+    nonisolated(unsafe) private let subject = CurrentValueSubject<[CaptionItem], Never>([])
 
-    var captionsReceived: AnyPublisher<[CaptionItem], Never> {
+    nonisolated var captionsReceived: AnyPublisher<[CaptionItem], Never> {
         subject.eraseToAnyPublisher()
     }
 

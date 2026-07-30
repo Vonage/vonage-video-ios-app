@@ -1,0 +1,141 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "recording"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room name
+- tapOn:
+    id: "room-name-input"
+
+- inputText: "testroom"
+
+- tapOn:
+    id: "join-waiting-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Disable mic (match React spec: audio off)
+- tapOn:
+    id: "waiting-room-mic-enabled"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 01-meeting-room
+
+# Start recording (button may be in overflow menu on smaller screens)
+- tapOn:
+    id: "meeting-room-more-options-button"
+    optional: true
+
+- tapOn:
+    id: "archiving-start-recording-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Confirm start recording alert
+- tapOn: "OK"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify recording indicator is visible
+- assertVisible:
+    id: "archiving-recording-indicator"
+
+- takeScreenshot: 02-recording-in-progress
+
+# Wait for recording to accumulate content
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Stop recording (button may be in overflow menu on smaller screens)
+- tapOn:
+    id: "meeting-room-more-options-button"
+    optional: true
+
+- tapOn:
+    id: "archiving-stop-recording-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Confirm stop recording alert
+- tapOn: "OK"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify recording indicator is gone
+- assertNotVisible:
+    id: "archiving-recording-indicator"
+
+- takeScreenshot: 03-recording-stopped
+
+# End call
+- tapOn:
+    id: "meeting-room-end-call-button"
+
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "goodbye-screen"
+
+# Verify archive list is visible on goodbye page
+- assertVisible:
+    id: "archiving-archive-list"
+
+- takeScreenshot: 04-goodbye-archives
+
+# Wait for archive to appear in the list (up to 1 minute)
+- extendedWaitUntil:
+    visible:
+      id: "archiving-archive-item"
+    timeout: 90000
+
+# Verify an archive item was created
+- assertVisible:
+    id: "archiving-archive-item"
+
+- takeScreenshot: 05-archive-item-created
+
+# Optionally wait for archive to become downloadable
+- extendedWaitUntil:
+    visible:
+      id: "archiving-download-button"
+    timeout: 30000
+    optional: true
+
+- takeScreenshot: 06-archive-download-optional

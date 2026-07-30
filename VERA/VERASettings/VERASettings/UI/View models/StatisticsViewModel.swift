@@ -20,10 +20,11 @@ public final class StatisticsViewModel: ObservableObject {
     /// Whether sender statistics are currently enabled.
     @Published public var isStatsEnabled: Bool = false
 
-    /// A formatted string of the estimated bandwidth, or `nil` if unavailable.
-    public var estimatedBandwidthFormatted: String? {
-        SettingsFormatter.formatBandwidth(stats.receivedAudio?.estimatedBandwidth)
-    }
+    /// Whether the publisher DisclosureGroup is expanded.
+    @Published public var isPublisherExpanded: Bool = false
+
+    /// Set of subscriber connection IDs whose DisclosureGroups are expanded.
+    @Published public var expandedSubscribers: Set<String> = []
 
     // MARK: - Dependencies
 
@@ -34,7 +35,7 @@ public final class StatisticsViewModel: ObservableObject {
     private let settingsRepository: PublisherSettingsRepository
 
     /// Tracks whether the view model has been initialized.
-    private var isInialized: Bool = false
+    private var isInitialized: Bool = false
 
     // MARK: - Init
 
@@ -56,8 +57,8 @@ public final class StatisticsViewModel: ObservableObject {
     /// Sets up the observers for stats and settings changes.
     /// Should be called once when the view appears. Subsequent calls are ignored.
     public func setup() {
-        guard !isInialized else { return }
-        isInialized = true
+        guard !isInitialized else { return }
+        isInitialized = true
 
         settingsRepository.preferencesPublisher
             .map(\.senderStatsEnabled)

@@ -8,7 +8,8 @@
   "audioSettings": {
     "allowAdvancedNoiseSuppression": true,
     "allowAudioOnJoin": true,
-    "allowMicrophoneControl": true
+    "allowMicrophoneControl": true,
+    "allowAudioDiagnostics": true
   },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,
@@ -20,6 +21,8 @@
     "allowChat": true,
     "allowDeviceSelection": true,
     "allowEmojis": true,
+    "allowFeedback": true,
+    "allowPictureInPicture": true,
     "allowScreenShare": true,
     "allowSettings": true,
     "defaultLayoutMode": "activespeaker",

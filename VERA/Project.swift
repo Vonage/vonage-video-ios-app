@@ -174,6 +174,44 @@ private func isAdvancedNoiseSuppressionEnabled() -> Bool {
     return audioSettings["allowAdvancedNoiseSuppression"] as! Bool
 }
 
+/// Returns whether Audio Diagnostics is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "audioSettings": {
+///     "allowAudioDiagnostics": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `audioSettings.allowAudioDiagnostics` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isAudioDiagnosticsEnabled() -> Bool {
+    let config = readAppConfig()
+    let audioSettings = config["audioSettings"] as! [String: Any]
+    return audioSettings["allowAudioDiagnostics"] as! Bool
+}
+
+/// Returns whether Feedback is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowFeedback": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowFeedback` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isFeedbackEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowFeedback"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -207,6 +245,7 @@ private func createDependencies() -> [TargetDependency] {
         .project(target: "VERACocoaLumberjackLogger", path: "VERACocoaLumberjackLogger"),
         // SDK module handles meeting room dependency wiring and all feature modules
         .project(target: "VERAMeetingRoomSDK", path: "VERAMeetingRoomSDK"),
+        .project(target: "VERAE2E", path: "VERAE2E"),
     ]
 
     // The following dependencies are still needed directly by VERAApp
@@ -243,6 +282,18 @@ private func createDependencies() -> [TargetDependency] {
     if isAdvancedNoiseSuppressionEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAAudioEffects", path: "VERAAudioEffects")
+        ])
+    }
+
+    if isAudioDiagnosticsEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAAudioDiagnostics", path: "VERAAudioDiagnostics")
+        ])
+    }
+
+    if isFeedbackEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAFeedback", path: "VERAFeedback")
         ])
     }
     return dependencies
@@ -298,6 +349,18 @@ private func createBuildSettings() -> Settings {
         baseSettings["AUDIOEFFECTS_ENABLED"] = "1"
         flags.append("AUDIOEFFECTS_ENABLED")
         print("AudioEffects feature enabled in build settings.")
+    }
+
+    if isAudioDiagnosticsEnabled() {
+        baseSettings["AUDIODIAGNOSTICS_ENABLED"] = "1"
+        flags.append("AUDIODIAGNOSTICS_ENABLED")
+        print("AudioDiagnostics feature enabled in build settings.")
+    }
+
+    if isFeedbackEnabled() {
+        baseSettings["FEEDBACK_ENABLED"] = "1"
+        flags.append("FEEDBACK_ENABLED")
+        print("Feedback feature enabled in build settings.")
     }
 
     if !flags.isEmpty {
@@ -362,6 +425,11 @@ let project = Project(
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "ITSAppUsesNonExemptEncryption": false,
                     "NSCameraReactionEffectGesturesEnabledDefault": false,
+                    "CFBundleURLTypes": .array([
+                        .dictionary([
+                            "CFBundleURLSchemes": .array([.string("vera"), .string("https")])
+                        ])
+                    ]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAApp/VERA/App/**"],
             resources: ["VERAApp/VERA/Resources/**"],

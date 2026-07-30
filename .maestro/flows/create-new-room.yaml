@@ -1,0 +1,46 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- assertVisible:
+    id: "create-new-room-button"
+
+# Tap "Create a new room" — generates random room name and navigates to waiting room
+- tapOn:
+    id: "create-new-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+- takeScreenshot: 01-waiting-room-new-room
+
+# Enter username and join meeting
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    id: "meeting-room-screen"
+
+- takeScreenshot: 02-meeting-room

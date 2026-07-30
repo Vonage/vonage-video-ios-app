@@ -19,21 +19,24 @@ struct VonageSettingsPluginTests {
 
         try await sut.callDidStart([:])
 
-        // After callDidStart, the plugin should be observing the repository
-        // Change stats enabled and verify it forwards to call
+        // After callDidStart, publisher stats are enabled and subscriber extras
+        // follow the current toggle state.
+        #expect(mocks.call.enableNetworkStatsCallCount == 1)
+        #expect(mocks.call.disableSubscriberExtraStatsCallCount == 2)
+
         await mocks.repository.updatePreferences { prefs in
             prefs.senderStatsEnabled = true
         }
 
         await delay()
 
-        #expect(mocks.call.enableNetworkStatsCallCount == 1)
+        #expect(mocks.call.enableSubscriberExtraStatsCallCount == 1)
     }
 
     // MARK: - Stats Toggle Tests
 
-    @Test("Stats toggle triggers enableNetworkStats")
-    func statsToggleTriggersEnableNetworkStats() async throws {
+    @Test("Stats toggle triggers enableSubscriberExtraStats")
+    func statsToggleTriggersEnableSubscriberExtraStats() async throws {
         let (sut, mocks) = makeSUT()
         sut.call = mocks.call
 
@@ -41,8 +44,9 @@ struct VonageSettingsPluginTests {
 
         await delay()
 
-        // Initial value is false, so disableNetworkStats is called once
-        #expect(mocks.call.disableNetworkStatsCallCount == 1)
+        // Initial value is false, so subscriber extras are disabled once.
+        #expect(mocks.call.disableSubscriberExtraStatsCallCount == 2)
+        #expect(mocks.call.enableNetworkStatsCallCount == 1)
 
         await mocks.repository.updatePreferences { prefs in
             prefs.senderStatsEnabled = true
@@ -50,12 +54,12 @@ struct VonageSettingsPluginTests {
 
         await delay()
 
-        #expect(mocks.call.enableNetworkStatsCallCount == 1)
-        #expect(mocks.call.disableNetworkStatsCallCount == 1)
+        #expect(mocks.call.enableSubscriberExtraStatsCallCount == 1)
+        #expect(mocks.call.disableSubscriberExtraStatsCallCount == 2)
     }
 
-    @Test("Stats toggle triggers disableNetworkStats")
-    func statsToggleTriggersDisableNetworkStats() async throws {
+    @Test("Stats toggle triggers disableSubscriberExtraStats")
+    func statsToggleTriggersDisableSubscriberExtraStats() async throws {
         let (sut, mocks) = makeSUT()
         sut.call = mocks.call
 
@@ -68,6 +72,9 @@ struct VonageSettingsPluginTests {
 
         await delay()
 
+        #expect(mocks.call.enableNetworkStatsCallCount == 1)
+        #expect(mocks.call.enableSubscriberExtraStatsCallCount == 2)
+
         // Then disable
         await mocks.repository.updatePreferences { prefs in
             prefs.senderStatsEnabled = false
@@ -75,7 +82,7 @@ struct VonageSettingsPluginTests {
 
         await delay()
 
-        #expect(mocks.call.disableNetworkStatsCallCount == 1)
+        #expect(mocks.call.disableSubscriberExtraStatsCallCount == 1)
     }
 
     // MARK: - Stats Forwarding Tests
@@ -121,7 +128,7 @@ struct VonageSettingsPluginTests {
 
         // Change a setting
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await delay()
@@ -151,6 +158,140 @@ struct VonageSettingsPluginTests {
         #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == initialCallCount)
     }
 
+    @Test("Initial preferences do not update the live publisher")
+    func initialPreferencesDoNotTriggerLiveUpdate() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Video bitrate preset updates the live publisher without recreation")
+    func videoBitratePresetTriggersOnlyLiveUpdate() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoBitratePreset = .bandwidthSaver
+        }
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.videoBitratePreset == .bwSaver)
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Custom video bitrate sends its maximum bitrate to the live publisher")
+    func customVideoBitrateSendsMaximumBitrate() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoBitratePreset = .custom
+            preferences.maxVideoBitrate = 1_500_000
+        }
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.videoBitratePreset == .customBitrate)
+        #expect(mocks.call.lastLiveSettings?.maxVideoBitrate == 1_500_000)
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Degradation preference updates the live publisher without recreation")
+    func degradationPreferenceTriggersOnlyLiveUpdate() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.degradationPreference = .balanced
+        }
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.degradationPreference == .balanced)
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Non-live publisher settings use recreation only")
+    func nonLiveSettingsTriggerOnlyPublisherRecreation() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoResolution = .high
+        }
+        await delay()
+
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Stats and overlay preferences do not update the publisher")
+    func statsAndOverlayDoNotUpdatePublisher() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.senderStatsEnabled = true
+            preferences.statsOverlayEnabled.toggle()
+        }
+        await delay()
+
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("Rapid live changes keep the latest settings")
+    func rapidLiveChangesKeepLatestSettings() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoBitratePreset = .bandwidthSaver
+        }
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoBitratePreset = .extraBandwidthSaver
+        }
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount >= 1)
+        #expect(mocks.call.lastLiveSettings?.videoBitratePreset == .extraBwSaver)
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+    }
+
+    @Test("callDidEnd stops live publisher updates")
+    func callDidEndStopsLivePublisherUpdates() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+        try await sut.callDidEnd()
+
+        await mocks.repository.updatePreferences { preferences in
+            preferences.videoBitratePreset = .bandwidthSaver
+        }
+        await delay()
+
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 0)
+    }
+
     // MARK: - Task Cancellation Tests
 
     @Test("Rapid settings changes cancel previous task")
@@ -164,15 +305,15 @@ struct VonageSettingsPluginTests {
 
         // Trigger multiple rapid changes
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 50_000
+            prefs.audioBitratePreference = .custom(50_000)
         }
 
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 70_000
+            prefs.audioBitratePreference = .custom(70_000)
         }
 
         await delay()
@@ -197,7 +338,7 @@ struct VonageSettingsPluginTests {
 
         // Now change something
         await mocks.repository.updatePreferences { prefs in
-            prefs.maxAudioBitrate = 60_000
+            prefs.audioBitratePreference = .custom(60_000)
         }
 
         await delay()

@@ -24,12 +24,11 @@ struct MeetingNoiseSuppressionButton: View {
 
     var body: some View {
         OngoingActivityControlImageButton(
-            isActive: false,
+            isActive: state.isEnabled,
             image: state.image,
             action: action)
     }
 }
-
 
 #if DEBUG
     #Preview("Disabled") {

@@ -5,10 +5,19 @@
 import Foundation
 import SwiftUI
 import Testing
+import VERACommonUI
 
 @testable import VERAMeetingRoom
 
-@Suite("BottomBar.calculateMaxExtraButtons Tests")
+#if os(macOS)
+    import AppKit
+    private typealias HostingController<Content: View> = NSHostingController<Content>
+#else
+    import UIKit
+    private typealias HostingController<Content: View> = UIHostingController<Content>
+#endif
+
+@Suite("BottomBar Tests")
 struct BottomBarCalculateMaxExtraButtonsTests {
 
     // MARK: - Helper
@@ -16,18 +25,343 @@ struct BottomBarCalculateMaxExtraButtonsTests {
     private func createBottomBar(
         allowMicrophoneControl: Bool = true,
         allowCameraControl: Bool = true,
-        showParticipantList: Bool = true
+        showParticipantList: Bool = true,
+        isParticipantsListPresented: Bool = false,
+        extraButtons: [BottomBarButton] = [],
+        presentationHandler: MeetingRoomPresentationHandler = .init()
     ) -> BottomBar {
-        BottomBar(
+        .init(
             isMicEnabled: true,
             isCameraEnabled: true,
+            isParticipantsListPresented: isParticipantsListPresented,
             participantsCount: 5,
             allowMicrophoneControl: allowMicrophoneControl,
             allowCameraControl: allowCameraControl,
             showParticipantList: showParticipantList,
             currentLayout: .activeSpeaker,
-            actions: .init()
+            actions: .init(),
+            presentationHandler: presentationHandler,
+            extraButtons: .constant(extraButtons)
         )
+    }
+
+    private func makeExtraButtons(count: Int) -> [BottomBarButton] {
+        (0..<count).map { index in
+            BottomBarButton(
+                id: "extra-button-\(index)",
+                label: "Extra \(index)",
+                image: Image(systemName: "square"),
+                action: {}
+            )
+        }
+    }
+
+    @Test("BottomBarButton stores shared inline and overflow presentation")
+    @MainActor
+    func bottomBarButtonStoresSharedPresentation() {
+        var didTap = false
+        let item = BottomBarActionItem(
+            id: "support-button",
+            label: "Support",
+            accessibilityIdentifier: "support-accessibility-id",
+            image: Image(systemName: "questionmark.circle"),
+            isActive: true,
+            action: {
+                didTap = true
+            }
+        )
+        let button = BottomBarButton(item)
+
+        #expect(button.id == "support-button")
+        #expect(button.label == "Support")
+        #expect(button.accessibilityIdentifier == "support-accessibility-id")
+        #expect(button.isActive)
+        #expect(button.accessory == nil)
+        #expect(button.overflowSelectionBehavior == .performActionBeforeDismiss)
+        let isGridItem: Bool
+        if case .gridItem = button.overflowPresentation {
+            isGridItem = true
+        } else {
+            isGridItem = false
+        }
+        #expect(isGridItem)
+
+        button.action()
+        #expect(didTap)
+    }
+
+    @Test("BottomBarButton can store dismiss before action behavior")
+    @MainActor
+    func bottomBarButtonCanStoreDismissBeforeActionBehavior() {
+        let button = BottomBarButton(
+            id: "settings-button",
+            label: "Settings",
+            image: Image(systemName: "gearshape"),
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: {}
+        )
+
+        #expect(button.overflowSelectionBehavior == .dismissBeforeAction)
+    }
+
+    @Test("BottomBarButton keeps nil presentation request by default")
+    @MainActor
+    func bottomBarButtonKeepsNilPresentationRequestByDefault() {
+        let button = BottomBarButton(
+            id: "plain-button",
+            label: "Plain",
+            image: Image(systemName: "square"),
+            action: {}
+        )
+
+        #expect(button.presentationRequest?() == nil)
+    }
+
+    @Test("BottomBar performs extra button action and presentation request")
+    @MainActor
+    func bottomBarPerformsExtraButtonActionAndPresentationRequest() {
+        var didPerformAction = false
+        var presentedRequest: MeetingRoomPresentationRequest?
+        let button = BottomBarButton(
+            id: "sheet-button",
+            label: "Sheet",
+            image: Image(systemName: "square"),
+            presentationRequest: {
+                MeetingRoomPresentationRequest(
+                    id: "sheet-request",
+                    style: .sheet,
+                    title: "Sheet"
+                )
+            },
+            action: {
+                didPerformAction = true
+            }
+        )
+        let bar = createBottomBar(
+            presentationHandler: MeetingRoomPresentationHandler(
+                present: { request in
+                    presentedRequest = request
+                }
+            )
+        )
+
+        bar.performExtraButton(button)
+
+        #expect(didPerformAction)
+        #expect(presentedRequest?.id == "sheet-request")
+        #expect(presentedRequest?.style == .sheet)
+    }
+
+    @Test("BottomBar performs extra button action without presentation request")
+    @MainActor
+    func bottomBarPerformsExtraButtonActionWithoutPresentationRequest() {
+        var didPerformAction = false
+        var presentationCount = 0
+        let button = BottomBarButton(
+            id: "plain-button",
+            label: "Plain",
+            image: Image(systemName: "square"),
+            presentationRequest: { nil },
+            action: {
+                didPerformAction = true
+            }
+        )
+        let bar = createBottomBar(
+            presentationHandler: MeetingRoomPresentationHandler(
+                present: { _ in
+                    presentationCount += 1
+                }
+            )
+        )
+
+        bar.performExtraButton(button)
+
+        #expect(didPerformAction)
+        #expect(presentationCount == 0)
+    }
+
+    @Test("BottomBarButton copies overflow selection behavior from presenter")
+    @MainActor
+    func bottomBarButtonCopiesOverflowSelectionBehaviorFromPresenter() {
+        let item = BottomBarActionItem(
+            id: "sheet-button",
+            label: "Sheet",
+            image: .init(systemName: "square"),
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: {}
+        )
+
+        let button = BottomBarButton(item)
+
+        #expect(button.overflowSelectionBehavior == .dismissBeforeAction)
+    }
+
+    @Test("BottomBarButton can override active presentation state")
+    @MainActor
+    func bottomBarButtonCanOverrideActivePresentationState() {
+        let item = BottomBarActionItem(
+            id: "sheet-button",
+            label: "Sheet",
+            image: .init(systemName: "square"),
+            isActive: false,
+            action: {}
+        )
+
+        let button = BottomBarButton(item, isActive: true)
+
+        #expect(button.isActive)
+    }
+
+    @Test("Extra button groups keep all buttons inline when they fit")
+    func extraButtonGroupsKeepAllButtonsInlineWhenTheyFit() {
+        let extraButtons = makeExtraButtons(count: 3)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let groups = bar.extraButtonGroups(availableWidth: 2000)
+
+        #expect(groups.inline.map(\.id) == extraButtons.map(\.id))
+        #expect(groups.overflow.isEmpty)
+    }
+
+    @Test("Extra button groups reserve one slot for More when overflow is needed")
+    func extraButtonGroupsReserveOneSlotForMoreWhenOverflowIsNeeded() {
+        let extraButtons = makeExtraButtons(count: 4)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let buttonWidth = BottomBarConstants.buttonWidth
+        let spacing = BottomBarConstants.buttonSpacing
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
+        let baseButtonsCount = 5
+        let baseButtonsWidth =
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
+        let widthForThreeExtraSlots = baseButtonsWidth + CGFloat(3) * (buttonWidth + spacing)
+
+        let groups = bar.extraButtonGroups(availableWidth: widthForThreeExtraSlots)
+
+        #expect(groups.inline.map(\.id) == ["extra-button-0", "extra-button-1"])
+        #expect(groups.overflow.map(\.id) == ["extra-button-2", "extra-button-3"])
+    }
+
+    @Test("Extra button groups move every extra button to overflow when no extra slot fits")
+    func extraButtonGroupsMoveEveryExtraButtonToOverflowWhenNoExtraSlotFits() {
+        let extraButtons = makeExtraButtons(count: 3)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        let groups = bar.extraButtonGroups(availableWidth: 10)
+
+        #expect(groups.inline.isEmpty)
+        #expect(groups.overflow.map(\.id) == extraButtons.map(\.id))
+    }
+
+    @Test("Overflow sheet excludes header content buttons from grid")
+    func overflowSheetExcludesHeaderContentButtonsFromGrid() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let gridButton = BottomBarButton(
+            id: "settings-button",
+            label: "Settings",
+            image: Image(systemName: "gearshape"),
+            action: {}
+        )
+        let sheet = BottomBarOverflowSheet(buttons: [headerButton, gridButton], onSelect: { _ in })
+
+        #expect(sheet.headerItems.map(\.id) == ["reactions-button"])
+        #expect(sheet.gridButtons.map(\.id) == ["settings-button"])
+    }
+
+    @Test("Overflow sheet keeps grid button order after removing headers")
+    func overflowSheetKeepsGridButtonOrderAfterRemovingHeaders() {
+        let buttons = [
+            BottomBarButton(
+                id: "reactions-button",
+                label: "Reactions",
+                image: Image(systemName: "face.smiling"),
+                overflowPresentation: .headerContent { AnyView(Text("Emoji header")) },
+                action: {}
+            ),
+            BottomBarButton(id: "chat-button", label: "Chat", image: Image(systemName: "message"), action: {}),
+            BottomBarButton(
+                id: "settings-button", label: "Settings", image: Image(systemName: "gearshape"), action: {}),
+            BottomBarButton(id: "feedback-button", label: "Feedback", image: Image(systemName: "flag"), action: {}),
+        ]
+        let sheet = BottomBarOverflowSheet(buttons: buttons, onSelect: { _ in })
+
+        #expect(sheet.gridButtons.map(\.id) == ["chat-button", "settings-button", "feedback-button"])
+    }
+
+    @Test("Overflow sheet selection forwards selected button")
+    func overflowSheetSelectionForwardsSelectedButton() {
+        let button = BottomBarButton(
+            id: "archive-button",
+            label: "Start Recording",
+            image: Image(systemName: "record.circle"),
+            action: {}
+        )
+        var selectedButtonId: String?
+        let sheet = BottomBarOverflowSheet(buttons: [button]) { selectedButton in
+            selectedButtonId = selectedButton.id
+        }
+
+        sheet.select(button)
+
+        #expect(selectedButtonId == "archive-button")
+    }
+
+    @Test("Overflow header content can be rendered")
+    func overflowHeaderContentCanBeRendered() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let sheet = BottomBarOverflowSheet(buttons: [headerButton], onSelect: { _ in })
+
+        let header = sheet.headerItems.first
+
+        #expect(header?.id == "reactions-button")
+        _ = header?.content()
+    }
+
+    @Test("Overflow sheet renders header and grid content")
+    @MainActor
+    func overflowSheetRendersHeaderAndGridContent() {
+        let headerButton = BottomBarButton(
+            id: "reactions-button",
+            label: "Reactions",
+            image: Image(systemName: "face.smiling"),
+            overflowPresentation: .headerContent {
+                AnyView(Text("Emoji header"))
+            },
+            action: {}
+        )
+        let gridButton = BottomBarButton(
+            id: "chat-button",
+            label: "Chat",
+            image: Image(systemName: "message"),
+            action: {}
+        )
+
+        host(BottomBarOverflowSheet(buttons: [headerButton, gridButton], onSelect: { _ in }))
+    }
+
+    @Test("BottomBar renders base buttons and overflow trigger")
+    @MainActor
+    func bottomBarRendersBaseButtonsAndOverflowTrigger() {
+        let extraButtons = makeExtraButtons(count: 4)
+        let bar = createBottomBar(extraButtons: extraButtons)
+
+        host(bar)
     }
 
     // MARK: - All Features Enabled
@@ -38,12 +372,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth  // 50
         let spacing = BottomBarConstants.buttonSpacing  // 8
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
 
         // All features enabled: 5 base buttons (Mic + Camera + Layout + Participants + EndCall)
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let result = bar.calculateMaxExtraButtons(availableWidth: baseButtonsWidth)
         #expect(result == 0)
@@ -55,12 +389,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth  // 50
         let spacing = BottomBarConstants.buttonSpacing  // 8
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2  // 16
 
         // All features enabled: 5 base buttons
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // Add space for exactly one extra button
         let widthForOneExtra = baseButtonsWidth + buttonWidth + spacing
@@ -75,12 +409,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // All features enabled: 5 base buttons
         let baseButtonsCount = 5
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // Add space for 5 extra buttons
         let widthForFiveExtras = baseButtonsWidth + CGFloat(5) * (buttonWidth + spacing)
@@ -117,12 +451,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // Only 2 base buttons: Layout + EndCall
         let baseButtonsCount = 2
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         // With minimal features, same width should fit more extra buttons
         let widthForThreeExtras = baseButtonsWidth + CGFloat(3) * (buttonWidth + spacing)
@@ -143,12 +477,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Mic + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 
@@ -166,12 +500,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Camera + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 
@@ -189,12 +523,12 @@ struct BottomBarCalculateMaxExtraButtonsTests {
 
         let buttonWidth = BottomBarConstants.buttonWidth
         let spacing = BottomBarConstants.buttonSpacing
-        let padding = BottomBarConstants.containerPaddingHorizontal * 2
+        let horizontalPadding = BottomBarConstants.containerPaddingHorizontal * 2
 
         // 3 base buttons: Participants + Layout + EndCall
         let baseButtonsCount = 3
         let baseButtonsWidth =
-            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + padding * 2
+            CGFloat(baseButtonsCount) * buttonWidth + CGFloat(baseButtonsCount - 1) * spacing + horizontalPadding
 
         let widthForTwoExtras = baseButtonsWidth + CGFloat(2) * (buttonWidth + spacing)
 
@@ -263,5 +597,18 @@ struct BottomBarCalculateMaxExtraButtonsTests {
         let minimalResult = minimalFeaturesBar.calculateMaxExtraButtons(availableWidth: testWidth)
 
         #expect(minimalResult >= fullResult)
+    }
+
+    @discardableResult
+    @MainActor
+    private func host<V: View>(_ view: V) -> HostingController<V> {
+        let controller = HostingController(rootView: view)
+        controller.view.frame = CGRect(x: 0, y: 0, width: 430, height: 360)
+        #if os(macOS)
+            controller.view.layoutSubtreeIfNeeded()
+        #else
+            controller.view.layoutIfNeeded()
+        #endif
+        return controller
     }
 }

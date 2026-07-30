@@ -30,15 +30,18 @@ public struct AppConfig {
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
+        public let allowAudioDiagnostics: Bool
 
         public init(
             allowAdvancedNoiseSuppression: Bool = true,
             allowAudioOnJoin: Bool = true,
-            allowMicrophoneControl: Bool = true
+            allowMicrophoneControl: Bool = true,
+            allowAudioDiagnostics: Bool = true
         ) {
             self.allowAdvancedNoiseSuppression = allowAdvancedNoiseSuppression
             self.allowAudioOnJoin = allowAudioOnJoin
             self.allowMicrophoneControl = allowMicrophoneControl
+            self.allowAudioDiagnostics = allowAudioDiagnostics
         }
     }
 
@@ -61,6 +64,8 @@ public struct AppConfig {
         public let allowChat: Bool
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
+        public let allowFeedback: Bool
+        public let allowPictureInPicture: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
@@ -72,6 +77,8 @@ public struct AppConfig {
             allowChat: Bool = true,
             allowDeviceSelection: Bool = true,
             allowEmojis: Bool = true,
+            allowFeedback: Bool = true,
+            allowPictureInPicture: Bool = true,
             allowScreenShare: Bool = true,
             defaultLayoutMode: MeetingRoomLayout = .activeSpeaker,
             showParticipantList: Bool = true,
@@ -82,6 +89,8 @@ public struct AppConfig {
             self.allowChat = allowChat
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
+            self.allowFeedback = allowFeedback
+            self.allowPictureInPicture = allowPictureInPicture
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList

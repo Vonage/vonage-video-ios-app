@@ -15,8 +15,8 @@ enum ParticipantVideoCardConstants {
     /// Background opacity for card fills
     static let backgroundOpacity: Double = 0.8
 
-    /// Padding around the avatar initials
-    static let avatarPadding: CGFloat = 24
+    /// Avatar height as a fraction of the card height for camera-off tiles.
+    static let avatarHeightFraction: CGFloat = 0.55
 
     /// Corner radius of the card
     static let cornerRadius: CGFloat = 8
@@ -53,15 +53,32 @@ enum ParticipantVideoCardConstants {
 
     /// Vertical padding of the name label
     static let nameLabelVerticalPadding: CGFloat = 4
+
+    /// Corner radius of the name label background
+    static let nameLabelCornerRadius: CGFloat = 8
+
+    /// Background opacity of the name label
+    static let nameLabelBackgroundOpacity: Double = 0.6
 }
 
 struct ParticipantVideoCard: View {
     @Environment(\.meetingRoomTheme) private var theme
     let participant: UIParticipant
     let activeSpeakerId: String?
-    var shouldFlipHorizontally: Bool { participant.isRemote && !participant.isScreenshare }
+    init(
+        participant: UIParticipant,
+        activeSpeakerId: String?
+    ) {
+        self.participant = participant
+        self.activeSpeakerId = activeSpeakerId
+    }
 
     var body: some View {
+        cardContent
+    }
+
+    @ViewBuilder
+    private var cardContent: some View {
         Group {
             if participant.isCameraEnabled {
                 ZStack {
@@ -91,6 +108,7 @@ struct ParticipantVideoCard: View {
                                         .clipped()
 
                                     ParticipantVideoCardOverlays(
+                                        participantID: participant.id,
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
@@ -98,15 +116,16 @@ struct ParticipantVideoCard: View {
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
-                                        onTogglePin: participant.onTogglePin
+                                        onTogglePin: participant.onTogglePin,
+                                        onForceMute: participant.onForceMute
                                     )
                                 } else {
                                     participant.view
-                                        .horizontallyFlipped(shouldFlipHorizontally)
                                         .aspectRatio(participant.aspectRatio, contentMode: .fit)
                                         .clipped()
 
                                     ParticipantVideoCardOverlays(
+                                        participantID: participant.id,
                                         isMicEnabled: participant.isMicEnabled,
                                         name: participant.name,
                                         isPinned: participant.isPinned,
@@ -114,7 +133,8 @@ struct ParticipantVideoCard: View {
                                         isRemote: participant.isRemote,
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
-                                        onTogglePin: participant.onTogglePin
+                                        onTogglePin: participant.onTogglePin,
+                                        onForceMute: participant.onForceMute
                                     )
                                 }
                             }
@@ -142,20 +162,24 @@ struct ParticipantVideoCard: View {
                         )
                         .overlay {
                             ZStack {
-                                Rectangle()
-                                    .fill(
-                                        theme.vGray4.opacity(
-                                            ParticipantVideoCardConstants.backgroundOpacity
-                                        )
-                                    )
-                                    .overlay(
-                                        AvatarInitials(state: .init(userName: participant.name))
-                                            .padding(ParticipantVideoCardConstants.avatarPadding)
-                                    )
-                                    .aspectRatio(participant.aspectRatio, contentMode: .fit)
-                                    .clipped()
+                                // The avatar is sized as a fixed fraction of the card, NOT via a
+                                // second background rectangle shaped by `participant.aspectRatio`:
+                                // that rectangle stacked a second translucent gray (shifting the
+                                // card's background depending on how much it covered) and made the
+                                // avatar size depend on stale video dimensions, so a participant who
+                                // joined camera-off looked different from one who turned their
+                                // camera off mid-call.
+                                GeometryReader { geometry in
+                                    let diameter =
+                                        geometry.size.height
+                                        * ParticipantVideoCardConstants.avatarHeightFraction
+                                    AvatarInitials(state: .init(userName: participant.name))
+                                        .frame(width: diameter, height: diameter)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
 
                                 ParticipantVideoCardOverlays(
+                                    participantID: participant.id,
                                     isMicEnabled: participant.isMicEnabled,
                                     name: participant.name,
                                     isPinned: participant.isPinned,
@@ -163,7 +187,8 @@ struct ParticipantVideoCard: View {
                                     isRemote: participant.isRemote,
                                     audioLevel: participant.audioLevel,
                                     isLocal: !participant.isRemote,
-                                    onTogglePin: participant.onTogglePin
+                                    onTogglePin: participant.onTogglePin,
+                                    onForceMute: participant.onForceMute
                                 )
                             }
                         }
@@ -179,11 +204,14 @@ struct ParticipantVideoCard: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius))
         .shadow(radius: ParticipantVideoCardConstants.shadowRadius)
+        .accessibilityAnchor(MeetingRoomAccessibilityID.participantCard(participant.id))
+        .animation(.easeInOut(duration: 0.25), value: participant.aspectRatio)
     }
 }
 
 struct ParticipantVideoCardOverlays: View {
 
+    let participantID: String
     let isMicEnabled: Bool
     let name: String
     let isPinned: Bool
@@ -192,6 +220,7 @@ struct ParticipantVideoCardOverlays: View {
     let audioLevel: Float
     let isLocal: Bool
     var onTogglePin: (() -> Void)?
+    var onForceMute: (() -> Void)?
 
     var body: some View {
         VStack {
@@ -212,11 +241,23 @@ struct ParticipantVideoCardOverlays: View {
                 }
                 Spacer()
                 if isLocal {
-                    AudioLevelIndicatorView(
-                        audioLevel: audioLevel,
-                        isMicEnabled: isMicEnabled)
+                    ZStack {
+                        AudioLevelIndicatorView(
+                            audioLevel: audioLevel,
+                            isMicEnabled: isMicEnabled)
+                    }
+                    .microphoneStateAccessibilityAnchor(
+                        participantID: participantID,
+                        isMicEnabled: isMicEnabled
+                    )
+                    .accessibilityElement(children: .contain)
                 } else {
-                    MicIndicator(isMicEnabled: isMicEnabled)
+                    MicIndicator(
+                        participantID: participantID,
+                        isMicEnabled: isMicEnabled,
+                        participantName: name,
+                        onForceMute: onForceMute
+                    )
                 }
             }
             Spacer()
@@ -254,13 +295,22 @@ struct ParticipantVideoCardOverlays: View {
 }
 
 struct NameLabel: View {
+    @Environment(\.meetingRoomTheme) private var theme
     var name: String
+
     var body: some View {
         Text(name)
             .font(.caption)
-            .foregroundColor(.white)
+            .foregroundColor(theme.onAccent)
             .padding(.horizontal, ParticipantVideoCardConstants.nameLabelHorizontalPadding)
             .padding(.vertical, ParticipantVideoCardConstants.nameLabelVerticalPadding)
+            .background(
+                theme.accent.opacity(ParticipantVideoCardConstants.nameLabelBackgroundOpacity),
+                in: RoundedRectangle(
+                    cornerRadius: ParticipantVideoCardConstants.nameLabelCornerRadius,
+                    style: .continuous
+                )
+            )
             .lineLimit(1)
             .truncationMode(.tail)
     }
@@ -268,9 +318,47 @@ struct NameLabel: View {
 
 struct MicIndicator: View {
     @Environment(\.meetingRoomTheme) private var theme
+    var participantID: String
     var isMicEnabled: Bool
+    var participantName: String
+    var onForceMute: (() -> Void)?
+    var forceMuteAccessibilityIdentifier: String?
+
+    var isForceMuteEnabled: Bool {
+        isMicEnabled && onForceMute != nil
+    }
+
+    var forceMuteAccessibilityLabel: String {
+        String(localized: "Mute \(participantName)")
+    }
 
     var body: some View {
+        ZStack {
+            if isForceMuteEnabled {
+                Button {
+                    onForceMute?()
+                } label: {
+                    indicator
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(forceMuteAccessibilityLabel)
+                .accessibilityIdentifier(
+                    forceMuteAccessibilityIdentifier
+                        ?? MeetingRoomAccessibilityID.participantForceMuteButton(participantID)
+                )
+            } else {
+                indicator
+            }
+
+        }
+        .microphoneStateAccessibilityAnchor(
+            participantID: participantID,
+            isMicEnabled: isMicEnabled
+        )
+        .accessibilityElement(children: .contain)
+    }
+
+    private var indicator: some View {
         MicIndicatorImage(isMicEnabled: isMicEnabled)
             .foregroundColor(isMicEnabled ? .white : theme.error)
             .padding(ParticipantVideoCardConstants.indicatorPadding)
@@ -279,6 +367,24 @@ struct MicIndicator: View {
             .frame(
                 width: ParticipantVideoCardConstants.indicatorSize,
                 height: ParticipantVideoCardConstants.indicatorSize)
+    }
+}
+
+extension View {
+    fileprivate func microphoneStateAccessibilityAnchor(
+        participantID: String,
+        isMicEnabled: Bool
+    ) -> some View {
+        accessibilityAnchor(
+            isMicEnabled
+                ? MeetingRoomAccessibilityID.participantMicEnabled(participantID)
+                : MeetingRoomAccessibilityID.participantMicDisabled(participantID),
+            label: isMicEnabled ? "Microphone enabled" : "Microphone disabled",
+            size: CGSize(
+                width: ParticipantVideoCardConstants.indicatorSize,
+                height: ParticipantVideoCardConstants.indicatorSize
+            )
+        )
     }
 }
 

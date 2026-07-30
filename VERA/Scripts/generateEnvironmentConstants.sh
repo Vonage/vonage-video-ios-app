@@ -91,6 +91,8 @@ cat > "$ENTITLEMENTS_FILE" << EOF
     <array>
         <string>group.com.vonage.VERA</string>
     </array>
+    <key>com.apple.developer.avfoundation.multitasking-camera-access</key>
+    <true/>
 </dict>
 </plist>
 EOF

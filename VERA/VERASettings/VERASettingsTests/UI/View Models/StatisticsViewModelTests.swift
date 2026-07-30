@@ -79,7 +79,7 @@ struct StatisticsViewModelTests {
         // Enable stats
         var prefs = await repository.getPreferences()
         prefs.senderStatsEnabled = true
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         // Wait for update
         await delay()
@@ -88,7 +88,7 @@ struct StatisticsViewModelTests {
 
         // Disable stats
         prefs.senderStatsEnabled = false
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         // Wait for update
         await delay()
@@ -203,6 +203,43 @@ struct StatisticsViewModelTests {
         _ = viewModel
     }
 
+    @Test("Expansion state is preserved across stats updates")
+    func preservesExpansionStateAcrossStatsUpdates() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatisticsViewModel(
+            statsDataSource: dataSource,
+            settingsRepository: repository
+        )
+        viewModel.setup()
+
+        await delay()
+
+        viewModel.isPublisherExpanded = true
+        viewModel.expandedSubscribers.insert("conn-1")
+
+        let updatedStats = NetworkMediaStats(
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "conn-1",
+                    subscriberName: "Ada",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 100,
+                        packetsLost: 2,
+                        bytesReceived: 1_000,
+                        timestamp: Date().timeIntervalSince1970
+                    )
+                )
+            ]
+        )
+        await dataSource.updateStats(updatedStats)
+
+        await delay()
+
+        #expect(viewModel.isPublisherExpanded == true)
+        #expect(viewModel.expandedSubscribers.contains("conn-1"))
+    }
+
     // MARK: - Combined Updates Tests
 
     @Test("ViewModel handles simultaneous stats and settings updates")
@@ -224,16 +261,22 @@ struct StatisticsViewModelTests {
         // Update both simultaneously
         var prefs = await repository.getPreferences()
         prefs.senderStatsEnabled = true
-        await repository.save(prefs)
+        try await repository.save(prefs)
 
         let mockStats = NetworkMediaStats(
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 3000,
-                packetsLost: 30,
-                bytesReceived: 150_000,
-                timestamp: Date().timeIntervalSince1970,
-                estimatedBandwidth: 512_000
-            )
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "test-1",
+                    subscriberName: "Test",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 3000,
+                        packetsLost: 30,
+                        bytesReceived: 150_000,
+                        timestamp: Date().timeIntervalSince1970,
+                        estimatedBandwidth: 512_000
+                    )
+                )
+            ]
         )
         await dataSource.updateStats(mockStats)
 
@@ -241,8 +284,8 @@ struct StatisticsViewModelTests {
         await delay()
 
         #expect(viewModel.isStatsEnabled == true)
-        #expect(viewModel.stats.receivedAudio?.packetsReceived == 3000)
-        #expect(viewModel.stats.receivedAudio?.estimatedBandwidth == 512_000)
+        #expect(viewModel.stats.subscriberStats.first?.receivedAudio?.packetsReceived == 3000)
+        #expect(viewModel.stats.subscriberStats.first?.receivedAudio?.estimatedBandwidth == 512_000)
 
         // Keep objects alive
         _ = repository
@@ -274,8 +317,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats == NetworkMediaStats.empty)
         #expect(viewModel.stats.sentAudio == nil)
         #expect(viewModel.stats.sentVideo == nil)
-        #expect(viewModel.stats.receivedAudio == nil)
-        #expect(viewModel.stats.receivedVideo == nil)
+        #expect(viewModel.stats.subscriberStats.isEmpty)
 
         // Keep objects alive
         _ = repository
@@ -313,8 +355,7 @@ struct StatisticsViewModelTests {
         #expect(viewModel.stats.sentAudio != nil)
         #expect(viewModel.stats.sentAudio?.packetsSent == 500)
         #expect(viewModel.stats.sentVideo == nil)
-        #expect(viewModel.stats.receivedAudio == nil)
-        #expect(viewModel.stats.receivedVideo == nil)
+        #expect(viewModel.stats.subscriberStats.isEmpty)
 
         // Keep objects alive
         _ = repository

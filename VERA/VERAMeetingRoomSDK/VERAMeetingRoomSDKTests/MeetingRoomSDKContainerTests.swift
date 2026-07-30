@@ -2,10 +2,14 @@
 //  Created by Vonage on 16/4/26.
 //
 
+import Combine
 import Foundation
 import Testing
+import VERAArchiving
+import VERACore
 import VERADomain
 import VERAMeetingRoom
+import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
@@ -116,17 +120,211 @@ struct MeetingRoomSDKContainerTests {
         #expect(container.configuration == config)
     }
 
+    @Test("Container uses injected HTTP client factory")
+    func containerUsesInjectedHTTPClientFactory() {
+        var didReceiveInterceptor = false
+        let factory = HTTPClientFactorySpy { context in
+            didReceiveInterceptor = context.interceptor is OSLogHTTPClientInterceptor
+            return HTTPClientStub()
+        }
+
+        let container = makeContainer(
+            enabledFeatures: [],
+            httpClientFactory: factory)
+
+        #expect(container.httpClient is HTTPClientStub)
+        #expect(didReceiveInterceptor)
+    }
+
+    @Test("Container uses injected session repository factory")
+    func containerUsesInjectedSessionRepositoryFactory() {
+        var didReceivePublisherSettings = false
+        var didReceivePluginRegistry = false
+        let factory = SessionRepositoryFactorySpy { context in
+            didReceivePublisherSettings = context.publisherSettings == .init()
+            didReceivePluginRegistry = !context.pluginRegistry.plugins.isEmpty
+            return SessionRepositoryStub()
+        }
+
+        let container = makeContainer(
+            enabledFeatures: [.chat],
+            sessionRepositoryFactory: factory)
+
+        #expect(container.sessionRepository is SessionRepositoryStub)
+        #expect(didReceivePublisherSettings)
+        #expect(didReceivePluginRegistry)
+    }
+
+    @Test("Container uses injected archiving data source factory")
+    func containerUsesInjectedArchivingDataSourceFactory() {
+        var didReceiveArchivingStatusDataSource = false
+        let factory = ArchivingDataSourceFactorySpy { context in
+            didReceiveArchivingStatusDataSource =
+                context.archivingStatusDataSource is DefaultArchivingStatusDataSource
+            return ArchivingDataSourceStub()
+        }
+
+        let container = makeContainer(
+            enabledFeatures: [.archiving],
+            archivingDataSourceFactory: factory)
+
+        #expect(container.archivingDataSource is ArchivingDataSourceStub)
+        #expect(didReceiveArchivingStatusDataSource)
+    }
+
     // MARK: - Helpers
 
     private func makeContainer(
-        enabledFeatures: Set<MeetingRoomFeature>
+        enabledFeatures: Set<MeetingRoomFeature>,
+        httpClientFactory: any MeetingRoomHTTPClientFactory =
+            DefaultMeetingRoomHTTPClientFactory(),
+        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
+            DefaultMeetingRoomSessionRepositoryFactory(),
+        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
+            DefaultMeetingRoomArchivingDataSourceFactory()
     ) -> MeetingRoomSDKContainer {
         MeetingRoomSDKContainer(
             baseURL: Self.testBaseURL,
             enabledFeatures: enabledFeatures,
             configuration: MeetingRoomConfiguration(),
             appGroupIdentifier: nil,
-            broadcastExtensionBundleId: nil
+            broadcastExtensionBundleId: nil,
+            httpClientFactory: httpClientFactory,
+            sessionRepositoryFactory: sessionRepositoryFactory,
+            archivingDataSourceFactory: archivingDataSourceFactory
         )
+    }
+}
+
+private final class HTTPClientStub: HTTPClient {
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
+        Data()
+    }
+
+    func get(_ url: URL) async throws -> Data {
+        Data()
+    }
+}
+
+private final class HTTPClientFactorySpy: MeetingRoomHTTPClientFactory {
+    private let client: (HTTPClientContext) -> any HTTPClient
+
+    init(client: @escaping (HTTPClientContext) -> any HTTPClient) {
+        self.client = client
+    }
+
+    func callAsFunction(_ context: HTTPClientContext) -> any HTTPClient {
+        client(context)
+    }
+}
+
+private final class SessionRepositoryFactorySpy: MeetingRoomSessionRepositoryFactory {
+    private let repository: (MeetingRoomSessionRepositoryFactoryContext) -> any SessionRepository
+
+    init(
+        repository:
+            @escaping (
+                MeetingRoomSessionRepositoryFactoryContext
+            ) -> any SessionRepository
+    ) {
+        self.repository = repository
+    }
+
+    func callAsFunction(
+        _ context: MeetingRoomSessionRepositoryFactoryContext
+    ) -> any SessionRepository {
+        repository(context)
+    }
+}
+
+private final class ArchivingDataSourceFactorySpy:
+    MeetingRoomArchivingDataSourceFactory
+{
+    private let dataSource:
+        (
+            MeetingRoomArchivingDataSourceFactoryContext
+        ) -> any ArchivingDataSource
+
+    init(
+        dataSource:
+            @escaping (
+                MeetingRoomArchivingDataSourceFactoryContext
+            ) -> any ArchivingDataSource
+    ) {
+        self.dataSource = dataSource
+    }
+
+    func callAsFunction(
+        _ context: MeetingRoomArchivingDataSourceFactoryContext
+    ) -> any ArchivingDataSource {
+        dataSource(context)
+    }
+}
+
+private final class SessionRepositoryStub: SessionRepository {
+    var currentCall: (any CallFacade)?
+
+    func createSession(_ credentials: RoomCredentials) async throws -> any CallFacade {
+        let call = CallFacadeStub()
+        currentCall = call
+        return call
+    }
+
+    func clearSession() {
+        currentCall = nil
+    }
+}
+
+private final class CallFacadeStub: CallFacade {
+    let publisherAudioLevelPublisher: AnyPublisher<Float, Never> = Just(0.0).eraseToAnyPublisher()
+
+    var participantsPublisher = Just(ParticipantsState.empty).eraseToAnyPublisher()
+    var eventsPublisher = Just(SessionEvent.idle).eraseToAnyPublisher()
+    var statePublisher = Just(SessionState(isPublishingAudio: true, isPublishingVideo: true)).eraseToAnyPublisher()
+    var callState = Just(CallState.idle).eraseToAnyPublisher()
+    var archivingState = Just(ArchivingState.idle).eraseToAnyPublisher()
+    var captionsPublisher = Just([CaptionItem]()).eraseToAnyPublisher()
+    var networkStatsPublisher = Just(NetworkMediaStats.empty).eraseToAnyPublisher()
+
+    var isMuted = false
+    var isOnHold = false
+    var areCaptionsEnabled = false
+
+    func connect() {}
+    func disconnect() async throws {}
+    func toggleLocalVideo() {}
+    func toggleLocalCamera() {}
+    func toggleLocalAudio() {}
+    func muteLocalMedia(_ isMuted: Bool) {
+        self.isMuted = isMuted
+    }
+    func setOnHold(_ isOnHold: Bool) {
+        self.isOnHold = isOnHold
+    }
+    func enableCaptions() async {
+        areCaptionsEnabled = true
+    }
+    func disableCaptions() async {
+        areCaptionsEnabled = false
+    }
+    func enableNetworkStats() {}
+    func disableNetworkStats() {}
+    func enableSubscriberExtraStats() {}
+    func disableSubscriberExtraStats() {}
+    func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {}
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
+}
+
+private final class ArchivingDataSourceStub: ArchivingDataSource {
+    func startArchiving(
+        _ request: StartArchivingDataSourceRequest
+    ) async throws -> StartArchivingDataSourceResponse {
+        StartArchivingDataSourceResponse(archiveId: "archive-id")
+    }
+
+    func stopArchiving(
+        _ request: StopArchivingDataSourceRequest
+    ) async throws -> StopArchivingDataSourceResponse {
+        StopArchivingDataSourceResponse(archiveId: request.archiveID)
     }
 }

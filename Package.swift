@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-            .upToNextMinor(from: "2.33.0")
+            .upToNextMinor(from: "2.34.1")
         ),
         .package(
             url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
@@ -121,6 +121,15 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .target(
+            name: "VERAFeedback",
+            dependencies: [
+                "VERACommonUI",
+                "VERADomain",
+            ],
+            path: "VERA/VERAFeedback/VERAFeedback",
+            resources: [.process("Resources")]
+        ),  
+        .target(
             name: "VERAReactions",
             dependencies: ["VERACommonUI"],
             path: "VERA/VERAReactions/VERAReactions",
@@ -152,6 +161,15 @@ let package = Package(
                 ),
             ],
             path: "VERA/VERAAudioEffects/VERAAudioEffects",
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "VERAAudioDiagnostics",
+            dependencies: [
+                "VERADomain",
+                "VERACommonUI",
+            ],
+            path: "VERA/VERAAudioDiagnostics/VERAAudioDiagnostics",
             resources: [.process("Resources")]
         ),
 
@@ -240,6 +258,8 @@ let package = Package(
                 "VERAScreenShare",
                 "VERAVonageScreenSharePlugin",
                 "VERAAudioEffects",
+                "VERAAudioDiagnostics",
+                "VERAFeedback",
                 .product(
                     name: "VonageClientSDKVideoTransformers",
                     package: "vonage-client-sdk-video-transformers"

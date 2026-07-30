@@ -21,7 +21,11 @@ public final class WaitingRoomViewModel: ObservableObject {
 
     @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
     @Published public var userName: String = ""
+    @Published public var toolbarButtons: [ViewHolder] = []
     @Published public var extraTrailingButtons: [ViewHolder] = []
+    @Published public var audioOutputTestButton: ViewHolder?
+
+    public var onPublisherReady: (() -> Void)?
 
     public let roomName: RoomName
     weak var publisher: VERAPublisher?
@@ -58,7 +62,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase,
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase,
         userRepository: UserRepository,
-        waitingRoomNavigation: WaitingRoomDestination
+        waitingRoomNavigation: WaitingRoomDestination,
     ) {
         self.roomName = roomName
         self.cameraPreviewProviderRepository = cameraPreviewProviderRepository
@@ -77,6 +81,7 @@ public final class WaitingRoomViewModel: ObservableObject {
         initialised = true
 
         observeCameraDevices()
+        observeCameraPreviewReset()
 
         loadUsername()
 
@@ -154,6 +159,15 @@ extension WaitingRoomViewModel {
         .store(in: &cancellables)
     }
 
+    fileprivate func observeCameraPreviewReset() {
+        cameraPreviewProviderRepository.didResetPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.startVideoPreview()
+            }
+            .store(in: &cancellables)
+    }
+
     fileprivate func loadUsername() {
         Task {
             do {
@@ -186,7 +200,10 @@ extension WaitingRoomViewModel {
                 allowCameraControl: AppConfig.videoSettings.allowCameraControl,
                 cameras: availableCameraDevices,
                 audioLevel: currentAudioLevel,
-                publisher: publisher))
+                allowAudioOutputTest: AppConfig.audioSettings.allowAudioDiagnostics,
+                publisher: publisher
+            )
+        )
     }
 
     fileprivate func makeUICameraDevice(
@@ -236,6 +253,7 @@ extension WaitingRoomViewModel {
 
             observeAudioLevel(publisher)
             updateUIState()
+            onPublisherReady?()
 
         } catch {
             self.waitingRoomNavigation.presentAlertError(with: error.localizedDescription)
@@ -262,6 +280,7 @@ extension WaitingRoomViewModel {
                 allowCameraControl: currentState.allowCameraControl,
                 cameras: currentState.cameras,
                 audioLevel: level,
+                allowAudioOutputTest: currentState.allowAudioOutputTest,
                 publisher: currentState.publisher))
     }
 

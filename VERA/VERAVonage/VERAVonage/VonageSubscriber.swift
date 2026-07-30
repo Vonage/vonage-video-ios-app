@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import OpenTok
 import SwiftUI
+import UIKit
 import VERACore
 import VERADomain
 
@@ -59,12 +60,12 @@ public class VonageSubscriber: NSObject {
     /// The stream’s display name if available.
     var name: String { otSubscriber.stream?.name ?? "" }
     /// The underlying Vonage stream.
-    private let stream: OTStream
+    let stream: OTStream
     /// The stream’s creation timestamp.
     var date: Date { stream.creationTime }
 
     /// True once the subscriber is connected; prevents premature subscription toggles.
-    @Atomic private var subscriberDidConnect = false
+    @Atomic var subscriberDidConnect = false
 
     /// Called when the subscriber encounters an error.
     var onError: (() -> Void)?
@@ -90,7 +91,7 @@ public class VonageSubscriber: NSObject {
 
     /// Tracks the number of views currently displaying this participant.
     /// Video is enabled when count > 0 and disabled when count reaches 0.
-    @Atomic private var visibilityCount: Int = 0
+    @Atomic var visibilityCount: Int = 0
 
     /// A delayed task that disables video subscription after visibility changes.
     /// Uses debouncing to handle rapid layout transitions gracefully.
@@ -160,12 +161,19 @@ public class VonageSubscriber: NSObject {
         updateParticipant()
     }
 
+    /// The view that renders this subscriber's video. The base uses OpenTok's native GL view;
+    /// `PictureInPictureVonageSubscriber` overrides it with a custom renderer that also feeds the
+    /// PiP window. Overridable so PiP-specific rendering needs no changes to `updateParticipant`.
+    func makeVideoView() -> UIView {
+        otSubscriber.view!
+    }
+
     /// Rebuilds the participant model from current stream state and wires visibility handlers.
     ///
     /// Visibility-driven subscription:
     /// - `onAppear`: Enables video subscription and schedules a delayed reinforcement
     /// - `onDisappear`: Disables video subscription
-    private func updateParticipant() {
+    func updateParticipant() {
         let name = stream.name ?? ""
         participant = Participant(
             id: id,
@@ -177,7 +185,7 @@ public class VonageSubscriber: NSObject {
             creationTime: date,
             isScreenshare: isScreenshare,
             audioLevel: 0.0,
-            view: AnyView(UIViewContainer(view: otSubscriber.view!)))
+            view: AnyView(UIViewContainer(view: makeVideoView())))
 
         participant.onAppear = { [weak self] in
             guard let self else { return }
@@ -205,7 +213,7 @@ public class VonageSubscriber: NSObject {
     /// - Parameter visible: `true` to subscribe to video; `false` to unsubscribe.
     ///
     /// - Important: No-ops until the subscriber is connected to avoid SDK limitations.
-    private func setActiveSubscription(_ visible: Bool) {
+    func setActiveSubscription(_ visible: Bool) {
         // Do not attempt to unsubscribe video before the subscriber did connect
         // it will result in an inability to modify the video subscription later
         guard subscriberDidConnect else { return }

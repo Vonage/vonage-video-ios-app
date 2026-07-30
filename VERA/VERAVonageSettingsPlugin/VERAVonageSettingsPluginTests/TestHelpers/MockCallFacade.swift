@@ -23,12 +23,16 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     let _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
 
-    let _captionsPublisher = CurrentValueSubject<[CaptionItem], Never>([])
+    let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
     let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
         _networkStatsPublisher.eraseToAnyPublisher()
+
+    let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
+        _publisherAudioLevel.eraseToAnyPublisher()
 
     var isMuted: Bool = false
     var isOnHold: Bool = false
@@ -36,8 +40,12 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     var enableNetworkStatsCallCount = 0
     var disableNetworkStatsCallCount = 0
+    var enableSubscriberExtraStatsCallCount = 0
+    var disableSubscriberExtraStatsCallCount = 0
     var applyPublisherAdvancedSettingsCallCount = 0
     var lastAppliedSettings: PublisherAdvancedSettings?
+    var updateLivePublisherAdvancedSettingsCallCount = 0
+    var lastLiveSettings: PublisherAdvancedSettings?
 
     func connect() {}
     func disconnect() async throws {}
@@ -57,8 +65,21 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
         disableNetworkStatsCallCount += 1
     }
 
+    func enableSubscriberExtraStats() {
+        enableSubscriberExtraStatsCallCount += 1
+    }
+
+    func disableSubscriberExtraStats() {
+        disableSubscriberExtraStatsCallCount += 1
+    }
+
     func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {
         applyPublisherAdvancedSettingsCallCount += 1
         lastAppliedSettings = settings
+    }
+
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {
+        updateLivePublisherAdvancedSettingsCallCount += 1
+        lastLiveSettings = settings
     }
 }

@@ -40,14 +40,14 @@ public final class ArchivesViewModel: ObservableObject {
                     }
             }
             .sink(
-                receiveCompletion: { completion in
+                receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
                         Task { @MainActor [weak self] in
                             self?.error = AlertItem.goodbyeError(error.localizedDescription)
                         }
                     }
                 },
-                receiveValue: { archives in
+                receiveValue: { [weak self] archives in
                     Task { @MainActor [weak self] in
                         self?.archives = archives
                     }

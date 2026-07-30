@@ -20,20 +20,32 @@ public struct VideoSendStats: Equatable {
     public let timestamp: Double
     /// The actual video codec negotiated by the SDK (e.g. "VP8", "H264", "VP9").
     ///
-    /// Populated from the WebRTC RTC stats report. `nil` until the first report arrives.
+    /// Extracted from the first video layer's codec field.
     public let videoCodec: String?
+    /// Current average video frame rate (fps).
+    public let videoFrameRate: Double
+    /// Timestamp (ms since epoch) from which cumulative totals started accumulating.
+    public let startTime: Double
+    /// Per-layer statistics for simulcast or SVC video encoding.
+    public let videoLayers: [VideoLayerStats]
 
     public init(
         packetsSent: Int64 = 0,
         packetsLost: Int64 = 0,
         bytesSent: Int64 = 0,
         timestamp: Double = 0,
-        videoCodec: String? = nil
+        videoCodec: String? = nil,
+        videoFrameRate: Double = 0,
+        startTime: Double = 0,
+        videoLayers: [VideoLayerStats] = []
     ) {
         self.packetsSent = packetsSent
         self.packetsLost = packetsLost
         self.bytesSent = bytesSent
         self.timestamp = timestamp
         self.videoCodec = videoCodec
+        self.videoFrameRate = videoFrameRate
+        self.startTime = startTime
+        self.videoLayers = videoLayers
     }
 }

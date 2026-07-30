@@ -16,7 +16,12 @@ import VERADomain
 /// ``VERAPublisher``.
 ///
 /// - SeeAlso: ``VonagePublisher``, ``VERAPublisher``, ``PublisherSettings``
-public final class VonagePublisherFactory: PublisherFactory {
+/// Creates local publishers that render through OpenTok's native view.
+///
+/// Subclass and override ``makePublisher(_:transformerFactory:initialDimensions:)`` to vary the
+/// publisher family; see ``PictureInPictureVonagePublisherFactory``. The composition root picks the
+/// concrete factory, so the PiP-vs-native choice is made once rather than branched on a flag.
+public class VonagePublisherFactory: PublisherFactory {
 
     /// Errors that can occur while creating an Vonage publisher.
     enum Error: Swift.Error {
@@ -65,6 +70,7 @@ public final class VonagePublisherFactory: PublisherFactory {
     private func makeOTPublisher(_ settings: PublisherSettings) throws -> OTPublisher {
         let publisherSettings = OTPublisherSettings()
         publisherSettings.name = settings.username
+        publisherSettings.allowAudioCaptureWhileMuted = true
         // All OTPublisherSettings properties must be set BEFORE OTPublisher is initialised.
         if let frameRate = settings.advancedSettings?.videoFrameRate?.otFrameRate {
             publisherSettings.cameraFrameRate = frameRate
@@ -113,11 +119,41 @@ public final class VonagePublisherFactory: PublisherFactory {
             otPublisher.degradationPreference = degradationPreference
         }
 
-        let publisher = VonagePublisher(
-            publisher: otPublisher,
-            transformerFactory: vonageTransformerFactory)
+        let initialDimensions =
+            settings.advancedSettings?.videoResolution?.dimensions
+            ?? VideoDimensions.initial
+
+        let publisher = makePublisher(
+            otPublisher,
+            transformerFactory: vonageTransformerFactory,
+            initialDimensions: initialDimensions)
         otPublisher.delegate = publisher
         return publisher
+    }
+
+    func makePublisher(
+        _ otPublisher: OTPublisher,
+        transformerFactory: VERATransformerFactory,
+        initialDimensions: CGSize
+    ) -> VonagePublisher {
+        VonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: transformerFactory,
+            initialDimensions: initialDimensions)
+    }
+}
+
+/// Creates local publishers that render through the PiP-capable custom renderer.
+public final class PictureInPictureVonagePublisherFactory: VonagePublisherFactory {
+    override func makePublisher(
+        _ otPublisher: OTPublisher,
+        transformerFactory: VERATransformerFactory,
+        initialDimensions: CGSize
+    ) -> VonagePublisher {
+        PictureInPictureVonagePublisher(
+            publisher: otPublisher,
+            transformerFactory: transformerFactory,
+            initialDimensions: initialDimensions)
     }
 }
 

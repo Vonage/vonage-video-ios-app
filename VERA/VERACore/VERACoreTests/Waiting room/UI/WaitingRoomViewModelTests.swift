@@ -58,6 +58,44 @@ struct WaitingRoomViewModelTests {
         }
     }
 
+    @Test("Given view model is loaded, when publisher is created, then onPublisherReady is called")
+    func loadUIShouldCallOnPublisherReady() async {
+        let sut = makeSUT()
+        var publisherReadyCalled = false
+        sut.onPublisherReady = {
+            publisherReadyCalled = true
+        }
+
+        sut.loadUI()
+        await delay()
+
+        #expect(publisherReadyCalled)
+    }
+
+    @Test("Given publisher is reset, when new publisher is created, then onPublisherReady is called again")
+    func onPublisherReadyCalledAfterReset() async {
+        let repo = makeMockCameraPreviewProviderRepository()
+        let sut = makeSUT(cameraPreviewProviderRepository: repo)
+        var callCount = 0
+        sut.onPublisherReady = {
+            callCount += 1
+        }
+
+        sut.loadUI()
+        await delay()
+
+        #expect(callCount == 1)
+
+        // resetPublisher nils out the publisher and emits didResetPublisher.
+        // The sink delivers on the next runloop (receive on main),
+        // so we set a new publisher after reset but before the delay.
+        repo.resetPublisher()
+        repo.publisher = .init()
+        await delay()
+
+        #expect(callCount == 2)
+    }
+
     @Test("Given initial state, when view model is loaded, then camera devices are available")
     func loadUIShouldLoadAvailableCameraDevices() async throws {
         let cameraDevicesRepository = makeMockCameraDevicesRepository()
@@ -225,6 +263,69 @@ struct WaitingRoomViewModelTests {
         #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
+    // MARK: - Toolbar Buttons Tests
+
+    @Test("Given initial state, toolbarButtons should be initialized as empty array")
+    func toolbarButtonsInitializesAsEmptyArray() {
+        let sut = makeSUT()
+
+        #expect(sut.toolbarButtons.isEmpty)
+    }
+
+    @Test("Given toolbarButtons is assigned, when accessed, then it should contain the assigned value")
+    func toolbarButtonsCanBeAssignedExternally() {
+        let sut = makeSUT()
+        let testButton = ViewHolder(id: "test-button") {
+            AnyView(Text("Test Button"))
+        }
+
+        sut.toolbarButtons = [testButton]
+
+        #expect(sut.toolbarButtons.count == 1)
+        #expect(sut.toolbarButtons.first?.id == "test-button")
+    }
+
+    @Test("Given toolbarButtons and extraTrailingButtons, when both are set, then they should be independent")
+    func toolbarButtonsAndExtraTrailingButtonsAreIndependent() {
+        let sut = makeSUT()
+        let toolbarButton = ViewHolder(id: "toolbar") {
+            AnyView(Text("Toolbar"))
+        }
+        let trailingButton = ViewHolder(id: "trailing") {
+            AnyView(Text("Trailing"))
+        }
+
+        sut.toolbarButtons = [toolbarButton]
+        sut.extraTrailingButtons = [trailingButton]
+
+        #expect(sut.toolbarButtons.count == 1)
+        #expect(sut.extraTrailingButtons.count == 1)
+        #expect(sut.toolbarButtons.first?.id == "toolbar")
+        #expect(sut.extraTrailingButtons.first?.id == "trailing")
+    }
+
+    // MARK: - Audio Output Test Button Tests
+
+    @Test("Given initial state, audioOutputTestButton should be nil")
+    func audioOutputTestButtonInitializesAsNil() {
+        let sut = makeSUT()
+
+        #expect(sut.audioOutputTestButton == nil)
+    }
+
+    @Test("Given audioOutputTestButton is assigned, when accessed, then it should contain the assigned value")
+    func audioOutputTestButtonCanBeAssignedExternally() {
+        let sut = makeSUT()
+        let testButton = ViewHolder(id: "audioTest") {
+            Text("Audio Test")
+        }
+
+        sut.audioOutputTestButton = testButton
+
+        #expect(sut.audioOutputTestButton != nil)
+        #expect(sut.audioOutputTestButton?.id == "audioTest")
+    }
+
     // MARK: SUT
 
     func makeSUT(
@@ -238,7 +339,7 @@ struct WaitingRoomViewModelTests {
             makePublisherAdvancedSettingsUseCase(),
         checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase =
             makeMockCheckCameraAuthorizationStatusUseCase(),
-        actionHandler: ActionHandler? = nil,
+        actionHandler: ActionHandler? = nil
     ) -> WaitingRoomViewModel {
         WaitingRoomViewModel(
             roomName: roomName,
@@ -254,6 +355,7 @@ struct WaitingRoomViewModelTests {
             checkCameraAuthorizationStatusUseCase: checkCameraAuthorizationStatusUseCase,
             checkMicrophoneAuthorizationStatusUseCase: checkMicrophoneAuthorizationStatusUseCase,
             userRepository: userRepository,
-            waitingRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName))
+            waitingRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName)
+        )
     }
 }

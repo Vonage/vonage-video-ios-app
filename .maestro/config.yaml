@@ -1,4 +1,5 @@
 appId: com.vonage.VERA
-
-  APP_ID: com.vonage.VERA
-  SIMULATOR_DEVICE: "iPhone 17"
+platform:
+  ios:
+    # When snapshotKeyHonorModalViews: false, Maestro does not limit the snapshot only to the modal.
+    snapshotKeyHonorModalViews: false

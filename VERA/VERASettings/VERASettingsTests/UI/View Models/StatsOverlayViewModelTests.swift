@@ -17,12 +17,47 @@ struct StatsOverlayViewModelTests {
 
     // MARK: - Initialization Tests
 
-    @Test("Initial state should be inactive with empty stats")
+    @Test("Initial state before setup should be inactive with empty stats")
     func testInitialState() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+
+        #expect(viewModel.isActive == false)
+        #expect(viewModel.statsText == "")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe default active overlay preference")
+    func testSetupObservesDefaultActiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
+
+        await delay()
+
+        #expect(viewModel.isActive == true)
+        #expect(viewModel.statsText == "Waiting for stats…")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    @Test("Setup should observe initial inactive overlay preference")
+    func testSetupObservesInitialInactiveOverlayPreference() async throws {
+        let repository = MockSettingsRepository(
+            initialPreferences: PublisherSettingsPreferences(statsOverlayEnabled: false)
+        )
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await delay()
 
         #expect(viewModel.isActive == false)
         #expect(viewModel.statsText == "")
@@ -44,16 +79,17 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
         // Wait for update
         await delay()
 
-        // Stats should NOT be processed when inactive (senderStatsEnabled = false)
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await delay()
+
+        // Stats should NOT be processed when inactive (overlay hidden)
         #expect(viewModel.isActive == false)
         #expect(viewModel.statsText == "")
 
@@ -64,15 +100,15 @@ struct StatsOverlayViewModelTests {
 
     // MARK: - Active State Tests
 
-    @Test("Enabling senderStatsEnabled should display stats")
-    func testEnablingSenderStatsEnabled() async throws {
+    @Test("Enabling overlay stats should display stats")
+    func testEnablingOverlayStats() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Enable stats FIRST
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Enable overlay FIRST
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()
@@ -82,9 +118,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -99,15 +133,15 @@ struct StatsOverlayViewModelTests {
         _ = viewModel
     }
 
-    @Test("Disabling senderStatsEnabled should hide stats")
-    func testDisablingSenderStatsEnabled() async throws {
+    @Test("Disabling overlay stats should hide stats")
+    func testDisablingOverlayStats() async throws {
         let repository = MockSettingsRepository()
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Enable stats FIRST
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Enable overlay FIRST
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()
@@ -117,9 +151,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -128,8 +160,8 @@ struct StatsOverlayViewModelTests {
 
         #expect(viewModel.statsText != "")
 
-        // Disable stats
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
+        // Disable overlay
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
 
         // Wait for update
         await delay()
@@ -151,15 +183,23 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
                 packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "test-1",
+                    subscriberName: "Test",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
+                    receivedVideo: VideoReceiveStats(
+                        packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                )
+            ]
         )
         await dataSource.updateStats(stats)
 
@@ -187,21 +227,22 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
             sentAudio: AudioSendStats(
-                packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
-            sentVideo: nil,
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: nil
+                packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus")
         )
         await dataSource.updateStats(stats)
 
-        // Wait for update
-        await delay()
+        // Wait for statsText to be populated — two async hops exist:
+        // 1. statsPublisher → .receive(on: DispatchQueue.main)
+        // 2. buildStatsText → Task { @MainActor in self.statsText = ... }
+        // Polling is more reliable than a fixed sleep on slow machines.
+        try await waitUntil {
+            viewModel.statsText.contains("opus")
+        }
 
-        #expect(viewModel.statsText != "")
         let text = viewModel.statsText
 
         // Should contain audio info
@@ -220,14 +261,11 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         let stats = NetworkMediaStats(
-            sentAudio: nil,
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: nil,
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -253,7 +291,7 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Don't send any stats
         await delay()
@@ -276,16 +314,14 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // First stats
         let stats1 = NetworkMediaStats(
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats1)
 
@@ -300,10 +336,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 200, packetsLost: 0, bytesSent: 10000, timestamp: 2000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 100, packetsLost: 0, bytesSent: 20000, timestamp: 2000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(
-                packetsReceived: 180, packetsLost: 2, bytesReceived: 9000, timestamp: 2000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 90, packetsLost: 4, bytesReceived: 19000, timestamp: 2000)
+                packetsSent: 100, packetsLost: 0, bytesSent: 20000, timestamp: 2000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats2)
 
@@ -328,7 +361,8 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Start inactive (senderStatsEnabled defaults to false)
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await delay()
         #expect(viewModel.isActive == false)
 
         // Send stats
@@ -336,17 +370,15 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
         // Wait for update
         await delay()
 
-        // Should remain empty when inactive
-        #expect(viewModel.statsText == "")
+        // Should not render live stats when inactive
+        #expect(!viewModel.statsText.contains("Audio Send"))
 
         _ = repository
         _ = dataSource
@@ -362,12 +394,12 @@ struct StatsOverlayViewModelTests {
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()
 
-        // Rapidly toggle via repository (end in enabled state)
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
-        await repository.updatePreferences { $0.senderStatsEnabled = false }
-        await repository.updatePreferences { $0.senderStatsEnabled = true }
+        // Rapidly toggle overlay via repository (end in enabled state)
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await repository.updatePreferences { $0.statsOverlayEnabled = false }
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
 
         // Wait for settings update
         await delay()
@@ -377,9 +409,7 @@ struct StatsOverlayViewModelTests {
             sentAudio: AudioSendStats(
                 packetsSent: 100, packetsLost: 0, bytesSent: 5000, timestamp: 1000, audioCodec: "opus"),
             sentVideo: VideoSendStats(
-                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8"),
-            receivedAudio: AudioReceiveStats(packetsReceived: 90, packetsLost: 1, bytesReceived: 4500, timestamp: 1000),
-            receivedVideo: VideoReceiveStats(packetsReceived: 45, packetsLost: 2, bytesReceived: 9500, timestamp: 1000)
+                packetsSent: 50, packetsLost: 0, bytesSent: 10000, timestamp: 1000, videoCodec: "VP8")
         )
         await dataSource.updateStats(stats)
 
@@ -389,6 +419,98 @@ struct StatsOverlayViewModelTests {
         // Final state should be active with stats
         #expect(viewModel.isActive == true)
         #expect(viewModel.statsText != "")
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    // MARK: - Ordering / bitrate regression tests
+
+    /// Regression: rapid consecutive stats emissions must preserve order so that
+    /// `statsText` reflects the most recent snapshot. A previous implementation
+    /// used a fire-and-forget `Task { @MainActor in await ... }` inside the sink,
+    /// which allowed an older snapshot to overwrite a newer one when the two
+    /// tasks resumed out of order from the repository actor.
+    @Test("StatsText reflects the latest snapshot after rapid stats updates")
+    func testStatsTextReflectsLatestOfRapidUpdates() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await repository.updatePreferences { $0.statsOverlayEnabled = true }
+        await delay()
+
+        // Fire several updates back-to-back without awaiting between them.
+        // The last one must win.
+        for iteration in 1...20 {
+            await dataSource.updateStats(
+                NetworkMediaStats(
+                    sentAudio: AudioSendStats(
+                        packetsSent: Int64(iteration),
+                        packetsLost: 0,
+                        bytesSent: 1000,
+                        timestamp: 1000,
+                        audioCodec: "opus"
+                    )
+                )
+            )
+        }
+
+        try await waitUntil {
+            viewModel.statsText.contains("\n") && viewModel.statsText.contains("opus")
+        }
+
+        let text = viewModel.statsText
+        // Latest snapshot had packetsSent == 20. Older snapshots (1...19) must not
+        // linger as the final value.
+        #expect(text.contains(" 20 "), "Expected latest packets '20' in text, got: \(text)")
+        #expect(!text.contains(" 19 "))
+        #expect(!text.contains(" 1 "))
+
+        _ = repository
+        _ = dataSource
+        _ = viewModel
+    }
+
+    /// Regression: a change to `audioBitratePreference` must be reflected in the
+    /// next stats emission without requiring any extra async hop. This exercises
+    /// the synchronous preference cache that replaced the previous
+    /// `await settingsRepository.getPreferences()` inside the stats sink.
+    @Test("StatsText picks up updated audioBitratePreference on next stats emission")
+    func testStatsTextReflectsUpdatedAudioBitratePreference() async throws {
+        let repository = MockSettingsRepository()
+        let dataSource = MockStatsDataSource()
+        let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
+        viewModel.setup()
+
+        await repository.updatePreferences {
+            $0.statsOverlayEnabled = true
+            $0.audioBitratePreference = .custom(128_000)
+        }
+        await delay()
+
+        let stats = NetworkMediaStats(
+            subscriberStats: [
+                SubscriberMediaStats(
+                    subscriberID: "sub-1",
+                    subscriberName: "Sub",
+                    receivedAudio: AudioReceiveStats(
+                        packetsReceived: 100,
+                        packetsLost: 1,
+                        bytesReceived: 5000,
+                        timestamp: 1000
+                    )
+                )
+            ]
+        )
+        await dataSource.updateStats(stats)
+
+        try await waitUntil { viewModel.statsText.contains("kbps") }
+
+        #expect(viewModel.statsText.contains("128.0 kbps"))
+        #expect(!viewModel.statsText.contains("Default"))
 
         _ = repository
         _ = dataSource

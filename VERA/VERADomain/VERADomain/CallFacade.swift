@@ -115,6 +115,15 @@ public protocol ParticipantsPublisherProvider: AnyObject {
     var participantsPublisher: AnyPublisher<ParticipantsState, Never> { get }
 }
 
+/// Provides a publisher that emits the local publisher's real-time audio level.
+///
+/// Implementers relay the raw audio level from the local ``VonagePublisher`` so that
+/// consumers can detect speaking-while-muted conditions without coupling to the SDK layer.
+public protocol PublisherAudioLevelProvider: AnyObject {
+    /// A publisher that emits the local publisher's audio level in the range [0.0, 1.0], never fails.
+    var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { get }
+}
+
 /// Provides a publisher that emits session-level events and errors.
 ///
 /// Use this publisher to react to errors and notable session events (e.g., signals).
@@ -236,6 +245,26 @@ public protocol PublisherSettingsApplicable: AnyObject {
     /// - Parameter settings: The desired publisher configuration.
     /// - Throws: If the unpublish, recreate, or re-publish step fails.
     func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws
+
+    /// Applies SDK-level publisher settings to the active publisher without recreating it.
+    ///
+    /// This is meant for live updates during an active call when the SDK allows the
+    /// existing publisher instance to be mutated in place.
+    ///
+    /// - Parameter settings: The subset of publisher configuration that can be updated live.
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async
+}
+
+/// Controls whether extra subscriber stats are actively requested from the SDK.
+///
+/// This is separated from generic network stats collection so the app can keep
+/// publisher stats available while toggling the richer subscriber-only metrics.
+public protocol SubscriberExtraStatsToggleable: AnyObject {
+    /// Starts requesting the extra subscriber-side stats that enrich the UI.
+    func enableSubscriberExtraStats()
+
+    /// Stops requesting the extra subscriber-side stats.
+    func disableSubscriberExtraStats()
 }
 
 /// A unified façade protocol for managing a video call.
@@ -263,7 +292,10 @@ public protocol CallFacade: AnyObject,
     CallArchivingPublisherProvider,
     CaptionsProvider,
     NetworkStatsProvider,
-    PublisherSettingsApplicable
+    PublisherSettingsApplicable,
+    SubscriberExtraStatsToggleable,
+    ParticipantForceMuting,
+    PublisherAudioLevelProvider
 {}
 
 /// Errors that can occur during call operations.

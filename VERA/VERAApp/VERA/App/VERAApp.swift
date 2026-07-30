@@ -8,6 +8,7 @@ import SwiftUI
 import VERACommonUI
 import VERACore
 import VERADomain
+import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
@@ -28,10 +29,25 @@ import VERAVonage
     import VERAAudioEffects
 #endif
 
+#if AUDIODIAGNOSTICS_ENABLED
+    import VERAAudioDiagnostics
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
-    let dependencyContainer = DependencyContainer()
+
+    #if DEBUG
+        @StateObject private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
+        @State private var isMeetingRoomCustomizationMenuPresented = false
+    #endif
+
+    var dependencyContainer: DependencyContainer = {
+        let httpClient = AppHTTPClientProvider(
+            isE2EEnabled: E2EConfiguration.isEnabled
+        )
+        return DependencyContainer(httpClient: httpClient())
+    }()
 
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
@@ -84,6 +100,11 @@ struct VERAApp: App {
                 handleUniversalLink(url)
             }
             .tint(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+            #if DEBUG
+                .sheet(isPresented: $isMeetingRoomCustomizationMenuPresented) {
+                    MeetingRoomCustomizationMenu(provider: meetingRoomCustomizationProvider)
+                }
+            #endif
         }
     }
 
@@ -98,7 +119,7 @@ struct VERAApp: App {
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
-        var backgroundBlurFactory: BackgroundBlurFactory { dependencyContainer.backgroundBlurFactory }
+        var backgroundEffectFactory: BackgroundEffectFactory { dependencyContainer.backgroundEffectFactory }
     #endif
 
     #if SETTINGS_ENABLED
@@ -137,11 +158,36 @@ struct VERAApp: App {
                 }
             }
             waitingRoomViewModel = result.viewModel
+            waitingRoomViewModel.toolbarButtons = makeWaitingRoomToolbarButtons()
             waitingRoomViewModel.extraTrailingButtons = makeWaitingRoomTrailingButtons()
+
+            #if AUDIODIAGNOSTICS_ENABLED
+                // Create audio output test button (same visual style as the Camera selector)
+                // to be displayed next to the Camera selector in the waiting room.
+                let audioButton = dependencyContainer.audioDiagnosticsFactory.makeWaitingRoomButton()
+                waitingRoomViewModel.audioOutputTestButton = ViewHolder(id: "audioOutputTest") {
+                    audioButton
+                }
+            #endif
+
+            #if BACKGROUND_EFFECTS_ENABLED
+                waitingRoomViewModel.onPublisherReady = { [weak navigationCoordinator] in
+                    navigationCoordinator?.videoEffectsViewModel?.reapplyCurrentEffect()
+                }
+            #endif
+
             navigationCoordinator.waitingRoomViewModel = waitingRoomViewModel
         }
 
         return waitingRoomFactory.make(viewModel: waitingRoomViewModel)
+            #if DEBUG
+                .toolbar(.visible, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        meetingRoomCustomizationMenuTrigger
+                    }
+                }
+            #endif
             .onDisappear {
                 // Required if the user goes back to the landing page
                 dependencyContainer.cameraPreviewProviderRepository.resetPublisher()
@@ -150,21 +196,39 @@ struct VERAApp: App {
             }
     }
 
+    /// Creates toolbar buttons for the top-right corner of the waiting room.
+    /// Currently includes only the Settings button with icon-only design.
+    /// These buttons use a plain icon design without circular backgrounds.
+    private func makeWaitingRoomToolbarButtons() -> [ViewHolder] {
+        var buttons: [ViewHolder] = []
+
+        #if SETTINGS_ENABLED
+            // Settings button with icon-only design (no circular background).
+            // Presents the in-app SettingsView as a sheet.
+            let settingsButton = settingsFactory.makeWaitingRoomButton()
+            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+        #endif
+
+        return buttons
+    }
+
+    /// Creates trailing buttons for the waiting room (Background Effects, Audio Effects).
+    /// These buttons use circular backgrounds and are positioned below the toolbar.
     private func makeWaitingRoomTrailingButtons() -> [ViewHolder] {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundBlurFactory.makeBlurButton(
+            let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
                 getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
             )
-            navigationCoordinator.backgroundBlurButtonViewModel = viewModel
+            navigationCoordinator.videoEffectsViewModel = viewModel
 
-            if let backgroundBlurButtonViewModel = navigationCoordinator.backgroundBlurButtonViewModel {
-                let view = backgroundBlurFactory.makeBlurButton(
-                    viewModel: backgroundBlurButtonViewModel
+            if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
+                let view = backgroundEffectFactory.makeEffectsButton(
+                    viewModel: videoEffectsViewModel
                 )
 
-                buttons.append(ViewHolder(id: "Blur", content: { view }))
+                buttons.append(ViewHolder(id: "Effects", content: { view }))
             }
         #endif
 
@@ -180,13 +244,22 @@ struct VERAApp: App {
             buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
         #endif
 
-        #if SETTINGS_ENABLED
-            let settingsButton = settingsFactory.makeWaitingRoomButton()
-            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
-        #endif
-
         return buttons
     }
+
+    #if DEBUG
+        private var meetingRoomCustomizationMenuTrigger: some View {
+            Button {
+                isMeetingRoomCustomizationMenuPresented = true
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("meeting-room-customization-menu-trigger")
+        }
+    #endif
 
     /// Creates the meeting room using the SDK builder, replacing ~200 lines
     /// of manual dependency wiring, plugin registration, and overlay composition.
@@ -202,7 +275,9 @@ struct VERAApp: App {
                 }
         }
 
-        let currentBlurLevel = navigationCoordinator.backgroundBlurButtonViewModel?.currentBlurLevel ?? .none
+        let currentVideoEffect =
+            navigationCoordinator.videoEffectsViewModel?.selectedEffect
+            ?? dependencyContainer.videoEffectRepository.load()
         let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
 
         let builder = MeetingRoomBuilder(
@@ -212,13 +287,14 @@ struct VERAApp: App {
             MeetingRoomConfiguration(
                 allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
-                showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList
+                showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList,
+                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture
             )
         )
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
         .publisherSettings(
             request.publisherSettings
-                .backgroundBlurLevel(currentBlurLevel)
+                .initialVideoEffect(currentVideoEffect)
                 .noiseSuppressionState(currentNoiseSuppressionState)
         )
         .appGroupIdentifier(EnvironmentConstants.veraAppGroupIdentifier)
@@ -234,6 +310,18 @@ struct VERAApp: App {
                 navigationCoordinator?.go(to: .waitingRoom(room))
             }
         }
+
+        builder.httpClientFactory(
+            SharedMeetingRoomHTTPClientFactory(httpClient: dependencyContainer.httpClient)
+        )
+        if E2EConfiguration.isEnabled {
+            builder
+                .sessionRepositoryFactory(E2EMeetingRoomSessionRepositoryFactory())
+                .archivingDataSourceFactory(E2EMeetingRoomArchivingDataSourceFactory())
+        }
+        #if DEBUG
+            builder.uiProvider(meetingRoomCustomizationProvider)
+        #endif
 
         let result = builder.build()
         navigationCoordinator.meetingRoomViewModel = result.viewModel

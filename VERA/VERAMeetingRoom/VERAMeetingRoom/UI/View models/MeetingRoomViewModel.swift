@@ -11,19 +11,39 @@ public enum MeetingRoomViewState: Equatable {
     case content(MeetingRoomState)
 }
 
-public struct MeetingRoomButtonsState {
-    public let archivingState: ArchivingState
-
-    public init(archivingState: ArchivingState) {
-        self.archivingState = archivingState
-    }
-}
-
 public struct MeetingRoomOverlayState {
     public let captions: [CaptionItem]
 
     public init(captions: [CaptionItem]) {
         self.captions = captions
+    }
+}
+
+public struct ForceMuteConfirmation: Identifiable, Equatable {
+    public let participantId: String
+    public let participantName: String
+
+    public init(participantId: String, participantName: String) {
+        self.participantId = participantId
+        self.participantName = participantName
+    }
+
+    public var id: String { participantId }
+
+    public var message: String {
+        let messageFormat = String(
+            localized: "Mute %@ for everyone in the call? Only %@ can unmute themselves.",
+            bundle: .module
+        )
+        return String(format: messageFormat, participantName, participantName)
+    }
+
+    public static var cancelButtonTitle: String {
+        String(localized: "Cancel", bundle: .module)
+    }
+
+    public static var muteButtonTitle: String {
+        String(localized: "Mute", bundle: .module)
     }
 }
 
@@ -42,6 +62,8 @@ public final class MeetingRoomViewModel: ObservableObject {
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    private let uiProvider: any MeetingRoomUIProvider
+    private var speakingWhileMutedDetector: SpeakingWhileMutedDetector?
 
     @MainActor @Published public var state: MeetingRoomViewState = .loading
     @MainActor @Published public var toast: ToastItem?
@@ -63,7 +85,6 @@ public final class MeetingRoomViewModel: ObservableObject {
     public let roomName: RoomName
     public let baseURL: URL
     private var initialised = false
-    private var getExternalButtons: (MeetingRoomButtonsState) -> [BottomBarButton]
 
     public init(
         roomName: RoomName,
@@ -76,7 +97,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         captionsStatusDataSource: CaptionsStatusDataSource,
         configuration: MeetingRoomConfiguration,
         meetingRoomNavigation: MeetingRoomDestination,
-        getExternalButtons: @escaping (MeetingRoomButtonsState) -> [BottomBarButton],
+        uiProvider: any MeetingRoomUIProvider,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
         pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
@@ -89,7 +110,7 @@ public final class MeetingRoomViewModel: ObservableObject {
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.configuration = configuration
         self.meetingRoomNavigation = meetingRoomNavigation
-        self.getExternalButtons = getExternalButtons
+        self.uiProvider = uiProvider
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
@@ -99,6 +120,14 @@ public final class MeetingRoomViewModel: ObservableObject {
     public func loadUI() async {
         guard !initialised else { return }
         initialised = true
+
+        uiProvider.updates
+            .sink { [weak self] in
+                Task { @MainActor [weak self] in
+                    self?.updateExtraButtons()
+                }
+            }
+            .store(in: &cancellables)
 
         do {
             await MediaPermissions.requestPermissionsIfNeeded()
@@ -148,6 +177,44 @@ public final class MeetingRoomViewModel: ObservableObject {
     public func onTogglePin(participantId: String) {
         Task {
             await pinnedParticipantsDataSource.togglePin(participantId: participantId)
+        }
+    }
+
+    public func onForceMute(participantId: String, participantName: String) {
+        guard currentCall != nil else { return }
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let confirmation = ForceMuteConfirmation(
+                participantId: participantId,
+                participantName: participantName
+            )
+            meetingRoomNavigation.presentForceMuteConfirmation(
+                message: confirmation.message,
+                confirmTitle: ForceMuteConfirmation.muteButtonTitle,
+                cancelTitle: ForceMuteConfirmation.cancelButtonTitle
+            ) { [weak self] in
+                self?.forceMute(
+                    participantId: confirmation.participantId,
+                    participantName: confirmation.participantName
+                )
+            }
+        }
+    }
+
+    private func forceMute(participantId: String, participantName: String) {
+        Task { @MainActor [weak self] in
+            guard let self, let currentCall = self.currentCall else { return }
+            do {
+                try await currentCall.forceMuteParticipant(id: participantId)
+                let messageFormat = String(localized: "%@ was muted.", bundle: .module)
+                self.toast = .init(
+                    message: String(format: messageFormat, participantName),
+                    mode: .success
+                )
+            } catch {
+                self.toast = .init(message: error.localizedDescription, mode: .failure)
+            }
         }
     }
 
@@ -289,6 +356,15 @@ extension MeetingRoomViewModel {
         uiParticipant.onTogglePin = { [weak self] in
             self?.onTogglePin(participantId: participant.id)
         }
+        if currentCall != nil,
+            participant.isRemote,
+            !participant.isScreenshare,
+            participant.isMicEnabled
+        {
+            uiParticipant.onForceMute = { [weak self] in
+                self?.onForceMute(participantId: participant.id, participantName: participant.name)
+            }
+        }
         return uiParticipant
     }
 
@@ -338,6 +414,23 @@ extension MeetingRoomViewModel {
                 self?.handleNoiseSuppressionChange(state)
             }
             .store(in: &cancellables)
+
+        let detector = SpeakingWhileMutedDetector(
+            isMicEnabled: sessionStatePublisher.map(\.isPublishingAudio).eraseToAnyPublisher(),
+            audioLevel: call.publisherAudioLevelPublisher
+        )
+        speakingWhileMutedDetector = detector
+
+        detector.isSpeakingWhileMuted
+            .filter { $0 == true }
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.toast = ToastItem(
+                        message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
+                        mode: .warning)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {
@@ -346,12 +439,14 @@ extension MeetingRoomViewModel {
             self.archivingPublisher.value = archivingState
             switch archivingState {
             case .idle:
-                self.toast = .init(message: "Session recording stopped", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording stopped", bundle: .module),
+                    mode: .info)
             case .archiving:
-                self.toast = .init(message: "Session recording started", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session recording started", bundle: .module),
+                    mode: .info)
             }
-
-            self.updateArchivingButtons()
         }
     }
 
@@ -360,15 +455,25 @@ extension MeetingRoomViewModel {
             guard let self else { return }
             switch event {
             case .didBeginReconnecting:
-                self.toast = .init(message: "Session did drop, started reconnection", mode: .warning)
+                self.toast = .init(
+                    message: String(localized: "Session did drop, started reconnection", bundle: .module),
+                    mode: .warning)
             case .didReconnect:
-                self.toast = .init(message: "Session did reconnect", mode: .info)
+                self.toast = .init(
+                    message: String(localized: "Session did reconnect", bundle: .module),
+                    mode: .info)
+            case .muteForced:
+                self.toast = .init(
+                    message: String(localized: "You were muted by the host.", bundle: .module),
+                    mode: .warning)
             case .error(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .sessionFailure(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
-                self.toast = .init(message: "Session did disconnect", mode: .failure)
+                self.toast = .init(
+                    message: String(localized: "Session did disconnect", bundle: .module),
+                    mode: .failure)
                 self.scheduleDisconnection()
             default:
                 break
@@ -395,13 +500,7 @@ extension MeetingRoomViewModel {
 
     @MainActor
     fileprivate func updateExtraButtons() {
-        updateArchivingButtons()
-    }
-
-    @MainActor
-    fileprivate func updateArchivingButtons() {
-        let archivingState = archivingPublisher.value
-        extraButtons = getExternalButtons(.init(archivingState: archivingState))
+        extraButtons = uiProvider.bottomBarButtons()
     }
 
 }

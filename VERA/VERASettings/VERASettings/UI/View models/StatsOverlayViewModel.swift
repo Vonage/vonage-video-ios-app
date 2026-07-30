@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import VERADomain
 
-/// Shows a floating stats overlay when the user has enabled sender stats.
+/// Shows a floating stats overlay when the user has enabled the overlay toggle.
 ///
 /// Observes ``PublisherSettingsRepository/preferencesPublisher`` to toggle visibility,
 /// and ``StatsDataSource/statsPublisher`` to display real-time network metrics.
@@ -15,7 +15,6 @@ public final class StatsOverlayViewModel: ObservableObject {
     // MARK: - Published state
 
     /// Controls whether the stats overlay is currently visible.
-    /// Automatically set based on the `senderStatsEnabled` preference.
     @Published public var isActive: Bool = false
 
     /// The formatted text to display in the stats overlay.
@@ -24,7 +23,7 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     // MARK: - Properties
 
-    /// Repository providing settings preferences including the stats toggle.
+    /// Repository providing settings preferences including the overlay toggle.
     private let settingsRepository: PublisherSettingsRepository
 
     /// Data source providing real-time network statistics.
@@ -38,12 +37,20 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// Set of Combine subscriptions managed by this view model.
     private var cancellables = Set<AnyCancellable>()
 
+    /// Latest max audio bitrate cached from the preferences stream.
+    ///
+    /// Cached synchronously so `buildStatsText(_:)` does not need to `await`
+    /// the settings repository actor. That async hop was the source of a race
+    /// where two in-flight stats updates could complete out of order and let
+    /// an older snapshot overwrite a newer one.
+    private var maxAudioBitrate: Int32?
+
     // MARK: - Init
 
     /// Creates a new stats overlay view model.
     ///
     /// - Parameters:
-    ///   - settingsRepository: Used to observe `senderStatsEnabled`.
+    ///   - settingsRepository: Used to observe `statsOverlayEnabled`.
     ///   - statsDataSource: Provides real-time network stats.
     ///   - statsUpdateInterval: Minimum seconds between UI updates. Defaults to `0` (no throttling).
     ///                          Use values like `2.0` to make rapidly changing stats readable.
@@ -72,14 +79,19 @@ public final class StatsOverlayViewModel: ObservableObject {
 
     // MARK: - Private
 
-    /// Observes the settings repository for changes to the sender stats toggle.
+    /// Observes the settings repository for changes to the overlay visibility toggle
+    /// and caches values used by the stats formatting pipeline.
     private func observeSettings() {
         settingsRepository.preferencesPublisher
-            .map(\.senderStatsEnabled)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] isEnabled in
+            .sink { [weak self] preferences in
                 guard let self else { return }
+
+                self.maxAudioBitrate = preferences.audioBitratePreference.customValue
+
+                let isEnabled = preferences.statsOverlayEnabled
+                guard self.isActive != isEnabled else { return }
 
                 self.isActive = isEnabled
 
@@ -109,28 +121,18 @@ public final class StatsOverlayViewModel: ObservableObject {
             .sink { [weak self] stats in
                 guard let self, self.isActive else { return }
 
-                self.buildStatsText(stats)
+                self.statsText = self.formatStats(stats, maxAudioBitrate: self.maxAudioBitrate)
             }
             .store(in: &cancellables)
-    }
-
-    /// Builds the stats text from the latest statistics snapshot.
-    ///
-    /// - Parameter stats: The network media statistics to format.
-    private func buildStatsText(_ stats: NetworkMediaStats) {
-        Task { @MainActor in
-            let maxAudioBitrate = await settingsRepository.getPreferences().maxAudioBitrate
-            self.statsText = await formatStats(stats, maxAudioBitrate: maxAudioBitrate)
-        }
     }
 
     /// Formats network statistics into a human-readable multi-line string.
     ///
     /// - Parameters:
     ///   - stats: The network media statistics.
-    ///   - maxAudioBitrate: The configured maximum audio bitrate.
+    ///   - maxAudioBitrate: The configured maximum audio bitrate, or `nil` for SDK default.
     /// - Returns: A formatted string with emoji icons and localized labels.
-    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32 = 0) async -> String {
+    private func formatStats(_ stats: NetworkMediaStats, maxAudioBitrate: Int32? = nil) -> String {
         var lines: [String] = []
 
         if let audioSend = stats.sentAudio {
@@ -148,22 +150,29 @@ public final class StatsOverlayViewModel: ObservableObject {
             lines.append("Lost".localized(args: videoSend.packetsLost.description))
         }
 
-        if let audioRecv = stats.receivedAudio {
+        let audioRecvStats = stats.subscriberStats.compactMap(\.receivedAudio)
+        if !audioRecvStats.isEmpty {
+            let totalPacketsReceived = audioRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = audioRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = audioRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("🔈 Audio Recv".localized)
             lines.append(
-                "Pkts".localized(args: audioRecv.packetsReceived.description, audioRecv.packetsLost.description))
-            lines.append("Bytes".localized(args: audioRecv.bytesReceivedFormmatted))
-            lines.append("Max Bitrate".localized(args: SettingsFormatter.formatBandwidth(maxAudioBitrate) ?? ""))
-            if let bw = audioRecv.estimatedBandwidthFormatted {
-                lines.append("Est. Bandwidth".localized(args: bw))
-            }
+                "Pkts".localized(args: totalPacketsReceived.description, totalPacketsLost.description))
+            lines.append("Bytes".localized(args: SettingsFormatter.formatBytes(totalBytesReceived)))
+            let maxBitrate = maxAudioBitrate.map { SettingsFormatter.formatBandwidth($0) ?? "" } ?? "Default".localized
+            lines.append("Max Bitrate".localized(args: maxBitrate))
         }
 
-        if let videoRecv = stats.receivedVideo {
+        let videoRecvStats = stats.subscriberStats.compactMap(\.receivedVideo)
+        if !videoRecvStats.isEmpty {
+            let totalPacketsReceived = videoRecvStats.reduce(0) { $0 + $1.packetsReceived }
+            let totalPacketsLost = videoRecvStats.reduce(0) { $0 + $1.packetsLost }
+            let totalBytesReceived = videoRecvStats.reduce(0) { $0 + $1.bytesReceived }
             lines.append("📺 Video Recv".localized)
             lines.append(
-                "Recv".localized(args: videoRecv.packetsReceived.description, videoRecv.bytesReceivedFormmatted))
-            lines.append("Lost".localized(args: videoRecv.packetsLost.description))
+                "Recv".localized(
+                    args: totalPacketsReceived.description, SettingsFormatter.formatBytes(Int64(totalBytesReceived))))
+            lines.append("Lost".localized(args: totalPacketsLost.description))
         }
 
         return lines.isEmpty ? "Waiting for stats…".localized : lines.joined(separator: "\n")

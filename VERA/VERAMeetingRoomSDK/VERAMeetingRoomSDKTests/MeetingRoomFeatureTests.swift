@@ -12,10 +12,12 @@ import VERAMeetingRoom
 @Suite("MeetingRoomFeature tests")
 struct MeetingRoomFeatureTests {
 
+    private let currentNumberOfFeatures = 12
+
     @Test("All features are available via CaseIterable")
     func allFeaturesAvailable() {
         let allFeatures = MeetingRoomFeature.allCases
-        #expect(allFeatures.count == 9)
+        #expect(allFeatures.count == currentNumberOfFeatures)
         #expect(allFeatures.contains(.chat))
         #expect(allFeatures.contains(.archiving))
         #expect(allFeatures.contains(.captions))
@@ -25,6 +27,8 @@ struct MeetingRoomFeatureTests {
         #expect(allFeatures.contains(.backgroundEffects))
         #expect(allFeatures.contains(.audioEffects))
         #expect(allFeatures.contains(.callKit))
+        #expect(allFeatures.contains(.feedback))
+        #expect(allFeatures.contains(.pictureInPicture))
     }
 
     @Test("Features are Hashable and can be stored in a Set")
@@ -53,7 +57,7 @@ struct MeetingRoomFeatureTests {
     @Test("Full feature set contains all features")
     func fullFeatureSet() {
         let features = Set(MeetingRoomFeature.allCases)
-        #expect(features.count == 9)
+        #expect(features.count == currentNumberOfFeatures)
         for feature in MeetingRoomFeature.allCases {
             #expect(features.contains(feature))
         }
