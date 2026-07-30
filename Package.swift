@@ -163,6 +163,15 @@ let package = Package(
             path: "VERA/VERAAudioEffects/VERAAudioEffects",
             resources: [.process("Resources")]
         ),
+        .target(
+            name: "VERAAudioDiagnostics",
+            dependencies: [
+                "VERADomain",
+                "VERACommonUI",
+            ],
+            path: "VERA/VERAAudioDiagnostics/VERAAudioDiagnostics",
+            resources: [.process("Resources")]
+        ),
 
         // MARK: - Vonage Plugin Modules
 
@@ -249,6 +258,7 @@ let package = Package(
                 "VERAScreenShare",
                 "VERAVonageScreenSharePlugin",
                 "VERAAudioEffects",
+                "VERAAudioDiagnostics",
                 "VERAFeedback",
                 .product(
                     name: "VonageClientSDKVideoTransformers",

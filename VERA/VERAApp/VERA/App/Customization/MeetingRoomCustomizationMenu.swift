@@ -3,8 +3,10 @@
 //
 
 import SwiftUI
+import VERACommonUI
 
 struct MeetingRoomCustomizationMenu: View {
+    @Environment(\.meetingRoomTheme) private var theme
     @ObservedObject var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
@@ -27,12 +29,15 @@ struct MeetingRoomCustomizationMenu: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
             .navigationTitle("Customize UI")
         }
+        .opaquePresentationBackground(theme.background)
     }
 }
 
 struct MeetingRoomCustomizationBottomBarMenu: View {
+    @Environment(\.meetingRoomTheme) private var theme
     @ObservedObject var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
@@ -69,11 +74,14 @@ struct MeetingRoomCustomizationBottomBarMenu: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(theme.background)
         .navigationTitle("Bottom bar")
     }
 }
 
 struct MeetingRoomCustomizationBottomBarButtonsView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     @ObservedObject var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
@@ -158,6 +166,8 @@ struct MeetingRoomCustomizationBottomBarButtonsView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(theme.background)
         .navigationTitle("Buttons")
     }
 }
@@ -198,6 +208,7 @@ struct MeetingRoomCustomizationAddButtonStyle: ButtonStyle {
 }
 
 struct MeetingRoomCustomizationBottomBarCustomBarView: View {
+    @Environment(\.meetingRoomTheme) private var theme
     @ObservedObject var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
@@ -233,6 +244,8 @@ struct MeetingRoomCustomizationBottomBarCustomBarView: View {
                 Label("Presentations · dialog, overlay, sheet", systemImage: "rectangle.on.rectangle")
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(theme.background)
         .navigationTitle("Custom bar")
     }
 

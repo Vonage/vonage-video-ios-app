@@ -141,7 +141,7 @@ struct FeedbackFormView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background(Color.feedbackFormBackground)
+            .background(theme.background)
             #if os(iOS)
                 .scrollDismissesKeyboard(.interactively)
                 .toolbar {

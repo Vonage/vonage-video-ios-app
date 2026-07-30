@@ -42,7 +42,7 @@ public struct ChatPanel: View {
                 .padding(.horizontal, ChatPanelConstants.inputAreaHorizontalPadding)
                 .padding(.vertical, ChatPanelConstants.inputAreaVerticalPadding)
         }
-        .background(theme.surface)
+        .background(theme.background)
     }
 }
 
