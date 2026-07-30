@@ -13,6 +13,7 @@ on:
 jobs:
   format-check:
     runs-on: macos-26
+    if: false  # TEMP(VIDSOL-1126): testing archive/TestFlight only — revert before merge
     steps:
       - uses: actions/checkout@v6
 
