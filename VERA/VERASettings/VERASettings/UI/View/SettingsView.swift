@@ -101,6 +101,20 @@ public struct SettingsView: View {
         .task {
             await viewModel.setup()
         }
+        #if canImport(UIKit)
+            .sheet(isPresented: $viewModel.showShareSheet) {
+                ShareSheet(activityItems: viewModel.logFileURLs) {
+                    viewModel.showShareSheet = false
+                }
+            }
+        #endif
+        .alert("No Logs Available".localized, isPresented: $viewModel.showNoLogsAlert) {
+            Button("OK".localized, role: .cancel) {}
+        } message: {
+            Text(
+                "No log files have been generated yet. Use the app and try again.".localized
+            )
+        }
     }
 
     // MARK: - Compact (iPhone)
@@ -140,6 +154,7 @@ public struct SettingsView: View {
                     statisticsViewModel: currentStatisticsViewModel,
                     isCompactLayout: true
                 )
+                LoggingSectionScreen(viewModel: viewModel)
 
                 Section {
                     GeneralSectionView(
@@ -238,11 +253,14 @@ public struct SettingsView: View {
                     isCompactLayout: false,
                     showsSectionHeaders: false
                 )
+            case .logging:
+                LoggingSectionScreen(viewModel: viewModel)
             }
         }
         .id(section)
         .navigationTitle(section.displayName)
     }
+
 }
 
 // MARK: - Previews

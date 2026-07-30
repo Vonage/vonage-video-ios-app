@@ -118,7 +118,11 @@ final class MeetingRoomSDKContainer {
     }()
 
     lazy var sessionRepository: any SessionRepository = {
-        sessionRepositoryFactory(
+        // Ensure SDK logging is configured before any OTSession is created.
+        if enabledFeatures.contains(.settings) {
+            _ = sdkLoggingService
+        }
+        return sessionRepositoryFactory(
             MeetingRoomSessionRepositoryFactoryContext(
                 publisherSettings: initialPublisherSettings ?? .init(),
                 sessionFactory: sessionFactory,
@@ -342,15 +346,42 @@ final class MeetingRoomSDKContainer {
         settingsRepository: settingsRepository,
         statsWriter: statsRepository)
 
+    lazy var sdkLoggingRepository: SDKLoggingRepository =
+        UserDefaultsSDKLoggingRepository()
+
+    lazy var sdkLoggingService: SDKLoggingService = {
+        let factory = SDKFileLogStrategyFactory()
+        let fileStrategy = factory.makeStrategy()
+        let service = SDKLoggingService(fileStrategy: fileStrategy)
+
+        var prefs = sdkLoggingRepository.loadPreferencesSync()
+
+        if prefs.pendingLogCleanup {
+            service.clearLogFiles()
+            prefs.pendingLogCleanup = false
+            sdkLoggingRepository.savePreferencesSync(prefs)
+        }
+
+        service.configure(
+            enabled: prefs.isLoggingEnabled,
+            logLevel: prefs.logLevel.rawValue
+        )
+        return service
+    }()
+
+    lazy var getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+        dataSource: SDKLogFileURLDataSource(provider: sdkLoggingService.getLogFileURLs))
+
+    lazy var settingsFactory = SettingsFactory(
+        repository: settingsRepository,
+        statsDataSource: statsRepository,
+        loggingRepository: sdkLoggingRepository,
+        loggingPreferencesLoader: sdkLoggingRepository.loadPreferencesSync,
+        getLogFileURLsUseCase: getLogFileURLsUseCase)
     lazy var defaultSpeakerTestService = DefaultSpeakerTestService()
 
     lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(
         speakerTestService: defaultSpeakerTestService
-    )
-
-    lazy var settingsFactory = SettingsFactory(
-        repository: settingsRepository,
-        statsDataSource: statsRepository
     )
 
     lazy var feedbackFactory = FeedbackFactory(

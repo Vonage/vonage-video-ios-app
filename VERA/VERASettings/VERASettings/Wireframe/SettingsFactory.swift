@@ -27,17 +27,37 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Repository for SDK logging preferences.
+    private let loggingRepository: SDKLoggingRepository
+
+    /// Use case for retrieving shareable SDK log file URLs.
+    private let getLogFileURLsUseCase: GetLogFileURLsUseCase
+
+    /// Synchronous loader for SDK logging preferences, used to provide
+    /// immediate initial state when creating view models.
+    private let loggingPreferencesLoader: (() -> SDKLoggingPreferences)?
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - loggingRepository: Repository for SDK logging preferences.
+    ///   - loggingPreferencesLoader: Synchronous loader for logging preferences. Defaults to `nil`.
+    ///   - getLogFileURLsUseCase: Use case for retrieving shareable SDK log file URLs. Defaults to a null data source.
     public init(
         repository: PublisherSettingsRepository,
-        statsDataSource: StatsDataSource
+        statsDataSource: StatsDataSource,
+        loggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(),
+        loggingPreferencesLoader: (() -> SDKLoggingPreferences)? = nil,
+        getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+            dataSource: NullLogFileURLDataSource())
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
+        self.loggingRepository = loggingRepository
+        self.loggingPreferencesLoader = loggingPreferencesLoader
+        self.getLogFileURLsUseCase = getLogFileURLsUseCase
     }
 
     // MARK: - Settings View
@@ -50,7 +70,12 @@ public final class SettingsFactory {
     /// - Returns: A configured settings view.
     @MainActor
     public func makeSettingsView() -> SettingsView {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: loggingRepository,
+            initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
+            getLogFileURLsUseCase: getLogFileURLsUseCase
+        )
         return SettingsView(viewModel: viewModel)
     }
 
@@ -73,7 +98,9 @@ public final class SettingsFactory {
             guard let self else {
                 let fallbackRepo = UserDefaultsSettingsRepository()
                 return SettingsView(
-                    viewModel: SettingsViewModel(repository: fallbackRepo)
+                    viewModel: SettingsViewModel(
+                        repository: fallbackRepo
+                    )
                 )
             }
             return self.makeSettingsView()
@@ -105,7 +132,12 @@ public final class SettingsFactory {
     /// - Returns: A tuple of the settings view model and the statistics view model.
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            loggingRepository: loggingRepository,
+            initialLoggingPreferences: loggingPreferencesLoader?() ?? .default,
+            getLogFileURLsUseCase: getLogFileURLsUseCase
+        )
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository

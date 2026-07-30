@@ -17,8 +17,41 @@ struct FileLogStrategyTests {
             .appendingPathComponent("veralogger-test-\(UUID().uuidString).log")
     }
 
+    private func makeLogsDirectory() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("veralogger-rolling-\(UUID().uuidString)", isDirectory: true)
+    }
+
     private func cleanup(_ url: URL) {
         try? FileManager.default.removeItem(at: url)
+    }
+
+    private func makeEvent(
+        level: LogLevel = .info,
+        tag: String = "Tag",
+        message: String = "message"
+    ) -> LogEvent {
+        LogEvent(
+            level: level,
+            tag: tag,
+            message: message,
+            timestamp: Date(timeIntervalSince1970: 1_000_000_000),
+            thread: "test-thread"
+        )
+    }
+
+    private func createFile(at url: URL, contents: String, modificationDate: Date? = nil) throws {
+        let directory = url.deletingLastPathComponent()
+        if !FileManager.default.fileExists(atPath: directory.path) {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+        try contents.write(to: url, atomically: true, encoding: .utf8)
+        if let modificationDate {
+            try FileManager.default.setAttributes(
+                [.modificationDate: modificationDate],
+                ofItemAtPath: url.path
+            )
+        }
     }
 
     // MARK: - Formatting
@@ -27,7 +60,7 @@ struct FileLogStrategyTests {
     func formatEventWithoutError() {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
         let event = LogEvent(
             level: .debug,
             tag: "MyTag",
@@ -49,7 +82,7 @@ struct FileLogStrategyTests {
     func formatEventWithError() {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
         let error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "boom"])
         let event = LogEvent(
             level: .error,
@@ -74,10 +107,9 @@ struct FileLogStrategyTests {
     func logWritesToFile() throws {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL)
-        let event = LogEvent(level: .info, tag: "Tag", message: "test message")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
 
-        strategy.log(event)
+        strategy.log(makeEvent(level: .info, message: "test message"))
 
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         #expect(content.contains("[INFO]"))
@@ -88,11 +120,11 @@ struct FileLogStrategyTests {
     func multipleEventsAppendedOnSeparateLines() throws {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
 
-        strategy.log(LogEvent(level: .debug, tag: "T", message: "first"))
-        strategy.log(LogEvent(level: .info, tag: "T", message: "second"))
-        strategy.log(LogEvent(level: .warn, tag: "T", message: "third"))
+        strategy.log(makeEvent(level: .debug, message: "first"))
+        strategy.log(makeEvent(level: .info, message: "second"))
+        strategy.log(makeEvent(level: .warn, message: "third"))
 
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         let lines = content.components(separatedBy: "\n").filter { !$0.isEmpty }
@@ -112,63 +144,255 @@ struct FileLogStrategyTests {
 
         #expect(!FileManager.default.fileExists(atPath: logFileURL.path))
 
-        let strategy = FileLogStrategy(fileURL: logFileURL)
-        strategy.log(LogEvent(level: .info, tag: "Tag", message: "create me"))
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
+        strategy.log(makeEvent(message: "create me"))
 
         #expect(FileManager.default.fileExists(atPath: logFileURL.path))
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         #expect(content.contains("create me"))
     }
 
-    // MARK: - Rotation
+    // MARK: - Truncate Rotation
 
-    @Test("Rotates file when max size is exceeded")
-    func rotatesFileWhenMaxSizeExceeded() throws {
+    @Test("Truncate mode: rotates file when max size is exceeded")
+    func truncateRotatesFileWhenMaxSizeExceeded() throws {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let smallMax: UInt64 = 50
-        let strategy = FileLogStrategy(fileURL: logFileURL, maxFileSize: smallMax)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(50)
+            .build()
 
         let bigContent = String(repeating: "x", count: 100)
         try bigContent.write(to: logFileURL, atomically: true, encoding: .utf8)
 
-        strategy.log(LogEvent(level: .debug, tag: "T", message: "after rotation"))
+        strategy.log(makeEvent(message: "after rotation"))
 
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         #expect(content.contains("after rotation"))
         #expect(!content.contains(String(repeating: "x", count: 50)))
     }
 
-    @Test("Does not rotate when file is under max size")
-    func doesNotRotateWhenUnderMaxSize() throws {
+    @Test("Truncate mode: does not rotate when under max size")
+    func truncateDoesNotRotateWhenUnderMaxSize() throws {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL, maxFileSize: 10_000)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(10_000)
+            .build()
 
         try "existing content\n".write(to: logFileURL, atomically: true, encoding: .utf8)
 
-        strategy.log(LogEvent(level: .info, tag: "T", message: "new entry"))
+        strategy.log(makeEvent(message: "new entry"))
 
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         #expect(content.contains("existing content"))
         #expect(content.contains("new entry"))
     }
 
-    @Test("Rotates when append would exceed max size")
-    func rotatesWhenAppendWouldExceedMaxSize() throws {
+    @Test("Truncate mode: rotates when append would exceed max size")
+    func truncateRotatesWhenAppendWouldExceedMaxSize() throws {
         let logFileURL = makeLogFileURL()
         defer { cleanup(logFileURL) }
-        let strategy = FileLogStrategy(fileURL: logFileURL, maxFileSize: 200)
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(200)
+            .build()
 
         let existingContent = String(repeating: "x", count: 180)
         try existingContent.write(to: logFileURL, atomically: true, encoding: .utf8)
 
-        strategy.log(LogEvent(level: .info, tag: "T", message: "new entry"))
+        strategy.log(makeEvent(message: "new entry"))
 
         let content = try String(contentsOf: logFileURL, encoding: .utf8)
         #expect(content.contains("new entry"))
         #expect(!content.contains(existingContent))
-        #expect(content.utf8.count <= 200)
+    }
+
+    @Test("Truncate mode: allLogFileURLs returns at most one file")
+    func truncateAllLogFileURLsReturnsAtMostOneFile() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
+
+        #expect(strategy.allLogFileURLs().isEmpty)
+
+        strategy.log(makeEvent(message: "create"))
+        #expect(strategy.allLogFileURLs().count == 1)
+    }
+
+    @Test("Truncate mode: deleteAllLogFiles removes the file")
+    func truncateDeleteAllLogFiles() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
+
+        strategy.log(makeEvent(message: "to delete"))
+        #expect(FileManager.default.fileExists(atPath: logFileURL.path))
+
+        strategy.deleteAllLogFiles()
+        #expect(!FileManager.default.fileExists(atPath: logFileURL.path))
+    }
+
+    // MARK: - Rolling Rotation
+
+    @Test("Rolling mode: creates directory and file if they do not exist")
+    func rollingCreatesDirectoryAndFile() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+
+        #expect(!FileManager.default.fileExists(atPath: logsDir.path))
+
+        strategy.log(makeEvent(message: "create me"))
+
+        #expect(FileManager.default.fileExists(atPath: logsDir.path))
+        #expect(FileManager.default.fileExists(atPath: logFileURL.path))
+    }
+
+    @Test("Rolling mode: archives file when max size is exceeded")
+    func rollingRotatesFileWhenMaxSizeExceeded() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(100)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+        let existingContent = String(repeating: "x", count: 90)
+
+        try createFile(at: logFileURL, contents: existingContent)
+
+        strategy.log(makeEvent(message: "after rotation"))
+
+        let allFiles = strategy.allLogFileURLs()
+        let currentContent = try String(contentsOf: logFileURL, encoding: .utf8)
+        let archives = allFiles.filter { $0.lastPathComponent != logFileURL.lastPathComponent }
+
+        #expect(allFiles.count == 2)
+        #expect(archives.count == 1)
+        #expect(currentContent.contains("after rotation"))
+        #expect(!currentContent.contains(existingContent))
+
+        let archiveContent = try String(contentsOf: archives[0], encoding: .utf8)
+        #expect(archiveContent.contains(existingContent))
+    }
+
+    @Test("Rolling mode: oldest files are deleted when exceeding max file count")
+    func rollingOldestFilesDeletedWhenExceedingMaxFileCount() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(100)
+            .rotationPolicy(.rolling(maxFileCount: 3))
+            .build()
+        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
+        let middleFile = logsDir.appendingPathComponent("sdk-log-20240101-000001000.log")
+        let newestArchive = logsDir.appendingPathComponent("sdk-log-20240101-000002000.log")
+
+        try createFile(at: oldestFile, contents: "oldest", modificationDate: Date(timeIntervalSince1970: 1))
+        try createFile(at: middleFile, contents: "middle", modificationDate: Date(timeIntervalSince1970: 2))
+        try createFile(at: newestArchive, contents: "newest", modificationDate: Date(timeIntervalSince1970: 3))
+        try createFile(
+            at: logFileURL,
+            contents: String(repeating: "x", count: 90),
+            modificationDate: Date(timeIntervalSince1970: 4)
+        )
+
+        strategy.log(makeEvent(message: "trigger rotation"))
+
+        let fileNames = Set(strategy.allLogFileURLs().map(\.lastPathComponent))
+
+        #expect(fileNames.count == 3)
+        #expect(!fileNames.contains(oldestFile.lastPathComponent))
+        #expect(!fileNames.contains(middleFile.lastPathComponent))
+        #expect(fileNames.contains(newestArchive.lastPathComponent))
+        #expect(fileNames.contains(logFileURL.lastPathComponent))
+    }
+
+    @Test("Rolling mode: allLogFileURLs returns files sorted newest first")
+    func rollingAllLogFileURLsReturnsNewestFirst() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+        let oldestFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
+        let newerFile = logsDir.appendingPathComponent("sdk-log-20240101-000001000.log")
+
+        try createFile(at: oldestFile, contents: "oldest", modificationDate: Date(timeIntervalSince1970: 1))
+        try createFile(at: newerFile, contents: "newer", modificationDate: Date(timeIntervalSince1970: 2))
+        try createFile(at: logFileURL, contents: "current", modificationDate: Date(timeIntervalSince1970: 3))
+
+        let fileNames = strategy.allLogFileURLs().map(\.lastPathComponent)
+
+        #expect(
+            fileNames == [
+                logFileURL.lastPathComponent,
+                newerFile.lastPathComponent,
+                oldestFile.lastPathComponent,
+            ])
+    }
+
+    @Test("Rolling mode: deleteAllLogFiles removes all files")
+    func rollingDeleteAllLogFilesRemovesAllFiles() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+        let rotatedFile = logsDir.appendingPathComponent("sdk-log-20240101-000000000.log")
+
+        try createFile(at: logFileURL, contents: "current")
+        try createFile(at: rotatedFile, contents: "rotated")
+
+        strategy.deleteAllLogFiles()
+
+        #expect(strategy.allLogFileURLs().isEmpty)
+        #expect(!FileManager.default.fileExists(atPath: logFileURL.path))
+        #expect(!FileManager.default.fileExists(atPath: rotatedFile.path))
+    }
+
+    // MARK: - Raw Writing
+
+    @Test("writeRaw writes text verbatim without formatting")
+    func writeRawWritesVerbatim() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL).build()
+
+        strategy.writeRaw("raw line 1\nraw line 2\n")
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        #expect(content == "raw line 1\nraw line 2\n")
+    }
+
+    // MARK: - Min Level Filtering
+
+    @Test("Respects minLevel filtering")
+    func respectsMinLevelFiltering() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .minLevel(.warn)
+            .build()
+
+        let skippedEvent = makeEvent(level: .info, message: "skip me")
+        let loggedEvent = makeEvent(level: .error, message: "log me")
+
+        #expect(!strategy.shouldLog(skippedEvent))
+        #expect(strategy.shouldLog(loggedEvent))
+
+        strategy.log(skippedEvent)
+        strategy.log(loggedEvent)
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        #expect(!content.contains("skip me"))
+        #expect(content.contains("log me"))
     }
 
     // MARK: - Constants
@@ -177,5 +401,172 @@ struct FileLogStrategyTests {
     func defaultConstants() {
         #expect(FileLogStrategy.defaultMaxFileSize == 5 * 1024 * 1024)
         #expect(FileLogStrategy.defaultDateFormat == "yyyy-MM-dd HH:mm:ss.SSS")
+        #expect(FileLogStrategy.defaultMinLevel == .verbose)
+    }
+
+    // MARK: - Builder
+
+    @Test("Builder derives logsDirectory from fileURL when not set")
+    func builderDerivesLogsDirectory() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("app.log")
+
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .rotationPolicy(.rolling(maxFileCount: 3))
+            .build()
+
+        strategy.log(makeEvent(message: "test"))
+
+        #expect(FileManager.default.fileExists(atPath: logsDir.path))
+        #expect(FileManager.default.fileExists(atPath: logFileURL.path))
+    }
+
+    @Test("Builder derives archivePrefix from filename when not set")
+    func builderDerivesArchivePrefix() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("sdk-log-current.log")
+
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(50)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+
+        try createFile(at: logFileURL, contents: String(repeating: "x", count: 60))
+        strategy.log(makeEvent(message: "trigger"))
+
+        let archives = strategy.allLogFileURLs()
+            .filter { $0.lastPathComponent != "sdk-log-current.log" }
+        #expect(archives.count == 1)
+        #expect(archives[0].lastPathComponent.hasPrefix("sdk-log-"))
+    }
+
+    @Test("Builder uses explicit archivePrefix when provided")
+    func builderUsesExplicitArchivePrefix() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("mylog.log")
+
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .archivePrefix("custom-prefix-")
+            .maxFileSize(50)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+
+        try createFile(at: logFileURL, contents: String(repeating: "x", count: 60))
+        strategy.log(makeEvent(message: "trigger"))
+
+        let archives = strategy.allLogFileURLs()
+            .filter { $0.lastPathComponent != "mylog.log" }
+        #expect(archives.count == 1)
+        #expect(archives[0].lastPathComponent.hasPrefix("custom-prefix-"))
+    }
+
+    @Test("Builder uses explicit logsDirectory when provided")
+    func builderUsesExplicitLogsDirectory() throws {
+        let customDir = makeLogsDirectory()
+        defer { cleanup(customDir) }
+        let logFileURL = customDir.appendingPathComponent("app.log")
+
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .logsDirectory(customDir)
+            .build()
+
+        strategy.log(makeEvent(message: "hello"))
+
+        #expect(FileManager.default.fileExists(atPath: logFileURL.path))
+    }
+
+    @Test("Builder uses custom fileManager when provided")
+    func builderUsesCustomFileManager() throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+
+        let customFM = FileManager()
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .fileManager(customFM)
+            .build()
+
+        strategy.log(makeEvent(message: "with custom FM"))
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        #expect(content.contains("with custom FM"))
+    }
+
+    @Test("Builder single-component filename gets prefix with trailing dash")
+    func builderSingleComponentFilenamePrefix() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("simple.log")
+
+        let strategy = FileLogStrategy.Builder(fileURL: logFileURL)
+            .maxFileSize(50)
+            .rotationPolicy(.rolling(maxFileCount: 5))
+            .build()
+
+        try createFile(at: logFileURL, contents: String(repeating: "x", count: 60))
+        strategy.log(makeEvent(message: "trigger"))
+
+        let archives = strategy.allLogFileURLs()
+            .filter { $0.lastPathComponent != "simple.log" }
+        #expect(archives.count == 1)
+        #expect(archives[0].lastPathComponent.hasPrefix("simple-"))
+    }
+
+    @Test("Direct init accepts all parameters as pure assignments")
+    func directInitAcceptsAllParameters() throws {
+        let logsDir = makeLogsDirectory()
+        defer { cleanup(logsDir) }
+        let logFileURL = logsDir.appendingPathComponent("test.log")
+
+        let df = DateFormatter()
+        df.dateFormat = "HH:mm:ss"
+        df.locale = Locale(identifier: "en_US_POSIX")
+
+        let fndf = DateFormatter()
+        fndf.dateFormat = FileLogStrategy.archiveDateFormat
+        fndf.locale = Locale(identifier: "en_US_POSIX")
+
+        let formatter = LogEventFormatter(dateFormatter: df)
+
+        let inventory = LogFileInventory(
+            fileURL: logFileURL,
+            logsDirectory: logsDir,
+            archivePrefix: "test-",
+            archiveSuffix: ".log"
+        )
+
+        let archiveManager = LogFileArchiveManager(
+            logsDirectory: logsDir,
+            archivePrefix: "test-",
+            archiveSuffix: ".log",
+            fileNameDateFormatter: fndf,
+            inventory: inventory
+        )
+
+        let rotator = LogFileRotator(
+            fileURL: logFileURL,
+            maxFileSize: 500,
+            rotationPolicy: .rolling(maxFileCount: 3),
+            archiveManager: archiveManager
+        )
+
+        let strategy = FileLogStrategy(
+            fileURL: logFileURL,
+            logsDirectory: logsDir,
+            rotationPolicy: .rolling(maxFileCount: 3),
+            minLevel: .debug,
+            formatter: formatter,
+            rotator: rotator,
+            inventory: inventory
+        )
+
+        strategy.log(makeEvent(level: .info, message: "direct init"))
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        #expect(content.contains("direct init"))
+        // Custom date formatter uses HH:mm:ss, not the default yyyy-MM-dd HH:mm:ss.SSS
+        #expect(!content.contains("2001-09-08"))
     }
 }

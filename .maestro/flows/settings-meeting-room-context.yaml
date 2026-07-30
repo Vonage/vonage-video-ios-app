@@ -83,7 +83,7 @@ appId: ${APP_ID}
 # Scroll to reveal audio section locked controls
 - swipe:
     direction: "UP"
-    duration: 500
+    duration: 2000
 
 - assertVisible:
     id: "settings-audio-bitrate-locked"

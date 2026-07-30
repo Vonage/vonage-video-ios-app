@@ -224,9 +224,37 @@ final class DependencyContainer {
             return repository
         }()
 
+        lazy var sdkLoggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository()
+
+        lazy var sdkLoggingService: SDKLoggingService = {
+
+            let factory = SDKFileLogStrategyFactory()
+            let fileStrategy = factory.makeStrategy()
+            let service = SDKLoggingService(fileStrategy: fileStrategy)
+
+            var prefs = sdkLoggingRepository.loadPreferencesSync()
+
+            if prefs.pendingLogCleanup {
+                service.clearLogFiles()
+                prefs.pendingLogCleanup = false
+                sdkLoggingRepository.savePreferencesSync(prefs)
+            }
+
+            service.configure(
+                enabled: prefs.isLoggingEnabled,
+                logLevel: prefs.logLevel.rawValue)
+            return service
+        }()
+
+        lazy var getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+            dataSource: SDKLogFileURLDataSource(provider: sdkLoggingService.getLogFileURLs))
+
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: InMemoryStatsRepository())
+            statsDataSource: InMemoryStatsRepository(),
+            loggingRepository: sdkLoggingRepository,
+            loggingPreferencesLoader: sdkLoggingRepository.loadPreferencesSync,
+            getLogFileURLsUseCase: getLogFileURLsUseCase)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

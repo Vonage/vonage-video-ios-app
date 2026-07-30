@@ -34,6 +34,18 @@ public final class SettingsViewModel: ObservableObject {
     /// Changes are auto-persisted after a short debounce.
     @Published public var settingsPreference: PublisherSettingsPreferences
 
+    /// Whether SDK logging is enabled.
+    @Published public var isLoggingEnabled: Bool
+
+    /// The selected SDK logging level.
+    @Published public var sdkLogLevel: SDKLogLevel
+
+    /// Controls presentation of the iOS share sheet for log files.
+    @Published public var showShareSheet: Bool = false
+
+    /// Controls presentation of the alert shown when no log files are available.
+    @Published public var showNoLogsAlert: Bool = false
+
     /// The current codec mode preference (auto or manual).
     public var codecMode: SettingsCodecMode {
         settingsPreference.codecPreference.mode
@@ -103,13 +115,56 @@ public final class SettingsViewModel: ObservableObject {
         settingsPreference.senderStatsEnabled
     }
 
+    /// Current log file URLs returned by the injected use case.
+    public var logFileURLs: [URL] {
+        getLogFileURLsUseCase()
+    }
+
+    /// Whether the logging configuration has been modified from its initial state.
+    /// Used by the UI to show a restart-required note.
+    public var loggingSettingsChanged: Bool {
+        isLoggingEnabled != initialLoggingEnabled || sdkLogLevel != initialLogLevel
+    }
+
+    /// Whether any log files are currently available to share.
+    public var hasLogFiles: Bool {
+        !logFileURLs.isEmpty
+    }
+
+    /// Attempts to share log files. Shows the share sheet if files exist,
+    /// or an alert if no log files are available yet.
+    public func sendLogs() {
+        if hasLogFiles {
+            showShareSheet = true
+        } else {
+            showNoLogsAlert = true
+        }
+    }
+
     // MARK: - Dependencies
+
+    /// Logger for recording errors during settings persistence.
+    private let logger = Logger(
+        subsystem: "com.vonage.vera.settings",
+        category: "SettingsViewModel"
+    )
 
     /// The repository responsible for persisting and retrieving publisher settings.
     private let repository: PublisherSettingsRepository
 
-    /// Cancellable for the auto-save subscription.
-    private var autoSaveCancellable: AnyCancellable?
+    /// Repository for reading and writing SDK logging preferences.
+    private let loggingRepository: SDKLoggingRepository
+
+    /// Use case for retrieving shareable SDK log file URLs.
+    private let getLogFileURLsUseCase: GetLogFileURLsUseCase
+
+    /// Tracks the original persisted logging toggle to decide cleanup behavior.
+    private var initialLoggingEnabled: Bool = false
+
+    /// Tracks the original persisted log level to detect changes.
+    private var initialLogLevel: SDKLogLevel = .debug
+    /// Cancellables for auto-save subscriptions.
+    private var autoSaveCancellables: Set<AnyCancellable> = []
 
     /// In-flight auto-save task. Cancelled before each new save to
     /// prevent overlapping writes that could overwrite newer data.
@@ -121,8 +176,6 @@ public final class SettingsViewModel: ObservableObject {
     /// Tracks whether the view model has been initialized.
     private var isInitialized: Bool = false
 
-    /// Logger for error reporting.
-    private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
 
     /// Called after each persistence attempt (success or failure).
     /// Used by tests to synchronise with the auto-save pipeline.
@@ -135,15 +188,28 @@ public final class SettingsViewModel: ObservableObject {
     /// - Parameters:
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
+    ///   - loggingRepository: Repository for SDK logging preferences..
+    ///   - initialLoggingPreferences: Synchronously loaded logging preferences for immediate UI state. Defaults to `.default`.
+    ///   - getLogFileURLsUseCase: Use case for retrieving shareable log file URLs. Defaults to a null data source.
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
     public init(
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
-        autoSaveDebounce: TimeInterval = 0.3
+        autoSaveDebounce: TimeInterval = 0.3,
+        loggingRepository: SDKLoggingRepository = UserDefaultsSDKLoggingRepository(),
+        initialLoggingPreferences: SDKLoggingPreferences = .default,
+        getLogFileURLsUseCase: GetLogFileURLsUseCase = DefaultGetLogFileURLsUseCase(
+            dataSource: NullLogFileURLDataSource())
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
+        self.loggingRepository = loggingRepository
+        self.getLogFileURLsUseCase = getLogFileURLsUseCase
+        self.isLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
+        self.sdkLogLevel = initialLoggingPreferences.logLevel
+        self.initialLoggingEnabled = initialLoggingPreferences.isLoggingEnabled
+        self.initialLogLevel = initialLoggingPreferences.logLevel
     }
 
     // MARK: - Actions
@@ -186,6 +252,12 @@ public final class SettingsViewModel: ObservableObject {
         isInitialized = true
 
         settingsPreference = await repository.getPreferences()
+
+        let loggingPreferences = await loggingRepository.getPreferences()
+        isLoggingEnabled = loggingPreferences.isLoggingEnabled
+        sdkLogLevel = loggingPreferences.logLevel
+        initialLoggingEnabled = loggingPreferences.isLoggingEnabled
+        initialLogLevel = loggingPreferences.logLevel
         startAutoSave()
     }
 
@@ -197,7 +269,9 @@ public final class SettingsViewModel: ObservableObject {
     public func dismiss() async {
         // Save any pending changes that haven't been auto-saved yet
         await persistCurrentState()
+        await persistLoggingState()
         isPresented = false
+
     }
 
     /// Reverts all settings to their default values and persists the changes.
@@ -210,23 +284,54 @@ public final class SettingsViewModel: ObservableObject {
 
     // MARK: - Private
 
-    /// Sets up a Combine pipeline that auto-saves preferences after a debounce.
+    /// Sets up Combine pipelines that auto-save preferences after a debounce.
+    ///
+    /// Two pipelines run independently:
+    /// 1. **Settings pipeline** – watches `$settingsPreference` and persists both
+    ///    publisher settings and logging preferences on every debounced change.
+    /// 2. **Logging pipeline** – watches `$isLoggingEnabled` and `$sdkLogLevel`
+    ///    so that toggling the logging switch or changing the log level triggers
+    ///    persistence and a restart alert even when no other setting changes.
     ///
     /// `dropFirst()` avoids re-saving the value just loaded from the repository.
     /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
     /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
     private func startAutoSave() {
-        autoSaveCancellable =
-            $settingsPreference
+        $settingsPreference
             .dropFirst()
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.autoSaveTask?.cancel()
-                self?.autoSaveTask = Task {
-                    await self?.persistCurrentState()
-                }
+                self?.scheduleAutoSave()
             }
+            .store(in: &autoSaveCancellables)
+
+        $isLoggingEnabled
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleAutoSave()
+            }
+            .store(in: &autoSaveCancellables)
+
+        $sdkLogLevel
+            .dropFirst()
+            .removeDuplicates()
+            .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.scheduleAutoSave()
+            }
+            .store(in: &autoSaveCancellables)
+    }
+
+    /// Coalesces multiple pipeline triggers into a single auto-save task.
+    private func scheduleAutoSave() {
+        autoSaveTask?.cancel()
+        autoSaveTask = Task {
+            await persistCurrentState()
+            await persistLoggingState()
+        }
     }
 
     /// Persists all current field values to the repository.
@@ -240,6 +345,22 @@ public final class SettingsViewModel: ObservableObject {
             logger.error("Failed to save settings preferences: \(error.localizedDescription)")
         }
         onDidSave?()
+    }
+
+    /// Persists the current logging values. When the logging toggle or log
+    /// level has changed, sets ``SDKLoggingPreferences/pendingLogCleanup``
+    /// so that log files are cleared on the next app launch.
+    private func persistLoggingState() async {
+        let loggingToggleChanged = isLoggingEnabled != initialLoggingEnabled
+        let logLevelChanged = sdkLogLevel != initialLogLevel
+
+        let preferences = SDKLoggingPreferences(
+            isLoggingEnabled: isLoggingEnabled,
+            logLevel: sdkLogLevel,
+            pendingLogCleanup: loggingToggleChanged || logLevelChanged
+        )
+
+        await loggingRepository.save(preferences)
     }
 
     /// Returns a sanitized copy of the preferences to ensure data consistency.

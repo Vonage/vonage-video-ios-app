@@ -13,6 +13,7 @@ public enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
     case video = "Video"
     case audio = "Audio"
     case stats = "Stats"
+    case logging = "Logging"
 
     /// Unique identifier used by `ForEach` and `NavigationSplitView`.
     ///
@@ -31,6 +32,7 @@ extension SettingsSection {
         case .video: "video"
         case .audio: "waveform"
         case .stats: "chart.bar"
+        case .logging: "doc.text"
         }
     }
 

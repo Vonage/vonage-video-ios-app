@@ -2,6 +2,7 @@
 //  Created by Vonage.
 //
 
+import Foundation
 import Testing
 import VERADomain
 
@@ -65,5 +66,153 @@ struct SettingsFactoryTests {
         statsDataSource: MockStatsDataSource = MockStatsDataSource()
     ) -> SettingsFactory {
         SettingsFactory(repository: repository, statsDataSource: statsDataSource)
+    }
+
+    // MARK: - Logging Dependencies
+
+    @Test("makeMeetingRoomViewModels with logging prefs loader provides initial state")
+    func makeMeetingRoomViewModelsWithLoggingPrefsLoader() {
+        let loggingRepository = MockSDKLoggingRepository()
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: loggingRepository,
+            loggingPreferencesLoader: {
+                SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn)
+            }
+        )
+
+        let (viewModel, _) = factory.makeMeetingRoomViewModels()
+        #expect(viewModel.isLoggingEnabled == true)
+        #expect(viewModel.sdkLogLevel == .warn)
+    }
+
+    @Test("makeMeetingRoomViewModels with log file provider exposes URLs")
+    func makeMeetingRoomViewModelsWithLogFileProvider() {
+        let expectedURLs = [URL(fileURLWithPath: "/tmp/sdk.log")]
+        let getLogFileURLs = MockGetLogFileURLsUseCase()
+        getLogFileURLs.urls = expectedURLs
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            getLogFileURLsUseCase: getLogFileURLs
+        )
+
+        let (viewModel, _) = factory.makeMeetingRoomViewModels()
+        #expect(viewModel.logFileURLs == expectedURLs)
+        #expect(viewModel.hasLogFiles == true)
+    }
+
+    @Test("makeSettingsView creates view with logging support when configured")
+    func makeSettingsViewWithLogging() {
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            loggingPreferencesLoader: {
+                SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .error)
+            }
+        )
+
+        let view = factory.makeSettingsView()
+        #expect(view.viewModel.isLoggingEnabled == true)
+        #expect(view.viewModel.sdkLogLevel == .error)
+    }
+
+    @Test("makeMeetingRoomButton creates button with action")
+    func makeMeetingRoomButtonCreatesButton() {
+        let factory = makeFactory()
+        var actionCalled = false
+
+        _ = factory.makeMeetingRoomButton {
+            actionCalled = true
+        }
+
+        // Button is created successfully — action is not called yet
+        #expect(!actionCalled)
+    }
+
+    @Test("makeStatsOverlayViewModel creates configured view model")
+    func makeStatsOverlayViewModelCreatesViewModel() {
+        let factory = makeFactory()
+
+        let viewModel = factory.makeStatsOverlayViewModel()
+        #expect(viewModel.isActive == false)
+    }
+
+    @Test("makeStatsOverlayView creates view from view model")
+    func makeStatsOverlayViewCreatesView() {
+        let factory = makeFactory()
+        let viewModel = factory.makeStatsOverlayViewModel()
+
+        let view = factory.makeStatsOverlayView(viewModel: viewModel)
+        // View is created successfully — no crash
+        _ = view
+    }
+
+    @Test("makeWaitingRoomButton creates button with settings closure")
+    func makeWaitingRoomButtonCreatesButton() {
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            loggingPreferencesLoader: {
+                SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .info)
+            }
+        )
+
+        let button = factory.makeWaitingRoomButton()
+        // Button is created successfully
+        _ = button
+    }
+
+    @Test("makeSettingsView uses default logging preferences when loader is nil")
+    func makeSettingsViewUsesDefaultLoggingWhenLoaderIsNil() {
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            loggingPreferencesLoader: nil
+        )
+
+        let view = factory.makeSettingsView()
+        #expect(view.viewModel.isLoggingEnabled == true)
+        #expect(view.viewModel.sdkLogLevel == .debug)
+    }
+
+    @Test("makeMeetingRoomViewModels uses default logging preferences when loader is nil")
+    func makeMeetingRoomViewModelsUsesDefaultLoggingWhenLoaderIsNil() {
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            loggingPreferencesLoader: nil
+        )
+
+        let (viewModel, _) = factory.makeMeetingRoomViewModels()
+        #expect(viewModel.isLoggingEnabled == true)
+        #expect(viewModel.sdkLogLevel == .debug)
+    }
+
+    @Test("Factory passes all dependencies to meeting room view models")
+    func factoryPassesAllDependenciesToMeetingRoomViewModels() {
+        let logURLs = [URL(fileURLWithPath: "/tmp/sdk.log")]
+        let getLogFileURLs = MockGetLogFileURLsUseCase()
+        getLogFileURLs.urls = logURLs
+        let factory = SettingsFactory(
+            repository: MockSettingsRepository(),
+            statsDataSource: MockStatsDataSource(),
+            loggingRepository: MockSDKLoggingRepository(),
+            loggingPreferencesLoader: {
+                SDKLoggingPreferences(isLoggingEnabled: true, logLevel: .warn)
+            },
+            getLogFileURLsUseCase: getLogFileURLs
+        )
+
+        let (viewModel, _) = factory.makeMeetingRoomViewModels()
+        #expect(viewModel.isLoggingEnabled == true)
+        #expect(viewModel.sdkLogLevel == .warn)
+        #expect(viewModel.logFileURLs == logURLs)
     }
 }

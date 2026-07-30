@@ -98,6 +98,7 @@ private final class MockHTTPClient: HTTPClient, @unchecked Sendable {
         lastPostURL = url
         return try postResult.get()
     }
+
 }
 
 private enum MockNetworkError: Error {
