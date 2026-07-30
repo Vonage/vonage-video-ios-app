@@ -82,7 +82,7 @@ let project = Project(
                         name: "Release",
                         settings: [
                             "CODE_SIGN_STYLE": "Manual",
-                            "CODE_SIGN_IDENTITY": "iPhone Distribution",
+                            "CODE_SIGN_IDENTITY": "Apple Distribution",
                             "PROVISIONING_PROFILE_SPECIFIER": "BroadcastExtension_App_Store",
                         ],
                         xcconfig: "../Config/Signing.xcconfig"
