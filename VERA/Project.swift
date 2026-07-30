@@ -382,7 +382,7 @@ private func createBuildSettings() -> Settings {
                 name: "Release",
                 settings: [
                     "CODE_SIGN_STYLE": "Manual",
-                    "CODE_SIGN_IDENTITY": "Apple Distribution",
+                    "CODE_SIGN_IDENTITY": "iPhone Distribution",
                     "PROVISIONING_PROFILE_SPECIFIER": "App_Store_VERA",
                 ],
                 xcconfig: "Config/Signing.xcconfig"
