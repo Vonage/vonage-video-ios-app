@@ -1,0 +1,25 @@
+VERA/VERAVonageScreenSharePlugin/Project.swift
+  s_514d36addd0530::t_d9e3684b4a1ebf 85
+VERA/VERAApp/Project.swift
+  s_514d36addd0530::t_6974f2f4497b90 55
+VERA/Project.swift
+  s_514d36addd0530::t_af66deeb64c2c4 385
+.github/workflows/ci.yml
+  s_514d36addd0530::t_ce7ba998711944 257-261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "0aab1fe9ccaa555481c9c3445d2cb7a47dcc93db",
+  "prompts": {},
+  "sessions": {
+    "s_514d36addd0530": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2419a37-25ac-487f-bb3c-bd34c8764069",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
