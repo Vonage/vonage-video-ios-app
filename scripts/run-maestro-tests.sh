@@ -240,7 +240,7 @@ if [ ${#MISSING_VARS[@]} -gt 0 ]; then
     echo -e "${YELLOW}Set them with:${NC}"
     echo -e "  export BASE_API_URL=https://api.example.net/"
     echo -e "  export DEVELOPMENT_TEAM=AB0C12DE34"
-    echo -e "  export MARKETING_VERSION=1.1"
+    echo -e "  export MARKETING_VERSION=1.0"
     echo -e "  export CURRENT_PROJECT_VERSION=1"
     echo ""
     echo -e "${BLUE}ℹ️  Continuing anyway (using existing generated files if available)...${NC}\n"
