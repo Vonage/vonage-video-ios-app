@@ -1,0 +1,24 @@
+.github/workflows/require-ai-tracking.yml
+  s_8e89e027dfaa9b::t_f31b13003f8152 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c41a1299244f48ca88ea372752951234967046ed",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_8e89e027dfaa9b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_dd6b5503-6175-4a35-9d13-663630641b5b",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
