@@ -7,8 +7,12 @@ permissions:
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
 
 jobs:
   format-check:

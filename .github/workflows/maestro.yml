@@ -3,8 +3,12 @@ name: Maestro UI Tests
 on:
   pull_request:
     branches: [develop, main]
+    paths:
+      - 'VERA/**'
   push:
     branches: [develop]
+    paths:
+      - 'VERA/**'
   workflow_dispatch:
 
 concurrency:
