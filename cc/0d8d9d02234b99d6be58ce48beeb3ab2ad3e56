@@ -1,0 +1,26 @@
+.github/workflows/ci.yml
+  s_82058ffa93e6a9::t_bcd576addf44dc 10-11,14-15
+.github/workflows/maestro.yml
+  s_82058ffa93e6a9::t_99b0b94a277e63 6-7,10-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "cc0d8d9d02234b99d6be58ce48beeb3ab2ad3e56",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_82058ffa93e6a9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_79208ec8-8f18-42da-ac41-eff8c5d7a29e",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
