@@ -1,0 +1,24 @@
+.github/workflows/ai-shepherd.yml
+  s_82058ffa93e6a9::t_9b0d7e2af08ddd 5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ea375fdb90f931bf42bd0fb1cca5787b62529855",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_82058ffa93e6a9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_79208ec8-8f18-42da-ac41-eff8c5d7a29e",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
