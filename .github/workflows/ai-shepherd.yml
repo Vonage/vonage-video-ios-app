@@ -2,15 +2,6 @@ name: AI Label Shepherd
 
 on:
   workflow_call:
-  # TODO: Remove workflow_dispatch and pull_request after validation
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to check'
-        required: true
-        type: number
-  pull_request:
-    types: [labeled, unlabeled, opened, synchronize]
 
 permissions:
   contents: read
@@ -18,26 +9,14 @@ permissions:
   issues: write
 
 jobs:
-  enforce-ai-label:
+  nudge-ai-label:
     runs-on: ubuntu-latest
     steps:
-      - name: Enforce a single AI-contribution label
+      - name: Nudge a single AI-contribution label
         uses: actions/github-script@v7
         with:
           script: |
-            // Support manual dispatch: fetch PR data from input
-            let pr;
-            if (context.eventName === 'workflow_dispatch') {
-              const prNumber = context.payload.inputs.pr_number;
-              const { data } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: Number(prNumber),
-              });
-              pr = data;
-            } else {
-              pr = context.payload.pull_request;
-            }
+            const pr = context.payload.pull_request;
 
             const validLabels = ['ai-generated', 'ai-assisted', 'ai-touched', 'no-ai'];
             const prLabels = pr.labels.map(l => l.name);
