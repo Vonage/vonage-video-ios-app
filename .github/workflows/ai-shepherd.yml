@@ -2,6 +2,13 @@ name: AI Label Shepherd
 
 on:
   workflow_call:
+  # TODO: Remove workflow_dispatch after validation
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to check'
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -16,8 +23,22 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Support manual dispatch: fetch PR data from input
+            let pr;
+            if (context.eventName === 'workflow_dispatch') {
+              const prNumber = context.payload.inputs.pr_number;
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: Number(prNumber),
+              });
+              pr = data;
+            } else {
+              pr = context.payload.pull_request;
+            }
+
             const validLabels = ['ai-generated', 'ai-assisted', 'ai-touched', 'no-ai'];
-            const prLabels = context.payload.pull_request.labels.map(l => l.name);
+            const prLabels = pr.labels.map(l => l.name);
             const hits = prLabels.filter(name => validLabels.includes(name));
             const commentMarker = '<!-- ai-shepherd-check -->';
 
@@ -41,7 +62,7 @@ jobs:
             ✅ AI-contribution label verified: \`${hits[0]}\``;
 
             const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
+            const issue_number = pr.number;
 
             // Find any previous bot comment from this check
             const comments = await github.paginate(github.rest.issues.listComments, {
