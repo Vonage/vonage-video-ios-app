@@ -1,0 +1,44 @@
+.github/workflows/ci.yml
+  h_5ddc9d372ac6a1 104-117
+VERA/Config/app-config.json
+  h_5ddc9d372ac6a1 25
+VERA/Project.swift
+  h_5ddc9d372ac6a1 215-233,318-322,390-395
+VERA/VERAOKTA/Project.swift
+  h_5ddc9d372ac6a1 1-91
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  h_5ddc9d372ac6a1 1-7
+VERA/VERAOKTA/VERAOKTA/Domain/Entities/OKTAEntity.swift
+  h_5ddc9d372ac6a1 1-7
+VERA/VERAOKTA/VERAOKTA/Domain/Repository/OKTARepository.swift
+  h_5ddc9d372ac6a1 1-7
+"VERA/VERAOKTA/VERAOKTA/Domain/Use cases/OKTAUseCase.swift"
+  h_5ddc9d372ac6a1 1-7
+VERA/VERAOKTA/VERAOKTA/Resources/Localizable.xcstrings
+  h_5ddc9d372ac6a1 1-7
+"VERA/VERAOKTA/VERAOKTA/UI/View models/OKTAViewModel.swift"
+  h_5ddc9d372ac6a1 1-13
+VERA/VERAOKTA/VERAOKTA/UI/View/OKTAView.swift
+  h_5ddc9d372ac6a1 1-19
+VERA/VERAOKTA/VERAOKTA/Utils/Bundle+VERAOKTA.swift
+  h_5ddc9d372ac6a1 1-13
+VERA/VERAOKTA/VERAOKTA/Wireframe/OKTAFactory.swift
+  h_5ddc9d372ac6a1 1-10
+VERA/VERAOKTA/VERAOKTAApp/VERAOKTAApp.swift
+  h_5ddc9d372ac6a1 1-18
+VERA/VERAOKTA/VERAOKTASnapshotTests/OKTASnapshotTests.swift
+  h_5ddc9d372ac6a1 1-12
+VERA/VERAOKTA/VERAOKTATests/OKTATests.swift
+  h_5ddc9d372ac6a1 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "759487261fcc50347dfbf41248b6c65be970eeeb",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
