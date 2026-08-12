@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Foundation
+import VERACommonUI
 import VERAConfiguration
 import VERACore
 import VERADomain
@@ -34,13 +35,44 @@ import VERAVonageCallKitPlugin
     import VERAAudioDiagnostics
 #endif
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 final class DependencyContainer {
 
     let httpClient: HTTPClient
 
-    init(httpClient: HTTPClient) {
-        self.httpClient = httpClient
-    }
+    #if OKTA_ENABLED
+        let authManager: OktaAuthManager
+    #endif
+
+    #if OKTA_ENABLED
+        init(httpClient: HTTPClient, authManager: OktaAuthManager) {
+            self.httpClient = httpClient
+            self.authManager = authManager
+        }
+    #else
+        init(httpClient: HTTPClient) {
+            self.httpClient = httpClient
+        }
+    #endif
+
+    // MARK: - Auth
+
+    #if OKTA_ENABLED
+        @MainActor
+        func navBarAuthButtonViewModel(
+            onLoginTapped: @escaping () -> Void,
+            onLogoutTapped: @escaping () async -> Void
+        ) -> NavBarAuthButtonViewModel {
+            NavBarAuthButtonViewModel(
+                authStateDataSource: authManager,
+                onLoginTapped: onLoginTapped,
+                onLogoutTapped: onLogoutTapped
+            )
+        }
+    #endif
 
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 

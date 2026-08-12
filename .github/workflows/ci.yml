@@ -71,8 +71,13 @@ jobs:
           cd VERA
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
+          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
+          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
+          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
+          ./Scripts/generateOktaConfig.sh
           tuist generate --no-open
           cd ..
 

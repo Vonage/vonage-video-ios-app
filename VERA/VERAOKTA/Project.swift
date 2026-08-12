@@ -4,41 +4,25 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAOKTA",
     packages: [
-        .swiftSnapshotTesting
+        .oktaMobileSwift,
+        .swiftSnapshotTesting,
     ],
     targets: [
         // MARK: - Framework Target
         .target(
             name: "VERAOKTA",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAOKTA",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAOKTA/**"],
             resources: ["VERAOKTA/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAOKTA")],
             dependencies: [
-                .project(target: "VERACommonUI", path: "../VERACommonUI")
-            ],
-            settings: createBaseBuildSettings()
-        ),
-
-        // MARK: - Demo App Target
-        .target(
-            name: "VERAOKTAApp",
-            destinations: [.iPhone, .iPad, .mac],
-            product: .app,
-            bundleId: "com.vonage.VERAOKTAApp",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
-            infoPlist: .extendingDefault(
-                with: [
-                    "CFBundleName": "VERAOKTAApp",
-                    "CFBundleDisplayName": "VERAOKTAApp",
-                ].merging(combinedPlistValues()) { _, new in new }),
-            sources: ["VERAOKTAApp/**"],
-            scripts: [.swiftLint(targetName: "VERAOKTAApp")],
-            dependencies: [
-                .target(name: "VERAOKTA")
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
+                .project(target: "VERADomain", path: "../VERADomain"),
+                .oktaAuthFoundation,
+                .oktaBrowserSignin,
             ],
             settings: createBaseBuildSettings()
         ),
@@ -46,13 +30,14 @@ let project = Project(
         // MARK: - Unit Tests Target
         .target(
             name: "VERAOKTATests",
-            destinations: [.iPhone, .iPad, .mac],
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAOKTATests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: DeploymentTargets.iOS("16.0"),
             sources: ["VERAOKTATests/**"],
             dependencies: [
-                .target(name: "VERAOKTA")
+                .target(name: "VERAOKTA"),
+                .project(target: "VERATestHelpers", path: "../VERACore"),
             ],
             settings: createBaseBuildSettings()
         ),

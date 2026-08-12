@@ -11,6 +11,9 @@
     "allowMicrophoneControl": true,
     "allowAudioDiagnostics": true
   },
+  "authSettings": {
+    "allowAuthentication": true
+  },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,
     "allowSettings": true
@@ -22,7 +25,6 @@
     "allowDeviceSelection": true,
     "allowEmojis": true,
     "allowFeedback": true,
-    "allowOKTA": true,
     "allowPictureInPicture": true,
     "allowScreenShare": true,
     "allowSettings": true,
