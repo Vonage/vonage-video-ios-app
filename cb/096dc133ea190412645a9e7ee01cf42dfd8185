@@ -1,0 +1,134 @@
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButtonViewModel.swift
+  s_c2cec532c375f3::t_fffabf64da6a2e 55-58
+  s_c2cec532c375f3::t_06882d06ec6375 31,45,48,50-53
+  s_c2cec532c375f3::t_53224786e95a31 54,59
+  s_c2cec532c375f3::t_4b7ee47b5a9052 32
+  s_c2cec532c375f3::t_6a35593184a25b 1-30,33-44,46-47,49,60-61
+VERA/VERACore/VERATestHelpers/Mocks/MockHTTPClient.swift
+  s_c2cec532c375f3::t_7ef6f86bcd7b24 37-38
+.github/workflows/ci.yml
+  s_6fd421fa6825f3::t_c120867ca8a3d1 74-77,80
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_c2cec532c375f3::t_bdde073290bd47 204
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_c2cec532c375f3::t_f77e76d71f686f 1-46,50-102
+  s_c2cec532c375f3::t_2ba334c0018c42 47-49
+VERA/VERAOKTA/VERAOKTA/Resources/Localizable.xcstrings
+  s_ef09545b1c4ab3::t_9915b5b00c387e 4-58
+  s_ef09545b1c4ab3::t_cb32606a295874 59-61
+VERA/Tuist/ProjectDescriptionHelpers/Package+OKTA.swift
+  s_c2cec532c375f3::t_236ec038667f2a 1-13
+VERA/VERAApp/VERA/App/Navigation/NavigationCoordinator.swift
+  s_c2cec532c375f3::t_6f5fa5de5485a1 32
+VERA/Scripts/generate-app-config.py
+  s_c2cec532c375f3::t_db09a4ff1a8370 156,162,169,174
+  s_c2cec532c375f3::t_d393e7e9696642 104-113
+  s_c2cec532c375f3::t_15461f99f78904 27
+README.md
+  s_6fd421fa6825f3::t_22d59f19661067 117
+VERA/VERADomain/VERADomain/Auth/AuthState.swift
+  s_c2cec532c375f3::t_8a267f075f498b 1-47
+VERA/Scripts/setUpOkta.example.sh
+  s_6fd421fa6825f3::t_37f746aad0ffd9 1-5
+VERA/VERAOKTA/VERAOKTA/Wireframe/OKTAFactory.swift
+  s_ef09545b1c4ab3::t_9ae381ec8d0726 5,9-11,13,16-17,23
+  s_c2cec532c375f3::t_c683e0c8e16cc9 6,14-15,18-22
+.gitignore
+  s_6fd421fa6825f3::t_1aa69aad858ef2 88,91
+VERA/VERAOKTA/VERAOKTATests/Mocks/MockOKTAAuthenticating.swift
+  s_c2cec532c375f3::t_1ec9ee7a0ae98a 1-63
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_c2cec532c375f3::t_bd3c8cfb28bf1c 7
+  s_ef09545b1c4ab3::t_941fdda41a853c 38-41,46,48
+  s_ef09545b1c4ab3::t_94a566c32f3318 47,50-59
+  s_c2cec532c375f3::t_7499b738555853 61-75
+  s_ef09545b1c4ab3::t_3abc215df7b6b7 49
+VERA/VERAOKTA/VERAOKTA/Data/OktaTokenProvider.swift
+  s_ef09545b1c4ab3::t_a2bd6a4343063b 5-6,8-13,15-26,35,37-40
+  s_ef09545b1c4ab3::t_fb1c8f7d41baea 27,30-34,36
+  s_ef09545b1c4ab3::t_4c0b5adafa2521 14
+  s_ef09545b1c4ab3::t_a310aaa4c6f902 28-29
+"VERA/VERAOKTA/VERAOKTA/Domain/Use cases/OKTAUseCase.swift"
+  s_ef09545b1c4ab3::t_cd4e99650c6a07 7-15
+VERA/VERACore/VERACore/Common/Data/URLSession/URLSessionHTTPClient.swift
+  s_c2cec532c375f3::t_a81babb824ae2b 21,24
+VERA/Scripts/generateOktaConfig.sh
+  s_6fd421fa6825f3::t_2db99005af3cf6 1-95
+VERA/VERADomain/VERADomain/Auth/IDProvider.swift
+  s_c2cec532c375f3::t_2fd53237790a59 7-16
+VERA/VERAApp/VERA/App/Factories/AppHTTPClientProvider.swift
+  s_c2cec532c375f3::t_c35e02fe2c9766 45-46,48-53,55-56,60-93
+  s_ef09545b1c4ab3::t_3effcb2aa61f7d 11-14,23-36,47,54,94
+  s_ef09545b1c4ab3::t_ba918411a27b3e 95-96
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_c2cec532c375f3::t_89ffa1d4746562 167
+  s_ef09545b1c4ab3::t_ee82293c5e3c24 188
+  s_ef09545b1c4ab3::t_f927567766d4f5 36-39
+  s_ef09545b1c4ab3::t_48572470a4a4ce 51-52,57
+  s_ef09545b1c4ab3::t_171e4b2bfd0937 50,53-56,58-63
+  s_c2cec532c375f3::t_7b6857f690280b 148,151-166,168-187,189
+VERA/VERADomain/VERADomain/HTTPClient.swift
+  s_c2cec532c375f3::t_01a19ddb3ebe2c 8-11,21-24
+docs/AUTHENTICATION.md
+  s_6fd421fa6825f3::t_429888b68a2262 1-186
+VERA/VERADomain/VERADomain/Auth/AuthStateDataSource.swift
+  s_c2cec532c375f3::t_5e2116f2a965ae 5,8-14
+VERA/VERACaptions/VERACaptionsTests/Data/DefaultCaptionsDataSourceTests.swift
+  s_c2cec532c375f3::t_3ba75ecba63763 84
+VERA/Config/app-config.json
+  s_c2cec532c375f3::t_db2e60ff58c051 14-16
+VERA/VERAOKTA/VERAOKTA/UI/View/SignInView.swift
+  s_c2cec532c375f3::t_4eb2a5a2657931 6,8,10-12,14-16,21-29,57-70,72-73,75-77,86,91-92
+  s_ef09545b1c4ab3::t_7bb7ab7208c8be 1-5,7,9,13,17-20,30-56,71,74,78-85,87-90,93-99
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_c2cec532c375f3::t_fbebfbe7a5add2 197
+VERA/VERAOKTA/Project.swift
+  s_ef09545b1c4ab3::t_580da5c31da7d8 7-8,14,17,22-25,33,36,39-40
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  s_ef09545b1c4ab3::t_f7adfcd47784a9 5-6,9-10,12-17,19,21-23,25,32-49,51-67,69-74,76-90,92-98,100-107,113-135
+  s_c2cec532c375f3::t_fee96933b4bece 7,18,20,24,26-31,68,75,99,108-112
+  s_ef09545b1c4ab3::t_7d368f2343dce1 50
+  s_ef09545b1c4ab3::t_3fc21de8b9f422 91
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EHTTPClient.swift
+  s_c2cec532c375f3::t_7468651cc0b9cd 21
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_c2cec532c375f3::t_01034b88454ad3 113,119,126,131
+  s_c2cec532c375f3::t_11f11a43ab6d54 61-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cb096dc133ea190412645a9e7ee01cf42dfd8185",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_6fd421fa6825f3": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_49e54228-4c23-4603-8a52-1d65d97e143c",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_c2cec532c375f3": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1fe319c-cea8-468f-91eb-8f27528d0097",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_ef09545b1c4ab3": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_35837da6-6a75-463c-ba3e-a3e2537379ad",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
