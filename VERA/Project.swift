@@ -212,6 +212,25 @@ private func isFeedbackEnabled() -> Bool {
     return meetingRoomSettings["allowFeedback"] as! Bool
 }
 
+/// Returns whether OKTA is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "meetingRoomSettings": {
+///     "allowOKTA": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `meetingRoomSettings.allowOKTA` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areOKTAEnabled() -> Bool {
+    let config = readAppConfig()
+    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
+    return meetingRoomSettings["allowOKTA"] as! Bool
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -296,6 +315,11 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAFeedback", path: "VERAFeedback")
         ])
     }
+    if areOKTAEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAOKTA", path: "VERAOKTA")
+        ])
+    }
     return dependencies
 }
 
@@ -361,6 +385,12 @@ private func createBuildSettings() -> Settings {
         baseSettings["FEEDBACK_ENABLED"] = "1"
         flags.append("FEEDBACK_ENABLED")
         print("Feedback feature enabled in build settings.")
+    }
+
+    if areOKTAEnabled() {
+        baseSettings["OKTA_ENABLED"] = "1"
+        flags.append("OKTA_ENABLED")
+        print("OKTA feature enabled in build settings.")
     }
 
     if !flags.isEmpty {
