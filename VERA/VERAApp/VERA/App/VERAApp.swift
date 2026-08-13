@@ -47,19 +47,20 @@ struct VERAApp: App {
     #endif
 
     var dependencyContainer: DependencyContainer = {
+        let baseHttpClient = AppHTTPClientProvider(
+            isE2EEnabled: E2EConfiguration.isEnabled
+        )()
+
         #if OKTA_ENABLED
             let authManager = OktaAuthManager()
             let tokenProvider = OktaTokenProvider(authManager: authManager)
-            let httpClient = AppHTTPClientProvider(
-                isE2EEnabled: E2EConfiguration.isEnabled,
+            let httpClient = TokenInjectingHTTPClient(
+                wrapped: baseHttpClient,
                 tokenProvider: tokenProvider
             )
-            return DependencyContainer(httpClient: httpClient(), authManager: authManager)
+            return DependencyContainer(httpClient: httpClient, authManager: authManager)
         #else
-            let httpClient = AppHTTPClientProvider(
-                isE2EEnabled: E2EConfiguration.isEnabled
-            )
-            return DependencyContainer(httpClient: httpClient())
+            return DependencyContainer(httpClient: baseHttpClient)
         #endif
     }()
 
