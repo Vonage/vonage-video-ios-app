@@ -1,0 +1,26 @@
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_d3c838477b1634::t_3708f669d95dba 202-205
+  s_d3c838477b1634::t_09ee18dc4c906f 206
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  s_d3c838477b1634::t_96ca12e9f0084e 82,93-98
+  s_d3c838477b1634::t_29415859bf090a 15-17,20
+  s_d3c838477b1634::t_dfd0dee01252f5 56,63
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButtonViewModel.swift
+  s_d3c838477b1634::t_788df44ce9db3c 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "93626b32604a560c6049d2972a9b4d080967d7e6",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
