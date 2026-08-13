@@ -1,0 +1,23 @@
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  s_d3c838477b1634::t_432f5314ae17eb 24-25,44-45,48,54,62,68,81,86,88
+  s_d3c838477b1634::t_d881f90abe8853 92
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_d3c838477b1634::t_2ab43712879015 67-71
+  s_d3c838477b1634::t_f98abeea609d21 61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "156f9662a6a9db0409c8f07bcf6b0f35b733f91e",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
