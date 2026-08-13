@@ -5,10 +5,7 @@
 import Foundation
 import VERADomain
 
-/// A lightweight decorator that injects an `Authorization: Bearer` header
-/// into every request when a valid token is available.
-///
-/// Delegates all actual HTTP work to the wrapped client.
+/// Decorator that injects a Bearer token header into every request.
 public final class TokenInjectingHTTPClient: HTTPClient {
 
     private let wrapped: any HTTPClient

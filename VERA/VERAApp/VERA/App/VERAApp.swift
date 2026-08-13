@@ -58,7 +58,8 @@ struct VERAApp: App {
                 wrapped: baseHttpClient,
                 tokenProvider: tokenProvider
             )
-            return DependencyContainer(httpClient: httpClient, authManager: authManager)
+            let oktaFactory = OKTAFactory(authManager: authManager)
+            return DependencyContainer(httpClient: httpClient, oktaFactory: oktaFactory)
         #else
             return DependencyContainer(httpClient: baseHttpClient)
         #endif
@@ -152,42 +153,38 @@ struct VERAApp: App {
 
         return Group {
             #if AUTHENTICATION_ENABLED
-                if dependencyContainer.appConfig.authSettings.allowAuthentication {
-                    landing
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                #if OKTA_ENABLED
-                                    NavBarAuthButton(
-                                        viewModel: dependencyContainer.navBarAuthButtonViewModel(
-                                            onLoginTapped: { navigationCoordinator.showSignIn = true },
-                                            onLogoutTapped: {
-                                                try? await dependencyContainer.authManager.signOut()
-                                            }
-                                        ))
-                                #endif
-                            }
-                        }
-                        .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                landing
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
                             #if OKTA_ENABLED
-                                SignInView(
-                                    providers: [IDProvider(id: "okta", displayName: "Okta")],
-                                    onProviderSelected: { _ in
-                                        guard
-                                            let window = UIApplication.shared.connectedScenes
-                                                .compactMap({ $0 as? UIWindowScene })
-                                                .flatMap(\.windows)
-                                                .first(where: \.isKeyWindow)
-                                        else { return }
-                                        try await dependencyContainer.authManager.signIn(from: window)
-                                    }
-                                )
-                                .presentationDetents([.height(200)])
-                                .presentationDragIndicator(.visible)
+                                NavBarAuthButton(
+                                    viewModel: dependencyContainer.oktaFactory.makeNavBarAuthButtonViewModel(
+                                        onLoginTapped: { navigationCoordinator.showSignIn = true },
+                                        onLogoutTapped: {
+                                            try? await dependencyContainer.oktaFactory.authenticationManager.signOut()
+                                        }
+                                    ))
                             #endif
                         }
-                } else {
-                    landing
-                }
+                    }
+                    .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                        #if OKTA_ENABLED
+                            SignInView(
+                                providers: [IDProvider(id: "okta", displayName: "Okta")],
+                                onProviderSelected: { _ in
+                                    guard
+                                        let window = UIApplication.shared.connectedScenes
+                                            .compactMap({ $0 as? UIWindowScene })
+                                            .flatMap(\.windows)
+                                            .first(where: \.isKeyWindow)
+                                    else { return }
+                                    try await dependencyContainer.oktaFactory.authenticationManager.signIn(from: window)
+                                }
+                            )
+                            .presentationDetents([.height(200)])
+                            .presentationDragIndicator(.visible)
+                        #endif
+                    }
             #else
                 landing
             #endif

@@ -8,21 +8,14 @@ import VERADomain
 
 @testable import VERAOKTA
 
-/// Mock implementation of `OKTAAuthenticating` for unit tests.
 @MainActor
 final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, ObservableObject {
 
-    // MARK: - Published State
-
     @Published var authState: AuthState = .notAuthenticated
-
-    // MARK: - AuthStateDataSource
 
     var authStatePublisher: AnyPublisher<AuthState, Never> {
         $authState.eraseToAnyPublisher()
     }
-
-    // MARK: - Spying
 
     var signInCallCount = 0
     var signOutCallCount = 0
@@ -31,8 +24,6 @@ final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, Obs
     var signInResult: Result<Void, Error> = .success(())
     var signOutResult: Result<Void, Error> = .success(())
     var currentTokenResult: Result<String, Error> = .success("mock-token")
-
-    // MARK: - OKTAAuthenticating
 
     func signIn(from anchor: ASPresentationAnchor) async throws {
         signInCallCount += 1

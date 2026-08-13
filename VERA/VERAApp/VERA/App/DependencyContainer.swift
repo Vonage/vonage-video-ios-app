@@ -44,33 +44,17 @@ final class DependencyContainer {
     let httpClient: HTTPClient
 
     #if OKTA_ENABLED
-        let authManager: OktaAuthManager
+        let oktaFactory: OKTAFactory
     #endif
 
     #if OKTA_ENABLED
-        init(httpClient: HTTPClient, authManager: OktaAuthManager) {
+        init(httpClient: HTTPClient, oktaFactory: OKTAFactory) {
             self.httpClient = httpClient
-            self.authManager = authManager
+            self.oktaFactory = oktaFactory
         }
     #else
         init(httpClient: HTTPClient) {
             self.httpClient = httpClient
-        }
-    #endif
-
-    // MARK: - Auth
-
-    #if OKTA_ENABLED
-        @MainActor
-        func navBarAuthButtonViewModel(
-            onLoginTapped: @escaping () -> Void,
-            onLogoutTapped: @escaping () async -> Void
-        ) -> NavBarAuthButtonViewModel {
-            NavBarAuthButtonViewModel(
-                authStateDataSource: authManager,
-                onLoginTapped: onLoginTapped,
-                onLogoutTapped: onLogoutTapped
-            )
         }
     #endif
 

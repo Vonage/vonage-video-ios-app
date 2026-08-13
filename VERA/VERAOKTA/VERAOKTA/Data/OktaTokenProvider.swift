@@ -7,11 +7,7 @@
     import Foundation
     import os
 
-    /// A `Sendable` token provider that bridges the `@MainActor`-isolated
-    /// `OktaAuthManager` to the `HTTPClient` layer.
-    ///
-    /// Returns the current access token if the user is authenticated,
-    /// or `nil` if unauthenticated.
+    /// Bridges `@MainActor`-isolated `OktaAuthManager` to `Sendable` `TokenProvider`.
     public final class OktaTokenProvider: TokenProvider, @unchecked Sendable {
 
         private let authManager: OktaAuthManager
