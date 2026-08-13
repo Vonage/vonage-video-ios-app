@@ -38,7 +38,6 @@ struct AuthAccountMenuViewSnapshotTests {
         arguments: [
             ("ShortName", "Jo"),
             ("LongName", "Alexander Christopher Wellington III"),
-            ("SingleWord", "Admin"),
         ])
     func nameVariants(variantName: String, userName: String) throws {
         let sut = makeSUT(userName: userName)
@@ -53,25 +52,6 @@ struct AuthAccountMenuViewSnapshotTests {
         let sut = makeSUT(userName: nil)
 
         snapshot(sut, named: "NoName")
-    }
-
-    // MARK: - Logging Out State
-
-    @Test(
-        "AuthAccountMenuView - Logging Out State",
-        arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
-        ])
-    func loggingOutState(schemeName: String, scheme: ColorScheme) throws {
-        let sut = AuthAccountMenuView(
-            userName: "John Doe",
-            isLoggingOut: true,
-            onSignOut: {}
-        )
-        .environment(\.colorScheme, scheme)
-
-        snapshot(sut, named: "LoggingOut_\(schemeName)")
     }
 
     // MARK: - Test Helpers

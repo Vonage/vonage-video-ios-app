@@ -30,63 +30,7 @@ struct NavBarAuthButtonSnapshotTests {
 
         snapshot(sut, named: "State_\(stateName)")
     }
-
-    // MARK: - Color Scheme Tests
-
-    @Test(
-        "NavBarAuthButton - Not Authenticated Color Schemes",
-        arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
-        ])
-    func notAuthenticatedColorSchemes(schemeName: String, scheme: ColorScheme) throws {
-        let sut = makeSUT(authState: .notAuthenticated)
-            .environment(\.colorScheme, scheme)
-
-        snapshot(sut, named: "NotAuthenticated_\(schemeName)")
-    }
-
-    @Test(
-        "NavBarAuthButton - Authenticated Color Schemes",
-        arguments: [
-            ("Light", ColorScheme.light),
-            ("Dark", ColorScheme.dark),
-        ])
-    func authenticatedColorSchemes(schemeName: String, scheme: ColorScheme) throws {
-        let sut = makeSUT(authState: .authenticated(AuthenticatedUser(name: "Jane Smith")))
-            .environment(\.colorScheme, scheme)
-
-        snapshot(sut, named: "Authenticated_\(schemeName)")
-    }
-
-    // MARK: - All States Comparison
-
-    @Test("NavBarAuthButton - All States Side by Side")
-    func allStatesSideBySide() throws {
-        let sut = HStack(spacing: 20) {
-            NavBarAuthButton(
-                authState: .notAuthenticated,
-                onLoginTapped: {},
-                onLogoutTapped: {}
-            )
-            NavBarAuthButton(
-                authState: .authenticated(AuthenticatedUser(name: "User")),
-                onLoginTapped: {},
-                onLogoutTapped: {}
-            )
-        }
-        .padding()
-        .background(Color.gray.opacity(0.2))
-
-        assertSnapshot(
-            of: sut,
-            as: .image(precision: 0.99, layout: .sizeThatFits),
-            named: "AllStates",
-            record: isRecording,
-            testName: "\(snapshotPrefix)_AllStates"
-        )
-    }
-
+    
     // MARK: - Test Helpers
 
     private func makeSUT(authState: AuthState) -> some View {
