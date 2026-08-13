@@ -10,23 +10,6 @@ public struct AuthenticatedUser: Equatable, Sendable {
     public init(name: String? = nil) {
         self.name = name
     }
-
-    /// Returns the user's initials (up to 2 characters) derived from their name.
-    public var initials: String {
-        guard let name = name else { return "" }
-        let parts =
-            name
-            .split(separator: " ")
-            .prefix(2)
-            .compactMap { $0.first }
-            .map(String.init)
-
-        if parts.isEmpty {
-            return String(name.prefix(2)).uppercased()
-        }
-
-        return parts.joined().uppercased()
-    }
 }
 
 public enum AuthState: Equatable {
