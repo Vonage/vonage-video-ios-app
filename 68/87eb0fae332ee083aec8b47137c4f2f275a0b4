@@ -1,0 +1,63 @@
+VERA/VERACommonUI/VERACommonUI/UI/AuthAccountMenuView.swift
+  s_88db2904afbf35::t_24853ef3d1cecb 1-51
+VERA/VERACommonUI/VERACommonUI/UI/SignInView.swift
+  s_88db2904afbf35::t_cb0c0821a26511 43,48,57,82,88
+VERA/VERACommonUI/VERACommonUISnapshotTests/NavBarAuthButtonSnapshotTests.swift
+  s_88db2904afbf35::t_f62e575ee14dcd 1-121
+VERA/VERACommonUI/VERACommonUISnapshotTests/SignInViewSnapshotTests.swift
+  s_88db2904afbf35::t_d0cf61fac9590f 1-162
+  s_88db2904afbf35::t_523f9a10abd10f 163
+VERA/VERADomain/VERADomain/TokenInjectingHTTPClient.swift
+  s_88db2904afbf35::t_a10707752ec85e 1-35
+VERA/VERAOKTA/VERAOKTATests/OKTAFactoryTests.swift
+  s_a0d0c0c0c69525::t_7ad35e34f0ebd5 1-61
+.maestro/flows/auth-sign-in.yaml
+  s_88db2904afbf35::t_3870f0e2f9eda6 1-66
+VERA/VERACommonUI/VERACommonUISnapshotTests/AuthAccountMenuViewSnapshotTests.swift
+  s_88db2904afbf35::t_4ac0ffac7fbbd7 1-102
+VERA/VERAOKTA/VERAOKTATests/OktaTokenProviderTests.swift
+  s_a0d0c0c0c69525::t_9c92f93a8719af 1-70
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_88db2904afbf35::t_cd16a11d0967ee 59-67
+  s_88db2904afbf35::t_8ce79a6c80d321 50
+VERA/VERADomain/VERADomain/Auth/TokenProvider.swift
+  s_88db2904afbf35::t_c20fd7876d8c4b 5,7-14
+.maestro/flows/auth-sign-out.yaml
+  s_88db2904afbf35::t_f36451e35149bc 1-79
+VERA/VERAOKTA/VERAOKTA/Data/OktaAuthManager.swift
+  s_88db2904afbf35::t_01ee3662a6887d 13
+VERA/VERAOKTA/VERAOKTATests/OktaAuthManagerTests.swift
+  s_a0d0c0c0c69525::t_aa40e7c4ef57bf 1-97
+VERA/VERADomain/VERADomainTests/TokenInjectingHTTPClientTests.swift
+  s_88db2904afbf35::t_0c6d22c4b1934d 8
+VERA/VERACommonUI/VERACommonUITests/NavBarAuthButtonViewModelTests.swift
+  s_a0d0c0c0c69525::t_a99ddb09c40ea9 40,47
+  s_a0d0c0c0c69525::t_3c8aace456b23d 1-27,29-33,35-39,41-46,48-52,54-59,61-89,91-97,99-130
+  s_a0d0c0c0c69525::t_fb797b3a434f09 28,34
+  s_a0d0c0c0c69525::t_8d1cda82f2b205 53,60
+  s_a0d0c0c0c69525::t_04c77305b15934 90,98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6887eb0fae332ee083aec8b47137c4f2f275a0b4",
+  "prompts": {},
+  "sessions": {
+    "s_88db2904afbf35": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_11011016-fab9-4823-898a-ca46618d17fc",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a0d0c0c0c69525": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_d201d152-590a-4f3d-a88f-79c78405f9ed",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
