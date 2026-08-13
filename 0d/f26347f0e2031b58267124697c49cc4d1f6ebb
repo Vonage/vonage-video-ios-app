@@ -1,0 +1,21 @@
+VERA/VERAOKTA/VERAOKTATests/TokenInjectingHTTPClientTests.swift
+  s_d3c838477b1634::t_d9da3aa50389a0 84-88
+  s_d3c838477b1634::t_3f54baec1ad6d3 16-17,27-28,38-39,50-51,61-62,72-73
+  s_d3c838477b1634::t_0f5109cc1405a4 1-15,18-26,29-37,40-49,52-60,63-71,74-83,89-131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0df26347f0e2031b58267124697c49cc4d1f6ebb",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
