@@ -1,0 +1,22 @@
+docs/AUTHENTICATION.md
+  s_d3c838477b1634::t_9fa1959b319f86 67-78
+  s_d3c838477b1634::t_62053a28a7b36c 5-12
+  s_d3c838477b1634::t_67988e4c3b1eb9 31
+  s_d3c838477b1634::t_eab27323ee764b 178,183-184,189-194,196
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3f7fa53ca1da309a1ea817c10dda0333ed41894f",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
