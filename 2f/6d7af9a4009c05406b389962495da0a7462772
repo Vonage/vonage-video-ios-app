@@ -1,0 +1,31 @@
+VERA/Scripts/setUpOkta.example.sh
+  s_d3c838477b1634::t_881a2c4a477556 1-18,24-27
+docs/AUTHENTICATION.md
+  s_d3c838477b1634::t_745e8861bd8ec2 137
+  s_d3c838477b1634::t_b99764f212a191 60,65
+  s_d3c838477b1634::t_cb68c99a51473d 164,168-169,174
+  s_d3c838477b1634::t_b7fd623705a888 66
+  s_d3c838477b1634::t_8016f5cf35a0ff 175
+.github/workflows/ci.yml
+  s_d3c838477b1634::t_35a576ec4f719e 78
+VERA/Config/app-config.json
+  s_d3c838477b1634::t_37767ce35a5f2d 15
+VERA/Project.swift
+  s_d3c838477b1634::t_533daf5cbc1d35 220-221,226,230-231
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2f6d7af9a4009c05406b389962495da0a7462772",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
