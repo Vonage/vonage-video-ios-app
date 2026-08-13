@@ -2,7 +2,14 @@
 
 The Vonage Video iOS Reference App supports optional authentication via an external identity provider (IdP). The current implementation integrates [Okta](https://developer.okta.com/) using the [okta-mobile-swift](https://github.com/okta/okta-mobile-swift) SDK for browser-based OIDC sign-in.
 
-Authentication is gated behind the `OKTA_ENABLED` compilation condition and can be toggled on or off via `app-config.json` without affecting the rest of the codebase.
+Authentication is gated behind two separate compilation conditions and can be toggled on or off via `app-config.json` without affecting the rest of the codebase:
+
+| Compilation condition | Controlled by | Purpose |
+|---|---|---|
+| `AUTHENTICATION_ENABLED` | `authSettings.allowAuthentication` | Enables the general authentication infrastructure (auth UI, token injection decorator) |
+| `OKTA_ENABLED` | `"okta"` present in `authSettings.idProviders` | Compiles the `VERAOKTA` module and registers the Okta identity provider |
+
+This separation allows the architecture to support multiple identity providers independently. A provider can be added to or removed from `idProviders` without affecting the auth infrastructure itself.
 
 ## Architecture Decisions
 
@@ -21,7 +28,7 @@ This means no module outside `VERAOKTA` needs to know about Okta — they only d
 
 ### VERAOKTA module
 
-`VERAOKTA` is an optional feature module following the standard Clean Architecture layers:
+`VERAOKTA` is an optional feature module structured in the following layers:
 
 ```
 VERAOKTA/
@@ -57,10 +64,18 @@ URLSessionHTTPClient  →  TokenInjectingHTTPClient  →  Network
 
 ### Conditional compilation
 
-The `OKTA_ENABLED` flag is derived from `app-config.json` (`authSettings.allowAuthentication`). When disabled:
-- The `VERAOKTA` module is not compiled.
-- `DependencyContainer` and `AppHTTPClientProvider` fall back to their non-authenticated paths.
-- No Okta SDK dependency is pulled in.
+Authentication uses two compilation conditions derived from `app-config.json`:
+
+**`AUTHENTICATION_ENABLED`** — derived from `authSettings.allowAuthentication`:
+- Gates the general authentication UI (toolbar button, sign-in sheet) in `VERAApp`.
+- When disabled, the app compiles without any authentication infrastructure.
+
+**`OKTA_ENABLED`** — derived from `"okta"` being present in `authSettings.idProviders`:
+- Gates the `VERAOKTA` module as a dependency.
+- When disabled, the Okta SDK is not pulled in and `OktaAuthManager` is not compiled.
+- `DependencyContainer` and `AppHTTPClientProvider` use `#if OKTA_ENABLED` to conditionally wire Okta-specific types.
+
+In practice, `OKTA_ENABLED` is nested inside `AUTHENTICATION_ENABLED` — disabling authentication removes all provider code, while disabling a specific provider only removes that provider's module.
 
 > **Note:** Authentication is **disabled by default** in the committed `app-config.json`. This is intentional — the reference app showcases Vonage Video best practices, and authentication is something developers integrate separately for their own infrastructure. CI and local development environments enable the flag explicitly to test the Okta module.
 
@@ -160,19 +175,25 @@ Add the following secrets to your GitHub repository settings:
 
 ## Enabling / Disabling
 
-Authentication is **disabled by default** in `VERA/Config/app-config.json`. To enable it, set `allowAuthentication` to `true`:
+Authentication is **disabled by default** in `VERA/Config/app-config.json`. Two settings control compilation:
 
 ```json
 {
   "authSettings": {
-    "allowAuthentication": true
+    "allowAuthentication": true,
+    "idProviders": ["okta"]
   }
 }
 ```
 
-For local development, the `setUpOkta.sh` script handles this automatically (see [Setup](#setup)).
+| Key | Effect |
+|---|---|
+| `allowAuthentication` | `true` injects `AUTHENTICATION_ENABLED` — compiles the auth UI and token injection infrastructure |
+| `idProviders` | Array of provider identifiers. Including `"okta"` injects `OKTA_ENABLED` and adds the `VERAOKTA` module as a dependency |
 
-After changing the value, regenerate the app config and workspace:
+For local development, the `setUpOkta.sh` script handles both automatically (see [Setup](#setup)).
+
+After changing the values, regenerate the app config and workspace:
 
 ```bash
 cd VERA
