@@ -21,6 +21,8 @@ import Foundation
             $authState.eraseToAnyPublisher()
         }
 
+        private var credential: Credential?
+
         private static let logger = Logger(
             subsystem: "com.vonage.VERA",
             category: "okta"
@@ -39,16 +41,17 @@ import Foundation
                 throw OktaAuthError.signInFailed
             }
 
-            let credential = try Credential.store(token)
+            let stored = try Credential.store(token)
+            credential = stored
             Self.logger.info("Sign-in successful, credential stored")
 
-            updateState(from: credential)
+            updateState(from: stored)
         }
 
         public func signOut() async throws {
             Self.logger.info("Starting sign-out")
 
-            guard let credential = Credential.default else {
+            guard let credential else {
                 authState = .notAuthenticated
                 return
             }
@@ -56,12 +59,13 @@ import Foundation
             try await credential.revoke(type: .all)
             try credential.remove()
 
+            self.credential = nil
             authState = .notAuthenticated
             Self.logger.info("Sign-out completed")
         }
 
         public func currentToken() async throws -> String {
-            guard let credential = Credential.default else {
+            guard let credential else {
                 throw OktaAuthError.noCredential
             }
 
@@ -74,17 +78,18 @@ import Foundation
         }
 
         public func restoreSession() {
-            guard let credential = Credential.default else {
+            guard let stored = Credential.default else {
                 authState = .notAuthenticated
                 return
             }
 
+            credential = stored
             Self.logger.info("Restored session from Keychain")
-            updateState(from: credential)
+            updateState(from: stored)
         }
 
         private func updateState(from credential: Credential) {
-            let name = credential.token.idToken?.body.value["name"] as? String ?? ""
+            let name = credential.token.idToken?.body.value["name"]?.string
             authState = .authenticated(AuthenticatedUser(name: name))
         }
     }

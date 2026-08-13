@@ -8,10 +8,7 @@ import VERADomain
 private enum NavBarAuthButtonConstants {
     static let sheetHeight: CGFloat = 200
     static let contentSpacing: CGFloat = 16
-    static let buttonContentSpacing: CGFloat = 8
-    static let buttonVerticalPadding: CGFloat = 12
     static let buttonHorizontalPadding: CGFloat = 32
-    static let borderWidth: CGFloat = 1
 }
 
 public struct NavBarAuthButton: View {
@@ -61,47 +58,24 @@ public struct NavBarAuthButton: View {
 
     private var accountMenuView: some View {
         VStack(spacing: NavBarAuthButtonConstants.contentSpacing) {
-            if let user = authState.user {
-                Text(user.name)
+            if let user = authState.user, let name = user.name {
+                Text(name)
                     .adaptiveFont(.headline)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
-
-                if let email = user.email {
-                    Text(email)
-                        .adaptiveFont(.bodyBase)
-                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
-                }
             }
 
-            Button(role: .destructive) {
+            OutlinedButton(
+                text: Text("auth_sign_out", bundle: .module),
+                color: VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                isDisabled: isLoggingOut
+            ) {
                 Task {
                     isLoggingOut = true
                     await onLogoutTapped()
                     isLoggingOut = false
                     showAccountMenu = false
                 }
-            } label: {
-                HStack(spacing: NavBarAuthButtonConstants.buttonContentSpacing) {
-                    if isLoggingOut {
-                        ProgressView()
-                            .tint(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
-                    }
-                    Text("auth_sign_out", bundle: .module)
-                        .adaptiveFont(.bodyBaseSemibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, NavBarAuthButtonConstants.buttonVerticalPadding)
             }
-            .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
-            .overlay(
-                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                    .stroke(
-                        VERACommonUIAsset.SemanticColors.border.swiftUIColor,
-                        lineWidth: NavBarAuthButtonConstants.borderWidth
-                    )
-            )
-            .cornerRadius(.medium)
-            .disabled(isLoggingOut)
             .padding(.horizontal, NavBarAuthButtonConstants.buttonHorizontalPadding)
         }
         .padding()
