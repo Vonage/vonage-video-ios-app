@@ -1,0 +1,50 @@
+VERA/VERAOKTA/VERAOKTA/Resources/Localizable.xcstrings
+  s_d3c838477b1634::t_154efe4020d9d8 6-20,30-35,47-52,64-69,81-86,98-103,109
+VERA/VERAOKTA/VERAOKTA/UI/View/SignInView.swift
+  s_d3c838477b1634::t_5f94556cfaf796 6,32-33,36-37,42-43,57,60,65-66
+  s_d3c838477b1634::t_69ac5e1e7c50cf 67
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_d3c838477b1634::t_d70e20cedc8a1f 160
+VERA/VERACommonUI/VERACommonUI/Resources/Localizable.xcstrings
+  s_d3c838477b1634::t_6b6de47d0d86c2 1-57
+  s_d3c838477b1634::t_b26797048a8a07 58-60
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_d3c838477b1634::t_06e3e8d3a65bae 85
+  s_d3c838477b1634::t_00154dd4c41fa7 38,40-42,57-58,72,75,80-84
+  s_d3c838477b1634::t_e83c70d117c6b9 9-12,16-23,28,30,35,56,64
+  s_d3c838477b1634::t_5f4119448483d2 39,43
+  s_d3c838477b1634::t_ef73aa777b0b9d 74
+  s_d3c838477b1634::t_869c7550f26ee5 37
+  s_d3c838477b1634::t_965cd6731d6673 55
+VERA/VERAOKTA/Project.swift
+  s_d3c838477b1634::t_b7b22c80328c31 6
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  s_d3c838477b1634::t_90813752debbb9 88-89
+VERA/VERADomain/VERADomain/Auth/AuthState.swift
+  s_d3c838477b1634::t_dcd76a94423701 8
+VERA/Scripts/generateOktaConfig.sh
+  s_d3c838477b1634::t_ad119fbec65c9d 68
+  s_d3c838477b1634::t_36d2576b64ea58 3
+  s_d3c838477b1634::t_57d0cafc4e5692 67
+docs/AUTHENTICATION.md
+  s_d3c838477b1634::t_a494d96a88da36 150
+  s_d3c838477b1634::t_a211ae342fe4e0 92
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthComponentButton.swift
+  s_d3c838477b1634::t_affa1dedde0cf0 1-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c76b0cb596c57febc1bf19f7c49b4d0d3680bd3f",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
