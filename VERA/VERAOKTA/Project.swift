@@ -5,7 +5,7 @@ let project = Project(
     name: "VERAOKTA",
     options: defaultProjectOptions(),
     packages: [
-        .oktaMobileSwift,
+        .oktaMobileSwift
     ],
     targets: [
         // MARK: - Framework Target
@@ -49,6 +49,6 @@ let project = Project(
             buildAction: .buildAction(targets: ["VERAOKTATests"]),
             testAction: .targets(["VERAOKTATests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
-        ),
+        )
     ]
 )
