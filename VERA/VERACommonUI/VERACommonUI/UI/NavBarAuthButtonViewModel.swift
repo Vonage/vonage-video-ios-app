@@ -15,7 +15,6 @@ public final class NavBarAuthButtonViewModel: ObservableObject {
     public var onLogoutTapped: () async -> Void
 
     private let authStateDataSource: AuthStateDataSource
-    private var cancellables = Set<AnyCancellable>()
 
     public init(
         authStateDataSource: AuthStateDataSource,
@@ -30,9 +29,6 @@ public final class NavBarAuthButtonViewModel: ObservableObject {
     public func startObserving() {
         authStateDataSource.authStatePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.authState = state
-            }
-            .store(in: &cancellables)
+            .assign(to: &$authState)
     }
 }

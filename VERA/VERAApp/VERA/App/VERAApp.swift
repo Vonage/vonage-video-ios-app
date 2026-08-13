@@ -199,7 +199,11 @@ struct VERAApp: App {
                     navigationCoordinator?.showSignIn = true
                 },
                 onLogoutTapped: {
-                    try? await self.dependencyContainer.oktaFactory.authenticationManager.signOut()
+                    do {
+                        try await dependencyContainer.oktaFactory.authenticationManager.signOut()
+                    } catch {
+                        print("❌ Sign-out failed: \(error.localizedDescription)")
+                    }
                 }
             )
             navigationCoordinator.navBarAuthButtonViewModel = viewModel

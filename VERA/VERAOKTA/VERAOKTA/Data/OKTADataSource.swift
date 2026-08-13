@@ -12,10 +12,12 @@ import os
 @MainActor
 public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
 
-    @Published public private(set) var authState: AuthState = .notAuthenticated
+    private let authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
+
+    public var authState: AuthState { authStateSubject.value }
 
     public var authStatePublisher: AnyPublisher<AuthState, Never> {
-        $authState.eraseToAnyPublisher()
+        authStateSubject.eraseToAnyPublisher()
     }
 
     private var credential: Credential?
@@ -51,15 +53,14 @@ public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
         Self.logger.info("Starting sign-out")
 
         guard let credential else {
-            authState = .notAuthenticated
+            sendState(.notAuthenticated)
             return
         }
 
-        try await credential.revoke(type: .all)
         try credential.remove()
 
         self.credential = nil
-        authState = .notAuthenticated
+        sendState(.notAuthenticated)
         Self.logger.info("Sign-out completed")
     }
 
@@ -78,7 +79,7 @@ public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
 
     public func restoreSession() {
         guard let stored = Credential.default else {
-            authState = .notAuthenticated
+            sendState(.notAuthenticated)
             return
         }
 
@@ -89,7 +90,12 @@ public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
 
     private func updateState(from credential: Credential) {
         let name = credential.token.idToken?.body.value["name"]?.string
-        authState = .authenticated(AuthenticatedUser(name: name))
+        sendState(.authenticated(AuthenticatedUser(name: name)))
+    }
+
+    private func sendState(_ state: AuthState) {
+        objectWillChange.send()
+        authStateSubject.send(state)
     }
 }
 
