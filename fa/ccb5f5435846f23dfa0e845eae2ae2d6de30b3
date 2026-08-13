@@ -1,0 +1,26 @@
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_d3c838477b1634::t_7837c23bb9406d 8-16,57,63-65,68-73,84,93,98-101,105
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_d3c838477b1634::t_3bbd877755feeb 162-163
+  s_d3c838477b1634::t_c7cf5b248786e5 191-209
+VERA/VERAApp/VERA/App/Navigation/NavigationCoordinator.swift
+  s_d3c838477b1634::t_5006ef6bafefe9 4
+VERA/VERAOKTA/VERAOKTA/UI/View/SignInView.swift
+  s_d3c838477b1634::t_e163106c709a6c 9-18,36,38,40,64,73,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "faccb5f5435846f23dfa0e845eae2ae2d6de30b3",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
