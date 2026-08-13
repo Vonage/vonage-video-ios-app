@@ -10,7 +10,7 @@ import VERADomain
 import os
 
 @MainActor
-public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
+public final class OktaAuthManager: OKTAAuthenticating {
 
     private let authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
 
@@ -94,7 +94,6 @@ public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
     }
 
     private func sendState(_ state: AuthState) {
-        objectWillChange.send()
         authStateSubject.send(state)
     }
 }

@@ -6,7 +6,6 @@ let project = Project(
     options: defaultProjectOptions(),
     packages: [
         .oktaMobileSwift,
-        .swiftSnapshotTesting,
     ],
     targets: [
         // MARK: - Framework Target
@@ -42,21 +41,6 @@ let project = Project(
             ],
             settings: createBaseBuildSettings()
         ),
-
-        // MARK: - Snapshot Tests Target
-        .target(
-            name: "VERAOKTASnapshotTests",
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "com.vonage.VERAOKTASnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
-            sources: ["VERAOKTASnapshotTests/**"],
-            dependencies: [
-                .target(name: "VERAOKTA"),
-                .swiftSnapshotTesting,
-            ],
-            settings: createBaseBuildSettings()
-        ),
     ],
     schemes: [
         .scheme(
@@ -64,13 +48,6 @@ let project = Project(
             shared: true,
             buildAction: .buildAction(targets: ["VERAOKTATests"]),
             testAction: .targets(["VERAOKTATests"], configuration: .debug),
-            runAction: .runAction(configuration: .debug)
-        ),
-        .scheme(
-            name: "VERAOKTASnapshotTests",
-            shared: true,
-            buildAction: .buildAction(targets: ["VERAOKTASnapshotTests"]),
-            testAction: .targets(["VERAOKTASnapshotTests"], configuration: .debug),
             runAction: .runAction(configuration: .debug)
         ),
     ]

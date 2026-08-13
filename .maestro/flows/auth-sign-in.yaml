@@ -1,0 +1,66 @@
+appId: ${APP_ID}
+---
+# Authentication Sign-In Flow
+# Validates the auth button on landing page and the sign-in sheet presentation.
+# Requires: AUTHENTICATION_ENABLED and OKTA_ENABLED compilation flags active.
+
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Verify the auth button is visible in the toolbar (not authenticated state)
+- assertVisible:
+    id: "auth-button"
+
+- takeScreenshot: 01-landing-with-auth-button
+
+# Tap the auth button to open the sign-in sheet
+- tapOn:
+    id: "auth-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify the sign-in screen is presented
+- assertVisible:
+    id: "auth-sign-in-screen"
+
+# Verify sign-in title and subtitle are visible
+- assertVisible:
+    id: "auth-sign-in-title"
+
+- assertVisible:
+    id: "auth-sign-in-subtitle"
+
+# Verify the Okta provider button is displayed
+- assertVisible:
+    id: "auth-sign-in-provider-okta"
+
+- takeScreenshot: 02-sign-in-sheet
+
+# Tap the provider button (will trigger Okta browser sign-in in real mode,
+# or succeed immediately in E2E mock mode)
+- tapOn:
+    id: "auth-sign-in-provider-okta"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# After successful sign-in, the sheet should dismiss and the auth button
+# should now reflect the authenticated state
+- assertVisible:
+    id: "landing-screen"
+
+- assertVisible:
+    id: "auth-button"
+
+- takeScreenshot: 03-landing-authenticated

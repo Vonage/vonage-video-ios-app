@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERADomain
 
 /// Decorator that injects a Bearer token header into every request.
 public final class TokenInjectingHTTPClient: HTTPClient {

@@ -1,0 +1,79 @@
+appId: ${APP_ID}
+---
+# Authentication Sign-Out Flow
+# Signs in first, then validates the account menu and sign-out behavior.
+# Requires: AUTHENTICATION_ENABLED and OKTA_ENABLED compilation flags active.
+
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# --- Sign in first so we reach the authenticated state ---
+
+- tapOn:
+    id: "auth-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    id: "auth-sign-in-screen"
+
+- tapOn:
+    id: "auth-sign-in-provider-okta"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Back on landing in authenticated state
+- assertVisible:
+    id: "landing-screen"
+
+- takeScreenshot: 01-landing-authenticated
+
+# --- Now test sign-out flow ---
+
+# Tap auth button again — should open account menu (authenticated state)
+- tapOn:
+    id: "auth-button"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify account menu is displayed with user name
+- assertVisible:
+    id: "auth-account-menu"
+
+- assertVisible:
+    id: "auth-account-name"
+
+# Verify sign-out button is visible
+- assertVisible:
+    id: "auth-sign-out-button"
+
+- takeScreenshot: 02-account-menu
+
+# Tap sign out
+- tapOn:
+    id: "auth-sign-out-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# After sign-out, should return to landing with unauthenticated auth button
+- assertVisible:
+    id: "landing-screen"
+
+- assertVisible:
+    id: "auth-button"
+
+- takeScreenshot: 03-landing-signed-out

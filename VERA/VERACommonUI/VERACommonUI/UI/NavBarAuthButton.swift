@@ -7,8 +7,6 @@ import VERADomain
 
 private enum NavBarAuthButtonConstants {
     static let sheetHeight: CGFloat = 200
-    static let contentSpacing: CGFloat = 16
-    static let buttonHorizontalPadding: CGFloat = 32
 }
 
 public struct NavBarAuthButton: View {
@@ -49,6 +47,7 @@ public struct NavBarAuthButton: View {
                     .accessibilityLabel(Text("auth_signed_in", bundle: .module))
             }
         }
+        .accessibilityIdentifier("auth-button")
         .sheet(isPresented: $showAccountMenu) {
             accountMenuView
                 .presentationDetents([.height(NavBarAuthButtonConstants.sheetHeight)])
@@ -57,27 +56,16 @@ public struct NavBarAuthButton: View {
     }
 
     private var accountMenuView: some View {
-        VStack(spacing: NavBarAuthButtonConstants.contentSpacing) {
-            if let user = authState.user, let name = user.name {
-                Text(name)
-                    .adaptiveFont(.headline)
-                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+        AuthAccountMenuView(
+            userName: authState.user?.name,
+            isLoggingOut: isLoggingOut
+        ) {
+            Task {
+                isLoggingOut = true
+                await onLogoutTapped()
+                isLoggingOut = false
+                showAccountMenu = false
             }
-
-            OutlinedButton(
-                text: Text("auth_sign_out", bundle: .module),
-                color: VERACommonUIAsset.SemanticColors.error.swiftUIColor,
-                isDisabled: isLoggingOut
-            ) {
-                Task {
-                    isLoggingOut = true
-                    await onLogoutTapped()
-                    isLoggingOut = false
-                    showAccountMenu = false
-                }
-            }
-            .padding(.horizontal, NavBarAuthButtonConstants.buttonHorizontalPadding)
         }
-        .padding()
     }
 }

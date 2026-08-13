@@ -4,9 +4,8 @@
 
 import Foundation
 import Testing
-import VERADomain
 
-@testable import VERAOKTA
+@testable import VERADomain
 
 @Suite("TokenInjectingHTTPClient Tests")
 struct TokenInjectingHTTPClientTests {

@@ -40,10 +40,12 @@ public struct SignInView: View {
                 Text("auth_sign_in_title", bundle: .module)
                     .adaptiveFont(.heading2)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                    .accessibilityIdentifier("auth-sign-in-title")
 
                 Text("auth_sign_in_subtitle", bundle: .module)
                     .adaptiveFont(.bodyBase)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                    .accessibilityIdentifier("auth-sign-in-subtitle")
             }
 
             if let errorMessage {
@@ -52,6 +54,7 @@ public struct SignInView: View {
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("auth-sign-in-error")
             }
 
             ForEach(providers) { provider in
@@ -76,11 +79,13 @@ public struct SignInView: View {
                 .cornerRadius(.medium)
                 .disabled(isLoading)
                 .padding(.horizontal, SignInViewConstants.buttonHorizontalPadding)
+                .accessibilityIdentifier("auth-sign-in-provider-\(provider.id)")
             }
 
             Spacer()
         }
         .padding()
+        .accessibilityIdentifier("auth-sign-in-screen")
     }
 
     @MainActor
