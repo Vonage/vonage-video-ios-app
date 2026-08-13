@@ -27,4 +27,6 @@ public protocol OKTAAuthenticating: ObservableObject {
 #if canImport(UIKit)
     import UIKit
     public typealias ASPresentationAnchor = UIWindow
+#elseif canImport(AppKit)
+    public typealias ASPresentationAnchor = Any
 #endif

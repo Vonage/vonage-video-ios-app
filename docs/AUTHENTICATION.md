@@ -127,11 +127,10 @@ The Okta SDK reads its configuration from `VERAOKTA/VERAOKTA/Resources/Okta.plis
    export OKTA_SCOPE="openid profile offline_access"
    ```
 
-3. Source the file and run the generation script:
+3. Run the setup script:
 
    ```bash
-   source Scripts/setUpOkta.sh
-   ./Scripts/generateOktaConfig.sh
+   ./Scripts/setUpOkta.sh
    ```
 
    This enables `authSettings.allowAuthentication` in `app-config.json` and generates `VERAOKTA/VERAOKTA/Resources/Okta.plist`.

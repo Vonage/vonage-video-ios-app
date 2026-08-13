@@ -11,10 +11,10 @@ let project = Project(
         // MARK: - Framework Target
         .target(
             name: "VERAOKTA",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAOKTA",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAOKTA/**"],
             resources: ["VERAOKTA/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAOKTA")],
@@ -30,10 +30,10 @@ let project = Project(
         // MARK: - Unit Tests Target
         .target(
             name: "VERAOKTATests",
-            destinations: .iOS,
+            destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAOKTATests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
             sources: ["VERAOKTATests/**"],
             dependencies: [
                 .target(name: "VERAOKTA"),

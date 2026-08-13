@@ -60,11 +60,14 @@ public struct AppConfig {
 
     public struct AuthSettings {
         public let allowAuthentication: Bool
+        public let idProviders: [String]
 
         public init(
-            allowAuthentication: Bool = false
+            allowAuthentication: Bool = false,
+            idProviders: [String] = ["okta"]
         ) {
             self.allowAuthentication = allowAuthentication
+            self.idProviders = idProviders
         }
     }
 

@@ -12,7 +12,10 @@
     "allowAudioDiagnostics": true
   },
   "authSettings": {
-    "allowAuthentication": false
+    "allowAuthentication": true,
+    "idProviders": [
+      "okta"
+    ]
   },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,

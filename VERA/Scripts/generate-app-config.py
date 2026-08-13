@@ -103,11 +103,14 @@ public struct AppConfig {{
 
     public struct AuthSettings {{
         public let allowAuthentication: Bool
+        public let idProviders: [String]
 
         public init(
-            allowAuthentication: Bool = {bool_str(auth['allowAuthentication'])}
+            allowAuthentication: Bool = {bool_str(auth['allowAuthentication'])},
+            idProviders: [String] = {json.dumps(auth.get('idProviders', []))}
         ) {{
             self.allowAuthentication = allowAuthentication
+            self.idProviders = idProviders
         }}
     }}
 

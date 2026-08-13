@@ -150,42 +150,46 @@ struct VERAApp: App {
         }
 
         return Group {
-            if dependencyContainer.appConfig.authSettings.allowAuthentication {
-                landing
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
+            #if AUTHENTICATION_ENABLED
+                if dependencyContainer.appConfig.authSettings.allowAuthentication {
+                    landing
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                #if OKTA_ENABLED
+                                    NavBarAuthButton(
+                                        viewModel: dependencyContainer.navBarAuthButtonViewModel(
+                                            onLoginTapped: { navigationCoordinator.showSignIn = true },
+                                            onLogoutTapped: {
+                                                try? await dependencyContainer.authManager.signOut()
+                                            }
+                                        ))
+                                #endif
+                            }
+                        }
+                        .sheet(isPresented: $navigationCoordinator.showSignIn) {
                             #if OKTA_ENABLED
-                                NavBarAuthButton(
-                                    viewModel: dependencyContainer.navBarAuthButtonViewModel(
-                                        onLoginTapped: { navigationCoordinator.showSignIn = true },
-                                        onLogoutTapped: {
-                                            try? await dependencyContainer.authManager.signOut()
-                                        }
-                                    ))
+                                SignInView(
+                                    providers: [IDProvider(id: "okta", displayName: "Okta")],
+                                    onProviderSelected: { _ in
+                                        guard
+                                            let window = UIApplication.shared.connectedScenes
+                                                .compactMap({ $0 as? UIWindowScene })
+                                                .flatMap(\.windows)
+                                                .first(where: \.isKeyWindow)
+                                        else { return }
+                                        try await dependencyContainer.authManager.signIn(from: window)
+                                    }
+                                )
+                                .presentationDetents([.height(200)])
+                                .presentationDragIndicator(.visible)
                             #endif
                         }
-                    }
-                    .sheet(isPresented: $navigationCoordinator.showSignIn) {
-                        #if OKTA_ENABLED
-                            SignInView(
-                                providers: [IDProvider(id: "okta", displayName: "Okta")],
-                                onProviderSelected: { _ in
-                                    guard
-                                        let window = UIApplication.shared.connectedScenes
-                                            .compactMap({ $0 as? UIWindowScene })
-                                            .flatMap(\.windows)
-                                            .first(where: \.isKeyWindow)
-                                    else { return }
-                                    try await dependencyContainer.authManager.signIn(from: window)
-                                }
-                            )
-                            .presentationDetents([.height(200)])
-                            .presentationDragIndicator(.visible)
-                        #endif
-                    }
-            } else {
+                } else {
+                    landing
+                }
+            #else
                 landing
-            }
+            #endif
         }
     }
 

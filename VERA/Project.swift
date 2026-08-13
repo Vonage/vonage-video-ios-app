@@ -212,7 +212,7 @@ private func isFeedbackEnabled() -> Bool {
     return meetingRoomSettings["allowFeedback"] as! Bool
 }
 
-/// Returns whether OKTA is enabled according to `app-config.json`.
+/// Returns whether authentication is enabled according to `app-config.json`.
 ///
 /// Expects the JSON shape:
 /// ```json
@@ -225,10 +225,30 @@ private func isFeedbackEnabled() -> Bool {
 ///
 /// - Returns: `true` if `authSettings.allowAuthentication` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func areOKTAEnabled() -> Bool {
+private func isAuthenticationEnabled() -> Bool {
     let config = readAppConfig()
     let authSettings = config["authSettings"] as! [String: Any]
     return authSettings["allowAuthentication"] as! Bool
+}
+
+/// Returns whether Okta is listed as an identity provider in `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "authSettings": {
+///     "idProviders": ["okta"]
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `authSettings.idProviders` contains `"okta"`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isOktaEnabled() -> Bool {
+    let config = readAppConfig()
+    let authSettings = config["authSettings"] as! [String: Any]
+    let idProviders = authSettings["idProviders"] as! [String]
+    return idProviders.contains("okta")
 }
 
 // MARK: - Dynamic Dependencies
@@ -315,7 +335,7 @@ private func createDependencies() -> [TargetDependency] {
             .project(target: "VERAFeedback", path: "VERAFeedback")
         ])
     }
-    if areOKTAEnabled() {
+    if isOktaEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAOKTA", path: "VERAOKTA")
         ])
@@ -387,10 +407,16 @@ private func createBuildSettings() -> Settings {
         print("Feedback feature enabled in build settings.")
     }
 
-    if areOKTAEnabled() {
+    if isAuthenticationEnabled() {
+        baseSettings["AUTHENTICATION_ENABLED"] = "1"
+        flags.append("AUTHENTICATION_ENABLED")
+        print("Authentication feature enabled in build settings.")
+    }
+
+    if isOktaEnabled() {
         baseSettings["OKTA_ENABLED"] = "1"
         flags.append("OKTA_ENABLED")
-        print("OKTA feature enabled in build settings.")
+        print("OKTA identity provider enabled in build settings.")
     }
 
     if !flags.isEmpty {
