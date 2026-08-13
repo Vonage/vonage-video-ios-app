@@ -217,18 +217,18 @@ private func isFeedbackEnabled() -> Bool {
 /// Expects the JSON shape:
 /// ```json
 /// {
-///   "meetingRoomSettings": {
-///     "allowOKTA": true
+///   "authSettings": {
+///     "allowAuthentication": true
 ///   }
 /// }
 /// ```
 ///
-/// - Returns: `true` if `meetingRoomSettings.allowOKTA` is `true`, else `false`.
+/// - Returns: `true` if `authSettings.allowAuthentication` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func areOKTAEnabled() -> Bool {
     let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowOKTA"] as! Bool
+    let authSettings = config["authSettings"] as! [String: Any]
+    return authSettings["allowAuthentication"] as! Bool
 }
 
 // MARK: - Dynamic Dependencies

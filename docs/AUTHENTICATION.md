@@ -57,10 +57,12 @@ URLSessionHTTPClient  →  TokenInjectingHTTPClient  →  Network
 
 ### Conditional compilation
 
-The `OKTA_ENABLED` flag is derived from `app-config.json` (`meetingRoomSettings.allowOKTA`). When disabled:
+The `OKTA_ENABLED` flag is derived from `app-config.json` (`authSettings.allowAuthentication`). When disabled:
 - The `VERAOKTA` module is not compiled.
 - `DependencyContainer` and `AppHTTPClientProvider` fall back to their non-authenticated paths.
 - No Okta SDK dependency is pulled in.
+
+> **Note:** Authentication is **disabled by default** in the committed `app-config.json`. This is intentional — the reference app showcases Vonage Video best practices, and authentication is something developers integrate separately for their own infrastructure. CI and local development environments enable the flag explicitly to test the Okta module.
 
 ### UI integration
 
@@ -132,7 +134,7 @@ The Okta SDK reads its configuration from `VERAOKTA/VERAOKTA/Resources/Okta.plis
    ./Scripts/generateOktaConfig.sh
    ```
 
-   This generates `VERAOKTA/VERAOKTA/Resources/Okta.plist`.
+   This enables `authSettings.allowAuthentication` in `app-config.json` and generates `VERAOKTA/VERAOKTA/Resources/Okta.plist`.
 
 > **Note:** `Scripts/setUpOkta.sh` and `Okta.plist` are both listed in `.gitignore` and will not be committed.
 
@@ -159,15 +161,17 @@ Add the following secrets to your GitHub repository settings:
 
 ## Enabling / Disabling
 
-Toggle Okta authentication in `VERA/Config/app-config.json`:
+Authentication is **disabled by default** in `VERA/Config/app-config.json`. To enable it, set `allowAuthentication` to `true`:
 
 ```json
 {
-  "meetingRoomSettings": {
-    "allowOKTA": true
+  "authSettings": {
+    "allowAuthentication": true
   }
 }
 ```
+
+For local development, the `setUpOkta.sh` script handles this automatically (see [Setup](#setup)).
 
 After changing the value, regenerate the app config and workspace:
 

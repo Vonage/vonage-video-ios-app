@@ -62,7 +62,7 @@ public struct AppConfig {
         public let allowAuthentication: Bool
 
         public init(
-            allowAuthentication: Bool = true
+            allowAuthentication: Bool = false
         ) {
             self.allowAuthentication = allowAuthentication
         }

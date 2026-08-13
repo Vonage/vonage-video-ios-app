@@ -75,6 +75,7 @@ jobs:
           export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
           export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
           export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
+          jq '.authSettings.allowAuthentication = true' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
           ./Scripts/generateOktaConfig.sh
