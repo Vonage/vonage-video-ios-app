@@ -5,6 +5,15 @@
 import SwiftUI
 import VERADomain
 
+private enum NavBarAuthButtonConstants {
+    static let sheetHeight: CGFloat = 200
+    static let contentSpacing: CGFloat = 16
+    static let buttonContentSpacing: CGFloat = 8
+    static let buttonVerticalPadding: CGFloat = 12
+    static let buttonHorizontalPadding: CGFloat = 32
+    static let borderWidth: CGFloat = 1
+}
+
 public struct NavBarAuthButton: View {
     private let authState: AuthState
     private let onLoginTapped: () -> Void
@@ -45,17 +54,23 @@ public struct NavBarAuthButton: View {
         }
         .sheet(isPresented: $showAccountMenu) {
             accountMenuView
-                .presentationDetents([.height(200)])
+                .presentationDetents([.height(NavBarAuthButtonConstants.sheetHeight)])
                 .presentationDragIndicator(.visible)
         }
     }
 
     private var accountMenuView: some View {
-        VStack(spacing: 16) {
-            if let user = authState.user, let name = user.name {
-                Text(name)
+        VStack(spacing: NavBarAuthButtonConstants.contentSpacing) {
+            if let user = authState.user {
+                Text(user.name)
                     .adaptiveFont(.headline)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+
+                if let email = user.email {
+                    Text(email)
+                        .adaptiveFont(.bodyBase)
+                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
+                }
             }
 
             Button(role: .destructive) {
@@ -66,7 +81,7 @@ public struct NavBarAuthButton: View {
                     showAccountMenu = false
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: NavBarAuthButtonConstants.buttonContentSpacing) {
                     if isLoggingOut {
                         ProgressView()
                             .tint(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
@@ -75,16 +90,19 @@ public struct NavBarAuthButton: View {
                         .adaptiveFont(.bodyBaseSemibold)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, NavBarAuthButtonConstants.buttonVerticalPadding)
             }
             .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
             .overlay(
                 RoundedRectangle(cornerRadius: BorderRadius.medium.value)
-                    .stroke(VERACommonUIAsset.SemanticColors.border.swiftUIColor, lineWidth: 1)
+                    .stroke(
+                        VERACommonUIAsset.SemanticColors.border.swiftUIColor,
+                        lineWidth: NavBarAuthButtonConstants.borderWidth
+                    )
             )
             .cornerRadius(.medium)
             .disabled(isLoggingOut)
-            .padding(.horizontal, 32)
+            .padding(.horizontal, NavBarAuthButtonConstants.buttonHorizontalPadding)
         }
         .padding()
     }

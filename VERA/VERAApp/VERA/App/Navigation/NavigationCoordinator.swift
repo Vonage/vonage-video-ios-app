@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import VERACommonUI
 import VERACore
 import VERADomain
 import VERAMeetingRoom
@@ -36,6 +37,7 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     var meetingRoomViewModel: MeetingRoomViewModel?
     var meetingRoomPrebuilt: MeetingRoomPrebuilt?
     var goodByeViewModel: GoodByeViewModel?
+    var navBarAuthButtonViewModel: NavBarAuthButtonViewModel?
 
     #if ARCHIVING_ENABLED
         var archivesViewModel: ArchivesViewModel?

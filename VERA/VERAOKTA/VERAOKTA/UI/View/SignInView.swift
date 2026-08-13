@@ -6,6 +6,16 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+private enum SignInViewConstants {
+    static let sectionSpacing: CGFloat = 24
+    static let titleSpacing: CGFloat = 8
+    static let topInset: CGFloat = 8
+    static let buttonContentSpacing: CGFloat = 8
+    static let buttonVerticalPadding: CGFloat = 14
+    static let buttonHorizontalPadding: CGFloat = 32
+    static let sheetHeight: CGFloat = 200
+}
+
 public struct SignInView: View {
     private let providers: [IDProvider]
     private let onProviderSelected: (IDProvider) async throws -> Void
@@ -23,11 +33,11 @@ public struct SignInView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: SignInViewConstants.sectionSpacing) {
             Spacer()
-                .frame(height: 8)
+                .frame(height: SignInViewConstants.topInset)
 
-            VStack(spacing: 8) {
+            VStack(spacing: SignInViewConstants.titleSpacing) {
                 Text("sign_in_title", bundle: .veraOKTA)
                     .adaptiveFont(.heading2)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
@@ -51,7 +61,7 @@ public struct SignInView: View {
                         await performSignIn(with: provider)
                     }
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: SignInViewConstants.buttonContentSpacing) {
                         if isLoading {
                             ProgressView()
                                 .tint(VERACommonUIAsset.SemanticColors.onPrimary.swiftUIColor)
@@ -60,13 +70,13 @@ public struct SignInView: View {
                             .adaptiveFont(.bodyBaseSemibold)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, SignInViewConstants.buttonVerticalPadding)
                 }
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.onPrimary.swiftUIColor)
                 .background(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
                 .cornerRadius(.medium)
                 .disabled(isLoading)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, SignInViewConstants.buttonHorizontalPadding)
             }
 
             Spacer()

@@ -27,7 +27,6 @@ import Foundation
         )
 
         public init() {
-            restoreSession()
         }
 
         public func signIn(from anchor: ASPresentationAnchor) async throws {
@@ -74,7 +73,7 @@ import Foundation
             return credential.token.accessToken
         }
 
-        private func restoreSession() {
+        public func restoreSession() {
             guard let credential = Credential.default else {
                 authState = .notAuthenticated
                 return

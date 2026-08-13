@@ -53,6 +53,7 @@ struct VERAApp: App {
 
         #if OKTA_ENABLED
             let authManager = OktaAuthManager()
+            authManager.restoreSession()
             let tokenProvider = OktaTokenProvider(authManager: authManager)
             let httpClient = TokenInjectingHTTPClient(
                 wrapped: baseHttpClient,
@@ -158,12 +159,8 @@ struct VERAApp: App {
                         ToolbarItem(placement: .topBarTrailing) {
                             #if OKTA_ENABLED
                                 NavBarAuthComponentButton(
-                                    viewModel: dependencyContainer.oktaFactory.makeNavBarAuthButtonViewModel(
-                                        onLoginTapped: { navigationCoordinator.showSignIn = true },
-                                        onLogoutTapped: {
-                                            try? await dependencyContainer.oktaFactory.authenticationManager.signOut()
-                                        }
-                                    ))
+                                    viewModel: makeOrGetNavBarAuthButtonViewModel()
+                                )
                             #endif
                         }
                     }
@@ -190,6 +187,25 @@ struct VERAApp: App {
             #endif
         }
     }
+
+    #if OKTA_ENABLED
+        @MainActor
+        private func makeOrGetNavBarAuthButtonViewModel() -> NavBarAuthButtonViewModel {
+            if let existing = navigationCoordinator.navBarAuthButtonViewModel {
+                return existing
+            }
+            let viewModel = dependencyContainer.oktaFactory.makeNavBarAuthButtonViewModel(
+                onLoginTapped: { [weak navigationCoordinator] in
+                    navigationCoordinator?.showSignIn = true
+                },
+                onLogoutTapped: {
+                    try? await self.dependencyContainer.oktaFactory.authenticationManager.signOut()
+                }
+            )
+            navigationCoordinator.navBarAuthButtonViewModel = viewModel
+            return viewModel
+        }
+    #endif
 
     private func makeWaitingRoom(roomName: String) -> some View {
         var waitingRoomViewModel: WaitingRoomViewModel
