@@ -10,7 +10,7 @@ import VERADomain
 import os
 
 @MainActor
-public final class OktaAuthManager: OKTAAuthenticating, AuthStateDataSource, ObservableObject {
+public final class OktaAuthManager: OKTAAuthenticating, ObservableObject {
 
     @Published public private(set) var authState: AuthState = .notAuthenticated
 

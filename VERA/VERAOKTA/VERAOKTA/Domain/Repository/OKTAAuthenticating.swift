@@ -2,12 +2,12 @@
 //  Created by Vonage on 12/8/26.
 //
 
+import Combine
 import Foundation
 import VERADomain
 
 @MainActor
-public protocol OKTAAuthenticating: ObservableObject {
-    var authState: AuthState { get }
+public protocol OKTAAuthenticating: AuthStateDataSource {
     func signIn(from anchor: ASPresentationAnchor) async throws
     func signOut() async throws
     func currentToken() async throws -> String

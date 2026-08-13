@@ -9,12 +9,12 @@ import VERADomain
 @testable import VERAOKTA
 
 @MainActor
-final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, ObservableObject {
+final class MockOKTAAuthenticating: OKTAAuthenticating {
 
-    @Published var authState: AuthState = .notAuthenticated
+    var authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
 
     var authStatePublisher: AnyPublisher<AuthState, Never> {
-        $authState.eraseToAnyPublisher()
+        authStateSubject.eraseToAnyPublisher()
     }
 
     var signInCallCount = 0
@@ -29,8 +29,8 @@ final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, Obs
         signInCallCount += 1
         switch signInResult {
         case .success:
-            authState = .authenticated(
-                AuthenticatedUser(name: "Test User")
+            authStateSubject.send(
+                .authenticated(AuthenticatedUser(name: "Test User"))
             )
         case .failure(let error):
             throw error
@@ -41,7 +41,7 @@ final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, Obs
         signOutCallCount += 1
         switch signOutResult {
         case .success:
-            authState = .notAuthenticated
+            authStateSubject.send(.notAuthenticated)
         case .failure(let error):
             throw error
         }

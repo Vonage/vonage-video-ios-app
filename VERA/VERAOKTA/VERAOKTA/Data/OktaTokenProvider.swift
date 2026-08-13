@@ -3,19 +3,19 @@
 //
 
 import Foundation
+import VERADomain
 import os
 
-/// Bridges `@MainActor`-isolated `OktaAuthManager` to `Sendable` `TokenProvider`.
 public final class OktaTokenProvider: TokenProvider, @unchecked Sendable {
 
-    private let authManager: OktaAuthManager
+    private let authManager: any OKTAAuthenticating
 
     private static let logger = Logger(
         subsystem: "com.vonage.VERA",
         category: "okta-token"
     )
 
-    public init(authManager: OktaAuthManager) {
+    public init(authManager: any OKTAAuthenticating) {
         self.authManager = authManager
     }
 
@@ -25,9 +25,6 @@ public final class OktaTokenProvider: TokenProvider, @unchecked Sendable {
 
     @MainActor
     private func getToken() async -> String? {
-        guard authManager.authState.isAuthenticated else {
-            return nil
-        }
         do {
             return try await authManager.currentToken()
         } catch {
