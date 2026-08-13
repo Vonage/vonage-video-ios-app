@@ -1,0 +1,23 @@
+VERA/VERAOKTA/VERAOKTA/Data/TokenInjectingHTTPClient.swift
+  s_d3c838477b1634::t_a7979e8ee1f166 1-39
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_d3c838477b1634::t_99fe8439144381 50-53,57-58,61,63
+VERA/VERAApp/VERA/App/Factories/AppHTTPClientProvider.swift
+  s_d3c838477b1634::t_2f8729b0f3e651 18-20,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "71aa57a8103c8cc007d98b3980ad48902e74487e",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
