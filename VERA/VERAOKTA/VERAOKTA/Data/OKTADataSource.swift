@@ -2,38 +2,36 @@
 //  Created by Vonage on 12/8/26.
 //
 
+import AuthFoundation
+import BrowserSignin
+import Combine
 import Foundation
+import VERADomain
+import os
 
-#if canImport(UIKit)
+@MainActor
+public final class OktaAuthManager: OKTAAuthenticating, AuthStateDataSource, ObservableObject {
 
-    import AuthFoundation
-    import BrowserSignin
-    import Combine
-    import VERADomain
-    import os
+    @Published public private(set) var authState: AuthState = .notAuthenticated
 
-    @MainActor
-    public final class OktaAuthManager: OKTAAuthenticating, AuthStateDataSource, ObservableObject {
+    public var authStatePublisher: AnyPublisher<AuthState, Never> {
+        $authState.eraseToAnyPublisher()
+    }
 
-        @Published public private(set) var authState: AuthState = .notAuthenticated
+    private var credential: Credential?
 
-        public var authStatePublisher: AnyPublisher<AuthState, Never> {
-            $authState.eraseToAnyPublisher()
-        }
+    private static let logger = Logger(
+        subsystem: "com.vonage.VERA",
+        category: "okta"
+    )
 
-        private var credential: Credential?
+    public init() {
+    }
 
-        private static let logger = Logger(
-            subsystem: "com.vonage.VERA",
-            category: "okta"
-        )
+    public func signIn(from anchor: ASPresentationAnchor) async throws {
+        Self.logger.info("Starting Okta browser sign-in")
 
-        public init() {
-        }
-
-        public func signIn(from anchor: ASPresentationAnchor) async throws {
-            Self.logger.info("Starting Okta browser sign-in")
-
+        #if canImport(UIKit)
             let token = try await BrowserSignin.shared?.signIn(from: anchor)
 
             guard let token else {
@@ -46,55 +44,54 @@ import Foundation
             Self.logger.info("Sign-in successful, credential stored")
 
             updateState(from: stored)
-        }
-
-        public func signOut() async throws {
-            Self.logger.info("Starting sign-out")
-
-            guard let credential else {
-                authState = .notAuthenticated
-                return
-            }
-
-            try await credential.revoke(type: .all)
-            try credential.remove()
-
-            self.credential = nil
-            authState = .notAuthenticated
-            Self.logger.info("Sign-out completed")
-        }
-
-        public func currentToken() async throws -> String {
-            guard let credential else {
-                throw OktaAuthError.noCredential
-            }
-
-            if credential.token.isExpired {
-                Self.logger.info("Token expired, refreshing")
-                try await credential.refreshIfNeeded()
-            }
-
-            return credential.token.accessToken
-        }
-
-        public func restoreSession() {
-            guard let stored = Credential.default else {
-                authState = .notAuthenticated
-                return
-            }
-
-            credential = stored
-            Self.logger.info("Restored session from Keychain")
-            updateState(from: stored)
-        }
-
-        private func updateState(from credential: Credential) {
-            let name = credential.token.idToken?.body.value["name"]?.string
-            authState = .authenticated(AuthenticatedUser(name: name))
-        }
+        #endif
     }
 
-#endif
+    public func signOut() async throws {
+        Self.logger.info("Starting sign-out")
+
+        guard let credential else {
+            authState = .notAuthenticated
+            return
+        }
+
+        try await credential.revoke(type: .all)
+        try credential.remove()
+
+        self.credential = nil
+        authState = .notAuthenticated
+        Self.logger.info("Sign-out completed")
+    }
+
+    public func currentToken() async throws -> String {
+        guard let credential else {
+            throw OktaAuthError.noCredential
+        }
+
+        if credential.token.isExpired {
+            Self.logger.info("Token expired, refreshing")
+            try await credential.refreshIfNeeded()
+        }
+
+        return credential.token.accessToken
+    }
+
+    public func restoreSession() {
+        guard let stored = Credential.default else {
+            authState = .notAuthenticated
+            return
+        }
+
+        credential = stored
+        Self.logger.info("Restored session from Keychain")
+        updateState(from: stored)
+    }
+
+    private func updateState(from credential: Credential) {
+        let name = credential.token.idToken?.body.value["name"]?.string
+        authState = .authenticated(AuthenticatedUser(name: name))
+    }
+}
 
 
 public enum OktaAuthError: Error, LocalizedError {

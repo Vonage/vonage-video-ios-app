@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import VERACommonUI
 import VERADomain
 
 private enum SignInViewConstants {
@@ -38,11 +37,11 @@ public struct SignInView: View {
                 .frame(height: SignInViewConstants.topInset)
 
             VStack(spacing: SignInViewConstants.titleSpacing) {
-                Text("sign_in_title", bundle: .veraOKTA)
+                Text("auth_sign_in_title", bundle: .module)
                     .adaptiveFont(.heading2)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
 
-                Text("sign_in_subtitle", bundle: .veraOKTA)
+                Text("auth_sign_in_subtitle", bundle: .module)
                     .adaptiveFont(.bodyBase)
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
             }
@@ -66,7 +65,7 @@ public struct SignInView: View {
                             ProgressView()
                                 .tint(VERACommonUIAsset.SemanticColors.onPrimary.swiftUIColor)
                         }
-                        Text("Sign in with \(provider.displayName)")
+                        Text("auth_sign_in_with \(provider.displayName)", bundle: .module)
                             .adaptiveFont(.bodyBaseSemibold)
                     }
                     .frame(maxWidth: .infinity)
