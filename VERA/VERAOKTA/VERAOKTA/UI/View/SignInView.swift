@@ -3,13 +3,9 @@
 //
 
 import SwiftUI
+import VERACommonUI
 import VERADomain
 
-/// A compact sheet view that presents available identity providers for sign-in.
-///
-/// Designed to be presented with a small detent from the landing page nav bar.
-/// Receives a list of `IDProvider`s and delegates the sign-in action for
-/// the selected provider to the composition root.
 public struct SignInView: View {
     private let providers: [IDProvider]
     private let onProviderSelected: (IDProvider) async throws -> Void
@@ -18,9 +14,6 @@ public struct SignInView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    /// - Parameters:
-    ///   - providers: The list of identity providers to display.
-    ///   - onProviderSelected: Called when the user selects a provider to sign in with.
     public init(
         providers: [IDProvider],
         onProviderSelected: @escaping (IDProvider) async throws -> Void
@@ -34,27 +27,24 @@ public struct SignInView: View {
             Spacer()
                 .frame(height: 8)
 
-            // Title
             VStack(spacing: 8) {
                 Text("sign_in_title", bundle: .veraOKTA)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .adaptiveFont(.heading2)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
 
                 Text("sign_in_subtitle", bundle: .veraOKTA)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .adaptiveFont(.bodyBase)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textSecondary.swiftUIColor)
             }
 
-            // Error message
             if let errorMessage {
                 Text(errorMessage)
-                    .font(.caption)
-                    .foregroundStyle(.red)
+                    .adaptiveFont(.caption)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
 
-            // Provider buttons
             ForEach(providers) { provider in
                 Button {
                     Task {
@@ -64,15 +54,17 @@ public struct SignInView: View {
                     HStack(spacing: 8) {
                         if isLoading {
                             ProgressView()
-                                .tint(.white)
+                                .tint(VERACommonUIAsset.SemanticColors.onPrimary.swiftUIColor)
                         }
                         Text("Sign in with \(provider.displayName)")
-                            .fontWeight(.semibold)
+                            .adaptiveFont(.bodyBaseSemibold)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                 }
-                .buttonStyle(.borderedProminent)
+                .foregroundStyle(VERACommonUIAsset.SemanticColors.onPrimary.swiftUIColor)
+                .background(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                .cornerRadius(.medium)
                 .disabled(isLoading)
                 .padding(.horizontal, 32)
             }

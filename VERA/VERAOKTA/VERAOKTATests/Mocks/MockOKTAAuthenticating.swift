@@ -30,7 +30,7 @@ final class MockOKTAAuthenticating: OKTAAuthenticating, AuthStateDataSource, Obs
         switch signInResult {
         case .success:
             authState = .authenticated(
-                AuthenticatedUser(email: "test@vonage.com", name: "Test User")
+                AuthenticatedUser(name: "Test User")
             )
         case .failure(let error):
             throw error

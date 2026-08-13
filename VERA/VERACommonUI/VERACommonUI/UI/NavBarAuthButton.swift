@@ -5,38 +5,42 @@
 import SwiftUI
 import VERADomain
 
-/// A toolbar button that shows the user's authentication state.
-///
-/// - Not authenticated: Shows a `person.circle` icon. Tapping delegates login to the composition root.
-/// - Authenticated: Shows the user's initials in a circular badge.
-///   Tapping shows a sign-out confirmation sheet.
-///
-/// This view is completely decoupled from any specific identity provider.
 public struct NavBarAuthButton: View {
-    @ObservedObject private var viewModel: NavBarAuthButtonViewModel
+    private let authState: AuthState
+    private let onLoginTapped: () -> Void
+    private let onLogoutTapped: () async -> Void
+
     @State private var showAccountMenu = false
     @State private var isLoggingOut = false
 
-    public init(viewModel: NavBarAuthButtonViewModel) {
-        self.viewModel = viewModel
+    public init(
+        authState: AuthState,
+        onLoginTapped: @escaping () -> Void,
+        onLogoutTapped: @escaping () async -> Void
+    ) {
+        self.authState = authState
+        self.onLoginTapped = onLoginTapped
+        self.onLogoutTapped = onLogoutTapped
     }
 
     public var body: some View {
         Button {
-            switch viewModel.authState {
+            switch authState {
             case .notAuthenticated:
-                viewModel.onLoginTapped()
+                onLoginTapped()
             case .authenticated:
                 showAccountMenu = true
             }
         } label: {
-            switch viewModel.authState {
+            switch authState {
             case .notAuthenticated:
-                Image(systemName: "person.circle")
-                    .font(.title3)
-                    .accessibilityLabel("Sign in")
-            case .authenticated(let user):
-                initialsView(for: user)
+                VERACommonUIAsset.Images.userSolid.swiftUIImage
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                    .accessibilityLabel(Text("auth_sign_in", bundle: .module))
+            case .authenticated:
+                VERACommonUIAsset.Images.assignUserSolid.swiftUIImage
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
+                    .accessibilityLabel(Text("auth_signed_in", bundle: .module))
             }
         }
         .sheet(isPresented: $showAccountMenu) {
@@ -44,41 +48,20 @@ public struct NavBarAuthButton: View {
                 .presentationDetents([.height(200)])
                 .presentationDragIndicator(.visible)
         }
-        .onAppear {
-            viewModel.startObserving()
-        }
-    }
-
-    // MARK: - Private Views
-
-    private func initialsView(for user: AuthenticatedUser) -> some View {
-        Text(user.initials)
-            .font(.caption)
-            .fontWeight(.semibold)
-            .foregroundStyle(.white)
-            .frame(width: 28, height: 28)
-            .background(
-                Circle()
-                    .fill(VERACommonUIAsset.SemanticColors.primary.swiftUIColor)
-            )
-            .accessibilityLabel(Text(user.name))
     }
 
     private var accountMenuView: some View {
         VStack(spacing: 16) {
-            if let user = viewModel.authState.user {
-                Text(user.name)
-                    .font(.headline)
-
-                Text(user.email)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            if let user = authState.user, let name = user.name {
+                Text(name)
+                    .adaptiveFont(.headline)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
             }
 
             Button(role: .destructive) {
                 Task {
                     isLoggingOut = true
-                    await viewModel.onLogoutTapped()
+                    await onLogoutTapped()
                     isLoggingOut = false
                     showAccountMenu = false
                 }
@@ -86,14 +69,20 @@ public struct NavBarAuthButton: View {
                 HStack(spacing: 8) {
                     if isLoggingOut {
                         ProgressView()
-                            .tint(.red)
+                            .tint(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                     }
-                    Text("Sign out")
+                    Text("auth_sign_out", bundle: .module)
+                        .adaptiveFont(.bodyBaseSemibold)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
             }
-            .buttonStyle(.bordered)
+            .foregroundStyle(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: BorderRadius.medium.value)
+                    .stroke(VERACommonUIAsset.SemanticColors.border.swiftUIColor, lineWidth: 1)
+            )
+            .cornerRadius(.medium)
             .disabled(isLoggingOut)
             .padding(.horizontal, 32)
         }

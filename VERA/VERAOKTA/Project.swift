@@ -3,6 +3,7 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAOKTA",
+    options: defaultProjectOptions(),
     packages: [
         .oktaMobileSwift,
         .swiftSnapshotTesting,

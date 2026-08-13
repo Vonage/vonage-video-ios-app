@@ -157,7 +157,7 @@ struct VERAApp: App {
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             #if OKTA_ENABLED
-                                NavBarAuthButton(
+                                NavBarAuthComponentButton(
                                     viewModel: dependencyContainer.oktaFactory.makeNavBarAuthButtonViewModel(
                                         onLoginTapped: { navigationCoordinator.showSignIn = true },
                                         onLogoutTapped: {

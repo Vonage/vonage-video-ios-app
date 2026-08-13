@@ -85,15 +85,13 @@ import Foundation
         }
 
         private func updateState(from credential: Credential) {
-            let email = credential.userInfo?.email ?? ""
-            let name = credential.userInfo?.name ?? credential.userInfo?.preferredUsername ?? email
-            authState = .authenticated(AuthenticatedUser(email: email, name: name))
+            let name = credential.token.idToken?.body.value["name"] as? String ?? ""
+            authState = .authenticated(AuthenticatedUser(name: name))
         }
     }
 
 #endif
 
-import Foundation
 
 public enum OktaAuthError: Error, LocalizedError {
     case signInFailed

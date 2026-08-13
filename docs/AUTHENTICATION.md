@@ -48,7 +48,6 @@ VERAOKTA/
 ├── Utils/
 │   └── Bundle+VERAOKTA.swift
 └── Resources/
-    ├── Okta.plist                         # ⚠️ Generated — not committed to git
     └── Localizable.xcstrings
 ```
 
@@ -90,7 +89,7 @@ The sign-in flow itself is presented as a `.sheet` with `SignInView`, which rece
 
 ## Okta Configuration
 
-The Okta SDK reads its configuration from `VERAOKTA/VERAOKTA/Resources/Okta.plist`. This file contains OIDC client credentials and **must not be committed to the repository**. It is generated at build time from environment variables.
+The Okta SDK reads its configuration from `Okta.plist` in the app's main bundle. This file contains OIDC client credentials and **must not be committed to the repository**. It is generated at build time from environment variables into `VERAApp/VERA/Resources/Okta.plist`.
 
 ### Plist structure
 
@@ -148,7 +147,7 @@ The Okta SDK reads its configuration from `VERAOKTA/VERAOKTA/Resources/Okta.plis
    ./Scripts/setUpOkta.sh
    ```
 
-   This enables `authSettings.allowAuthentication` in `app-config.json` and generates `VERAOKTA/VERAOKTA/Resources/Okta.plist`.
+   This enables `authSettings.allowAuthentication` in `app-config.json` and generates `VERAApp/VERA/Resources/Okta.plist`.
 
 > **Note:** `Scripts/setUpOkta.sh` and `Okta.plist` are both listed in `.gitignore` and will not be committed.
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Generates Okta.plist with OIDC configuration for the VERAOKTA module.
+# Generates Okta.plist in the VERAApp main bundle with OIDC configuration.
 # Usage:
 #   export OKTA_ISSUER_URL=https://your-org.okta.com
 #   export OKTA_CLIENT_ID=your_client_id
@@ -64,8 +64,8 @@ fi
 # Default scope if not provided
 OKTA_SCOPE="${OKTA_SCOPE:-openid profile offline_access}"
 
-# Output path
-OUTPUT_DIR="VERAOKTA/VERAOKTA/Resources"
+# Output path — must be in the app target so it ends up in the main bundle
+OUTPUT_DIR="VERAApp/VERA/Resources"
 OUTPUT_FILE="$OUTPUT_DIR/Okta.plist"
 
 # Create Resources directory if it doesn't exist

@@ -4,18 +4,16 @@
 
 import Foundation
 
-/// Represents an authenticated user with their profile information.
 public struct AuthenticatedUser: Equatable, Sendable {
-    public let email: String
-    public let name: String
+    public let name: String?
 
-    public init(email: String, name: String) {
-        self.email = email
+    public init(name: String? = nil) {
         self.name = name
     }
 
     /// Returns the user's initials (up to 2 characters) derived from their name.
     public var initials: String {
+        guard let name = name else { return "" }
         let parts =
             name
             .split(separator: " ")
@@ -31,7 +29,6 @@ public struct AuthenticatedUser: Equatable, Sendable {
     }
 }
 
-/// Represents the authentication state of the user.
 public enum AuthState: Equatable {
     case notAuthenticated
     case authenticated(AuthenticatedUser)
