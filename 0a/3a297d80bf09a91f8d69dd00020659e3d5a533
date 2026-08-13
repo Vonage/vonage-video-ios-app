@@ -1,0 +1,23 @@
+VERA/VERACommonUI/VERACommonUI/Resources/Localizable.xcstrings
+  s_d3c838477b1634::t_23cf3f644c0611 25-75,116
+VERA/VERAOKTA/VERAOKTA/Wireframe/OKTAFactory.swift
+  s_d3c838477b1634::t_84a434e30af65e 5-7,9-10,12,14-16,18-24,26-35,38-41
+VERA/VERACommonUI/VERACommonUI/UI/SignInView.swift
+  s_d3c838477b1634::t_532454c4d36f9b 1-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0a3a297d80bf09a91f8d69dd00020659e3d5a533",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
