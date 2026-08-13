@@ -1,0 +1,26 @@
+VERA/VERAOKTA/VERAOKTA/Data/OKTADataSource.swift
+  s_d3c838477b1634::t_81433cafdef026 13
+VERA/VERAOKTA/VERAOKTA/Data/OktaTokenProvider.swift
+  s_d3c838477b1634::t_01eb7e41e921f0 6
+  s_d3c838477b1634::t_be502988ced112 11,18
+VERA/VERAOKTA/VERAOKTA/Domain/Repository/OKTAAuthenticating.swift
+  s_d3c838477b1634::t_7d8f107537052f 5,10
+VERA/VERAOKTA/VERAOKTATests/Mocks/MockOKTAAuthenticating.swift
+  s_d3c838477b1634::t_848d475600819f 12,14,17,32-33,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "883b36f8d726cdef3c1645cd5329787c5ca5cda4",
+  "prompts": {},
+  "sessions": {
+    "s_d3c838477b1634": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a1e8d5fa-cf62-416f-9692-e3c29d0286a2",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
