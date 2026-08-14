@@ -8,6 +8,7 @@ import VERACommonUI
 import VERAConfiguration
 import VERACore
 import VERADomain
+import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
@@ -44,13 +45,21 @@ final class DependencyContainer {
     let httpClient: HTTPClient
 
     #if OKTA_ENABLED
-        let oktaFactory: OKTAFactory
+        let oktaFactory: OKTAFactory?
+        let e2eAuthManager: E2EAuthStateManager?
     #endif
 
     #if OKTA_ENABLED
         init(httpClient: HTTPClient, oktaFactory: OKTAFactory) {
             self.httpClient = httpClient
             self.oktaFactory = oktaFactory
+            self.e2eAuthManager = nil
+        }
+
+        init(httpClient: HTTPClient, e2eAuthManager: E2EAuthStateManager) {
+            self.httpClient = httpClient
+            self.oktaFactory = nil
+            self.e2eAuthManager = e2eAuthManager
         }
     #else
         init(httpClient: HTTPClient) {
