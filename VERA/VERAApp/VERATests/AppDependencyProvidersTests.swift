@@ -12,6 +12,10 @@ import VERAVonage
 @testable import VERA
 @testable import VERAMeetingRoomSDK
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 @Suite("App dependency provider tests")
 struct AppDependencyProvidersTests {
 
@@ -37,7 +41,13 @@ struct AppDependencyProvidersTests {
     func dependencyContainerExposesInjectedHTTPClient() {
         let client = E2EHTTPClient(interceptor: HTTPClientInterceptorSpy())
 
-        let sut = DependencyContainer(httpClient: client)
+        #if OKTA_ENABLED
+            let sut = DependencyContainer(
+                httpClient: client,
+                oktaFactory: OKTAFactory(authManager: OktaAuthManager()))
+        #else
+            let sut = DependencyContainer(httpClient: client)
+        #endif
 
         #expect((sut.httpClient as? E2EHTTPClient) === client)
     }
