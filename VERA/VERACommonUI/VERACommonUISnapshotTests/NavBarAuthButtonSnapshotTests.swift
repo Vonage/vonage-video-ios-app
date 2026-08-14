@@ -30,7 +30,7 @@ struct NavBarAuthButtonSnapshotTests {
 
         snapshot(sut, named: "State_\(stateName)")
     }
-    
+
     // MARK: - Test Helpers
 
     private func makeSUT(authState: AuthState) -> some View {

@@ -152,40 +152,39 @@ struct VERAApp: App {
             navigationCoordinator.go(to: .waitingRoom(roomName))
         }
 
-        return Group {
-            #if AUTHENTICATION_ENABLED
+        #if AUTHENTICATION_ENABLED
+            return
                 landing
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            #if OKTA_ENABLED
-                                NavBarAuthComponentButton(
-                                    viewModel: makeOrGetNavBarAuthButtonViewModel()
-                                )
-                            #endif
-                        }
-                    }
-                    .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
                         #if OKTA_ENABLED
-                            SignInView(
-                                providers: [IDProvider(id: "okta", displayName: "Okta")],
-                                onProviderSelected: { _ in
-                                    guard
-                                        let window = UIApplication.shared.connectedScenes
-                                            .compactMap({ $0 as? UIWindowScene })
-                                            .flatMap(\.windows)
-                                            .first(where: \.isKeyWindow)
-                                    else { return }
-                                    try await dependencyContainer.oktaFactory.authenticationManager.signIn(from: window)
-                                }
+                            NavBarAuthComponentButton(
+                                viewModel: makeOrGetNavBarAuthButtonViewModel()
                             )
-                            .presentationDetents([.height(200)])
-                            .presentationDragIndicator(.visible)
                         #endif
                     }
-            #else
-                landing
-            #endif
-        }
+                }
+                .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                    #if OKTA_ENABLED
+                        SignInView(
+                            providers: [IDProvider(id: "okta", displayName: "Okta")],
+                            onProviderSelected: { _ in
+                                guard
+                                    let window = UIApplication.shared.connectedScenes
+                                        .compactMap({ $0 as? UIWindowScene })
+                                        .flatMap(\.windows)
+                                        .first(where: \.isKeyWindow)
+                                else { return }
+                                try await dependencyContainer.oktaFactory.authenticationManager.signIn(from: window)
+                            }
+                        )
+                        .presentationDetents([.height(200)])
+                        .presentationDragIndicator(.visible)
+                    #endif
+                }
+        #else
+            return landing
+        #endif
     }
 
     #if OKTA_ENABLED
