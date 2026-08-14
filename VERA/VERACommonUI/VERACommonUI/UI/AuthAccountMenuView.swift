@@ -27,25 +27,31 @@ public struct AuthAccountMenuView: View {
     }
 
     public var body: some View {
-        VStack(spacing: AuthAccountMenuViewConstants.contentSpacing) {
-            if let name = userName {
-                Text(name)
-                    .adaptiveFont(.headline)
-                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
-                    .accessibilityIdentifier("auth-account-name")
-            }
+        ZStack {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityIdentifier("auth-account-menu")
 
-            OutlinedButton(
-                text: Text("auth_sign_out", bundle: .module),
-                color: VERACommonUIAsset.SemanticColors.error.swiftUIColor,
-                isDisabled: isLoggingOut
-            ) {
-                onSignOut()
+            VStack(spacing: AuthAccountMenuViewConstants.contentSpacing) {
+                if let name = userName {
+                    Text(name)
+                        .adaptiveFont(.headline)
+                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                        .accessibilityIdentifier("auth-account-name")
+                }
+
+                OutlinedButton(
+                    text: Text("auth_sign_out", bundle: .module),
+                    color: VERACommonUIAsset.SemanticColors.error.swiftUIColor,
+                    isDisabled: isLoggingOut
+                ) {
+                    onSignOut()
+                }
+                .accessibilityIdentifier("auth-sign-out-button")
+                .padding(.horizontal, AuthAccountMenuViewConstants.buttonHorizontalPadding)
             }
-            .accessibilityIdentifier("auth-sign-out-button")
-            .padding(.horizontal, AuthAccountMenuViewConstants.buttonHorizontalPadding)
+            .padding()
         }
-        .padding()
-        .accessibilityIdentifier("auth-account-menu")
     }
 }
