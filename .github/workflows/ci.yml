@@ -112,19 +112,19 @@ jobs:
             $XCODE_COMMON_FLAGS | xcpretty
 
       - name: Run VERAOKTATests (macOS)
-      id: okta-tests-macos
-      run: |
-        echo "🧪 Running VERAOKTATests on macOS"
-        xcodebuild test \
-          -workspace VERA/VERA.xcworkspace \
-          -scheme VERAOKTATests \
-          -destination "platform=macOS" \
-          -derivedDataPath DerivedData \
-          -enableCodeCoverage YES \
-          -resultBundlePath DerivedData/VERAOKTATests-macOS.xcresult \
-          $XCODE_COMMON_FLAGS | xcpretty
+        id: okta-tests-macos
+        run: |
+          echo "🧪 Running VERAOKTATests on macOS"
+          xcodebuild test \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERAOKTATests \
+            -destination "platform=macOS" \
+            -derivedDataPath DerivedData \
+            -enableCodeCoverage YES \
+            -resultBundlePath DerivedData/VERAOKTATests-macOS.xcresult \
+            $XCODE_COMMON_FLAGS | xcpretty
 
-    - name: Preboot iOS Simulator
+      - name: Preboot iOS Simulator
         run: |
           set -euo pipefail
           xcrun simctl boot "iPhone 17" || true 
