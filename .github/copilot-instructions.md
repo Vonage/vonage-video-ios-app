@@ -25,7 +25,7 @@ All commands must be run from within the `VERA/` directory unless noted otherwis
 # Export required env vars
 export BASE_API_URL=https://api.example.net/
 export DEVELOPMENT_TEAM=AB0C12DE34
-export MARKETING_VERSION=1.1
+export MARKETING_VERSION=1.0
 export CURRENT_PROJECT_VERSION=1
 
 # Run from VERA/ directory

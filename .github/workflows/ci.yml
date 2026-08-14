@@ -7,8 +7,12 @@ permissions:
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
 
 jobs:
   format-check:
@@ -283,7 +287,7 @@ jobs:
               -allowProvisioningUpdates \
               -archivePath $PWD/build/VERA.xcarchive \
               CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
-              archive | xcpretty
+              archive
 
       - name: Export IPA
         run: |
@@ -291,7 +295,7 @@ jobs:
               -archivePath "$PWD/build/VERA.xcarchive" \
               -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
               -allowProvisioningUpdates \
-              -exportPath "$PWD/build" | xcpretty
+              -exportPath "$PWD/build"
 
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v3.0.1

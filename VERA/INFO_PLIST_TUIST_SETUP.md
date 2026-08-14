@@ -9,7 +9,7 @@ Create the script `Scripts/setUpInfoPlist.sh` (do **not** commit your real team 
 ```bash
 export DEVELOPMENT_TEAM=YOUR_TEAM_ID      # Replace with your real team ID
 export CURRENT_PROJECT_VERSION=1          # Numeric build number
-export MARKETING_VERSION=1.1              # Human-readable version (semantic)
+export MARKETING_VERSION=1.0              # Human-readable version (semantic)
 ```
 
 (Template example: `Scripts/setUpInfoPlist.sh.example`)
@@ -25,7 +25,7 @@ This generates `Config/Signing.xcconfig` containing:
 
 ```text
 DEVELOPMENT_TEAM = <your team id>
-MARKETING_VERSION = 1.1
+MARKETING_VERSION = 1.0
 CURRENT_PROJECT_VERSION = 1
 ```
 
