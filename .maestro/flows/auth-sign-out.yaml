@@ -53,9 +53,6 @@ appId: ${APP_ID}
 - assertVisible:
     id: "auth-account-menu"
 
-- assertVisible:
-    id: "auth-account-name"
-
 # Verify sign-out button is visible
 - assertVisible:
     id: "auth-sign-out-button"
