@@ -33,6 +33,7 @@ struct AppDependencyProvidersTests {
         #expect(client is E2EHTTPClient)
     }
 
+    @MainActor
     @Test("Dependency container exposes injected HTTP client")
     func dependencyContainerExposesInjectedHTTPClient() {
         let client = E2EHTTPClient(interceptor: HTTPClientInterceptorSpy())
