@@ -1,0 +1,44 @@
+VERA/VERAE2E/VERAE2E/Domain/Auth/E2EAuthStateManager.swift
+  s_b3da73fe312d2b::t_b14a3396e1cea0 13
+VERA/VERAOKTA/VERAOKTA/Data/DefaultBrowserSignInProvider.swift
+  s_b3da73fe312d2b::t_fcad7e2ccf7367 1-13,15,21-25,49-50
+  s_b3da73fe312d2b::t_ce92213b0898e5 14,16-20,26-48
+VERA/VERAOKTA/VERAOKTA/Domain/Repository/BrowserSignInProvider.swift
+  s_b3da73fe312d2b::t_21c56242c59066 1-6,19,31
+  s_b3da73fe312d2b::t_f14d459a1a03ea 7-18,20-30
+VERA/VERAOKTA/VERAOKTA/Data/OktaAuthManager.swift
+  s_b3da73fe312d2b::t_30b0cfe93322c1 34,40,45-46,51,55-56,60
+  s_b3da73fe312d2b::t_2f69d6a0f547bb 14,27-28,35-37,39
+VERA/VERADomain/VERADomain/Auth/AuthStateDataSource.swift
+  s_b3da73fe312d2b::t_35538fdf06d347 12
+VERA/VERAOKTA/VERAOKTATests/Mocks/MockBrowserSignInProvider.swift
+  s_b3da73fe312d2b::t_1f34fc31e81516 1-43
+VERA/VERAOKTA/VERAOKTATests/OktaAuthManagerTests.swift
+  s_b3da73fe312d2b::t_a0fe3c93a62804 20,27,35-78,81-85,90,93-96,98-101,103-122,127-130,134,137-140,142,144,162-177
+sonar-project.properties
+  s_0c214c6d86769c::t_b537be9d5264a7 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "696fed79353fcdcf854728aac0be996e70f399c4",
+  "prompts": {},
+  "sessions": {
+    "s_0c214c6d86769c": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "50e6cf15-680f-4f27-bfcc-c697aee5a1a5",
+        "model": "claude-haiku-4.5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
