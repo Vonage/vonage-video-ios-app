@@ -17,14 +17,14 @@ struct OktaAuthManagerTests {
 
     @Test("initial authState is notAuthenticated")
     func initialState() {
-        let sut = OktaAuthManager()
+        let (sut, _) = makeSUT()
 
         #expect(sut.authState == .notAuthenticated)
     }
 
     @Test("authStatePublisher emits notAuthenticated on subscription")
     func initialPublisherValue() {
-        let sut = OktaAuthManager()
+        let (sut, _) = makeSUT()
         var received: [AuthState] = []
         let cancellable = sut.authStatePublisher.sink { received.append($0) }
 
@@ -32,51 +32,116 @@ struct OktaAuthManagerTests {
         _ = cancellable
     }
 
+    // MARK: - Sign In
+
+    @Test("signIn publishes authenticated with user name on success")
+    func signInSuccess() async throws {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .success(SignInResult(accessToken: "tok", userName: "Alice"))
+
+        try await sut.signIn(from: makeAnchor())
+
+        #expect(sut.authState == .authenticated(AuthenticatedUser(name: "Alice")))
+    }
+
+    @Test("signIn publishes authenticated with nil name when provider returns nil name")
+    func signInSuccessNilName() async throws {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .success(SignInResult(accessToken: "tok", userName: nil))
+
+        try await sut.signIn(from: makeAnchor())
+
+        #expect(sut.authState == .authenticated(AuthenticatedUser(name: nil)))
+    }
+
+    @Test("signIn throws signInFailed when provider returns nil")
+    func signInReturnsNil() async {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .success(nil)
+
+        await #expect(throws: OktaAuthError.signInFailed) {
+            try await sut.signIn(from: makeAnchor())
+        }
+        #expect(sut.authState == .notAuthenticated)
+    }
+
+    @Test("signIn rethrows provider error")
+    func signInRethrows() async {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .failure(NSError(domain: "test", code: 42))
+
+        await #expect(throws: Error.self) {
+            try await sut.signIn(from: makeAnchor())
+        }
+        #expect(sut.authState == .notAuthenticated)
+    }
+
     // MARK: - Sign Out
 
-    @Test("signOut sets state to notAuthenticated when no credential stored")
-    func signOutWithoutCredential() async throws {
-        let sut = OktaAuthManager()
+    @Test("signOut sets state to notAuthenticated")
+    func signOut() async throws {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .success(SignInResult(accessToken: "tok", userName: "Bob"))
+        try await sut.signIn(from: makeAnchor())
 
         try await sut.signOut()
 
         #expect(sut.authState == .notAuthenticated)
+        #expect(provider.removeCredentialCallCount == 1)
     }
 
-    @Test("signOut publishes notAuthenticated")
-    func signOutPublishes() async throws {
-        let sut = OktaAuthManager()
-        var received: [AuthState] = []
-        let cancellable = sut.authStatePublisher
-            .dropFirst()
-            .sink { received.append($0) }
+    @Test("signOut rethrows removeCredential error")
+    func signOutRethrows() async {
+        let (sut, provider) = makeSUT()
+        provider.removeCredentialResult = .failure(NSError(domain: "test", code: 1))
 
-        try await sut.signOut()
-
-        #expect(received.contains(.notAuthenticated))
-        _ = cancellable
+        await #expect(throws: Error.self) {
+            try await sut.signOut()
+        }
     }
 
-    // MARK: - Restore Session
+    // MARK: - Current Token
 
-    @Test("restoreSession sets notAuthenticated when no stored credential exists")
-    func restoreSessionWithNoStoredCredential() {
-        let sut = OktaAuthManager()
+    @Test("currentToken returns token from provider")
+    func currentToken() async throws {
+        let (sut, provider) = makeSUT()
+        provider.currentTokenResult = .success("access-123")
 
-        sut.restoreSession()
+        let token = try await sut.currentToken()
 
-        #expect(sut.authState == .notAuthenticated)
+        #expect(token == "access-123")
     }
 
-    // MARK: - currentToken
-
-    @Test("currentToken throws noCredential when not authenticated")
-    func currentTokenThrowsWhenNoCredential() async {
-        let sut = OktaAuthManager()
+    @Test("currentToken throws when provider throws")
+    func currentTokenThrows() async {
+        let (sut, provider) = makeSUT()
+        provider.currentTokenResult = .failure(OktaAuthError.noCredential)
 
         await #expect(throws: OktaAuthError.noCredential) {
             try await sut.currentToken()
         }
+    }
+
+    // MARK: - Restore Session
+
+    @Test("restoreSession publishes authenticated when provider has stored session")
+    func restoreSessionSuccess() {
+        let (sut, provider) = makeSUT()
+        provider.restoreSessionResult = SignInResult(accessToken: "tok", userName: "Restored")
+
+        sut.restoreSession()
+
+        #expect(sut.authState == .authenticated(AuthenticatedUser(name: "Restored")))
+    }
+
+    @Test("restoreSession publishes notAuthenticated when no stored session")
+    func restoreSessionNone() {
+        let (sut, provider) = makeSUT()
+        provider.restoreSessionResult = nil
+
+        sut.restoreSession()
+
+        #expect(sut.authState == .notAuthenticated)
     }
 
     // MARK: - OktaAuthError
@@ -93,5 +158,21 @@ struct OktaAuthManagerTests {
         let errors: [OktaAuthError] = [.signInFailed, .noCredential, .noAccessToken]
         let descriptions = errors.compactMap(\.errorDescription)
         #expect(Set(descriptions).count == 3)
+    }
+
+    // MARK: - Helpers
+
+    private func makeSUT() -> (OktaAuthManager, MockBrowserSignInProvider) {
+        let provider = MockBrowserSignInProvider()
+        let sut = OktaAuthManager(browserSignIn: provider)
+        return (sut, provider)
+    }
+
+    private func makeAnchor() -> ASPresentationAnchor {
+        #if canImport(UIKit)
+            UIWindow()
+        #else
+            () as Any
+        #endif
     }
 }

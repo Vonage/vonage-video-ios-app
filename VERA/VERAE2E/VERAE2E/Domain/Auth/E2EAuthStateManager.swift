@@ -10,7 +10,7 @@ import VERADomain
 public final class E2EAuthStateManager: AuthStateDataSource {
     private let subject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
 
-    public nonisolated var authStatePublisher: AnyPublisher<AuthState, Never> {
+    public var authStatePublisher: AnyPublisher<AuthState, Never> {
         subject.eraseToAnyPublisher()
     }
 

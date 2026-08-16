@@ -9,6 +9,7 @@ import Foundation
 ///
 /// Implementations publish the current `AuthState` and emit updates
 /// whenever the user's authentication status changes.
+@MainActor
 public protocol AuthStateDataSource {
     var authStatePublisher: AnyPublisher<AuthState, Never> { get }
 }
