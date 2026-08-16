@@ -103,11 +103,12 @@ struct NavBarAuthButtonViewModelTests {
     // MARK: - Helpers
 
     private func makeSUT(
-        dataSource: MockAuthStateDataSource = MockAuthStateDataSource(),
+        dataSource: MockAuthStateDataSource? = nil,
         onLoginTapped: @escaping () -> Void = {},
         onLogoutTapped: @escaping () async -> Void = {}
     ) -> NavBarAuthButtonViewModel {
-        NavBarAuthButtonViewModel(
+        let dataSource = dataSource ?? MockAuthStateDataSource()
+        return NavBarAuthButtonViewModel(
             authStateDataSource: dataSource,
             onLoginTapped: onLoginTapped,
             onLogoutTapped: onLogoutTapped
@@ -117,6 +118,7 @@ struct NavBarAuthButtonViewModelTests {
 
 // MARK: - Test Doubles
 
+@MainActor
 private final class MockAuthStateDataSource: AuthStateDataSource {
     let subject: CurrentValueSubject<AuthState, Never>
 

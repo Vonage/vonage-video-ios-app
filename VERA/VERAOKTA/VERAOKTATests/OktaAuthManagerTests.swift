@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Testing
+import UIKit
 import VERADomain
 
 @testable import VERAOKTA
