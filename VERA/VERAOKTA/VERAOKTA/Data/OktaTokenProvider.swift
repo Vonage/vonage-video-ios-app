@@ -20,11 +20,6 @@ public final class OktaTokenProvider: TokenProvider, @unchecked Sendable {
     }
 
     public func token() async -> String? {
-        await getToken()
-    }
-
-    @MainActor
-    private func getToken() async -> String? {
         do {
             return try await authManager.currentToken()
         } catch {

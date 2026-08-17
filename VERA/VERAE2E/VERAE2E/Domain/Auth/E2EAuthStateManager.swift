@@ -6,8 +6,7 @@ import Combine
 import VERADomain
 
 /// A fake auth state manager used by E2E tests to bypass real identity provider flows.
-@MainActor
-public final class E2EAuthStateManager: OKTAAuthenticating {
+public final class E2EAuthStateManager: OKTAAuthenticating, @unchecked Sendable {
     private let subject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
 
     public var authStatePublisher: AnyPublisher<AuthState, Never> {
@@ -16,6 +15,7 @@ public final class E2EAuthStateManager: OKTAAuthenticating {
 
     public init() {}
 
+    @MainActor
     public func signIn(from anchor: ASPresentationAnchor) async throws {
         subject.send(.authenticated(AuthenticatedUser(name: "E2E Test User")))
     }

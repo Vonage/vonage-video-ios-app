@@ -12,9 +12,8 @@ import Foundation
     public typealias ASPresentationAnchor = Any
 #endif
 
-@MainActor
 public protocol OKTAAuthenticating: AuthStateDataSource {
-    func signIn(from anchor: ASPresentationAnchor) async throws
+    @MainActor func signIn(from anchor: ASPresentationAnchor) async throws
     func signOut() async throws
     func currentToken() async throws -> String
 }

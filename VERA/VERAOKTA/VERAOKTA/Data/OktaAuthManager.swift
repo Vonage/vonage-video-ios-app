@@ -7,8 +7,7 @@ import Foundation
 import VERADomain
 import os
 
-@MainActor
-public final class OktaAuthManager: OKTAAuthenticating {
+public final class OktaAuthManager: OKTAAuthenticating, @unchecked Sendable {
 
     private let authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
     private let browserSignIn: BrowserSignInProvider
@@ -28,6 +27,7 @@ public final class OktaAuthManager: OKTAAuthenticating {
         self.browserSignIn = browserSignIn
     }
 
+    @MainActor
     public func signIn(from anchor: ASPresentationAnchor) async throws {
         Self.logger.info("Starting Okta browser sign-in")
 

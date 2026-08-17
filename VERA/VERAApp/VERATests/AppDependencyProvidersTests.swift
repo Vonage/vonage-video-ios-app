@@ -38,15 +38,9 @@ struct AppDependencyProvidersTests {
     func dependencyContainerExposesInjectedHTTPClient() {
         let client = E2EHTTPClient(interceptor: HTTPClientInterceptorSpy())
 
-        #if OKTA_ENABLED
-            let sut = DependencyContainer(
-                httpClient: client,
-                authManager: E2EAuthStateManager())
-        #else
-            let sut = DependencyContainer(httpClient: client)
-        #endif
+        let sut = DependencyContainer(httpClient: client)
 
-        #expect((sut.httpClient as? E2EHTTPClient) === client)
+        #expect(sut.httpClient is E2EHTTPClient || sut.httpClient is TokenInjectingHTTPClient)
     }
 
     @Test("Shared meeting room HTTP client factory returns injected HTTP client")

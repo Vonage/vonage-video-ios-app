@@ -8,8 +8,7 @@ import VERADomain
 
 @testable import VERAOKTA
 
-@MainActor
-final class MockOKTAAuthenticating: OKTAAuthenticating {
+final class MockOKTAAuthenticating: OKTAAuthenticating, @unchecked Sendable {
 
     var authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
 
@@ -25,7 +24,7 @@ final class MockOKTAAuthenticating: OKTAAuthenticating {
     var signOutResult: Result<Void, Error> = .success(())
     var currentTokenResult: Result<String, Error> = .success("mock-token")
 
-    func signIn(from anchor: ASPresentationAnchor) async throws {
+    @MainActor func signIn(from anchor: ASPresentationAnchor) async throws {
         signInCallCount += 1
         switch signInResult {
         case .success:

@@ -42,22 +42,34 @@ import VERAVonageCallKitPlugin
 
 final class DependencyContainer {
 
-    let httpClient: HTTPClient
+    private let baseHttpClient: HTTPClient
 
     #if OKTA_ENABLED
-        let authManager: (any OKTAAuthenticating)?
-    #endif
+        lazy var authManager: any OKTAAuthenticating = {
+            if E2EConfiguration.isEnabled {
+                return E2EAuthStateManager()
+            }
+            let okta = OktaAuthManager()
+            okta.restoreSession()
+            return okta
+        }()
 
-    #if OKTA_ENABLED
-        init(httpClient: HTTPClient, authManager: any OKTAAuthenticating) {
-            self.httpClient = httpClient
-            self.authManager = authManager
-        }
+        lazy var httpClient: HTTPClient = {
+            if E2EConfiguration.isEnabled {
+                return baseHttpClient
+            }
+            return TokenInjectingHTTPClient(
+                wrapped: baseHttpClient,
+                tokenProvider: OktaTokenProvider(authManager: authManager)
+            )
+        }()
     #else
-        init(httpClient: HTTPClient) {
-            self.httpClient = httpClient
-        }
+        var httpClient: HTTPClient { baseHttpClient }
     #endif
+
+    init(httpClient: HTTPClient) {
+        self.baseHttpClient = httpClient
+    }
 
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 
