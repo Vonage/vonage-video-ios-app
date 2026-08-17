@@ -42,7 +42,9 @@ import VERAVonageCallKitPlugin
 
 final class DependencyContainer {
 
-    private let baseHttpClient: HTTPClient
+    private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
+        isE2EEnabled: E2EConfiguration.isEnabled
+    )()
 
     #if OKTA_ENABLED
         lazy var authManager: any OKTAAuthenticating = {
@@ -67,9 +69,7 @@ final class DependencyContainer {
         var httpClient: HTTPClient { baseHttpClient }
     #endif
 
-    init(httpClient: HTTPClient) {
-        self.baseHttpClient = httpClient
-    }
+    init() {}
 
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 

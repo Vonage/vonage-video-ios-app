@@ -46,12 +46,7 @@ struct VERAApp: App {
         @State private var isMeetingRoomCustomizationMenuPresented = false
     #endif
 
-    var dependencyContainer: DependencyContainer = {
-        let httpClient = AppHTTPClientProvider(
-            isE2EEnabled: E2EConfiguration.isEnabled
-        )()
-        return DependencyContainer(httpClient: httpClient)
-    }()
+    var dependencyContainer = DependencyContainer()
 
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
