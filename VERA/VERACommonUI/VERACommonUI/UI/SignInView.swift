@@ -25,10 +25,12 @@ public struct SignInView: View {
 
     public init(
         providers: [IDProvider],
-        onProviderSelected: @escaping (IDProvider) async throws -> Void
+        onProviderSelected: @escaping (IDProvider) async throws -> Void,
+        initialErrorMessage: String? = nil
     ) {
         self.providers = providers
         self.onProviderSelected = onProviderSelected
+        self._errorMessage = State(initialValue: initialErrorMessage)
     }
 
     public var body: some View {

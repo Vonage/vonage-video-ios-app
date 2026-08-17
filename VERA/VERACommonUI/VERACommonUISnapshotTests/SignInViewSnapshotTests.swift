@@ -55,7 +55,7 @@ struct SignInViewSnapshotTests {
             ("Dark", ColorScheme.dark),
         ])
     func errorStateColorSchemes(schemeName: String, scheme: ColorScheme) throws {
-        let sut = makeSUTWithError(
+        let sut = makeSUT(
             providers: [IDProvider(id: "okta", displayName: "Okta")],
             errorMessage: "Sign-in failed. Please try again."
         )
@@ -75,23 +75,14 @@ struct SignInViewSnapshotTests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT(providers: [IDProvider]) -> some View {
+    private func makeSUT(
+        providers: [IDProvider],
+        errorMessage: String? = nil
+    ) -> some View {
         SignInView(
             providers: providers,
-            onProviderSelected: { _ in }
-        )
-    }
-
-    /// Creates a SignInView that displays an error message by wrapping it in a
-    /// container that overlays the error text. Since the error state is internal
-    /// (@State), we simulate its visual appearance directly.
-    private func makeSUTWithError(
-        providers: [IDProvider],
-        errorMessage: String
-    ) -> some View {
-        SignInViewErrorPreview(
-            providers: providers,
-            errorMessage: errorMessage
+            onProviderSelected: { _ in },
+            initialErrorMessage: errorMessage
         )
     }
 
@@ -110,54 +101,5 @@ struct SignInViewSnapshotTests {
             line: line,
             column: column
         )
-    }
-}
-
-// MARK: - Error State Preview Helper
-
-/// A wrapper that simulates the SignInView error state for snapshot testing.
-/// Since the error is an internal @State, we recreate the visual layout to capture
-/// the error appearance.
-private struct SignInViewErrorPreview: View {
-    let providers: [IDProvider]
-    let errorMessage: String
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-                .frame(height: 8)
-
-            VStack(spacing: 8) {
-                Text("Sign in to VERA")
-                    .font(.title2.bold())
-
-                Text("Use your Vonage account")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-            }
-
-            Text(errorMessage)
-                .font(.caption)
-                .foregroundStyle(.red)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            ForEach(providers) { provider in
-                Button {
-                } label: {
-                    Text("Sign in with \(provider.displayName)")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                }
-                .foregroundStyle(.white)
-                .background(.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .padding(.horizontal, 32)
-            }
-
-            Spacer()
-        }
-        .padding()
     }
 }
