@@ -1,0 +1,23 @@
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_b3da73fe312d2b::t_a28cdeac263fce 49
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_b3da73fe312d2b::t_c6220928023ce7 45-47,72
+VERA/VERAApp/VERATests/AppDependencyProvidersTests.swift
+  s_b3da73fe312d2b::t_71b1e323592442 37-39,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2cb0fb95dd24ddb172b64c7b694b2190b102bd40",
+  "prompts": {},
+  "sessions": {
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
