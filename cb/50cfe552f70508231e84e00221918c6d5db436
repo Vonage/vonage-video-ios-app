@@ -1,0 +1,25 @@
+VERA/Tuist/ProjectDescriptionHelpers/TestSchemes.swift
+  s_b3da73fe312d2b::t_fc09c6a537bf66 161-172
+  s_b3da73fe312d2b::t_b370fb77e919b2 43-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cb50cfe552f70508231e84e00221918c6d5db436",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
