@@ -163,7 +163,7 @@ struct VERAApp: App {
                                         .flatMap(\.windows)
                                         .first(where: \.isKeyWindow)
                                 else { return }
-                                try await dependencyContainer.authManager!.signIn(from: window)
+                                try await dependencyContainer.authManager.signIn(from: window)
                             }
                         )
                         .presentationDetents([.height(200)])
@@ -183,13 +183,13 @@ struct VERAApp: App {
             }
 
             let viewModel = NavBarAuthButtonViewModel(
-                authStateDataSource: dependencyContainer.authManager!,
+                authStateDataSource: dependencyContainer.authManager,
                 onLoginTapped: { [weak navigationCoordinator] in
                     navigationCoordinator?.showSignIn = true
                 },
                 onLogoutTapped: {
                     do {
-                        try await dependencyContainer.authManager!.signOut()
+                        try await dependencyContainer.authManager.signOut()
                     } catch {
                         print("❌ Sign-out failed: \(error.localizedDescription)")
                     }
