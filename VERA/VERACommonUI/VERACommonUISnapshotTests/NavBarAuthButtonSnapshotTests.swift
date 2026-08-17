@@ -31,6 +31,20 @@ struct NavBarAuthButtonSnapshotTests {
         snapshot(sut, named: "State_\(stateName)")
     }
 
+    // MARK: - Account Menu (sheet content)
+
+    @Test(
+        "NavBarAuthButton - Account Menu shown when authenticated",
+        arguments: [
+            ("WithName", "John Doe"),
+            ("WithoutName", nil as String?),
+        ])
+    func accountMenuPresented(caseName: String, userName: String?) throws {
+        let sut = makeSUTWithAccountMenu(userName: userName)
+
+        snapshot(sut, named: "AccountMenu_\(caseName)", size: CGSize(width: 320, height: 200))
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(authState: AuthState) -> some View {
@@ -46,15 +60,24 @@ struct NavBarAuthButtonSnapshotTests {
         }
     }
 
+    private func makeSUTWithAccountMenu(userName: String?) -> some View {
+        AuthAccountMenuView(
+            userName: userName,
+            isLoggingOut: false,
+            onSignOut: {}
+        )
+    }
+
     private func snapshot(
         _ view: some View,
         named: String,
+        size: CGSize = CGSize(width: 60, height: 60),
         line: UInt = #line,
         column: UInt = #column
     ) {
         assertSnapshot(
             of: view,
-            as: .image(precision: 0.99, layout: .fixed(width: 60, height: 60)),
+            as: .image(precision: 0.99, layout: .fixed(width: size.width, height: size.height)),
             named: named,
             record: isRecording,
             testName: "\(snapshotPrefix)_\(named)",
