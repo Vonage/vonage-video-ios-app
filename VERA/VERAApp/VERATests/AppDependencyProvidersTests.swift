@@ -38,10 +38,10 @@ struct AppDependencyProvidersTests {
     func dependencyContainerExposesInjectedHTTPClient() {
         let client = E2EHTTPClient(interceptor: HTTPClientInterceptorSpy())
 
-        #if canImport(VERAOKTA)
+        #if OKTA_ENABLED
             let sut = DependencyContainer(
                 httpClient: client,
-                e2eAuthManager: E2EAuthStateManager())
+                authManager: E2EAuthStateManager())
         #else
             let sut = DependencyContainer(httpClient: client)
         #endif

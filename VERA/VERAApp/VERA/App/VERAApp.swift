@@ -53,7 +53,7 @@ struct VERAApp: App {
 
         #if OKTA_ENABLED
             if E2EConfiguration.isEnabled {
-                return DependencyContainer(httpClient: baseHttpClient, e2eAuthManager: E2EAuthStateManager())
+                return DependencyContainer(httpClient: baseHttpClient, authManager: E2EAuthStateManager())
             }
             let authManager = OktaAuthManager()
             authManager.restoreSession()
@@ -62,8 +62,7 @@ struct VERAApp: App {
                 wrapped: baseHttpClient,
                 tokenProvider: tokenProvider
             )
-            let oktaFactory = OKTAFactory(authManager: authManager)
-            return DependencyContainer(httpClient: httpClient, oktaFactory: oktaFactory)
+            return DependencyContainer(httpClient: httpClient, authManager: authManager)
         #else
             return DependencyContainer(httpClient: baseHttpClient)
         #endif
@@ -173,17 +172,13 @@ struct VERAApp: App {
                             providers: [IDProvider(id: "okta", displayName: "Okta")],
                             onProviderSelected: { provider in
                                 guard provider.id == "okta" else { return }
-                                if let e2eAuth = dependencyContainer.e2eAuthManager {
-                                    e2eAuth.signIn()
-                                    return
-                                }
                                 guard
                                     let window = UIApplication.shared.connectedScenes
                                         .compactMap({ $0 as? UIWindowScene })
                                         .flatMap(\.windows)
                                         .first(where: \.isKeyWindow)
                                 else { return }
-                                try await dependencyContainer.oktaFactory!.authenticationManager.signIn(from: window)
+                                try await dependencyContainer.authManager!.signIn(from: window)
                             }
                         )
                         .presentationDetents([.height(200)])
@@ -202,22 +197,14 @@ struct VERAApp: App {
                 return existing
             }
 
-            let authDataSource: AuthStateDataSource =
-                dependencyContainer.e2eAuthManager
-                ?? dependencyContainer.oktaFactory!.authenticationManager
-
             let viewModel = NavBarAuthButtonViewModel(
-                authStateDataSource: authDataSource,
+                authStateDataSource: dependencyContainer.authManager!,
                 onLoginTapped: { [weak navigationCoordinator] in
                     navigationCoordinator?.showSignIn = true
                 },
                 onLogoutTapped: {
-                    if let e2eAuth = dependencyContainer.e2eAuthManager {
-                        e2eAuth.signOut()
-                        return
-                    }
                     do {
-                        try await dependencyContainer.oktaFactory!.authenticationManager.signOut()
+                        try await dependencyContainer.authManager!.signOut()
                     } catch {
                         print("❌ Sign-out failed: \(error.localizedDescription)")
                     }

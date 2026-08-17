@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Result of a successful browser sign-in.
 public struct SignInResult: Sendable {

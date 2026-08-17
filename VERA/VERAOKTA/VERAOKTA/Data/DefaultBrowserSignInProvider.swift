@@ -5,6 +5,7 @@
 import AuthFoundation
 import BrowserSignin
 import Foundation
+import VERADomain
 
 /// Default implementation that delegates to the Okta SDK.
 public struct DefaultBrowserSignInProvider: BrowserSignInProvider {

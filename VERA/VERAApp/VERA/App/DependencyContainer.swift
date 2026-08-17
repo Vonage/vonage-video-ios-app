@@ -45,21 +45,13 @@ final class DependencyContainer {
     let httpClient: HTTPClient
 
     #if OKTA_ENABLED
-        let oktaFactory: OKTAFactory?
-        let e2eAuthManager: E2EAuthStateManager?
+        let authManager: (any OKTAAuthenticating)?
     #endif
 
     #if OKTA_ENABLED
-        init(httpClient: HTTPClient, oktaFactory: OKTAFactory) {
+        init(httpClient: HTTPClient, authManager: any OKTAAuthenticating) {
             self.httpClient = httpClient
-            self.oktaFactory = oktaFactory
-            self.e2eAuthManager = nil
-        }
-
-        init(httpClient: HTTPClient, e2eAuthManager: E2EAuthStateManager) {
-            self.httpClient = httpClient
-            self.oktaFactory = nil
-            self.e2eAuthManager = e2eAuthManager
+            self.authManager = authManager
         }
     #else
         init(httpClient: HTTPClient) {
