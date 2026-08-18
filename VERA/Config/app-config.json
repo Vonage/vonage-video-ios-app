@@ -12,7 +12,7 @@
     "allowAudioDiagnostics": true
   },
   "authSettings": {
-    "allowAuthentication": true,
+    "allowAuthentication": false,
     "idProviders": [
       "okta"
     ]
