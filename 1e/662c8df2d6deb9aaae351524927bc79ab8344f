@@ -1,0 +1,31 @@
+Package.resolved
+  s_ce97a1758ac71a::t_23046ed9db97c5 17-18
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  s_6588b3e314ab13::t_d2d9c3295a3676 6
+Package.swift
+  s_6588b3e314ab13::t_def9b186f819d7 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "1e662c8df2d6deb9aaae351524927bc79ab8344f",
+  "prompts": {},
+  "sessions": {
+    "s_6588b3e314ab13": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_95ca44e9-3550-4886-abea-b3ccf72fae9d",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_ce97a1758ac71a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1787311319378986000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
