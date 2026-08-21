@@ -63,6 +63,7 @@ let project = Project(
                 .sdk(name: "CoreMedia", type: .framework, status: .required),
                 .sdk(name: "CoreVideo", type: .framework, status: .required),
                 .sdk(name: "ReplayKit", type: .framework, status: .required),
+                .sdk(name: "c++", type: .library, status: .required),
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
             ],
             settings: .settings(
