@@ -10,7 +10,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAMeetingRoom",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAMeetingRoom/**"],
             resources: [
                 "VERAMeetingRoom/Resources/**"
@@ -27,7 +27,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAMeetingRoomTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAMeetingRoomTests/**"],
             dependencies: [
                 .target(name: "VERAMeetingRoom"),
@@ -40,7 +40,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAMeetingRoom.snapshottests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAMeetingRoomSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERAMeetingRoom"),

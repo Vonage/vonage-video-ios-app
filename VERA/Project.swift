@@ -408,7 +408,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: veraAppBundleID,
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERA",
