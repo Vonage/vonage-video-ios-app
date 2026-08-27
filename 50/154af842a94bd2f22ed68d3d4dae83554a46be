@@ -1,0 +1,19 @@
+VERA/VERADomain/VERADomainTests/AuthStateTests.swift
+  s_b3da73fe312d2b::t_e63c5ff3aa65d5 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "50154af842a94bd2f22ed68d3d4dae83554a46be",
+  "prompts": {},
+  "sessions": {
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

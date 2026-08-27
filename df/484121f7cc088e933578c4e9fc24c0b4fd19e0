@@ -1,0 +1,14 @@
+.github/workflows/ci.yml
+  h_5ddc9d372ac6a1 115-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "df484121f7cc088e933578c4e9fc24c0b4fd19e0",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+VERA/VERAOKTA/VERAOKTATests/SignInResultTests.swift
+  s_b3da73fe312d2b::t_c504f6aef66f2e 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d5b8aa9d830ca945438fc4f342eb0a5886b5ce72",
+  "prompts": {},
+  "sessions": {
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

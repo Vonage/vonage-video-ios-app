@@ -1,0 +1,19 @@
+VERA/VERAApp/VERATests/AppDependencyProvidersTests.swift
+  s_b3da73fe312d2b::t_e54f24525a6d04 43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5c0dc7930e46fba7902a1bbc511915f1629ad4ae",
+  "prompts": {},
+  "sessions": {
+    "s_b3da73fe312d2b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_bc3e6980-3cf7-43cb-b906-8a549e29d536",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+VERA/VERACommonUI/VERACommonUI/UI/AuthAccountMenuView.swift
+  s_1abf19a2b895b0::t_d0e978bcebf95b 30-42,44-52,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9ea3a338037ff49ffabc18253fb7bebbcfefe758",
+  "prompts": {},
+  "sessions": {
+    "s_1abf19a2b895b0": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_c544b09b-8aa2-4761-ad8a-330eec41c20f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

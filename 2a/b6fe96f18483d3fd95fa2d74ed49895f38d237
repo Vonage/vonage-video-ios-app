@@ -1,0 +1,20 @@
+VERA/VERACommonUI/VERACommonUITests/NavBarAuthButtonViewModelTests.swift
+  s_0c214c6d86769c::t_133d2f96471bbe 121
+  s_0c214c6d86769c::t_370f39ddc9f9bc 106,110-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2ab6fe96f18483d3fd95fa2d74ed49895f38d237",
+  "prompts": {},
+  "sessions": {
+    "s_0c214c6d86769c": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "50e6cf15-680f-4f27-bfcc-c697aee5a1a5",
+        "model": "claude-haiku-4.5"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
