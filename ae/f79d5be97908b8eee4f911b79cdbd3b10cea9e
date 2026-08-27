@@ -1,0 +1,21 @@
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  s_ce523cf545756a::t_b98ce84182412a 19-21
+Package.resolved
+  s_ce523cf545756a::t_b98ce84182412a 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "aef79d5be97908b8eee4f911b79cdbd3b10cea9e",
+  "prompts": {},
+  "sessions": {
+    "s_ce523cf545756a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1787846288427595000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
