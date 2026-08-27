@@ -17,9 +17,8 @@ let project = Project(
             sources: ["VERAVonage/**"],
             scripts: [.swiftLint(targetName: "VERAVonage")],
             dependencies: [
-                .project(target: "VERACore", path: "../VERACore"),
-                .vonageVideoSDK,
-            ],
+                .project(target: "VERACore", path: "../VERACore")
+            ] + TargetDependency.vonageVideoSDKWithSystemDependencies,
             settings: createBaseBuildSettings()
         ),
         .target(

@@ -9,6 +9,15 @@ extension Package {
 
 extension TargetDependency {
     public static let vonageVideoSDK = TargetDependency.package(product: "VonageClientSDKVideo")
+
+    /// The Vonage Video SDK target dependency along with its required system libraries.
+    /// Use this instead of `.vonageVideoSDK` for targets that link the SDK directly,
+    /// since Tuist does not propagate linkerSettings from SPM package targets
+    /// to the generated Xcode project (see: https://github.com/tuist/tuist/issues/8056).
+    public static let vonageVideoSDKWithSystemDependencies: [TargetDependency] = [
+        .vonageVideoSDK,
+        .sdk(name: "c++", type: .library, status: .required),
+    ]
 }
 
 extension Package {
