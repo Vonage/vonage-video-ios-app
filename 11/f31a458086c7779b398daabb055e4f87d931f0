@@ -1,0 +1,23 @@
+VERA/VERAVonageScreenSharePlugin/Project.swift
+  s_3f57fe8913cc44::t_837f3f8d4af20f 60
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  s_3f57fe8913cc44::t_837f3f8d4af20f 12-20
+VERA/VERAVonage/Project.swift
+  s_3f57fe8913cc44::t_837f3f8d4af20f 20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "11f31a458086c7779b398daabb055e4f87d931f0",
+  "prompts": {},
+  "sessions": {
+    "s_3f57fe8913cc44": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1787821529742308000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
