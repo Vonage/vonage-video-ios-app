@@ -1,0 +1,19 @@
+.claude/skills/new-module/SKILL.md
+  s_89cb78c2813c1a::t_ea17e55011a261 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "31c21e2ee5d7cefb060515bbcc706849e2659cea",
+  "prompts": {},
+  "sessions": {
+    "s_89cb78c2813c1a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84ae305f-d7d6-4c98-9267-e1bac4a6d8b6",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
