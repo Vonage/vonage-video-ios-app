@@ -16,6 +16,9 @@ extension TargetDependency {
     /// to the generated Xcode project (see: https://github.com/tuist/tuist/issues/8056).
     public static let vonageVideoSDKDependencies: [TargetDependency] = [
         .vonageVideoSDK,
+        .sdk(name: "Network", type: .framework, status: .required),
+        .sdk(name: "VideoToolbox", type: .framework, status: .required),
+        .sdk(name: "Accelerate", type: .framework, status: .required),
         .sdk(name: "c++", type: .library, status: .required),
     ]
 }

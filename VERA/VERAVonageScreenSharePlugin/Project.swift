@@ -58,7 +58,6 @@ let project = Project(
             sources: ["../VERAApp/BroadcastExtension/**/*.swift"],
             entitlements: "../VERAApp/BroadcastExtension/BroadcastExtension.entitlements",
             dependencies: TargetDependency.vonageVideoSDKDependencies + [
-                .sdk(name: "VideoToolbox", type: .framework, status: .required),
                 .sdk(name: "CoreMedia", type: .framework, status: .required),
                 .sdk(name: "CoreVideo", type: .framework, status: .required),
                 .sdk(name: "ReplayKit", type: .framework, status: .required),

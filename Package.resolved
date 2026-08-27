@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Vonage/vonage-client-sdk-video-transformers",
       "state" : {
-        "revision" : "a66115f8d947225710eb80cf25bd9dd06c5ba02e",
-        "version" : "2.33.0"
+        "revision" : "cda4015eb502468bbba718655705db3e5dfb0dc7",
+        "version" : "2.35.1"
       }
     },
     {
