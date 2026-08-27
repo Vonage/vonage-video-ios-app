@@ -22,8 +22,7 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
-                .vonageVideoTransformersSDK,
-            ],
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies,
             settings: createBaseBuildSettings()
         ),
         .target(

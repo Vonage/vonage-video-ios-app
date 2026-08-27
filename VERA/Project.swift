@@ -260,10 +260,10 @@ private func createDependencies() -> [TargetDependency] {
     }
 
     if areBackgroundEffectsEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
-            .vonageVideoTransformersSDK,
-        ])
+        dependencies.append(
+            contentsOf: [
+                .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies)
     }
 
     if areSettingsEnabled() {
