@@ -14,7 +14,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAAudioDiagnostics",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAAudioDiagnostics/**"],
             resources: ["VERAAudioDiagnostics/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAAudioDiagnostics")],
@@ -31,7 +31,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAAudioDiagnosticsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAAudioDiagnosticsTests/**"],
             dependencies: [
                 .target(name: "VERAAudioDiagnostics")
@@ -45,7 +45,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAAudioDiagnosticsSnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAAudioDiagnosticsSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERAAudioDiagnostics"),

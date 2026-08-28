@@ -1,5 +1,15 @@
 import ProjectDescription
 
+// MARK: - Deployment Targets
+
+/// Deployment target for iOS-only modules (Vonage SDK, plugins, snapshot tests).
+public let iOSDeploymentTarget = DeploymentTargets.iOS("17.0")
+
+/// Deployment target for multi-platform modules (unit tests run on macOS without simulator).
+public let multiplatformDeploymentTarget = DeploymentTargets.multiplatform(iOS: "17.0", macOS: "14.6")
+
+// MARK: - Bundle & Localization
+
 /// The base bundle identifier for the VERA app.
 ///
 /// All targets that derive their bundle ID from the main app (e.g. extensions)

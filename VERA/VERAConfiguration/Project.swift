@@ -10,7 +10,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAConfiguration",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAConfiguration/**"],
             scripts: [.swiftLint(targetName: "VERAConfiguration")],
             dependencies: [

@@ -260,10 +260,10 @@ private func createDependencies() -> [TargetDependency] {
     }
 
     if areBackgroundEffectsEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
-            .vonageVideoTransformersSDK,
-        ])
+        dependencies.append(
+            contentsOf: [
+                .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies)
     }
 
     if areSettingsEnabled() {
@@ -408,7 +408,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: veraAppBundleID,
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERA",

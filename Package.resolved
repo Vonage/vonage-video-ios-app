@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Vonage/vonage-client-sdk-video-transformers",
       "state" : {
-        "revision" : "a66115f8d947225710eb80cf25bd9dd06c5ba02e",
-        "version" : "2.33.0"
+        "revision" : "cda4015eb502468bbba718655705db3e5dfb0dc7",
+        "version" : "2.35.1"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Vonage/vonage-video-client-sdk-swift",
       "state" : {
-        "revision" : "4ab0aa2859895c0d5e0f23d6d8d09e98df5e7a7d",
-        "version" : "2.34.1"
+        "revision" : "90f932330fa01f69928b92654ab5f5099447f46a",
+        "version" : "2.35.1"
       }
     }
   ],

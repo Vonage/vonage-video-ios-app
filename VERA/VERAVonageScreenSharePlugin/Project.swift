@@ -13,7 +13,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAVonageScreenSharePlugin",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAVonageScreenSharePlugin/**"],
             scripts: [.swiftLint(targetName: "VERAVonageScreenSharePlugin")],
             dependencies: [
@@ -27,7 +27,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAVonageScreenSharePluginTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAVonageScreenSharePluginTests/**"],
             dependencies: [
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
@@ -44,7 +44,7 @@ let project = Project(
             destinations: .iOS,
             product: .appExtension,
             bundleId: "\(veraAppBundleID).BroadcastExtension",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(with: [
                 "CFBundleDisplayName": "VERA Broadcast",
                 "NSExtension": .dictionary([
@@ -57,9 +57,7 @@ let project = Project(
             ]),
             sources: ["../VERAApp/BroadcastExtension/**/*.swift"],
             entitlements: "../VERAApp/BroadcastExtension/BroadcastExtension.entitlements",
-            dependencies: [
-                .vonageVideoSDK,
-                .sdk(name: "VideoToolbox", type: .framework, status: .required),
+            dependencies: TargetDependency.vonageVideoSDKDependencies + [
                 .sdk(name: "CoreMedia", type: .framework, status: .required),
                 .sdk(name: "CoreVideo", type: .framework, status: .required),
                 .sdk(name: "ReplayKit", type: .framework, status: .required),
