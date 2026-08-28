@@ -22,7 +22,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-            .upToNextMinor(from: "2.33.0")
+            .upToNextMinor(from: "2.35.1")
         ),
     ],
     targets: [

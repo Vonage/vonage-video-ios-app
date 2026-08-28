@@ -26,7 +26,7 @@ extension TargetDependency {
 extension Package {
     public static let vonageVideoTransformersSDK = Package.package(
         url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-        .upToNextMinor(from: "2.33")
+        .upToNextMinor(from: "2.35.1")
     )
 }
 
