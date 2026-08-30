@@ -14,10 +14,17 @@ applyTo: "VERA/**/VERAConfiguration/**/*"
 - **Changing value types**: update both the Python `bool_str()`/`layout_mode()` helpers and the Swift struct property type.
 
 ### Feature flag flow
-Configuration drives module inclusion via a three-stage pipeline:
-1. `app-config.json` → `Project.swift` reader functions (e.g., `isChatEnabled()`) — evaluated at `tuist generate` time
-2. `Project.swift` → `SWIFT_ACTIVE_COMPILATION_CONDITIONS` (e.g., `CHAT_ENABLED`)
-3. `DependencyContainer.swift` → `#if CHAT_ENABLED` conditional imports and instantiation
+Configuration gates features via two pipelines:
+
+**Meeting-room features** (chat, captions, reactions, screen share, …) are runtime-gated — always compiled via `VERAMeetingRoomSDK`:
+1. `app-config.json` → generated `AppConfig` values
+2. `DependencyContainer.meetingRoomEnabledFeatures` → `Set<MeetingRoomFeature>`
+3. `MeetingRoomSDKContainer` / `BottomBarButtonsAssembler` → `enabledFeatures.contains(_:)` checks
+
+**App-level features** (archiving, background effects, settings, audio effects, audio diagnostics, feedback) use a compile-time pipeline scoped to the VERA app target:
+1. `app-config.json` → `Project.swift` reader functions (e.g., `isArchivingEnabled()`) — evaluated at `tuist generate` time
+2. `Project.swift` → `SWIFT_ACTIVE_COMPILATION_CONDITIONS` (e.g., `ARCHIVING_ENABLED`)
+3. `DependencyContainer.swift` / `VERAApp.swift` → `#if ARCHIVING_ENABLED` conditional imports and instantiation
 
 Changing a flag in `app-config.json` requires running `tuist generate` to take effect.
 
