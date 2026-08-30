@@ -1,0 +1,16 @@
+VERA/CONFIGURATION_README.md
+  h_4202290f411bdc 3,9,13,15-16,18,20
+VERA/VERAScreenShare/README.md
+  h_4202290f411bdc 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "2f326b417baa1f57ca1b7ac9cf04454f67439147",
+  "prompts": {},
+  "humans": {
+    "h_4202290f411bdc": {
+      "author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
