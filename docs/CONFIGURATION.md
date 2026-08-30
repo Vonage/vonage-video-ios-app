@@ -4,26 +4,25 @@ The app is configured through two primary mechanisms: **feature flags** in `app-
 
 ## Feature Flags (`app-config.json`)
 
-`VERA/Config/app-config.json` gates optional features through two mechanisms:
+`VERA/Config/app-config.json` controls which optional feature modules are compiled into the app. When `tuist generate` runs, `Project.swift` reads this file and:
 
-### Runtime gating (meeting-room features)
+1. Adds the corresponding module targets as dependencies.
+2. Sets Swift compilation conditions so conditional compilation blocks are respected.
 
-Chat, captions, reactions, screen share, and the other in-call features are always compiled — `VERAMeetingRoomSDK` links every feature module unconditionally — and are enabled at runtime. `DependencyContainer.meetingRoomEnabledFeatures` (in `VERAApp`) maps `AppConfig` keys to `MeetingRoomFeature` cases, and `MeetingRoomSDKContainer` gates plugin registration and UI on `enabledFeatures.contains(_:)`. The old `CHAT_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, and `SCREEN_SHARE_ENABLED` compilation conditions no longer exist.
-
-### Compile-time flags (app-level features)
-
-When `tuist generate` runs, `Project.swift` reads the JSON, adds the corresponding module targets as dependencies of the app, and sets Swift compilation conditions on the VERA app target only:
+### Flag Mapping
 
 | `app-config.json` key | Swift condition | Module enabled |
 |---|---|---|
+| `meetingRoomSettings.allowChat` | `CHAT_ENABLED` | VERAChat + VERAVonageChatPlugin |
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` | VERAArchiving + VERAVonageArchivingPlugin |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` | VERABackgroundEffects |
+| `meetingRoomSettings.allowCaptions` | `CAPTIONS_ENABLED` | VERACaptions + VERAVonageCaptionsPlugin |
+| `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` | VERAReactions + VERAVonageReactionsPlugin |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` | VERASettings + VERAVonageSettingsPlugin |
+| `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` | VERAScreenShare + VERAVonageScreenSharePlugin |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` | VERAAudioEffects |
-| `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` | VERAAudioDiagnostics |
-| `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` | VERAFeedback |
 
-Code guarded by `#if SETTINGS_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` and `VERAApp.swift` follow the same pattern to conditionally instantiate app-level feature objects.
+Code guarded by `#if CHAT_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
 ### Regenerating AppConfig.swift
 

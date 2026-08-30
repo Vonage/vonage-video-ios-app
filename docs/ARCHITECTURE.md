@@ -106,14 +106,14 @@ Wireframe/           – Factory classes that wire Domain + Data + UI together
 
 ## Plugin Pattern
 
-Optional features integrate with the Vonage session through the `VonagePlugin` protocol (`VonagePluginCallLifeCycle & VonagePluginID`). Plugins are registered on `VonagePluginRegistry` inside `MeetingRoomSDKContainer` (in `VERAMeetingRoomSDK`), gated by the enabled `MeetingRoomFeature` set, and the registry is handed to the session repository. They receive `callDidStart(_:)` / `callDidEnd()` lifecycle callbacks and can hold a `VonageSignalChannel` to emit signals.
+Optional features integrate with the Vonage session through the `VonagePlugin` protocol (`VonagePluginCallLifeCycle & VonagePluginID`). Plugins are registered on `VonagePluginRegistry` inside `DependencyContainer` and are passed to `VonageSessionRepository`. They receive `callDidStart(_:)` / `callDidEnd()` lifecycle callbacks and can hold a `VonageSignalChannel` to emit signals.
 
 ## Screen Construction (Factory / Wireframe Pattern)
 
 Each flow uses a `XxxFactory` class (in a `Wireframe/` folder) that constructs the `ViewModel` and the SwiftUI `View` as a pair:
 
 ```swift
-let (view, viewModel) = meetingRoomFactory.make(roomName:uiProvider:onActionHandler:)
+let (view, viewModel) = meetingRoomFactory.make(roomName:getExternalButtons:onActionHandler:)
 ```
 
 Factories receive all dependencies through their initializer from `DependencyContainer`.

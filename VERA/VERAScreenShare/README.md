@@ -52,4 +52,4 @@ Screen sharing is enabled via `app-config.json`:
 }
 ```
 
-When enabled, the `.screenShare` case is added to the app's `MeetingRoomFeature` set at runtime (`DependencyContainer.meetingRoomEnabledFeatures`), and `Project.swift` adds the `BroadcastExtension` app-extension target as a dependency at `tuist generate` time. `VERAScreenShare` and `VERAVonageScreenSharePlugin` are always linked via `VERAMeetingRoomSDK`; there is no `SCREEN_SHARE_ENABLED` compilation condition.
+When enabled, `Project.swift` sets `SCREEN_SHARE_ENABLED` as a Swift active compilation condition and includes `VERAScreenShare`, `VERAVonageScreenSharePlugin`, and `BroadcastExtension` as dependencies.

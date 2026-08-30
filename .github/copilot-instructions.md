@@ -223,32 +223,34 @@ VERAVonageCallKitPlugin   – always included
 ```
 
 ### Feature flags
-`VERA/Config/app-config.json` gates optional features through two mechanisms:
+`VERA/Config/app-config.json` controls which optional modules are compiled in. When `tuist generate` runs, `Project.swift` reads this file and:
+1. Adds the corresponding module targets as dependencies.
+2. Sets Swift compilation conditions (`CHAT_ENABLED`, `ARCHIVING_ENABLED`, `BACKGROUND_EFFECTS_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, `SETTINGS_ENABLED`, `SCREEN_SHARE_ENABLED`, `AUDIOEFFECTS_ENABLED`).
 
-1. **Runtime gating (meeting-room features).** Chat, captions, reactions, screen share, and the other in-call features are always compiled (linked via `VERAMeetingRoomSDK`) and enabled at runtime: `DependencyContainer.meetingRoomEnabledFeatures` maps `AppConfig` keys to `MeetingRoomFeature` cases, and `MeetingRoomSDKContainer` gates plugin registration and UI on `enabledFeatures.contains(_:)`. The old `CHAT_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, and `SCREEN_SHARE_ENABLED` compilation conditions no longer exist.
-2. **Compile-time flags (app-level features).** When `tuist generate` runs, `Project.swift` reads the JSON, adds the corresponding module targets as app dependencies, and sets Swift compilation conditions on the VERA app target only:
-
+The mapping from JSON keys to flags:
 | `app-config.json` key | Compilation condition |
 |---|---|
+| `meetingRoomSettings.allowChat` | `CHAT_ENABLED` |
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` |
+| `meetingRoomSettings.allowCaptions` | `CAPTIONS_ENABLED` |
+| `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` |
+| `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` |
-| `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` |
-| `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` |
 
-Code inside `#if SETTINGS_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` and `VERAApp.swift` follow the same pattern to conditionally instantiate app-level feature objects, using Null-object fallbacks for cross-feature consumers.
+Code inside `#if CHAT_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
 ### Dependency injection
 `DependencyContainer` in `VERAApp` is the single composition root. All repositories, use cases, and plugins are lazy properties here. Nothing else creates concrete dependencies — modules depend only on protocols defined in `VERADomain`.
 
 ### Plugin pattern
-Optional features integrate with the Vonage session via the `VonagePlugin` protocol (`VonagePluginCallLifeCycle & VonagePluginID`). Plugins are registered on `VonagePluginRegistry` inside `MeetingRoomSDKContainer` (in `VERAMeetingRoomSDK`), gated by the enabled `MeetingRoomFeature` set, and the registry is handed to the session repository. Plugins receive `callDidStart(_:)` / `callDidEnd()` lifecycle callbacks and can hold a `VonageSignalChannel` to emit signals.
+Optional features integrate with the Vonage session via the `VonagePlugin` protocol (`VonagePluginCallLifeCycle & VonagePluginID`). Plugins are registered on `VonagePluginRegistry` inside `DependencyContainer`, which passes them to `VonageSessionRepository`. Plugins receive `callDidStart(_:)` / `callDidEnd()` lifecycle callbacks and can hold a `VonageSignalChannel` to emit signals.
 
 ### Screen construction (Factory / Wireframe pattern)
 Each flow uses a `XxxFactory` class (in a `Wireframe/` folder) that constructs the `ViewModel` and the SwiftUI `View` as a pair:
 ```swift
-let (view, viewModel) = meetingRoomFactory.make(roomName:uiProvider:onActionHandler:)
+let (view, viewModel) = meetingRoomFactory.make(roomName:getExternalButtons:onActionHandler:)
 ```
 Factories receive all dependencies through their initialiser from `DependencyContainer`.
 
