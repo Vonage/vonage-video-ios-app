@@ -103,7 +103,7 @@ python3 Scripts/generate-app-config.py
 3. Verify that the file `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift` has been created
 
 ### Build Settings Not Applied
-1. Check that `CHAT_ENABLED` appears in **Swift Compiler - Custom Flags** → **Active Compilation Conditions**
+1. Check that the app-level flag (e.g. `ARCHIVING_ENABLED`) appears in **Swift Compiler - Custom Flags** → **Active Compilation Conditions**
 2. Verify the script output shows "Chat enabled: true" during `tuist generate`
 3. Clean and regenerate: `tuist clean && tuist generate`
 
