@@ -195,7 +195,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.$MODULE",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["$MODULE/**"],
             resources: ["$MODULE/Resources/**"],
             scripts: [.swiftLint(targetName: "$MODULE")],
@@ -211,7 +211,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .app,
             bundleId: "com.vonage.${MODULE}App",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "${MODULE}App",
@@ -231,7 +231,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.${MODULE}Tests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["${MODULE}Tests/**"],
             dependencies: [
                 .target(name: "$MODULE")
@@ -245,7 +245,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.${MODULE}SnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["${MODULE}SnapshotTests/**"],
             dependencies: [
                 .target(name: "$MODULE"),
@@ -456,7 +456,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.$PLUGIN",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["$PLUGIN/**"],
             scripts: [.swiftLint(targetName: "$PLUGIN")],
             dependencies: [
@@ -470,7 +470,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.${PLUGIN}Tests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["${PLUGIN}Tests/**"],
             dependencies: [
                 .project(target: "$MODULE", path: "../$MODULE"),

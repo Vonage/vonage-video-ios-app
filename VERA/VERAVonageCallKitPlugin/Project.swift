@@ -10,7 +10,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAVonageCallKitPlugin",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAVonageCallKitPlugin/**"],
             scripts: [.swiftLint(targetName: "VERAVonageCallKitPlugin")],
             dependencies: [
@@ -25,7 +25,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAVonageCallKitPluginTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAVonageCallKitPluginTests/**"],
             dependencies: [
                 .project(target: "VERAVonage", path: "../VERAVonage"),
