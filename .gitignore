@@ -97,3 +97,5 @@ Okta.plist
 .kiro/settings/
 .kiro/settings.json
 .kiro/skills/
+setUpOkta.sh
+Okta.plist
