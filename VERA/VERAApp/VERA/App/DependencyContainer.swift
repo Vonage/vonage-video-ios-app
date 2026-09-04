@@ -4,9 +4,11 @@
 
 import AVFoundation
 import Foundation
+import VERACommonUI
 import VERAConfiguration
 import VERACore
 import VERADomain
+import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
@@ -34,13 +36,40 @@ import VERAVonageCallKitPlugin
     import VERAAudioDiagnostics
 #endif
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 final class DependencyContainer {
 
-    let httpClient: HTTPClient
+    private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
+        isE2EEnabled: E2EConfiguration.isEnabled
+    )()
 
-    init(httpClient: HTTPClient) {
-        self.httpClient = httpClient
-    }
+    #if OKTA_ENABLED
+        lazy var authManager: any OKTAAuthenticating = {
+            if E2EConfiguration.isEnabled {
+                return E2EAuthStateManager()
+            }
+            let okta = OktaAuthManager()
+            okta.restoreSession()
+            return okta
+        }()
+
+        lazy var httpClient: HTTPClient = {
+            if E2EConfiguration.isEnabled {
+                return baseHttpClient
+            }
+            return TokenInjectingHTTPClient(
+                wrapped: baseHttpClient,
+                tokenProvider: OktaTokenProvider(authManager: authManager)
+            )
+        }()
+    #else
+        var httpClient: HTTPClient { baseHttpClient }
+    #endif
+
+    init() {}
 
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 

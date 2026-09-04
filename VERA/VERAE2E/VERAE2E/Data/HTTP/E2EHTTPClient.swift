@@ -18,7 +18,7 @@ public final class E2EHTTPClient: HTTPClient {
         self.interceptor = interceptor
     }
 
-    public func get(_ url: URL) async throws -> Data {
+    public func get(_ url: URL, additionalHeaders: [String: String] = [:]) async throws -> Data {
         try await respond(to: url, method: "GET", requestBody: nil)
     }
 

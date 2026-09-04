@@ -5,7 +5,10 @@
 import Foundation
 
 public protocol HTTPClient {
-    func get(_ url: URL) async throws -> Data
+    func get(
+        _ url: URL,
+        additionalHeaders: [String: String]
+    ) async throws -> Data
 
     func post(
         _ url: URL,
@@ -15,6 +18,10 @@ public protocol HTTPClient {
 }
 
 extension HTTPClient {
+    public func get(_ url: URL) async throws -> Data {
+        try await get(url, additionalHeaders: [:])
+    }
+
     public func post(
         _ url: URL,
         data: Data
