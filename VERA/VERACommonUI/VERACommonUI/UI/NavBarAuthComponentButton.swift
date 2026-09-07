@@ -12,13 +12,9 @@ public struct NavBarAuthComponentButton: View {
     }
 
     public var body: some View {
-        NavBarAuthButton(
-            authState: viewModel.authState,
-            onLoginTapped: viewModel.onLoginTapped,
-            onLogoutTapped: viewModel.onLogoutTapped
-        )
-        .onAppear {
-            viewModel.startObserving()
-        }
+        NavBarAuthButton(viewModel: viewModel)
+            .onAppear {
+                viewModel.startObserving()
+            }
     }
 }

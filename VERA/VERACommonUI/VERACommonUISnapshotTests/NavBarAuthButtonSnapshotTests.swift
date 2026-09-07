@@ -2,6 +2,7 @@
 //  Created by Vonage on 13/8/26.
 //
 
+@preconcurrency import Combine
 import SnapshotTesting
 import SwiftUI
 import Testing
@@ -48,15 +49,18 @@ struct NavBarAuthButtonSnapshotTests {
     // MARK: - Test Helpers
 
     private func makeSUT(authState: AuthState) -> some View {
-        ZStack {
+        let viewModel = NavBarAuthButtonViewModel(
+            authStateDataSource: StubAuthStateDataSource(),
+            initialState: authState,
+            onLoginTapped: {},
+            onLogoutTapped: {}
+        )
+
+        return ZStack {
             Color.gray.opacity(0.1)
                 .ignoresSafeArea()
 
-            NavBarAuthButton(
-                authState: authState,
-                onLoginTapped: {},
-                onLogoutTapped: {}
-            )
+            NavBarAuthButton(viewModel: viewModel)
         }
     }
 
@@ -85,4 +89,10 @@ struct NavBarAuthButtonSnapshotTests {
             column: column
         )
     }
+}
+
+// MARK: - Test Doubles
+
+private struct StubAuthStateDataSource: AuthStateDataSource {
+    let authStatePublisher = Empty<AuthState, Never>().eraseToAnyPublisher()
 }

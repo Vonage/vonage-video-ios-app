@@ -10,33 +10,17 @@ private enum NavBarAuthButtonConstants {
 }
 
 public struct NavBarAuthButton: View {
-    private let authState: AuthState
-    private let onLoginTapped: () -> Void
-    private let onLogoutTapped: () async -> Void
+    @ObservedObject private var viewModel: NavBarAuthButtonViewModel
 
-    @State private var showAccountMenu = false
-    @State private var isLoggingOut = false
-
-    public init(
-        authState: AuthState,
-        onLoginTapped: @escaping () -> Void,
-        onLogoutTapped: @escaping () async -> Void
-    ) {
-        self.authState = authState
-        self.onLoginTapped = onLoginTapped
-        self.onLogoutTapped = onLogoutTapped
+    public init(viewModel: NavBarAuthButtonViewModel) {
+        self.viewModel = viewModel
     }
 
     public var body: some View {
         Button {
-            switch authState {
-            case .notAuthenticated:
-                onLoginTapped()
-            case .authenticated:
-                showAccountMenu = true
-            }
+            viewModel.authButtonTapped()
         } label: {
-            switch authState {
+            switch viewModel.authState {
             case .notAuthenticated:
                 VERACommonUIAsset.Images.userSolid.swiftUIImage
                     .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
@@ -48,7 +32,7 @@ public struct NavBarAuthButton: View {
             }
         }
         .accessibilityIdentifier("auth-button")
-        .sheet(isPresented: $showAccountMenu) {
+        .sheet(isPresented: $viewModel.showAccountMenu) {
             accountMenuView
                 .presentationDetents([.height(NavBarAuthButtonConstants.sheetHeight)])
                 .presentationDragIndicator(.visible)
@@ -57,15 +41,10 @@ public struct NavBarAuthButton: View {
 
     private var accountMenuView: some View {
         AuthAccountMenuView(
-            userName: authState.user?.name,
-            isLoggingOut: isLoggingOut
+            userName: viewModel.authState.user?.name,
+            isLoggingOut: viewModel.isLoggingOut
         ) {
-            Task {
-                isLoggingOut = true
-                await onLogoutTapped()
-                isLoggingOut = false
-                showAccountMenu = false
-            }
+            Task { await viewModel.signOut() }
         }
     }
 }

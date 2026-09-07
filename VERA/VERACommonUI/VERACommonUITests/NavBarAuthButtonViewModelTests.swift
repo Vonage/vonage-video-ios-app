@@ -100,6 +100,65 @@ struct NavBarAuthButtonViewModelTests {
         #expect(sut.authState == .authenticated(AuthenticatedUser(name: "User2")))
     }
 
+    // MARK: - authButtonTapped
+
+    @Test("authButtonTapped invokes login when not authenticated and does not show the menu")
+    func authButtonTappedWhenNotAuthenticated() {
+        var loginCalled = false
+        let sut = makeSUT(onLoginTapped: { loginCalled = true })
+
+        sut.authButtonTapped()
+
+        #expect(loginCalled)
+        #expect(sut.showAccountMenu == false)
+    }
+
+    @Test("authButtonTapped shows the account menu when authenticated and does not invoke login")
+    func authButtonTappedWhenAuthenticated() async {
+        let dataSource = MockAuthStateDataSource(
+            initialState: .authenticated(AuthenticatedUser(name: "Alice"))
+        )
+        var loginCalled = false
+        let sut = makeSUT(dataSource: dataSource, onLoginTapped: { loginCalled = true })
+
+        sut.startObserving()
+        await Task.yield()
+        sut.authButtonTapped()
+
+        #expect(sut.showAccountMenu)
+        #expect(loginCalled == false)
+    }
+
+    // MARK: - signOut
+
+    @Test("signOut invokes onLogoutTapped and dismisses the menu")
+    func signOutInvokesLogoutAndDismisses() async {
+        var logoutCalled = false
+        let sut = makeSUT(onLogoutTapped: { logoutCalled = true })
+        sut.showAccountMenu = true
+
+        await sut.signOut()
+
+        #expect(logoutCalled)
+        #expect(sut.showAccountMenu == false)
+        #expect(sut.isLoggingOut == false)
+    }
+
+    @Test("signOut flags isLoggingOut while the logout is in flight")
+    func signOutFlagsIsLoggingOut() async {
+        var loggingOutDuringLogout = false
+        let sut = makeSUT()
+        // Capture the flag from inside the logout handler, i.e. while signOut is awaiting.
+        sut.onLogoutTapped = { [weak sut] in
+            loggingOutDuringLogout = sut?.isLoggingOut ?? false
+        }
+
+        await sut.signOut()
+
+        #expect(loggingOutDuringLogout)
+        #expect(sut.isLoggingOut == false)
+    }
+
     // MARK: - Helpers
 
     private func makeSUT(
