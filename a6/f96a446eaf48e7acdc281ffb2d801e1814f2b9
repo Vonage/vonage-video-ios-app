@@ -1,0 +1,31 @@
+VERA/VERAAudioEffects/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 24
+VERA/VERABackgroundEffects/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 25
+VERA/VERAVonage/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 21
+VERA/VERAVonageScreenSharePlugin/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 60
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 17,32-43
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 48,75
+VERA/Project.swift
+  s_abc743072b47db::t_18bfe4f4fe7a47 263-266
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a6f96a446eaf48e7acdc281ffb2d801e1814f2b9",
+  "prompts": {},
+  "sessions": {
+    "s_abc743072b47db": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1787824697953815000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

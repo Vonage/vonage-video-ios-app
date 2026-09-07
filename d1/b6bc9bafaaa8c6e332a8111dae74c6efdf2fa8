@@ -1,0 +1,23 @@
+.claude/skills/record-snapshots/SKILL.md
+  s_89cb78c2813c1a::t_fb3b508840ca6e 1-61
+.claude/skills/setup/SKILL.md
+  s_89cb78c2813c1a::t_915bb9450e9a12 1-98
+.claude/skills/run-tests/SKILL.md
+  s_89cb78c2813c1a::t_72f6d1f2bef4ff 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d1b6bc9bafaaa8c6e332a8111dae74c6efdf2fa8",
+  "prompts": {},
+  "sessions": {
+    "s_89cb78c2813c1a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84ae305f-d7d6-4c98-9267-e1bac4a6d8b6",
+        "model": "claude-fable-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
