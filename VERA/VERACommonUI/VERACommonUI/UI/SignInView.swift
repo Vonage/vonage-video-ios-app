@@ -26,11 +26,13 @@ public struct SignInView: View {
     public init(
         providers: [IDProvider],
         onProviderSelected: @escaping (IDProvider) async throws -> Void,
-        initialErrorMessage: String? = nil
+        initialErrorMessage: String? = nil,
+        initialIsLoading: Bool = false
     ) {
         self.providers = providers
         self.onProviderSelected = onProviderSelected
         self._errorMessage = State(initialValue: initialErrorMessage)
+        self._isLoading = State(initialValue: initialIsLoading)
     }
 
     public var body: some View {

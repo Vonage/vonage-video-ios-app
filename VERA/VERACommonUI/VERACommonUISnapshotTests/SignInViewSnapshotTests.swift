@@ -73,16 +73,30 @@ struct SignInViewSnapshotTests {
         snapshot(sut, named: "NoProviders")
     }
 
+    // MARK: - Loading State
+
+    @Test("SignInView - Loading State")
+    func loadingState() throws {
+        let sut = makeSUT(
+            providers: [IDProvider(id: "okta", displayName: "Okta")],
+            isLoading: true
+        )
+
+        snapshot(sut, named: "LoadingState")
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
         providers: [IDProvider],
-        errorMessage: String? = nil
+        errorMessage: String? = nil,
+        isLoading: Bool = false
     ) -> some View {
         SignInView(
             providers: providers,
             onProviderSelected: { _ in },
-            initialErrorMessage: errorMessage
+            initialErrorMessage: errorMessage,
+            initialIsLoading: isLoading
         )
     }
 
