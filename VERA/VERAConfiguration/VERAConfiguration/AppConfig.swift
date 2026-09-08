@@ -58,6 +58,19 @@ public struct AppConfig {
         }
     }
 
+    public struct AuthSettings {
+        public let allowAuthentication: Bool
+        public let idProviders: [String]
+
+        public init(
+            allowAuthentication: Bool = false,
+            idProviders: [String] = ["okta"]
+        ) {
+            self.allowAuthentication = allowAuthentication
+            self.idProviders = idProviders
+        }
+    }
+
     public struct MeetingRoomSettings {
         public let allowArchiving: Bool
         public let allowCaptions: Bool
@@ -100,21 +113,25 @@ public struct AppConfig {
 
     public static let videoSettings = VideoSettings()
     public static let audioSettings = AudioSettings()
+    public static let authSettings = AuthSettings()
     public static let waitingRoomSettings = WaitingRoomSettings()
     public static let meetingRoomSettings = MeetingRoomSettings()
 
     public let videoSettings: VideoSettings
     public let audioSettings: AudioSettings
+    public let authSettings: AuthSettings
     public let waitingRoomSettings: WaitingRoomSettings
     public let meetingRoomSettings: MeetingRoomSettings
 
     public init(
         videoSettings: VideoSettings = VideoSettings(),
         audioSettings: AudioSettings = AudioSettings(),
+        authSettings: AuthSettings = AuthSettings(),
         waitingRoomSettings: WaitingRoomSettings = WaitingRoomSettings(),
         meetingRoomSettings: MeetingRoomSettings = MeetingRoomSettings()
     ) {
         self.audioSettings = audioSettings
+        self.authSettings = authSettings
         self.videoSettings = videoSettings
         self.waitingRoomSettings = waitingRoomSettings
         self.meetingRoomSettings = meetingRoomSettings

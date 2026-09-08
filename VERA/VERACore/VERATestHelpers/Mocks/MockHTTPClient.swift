@@ -34,8 +34,8 @@ public final class MockHTTPClient: HTTPClient {
         self.recordedData = recordedData
     }
 
-    public func get(_ url: URL) async throws -> Data {
-        try await recordAndReturn(url: url, data: nil)
+    public func get(_ url: URL, additionalHeaders: [String: String] = [:]) async throws -> Data {
+        try await recordAndReturn(url: url, additionalHeaders: additionalHeaders, data: nil)
     }
 
     public func post(_ url: URL, additionalHeaders: [String: String] = [:], data: Data) async throws -> Data {
