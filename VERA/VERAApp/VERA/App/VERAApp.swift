@@ -275,10 +275,20 @@ struct VERAApp: App {
                 }
         }
 
-        let currentVideoEffect =
-            navigationCoordinator.videoEffectsViewModel?.selectedEffect
-            ?? dependencyContainer.videoEffectRepository.load()
-        let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #if BACKGROUND_EFFECTS_ENABLED
+            let currentVideoEffect =
+                navigationCoordinator.videoEffectsViewModel?.selectedEffect
+                ?? dependencyContainer.videoEffectRepository.load()
+        #else
+            let currentVideoEffect: VideoEffect? = nil
+        #endif
+
+        #if AUDIOEFFECTS_ENABLED
+            let currentNoiseSuppressionState =
+                navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #else
+            let currentNoiseSuppressionState: NoiseSuppressionState? = nil
+        #endif
 
         let builder = MeetingRoomBuilder(
             baseURL: dependencyContainer.baseURL,
