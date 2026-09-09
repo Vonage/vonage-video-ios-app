@@ -249,7 +249,7 @@ extension MeetingRoomEnabledFeaturesTests {
                 allowScreenShare: screenShare,
                 allowSettings: settings))
 
-        let container = DependencyContainer(httpClient: StubHTTPClient())
+        let container = DependencyContainer()
         container.appConfig = config
         return container
     }

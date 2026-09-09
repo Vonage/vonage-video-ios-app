@@ -60,7 +60,7 @@ struct BaseURLResolverTests {
 
     @Test("Container baseURL is wired through BaseURLResolver")
     func containerBaseURLIsWiredThroughResolver() {
-        let sut = DependencyContainer(httpClient: StubHTTPClient())
+        let sut = DependencyContainer()
 
         let expected = BaseURLResolver.resolve(
             configuredURLString: AppConfig.baseApiUrl,
