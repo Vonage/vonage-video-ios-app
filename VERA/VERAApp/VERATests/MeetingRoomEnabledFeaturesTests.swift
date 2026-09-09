@@ -324,7 +324,10 @@ struct AppConfigFixture: Decodable {
 }
 
 /// Minimal no-op `HTTPClient` so tests don't depend on `VERATestHelpers`.
+/// Methods are `nonisolated` to satisfy the protocol under default MainActor isolation.
 private final class StubHTTPClient: HTTPClient, @unchecked Sendable {
-    func get(_ url: URL) async throws -> Data { Data() }
-    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data { Data() }
+    nonisolated func get(_ url: URL) async throws -> Data { Data() }
+    nonisolated func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
+        Data()
+    }
 }
