@@ -147,6 +147,18 @@ run_tuist_generate() {
     fi
 }
 
+# Regenerates the SPM-only asset accessors from the Tuist-generated
+# TuistAssets+VERACommonUI.swift so the SPM build never drifts from the asset
+# catalog. MUST run after `tuist generate` (it reads the Derived/ output).
+run_spm_assets_codegen() {
+    step "generate-spm-assets.py → SPMAssets+VERACommonUI.swift"
+    if python3 Scripts/generate-spm-assets.py; then
+        ok "SPM asset accessors generated"
+    else
+        error_exit "Failed to generate SPM asset accessors."
+    fi
+}
+
 open_xcode() {
     step "Opening Xcode..."
     if open VERA.xcworkspace; then
@@ -175,6 +187,7 @@ if [ "$MODE" = "update" ]; then
 
     phase "Generate workspace"
     run_tuist_generate
+    run_spm_assets_codegen
 
     print_done "Update complete"
     echo -e "  ${DIM}If Xcode is already open, let it reload the project and Build"
@@ -336,6 +349,7 @@ fi
 phase "Generate workspace"
 # ----------------------------------------------------------------------------
 run_tuist_generate
+run_spm_assets_codegen
 
 # ----------------------------------------------------------------------------
 # Xcode opening prompt

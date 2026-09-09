@@ -1,3 +1,4 @@
+// swift-format-ignore-file
 //
 // TypographyStyle.swift
 // Generated from theme.json - DO NOT EDIT MANUALLY
@@ -41,14 +42,11 @@ public enum TypographyStyle {
         case .heading3: return TypographyConfig(fontSize: 20, lineHeight: 28, weight: .medium, lineSpacing: 8.0)
         case .heading4: return TypographyConfig(fontSize: 18, lineHeight: 24, weight: .medium, lineSpacing: 6.0)
         case .bodyExtended: return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .regular, lineSpacing: 8.0)
-        case .bodyExtendedSemibold:
-            return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .semibold, lineSpacing: 8.0)
+        case .bodyExtendedSemibold: return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .semibold, lineSpacing: 8.0)
         case .bodyBase: return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .regular, lineSpacing: 6.0)
-        case .bodyBaseSemibold:
-            return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .semibold, lineSpacing: 6.0)
+        case .bodyBaseSemibold: return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .semibold, lineSpacing: 6.0)
         case .caption: return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .regular, lineSpacing: 4.0)
-        case .captionSemibold:
-            return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .semibold, lineSpacing: 4.0)
+        case .captionSemibold: return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .semibold, lineSpacing: 4.0)
         }
     }
 
@@ -61,20 +59,17 @@ public enum TypographyStyle {
         case .heading3: return TypographyConfig(fontSize: 26, lineHeight: 36, weight: .medium, lineSpacing: 10.0)
         case .heading4: return TypographyConfig(fontSize: 20, lineHeight: 28, weight: .medium, lineSpacing: 8.0)
         case .bodyExtended: return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .regular, lineSpacing: 8.0)
-        case .bodyExtendedSemibold:
-            return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .semibold, lineSpacing: 8.0)
+        case .bodyExtendedSemibold: return TypographyConfig(fontSize: 16, lineHeight: 24, weight: .semibold, lineSpacing: 8.0)
         case .bodyBase: return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .regular, lineSpacing: 6.0)
-        case .bodyBaseSemibold:
-            return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .semibold, lineSpacing: 6.0)
+        case .bodyBaseSemibold: return TypographyConfig(fontSize: 14, lineHeight: 20, weight: .semibold, lineSpacing: 6.0)
         case .caption: return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .regular, lineSpacing: 4.0)
-        case .captionSemibold:
-            return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .semibold, lineSpacing: 4.0)
+        case .captionSemibold: return TypographyConfig(fontSize: 12, lineHeight: 16, weight: .semibold, lineSpacing: 4.0)
         }
     }
 }
 
-extension View {
-    public func adaptiveFont(_ style: TypographyStyle) -> some View {
+public extension View {
+    func adaptiveFont(_ style: TypographyStyle) -> some View {
         self.modifier(AdaptiveFontModifier(style: style))
     }
 }

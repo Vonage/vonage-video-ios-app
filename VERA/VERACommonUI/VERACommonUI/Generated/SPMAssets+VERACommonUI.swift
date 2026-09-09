@@ -9,6 +9,9 @@
 //
 // This file is compiled ONLY when building with Swift Package Manager.
 // During Tuist builds, the equivalent code is auto-generated in Derived/Sources/.
+//
+// DO NOT EDIT MANUALLY — regenerate via Scripts/generate-spm-assets.py
+// (runs automatically as part of Scripts/builder.sh, after `tuist generate`).
 
 #if SWIFT_PACKAGE
 
@@ -27,7 +30,7 @@
 
 public enum VERACommonUIAsset: Sendable {
   public enum Colors {
-  public static let vGray0 = VERACommonUIColors(name: "vGray0")
+    public static let vGray0 = VERACommonUIColors(name: "vGray0")
     public static let vGray1 = VERACommonUIColors(name: "vGray1")
     public static let vGray2 = VERACommonUIColors(name: "vGray2")
     public static let vGray3 = VERACommonUIColors(name: "vGray3")
@@ -35,9 +38,10 @@ public enum VERACommonUIAsset: Sendable {
     public static let videoBackground = VERACommonUIColors(name: "videoBackground")
   }
   public enum Images {
-  public static let callKitIcon = VERACommonUIImages(name: "CallKitIcon")
+    public static let callKitIcon = VERACommonUIImages(name: "CallKitIcon")
     public static let appsSolid = VERACommonUIImages(name: "apps-solid")
     public static let arrowBoldLeftLine = VERACommonUIImages(name: "arrow-bold-left-line")
+    public static let assignUserSolid = VERACommonUIImages(name: "assign-user-solid")
     public static let audioMaxSolidOff = VERACommonUIImages(name: "audio-max-solid-off")
     public static let audioMaxSolid = VERACommonUIImages(name: "audio-max-solid")
     public static let audioMidLine = VERACommonUIImages(name: "audio-mid-line")
@@ -78,6 +82,7 @@ public enum VERACommonUIAsset: Sendable {
     public static let removeLine = VERACommonUIImages(name: "remove-line")
     public static let screenShareSolid = VERACommonUIImages(name: "screen-share-solid")
     public static let shareLine = VERACommonUIImages(name: "share-line")
+    public static let userSolid = VERACommonUIImages(name: "user-solid")
     public static let videoActiveLine = VERACommonUIImages(name: "video-active-line")
     public static let videoLine = VERACommonUIImages(name: "video-line")
     public static let videoOffLine = VERACommonUIImages(name: "video-off-line")
@@ -86,11 +91,13 @@ public enum VERACommonUIAsset: Sendable {
     public static let warningLine = VERACommonUIImages(name: "warning-line")
   }
   public enum SemanticColors {
-  public static let background = VERACommonUIColors(name: "background")
+    public static let accent = VERACommonUIColors(name: "accent")
+    public static let background = VERACommonUIColors(name: "background")
     public static let border = VERACommonUIColors(name: "border")
     public static let disabled = VERACommonUIColors(name: "disabled")
     public static let error = VERACommonUIColors(name: "error")
     public static let errorHover = VERACommonUIColors(name: "error_hover")
+    public static let onAccent = VERACommonUIColors(name: "on_accent")
     public static let onBackground = VERACommonUIColors(name: "on_background")
     public static let onError = VERACommonUIColors(name: "on_error")
     public static let onPrimary = VERACommonUIColors(name: "on_primary")

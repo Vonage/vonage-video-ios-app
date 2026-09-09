@@ -42,7 +42,8 @@ Use this the first time, after extracting the Starter Kit ZIP. It runs, in phase
    - `generateEnvironmentConstants.sh` → `VERAApp/VERA/App/Generated/EnvironmentConstants.swift`
    - `generate-app-theme.py` → `VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets` (+ `BorderRadius.swift`, `TypographyStyle.swift`)
 5. **Generate workspace** — `tuist generate`.
-6. **Open Xcode** automatically.
+6. **Generate SPM asset accessors** — `generate-spm-assets.py` → `VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift`, derived from the Tuist-generated `Derived/Sources/TuistAssets+VERACommonUI.swift` (must run after `tuist generate`). Keeps the SPM build in sync with the asset catalog.
+7. **Open Xcode** automatically.
 
 ### `./Scripts/builder.sh --update` — fast path
 
@@ -51,7 +52,8 @@ Use this after editing `Config/app-config.json` or `Config/theme.json`. It:
 1. Validates `app-config.json`.
 2. Regenerates the JSON-driven files (`AppConfig.swift` + theme assets).
 3. Runs `tuist generate --no-open`.
-4. Asks whether to open Xcode.
+4. Regenerates `SPMAssets+VERACommonUI.swift` from the Tuist assets.
+5. Asks whether to open Xcode.
 
 It **skips** prerequisite checks, `BASE_API_URL` resolution and `EnvironmentConstants.swift` (those only matter for first-time setup).
 
@@ -85,6 +87,7 @@ See [`CONFIGURATION_README.md`](CONFIGURATION_README.md) for the full feature-fl
 | Changes to `app-config.json` not reflected | Run `./Scripts/builder.sh --update` (a plain `tuist generate` won't regenerate) |
 | Stale workspace | `tuist clean` then `./Scripts/builder.sh --update` |
 | `builder.sh` fails on codegen | Run the failing script directly to see the error, e.g. `python3 Scripts/generate-app-config.py` |
+| SPM build fails on a missing asset (e.g. `SemanticColors.accent`) | `SPMAssets+VERACommonUI.swift` drifted from the catalog. Run `tuist generate` then `python3 Scripts/generate-spm-assets.py` (or `./Scripts/builder.sh --update`). Do not edit the file by hand. |
 | Signing / entitlements issues | Confirm `DEVELOPMENT_TEAM` is set and `Config/Signing.xcconfig` was generated |
 
 Never edit `.xcodeproj`/`.xcworkspace` (generated, not committed) or files marked `DO NOT EDIT MANUALLY`.

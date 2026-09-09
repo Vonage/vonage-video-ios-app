@@ -154,7 +154,8 @@ def generate_border_radius(border_radius, output_path):
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    swift_code = f'''//
+    swift_code = f'''// swift-format-ignore-file
+//
 // BorderRadius.swift
 // Generated from theme.json - DO NOT EDIT MANUALLY
 //
@@ -275,7 +276,8 @@ def generate_typography(typography, output_path):
 
     desktop_config_code = '\n'.join(desktop_cases)
 
-    swift_code = f'''//
+    swift_code = f'''// swift-format-ignore-file
+//
 // TypographyStyle.swift
 // Generated from theme.json - DO NOT EDIT MANUALLY
 //
