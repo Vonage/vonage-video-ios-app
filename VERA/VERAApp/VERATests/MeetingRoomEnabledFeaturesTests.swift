@@ -5,7 +5,6 @@
 import Foundation
 import Testing
 import VERAConfiguration
-import VERADomain
 
 @testable import VERA
 @testable import VERAMeetingRoomSDK
@@ -321,13 +320,4 @@ struct AppConfigFixture: Decodable {
     let videoSettings: VideoSettings
     let audioSettings: AudioSettings
     let meetingRoomSettings: MeetingRoomSettings
-}
-
-/// Minimal no-op `HTTPClient` so tests don't depend on `VERATestHelpers`.
-/// Methods are `nonisolated` to satisfy the protocol under default MainActor isolation.
-private final class StubHTTPClient: HTTPClient, @unchecked Sendable {
-    nonisolated func get(_ url: URL) async throws -> Data { Data() }
-    nonisolated func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data {
-        Data()
-    }
 }
