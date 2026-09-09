@@ -1,0 +1,33 @@
+VERA/Config/app-config.json
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 8
+  s_f910ebb05bb38f::t_72c3fcec8f80c4 5-7
+VERA/Scripts/generate-app-config.py
+  s_86acf879694243::t_89a56409e9317c 9,30-33,45,56-58,177
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 10
+  s_f910ebb05bb38f::t_9d9f6808bd8005 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "c5e6fa75c0b3027cf3ba6b18ed2b0ca997d08818",
+  "prompts": {},
+  "sessions": {
+    "s_86acf879694243": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788912228496081000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_f910ebb05bb38f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788912014598166000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
