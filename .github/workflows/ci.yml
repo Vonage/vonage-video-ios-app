@@ -206,7 +206,6 @@ jobs:
   upload-testflight:
     name: Upload to TestFlight
     runs-on: macos-26
-    
     steps:
       - uses: actions/checkout@v6
     
