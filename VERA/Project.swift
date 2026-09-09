@@ -212,6 +212,45 @@ private func isFeedbackEnabled() -> Bool {
     return meetingRoomSettings["allowFeedback"] as! Bool
 }
 
+/// Returns whether authentication is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "authSettings": {
+///     "allowAuthentication": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `authSettings.allowAuthentication` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isAuthenticationEnabled() -> Bool {
+    let config = readAppConfig()
+    let authSettings = config["authSettings"] as! [String: Any]
+    return authSettings["allowAuthentication"] as! Bool
+}
+
+/// Returns whether Okta is listed as an identity provider in `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "authSettings": {
+///     "idProviders": ["okta"]
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `authSettings.idProviders` contains `"okta"`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isOktaEnabled() -> Bool {
+    let config = readAppConfig()
+    let authSettings = config["authSettings"] as! [String: Any]
+    let idProviders = authSettings["idProviders"] as! [String]
+    return idProviders.contains("okta")
+}
+
 // MARK: - Dynamic Dependencies
 
 /// Builds Swift Package dependencies dynamically based on feature flags.
@@ -260,10 +299,10 @@ private func createDependencies() -> [TargetDependency] {
     }
 
     if areBackgroundEffectsEnabled() {
-        dependencies.append(contentsOf: [
-            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"),
-            .vonageVideoTransformersSDK,
-        ])
+        dependencies.append(
+            contentsOf: [
+                .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies)
     }
 
     if areSettingsEnabled() {
@@ -294,6 +333,11 @@ private func createDependencies() -> [TargetDependency] {
     if isFeedbackEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERAFeedback", path: "VERAFeedback")
+        ])
+    }
+    if isOktaEnabled() {
+        dependencies.append(contentsOf: [
+            .project(target: "VERAOKTA", path: "VERAOKTA")
         ])
     }
     return dependencies
@@ -363,6 +407,18 @@ private func createBuildSettings() -> Settings {
         print("Feedback feature enabled in build settings.")
     }
 
+    if isAuthenticationEnabled() {
+        baseSettings["AUTHENTICATION_ENABLED"] = "1"
+        flags.append("AUTHENTICATION_ENABLED")
+        print("Authentication feature enabled in build settings.")
+    }
+
+    if isOktaEnabled() {
+        baseSettings["OKTA_ENABLED"] = "1"
+        flags.append("OKTA_ENABLED")
+        print("OKTA identity provider enabled in build settings.")
+    }
+
     if !flags.isEmpty {
         baseSettings["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] = "$(inherited) \(flags.joined(separator: " "))"
     }
@@ -408,7 +464,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: veraAppBundleID,
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERA",

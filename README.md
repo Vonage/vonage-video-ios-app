@@ -114,6 +114,7 @@ This app has been tested with **Vonage Video SDK 2.32** and **2.33**. Use the la
 |---|---|
 | [Getting Started](docs/GETTING_STARTED.md) | Prerequisites, environment setup, and first run |
 | [Architecture](docs/ARCHITECTURE.md) | Project architecture, module overview, Clean Architecture layers, DI, and key patterns |
+| [Authentication](docs/AUTHENTICATION.md) | Okta integration, token injection, and identity provider setup |
 | [Configuration](docs/CONFIGURATION.md) | Feature flags, theme tokens, signing, and SDK version |
 | [Testing](docs/TESTING.md) | Unit, snapshot, and Maestro E2E tests |
 | [Localization](docs/LOCALIZATION.md) | Adding languages and working with String Catalogs |

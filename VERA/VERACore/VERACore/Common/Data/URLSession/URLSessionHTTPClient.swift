@@ -18,9 +18,10 @@ public final class URLSessionHTTPClient: HTTPClient {
         self.interceptor = interceptor
     }
 
-    public func get(_ url: URL) async throws -> Data {
+    public func get(_ url: URL, additionalHeaders: [String: String] = [:]) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        additionalHeaders.forEach { request.setValue($1, forHTTPHeaderField: $0) }
         return try await perform(request)
     }
 

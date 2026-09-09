@@ -7,7 +7,7 @@ let package = Package(
     name: "VERAMeetingRoomSDK",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v16)
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -18,11 +18,11 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-            .upToNextMinor(from: "2.34.1")
+            .upToNextMinor(from: "2.35.1")
         ),
         .package(
             url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-            .upToNextMinor(from: "2.33.0")
+            .upToNextMinor(from: "2.35.1")
         ),
     ],
     targets: [

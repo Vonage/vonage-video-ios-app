@@ -33,13 +33,12 @@ struct AppDependencyProvidersTests {
         #expect(client is E2EHTTPClient)
     }
 
-    @Test("Dependency container exposes injected HTTP client")
-    func dependencyContainerExposesInjectedHTTPClient() {
-        let client = E2EHTTPClient(interceptor: HTTPClientInterceptorSpy())
+    @MainActor
+    @Test("Dependency container exposes HTTP client")
+    func dependencyContainerExposesHTTPClient() {
+        let sut = DependencyContainer()
 
-        let sut = DependencyContainer(httpClient: client)
-
-        #expect((sut.httpClient as? E2EHTTPClient) === client)
+        #expect(sut.httpClient is URLSessionHTTPClient || sut.httpClient is TokenInjectingHTTPClient)
     }
 
     @Test("Shared meeting room HTTP client factory returns injected HTTP client")
