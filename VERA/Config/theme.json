@@ -32,7 +32,9 @@
       "success-hover": "#1F7629",
       "border": "#E6E6E6",
       "disabled": "#E6E6E6",
-      "text-disabled": "#B3B3B3"
+      "text-disabled": "#B3B3B3",
+      "accent": "#000000",
+      "on-accent": "#FFFFFF"
     },
     "dark": {
       "primary": "#B27BF2",
@@ -60,7 +62,9 @@
       "success-hover": "#53CA6A",
       "border": "#333333",
       "disabled": "#333333",
-      "text-disabled": "#666666"
+      "text-disabled": "#666666",
+      "accent": "#000000",
+      "on-accent": "#FFFFFF"
     }
   },
   "borderRadius": {

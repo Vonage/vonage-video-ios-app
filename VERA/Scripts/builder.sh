@@ -125,11 +125,16 @@ run_config_codegen() {
         error_exit "Failed to generate AppConfig.swift. Re-run without >/dev/null to see details."
     fi
 
-    step "generate-app-theme.py → theme assets"
-    if python3 Scripts/generate-app-theme.py >/dev/null; then
+    # Normalizes theme.json first (backfills any missing color/radius/typography
+    # tokens with defaults, persisting them into the file) and then regenerates the
+    # theme assets.
+    step "generate-app-theme.py → normalize theme.json + theme assets"
+    if theme_out=$(python3 Scripts/generate-app-theme.py 2>&1); then
+        echo "$theme_out" | grep -q "Added missing" && ok "theme.json normalized (missing tokens added)"
         ok "Theme assets generated"
     else
-        error_exit "Failed to generate theme assets. Re-run without >/dev/null to see details."
+        echo "$theme_out" | tail -3
+        error_exit "Failed to generate theme assets."
     fi
 }
 
@@ -188,7 +193,7 @@ fi
 # ============================================================================
 # SETUP mode: full first-time setup
 # ============================================================================
-TOTAL_PHASES=6
+TOTAL_PHASES=5
 
 # ----------------------------------------------------------------------------
 phase "Check prerequisites"
@@ -316,10 +321,14 @@ else
     error_exit "Failed to generate EnvironmentConstants.swift."
 fi
 
-step "generate-app-theme.py → theme assets"
-if python3 Scripts/generate-app-theme.py >/dev/null; then
+# Normalizes theme.json first (backfills any missing color/radius/typography
+# tokens with defaults, persisting them into the file) and then regenerates assets.
+step "generate-app-theme.py → normalize theme.json + theme assets"
+if theme_out=$(python3 Scripts/generate-app-theme.py 2>&1); then
+    echo "$theme_out" | grep -q "Added missing" && ok "theme.json normalized (missing tokens added)"
     ok "Theme assets generated"
 else
+    echo "$theme_out" | tail -3
     error_exit "Failed to generate theme assets."
 fi
 

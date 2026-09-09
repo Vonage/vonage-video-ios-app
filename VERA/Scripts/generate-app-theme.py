@@ -335,6 +335,91 @@ private struct AdaptiveFontModifier: ViewModifier {{
 
     print("✅ Generated TypographyStyle.swift")
 
+# Canonical defaults for tokens the app depends on. Used to backfill an injected
+# theme.json (e.g. the Prebuilts MFE payload) that omits them.
+THEME_COLOR_DEFAULTS = {
+    "accent": "#000000",
+    "on-accent": "#FFFFFF",
+}
+
+BORDER_RADIUS_DEFAULTS = {
+    "none": 0,
+    "extra-small": 2,
+    "small": 4,
+    "medium": 8,
+    "large": 12,
+    "extra-large": 24,
+}
+
+TYPOGRAPHY_DEFAULTS = {
+    "font-family": "Inter",
+    "desktop": {
+        "headline": {"font-size": "66px", "line-height": "88px", "font-weight": 500},
+        "subtitle": {"font-size": "52px", "line-height": "68px", "font-weight": 500},
+        "heading-1": {"font-size": "40px", "line-height": "52px", "font-weight": 500},
+        "heading-2": {"font-size": "32px", "line-height": "44px", "font-weight": 500},
+        "heading-3": {"font-size": "26px", "line-height": "36px", "font-weight": 500},
+        "heading-4": {"font-size": "20px", "line-height": "28px", "font-weight": 500},
+        "body-extended": {"font-size": "16px", "line-height": "24px", "font-weight": 400},
+        "body-extended-semibold": {"font-size": "16px", "line-height": "24px", "font-weight": 600},
+        "body-base": {"font-size": "14px", "line-height": "20px", "font-weight": 400},
+        "body-base-semibold": {"font-size": "14px", "line-height": "20px", "font-weight": 600},
+        "caption": {"font-size": "12px", "line-height": "16px", "font-weight": 400},
+        "caption-semibold": {"font-size": "12px", "line-height": "16px", "font-weight": 600},
+    },
+    "mobile": {
+        "headline": {"font-size": "32px", "line-height": "40px", "font-weight": 500},
+        "subtitle": {"font-size": "30px", "line-height": "40px", "font-weight": 500},
+        "heading-1": {"font-size": "28px", "line-height": "36px", "font-weight": 500},
+        "heading-2": {"font-size": "24px", "line-height": "32px", "font-weight": 500},
+        "heading-3": {"font-size": "20px", "line-height": "28px", "font-weight": 500},
+        "heading-4": {"font-size": "18px", "line-height": "24px", "font-weight": 500},
+        "body-extended": {"font-size": "16px", "line-height": "24px", "font-weight": 400},
+        "body-extended-semibold": {"font-size": "16px", "line-height": "24px", "font-weight": 600},
+        "body-base": {"font-size": "14px", "line-height": "20px", "font-weight": 400},
+        "body-base-semibold": {"font-size": "14px", "line-height": "20px", "font-weight": 600},
+        "caption": {"font-size": "12px", "line-height": "16px", "font-weight": 400},
+        "caption-semibold": {"font-size": "12px", "line-height": "16px", "font-weight": 600},
+    },
+}
+
+
+def backfill_theme_defaults(theme_data):
+    """Add only the tokens that are missing from `theme_data`.
+
+    Returns True if anything was added (so the caller can persist the file),
+    False if the theme already had every token (nothing is written).
+    """
+    changed = False
+
+    colors = theme_data.setdefault("colors", {})
+    for variant in ("light", "dark"):
+        variant_colors = colors.setdefault(variant, {})
+        for token, default_hex in THEME_COLOR_DEFAULTS.items():
+            if token not in variant_colors:
+                variant_colors[token] = default_hex
+                changed = True
+
+    border_radius = theme_data.setdefault("borderRadius", {})
+    for token, default_value in BORDER_RADIUS_DEFAULTS.items():
+        if token not in border_radius:
+            border_radius[token] = default_value
+            changed = True
+
+    typography = theme_data.setdefault("typography", {})
+    if "font-family" not in typography:
+        typography["font-family"] = TYPOGRAPHY_DEFAULTS["font-family"]
+        changed = True
+    for section in ("desktop", "mobile"):
+        section_styles = typography.setdefault(section, {})
+        for style_name, config in TYPOGRAPHY_DEFAULTS[section].items():
+            if style_name not in section_styles:
+                section_styles[style_name] = dict(config)
+                changed = True
+
+    return changed
+
+
 def main():
     # Read theme.json
     theme_path = "./Config/theme.json"
@@ -355,6 +440,15 @@ def main():
         if key not in theme_data:
             print(f"❌ Error: Missing required section: {key}")
             exit(1)
+
+    # Backfill only the tokens that are missing, and PERSIST them back into theme.json
+    # so they become visible/editable for the client and are already present on the
+    # next `build.sh --update` (nothing is written if the theme is already complete).
+    if backfill_theme_defaults(theme_data):
+        with open(theme_path, 'w') as f:
+            json.dump(theme_data, f, indent=2)
+            f.write("\n")
+        print(f"ℹ️  Added missing theme defaults to {theme_path}")
 
     # Extract data from flat theme.json structure (not nested under themes.vonage)
     light_colors = theme_data['colors']['light']
