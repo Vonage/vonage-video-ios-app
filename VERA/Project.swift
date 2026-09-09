@@ -444,7 +444,8 @@ let project = Project(
             bundleId: "\(veraAppBundleID)Tests",
             sources: ["VERAApp/VERATests/**"],
             dependencies: [
-                .target(name: "VERA")
+                .target(name: "VERA"),
+                .project(target: "VERATestHelpers", path: "VERACore"),
             ]
         ),
     ],
