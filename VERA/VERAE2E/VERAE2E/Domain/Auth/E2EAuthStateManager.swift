@@ -1,0 +1,30 @@
+//
+//  Created by Vonage on 14/8/26.
+//
+
+import Combine
+import VERADomain
+
+/// A fake auth state manager used by E2E tests to bypass real identity provider flows.
+public final class E2EAuthStateManager: OKTAAuthenticating, @unchecked Sendable {
+    private let subject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
+
+    public var authStatePublisher: AnyPublisher<AuthState, Never> {
+        subject.eraseToAnyPublisher()
+    }
+
+    public init() {}
+
+    @MainActor
+    public func signIn(from anchor: ASPresentationAnchor) async throws {
+        subject.send(.authenticated(AuthenticatedUser(name: "E2E Test User")))
+    }
+
+    public func signOut() async throws {
+        subject.send(.notAuthenticated)
+    }
+
+    public func currentToken() async throws -> String {
+        "e2e-fake-token"
+    }
+}

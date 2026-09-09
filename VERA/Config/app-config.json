@@ -18,6 +18,12 @@
     "allowMicrophoneControl": true,
     "allowAudioDiagnostics": true
   },
+  "authSettings": {
+    "allowAuthentication": false,
+    "idProviders": [
+      "okta"
+    ]
+  },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,
     "allowSettings": true

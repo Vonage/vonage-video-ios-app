@@ -81,7 +81,7 @@ private final class MockHTTPClient: HTTPClient, @unchecked Sendable {
     var lastPostURL: URL?
     var postResult: Result<Data, Error> = .success(Data())
 
-    func get(_ url: URL) async throws -> Data {
+    func get(_ url: URL, additionalHeaders: [String: String]) async throws -> Data {
         Data()
     }
 

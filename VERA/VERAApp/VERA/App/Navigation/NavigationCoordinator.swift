@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import VERACommonUI
 import VERACore
 import VERADomain
 import VERAMeetingRoom
@@ -29,12 +30,14 @@ open class NavigationCoordinator: ObservableObject, Navigator {
     @Published var isInMeeting = false
     @Published var currentMeetingRoomRequest: NewRoomRequest?
     @Published var alertItem: AlertItem?
+    @Published var showSignIn = false
 
     // Cache for waiting room view models to prevent recreation
     var waitingRoomViewModel: WaitingRoomViewModel?
     var meetingRoomViewModel: MeetingRoomViewModel?
     var meetingRoomPrebuilt: MeetingRoomPrebuilt?
     var goodByeViewModel: GoodByeViewModel?
+    var navBarAuthButtonViewModel: NavBarAuthButtonViewModel?
 
     #if ARCHIVING_ENABLED
         var archivesViewModel: ArchivesViewModel?
