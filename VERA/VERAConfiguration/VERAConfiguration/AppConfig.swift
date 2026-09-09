@@ -7,6 +7,9 @@ import Foundation
 import VERADomain
 
 public struct AppConfig {
+    public static let baseApiUrl: String = ""
+    public static let configVersion: String = "1.0.0"
+
     public struct VideoSettings {
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
