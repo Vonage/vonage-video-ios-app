@@ -86,13 +86,11 @@ public enum VERACommonUIAsset: Sendable {
     public static let warningLine = VERACommonUIImages(name: "warning-line")
   }
   public enum SemanticColors {
-  public static let accent = VERACommonUIColors(name: "accent")
-    public static let background = VERACommonUIColors(name: "background")
+  public static let background = VERACommonUIColors(name: "background")
     public static let border = VERACommonUIColors(name: "border")
     public static let disabled = VERACommonUIColors(name: "disabled")
     public static let error = VERACommonUIColors(name: "error")
     public static let errorHover = VERACommonUIColors(name: "error_hover")
-    public static let onAccent = VERACommonUIColors(name: "on_accent")
     public static let onBackground = VERACommonUIColors(name: "on_background")
     public static let onError = VERACommonUIColors(name: "on_error")
     public static let onPrimary = VERACommonUIColors(name: "on_primary")

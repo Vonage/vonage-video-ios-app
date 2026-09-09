@@ -1,10 +1,8 @@
 //
-//  Created by Vonage on 13/11/25.
+// BorderRadius.swift
+// Generated from theme.json - DO NOT EDIT MANUALLY
 //
-
 import SwiftUI
-
-// MARK: - Border Radius
 
 public enum BorderRadius {
     case none
@@ -26,12 +24,7 @@ public enum BorderRadius {
     }
 }
 
-// MARK: - View Extension
-
 extension View {
-    /// Applies semantic border radius
-    /// - Parameter radius: The border radius style to apply
-    /// - Returns: A view with rounded corners
     public func cornerRadius(_ radius: BorderRadius) -> some View {
         clipShape(RoundedRectangle(cornerRadius: radius.value, style: .continuous))
     }
