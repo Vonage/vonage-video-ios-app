@@ -1,130 +1,79 @@
 # VERA Dynamic Configuration System
 
-This system allows enabling or disabling VERA application features through JSON configuration, specifically the chat module.
+This system enables or disables VERA application features and design tokens through JSON configuration files, without touching Swift code by hand.
+
+> Build flow lives in [`PREBUILTS_README.md`](PREBUILTS_README.md). After editing any config file, run `./Scripts/builder.sh --update`.
 
 ## Important Files
 
-- `./Config/app-config.json`: Main configuration file
-- `Scripts/generate-app-config.py`: Generates Swift code from JSON configuration
-- `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift`: Auto-generated code (do not edit manually)
+- `./Config/app-config.json` — feature flags and `baseApiUrl` (edit this).
+- `./Config/theme.json` — design tokens: colors, typography, border radii (edit this).
+- `Scripts/generate-app-config.py` — generates Swift from `app-config.json`.
+- `Scripts/generate-app-theme.py` — generates theme assets from `theme.json`.
+- `VERAConfiguration/VERAConfiguration/AppConfig.swift` — auto-generated (do not edit).
 
 ## How It Works
 
-1. **Build time**: The Python script reads `app-config.json` and generates Swift code
-2. **Conditional dependencies**: `Project.swift` reads the configuration and adds dependencies only if chat is enabled
-3. **Conditional compilation**: Code uses `#if CHAT_ENABLED` to include or exclude chat functionality
+Code generation is owned by **`Scripts/builder.sh`**, not by `Project.swift`.
 
-## Chat Configuration
+1. **Codegen** (`builder.sh`): the Python scripts read `app-config.json` / `theme.json` and generate `AppConfig.swift` and the theme assets.
+2. **Project graph** (`tuist generate`, run by `builder.sh`): `Project.swift` reads `app-config.json` and, for the flag-gated features, adds the module dependencies and Swift compilation conditions.
+3. **Runtime**: `AppConfig` values are read at runtime — most meeting-room features are enabled/disabled here (see below).
 
-In `app-config.json`, the chat configuration is located at:
+> A plain `tuist generate` does **not** regenerate `AppConfig.swift` or theme assets. Always use `./Scripts/builder.sh --update` after editing a JSON file.
 
-```json
-{
-  "meetingRoomSettings": {
-    "allowChat": true  // true = enables chat, false = disables chat
-  }
-}
-```
+## Runtime features vs. compile-time flags
+
+Not all features work the same way:
+
+- **Runtime (via `VERAMeetingRoomSDK`)** — `allowChat`, `allowCaptions`, `allowEmojis` (reactions), `allowScreenShare`, plus picture-in-picture. These modules are always linked; `DependencyContainer.meetingRoomEnabledFeatures` reads `AppConfig` and passes the enabled set to the meeting room SDK. Turning them off hides the feature at runtime.
+- **Compile-time flags (in `Project.swift`)** — `allowArchiving` → `ARCHIVING_ENABLED`, `allowBackgroundEffects` → `BACKGROUND_EFFECTS_ENABLED`, `allowSettings` → `SETTINGS_ENABLED`, `allowAdvancedNoiseSuppression` → `AUDIOEFFECTS_ENABLED`, `allowAudioDiagnostics` → `AUDIODIAGNOSTICS_ENABLED`, `allowFeedback` → `FEEDBACK_ENABLED`. These add/remove `VERAApp` dependencies and guard code with `#if …_ENABLED`.
 
 ## Usage
 
-### Enable/Disable Chat
+### Enable / disable a feature
 
-Manually edit the `app-config.json` file:
-
-```json
-{
-  "meetingRoomSettings": {
-    "allowChat": true  // change to false to disable
-  }
-}
-```
-
-Then regenerate the project:
-```bash
-tuist generate
-```
-
-### Complete Workflow
-
-1. Change configuration in `app-config.json` manually
-2. Run `tuist generate` to regenerate the project
-3. The system automatically:
-   - Includes or excludes chat dependencies
-   - Generates appropriate compilation flags
-   - Compiles only necessary code
-
-## Effects When Chat Is Disabled
-
-- ❌ `VERAChat` and `VERAVonageChatPlugin` are not included as dependencies
-- ❌ Chat-related code is not compiled
-- ❌ Chat button does not appear in the interface
-- ✅ Application works normally without chat functionality
-- ✅ Build size is smaller
-
-## Adding New Configurations
-
-To add new configurable features:
-
-1. Add the configuration to `app-config.json`
-2. Update `Scripts/generate-app-config.py` to read the new configuration
-3. Modify `Project.swift` to handle conditional dependencies
-4. Use `#if FEATURE_ENABLED` in Swift code for conditional compilation
-
-## Example of New Feature
-
-```json
-{
-  "meetingRoomSettings": {
-    "allowScreenShare": false
-  }
-}
-```
-
-Then in the code:
-```swift
-#if SCREENSHARE_ENABLED
-import VERAScreenShare
-#endif
-```
+1. Edit the relevant flag in `Config/app-config.json`, e.g.:
+   ```json
+   {
+     "meetingRoomSettings": { "allowChat": false }
+   }
+   ```
+2. Regenerate:
+   ```bash
+   ./Scripts/builder.sh --update
+   ```
+3. Build in Xcode (Clean Build Folder if a toggled feature doesn't take effect).
 
 ## Accessing Configuration in Code
 
-The generated configuration is available as static properties:
+`AppConfig` exposes the parsed configuration:
 
 ```swift
-// Access chat setting
-let chatEnabled = AppConfig.MeetingRoomSettings.allowChat
-
-// Access other settings
-let videoOnJoin = AppConfig.VideoSettings.allowVideoOnJoin
-let defaultLayout = AppConfig.MeetingRoomSettings.defaultLayoutMode
-let allowScreenShare = AppConfig.MeetingRoomSettings.allowScreenShare
+let chatEnabled     = AppConfig().meetingRoomSettings.allowChat
+let videoOnJoin     = AppConfig().videoSettings.allowVideoOnJoin
+let defaultLayout   = AppConfig().meetingRoomSettings.defaultLayoutMode
+let baseApiUrl      = AppConfig.baseApiUrl   // static
 ```
+
+## Adding a new configurable feature
+
+1. Add the key to `Config/app-config.json`.
+2. Update `Scripts/generate-app-config.py` to read it into `AppConfig`.
+3. Wire it either:
+   - **at runtime** — add a `MeetingRoomFeature` case and insert it in `DependencyContainer.meetingRoomEnabledFeatures`, or
+   - **at compile time** — add the flag in `Project.swift` (`createDependencies()` / `createBuildSettings()`) and guard code with `#if …_ENABLED`.
+4. Run `./Scripts/builder.sh --update`.
 
 ## Troubleshooting
 
-### Verify Generation Works
-```bash
-# Test the generation script
-python3 Scripts/generate-app-config.py
-```
+| Problem | Fix |
+|---|---|
+| JSON change not reflected | Run `./Scripts/builder.sh --update` (not a plain `tuist generate`) |
+| `AppConfig.swift` not updated | Run the script directly: `python3 Scripts/generate-app-config.py` and check for JSON errors |
+| Compile-time flag not applied | Confirm the flag appears in the target's **Active Compilation Conditions**, then `tuist clean` + `./Scripts/builder.sh --update` |
 
-### If `tuist generate` fails
-1. Verify that `app-config.json` is valid JSON
-2. Test the generation script manually: `python3 Scripts/generate-app-config.py`
-3. Verify that the file `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift` has been created
+## Notes
 
-### Build Settings Not Applied
-1. Check that `CHAT_ENABLED` appears in **Swift Compiler - Custom Flags** → **Active Compilation Conditions**
-2. Verify the script output shows "Chat enabled: true" during `tuist generate`
-3. Clean and regenerate: `tuist clean && tuist generate`
-
-## Important Notes
-
-- The file `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift` is regenerated automatically on each build
-- Never manually edit files in the `Generated/` folder
-- Always run `tuist generate` after changing `app-config.json`
-- Compilation flags are set automatically based on configuration
-- The system has multiple fallbacks for maximum compatibility
-- All configuration properties are static and can be accessed directly without instantiation
+- `VERAConfiguration/VERAConfiguration/AppConfig.swift` and the theme assets are generated — never edit them by hand.
+- `.xcodeproj` / `.xcworkspace` are generated and not committed; never edit them directly.
