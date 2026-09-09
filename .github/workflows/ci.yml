@@ -13,9 +13,11 @@ on:
     branches: [ main, develop ]
     paths:
       - 'VERA/**'
+  workflow_dispatch:
 
 jobs:
   format-check:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v6
@@ -31,6 +33,7 @@ jobs:
           ./scripts/format.sh --check
 
   spm-build:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: macos-26
     needs: [format-check]
     steps:
@@ -43,6 +46,7 @@ jobs:
             -destination "generic/platform=iOS Simulator" | xcpretty
 
   unit-tests:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: macos-26
     needs: [format-check]
     defaults:
