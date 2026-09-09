@@ -5,7 +5,7 @@
 import Foundation
 import Testing
 import VERAConfiguration
-import VERATestHelpers
+import VERADomain
 
 @testable import VERA
 @testable import VERAMeetingRoomSDK
@@ -250,7 +250,7 @@ extension MeetingRoomEnabledFeaturesTests {
                 allowScreenShare: screenShare,
                 allowSettings: settings))
 
-        let container = DependencyContainer(httpClient: MockHTTPClient())
+        let container = DependencyContainer(httpClient: StubHTTPClient())
         container.appConfig = config
         return container
     }
@@ -321,4 +321,10 @@ struct AppConfigFixture: Decodable {
     let videoSettings: VideoSettings
     let audioSettings: AudioSettings
     let meetingRoomSettings: MeetingRoomSettings
+}
+
+/// Minimal no-op `HTTPClient` so tests don't depend on `VERATestHelpers`.
+private final class StubHTTPClient: HTTPClient, @unchecked Sendable {
+    func get(_ url: URL) async throws -> Data { Data() }
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data { Data() }
 }

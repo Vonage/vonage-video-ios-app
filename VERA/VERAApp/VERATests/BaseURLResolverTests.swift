@@ -5,7 +5,7 @@
 import Foundation
 import Testing
 import VERAConfiguration
-import VERATestHelpers
+import VERADomain
 
 @testable import VERA
 
@@ -61,7 +61,7 @@ struct BaseURLResolverTests {
 
     @Test("Container baseURL is wired through BaseURLResolver")
     func containerBaseURLIsWiredThroughResolver() {
-        let sut = DependencyContainer(httpClient: MockHTTPClient())
+        let sut = DependencyContainer(httpClient: StubHTTPClient())
 
         let expected = BaseURLResolver.resolve(
             configuredURLString: AppConfig.baseApiUrl,
@@ -69,4 +69,10 @@ struct BaseURLResolverTests {
 
         #expect(sut.baseURL == expected)
     }
+}
+
+/// Minimal no-op `HTTPClient` so tests don't depend on `VERATestHelpers`.
+private final class StubHTTPClient: HTTPClient, @unchecked Sendable {
+    func get(_ url: URL) async throws -> Data { Data() }
+    func post(_ url: URL, additionalHeaders: [String: String], data: Data) async throws -> Data { Data() }
 }
