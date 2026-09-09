@@ -1,0 +1,25 @@
+VERA/VERAApp/VERATests/StubHTTPClient.swift
+  s_a383a44f59b93f::t_fc23e8dc6df326 1-10,15-24
+  s_a383a44f59b93f::t_4d345b08bb8914 11-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "652661937daf83f2919c935c12cf951abab505e3",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
