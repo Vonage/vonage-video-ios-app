@@ -7,6 +7,8 @@ metadata:
   annotations:
     vonage.com/jira-id: VPF   # video general projects
     business-criticality: Tier-3
+  tags:
+    - tier2
 spec:
   type: library
   owner: group:orgdata/vdk   # helm "owner" orgdata squad id or general orgdata/vid
