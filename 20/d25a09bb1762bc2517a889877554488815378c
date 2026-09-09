@@ -1,0 +1,37 @@
+VERA/PREBUILTS_README.md
+  s_a383a44f59b93f::t_5b2c21d166c6f0 1-90
+docs/CONFIGURATION.md
+  s_a383a44f59b93f::t_880ab8c7ae6a84 5,9,11-12,14,22-23,25,29,32,35,37,39,42,45
+  s_a383a44f59b93f::t_0f256668877983 3
+  s_a383a44f59b93f::t_b5915261f7f598 76
+  s_a383a44f59b93f::t_6ab00289450763 4
+.github/instructions/config-generation.instructions.md
+  s_a383a44f59b93f::t_9aa60f17925344 9
+  s_a383a44f59b93f::t_821c4e75c00681 17,19-26
+VERA/CONFIGURATION_README.md
+  s_a383a44f59b93f::t_20918f977bd363 3-5,9-13,17,19-21,23,25,27,29-30,32,34,36-46,50,53-56,59,61-66,68,70-74,76,78-79
+README.md
+  s_a383a44f59b93f::t_b947837749aa1c 116
+docs/GETTING_STARTED.md
+  s_a383a44f59b93f::t_3abd0704a2f341 33,35,38-45,48,50-54,57-63,75-76
+.github/copilot-instructions.md
+  s_a383a44f59b93f::t_36d7a62d50f77d 24-26,28,34-36,38-40,43
+  s_a383a44f59b93f::t_362002f10751df 231-233,235,242-243,245
+  s_a383a44f59b93f::t_6fef768ad5524a 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "20d25a09bb1762bc2517a889877554488815378c",
+  "prompts": {},
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
