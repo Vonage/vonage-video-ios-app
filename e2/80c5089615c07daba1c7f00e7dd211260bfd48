@@ -1,0 +1,19 @@
+VERA/Project.swift
+  s_a383a44f59b93f::t_7f0f7ce67de2e0 447-448
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "e280c5089615c07daba1c7f00e7dd211260bfd48",
+  "prompts": {},
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

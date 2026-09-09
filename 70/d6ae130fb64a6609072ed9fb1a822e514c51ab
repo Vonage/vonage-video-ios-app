@@ -1,0 +1,46 @@
+VERA/VERACommonUI/VERACommonUI/UI/BorderRadius.swift
+  s_362e0979f9e65b::t_f7908f6e6c2caa 17,19-21,27-28
+VERA/VERACommonUI/VERACommonUI/UI/TypographyStyle.swift
+  s_362e0979f9e65b::t_f7908f6e6c2caa 44,46,48,61,63,65,70-71
+VERA/Scripts/generate-app-theme.py
+  s_a383a44f59b93f::t_27babe9d34175d 444-452
+  s_a383a44f59b93f::t_117c8b462660d2 338-422
+VERA/VERACommonUI/VERACommonUI/UI/MeetingRoomTheme.swift
+  s_a383a44f59b93f::t_3f614af1212e85 74
+  s_a383a44f59b93f::t_24ace7b72eeb7f 88
+VERA/Config/theme.json
+  s_362e0979f9e65b::t_f7908f6e6c2caa 35-37,65-67
+VERA/Scripts/builder.sh
+  s_a383a44f59b93f::t_a5737a8b998830 196
+  s_a383a44f59b93f::t_c4b8312fde996d 324-328,331
+  s_a383a44f59b93f::t_808e876a1a0ddf 128-133,136-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "70d6ae130fb64a6609072ed9fb1a822e514c51ab",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_362e0979f9e65b": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788919990032676000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

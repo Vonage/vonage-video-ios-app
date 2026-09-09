@@ -1,0 +1,32 @@
+VERA/VERAApp/VERATests/BaseURLResolverTests.swift
+  h_2499cc15b3806e 73-78
+  s_a383a44f59b93f::t_7d39f9f2d8b6d3 8
+  s_a383a44f59b93f::t_7b98cc87a9f2ee 64
+VERA/Project.swift
+  s_a383a44f59b93f::t_90ea643d044b2e 447
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_a383a44f59b93f::t_029241439cb66e 253
+  s_a383a44f59b93f::t_8c1e146ae42951 8
+  h_2499cc15b3806e 325-330
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "7f93948174143e25f0a3ef306e31c85567ced9e5",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

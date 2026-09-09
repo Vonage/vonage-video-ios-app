@@ -1,0 +1,21 @@
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_a383a44f59b93f::t_97658cb8a2a196 327,329-332
+VERA/VERAApp/VERATests/BaseURLResolverTests.swift
+  s_a383a44f59b93f::t_8dcfaa5652d4c9 75,77-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "1a3c7151d1cbcda2cfbb46cca0914610ababc9d1",
+  "prompts": {},
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

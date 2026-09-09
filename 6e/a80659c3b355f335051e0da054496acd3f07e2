@@ -1,0 +1,25 @@
+VERA/VERACommonUI/VERACommonUI/UI/TypographyStyle.swift
+  s_ac070cb06c243d::t_8e3109ffb5882b 44-52,55-63,65-66,68-69,71
+  s_ac070cb06c243d::t_66189078b851c8 41-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6ea80659c3b355f335051e0da054496acd3f07e2",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_ac070cb06c243d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788911960555382000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

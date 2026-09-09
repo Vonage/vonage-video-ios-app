@@ -1,0 +1,62 @@
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 278-291
+VERA/VERAApp/VERA/App/Utils/BaseURLResolver.swift
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 20-21
+  s_a383a44f59b93f::t_752196a1ce8662 1-19,22-26
+VERA/VERAApp/VERATests/BaseURLResolverTests.swift
+  s_a383a44f59b93f::t_73fe5b65005ee5 64
+  s_a383a44f59b93f::t_f6a76946c28aac 8
+  s_a383a44f59b93f::t_b44167ba9b52d4 1-7,9-63,65-72
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_a383a44f59b93f::t_e56e2aef17a204 45
+  s_a383a44f59b93f::t_d0d15b00643bf1 46-47
+VERA/Scripts/builder.sh
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 1-338
+VERA/Scripts/generateEnvironmentConstants.sh
+  s_ef17f71ceede60::t_7077b77409e33b 53-71,73,101-105,109,128-133
+  s_ef17f71ceede60::t_dce189b9a17652 4-8
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_f9a2fe0aa50458::t_abecf7fab1a27e 1-7,9-252,254-324
+  s_a383a44f59b93f::t_904ea3f9020e87 253
+  s_a383a44f59b93f::t_8d68995bf8fb4e 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "53e0308acae8b8113a3c79f851f83dec7663d047",
+  "prompts": {},
+  "sessions": {
+    "s_a383a44f59b93f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6ac57b34-1ac3-4f99-9432-07e56dfd9ee3",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_ef17f71ceede60": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08044-3089-73e1-913c-bd03b8efb8ad",
+        "model": "gpt-5.5"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_f910ebb05bb38f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788912014598166000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_f9a2fe0aa50458": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788912250979091000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
