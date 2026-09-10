@@ -47,9 +47,9 @@ let project = Project(
             deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(with: [
                 "CFBundleDisplayName": "VERA Broadcast",
+                "CFBundleShortVersionString": "$(MARKETING_VERSION)",
+                "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                 "NSExtension": .dictionary([
-                    "CFBundleShortVersionString": "$(MARKETING_VERSION)",
-                    "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
                     "NSExtensionPointIdentifier": "com.apple.broadcast-services-upload",
                     "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME).BroadcastSampleHandler",
                     "RPBroadcastProcessMode": "RPBroadcastProcessModeSampleBuffer",
