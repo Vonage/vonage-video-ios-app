@@ -13,7 +13,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAMeetingRoomSDK",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAMeetingRoomSDK/**"],
             resources: [
                 "VERAMeetingRoomSDK/Resources/**"
@@ -45,8 +45,7 @@ let project = Project(
                 .project(target: "VERAVonageScreenSharePlugin", path: "../VERAVonageScreenSharePlugin"),
                 .project(target: "VERAAudioEffects", path: "../VERAAudioEffects"),
                 .project(target: "VERAAudioDiagnostics", path: "../VERAAudioDiagnostics"),
-                .vonageVideoTransformersSDK,
-            ],
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies,
             settings: createBaseBuildSettings()
         ),
         // MARK: - Demo App Target
@@ -56,7 +55,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: "com.vonage.VERAMeetingRoomSDKApp",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERAMeetingRoomSDKApp",
@@ -73,8 +72,7 @@ let project = Project(
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
-                .vonageVideoTransformersSDK,
-            ],
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies,
             settings: createBaseBuildSettings()
         ),
 
@@ -85,7 +83,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAMeetingRoomSDKTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAMeetingRoomSDKTests/**"],
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),

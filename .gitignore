@@ -85,8 +85,10 @@ slather-report/
 # Tuist
 **/Derived/
 setUpInfoPlist.sh
+setUpOkta.sh
 VERA.entitlements
 EnvironmentConstants.swift
+Okta.plist
 
 
 # Kiro
@@ -95,3 +97,5 @@ EnvironmentConstants.swift
 .kiro/settings/
 .kiro/settings.json
 .kiro/skills/
+setUpOkta.sh
+Okta.plist

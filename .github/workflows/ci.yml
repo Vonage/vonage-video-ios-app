@@ -7,8 +7,12 @@ permissions:
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
 
 jobs:
   format-check:
@@ -71,8 +75,14 @@ jobs:
           cd VERA
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
+          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
+          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
+          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
+          jq '.authSettings.allowAuthentication = true | .authSettings.idProviders |= (if contains(["okta"]) then . else . + ["okta"] end)' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
+          ./Scripts/generateOktaConfig.sh
           tuist generate --no-open
           cd ..
 
@@ -249,8 +259,14 @@ jobs:
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
+          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
+          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
+          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
+          jq '.authSettings.allowAuthentication = true | .authSettings.idProviders |= (if contains(["okta"]) then . else . + ["okta"] end)' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
+          ./Scripts/generateOktaConfig.sh
           tuist generate --no-open
           cd ..
 
@@ -264,7 +280,7 @@ jobs:
               -allowProvisioningUpdates \
               -archivePath $PWD/build/VERA.xcarchive \
               CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
-              archive | xcpretty
+              archive
 
       - name: Export IPA
         run: |
@@ -272,7 +288,7 @@ jobs:
               -archivePath "$PWD/build/VERA.xcarchive" \
               -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
               -allowProvisioningUpdates \
-              -exportPath "$PWD/build" | xcpretty
+              -exportPath "$PWD/build"
 
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v3.0.1

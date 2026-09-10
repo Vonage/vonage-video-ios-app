@@ -33,6 +33,10 @@ import VERAVonage
     import VERAAudioDiagnostics
 #endif
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 @main
 struct VERAApp: App {
     @StateObject var navigationCoordinator = NavigationCoordinator()
@@ -42,12 +46,7 @@ struct VERAApp: App {
         @State private var isMeetingRoomCustomizationMenuPresented = false
     #endif
 
-    var dependencyContainer: DependencyContainer = {
-        let httpClient = AppHTTPClientProvider(
-            isE2EEnabled: E2EConfiguration.isEnabled
-        )
-        return DependencyContainer(httpClient: httpClient())
-    }()
+    var dependencyContainer = DependencyContainer()
 
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
@@ -131,10 +130,70 @@ struct VERAApp: App {
     #endif
 
     private func makeLandingPage() -> some View {
-        landingPageFactory.make { roomName in
+        let landing = landingPageFactory.make { roomName in
             navigationCoordinator.go(to: .waitingRoom(roomName))
         }
+
+        #if AUTHENTICATION_ENABLED
+            return
+                landing
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        #if OKTA_ENABLED
+                            NavBarAuthComponentButton(
+                                viewModel: makeOrGetNavBarAuthButtonViewModel()
+                            )
+                        #endif
+                    }
+                }
+                .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                    #if OKTA_ENABLED
+                        SignInView(
+                            providers: [IDProvider(id: "okta", displayName: "Okta")],
+                            onProviderSelected: { provider in
+                                guard provider.id == "okta" else { return }
+                                guard
+                                    let window = UIApplication.shared.connectedScenes
+                                        .compactMap({ $0 as? UIWindowScene })
+                                        .flatMap(\.windows)
+                                        .first(where: \.isKeyWindow)
+                                else { return }
+                                try await dependencyContainer.authManager.signIn(from: window)
+                            }
+                        )
+                        .presentationDetents([.height(200)])
+                        .presentationDragIndicator(.visible)
+                    #endif
+                }
+        #else
+            return landing
+        #endif
     }
+
+    #if OKTA_ENABLED
+        @MainActor
+        private func makeOrGetNavBarAuthButtonViewModel() -> NavBarAuthButtonViewModel {
+            if let existing = navigationCoordinator.navBarAuthButtonViewModel {
+                return existing
+            }
+
+            let viewModel = NavBarAuthButtonViewModel(
+                authStateDataSource: dependencyContainer.authManager,
+                onLoginTapped: { [weak navigationCoordinator] in
+                    navigationCoordinator?.showSignIn = true
+                },
+                onLogoutTapped: {
+                    do {
+                        try await dependencyContainer.authManager.signOut()
+                    } catch {
+                        print("❌ Sign-out failed: \(error.localizedDescription)")
+                    }
+                }
+            )
+            navigationCoordinator.navBarAuthButtonViewModel = viewModel
+            return viewModel
+        }
+    #endif
 
     private func makeWaitingRoom(roomName: String) -> some View {
         var waitingRoomViewModel: WaitingRoomViewModel
