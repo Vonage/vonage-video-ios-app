@@ -1,0 +1,19 @@
+VERA/VERAVonageScreenSharePlugin/Project.swift
+  s_50637c8d895190::t_d8dc1ee68fd383 50-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "a284bf1981aa76ebb2b9b0f4d683d5326510a17b",
+  "prompts": {},
+  "sessions": {
+    "s_50637c8d895190": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_028b51da-33d6-4d52-8ba5-eb2a1f7a657f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
