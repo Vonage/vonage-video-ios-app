@@ -114,6 +114,7 @@ cat > "$ENTITLEMENTS_TEMP_FILE" << EOF
     <key>com.apple.developer.associated-domains</key>
     <array>
         <string>applinks:$DOMAIN</string>
+        <string>webcredentials:$DOMAIN</string>
     </array>
     <key>com.apple.security.application-groups</key>
     <array>
@@ -128,6 +129,6 @@ EOF
 write_if_changed \
     "$ENTITLEMENTS_TEMP_FILE" \
     "$ENTITLEMENTS_FILE" \
-    "✅ VERA.entitlements already up to date with applinks:$DOMAIN" \
-    "✅ VERA.entitlements updated with applinks:$DOMAIN"
+    "✅ VERA.entitlements already up to date with associated domains for $DOMAIN (applinks + webcredentials)" \
+    "✅ VERA.entitlements updated with associated domains for $DOMAIN (applinks + webcredentials)"
 echo "   Output: $ENTITLEMENTS_FILE"
