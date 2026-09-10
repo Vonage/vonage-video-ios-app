@@ -140,8 +140,13 @@ run_config_codegen() {
 
 run_tuist_generate() {
     step "tuist generate (workspace)"
+    local workspace_file="VERA.xcworkspace"
     if tuist generate --no-open; then
-        ok "VERA.xcworkspace generated"
+        if [ -d "$workspace_file" ]; then
+            ok "Workspace generated → ${workspace_file}"
+        else
+            warn "tuist generate ran but ${workspace_file} was not found."
+        fi
     else
         error_exit "Failed to generate workspace with tuist. Check the error above."
     fi
