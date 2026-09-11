@@ -1,6 +1,11 @@
 #!/bin/bash
 
 # Generates a Swift file with environment constants and updates entitlements
+#
+# ⚠️  IMPORTANT: This script must be run BEFORE tuist generate / xcodebuild
+#     Do NOT use this as a build phase or scheme pre-action
+#     The entitlements file must be stable during the Xcode build process
+#
 # Usage: 
 #   BASE_API_URL=https://api.example.com/ ./generateEnvironmentConstants.sh
 # 
@@ -45,8 +50,27 @@ fi
 # Create Generated directory if it doesn't exist
 mkdir -p "$SWIFT_OUTPUT_DIR"
 
+write_if_changed() {
+    local temp_file="$1"
+    local output_file="$2"
+    local unchanged_message="$3"
+    local updated_message="$4"
+
+    if [ -f "$output_file" ] && cmp -s "$temp_file" "$output_file"; then
+        rm "$temp_file"
+        echo "$unchanged_message"
+    else
+        mv "$temp_file" "$output_file"
+        echo "$updated_message"
+    fi
+}
+
+SWIFT_TEMP_FILE="$(mktemp "$SWIFT_OUTPUT_DIR/EnvironmentConstants.swift.XXXXXX")"
+ENTITLEMENTS_TEMP_FILE="$(mktemp "VERAApp/VERA/VERA.entitlements.XXXXXX")"
+trap 'rm -f "$SWIFT_TEMP_FILE" "$ENTITLEMENTS_TEMP_FILE"' EXIT
+
 # Generate the Swift file
-cat > "$SWIFT_OUTPUT_FILE" << EOF
+cat > "$SWIFT_TEMP_FILE" << EOF
 //
 // EnvironmentConstants.swift
 // VERA
@@ -74,11 +98,15 @@ enum EnvironmentConstants {
 }
 EOF
 
-echo "✅ EnvironmentConstants.swift generated with BASE_API_URL = $BASE_API_URL"
+write_if_changed \
+    "$SWIFT_TEMP_FILE" \
+    "$SWIFT_OUTPUT_FILE" \
+    "✅ EnvironmentConstants.swift already up to date with BASE_API_URL = $BASE_API_URL" \
+    "✅ EnvironmentConstants.swift generated with BASE_API_URL = $BASE_API_URL"
 echo "   Output: $SWIFT_OUTPUT_FILE"
 
 # Update entitlements file with associated domain
-cat > "$ENTITLEMENTS_FILE" << EOF
+cat > "$ENTITLEMENTS_TEMP_FILE" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -98,5 +126,9 @@ cat > "$ENTITLEMENTS_FILE" << EOF
 </plist>
 EOF
 
-echo "✅ VERA.entitlements updated with associated domains for $DOMAIN (applinks + webcredentials)"
+write_if_changed \
+    "$ENTITLEMENTS_TEMP_FILE" \
+    "$ENTITLEMENTS_FILE" \
+    "✅ VERA.entitlements already up to date with associated domains for $DOMAIN (applinks + webcredentials)" \
+    "✅ VERA.entitlements updated with associated domains for $DOMAIN (applinks + webcredentials)"
 echo "   Output: $ENTITLEMENTS_FILE"

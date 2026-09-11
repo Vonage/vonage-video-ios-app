@@ -113,6 +113,7 @@ This app has been tested with **Vonage Video SDK 2.32** and **2.33**. Use the la
 | Guide | Description |
 |---|---|
 | [Getting Started](docs/GETTING_STARTED.md) | Prerequisites, environment setup, and first run |
+| [Building the Starter Kit (Prebuilts)](VERA/PREBUILTS_README.md) | One-command build via `builder.sh` and the config/theme workflow |
 | [Architecture](docs/ARCHITECTURE.md) | Project architecture, module overview, Clean Architecture layers, DI, and key patterns |
 | [Authentication](docs/AUTHENTICATION.md) | Okta integration, token injection, and identity provider setup |
 | [Configuration](docs/CONFIGURATION.md) | Feature flags, theme tokens, signing, and SDK version |

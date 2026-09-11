@@ -30,23 +30,37 @@ export MARKETING_VERSION=1.1
 export CURRENT_PROJECT_VERSION=1
 ```
 
-## Code Generation
+## Build (one command)
 
-Run the generation scripts from the `VERA/` directory:
-
-```bash
-./Scripts/generateEnvironmentConstants.sh   # → VERAApp/VERA/App/Generated/EnvironmentConstants.swift
-./Scripts/regenerateSigningConfig.sh        # → Config/Signing.xcconfig
-python3 ./Scripts/generate-app-config.py   # → VERAConfiguration/VERAConfiguration/AppConfig.swift
-python3 ./Scripts/generate-app-theme.py    # → VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets
-```
-
-## Workspace Generation
-
-Generate the Xcode workspace with Tuist:
+The simplest path is the builder script, which runs code generation and generates the workspace, then opens Xcode:
 
 ```bash
 cd VERA
+./Scripts/builder.sh
+```
+
+After editing `Config/app-config.json` or `Config/theme.json`, regenerate with:
+
+```bash
+./Scripts/builder.sh --update
+```
+
+See [Building the Starter Kit (Prebuilts)](../VERA/PREBUILTS_README.md) for the full flow.
+
+> A plain `tuist generate` rebuilds the workspace but does **not** regenerate the JSON-driven files (`AppConfig.swift`, theme assets). Use `./Scripts/builder.sh --update` after changing a config file.
+
+## Manual steps (equivalent to `builder.sh`)
+
+If you prefer to run the steps yourself, from the `VERA/` directory:
+
+```bash
+# Code generation
+./Scripts/generateEnvironmentConstants.sh   # → VERAApp/VERA/App/Generated/EnvironmentConstants.swift
+./Scripts/regenerateSigningConfig.sh        # → Config/Signing.xcconfig
+python3 ./Scripts/generate-app-config.py    # → VERAConfiguration/VERAConfiguration/AppConfig.swift
+python3 ./Scripts/generate-app-theme.py     # → VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets
+
+# Workspace
 tuist generate
 ```
 
@@ -58,7 +72,8 @@ Open the workspace in Xcode and run the **VERA** app target.
 
 | Problem | Fix |
 |---|---|
-| Stale workspace | `tuist clean && tuist generate` |
+| JSON config change not reflected | `./Scripts/builder.sh --update` |
+| Stale workspace | `tuist clean` then `./Scripts/builder.sh --update` |
 | Edit Tuist DSL files | `tuist edit` |
 
 ## Git LFS

@@ -6,7 +6,7 @@ import os
 def generate_app_config():
     config_path = "./Config/app-config.json"
     output_path = "./VERAConfiguration/VERAConfiguration/AppConfig.swift"
-    
+
     # Create directory if it doesn't exist
     os.makedirs("./VERAConfiguration/VERAConfiguration", exist_ok=True)
 
@@ -28,6 +28,10 @@ def generate_app_config():
     waiting = config['waitingRoomSettings']
     meeting = config['meetingRoomSettings']
 
+    # Extract metadata and baseApiUrl (Task 3.1)
+    base_api_url = config.get('baseApiUrl', '')
+    metadata_version = config.get('metadata', {}).get('version', '1.0.0')
+
     # Helper to convert bool to Swift
     def bool_str(val):
         return "true" if val else "false"
@@ -39,7 +43,7 @@ def generate_app_config():
             "grid": ".grid"
         }
         return layout_map.get(val.lower(), ".activeSpeaker")
-        
+
     # Generate Swift code
     swift_code = f'''//
 // AppConfig.swift
@@ -50,6 +54,9 @@ import Foundation
 import VERADomain
 
 public struct AppConfig {{
+    public static let baseApiUrl: String = "{base_api_url}"
+    public static let configVersion: String = "{metadata_version}"
+
     public struct VideoSettings {{
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
@@ -185,7 +192,7 @@ public struct AppConfig {{
     # Write file
     with open(output_path, 'w') as f:
         f.write(swift_code)
-    
+
     print("✅ Generated AppConfig.swift")
 
 if __name__ == "__main__":

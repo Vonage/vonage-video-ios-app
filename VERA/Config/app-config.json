@@ -1,4 +1,11 @@
 {
+  "metadata": {
+    "name": "vonage",
+    "version": "1.0.0",
+    "created": "2026-09-07",
+    "description": "Default Vonage Video app configuration."
+  },
+  "baseApiUrl": "",
   "videoSettings": {
     "allowBackgroundEffects": true,
     "allowCameraControl": true,

@@ -71,7 +71,9 @@ final class DependencyContainer {
 
     init() {}
 
-    lazy var baseURL: URL = EnvironmentConstants.baseURL
+    lazy var baseURL: URL = BaseURLResolver.resolve(
+        configuredURLString: AppConfig.baseApiUrl,
+        fallback: EnvironmentConstants.baseURL)
 
     lazy var jsonDecoder = JSONDecoder()
 
