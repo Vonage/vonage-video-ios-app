@@ -1,0 +1,40 @@
+VERA/Tuist/ProjectDescriptionHelpers/Scripts+GenerateSPMAssets.swift
+  s_81edfe3dd59679::t_0ea9e52856f442 1-33
+scripts/generate-spm-assets-xcode.sh
+  s_81edfe3dd59679::t_61b2c19ef931fb 46-49
+  s_81edfe3dd59679::t_5017272485b75c 1-45,50-65
+  s_64ae4715c62282::t_67fa0c0fafb5e7 66-72
+VERA/VERACommonUI/Project.swift
+  s_81edfe3dd59679::t_ba7eb0134601fd 22-25
+VERA/Scripts/builder.sh
+  s_64ae4715c62282::t_0d6f5c79933e7e 143,145-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "02e88d02b1efaed03e81924a37f32417ceb2bae7",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_64ae4715c62282": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_dc718aca-6b05-4725-9032-766cb12ce4a8",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_81edfe3dd59679": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_45d251a1-9996-484f-93e0-85ea43f5f335",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
