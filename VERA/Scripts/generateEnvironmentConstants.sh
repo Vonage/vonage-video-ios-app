@@ -86,6 +86,7 @@ cat > "$ENTITLEMENTS_FILE" << EOF
     <key>com.apple.developer.associated-domains</key>
     <array>
         <string>applinks:$DOMAIN</string>
+        <string>webcredentials:$DOMAIN</string>
     </array>
     <key>com.apple.security.application-groups</key>
     <array>
@@ -97,5 +98,5 @@ cat > "$ENTITLEMENTS_FILE" << EOF
 </plist>
 EOF
 
-echo "✅ VERA.entitlements updated with applinks:$DOMAIN"
+echo "✅ VERA.entitlements updated with associated domains for $DOMAIN (applinks + webcredentials)"
 echo "   Output: $ENTITLEMENTS_FILE"
