@@ -1,0 +1,49 @@
+VERA/VERACommonUI/VERACommonUI/UI/TypographyStyle.swift
+  s_292d24e8f3331e::t_5369d9dc594a7c 1,45,47,49,62,64,66,71-72
+scripts/format.sh
+  s_3af9b479167fd8::t_4f36374b14ddce 90
+VERA/VERACommonUI/VERACommonUI/UI/BorderRadius.swift
+  s_292d24e8f3331e::t_5369d9dc594a7c 1,18,20-22,28-29
+VERA/PREBUILTS_README.md
+  s_3af9b479167fd8::t_507f694c53b7e9 90
+  s_3af9b479167fd8::t_763be8d2f6dcff 45-46
+  s_3af9b479167fd8::t_11002275275f58 55-56
+VERA/Scripts/generate-app-theme.py
+  s_3af9b479167fd8::t_6b66f6d9d2364f 279-280
+  s_3af9b479167fd8::t_1aa89954d16f71 157-158
+VERA/Scripts/builder.sh
+  s_3af9b479167fd8::t_7edafd7cb4dc97 352
+  s_3af9b479167fd8::t_b2699cd3c1f54b 150-161
+  s_3af9b479167fd8::t_4b33ccdd695408 190
+VERA/VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift
+  s_292d24e8f3331e::t_5369d9dc594a7c 12-14,33,41,44,85,94
+  s_3af9b479167fd8::t_acabbea6dffee9 100
+  s_3af9b479167fd8::t_2d981ae9233194 95
+VERA/Scripts/generate-spm-assets.py
+  s_3af9b479167fd8::t_33961fee6a0b47 1-76,121-124,127-144,147-183
+  s_3af9b479167fd8::t_d0e933bd575930 77-120,125-126,145-146
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "3347e3be40dba1f8fae15d07fecd291d4934ed44",
+  "prompts": {},
+  "sessions": {
+    "s_292d24e8f3331e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788995945127734000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_3af9b479167fd8": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_9825c9f5-b3a9-4aa3-83cf-f3eec18a40bb",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

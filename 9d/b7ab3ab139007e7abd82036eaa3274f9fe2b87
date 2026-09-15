@@ -1,0 +1,24 @@
+.github/workflows/ci.yml
+  s_0af1626264c195::t_636ace2532338b 262-266,269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "9db7ab3ab139007e7abd82036eaa3274f9fe2b87",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_0af1626264c195": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_5ead05b2-5792-45d9-bd4c-8e69526b01d0",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

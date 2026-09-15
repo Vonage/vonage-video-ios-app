@@ -1,0 +1,26 @@
+VERA/VERACommonUI/VERACommonUISnapshotTests/SignInViewSnapshotTests.swift
+  s_50637c8d895190::t_ef921cb8a6f00a 76-87,92-93,98-99
+VERA/VERACommonUI/VERACommonUI/UI/SignInView.swift
+  s_50637c8d895190::t_4763e18eba5f0a 29-30,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "54e771bd6cf43507768f0ceee9dc2e94789b71e9",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_50637c8d895190": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_028b51da-33d6-4d52-8ba5-eb2a1f7a657f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

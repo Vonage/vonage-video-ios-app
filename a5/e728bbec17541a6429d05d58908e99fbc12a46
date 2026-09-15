@@ -1,0 +1,19 @@
+VERA/Scripts/generateEnvironmentConstants.sh
+  s_50637c8d895190::t_81aae9dddf7f98 89,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "a5e728bbec17541a6429d05d58908e99fbc12a46",
+  "prompts": {},
+  "sessions": {
+    "s_50637c8d895190": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_028b51da-33d6-4d52-8ba5-eb2a1f7a657f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+VERA/VERAApp/VERATests/BaseURLResolverTests.swift
+  s_f6ad2966e78cc9::t_ad72be13824166 63
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_f6ad2966e78cc9::t_ad72be13824166 252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "67b06b3bdea3d3c0c6f69fe74e8f4f541a792ec1",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_f6ad2966e78cc9": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788992306790583000",
+        "model": "unknown"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

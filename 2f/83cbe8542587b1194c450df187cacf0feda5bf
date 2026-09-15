@@ -1,0 +1,45 @@
+VERA/VERACommonUI/VERACommonUITests/NavBarAuthButtonViewModelTests.swift
+  s_50637c8d895190::t_9520df4f75537f 103-161
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButtonViewModel.swift
+  s_50637c8d895190::t_da46ba35110920 27,32
+  s_50637c8d895190::t_f71f9a7b4dd075 14-19,42-61
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_50637c8d895190::t_1e9d4c42585cb6 13,15-16,21,23,35,44-45,47
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthComponentButton.swift
+  s_50637c8d895190::t_0fd6990817a671 15-18
+VERA/VERACommonUI/VERACommonUISnapshotTests/NavBarAuthButtonSnapshotTests.swift
+  s_53b227b4d7464a::t_ced97c935382ad 5
+  s_50637c8d895190::t_fe3280f2858b45 52,55-59,63
+  s_50637c8d895190::t_c14975682a4299 93-96,98
+  s_50637c8d895190::t_dde2e61e5e4924 97
+  s_50637c8d895190::t_0d4f56897b9967 53-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2f83cbe8542587b1194c450df187cacf0feda5bf",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_50637c8d895190": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_028b51da-33d6-4d52-8ba5-eb2a1f7a657f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_53b227b4d7464a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788815709488027000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
