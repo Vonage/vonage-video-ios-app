@@ -1,9 +1,13 @@
 ---
 name: feature-flag
 description: Add, remove, or wire a feature flag end-to-end in this repo — app-config.json key, Tuist Project.swift mapping, compile conditions, DependencyContainer, AppConfig codegen, test-scheme gating. Use whenever the user wants to feature-gate something, add a config toggle, make a feature optional, ask why a flag isn't taking effect, or mentions allowX keys, XXX_ENABLED conditions, or app-config.json.
+inclusion: fileMatch
+fileMatchPattern: 'VERA/Config/**'
 ---
 
 # VERA Feature Flags, End-to-End
+
+In kiro this attaches automatically when editing `VERA/Config/**`; pull it in with `#vera-feature-flags` when working in `VERA/Project.swift`, `generate-app-config.py`, or `TestSchemes.swift`.
 
 **First, pick the right mechanism.** Since the `VERAMeetingRoomSDK` refactor there are two distinct paths, and several docs (including parts of CLAUDE.md, `docs/CONFIGURATION.md`, and copilot instructions) still describe the old one — trust the code, not the flag tables in docs:
 

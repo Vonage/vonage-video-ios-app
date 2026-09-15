@@ -1,6 +1,8 @@
 ---
 name: record-snapshots
 description: Re-record snapshot test reference images the right way — LFS pull, flip isRecording, run the right scheme on iPhone 17 non-parallel, flip back, verify diffs. Use whenever snapshot tests fail with image diffs, the user changed UI and needs new baselines, mentions __Snapshots__, record mode, or reference images, or a snapshot suite fails on a fresh clone.
+inclusion: fileMatch
+fileMatchPattern: '**/*SnapshotTests/**'
 ---
 
 # Re-recording Snapshot Tests

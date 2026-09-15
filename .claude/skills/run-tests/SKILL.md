@@ -1,6 +1,8 @@
 ---
 name: run-tests
 description: Route "run the tests" to the right xcodebuild invocation for this repo — pick macOS vs iOS-simulator vs snapshot scheme for a given file or module, with the exact flags CI uses. Use whenever the user asks to run tests, verify a change, check whether tests pass, run a single suite, or after editing code in any VERA module and tests should be run.
+inclusion: fileMatch
+fileMatchPattern: '**/*Tests/**'
 ---
 
 # Running VERA Tests
@@ -19,7 +21,7 @@ Rule: sources in `VERA/VERA<X>/` → scheme `VERA<X>Tests` (unit) and `VERA<X>Sn
 **iOS-simulator-only unit schemes** (`-destination "platform=iOS Simulator,name=iPhone 17"`) — anything touching the Vonage SDK, UIKit, or VideoTransformers:
 `VERAVonageTests`, `VERAMeetingRoomSDKTests`, `VERAAudioEffectsTests`, `VERABackgroundEffectsTests`, `VERATests` (app), and every `VERAVonage<X>PluginTests`
 
-**Snapshot schemes** (iOS simulator + `-parallel-testing-enabled NO`, see the `record-snapshots` skill for failures):
+**Snapshot schemes** (iOS simulator + `-parallel-testing-enabled NO`, for failures see the snapshot re-recording guide — `/record-snapshots` in Claude Code, `#vera-snapshot-tests` in kiro):
 `<Module>SnapshotTests` for Core, MeetingRoom, CommonUI, Chat, Archiving, Captions, Reactions, Settings, AudioEffects, BackgroundEffects, Feedback, AudioDiagnostics
 
 If a change spans modules, remember tests also live downstream: a `VERADomain` protocol change should run `VERADomainTests` plus the consuming modules' suites — or just use the aggregates below.

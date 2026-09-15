@@ -1,9 +1,12 @@
 ---
 name: new-module
 description: Create a new VERA feature module (optionally with a Vonage plugin) using scripts/generate-module.sh plus all the manual integration the script doesn't do. Use whenever the user wants to add a new feature module, scaffold a module, create a plugin module, or add a new meeting-room feature — even if they just describe the feature ("add a polls feature") without saying "module".
+inclusion: manual
 ---
 
 # New VERA Feature Module
+
+Invoke with `/new-module` in Claude Code, or `#vera-new-module` in kiro.
 
 Scaffold a module with `scripts/generate-module.sh`, then do the integration work the script leaves undone. The script predates the `VERAMeetingRoomSDK` refactor, so several of its automated steps are stale — treat it as a scaffolder, not a full integrator.
 
@@ -13,7 +16,7 @@ Scaffold a module with `scripts/generate-module.sh`, then do the integration wor
 2. **Does it need a Vonage plugin?** Yes if it sends/receives session signals or needs call lifecycle callbacks (`callDidStart`/`callDidEnd`) → `--with-plugin`.
 3. **Where does the feature surface?** This determines the integration path after scaffolding:
    - **Meeting room** (a bottom-bar button, overlay, or in-call behavior) → runtime `MeetingRoomFeature` path. No compile flag is used at runtime even though the script adds one.
-   - **App-level** (waiting room, goodbye screen, landing) → compile-flag path via `DependencyContainer`. See the `feature-flag` skill for that wiring.
+   - **App-level** (waiting room, goodbye screen, landing) → compile-flag path via `DependencyContainer`. See the feature-flag guide for that wiring — `/feature-flag` in Claude Code, `#vera-feature-flags` in kiro.
 
 ## Running the script
 
@@ -46,7 +49,7 @@ Work through all of these — a module that skips them compiles but never appear
    - In `BottomBarButtonsAssembler.swift`: append the button in `buildButtons()` behind the feature check, plus the `onShow<Name>` binding, `is<Name>Presented` + setter, and `cleanUp()`.
    - In `MeetingRoomComposedView.swift`: add a `<Name>OverlayModifier` (copy `SettingsOverlayModifier` — `isEnabled` + `if isEnabled { content.sheet(...) }`), `@State var show<Name>`, `.onAppear`/`.onChange` wiring; `MeetingRoomBuilder.build()` if a pre-created view model is needed.
    - In `VERAApp/VERA/App/DependencyContainer.swift`: one line in `meetingRoomEnabledFeatures` mapping `appConfig.meetingRoomSettings.allow<Name>` → `.insert(.<name>)`.
-5. **For an app-level feature**, follow the `feature-flag` skill instead: keep the compile flag the script added to `VERA/Project.swift` and wire `#if <NAME>_ENABLED` blocks in `DependencyContainer.swift` and `VERAApp.swift`.
+5. **For an app-level feature**, follow the feature-flag guide instead (`/feature-flag`, or `#vera-feature-flags` in kiro): keep the compile flag the script added to `VERA/Project.swift` and wire `#if <NAME>_ENABLED` blocks in `DependencyContainer.swift` and `VERAApp.swift`.
 6. **Regenerate and verify** — `cd VERA && tuist generate`, then build and run the module's unit tests on macOS (fast, no simulator):
    ```bash
    xcodebuild test -workspace VERA/VERA.xcworkspace -scheme VERA<Name>Tests \

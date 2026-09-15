@@ -1,9 +1,12 @@
 ---
 name: setup
 description: First-time environment setup and environment doctor for this repo. Use whenever the user wants to set up the project, bootstrap their machine, can't build or generate the workspace, hits tuist/signing/env-var errors, asks "why won't this build", or mentions onboarding a new developer. Also use to verify an environment before a release or after an Xcode/tuist upgrade.
+inclusion: manual
 ---
 
 # VERA Environment Setup & Doctor
+
+Invoke with `/setup` in Claude Code, or `#vera-setup` in kiro.
 
 Set up (or diagnose) a local development environment for this repo. Run checks first, report what's wrong, then fix — don't blindly re-run everything on a machine that's already mostly set up.
 

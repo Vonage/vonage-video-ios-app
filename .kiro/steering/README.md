@@ -1,28 +1,43 @@
 # VERA steering files
 
-Repo-specific context that kiro loads into a session. These mirror the Claude Code skills in
-`.claude/skills/` — same content, kiro's inclusion model instead of skill descriptions. When you
-change one, change its twin so the two assistants don't drift apart.
+Repo-specific context that kiro loads into a session.
 
-| File | Inclusion | Loads when |
-|---|---|---|
-| `vera-feature-flags.md` | `fileMatch` — `VERA/Config/**` | Editing `app-config.json`; pull in manually with `#vera-feature-flags` when touching `Project.swift`, `generate-app-config.py`, or `TestSchemes.swift` |
-| `vera-testing.md` | `fileMatch` — `**/*Tests/**` | Any test file is in context |
-| `vera-snapshot-tests.md` | `fileMatch` — `**/*SnapshotTests/**` | Snapshot tests specifically — the re-record procedure |
-| `vera-new-module.md` | `manual` | `#vera-new-module` |
-| `vera-setup.md` | `manual` | `#vera-setup` |
+**These files are symlinks.** Each one points at its twin under `.claude/skills/`, so kiro and
+Claude Code read the *same* file — there is only ever one copy to edit, and the two assistants
+cannot drift apart.
 
-No file uses `inclusion: always`, so none of them costs context on unrelated work.
+| Steering file (symlink) | Real file | Inclusion | Loads when |
+|---|---|---|---|
+| `vera-feature-flags.md` | `.claude/skills/feature-flag/SKILL.md` | `fileMatch` — `VERA/Config/**` | Editing `app-config.json`; pull in with `#vera-feature-flags` for `Project.swift`, `generate-app-config.py`, or `TestSchemes.swift` |
+| `vera-testing.md` | `.claude/skills/run-tests/SKILL.md` | `fileMatch` — `**/*Tests/**` | Any test file is in context |
+| `vera-snapshot-tests.md` | `.claude/skills/record-snapshots/SKILL.md` | `fileMatch` — `**/*SnapshotTests/**` | Snapshot tests — the re-record procedure |
+| `vera-new-module.md` | `.claude/skills/new-module/SKILL.md` | `manual` | `#vera-new-module` |
+| `vera-setup.md` | `.claude/skills/setup/SKILL.md` | `manual` | `#vera-setup` |
 
-## Note on the docs
+## How the shared front-matter works
 
-`docs/CONFIGURATION.md`, `.github/copilot-instructions.md`, and `VERA/CONFIGURATION_README.md`
-still document `CHAT_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, and
-`SCREEN_SHARE_ENABLED` as live compilation conditions. They were removed in the
-`VERAMeetingRoomSDK` refactor — those features are now gated at runtime through
-`MeetingRoomFeature`. `vera-feature-flags.md` documents the current behaviour and says to trust
-the code over those tables. Verify the live set any time with:
+Each file carries the keys both tools need. Every key is documented by at least one of them, and
+each tool reads only its own and ignores the rest:
 
-```bash
-grep -o '"[A-Z_]*_ENABLED"' VERA/Project.swift | sort -u
+```yaml
+---
+name: feature-flag                      # Claude Code (also a valid kiro field)
+description: …                          # Claude Code trigger (also a valid kiro field)
+inclusion: fileMatch                    # kiro trigger
+fileMatchPattern: 'VERA/Config/**'      # kiro trigger
+---
 ```
+
+## Editing
+
+Edit the real file under `.claude/skills/`, or edit through the symlink — same thing. Because both
+assistants read the file, keep cross-references tool-neutral, naming both invocations
+(`/feature-flag` in Claude Code, `#vera-feature-flags` in kiro).
+
+Two things to know:
+
+- **Adding a new pair:** create `.claude/skills/<name>/SKILL.md` with all four front-matter keys,
+  then `ln -s ../../.claude/skills/<name>/SKILL.md .kiro/steering/vera-<name>.md`.
+- **Packaging:** `inclusion` and `fileMatchPattern` are not in the Agent Skills spec, so uploading
+  these to claude.ai or the Skills API would fail on the unexpected keys. Strip them first
+  (`yq 'del(.inclusion, .fileMatchPattern)'`). This does not affect local use in either tool.
