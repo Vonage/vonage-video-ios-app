@@ -35,8 +35,8 @@ cd VERA
 Use this the first time, after extracting the Starter Kit ZIP. It runs, in phases:
 
 1. **Check prerequisites** — Xcode, Homebrew, Python 3, Tuist.
-2. **Validate configuration** — `Config/app-config.json` and `Config/theme.json` must exist.
-3. **Resolve `BASE_API_URL`** — from `baseApiUrl` in `app-config.json`, or the `BASE_API_URL` env var.
+2. **Validate configuration** — `Config/app-config.json` and `Config/theme.json` must exist. If an `app-config.json`/`theme.json` is present at the repository root, it is moved into `Config/` (overriding the default) first.
+3. **Resolve base URL & environment constants** — reads a **valid** `baseApiUrl` from `app-config.json` (required; the build errors out if it is missing or not a valid `http`/`https` URL) and injects it into `EnvironmentConstants.swift`.
 4. **Generate code from config and theme**:
    - `generate-app-config.py` → `VERAConfiguration/VERAConfiguration/AppConfig.swift`
    - `generateEnvironmentConstants.sh` → `VERAApp/VERA/App/Generated/EnvironmentConstants.swift`
@@ -49,13 +49,14 @@ Use this the first time, after extracting the Starter Kit ZIP. It runs, in phase
 
 Use this after editing `Config/app-config.json` or `Config/theme.json`. It:
 
-1. Validates `app-config.json`.
+1. Validates `app-config.json` (applying any root-level override first).
 2. Regenerates the JSON-driven files (`AppConfig.swift` + theme assets).
-3. Runs `tuist generate --no-open`.
-4. Regenerates `SPMAssets+VERACommonUI.swift` from the Tuist assets.
-5. Asks whether to open Xcode.
+3. Resolves the base URL from `app-config.json` and regenerates `EnvironmentConstants.swift`, so URL changes are picked up too.
+4. Runs `tuist generate --no-open`.
+5. Regenerates `SPMAssets+VERACommonUI.swift` from the Tuist assets.
+6. Asks whether to open Xcode.
 
-It **skips** prerequisite checks, `BASE_API_URL` resolution and `EnvironmentConstants.swift` (those only matter for first-time setup).
+It **skips** only the prerequisite checks (those matter just for first-time setup).
 
 ## Important: `tuist generate` alone does NOT regenerate code
 
@@ -67,7 +68,8 @@ Code generation is owned by `builder.sh`, **not** by `Project.swift`. A plain `t
 
 | Source (edit this) | Generated (do not edit) | Effect |
 |---|---|---|
-| `Config/app-config.json` | `VERAConfiguration/.../AppConfig.swift` | Enables/disables features and sets `baseApiUrl` |
+| `Config/app-config.json` | `VERAConfiguration/.../AppConfig.swift` | Enables/disables features |
+| `Config/app-config.json` (`baseApiUrl`) | `VERAApp/.../EnvironmentConstants.swift` | Sets the required API base URL (single source of truth) |
 | `Config/theme.json` | `SemanticColors.xcassets`, `BorderRadius.swift`, `TypographyStyle.swift` | Design tokens (colors, typography, radii) |
 
 See [`CONFIGURATION_README.md`](CONFIGURATION_README.md) for the full feature-flag reference and how features are wired at runtime vs. compile time.

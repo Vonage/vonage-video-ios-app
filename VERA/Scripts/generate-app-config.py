@@ -28,8 +28,10 @@ def generate_app_config():
     waiting = config['waitingRoomSettings']
     meeting = config['meetingRoomSettings']
 
-    # Extract metadata and baseApiUrl (Task 3.1)
-    base_api_url = config.get('baseApiUrl', '')
+    # Extract metadata. Note: baseApiUrl is intentionally NOT emitted into
+    # AppConfig.swift. The API base URL has a single entry point: builder.sh
+    # reads baseApiUrl from app-config.json and injects it into
+    # EnvironmentConstants at build time (see generateEnvironmentConstants.sh).
     metadata_version = config.get('metadata', {}).get('version', '1.0.0')
 
     # Helper to convert bool to Swift
@@ -54,7 +56,6 @@ import Foundation
 import VERADomain
 
 public struct AppConfig {{
-    public static let baseApiUrl: String = "{base_api_url}"
     public static let configVersion: String = "{metadata_version}"
 
     public struct VideoSettings {{

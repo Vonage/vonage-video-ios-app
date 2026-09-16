@@ -140,6 +140,48 @@ run_config_codegen() {
 }
 
 # ----------------------------------------------------------------------------
+# Shared: resolve API base URL and (re)generate EnvironmentConstants.swift
+# ----------------------------------------------------------------------------
+# The API base URL has a SINGLE entry point: EnvironmentConstants.swift. This
+# helper resolves the URL and regenerates that file so both first-time setup and
+# the --update fast path stay in sync.
+#
+# Requirement: when using builder.sh, a VALID baseApiUrl MUST be present in
+# app-config.json. It is the single source for the API base URL and always
+# overrides EnvironmentConstants. If it is missing or invalid, the build stops
+# with an error (there is no environment-variable fallback here — the VERA CI
+# path calls generateEnvironmentConstants.sh directly with its own BASE_API_URL).
+#
+# "Valid" means a non-empty absolute URL with an http/https scheme and a host.
+resolve_and_generate_env_constants() {
+    local json_base_url
+    json_base_url=$(python3 -c "
+import json
+from urllib.parse import urlparse
+try:
+    val = (json.load(open('Config/app-config.json')).get('baseApiUrl', '') or '').strip()
+    parsed = urlparse(val)
+    print(val if parsed.scheme in ('http', 'https') and parsed.netloc else '')
+except Exception:
+    print('')
+")
+
+    if [ -z "$json_base_url" ]; then
+        error_exit "A valid baseApiUrl is required in Config/app-config.json (absolute http/https URL with a host)."
+    fi
+
+    export BASE_API_URL="$json_base_url"
+    ok "Base URL from app-config.json: $BASE_API_URL"
+
+    step "generateEnvironmentConstants.sh → EnvironmentConstants.swift"
+    if ./Scripts/generateEnvironmentConstants.sh >/dev/null; then
+        ok "EnvironmentConstants.swift generated"
+    else
+        error_exit "Failed to generate EnvironmentConstants.swift."
+    fi
+}
+
+# ----------------------------------------------------------------------------
 # Shared: root-level config/theme overrides
 # ----------------------------------------------------------------------------
 # The template ships default Config/app-config.json and Config/theme.json that
@@ -227,6 +269,9 @@ if [ "$MODE" = "update" ]; then
 
     phase "Regenerate code from config and theme"
     run_config_codegen
+    # A valid baseApiUrl in app-config.json is required and always overrides
+    # EnvironmentConstants, so `--update` picks up URL changes too.
+    resolve_and_generate_env_constants
 
     phase "Generate workspace"
     run_tuist_generate
@@ -339,27 +384,11 @@ fi
 ok "theme.json found"
 
 # ----------------------------------------------------------------------------
-phase "Resolve BASE_API_URL"
+phase "Resolve base URL & environment constants"
 # ----------------------------------------------------------------------------
-# Priority 1: baseApiUrl from app-config.json (Starter Kit)
-# Priority 2: $BASE_API_URL from environment (VERA internal)
-JSON_BASE_URL=$(python3 -c "
-import json
-try:
-    val = json.load(open('Config/app-config.json')).get('baseApiUrl', '')
-    print(val.strip())
-except:
-    print('')
-")
-
-if [ -n "$JSON_BASE_URL" ]; then
-    export BASE_API_URL="$JSON_BASE_URL"
-    ok "From app-config.json: $BASE_API_URL"
-elif [ -n "${BASE_API_URL:-}" ]; then
-    ok "From environment: $BASE_API_URL"
-else
-    error_exit "baseApiUrl not found in Config/app-config.json and BASE_API_URL env var is not set."
-fi
+# SINGLE entry point for the API base URL: a valid baseApiUrl in app-config.json
+# is required and is injected into EnvironmentConstants.swift.
+resolve_and_generate_env_constants
 
 # ----------------------------------------------------------------------------
 phase "Generate code from config and theme"
@@ -369,13 +398,6 @@ if python3 Scripts/generate-app-config.py >/dev/null; then
     ok "AppConfig.swift generated"
 else
     error_exit "Failed to generate AppConfig.swift."
-fi
-
-step "generateEnvironmentConstants.sh → EnvironmentConstants.swift"
-if ./Scripts/generateEnvironmentConstants.sh >/dev/null; then
-    ok "EnvironmentConstants.swift generated"
-else
-    error_exit "Failed to generate EnvironmentConstants.swift."
 fi
 
 # Normalizes theme.json first (backfills any missing color/radius/typography
