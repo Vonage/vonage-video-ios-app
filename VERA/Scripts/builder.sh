@@ -26,9 +26,10 @@ readonly BOLD='\033[1m'
 readonly DIM='\033[2m'
 readonly NC='\033[0m' # No Color
 
-# Get script directory and VERA root
+# Get script directory, VERA root, and repository root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$VERA_DIR/.." && pwd)"
 
 # Mode: setup (default) or update
 MODE="setup"
@@ -138,6 +139,42 @@ run_config_codegen() {
     fi
 }
 
+# ----------------------------------------------------------------------------
+# Shared: root-level config/theme overrides
+# ----------------------------------------------------------------------------
+# The template ships default Config/app-config.json and Config/theme.json that
+# work out of the box. Developers can customise the build by dropping an
+# app-config.json and/or theme.json at the repository root: when present, each
+# is MOVED into Config/, overwriting the default and removing it from the root,
+# before codegen runs. If neither override exists, the Config/ defaults are used
+# unchanged.
+apply_root_overrides() {
+    local applied=0
+
+    # $1 = filename to look for at the repo root; moved into Config/ if present
+    _override_one() {
+        local filename="$1"
+        local src="$REPO_ROOT/$filename"
+        local dst="./Config/$filename"
+
+        if [ -f "$src" ]; then
+            if mv -f "$src" "$dst"; then
+                ok "Root override applied: ${filename} → Config/${filename}"
+                applied=1
+            else
+                error_exit "Failed to move root override ${src} → ${dst}"
+            fi
+        fi
+    }
+
+    _override_one "app-config.json"
+    _override_one "theme.json"
+
+    if [ "$applied" -eq 0 ]; then
+        ok "No root-level overrides found; using Config/ defaults"
+    fi
+}
+
 run_tuist_generate() {
     step "tuist generate (workspace)"
     local workspace_file="VERA.xcworkspace"
@@ -182,6 +219,7 @@ if [ "$MODE" = "update" ]; then
     TOTAL_PHASES=3
 
     phase "Validate configuration"
+    apply_root_overrides
     if [ ! -f "./Config/app-config.json" ]; then
         error_exit "Configuration file not found at ./Config/app-config.json"
     fi
@@ -289,6 +327,7 @@ fi
 # ----------------------------------------------------------------------------
 phase "Validate configuration"
 # ----------------------------------------------------------------------------
+apply_root_overrides
 if [ ! -f "./Config/app-config.json" ]; then
     error_exit "Configuration file not found at ./Config/app-config.json"
 fi
