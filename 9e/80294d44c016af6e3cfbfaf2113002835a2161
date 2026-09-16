@@ -1,14 +1,16 @@
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_f910ebb05bb38f::t_bdea3a8c1fff10 10
 VERA/Scripts/builder.sh
   s_303325734b4c08::t_a366d50d2fd7cf 148-150,154,161,165
-  s_303325734b4c08::t_e1d7ea926fbb52 142-147,151-153,155-160,162-164,166-177
+  s_303325734b4c08::t_792a26e4f5d6dd 222
   s_303325734b4c08::t_6099846ce4f27b 330
   s_303325734b4c08::t_941ad515599e8a 29,32
-  s_303325734b4c08::t_792a26e4f5d6dd 222
+  s_303325734b4c08::t_e1d7ea926fbb52 142-147,151-153,155-160,162-164,166-177
 ---
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.7.4",
-  "base_commit_sha": "877276fa8f6a05cf7b0e04a95396818f78c75fb7",
+  "base_commit_sha": "9e80294d44c016af6e3cfbfaf2113002835a2161",
   "prompts": {},
   "humans": {
     "h_2499cc15b3806e": {
@@ -21,6 +23,14 @@ VERA/Scripts/builder.sh
         "tool": "kiro",
         "id": "sess_99b0160e-abbe-4461-9435-3a2dabeee9ed",
         "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    },
+    "s_f910ebb05bb38f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1788912014598166000",
+        "model": "unknown"
       },
       "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
     }
