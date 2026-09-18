@@ -88,13 +88,14 @@ struct ToastModifierTests {
 }
 
 @MainActor
-private final class ToastHolder: ObservableObject {
-    @Published var toast: ToastItem?
+@Observable
+private final class ToastHolder {
+    var toast: ToastItem?
 }
 
 @MainActor
 private struct ToastTestHost: View {
-    @ObservedObject var holder: ToastHolder
+    @Bindable var holder: ToastHolder
     let visibleDuration: TimeInterval
     let resetDelay: TimeInterval
     let placement: Edge

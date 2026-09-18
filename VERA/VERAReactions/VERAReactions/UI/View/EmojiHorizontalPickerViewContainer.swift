@@ -24,7 +24,7 @@ public struct EmojiHorizontalPickerViewContainer: View {
 
     // MARK: - Properties
 
-    @ObservedObject private var viewModel: EmojiPickerContainerViewModel
+    private var viewModel: EmojiPickerContainerViewModel
 
     private var emojis: [UIEmojiReaction] {
         viewModel.configuration.emojis

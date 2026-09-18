@@ -19,7 +19,7 @@ struct VERASettingsDemoApp: App {
 // MARK: - Demo Meeting View
 
 struct DemoMeetingView: View {
-    @StateObject private var viewModel = DemoViewModel()
+    @State private var viewModel = DemoViewModel()
     @State private var showSettings = false
 
     var body: some View {
@@ -113,7 +113,8 @@ struct DemoControlBar: View {
 // MARK: - Demo View Model
 
 @MainActor
-class DemoViewModel: ObservableObject {
+@Observable
+class DemoViewModel {
     let settingsRepository: DemoSettingsRepository
     let statsDataSource: DemoStatsDataSource
     let settingsViewModel: SettingsViewModel

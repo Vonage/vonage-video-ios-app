@@ -4,18 +4,24 @@
 
 import Foundation
 import OSLog
+import Observation
 import VERADomain
 
-public final class NoiseSuppressionViewModel: ObservableObject {
+@Observable
+public final class NoiseSuppressionViewModel {
 
-    @Published public var state: NoiseSuppressionState = .disabled
+    public var state: NoiseSuppressionState = .disabled
 
+    @ObservationIgnored
     private let logger = Logger(
         subsystem: "com.vonage.VERAAudioEffects",
         category: "NoiseSuppressionButtonViewModel")
 
+    @ObservationIgnored
     private final let getCurrentPublisher: GetPublisher
+    @ObservationIgnored
     private final let disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase
+    @ObservationIgnored
     private final let enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
 
     public init(

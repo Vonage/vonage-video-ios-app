@@ -20,8 +20,8 @@ struct VERACaptionsApp: App {
 // MARK: - Demo View
 
 struct CaptionsDemoView: View {
-    @StateObject private var buttonViewModel: CaptionsButtonViewModel
-    @StateObject private var captionsViewModel: CaptionsViewModel
+    @State private var buttonViewModel: CaptionsButtonViewModel
+    @State private var captionsViewModel: CaptionsViewModel
 
     private let repository: CaptionsRepository
     private let statusDataSource: DefaultCaptionsStatusDataSource
@@ -46,8 +46,8 @@ struct CaptionsDemoView: View {
 
         self.repository = repository
         self.statusDataSource = statusDataSource
-        _captionsViewModel = StateObject(wrappedValue: captionsResult.viewModel)
-        _buttonViewModel = StateObject(wrappedValue: buttonResult.viewModel)
+        _captionsViewModel = State(wrappedValue: captionsResult.viewModel)
+        _buttonViewModel = State(wrappedValue: buttonResult.viewModel)
     }
 
     var body: some View {

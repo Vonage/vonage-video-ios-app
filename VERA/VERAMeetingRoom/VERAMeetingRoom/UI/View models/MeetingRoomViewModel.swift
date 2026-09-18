@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 public enum MeetingRoomViewState: Equatable {
@@ -47,43 +48,64 @@ public struct ForceMuteConfirmation: Identifiable, Equatable {
     }
 }
 
-public final class MeetingRoomViewModel: ObservableObject {
+@Observable
+public final class MeetingRoomViewModel {
 
     private static let disconnectionTimeoutInSeconds = 6
 
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored
     private let connectToRoomUseCase: ConnectToRoomUseCase
+    @ObservationIgnored
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
+    @ObservationIgnored
     private let disconnectRoomUseCase: DisconnectRoomUseCase
+    @ObservationIgnored
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    @ObservationIgnored
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    @ObservationIgnored
     private let configuration: MeetingRoomConfiguration
+    @ObservationIgnored
     private let meetingRoomNavigation: MeetingRoomDestination
+    @ObservationIgnored
     private let captionsStatusDataSource: CaptionsStatusDataSource
+    @ObservationIgnored
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
+    @ObservationIgnored
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
+    @ObservationIgnored
     private let uiProvider: any MeetingRoomUIProvider
+    @ObservationIgnored
     private var speakingWhileMutedDetector: SpeakingWhileMutedDetector?
 
-    @MainActor @Published public var state: MeetingRoomViewState = .loading
-    @MainActor @Published public var toast: ToastItem?
-    @MainActor @Published public var extraButtons: [BottomBarButton] = []
-    @MainActor @Published public var extraTopTrailingButtons: [ViewGenerator] = []
-    @MainActor @Published public var isArchiving = false
+    @MainActor public var state: MeetingRoomViewState = .loading
+    @MainActor public var toast: ToastItem?
+    @MainActor public var extraButtons: [BottomBarButton] = []
+    @MainActor public var extraTopTrailingButtons: [ViewGenerator] = []
+    @MainActor public var isArchiving = false
 
     /// Tracks the fallback disconnection task so it can be cancelled on normal call end.
-    @MainActor private var disconnectionTask: Task<Void, Never>?
+    @MainActor @ObservationIgnored private var disconnectionTask: Task<Void, Never>?
 
+    @ObservationIgnored
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(.activeSpeaker)
+    @ObservationIgnored
     private let sessionStatePublisher = CurrentValueSubject<SessionState, Never>(.initial)
+    @ObservationIgnored
     private let callStatePublisher = CurrentValueSubject<CallState, Never>(.idle)
+    @ObservationIgnored
     private let archivingPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
+    @ObservationIgnored
     private let noiseSuppressionPublisher = CurrentValueSubject<NoiseSuppressionState, Never>(.idle)
 
+    @ObservationIgnored
     public weak var currentCall: CallFacade?
 
     public let roomName: RoomName
     public let baseURL: URL
+    @ObservationIgnored
     private var initialised = false
 
     public init(

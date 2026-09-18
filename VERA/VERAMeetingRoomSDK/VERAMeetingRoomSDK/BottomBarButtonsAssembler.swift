@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERAArchiving
 import VERAAudioDiagnostics
 import VERAAudioEffects
@@ -25,11 +26,6 @@ final class BottomBarButtonsAssembler {
     private let container: MeetingRoomSDKContainer
     private let enabledFeatures: Set<MeetingRoomFeature>
     private let buttonsDidChangeSubject = PassthroughSubject<Void, Never>()
-    private let chatUpdates: AnyPublisher<Void, Never>
-    private var archiveCancellable: AnyCancellable?
-    private var captionsCancellable: AnyCancellable?
-    private var effectsCancellable: AnyCancellable?
-    private var noiseSuppressionCancellable: AnyCancellable?
     private var isChatPresented = false
     private var isReactionsPickerPresented = false
     private var isSettingsPresented = false
@@ -77,11 +73,7 @@ final class BottomBarButtonsAssembler {
     var onShowAudioDiagnostics: (() -> Void)?
 
     var buttonsDidChange: AnyPublisher<Void, Never> {
-        return Publishers.MergeMany([
-            chatUpdates,
-            buttonsDidChangeSubject.eraseToAnyPublisher(),
-        ])
-        .eraseToAnyPublisher()
+        buttonsDidChangeSubject.eraseToAnyPublisher()
     }
 
     init(
@@ -90,13 +82,10 @@ final class BottomBarButtonsAssembler {
     ) {
         self.container = container
         self.enabledFeatures = enabledFeatures
-        self.chatUpdates =
-            enabledFeatures.contains(.chat)
-            ? container.chatBadgeButtonViewModel.$unreadMessagesCount
-                .dropFirst()
-                .map { _ in () }
-                .eraseToAnyPublisher()
-            : Empty().eraseToAnyPublisher()
+        if enabledFeatures.contains(.chat) {
+            let chatViewModel = container.chatBadgeButtonViewModel
+            observeChanges { chatViewModel.unreadMessagesCount }
+        }
     }
 
     /// Builds the array of extra bottom bar buttons based on enabled features.
@@ -294,47 +283,68 @@ final class BottomBarButtonsAssembler {
     }
 
     private func bindNoiseSuppressionUpdates(_ viewModel: MeetingNoiseSuppressionViewModel?) {
-        noiseSuppressionCancellable = nil
         guard let viewModel else { return }
 
-        noiseSuppressionCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            while: { [weak self] in self?.meetingNoiseSuppressionButtonViewModel === viewModel },
+            read: { viewModel.state }
+        )
     }
 
     private func bindArchiveUpdates(_ viewModel: ArchiveButtonViewModel?) {
-        archiveCancellable = nil
         guard let viewModel else { return }
 
-        archiveCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            while: { [weak self] in self?.archiveButtonViewModel === viewModel },
+            read: { viewModel.state }
+        )
     }
 
     private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
-        captionsCancellable = nil
         guard let viewModel else { return }
 
-        captionsCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            while: { [weak self] in self?.captionsButtonViewModel === viewModel },
+            read: { viewModel.state }
+        )
     }
 
     private func bindEffectsUpdates(_ viewModel: VideoEffectsViewModel?) {
-        effectsCancellable = nil
         guard let viewModel else { return }
 
-        effectsCancellable = viewModel.$selectedEffect
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
+        observeChanges(
+            while: { [weak self] in self?.videoEffectsViewModel === viewModel },
+            read: { viewModel.selectedEffect }
+        )
+    }
+
+    /// Observes changes to an `@Observable` property via the Observation framework and
+    /// forwards each change to ``buttonsDidChangeSubject``.
+    ///
+    /// `withObservationTracking` fires its `onChange` exactly once, synchronously, just
+    /// before the tracked value changes, so it is re-armed after every change to keep
+    /// observing — mirroring the continuous delivery of the previous Combine `sink`.
+    /// `isCurrent` guards against stale re-arming when the underlying view model for a
+    /// slot has been replaced or cleared; when it returns `false` the loop stops, which
+    /// mirrors the previous cancellable teardown.
+    ///
+    /// The assembler is `@MainActor` and every observed view model is mutated on the main
+    /// actor, so `onChange` runs main-actor-isolated; `assumeIsolated` lets it forward the
+    /// update synchronously (matching the old publisher's synchronous emission) without a
+    /// deferring `Task`.
+    private func observeChanges<Value>(
+        while isCurrent: @escaping () -> Bool = { true },
+        read: @escaping () -> Value
+    ) {
+        withObservationTracking {
+            _ = read()
+        } onChange: { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self, isCurrent() else { return }
+                self.buttonsDidChangeSubject.send()
+                self.observeChanges(while: isCurrent, read: read)
             }
+        }
     }
 
     private func hasChanged<Object: AnyObject>(from oldValue: Object?, to newValue: Object?) -> Bool {
@@ -361,7 +371,6 @@ final class BottomBarButtonsAssembler {
         onShowFeedbackForm = nil
         onShowEffects = nil
         onShowAudioDiagnostics = nil
-        noiseSuppressionCancellable = nil
         isChatPresented = false
         isReactionsPickerPresented = false
         isSettingsPresented = false

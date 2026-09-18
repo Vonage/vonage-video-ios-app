@@ -84,7 +84,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(assembler.buildButtons().first?.accessory == nil)
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        _ = await viewModel.$unreadMessagesCount.values.first { $0 == 1 }
+        await waitForUnread(viewModel) { $0 == 1 }
 
         let button = assembler.buildButtons().first
 
@@ -115,7 +115,9 @@ struct BottomBarButtonsAssemblerTests {
         }
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        _ = await container.chatBadgeButtonViewModel.$unreadMessagesCount.values.first { $0 == 1 }
+        await waitForUnread(container.chatBadgeButtonViewModel) { $0 == 1 }
+        // Allow the Observation onChange -> Task re-arm to forward the update.
+        await waitUntil { didEmitUpdate }
 
         #expect(didEmitUpdate)
         cancellable.cancel()
@@ -757,6 +759,33 @@ struct BottomBarButtonsAssemblerTests {
     }
 
     // MARK: - Helpers
+
+    /// Polls `unreadMessagesCount` on the main actor until `predicate` holds or the timeout
+    /// elapses. Replaces the old `@Published.values` async sequence after the `@Observable`
+    /// migration.
+    private func waitForUnread(
+        _ viewModel: ChatBadgeButtonViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping (Int) -> Bool
+    ) async {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            if await MainActor.run(body: { predicate(viewModel.unreadMessagesCount) }) { return }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+    }
+
+    /// Polls until `condition` becomes true or the timeout elapses.
+    private func waitUntil(
+        timeout: Duration = .seconds(2),
+        _ condition: @escaping () -> Bool
+    ) async {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            if condition() { return }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+    }
 
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>

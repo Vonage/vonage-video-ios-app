@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import OSLog
+import Observation
 import SwiftUI
 import VERADomain
 
@@ -13,20 +14,27 @@ import VERADomain
 /// Manages background blur, stock backgrounds, user-uploaded backgrounds,
 /// and immediately applies the selected effect to the publisher's stream.
 @MainActor
-public final class VideoEffectsViewModel: ObservableObject {
+@Observable
+public final class VideoEffectsViewModel {
 
-    @Published public var selectedEffect: VideoEffect = .none
-    @Published public var backgrounds: [VideoBackgroundItem] = []
-    @Published public var remainingSlots: Int = 0
-    @Published public var isSheetPresented: Bool = false
-    @Published public var errorMessage: String?
+    public var selectedEffect: VideoEffect = .none
+    public var backgrounds: [VideoBackgroundItem] = []
+    public var remainingSlots: Int = 0
+    public var isSheetPresented: Bool = false
+    public var errorMessage: String?
 
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "VideoEffects")
+    @ObservationIgnored
     private let getCurrentPublisher: () throws -> VERAPublisher
+    @ObservationIgnored
     private let getBackgroundsUseCase: GetBackgroundsUseCase
+    @ObservationIgnored
     private let addBackgroundUseCase: AddBackgroundUseCase
+    @ObservationIgnored
     private let deleteBackgroundUseCase: DeleteBackgroundUseCase
+    @ObservationIgnored
     private let videoEffectRepository: VideoEffectRepository
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
     public init(

@@ -208,9 +208,7 @@ struct MeetingRoomViewModelTests {
             )
         )
 
-        let state = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.first?.canForceMute == true }
+        let state = try? await waitForContentState(sut) { $0.participants.first?.canForceMute == true }
         let participant = try #require(state?.participants.first)
 
         participant.onForceMute?()
@@ -304,9 +302,7 @@ struct MeetingRoomViewModelTests {
             )
         )
 
-        let state = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participantsCount == 1 }
+        let state = try? await waitForContentState(sut) { $0.participantsCount == 1 }
 
         #expect(state?.participants.first?.canForceMute == true)
     }
@@ -331,9 +327,7 @@ struct MeetingRoomViewModelTests {
             )
         )
 
-        let state = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.count == 2 }
+        let state = try? await waitForContentState(sut) { $0.participants.count == 2 }
 
         #expect(state?.participants.allSatisfy { !$0.canForceMute } == true)
     }
@@ -355,9 +349,7 @@ struct MeetingRoomViewModelTests {
             )
         )
 
-        let state = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.first?.id == "local" }
+        let state = try? await waitForContentState(sut) { $0.participants.first?.id == "local" }
 
         #expect(state?.participants.first?.canForceMute == false)
     }
@@ -404,9 +396,7 @@ struct MeetingRoomViewModelTests {
             )
         )
 
-        let state = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.first?.canForceMute == true }
+        let state = try? await waitForContentState(sut) { $0.participants.first?.canForceMute == true }
         let participant = try #require(state?.participants.first)
 
         participant.onForceMute?()
@@ -795,9 +785,7 @@ struct MeetingRoomViewModelTests {
 
         dataSource.set(state: .enabled)
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.noiseSuppressionState == .enabled }
+        let updatedState = try? await waitForContentState(sut) { $0.noiseSuppressionState == .enabled }
 
         #expect(updatedState?.noiseSuppressionState == .enabled)
     }
@@ -812,9 +800,7 @@ struct MeetingRoomViewModelTests {
 
         dataSource.set(state: .disabled)
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.noiseSuppressionState == .disabled }
+        let updatedState = try? await waitForContentState(sut) { $0.noiseSuppressionState == .disabled }
 
         #expect(updatedState?.noiseSuppressionState == .disabled)
     }
@@ -830,18 +816,14 @@ struct MeetingRoomViewModelTests {
         // Idle -> Enabled
         dataSource.set(state: .enabled)
 
-        let enabledState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.noiseSuppressionState == .enabled }
+        let enabledState = try? await waitForContentState(sut) { $0.noiseSuppressionState == .enabled }
 
         #expect(enabledState?.noiseSuppressionState == .enabled)
 
         // Enabled -> Disabled
         dataSource.set(state: .disabled)
 
-        let disabledState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.noiseSuppressionState == .disabled }
+        let disabledState = try? await waitForContentState(sut) { $0.noiseSuppressionState == .disabled }
 
         #expect(disabledState?.noiseSuppressionState == .disabled)
     }
@@ -865,9 +847,7 @@ struct MeetingRoomViewModelTests {
 
         dataSource.set(state: .enabled)
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.noiseSuppressionState == .enabled }
+        let updatedState = try? await waitForContentState(sut) { $0.noiseSuppressionState == .enabled }
 
         // Verify other properties remain unchanged
         #expect(updatedState?.roomName == initialState.roomName)
@@ -897,16 +877,14 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: [participant], activeParticipantId: nil)
         )
 
-        let initialState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participantsCount == 1 }
+        let initialState = try? await waitForContentState(sut) { $0.participantsCount == 1 }
         #expect(initialState?.participants.first(where: { $0.id == "p1" })?.isPinned == false)
 
         sut.onTogglePin(participantId: "p1")
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.contains(where: { $0.id == "p1" && $0.isPinned }) }
+        let updatedState = try? await waitForContentState(sut) {
+            $0.participants.contains(where: { $0.id == "p1" && $0.isPinned })
+        }
 
         let pinnedParticipant = try #require(updatedState?.participants.first(where: { $0.id == "p1" }))
         #expect(pinnedParticipant.isPinned == true)
@@ -934,17 +912,17 @@ struct MeetingRoomViewModelTests {
         // Pin the participant first
         sut.onTogglePin(participantId: "p1")
 
-        let pinnedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.contains(where: { $0.id == "p1" && $0.isPinned }) }
+        let pinnedState = try? await waitForContentState(sut) {
+            $0.participants.contains(where: { $0.id == "p1" && $0.isPinned })
+        }
         #expect(pinnedState?.participants.first(where: { $0.id == "p1" })?.isPinned == true)
 
         // Unpin the participant
         sut.onTogglePin(participantId: "p1")
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.contains(where: { $0.id == "p1" && !$0.isPinned }) }
+        let updatedState = try? await waitForContentState(sut) {
+            $0.participants.contains(where: { $0.id == "p1" && !$0.isPinned })
+        }
 
         let unpinnedParticipant = try #require(updatedState?.participants.first(where: { $0.id == "p1" }))
         #expect(unpinnedParticipant.isPinned == false)
@@ -973,16 +951,14 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
         )
 
-        let initialState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participantsCount == 3 }
+        let initialState = try? await waitForContentState(sut) { $0.participantsCount == 3 }
         #expect(initialState?.participantsCount == 3)
 
         sut.onTogglePin(participantId: "p2")
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.contains(where: { $0.id == "p2" && $0.isPinned }) }
+        let updatedState = try? await waitForContentState(sut) {
+            $0.participants.contains(where: { $0.id == "p2" && $0.isPinned })
+        }
 
         let stateParticipants = try #require(updatedState?.participants)
 
@@ -1021,9 +997,7 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
         )
 
-        let initialState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participantsCount == 4 }
+        let initialState = try? await waitForContentState(sut) { $0.participantsCount == 4 }
         #expect(initialState?.participantsCount == 4)
 
         // Pin 3 participants
@@ -1031,11 +1005,9 @@ struct MeetingRoomViewModelTests {
         sut.onTogglePin(participantId: "p2")
         sut.onTogglePin(participantId: "p3")
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { state in
-                state.participants.filter(\.isPinned).count == 3
-            }
+        let updatedState = try? await waitForContentState(sut) { state in
+            state.participants.filter(\.isPinned).count == 3
+        }
 
         let dave = try #require(updatedState?.participants.first(where: { $0.id == "p4" }))
         #expect(dave.isPinned == false)
@@ -1073,9 +1045,7 @@ struct MeetingRoomViewModelTests {
             ParticipantsState(localParticipant: nil, participants: participants, activeParticipantId: nil)
         )
 
-        let initialState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.participants.count == 4 }
+        let initialState = try? await waitForContentState(sut) { $0.participants.count == 4 }
         #expect(initialState?.participants.count == 4)
 
         // Pin 3 participants: Alice, Bob, and the screen share
@@ -1083,11 +1053,9 @@ struct MeetingRoomViewModelTests {
         sut.onTogglePin(participantId: "p2")
         sut.onTogglePin(participantId: "screen1")
 
-        let pinnedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { state in
-                state.participants.filter(\.isPinned).count == 3
-            }
+        let pinnedState = try? await waitForContentState(sut) { state in
+            state.participants.filter(\.isPinned).count == 3
+        }
 
         // Verify Charlie cannot be pinned (3 slots used)
         let charlieBeforeRemoval = try #require(pinnedState?.participants.first(where: { $0.id == "p3" }))
@@ -1104,12 +1072,10 @@ struct MeetingRoomViewModelTests {
         )
 
         // Verify Charlie can now be pinned (stale screen share ID no longer counts)
-        let restoredState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { state in
-                state.participants.filter(\.isPinned).count == 2
-                    && state.participants.first(where: { $0.id == "p3" })?.canBePinned == true
-            }
+        let restoredState = try? await waitForContentState(sut) { state in
+            state.participants.filter(\.isPinned).count == 2
+                && state.participants.first(where: { $0.id == "p3" })?.canBePinned == true
+        }
 
         let charlieAfterRemoval = try #require(restoredState?.participants.first(where: { $0.id == "p3" }))
         #expect(charlieAfterRemoval.canBePinned == true)
@@ -1162,10 +1128,10 @@ struct MeetingRoomViewModelTests {
             mockCall._publisherAudioLevel.send(0.8)
         }
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .warning)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .warning)
     }
 
     // MARK: - Archiving State Change Tests
@@ -1181,10 +1147,10 @@ struct MeetingRoomViewModelTests {
 
         mockCall._archivingState.send(.archiving("archive-123"))
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .info)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .info)
     }
 
     @Test("Given archiving stops, Then an info toast with 'recording stopped' is shown")
@@ -1200,17 +1166,17 @@ struct MeetingRoomViewModelTests {
         mockCall._archivingState.send(.archiving("archive-123"))
 
         // Wait for the first toast to appear
-        _ = await sut.$toast.values.first { $0 != nil }
+        _ = await waitForToast(sut) { $0 != nil }
 
         // Reset toast to detect the next one
         sut.toast = nil
 
         mockCall._archivingState.send(.idle)
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .info)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .info)
     }
 
     @Test("Given archiving starts, Then isArchiving becomes true")
@@ -1227,9 +1193,7 @@ struct MeetingRoomViewModelTests {
 
         mockCall._archivingState.send(.archiving("archive-456"))
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.archivingState != .idle }
+        let updatedState = try? await waitForContentState(sut) { $0.archivingState != .idle }
 
         #expect(updatedState?.archivingState == .archiving("archive-456"))
     }
@@ -1245,15 +1209,11 @@ struct MeetingRoomViewModelTests {
 
         mockCall._archivingState.send(.archiving("archive-456"))
 
-        _ = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.archivingState != .idle }
+        _ = (try? await waitForContentState(sut) { $0.archivingState != .idle })
 
         mockCall._archivingState.send(.idle)
 
-        let updatedState = await sut.$state.values
-            .compactMap(\.contentState)
-            .first { $0.archivingState == .idle }
+        let updatedState = (try? await waitForContentState(sut) { $0.archivingState == .idle })
 
         #expect(updatedState?.archivingState == .idle)
     }
@@ -1271,10 +1231,10 @@ struct MeetingRoomViewModelTests {
 
         mockCall._eventsPublisher.send(.didBeginReconnecting)
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .warning)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .warning)
     }
 
     @Test("Given session reconnects, Then an info toast is shown")
@@ -1288,10 +1248,10 @@ struct MeetingRoomViewModelTests {
 
         mockCall._eventsPublisher.send(.didReconnect)
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .info)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .info)
     }
 
     @Test("Given a session error occurs, Then a failure toast with the error description is shown")
@@ -1307,10 +1267,10 @@ struct MeetingRoomViewModelTests {
             domain: "TestDomain", code: 42, userInfo: [NSLocalizedDescriptionKey: "Something broke"])
         mockCall._eventsPublisher.send(.error(testError))
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message == "Something broke")
-        #expect(toast??.mode == .failure)
+        #expect(toast?.message == "Something broke")
+        #expect(toast?.mode == .failure)
     }
 
     @Test("Given a session failure occurs, Then a failure toast with the error description is shown")
@@ -1326,10 +1286,10 @@ struct MeetingRoomViewModelTests {
             domain: "TestDomain", code: 99, userInfo: [NSLocalizedDescriptionKey: "Session lost"])
         mockCall._eventsPublisher.send(.sessionFailure(testError))
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message == "Session lost")
-        #expect(toast??.mode == .failure)
+        #expect(toast?.message == "Session lost")
+        #expect(toast?.mode == .failure)
     }
 
     @Test("Given session disconnects unexpectedly, Then a failure toast is shown")
@@ -1343,10 +1303,10 @@ struct MeetingRoomViewModelTests {
 
         mockCall._eventsPublisher.send(.disconnected)
 
-        let toast = await sut.$toast.values.first { $0 != nil }
+        let toast = await waitForToast(sut) { $0 != nil }
 
-        #expect(toast??.message != nil)
-        #expect(toast??.mode == .failure)
+        #expect(toast?.message != nil)
+        #expect(toast?.mode == .failure)
     }
 
     @Test("Given session disconnects unexpectedly, Then disconnect use case is called after timeout")
@@ -1365,7 +1325,7 @@ struct MeetingRoomViewModelTests {
         mockCall._eventsPublisher.send(.disconnected)
 
         // Wait for toast to appear (confirms event was handled)
-        _ = await sut.$toast.values.first { $0 != nil }
+        _ = await waitForToast(sut) { $0 != nil }
 
         // The disconnection is scheduled with a 6-second timeout.
         // We verify it was scheduled by waiting slightly longer.
@@ -1420,7 +1380,7 @@ struct MeetingRoomViewModelTests {
 
         mockCall._eventsPublisher.send(.muteForced)
 
-        let toast = await sut.$toast.values.first { $0?.message == "You were muted by the host." }
+        let toast = await waitForToast(sut) { $0?.message == "You were muted by the host." }
 
         #expect(toast == ToastItem(message: "You were muted by the host.", mode: .warning))
     }
@@ -1485,10 +1445,45 @@ struct MeetingRoomViewModelTests {
 
     // MARK: Helper
 
+    /// Polls `state` on the main actor until a `.content` state satisfying `predicate`
+    /// appears, or the timeout elapses. Replaces the old `@Published.values` async
+    /// sequence after the `@Observable` migration.
+    func waitForContentState(
+        _ sut: MeetingRoomViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping (MeetingRoomState) -> Bool = { _ in true }
+    ) async throws -> MeetingRoomState {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            if let content = await MainActor.run(body: { sut.state.contentState }), predicate(content) {
+                return content
+            }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        guard let content = await MainActor.run(body: { sut.state.contentState }), predicate(content) else {
+            throw Error.nilValue
+        }
+        return content
+    }
+
     func getContentState(_ sut: MeetingRoomViewModel) async throws -> MeetingRoomState {
-        try await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true } ?? { throw Error.nilValue }()
+        try await waitForContentState(sut)
+    }
+
+    /// Polls `toast` on the main actor until `predicate` holds or the timeout elapses.
+    @discardableResult
+    func waitForToast(
+        _ sut: MeetingRoomViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping (ToastItem?) -> Bool
+    ) async -> ToastItem? {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            let toast = await MainActor.run { sut.toast }
+            if predicate(toast) { return toast }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return await MainActor.run { sut.toast }
     }
 
     func when(given configuration: MeetingRoomConfiguration) async throws -> MeetingRoomState {
@@ -1496,12 +1491,7 @@ struct MeetingRoomViewModelTests {
 
         await sut.loadUI()
 
-        let contentState =
-            try await sut.$state.values
-            .compactMap(\.contentState)
-            .first { _ in true } ?? { throw Error.nilValue }()
-
-        return contentState
+        return try await waitForContentState(sut)
     }
 
     @MainActor

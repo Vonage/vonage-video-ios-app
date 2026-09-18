@@ -7,7 +7,7 @@ import VERACommonUI
 import VERADomain
 
 public struct LandingPageScreen: View {
-    @ObservedObject var viewModel: LandingPageViewModel
+    @Bindable var viewModel: LandingPageViewModel
     private let onNavigateToWaitingRoom: (String) -> Void
 
     public init(
@@ -25,7 +25,7 @@ public struct LandingPageScreen: View {
             onNavigateToWaitingRoom: onNavigateToWaitingRoom
         )
         .alert(item: $viewModel.error) { $0.view }
-        .onReceive(viewModel.$state) { value in
+        .onChange(of: viewModel.state) { _, value in
             switch value {
             case .success(let roomName): onNavigateToWaitingRoom(roomName)
             default: break

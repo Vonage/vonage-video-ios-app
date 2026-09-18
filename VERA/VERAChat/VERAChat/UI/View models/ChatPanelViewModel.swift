@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 
 public struct ChatPanelState: Equatable {
     public let messages: [UIChatMessage]
@@ -20,13 +21,16 @@ public enum ChatPanelViewState: Equatable {
     case loading
 }
 
-public final class ChatPanelViewModel: ObservableObject {
+@Observable
+public final class ChatPanelViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: ChatPanelViewState = .loading
+    public var state: ChatPanelViewState = .loading
 
     private let chatMessagesRepository: ChatMessagesRepository
     private let sendChatMessageUseCase: SendChatMessageUseCase
+    @ObservationIgnored
     private var isInitialised = false
 
     public init(

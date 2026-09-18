@@ -14,15 +14,15 @@ struct ArchivesViewModelTests {
     @Test func initialArchivesAreEmpty() async {
         let sut = makeSUT()
 
-        let archives = await sut.$archives.values.first { _ in true }
+        let archives = await MainActor.run { sut.archives }
 
-        #expect(archives?.isEmpty == true)
+        #expect(archives.isEmpty == true)
     }
 
     @Test func initialErrorIsNil() async {
         let sut = makeSUT()
 
-        let error = await sut.$error.values.first { _ in true }
+        let error = await MainActor.run { sut.error }
 
         #expect(error == nil as AlertItem?)
     }
@@ -49,9 +49,9 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await waitForArchives(sut) { !$0.isEmpty }
 
-        #expect(uiArchives?.count == 2)
+        #expect(uiArchives.count == 2)
     }
 
     @Test func loadDataReversesArchivesOrder() async {
@@ -62,11 +62,11 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await waitForArchives(sut) { !$0.isEmpty }
 
         // First archive should be the last one (reversed)
-        #expect(uiArchives?.first?.id == archives.last?.id)
-        #expect(uiArchives?.last?.id == archives.first?.id)
+        #expect(uiArchives.first?.id == archives.last?.id)
+        #expect(uiArchives.last?.id == archives.first?.id)
     }
 
     @Test func loadDataAssignsCorrectIndexes() async {
@@ -77,11 +77,11 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await waitForArchives(sut) { !$0.isEmpty }
 
         // Verify indices are assigned correctly (first item gets highest index)
-        #expect(uiArchives?.first?.title.contains("2") == true)
-        #expect(uiArchives?.last?.title.contains("1") == true)
+        #expect(uiArchives.first?.title.contains("2") == true)
+        #expect(uiArchives.last?.title.contains("1") == true)
     }
 
     @Test func loadDataHandlesEmptyArchives() async {
@@ -93,9 +93,9 @@ struct ArchivesViewModelTests {
 
         try? await Task.sleep(for: .milliseconds(100))
 
-        let uiArchives = await sut.$archives.values.first { _ in true }
+        let uiArchives = await MainActor.run { sut.archives }
 
-        #expect(uiArchives?.isEmpty == true)
+        #expect(uiArchives.isEmpty == true)
     }
 
     @Test func loadDataSetsErrorOnFailure() async {
@@ -105,7 +105,7 @@ struct ArchivesViewModelTests {
 
         await sut.loadData()
 
-        let error = await sut.$error.values.first { $0 != nil }
+        let error = await waitForError(sut) { $0 != nil }
 
         #expect(error != nil)
     }
@@ -219,7 +219,7 @@ struct ArchivesViewModelTests {
 
         sut.downloadArchive(archive)
 
-        let error = await sut.$error.values.first { $0 != nil }
+        let error = await waitForError(sut) { $0 != nil }
 
         #expect(error != nil)
     }
@@ -236,9 +236,9 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await waitForArchives(sut) { !$0.isEmpty }
 
-        uiArchives?.first?.onDownload?()
+        uiArchives.first?.onDownload?()
 
         try? await Task.sleep(for: .milliseconds(100))
 
@@ -246,6 +246,39 @@ struct ArchivesViewModelTests {
     }
 
     // MARK: - Test Helpers
+
+    /// Polls `archives` on the main actor until `predicate` holds or the timeout elapses.
+    /// Replaces the old `@Published.values` async sequence after the `@Observable` migration.
+    @discardableResult
+    private func waitForArchives(
+        _ sut: ArchivesViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping ([ArchiveUIData]) -> Bool
+    ) async -> [ArchiveUIData] {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            let archives = await MainActor.run { sut.archives }
+            if predicate(archives) { return archives }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return await MainActor.run { sut.archives }
+    }
+
+    /// Polls `error` on the main actor until `predicate` holds or the timeout elapses.
+    @discardableResult
+    private func waitForError(
+        _ sut: ArchivesViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping (AlertItem?) -> Bool
+    ) async -> AlertItem? {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            let error = await MainActor.run { sut.error }
+            if predicate(error) { return error }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return await MainActor.run { sut.error }
+    }
 
     private func makeSUT(
         sessionKey: String = "heart-of-gold",

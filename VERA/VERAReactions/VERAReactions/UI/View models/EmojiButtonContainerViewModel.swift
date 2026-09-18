@@ -2,15 +2,16 @@
 //  Created by Vonage on 11/2/26.
 //
 
-import Combine
 import Foundation
+import Observation
 
 /// ViewModel for managing the emoji button and picker visibility state.
 ///
 /// This ViewModel controls whether the emoji picker popover is shown
 /// and coordinates with the `EmojiPickerContainerViewModel` for sending reactions.
 /// Uses a single source of truth for visibility via `pickerViewModel.isVisible`.
-public final class EmojiButtonContainerViewModel: ObservableObject {
+@Observable
+public final class EmojiButtonContainerViewModel {
 
     // MARK: - Computed Properties
 
@@ -28,30 +29,27 @@ public final class EmojiButtonContainerViewModel: ObservableObject {
     // MARK: - Dependencies
 
     /// The use case for sending reactions.
+    @ObservationIgnored
     private let sendReactionUseCase: SendReactionUseCase
 
     /// The configuration for the emoji picker.
+    @ObservationIgnored
     private let configuration: EmojiPickerConfiguration
-
-    /// Subscriptions for forwarding objectWillChange from child ViewModel.
-    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Child ViewModel
 
     /// The ViewModel for the emoji picker component.
     /// Created lazily when the picker is shown.
+    ///
+    /// As a nested `@Observable`, SwiftUI automatically tracks reads of its
+    /// properties (e.g. `isVisible`) made through this view model's computed
+    /// properties, so no manual change forwarding is required.
+    @ObservationIgnored
     public lazy var pickerViewModel: EmojiPickerContainerViewModel = {
-        let viewModel = EmojiPickerContainerViewModel(
+        EmojiPickerContainerViewModel(
             configuration: configuration,
             sendReactionUseCase: sendReactionUseCase
         )
-        // Forward child's objectWillChange to parent so SwiftUI updates when picker visibility changes
-        viewModel.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-        return viewModel
     }()
 
     // MARK: - Initialization

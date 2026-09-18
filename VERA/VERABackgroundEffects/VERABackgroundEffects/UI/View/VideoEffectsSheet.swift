@@ -13,7 +13,7 @@ import VERADomain
 /// followed by a grid of background thumbnails with an "Add image" tile.
 public struct VideoEffectsSheet: View {
 
-    @ObservedObject var viewModel: VideoEffectsViewModel
+    var viewModel: VideoEffectsViewModel
     @State private var selectedPhotos: [PhotosPickerItem] = []
 
     public init(viewModel: VideoEffectsViewModel) {
