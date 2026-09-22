@@ -4,7 +4,7 @@
 
 | Category | Technologies |
 |---|---|
-| **Core** | Xcode 26 · Swift 5.9 · Minimum iOS 16.0 · macOS 14.6 (test targets) |
+| **Core** | Xcode 26 · Swift 5.9 · Minimum iOS 17.0 · macOS 14.6 (test targets) |
 | **UI** | SwiftUI · Combine (reactive streams) · async/await preferred over callbacks |
 | **Architecture** | MVVM · Clean Architecture · Dependency Injection via composition root |
 | **Build System** | [Tuist](https://tuist.dev) for dynamic project generation · Swift Package Manager (SPM) |
@@ -287,7 +287,7 @@ Wireframe/           – Factory classes that wire Domain + Data + UI together
 - `Utils/` contains pure helpers (extensions, formatters) with no layer dependencies.
 
 ### Multi-platform targets
-Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 16+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
+Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 17+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
 
 ### Testing helpers
 `VERATestHelpers` (a framework target inside `VERACore`) provides shared mocks and spies (`MockCall`, `MockSessionRepository`, etc.) for use across all test targets.
