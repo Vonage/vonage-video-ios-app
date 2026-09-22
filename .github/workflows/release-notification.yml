@@ -3,6 +3,12 @@ name: Notify Slack on Release
 on:
   release:
     types: [published]
+  # TEMPORARY: manual trigger to test the Slack notification. Remove after testing.
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing release tag to notify about (e.g. 1.3.0)"
+        required: true
 
 permissions:
   contents: read
@@ -15,10 +21,24 @@ jobs:
       - name: Build Slack payload
         id: payload
         env:
+          # For release events these come from the event context; for manual
+          # runs they are empty and the release is fetched by tag below.
           RELEASE_NAME: ${{ github.event.release.name }}
           RELEASE_BODY: ${{ github.event.release.body }}
           RELEASE_URL: ${{ github.event.release.html_url }}
+          # TEMPORARY: inputs for the manual test trigger.
+          INPUT_TAG: ${{ github.event.inputs.release_tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          # TEMPORARY: on manual dispatch, load the release fields by tag so the
+          # test uses the real release body. Remove with the workflow_dispatch trigger.
+          if [ -n "$INPUT_TAG" ]; then
+            RELEASE_NAME=$(gh release view "$INPUT_TAG" --json name --jq '.name')
+            RELEASE_BODY=$(gh release view "$INPUT_TAG" --json body --jq '.body')
+            RELEASE_URL=$(gh release view "$INPUT_TAG" --json url --jq '.url')
+          fi
+
           # Build the payload with jq so the release body is JSON-escaped
           # correctly (quotes, newlines, '#', '<', '>' are all handled).
           # The body is passed via env var and never interpolated into YAML/JSON
