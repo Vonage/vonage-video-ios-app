@@ -1,0 +1,45 @@
+docs/CONFIGURATION.md
+  s_303325734b4c08::t_1673fca9ab8c78 37,39
+VERA/CONFIGURATION_README.md
+  s_303325734b4c08::t_8fc15bc0ce223c 7
+  s_303325734b4c08::t_4559422dd9521f 37-38,40-41,43-45,48,50-67
+  s_303325734b4c08::t_e6b1087395d997 8-9
+  s_303325734b4c08::t_6c0951ebace06b 35-36
+  s_303325734b4c08::t_2398774a6f8d6e 39
+  s_303325734b4c08::t_c6431dd800272c 46
+VERA/Scripts/generate-app-config.py
+  s_303325734b4c08::t_85aea8808e9ab1 31-34
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_303325734b4c08::t_2e54401f7a2ca9 74
+VERA/PREBUILTS_README.md
+  s_303325734b4c08::t_e9c8f0b7322b71 38-39
+  s_303325734b4c08::t_d1f7ff3633b1ba 52,54-57,59
+  s_303325734b4c08::t_9131b16f3cc5dc 71-72
+VERA/Scripts/builder.sh
+  s_303325734b4c08::t_e75786c50492b6 390-391
+  s_303325734b4c08::t_b345d3774f0154 149-153,169-170,172-174
+  s_303325734b4c08::t_83c4c2ccce6a9d 272-274
+  s_303325734b4c08::t_4ef984cb3cf585 387,389
+  s_303325734b4c08::t_c9372c0d1f98ce 142-148,154-168,171,175-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4e552110d06a1f843072cabb779280981866b193",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_303325734b4c08": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_99b0160e-abbe-4461-9435-3a2dabeee9ed",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
