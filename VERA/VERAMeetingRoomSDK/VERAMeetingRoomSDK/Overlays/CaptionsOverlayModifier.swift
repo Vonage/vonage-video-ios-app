@@ -21,7 +21,7 @@ struct CaptionsOverlayModifier: ViewModifier {
     func body(content: Content) -> some View {
         if isEnabled {
             content
-                .onChange(of: captionsButtonViewModel?.state) { _, state in
+                .onChange(of: captionsButtonViewModel?.state, initial: true) { _, state in
                     guard let state else { return }
                     showCaptions = state.captionsEnabled
                 }

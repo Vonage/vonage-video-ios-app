@@ -83,8 +83,7 @@ final class BottomBarButtonsAssembler {
         self.container = container
         self.enabledFeatures = enabledFeatures
         if enabledFeatures.contains(.chat) {
-            let chatViewModel = container.chatBadgeButtonViewModel
-            observeChanges { chatViewModel.unreadMessagesCount }
+            observeChanges(container.chatBadgeButtonViewModel) { $0.unreadMessagesCount }
         }
     }
 
@@ -285,64 +284,40 @@ final class BottomBarButtonsAssembler {
     private func bindNoiseSuppressionUpdates(_ viewModel: MeetingNoiseSuppressionViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(
-            while: { [weak self] in self?.meetingNoiseSuppressionButtonViewModel === viewModel },
-            read: { viewModel.state }
-        )
+        observeChanges(viewModel) { $0.state }
     }
 
     private func bindArchiveUpdates(_ viewModel: ArchiveButtonViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(
-            while: { [weak self] in self?.archiveButtonViewModel === viewModel },
-            read: { viewModel.state }
-        )
+        observeChanges(viewModel) { $0.state }
     }
 
     private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(
-            while: { [weak self] in self?.captionsButtonViewModel === viewModel },
-            read: { viewModel.state }
-        )
+        observeChanges(viewModel) { $0.state }
     }
 
     private func bindEffectsUpdates(_ viewModel: VideoEffectsViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(
-            while: { [weak self] in self?.videoEffectsViewModel === viewModel },
-            read: { viewModel.selectedEffect }
-        )
+        observeChanges(viewModel) { $0.selectedEffect }
     }
 
-    /// Observes changes to an `@Observable` property via the Observation framework and
-    /// forwards each change to ``buttonsDidChangeSubject``.
-    ///
-    /// `withObservationTracking` fires its `onChange` exactly once, synchronously, just
-    /// before the tracked value changes, so it is re-armed after every change to keep
-    /// observing — mirroring the continuous delivery of the previous Combine `sink`.
-    /// `isCurrent` guards against stale re-arming when the underlying view model for a
-    /// slot has been replaced or cleared; when it returns `false` the loop stops, which
-    /// mirrors the previous cancellable teardown.
-    ///
-    /// The assembler is `@MainActor` and every observed view model is mutated on the main
-    /// actor, so `onChange` runs main-actor-isolated; `assumeIsolated` lets it forward the
-    /// update synchronously (matching the old publisher's synchronous emission) without a
-    /// deferring `Task`.
-    private func observeChanges<Value>(
-        while isCurrent: @escaping () -> Bool = { true },
-        read: @escaping () -> Value
+
+    private func observeChanges<Object: AnyObject, Value>(
+        _ object: Object,
+        read: @escaping (Object) -> Value
     ) {
-        withObservationTracking {
-            _ = read()
-        } onChange: { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self, isCurrent() else { return }
+        withObservationTracking { [weak object] in
+            guard let object else { return }
+            _ = read(object)
+        } onChange: { [weak self, weak object] in
+            Task { @MainActor in
+                guard let self, let object else { return }
                 self.buttonsDidChangeSubject.send()
-                self.observeChanges(while: isCurrent, read: read)
+                self.observeChanges(object, read: read)
             }
         }
     }

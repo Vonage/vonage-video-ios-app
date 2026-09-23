@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Observation
 import SwiftUI
 import VERADomain
 import VERASettings
