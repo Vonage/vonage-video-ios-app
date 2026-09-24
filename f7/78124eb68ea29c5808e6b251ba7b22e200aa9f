@@ -1,0 +1,20 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_7fc538fb4e7856::t_8fdd4573458207 118
+  s_7fc538fb4e7856::t_fae452774c1832 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f778124eb68ea29c5808e6b251ba7b22e200aa9f",
+  "prompts": {},
+  "sessions": {
+    "s_7fc538fb4e7856": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_20615722-3d46-4560-9511-2e7cf087a3be",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
