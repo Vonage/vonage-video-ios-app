@@ -1,10 +1,9 @@
+// swift-format-ignore-file
 //
-//  Created by Vonage on 13/11/25.
+// BorderRadius.swift
+// Generated from theme.json - DO NOT EDIT MANUALLY
 //
-
 import SwiftUI
-
-// MARK: - Border Radius
 
 public enum BorderRadius {
     case none
@@ -16,23 +15,18 @@ public enum BorderRadius {
 
     public var value: CGFloat {
         switch self {
-        case .none: return 0
+        case .none:       return 0
         case .extraSmall: return 2
-        case .small: return 4
-        case .medium: return 8
-        case .large: return 12
+        case .small:      return 4
+        case .medium:     return 8
+        case .large:      return 12
         case .extraLarge: return 24
         }
     }
 }
 
-// MARK: - View Extension
-
-extension View {
-    /// Applies semantic border radius
-    /// - Parameter radius: The border radius style to apply
-    /// - Returns: A view with rounded corners
-    public func cornerRadius(_ radius: BorderRadius) -> some View {
+public extension View {
+    func cornerRadius(_ radius: BorderRadius) -> some View {
         clipShape(RoundedRectangle(cornerRadius: radius.value, style: .continuous))
     }
 }

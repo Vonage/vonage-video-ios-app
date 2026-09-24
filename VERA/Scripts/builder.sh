@@ -1,0 +1,427 @@
+#!/bin/bash
+set -euo pipefail
+
+# Starter Kit Builder Script
+#
+# Owns code generation and workspace generation for the iOS Starter Kit.
+#
+# Usage:
+#   ./Scripts/builder.sh            First-time setup: prerequisites, full codegen,
+#                                   workspace generation, and optional Xcode launch.
+#   ./Scripts/builder.sh --update   Fast path: regenerate JSON-driven files
+#                                   (AppConfig.swift + theme assets) and the workspace.
+#                                   No prerequisite checks, no Xcode launch.
+#
+# Code generation lives HERE (not in Project.swift): editing Config/app-config.json or
+# Config/theme.json requires running this script (a plain `tuist generate` won't
+# regenerate the generated files).
+
+# Color codes for output
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[0;33m'
+readonly RED='\033[0;31m'
+readonly BLUE='\033[0;34m'
+readonly CYAN='\033[0;36m'
+readonly BOLD='\033[1m'
+readonly DIM='\033[2m'
+readonly NC='\033[0m' # No Color
+
+# Get script directory, VERA root, and repository root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$VERA_DIR/.." && pwd)"
+
+# Mode: setup (default) or update
+MODE="setup"
+
+# Phase tracking (set TOTAL_PHASES per mode before the first `phase` call)
+TOTAL_PHASES=0
+CURRENT_PHASE=0
+
+# ----------------------------------------------------------------------------
+# Output helpers
+# ----------------------------------------------------------------------------
+print_banner() {
+    echo ""
+    echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}${BOLD}║             Starter Kit · Builder            ║${NC}"
+    echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════════╝${NC}"
+    echo -e "  ${DIM}mode:${NC} ${BOLD}$MODE${NC}"
+}
+
+# phase "Title" — prints a numbered section header framed by divider lines
+readonly PHASE_RULE="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+phase() {
+    CURRENT_PHASE=$((CURRENT_PHASE + 1))
+    echo ""
+    echo -e "${BLUE}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${BLUE}${BOLD} Phase ${CURRENT_PHASE}/${TOTAL_PHASES} · $1${NC}"
+    echo -e "${BLUE}${BOLD}${PHASE_RULE}${NC}"
+}
+
+# step "message" — an in-progress sub-step
+step() {
+    echo -e "  ${YELLOW}▸${NC} $1"
+}
+
+# ok "message" — a completed sub-step
+ok() {
+    echo -e "  ${GREEN}✓${NC} $1"
+}
+
+# warn "message"
+warn() {
+    echo -e "  ${YELLOW}!${NC} $1"
+}
+
+# fail "message" and exit — framed error banner
+error_exit() {
+    echo ""
+    echo -e "${RED}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${RED}${BOLD} ✗ FAILED${NC}"
+    echo -e "${RED} $1${NC}"
+    echo -e "${RED}${BOLD}${PHASE_RULE}${NC}"
+    echo ""
+    exit 1
+}
+
+# print_done "message" — framed success banner
+print_done() {
+    echo ""
+    echo -e "${GREEN}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${GREEN}${BOLD} ✓ $1${NC}"
+    echo -e "${GREEN}${BOLD}${PHASE_RULE}${NC}"
+    echo ""
+}
+
+# ----------------------------------------------------------------------------
+# Argument parsing
+# ----------------------------------------------------------------------------
+for arg in "$@"; do
+    case "$arg" in
+        --update)
+            MODE="update"
+            ;;
+        -h|--help)
+            grep '^#' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+            exit 0
+            ;;
+        *)
+            error_exit "Unknown option: $arg (use --update, or no flag for full setup)"
+            ;;
+    esac
+done
+
+# Change to VERA directory (all paths below are relative to it)
+cd "$VERA_DIR"
+
+# ----------------------------------------------------------------------------
+# Shared: JSON-driven code generation (AppConfig.swift + theme assets)
+# ----------------------------------------------------------------------------
+run_config_codegen() {
+    step "generate-app-config.py → AppConfig.swift"
+    if python3 Scripts/generate-app-config.py >/dev/null; then
+        ok "AppConfig.swift generated"
+    else
+        error_exit "Failed to generate AppConfig.swift. Re-run without >/dev/null to see details."
+    fi
+
+    # Normalizes theme.json first (backfills any missing color/radius/typography
+    # tokens with defaults, persisting them into the file) and then regenerates the
+    # theme assets.
+    step "generate-app-theme.py → normalize theme.json + theme assets"
+    if theme_out=$(python3 Scripts/generate-app-theme.py 2>&1); then
+        echo "$theme_out" | grep -q "Added missing" && ok "theme.json normalized (missing tokens added)"
+        ok "Theme assets generated"
+    else
+        echo "$theme_out" | tail -3
+        error_exit "Failed to generate theme assets."
+    fi
+}
+
+# ----------------------------------------------------------------------------
+# Shared: resolve API base URL and (re)generate EnvironmentConstants.swift
+# ----------------------------------------------------------------------------
+# The API base URL has a SINGLE entry point: EnvironmentConstants.swift. This
+# helper resolves the URL and regenerates that file so both first-time setup and
+# the --update fast path stay in sync.
+#
+# Requirement: when using builder.sh, a VALID baseApiUrl MUST be present in
+# app-config.json. It is the single source for the API base URL and always
+# overrides EnvironmentConstants. If it is missing or invalid, the build stops
+# with an error (there is no environment-variable fallback here — the VERA CI
+# path calls generateEnvironmentConstants.sh directly with its own BASE_API_URL).
+#
+# "Valid" means a non-empty absolute URL with an http/https scheme and a host.
+resolve_and_generate_env_constants() {
+    local json_base_url
+    json_base_url=$(python3 -c "
+import json
+from urllib.parse import urlparse
+try:
+    val = (json.load(open('Config/app-config.json')).get('baseApiUrl', '') or '').strip()
+    parsed = urlparse(val)
+    print(val if parsed.scheme in ('http', 'https') and parsed.netloc else '')
+except Exception:
+    print('')
+")
+
+    if [ -z "$json_base_url" ]; then
+        error_exit "A valid baseApiUrl is required in Config/app-config.json (absolute http/https URL with a host)."
+    fi
+
+    export BASE_API_URL="$json_base_url"
+    ok "Base URL from app-config.json: $BASE_API_URL"
+
+    step "generateEnvironmentConstants.sh → EnvironmentConstants.swift"
+    if ./Scripts/generateEnvironmentConstants.sh >/dev/null; then
+        ok "EnvironmentConstants.swift generated"
+    else
+        error_exit "Failed to generate EnvironmentConstants.swift."
+    fi
+}
+
+# ----------------------------------------------------------------------------
+# Shared: root-level config/theme overrides
+# ----------------------------------------------------------------------------
+# The template ships default Config/app-config.json and Config/theme.json that
+# work out of the box. Developers can customise the build by dropping an
+# app-config.json and/or theme.json at the repository root: when present, each
+# is MOVED into Config/, overwriting the default and removing it from the root,
+# before codegen runs. If neither override exists, the Config/ defaults are used
+# unchanged.
+apply_root_overrides() {
+    local applied=0
+
+    # $1 = filename to look for at the repo root; moved into Config/ if present
+    _override_one() {
+        local filename="$1"
+        local src="$REPO_ROOT/$filename"
+        local dst="./Config/$filename"
+
+        if [ -f "$src" ]; then
+            if mv -f "$src" "$dst"; then
+                ok "Root override applied: ${filename} → Config/${filename}"
+                applied=1
+            else
+                error_exit "Failed to move root override ${src} → ${dst}"
+            fi
+        fi
+    }
+
+    _override_one "app-config.json"
+    _override_one "theme.json"
+
+    if [ "$applied" -eq 0 ]; then
+        ok "No root-level overrides found; using Config/ defaults"
+    fi
+}
+
+run_tuist_generate() {
+    step "tuist generate (workspace)"
+    local workspace_file="VERA.xcworkspace"
+    if tuist generate --no-open; then
+        if [ -d "$workspace_file" ]; then
+            ok "Workspace generated → ${workspace_file}"
+        else
+            warn "tuist generate ran but ${workspace_file} was not found."
+        fi
+    else
+        error_exit "Failed to generate workspace with tuist. Check the error above."
+    fi
+}
+
+# Regenerates the SPM-only asset accessors from the Tuist-generated
+# TuistAssets+VERACommonUI.swift so the SPM build never drifts from the asset
+# catalog. MUST run after `tuist generate` (it reads the Derived/ output).
+run_spm_assets_codegen() {
+    step "generate-spm-assets.py → SPMAssets+VERACommonUI.swift"
+    if python3 Scripts/generate-spm-assets.py; then
+        ok "SPM asset accessors generated"
+    else
+        error_exit "Failed to generate SPM asset accessors."
+    fi
+}
+
+open_xcode() {
+    step "Opening Xcode..."
+    if open VERA.xcworkspace; then
+        ok "Xcode launched"
+    else
+        warn "Failed to open Xcode. Open VERA.xcworkspace manually."
+    fi
+}
+
+print_banner
+
+# ============================================================================
+# UPDATE mode: regenerate config-driven files + workspace, then exit
+# ============================================================================
+if [ "$MODE" = "update" ]; then
+    TOTAL_PHASES=3
+
+    phase "Validate configuration"
+    apply_root_overrides
+    if [ ! -f "./Config/app-config.json" ]; then
+        error_exit "Configuration file not found at ./Config/app-config.json"
+    fi
+    ok "app-config.json found"
+
+    phase "Regenerate code from config and theme"
+    run_config_codegen
+    # A valid baseApiUrl in app-config.json is required and always overrides
+    # EnvironmentConstants, so `--update` picks up URL changes too.
+    resolve_and_generate_env_constants
+
+    phase "Generate workspace"
+    run_tuist_generate
+    run_spm_assets_codegen
+
+    print_done "Update complete"
+    echo -e "  ${DIM}If Xcode is already open, let it reload the project and Build"
+    echo -e "  (Clean Build Folder if you toggled a feature flag).${NC}"
+    echo ""
+
+    read -p "  Open VERA.xcworkspace in Xcode now? (y/n): " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        open_xcode
+    fi
+    echo ""
+    exit 0
+fi
+
+# ============================================================================
+# SETUP mode: full first-time setup
+# ============================================================================
+TOTAL_PHASES=5
+
+# ----------------------------------------------------------------------------
+phase "Check prerequisites"
+# ----------------------------------------------------------------------------
+
+# Check Xcode
+if ! xcode-select -p >/dev/null 2>&1; then
+    error_exit "Xcode not installed. Please install Xcode from the App Store."
+fi
+ok "Xcode found"
+
+# Check Homebrew
+if ! command -v brew >/dev/null 2>&1; then
+    echo ""
+    read -p "  Homebrew not found. Install it now? (y/n): " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        step "Installing Homebrew..."
+        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            ok "Homebrew installed successfully"
+
+            # Load Homebrew into PATH for current session
+            # Apple Silicon
+            if [ -x /opt/homebrew/bin/brew ]; then
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+            fi
+            # Intel
+            if [ -x /usr/local/bin/brew ]; then
+                eval "$(/usr/local/bin/brew shellenv)"
+            fi
+
+            # Verify brew is now available
+            if ! command -v brew >/dev/null 2>&1; then
+                error_exit "Homebrew was installed but brew is not available in PATH. Restart the terminal and rerun this script."
+            fi
+        else
+            error_exit "Failed to install Homebrew"
+        fi
+    else
+        error_exit "Homebrew is required. Visit https://brew.sh to install it."
+    fi
+fi
+ok "Homebrew found"
+
+# Check Python 3
+if ! command -v python3 >/dev/null 2>&1; then
+    step "Installing Python 3 via Homebrew..."
+    if brew install python3; then
+        ok "Python 3 installed successfully"
+    else
+        error_exit "Failed to install Python 3"
+    fi
+fi
+ok "Python 3 found"
+
+# Tuist
+if ! command -v tuist >/dev/null 2>&1; then
+    echo ""
+    read -p "  Tuist not found. Install via Homebrew? (y/n): " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        step "Installing Tuist..."
+        if brew install tuist; then
+            ok "Tuist installed successfully"
+        else
+            error_exit "Failed to install Tuist via Homebrew"
+        fi
+    else
+        error_exit "Tuist is required to generate the workspace. Exiting."
+    fi
+else
+    ok "Tuist found"
+fi
+
+# ----------------------------------------------------------------------------
+phase "Validate configuration"
+# ----------------------------------------------------------------------------
+apply_root_overrides
+if [ ! -f "./Config/app-config.json" ]; then
+    error_exit "Configuration file not found at ./Config/app-config.json"
+fi
+ok "app-config.json found"
+
+if [ ! -f "./Config/theme.json" ]; then
+    error_exit "Theme file not found at ./Config/theme.json"
+fi
+ok "theme.json found"
+
+# ----------------------------------------------------------------------------
+phase "Resolve base URL & environment constants"
+# ----------------------------------------------------------------------------
+# SINGLE entry point for the API base URL: a valid baseApiUrl in app-config.json
+# is required and is injected into EnvironmentConstants.swift.
+resolve_and_generate_env_constants
+
+# ----------------------------------------------------------------------------
+phase "Generate code from config and theme"
+# ----------------------------------------------------------------------------
+step "generate-app-config.py → AppConfig.swift"
+if python3 Scripts/generate-app-config.py >/dev/null; then
+    ok "AppConfig.swift generated"
+else
+    error_exit "Failed to generate AppConfig.swift."
+fi
+
+# Normalizes theme.json first (backfills any missing color/radius/typography
+# tokens with defaults, persisting them into the file) and then regenerates assets.
+step "generate-app-theme.py → normalize theme.json + theme assets"
+if theme_out=$(python3 Scripts/generate-app-theme.py 2>&1); then
+    echo "$theme_out" | grep -q "Added missing" && ok "theme.json normalized (missing tokens added)"
+    ok "Theme assets generated"
+else
+    echo "$theme_out" | tail -3
+    error_exit "Failed to generate theme assets."
+fi
+
+# ----------------------------------------------------------------------------
+phase "Generate workspace"
+# ----------------------------------------------------------------------------
+run_tuist_generate
+run_spm_assets_codegen
+
+# ----------------------------------------------------------------------------
+# Xcode opening prompt
+# ----------------------------------------------------------------------------
+print_done "Setup complete"
+
+# On first-time setup we open Xcode automatically.
+open_xcode
+echo ""
