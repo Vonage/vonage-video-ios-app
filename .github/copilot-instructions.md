@@ -225,21 +225,21 @@ VERAVonageCallKitPlugin   – always included
 ### Feature flags
 `VERA/Config/app-config.json` controls which optional modules are compiled in. When `tuist generate` runs, `Project.swift` reads this file and:
 1. Adds the corresponding module targets as dependencies.
-2. Sets Swift compilation conditions (`CHAT_ENABLED`, `ARCHIVING_ENABLED`, `BACKGROUND_EFFECTS_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, `SETTINGS_ENABLED`, `SCREEN_SHARE_ENABLED`, `AUDIOEFFECTS_ENABLED`).
+2. Sets Swift compilation conditions (`ARCHIVING_ENABLED`, `BACKGROUND_EFFECTS_ENABLED`, `SETTINGS_ENABLED`, `AUDIOEFFECTS_ENABLED`, `AUDIODIAGNOSTICS_ENABLED`, `FEEDBACK_ENABLED`) on the VERA app target.
+
+Meeting-room features (chat, captions, reactions, screen share) have no compilation condition — they are always compiled via `VERAMeetingRoomSDK` and gated at runtime by `MeetingRoomFeature` / `DependencyContainer.meetingRoomEnabledFeatures`.
 
 The mapping from JSON keys to flags:
 | `app-config.json` key | Compilation condition |
 |---|---|
-| `meetingRoomSettings.allowChat` | `CHAT_ENABLED` |
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` |
-| `meetingRoomSettings.allowCaptions` | `CAPTIONS_ENABLED` |
-| `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` |
-| `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` |
+| `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` |
+| `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` |
 
-Code inside `#if CHAT_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
+Code inside `#if ARCHIVING_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
 ### Dependency injection
 `DependencyContainer` in `VERAApp` is the single composition root. All repositories, use cases, and plugins are lazy properties here. Nothing else creates concrete dependencies — modules depend only on protocols defined in `VERADomain`.

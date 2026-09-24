@@ -9,20 +9,20 @@ The app is configured through two primary mechanisms: **feature flags** in `app-
 1. Adds the corresponding module targets as dependencies.
 2. Sets Swift compilation conditions so conditional compilation blocks are respected.
 
+Meeting-room features (chat, captions, reactions, screen share) are **not** in this table — they are always compiled via `VERAMeetingRoomSDK` and gated at runtime by `MeetingRoomFeature` / `DependencyContainer.meetingRoomEnabledFeatures`.
+
 ### Flag Mapping
 
 | `app-config.json` key | Swift condition | Module enabled |
 |---|---|---|
-| `meetingRoomSettings.allowChat` | `CHAT_ENABLED` | VERAChat + VERAVonageChatPlugin |
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` | VERAArchiving + VERAVonageArchivingPlugin |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` | VERABackgroundEffects |
-| `meetingRoomSettings.allowCaptions` | `CAPTIONS_ENABLED` | VERACaptions + VERAVonageCaptionsPlugin |
-| `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` | VERAReactions + VERAVonageReactionsPlugin |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` | VERASettings + VERAVonageSettingsPlugin |
-| `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` | VERAScreenShare + VERAVonageScreenSharePlugin |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` | VERAAudioEffects |
+| `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` | VERAAudioDiagnostics |
+| `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` | VERAFeedback |
 
-Code guarded by `#if CHAT_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
+Code guarded by `#if ARCHIVING_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
 ### Regenerating AppConfig.swift
 
