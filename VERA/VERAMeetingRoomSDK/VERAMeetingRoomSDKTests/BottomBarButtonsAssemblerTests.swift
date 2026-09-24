@@ -84,7 +84,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(assembler.buildButtons().first?.accessory == nil)
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        await waitForUnread(viewModel) { $0 == 1 }
+        await waitUntil { viewModel.unreadMessagesCount == 1 }
 
         let button = assembler.buildButtons().first
 
@@ -115,7 +115,7 @@ struct BottomBarButtonsAssemblerTests {
         }
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        await waitForUnread(container.chatBadgeButtonViewModel) { $0 == 1 }
+        await waitUntil { container.chatBadgeButtonViewModel.unreadMessagesCount == 1 }
         // Allow the Observation onChange -> Task re-arm to forward the update.
         await waitUntil { didEmitUpdate }
 
@@ -763,21 +763,6 @@ struct BottomBarButtonsAssemblerTests {
     }
 
     // MARK: - Helpers
-
-    /// Polls `unreadMessagesCount` on the main actor until `predicate` holds or the timeout
-    /// elapses. Replaces the old `@Published.values` async sequence after the `@Observable`
-    /// migration.
-    private func waitForUnread(
-        _ viewModel: ChatBadgeButtonViewModel,
-        timeout: Duration = .seconds(2),
-        predicate: @escaping (Int) -> Bool
-    ) async {
-        let deadline = ContinuousClock.now.advanced(by: timeout)
-        while ContinuousClock.now < deadline {
-            if await MainActor.run(body: { predicate(viewModel.unreadMessagesCount) }) { return }
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-    }
 
     /// Polls until `condition` becomes true or the timeout elapses.
     private func waitUntil(

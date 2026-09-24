@@ -69,7 +69,6 @@ final class MeetingRoomCustomizationProvider: MeetingRoomUIProvider {
     private(set) var items: [MeetingRoomCustomizationButtonItem] = []
     private(set) var isCustomBottomBarEnabled = false
 
-    @ObservationIgnored
     private let updatesSubject = PassthroughSubject<Void, Never>()
     public var updates: AnyPublisher<Void, Never> {
         updatesSubject.eraseToAnyPublisher()
