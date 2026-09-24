@@ -84,7 +84,7 @@ struct BottomBarButtonsAssemblerTests {
         #expect(assembler.buildButtons().first?.accessory == nil)
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        _ = await viewModel.$unreadMessagesCount.values.first { $0 == 1 }
+        await waitUntil { viewModel.unreadMessagesCount == 1 }
 
         let button = assembler.buildButtons().first
 
@@ -115,7 +115,9 @@ struct BottomBarButtonsAssemblerTests {
         }
 
         container.chatMessagesRepository.addMessage(makeChatMessage("Hello"))
-        _ = await container.chatBadgeButtonViewModel.$unreadMessagesCount.values.first { $0 == 1 }
+        await waitUntil { container.chatBadgeButtonViewModel.unreadMessagesCount == 1 }
+        // Allow the Observation onChange -> Task re-arm to forward the update.
+        await waitUntil { didEmitUpdate }
 
         #expect(didEmitUpdate)
         cancellable.cancel()
@@ -547,11 +549,15 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
         var didEmitUpdate = false
-        let cancellable = assembler.buttonsDidChange.sink {
-            didEmitUpdate = true
-        }
         let viewModel = container.backgroundEffectFactory.makeViewModel {
             MockVERAPublisher()
+        }
+        // Normalize the persisted effect (UserDefaults-backed) to a known baseline so the
+        // selection below is guaranteed to be an actual value change — @Observable only
+        // notifies on a real change, unlike the previous @Published emission.
+        viewModel.selectEffect(.none)
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
         }
 
         assembler.videoEffectsViewModel = viewModel
@@ -757,6 +763,18 @@ struct BottomBarButtonsAssemblerTests {
     }
 
     // MARK: - Helpers
+
+    /// Polls until `condition` becomes true or the timeout elapses.
+    private func waitUntil(
+        timeout: Duration = .seconds(2),
+        _ condition: @escaping () -> Bool
+    ) async {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            if condition() { return }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+    }
 
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>

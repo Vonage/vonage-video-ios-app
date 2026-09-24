@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERAArchiving
 import VERAAudioDiagnostics
 import VERAAudioEffects
@@ -25,11 +26,6 @@ final class BottomBarButtonsAssembler {
     private let container: MeetingRoomSDKContainer
     private let enabledFeatures: Set<MeetingRoomFeature>
     private let buttonsDidChangeSubject = PassthroughSubject<Void, Never>()
-    private let chatUpdates: AnyPublisher<Void, Never>
-    private var archiveCancellable: AnyCancellable?
-    private var captionsCancellable: AnyCancellable?
-    private var effectsCancellable: AnyCancellable?
-    private var noiseSuppressionCancellable: AnyCancellable?
     private var isChatPresented = false
     private var isReactionsPickerPresented = false
     private var isSettingsPresented = false
@@ -77,11 +73,7 @@ final class BottomBarButtonsAssembler {
     var onShowAudioDiagnostics: (() -> Void)?
 
     var buttonsDidChange: AnyPublisher<Void, Never> {
-        return Publishers.MergeMany([
-            chatUpdates,
-            buttonsDidChangeSubject.eraseToAnyPublisher(),
-        ])
-        .eraseToAnyPublisher()
+        buttonsDidChangeSubject.eraseToAnyPublisher()
     }
 
     init(
@@ -90,13 +82,9 @@ final class BottomBarButtonsAssembler {
     ) {
         self.container = container
         self.enabledFeatures = enabledFeatures
-        self.chatUpdates =
-            enabledFeatures.contains(.chat)
-            ? container.chatBadgeButtonViewModel.$unreadMessagesCount
-                .dropFirst()
-                .map { _ in () }
-                .eraseToAnyPublisher()
-            : Empty().eraseToAnyPublisher()
+        if enabledFeatures.contains(.chat) {
+            observeChanges(container.chatBadgeButtonViewModel) { $0.unreadMessagesCount }
+        }
     }
 
     /// Builds the array of extra bottom bar buttons based on enabled features.
@@ -294,47 +282,74 @@ final class BottomBarButtonsAssembler {
     }
 
     private func bindNoiseSuppressionUpdates(_ viewModel: MeetingNoiseSuppressionViewModel?) {
-        noiseSuppressionCancellable = nil
         guard let viewModel else { return }
 
-        noiseSuppressionCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.meetingNoiseSuppressionButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindArchiveUpdates(_ viewModel: ArchiveButtonViewModel?) {
-        archiveCancellable = nil
         guard let viewModel else { return }
 
-        archiveCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.archiveButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
-        captionsCancellable = nil
         guard let viewModel else { return }
 
-        captionsCancellable = viewModel.$state
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
-            }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.captionsButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindEffectsUpdates(_ viewModel: VideoEffectsViewModel?) {
-        effectsCancellable = nil
         guard let viewModel else { return }
 
-        effectsCancellable = viewModel.$selectedEffect
-            .dropFirst()
-            .sink { [weak self] _ in
-                self?.buttonsDidChangeSubject.send()
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.videoEffectsViewModel === viewModel }
+        ) { $0.selectedEffect }
+    }
+
+    private func observeChanges<Object: AnyObject, Value>(
+        _ object: Object,
+        while isCurrent: @escaping () -> Bool = { true },
+        read: @escaping (Object) -> Value
+    ) {
+        withObservationTracking { [weak object] in
+            guard let object else { return }
+            _ = read(object)
+        } onChange: { [weak self, weak object] in
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    self?.forwardChange(object, isCurrent: isCurrent, read: read)
+                }
+            } else {
+                Task { @MainActor [weak self, weak object] in
+                    self?.forwardChange(object, isCurrent: isCurrent, read: read)
+                }
             }
+        }
+    }
+
+    private func forwardChange<Object: AnyObject, Value>(
+        _ object: Object?,
+        isCurrent: @escaping () -> Bool,
+        read: @escaping (Object) -> Value
+    ) {
+        guard let object, isCurrent() else { return }
+        buttonsDidChangeSubject.send()
+        // Re-arm on the next turn so tracking registers against the settled value.
+        Task { @MainActor [weak self, weak object] in
+            guard let self, let object, isCurrent() else { return }
+            self.observeChanges(object, while: isCurrent, read: read)
+        }
     }
 
     private func hasChanged<Object: AnyObject>(from oldValue: Object?, to newValue: Object?) -> Bool {
@@ -361,7 +376,6 @@ final class BottomBarButtonsAssembler {
         onShowFeedbackForm = nil
         onShowEffects = nil
         onShowAudioDiagnostics = nil
-        noiseSuppressionCancellable = nil
         isChatPresented = false
         isReactionsPickerPresented = false
         isSettingsPresented = false

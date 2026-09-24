@@ -28,7 +28,7 @@ import SwiftUI
 public struct CaptionsButtonContainer: View {
 
     /// The view model driving the button's state and tap action.
-    @ObservedObject var viewModel: CaptionsButtonViewModel
+    var viewModel: CaptionsButtonViewModel
 
     /// Creates a container wrapping the given button view model.
     ///

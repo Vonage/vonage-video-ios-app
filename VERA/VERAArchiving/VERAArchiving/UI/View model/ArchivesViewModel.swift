@@ -4,16 +4,22 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
-public final class ArchivesViewModel: ObservableObject {
+@Observable
+public final class ArchivesViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
+    @ObservationIgnored
     private let archivesRepository: ArchivesRepository
+    @ObservationIgnored
     private let playRecordingUseCase: PlayRecordingUseCase
 
-    @MainActor @Published public var archives: [ArchiveUIData] = []
-    @MainActor @Published public var error: AlertItem?
+    @MainActor public var archives: [ArchiveUIData] = []
+    @MainActor public var error: AlertItem?
 
     public init(
         sessionKeyProvider: SessionKeyProvider,

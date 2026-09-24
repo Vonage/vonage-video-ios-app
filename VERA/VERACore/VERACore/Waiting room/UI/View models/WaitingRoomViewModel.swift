@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERAConfiguration
 import VERADomain
 
@@ -16,32 +17,47 @@ public enum WaitingRoomViewState: Equatable {
 }
 
 @MainActor
-public final class WaitingRoomViewModel: ObservableObject {
+@Observable
+public final class WaitingRoomViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
-    @Published public var userName: String = ""
-    @Published public var toolbarButtons: [ViewHolder] = []
-    @Published public var extraTrailingButtons: [ViewHolder] = []
-    @Published public var audioOutputTestButton: ViewHolder?
+    public var state: WaitingRoomViewState = .content(WaitingRoomState.initial)
+    public var userName: String = ""
+    public var toolbarButtons: [ViewHolder] = []
+    public var extraTrailingButtons: [ViewHolder] = []
+    public var audioOutputTestButton: ViewHolder?
 
+    @ObservationIgnored
     public var onPublisherReady: (() -> Void)?
 
     public let roomName: RoomName
+    @ObservationIgnored
     weak var publisher: VERAPublisher?
 
+    @ObservationIgnored
     private let cameraPreviewProviderRepository: CameraPreviewProviderRepository
+    @ObservationIgnored
     private let cameraDevicesRepository: CameraDevicesRepository
+    @ObservationIgnored
     private let joinRoomUseCase: JoinRoomUseCase
+    @ObservationIgnored
     private let requestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase
+    @ObservationIgnored
     private let requestCameraPermissionUseCase: RequestCameraPermissionUseCase
+    @ObservationIgnored
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
+    @ObservationIgnored
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
+    @ObservationIgnored
     private let userRepository: UserRepository
+    @ObservationIgnored
     private let waitingRoomNavigation: WaitingRoomDestination
 
+    @ObservationIgnored
     private var availableCameraDevices: [UICameraDevice] = []
 
+    @ObservationIgnored
     private var initialised: Bool = false
 
     private var isMicrophoneEnabled: Bool {
@@ -304,13 +320,13 @@ extension WaitingRoomViewModel {
 
     @MainActor
     fileprivate func checkPermissions() async {
-        _ = await requestPermission(
-            permissionChecker: checkMicrophoneAuthorizationStatusUseCase,
-            permissionRequester: requestMicrophonePermissionUseCase)
+        _ = await PermissionRequester.request(
+            checker: checkMicrophoneAuthorizationStatusUseCase,
+            requester: requestMicrophonePermissionUseCase)
 
-        _ = await requestPermission(
-            permissionChecker: checkCameraAuthorizationStatusUseCase,
-            permissionRequester: requestCameraPermissionUseCase)
+        _ = await PermissionRequester.request(
+            checker: checkCameraAuthorizationStatusUseCase,
+            requester: requestCameraPermissionUseCase)
 
         startVideoPreview()
     }

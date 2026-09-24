@@ -26,7 +26,7 @@ import SwiftUI
 public struct CaptionsViewContainer: View {
 
     /// The view model that provides live caption data.
-    @ObservedObject var viewModel: CaptionsViewModel
+    var viewModel: CaptionsViewModel
 
     /// Creates a container wrapping the given captions view model.
     ///

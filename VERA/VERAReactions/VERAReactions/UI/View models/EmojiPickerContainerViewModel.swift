@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 
 /// ViewModel for the emoji picker component.
 ///
@@ -20,24 +21,26 @@ import Foundation
 /// EmojiPickerViewContainer(viewModel: viewModel)
 ///     .popover(isPresented: $viewModel.isVisible) { ... }
 /// ```
-public final class EmojiPickerContainerViewModel: ObservableObject {
+@Observable
+public final class EmojiPickerContainerViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
     /// Controls whether the picker is visible.
-    @Published public var isVisible: Bool = false
+    public var isVisible: Bool = false
 
     /// The picker configuration containing emojis and layout settings.
-    @Published public private(set) var configuration: EmojiPickerConfiguration
+    public private(set) var configuration: EmojiPickerConfiguration
 
     /// Indicates if a reaction is currently being sent.
-    @Published public private(set) var isSending: Bool = false
+    public private(set) var isSending: Bool = false
 
     /// The last error that occurred when sending a reaction, if any.
-    @Published public private(set) var lastError: Error?
+    public private(set) var lastError: Error?
 
     // MARK: - Dependencies
 
+    @ObservationIgnored
     private let sendReactionUseCase: SendReactionUseCase
 
     // MARK: - Initialization

@@ -11,7 +11,7 @@ private enum MeetingRoomScreenConstants {
 }
 
 public struct MeetingRoomScreen: View {
-    @ObservedObject var viewModel: MeetingRoomViewModel
+    @Bindable var viewModel: MeetingRoomViewModel
     private let uiProvider: any MeetingRoomUIProvider
 
     public init(

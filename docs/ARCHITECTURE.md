@@ -120,7 +120,7 @@ Factories receive all dependencies through their initializer from `DependencyCon
 
 ## Multi-Platform Targets
 
-Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 16+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator.
+Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 17+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator.
 
 iOS-only modules include anything using the Vonage SDK, UIKit, or VonageVideoTransformers (e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules).
 

@@ -6,7 +6,7 @@ import SwiftUI
 
 struct FeedbackInfoFieldView: View {
 
-    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
+    var feedbackFieldViewModel: FeedbackFieldViewModel
 
     var body: some View {
         Text(feedbackFieldViewModel.value)

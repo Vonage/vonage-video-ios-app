@@ -14,7 +14,7 @@ struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
+    var feedbackFormViewModel: FeedbackFormViewModel
 
     var body: some View {
         Group {
