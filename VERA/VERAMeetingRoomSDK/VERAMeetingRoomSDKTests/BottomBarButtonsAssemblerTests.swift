@@ -549,11 +549,15 @@ struct BottomBarButtonsAssemblerTests {
             enabledFeatures: features
         )
         var didEmitUpdate = false
-        let cancellable = assembler.buttonsDidChange.sink {
-            didEmitUpdate = true
-        }
         let viewModel = container.backgroundEffectFactory.makeViewModel {
             MockVERAPublisher()
+        }
+        // Normalize the persisted effect (UserDefaults-backed) to a known baseline so the
+        // selection below is guaranteed to be an actual value change — @Observable only
+        // notifies on a real change, unlike the previous @Published emission.
+        viewModel.selectEffect(.none)
+        let cancellable = assembler.buttonsDidChange.sink {
+            didEmitUpdate = true
         }
 
         assembler.videoEffectsViewModel = viewModel

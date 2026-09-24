@@ -284,41 +284,71 @@ final class BottomBarButtonsAssembler {
     private func bindNoiseSuppressionUpdates(_ viewModel: MeetingNoiseSuppressionViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(viewModel) { $0.state }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.meetingNoiseSuppressionButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindArchiveUpdates(_ viewModel: ArchiveButtonViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(viewModel) { $0.state }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.archiveButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(viewModel) { $0.state }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.captionsButtonViewModel === viewModel }
+        ) { $0.state }
     }
 
     private func bindEffectsUpdates(_ viewModel: VideoEffectsViewModel?) {
         guard let viewModel else { return }
 
-        observeChanges(viewModel) { $0.selectedEffect }
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.videoEffectsViewModel === viewModel }
+        ) { $0.selectedEffect }
     }
-
 
     private func observeChanges<Object: AnyObject, Value>(
         _ object: Object,
+        while isCurrent: @escaping () -> Bool = { true },
         read: @escaping (Object) -> Value
     ) {
         withObservationTracking { [weak object] in
             guard let object else { return }
             _ = read(object)
         } onChange: { [weak self, weak object] in
-            Task { @MainActor in
-                guard let self, let object else { return }
-                self.buttonsDidChangeSubject.send()
-                self.observeChanges(object, read: read)
+            if Thread.isMainThread {
+                MainActor.assumeIsolated {
+                    self?.forwardChange(object, isCurrent: isCurrent, read: read)
+                }
+            } else {
+                Task { @MainActor [weak self, weak object] in
+                    self?.forwardChange(object, isCurrent: isCurrent, read: read)
+                }
             }
+        }
+    }
+
+    private func forwardChange<Object: AnyObject, Value>(
+        _ object: Object?,
+        isCurrent: @escaping () -> Bool,
+        read: @escaping (Object) -> Value
+    ) {
+        guard let object, isCurrent() else { return }
+        buttonsDidChangeSubject.send()
+        // Re-arm on the next turn so tracking registers against the settled value.
+        Task { @MainActor [weak self, weak object] in
+            guard let self, let object, isCurrent() else { return }
+            self.observeChanges(object, while: isCurrent, read: read)
         }
     }
 
