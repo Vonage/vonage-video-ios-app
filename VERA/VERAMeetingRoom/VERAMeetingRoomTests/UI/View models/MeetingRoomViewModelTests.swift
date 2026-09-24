@@ -1446,23 +1446,18 @@ struct MeetingRoomViewModelTests {
     // MARK: Helper
 
     /// Polls `state` on the main actor until a `.content` state satisfying `predicate`
-    /// appears, or the timeout elapses. Replaces the old `@Published.values` async
-    /// sequence after the `@Observable` migration.
+    /// appears, or the timeout elapses. Throws if no matching content state is reached.
     func waitForContentState(
         _ sut: MeetingRoomViewModel,
         timeout: Duration = .seconds(2),
         predicate: @escaping (MeetingRoomState) -> Bool = { _ in true }
     ) async throws -> MeetingRoomState {
-        let deadline = ContinuousClock.now.advanced(by: timeout)
-        while ContinuousClock.now < deadline {
-            if let content = await MainActor.run(body: { sut.state.contentState }), predicate(content) {
-                return content
-            }
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-        guard let content = await MainActor.run(body: { sut.state.contentState }), predicate(content) else {
-            throw Error.nilValue
-        }
+        let content = await poll(
+            timeout: timeout,
+            read: { await MainActor.run { sut.state.contentState } },
+            until: { $0.map(predicate) ?? false }
+        )
+        guard let content, predicate(content) else { throw Error.nilValue }
         return content
     }
 
@@ -1477,13 +1472,11 @@ struct MeetingRoomViewModelTests {
         timeout: Duration = .seconds(2),
         predicate: @escaping (ToastItem?) -> Bool
     ) async -> ToastItem? {
-        let deadline = ContinuousClock.now.advanced(by: timeout)
-        while ContinuousClock.now < deadline {
-            let toast = await MainActor.run { sut.toast }
-            if predicate(toast) { return toast }
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-        return await MainActor.run { sut.toast }
+        await poll(
+            timeout: timeout,
+            read: { await MainActor.run { sut.toast } },
+            until: predicate
+        )
     }
 
     func when(given configuration: MeetingRoomConfiguration) async throws -> MeetingRoomState {

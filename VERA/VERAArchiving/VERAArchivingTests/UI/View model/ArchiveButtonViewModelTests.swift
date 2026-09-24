@@ -8,6 +8,7 @@ import Testing
 import VERAArchiving
 import VERAArchivingTestHelpers
 import VERADomain
+import VERATestHelpers
 
 @Suite("Archive button view model tests")
 struct ArchiveButtonViewModelTests {
@@ -26,7 +27,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await waitForState(sut) { _ in true }
+        let state = await poll(read: { sut.state }) { _ in true }
 
         #expect(state == .idle)
         #expect(dataSource.archivingStatusCallCount == 1)
@@ -40,7 +41,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await waitForState(sut) { $0.isArchiving }
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
 
         #expect(state == .archiving(archiveID))
     }
@@ -52,7 +53,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await waitForState(sut) { _ in true }
+        let state = await poll(read: { sut.state }) { _ in true }
 
         #expect(state == .idle)
     }
@@ -140,7 +141,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await waitForState(sut) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
 
@@ -170,7 +171,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await waitForState(sut) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
 
@@ -205,7 +206,7 @@ struct ArchiveButtonViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         dataSource._archivingState.value = .archiving("new-archive-456")
-        _ = await waitForState(sut) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
@@ -237,14 +238,14 @@ struct ArchiveButtonViewModelTests {
 
         // Stop archiving
         dataSource._archivingState.value = .archiving("archive-789")
-        _ = await waitForState(sut) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Try to start again
         dataSource._archivingState.value = .idle
-        _ = await waitForState(sut) { !$0.isArchiving }
+        _ = await poll(read: { sut.state }) { !$0.isArchiving }
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
@@ -282,7 +283,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await waitForState(sut) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
@@ -292,23 +293,6 @@ struct ArchiveButtonViewModelTests {
     }
 
     // MARK: - Test Helpers
-
-    /// Polls `state` until `predicate` holds or the timeout elapses.
-    /// Replaces the old `@Published.values` async sequence after the `@Observable` migration.
-    @discardableResult
-    private func waitForState(
-        _ sut: ArchiveButtonViewModel,
-        timeout: Duration = .seconds(2),
-        predicate: @escaping (ArchivingState) -> Bool
-    ) async -> ArchivingState {
-        let deadline = ContinuousClock.now.advanced(by: timeout)
-        while ContinuousClock.now < deadline {
-            let state = sut.state
-            if predicate(state) { return state }
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-        return sut.state
-    }
 
     private func makeSUT(
         sessionKey: String = "heart-of-gold",
