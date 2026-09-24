@@ -1,0 +1,24 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_7fc538fb4e7856::t_994510e52472c9 555-560
+  s_7fc538fb4e7856::t_37d9d53ec9b49b 561
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_7fc538fb4e7856::t_197b1b15b33046 329-330,332-334,336,341-342,344-345,347
+  s_7fc538fb4e7856::t_ecdc5fabcf7883 287-290,296-299,305-308,314-317,322,331,335,343,346,348-352
+  s_7fc538fb4e7856::t_5f3f0628d67797 353-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "7349e017061f9d71cffe0312503895cae99e7a5f",
+  "prompts": {},
+  "sessions": {
+    "s_7fc538fb4e7856": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_20615722-3d46-4560-9511-2e7cf087a3be",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
