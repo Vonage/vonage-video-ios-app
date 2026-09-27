@@ -140,8 +140,6 @@ jobs:
             ${{ matrix.extra_flags }} \
             $XCODE_COMMON_FLAGS | xcpretty
 
-      # The result bundle sits alone in TestResults/ so the artifact keeps the
-      # <scheme>.xcresult folder name; SonarCloud merges all three by that name.
       - name: Upload test results
         uses: actions/upload-artifact@v7
         if: always()
@@ -150,7 +148,7 @@ jobs:
           path: TestResults/
           overwrite: true
 
-  # Aggregates the matrix into the single "unit-tests" status that branch protection
+  # Aggregates into the single "unit-tests" status that branch protection
   # requires and that sonarcloud / upload-testflight depend on. It runs even when a
   # leg fails, so the required check always reports instead of staying pending.
   unit-tests:
