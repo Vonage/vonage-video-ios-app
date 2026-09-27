@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_878a4967571cda::t_d1a3da0f0f5c26 151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "adf813d37926b7f5de81d1c4a6d2dc6a6e62d9e6",
+  "prompts": {},
+  "sessions": {
+    "s_878a4967571cda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6f0f0e19-5b61-4c97-8920-493424200536",
+        "model": "unknown"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
