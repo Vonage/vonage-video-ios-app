@@ -42,15 +42,38 @@ jobs:
             -scheme VERAMeetingRoomSDK \
             -destination "generic/platform=iOS Simulator" | xcpretty
 
-  unit-tests:
+  tests:
+    name: tests (${{ matrix.name }})
     runs-on: macos-26
     needs: [format-check]
     defaults:
       run:
         shell: bash
-    outputs:
-      test-results: ${{ steps.tests.outcome }}
-    
+    strategy:
+      # Let every leg finish so one failure doesn't hide the others; a failed leg
+      # can be re-run on its own via "Re-run failed jobs".
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            scheme: VERAUnitTests-macOS
+            destination: platform=macOS
+            simulator: false
+            timeout: 25
+            extra_flags: ""
+          - name: iOS
+            scheme: VERAUnitTests-iOS
+            destination: platform=iOS Simulator,name=iPhone 17
+            simulator: true
+            timeout: 45
+            extra_flags: ""
+          - name: snapshots
+            scheme: VERASnapshotTests-iOS
+            destination: platform=iOS Simulator,name=iPhone 17
+            simulator: true
+            timeout: 45
+            extra_flags: -parallel-testing-enabled NO
+
     steps:
       - uses: actions/checkout@v6
     
