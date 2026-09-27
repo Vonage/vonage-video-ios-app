@@ -110,6 +110,7 @@ jobs:
           cd ..
 
       - name: List available simulators
+        if: matrix.simulator
         run: |
           echo "📱 Available iOS Simulators:"
           xcrun simctl list devices
@@ -178,6 +179,7 @@ jobs:
             DerivedData/VERAUnitTests-iOS.xcresult
             DerivedData/VERASnapshotTests-iOS.xcresult
           
+  unit-tests:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-26
