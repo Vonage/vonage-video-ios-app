@@ -121,65 +121,50 @@ jobs:
             echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
           } >> $GITHUB_ENV
 
-      - name: Run unit tests (macOS)
-        id: unit-tests-macos
-        timeout-minutes: 25
-        run: |
-          echo "🧪 Running VERAUnitTests-macOS (all macOS unit test targets, single invocation)"
-          xcodebuild test \
-            -workspace VERA/VERA.xcworkspace \
-            -scheme VERAUnitTests-macOS \
-            -destination "platform=macOS" \
-            -derivedDataPath DerivedData \
-            -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERAUnitTests-macOS.xcresult \
-            $XCODE_COMMON_FLAGS | xcpretty
-
       - name: Preboot iOS Simulator
+        if: matrix.simulator
         run: |
-          set -euo pipefail
-          xcrun simctl boot "iPhone 17" || true 
+          xcrun simctl boot "iPhone 17" || true
 
-      - name: Run unit tests (iOS Simulator)
-        id: unit-tests-ios
-        timeout-minutes: 45
+      - name: Run ${{ matrix.scheme }}
+        timeout-minutes: ${{ matrix.timeout }}
         run: |
-          echo "🧪 Running VERAUnitTests-iOS (all iOS unit and plugin test targets, single invocation)"
+          echo "🧪 Running ${{ matrix.scheme }} on ${{ matrix.destination }} (single invocation)"
           xcodebuild test \
             -workspace VERA/VERA.xcworkspace \
-            -scheme VERAUnitTests-iOS \
-            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -scheme "${{ matrix.scheme }}" \
+            -destination "${{ matrix.destination }}" \
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERAUnitTests-iOS.xcresult \
+            -resultBundlePath "TestResults/${{ matrix.scheme }}.xcresult" \
+            ${{ matrix.extra_flags }} \
             $XCODE_COMMON_FLAGS | xcpretty
 
-      - name: Run snapshot tests (iOS Simulator)
-        id: snapshot-tests-ios
-        timeout-minutes: 45
-        run: |
-          echo "📸 Running VERASnapshotTests-iOS (all snapshot test targets, single invocation)"
-          xcodebuild test \
-            -workspace VERA/VERA.xcworkspace \
-            -scheme VERASnapshotTests-iOS \
-            -destination "platform=iOS Simulator,name=iPhone 17" \
-            -derivedDataPath DerivedData \
-            -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERASnapshotTests-iOS.xcresult \
-            -parallel-testing-enabled NO \
-            $XCODE_COMMON_FLAGS | xcpretty
-
-      - name: Upload all test results
+      # The result bundle sits alone in TestResults/ so the artifact keeps the
+      # <scheme>.xcresult folder name; SonarCloud merges all three by that name.
+      - name: Upload test results
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: unit-test-results
-          path: |
-            DerivedData/VERAUnitTests-macOS.xcresult
-            DerivedData/VERAUnitTests-iOS.xcresult
-            DerivedData/VERASnapshotTests-iOS.xcresult
-          
+          name: test-results-${{ matrix.name }}
+          path: TestResults/
+
+  # Aggregates the matrix into the single "unit-tests" status that branch protection
+  # requires and that sonarcloud / upload-testflight depend on. It runs even when a
+  # leg fails, so the required check always reports instead of staying pending.
   unit-tests:
+    runs-on: ubuntu-24.04
+    needs: [tests]
+    if: always()
+    steps:
+      - name: Require every test leg to pass
+        run: |
+          echo "tests matrix result: ${{ needs.tests.result }}"
+          if [ "${{ needs.tests.result }}" != "success" ]; then
+            echo "::error::A test leg did not succeed. Check the tests (macOS / iOS / snapshots) jobs."
+            exit 1
+          fi
+
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-26
@@ -194,7 +179,8 @@ jobs:
       - name: Download unit test results
         uses: actions/download-artifact@v8
         with:
-          name: unit-test-results
+          pattern: test-results-*
+          merge-multiple: true
           path: DerivedData/
     
       - name: Install dependencies
