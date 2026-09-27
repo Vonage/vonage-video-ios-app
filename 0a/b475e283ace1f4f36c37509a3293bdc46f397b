@@ -1,0 +1,261 @@
+"VERA/VERACore/VERACore/Landing page/UI/View models/LandingPageViewModel.swift"
+  s_6a06acf04cea64::t_cb4fb4dc645b12 5,16-17,19,21,24-25
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/BackgroundEffectScreenButton.swift
+  s_6a06acf04cea64::t_d13ae8b8314e8d 11
+VERA/VERAAudioEffects/VERAAudioEffects/UI/View/MeetingNoiseSuppressionButtonContainer.swift
+  s_6a06acf04cea64::t_c5c0bb818a0388 11
+VERA/VERAFeedback/VERAFeedback/UI/View/FormFields/FeedbackInfoFieldView.swift
+  s_6a06acf04cea64::t_24810a89b03153 9
+"VERA/VERASettings/VERASettings/UI/View models/StatisticsViewModel.swift"
+  s_6a06acf04cea64::t_387b172b58296c 7,14-15,17,20,23,26,29,34,38,42,45-47
+  s_6a06acf04cea64::t_854d422f5660af 76-79,83-86
+  s_6a06acf04cea64::t_c13bd8f5273e02 48
+VERA/VERACommonUI/VERACommonUITests/ToastModifierTests.swift
+  s_6a06acf04cea64::t_43211ac34868c1 91-93,98
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_6a06acf04cea64::t_a737684a4b1311 18,29,43,55
+  s_3cd9eb0643fc20::t_be4c884a01aa6d 143,173,208,240,247,285
+  s_6a06acf04cea64::t_0add9bcfbec36e 296-312
+VERA/VERACaptions/VERACaptionsApp/VERACaptionsApp.swift
+  s_6a06acf04cea64::t_e7aa3f142be19b 23-24
+  s_7d4871cba198ed::t_43896bf52e2cf1 49-50
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  s_6a06acf04cea64::t_612dd5041fffa4 8,17-18,20-24,27,29,31,33,35,37
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsButtonViewModel.swift"
+  s_6a06acf04cea64::t_bae799acf4553e 34-36,40,46,49,52,55,58,61
+  s_6a06acf04cea64::t_3bcfe5d640bfa4 7
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveScreenButton.swift
+  s_6a06acf04cea64::t_058fbda9ab6d2a 9
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButton.swift
+  s_6a06acf04cea64::t_2c4162ca972f41 13
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_6a06acf04cea64::t_a387ab76d4a451 51-52,56,58,60,62,64,66,68,70,72,74,76,78,80,83-87,90,92,94,96,98,100,103,108
+  s_6a06acf04cea64::t_69ed4574df5aaf 7
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_6a06acf04cea64::t_8399039bd4bbf3 211
+  s_6a06acf04cea64::t_3dd43a3dbeca55 1075-1078
+  s_6a06acf04cea64::t_948ca283ef0136 1131,1133-1134
+  s_6a06acf04cea64::t_40a6ff42c49948 1383
+  s_6a06acf04cea64::t_7635393ee1725c 1448-1468,1470-1471,1494
+  s_6a06acf04cea64::t_0f8a001e8bf885 1196
+  s_6a06acf04cea64::t_fe548f18df6b18 1473-1486
+  s_6a06acf04cea64::t_90d3e65f867554 399
+  s_6a06acf04cea64::t_6d6b1991b4eef4 788
+  s_6a06acf04cea64::t_40a772a7b02ce2 1150,1152-1153
+  s_6a06acf04cea64::t_c9a0dca2233a5a 959-961
+  s_6a06acf04cea64::t_4a993bfeba4d2e 819
+  s_6a06acf04cea64::t_6777370ef2cee6 850
+  s_6a06acf04cea64::t_9cfdf30362b36d 923-925
+  s_6a06acf04cea64::t_f84be7e447bfa2 305
+  s_6a06acf04cea64::t_af3e2bbf430924 1000
+  s_6a06acf04cea64::t_02196b4d777f16 330
+  s_6a06acf04cea64::t_ab69b227e6a307 1008-1010
+  s_6a06acf04cea64::t_f5b345fd5ef121 1169,1176,1178-1179
+  s_d60268d14bb679::t_3f4da165efbe90 1212,1216,1234,1236-1237,1251,1253-1254,1270,1272-1273,1289,1291-1292,1306,1308-1309,1328
+  s_6a06acf04cea64::t_ed58823b38f7a2 954
+  s_6a06acf04cea64::t_1f573a0e3967bb 880
+  s_6a06acf04cea64::t_53bcf29f5db3ee 803
+  s_6a06acf04cea64::t_674a7b61d29a40 915-917
+  s_6a06acf04cea64::t_35262d28de39f0 1048
+  s_6a06acf04cea64::t_bbdf8a9d1706bf 1056-1058
+  s_6a06acf04cea64::t_5db22b3397e44d 885-887
+  s_6a06acf04cea64::t_6242fcc7ecc435 1472
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiButtonContainerViewModel.swift"
+  s_6a06acf04cea64::t_aceed9fa3ca3b5 6,13-14,32,36,43-47,49
+"VERA/VERACore/VERACore/GoodBye/UI/View models/GoodByeViewModel.swift"
+  s_6a06acf04cea64::t_fd242d207e7c34 7
+  s_6a06acf04cea64::t_c5996013934956 25-27,30,32,35
+VERA/VERASettings/VERASettings/UI/View/Sections/VideoSectionView.swift
+  s_6a06acf04cea64::t_aae377a8ea5270 24
+VERA/VERAChat/VERAChatTests/ChatBadgeButtonViewModelTests.swift
+  s_6a06acf04cea64::t_26316840f8c6f8 19,30,43,55,61,90,96,104,114,128,145-160
+  s_6a06acf04cea64::t_32e9d0e6c5acab 161
+"VERA/VERACore/VERACore/Landing page/UI/Views/LandingPageScreen.swift"
+  s_6a06acf04cea64::t_d95838ed1ade9b 10,28
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  s_6a06acf04cea64::t_a83e515305eccb 7,14-15,17,20,24,29,33,39,43,52
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomScreen.swift
+  s_6a06acf04cea64::t_e0e1827bbc0515 14
+VERA/VERAFeedback/VERAFeedback/UI/View/FormFields/FeedbackTextFieldView.swift
+  s_6a06acf04cea64::t_b4035ec683446d 18
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_6a06acf04cea64::t_d52be899ea7a65 763-789
+  s_6a06acf04cea64::t_0389bf57eae295 87
+  s_6a06acf04cea64::t_629a13d84a7b39 118-120
+"VERA/VERAFeedback/VERAFeedback/UI/View models/FeedbackFormViewModel.swift"
+  s_6a06acf04cea64::t_8b3eb43f494b3a 6,15-16,33-37
+  s_6a06acf04cea64::t_e1f5911c806127 72,74
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsViewModel.swift"
+  s_6a06acf04cea64::t_5e11ad5a679089 7
+  s_6a06acf04cea64::t_13a952cf35b15d 39-40,46,49,51,55
+VERA/VERAReactions/VERAReactionsApp/VERAReactionsApp.swift
+  s_6a06acf04cea64::t_21aa984300d40f 23-25,31,36,41
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffectsSheet.swift
+  s_6a06acf04cea64::t_2e320d02540fc4 16
+"VERA/VERAChat/VERAChat/UI/View models/ChatPanelViewModel.swift"
+  s_6a06acf04cea64::t_f07bc820e25b83 24-26,29,33
+  s_6a06acf04cea64::t_9d3e8f97d83f2d 7
+"VERA/VERAFeedback/VERAFeedback/UI/View models/FeedbackFieldViewModel.swift"
+  s_6a06acf04cea64::t_616daf34c09944 5,15-16,20-21
+"VERA/VERAReactions/VERAReactions/UI/View models/FloatingEmojisOverlayViewModel.swift"
+  s_6a06acf04cea64::t_61c25689706e39 7
+  s_6a06acf04cea64::t_d4337446049d46 38-39,41,44,48
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_6a06acf04cea64::t_f603df080b38bc 7,20-22,25-29,31,35,38,40,42,44,46,48,50,52,54,57,60
+  s_6a06acf04cea64::t_8aa4c0741093a2 323-325,327-329
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchivesViewModel.swift"
+  s_6a06acf04cea64::t_65324f9032b833 7,10-12,14,16,18,21-22
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationMenu.swift
+  s_6a06acf04cea64::t_1a50eee99eb8b0 212
+  s_6a06acf04cea64::t_13403bca6a0d92 85
+  s_6a06acf04cea64::t_533224fba78a61 10
+  s_6a06acf04cea64::t_78c4e8352def74 41
+VERA/VERAChat/VERAChat/UI/View/ChatBadgeComponentButton.swift
+  s_6a06acf04cea64::t_928cf0b1669413 10
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthComponentButton.swift
+  s_6a06acf04cea64::t_88855e3c3d533f 8
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiPickerContainerViewModel.swift"
+  s_6a06acf04cea64::t_6afbbc0e18278e 7,24-25,27,30,33,36,39,43
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/ViewModels/AudioOutputControlViewModel.swift
+  s_6a06acf04cea64::t_83a2648b53fef1 7,14-15,17,21,24,28,30
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_6a06acf04cea64::t_7700d06233635f 40
+VERA/VERAReactions/VERAReactions/UI/View/EmojiButtonContainer.swift
+  s_6a06acf04cea64::t_738e86e33bbf9c 31
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_6a06acf04cea64::t_a13af9028274fc 7,10-12,15,17,19,21,23,25,27
+VERA/VERASettings/VERASettings/UI/View/Sections/AudioSectionView.swift
+  s_6a06acf04cea64::t_61186fe8f6c8d5 13
+VERA/VERAReactions/VERAReactions/UI/View/EmojiHorizontalPickerViewContainer.swift
+  s_6a06acf04cea64::t_238c6e345c7c4c 27
+VERA/VERAReactions/VERAReactions/UI/View/EmojiPickerViewContainer.swift
+  s_6a06acf04cea64::t_acdb03ad3a7d05 24
+VERA/VERACommonUI/VERACommonUI/UI/NavBarAuthButtonViewModel.swift
+  s_6a06acf04cea64::t_49c90c3f460ea3 7,11-12,14,17,20,22,24,27,30-32,48-51
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_6a06acf04cea64::t_3246daeb043748 42,45
+  s_6a06acf04cea64::t_8e4192a7581c5a 96
+VERA/VERASettings/VERASettings/UI/View/SettingsSheetContent.swift
+  s_6a06acf04cea64::t_e2c91e344ff434 7,9,13-14,18-19
+"VERA/VERAAudioEffects/VERAAudioEffects/UI/View models/NoiseSuppressionViewModel.swift"
+  s_6a06acf04cea64::t_50d5966ff7b131 7,10-11,13,15,20,22,24
+VERA/VERACaptions/VERACaptions/UI/View/CaptionsViewContainer.swift
+  s_6a06acf04cea64::t_73809bf083f1a5 29
+VERA/VERAFeedback/VERAFeedback/UI/View/FormFields/FeedbackImageFieldView.swift
+  s_6a06acf04cea64::t_5626447c020dea 17
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsView.swift
+  s_6a06acf04cea64::t_9ad3a7db9330bb 18
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationProvider.swift
+  s_6a06acf04cea64::t_f17be1d1903232 6
+  s_6a06acf04cea64::t_42db8bdbb7d496 67-70,72,77
+VERA/VERACaptions/VERACaptions/UI/View/CaptionsButtonContainer.swift
+  s_6a06acf04cea64::t_1d52e223778539 31
+VERA/VERAReactions/VERAReactions/UI/View/FloatingEmojisOverlayView.swift
+  s_6a06acf04cea64::t_815ebdbf77beaf 28
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/Components/AudioOutputControlPanel.swift
+  s_6a06acf04cea64::t_0329dce10dfd8e 23
+VERA/VERASettings/VERASettings/UI/View/Sections/StatisticsSectionScreen.swift
+  s_6a06acf04cea64::t_bd0e04b26ed72f 22
+  s_6a06acf04cea64::t_711e52421aeea9 137,140,144-145
+VERA/VERACore/VERACore/GoodBye/UI/View/GoodByeViewScreen.swift
+  s_6a06acf04cea64::t_ece8825a961e66 10
+VERA/VERACore/VERACore/Extensions/PermissionRequester.swift
+  s_6a06acf04cea64::t_a7020e5fe482d4 7-14,16-18
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_6a06acf04cea64::t_f44ff0c03b9d5f 102
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackFormView.swift
+  s_6a06acf04cea64::t_24c13fc047d659 30
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/MeetingBackgroundEffectScreenButton.swift
+  s_6a06acf04cea64::t_3e2cec425895f6 11
+"VERA/VERAChat/VERAChat/UI/View models/ChatBadgeButtonViewModel.swift"
+  s_6a06acf04cea64::t_ca14c5ce8f1ef1 16,18,20
+  s_6a06acf04cea64::t_fa143ec5b0b4b3 7,9-10,12,14
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomScreen.swift"
+  s_6a06acf04cea64::t_7ee4d9ef5403f8 10
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackView.swift
+  s_6a06acf04cea64::t_cc1671790aa148 17
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_6a06acf04cea64::t_e6f1105472ca06 288-291,297-300,306-309,315-323,335-341,343-345,347
+  s_6a06acf04cea64::t_4b77fb7dcd27ea 7
+  s_6a06acf04cea64::t_09c7c336d40f30 76,85-88
+  s_6a06acf04cea64::t_edd69a38ad18fa 324-334,342
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackSheetContent.swift
+  s_6a06acf04cea64::t_a73ba505989903 8,14
+VERA/VERAApp/VERA/App/Navigation/NavigationCoordinator.swift
+  s_6a06acf04cea64::t_060bdf0c35b4c0 29-35,38,40,42,44,46,50,55,60
+  s_6a06acf04cea64::t_45e409fbfc2266 3
+VERA/VERAChat/VERAChat/UI/View/ChatScreen.swift
+  s_6a06acf04cea64::t_c921d5249f1979 11
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/CaptionsOverlayModifier.swift
+  s_6a06acf04cea64::t_f38b381462e8cf 24-25,28-29
+VERA/VERASettings/VERASettings/UI/View/StatsOverlayView.swift
+  s_6a06acf04cea64::t_ee0989ab372410 51
+VERA/VERAAudioEffects/VERAAudioEffects/UI/View/WaitingNoiseSuppressionButtonContainer.swift
+  s_6a06acf04cea64::t_19f93e416f9421 10
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivesScreen.swift
+  s_6a06acf04cea64::t_6353b099a93d89 10
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  s_6a06acf04cea64::t_c4cf38aaaf3288 80,83-84
+  s_6a06acf04cea64::t_5e149c3e3395da 250-282
+  s_6a06acf04cea64::t_08cec801cd6afd 239,241
+  s_6a06acf04cea64::t_00c298cf168cac 96,98
+  s_6a06acf04cea64::t_b8e9a7f3ea4bc0 65,68-69
+  s_6a06acf04cea64::t_711e1067842ab3 17,19,25
+  s_6a06acf04cea64::t_646b2bbc5eef08 52,54
+  s_6a06acf04cea64::t_ce2fb63b270875 108,222
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  s_6a06acf04cea64::t_4b752a9b375323 12
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_6a06acf04cea64::t_baafd1f82485dd 26-27,29,33,37-39
+  s_6a06acf04cea64::t_ecca961fd54ef0 233-234,237
+  s_6a06acf04cea64::t_f87d7eeb7b560f 7
+  s_6a06acf04cea64::t_926a23bc9d9686 113,116-120,122,127,131,135,139,144
+VERA/VERASettings/VERASettingsApp/VERASettingsApp.swift
+  s_6a06acf04cea64::t_abe5c810465d4e 116-117
+  s_6a06acf04cea64::t_f5e6c79bdad598 22
+VERA/VERAChat/VERAChatTests/ChatPanelViewModelTests.swift
+  s_6a06acf04cea64::t_7aeea8360853ea 27,31,45,49,90-103
+  s_6a06acf04cea64::t_6ea3e3edac7986 104-105
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  s_6a06acf04cea64::t_28e8cce9d52ab5 38,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "0ab475e283ace1f4f36c37509a3293bdc46f397b",
+  "prompts": {},
+  "sessions": {
+    "s_3cd9eb0643fc20": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1789680504206120000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_6a06acf04cea64": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_0ae2ae86-70b2-4b06-9a21-518003e90e23",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_7d4871cba198ed": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1789680922041026000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_d60268d14bb679": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1789709376540953000",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}

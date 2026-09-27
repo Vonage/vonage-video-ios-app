@@ -1,0 +1,28 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_7fc538fb4e7856::t_ea1484f86978fc 287,293,299,305,308-311,313-318,320
+  s_7fc538fb4e7856::t_330e8e7ba6880e 86
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/CaptionsOverlayModifier.swift
+  s_7fc538fb4e7856::t_b0669e2e0c0c0c 24
+VERA/VERACommonUI/VERACommonUITests/ToastModifierTests.swift
+  s_7fc538fb4e7856::t_cd0ee7f9cdbd32 1
+"VERA/VERAFeedback/VERAFeedback/UI/View models/FeedbackFieldViewModel.swift"
+  s_7fc538fb4e7856::t_7ba0610a281edd 5
+VERA/VERASettings/VERASettingsApp/VERASettingsApp.swift
+  s_7fc538fb4e7856::t_170b3572dc75e5 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "11a7b0af936ac154a6e179ed8a3808a24787a58e",
+  "prompts": {},
+  "sessions": {
+    "s_7fc538fb4e7856": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_20615722-3d46-4560-9511-2e7cf087a3be",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
