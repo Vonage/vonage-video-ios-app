@@ -26,7 +26,7 @@ struct ChatSheetModifier: ViewModifier {
                         showChat = false
                     }
                     result.view
-                        .opaquePresentationBackground(theme.background)
+                        .presentationBackground(theme.background)
                 }
         } else {
             content

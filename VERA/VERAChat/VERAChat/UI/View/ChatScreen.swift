@@ -50,7 +50,7 @@ public struct ChatScreen: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .opaquePresentationBackground(theme.background)
+        .presentationBackground(theme.background)
         .presentationDragIndicator(.visible)
     }
 }
