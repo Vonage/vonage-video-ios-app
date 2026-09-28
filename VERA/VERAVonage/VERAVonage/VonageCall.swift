@@ -132,13 +132,18 @@ public final class VonageCall: CallFacade {
     /// Useful for logging, analytics, and correlating call-related operations.
     public let id = UUID()
 
-    /// The credentials required to connect to the Vonage session.
-    ///
-    /// Contains the session ID, authentication token, and room name used during connection.
-    public let credentials: RoomCredentials
+    /// The room this call connects to.
+    public let roomName: RoomName
 
     /// The Vonage session wrapper managing the connection and signals.
-    public let session: VonageSession
+    ///
+    /// Created lazily inside ``connect()`` via ``makeSession``, so it is `nil`
+    /// until a connection is initiated.
+    public private(set) var session: VonageSession?
+
+    /// Creates a session for the given room, resolving fresh credentials each
+    /// time. Injected so the call can (re)acquire its session at connect time.
+    private let makeSession: (RoomName) async throws -> VonageSession
 
     /// The publisher for the local participant's audio and video.
     ///
@@ -186,21 +191,21 @@ public final class VonageCall: CallFacade {
     /// Initializes a new Vonage call instance.
     ///
     /// - Parameters:
-    ///   - credentials: Room credentials with session ID, token, and room name.
-    ///   - session: The Vonage session wrapper managing connectivity and signals.
+    ///   - roomName: The room this call connects to.
+    ///   - makeSession: Resolves fresh credentials and creates the Vonage session for the room at connect time.
     ///   - publisher: Local media publisher for audio/video.
     ///   - publisherRepository: Repository for recreating the publisher during settings changes.
     ///   - networkStatsCollector: Collect info of audio, video and rtc data
     /// - Important: Call ``setup()`` before ``connect()`` to configure handlers and observers.
     public init(
-        credentials: RoomCredentials,
-        session: VonageSession,
+        roomName: RoomName,
+        makeSession: @escaping (RoomName) async throws -> VonageSession,
         publisher: VonagePublisher,
         publisherRepository: PublisherRepository,
         statsCollector: StatsCollector
     ) {
-        self.credentials = credentials
-        self.session = session
+        self.roomName = roomName
+        self.makeSession = makeSession
         self.publisher = publisher
         self.publisherRepository = publisherRepository
         self.statsCollector = statsCollector
@@ -210,20 +215,24 @@ public final class VonageCall: CallFacade {
             : VonageSubscriberFactory()
     }
 
-    /// Sets up the call by configuring session handlers and initializing observers.
+    /// Returns the active session or throws if the call has not connected yet.
+    private func requireSession() throws -> VonageSession {
+        guard let session else { throw CallError.callNotConnected }
+        return session
+    }
+
+    /// Initializes observers not tied to the session.
     ///
-    /// Establishes event handling for streams and session events, initializes media state,
-    /// and starts active speaker tracking.
+    /// Session-level handlers are wired in ``connect()`` once the session exists.
     ///
-    /// - Important: Call exactly once per instance to avoid duplicate handlers.
+    /// - Important: Call exactly once per instance.
     /// - SeeAlso: ``connect()``
     public func setup() {
-        setupSessionHandlers()
         updateMediaState()
         setupActiveSpeakerObservation()
     }
 
-    private func setupSessionHandlers() {
+    private func setupSessionHandlers(_ session: VonageSession) {
         session.onNewStream = { [weak self] stream in
             self?.addSubscriber(stream)
         }
@@ -289,7 +298,7 @@ public final class VonageCall: CallFacade {
     private func publishToSession() {
         guard !publisher.hasSession else { return }
         do {
-            try session.publish(publisher: publisher)
+            try requireSession().publish(publisher: publisher)
             // In PiP mode, read `participant` only after setup(), which swaps in the renderer view.
             // Reading it before would freeze the local tile.
             publisher.setup()
@@ -373,7 +382,7 @@ public final class VonageCall: CallFacade {
             setupSubscriberObservation(vonageSubscriber)
             setupAudioLevelObservation(vonageSubscriber)
 
-            try session.subscribe(subscriber: vonageSubscriber)
+            try requireSession().subscribe(subscriber: vonageSubscriber)
 
             let state = await callStateManager.addSubscriber(vonageSubscriber)
             await updateParticipantsState(state)
@@ -431,17 +440,21 @@ public final class VonageCall: CallFacade {
 
     /// Initiates the connection to the Vonage session.
     ///
-    /// Transitions the call to the connecting state and attempts to establish a connection
-    /// using the provided credentials. On success, the local publisher is added to the session
-    /// and plugins are notified.
+    /// Transitions the call to the connecting state, creates the session for the
+    /// current credentials, wires session handlers and plugin channels, then
+    /// establishes the connection. On success the local publisher is added and
+    /// plugins are notified.
     ///
-    /// - Important: Requires prior call to ``setup()``.
-    /// - Warning: Calling while already connected has no effect.
+    /// - Throws: Any error creating the session (e.g. authentication) or connecting.
     /// - SeeAlso: ``disconnect()``
-    public func connect() {
+    public func connect() async throws {
+        updateCallState(to: .connecting)
+        let session = try await makeSession(roomName)
+        self.session = session
+        setupSessionHandlers(session)
+        wirePluginChannels(session)
         do {
-            updateCallState(to: .connecting)
-            try session.connect(with: credentials.token)
+            try session.connect()
         } catch {
             _eventsPublisher.value = .error(error)
         }
@@ -472,14 +485,14 @@ public final class VonageCall: CallFacade {
             stopCaptionCleanup()
             isNetworkStatsEnabled = false
             statsCollector.reset()
-            try session.disconnect()
+            try requireSession().disconnect()
             publisher.cleanUp()
-            session.cleanUp()
+            session?.cleanUp()
             updateCallState(to: .disconnected)
         } catch {
             _eventsPublisher.value = .error(error)
             publisher.cleanUp()
-            session.cleanUp()
+            session?.cleanUp()
             updateCallState(to: .disconnected)
             throw error
         }
@@ -596,7 +609,7 @@ public final class VonageCall: CallFacade {
         guard let stream else {
             throw ParticipantForceMuteError.participantNotFound
         }
-        try session.forceMute(stream: stream)
+        try requireSession().forceMute(stream: stream)
     }
 
     // MARK: Signals
@@ -604,11 +617,11 @@ public final class VonageCall: CallFacade {
     private var callParams: [String: String] {
         [
             VonageCallParams.username.rawValue: publisher.participant.name,
-            VonageCallParams.roomName.rawValue: credentials.roomName,
+            VonageCallParams.roomName.rawValue: roomName,
             VonageCallParams.callID.rawValue: id.uuidString,
-            VonageCallParams.applicationId.rawValue: credentials.applicationId,
-            VonageCallParams.sessionId.rawValue: credentials.sessionId,
-            VonageCallParams.token.rawValue: credentials.token,
+            VonageCallParams.applicationId.rawValue: session?.applicationId ?? "",
+            VonageCallParams.sessionId.rawValue: session?.sessionId ?? "",
+            VonageCallParams.token.rawValue: session?.token ?? "",
         ]
     }
 
@@ -626,12 +639,16 @@ public final class VonageCall: CallFacade {
         self.plugins = plugins
 
         plugins.forEach {
-            if let channelHolder = $0 as? VonageSignalEmitter {
-                channelHolder.channel = session
-            }
-
             if let callHolder = $0 as? VonagePluginCallHolder {
                 callHolder.call = self
+            }
+        }
+    }
+
+    private func wirePluginChannels(_ session: VonageSession) {
+        plugins.forEach {
+            if let channelHolder = $0 as? VonageSignalEmitter {
+                channelHolder.channel = session
             }
         }
     }
@@ -740,7 +757,7 @@ public final class VonageCall: CallFacade {
 
         // 2. Clean up publisher captions subscriber if it exists
         if let captionsSub = publisherCaptions {
-            try? session.unsubscribe(subscriber: captionsSub)
+            try? requireSession().unsubscribe(subscriber: captionsSub)
             publisherCaptions = nil
         }
 
@@ -750,7 +767,7 @@ public final class VonageCall: CallFacade {
         // would later overwrite publisherParticipant with an empty-view participant,
         // blanking the local video tile after the new publisher is already set up.
         publisherCancellables.removeAll()
-        try session.unpublish(publisher: publisher)
+        try requireSession().unpublish(publisher: publisher)
         publisher.cleanUp()
 
         // Yield so the run loop can process the unpublish event before OTPublisher init.
@@ -944,7 +961,7 @@ public final class VonageCall: CallFacade {
                 self?.removeSubscriber(stream)
             }
 
-            try session.subscribe(subscriber: vonageSubscriber)
+            try requireSession().subscribe(subscriber: vonageSubscriber)
 
             vonageSubscriber.onConnected = { [weak vonageSubscriber] in
                 vonageSubscriber?.enableCaptions()

@@ -61,7 +61,7 @@ public final class E2ECallFacade: CallFacade {
         observeArchivingEvents()
     }
 
-    public func connect() {
+    public func connect() async throws {
         callStateSubject.send(.connecting)
         callStateSubject.send(.connected)
         eventsSubject.send(.connected)

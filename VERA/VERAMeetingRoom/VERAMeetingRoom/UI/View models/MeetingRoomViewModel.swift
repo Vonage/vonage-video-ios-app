@@ -164,6 +164,10 @@ public final class MeetingRoomViewModel {
             await MainActor.run { [weak self] in
                 self?.meetingRoomNavigation.onBack()
             }
+        } catch is AuthenticationError {
+            await MainActor.run { [weak self] in
+                self?.meetingRoomNavigation.onBack()
+            }
         } catch {
             await MainActor.run { [weak self] in
                 self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: true)

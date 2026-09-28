@@ -18,7 +18,7 @@ struct VonageCallTests {
     @Test
     func connectCallsSessionConnectWithAnSpecificToken() async throws {
         let aToken = "random-token"
-        let session = VonageSessionSpy()
+        let session = VonageSessionSpy(token: aToken)
         let sut = makeSUT(
             credentials: makeMockCredentials(
                 token: aToken
@@ -27,7 +27,7 @@ struct VonageCallTests {
 
         #expect(session.connectCalled == false)
         #expect(session.recordedTokens.isEmpty)
-        sut.connect()
+        try await sut.connect()
         #expect(session.connectCalled == true)
         #expect(session.recordedTokens == [aToken])
     }
@@ -38,7 +38,7 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let event = await sut.eventsPublisher.values.first { event in
             if case .error = event { return true }
@@ -94,6 +94,8 @@ struct VonageCallTests {
         let stream = makeOpaqueStream()
         let session = VonageSessionSpy()
         let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
         sut.participantStreamResolver = { id in
             #expect(id == "participant-id")
             return stream
@@ -106,11 +108,13 @@ struct VonageCallTests {
     }
 
     @Test
-    func forceMuteParticipantPropagatesSessionError() async {
+    func forceMuteParticipantPropagatesSessionError() async throws {
         let stream = makeOpaqueStream()
         let session = VonageSessionSpy()
         session.forceMuteError = ForceMuteTestError.requestFailed
         let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
         sut.participantStreamResolver = { _ in stream }
 
         await #expect(throws: ForceMuteTestError.requestFailed) {
@@ -151,7 +155,7 @@ struct VonageCallTests {
         let publisherSpy = VonagePublisherSpy()
         let sut = makeSUT(publisher: publisherSpy)
         sut.setup()
-        sut.connect()
+        try await sut.connect()
 
         publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
 
@@ -259,7 +263,7 @@ struct VonageCallTests {
         sut.setup()
 
         // Connect to enable settings application
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(
             videoResolution: .high,
@@ -297,7 +301,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -319,7 +323,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -345,7 +349,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
         sut.enableNetworkStats()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
@@ -371,7 +375,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -389,7 +393,7 @@ struct VonageCallTests {
             publisher: publisherSpy
         )
         sut.setup()
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(
             videoBitratePreset: .customBitrate,
@@ -421,7 +425,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -449,7 +453,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         await delay()
 
@@ -480,7 +484,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         await delay()
 
@@ -502,8 +506,8 @@ struct VonageCallTests {
         statsCollector: StatsCollector = MockStatsCollector()
     ) -> VonageCall {
         VonageCall(
-            credentials: credentials,
-            session: session,
+            roomName: credentials.roomName,
+            makeSession: { _ in session },
             publisher: publisher,
             publisherRepository: publisherRepository,
             statsCollector: statsCollector
@@ -520,7 +524,8 @@ struct VonageCallTests {
                 applicationId: "applicationId",
                 sessionId: "sessionId",
                 delegate: nil
-            )!
+            )!,
+            credentials: makeMockCredentials()
         )
     }
 }

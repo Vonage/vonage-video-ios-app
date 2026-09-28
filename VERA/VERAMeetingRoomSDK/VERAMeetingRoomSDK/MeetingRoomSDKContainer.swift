@@ -122,6 +122,8 @@ final class MeetingRoomSDKContainer {
             MeetingRoomSessionRepositoryFactoryContext(
                 publisherSettings: initialPublisherSettings ?? .init(),
                 sessionFactory: sessionFactory,
+                roomCredentialsRepository: roomCredentialsRepository,
+                sessionKeyWriter: sessionKeyHolder,
                 publisherRepository: publisherRepository,
                 pluginRegistry: pluginRegistry,
                 statsCollector: statsCollector))
@@ -185,11 +187,9 @@ final class MeetingRoomSDKContainer {
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
         noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: pinnedParticipantsDataSource,
-        sessionKeyHolder: sessionKeyHolder
+        pinnedParticipantsDataSource: pinnedParticipantsDataSource
     )
 
     // MARK: - Chat Feature

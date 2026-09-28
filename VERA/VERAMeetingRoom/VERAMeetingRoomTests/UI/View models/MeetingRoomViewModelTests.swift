@@ -414,8 +414,7 @@ struct MeetingRoomViewModelTests {
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
-            sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
+            sessionRepository: sessionRepository)
         let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
 
         let sut = makeSUT(
@@ -443,8 +442,7 @@ struct MeetingRoomViewModelTests {
     func endCallShowsErrorIfDisconnectCallFails() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
-            sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
+            sessionRepository: sessionRepository)
         let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())
