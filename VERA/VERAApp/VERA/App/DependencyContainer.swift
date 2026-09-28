@@ -66,9 +66,13 @@ final class DependencyContainer {
                     wrapped: baseHttpClient,
                     tokenProvider: OktaTokenProvider(authManager: authManager)
                 )
-            return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
-                await MainActor.run { self?.onUnauthorized?() }
-            }
+            #if AUTHENTICATION_ENABLED
+                return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
+                    await MainActor.run { self?.onUnauthorized?() }
+                }
+            #else
+                return inner
+            #endif
         }()
     #else
         var httpClient: HTTPClient { baseHttpClient }

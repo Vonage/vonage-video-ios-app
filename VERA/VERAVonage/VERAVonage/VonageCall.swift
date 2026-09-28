@@ -449,7 +449,13 @@ public final class VonageCall: CallFacade {
     /// - SeeAlso: ``disconnect()``
     public func connect() async throws {
         updateCallState(to: .connecting)
-        let session = try await makeSession(roomName)
+        let session: VonageSession
+        do {
+            session = try await makeSession(roomName)
+        } catch {
+            updateCallState(to: .disconnected)
+            throw error
+        }
         self.session = session
         setupSessionHandlers(session)
         wirePluginChannels(session)

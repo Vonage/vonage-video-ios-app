@@ -74,6 +74,27 @@ struct VonageCallTests {
         }
     }
 
+    @Test
+    func connectRethrowsAndDisconnectsWhenSessionCreationFails() async throws {
+        enum MakeSessionError: Swift.Error { case failed }
+        let publisherRepository = MockPublisherRepository()
+        let sut = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in throw MakeSessionError.failed },
+            publisher: VonagePublisherSpy(),
+            publisherRepository: publisherRepository,
+            statsCollector: MockStatsCollector()
+        )
+        sut.setup()
+
+        await #expect(throws: MakeSessionError.self) {
+            try await sut.connect()
+        }
+
+        let state = await sut.callState.values.first { $0 == .disconnected }
+        #expect(state == .disconnected)
+    }
+
     // MARK: - Participant moderation tests
 
     @Test
