@@ -1,0 +1,53 @@
+VERA/VERAChat/VERAChat/UI/View/ChatPanel.swift
+  s_278408402e9a8c::t_b2b2939af40d2e 59
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/FeedbackFormOverlayModifier.swift
+  s_278408402e9a8c::t_97968730898e06 28
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantsListView.swift
+  s_278408402e9a8c::t_a981170bb475f3 82
+VERA/VERACommonUI/VERACommonUITests/BottomBarItemTests.swift
+  s_278408402e9a8c::t_26c7ba934e5945 212,214-215
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/SettingsOverlayModifier.swift
+  s_278408402e9a8c::t_dd8408bb7a874b 25
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsWaitingRoomButton.swift
+  s_278408402e9a8c::t_d053665a76369d 63
+VERA/VERASettings/VERASettings/UI/View/SettingsToolbarButton.swift
+  s_278408402e9a8c::t_d85251d6f2407d 60
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_278408402e9a8c::t_065aebc93c323e 346
+VERA/VERAChat/VERAChat/UI/View/ChatScreen.swift
+  s_278408402e9a8c::t_5994eed1226bf3 53
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/BackgroundEffectScreenButton.swift
+  s_278408402e9a8c::t_aef08a6dec958a 25
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationMenu.swift
+  s_278408402e9a8c::t_a2431842ad3440 35
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackFormView.swift
+  s_278408402e9a8c::t_3fe22d7a1e8e5d 243-245
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Wireframe/AudioDiagnosticsFactory.swift
+  s_278408402e9a8c::t_7d80547c9c42a8 47
+  h_2499cc15b3806e 56,80
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/ChatSheetModifier.swift
+  s_278408402e9a8c::t_a73ea82b9a72e3 29
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/BackgroundEffectsOverlayModifier.swift
+  h_2499cc15b3806e 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c6a54776b03e71ebf061a6ca730556740e9f3bb5",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_278408402e9a8c": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_20768abd-c15e-44a5-bd1c-8a0437da25e2",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
