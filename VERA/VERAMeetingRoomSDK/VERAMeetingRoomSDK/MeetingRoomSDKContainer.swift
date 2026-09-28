@@ -92,7 +92,11 @@ final class MeetingRoomSDKContainer {
     }()
 
     lazy var publisherRepository: any PublisherRepository = {
-        DefaultPublisherRepository(publisherFactory: publisherFactory)
+        let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
+        if let initialPublisherSettings {
+            try? repository.recreatePublisher(initialPublisherSettings)
+        }
+        return repository
     }()
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
