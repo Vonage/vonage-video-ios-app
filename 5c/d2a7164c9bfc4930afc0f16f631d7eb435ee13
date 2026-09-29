@@ -1,0 +1,39 @@
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_7fc538fb4e7856::t_0d6091b1c34223 1449,1460
+  s_7fc538fb4e7856::t_33aec97bf6f6ed 1455-1459
+  s_7fc538fb4e7856::t_0871ef5fe603bb 1475-1479
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  s_7fc538fb4e7856::t_4cc01c251e5f0b 10
+  s_7fc538fb4e7856::t_cf23516a08972c 53,66,81,240
+  s_4245f8918dfb21::t_ceb783f876760c 109,223
+VERA/VERACore/VERATestHelpers/Helpers/Poll.swift
+  s_7fc538fb4e7856::t_189d2b739fc5d9 1-35
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_7fc538fb4e7856::t_29055b725c1f6e 11
+  s_7fc538fb4e7856::t_b8c18db7b95173 30,44,56
+  s_7fc538fb4e7856::t_1361a7214822bf 144,174,209,241,248,286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "5cd2a7164c9bfc4930afc0f16f631d7eb435ee13",
+  "prompts": {},
+  "sessions": {
+    "s_4245f8918dfb21": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1790259544804720000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_7fc538fb4e7856": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_20615722-3d46-4560-9511-2e7cf087a3be",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

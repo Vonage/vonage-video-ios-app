@@ -1,0 +1,143 @@
+VERA/VERAVonage/VERAVonageTests/Mock/MockVonageSessionProvider.swift
+  s_8f98b5a19f06be::t_bb75fb996c8c49 21,29-36
+  s_8f98b5a19f06be::t_0fa5074f7ab541 1-20,22-28,37-38
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_8f98b5a19f06be::t_5ac72426eefdb9 443-446,448,450-451,453-455,457
+  s_8f98b5a19f06be::t_7fda2efbf38400 385,964
+  s_8f98b5a19f06be::t_51f6bd19a81dde 208,218-221
+  s_8f98b5a19f06be::t_f426a957aba720 135-136,144-146
+  s_8f98b5a19f06be::t_06170675f94356 612
+  s_8f98b5a19f06be::t_06ea0052ad4151 224,226,228,235
+  s_8f98b5a19f06be::t_c56de18d4de5b3 452
+  s_8f98b5a19f06be::t_88527bb6301052 648-651
+  s_8f98b5a19f06be::t_fcdc509f1fae21 620,622-624
+  s_8f98b5a19f06be::t_b4834eab1d79ed 194-195,201-202,207
+  s_8f98b5a19f06be::t_f3c692362a3b25 301
+  s_8f98b5a19f06be::t_4d39ceffcef0a4 760
+  s_8f98b5a19f06be::t_78f2c04bdad309 488,490,495
+  s_8f98b5a19f06be::t_1404c1f4b40025 139-143
+  s_a1d8702c3350c2::t_7f39fafc2df3e6 770
+  s_8f98b5a19f06be::t_6502512414f33d 222-223
+  s_8f98b5a19f06be::t_1fedfbebb40f72 652-654
+VERA/VERAVonage/VERAVonage/VonageSession.swift
+  s_8f98b5a19f06be::t_2641f6849c341c 7
+  s_8f98b5a19f06be::t_b3a5f6329560d9 31
+  s_8f98b5a19f06be::t_58b88e8555118b 87-88,90-105
+  s_8f98b5a19f06be::t_5b9e9e6866f3b4 123,129
+  s_8f98b5a19f06be::t_f8070faf8e92f2 85-86
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  s_8f98b5a19f06be::t_58fc7fd3d8bf4e 353
+VERA/VERAMeetingRoom/VERAMeetingRoom/Wireframe/MeetingRoomFactory.swift
+  s_8f98b5a19f06be::t_f16744c5c80ad3 59
+  s_8f98b5a19f06be::t_50334730915367 30
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_8f98b5a19f06be::t_089d44e09b75ae 125-126
+  s_8f98b5a19f06be::t_df84682b67a808 192
+"VERA/VERAMeetingRoom/VERAMeetingRoom/Domain/Use cases/ConnectToRoomUseCase.swift"
+  s_8f98b5a19f06be::t_825ab5e9a0851e 16,21
+  s_8f98b5a19f06be::t_39a35837022390 22
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_8f98b5a19f06be::t_93f599caa6439d 417
+  s_8f98b5a19f06be::t_1a065536b1d0a8 445
+VERA/VERAApp/VERA/App/Factories/E2EMeetingRoomSessionRepositoryFactory.swift
+  s_8f98b5a19f06be::t_1caab550c3ad21 14-15
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_8f98b5a19f06be::t_91f2f1c3d6a1b1 227
+VERA/VERAVonage/VERAVonageTests/VonageSessionRepositoryTests.swift
+  s_8f98b5a19f06be::t_ed4924ac0b69b9 53
+  s_8f98b5a19f06be::t_fdf47a8e005229 19,25,33-36,41,47,64-65,69,71
+  s_8f98b5a19f06be::t_ef6cde695f16fa 31
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageReactionsPluginTests.swift
+  s_8f98b5a19f06be::t_f58d42b40cf0b8 556
+VERA/VERAVonage/VERAVonageTests/VonageSessionProviderTests.swift
+  s_8f98b5a19f06be::t_e3028be2fdabf5 1-8,10-16,18,27-28,30-34,39-40,42-56
+  s_8f98b5a19f06be::t_2f95eff224393d 9
+  s_8f98b5a19f06be::t_d7736a099466a8 17,19-26,29,35-38,41
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_8f98b5a19f06be::t_086cfb94374c8a 220
+  s_8f98b5a19f06be::t_91cc5d6a25d6fb 230
+VERA/VERADomain/VERADomain/SessionRepository.swift
+  s_8f98b5a19f06be::t_a70e40af4ee190 10
+VERA/VERAVonage/VERAVonageTests/Mock/MockVonageSessionFactory.swift
+  s_8f98b5a19f06be::t_64790cef7402d9 23
+VERA/VERADomain/VERADomain/SessionProvider.swift
+  s_8f98b5a19f06be::t_2807f7bee5fa4a 9
+  s_8f98b5a19f06be::t_bdb40379fbfcca 1-8,10
+VERA/VERADomain/VERADomain/RoomCredentialsResponse+RoomCredentials.swift
+  s_8f98b5a19f06be::t_2e43f94e3adf4e 1-17
+VERA/VERADomain/VERADomain/Auth/AuthenticationError.swift
+  s_8f98b5a19f06be::t_701e525409f6f3 1-9
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSessionRepositoryFactory.swift
+  s_8f98b5a19f06be::t_8106a383701612 12-13,21-22,29-30
+  s_8f98b5a19f06be::t_3735f0c0fee073 52-55
+VERA/VERAVonage/VERAVonageTests/Spies/VonageSessionSpy.swift
+  s_8f98b5a19f06be::t_d46da72c4113af 27-32
+  s_8f98b5a19f06be::t_01018928df69b9 7
+  s_8f98b5a19f06be::t_4aea69abe2a4fa 21,26,35,38
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_8f98b5a19f06be::t_bdbbac0406d511 293
+  s_8f98b5a19f06be::t_422377d290bf16 267
+VERA/VERAVonage/VERAVonageTests/Mock/ThrowingVonageSession.swift
+  s_8f98b5a19f06be::t_a857108d4de9cb 7,22-27
+  s_8f98b5a19f06be::t_859700a28979e7 21,30
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  s_8f98b5a19f06be::t_a49cf48e36eca6 60
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Use cases/ConnectToRoomUseCaseTests.swift"
+  s_8f98b5a19f06be::t_9bf137a1e42443 21,30,34,48,50
+VERA/VERAVonage/VERAVonage/VonageSessionRepository.swift
+  s_8f98b5a19f06be::t_d80f28692c4ba7 76,79,86-87
+  s_8f98b5a19f06be::t_aa3fe414ae6176 27-28,38-39,55,59,64,72-74,78,84
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  s_8f98b5a19f06be::t_6d4863c8c0b078 50
+VERA/VERACore/VERATestHelpers/Mocks/MockSessionRepository.swift
+  s_8f98b5a19f06be::t_1394671b4f6fc3 15
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_8f98b5a19f06be::t_8c4ea2728c4593 167-170
+VERA/VERAE2E/VERAE2E/Domain/Session/E2ESessionRepository.swift
+  s_8f98b5a19f06be::t_7cbfb3ae349f0d 10-11,16-17,21-22,32-35
+  s_8f98b5a19f06be::t_39f11d3e4b8382 27
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Feedback/FeedbackSessionDebugInfo+CurrentCall.swift
+  s_8f98b5a19f06be::t_aacc374792884a 12-14,19-21
+VERA/VERADomain/VERADomain/CallFacade.swift
+  s_8f98b5a19f06be::t_964c51ce8f82e4 165,167
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_8f98b5a19f06be::t_af3dca85bfb44a 21,30,41
+  s_8f98b5a19f06be::t_f1de561b85b1f4 158,266,304,326,352,378,396,428,456,487
+  s_8f98b5a19f06be::t_80967f7fbfc212 509,528
+  s_8f98b5a19f06be::t_230521fd76cc71 510,527
+  s_8f98b5a19f06be::t_6f9cfd94f71ff9 97-98,111,116-117
+VERA/VERAVonage/VERAVonageTests/PictureInPictureSessionOrchestratorTests.swift
+  s_8f98b5a19f06be::t_9e3ed5900870bd 134
+  s_8f98b5a19f06be::t_5ba572f357f90f 133
+VERA/VERAVonage/VERAVonage/VonageSessionFactory.swift
+  s_8f98b5a19f06be::t_ea50d6f8a07bb3 63
+VERA/VERAE2E/VERAE2E/Domain/Session/E2ECallFacade.swift
+  s_8f98b5a19f06be::t_3b43cdfc4c31d5 64
+VERA/VERAVonage/VERAVonage/VonageSessionProvider.swift
+  s_8f98b5a19f06be::t_146598b903e294 1-11,14,20,23-24,31-32
+  s_8f98b5a19f06be::t_d80fb40da357aa 12-13,15-19,21-22,25-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "251520e06254bd311f418b298a48239e49047574",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a1d8702c3350c2": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1790541036783582000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

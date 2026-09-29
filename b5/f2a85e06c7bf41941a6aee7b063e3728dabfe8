@@ -1,0 +1,41 @@
+VERA/VERAApp/VERA/App/Factories/UnauthorizedHandlingHTTPClient.swift
+  s_8f98b5a19f06be::t_73bd25c7ce619a 37,45,49-55
+  s_8f98b5a19f06be::t_02b40fb6ae0516 1-36,38-44,46-48,56-57
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_8f98b5a19f06be::t_60aa9d830b0970 98-104
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_8f98b5a19f06be::t_b036f6be3a1eaa 163-166
+.maestro/flows/login-dialog-on-401.yaml
+  s_8f98b5a19f06be::t_18b439c8bcf44c 1-61
+VERA/VERADomain/VERADomain/Auth/UnauthorizedError.swift
+  s_8f98b5a19f06be::t_27390288a3c2e2 1-9
+VERA/VERAE2E/VERAE2E/Utils/E2EConfiguration.swift
+  s_8f98b5a19f06be::t_573435dc23e561 38-41
+  s_8f98b5a19f06be::t_a074274e336ff5 10
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_8f98b5a19f06be::t_57abe6cfb07171 49-50,70
+  s_8f98b5a19f06be::t_43e9b67dc15dea 62-69
+VERA/VERAApp/VERATests/UnauthorizedHandlingHTTPClientTests.swift
+  s_8f98b5a19f06be::t_18f930b1d14bd3 1-16,19-22,24-28,30-70
+  s_8f98b5a19f06be::t_6c134099540212 17-18,23,29
+.maestro/flows/error-dialog-on-500.yaml
+  s_8f98b5a19f06be::t_3d87f5ad3dc16b 1-55
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EHTTPClient.swift
+  s_8f98b5a19f06be::t_1a34c3aa8d56e3 42,47,50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "b5f2a85e06c7bf41941a6aee7b063e3728dabfe8",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
