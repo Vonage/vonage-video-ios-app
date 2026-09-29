@@ -1,0 +1,27 @@
+VERA/VERADomain/VERADomainTests/AuthenticationErrorTests.swift
+  s_8f98b5a19f06be::t_340c7b5d7c36d9 1-23
+VERA/VERACore/VERACoreTests/Common/Data/Default/DefaultPublisherRepositoryTests.swift
+  s_8f98b5a19f06be::t_bc01ae20de4e40 9
+  s_8f98b5a19f06be::t_36c769f6747de5 25-35
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_8f98b5a19f06be::t_5a2d207bcb435e 104-105,109-118,125-126
+  s_8f98b5a19f06be::t_c8037cc2fcffed 89-103,106-108,119-124,127-128
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Mocks/Use cases/MockConnectToRoomUseCase.swift"
+  s_8f98b5a19f06be::t_e4b97f5dd03ba7 47-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f7141882c8830c379bcde49c83efb64f186ea26d",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
