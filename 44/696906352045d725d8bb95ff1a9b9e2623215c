@@ -1,0 +1,21 @@
+VERA/VERAVonage/VERAVonageTests/VonageSessionTests.swift
+  s_8f98b5a19f06be::t_cd975f808dfe5c 9-10,32,43,52,54,67,76,78,87,89,98,100,141,155,171,178-181
+  s_8f98b5a19f06be::t_02c20ff8df0d2c 1-8,11-31,33-42,44-51,53,55-66,68-75,77,79-86,88,90-97,99,101-140,142-143,148-154,156,161-170,172-177,182-183
+  s_8f98b5a19f06be::t_5db1d5e1c212e8 144-147,157-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "44696906352045d725d8bb95ff1a9b9e2623215c",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
