@@ -201,6 +201,9 @@ extension WaitingRoomViewModel {
                 cameras: availableCameraDevices,
                 audioLevel: currentAudioLevel,
                 allowAudioOutputTest: AppConfig.audioSettings.allowAudioDiagnostics,
+                allowSettings: AppConfig.waitingRoomSettings.allowSettings,
+                allowBackgroundEffects: AppConfig.videoSettings.allowBackgroundEffects,
+                allowAudioEffects: AppConfig.audioSettings.allowAdvancedNoiseSuppression,
                 publisher: publisher
             )
         )
@@ -241,8 +244,8 @@ extension WaitingRoomViewModel {
     fileprivate func updateUIState() {
         buildContentUiState(
             roomName: roomName,
-            isMicrophoneEnabled: isMicrophoneEnabled,
-            isCameraEnabled: isCameraEnable)
+            isMicrophoneEnabled: isMicrophoneEnabled && AppConfig.audioSettings.allowAudioOnJoin,
+            isCameraEnabled: isCameraEnable && AppConfig.videoSettings.allowVideoOnJoin)
     }
 
     @MainActor
@@ -281,6 +284,9 @@ extension WaitingRoomViewModel {
                 cameras: currentState.cameras,
                 audioLevel: level,
                 allowAudioOutputTest: currentState.allowAudioOutputTest,
+                allowSettings: currentState.allowSettings,
+                allowBackgroundEffects: currentState.allowBackgroundEffects,
+                allowAudioEffects: currentState.allowAudioEffects,
                 publisher: currentState.publisher))
     }
 

@@ -264,8 +264,10 @@ struct VERAApp: App {
         #if SETTINGS_ENABLED
             // Settings button with icon-only design (no circular background).
             // Presents the in-app SettingsView as a sheet.
-            let settingsButton = settingsFactory.makeWaitingRoomButton()
-            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            if dependencyContainer.appConfig.waitingRoomSettings.allowSettings {
+                let settingsButton = settingsFactory.makeWaitingRoomButton()
+                buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            }
         #endif
 
         return buttons
@@ -277,30 +279,34 @@ struct VERAApp: App {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.videoEffectsViewModel = viewModel
-
-            if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
-                let view = backgroundEffectFactory.makeEffectsButton(
-                    viewModel: videoEffectsViewModel
+            if dependencyContainer.appConfig.videoSettings.allowBackgroundEffects {
+                let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
                 )
+                navigationCoordinator.videoEffectsViewModel = viewModel
 
-                buttons.append(ViewHolder(id: "Effects", content: { view }))
+                if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
+                    let view = backgroundEffectFactory.makeEffectsButton(
+                        viewModel: videoEffectsViewModel
+                    )
+
+                    buttons.append(ViewHolder(id: "Effects", content: { view }))
+                }
             }
         #endif
 
         #if AUDIOEFFECTS_ENABLED
-            let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
+            if dependencyContainer.appConfig.audioSettings.allowAdvancedNoiseSuppression {
+                let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+                )
+                navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
 
-            let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                viewModel: audioViewModel
-            )
-            buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+                let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    viewModel: audioViewModel
+                )
+                buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+            }
         #endif
 
         return buttons

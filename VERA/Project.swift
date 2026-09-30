@@ -23,6 +23,19 @@ private func readAppConfig() -> [String: Any] {
     }
 }
 
+/// Returns the boolean value of a feature flag in `app-config.json`.
+///
+/// - Parameters:
+///   - section: The top-level config section, e.g. `"meetingRoomSettings"`.
+///   - key: The boolean flag within that section, e.g. `"allowChat"`.
+/// - Returns: The flag's boolean value.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func isFeatureEnabled(_ section: String, _ key: String) -> Bool {
+    let config = readAppConfig()
+    let settings = config[section] as! [String: Any]
+    return settings[key] as! Bool
+}
+
 /// Returns whether chat is enabled according to `app-config.json`.
 ///
 /// Expects the JSON shape:
@@ -37,9 +50,7 @@ private func readAppConfig() -> [String: Any] {
 /// - Returns: `true` if `meetingRoomSettings.allowChat` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isChatEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowChat"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowChat")
 }
 
 /// Returns whether archiving is enabled according to `app-config.json`.
@@ -56,9 +67,7 @@ private func isChatEnabled() -> Bool {
 /// - Returns: `true` if `meetingRoomSettings.allowArchiving` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isArchivingEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowArchiving"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowArchiving")
 }
 
 /// Returns whether background effects are enabled according to `app-config.json`.
@@ -74,9 +83,7 @@ private func isArchivingEnabled() -> Bool {
 /// - Returns: `true` if `videoSettings.allowBackgroundEffects` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func areBackgroundEffectsEnabled() -> Bool {
-    let config = readAppConfig()
-    let videoSettings = config["videoSettings"] as! [String: Any]
-    return videoSettings["allowBackgroundEffects"] as! Bool
+    isFeatureEnabled("videoSettings", "allowBackgroundEffects")
 }
 
 /// Returns whether captions is enabled according to `app-config.json`.
@@ -93,9 +100,7 @@ private func areBackgroundEffectsEnabled() -> Bool {
 /// - Returns: `true` if `meetingRoomSettings.allowCaptions` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func areCaptionsEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowCaptions"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowCaptions")
 }
 
 /// Returns whether emojis/reactions are enabled according to `app-config.json`.
@@ -112,12 +117,28 @@ private func areCaptionsEnabled() -> Bool {
 /// - Returns: `true` if `meetingRoomSettings.allowEmojis` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func areEmojisEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowEmojis"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowEmojis")
 }
 
-/// Returns whether Settings is enabled according to `app-config.json`.
+/// Returns whether the waiting-room Settings feature is enabled according to `app-config.json`.
+///
+/// Expects the JSON shape:
+/// ```json
+/// {
+///   "waitingRoomSettings": {
+///     "allowSettings": true
+///   }
+/// }
+/// ```
+///
+/// - Returns: `true` if `waitingRoomSettings.allowSettings` is `true`, else `false`.
+/// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
+private func areWaitingRoomSettingsEnabled() -> Bool {
+    isFeatureEnabled("waitingRoomSettings", "allowSettings")
+}
+
+/// Returns whether the in-call (meeting room) Settings feature is enabled according to
+/// `app-config.json`.
 ///
 /// Expects the JSON shape:
 /// ```json
@@ -130,10 +151,8 @@ private func areEmojisEnabled() -> Bool {
 ///
 /// - Returns: `true` if `meetingRoomSettings.allowSettings` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
-private func areSettingsEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowSettings"] as! Bool
+private func areMeetingRoomSettingsEnabled() -> Bool {
+    isFeatureEnabled("meetingRoomSettings", "allowSettings")
 }
 
 /// Returns whether screen share is enabled according to `app-config.json`.
@@ -150,9 +169,7 @@ private func areSettingsEnabled() -> Bool {
 /// - Returns: `true` if `meetingRoomSettings.allowScreenShare` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isScreenShareEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowScreenShare"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowScreenShare")
 }
 
 /// Returns whether Settings is enabled according to `app-config.json`.
@@ -169,9 +186,7 @@ private func isScreenShareEnabled() -> Bool {
 /// - Returns: `true` if `audioSettings.allowAdvancedNoiseSuppression` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isAdvancedNoiseSuppressionEnabled() -> Bool {
-    let config = readAppConfig()
-    let audioSettings = config["audioSettings"] as! [String: Any]
-    return audioSettings["allowAdvancedNoiseSuppression"] as! Bool
+    isFeatureEnabled("audioSettings", "allowAdvancedNoiseSuppression")
 }
 
 /// Returns whether Audio Diagnostics is enabled according to `app-config.json`.
@@ -188,9 +203,7 @@ private func isAdvancedNoiseSuppressionEnabled() -> Bool {
 /// - Returns: `true` if `audioSettings.allowAudioDiagnostics` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isAudioDiagnosticsEnabled() -> Bool {
-    let config = readAppConfig()
-    let audioSettings = config["audioSettings"] as! [String: Any]
-    return audioSettings["allowAudioDiagnostics"] as! Bool
+    isFeatureEnabled("audioSettings", "allowAudioDiagnostics")
 }
 
 /// Returns whether Feedback is enabled according to `app-config.json`.
@@ -207,9 +220,7 @@ private func isAudioDiagnosticsEnabled() -> Bool {
 /// - Returns: `true` if `meetingRoomSettings.allowFeedback` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isFeedbackEnabled() -> Bool {
-    let config = readAppConfig()
-    let meetingRoomSettings = config["meetingRoomSettings"] as! [String: Any]
-    return meetingRoomSettings["allowFeedback"] as! Bool
+    isFeatureEnabled("meetingRoomSettings", "allowFeedback")
 }
 
 /// Returns whether authentication is enabled according to `app-config.json`.
@@ -226,9 +237,7 @@ private func isFeedbackEnabled() -> Bool {
 /// - Returns: `true` if `authSettings.allowAuthentication` is `true`, else `false`.
 /// - Important: Uses force-casts based on the expected config shape; misconfigured JSON will crash.
 private func isAuthenticationEnabled() -> Bool {
-    let config = readAppConfig()
-    let authSettings = config["authSettings"] as! [String: Any]
-    return authSettings["allowAuthentication"] as! Bool
+    isFeatureEnabled("authSettings", "allowAuthentication")
 }
 
 /// Returns whether Okta is listed as an identity provider in `app-config.json`.
@@ -305,7 +314,7 @@ private func createDependencies() -> [TargetDependency] {
             ] + TargetDependency.vonageVideoTransformersSDKDependencies)
     }
 
-    if areSettingsEnabled() {
+    if areWaitingRoomSettingsEnabled() {
         dependencies.append(contentsOf: [
             .project(target: "VERASettings", path: "VERASettings"),
             .project(target: "VERAVonageSettingsPlugin", path: "VERAVonageSettingsPlugin"),
@@ -383,7 +392,7 @@ private func createBuildSettings() -> Settings {
         print("Background effects feature enabled in build settings.")
     }
 
-    if areSettingsEnabled() {
+    if areWaitingRoomSettingsEnabled() {
         baseSettings["SETTINGS_ENABLED"] = "1"
         flags.append("SETTINGS_ENABLED")
         print("Settings feature enabled in build settings.")
