@@ -209,10 +209,10 @@ struct BottomBarItemTests {
         host(item)
     }
 
-    @Test("Opaque presentation background modifier renders")
+    @Test("Presentation background modifier renders")
     @MainActor
-    func opaquePresentationBackgroundModifierRenders() {
-        host(Text("Sheet").opaquePresentationBackground(.red))
+    func presentationBackgroundModifierRenders() {
+        host(Text("Sheet").presentationBackground(.red))
     }
 
     @Test("Drag indicator renders")
