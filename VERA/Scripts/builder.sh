@@ -1,4 +1,14 @@
 #!/bin/bash
+
+# Ensure we run under real bash (not sh/dash or bash's POSIX mode). When invoked as
+# `sh builder.sh`, macOS runs bash in POSIX mode where `echo -e` prints a literal
+# "-e"; re-exec / disable POSIX so the colored output and bashisms behave correctly.
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec bash "$0" "$@"
+fi
+set +o posix 2>/dev/null || true
+shopt -u xpg_echo 2>/dev/null || true
+
 set -euo pipefail
 
 # Starter Kit Builder Script
@@ -91,6 +101,34 @@ print_done() {
     echo -e "${GREEN}${BOLD}${PHASE_RULE}${NC}"
     echo -e "${GREEN}${BOLD} ✓ $1${NC}"
     echo -e "${GREEN}${BOLD}${PHASE_RULE}${NC}"
+    echo ""
+}
+
+# warn_unsaved_config — prominent reminder shown right before code generation.
+# Code generation reads Config/app-config.json and Config/theme.json FROM DISK, so
+# any edits still held in the editor's memory (unsaved) are invisible here and will
+# NOT be picked up. This can't be detected from a shell, so we make the reminder
+# impossible to miss and (when interactive) pause until the user confirms.
+warn_unsaved_config() {
+    echo ""
+    echo -e "${YELLOW}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${YELLOW}${BOLD} ⚠  Save your config/theme edits first${NC}"
+    echo -e "${YELLOW}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "  Code generation reads ${BOLD}app-config.json${NC} and ${BOLD}theme.json${NC} from disk,"
+    echo -e "  so ${BOLD}unsaved${NC} editor changes won't be applied. Save now with ${BOLD}⌘S / Save All${NC}."
+    echo ""
+    if [ -t 0 ]; then
+        local remaining=15
+        while [ "$remaining" -gt 0 ]; do
+            printf "\r  ${YELLOW}▸${NC} Continuing in ${BOLD}%2ds${NC} — press Enter to go now (Ctrl-C to abort) " "$remaining"
+            # -t 1: wait up to 1s for a keypress; returns non-zero on timeout.
+            if read -t 1 -n 1 -r _key 2>/dev/null; then
+                break
+            fi
+            remaining=$((remaining - 1))
+        done
+        printf "\r\033[K"  # clear the countdown line
+    fi
     echo ""
 }
 
@@ -252,6 +290,341 @@ open_xcode() {
     fi
 }
 
+# Framed "Launch App" section header, printed before the build-&-run prompt.
+launch_app_header() {
+    echo ""
+    echo -e "${CYAN}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${CYAN}${BOLD} ▶  Launch App${NC}"
+    echo -e "${CYAN}${BOLD}${PHASE_RULE}${NC}"
+}
+
+# Echoes currently CONNECTED physical iOS devices as "UDID<TAB>Name" lines (via
+# devicectl, which reports live connection state). Empty output = none connected.
+list_connected_devices() {
+    xcrun devicectl --version >/dev/null 2>&1 || return 0
+    local json="$VERA_DIR/build/.devicectl-devices.json"
+    mkdir -p "$(dirname "$json")"
+    xcrun devicectl list devices --json-output "$json" >/dev/null 2>&1 || return 0
+    python3 -c "
+import json, sys
+try:
+    data = json.load(open('$json'))
+except Exception:
+    sys.exit()
+for dev in data.get('result', {}).get('devices', []):
+    conn = dev.get('connectionProperties', {})
+    if conn.get('tunnelState') == 'connected':
+        name = dev.get('deviceProperties', {}).get('name', 'device')
+        udid = dev.get('hardwareProperties', {}).get('udid') or dev.get('identifier', '')
+        if udid:
+            print(f'{udid}\t{name}')
+" 2>/dev/null
+}
+
+# Echoes available iPhone simulators as "UDID<TAB>Label" lines (booted ones first).
+list_available_simulators() {
+    xcrun simctl list devices available -j 2>/dev/null | python3 -c "
+import json, sys
+try:
+    devices = json.load(sys.stdin)['devices']
+except Exception:
+    sys.exit()
+rows = []
+for runtime, devs in devices.items():
+    rt = runtime.split('.')[-1].replace('-', ' ')
+    for x in devs:
+        if not x.get('isAvailable') or 'iPhone' not in x.get('name', ''):
+            continue
+        booted = ' [booted]' if x.get('state') == 'Booted' else ''
+        rows.append((x['udid'], f\"{x['name']} — {rt}{booted}\"))
+rows.sort(key=lambda r: ('[booted]' not in r[1], r[1]))
+for udid, label in rows:
+    print(f'{udid}\t{label}')
+" 2>/dev/null
+}
+
+# Arrow-key menu. $1 = prompt, $2 = newline-separated "value<TAB>label" options.
+# Sets MENU_RESULT (value) and MENU_LABEL (label). With a single option it selects
+# it directly. Non-interactive (no TTY) picks the first option.
+menu_select() {
+    local prompt="$1" options="$2"
+    local -a values=() labels=()
+    local v l
+    while IFS=$'\t' read -r v l; do
+        [ -z "$v" ] && continue
+        values+=("$v")
+        labels+=("$l")
+    done <<<"$options"
+
+    local n=${#values[@]}
+    [ "$n" -eq 0 ] && return 1
+    if [ "$n" -eq 1 ] || [ ! -t 0 ] || [ ! -r /dev/tty ]; then
+        MENU_RESULT="${values[0]}"
+        MENU_LABEL="${labels[0]}"
+        return 0
+    fi
+
+    local sel=0 key rest i
+    printf "  %s ${DIM}(↑/↓ to move, Enter to select)${NC}:\n" "$prompt"
+    tput civis 2>/dev/null || true
+    while true; do
+        for i in $(seq 0 $((n - 1))); do
+            if [ "$i" -eq "$sel" ]; then
+                printf "  ${CYAN}${BOLD}❯ %s${NC}\033[K\n" "${labels[$i]}"
+            else
+                printf "    ${DIM}%s${NC}\033[K\n" "${labels[$i]}"
+            fi
+        done
+        IFS= read -rsn1 key </dev/tty || true
+        if [ "$key" = $'\x1b' ]; then
+            # Arrow keys arrive as ESC [ A/B. macOS ships bash 3.2, whose `read -t`
+            # only accepts INTEGER timeouts, so use 1 (not a fractional value).
+            IFS= read -rsn2 -t 1 rest </dev/tty || true
+            case "$rest" in
+                '[A' | 'OA') sel=$(((sel - 1 + n) % n)) ;;
+                '[B' | 'OB') sel=$(((sel + 1) % n)) ;;
+            esac
+        elif [ -z "$key" ]; then
+            break
+        fi
+        printf "\033[%dA" "$n" # move cursor back up to redraw
+    done
+    tput cnorm 2>/dev/null || true
+    MENU_RESULT="${values[$sel]}"
+    MENU_LABEL="${labels[$sel]}"
+    return 0
+}
+
+# Yes/No arrow selector. Returns 0 for Yes, 1 for No. Non-interactive → No.
+confirm_menu() {
+    local prompt="$1"
+    if [ ! -t 0 ] || [ ! -r /dev/tty ]; then
+        return 1
+    fi
+    menu_select "$prompt" "yes"$'\t'"Yes"$'\n'"no"$'\t'"No" || return 1
+    [ "$MENU_RESULT" = "yes" ]
+}
+
+# Runs "$@" (output discarded) with a spinner animation on the line below, so long
+# steps like xcodebuild show progress. Returns the command's exit code. On a
+# non-TTY it runs synchronously without animation.
+spin() {
+    if [ ! -t 1 ]; then
+        "$@" >/dev/null 2>&1
+        return $?
+    fi
+    "$@" >/dev/null 2>&1 &
+    local pid=$! i=0 idx
+    local frames='|/-\'
+    tput civis 2>/dev/null || true
+    while kill -0 "$pid" 2>/dev/null; do
+        idx=$((i % ${#frames}))
+        printf "\r    ${CYAN}%s${NC} working...  " "${frames:idx:1}"
+        i=$((i + 1))
+        sleep 0.2
+    done
+    local rc=0
+    wait "$pid" || rc=$?
+    printf "\r\033[K"
+    tput cnorm 2>/dev/null || true
+    return "$rc"
+}
+
+# Builds the VERA app for an iOS Simulator, installs and launches it. This is the
+# heavy path (a full xcodebuild) and is always optional. Any failure is non-fatal:
+# it warns and returns so the script still finishes cleanly.
+# $1 = simulator UDID (required; chosen by the caller).
+run_on_simulator() {
+    local udid="${1:-}"
+    if ! xcrun simctl help >/dev/null 2>&1; then
+        warn "Simulator tools (xcrun simctl) not available. Skipping."
+        return 0
+    fi
+    if [ -z "$udid" ]; then
+        warn "No iPhone simulator selected. Skipping run."
+        return 0
+    fi
+    ok "Simulator: $udid"
+
+    open -a Simulator >/dev/null 2>&1 || true
+
+    # If the simulator is already running, close the app first (cold start). Otherwise
+    # boot it. Either way we do NOT print "Booting..." for an already-running sim.
+    if xcrun simctl list devices booted 2>/dev/null | grep -q "$udid"; then
+        local app_bundle_id
+        app_bundle_id=$(grep -m1 -E 'bundleId:' VERAApp/Project.swift 2>/dev/null | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ -n "$app_bundle_id" ]; then
+            step "Simulator already running — closing the app..."
+            xcrun simctl terminate "$udid" "$app_bundle_id" >/dev/null 2>&1 || true
+        fi
+    else
+        step "Booting simulator..."
+        xcrun simctl boot "$udid" >/dev/null 2>&1 || true
+    fi
+
+    step "Building VERA for the simulator (this can take a few minutes)..."
+    local derived="$VERA_DIR/build/BuilderRun"
+    if spin xcodebuild build \
+        -workspace VERA.xcworkspace \
+        -scheme VERA \
+        -configuration Debug \
+        -destination "id=$udid" \
+        -derivedDataPath "$derived" \
+        CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO; then
+        ok "Build succeeded"
+    else
+        warn "Build failed. Open VERA.xcworkspace and run from Xcode to see the error."
+        return 0
+    fi
+
+    local app_path
+    app_path=$(find "$derived/Build/Products/Debug-iphonesimulator" -maxdepth 1 -name "*.app" 2>/dev/null | head -1)
+    if [ -z "$app_path" ]; then
+        warn "Could not locate the built .app. Run from Xcode instead."
+        return 0
+    fi
+
+    local bundle_id
+    bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$app_path/Info.plist" 2>/dev/null || echo "")
+    if [ -z "$bundle_id" ]; then
+        warn "Could not read the app bundle id. Run from Xcode instead."
+        return 0
+    fi
+
+    step "Installing and launching $bundle_id..."
+    if xcrun simctl install "$udid" "$app_path" >/dev/null 2>&1 &&
+        xcrun simctl launch "$udid" "$bundle_id" >/dev/null 2>&1; then
+        ok "App launched on the simulator"
+    else
+        warn "Install/launch failed. Run from Xcode instead."
+    fi
+}
+
+# Builds the VERA app for a connected physical device and installs/launches it via
+# devicectl. Requires valid code signing (team + provisioning); non-fatal on failure.
+# $1 = device UDID, $2 = device name (for display).
+run_on_device() {
+    local udid="$1" name="$2"
+    ok "Device: ${name:-unknown} ($udid)"
+
+    # Close the app on the device (if running) right after selecting it, for a cold
+    # start. Best-effort: find the app's process by its bundle path and terminate it.
+    step "Closing the app on the device (if running)..."
+    local proc_json="$VERA_DIR/build/.device-procs.json"
+    mkdir -p "$(dirname "$proc_json")"
+    if xcrun devicectl device info processes --device "$udid" --json-output "$proc_json" >/dev/null 2>&1; then
+        local pid
+        pid=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$proc_json'))
+except Exception:
+    sys.exit()
+for p in d.get('result', {}).get('runningProcesses', []):
+    path = (p.get('executable') or p.get('executablePath') or '') or ''
+    if '/VERA.app/' in path or path.endswith('/VERA'):
+        print(p.get('processIdentifier') or p.get('pid') or '')
+        break
+" 2>/dev/null)
+        if [ -n "$pid" ]; then
+            xcrun devicectl device process terminate --device "$udid" --pid "$pid" >/dev/null 2>&1 || true
+        fi
+    fi
+
+    step "Building VERA for the device (requires valid signing; this can take a few minutes)..."
+    local derived="$VERA_DIR/build/BuilderRunDevice"
+    if spin xcodebuild build \
+        -workspace VERA.xcworkspace \
+        -scheme VERA \
+        -configuration Debug \
+        -destination "id=$udid" \
+        -derivedDataPath "$derived" \
+        -allowProvisioningUpdates; then
+        ok "Build succeeded"
+    else
+        warn "Device build failed — usually code signing (team/provisioning)."
+        warn "Open VERA.xcworkspace, pick your team, and run on the device from Xcode."
+        return 0
+    fi
+
+    local app_path
+    app_path=$(find "$derived/Build/Products/Debug-iphoneos" -maxdepth 1 -name "*.app" 2>/dev/null | head -1)
+    if [ -z "$app_path" ]; then
+        warn "Could not locate the built .app. Run from Xcode instead."
+        return 0
+    fi
+
+    local bundle_id
+    bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$app_path/Info.plist" 2>/dev/null || echo "")
+
+    step "Installing and launching on ${name:-device}..."
+    # --terminate-existing kills any running instance first for a visible cold start.
+    if xcrun devicectl device install app --device "$udid" "$app_path" >/dev/null 2>&1 &&
+        [ -n "$bundle_id" ] &&
+        xcrun devicectl device process launch --terminate-existing --device "$udid" "$bundle_id" >/dev/null 2>&1; then
+        ok "App launched on ${name:-the device}"
+    else
+        warn "Install/launch on device failed. Run from Xcode instead."
+    fi
+}
+
+# Prints the Launch App header, detects connected physical devices, and asks where
+# to run. With a device connected: (s)imulator / (d)evice / (n)o. Otherwise a simple
+# simulator y/n.
+launch_on_simulator_flow() {
+    local sims
+    sims=$(list_available_simulators)
+    if [ -z "$sims" ]; then
+        warn "No iPhone simulators available. Skipping."
+        return 0
+    fi
+    if menu_select "Select a simulator" "$sims"; then
+        ok "Selected: $MENU_LABEL"
+        run_on_simulator "$MENU_RESULT"
+    fi
+}
+
+launch_on_device_flow() {
+    local devices
+    devices=$(list_connected_devices)
+    if [ -z "$devices" ]; then
+        warn "No connected devices found."
+        return 0
+    fi
+    if menu_select "Select a device" "$devices"; then
+        run_on_device "$MENU_RESULT" "$MENU_LABEL"
+    fi
+}
+
+# Prints the Launch App header, detects connected physical devices, and asks where
+# to run. With a device connected: (s)imulator / (d)evice / (n)o. Otherwise a simple
+# simulator y/n. Each path lists the targets and lets you arrow-select (or launches
+# directly when there is only one).
+offer_launch() {
+    launch_app_header
+
+    # Only offer to launch when running interactively (skip in CI / piped runs).
+    if [ ! -t 0 ] || [ ! -r /dev/tty ]; then
+        return 0
+    fi
+
+    # Top-level target menu: Simulator, Physical device (only if connected), or none.
+    local connected options
+    connected=$(list_connected_devices)
+    options="sim"$'\t'"iOS Simulator"
+    if [ -n "$connected" ]; then
+        options+=$'\n'"device"$'\t'"Physical device"
+    fi
+    options+=$'\n'"none"$'\t'"Don't launch"
+
+    menu_select "Where do you want to run the app?" "$options" || return 0
+    case "$MENU_RESULT" in
+        sim) launch_on_simulator_flow ;;
+        device) launch_on_device_flow ;;
+        *) : ;;
+    esac
+}
+
 print_banner
 
 # ============================================================================
@@ -268,6 +641,7 @@ if [ "$MODE" = "update" ]; then
     ok "app-config.json found"
 
     phase "Regenerate code from config and theme"
+    warn_unsaved_config
     run_config_codegen
     # A valid baseApiUrl in app-config.json is required and always overrides
     # EnvironmentConstants, so `--update` picks up URL changes too.
@@ -282,11 +656,11 @@ if [ "$MODE" = "update" ]; then
     echo -e "  (Clean Build Folder if you toggled a feature flag).${NC}"
     echo ""
 
-    read -p "  Open VERA.xcworkspace in Xcode now? (y/n): " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if confirm_menu "Open VERA.xcworkspace in Xcode now?"; then
         open_xcode
     fi
+
+    offer_launch
     echo ""
     exit 0
 fi
@@ -393,6 +767,7 @@ resolve_and_generate_env_constants
 # ----------------------------------------------------------------------------
 phase "Generate code from config and theme"
 # ----------------------------------------------------------------------------
+warn_unsaved_config
 step "generate-app-config.py → AppConfig.swift"
 if python3 Scripts/generate-app-config.py >/dev/null; then
     ok "AppConfig.swift generated"
@@ -422,6 +797,9 @@ run_spm_assets_codegen
 # ----------------------------------------------------------------------------
 print_done "Setup complete"
 
-# On first-time setup we open Xcode automatically.
-open_xcode
+if confirm_menu "Open VERA.xcworkspace in Xcode now?"; then
+    open_xcode
+fi
+
+offer_launch
 echo ""
