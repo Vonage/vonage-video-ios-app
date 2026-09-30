@@ -1,0 +1,58 @@
+VERA/Scripts/builder.sh
+  s_544dc80de7d67a::t_021ffe50445bef 295-296,298,323
+  s_544dc80de7d67a::t_3e48009af8e92f 561,564
+  s_544dc80de7d67a::t_bc5157b34a028a 121
+  s_544dc80de7d67a::t_97611ebc312511 115,117-118,123
+  s_544dc80de7d67a::t_fa6e2f4b01b865 384-385
+  s_544dc80de7d67a::t_67596552c9d518 803
+  s_544dc80de7d67a::t_0ce55ae362b5d2 380-382
+  s_544dc80de7d67a::t_bbfe33b90f0802 398-407
+  s_544dc80de7d67a::t_1c621ac2eff05d 107-114,120,131,133-134
+  s_544dc80de7d67a::t_54e8221b8d9f14 2-11
+  s_544dc80de7d67a::t_afa3ef1ba9b9e1 467,473-475
+  s_544dc80de7d67a::t_09a9aff1748a7f 439,441-442,498,500-502
+  s_544dc80de7d67a::t_1e7fa1f1889e17 659
+  s_544dc80de7d67a::t_b74a9c7d944149 510-533
+  s_544dc80de7d67a::t_2d64c7d09a7191 122,124-130
+  s_544dc80de7d67a::t_221999bafa0ced 644
+  s_544dc80de7d67a::t_c893032f5e370c 449-452,454-462
+  s_544dc80de7d67a::t_ecfdf0ce2f913c 662
+  s_544dc80de7d67a::t_7855ae2ac186a0 301-321
+  s_544dc80de7d67a::t_e878407a82e7e4 770
+  s_544dc80de7d67a::t_bd85d57ea1e7d8 804
+  s_544dc80de7d67a::t_c063f37f4f2e0d 536,542-544
+  s_544dc80de7d67a::t_40d7ef8af1641e 440,443,445-448,464-466,468-472,476-497,499
+  s_544dc80de7d67a::t_281ccf458cfd3b 408-432
+  s_544dc80de7d67a::t_ab8b0acaf11b76 574-602,610,615
+  s_544dc80de7d67a::t_913bd05cf449d3 453,463
+  s_544dc80de7d67a::t_0a36f46b29d7f3 116,119,132
+  s_544dc80de7d67a::t_e5293be7ba69a3 606-609,611-614,616,618-625
+  s_544dc80de7d67a::t_a18c25476b9a50 322,437
+  s_544dc80de7d67a::t_ebecf79af3f3a4 503-504,506,508-509,534-535,537-541,545-560,562-563,565-573,603-605,617,626-627
+  s_544dc80de7d67a::t_6c41747d0ec0f0 505,507
+  s_544dc80de7d67a::t_f4ab858eaf52b6 293-294,297,299-300,433-435
+  s_544dc80de7d67a::t_c244dc26264232 324-379,383,386-397,436,438,444
+  s_544dc80de7d67a::t_3b658943a2559c 663
+  s_544dc80de7d67a::t_2c8675d605f418 800-802
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c5cbcb670bf7acbe5890c5592a0611904a748a93",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
