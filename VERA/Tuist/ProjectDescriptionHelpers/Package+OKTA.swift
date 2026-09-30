@@ -3,7 +3,7 @@ import ProjectDescription
 extension Package {
     public static let oktaMobileSwift = Package.package(
         url: "https://github.com/okta/okta-mobile-swift.git",
-        .upToNextMajor(from: "2.1.5")
+        .upToNextMajor(from: DependencyVersions.oktaMobileSwift)
     )
 }
 
