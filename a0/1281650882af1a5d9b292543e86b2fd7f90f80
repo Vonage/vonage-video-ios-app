@@ -1,0 +1,32 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_544dc80de7d67a::t_abc5af328c2696 81-94
+  s_544dc80de7d67a::t_9a5b4bd0bd783f 71-80
+VERA/VERAMeetingRoom/VERAMeetingRoom/MeetingRoomConfiguration.swift
+  s_544dc80de7d67a::t_79a5427a778008 56
+  s_544dc80de7d67a::t_92a7d39b54f17a 34-36,44,49-50
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_544dc80de7d67a::t_ed96a06c60f4d0 459-461
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_544dc80de7d67a::t_c3b15964c6ff5f 360-361
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a01281650882af1a5d9b292543e86b2fd7f90f80",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
