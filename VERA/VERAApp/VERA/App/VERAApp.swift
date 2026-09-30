@@ -270,6 +270,18 @@ struct VERAApp: App {
             }
         #endif
 
+        // Audio-output route selector (system AVRoutePicker), shown next to Settings.
+        // Reuses the meeting room's picker; gated by the waiting-room device-selection flag.
+        if dependencyContainer.appConfig.waitingRoomSettings.allowDeviceSelection {
+            buttons.append(
+                ViewHolder(id: AudioRoutePickerView.viewID) {
+                    AudioRoutePickerView.button(
+                        iconColor: VERACommonUIAsset.SemanticColors.secondary.color
+                    )
+                }
+            )
+        }
+
         return buttons
     }
 
