@@ -95,6 +95,13 @@ struct VERAApp: App {
             }
             .environment(navigationCoordinator)
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
+            .onAppear {
+                #if AUTHENTICATION_ENABLED
+                    dependencyContainer.onUnauthorized = {
+                        navigationCoordinator.showSignIn = true
+                    }
+                #endif
+            }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }

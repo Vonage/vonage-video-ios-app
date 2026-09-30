@@ -224,7 +224,7 @@ private final class ArchivingDataSourceFactoryStub:
 private final class SessionRepositoryStub: SessionRepository {
     var currentCall: (any CallFacade)?
 
-    func createSession(_ credentials: RoomCredentials) async throws -> any CallFacade {
+    func createSession(for roomName: RoomName) async throws -> any CallFacade {
         fatalError("Not used")
     }
 

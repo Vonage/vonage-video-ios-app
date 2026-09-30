@@ -160,6 +160,14 @@ public final class MeetingRoomViewModel {
             await addObservers(call)
 
             updateExtraButtons()
+        } catch is UnauthorizedError {
+            await MainActor.run { [weak self] in
+                self?.meetingRoomNavigation.onBack()
+            }
+        } catch is AuthenticationError {
+            await MainActor.run { [weak self] in
+                self?.meetingRoomNavigation.onBack()
+            }
         } catch {
             await MainActor.run { [weak self] in
                 self?.meetingRoomNavigation.presentAlertError(with: error.localizedDescription, shouldBack: true)

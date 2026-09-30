@@ -88,6 +88,46 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func loadUINavigatesBackWithoutAlertWhenConnectThrowsUnauthorized() async throws {
+        try await assertLoadUINavigatesBackWithoutAlert(on: UnauthorizedError())
+    }
+
+    @Test
+    @MainActor
+    func loadUINavigatesBackWithoutAlertWhenConnectThrowsAuthenticationError() async throws {
+        try await assertLoadUINavigatesBackWithoutAlert(on: AuthenticationError())
+    }
+
+    @MainActor
+    private func assertLoadUINavigatesBackWithoutAlert(on error: Swift.Error) async throws {
+        let roomName = "heart-of-gold"
+        var didNavigateBack = false
+        var didPresentAlert = false
+        let sut = makeSUT(
+            roomName: roomName,
+            connectToRoomUseCase: makeThrowingConnectToRoomUseCase(error: error),
+            actionHandler: { action in
+                switch action {
+                case .navigateToWaitingRoom(let name) where name == roomName:
+                    didNavigateBack = true
+                case .presentAlert:
+                    didPresentAlert = true
+                default:
+                    break
+                }
+            }
+        )
+
+        await sut.loadUI()
+
+        #expect(sut.currentCall == nil)
+        // The auth catch branches navigate back and must not surface an error alert.
+        #expect(didNavigateBack)
+        #expect(!didPresentAlert)
+    }
+
+    @Test
+    @MainActor
     func callingLoadUICanFailAndShouldNavigateBackAfterConfirmation() async throws {
         let connectToRoomUseCase = makeFailingMockConnectToRoomUseCase()
         var alertErrorTriggered = false
@@ -414,8 +454,7 @@ struct MeetingRoomViewModelTests {
     func endCall_invokesDisconnectUseCase() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
-            sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
+            sessionRepository: sessionRepository)
         let disconnectRoomUseCase = makeMockDisconnectRoomUseCase()
 
         let sut = makeSUT(
@@ -443,8 +482,7 @@ struct MeetingRoomViewModelTests {
     func endCallShowsErrorIfDisconnectCallFails() async throws {
         let sessionRepository = makeMockSessionRepository()
         let connectToRoomUseCase = DefaultConnectToRoomUseCase(
-            sessionRepository: sessionRepository,
-            roomCredentialsRepository: makeMockRoomCredentialsRepository(), sessionKeyWriter: DefaultSessionKeyHolder())
+            sessionRepository: sessionRepository)
         let disconnectRoomUseCase = makeFailingMockDisconnectRoomUseCase(
             sessionRepository: sessionRepository,
             publisherRepository: makeMockVERAPublisherRepository())

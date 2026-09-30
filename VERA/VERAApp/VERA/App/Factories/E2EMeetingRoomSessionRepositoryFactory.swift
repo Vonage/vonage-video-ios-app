@@ -11,6 +11,8 @@ struct E2EMeetingRoomSessionRepositoryFactory: MeetingRoomSessionRepositoryFacto
         _ context: MeetingRoomSessionRepositoryFactoryContext
     ) -> any SessionRepository {
         E2ESessionRepository(
+            roomCredentialsRepository: context.roomCredentialsRepository,
+            sessionKeyWriter: context.sessionKeyWriter,
             publisherSettings: context.publisherSettings,
             plugins: context.pluginRegistry.plugins)
     }
