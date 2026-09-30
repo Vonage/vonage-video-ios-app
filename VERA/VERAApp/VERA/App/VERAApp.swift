@@ -357,7 +357,8 @@ struct VERAApp: App {
                 allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
                 allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
                 showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList,
-                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture
+                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture,
+                allowDeviceSelection: dependencyContainer.appConfig.meetingRoomSettings.allowDeviceSelection
             )
         )
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
