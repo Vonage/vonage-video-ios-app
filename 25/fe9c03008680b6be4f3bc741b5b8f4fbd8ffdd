@@ -1,0 +1,38 @@
+VERA/VERACommonUI/VERACommonUITests/AudioRoutePickerViewTests.swift
+  s_544dc80de7d67a::t_b4753dc2f5442e 1-102
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/ViewGenerator+AVRoutePicker.swift
+  s_544dc80de7d67a::t_a5a54477fa45ee 13,15
+  s_544dc80de7d67a::t_6dc29535aac9cb 7
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_544dc80de7d67a::t_10b103bfeee0fa 277
+  s_544dc80de7d67a::t_3f3920c9534777 278,280
+  s_544dc80de7d67a::t_f54759ec207549 273-276,281-284
+  s_544dc80de7d67a::t_596fcc1f990893 279
+VERA/VERACommonUI/VERACommonUI/UI/AudioRoutePickerView.swift
+  s_544dc80de7d67a::t_b4998563859946 17,19-24,39
+  s_544dc80de7d67a::t_9cc3135da7d071 1-16,18,25-38,40-56,72
+  s_544dc80de7d67a::t_7e86284d8f12d4 59-62
+  s_544dc80de7d67a::t_0cbae778040c7b 57-58,63-66,69-71
+  s_544dc80de7d67a::t_d191796f00780b 67-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "25fe9c03008680b6be4f3bc741b5b8f4fbd8ffdd",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
