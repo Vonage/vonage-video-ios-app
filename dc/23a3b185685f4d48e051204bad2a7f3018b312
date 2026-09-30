@@ -1,0 +1,61 @@
+VERA/Tuist/ProjectDescriptionHelpers/TestSchemes.swift
+  s_544dc80de7d67a::t_1d2affe8af5924 124
+  s_544dc80de7d67a::t_96bfddb1e18af2 58
+  s_544dc80de7d67a::t_42eac89c5b3687 86
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomView.swift"
+  s_544dc80de7d67a::t_c5d614f35b4a9b 69-71
+  s_544dc80de7d67a::t_9dd59311f3580f 18-20,32-34,45-47
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelFlagTests.swift"
+  s_544dc80de7d67a::t_bf4188a40fbd1b 1-81,88-89,91-92,94-95,98-99,101-102,104-105
+  s_544dc80de7d67a::t_c6c2bdd9e80993 82-87,90,93,96-97,100,103
+VERA/Project.swift
+  s_544dc80de7d67a::t_31f902840c035a 172
+  s_544dc80de7d67a::t_170decbb004a51 26-38,124,135
+  s_544dc80de7d67a::t_ad291f7bd4aa41 123
+  s_544dc80de7d67a::t_da1ce699d4a5b6 53
+  s_544dc80de7d67a::t_a825f37822d597 223
+  s_544dc80de7d67a::t_62962e8f0fbea8 103
+  s_544dc80de7d67a::t_6650e2684d056c 128-134
+  s_544dc80de7d67a::t_13e3d19c02e5ac 189
+  s_544dc80de7d67a::t_e3f828889fa8df 206
+  s_544dc80de7d67a::t_1508d8fd42b6c4 395
+  s_544dc80de7d67a::t_6bbb784d2acec2 240
+  s_544dc80de7d67a::t_efc3fd9bf45d9a 120
+  s_544dc80de7d67a::t_9b38bbb1ac449d 86
+  s_544dc80de7d67a::t_89bab38b8b4c67 317
+  s_544dc80de7d67a::t_a1c0640aa25870 70
+  s_544dc80de7d67a::t_916615e2f524a8 136-141,154-155
+  s_544dc80de7d67a::t_c9a56ddadd95fc 125-127
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_544dc80de7d67a::t_a4e596721a705e 267-270
+  s_544dc80de7d67a::t_4b0940035924fb 282-284,286,288-294,299-303,305-309
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/Mocks/WaitingRoomMockData.swift"
+  s_544dc80de7d67a::t_10e8de84e0c2c1 18-21,31-33
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomStateTests.swift"
+  s_544dc80de7d67a::t_924a19c8f5f47d 174-350
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_544dc80de7d67a::t_aa576dc3f59278 204-206
+  s_544dc80de7d67a::t_de12032c0f636e 287-289
+  s_544dc80de7d67a::t_e5131670258b5c 247-248
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dc23a3b185685f4d48e051204bad2a7f3018b312",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
