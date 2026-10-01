@@ -37,26 +37,41 @@ Use this the first time, after extracting the Starter Kit ZIP. It runs, in phase
 1. **Check prerequisites** — Xcode, Homebrew, Python 3, Tuist.
 2. **Validate configuration** — `Config/app-config.json` and `Config/theme.json` must exist. If an `app-config.json`/`theme.json` is present at the repository root, it is moved into `Config/` (overriding the default) first.
 3. **Resolve base URL & environment constants** — reads a **valid** `baseApiUrl` from `app-config.json` (required; the build errors out if it is missing or not a valid `http`/`https` URL) and injects it into `EnvironmentConstants.swift`.
-4. **Generate code from config and theme**:
+4. **Generate code from config and theme** (preceded by a [save reminder](#before-codegen-save-your-config-edits)):
    - `generate-app-config.py` → `VERAConfiguration/VERAConfiguration/AppConfig.swift`
    - `generateEnvironmentConstants.sh` → `VERAApp/VERA/App/Generated/EnvironmentConstants.swift`
    - `generate-app-theme.py` → `VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets` (+ `BorderRadius.swift`, `TypographyStyle.swift`)
 5. **Generate workspace** — `tuist generate`.
 6. **Generate SPM asset accessors** — `generate-spm-assets.py` → `VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift`, derived from the Tuist-generated `Derived/Sources/TuistAssets+VERACommonUI.swift` (must run after `tuist generate`). Keeps the SPM build in sync with the asset catalog.
-7. **Open Xcode** automatically.
+7. **Open Xcode** — asks before opening the workspace.
+8. **Launch the app** — optionally [builds and runs](#launching-the-app) on a simulator or connected device.
 
 ### `./Scripts/builder.sh --update` — fast path
 
 Use this after editing `Config/app-config.json` or `Config/theme.json`. It:
 
 1. Validates `app-config.json` (applying any root-level override first).
-2. Regenerates the JSON-driven files (`AppConfig.swift` + theme assets).
+2. Shows a [save reminder](#before-codegen-save-your-config-edits), then regenerates the JSON-driven files (`AppConfig.swift` + theme assets).
 3. Resolves the base URL from `app-config.json` and regenerates `EnvironmentConstants.swift`, so URL changes are picked up too.
 4. Runs `tuist generate --no-open`.
 5. Regenerates `SPMAssets+VERACommonUI.swift` from the Tuist assets.
-6. Asks whether to open Xcode.
+6. Asks whether to open Xcode, then optionally [launches the app](#launching-the-app).
 
 It **skips** only the prerequisite checks (those matter just for first-time setup).
+
+## Before codegen: save your config edits
+
+Code generation reads `Config/app-config.json` and `Config/theme.json` **from disk**. Edits still unsaved in your editor are invisible to the script and won't be picked up, and that can't be detected from a shell. So right before generating, `builder.sh` prints a reminder to save. When run interactively it pauses with a short countdown (press Enter to continue, Ctrl-C to abort); in non-interactive runs (CI / piped) it just prints the reminder and continues.
+
+## Launching the app
+
+After the workspace is generated (and the optional Xcode-open prompt), `builder.sh` offers to build and run the app — only when running interactively. You pick, via arrow-key menus:
+
+- **Simulator** — lists booted/available simulators (selected directly if there's only one).
+- **Device** — lists connected physical devices (requires valid signing: `DEVELOPMENT_TEAM` + provisioning).
+- **Don't launch** — skip.
+
+During the build a spinner shows progress, and any already-running instance of the app is terminated before the new build is installed and relaunched. On a non-TTY run the launch step is skipped entirely.
 
 ## Important: `tuist generate` alone does NOT regenerate code
 
