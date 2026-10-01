@@ -184,20 +184,22 @@ run_config_codegen() {
 # helper resolves the URL and regenerates that file so both first-time setup and
 # the --update fast path stay in sync.
 #
-# Requirement: when using builder.sh, a VALID baseApiUrl MUST be present in
+# Requirement: when using builder.sh, a VALID baseApiUrl MUST resolve from
 # app-config.json. It is the single source for the API base URL and always
-# overrides EnvironmentConstants. If it is missing or invalid, the build stops
-# with an error (there is no environment-variable fallback here — the VERA CI
-# path calls generateEnvironmentConstants.sh directly with its own BASE_API_URL).
+# overrides EnvironmentConstants. The value supports ${VAR} placeholders, which
+# are expanded from the environment (e.g. "${BASE_API_URL}" picks up an exported
+# BASE_API_URL). If the resolved value is missing or invalid, the build stops
+# with an error.
 #
 # "Valid" means a non-empty absolute URL with an http/https scheme and a host.
 resolve_and_generate_env_constants() {
     local json_base_url
     json_base_url=$(python3 -c "
-import json
+import json, os
 from urllib.parse import urlparse
 try:
     val = (json.load(open('Config/app-config.json')).get('baseApiUrl', '') or '').strip()
+    val = os.path.expandvars(val)
     parsed = urlparse(val)
     print(val if parsed.scheme in ('http', 'https') and parsed.netloc else '')
 except Exception:

@@ -5,7 +5,7 @@
     "created": "2026-09-07",
     "description": "Default Vonage Video app configuration."
   },
-  "baseApiUrl": "",
+  "baseApiUrl": "${BASE_API_URL}",
   "videoSettings": {
     "allowBackgroundEffects": true,
     "allowCameraControl": true,
