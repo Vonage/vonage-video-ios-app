@@ -4,37 +4,43 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 /// Shows a floating stats overlay when the user has enabled the overlay toggle.
 ///
 /// Observes ``PublisherSettingsRepository/preferencesPublisher`` to toggle visibility,
 /// and ``StatsDataSource/statsPublisher`` to display real-time network metrics.
-public final class StatsOverlayViewModel: ObservableObject {
+@Observable
+public final class StatsOverlayViewModel {
 
-    // MARK: - Published state
+    // MARK: - Observable state
 
     /// Controls whether the stats overlay is currently visible.
-    @Published public var isActive: Bool = false
+    public var isActive: Bool = false
 
     /// The formatted text to display in the stats overlay.
     /// Contains real-time network statistics formatted for display.
-    @Published public var statsText: String = ""
+    public var statsText: String = ""
 
     // MARK: - Properties
 
     /// Repository providing settings preferences including the overlay toggle.
+    @ObservationIgnored
     private let settingsRepository: PublisherSettingsRepository
 
     /// Data source providing real-time network statistics.
+    @ObservationIgnored
     private let statsDataSource: StatsDataSource
 
     /// Minimum time interval between stats UI updates in seconds.
     /// - `0`: No throttling (immediate updates)
     /// - `> 0`: Updates limited to once per interval
+    @ObservationIgnored
     private let statsUpdateInterval: TimeInterval
 
     /// Set of Combine subscriptions managed by this view model.
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
     /// Latest max audio bitrate cached from the preferences stream.
@@ -43,6 +49,7 @@ public final class StatsOverlayViewModel: ObservableObject {
     /// the settings repository actor. That async hop was the source of a race
     /// where two in-flight stats updates could complete out of order and let
     /// an older snapshot overwrite a newer one.
+    @ObservationIgnored
     private var maxAudioBitrate: Int32?
 
     // MARK: - Init

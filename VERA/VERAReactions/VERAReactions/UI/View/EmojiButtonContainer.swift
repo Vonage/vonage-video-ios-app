@@ -28,7 +28,7 @@ public struct EmojiButtonContainer: View {
     // MARK: - Properties
 
     /// The ViewModel managing the button and picker state.
-    @ObservedObject private var viewModel: EmojiButtonContainerViewModel
+    private var viewModel: EmojiButtonContainerViewModel
 
     // MARK: - Initialization
 

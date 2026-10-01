@@ -13,15 +13,12 @@ struct ConnectToRoomUseCaseTests {
 
     @Test
     func connectToRoomUseCaseCreatesAndCallsToConnect() async throws {
-        let roomCredentialsRepository = makeMockRoomCredentialsRepository()
         let sessionRepository = makeMockSessionRepository()
 
         let mockCall = MockCall()
         sessionRepository.currentCall = mockCall
 
-        let sut = makeSUT(
-            roomCredentialsRepository: roomCredentialsRepository,
-            sessionRepository: sessionRepository)
+        let sut = makeSUT(sessionRepository: sessionRepository)
 
         _ = try await sut(roomName: "heart-of-gold")
 
@@ -30,35 +27,15 @@ struct ConnectToRoomUseCaseTests {
     }
 
     @Test
-    func sessionKeyIsSetAfterSuccessfulConnection() async throws {
-        let sessionKeyHolder = DefaultSessionKeyHolder()
-        let sessionRepository = makeMockSessionRepository()
-        sessionRepository.currentCall = MockCall()
-
-        let sut = makeSUT(
-            sessionRepository: sessionRepository,
-            sessionKeyWriter: sessionKeyHolder)
-
-        _ = try await sut(roomName: "heart-of-gold")
-
-        #expect(sessionKeyHolder.sessionKey == "aSessionKey")
-    }
-
-    @Test
-    func sessionKeyIsNotSetWhenCreateSessionFails() async throws {
-        let sessionKeyHolder = DefaultSessionKeyHolder()
+    func propagatesCreateSessionError() async throws {
         let sessionRepository = makeMockSessionRepository()
         sessionRepository.createSessionError = MockError.sessionCreationFailed
 
-        let sut = makeSUT(
-            sessionRepository: sessionRepository,
-            sessionKeyWriter: sessionKeyHolder)
+        let sut = makeSUT(sessionRepository: sessionRepository)
 
         await #expect(throws: MockError.self) {
             try await sut(roomName: "heart-of-gold")
         }
-
-        #expect(sessionKeyHolder.sessionKey == "")
     }
 
     // MARK: - Test Helpers
@@ -68,13 +45,8 @@ struct ConnectToRoomUseCaseTests {
     }
 
     private func makeSUT(
-        roomCredentialsRepository: RoomCredentialsRepository = makeMockRoomCredentialsRepository(),
-        sessionRepository: SessionRepository = makeMockSessionRepository(),
-        sessionKeyWriter: SessionKeyWriter = DefaultSessionKeyHolder()
+        sessionRepository: SessionRepository = makeMockSessionRepository()
     ) -> ConnectToRoomUseCase {
-        return DefaultConnectToRoomUseCase(
-            sessionRepository: sessionRepository,
-            roomCredentialsRepository: roomCredentialsRepository,
-            sessionKeyWriter: sessionKeyWriter)
+        DefaultConnectToRoomUseCase(sessionRepository: sessionRepository)
     }
 }

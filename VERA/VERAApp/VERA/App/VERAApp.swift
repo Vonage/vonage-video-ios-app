@@ -39,10 +39,10 @@ import VERAVonage
 
 @main
 struct VERAApp: App {
-    @StateObject var navigationCoordinator = NavigationCoordinator()
+    @State var navigationCoordinator = NavigationCoordinator()
 
     #if DEBUG
-        @StateObject private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
+        @State private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
         @State private var isMeetingRoomCustomizationMenuPresented = false
     #endif
 
@@ -93,8 +93,15 @@ struct VERAApp: App {
                         .alert(item: $navigationCoordinator.alertItem) { $0.view }
                 }
             }
-            .environmentObject(navigationCoordinator)
+            .environment(navigationCoordinator)
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
+            .onAppear {
+                #if AUTHENTICATION_ENABLED
+                    dependencyContainer.onUnauthorized = {
+                        navigationCoordinator.showSignIn = true
+                    }
+                #endif
+            }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }

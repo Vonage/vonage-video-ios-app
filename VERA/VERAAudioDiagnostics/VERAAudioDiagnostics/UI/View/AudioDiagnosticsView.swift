@@ -15,7 +15,7 @@
     /// Matches the style of other bottom sheets like VideoEffectsSheet.
     public struct AudioDiagnosticsView: View {
 
-        @ObservedObject var viewModel: AudioOutputControlViewModel
+        var viewModel: AudioOutputControlViewModel
 
         public init(viewModel: AudioOutputControlViewModel) {
             self.viewModel = viewModel

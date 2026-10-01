@@ -4,23 +4,31 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 @MainActor
-public final class NavBarAuthButtonViewModel: ObservableObject {
+@Observable
+public final class NavBarAuthButtonViewModel {
 
-    @Published public private(set) var authState: AuthState = .notAuthenticated
+    public private(set) var authState: AuthState = .notAuthenticated
 
     /// Controls presentation of the account menu sheet.
-    @Published public var showAccountMenu = false
+    public var showAccountMenu = false
 
     /// Whether a sign-out is in progress (disables the sign-out button).
-    @Published public private(set) var isLoggingOut = false
+    public private(set) var isLoggingOut = false
 
+    @ObservationIgnored
     public var onLoginTapped: () -> Void
+    @ObservationIgnored
     public var onLogoutTapped: () async -> Void
 
+    @ObservationIgnored
     private let authStateDataSource: AuthStateDataSource
+
+    @ObservationIgnored
+    private var cancellables = Set<AnyCancellable>()
 
     public init(
         authStateDataSource: AuthStateDataSource,
@@ -37,7 +45,10 @@ public final class NavBarAuthButtonViewModel: ObservableObject {
     public func startObserving() {
         authStateDataSource.authStatePublisher
             .receive(on: DispatchQueue.main)
-            .assign(to: &$authState)
+            .sink { [weak self] state in
+                self?.authState = state
+            }
+            .store(in: &cancellables)
     }
 
     /// Handles a tap on the nav-bar auth button: signed-out users are sent to login,

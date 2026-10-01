@@ -37,7 +37,7 @@ enum MeetingRoomComposedConstants {
 struct MeetingRoomComposedView: View {
 
     let meetingRoomFactory: MeetingRoomFactory
-    @ObservedObject var viewModel: MeetingRoomViewModel
+    var viewModel: MeetingRoomViewModel
     let uiProvider: any MeetingRoomUIProvider
 
     let container: MeetingRoomSDKContainer

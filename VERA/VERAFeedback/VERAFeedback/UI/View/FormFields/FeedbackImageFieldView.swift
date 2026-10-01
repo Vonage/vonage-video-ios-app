@@ -14,7 +14,7 @@ struct FeedbackImageFieldView: View {
         static let previewCornerRadius: CGFloat = 8
     }
 
-    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
+    var feedbackFieldViewModel: FeedbackFieldViewModel
     let showValidationErrors: Bool
     var onImagePicked: (() -> Void)? = nil
     @State private var isPhotoLibraryPresented = false
