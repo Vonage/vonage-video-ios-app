@@ -16,7 +16,7 @@ struct ChatBadgeButtonViewModelTests {
         let repository = SpyChatMessagesRepository()
         let sut = ChatBadgeButtonViewModel(chatMessagesObserver: repository)
 
-        let count = await sut.$unreadMessagesCount.values.first { _ in true }
+        let count = await sut.unreadMessagesCount
 
         #expect(count == 0)
     }
@@ -25,12 +25,9 @@ struct ChatBadgeButtonViewModelTests {
         let repository = SpyChatMessagesRepository()
         let sut = ChatBadgeButtonViewModel(chatMessagesObserver: repository)
 
-        // Wait for Combine subscription to be established
-        _ = await sut.$unreadMessagesCount.values.first { _ in true }
-
         repository.addMessage(makeMessage("Hello"))
 
-        let count = await sut.$unreadMessagesCount.values.first { $0 > 0 }
+        let count = await waitFor(sut) { $0 > 0 }
 
         #expect(count == 1)
     }
@@ -43,10 +40,7 @@ struct ChatBadgeButtonViewModelTests {
         repository.addMessage(makeMessage("World"))
         repository.addMessage(makeMessage("Test"))
 
-        // Give time for the publisher to process on main queue
-        try? await Task.sleep(nanoseconds: 100_000_000)
-
-        let count = await MainActor.run { sut.unreadMessagesCount }
+        let count = await waitFor(sut) { $0 == 3 }
 
         #expect(count == 3)
     }
@@ -58,13 +52,13 @@ struct ChatBadgeButtonViewModelTests {
         repository.addMessage(makeMessage("Hello"))
         repository.addMessage(makeMessage("World"))
 
-        _ = await sut.$unreadMessagesCount.values.first { $0 == 2 }
+        _ = await waitFor(sut) { $0 == 2 }
 
         await MainActor.run {
             sut.chatDidOpen()
         }
 
-        let count = await sut.$unreadMessagesCount.values.first { _ in true }
+        let count = await waitFor(sut) { $0 == 0 }
 
         #expect(count == 0)
     }
@@ -93,13 +87,13 @@ struct ChatBadgeButtonViewModelTests {
 
         repository.addMessage(makeMessage("Hello"))
 
-        _ = await sut.$unreadMessagesCount.values.first { $0 == 1 }
+        _ = await waitFor(sut) { $0 == 1 }
 
         await MainActor.run {
             sut.chatDidOpen()
         }
 
-        _ = await sut.$unreadMessagesCount.values.first { $0 == 0 }
+        _ = await waitFor(sut) { $0 == 0 }
 
         await MainActor.run {
             sut.chatDidClose()
@@ -107,7 +101,7 @@ struct ChatBadgeButtonViewModelTests {
 
         repository.addMessage(makeMessage("New message"))
 
-        let count = await sut.$unreadMessagesCount.values.first { $0 > 0 }
+        let count = await waitFor(sut) { $0 > 0 }
 
         #expect(count == 1)
     }
@@ -117,7 +111,7 @@ struct ChatBadgeButtonViewModelTests {
         let sut = ChatBadgeButtonViewModel(chatMessagesObserver: repository)
 
         repository.addMessage(makeMessage("Hello"))
-        _ = await sut.$unreadMessagesCount.values.first { $0 == 1 }
+        _ = await waitFor(sut) { $0 == 1 }
 
         await MainActor.run {
             #expect(sut.id == "chat-button")
@@ -131,7 +125,7 @@ struct ChatBadgeButtonViewModelTests {
             sut.performAction()
         }
 
-        let count = await sut.$unreadMessagesCount.values.first { _ in true }
+        let count = await waitFor(sut) { $0 == 0 }
 
         #expect(count == 0)
     }
@@ -147,6 +141,23 @@ struct ChatBadgeButtonViewModelTests {
     }
 
     // MARK: Helpers
+
+    /// Polls `unreadMessagesCount` on the main actor until `predicate` holds or the timeout elapses.
+    /// Replaces the old `@Published.values` async sequence after the `@Observable` migration.
+    @discardableResult
+    private func waitFor(
+        _ sut: ChatBadgeButtonViewModel,
+        timeout: Duration = .seconds(2),
+        predicate: @escaping (Int) -> Bool
+    ) async -> Int {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            let count = await MainActor.run { sut.unreadMessagesCount }
+            if predicate(count) { return count }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return await MainActor.run { sut.unreadMessagesCount }
+    }
 
     private func makeMessage(_ text: String) -> ChatMessage {
         ChatMessage(

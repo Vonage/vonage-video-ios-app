@@ -4,18 +4,27 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
-public final class ArchiveButtonViewModel: ObservableObject {
+@Observable
+public final class ArchiveButtonViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: ArchivingState = .idle
+    public var state: ArchivingState = .idle
 
+    @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
+    @ObservationIgnored
     private let startArchivingUseCase: StartArchivingUseCase
+    @ObservationIgnored
     private let stopArchivingUseCase: StopArchivingUseCase
+    @ObservationIgnored
     private let archivingStatusDataSource: ArchivingStatusDataSource
+    @ObservationIgnored
     private let showAlert: (AlertItem) -> Void
+    @ObservationIgnored
     private var initiated = false
 
     public init(

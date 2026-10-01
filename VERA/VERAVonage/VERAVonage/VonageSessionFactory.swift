@@ -60,7 +60,7 @@ public final class VonageSessionFactory: SessionFactory {
             throw Error.failedSessionInitialization
         }
 
-        let session = VonageSession(session: unwrappedSession)
+        let session = VonageSession(session: unwrappedSession, credentials: sessionCredentials)
         unwrappedSession.delegate = session
         return session
     }

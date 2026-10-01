@@ -18,6 +18,7 @@ public struct DefaultBrowserSignInProvider: BrowserSignInProvider {
                 return nil
             }
             let credential = try Credential.store(token)
+            Credential.default = credential
             return makeResult(from: credential)
         #else
             return nil

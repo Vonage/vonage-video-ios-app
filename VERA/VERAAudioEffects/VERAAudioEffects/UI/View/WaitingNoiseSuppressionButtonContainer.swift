@@ -7,7 +7,7 @@ import VERACommonUI
 
 public struct WaitingNoiseSuppressionButtonContainer: View {
 
-    @ObservedObject var viewModel: WaitingNoiseSuppressionViewModel
+    var viewModel: WaitingNoiseSuppressionViewModel
 
     public init(viewModel: WaitingNoiseSuppressionViewModel) {
         self.viewModel = viewModel

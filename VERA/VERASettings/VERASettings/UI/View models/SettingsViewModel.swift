@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import os.log
 
 /// Constants used throughout the settings system.
@@ -22,17 +23,20 @@ public enum AudioSettingsConstants {
 /// debounce to batch rapid changes (e.g. slider drags). Downstream consumers
 /// react immediately via ``PublisherSettingsRepository/preferencesPublisher``.
 ///
-public final class SettingsViewModel: ObservableObject {
+@Observable
+public final class SettingsViewModel {
 
-    // MARK: - Published state
+    // MARK: - Observable state
 
     /// Controls whether the settings view is currently presented.
     /// Set to `false` to dismiss the settings sheet.
-    @Published public var isPresented: Bool = true
+    public var isPresented: Bool = true
 
     /// The current publisher settings preferences being edited.
     /// Changes are auto-persisted after a short debounce.
-    @Published public var settingsPreference: PublisherSettingsPreferences
+    public var settingsPreference: PublisherSettingsPreferences {
+        didSet { settingsPreferenceSubject.send(settingsPreference) }
+    }
 
     /// The current codec mode preference (auto or manual).
     public var codecMode: SettingsCodecMode {
@@ -106,26 +110,38 @@ public final class SettingsViewModel: ObservableObject {
     // MARK: - Dependencies
 
     /// The repository responsible for persisting and retrieving publisher settings.
+    @ObservationIgnored
     private let repository: PublisherSettingsRepository
 
+    /// Emits on every `settingsPreference` mutation to drive the debounced auto-save.
+    /// Replaces the former `@Published` projected publisher used by the Combine pipeline.
+    @ObservationIgnored
+    private let settingsPreferenceSubject = PassthroughSubject<PublisherSettingsPreferences, Never>()
+
     /// Cancellable for the auto-save subscription.
+    @ObservationIgnored
     private var autoSaveCancellable: AnyCancellable?
 
     /// In-flight auto-save task. Cancelled before each new save to
     /// prevent overlapping writes that could overwrite newer data.
+    @ObservationIgnored
     private var autoSaveTask: Task<Void, Never>?
 
     /// Debounce interval for auto-save (seconds).
+    @ObservationIgnored
     private let autoSaveDebounce: TimeInterval
 
     /// Tracks whether the view model has been initialized.
+    @ObservationIgnored
     private var isInitialized: Bool = false
 
     /// Logger for error reporting.
+    @ObservationIgnored
     private let logger = Logger(subsystem: "com.vonage.VERA", category: "SettingsViewModel")
 
     /// Called after each persistence attempt (success or failure).
     /// Used by tests to synchronise with the auto-save pipeline.
+    @ObservationIgnored
     var onDidSave: (@Sendable () -> Void)?
 
     // MARK: - Init
@@ -212,13 +228,13 @@ public final class SettingsViewModel: ObservableObject {
 
     /// Sets up a Combine pipeline that auto-saves preferences after a debounce.
     ///
-    /// `dropFirst()` avoids re-saving the value just loaded from the repository.
     /// `removeDuplicates()` prevents unnecessary writes when the value hasn't changed.
     /// `debounce` batches rapid changes (e.g. slider drags) to avoid excessive writes.
+    /// The subject only emits on `settingsPreference` mutations that occur after this
+    /// subscription is created, so the value loaded during `setup()` is never re-saved.
     private func startAutoSave() {
         autoSaveCancellable =
-            $settingsPreference
-            .dropFirst()
+            settingsPreferenceSubject
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
             .sink { [weak self] _ in

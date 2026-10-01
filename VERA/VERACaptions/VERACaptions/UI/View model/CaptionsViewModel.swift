@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 /// Default values shared between ``CaptionsViewModel`` and its consumers.
@@ -35,19 +36,23 @@ public enum CaptionsConstants {
 /// ```
 ///
 /// - SeeAlso: ``CaptionsViewContainer``, ``CaptionsView``, ``CaptionsFactory``
-public final class CaptionsViewModel: ObservableObject {
+@Observable
+public final class CaptionsViewModel {
 
     /// The display-ready caption items currently visible in the overlay.
     ///
     /// Updated on the main queue every time the ``CaptionsObserver`` emits
     /// new data. At most ``maxVisibleCaptions`` items are kept.
-    @Published public var captions: [UICaptionItem] = []
+    public var captions: [UICaptionItem] = []
 
     /// Maximum number of captions to display simultaneously.
+    @ObservationIgnored
     private let maxVisibleCaptions: Int
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
     /// The observer that emits raw ``CaptionItem`` arrays from the repository.
+    @ObservationIgnored
     private let captionsObserver: CaptionsObserver
 
     /// Creates a view model backed by the given captions observer.

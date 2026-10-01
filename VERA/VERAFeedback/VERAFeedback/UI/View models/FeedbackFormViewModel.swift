@@ -2,8 +2,8 @@
 //  Created by Vonage on 10/06/2026.
 //
 
-import Combine
 import Foundation
+import Observation
 import VERADomain
 
 enum FeedbackFormConstants {
@@ -12,7 +12,8 @@ enum FeedbackFormConstants {
 }
 
 @MainActor
-class FeedbackFormViewModel: ObservableObject {
+@Observable
+class FeedbackFormViewModel {
 
     static let titleKey = String(localized: "Title")
     static let titleFieldText = String(localized: "When you noticed this issue, what were you trying to do?")
@@ -29,11 +30,11 @@ class FeedbackFormViewModel: ObservableObject {
     static let formTitle = String(localized: "Report issue")
 
     let title = formTitle
-    @Published var isLoading = false
-    @Published var toast: ToastItem?
-    @Published var feedbackResult: FeedbackReportResult?
-    @Published var showValidationErrors = false
-    @Published var feedbackFields = [
+    var isLoading = false
+    var toast: ToastItem?
+    var feedbackResult: FeedbackReportResult?
+    var showValidationErrors = false
+    var feedbackFields = [
         FeedbackFieldViewModel(
             maxChars: FeedbackFormConstants.maxStandardFieldChars,
             title: titleFieldText,
@@ -68,7 +69,9 @@ class FeedbackFormViewModel: ObservableObject {
         ),
     ]
 
+    @ObservationIgnored
     private let feedbackReportUseCase: FeedbackReportUseCase
+    @ObservationIgnored
     private let sessionDebugInfoProvider: () -> FeedbackSessionDebugInfo
 
     init(

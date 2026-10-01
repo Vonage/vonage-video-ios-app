@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Observation
 import SwiftUI
 import VERACommonUI
 import VERACore
@@ -25,29 +26,38 @@ import os.log
 #endif
 
 @MainActor
-open class NavigationCoordinator: ObservableObject, Navigator {
-    @Published var path = NavigationPath()
-    @Published var isInMeeting = false
-    @Published var currentMeetingRoomRequest: NewRoomRequest?
-    @Published var alertItem: AlertItem?
-    @Published var showSignIn = false
+@Observable
+open class NavigationCoordinator: Navigator {
+    var path = NavigationPath()
+    var isInMeeting = false
+    var currentMeetingRoomRequest: NewRoomRequest?
+    var alertItem: AlertItem?
+    var showSignIn = false
 
     // Cache for waiting room view models to prevent recreation
+    @ObservationIgnored
     var waitingRoomViewModel: WaitingRoomViewModel?
+    @ObservationIgnored
     var meetingRoomViewModel: MeetingRoomViewModel?
+    @ObservationIgnored
     var meetingRoomPrebuilt: MeetingRoomPrebuilt?
+    @ObservationIgnored
     var goodByeViewModel: GoodByeViewModel?
+    @ObservationIgnored
     var navBarAuthButtonViewModel: NavBarAuthButtonViewModel?
 
     #if ARCHIVING_ENABLED
+        @ObservationIgnored
         var archivesViewModel: ArchivesViewModel?
     #endif
 
     #if BACKGROUND_EFFECTS_ENABLED
+        @ObservationIgnored
         var videoEffectsViewModel: VideoEffectsViewModel?
     #endif
 
     #if AUDIOEFFECTS_ENABLED
+        @ObservationIgnored
         var waitingNoiseSuppressionViewModel: WaitingNoiseSuppressionViewModel?
     #endif
 

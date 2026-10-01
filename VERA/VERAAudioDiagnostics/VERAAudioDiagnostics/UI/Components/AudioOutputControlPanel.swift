@@ -20,7 +20,7 @@
     /// in Settings, Waiting Room, or any pre-call/in-call context.
     public struct AudioOutputControlPanel: View {
 
-        @ObservedObject var viewModel: AudioOutputControlViewModel
+        var viewModel: AudioOutputControlViewModel
 
         public init(viewModel: AudioOutputControlViewModel) {
             self.viewModel = viewModel

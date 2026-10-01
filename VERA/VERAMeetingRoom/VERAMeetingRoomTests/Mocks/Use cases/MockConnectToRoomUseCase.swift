@@ -44,3 +44,21 @@ public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
         throw Error.errorMock
     }
 }
+
+public func makeThrowingConnectToRoomUseCase(error: Swift.Error) -> ThrowingConnectToRoomUseCase {
+    ThrowingConnectToRoomUseCase(error: error)
+}
+
+public final class ThrowingConnectToRoomUseCase: ConnectToRoomUseCase {
+    private let error: Swift.Error
+
+    public init(error: Swift.Error) {
+        self.error = error
+    }
+
+    public func callAsFunction(
+        roomName: RoomName
+    ) async throws -> any CallFacade {
+        throw error
+    }
+}

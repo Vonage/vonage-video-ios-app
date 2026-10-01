@@ -9,14 +9,16 @@ import VERAVonage
 extension FeedbackSessionDebugInfo {
     /// Builds session debug info from the current call, when available.
     public static func fromCurrentCall(in sessionRepository: SessionRepository) -> FeedbackSessionDebugInfo {
-        guard let call = sessionRepository.currentCall as? VonageCall else {
+        guard let call = sessionRepository.currentCall as? VonageCall,
+            let session = call.session
+        else {
             return .empty
         }
 
         return FeedbackSessionDebugInfo(
-            sessionId: call.session.sessionId,
-            connectionId: call.session.connectionId,
-            connectionCreationTime: call.session.connectionCreationTime
+            sessionId: session.sessionId,
+            connectionId: session.connectionId,
+            connectionCreationTime: session.connectionCreationTime
         )
     }
 }

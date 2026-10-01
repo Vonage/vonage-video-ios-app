@@ -476,11 +476,9 @@ public final class MeetingRoomBuilder {
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
             emojiPickerContainerViewModel: emojiPickerContainerViewModel,
             statsOverlayViewModel: statsOverlayViewModel
-        ).task { [weak container, weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
-            guard let container else { return }
+        ).task { [weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
             await MediaPermissions.requestPermissionsIfNeeded()
 
-            container.resetPublisher()
             effectsVM?.reapplyCurrentEffect()
         }
 

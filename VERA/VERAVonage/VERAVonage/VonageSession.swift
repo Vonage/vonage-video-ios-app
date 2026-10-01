@@ -4,6 +4,7 @@
 
 import Foundation
 import OpenTok
+import VERADomain
 
 /// A thin wrapper around `OTSession` that manages connection lifecycle, stream events, and signaling.
 ///
@@ -27,6 +28,7 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     var forceMuteStreamOperation: ((OTStream) -> OTError?)?
 
     private let session: OTSession
+    private let credentials: RoomCredentials
 
     /// Called when the session successfully connects.
     ///
@@ -80,9 +82,27 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
 
     /// Creates a new session wrapper.
     ///
-    /// - Parameter session: A configured `OTSession` instance.
-    public init(session: OTSession) {
+    /// - Parameters:
+    ///   - session: A configured `OTSession` instance.
+    ///   - credentials: The credentials used to connect the session and shared with plugins.
+    public init(session: OTSession, credentials: RoomCredentials) {
         self.session = session
+        self.credentials = credentials
+    }
+
+    /// The Vonage application (API) key associated with the session.
+    public var applicationId: String {
+        credentials.applicationId
+    }
+
+    /// The Vonage token used to authenticate and connect.
+    public var token: String {
+        credentials.token
+    }
+
+    /// The human-readable room name.
+    public var roomName: String {
+        credentials.roomName
     }
 
     /// The Vonage session identifier.
@@ -100,14 +120,13 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         session.connection?.creationTime
     }
 
-    /// Connects to the Vonage session using the provided token.
+    /// Connects to the Vonage session using the token provided at initialization.
     ///
-    /// - Parameter token: A valid Vonage token associated with the session.
     /// - Throws: An `OTError` when the connection operation fails.
     ///
     /// ## Implementation Details
     /// Delegates to `OTSession.connect(withToken:error:)` and throws if an error is returned.
-    open func connect(with token: String) throws {
+    open func connect() throws {
         var error: OTError?
         session.connect(withToken: token, error: &error)
         if let error = error {

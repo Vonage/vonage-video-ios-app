@@ -7,7 +7,7 @@ import VERACommonUI
 
 struct MeetingRoomCustomizationMenu: View {
     @Environment(\.meetingRoomTheme) private var theme
-    @ObservedObject var provider: MeetingRoomCustomizationProvider
+    var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
         NavigationStack {
@@ -38,7 +38,7 @@ struct MeetingRoomCustomizationMenu: View {
 
 struct MeetingRoomCustomizationBottomBarMenu: View {
     @Environment(\.meetingRoomTheme) private var theme
-    @ObservedObject var provider: MeetingRoomCustomizationProvider
+    var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
         List {
@@ -82,7 +82,7 @@ struct MeetingRoomCustomizationBottomBarMenu: View {
 
 struct MeetingRoomCustomizationBottomBarButtonsView: View {
     @Environment(\.meetingRoomTheme) private var theme
-    @ObservedObject var provider: MeetingRoomCustomizationProvider
+    var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
         List {
@@ -209,7 +209,7 @@ struct MeetingRoomCustomizationAddButtonStyle: ButtonStyle {
 
 struct MeetingRoomCustomizationBottomBarCustomBarView: View {
     @Environment(\.meetingRoomTheme) private var theme
-    @ObservedObject var provider: MeetingRoomCustomizationProvider
+    var provider: MeetingRoomCustomizationProvider
 
     var body: some View {
         List {

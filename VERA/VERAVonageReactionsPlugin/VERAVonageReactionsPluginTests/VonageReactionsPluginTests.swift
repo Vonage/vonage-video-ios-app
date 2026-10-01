@@ -553,7 +553,7 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
-    func connect() {}
+    func connect() async throws {}
     func disconnect() async throws {}
     func toggleLocalVideo() {}
     func toggleLocalCamera() {}

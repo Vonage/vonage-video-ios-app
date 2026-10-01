@@ -92,7 +92,11 @@ final class MeetingRoomSDKContainer {
     }()
 
     lazy var publisherRepository: any PublisherRepository = {
-        DefaultPublisherRepository(publisherFactory: publisherFactory)
+        let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
+        if let initialPublisherSettings {
+            try? repository.recreatePublisher(initialPublisherSettings)
+        }
+        return repository
     }()
 
     lazy var currentCallParticipantsRepository = DefaultCurrentCallParticipantsRepository()
@@ -122,6 +126,8 @@ final class MeetingRoomSDKContainer {
             MeetingRoomSessionRepositoryFactoryContext(
                 publisherSettings: initialPublisherSettings ?? .init(),
                 sessionFactory: sessionFactory,
+                roomCredentialsRepository: roomCredentialsRepository,
+                sessionKeyWriter: sessionKeyHolder,
                 publisherRepository: publisherRepository,
                 pluginRegistry: pluginRegistry,
                 statsCollector: statsCollector))
@@ -185,11 +191,9 @@ final class MeetingRoomSDKContainer {
         currentCallParticipantsRepository: currentCallParticipantsRepository,
         sessionRepository: sessionRepository,
         publisherRepository: publisherRepository,
-        roomCredentialsRepository: roomCredentialsRepository,
         captionsStatusDataSource: captionsStatusDataSource,
         noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: pinnedParticipantsDataSource,
-        sessionKeyHolder: sessionKeyHolder
+        pinnedParticipantsDataSource: pinnedParticipantsDataSource
     )
 
     // MARK: - Chat Feature

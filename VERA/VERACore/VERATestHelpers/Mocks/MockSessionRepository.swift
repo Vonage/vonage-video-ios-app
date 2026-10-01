@@ -12,7 +12,7 @@ public class MockSessionRepository: SessionRepository {
     public private(set) var createSessionCallCount = 0
 
     public func createSession(
-        _ credentials: RoomCredentials
+        for roomName: RoomName
     ) async throws -> any CallFacade {
         createSessionCallCount += 1
         if let error = createSessionError {

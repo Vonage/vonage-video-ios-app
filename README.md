@@ -96,7 +96,7 @@ This application provides features for common conferencing use cases, such as:
 
 | Requirement | Version |
 |---|---|
-| iOS deployment target | 16.0+ |
+| iOS deployment target | 17.0+ |
 | Xcode | 26 |
 | Tuist | latest |
 | SwiftLint | latest |
