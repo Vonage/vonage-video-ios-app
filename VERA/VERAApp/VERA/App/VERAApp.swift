@@ -372,8 +372,8 @@ struct VERAApp: App {
             roomName: request.roomName
         ).configuration(
             MeetingRoomConfiguration(
-                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.shouldShowMicrophoneControl,
+                allowCameraControl: dependencyContainer.appConfig.videoSettings.shouldShowCameraControl,
                 showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList,
                 allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture,
                 allowDeviceSelection: dependencyContainer.appConfig.meetingRoomSettings.allowDeviceSelection

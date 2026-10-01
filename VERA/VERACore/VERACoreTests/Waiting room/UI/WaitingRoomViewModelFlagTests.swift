@@ -102,4 +102,28 @@ struct WaitingRoomViewModelFlagTests {
         let state = try #require(getContentState(from: sut))
         #expect(state.isMicrophoneEnabled == AppConfig.audioSettings.allowAudioOnJoin)
     }
+
+    // MARK: - Control button visibility (control AND onJoin)
+
+    @Test("Microphone button visibility requires allowMicrophoneControl AND allowAudioOnJoin")
+    func microphoneButtonVisibilityRequiresBothFlags() throws {
+        let sut = makeSUT()
+        sut.loadUI()
+
+        let state = try #require(getContentState(from: sut))
+        #expect(
+            state.allowMicrophoneControl
+                == (AppConfig.audioSettings.allowMicrophoneControl && AppConfig.audioSettings.allowAudioOnJoin))
+    }
+
+    @Test("Camera button visibility requires allowCameraControl AND allowVideoOnJoin")
+    func cameraButtonVisibilityRequiresBothFlags() throws {
+        let sut = makeSUT()
+        sut.loadUI()
+
+        let state = try #require(getContentState(from: sut))
+        #expect(
+            state.allowCameraControl
+                == (AppConfig.videoSettings.allowCameraControl && AppConfig.videoSettings.allowVideoOnJoin))
+    }
 }
