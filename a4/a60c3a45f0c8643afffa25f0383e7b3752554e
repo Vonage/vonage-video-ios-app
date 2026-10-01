@@ -1,0 +1,37 @@
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_544dc80de7d67a::t_cbe5906eab6961 247-248
+  s_544dc80de7d67a::t_087ee011f35f9e 257-261
+  s_544dc80de7d67a::t_c4bb5c2bcbee5f 199-200
+  s_544dc80de7d67a::t_480c18bcc3b81b 262-263
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelFlagTests.swift"
+  s_544dc80de7d67a::t_382b81bc3bed90 105-126
+  s_544dc80de7d67a::t_0893be40e9f194 127-128
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomUserPreviewView.swift"
+  s_544dc80de7d67a::t_322763e4641b5c 68
+  s_544dc80de7d67a::t_28bc82c6f6bbf9 67
+VERA/VERAConfiguration/VERAConfiguration/AppConfig+ControlVisibility.swift
+  s_544dc80de7d67a::t_848dc9408e7e47 1-13
+VERA/VERAApp/VERA/App/VERAApp.swift
+  s_544dc80de7d67a::t_aaa930500e00a5 375-376
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a4a60c3a45f0c8643afffa25f0383e7b3752554e",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
