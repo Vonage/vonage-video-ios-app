@@ -258,6 +258,14 @@ apply_root_overrides() {
 }
 
 run_tuist_generate() {
+    # Fetch Tuist-managed SPM dependencies (Tuist/Package.swift) before generate.
+    step "tuist install (SPM dependencies)"
+    if tuist install; then
+        ok "Dependencies installed"
+    else
+        error_exit "Failed to install dependencies with tuist. Check the error above."
+    fi
+
     step "tuist generate (workspace)"
     local workspace_file="VERA.xcworkspace"
     if tuist generate --no-open; then
@@ -502,12 +510,119 @@ run_on_simulator() {
     fi
 }
 
+# Prominent reminder: Xcode must be signed in to the team so the development
+# provisioning profiles can be downloaded for a physical-device install.
+notice_xcode_login_for_device() {
+    echo ""
+    echo -e "${YELLOW}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "${YELLOW}${BOLD} ⚠  Xcode sign-in required to install on a physical device${NC}"
+    echo -e "${YELLOW}${BOLD}${PHASE_RULE}${NC}"
+    echo -e "  You must be signed in to this team in Xcode (${BOLD}Settings → Accounts${NC})"
+    echo -e "  so the development provisioning profiles can be downloaded."
+    echo -e "  ${DIM}Not needed for the Simulator.${NC}"
+    echo ""
+}
+
+# Persists DEVELOPMENT_TEAM to Config/Signing.xcconfig via the canonical
+# regenerateSigningConfig.sh (single source of truth). $1 = team id.
+write_development_team() {
+    # Canonical writer for Signing.xcconfig; creates it with the given team.
+    DEVELOPMENT_TEAM="$1" ./Scripts/regenerateSigningConfig.sh >/dev/null
+}
+
+# Guarantees Config/Signing.xcconfig exists before `tuist generate`, which fails
+# without it (Project.swift references it as an xcconfig). If missing, it's created
+# via regenerateSigningConfig.sh using the current DEVELOPMENT_TEAM env (may be empty,
+# which is fine for generation and the simulator; the device flow prompts for a real
+# team later).
+ensure_signing_config() {
+    local xcconfig="./Config/Signing.xcconfig"
+    if [ -f "$xcconfig" ]; then
+        ok "Config/Signing.xcconfig already present"
+        notice_xcode_login_for_device
+        return 0
+    fi
+
+    warn "Config/Signing.xcconfig not found."
+    echo -e "  ${DIM}It's needed to generate the project and to install the app.${NC}"
+    echo -e "  ${DIM}Without a valid Apple Development Team you can still run on the"
+    echo -e "  Simulator, but you won't be able to install on a physical device.${NC}"
+
+    local team=""
+    if [ -n "${DEVELOPMENT_TEAM:-}" ]; then
+        team="$DEVELOPMENT_TEAM"
+    elif [ -t 0 ] && [ -r /dev/tty ]; then
+        printf "  Enter your Apple Development Team ID (blank to continue without it): "
+        read -r team </dev/tty || true
+        team=$(printf '%s' "$team" | tr -d '[:space:]')
+    fi
+
+    DEVELOPMENT_TEAM="$team" ./Scripts/regenerateSigningConfig.sh >/dev/null
+    if [ -n "$team" ]; then
+        ok "Config/Signing.xcconfig created (team: $team)"
+        notice_xcode_login_for_device
+    else
+        warn "Config/Signing.xcconfig created WITHOUT a team — device installs will fail until you set one."
+    fi
+}
+
+# Ensures a Development Team is configured before a device build. Reads it from the
+# DEVELOPMENT_TEAM env var (wins) or Config/Signing.xcconfig. If missing and running
+# interactively, offers to enter a Team ID and persists it to the xcconfig (which
+# survives regeneration, unlike the Xcode "Signing & Capabilities" UI). Returns
+# non-zero when no team could be resolved.
+ensure_development_team() {
+    local xcconfig="./Config/Signing.xcconfig"
+    local team=""
+    if [ -f "$xcconfig" ]; then
+        team=$(grep -E '^DEVELOPMENT_TEAM' "$xcconfig" | sed -E 's/^DEVELOPMENT_TEAM[[:space:]]*=[[:space:]]*//' | tr -d '[:space:]')
+    fi
+    [ -n "${DEVELOPMENT_TEAM:-}" ] && team="$DEVELOPMENT_TEAM"
+
+    if [ -n "$team" ]; then
+        ok "Development Team: $team"
+        return 0
+    fi
+
+    warn "No Development Team configured — required to run on a physical device."
+    warn "Set it in Config/Signing.xcconfig (persists across builder.sh / tuist generate);"
+    warn "the Xcode 'Signing & Capabilities' UI is reset whenever the project is regenerated."
+
+    if [ ! -t 0 ] || [ ! -r /dev/tty ]; then
+        return 1
+    fi
+
+    printf "  Enter your Apple Development Team ID (blank to skip): "
+    local input=""
+    read -r input </dev/tty || true
+    input=$(printf '%s' "$input" | tr -d '[:space:]')
+    if [ -z "$input" ]; then
+        warn "No Team ID entered. Skipping device run."
+        return 1
+    fi
+
+    write_development_team "$input"
+    ok "Development Team saved to Config/Signing.xcconfig"
+    notice_xcode_login_for_device
+    return 0
+}
+
 # Builds the VERA app for a connected physical device and installs/launches it via
 # devicectl. Requires valid code signing (team + provisioning); non-fatal on failure.
 # $1 = device UDID, $2 = device name (for display).
 run_on_device() {
     local udid="$1" name="$2"
     ok "Device: ${name:-unknown} ($udid)"
+
+    # A device build needs a Development Team. Offer to configure it persistently.
+    # If none is provided, a physical device can't be used — fall back to the simulator.
+    if ! ensure_development_team; then
+        warn "Without a Development Team the app can't run on a physical device."
+        if confirm_menu "Run on the iOS Simulator instead?"; then
+            launch_on_simulator_flow
+        fi
+        return 0
+    fi
 
     # Close the app on the device (if running) right after selecting it, for a cold
     # start. Best-effort: find the app's process by its bundle path and terminate it.
@@ -545,7 +660,8 @@ for p in d.get('result', {}).get('runningProcesses', []):
         ok "Build succeeded"
     else
         warn "Device build failed — usually code signing (team/provisioning)."
-        warn "Open VERA.xcworkspace, pick your team, and run on the device from Xcode."
+        warn "Make sure you're signed in to this team in Xcode (Settings → Accounts)."
+        warn "Tip: set DEVELOPMENT_TEAM in Config/Signing.xcconfig so it survives regeneration."
         return 0
     fi
 
@@ -615,7 +731,7 @@ offer_launch() {
     connected=$(list_connected_devices)
     options="sim"$'\t'"iOS Simulator"
     if [ -n "$connected" ]; then
-        options+=$'\n'"device"$'\t'"Physical device"
+        options+=$'\n'"device"$'\t'"Physical device (requires Xcode sign-in + a valid Development Team)"
     fi
     options+=$'\n'"none"$'\t'"Don't launch"
 
@@ -633,7 +749,7 @@ print_banner
 # UPDATE mode: regenerate config-driven files + workspace, then exit
 # ============================================================================
 if [ "$MODE" = "update" ]; then
-    TOTAL_PHASES=3
+    TOTAL_PHASES=5
 
     phase "Validate configuration"
     apply_root_overrides
@@ -649,9 +765,16 @@ if [ "$MODE" = "update" ]; then
     # EnvironmentConstants, so `--update` picks up URL changes too.
     resolve_and_generate_env_constants
 
+    phase "Configure code signing"
+    ensure_signing_config
+
     phase "Generate workspace"
     run_tuist_generate
+
+    phase "Generate SPM assets"
     run_spm_assets_codegen
+
+    offer_launch
 
     print_done "Update complete"
     echo -e "  ${DIM}If Xcode is already open, let it reload the project and Build"
@@ -661,8 +784,6 @@ if [ "$MODE" = "update" ]; then
     if confirm_menu "Open VERA.xcworkspace in Xcode now?"; then
         open_xcode
     fi
-
-    offer_launch
     echo ""
     exit 0
 fi
@@ -670,7 +791,7 @@ fi
 # ============================================================================
 # SETUP mode: full first-time setup
 # ============================================================================
-TOTAL_PHASES=5
+TOTAL_PHASES=7
 
 # ----------------------------------------------------------------------------
 phase "Check prerequisites"
@@ -789,19 +910,28 @@ else
 fi
 
 # ----------------------------------------------------------------------------
+phase "Configure code signing"
+# ----------------------------------------------------------------------------
+ensure_signing_config
+
+# ----------------------------------------------------------------------------
 phase "Generate workspace"
 # ----------------------------------------------------------------------------
 run_tuist_generate
+
+# ----------------------------------------------------------------------------
+phase "Generate SPM assets"
+# ----------------------------------------------------------------------------
 run_spm_assets_codegen
 
 # ----------------------------------------------------------------------------
-# Xcode opening prompt
+# Launch, completion banner, then the Xcode-opening prompt
 # ----------------------------------------------------------------------------
+offer_launch
+
 print_done "Setup complete"
 
 if confirm_menu "Open VERA.xcworkspace in Xcode now?"; then
     open_xcode
 fi
-
-offer_launch
 echo ""
