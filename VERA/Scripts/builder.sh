@@ -545,14 +545,14 @@ ensure_signing_config() {
 
     warn "Config/Signing.xcconfig not found."
     echo -e "  ${DIM}It's needed to generate the project and to install the app.${NC}"
-    echo -e "  ${DIM}Without a valid Apple Development Team you can still run on the"
+    echo -e "  ${DIM}Without a valid Apple Developer Team you can still run on the"
     echo -e "  Simulator, but you won't be able to install on a physical device.${NC}"
 
     local team=""
     if [ -n "${DEVELOPMENT_TEAM:-}" ]; then
         team="$DEVELOPMENT_TEAM"
     elif [ -t 0 ] && [ -r /dev/tty ]; then
-        printf "  Enter your Apple Development Team ID (blank to continue without it): "
+        printf "  Enter your Apple Developer Team ID (from developer.apple.com; blank to continue without it): "
         read -r team </dev/tty || true
         team=$(printf '%s' "$team" | tr -d '[:space:]')
     fi
@@ -580,11 +580,11 @@ ensure_development_team() {
     [ -n "${DEVELOPMENT_TEAM:-}" ] && team="$DEVELOPMENT_TEAM"
 
     if [ -n "$team" ]; then
-        ok "Development Team: $team"
+        ok "Apple Developer Team: $team"
         return 0
     fi
 
-    warn "No Development Team configured — required to run on a physical device."
+    warn "No Apple Developer Team configured — required to run on a physical device."
     warn "Set it in Config/Signing.xcconfig (persists across builder.sh / tuist generate);"
     warn "the Xcode 'Signing & Capabilities' UI is reset whenever the project is regenerated."
 
@@ -592,7 +592,7 @@ ensure_development_team() {
         return 1
     fi
 
-    printf "  Enter your Apple Development Team ID (blank to skip): "
+    printf "  Enter your Apple Developer Team ID (from developer.apple.com; blank to skip): "
     local input=""
     read -r input </dev/tty || true
     input=$(printf '%s' "$input" | tr -d '[:space:]')
@@ -602,7 +602,7 @@ ensure_development_team() {
     fi
 
     write_development_team "$input"
-    ok "Development Team saved to Config/Signing.xcconfig"
+    ok "Apple Developer Team saved to Config/Signing.xcconfig"
     notice_xcode_login_for_device
     return 0
 }
@@ -617,7 +617,7 @@ run_on_device() {
     # A device build needs a Development Team. Offer to configure it persistently.
     # If none is provided, a physical device can't be used — fall back to the simulator.
     if ! ensure_development_team; then
-        warn "Without a Development Team the app can't run on a physical device."
+        warn "Without an Apple Developer Team the app can't run on a physical device."
         if confirm_menu "Run on the iOS Simulator instead?"; then
             launch_on_simulator_flow
         fi
@@ -731,7 +731,7 @@ offer_launch() {
     connected=$(list_connected_devices)
     options="sim"$'\t'"iOS Simulator"
     if [ -n "$connected" ]; then
-        options+=$'\n'"device"$'\t'"Physical device (requires Xcode sign-in + a valid Development Team)"
+        options+=$'\n'"device"$'\t'"Physical device (requires Xcode sign-in + a valid Apple Developer Team)"
     fi
     options+=$'\n'"none"$'\t'"Don't launch"
 
