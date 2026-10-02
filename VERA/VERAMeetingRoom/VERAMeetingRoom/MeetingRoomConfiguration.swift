@@ -31,6 +31,9 @@ public struct MeetingRoomConfiguration: Equatable, Sendable {
     /// Whether Picture-in-Picture is enabled.
     public let allowPictureInPicture: Bool
 
+    /// Whether the audio-output (route) selector button is shown in the top bar.
+    public let allowDeviceSelection: Bool
+
     /// Creates a meeting room configuration.
     ///
     /// - Parameters:
@@ -38,15 +41,18 @@ public struct MeetingRoomConfiguration: Equatable, Sendable {
     ///   - allowCameraControl: Show the camera toggle. Defaults to `true`.
     ///   - showParticipantList: Show the participants button. Defaults to `true`.
     ///   - allowPictureInPicture: Enable Picture-in-Picture. Defaults to `true`.
+    ///   - allowDeviceSelection: Show the audio-output selector. Defaults to `true`.
     public init(
         allowMicrophoneControl: Bool = true,
         allowCameraControl: Bool = true,
         showParticipantList: Bool = true,
-        allowPictureInPicture: Bool = true
+        allowPictureInPicture: Bool = true,
+        allowDeviceSelection: Bool = true
     ) {
         self.allowMicrophoneControl = allowMicrophoneControl
         self.allowCameraControl = allowCameraControl
         self.showParticipantList = showParticipantList
         self.allowPictureInPicture = allowPictureInPicture
+        self.allowDeviceSelection = allowDeviceSelection
     }
 }

@@ -23,15 +23,11 @@ extension TargetDependency {
     ]
 }
 
-extension Package {
-    public static let vonageVideoTransformersSDK = Package.package(
-        url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-        .upToNextMinor(from: "2.35.1")
-    )
-}
-
 extension TargetDependency {
-    public static let vonageVideoTransformersSDK = TargetDependency.package(product: "VonageClientSDKVideoTransformers")
+    /// Resolved via Tuist's modern SPM integration (`Tuist/Package.swift`) so the
+    /// dynamic transformers framework gets embedded in the app. Do not declare it
+    /// as an inline `Package` or in any project's `packages:`.
+    public static let vonageVideoTransformersSDK = TargetDependency.external(name: "VonageClientSDKVideoTransformers")
 
     /// The Vonage Video Transformers SDK target dependency along with its required system libraries.
     /// Use this instead of `.vonageVideoTransformersSDK` for targets that link the SDK directly,
