@@ -1,0 +1,22 @@
+VERA/PREBUILTS_README.md
+  s_d156421ddd1ccf::t_1bf9e513b64002 55-57,59-60
+  s_d156421ddd1ccf::t_e2299367b172b6 44-48
+  s_d156421ddd1ccf::t_da4de7b75a526e 70,72-73,76-91
+  s_d156421ddd1ccf::t_cb9604ee7136b7 125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2355ea7b0a0e3a7596aec68e1f6249c538f79447",
+  "prompts": {},
+  "sessions": {
+    "s_d156421ddd1ccf": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_642b54b4-1978-4130-b3a2-da8798ae5619",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
