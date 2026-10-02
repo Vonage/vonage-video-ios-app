@@ -1,0 +1,52 @@
+VERA/Scripts/builder.sh
+  s_d156421ddd1ccf::t_9a0adccf87f2f4 773-774
+  s_d156421ddd1ccf::t_c0400084dc0b78 912,921-924
+  s_d156421ddd1ccf::t_b2944382f7f7c3 262-268
+  s_d156421ddd1ccf::t_5884e43aeef32d 515,524-525
+  s_d156421ddd1ccf::t_17813d3f3a9efa 533-539,567-568
+  s_d156421ddd1ccf::t_8ee007d217d8f8 540-544
+  s_d156421ddd1ccf::t_2efaab7d6a4eac 663
+  s_d156421ddd1ccf::t_3144b5a66a3562 752
+  s_d156421ddd1ccf::t_4d184c01b03bfd 618,620-623
+  s_d156421ddd1ccf::t_48b2b1cf51db05 928
+  s_d156421ddd1ccf::t_c17078673f3ef7 604
+  s_d156421ddd1ccf::t_4af9cd1b6a6b09 606
+  s_d156421ddd1ccf::t_5ae708cf721bd4 261
+  s_d156421ddd1ccf::t_ee2018aa21d761 513-514,516-523
+  s_d156421ddd1ccf::t_9825b4d4d2d74c 563
+  s_d156421ddd1ccf::t_3587ed207e0b05 768-769
+  s_d156421ddd1ccf::t_3facdfac347856 794
+  s_d156421ddd1ccf::t_11523bfe8cb644 930
+  s_d156421ddd1ccf::t_0efdfee14c1c02 526-527
+  s_d156421ddd1ccf::t_e3b6e1221392f3 931
+  s_d156421ddd1ccf::t_cde36167ee0418 528,531-532,569-603,605,607-609,617,619,624-625
+  s_d156421ddd1ccf::t_060d76f6ff9f6b 777-778
+  s_d156421ddd1ccf::t_f21f8805876057 913-916
+  s_d156421ddd1ccf::t_117faf6bb47022 545-562,564-566
+  s_d156421ddd1ccf::t_f0325f6c48facf 529-530
+  s_d156421ddd1ccf::t_325082d06a92ec 664
+  s_d156421ddd1ccf::t_1362bf26dbf57e 734
+  s_d156421ddd1ccf::t_b4010d9eeef3a5 626
+  s_d156421ddd1ccf::t_c6b53de23a38d1 770
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b1b7b3fcc2627d69ebf2bfbb4d89f0df92174215",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_d156421ddd1ccf": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_642b54b4-1978-4130-b3a2-da8798ae5619",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
