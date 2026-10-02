@@ -262,19 +262,6 @@ private func isOktaEnabled() -> Bool {
 
 // MARK: - Dynamic Dependencies
 
-/// Builds Swift Package dependencies dynamically based on feature flags.
-///
-/// - Returns: The list of Swift Package dependencies for the project.
-private func createPackages() -> [Package] {
-    var packages: [Package] = []
-
-    if areBackgroundEffectsEnabled() {
-        packages.append(.vonageVideoTransformersSDK)
-    }
-
-    return packages
-}
-
 /// Builds target dependencies dynamically based on the chat feature flag.
 ///
 /// Always includes core modules (Core, Vonage, CommonUI, Configuration, CallKit plugin).
@@ -308,10 +295,9 @@ private func createDependencies() -> [TargetDependency] {
     }
 
     if areBackgroundEffectsEnabled() {
+        // Transformers SDK is pulled in transitively; don't link it directly here.
         dependencies.append(
-            contentsOf: [
-                .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects")
-            ] + TargetDependency.vonageVideoTransformersSDKDependencies)
+            .project(target: "VERABackgroundEffects", path: "VERABackgroundEffects"))
     }
 
     if areWaitingRoomSettingsEnabled() {
@@ -466,7 +452,8 @@ private func createBuildSettings() -> Settings {
 let project = Project(
     name: "VERA",
     options: defaultProjectOptions(),
-    packages: createPackages(),
+    // Transformers SDK is resolved via Tuist/Package.swift and reaches the app transitively.
+    packages: [],
     targets: [
         .target(
             name: "VERA",
