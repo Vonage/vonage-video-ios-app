@@ -20,7 +20,7 @@ cd VERA
 
 | Tool | Notes |
 |---|---|
-| Xcode 26 | iOS 16.0+ deployment target |
+| Xcode 26 | iOS 17.0+ deployment target |
 | Homebrew | `builder.sh` can install the rest for you |
 | Python 3 | Runs the code-generation scripts |
 | Tuist | Generates the Xcode workspace |
