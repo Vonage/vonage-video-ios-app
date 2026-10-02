@@ -1,0 +1,31 @@
+VERA/Scripts/builder.sh
+  s_d156421ddd1ccf::t_f0c3c768158672 620
+  s_d156421ddd1ccf::t_ec9288c763b246 583
+  h_2499cc15b3806e 555,595,734
+  s_d156421ddd1ccf::t_0d9cf1a65bd22b 548
+  s_d156421ddd1ccf::t_83a58421a71e06 605
+  s_d156421ddd1ccf::t_3b0c499732d869 587
+VERA/PREBUILTS_README.md
+  s_d156421ddd1ccf::t_f341a4502a36ad 82-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8365a39f0dd0754ab0e3d030f19372f8690371a7",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_d156421ddd1ccf": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_642b54b4-1978-4130-b3a2-da8798ae5619",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
