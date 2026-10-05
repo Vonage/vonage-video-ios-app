@@ -271,9 +271,23 @@ struct VERAApp: App {
         #if SETTINGS_ENABLED
             // Settings button with icon-only design (no circular background).
             // Presents the in-app SettingsView as a sheet.
-            let settingsButton = settingsFactory.makeWaitingRoomButton()
-            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            if dependencyContainer.appConfig.waitingRoomSettings.allowSettings {
+                let settingsButton = settingsFactory.makeWaitingRoomButton()
+                buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            }
         #endif
+
+        // Audio-output route selector (system AVRoutePicker), shown next to Settings.
+        // Reuses the meeting room's picker; gated by the waiting-room device-selection flag.
+        if dependencyContainer.appConfig.waitingRoomSettings.allowDeviceSelection {
+            buttons.append(
+                ViewHolder(id: AudioRoutePickerView.viewID) {
+                    AudioRoutePickerView.button(
+                        iconColor: VERACommonUIAsset.SemanticColors.secondary.color
+                    )
+                }
+            )
+        }
 
         return buttons
     }
@@ -284,30 +298,34 @@ struct VERAApp: App {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.videoEffectsViewModel = viewModel
-
-            if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
-                let view = backgroundEffectFactory.makeEffectsButton(
-                    viewModel: videoEffectsViewModel
+            if dependencyContainer.appConfig.videoSettings.allowBackgroundEffects {
+                let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
                 )
+                navigationCoordinator.videoEffectsViewModel = viewModel
 
-                buttons.append(ViewHolder(id: "Effects", content: { view }))
+                if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
+                    let view = backgroundEffectFactory.makeEffectsButton(
+                        viewModel: videoEffectsViewModel
+                    )
+
+                    buttons.append(ViewHolder(id: "Effects", content: { view }))
+                }
             }
         #endif
 
         #if AUDIOEFFECTS_ENABLED
-            let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
+            if dependencyContainer.appConfig.audioSettings.allowAdvancedNoiseSuppression {
+                let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+                )
+                navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
 
-            let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                viewModel: audioViewModel
-            )
-            buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+                let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    viewModel: audioViewModel
+                )
+                buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+            }
         #endif
 
         return buttons
@@ -341,20 +359,31 @@ struct VERAApp: App {
                 }
         }
 
-        let currentVideoEffect =
-            navigationCoordinator.videoEffectsViewModel?.selectedEffect
-            ?? dependencyContainer.videoEffectRepository.load()
-        let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #if BACKGROUND_EFFECTS_ENABLED
+            let currentVideoEffect =
+                navigationCoordinator.videoEffectsViewModel?.selectedEffect
+                ?? dependencyContainer.videoEffectRepository.load()
+        #else
+            let currentVideoEffect: VideoEffect? = nil
+        #endif
+
+        #if AUDIOEFFECTS_ENABLED
+            let currentNoiseSuppressionState =
+                navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #else
+            let currentNoiseSuppressionState: NoiseSuppressionState? = nil
+        #endif
 
         let builder = MeetingRoomBuilder(
             baseURL: dependencyContainer.baseURL,
             roomName: request.roomName
         ).configuration(
             MeetingRoomConfiguration(
-                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.shouldShowMicrophoneControl,
+                allowCameraControl: dependencyContainer.appConfig.videoSettings.shouldShowCameraControl,
                 showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList,
-                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture
+                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture,
+                allowDeviceSelection: dependencyContainer.appConfig.meetingRoomSettings.allowDeviceSelection
             )
         )
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
