@@ -35,6 +35,12 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     private var lastInPipRetargetAt: Date?
     private static let minimumInPipRetargetInterval: TimeInterval = 1.5
 
+    /// One task handles participant updates, one at a time. A new update waits until the previous
+    /// retarget has finished, so two retargets can never run at the same time. The stream only
+    /// keeps the newest update, so a burst of updates becomes a single retarget.
+    private var participantsTask: Task<Void, Never>?
+    private var participantsContinuation: AsyncStream<ParticipantsState>.Continuation?
+
     /// The current target's renderer: feeds the PiP window, hosts the camera-off placeholder, and
     /// its view is the controller's anchor.
     private var activePipRenderer: PictureInPictureVideoRenderer?
@@ -78,22 +84,26 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
         self.call = call
 
+        let (states, continuation) = AsyncStream.makeStream(
+            of: ParticipantsState.self, bufferingPolicy: .bufferingNewest(1))
+        participantsContinuation = continuation
+
         call.participantsPublisher
-            // Drop high-frequency audio-level churn: only react when something that can change the
-            // PiP target/placeholder changes (participant set, camera states, active speaker, local
-            // camera). Without this, every audio-level emission spawns a @MainActor task and these
-            // pile up faster than they drain, starving the main actor (frozen video, dead buttons).
+            // Ignore audio-level updates. Only react when something that matters for PiP changes
+            // (participants, cameras, active speaker). Otherwise the main thread gets flooded.
             .removeDuplicates {
                 PictureInPictureParticipantSelector.signature(for: $0)
                     == PictureInPictureParticipantSelector.signature(for: $1)
             }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                Task { @MainActor [weak self] in
-                    await self?.updatePipTarget(for: state)
-                }
-            }
+            .sink { continuation.yield($0) }
             .store(in: &cancellables)
+
+        participantsTask = Task { @MainActor [weak self] in
+            for await state in states {
+                guard let self else { return }
+                await self.updatePipTarget(for: state)
+            }
+        }
 
         call.callState
             .receive(on: DispatchQueue.main)
@@ -157,6 +167,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
     public func tearDown() {
         cancellables.removeAll()
+        participantsContinuation?.finish()
+        participantsContinuation = nil
+        participantsTask?.cancel()
+        participantsTask = nil
         lastInPipRetargetAt = nil
         activePipRenderer?.stopPlaceholder()
         activePipRenderer = nil
@@ -293,9 +307,7 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         activePipRenderer = renderer
         pipTargetParticipantId = targetId
 
-        if previousRenderer !== renderer {
-            previousRenderer?.pipBufferDisplayLayer = nil
-        }
+        // The controller detaches the previous renderer itself.
         pipController.attachFeed(to: renderer)
 
         if pipTargetCameraEnabled {
