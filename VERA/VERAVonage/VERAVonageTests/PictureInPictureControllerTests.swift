@@ -56,13 +56,68 @@ struct PictureInPictureControllerTests {
         #expect(sut.isConfigured == false)
     }
 
+    // PiP is unsupported on the simulator, so `configure` never yields a live controller and
+    // `attachFeed` stays a no-op there; this only exercises the gated path. The hand-over itself is
+    // covered through `routeFeed` below.
     @Test("attachFeed exercises the wiring path")
     func attachFeedRuns() {
         let sut = PictureInPictureController()
         sut.configure(with: UIView())
         let renderer = PictureInPictureVideoRenderer()
 
-        sut.attachFeed(to: renderer)  // wires when configured; no-op otherwise (simulator)
+        sut.attachFeed(to: renderer)
+    }
+
+    @Test("routeFeed wires the shared PiP layer into the renderer")
+    func routeFeedWiresLayer() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: renderer)
+
+        #expect(renderer.pipBufferDisplayLayer != nil)
+    }
+
+    // Regression for VIDSOL-1262: every renderer holding the PiP layer enqueues into it, so a
+    // stale holder made the PiP window flicker through participants one frame at a time.
+    @Test("routeFeed moves the feed so only the newest renderer holds the PiP layer")
+    func routeFeedDetachesPreviousRenderer() {
+        let sut = PictureInPictureController()
+        let first = PictureInPictureVideoRenderer()
+        let second = PictureInPictureVideoRenderer()
+        let third = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: first)
+        let sharedLayer = first.pipBufferDisplayLayer
+        sut.routeFeed(to: second)
+        sut.routeFeed(to: third)
+
+        #expect(sharedLayer != nil)
+        #expect(first.pipBufferDisplayLayer == nil)
+        #expect(second.pipBufferDisplayLayer == nil)
+        #expect(third.pipBufferDisplayLayer === sharedLayer)
+    }
+
+    @Test("routeFeed to the current renderer keeps its feed")
+    func routeFeedSameRendererIsStable() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: renderer)
+        sut.routeFeed(to: renderer)
+
+        #expect(renderer.pipBufferDisplayLayer != nil)
+    }
+
+    @Test("tearDown detaches the feeding renderer")
+    func tearDownDetachesFeed() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+        sut.routeFeed(to: renderer)
+
+        sut.tearDown()
+
+        #expect(renderer.pipBufferDisplayLayer == nil)
     }
 
     @Test("attachFeed is a no-op when not configured")
