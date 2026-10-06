@@ -35,9 +35,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     private var lastInPipRetargetAt: Date?
     private static let minimumInPipRetargetInterval: TimeInterval = 1.5
 
-    /// One task handles participant updates, one at a time. A new update waits until the previous
-    /// retarget has finished, so two retargets can never run at the same time. The stream only
-    /// keeps the newest update, so a burst of updates becomes a single retarget.
     private var participantsTask: Task<Void, Never>?
     private var participantsContinuation: AsyncStream<ParticipantsState>.Continuation?
 
@@ -89,8 +86,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         participantsContinuation = continuation
 
         call.participantsPublisher
-            // Ignore audio-level updates. Only react when something that matters for PiP changes
-            // (participants, cameras, active speaker). Otherwise the main thread gets flooded.
+            // Drop high-frequency audio-level churn: only react when something that can change the
+            // PiP target/placeholder changes (participant set, camera states, active speaker, local
+            // camera). Without this, every audio-level emission spawns a @MainActor task and these
+            // pile up faster than they drain, starving the main actor (frozen video, dead buttons).
             .removeDuplicates {
                 PictureInPictureParticipantSelector.signature(for: $0)
                     == PictureInPictureParticipantSelector.signature(for: $1)
@@ -307,7 +306,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         activePipRenderer = renderer
         pipTargetParticipantId = targetId
 
-        // The controller detaches the previous renderer itself.
         pipController.attachFeed(to: renderer)
 
         if pipTargetCameraEnabled {

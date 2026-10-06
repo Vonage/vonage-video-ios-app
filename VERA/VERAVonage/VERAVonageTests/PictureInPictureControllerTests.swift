@@ -56,9 +56,6 @@ struct PictureInPictureControllerTests {
         #expect(sut.isConfigured == false)
     }
 
-    // PiP is unsupported on the simulator, so `configure` never yields a live controller and
-    // `attachFeed` stays a no-op there; this only exercises the gated path. The hand-over itself is
-    // covered through `routeFeed` below.
     @Test("attachFeed exercises the wiring path")
     func attachFeedRuns() {
         let sut = PictureInPictureController()
@@ -78,8 +75,6 @@ struct PictureInPictureControllerTests {
         #expect(renderer.pipBufferDisplayLayer != nil)
     }
 
-    // Regression for VIDSOL-1262: every renderer holding the PiP layer enqueues into it, so a
-    // stale holder made the PiP window flicker through participants one frame at a time.
     @Test("routeFeed moves the feed so only the newest renderer holds the PiP layer")
     func routeFeedDetachesPreviousRenderer() {
         let sut = PictureInPictureController()

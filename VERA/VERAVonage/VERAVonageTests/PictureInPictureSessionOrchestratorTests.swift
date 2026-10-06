@@ -183,7 +183,6 @@ struct PictureInPictureOrchestratorTests {
 
 // MARK: - Helpers
 
-/// Polls `condition` every 10 ms, throwing if it hasn't become `true` within `timeout` seconds.
 @MainActor
 private func waitUntil(timeout: TimeInterval = 2, _ condition: () -> Bool) async throws {
     let deadline = Date().addingTimeInterval(timeout)

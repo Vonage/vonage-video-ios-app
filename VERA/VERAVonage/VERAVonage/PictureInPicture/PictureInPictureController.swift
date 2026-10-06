@@ -13,9 +13,6 @@ final class PictureInPictureController: NSObject {
     private var pipController: AVPictureInPictureController?
     private let sampleBufferVideoCallView = PictureInPictureSampleBufferView()
 
-    /// The renderer that currently sends frames to the PiP layer. Only one renderer may do this at
-    /// a time: if two do, the PiP window flickers between participants. The controller tracks the
-    /// current one so it always detaches the right renderer before attaching a new one.
     private weak var currentFeedRenderer: PictureInPictureVideoRenderer?
 
     private(set) var isInPictureInPicture = false
@@ -71,16 +68,13 @@ final class PictureInPictureController: NSObject {
         pipController?.startPictureInPicture()
     }
 
-    /// Makes `videoRenderer` the one that feeds the PiP window, detaching the previous renderer.
-    /// Does nothing until the AVKit controller is configured.
+    /// Re-points the running PiP sample-buffer layer at a different renderer's feed (used when the
+    /// PiP target changes between renderers while PiP stays active — e.g. publisher ↔ remote).
     func attachFeed(to videoRenderer: PictureInPictureVideoRenderer) {
         guard isConfigured else { return }
         routeFeed(to: videoRenderer)
     }
 
-    /// Detaches the previous renderer and attaches `videoRenderer` to the PiP layer. Separate from
-    /// ``attachFeed(to:)`` so it can be unit tested on the simulator, where AVKit cannot create a
-    /// controller.
     func routeFeed(to videoRenderer: PictureInPictureVideoRenderer) {
         if currentFeedRenderer !== videoRenderer {
             currentFeedRenderer?.pipBufferDisplayLayer = nil
