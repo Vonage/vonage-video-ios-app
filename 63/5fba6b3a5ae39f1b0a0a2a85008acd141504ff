@@ -1,0 +1,19 @@
+VERA/VERAVonage/VERAVonageTests/PictureInPictureSessionOrchestratorTests.swift
+  s_e840fe1a9c2c90::t_f454a305ea6d6e 125-181,186-219
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "635fba6b3a5ae39f1b0a0a2a85008acd141504ff",
+  "prompts": {},
+  "sessions": {
+    "s_e840fe1a9c2c90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c44af68e-643d-404b-ae4a-58f368c0d812",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
