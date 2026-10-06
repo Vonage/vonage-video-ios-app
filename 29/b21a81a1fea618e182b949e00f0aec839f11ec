@@ -1,0 +1,34 @@
+.github/ISSUE_TEMPLATE/2-feature-request.yml
+  s_e10ec8475c84a4::t_0ee167a4835f7c 1-15,17,20-21,47-55
+  s_06fca2b877cb93::t_d74676fd11146d 16,18-19,22-46
+.github/ISSUE_TEMPLATE/config.yml
+  s_e10ec8475c84a4::t_0ee167a4835f7c 1-2,4-5
+  s_06fca2b877cb93::t_114a9f32ef9b83 3,6-8
+.github/ISSUE_TEMPLATE/1-bug-report.yml
+  s_e10ec8475c84a4::t_0ee167a4835f7c 1-39,42,64-85
+  s_06fca2b877cb93::t_81628ea96b6eb8 40-41,43-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "29b21a81a1fea618e182b949e00f0aec839f11ec",
+  "prompts": {},
+  "sessions": {
+    "s_06fca2b877cb93": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_e88aeb7b-ba83-4f5a-a15a-869e0b19640f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_e10ec8475c84a4": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1791299028676116000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
