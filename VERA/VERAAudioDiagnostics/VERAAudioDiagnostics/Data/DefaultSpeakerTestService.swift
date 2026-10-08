@@ -29,6 +29,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     private var levelTimer: Timer?
     private var isPlaying: Bool = false
     private var isObservingAudioRoutes: Bool = false
+    private let notificationCenter: NotificationCenter
     private let generateTonePlayerUseCase: GenerateTonePlayerUseCase
 
     private let audioLevelSubject = PassthroughSubject<Float, Never>()
@@ -37,16 +38,20 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     }
 
     public init(
-        generateTonePlayerUseCase: GenerateTonePlayerUseCase = DefaultGenerateTonePlayerUseCase()
+        generateTonePlayerUseCase: GenerateTonePlayerUseCase = DefaultGenerateTonePlayerUseCase(),
+        notificationCenter: NotificationCenter = .default
     ) {
+        self.notificationCenter = notificationCenter
         self.generateTonePlayerUseCase = generateTonePlayerUseCase
         super.init()
     }
 
     deinit {
+        levelTimer?.invalidate()
+        player?.stop()
         #if os(iOS)
             if isObservingAudioRoutes {
-                NotificationCenter.default.removeObserver(
+                notificationCenter.removeObserver(
                     self,
                     name: AVAudioSession.routeChangeNotification,
                     object: nil
@@ -63,7 +68,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     public func startObservingAudioRoutes() {
         #if os(iOS)
             if !isObservingAudioRoutes {
-                NotificationCenter.default.addObserver(
+                notificationCenter.addObserver(
                     self,
                     selector: #selector(handleRouteChange),
                     name: AVAudioSession.routeChangeNotification,
@@ -76,10 +81,12 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
 
     /// Stops listening for audio route changes.
     ///
-    /// Marks the observer as inactive. Actual removal happens in `deinit`.
+    /// Removes the observer immediately so subsequent starts register exactly once.
     /// On macOS this method has no effect.
     public func stopObservingAudioRoutes() {
         #if os(iOS)
+            guard isObservingAudioRoutes else { return }
+            notificationCenter.removeObserver(self, name: AVAudioSession.routeChangeNotification, object: nil)
             isObservingAudioRoutes = false
         #endif
     }
@@ -113,7 +120,6 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
     #endif
 
     public func playTestSound() {
-        isPlaying = true
         startObservingAudioRoutes()
         startAudioAndMonitoring()
     }
@@ -145,7 +151,6 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
                 newPlayer.numberOfLoops = AudioDiagnosticsConstants.AudioPlayback.infiniteLoops
                 newPlayer.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
                 newPlayer.prepareToPlay()
-                newPlayer.play()
                 player = newPlayer
             } catch {
                 logger.error("Failed to generate tone player: \(error.localizedDescription)")
@@ -156,10 +161,11 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService, @unc
             // Reuse existing player - restart playback
             player?.currentTime = 0
             player?.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
-            player?.play()
         }
 
-        // Start monitoring levels
+        // stopMonitoring clears the previous playback state. Restore it only when playback succeeds.
+        guard let player, player.play() else { return }
+        isPlaying = true
         startMonitoring()
     }
 
