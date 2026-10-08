@@ -267,6 +267,29 @@ struct ArchivesViewModelTests {
         withExtendedLifetime(sut) {}
     }
 
+    @Test func queuedEventsFromSupersededObservationDoNotOverwriteCurrentState() async {
+        let firstPublisher = IgnoringCancellationPublisher()
+        let secondPublisher = IgnoringCancellationPublisher()
+        let repository = QueuedEventsRepository(first: firstPublisher, second: secondPublisher)
+        let sut = makeSUT(archivesRepository: repository)
+        let staleArchive = makeArchives()[0]
+        let currentArchive = makeArchives()[1]
+
+        await sut.loadData()
+        await sut.loadData()
+
+        firstPublisher.send([staleArchive])
+        firstPublisher.fail(NSError(domain: "stale", code: 1))
+        secondPublisher.send([currentArchive])
+
+        try? await Task.sleep(for: .milliseconds(100))
+
+        let currentArchives = await MainActor.run { sut.archives }
+        let currentError = await MainActor.run { sut.error }
+        #expect(currentArchives.map(\.id) == [currentArchive.id])
+        #expect(currentError == nil)
+    }
+
     @Test func releasingArchiveViewModelCancelsObservation() async {
         let repository = RefreshObservationRepository()
         var sut: ArchivesViewModel? = makeSUT(archivesRepository: repository)
@@ -385,6 +408,48 @@ private final class RefreshObservationRepository: ArchivesRepository, @unchecked
             }
         ).eraseToAnyPublisher()
     }
+}
+
+private final class QueuedEventsRepository: ArchivesRepository, @unchecked Sendable {
+    private let first: IgnoringCancellationPublisher
+    private let second: IgnoringCancellationPublisher
+    private var requestCount = 0
+
+    init(first: IgnoringCancellationPublisher, second: IgnoringCancellationPublisher) {
+        self.first = first
+        self.second = second
+    }
+
+    func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
+        requestCount += 1
+        return (requestCount == 1 ? first : second).eraseToAnyPublisher()
+    }
+}
+
+private final class IgnoringCancellationPublisher: Publisher, @unchecked Sendable {
+    typealias Output = [Archive]
+    typealias Failure = Error
+
+    private let lock = NSLock()
+    private var downstream: AnySubscriber<Output, Failure>?
+
+    func receive<S>(subscriber: S) where S: Subscriber, Error == S.Failure, [Archive] == S.Input {
+        lock.withLock { downstream = AnySubscriber(subscriber) }
+        subscriber.receive(subscription: IgnoringCancellationSubscription())
+    }
+
+    func send(_ value: [Archive]) {
+        _ = lock.withLock { downstream }?.receive(value)
+    }
+
+    func fail(_ error: Error) {
+        _ = lock.withLock { downstream }?.receive(completion: .failure(error))
+    }
+}
+
+private final class IgnoringCancellationSubscription: Subscription {
+    func request(_ demand: Subscribers.Demand) {}
+    func cancel() {}
 }
 
 private actor DeferredRefreshRepository: ArchivesRepository {

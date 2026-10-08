@@ -198,6 +198,26 @@ struct DefaultArchivesRepositoryTests {
         #expect(error is MockArchivesDataSourceError)
     }
 
+    @Test("Should recreate a publisher after a data source error")
+    func recreatesPublisherAfterDataSourceError() async throws {
+        let expectedArchive = makeArchive(id: UUID(), status: .available)
+        let dataSource = SequencedArchivesDataSource(results: [
+            .failure(MockArchivesDataSourceError()),
+            .success([expectedArchive]),
+        ])
+        let sut = makeSUT(archivesDataSource: dataSource)
+
+        let failedPublisher = await sut.getArchives(sessionKey: "test-room")
+        let error = try await awaitError(from: failedPublisher)
+        #expect(error is MockArchivesDataSourceError)
+
+        let recoveredPublisher = await sut.getArchives(sessionKey: "test-room")
+        let archives = try await awaitFirstNonEmptyValue(from: recoveredPublisher)
+
+        #expect(archives == [expectedArchive])
+        #expect(await dataSource.callCount == 2)
+    }
+
     @Test("Should cache publishers for same room")
     func cachesPublishersForSameRoom() async throws {
         let expectedArchive = makeArchive(id: UUID(), status: .available)
@@ -409,6 +429,21 @@ struct DefaultArchivesRepositoryTests {
             group.cancelAll()
             return result
         }
+    }
+}
+
+private actor SequencedArchivesDataSource: ArchivesDataSource {
+    private var results: [Result<[Archive], Error>]
+    private(set) var callCount = 0
+
+    init(results: [Result<[Archive], Error>]) {
+        self.results = results
+    }
+
+    func getArchives(sessionKey: String) async throws -> [Archive] {
+        callCount += 1
+        let result = results[min(callCount - 1, results.count - 1)]
+        return try result.get()
     }
 }
 
