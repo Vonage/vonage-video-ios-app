@@ -5,10 +5,11 @@ applyTo: "VERA/**/VERAVonageCallKitPlugin/**/*,VERA/**/VERAVonage/**/*"
 ## Call lifecycle and media rules
 
 ### State machine
-- `CallState` follows a strict linear flow: `idle → connecting → connected → disconnecting → disconnected`.
-- Never skip states (e.g., do not go from `connecting` straight to `disconnected`).
+- Normal connection follows `idle → connecting → connected → disconnecting → disconnected`.
+- Cancellation and terminal failure can enter `disconnecting` from `idle` or `connecting`; always finish cleanup before `disconnected`.
 - State is emitted via `_callState` (`CurrentValueSubject`). Consumers observe `callState: AnyPublisher<CallState, Never>`.
-- Guard on the current state before mutating — `disconnect()` must verify `.connected` first.
+- `disconnect()` is idempotent and accepts calls still connecting or resolving credentials. Concurrent requests share one cleanup task.
+- Reject late session creation and connected callbacks after cancellation; a call instance has one lifecycle.
 
 ### Cleanup ordering
 - `VonageCall.disconnect()` performs cleanup in a specific sequence — preserve this order:
@@ -19,7 +20,7 @@ applyTo: "VERA/**/VERAVonageCallKitPlugin/**/*,VERA/**/VERAVonage/**/*"
   5. `session.disconnect()` — OTSession teardown
   6. `publisher.cleanUp()` / `session.cleanUp()` — release SDK objects and nil out callbacks
   7. Transition to `.disconnected`
-- The same cleanup path (steps 5–7) must also execute in the `catch` block to avoid leaks on error.
+- SDK cleanup and the final state transition run in `defer`, including when session disconnect throws. A cancelled credential lookup may not have created a session yet.
 
 ### Subscriber lifecycle
 - Cancel the keyed `subscriberCancellables[streamId]` **before** calling `callStateManager.removeSubscriber` — otherwise the `$participant` sink can re-add the participant during removal.
@@ -28,7 +29,7 @@ applyTo: "VERA/**/VERAVonageCallKitPlugin/**/*,VERA/**/VERAVonage/**/*"
 ### Threading
 - `CallStateManager` is an `actor` — all participant mutations are serialized there. Never bypass it with direct array access.
 - `@Atomic` (concurrent queue + barrier) is used for `subscriberDidConnect` and `visibilityCount` on `VonageSubscriber`. Use `@Atomic` for any new subscriber-level mutable state.
-- `@MainActor` is required for `doSubscribe(_:)` and `applyPublisherAdvancedSettings(_:)` — OTSubscriber/OTPublisher creation must happen on the main thread.
+- `@MainActor` is required for `connect()`, `disconnect()`, `doSubscribe(_:)` and `applyPublisherAdvancedSettings(_:)` — OTSubscriber/OTPublisher creation must happen on the main thread.
 
 ### Publisher republish cycle
 - When applying advanced settings (`applyPublisherAdvancedSettings`), the publisher is destroyed and recreated:
