@@ -60,7 +60,8 @@ struct DefaultArchivesRepositoryTests {
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
         // Collect multiple values from the publisher
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         // Should receive 3 updates
         #expect(values.count == 3)
@@ -103,7 +104,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         #expect(values.count == 3)
 
@@ -242,6 +244,115 @@ struct DefaultArchivesRepositoryTests {
         #expect(mockDataSource.callCount == 2)
         #expect(archives1.count == 1)
         #expect(archives2.count == 1)
+    }
+
+    @Test func reviewArchiveRetryRecoversAfterTransientFailure() async throws {
+        let source = MockArchivesDataSource(shouldThrowError: true)
+        let repository = makeSUT(archivesDataSource: source)
+        let failedPublisher = await repository.getArchives(sessionKey: "review-room")
+        _ = try await awaitError(from: failedPublisher)
+        source.shouldThrowError = false
+        source.archivesToReturn = [makeArchive(id: UUID(), status: .available)]
+        let retryPublisher = await repository.getArchives(sessionKey: "review-room")
+        do {
+            let value = try await awaitFirstNonEmptyValue(from: retryPublisher)
+            #expect(value.count == 1)
+        } catch {
+            Issue.record("Retry still delivers completed publisher error: \(error)")
+        }
+    }
+
+    @Test func reviewArchivePollingStopsWhenOwnerAndObservationAreReleased() async throws {
+        let source = MockArchivesDataSource(
+            archivesToReturn: [makeArchive(id: UUID(), status: .stopped)])
+        defer { source.archivesToReturn = [] }  // Let the current implementation exit after the assertion.
+        var repository: DefaultArchivesRepository? = makeSUT(archivesDataSource: source)
+        weak var observedRepository = repository
+        var publisher: AnyPublisher<[Archive], Error>? = await repository?.getArchives(sessionKey: "review-room")
+        var observation: AnyCancellable? = publisher?.sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        try await Task.sleep(for: .milliseconds(150))
+        observation?.cancel()
+        observation = nil
+        publisher = nil
+        repository = nil
+        #expect(observedRepository == nil)
+        try await Task.sleep(for: .milliseconds(100))  // Drain an already-running fetch.
+        let requestsAtRelease = source.callCount
+        try await Task.sleep(for: .milliseconds(350))
+        #expect(source.callCount == requestsAtRelease, "Archive polling continues without an owner or subscriber")
+    }
+
+    @Test func pollingStopsWhenLastSubscriberCancelsWithRepositoryStillAlive() async throws {
+        let source = MockArchivesDataSource(archivesToReturn: [makeArchive(id: UUID(), status: .stopped)])
+        defer { source.archivesToReturn = [] }
+        let repository = makeSUT(archivesDataSource: source)
+        let publisher = await repository.getArchives(sessionKey: "cancel-room")
+        let observation = publisher.sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        try await Task.sleep(for: .milliseconds(150))
+        observation.cancel()
+        try await Task.sleep(for: .milliseconds(100))
+        let requests = source.callCount
+        try await Task.sleep(for: .milliseconds(350))
+        #expect(source.callCount == requests)
+        _ = repository
+    }
+
+    @Test func oneSubscriberCancellingDoesNotStopAnotherSubscriber() async throws {
+        let source = MockArchivesDataSource(archivesToReturn: [makeArchive(id: UUID(), status: .stopped)])
+        defer { source.archivesToReturn = [] }
+        let repository = makeSUT(archivesDataSource: source)
+        let publisher = await repository.getArchives(sessionKey: "shared-room")
+        let first = publisher.sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        let second = publisher.sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        try await Task.sleep(for: .milliseconds(150))
+        first.cancel()
+        let requests = source.callCount
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(source.callCount > requests)
+        second.cancel()
+        try await Task.sleep(for: .milliseconds(100))
+        let finalRequests = source.callCount
+        try await Task.sleep(for: .milliseconds(350))
+        #expect(source.callCount == finalRequests)
+    }
+
+    @Test func repositoryReleaseStopsPollingEvenWhileSubscriptionRemains() async throws {
+        let source = MockArchivesDataSource(archivesToReturn: [makeArchive(id: UUID(), status: .stopped)])
+        defer { source.archivesToReturn = [] }
+        var repository: DefaultArchivesRepository? = makeSUT(archivesDataSource: source)
+        weak var weakRepository = repository
+        let publisher = await repository!.getArchives(sessionKey: "owner-room")
+        let observation = publisher.sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        defer { observation.cancel() }
+        try await Task.sleep(for: .milliseconds(150))
+        repository = nil
+        #expect(weakRepository == nil)
+        try await Task.sleep(for: .milliseconds(100))
+        let requests = source.callCount
+        try await Task.sleep(for: .milliseconds(350))
+        #expect(source.callCount == requests)
+    }
+
+    @Test func retryingTheSameReturnedPublisherUsesAFreshSubject() async throws {
+        let source = MockArchivesDataSource(shouldThrowError: true)
+        let repository = makeSUT(archivesDataSource: source)
+        let publisher = await repository.getArchives(sessionKey: "resubscribe-room")
+        let recovered = publisher.catch { _ -> AnyPublisher<[Archive], Error> in
+            source.shouldThrowError = false
+            source.archivesToReturn = [makeArchive(id: UUID(), status: .available)]
+            return publisher
+        }.eraseToAnyPublisher()
+        let archives = try await awaitFirstNonEmptyValue(from: recovered)
+        #expect(archives.count == 1)
+        #expect(source.callCount == 2)
+    }
+
+    @Test func anUnobservedPublisherDoesNotStartPolling() async throws {
+        let source = MockArchivesDataSource(archivesToReturn: [makeArchive(id: UUID(), status: .stopped)])
+        let repository = makeSUT(archivesDataSource: source)
+        _ = await repository.getArchives(sessionKey: "unobserved-room")
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(source.callCount == 0)
     }
 
     // MARK: - Test Helpers
