@@ -686,6 +686,32 @@ struct DefaultSpeakerTestServiceTests {
             #expect(!player.isPlaying)
         }
 
+        @Test func stoppedRunCannotRestartANewPlaybackRun() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            changeRoute(center)
+            sut.stopTestSound()
+            sut.playTestSound()
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 2)
+        }
+
+        @Test func routePauseDuringMeteringDoesNotCancelPlaybackIntent() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            player.stop()
+            center.post(
+                name: AVAudioSession.routeChangeNotification, object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+                ])
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 2)
+            #expect(player.isPlaying)
+        }
+
         @Test func failedPlaybackDoesNotRespondToRouteChanges() async throws {
             let (sut, player, center) = try makeSUT()
             defer { sut.stopTestSound() }
