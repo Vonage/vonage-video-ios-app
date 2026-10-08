@@ -611,9 +611,10 @@ struct SystemMediaStateTests {
         #expect(state.isPublishingAudio && state.isPublishingVideo == cameraEnabled)
     }
 
-    @Test func holdAndResumePublishActualMediaState() async throws {
+    @Test(arguments: [true, false])
+    func holdAndResumePublishActualMediaState(audioInitiallyEnabled: Bool) async throws {
         let call = makeCall()
-        call.publisher.publishAudio = true
+        call.publisher.publishAudio = audioInitiallyEnabled
         call.publisher.publishVideo = false
         var state: SessionState = .initial
         let observation = call.statePublisher.sink { state = $0 }
@@ -622,12 +623,13 @@ struct SystemMediaStateTests {
         call.setOnHold(true)
         try await Task.sleep(for: .milliseconds(100))
         #expect(!state.isPublishingAudio && !state.isPublishingVideo)
-        call.muteLocalAudio(false)
+        call.muteLocalAudio(audioInitiallyEnabled)
         try await Task.sleep(for: .milliseconds(100))
         #expect(!call.publisher.publishAudio && !call.publisher.publishVideo)
         call.setOnHold(false)
         try await Task.sleep(for: .milliseconds(100))
-        #expect(state.isPublishingAudio && !state.isPublishingVideo)
+        #expect(state.isPublishingAudio == !audioInitiallyEnabled)
+        #expect(!state.isPublishingVideo)
     }
 }
 

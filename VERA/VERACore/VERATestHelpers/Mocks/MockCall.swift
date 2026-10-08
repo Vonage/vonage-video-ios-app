@@ -36,6 +36,7 @@ public class MockCall: CallFacade, AudioMuteControllable {
         _publisherAudioLevel.eraseToAnyPublisher()
 
     public var recordedActions: [CallActions] = []
+    public private(set) var recordedAudioMuteStates: [Bool] = []
 
     public var isMuted: Bool = false
     public var isOnHold: Bool = false
@@ -84,7 +85,7 @@ public class MockCall: CallFacade, AudioMuteControllable {
     }
 
     public func muteLocalAudio(_ isMuted: Bool) {
-        self.isMuted = isMuted
+        recordedAudioMuteStates.append(isMuted)
         recordedActions.append(.muteLocalAudio)
     }
 

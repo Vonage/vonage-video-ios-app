@@ -2,9 +2,11 @@
 //  Created by Vonage on 13/10/25.
 //
 
+import Combine
 import Foundation
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 import VERAVonage
 
@@ -130,7 +132,8 @@ struct VonageCallKitPluginTests {
 
         sut.providerDelegate?.onMute?(isMuted)
 
-        #expect(call.isMuted == isMuted)
+        #expect(call.recordedAudioMuteStates == [isMuted])
+        #expect(!call.isMuted)
         #expect(call.recordedActions.contains(.muteLocalAudio))
         #expect(!call.recordedActions.contains(.muteLocalMedia))
     }
@@ -280,6 +283,27 @@ struct VonageCallKitPluginTests {
         #expect(sut.pluginIdentifier == "VonageCallKitPlugin")
     }
 
+    @Test(arguments: [true, false])
+    func audioMuteMockDoesNotChangeFullMediaMuteState(fullMediaMuted: Bool) {
+        let call = MockCall()
+        call.isMuted = fullMediaMuted
+        call.muteLocalAudio(!fullMediaMuted)
+        #expect(call.isMuted == fullMediaMuted)
+        #expect(call.recordedAudioMuteStates == [!fullMediaMuted])
+    }
+
+    @Test(arguments: [true, false])
+    func systemMuteUsesBulkFallbackForLegacyFacade(isMuted: Bool) {
+        let sut = makeSUT()
+        let call = LegacyCallFacade()
+        sut.call = call
+        sut.setup()
+        sut.providerDelegate?.onMute?(isMuted)
+        #expect(call.stub.isMuted == isMuted)
+        #expect(call.stub.recordedActions.contains(.muteLocalMedia))
+        #expect(!call.stub.recordedActions.contains(.muteLocalAudio))
+    }
+
     // MARK: SUT
 
     func makeSUT(callController: MockCallController? = nil) -> VonageCallKitPlugin {
@@ -293,4 +317,40 @@ struct VonageCallKitPluginTests {
 
 private func delay() async {
     try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+}
+
+// Composition deliberately leaves this custom facade without the optional audio-only capability.
+private final class LegacyCallFacade: CallFacade {
+    let stub = MockCall()
+    var participantsPublisher: AnyPublisher<ParticipantsState, Never> { stub.participantsPublisher }
+    var eventsPublisher: AnyPublisher<SessionEvent, Never> { stub.eventsPublisher }
+    var statePublisher: AnyPublisher<SessionState, Never> { stub.statePublisher }
+    var callState: AnyPublisher<CallState, Never> { stub.callState }
+    var archivingState: AnyPublisher<ArchivingState, Never> { stub.archivingState }
+    var captionsPublisher: AnyPublisher<[CaptionItem], Never> { stub.captionsPublisher }
+    var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> { stub.networkStatsPublisher }
+    var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { stub.publisherAudioLevelPublisher }
+    var isMuted: Bool { stub.isMuted }
+    var isOnHold: Bool { stub.isOnHold }
+    var areCaptionsEnabled: Bool { stub.areCaptionsEnabled }
+    func connect() async throws { try await stub.connect() }
+    func disconnect() async throws { try await stub.disconnect() }
+    func toggleLocalVideo() { stub.toggleLocalVideo() }
+    func toggleLocalCamera() { stub.toggleLocalCamera() }
+    func toggleLocalAudio() { stub.toggleLocalAudio() }
+    func muteLocalMedia(_ muted: Bool) { stub.muteLocalMedia(muted) }
+    func setOnHold(_ held: Bool) { stub.setOnHold(held) }
+    func enableCaptions() async { await stub.enableCaptions() }
+    func disableCaptions() async { await stub.disableCaptions() }
+    func enableNetworkStats() { stub.enableNetworkStats() }
+    func disableNetworkStats() { stub.disableNetworkStats() }
+    func enableSubscriberExtraStats() { stub.enableSubscriberExtraStats() }
+    func disableSubscriberExtraStats() { stub.disableSubscriberExtraStats() }
+    func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {
+        try await stub.applyPublisherAdvancedSettings(settings)
+    }
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {
+        await stub.updateLivePublisherAdvancedSettings(settings)
+    }
+    func forceMuteParticipant(id: String) async throws { try await stub.forceMuteParticipant(id: id) }
 }
