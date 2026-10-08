@@ -157,6 +157,9 @@ public final class VonageCall: CallFacade {
     public var publisherParticipant: Participant?
 
     /// Repository used to recreate the publisher with new settings during ``applyPublisherAdvancedSettings(_:)``.
+    @MainActor private var publisherSettingsOperation: Task<Void, Error>?
+    @MainActor private var publisherSettingsOperationID: UUID?
+
     private let publisherRepository: PublisherRepository
 
     private let subscriberFactory: VonageSubscriberFactory
@@ -745,9 +748,38 @@ public final class VonageCall: CallFacade {
     /// - Parameter advancedSettings: The desired publisher configuration. Only the SDK-level
     ///   fields (resolution, frame rate, codec, audio bitrate, audio fallback) are
     ///   used; audio/video publishing, camera position, and transformers are preserved.
-    /// - Throws: If unpublish, publisher recreation, or re-publish fails.
+    /// Replacements run serially. Cancellation before a replacement starts leaves the current
+    /// publisher intact; after unpublish, replacement finishes unless the call has ended.
+    /// - Throws: If cancelled before replacement starts, or unpublish/recreation fails.
     @MainActor
     public func applyPublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        try Task.checkCancellation()
+        let previous = publisherSettingsOperation
+        let operationID = UUID()
+        let operation = Task { @MainActor [weak self] in
+            _ = try? await previous?.value
+            try Task.checkCancellation()
+            guard let self else { return }
+            try await self.performPublisherReplacement(advancedSettings)
+        }
+        publisherSettingsOperation = operation
+        publisherSettingsOperationID = operationID
+        defer {
+            if publisherSettingsOperationID == operationID {
+                publisherSettingsOperation = nil
+                publisherSettingsOperationID = nil
+            }
+        }
+        try await withTaskCancellationHandler {
+            try await operation.value
+        } onCancel: {
+            operation.cancel()
+        }
+    }
+
+    @MainActor
+    private func performPublisherReplacement(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        try Task.checkCancellation()
         guard _callState.value == .connected else { return }
 
         // 1. Capture current runtime state
@@ -778,6 +810,10 @@ public final class VonageCall: CallFacade {
 
         // Yield so the run loop can process the unpublish event before OTPublisher init.
         await Task.yield()
+
+        // Once unpublish starts, finish restoring a valid publisher even if the settings task
+        // is cancelled. A call that has ended must never create or publish new media.
+        guard _callState.value == .connected else { return }
 
         // 4. Build merged settings: new SDK fields + preserved runtime state
         let mergedSettings = PublisherSettings(

@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -553,4 +554,78 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+
+@Suite("PublisherReplacementCancellationTests", .serialized)
+@MainActor
+struct PublisherReplacementCancellationTests {
+    private func makeCall(_ session: VonageSession = PublisherReplacementCancellationTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewCancelledRepublishDoesNotRecreatePublisher() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        repository.publisherToReturn = VonagePublisherSpy()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: repository,
+            statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let task = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        task.cancel()
+        _ = try? await task.value
+        #expect(
+            repository.recreatePublisherCallCount == 0,
+            "cancelled republish still destroys and recreates publisher")
+        try await call.disconnect()
+    }
+
+    @Test func concurrentReplacementsUnpublishEachPublisherInOrder() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        let original = VonagePublisherSpy()
+        let replacement = VonagePublisherSpy()
+        repository.publisherToReturn = replacement
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: original,
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let first = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        let second = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .low))
+        }
+        try await first.value
+        try await second.value
+        #expect(session.unpublished == [ObjectIdentifier(original), ObjectIdentifier(replacement)])
+        #expect(repository.recreatePublisherCallCount == 2)
+        try await call.disconnect()
+    }
+}
+
+private final class PublisherReplacementCancellationTestsSession: VonageSession {
+    var disconnectCount = 0
+    var unpublished: [ObjectIdentifier] = []
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws { unpublished.append(ObjectIdentifier(publisher)) }
 }
