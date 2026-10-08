@@ -264,7 +264,7 @@ private final class ArchivingDataSourceFactorySpy:
 private final class SessionRepositoryStub: SessionRepository {
     var currentCall: (any CallFacade)?
 
-    func createSession(_ credentials: RoomCredentials) async throws -> any CallFacade {
+    func createSession(for roomName: RoomName) async throws -> any CallFacade {
         let call = CallFacadeStub()
         currentCall = call
         return call
@@ -290,7 +290,7 @@ private final class CallFacadeStub: CallFacade {
     var isOnHold = false
     var areCaptionsEnabled = false
 
-    func connect() {}
+    func connect() async throws {}
     func disconnect() async throws {}
     func toggleLocalVideo() {}
     func toggleLocalCamera() {}

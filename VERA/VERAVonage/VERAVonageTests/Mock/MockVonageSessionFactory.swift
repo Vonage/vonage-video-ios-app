@@ -20,6 +20,6 @@ class MockVonageSessionFactory: SessionFactory {
         guard let otSession = OTSession(applicationId: "appId", sessionId: "sessionId", delegate: nil) else {
             throw Error.sessionInitializationFailed
         }
-        return VonageSession(session: otSession)
+        return VonageSession(session: otSession, credentials: credentials)
     }
 }

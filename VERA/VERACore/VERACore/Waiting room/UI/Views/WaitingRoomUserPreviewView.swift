@@ -64,7 +64,8 @@ struct WaitingRoomUserPreviewView: View {
 
     var body: some View {
         ZStack {
-            if let publisher = state.publisher {
+            // Show the live preview only when video is enabled, so it never leaks behind the avatar.
+            if state.isCameraEnabled, let publisher = state.publisher {
                 PublisherVideoView(videoView: publisher.view)
             } else {
                 PublisherVideoView(videoView: nil)

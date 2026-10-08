@@ -55,7 +55,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
             targets.append(testableTarget("VERAReactionsTests", in: "VERAReactions"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERASettingsTests", in: "VERASettings"))
         }
         if isFeatureEnabled("meetingRoomSettings", "allowFeedback") {
@@ -83,7 +83,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowArchiving") {
             targets.append(testableTarget("VERAVonageArchivingPluginTests", in: "VERAVonageArchivingPlugin"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERAVonageSettingsPluginTests", in: "VERAVonageSettingsPlugin"))
         }
         if isFeatureEnabled("meetingRoomSettings", "allowScreenShare") {
@@ -121,7 +121,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
             targets.append(testableTarget("VERAReactionsSnapshotTests", in: "VERAReactions"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERASettingsSnapshotTests", in: "VERASettings"))
         }
         if isFeatureEnabled("audioSettings", "allowAdvancedNoiseSuppression") {

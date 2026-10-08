@@ -7,6 +7,7 @@ import Foundation
 public enum E2EConfiguration {
     public static let enabledArgument = "VERA_E2E_MOCKS"
     public static let failEndpointArgument = "VERA_E2E_FAIL_ENDPOINT"
+    public static let failStatusArgument = "VERA_E2E_FAIL_STATUS"
     public static let scenarioArgument = "VERA_E2E_SCENARIO"
     public static let forceMuteScenarioArgument = "VERA_E2E_FORCE_MUTE_SCENARIO"
 
@@ -32,6 +33,10 @@ public enum E2EConfiguration {
 
     static var failedEndpoint: E2EEndpoint? {
         launchValue(for: failEndpointArgument).flatMap(E2EEndpoint.init(rawValue:))
+    }
+
+    static var failedStatusCode: Int {
+        launchValue(for: failStatusArgument).flatMap(Int.init) ?? 500
     }
 
     private static func launchValue(for key: String) -> String? {

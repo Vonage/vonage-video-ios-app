@@ -162,8 +162,9 @@ public protocol CallArchivingPublisherProvider: AnyObject {
 public protocol CallConnectable: AnyObject {
     /// Initiates a connection to the session.
     ///
+    /// - Throws: An error if the session cannot be created or the connection fails.
     /// - Important: Implementations should transition to ``CallState/connecting`` and, on success, ``CallState/connected``.
-    func connect()
+    func connect() async throws
 
     /// Disconnects from the session and performs cleanup.
     ///

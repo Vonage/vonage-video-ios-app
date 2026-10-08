@@ -57,7 +57,7 @@ public class MockCall: CallFacade {
 
     public init() {}
 
-    public func connect() {
+    public func connect() async throws {
         recordedActions.append(.connect)
     }
 

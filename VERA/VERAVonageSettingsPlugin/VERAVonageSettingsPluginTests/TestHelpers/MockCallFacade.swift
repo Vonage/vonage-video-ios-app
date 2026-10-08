@@ -47,7 +47,7 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     var updateLivePublisherAdvancedSettingsCallCount = 0
     var lastLiveSettings: PublisherAdvancedSettings?
 
-    func connect() {}
+    func connect() async throws {}
     func disconnect() async throws {}
     func toggleLocalVideo() {}
     func toggleLocalAudio() {}
