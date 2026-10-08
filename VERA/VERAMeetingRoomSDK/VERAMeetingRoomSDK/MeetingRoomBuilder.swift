@@ -456,8 +456,9 @@ public final class MeetingRoomBuilder {
             }
         )
 
-        // 5. Set top trailing buttons (audio route picker)
-        meetingRoomViewModel.extraTopTrailingButtons = Self.topTrailingButtons
+        // 5. Set top trailing buttons (audio route picker), gated by device-selection config
+        meetingRoomViewModel.extraTopTrailingButtons =
+            _configuration.allowDeviceSelection ? Self.topTrailingButtons : []
 
         // 6. Compose the final view with all overlays
         let composedView = MeetingRoomComposedView(
@@ -475,11 +476,9 @@ public final class MeetingRoomBuilder {
             floatingEmojisOverlayViewModel: floatingEmojisOverlayViewModel,
             emojiPickerContainerViewModel: emojiPickerContainerViewModel,
             statsOverlayViewModel: statsOverlayViewModel
-        ).task { [weak container, weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
-            guard let container else { return }
+        ).task { [weak effectsVM = buttonsAssembler.videoEffectsViewModel] in
             await MediaPermissions.requestPermissionsIfNeeded()
 
-            container.resetPublisher()
             effectsVM?.reapplyCurrentEffect()
         }
 

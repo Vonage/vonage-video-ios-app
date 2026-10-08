@@ -130,8 +130,8 @@ struct PictureInPictureOrchestratorTests {
 @MainActor
 private func makeSUT() -> VonageCall {
     VonageCall(
-        credentials: makeMockCredentials(),
-        session: VonageSessionSpy(),
+        roomName: "roomName",
+        makeSession: { _ in VonageSessionSpy() },
         publisher: VonagePublisherSpy(),
         publisherRepository: MockPublisherRepository(),
         statsCollector: MockStatsCollector()

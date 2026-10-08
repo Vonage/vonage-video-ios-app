@@ -84,6 +84,7 @@ slather-report/
 
 # Tuist
 **/Derived/
+VERA/Tuist/Package.resolved
 setUpInfoPlist.sh
 setUpOkta.sh
 VERA.entitlements

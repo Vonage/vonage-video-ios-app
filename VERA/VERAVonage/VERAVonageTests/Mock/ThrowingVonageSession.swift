@@ -4,6 +4,7 @@
 
 import Foundation
 import OpenTok
+import VERADomain
 import VERAVonage
 
 class ThrowingVonageSession: VonageSession {
@@ -17,10 +18,16 @@ class ThrowingVonageSession: VonageSession {
             session: OTSession(
                 applicationId: "applicationId",
                 sessionId: "sessionId",
-                delegate: nil)!)
+                delegate: nil)!,
+            credentials: RoomCredentials(
+                sessionId: "sessionId",
+                token: "token",
+                applicationId: "applicationId",
+                roomName: "roomName",
+                sessionKey: "sessionKey"))
     }
 
-    public override func connect(with token: String) throws {
+    public override func connect() throws {
         throw Error.any
     }
 

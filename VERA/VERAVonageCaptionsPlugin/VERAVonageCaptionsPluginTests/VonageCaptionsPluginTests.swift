@@ -350,7 +350,7 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
         case enableCaptions, disableCaptions
     }
 
-    func connect() { recordedActions.append(.connect) }
+    func connect() async throws { recordedActions.append(.connect) }
     func disconnect() async throws { recordedActions.append(.disconnect) }
     func toggleLocalVideo() { recordedActions.append(.toggleLocalVideo) }
     func toggleLocalAudio() { recordedActions.append(.toggleLocalAudio) }

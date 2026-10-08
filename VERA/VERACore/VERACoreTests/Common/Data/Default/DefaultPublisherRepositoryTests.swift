@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 import XCTest
 
@@ -19,6 +20,17 @@ final class DefaultPublisherRepositoryTests: XCTestCase {
         _ = try sut.getPublisher()
 
         sut.resetPublisher()
+    }
+
+    func test_recreatePublisher_replacesCachedPublisherWithNewInstance() async throws {
+        let publisher = MockVERAPublisher()
+        let publisherFactory = MockPublisherFactory(mockPublisher: publisher)
+        let sut = try await makeSUT(publisherFactory: publisherFactory)
+
+        try sut.recreatePublisher(PublisherSettings())
+
+        let recreated = try sut.getPublisher()
+        XCTAssertTrue(recreated === publisher)
     }
 
     // MARK: - Test Helpers
