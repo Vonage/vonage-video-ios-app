@@ -131,7 +131,8 @@ struct VonageCallKitPluginTests {
         sut.providerDelegate?.onMute?(isMuted)
 
         #expect(call.isMuted == isMuted)
-        #expect(call.recordedActions.contains(.muteLocalMedia))
+        #expect(call.recordedActions.contains(.muteLocalAudio))
+        #expect(!call.recordedActions.contains(.muteLocalMedia))
     }
 
     @Test func whenProviderDelegateResetsProviderShouldDisconnect() async {

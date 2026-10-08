@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import VERADomain
 
-public class MockCall: CallFacade {
+public class MockCall: CallFacade, AudioMuteControllable {
 
     public let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     public lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
@@ -50,6 +50,7 @@ public class MockCall: CallFacade {
         case toggleLocalAudio
         case toggleLocalCamera
         case muteLocalMedia
+        case muteLocalAudio
         case setOnHold
         case enableCaptions
         case disableCaptions
@@ -80,6 +81,11 @@ public class MockCall: CallFacade {
     public func muteLocalMedia(_ isMuted: Bool) {
         self.isMuted = isMuted
         recordedActions.append(.muteLocalMedia)
+    }
+
+    public func muteLocalAudio(_ isMuted: Bool) {
+        self.isMuted = isMuted
+        recordedActions.append(.muteLocalAudio)
     }
 
     public func forceMuteParticipant(id: String) async throws {
