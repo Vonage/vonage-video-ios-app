@@ -110,8 +110,8 @@ public final class DefaultArchivesRepository: ArchivesRepository {
                 } catch {
                     guard !Task.isCancelled else { return }
                     state.removePublisher(publisher, for: sessionKey)
-                    publisher.send(completion: .failure(error))
                     state.removeTask(for: sessionKey)
+                    publisher.send(completion: .failure(error))
                     return
                 }
             } while !Task.isCancelled
