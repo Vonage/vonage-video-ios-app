@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -553,4 +554,76 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+
+@Suite("PublisherErrorForwardingTests", .serialized)
+@MainActor
+struct PublisherErrorForwardingTests {
+    private func makeCall(_ session: VonageSession = PublisherErrorForwardingTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+
+    @Test func publisherDelegateFailureReachesCallEvents() async throws {
+        let session = PublisherErrorForwardingTestsSession()
+        let call = makeCall(session)
+        var errors: [NSError] = []
+        let observation = call.eventsPublisher.sink {
+            if case .error(let error) = $0 { errors.append(error as NSError) }
+        }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let error = OTError(domain: "review.publisher", code: 1, userInfo: nil)
+        call.publisher.publisher(call.publisher.otPublisher, didFailWithError: error)
+        #expect(errors.count == 1)
+        #expect(errors.first === error)
+        try await call.disconnect()
+    }
+
+    @Test func replacementPublisherForwardsErrorsAndOldPublisherStopsForwarding() async throws {
+        let session = PublisherErrorForwardingTestsSession()
+        let repository = MockPublisherRepository()
+        let replacement = VonagePublisherSpy()
+        repository.publisherToReturn = replacement
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: VonagePublisherSpy(),
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        var errors: [NSError] = []
+        let observation = call.eventsPublisher.sink {
+            if case .error(let error) = $0 { errors.append(error as NSError) }
+        }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let original = call.publisher
+        try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        let error = OTError(domain: "review.publisher", code: 2, userInfo: nil)
+        original.publisher(original.otPublisher, didFailWithError: error)
+        #expect(errors.isEmpty)
+        replacement.publisher(replacement.otPublisher, didFailWithError: error)
+        #expect(errors.count == 1)
+        #expect(errors.first === error)
+        try await call.disconnect()
+    }
+}
+
+private final class PublisherErrorForwardingTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
 }
