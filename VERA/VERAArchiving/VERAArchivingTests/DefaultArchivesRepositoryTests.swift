@@ -355,6 +355,30 @@ struct DefaultArchivesRepositoryTests {
         #expect(source.callCount == 0)
     }
 
+    @Test func joiningSubscribersRetryTogetherAfterControlledFailure() async throws {
+        let source = ControlledRetryArchivesSource()
+        let repository = makeSUT(archivesDataSource: source)
+        let publisher = await repository.getArchives(sessionKey: "controlled-retry")
+        let observed = publisher.handleEvents(receiveSubscription: { _ in
+            Task { await source.didSubscribe() }
+        }).eraseToAnyPublisher()
+        let recovered = observed.catch { _ in observed }.eraseToAnyPublisher()
+        let first = Task { try await awaitFirstNonEmptyValue(from: recovered) }
+        await source.waitForRequests(1)
+        let second = Task { try await awaitFirstNonEmptyValue(from: recovered) }
+        await source.waitForSubscriptions(2)
+        await source.failPending()
+        await source.waitForSubscriptions(4)
+        await source.waitForRequests(2)
+        let archive = makeArchive(id: UUID(), status: .available)
+        await source.completePending(with: [archive])
+        let firstArchives = try await first.value
+        let secondArchives = try await second.value
+        #expect(firstArchives.first?.id == archive.id)
+        #expect(secondArchives.first?.id == archive.id)
+        #expect(await source.requestCount == 2)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -524,3 +548,45 @@ struct DefaultArchivesRepositoryTests {
 }
 
 private struct TimeoutError: Error {}
+
+private actor ControlledRetryArchivesSource: ArchivesDataSource {
+    private(set) var requestCount = 0
+    private var subscriptionCount = 0
+    private var pending: [CheckedContinuation<[Archive], Error>] = []
+    private var requestWaiters: [(Int, CheckedContinuation<Void, Never>)] = []
+    private var subscriptionWaiters: [(Int, CheckedContinuation<Void, Never>)] = []
+
+    func getArchives(sessionKey: String) async throws -> [Archive] {
+        try await withCheckedThrowingContinuation { continuation in
+            pending.append(continuation)
+            requestCount += 1
+            let ready = requestWaiters.filter { $0.0 <= requestCount }
+            requestWaiters.removeAll { $0.0 <= requestCount }
+            ready.forEach { $0.1.resume() }
+        }
+    }
+    func didSubscribe() {
+        subscriptionCount += 1
+        let ready = subscriptionWaiters.filter { $0.0 <= subscriptionCount }
+        subscriptionWaiters.removeAll { $0.0 <= subscriptionCount }
+        ready.forEach { $0.1.resume() }
+    }
+    func waitForRequests(_ count: Int) async {
+        if requestCount >= count { return }
+        await withCheckedContinuation { requestWaiters.append((count, $0)) }
+    }
+    func waitForSubscriptions(_ count: Int) async {
+        if subscriptionCount >= count { return }
+        await withCheckedContinuation { subscriptionWaiters.append((count, $0)) }
+    }
+    func failPending() {
+        let requests = pending
+        pending.removeAll()
+        requests.forEach { $0.resume(throwing: MockArchivesDataSourceError()) }
+    }
+    func completePending(with archives: [Archive]) {
+        let requests = pending
+        pending.removeAll()
+        requests.forEach { $0.resume(returning: archives) }
+    }
+}

@@ -18,13 +18,21 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         private var observers: [String: Set<UUID>] = [:]
         private var pollingTasks: [String: (id: UUID, task: Task<Void, Never>)] = [:]
 
-        func beginObservation(_ id: UUID, for key: String) -> CurrentValueSubject<[Archive], Error> {
+        func beginObservation(
+            _ observerID: UUID, for key: String,
+            createTask: (UUID, CurrentValueSubject<[Archive], Error>) -> Task<Void, Never>
+        ) -> CurrentValueSubject<[Archive], Error> {
             lock.lock()
             defer { lock.unlock() }
-            observers[key, default: []].insert(id)
-            if let publisher = cache[key] { return publisher }
-            let publisher = CurrentValueSubject<[Archive], Error>([])
+            observers[key, default: []].insert(observerID)
+            let publisher = cache[key] ?? CurrentValueSubject<[Archive], Error>([])
             cache[key] = publisher
+            // Resolve the subject and reserve its poller in the same critical section.
+            // A concurrent failure cannot evict the subject between these two operations.
+            if pollingTasks[key] == nil {
+                let taskID = UUID()
+                pollingTasks[key] = (taskID, createTask(taskID, publisher))
+            }
             return publisher
         }
 
@@ -43,15 +51,6 @@ public final class DefaultArchivesRepository: ArchivesRepository {
             let task = pollingTasks.removeValue(forKey: key)?.task
             lock.unlock()
             task?.cancel()
-        }
-
-        func startTaskIfNeeded(for key: String, create: (UUID) -> Task<Void, Never>) {
-            lock.lock()
-            defer { lock.unlock() }
-            guard pollingTasks[key] == nil, observers[key]?.isEmpty == false else { return }
-            let id = UUID()
-            // The task checks its identity under this lock before doing work. Register it first.
-            pollingTasks[key] = (id, create(id))
         }
 
         func isCurrent(_ id: UUID, for key: String) -> Bool {
@@ -97,8 +96,9 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         Deferred { [weak self] () -> AnyPublisher<[Archive], Error> in
             guard let self else { return Empty(completeImmediately: true).eraseToAnyPublisher() }
             let observerID = UUID()
-            let publisher = self.state.beginObservation(observerID, for: sessionKey)
-            self.startPolling(for: sessionKey, publisher: publisher)
+            let publisher = self.state.beginObservation(observerID, for: sessionKey) { id, subject in
+                self.makePollingTask(for: sessionKey, id: id, publisher: subject)
+            }
             return publisher.handleEvents(
                 receiveCompletion: { [state = self.state] _ in
                     state.endObservation(observerID, for: sessionKey)
@@ -110,24 +110,24 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         }.eraseToAnyPublisher()
     }
 
-    private func startPolling(for sessionKey: String, publisher: CurrentValueSubject<[Archive], Error>) {
-        state.startTaskIfNeeded(for: sessionKey) { id in
-            Task { [state, archivesDataSource, pollingInterval] in
-                defer { state.finishTask(id, for: sessionKey) }
-                while !Task.isCancelled, state.isCurrent(id, for: sessionKey) {
-                    do {
-                        let archives = try await archivesDataSource.getArchives(sessionKey: sessionKey)
-                        guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
-                        publisher.send(archives)
-                        if Self.shouldStopPolling(archives) { return }
-                        try await Task.sleep(nanoseconds: UInt64(pollingInterval * 1_000_000_000))
-                    } catch {
-                        guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
-                        // Release the task and failed cache before completion callbacks can retry.
-                        state.finishTask(id, for: sessionKey, evictPublisher: true)
-                        publisher.send(completion: .failure(error))
-                        return
-                    }
+    private func makePollingTask(
+        for sessionKey: String, id: UUID, publisher: CurrentValueSubject<[Archive], Error>
+    ) -> Task<Void, Never> {
+        Task { [state, archivesDataSource, pollingInterval] in
+            defer { state.finishTask(id, for: sessionKey) }
+            while !Task.isCancelled, state.isCurrent(id, for: sessionKey) {
+                do {
+                    let archives = try await archivesDataSource.getArchives(sessionKey: sessionKey)
+                    guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
+                    publisher.send(archives)
+                    if Self.shouldStopPolling(archives) { return }
+                    try await Task.sleep(nanoseconds: UInt64(pollingInterval * 1_000_000_000))
+                } catch {
+                    guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
+                    // Release the task and failed cache before completion callbacks can retry.
+                    state.finishTask(id, for: sessionKey, evictPublisher: true)
+                    publisher.send(completion: .failure(error))
+                    return
                 }
             }
         }
