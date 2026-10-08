@@ -10,7 +10,9 @@ import VERADomain
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
-    private var cancellables = Set<AnyCancellable>()
+    @MainActor private var archiveObservation: AnyCancellable?
+    @ObservationIgnored
+    @MainActor private var loadRequestID: UUID?
     @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
     @ObservationIgnored
@@ -31,11 +33,18 @@ public final class ArchivesViewModel {
         self.playRecordingUseCase = playRecordingUseCase
     }
 
-    @BackgroundActor
+    @MainActor
     public func loadData() async {
-        await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
+        archiveObservation?.cancel()
+        archiveObservation = nil
+        let requestID = UUID()
+        loadRequestID = requestID
+        let publisher = await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
+        guard loadRequestID == requestID else { return }
+        archiveObservation =
+            publisher
             .receive(on: DispatchQueue.main)
-            .map { [weak self] archives in
+            .map { [weak self] archives -> [ArchiveUIData] in
                 guard let self else { return [] }
                 return
                     archives
@@ -49,17 +58,18 @@ public final class ArchivesViewModel {
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
                         Task { @MainActor [weak self] in
+                            guard self?.loadRequestID == requestID else { return }
                             self?.error = AlertItem.goodbyeError(error.localizedDescription)
                         }
                     }
                 },
                 receiveValue: { [weak self] archives in
                     Task { @MainActor [weak self] in
+                        guard self?.loadRequestID == requestID else { return }
                         self?.archives = archives
                     }
                 }
             )
-            .store(in: &cancellables)
     }
 
     public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {

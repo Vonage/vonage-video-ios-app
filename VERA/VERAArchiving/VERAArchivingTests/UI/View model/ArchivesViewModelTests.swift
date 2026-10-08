@@ -246,6 +246,38 @@ struct ArchivesViewModelTests {
         #expect(playUseCase.callCount == 1)
     }
 
+    @Test func repeatedLoadKeepsOnlyOneArchiveObservation() async {
+        let repository = RefreshObservationRepository()
+        let sut = makeSUT(archivesRepository: repository)
+        for _ in 0..<20 { await sut.loadData() }
+        #expect(repository.activeSubscriptions == 1)
+        #expect(repository.maximumActiveSubscriptions == 1)
+        withExtendedLifetime(sut) {}
+    }
+
+    @Test func overlappingLoadsDiscardOlderRepositoryLookup() async {
+        let repository = DeferredRefreshRepository()
+        let sut = makeSUT(archivesRepository: repository)
+        let first = Task { await sut.loadData() }
+        await repository.waitForFirstRequest()
+        await sut.loadData()
+        await repository.finishFirstRequest()
+        await first.value
+        #expect(repository.subscribedRequests == [2])
+        withExtendedLifetime(sut) {}
+    }
+
+    @Test func releasingArchiveViewModelCancelsObservation() async {
+        let repository = RefreshObservationRepository()
+        var sut: ArchivesViewModel? = makeSUT(archivesRepository: repository)
+        await sut?.loadData()
+        weak var weakModel = sut
+        #expect(repository.activeSubscriptions == 1)
+        sut = nil
+        #expect(weakModel == nil)
+        #expect(repository.activeSubscriptions == 0)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -307,17 +339,87 @@ final class SpyArchivesRepository: ArchivesRepository {
     }
 }
 
-final class SpyPlayRecordingUseCase: PlayRecordingUseCase {
-    var callCount = 0
-    var lastArchive: Archive?
-    var shouldThrowError = false
-
+final class SpyPlayRecordingUseCase: PlayRecordingUseCase, @unchecked Sendable {
+    private let lock = NSLock()
+    private var recordedCalls = 0
+    private var recordedArchive: Archive?
+    private var failureEnabled = false
+    var callCount: Int { lock.withLock { recordedCalls } }
+    var lastArchive: Archive? { lock.withLock { recordedArchive } }
+    var shouldThrowError: Bool {
+        get { lock.withLock { failureEnabled } }
+        set { lock.withLock { failureEnabled = newValue } }
+    }
     func callAsFunction(_ archive: Archive) async throws {
-        callCount += 1
-        lastArchive = archive
-
-        if shouldThrowError {
-            throw NSError(domain: "test", code: -1)
+        let shouldThrow = recordCall(archive)
+        if shouldThrow { throw NSError(domain: "test", code: -1) }
+    }
+    private func recordCall(_ archive: Archive) -> Bool {
+        lock.withLock {
+            recordedCalls += 1
+            recordedArchive = archive
+            return failureEnabled
         }
     }
+}
+
+private final class RefreshObservationRepository: ArchivesRepository, @unchecked Sendable {
+    private let lock = NSLock()
+    private var active = 0
+    private var maximum = 0
+    private let subject = PassthroughSubject<[Archive], Error>()
+    var activeSubscriptions: Int { lock.withLock { active } }
+    var maximumActiveSubscriptions: Int { lock.withLock { maximum } }
+    func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
+        subject.handleEvents(
+            receiveSubscription: { [weak self] _ in
+                guard let self else { return }
+                self.lock.withLock {
+                    self.active += 1
+                    self.maximum = max(self.maximum, self.active)
+                }
+            },
+            receiveCancel: { [weak self] in
+                guard let self else { return }
+                self.lock.withLock { self.active -= 1 }
+            }
+        ).eraseToAnyPublisher()
+    }
+}
+
+private actor DeferredRefreshRepository: ArchivesRepository {
+    private let subscriptions = RefreshRequestCounter()
+    private var requests = 0
+    private var firstRequest: CheckedContinuation<Void, Never>?
+    private var waitingForFirst: CheckedContinuation<Void, Never>?
+    nonisolated var subscribedRequests: [Int] { subscriptions.values }
+    func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
+        requests += 1
+        let request = requests
+        if request == 1 {
+            await withCheckedContinuation { continuation in
+                firstRequest = continuation
+                waitingForFirst?.resume()
+                waitingForFirst = nil
+            }
+        }
+        return PassthroughSubject<[Archive], Error>()
+            .handleEvents(receiveSubscription: { [subscriptions] _ in subscriptions.record(request) })
+            .eraseToAnyPublisher()
+    }
+    func waitForFirstRequest() async {
+        if firstRequest != nil { return }
+        await withCheckedContinuation { waitingForFirst = $0 }
+    }
+    func finishFirstRequest() {
+        firstRequest?.resume()
+        firstRequest = nil
+    }
+}
+
+private final class RefreshRequestCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var requests: [Int] = []
+    var values: [Int] { lock.withLock { requests } }
+    func record(_ request: Int) { lock.withLock { requests.append(request) } }
 }
