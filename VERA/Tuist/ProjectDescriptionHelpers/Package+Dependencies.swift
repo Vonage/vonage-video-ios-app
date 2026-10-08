@@ -3,7 +3,7 @@ import ProjectDescription
 extension Package {
     public static let vonageVideoSDK = Package.package(
         url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-        .upToNextMinor(from: "2.35.1")
+        .upToNextMinor(from: DependencyVersions.vonageVideoSDK)
     )
 }
 
@@ -21,6 +21,13 @@ extension TargetDependency {
         .sdk(name: "Accelerate", type: .framework, status: .required),
         .sdk(name: "c++", type: .library, status: .required),
     ]
+}
+
+extension Package {
+    public static let vonageVideoTransformersSDK = Package.package(
+        url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
+        .upToNextMinor(from: DependencyVersions.vonageVideoTransformersSDK)
+    )
 }
 
 extension TargetDependency {
@@ -45,7 +52,7 @@ extension TargetDependency {
 extension Package {
     public static let swiftSnapshotTesting = Package.package(
         url: "https://github.com/pointfreeco/swift-snapshot-testing",
-        .upToNextMinor(from: "1.18.4")
+        .upToNextMinor(from: DependencyVersions.swiftSnapshotTesting)
     )
 }
 
@@ -56,7 +63,7 @@ extension TargetDependency {
 extension Package {
     public static let cocoaLumberjack = Package.package(
         url: "https://github.com/CocoaLumberjack/CocoaLumberjack",
-        .upToNextMajor(from: "3.8.5")
+        .upToNextMajor(from: DependencyVersions.cocoaLumberjack)
     )
 }
 

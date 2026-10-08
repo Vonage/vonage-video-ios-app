@@ -108,6 +108,21 @@ Core framework modules also target **macOS 14.6+** to enable fast unit-test runs
 
 This app has been tested with **Vonage Video SDK 2.32** and **2.33**. Use the latest available SDK version where possible.
 
+## Updating a dependency version
+
+All external dependency versions live in one file: `VERA/Dependencies.json`.
+Both the root `Package.swift` and the Tuist helper
+`VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift` read it directly.
+
+1. Edit the version in `VERA/Dependencies.json`.
+2. Vonage SDKs live under the `vonage` key. If you change `videoSDK`, also change
+   `videoTransformersSDK` to the same version (Client SDK team requirement).
+   Other dependencies live under `thirdParty`.
+3. Run `tuist generate` from `VERA/` and verify the project builds and tests pass.
+   If Xcode/SPM keeps resolving the old version, reset the package cache
+   (File ▸ Packages ▸ Reset Package Caches), since manifest caching only tracks
+   `Package.swift` itself.
+
 ## Documentation
 
 | Guide | Description |
