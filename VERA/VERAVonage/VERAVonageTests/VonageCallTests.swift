@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -553,4 +554,48 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+
+@Suite("RepublishBitratePresetTests", .serialized)
+@MainActor
+struct RepublishBitratePresetTests {
+    private func makeCall(_ session: VonageSession = RepublishBitratePresetTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewRepublishPreservesBitratePreset() async throws {
+        let session = RepublishBitratePresetTestsSession()
+        let repository = MockPublisherRepository()
+        repository.publisherToReturn = VonagePublisherSpy()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: repository,
+            statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let settings = PublisherAdvancedSettings(
+            videoResolution: .high,
+            videoBitratePreset: .extraBwSaver, maxVideoBitrate: 300_000)
+        try await call.applyPublisherAdvancedSettings(settings)
+        #expect(repository.recordedSettings.last?.advancedSettings?.videoBitratePreset == .extraBwSaver)
+        try await call.disconnect()
+    }
+}
+
+private final class RepublishBitratePresetTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
 }
