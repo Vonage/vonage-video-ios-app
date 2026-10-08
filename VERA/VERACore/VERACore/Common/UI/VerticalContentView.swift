@@ -42,9 +42,7 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
 
             Spacer()
 
-            HStack(spacing: 8) {
-                GHRepoButton()
-            }
+            AppVersionFooter()
             .frame(maxWidth: .infinity)
             .frame(height: 50)
             .padding(.horizontal)
