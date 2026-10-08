@@ -279,6 +279,22 @@ struct VonageCallKitPluginTests {
         #expect(sut.pluginIdentifier == "VonageCallKitPlugin")
     }
 
+    @Test func reviewHeldCallStillDisconnectsOnSystemHangup() async {
+        let sut = makeSUT()
+        let call = MockCall()
+        sut.call = call
+        sut.setup()
+        // Isolate the hangup callback from Simulator's automatic provider-reset callback.
+        sut.providerDelegate?.onProviderReset = nil
+        await delay()
+        call.setOnHold(true)
+        call.recordedActions.removeAll()
+        #expect(call.isOnHold)
+        sut.providerDelegate?.onEndCall?()
+        await delay()
+        #expect(call.recordedActions.contains(.disconnect))
+    }
+
     // MARK: SUT
 
     func makeSUT(callController: MockCallController? = nil) -> VonageCallKitPlugin {

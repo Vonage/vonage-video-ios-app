@@ -105,13 +105,12 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - `VERACallManager` to manage CallKit transactions
     /// - `OTAudioSessionManager` in Calling Services mode
     /// - `ProviderDelegate` event handlers to sync with the call façade:
-    ///   - `onEndCall`: Ends the call unless the call is currently on hold
+    ///   - `onEndCall`: Ends the call, including while it is on hold
     ///   - `onProviderReset`: Ends the call on provider reset
     ///   - `onHold`: Toggles call hold state on the façade
     ///   - `onMute`: Toggles local media mute on the façade
     ///
     /// - Important: Must be called before invoking lifecycle methods or handling events.
-    /// - Note: End-call events are ignored while on hold to preserve the paused state.
     public func setup() {
 
         callManager = VERACallManager()
@@ -123,12 +122,8 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
         providerDelegate?.onEndCall = { [weak self] in
             Task { [weak self] in
                 guard let self else { return }
-                if let isOnHold = self.call?.isOnHold, isOnHold {
-                    // Ignore end call event
-                } else {
-                    self.currentCallID = nil
-                    try? await self.call?.disconnect()
-                }
+                self.currentCallID = nil
+                try? await self.call?.disconnect()
             }
         }
         providerDelegate?.onProviderReset = { [weak self] in
