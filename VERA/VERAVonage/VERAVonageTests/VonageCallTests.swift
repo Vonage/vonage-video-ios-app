@@ -614,6 +614,29 @@ struct PublisherReplacementCancellationTests {
         #expect(repository.recreatePublisherCallCount == 2)
         try await call.disconnect()
     }
+    @Test func failedReplacementPreventsQueuedWorkFromUnpublishingDestroyedPublisher() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = FailingReplacementRepository()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: VonagePublisherSpy(),
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let first = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        let second = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .low))
+        }
+        await #expect(throws: ReplacementFailure.self) { try await first.value }
+        await #expect(throws: ReplacementFailure.self) { try await second.value }
+        #expect(session.unpublished.count == 1)
+        #expect(repository.recreateCount == 1)
+        try await call.disconnect()
+    }
+
 }
 
 private final class PublisherReplacementCancellationTestsSession: VonageSession {
@@ -628,4 +651,15 @@ private final class PublisherReplacementCancellationTestsSession: VonageSession 
     override func disconnect() throws { disconnectCount += 1 }
     override func publish(publisher: VonagePublisher) throws {}
     override func unpublish(publisher: VonagePublisher) throws { unpublished.append(ObjectIdentifier(publisher)) }
+}
+
+private enum ReplacementFailure: Error { case failed }
+private final class FailingReplacementRepository: PublisherRepository {
+    var recreateCount = 0
+    func recreatePublisher(_ settings: PublisherSettings) throws {
+        recreateCount += 1
+        throw ReplacementFailure.failed
+    }
+    func getPublisher() -> any VERAPublisher { VonagePublisherSpy() }
+    func resetPublisher() {}
 }

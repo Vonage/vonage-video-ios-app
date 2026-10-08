@@ -476,6 +476,7 @@ public final class VonageCall: CallFacade {
     ///
     /// - Throws: ``Error/callNotConnected`` if the call is not currently in ``CallState/connected``.
     /// - Important: Cancels Combine subscriptions and clears plugin assignments as part of teardown.
+    @MainActor
     public func disconnect() async throws {
         guard _callState.value == .connected else {
             _eventsPublisher.value = .error(CallError.callNotConnected)
@@ -757,7 +758,11 @@ public final class VonageCall: CallFacade {
         let previous = publisherSettingsOperation
         let operationID = UUID()
         let operation = Task { @MainActor [weak self] in
-            _ = try? await previous?.value
+            do {
+                try await previous?.value
+            } catch is CancellationError {
+                // Superseded work cancelled before unpublish leaves a valid publisher.
+            }
             try Task.checkCancellation()
             guard let self else { return }
             try await self.performPublisherReplacement(advancedSettings)
