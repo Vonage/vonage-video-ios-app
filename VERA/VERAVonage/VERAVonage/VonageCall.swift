@@ -173,6 +173,8 @@ public final class VonageCall: CallFacade {
     /// - SeeAlso: ``assignPlugins(_:)``, `VonageSignalEmitter`, `VonagePluginCallHolder`, `VonageSignalHandler`
     public var plugins: [any VonagePlugin] = []
 
+    @Atomic private var isTerminal = false
+    @MainActor private var credentialResolutionTask: Task<VonageSession, Error>?
     @MainActor private var connectionAttemptID: UUID?
     @MainActor private var teardownTask: Task<Void, Error>?
 
@@ -255,7 +257,7 @@ public final class VonageCall: CallFacade {
             self?.sessionDidReconnect()
         }
         session.onSessionDidConnect = { [weak self] in
-            guard let self, self._callState.value == .connecting else { return }
+            guard let self, !self.isTerminal, self._callState.value == .connecting else { return }
             self.updateCallState(to: .connected)
             self.publishToSession()
             Task { [weak self] in
@@ -454,20 +456,27 @@ public final class VonageCall: CallFacade {
     @MainActor
     public func connect() async throws {
         // A call instance has one lifecycle. Cancellation must not be undone by a later start.
-        guard _callState.value == .idle else { return }
+        guard !isTerminal, _callState.value == .idle else { return }
         try Task.checkCancellation()
         let attemptID = UUID()
         connectionAttemptID = attemptID
         updateCallState(to: .connecting)
+        let resolution = Task { @MainActor [makeSession, roomName] in try await makeSession(roomName) }
+        credentialResolutionTask = resolution
+        defer { credentialResolutionTask = nil }
         let session: VonageSession
         do {
-            session = try await makeSession(roomName)
+            session = try await withTaskCancellationHandler {
+                try await resolution.value
+            } onCancel: {
+                resolution.cancel()
+            }
         } catch {
             guard connectionAttemptID == attemptID else { throw CancellationError() }
             try? await disconnect()
             throw error
         }
-        guard connectionAttemptID == attemptID, _callState.value == .connecting, !Task.isCancelled else {
+        guard !isTerminal, connectionAttemptID == attemptID, _callState.value == .connecting, !Task.isCancelled else {
             session.cleanUp()
             if connectionAttemptID == attemptID { try? await disconnect() }
             throw CancellationError()
@@ -478,8 +487,9 @@ public final class VonageCall: CallFacade {
         do {
             try session.connect()
         } catch {
-            _eventsPublisher.value = .error(error)
             try? await disconnect()
+            _eventsPublisher.value = .error(error)
+            throw error
         }
     }
 
@@ -494,7 +504,9 @@ public final class VonageCall: CallFacade {
             return
         }
         guard _callState.value != .disconnected else { return }
+        isTerminal = true
         connectionAttemptID = nil
+        credentialResolutionTask?.cancel()
         updateCallState(to: .disconnecting)
         let operation = Task { @MainActor [weak self] in
             guard let self else { return }
@@ -536,11 +548,13 @@ public final class VonageCall: CallFacade {
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
+        isTerminal = true
         _eventsPublisher.send(.sessionFailure(error))
         Task { @MainActor [weak self] in try? await self?.disconnect() }
     }
 
     private func sessionDidDisconnect() {
+        isTerminal = true
         _eventsPublisher.send(.disconnected)
         Task { @MainActor [weak self] in try? await self?.disconnect() }
     }

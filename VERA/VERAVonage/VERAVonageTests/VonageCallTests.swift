@@ -39,7 +39,7 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        try await sut.connect()
+        await #expect(throws: ThrowingVonageSession.Error.self) { try await sut.connect() }
 
         let event = await sut.eventsPublisher.values.first { event in
             if case .error = event { return true }
@@ -572,7 +572,7 @@ struct CallTerminationTests {
         var state: CallState = .idle
         let observation = call.callState.sink { state = $0 }
         call.setup()
-        try await call.connect()
+        await #expect(throws: ThrowingVonageSession.Error.self) { try await call.connect() }
         #expect(state == .disconnected, "connect failure leaves call stuck connecting")
         observation.cancel()
     }
@@ -669,6 +669,57 @@ struct CallTerminationTests {
         #expect(state == .disconnected)
         #expect(session.cleanupCount == 1)
     }
+    @Test func synchronousConnectionFailureIsRethrownAfterCleanup() async throws {
+        let call = makeCall(ThrowingVonageSession())
+        var capturedError: Swift.Error?
+        call.setup()
+        do { try await call.connect() } catch { capturedError = error }
+        #expect(capturedError is ThrowingVonageSession.Error)
+    }
+
+    @Test(arguments: [true, false])
+    func terminalCallbackImmediatelyRejectsLateConnect(isFailure: Bool) async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        call.setup()
+        try await call.connect()
+        let lateConnect = session.onSessionDidConnect
+        if isFailure {
+            session.onSessionFailure?(NSError(domain: "terminal", code: 1))
+        } else {
+            session.onSessionDidDisconnect?()
+        }
+        lateConnect?()
+        #expect(session.publishCount == 0)
+        try await Task.sleep(for: .milliseconds(100))
+    }
+
+    @Test(arguments: [true, false])
+    func credentialProviderReceivesCancellation(cancelCaller: Bool) async throws {
+        var started = false
+        var cancelled = false
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in
+                started = true
+                do { try await Task.sleep(for: .seconds(10)) } catch {
+                    cancelled = Task.isCancelled
+                    throw error
+                }
+                return CallTerminationTestsSession()
+            }, publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+        call.setup()
+        let connecting = Task { @MainActor in try await call.connect() }
+        for _ in 0..<100 where !started { await Task.yield() }
+        #expect(started)
+        if cancelCaller { connecting.cancel() } else { try await call.disconnect() }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(cancelled)
+        connecting.cancel()
+        _ = try? await connecting.value
+    }
+
 }
 
 private final class CallTerminationTestsSession: VonageSession {

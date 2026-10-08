@@ -10,6 +10,8 @@ applyTo: "VERA/**/VERAVonageCallKitPlugin/**/*,VERA/**/VERAVonage/**/*"
 - State is emitted via `_callState` (`CurrentValueSubject`). Consumers observe `callState: AnyPublisher<CallState, Never>`.
 - `disconnect()` is idempotent and accepts calls still connecting or resolving credentials. Concurrent requests share one cleanup task.
 - Reject late session creation and connected callbacks after cancellation; a call instance has one lifecycle.
+- Terminal callbacks set the terminal flag synchronously before scheduling cleanup. Disconnect and caller cancellation cancel the stored credential-resolution task.
+- SDK connection errors are forwarded and rethrown after teardown, preserving the original error.
 
 ### Cleanup ordering
 - `VonageCall.disconnect()` performs cleanup in a specific sequence — preserve this order:
