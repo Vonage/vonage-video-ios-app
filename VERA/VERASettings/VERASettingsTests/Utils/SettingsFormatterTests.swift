@@ -4,11 +4,12 @@
 
 import Foundation
 import Testing
+import VERACommonUI
 import VERADomain
 
 @testable import VERASettings
 
-@Suite("SettingsFormatter Tests")
+@Suite("SettingsFormatter Tests", .serialized)
 struct SettingsFormatterTests {
 
     // MARK: - formatBytes Tests
@@ -117,6 +118,19 @@ struct SettingsFormatterTests {
     func formatBandwidthBps() {
         let result = SettingsFormatter.formatBandwidth(Int64(500))
         #expect(result == "500.0 bps")
+    }
+
+    @Test("Formats decimal values using the selected app locale")
+    func formatsDecimalValuesUsingSelectedAppLocale() {
+        let languageStore = AppLanguageStore.shared
+        let previousSelection = languageStore.selection
+        languageStore.selection = .german
+        defer { languageStore.selection = previousSelection }
+
+        #expect(SettingsFormatter.formatBandwidth(Int64(2_500_000)) == "2,5 Mbps")
+        #expect(SettingsFormatter.formatBandwidth(Int64(500)) == "500,0 bps")
+        #expect(SettingsFormatter.formatFrameRate(30.0) == "30 fps")
+        #expect(SettingsFormatter.formatDuration(milliseconds: 1_500) == "1,5 s")
     }
 
     // MARK: - formatFrameRate Tests

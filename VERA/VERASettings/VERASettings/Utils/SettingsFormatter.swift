@@ -146,17 +146,17 @@ enum SettingsFormatter {
         return switch bps {
         case ...0: nil
         case 1_000_000...:
-            String(format: "%.1f Mbps", bps / 1_000_000)
+            String(format: "%.1f Mbps", locale: AppLanguageStore.shared.locale, bps / 1_000_000)
         case 1_000...:
-            String(format: "%.1f kbps", bps / 1_000)
+            String(format: "%.1f kbps", locale: AppLanguageStore.shared.locale, bps / 1_000)
         default:
-            "\(bps) bps"
+            String(format: "%.1f bps", locale: AppLanguageStore.shared.locale, bps)
         }
     }
 
     /// Formats a frame rate as a string (e.g., "30 fps").
     static func formatFrameRate(_ fps: Double) -> String {
-        String(format: "%.0f fps", fps)
+        String(format: "%.0f fps", locale: AppLanguageStore.shared.locale, fps)
     }
 
     /// Formats width × height as a resolution string (e.g., "1280×720").
@@ -170,7 +170,7 @@ enum SettingsFormatter {
         if seconds < 1 {
             return "\(milliseconds) ms"
         } else if seconds < 60 {
-            return String(format: "%.1f s", seconds)
+            return String(format: "%.1f s", locale: AppLanguageStore.shared.locale, seconds)
         } else {
             let minutes = Int(seconds) / 60
             let remainingSeconds = Int(seconds) % 60

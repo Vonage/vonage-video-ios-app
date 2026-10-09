@@ -178,7 +178,11 @@ final class DependencyContainer {
                 }
 
             }
-            adapter.setup(with: settingsRepository.preferencesPublisher)
+            let repository = settingsRepository
+            Task {
+                await repository.setup()
+                adapter.setup(with: repository.preferencesPublisher)
+            }
             return adapter
         }()
     #endif
