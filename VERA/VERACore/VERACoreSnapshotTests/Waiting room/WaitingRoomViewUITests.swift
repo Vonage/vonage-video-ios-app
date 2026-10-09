@@ -56,7 +56,7 @@ class WaitingRoomViewUITests {
         let sut = makeSUT()
 
         assertSnapshot(
-            of: sut.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
+            of: sut.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: config)),
             named: deviceName,
             record: isRecording,
@@ -72,7 +72,7 @@ class WaitingRoomViewUITests {
             .environment(\.colorScheme, scheme)
 
         assertSnapshot(
-            of: sut.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
+            of: sut.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: schemeName,
             record: isRecording,
@@ -88,7 +88,7 @@ class WaitingRoomViewUITests {
             .environment(\.colorScheme, scheme)
 
         assertSnapshot(
-            of: sut.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
+            of: sut.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: schemeName,
             record: isRecording,
@@ -134,7 +134,7 @@ class WaitingRoomViewUITests {
         column: UInt = #column
     ) {
         assertSnapshot(
-            of: view.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
+            of: view.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: named,
             record: isRecording,
