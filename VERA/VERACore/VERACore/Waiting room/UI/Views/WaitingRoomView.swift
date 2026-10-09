@@ -139,7 +139,11 @@ struct HorizontalWaitingRoomContentView: View {
     let onCameraToggle: () -> Void
 
     var body: some View {
-        HorizontalContentView(showHeader: verticalSizeClass == .regular, ignoresKeyboard: false) {
+        HorizontalContentView(
+            showHeader: verticalSizeClass == .regular,
+            showFooter: verticalSizeClass == .regular,
+            ignoresKeyboard: false
+        ) {
             VideoPreviewView(
                 state: state,
                 userName: userName,

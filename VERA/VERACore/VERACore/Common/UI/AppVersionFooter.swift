@@ -10,7 +10,11 @@ struct AppVersionDisplay {
     let sdkVersion: String?
 
     static func versionText(appVersion: String?, sdkVersion: String?) -> String {
-        "v\(appVersion ?? "Unknown") (SDK \(sdkVersion ?? "Unknown"))"
+        let unknownVersion = String(localized: "Unknown", bundle: .veraCore)
+        return String(
+            format: String(localized: "v%@ (SDK %@)", bundle: .veraCore),
+            arguments: [appVersion ?? unknownVersion, sdkVersion ?? unknownVersion]
+        )
     }
 }
 
