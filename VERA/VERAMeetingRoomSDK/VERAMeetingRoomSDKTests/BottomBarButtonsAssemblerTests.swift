@@ -776,6 +776,59 @@ struct BottomBarButtonsAssemblerTests {
         }
     }
 
+    @Test(arguments: [MeetingRoomFeature.archiving, .captions, .backgroundEffects, .audioEffects])
+    @MainActor
+    func cleanupReleasesFeatureModelWithoutStateChange(feature: MeetingRoomFeature) {
+        let container = makeContainer(enabledFeatures: [feature])
+        let assembler = BottomBarButtonsAssembler(container: container, enabledFeatures: [feature])
+        let reference = bindLifetimeModel(feature, container: container, assembler: assembler)
+        #expect(reference.object != nil)
+        assembler.cleanUp()
+        #expect(reference.object == nil)
+    }
+
+    @Test(arguments: [MeetingRoomFeature.archiving, .captions, .backgroundEffects, .audioEffects])
+    @MainActor
+    func assemblerDeallocationReleasesFeatureModel(feature: MeetingRoomFeature) {
+        let container = makeContainer(enabledFeatures: [feature])
+        var assembler: BottomBarButtonsAssembler? = BottomBarButtonsAssembler(
+            container: container, enabledFeatures: [feature])
+        let reference = bindLifetimeModel(feature, container: container, assembler: assembler!)
+        weak var weakAssembler = assembler
+        assembler = nil
+        #expect(weakAssembler == nil)
+        #expect(reference.object == nil)
+    }
+
+    @MainActor
+    private func bindLifetimeModel(
+        _ feature: MeetingRoomFeature, container: MeetingRoomSDKContainer, assembler: BottomBarButtonsAssembler
+    ) -> FeatureModelWeakReference {
+        let reference = FeatureModelWeakReference()
+        switch feature {
+        case .archiving:
+            let (_, model) = container.archivingFactory.makeArchivingButton { _ in }
+            assembler.archiveButtonViewModel = model
+            reference.object = model
+        case .captions:
+            let (_, model) = container.captionsFactory.makeCaptionsButton()
+            assembler.captionsButtonViewModel = model
+            reference.object = model
+        case .backgroundEffects:
+            let model = container.backgroundEffectFactory.makeViewModel {
+                MockVERAPublisher()
+            }
+            assembler.videoEffectsViewModel = model
+            reference.object = model
+        case .audioEffects:
+            let model = container.audioEffectsFactory.makeMeetingNoiseSuppressionButton().viewModel
+            assembler.meetingNoiseSuppressionButtonViewModel = model
+            reference.object = model
+        default: Issue.record("Unsupported lifetime fixture")
+        }
+        return reference
+    }
+
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>
     ) -> MeetingRoomSDKContainer {
@@ -791,4 +844,8 @@ struct BottomBarButtonsAssemblerTests {
             date: Date()
         )
     }
+}
+
+private final class FeatureModelWeakReference {
+    weak var object: AnyObject?
 }
