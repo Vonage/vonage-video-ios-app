@@ -25,6 +25,9 @@ jobs:
           brew install swift-format
           swift-format --version
   
+      - name: Validate localization catalogs
+        run: python3 scripts/validate-localizations.py
+
       - name: Check Swift formatting
         run: |
           chmod +x scripts/format.sh
