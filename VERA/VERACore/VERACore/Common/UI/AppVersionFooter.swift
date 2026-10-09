@@ -5,13 +5,28 @@
 import SwiftUI
 import VERACommonUI
 
-enum AppVersionDisplay {
+struct AppVersionDisplay {
+    let appVersion: String?
+    let sdkVersion: String?
+
     static func versionText(appVersion: String?, sdkVersion: String?) -> String {
         "v\(appVersion ?? "Unknown") (SDK \(sdkVersion ?? "Unknown"))"
     }
 }
 
+private struct AppVersionDisplayKey: EnvironmentKey {
+    static let defaultValue: AppVersionDisplay? = nil
+}
+
+extension EnvironmentValues {
+    var appVersionDisplay: AppVersionDisplay? {
+        get { self[AppVersionDisplayKey.self] }
+        set { self[AppVersionDisplayKey.self] = newValue }
+    }
+}
+
 struct AppVersionFooter: View {
+    @Environment(\.appVersionDisplay) private var versionDisplay
     private let appVersion: String?
     private let sdkVersion: String?
 
@@ -32,9 +47,14 @@ struct AppVersionFooter: View {
                     .adaptiveFont(.bodyBase)
                     .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
 
-                Text(AppVersionDisplay.versionText(appVersion: appVersion, sdkVersion: sdkVersion))
-                    .adaptiveFont(.caption)
-                    .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
+                Text(
+                    AppVersionDisplay.versionText(
+                        appVersion: versionDisplay?.appVersion ?? appVersion,
+                        sdkVersion: versionDisplay?.sdkVersion ?? sdkVersion
+                    )
+                )
+                .adaptiveFont(.caption)
+                .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
             }
         }
         .accessibilityIdentifier(LandingPageAccessibilityID.versionFooter)
