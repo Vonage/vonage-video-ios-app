@@ -79,7 +79,7 @@ public struct ParticipantsListView: View {
         }
         .tint(theme.textSecondary)
         .presentationDetents([.medium, .large])
-        .opaquePresentationBackground(theme.background)
+        .presentationBackground(theme.background)
         .presentationDragIndicator(.visible)
     }
 

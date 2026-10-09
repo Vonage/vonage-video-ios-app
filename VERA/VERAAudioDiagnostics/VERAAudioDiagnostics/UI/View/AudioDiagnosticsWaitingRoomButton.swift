@@ -60,7 +60,7 @@
                     )
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.hidden)
-                    .opaquePresentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
+                    .presentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
                 )
             }
             .padding()

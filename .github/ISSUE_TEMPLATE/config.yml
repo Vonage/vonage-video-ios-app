@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Need help with running the Vonage Video iOS App?
+    url: https://api.support.vonage.com/hc/en-us
+    about: Check out our support page.
+  - name: Read our contributing guidelines
+    url: https://github.com/Vonage/vonage-video-ios-app/blob/develop/docs/CONTRIBUTING.md
+    about: Non-trivial feature requests should be discussed and approved here before opening a PR.
