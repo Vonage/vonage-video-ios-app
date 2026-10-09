@@ -24,7 +24,6 @@ jobs:
     env:
       BASE_API_URL: ${{ secrets.BASE_API_URL || 'https://ci.vera.invalid/' }}
       DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
-      MARKETING_VERSION: "1.0"
       CURRENT_PROJECT_VERSION: ${{ github.run_number }}
       OKTA_ISSUER_URL: ${{ secrets.OKTA_ISSUER_URL || 'https://idp.vera.invalid/' }}
       OKTA_CLIENT_ID: ${{ secrets.OKTA_CLIENT_ID || 'vera-ci' }}
