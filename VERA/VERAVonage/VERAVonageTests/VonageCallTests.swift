@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -553,4 +554,61 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+
+@Suite("CallObserverLifetimeTests", .serialized)
+@MainActor
+struct CallObserverLifetimeTests {
+    private func makeCall(_ session: VonageSession = CallObserverLifetimeTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewSetupCallReleasesWhenOwnerDropsIt() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call?.setup()
+        try await Task.sleep(for: .milliseconds(100))
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil, "setup observer keeps call alive after its owner releases it")
+    }
+
+    @Test func reviewCallWithoutObserversReleases() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call = nil
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(observed == nil)
+    }
+
+    @Test func reviewNormalDisconnectReleasesCall() async throws {
+        let session = CallObserverLifetimeTestsSession()
+        var call: VonageCall? = makeCall(session)
+        weak var observed = call
+        call?.setup()
+        try await call?.connect()
+        session.onSessionDidConnect?()
+        try await Task.sleep(for: .milliseconds(100))
+        try await call?.disconnect()
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil)
+    }
+}
+
+private final class CallObserverLifetimeTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
 }
