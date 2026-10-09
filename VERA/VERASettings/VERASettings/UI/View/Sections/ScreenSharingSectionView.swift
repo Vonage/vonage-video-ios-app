@@ -79,7 +79,7 @@ struct ScreenSharingSectionView: View {
             SettingsDivider()
             Picker("Bitrate".localized, selection: preferences.screenShareBitratePreset) {
                 Text("SDK default".localized).tag(Optional<SettingsVideoBitratePreset>.none)
-                ForEach(SettingsVideoBitratePreset.allCases) { preset in
+                ForEach(SettingsVideoBitratePreset.allCases.filter { $0 != .default }) { preset in
                     Text(preset.displayName).tag(Optional(preset))
                 }
             }

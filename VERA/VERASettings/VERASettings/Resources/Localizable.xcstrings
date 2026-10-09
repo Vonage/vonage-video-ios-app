@@ -625,7 +625,7 @@
         }
       }
     },
-    "Detail": {
+    "Sharp detail": {
       "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.detail (develop 77c9b91).",
       "localizations": {
         "en": {
@@ -1233,7 +1233,7 @@
         }
       }
     },
-    "Motion": {
+    "Smooth motion": {
       "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.motion (develop 77c9b91).",
       "localizations": {
         "en": {
@@ -1803,7 +1803,7 @@
         }
       }
     },
-    "Text": {
+    "Readable text": {
       "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.text (develop 77c9b91).",
       "localizations": {
         "en": {

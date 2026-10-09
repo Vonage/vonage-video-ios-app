@@ -81,9 +81,9 @@ extension VideoContentHint {
     var displayName: String {
         switch self {
         case .automatic: "Automatic".localized
-        case .motion: "Motion".localized
-        case .detail: "Detail".localized
-        case .text: "Text".localized
+        case .motion: "Smooth motion".localized
+        case .detail: "Sharp detail".localized
+        case .text: "Readable text".localized
         }
     }
 }

@@ -204,6 +204,22 @@ struct UserDefaultsSettingsRepositoryTests {
         #expect(loadedPreferences.senderStatsEnabled == true)
     }
 
+    @Test("Persisted preferences are published before setup")
+    func persistedPreferencesArePublishedBeforeSetup() async {
+        let userDefaults = UserDefaults.ephemeral()
+        var persistedPreferences = PublisherSettingsPreferences.default
+        persistedPreferences.screenShareContentHint = .text
+        let sourceRepository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        await sourceRepository.save(persistedPreferences)
+
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        var receivedPreferences: [PublisherSettingsPreferences] = []
+        let cancellable = repository.preferencesPublisher.sink { receivedPreferences.append($0) }
+
+        #expect(receivedPreferences == [persistedPreferences])
+        withExtendedLifetime(cancellable) {}
+    }
+
     @Test("Corrupted data falls back to defaults")
     func corruptedDataFallsBackToDefaults() async {
         let userDefaults = UserDefaults.ephemeral()
