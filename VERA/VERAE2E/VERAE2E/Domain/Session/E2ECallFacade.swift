@@ -7,7 +7,7 @@ import Foundation
 import VERADomain
 import VERAVonage
 
-public final class E2ECallFacade: CallFacade {
+public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     public lazy var _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
     public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
 
@@ -107,6 +107,12 @@ public final class E2ECallFacade: CallFacade {
             .init(
                 isPublishingAudio: !isMuted,
                 isPublishingVideo: !isMuted))
+    }
+
+    public func muteLocalAudio(_ isMuted: Bool) {
+        let current = stateSubject.value
+        stateSubject.send(.init(isPublishingAudio: !isMuted, isPublishingVideo: current.isPublishingVideo))
+        self.isMuted = isMuted && !current.isPublishingVideo
     }
 
     public func setOnHold(_ isOnHold: Bool) {

@@ -232,6 +232,15 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             view: view)
     }
 
+    /// Changes the microphone choice without resuming media while the call is held.
+    public func setAudioMuted(_ isMuted: Bool) {
+        if isOnHold {
+            wasPublishingAudio = !isMuted
+        } else {
+            otPublisher.publishAudio = !isMuted
+        }
+    }
+
     /// Sets or clears hold mode on the publisher.
     ///
     /// When entering hold, current audio/video states are remembered and disabled.
