@@ -385,7 +385,7 @@ if ! xcrun simctl list devices available | grep -q "$DEVICE"; then
 fi
 
 # Get simulator UUID for reliable operations
-SIMULATOR_ID=$(xcrun simctl list devices available | grep "$DEVICE" | head -n 1 | grep -oE '\([A-F0-9-]+\)' | tr -d '()')
+SIMULATOR_ID=$(xcrun simctl list devices available | grep -F "$DEVICE (" | head -n 1 | grep -oE '\([A-F0-9-]+\)' | tr -d '()')
 
 if [ -z "$SIMULATOR_ID" ]; then
     echo -e "${RED}❌ Could not get simulator ID for '$DEVICE'${NC}"
@@ -467,7 +467,7 @@ run_maestro_flow() {
 
     echo -e "${BLUE}▶ Running flow: $flow_name${NC}"
 
-    if maestro test \
+    if maestro --device "$SIMULATOR_ID" test \
         --config .maestro/config.yaml \
         --env APP_ID="$APP_ID" \
         --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
@@ -510,7 +510,7 @@ if [ "$VERA_E2E_MOCKS_VALUE" -eq 0 ]; then
         fi
     fi
 else
-    if maestro test \
+    if maestro --device "$SIMULATOR_ID" test \
         --config .maestro/config.yaml \
         --env APP_ID="$APP_ID" \
         --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \

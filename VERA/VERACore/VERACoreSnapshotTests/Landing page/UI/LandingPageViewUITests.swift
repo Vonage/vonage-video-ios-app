@@ -39,7 +39,7 @@ struct LandingPageViewUITests {
         let sut = makeSUT()
 
         assertSnapshot(
-            of: sut,
+            of: sut.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: config)),
             named: deviceName,
             record: isRecording,
@@ -55,7 +55,7 @@ struct LandingPageViewUITests {
             .environment(\.colorScheme, scheme)
 
         assertSnapshot(
-            of: sut,
+            of: sut.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: schemeName,
             record: isRecording,
@@ -80,7 +80,7 @@ struct LandingPageViewUITests {
         column: UInt = #column
     ) {
         assertSnapshot(
-            of: view,
+            of: view.environment(\.appVersionDisplay, SnapshotTestHelper.footerVersions),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: named,
             record: isRecording,

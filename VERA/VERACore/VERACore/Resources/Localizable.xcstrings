@@ -388,6 +388,24 @@
         }
       }
     },
+    "Unknown" : {
+      "comment" : "Fallback displayed when an app or SDK version is unavailable.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconocido"
+          }
+        }
+      }
+    },
     "User name cannot be empty" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -401,6 +419,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nombre de usuario vacío"
+          }
+        }
+      }
+    },
+    "v%@ (SDK %@)" : {
+      "comment" : "The app version and Vonage Video SDK version displayed in the footer.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v%@ (SDK %@)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v%@ (SDK %@)"
           }
         }
       }

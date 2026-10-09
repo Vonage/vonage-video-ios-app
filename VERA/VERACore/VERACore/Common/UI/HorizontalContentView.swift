@@ -89,14 +89,9 @@ struct HorizontalContentView<Left: View, Right: View>: View {
                 Spacer()
 
                 if showFooter {
-                    HStack(spacing: 8) {
-                        GHRepoButton()
-                        Text("Vonage Video Reference Application", bundle: .veraCore)
-                            .adaptiveFont(.bodyBase)
-                            .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: footerHeight)
+                    AppVersionFooter()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: footerHeight)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
