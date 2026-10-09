@@ -47,7 +47,7 @@ applyTo: "VERA/**/VERAVonageCallKitPlugin/**/*,VERA/**/VERAVonage/**/*"
 
 ### Hold and interruptions
 - Hold preserves audio/video subscription state in `wasSubscribedToAudio`/`wasSubscribedToVideo` on each subscriber and restores it on unhold. Do not reset these flags outside of the hold flow.
-- `VonageCallKitPlugin` bridges CXCallController actions (`end`, `hold`, `mute`) to `CallFacade` methods. The `onEndCall` closure ignores end-call while on hold — do not remove this guard.
+- `VonageCallKitPlugin` bridges CXCallController actions (`end`, `hold`, `mute`) to `CallFacade` methods. An explicit `onEndCall` action must disconnect the call even while it is on hold; hold preserves a session, but hangup terminates it.
 
 ### Visibility-driven bandwidth
 - `VonageSubscriber` uses `onAppear`/`onDisappear` callbacks with a 500ms debounce to toggle `subscribeToVideo`. Changes to this debounce or visibility logic affect bandwidth for all participants.
