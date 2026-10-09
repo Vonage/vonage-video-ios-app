@@ -173,6 +173,11 @@ public final class VonageCall: CallFacade {
     /// - SeeAlso: ``assignPlugins(_:)``, `VonageSignalEmitter`, `VonagePluginCallHolder`, `VonageSignalHandler`
     public var plugins: [any VonagePlugin] = []
 
+    @Atomic private var isTerminal = false
+    @MainActor private var credentialResolutionTask: Task<VonageSession, Error>?
+    @MainActor private var connectionAttemptID: UUID?
+    @MainActor private var teardownTask: Task<Void, Error>?
+
     private var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
 
     /// A publisher that emits the current connection state of the call, never fails.
@@ -252,8 +257,9 @@ public final class VonageCall: CallFacade {
             self?.sessionDidReconnect()
         }
         session.onSessionDidConnect = { [weak self] in
-            self?.updateCallState(to: .connected)
-            self?.publishToSession()
+            guard let self, !self.isTerminal, self._callState.value == .connecting else { return }
+            self.updateCallState(to: .connected)
+            self.publishToSession()
             Task { [weak self] in
                 await self?.notifyCallDidStartToPlugins()
             }
@@ -447,14 +453,33 @@ public final class VonageCall: CallFacade {
     ///
     /// - Throws: Any error creating the session (e.g. authentication) or connecting.
     /// - SeeAlso: ``disconnect()``
+    @MainActor
     public func connect() async throws {
+        // A call instance has one lifecycle. Cancellation must not be undone by a later start.
+        guard !isTerminal, _callState.value == .idle else { return }
+        try Task.checkCancellation()
+        let attemptID = UUID()
+        connectionAttemptID = attemptID
         updateCallState(to: .connecting)
+        let resolution = Task { @MainActor [makeSession, roomName] in try await makeSession(roomName) }
+        credentialResolutionTask = resolution
+        defer { credentialResolutionTask = nil }
         let session: VonageSession
         do {
-            session = try await makeSession(roomName)
+            session = try await withTaskCancellationHandler {
+                try await resolution.value
+            } onCancel: {
+                resolution.cancel()
+            }
         } catch {
-            updateCallState(to: .disconnected)
+            guard connectionAttemptID == attemptID else { throw CancellationError() }
+            try? await disconnect()
             throw error
+        }
+        guard !isTerminal, connectionAttemptID == attemptID, _callState.value == .connecting, !Task.isCancelled else {
+            session.cleanUp()
+            if connectionAttemptID == attemptID { try? await disconnect() }
+            throw CancellationError()
         }
         self.session = session
         setupSessionHandlers(session)
@@ -462,44 +487,58 @@ public final class VonageCall: CallFacade {
         do {
             try session.connect()
         } catch {
+            try? await disconnect()
             _eventsPublisher.value = .error(error)
+            throw error
         }
     }
 
-    /// Disconnects from the Vonage session and performs complete cleanup.
-    ///
-    /// Gracefully terminates the call, cleaning up subscribers, publisher, plugins,
-    /// and session resources. Updates the call state to ``CallState/disconnected`` upon completion.
-    ///
-    /// - Throws: ``Error/callNotConnected`` if the call is not currently in ``CallState/connected``.
-    /// - Important: Cancels Combine subscriptions and clears plugin assignments as part of teardown.
+    /// Terminates a call, including one still resolving credentials or connecting to the SDK.
+    /// Concurrent and repeated requests share one cleanup operation. Cancels observers and
+    /// clears plugin assignments before releasing SDK resources and publishing `.disconnected`.
+    /// - Throws: A session disconnect error, after cleanup has completed.
+    @MainActor
     public func disconnect() async throws {
-        guard _callState.value == .connected else {
-            _eventsPublisher.value = .error(CallError.callNotConnected)
-            throw CallError.callNotConnected
+        if let teardownTask {
+            try await teardownTask.value
+            return
         }
-        _callState.value = .disconnecting
+        guard _callState.value != .disconnected else { return }
+        isTerminal = true
+        connectionAttemptID = nil
+        credentialResolutionTask?.cancel()
+        updateCallState(to: .disconnecting)
+        let operation = Task { @MainActor [weak self] in
+            guard let self else { return }
+            try await self.finishDisconnection()
+        }
+        teardownTask = operation
+        defer { teardownTask = nil }
+        try await operation.value
+    }
 
-        do {
-            await callStateManager.cleanUpParticipants()
-            await notifyCallDidEndToPlugins()
-            unassignPlugins()
-            cancellables.forEach { $0.cancel() }
-            cancellables.removeAll()
-            subscriberCancellables.removeAll()
-            publisherCancellables.removeAll()
-            stopCaptionCleanup()
-            isNetworkStatsEnabled = false
-            statsCollector.reset()
-            try requireSession().disconnect()
+    @MainActor
+    private func finishDisconnection() async throws {
+        await callStateManager.cleanUpParticipants()
+        await notifyCallDidEndToPlugins()
+        unassignPlugins()
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        subscriberCancellables.removeAll()
+        publisherCancellables.removeAll()
+        stopCaptionCleanup()
+        isNetworkStatsEnabled = false
+        statsCollector.reset()
+        defer {
             publisher.cleanUp()
             session?.cleanUp()
             updateCallState(to: .disconnected)
+        }
+        do {
+            // A cancelled credential lookup has not created a session yet.
+            try session?.disconnect()
         } catch {
             _eventsPublisher.value = .error(error)
-            publisher.cleanUp()
-            session?.cleanUp()
-            updateCallState(to: .disconnected)
             throw error
         }
     }
@@ -509,11 +548,15 @@ public final class VonageCall: CallFacade {
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
+        isTerminal = true
         _eventsPublisher.send(.sessionFailure(error))
+        Task { @MainActor [weak self] in try? await self?.disconnect() }
     }
 
     private func sessionDidDisconnect() {
+        isTerminal = true
         _eventsPublisher.send(.disconnected)
+        Task { @MainActor [weak self] in try? await self?.disconnect() }
     }
 
     private func sessionDidBeginReconnecting() {
