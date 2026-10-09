@@ -51,11 +51,20 @@ struct EmojiButton: View {
             image: VERACommonUIAsset.Images.emojiSolid.swiftUIImage,
             action: action
         )
-        .accessibilityLabel(String(localized: "Reactions", bundle: .veraReactions))
+        .accessibilityLabel(
+            String(
+                localized: "Reactions", bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+                locale: AppLanguageStore.shared.locale)
+        )
         .accessibilityHint(
             state.isPickerVisible
-                ? String(localized: "Close emoji picker", bundle: .veraReactions)
-                : String(localized: "Open emoji picker", bundle: .veraReactions)
+                ? String(
+                    localized: "Close emoji picker",
+                    bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+                    locale: AppLanguageStore.shared.locale)
+                : String(
+                    localized: "Open emoji picker", bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+                    locale: AppLanguageStore.shared.locale)
         )
     }
 }

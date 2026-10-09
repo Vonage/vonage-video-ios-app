@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 @Observable
@@ -98,14 +99,15 @@ extension Archive {
 
         return String(
             localized: "\(durationFormatted) • \(sizeFormatted) • Created: \(formattedDate)",
-            bundle: .veraArchiving
-        )
+            bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving), locale: AppLanguageStore.shared.locale)
     }
 
     func toUIArchive(with index: Int) -> ArchiveUIData {
         .init(
             id: id,
-            title: String(localized: "Recording \(index)", bundle: .veraArchiving),
+            title: String(
+                localized: "Recording \(index)", bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                locale: AppLanguageStore.shared.locale),
             subtitle: subtitle,
             isDownloadable: status == .available)
     }

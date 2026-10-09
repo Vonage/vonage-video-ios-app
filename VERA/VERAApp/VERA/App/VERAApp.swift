@@ -94,6 +94,7 @@ struct VERAApp: App {
                 }
             }
             .environment(navigationCoordinator)
+            .environment(\.locale, AppLanguageStore.shared.locale)
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
             .onAppear {
                 #if AUTHENTICATION_ENABLED

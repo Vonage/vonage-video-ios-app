@@ -11,7 +11,11 @@ struct FeedbackBottomItemPresenter: BottomItemPresentable {
     let onShowFeedbackForm: () -> Void
 
     var id: String { "feedback-button" }
-    var label: String { String(localized: "Feedback", bundle: .veraFeedback) }
+    var label: String {
+        String(
+            localized: "Feedback", bundle: AppLanguageStore.shared.localizedBundle(in: .veraFeedback),
+            locale: AppLanguageStore.shared.locale)
+    }
     var accessibilityIdentifier: String? { nil }
     var image: Image { VERACommonUIAsset.Images.feedbackLine.swiftUIImage }
     var isActive: Bool { false }

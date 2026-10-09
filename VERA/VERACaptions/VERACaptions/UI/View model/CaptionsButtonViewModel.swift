@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 /// View model that drives the captions toggle button.
@@ -114,7 +115,10 @@ public final class CaptionsButtonViewModel {
                     try await enableCaptionsUseCase(.init(sessionKey: sessionKeyProvider.sessionKey))
                 } catch {
                     self.toast = .init(
-                        message: String(localized: "captions_enable_error", bundle: .veraCaptions),
+                        message: String(
+                            localized: "captions_enable_error",
+                            bundle: AppLanguageStore.shared.localizedBundle(in: .veraCaptions),
+                            locale: AppLanguageStore.shared.locale),
                         mode: .failure
                     )
                 }

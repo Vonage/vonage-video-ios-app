@@ -10,7 +10,9 @@ extension VideoEffectsViewModel: BottomItemPresentable {
     public var id: String { "effects-button" }
 
     public var label: String {
-        String(localized: "Effects", bundle: .module)
+        String(
+            localized: "Effects", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
     }
 
     public var accessibilityIdentifier: String? {

@@ -11,7 +11,11 @@ struct SettingsBottomItemPresenter: BottomItemPresentable {
     let onShowSettings: () -> Void
 
     var id: String { "settings-button" }
-    var label: String { String(localized: "Settings", bundle: .veraSettings) }
+    var label: String {
+        String(
+            localized: "Settings", bundle: AppLanguageStore.shared.localizedBundle(in: .veraSettings),
+            locale: AppLanguageStore.shared.locale)
+    }
     var accessibilityIdentifier: String? { "meeting-room-settings-button" }
     var image: Image { VERACommonUIAsset.Images.gearSolid.swiftUIImage }
     var isActive: Bool { false }

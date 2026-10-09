@@ -29,7 +29,11 @@ public struct VideoEffectsSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(String(localized: "Video effects", bundle: .module))
+            .navigationTitle(
+                String(
+                    localized: "Video effects", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale)
+            )
             .navigationBarTitleDisplayMode(.inline)
             .onAppear { viewModel.loadBackgrounds() }
         }
@@ -40,10 +44,14 @@ public struct VideoEffectsSheet: View {
     @ViewBuilder
     private var effectsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(localized: "Effects", bundle: .module))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
+            Text(
+                String(
+                    localized: "Effects", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale)
+            )
+            .font(.subheadline)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
 
             HStack(spacing: 16) {
                 effectTile(
@@ -116,10 +124,14 @@ public struct VideoEffectsSheet: View {
     @ViewBuilder
     private var backgroundsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(localized: "Backgrounds", bundle: .module))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
+            Text(
+                String(
+                    localized: "Backgrounds", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale)
+            )
+            .font(.subheadline)
+            .fontWeight(.semibold)
+            .foregroundStyle(.secondary)
 
             LazyVGrid(columns: backgroundColumns, spacing: 12) {
                 ForEach(viewModel.backgrounds) { item in
@@ -198,7 +210,10 @@ public struct VideoEffectsSheet: View {
                 .foregroundStyle(.white, .black.opacity(0.6))
                 .padding(4)
         }
-        .accessibilityLabel(String(localized: "Delete background", bundle: .module))
+        .accessibilityLabel(
+            String(
+                localized: "Delete background", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale))
     }
 
     @ViewBuilder
@@ -225,15 +240,25 @@ public struct VideoEffectsSheet: View {
                 .buttonStyle(.plain)
             }
         }
-        .accessibilityLabel(String(localized: "Add image", bundle: .module))
+        .accessibilityLabel(
+            String(
+                localized: "Add image", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        )
         .alert(
-            String(localized: "Limit reached", bundle: .module),
+            String(
+                localized: "Limit reached", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale),
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }
             )
         ) {
-            Button(String(localized: "OK", bundle: .module), role: .cancel) {}
+            Button(
+                String(
+                    localized: "OK", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale), role: .cancel
+            ) {}
         } message: {
             if let message = viewModel.errorMessage {
                 Text(message)

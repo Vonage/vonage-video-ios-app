@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERACommonUI
 
 /// Represents a single emoji reaction for display in the reactions grid.
 ///
@@ -36,7 +37,11 @@ public struct UIEmojiReaction: Identifiable, Equatable, Hashable {
     /// Human-readable name used for accessibility labels (localized)
     public var name: String {
         if let key = nameKey {
-            return String(localized: String.LocalizationValue(key), bundle: .veraReactions)
+            return String(
+                localized: String.LocalizationValue(key),
+                bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+                locale: AppLanguageStore.shared.locale
+            )
         }
         return fallbackName
     }

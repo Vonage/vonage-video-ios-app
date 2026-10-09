@@ -17,7 +17,11 @@ struct ScreenShareBottomItemPresenter: BottomItemPresentable {
     }
 
     var id: String { "screen-share-button" }
-    var label: String { String(localized: "Share Screen", bundle: .veraScreenShare) }
+    var label: String {
+        String(
+            localized: "Share Screen", bundle: AppLanguageStore.shared.localizedBundle(in: .veraScreenShare),
+            locale: AppLanguageStore.shared.locale)
+    }
     var accessibilityIdentifier: String? { nil }
     var image: Image { VERACommonUIAsset.Images.screenShareSolid.swiftUIImage }
     var isActive: Bool { false }

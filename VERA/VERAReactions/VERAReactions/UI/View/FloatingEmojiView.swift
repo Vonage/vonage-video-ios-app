@@ -85,7 +85,10 @@ struct FloatingEmojiView: View {
     /// Returns a localized "You" when ``isMe`` is `true`,
     /// otherwise returns ``participantName`` as-is.
     private var displayName: String {
-        isMe ? String(localized: "You", bundle: .veraReactions) : participantName
+        isMe
+            ? String(
+                localized: "You", bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+                locale: AppLanguageStore.shared.locale) : participantName
     }
 }
 

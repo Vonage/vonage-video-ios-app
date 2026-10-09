@@ -270,7 +270,16 @@ struct ParticipantVideoCardOverlays: View {
                             onTogglePin()
                         } label: {
                             Label {
-                                Text(isPinned ? String(localized: "Unpin") : String(localized: "Pin"))
+                                Text(
+                                    isPinned
+                                        ? String(
+                                            localized: "Unpin",
+                                            bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                                            locale: AppLanguageStore.shared.locale)
+                                        : String(
+                                            localized: "Pin",
+                                            bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                                            locale: AppLanguageStore.shared.locale))
                             } icon: {
                                 (isPinned
                                     ? VERACommonUIAsset.Images.pin2OffSolid.swiftUIImage
@@ -329,7 +338,9 @@ struct MicIndicator: View {
     }
 
     var forceMuteAccessibilityLabel: String {
-        String(localized: "Mute \(participantName)")
+        String(
+            localized: "Mute \(participantName)", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
     }
 
     var body: some View {

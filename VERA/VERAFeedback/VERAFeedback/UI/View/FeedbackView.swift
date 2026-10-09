@@ -45,7 +45,10 @@ struct FeedbackView: View {
             sidebar
         } detail: {
             feedbackForm
-                .navigationTitle(String(localized: "Details"))
+                .navigationTitle(
+                    String(
+                        localized: "Details", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale))
         }
         .navigationSplitViewStyle(.balanced)
     }
@@ -54,7 +57,11 @@ struct FeedbackView: View {
         List {
             Label(feedbackFormViewModel.title, systemImage: "exclamationmark.bubble")
         }
-        .navigationTitle(String(localized: "Feedback"))
+        .navigationTitle(
+            String(
+                localized: "Feedback", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        )
         .toolbar {
             closeToolbarItem
         }
@@ -67,7 +74,11 @@ struct FeedbackView: View {
     @ToolbarContentBuilder
     private var closeToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            Button(String(localized: "Close")) {
+            Button(
+                String(
+                    localized: "Close", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale)
+            ) {
                 dismiss()
             }
         }

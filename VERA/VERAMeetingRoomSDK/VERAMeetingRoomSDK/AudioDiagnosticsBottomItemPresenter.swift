@@ -11,7 +11,11 @@ struct AudioDiagnosticsBottomItemPresenter: BottomItemPresentable {
     let onShowAudioDiagnostics: () -> Void
 
     var id: String { "audio-diagnostics-button" }
-    var label: String { String(localized: "Audio Test", bundle: .module) }
+    var label: String {
+        String(
+            localized: "Audio Test", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
+    }
     var accessibilityIdentifier: String? { AudioDiagnosticsAccessibilityID.meetingRoomButton }
     var image: Image { VERACommonUIAsset.Images.audioMaxSolid.swiftUIImage }
     var isActive: Bool { false }

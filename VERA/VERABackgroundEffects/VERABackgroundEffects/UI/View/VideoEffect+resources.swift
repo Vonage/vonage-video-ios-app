@@ -21,10 +21,22 @@ extension VideoEffect {
     /// A short localised label suitable for accessibility and bottom-bar tooltips.
     public var label: String {
         switch self {
-        case .none: String(localized: "None")
-        case .blurLow: String(localized: "Low")
-        case .blurHigh: String(localized: "High")
-        case .backgroundImage: String(localized: "Background")
+        case .none:
+            String(
+                localized: "None", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        case .blurLow:
+            String(
+                localized: "Low", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        case .blurHigh:
+            String(
+                localized: "High", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        case .backgroundImage:
+            String(
+                localized: "Background", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
         }
     }
 }

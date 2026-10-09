@@ -128,6 +128,7 @@ public struct SettingsView: View {
             .scrollContentBackground(.hidden)
         }
         .accessibilityIdentifier(SettingsAccessibilityID.screen)
+        .environment(\.locale, AppLanguageStore.shared.locale)
     }
 
     // MARK: - Regular (iPad / Mac)
@@ -145,6 +146,7 @@ public struct SettingsView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .accessibilityIdentifier(SettingsAccessibilityID.screen)
+        .environment(\.locale, AppLanguageStore.shared.locale)
     }
 
     // MARK: - Sidebar
@@ -160,7 +162,11 @@ public struct SettingsView: View {
         .navigationTitle("Settings".localized)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button(String(localized: "Close")) {
+                Button(
+                    String(
+                        localized: "Close", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)
+                ) {
                     Task { @MainActor in
                         await viewModel.dismiss()
                         dismiss()

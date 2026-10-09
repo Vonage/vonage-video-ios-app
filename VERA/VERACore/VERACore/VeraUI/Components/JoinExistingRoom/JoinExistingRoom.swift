@@ -48,7 +48,9 @@ struct JoinExistingRoom: View {
                     .padding(.bottom, JoinExistingRoomConstants.titleBottomPadding)
 
                 VonageTextField(
-                    placeholder: String(localized: "Room name", bundle: .veraCore),
+                    placeholder: String(
+                        localized: "Room name", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCore),
+                        locale: AppLanguageStore.shared.locale),
                     text: $roomName,
                     state: roomState,
                     forceLowercase: true

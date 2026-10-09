@@ -4,6 +4,7 @@
 
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 enum FeedbackFormConstants {
@@ -15,21 +16,24 @@ enum FeedbackFormConstants {
 @Observable
 class FeedbackFormViewModel {
 
-    static let titleKey = String(localized: "Title")
-    static let titleFieldText = String(localized: "When you noticed this issue, what were you trying to do?")
-    static let nameKey = String(localized: "Name")
-    static let nameFieldText = String(localized: "Tell us your name")
-    static let descriptionKey = String(localized: "Description")
-    static let descriptionFieldText = String(localized: "Describe your issue")
-    static let infoKey = String(localized: "Info")
-    static let infoFieldText = String(localized: "Please do not include any sensitive information.")
-    static let imageKey = String(localized: "Image")
-    static let imageFieldText = String(
-        localized: "A screenshot will help us better understand the issue. (optional)")
+    static let titleKey = "Title"
+    static let titleFieldText = "When you noticed this issue, what were you trying to do?"
+    static let nameKey = "Name"
+    static let nameFieldText = "Tell us your name"
+    static let descriptionKey = "Description"
+    static let descriptionFieldText = "Describe your issue"
+    static let infoKey = "Info"
+    static let infoFieldText = "Please do not include any sensitive information."
+    static let imageKey = "Image"
+    static let imageFieldText = "A screenshot will help us better understand the issue. (optional)"
 
-    static let formTitle = String(localized: "Report issue")
+    static var formTitle: String {
+        String(
+            localized: "Report issue", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
+    }
 
-    let title = formTitle
+    var title: String { Self.formTitle }
     var isLoading = false
     var toast: ToastItem?
     var feedbackResult: FeedbackReportResult?
@@ -108,15 +112,22 @@ class FeedbackFormViewModel {
         do {
             feedbackResult = try await feedbackReportUseCase(
                 .init(
-                    title: fieldValue(forKey: String(localized: "Title")),
-                    name: fieldValue(forKey: String(localized: "Name")),
-                    issue: fieldValue(forKey: String(localized: "Description")),
+                    title: fieldValue(
+                        forKey: Self.titleKey),
+                    name: fieldValue(
+                        forKey: Self.nameKey),
+                    issue: fieldValue(
+                        forKey: Self.descriptionKey),
                     image: imageField()?.attachedImage,
                     debugDump: debugDump()
                 )
             )
         } catch {
-            toast = .init(message: String(localized: "Something failed, please try again"), mode: .failure)
+            toast = .init(
+                message: String(
+                    localized: "Something failed, please try again",
+                    bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale), mode: .failure)
         }
     }
 

@@ -10,7 +10,9 @@ extension ChatBadgeButtonViewModel: BottomItemPresentable {
     public var id: String { "chat-button" }
 
     public var label: String {
-        String(localized: "Chat", bundle: .veraChat)
+        String(
+            localized: "Chat", bundle: AppLanguageStore.shared.localizedBundle(in: .veraChat),
+            locale: AppLanguageStore.shared.locale)
     }
 
     public var accessibilityIdentifier: String? {

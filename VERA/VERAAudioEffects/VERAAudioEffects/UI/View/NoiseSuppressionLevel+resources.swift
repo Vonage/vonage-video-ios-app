@@ -17,8 +17,14 @@ extension NoiseSuppressionState {
 
     public var label: String {
         switch self {
-        case .enabled: String(localized: "Enabled")
-        case .idle, .disabled: String(localized: "Disabled")
+        case .enabled:
+            String(
+                localized: "Enabled", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
+        case .idle, .disabled:
+            String(
+                localized: "Disabled", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
         }
     }
 }

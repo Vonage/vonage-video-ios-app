@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import VERACommonUI
 import VERADomain
 
 extension CaptionItem {
@@ -17,7 +18,9 @@ extension CaptionItem {
     public func toUICaptionItem() -> UICaptionItem {
         let name =
             isMe
-            ? String(localized: "You", bundle: .veraCaptions)
+            ? String(
+                localized: "You", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCaptions),
+                locale: AppLanguageStore.shared.locale)
             : speakerName
 
         var boldPart = AttributedString(name + ": ")
@@ -25,7 +28,9 @@ extension CaptionItem {
         var regularPart = AttributedString(text)
         regularPart.font = .system(.footnote, design: .default)
 
-        let localizedFormat = String(localized: "user_say", bundle: .veraCaptions)
+        let localizedFormat = String(
+            localized: "user_say", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCaptions),
+            locale: AppLanguageStore.shared.locale)
 
         return UICaptionItem(
             id: id,

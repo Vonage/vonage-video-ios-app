@@ -5,12 +5,13 @@
 import SwiftUI
 import VERACommonUI
 
-/// General section content: reset-to-defaults action.
+/// General section content: language, statistics overlay and reset-to-defaults action.
 ///
 /// Returns `Section` blocks intended to be embedded inside a parent `Form`.
 struct GeneralSectionView: View {
     var viewModel: SettingsViewModel
     @Binding var statsOverlayEnabled: Bool
+    @Bindable private var languageStore = AppLanguageStore.shared
     private let isInActiveCall: Bool
     private let isCompactLayout: Bool
 
@@ -36,6 +37,8 @@ struct GeneralSectionView: View {
 
     private var compactBody: some View {
         VStack(alignment: .leading, spacing: 12) {
+            languageContent
+            SettingsDivider()
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
             if !isInActiveCall {
@@ -47,6 +50,7 @@ struct GeneralSectionView: View {
 
     private var regularBody: some View {
         Section {
+            languageContent
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
             if !isInActiveCall {
@@ -62,6 +66,19 @@ struct GeneralSectionView: View {
                 }
             }
         }
+    }
+
+    private var languageContent: some View {
+        Picker("Language".localized, selection: $languageStore.selection) {
+            ForEach(AppLanguage.allCases) { language in
+                Text(
+                    verbatim: language == .system
+                        ? "System Default".localized : "\(language.flag ?? "") \(language.displayName)"
+                )
+                .tag(language)
+            }
+        }
+        .accessibilityIdentifier(SettingsAccessibilityID.languagePicker)
     }
 
     @ViewBuilder

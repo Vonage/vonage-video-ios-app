@@ -59,11 +59,22 @@
                         actionTrigger.send()
                     }
                 )
-                .accessibilityLabel(String(localized: "Share Screen", bundle: .veraScreenShare))
+                .accessibilityLabel(
+                    String(
+                        localized: "Share Screen",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .veraScreenShare),
+                        locale: AppLanguageStore.shared.locale)
+                )
                 .accessibilityHint(
                     state.isSharing
-                        ? String(localized: "Stop screen sharing", bundle: .veraScreenShare)
-                        : String(localized: "Start screen sharing", bundle: .veraScreenShare)
+                        ? String(
+                            localized: "Stop screen sharing",
+                            bundle: AppLanguageStore.shared.localizedBundle(in: .veraScreenShare),
+                            locale: AppLanguageStore.shared.locale)
+                        : String(
+                            localized: "Start screen sharing",
+                            bundle: AppLanguageStore.shared.localizedBundle(in: .veraScreenShare),
+                            locale: AppLanguageStore.shared.locale)
                 )
 
                 BroadcastPickerRepresentable(

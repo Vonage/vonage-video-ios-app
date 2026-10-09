@@ -38,9 +38,17 @@ String keys should be descriptive and scoped to their screen or feature to avoid
 - Never hard-code user-visible strings outside of string catalogs.
 - Since `SWIFT_EMIT_LOC_STRINGS` is active, stale or missing keys are surfaced at build time.
 
-## Shipped languages and translation sources
+## Language selection and translation sources
 
-English, English (US), Deutsch, Italiano, Español, Español (México), and 日本語 match the web app.
+VERA iOS offers System Default, English, English (US), Deutsch, Italiano,
+Español, Español (México), and 日本語. Country flags, choices and ordering match the web
+app's language selector. English (US) reuses English wording, as on the web;
+regional choices retain their own locale for formatting.
+
+System Default checks the device's preferred languages in order, first matching
+an available regional variant, then its base language. If none match, it uses
+English. The explicit choice is stored separately from publisher preferences.
+Reset to Defaults returns it to System Default.
 
 Matching translations come from
 [the web app's develop resources](https://github.com/Vonage/vonage-video-react-app/tree/77c9b91e844fbd76acca1fb22d31bccda56f9510/frontend/src/locales).
@@ -53,7 +61,15 @@ New translations for iOS-only wording are drafts marked `needs_review` in the
 catalogs and should receive linguistic review. Spanish translations already
 present are retained where applicable, with mismatched formatting arguments
 corrected. Future languages or strings must be added consistently to every
-module's catalog, the Tuist language declaration.
+module's catalog, the Tuist language declaration and `AppLanguage`.
 
 Run `python3 scripts/validate-localizations.py` to check full catalog coverage,
-format argument compatibility and language declarations. Runtime language selection and its unit tests are provided in the follow-up selector PR.
+format argument compatibility and language declarations. Common UI language
+tests cover persistence, reset, regional matching, English fallback, observation,
+and resource selection for each shipped language.
+
+Runtime code uses `AppLanguageStore` for resource selection and sets the SwiftUI
+locale at the app root. Foundation `String(localized:)` callers must pass
+`localizedBundle(in:)`; passing `locale:` alone only changes formatting and does
+not select the requested language's resources. Do not use translated strings as
+model identifiers or cache translated titles in static constants.

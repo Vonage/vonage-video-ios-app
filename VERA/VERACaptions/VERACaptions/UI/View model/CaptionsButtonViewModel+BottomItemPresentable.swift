@@ -10,7 +10,9 @@ extension CaptionsButtonViewModel: BottomItemPresentable {
     public var id: String { "captions-button" }
 
     public var label: String {
-        String(localized: "Captions", bundle: .veraCaptions)
+        String(
+            localized: "Captions", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCaptions),
+            locale: AppLanguageStore.shared.locale)
     }
 
     public var accessibilityIdentifier: String? {

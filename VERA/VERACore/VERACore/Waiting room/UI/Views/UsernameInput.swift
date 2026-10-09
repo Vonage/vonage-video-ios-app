@@ -13,7 +13,9 @@ struct UsernameInput: View {
     var body: some View {
         HStack {
             VonageTextField(
-                placeholder: String(localized: "Enter your name", bundle: .veraCore),
+                placeholder: String(
+                    localized: "Enter your name", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCore),
+                    locale: AppLanguageStore.shared.locale),
                 text: $userName,
                 state: usernameState
             )

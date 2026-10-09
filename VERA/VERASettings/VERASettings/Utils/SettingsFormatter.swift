@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERACommonUI
 import VERADomain
 
 // MARK: - VideoSendStats Extensions
@@ -116,6 +117,7 @@ enum SettingsFormatter {
     public static func formatPackets(_ packets: Int64) -> String {
         guard packets > 0 else { return "0" }
         let formatter = NumberFormatter()
+        formatter.locale = AppLanguageStore.shared.locale
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: packets)) ?? "\(packets)"
     }

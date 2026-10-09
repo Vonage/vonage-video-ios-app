@@ -7,6 +7,7 @@ import Foundation
 import OSLog
 import Observation
 import SwiftUI
+import VERACommonUI
 import VERADomain
 
 /// ViewModel for the video effects bottom sheet.
@@ -127,8 +128,7 @@ public final class VideoEffectsViewModel {
     public func showMaxImagesError() {
         errorMessage = String(
             localized: "You've reached the limit of 10 images. Delete an image to add a new one.",
-            bundle: .module
-        )
+            bundle: AppLanguageStore.shared.localizedBundle(in: .module), locale: AppLanguageStore.shared.locale)
     }
 
     // MARK: - Private

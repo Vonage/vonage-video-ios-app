@@ -9,8 +9,12 @@ import VERADomain
 extension ArchivingState {
     public var bottomBarLabel: String {
         isArchiving
-            ? String(localized: "Stop Recording", bundle: .veraArchiving)
-            : String(localized: "Start Recording", bundle: .veraArchiving)
+            ? String(
+                localized: "Stop Recording", bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                locale: AppLanguageStore.shared.locale)
+            : String(
+                localized: "Start Recording", bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                locale: AppLanguageStore.shared.locale)
     }
 
     public var bottomBarAccessibilityIdentifier: String {

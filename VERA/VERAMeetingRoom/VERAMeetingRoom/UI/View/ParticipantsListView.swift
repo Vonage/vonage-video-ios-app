@@ -56,7 +56,12 @@ public struct ParticipantsListView: View {
 
                     participantsList
                 }
-                .navigationTitle(String(localized: "Participants (\(participantsCount))"))
+                .navigationTitle(
+                    String(
+                        localized: "Participants (\(participantsCount))",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)
+                )
                 #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)
                 #endif

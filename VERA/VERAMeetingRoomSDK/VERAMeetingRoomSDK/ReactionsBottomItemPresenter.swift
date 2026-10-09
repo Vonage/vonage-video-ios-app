@@ -13,7 +13,11 @@ struct ReactionsBottomItemPresenter: BottomItemPresentable {
     let onShowPickerView: () -> Void
 
     var id: String { "reactions-button" }
-    var label: String { String(localized: "Reactions", bundle: .veraReactions) }
+    var label: String {
+        String(
+            localized: "Reactions", bundle: AppLanguageStore.shared.localizedBundle(in: .veraReactions),
+            locale: AppLanguageStore.shared.locale)
+    }
     var accessibilityIdentifier: String? { nil }
     var image: Image { VERACommonUIAsset.Images.emojiSolid.swiftUIImage }
     var isActive: Bool { isPickerPresented }

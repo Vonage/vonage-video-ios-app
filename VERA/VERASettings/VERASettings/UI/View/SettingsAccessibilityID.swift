@@ -62,6 +62,7 @@ enum SettingsAccessibilityID {
 
     // MARK: - General Section
 
+    static let languagePicker = "settings-language-picker"
     static let resetDefaultsButton = "settings-reset-defaults-button"
     static let waitingRoomSettingsButton = "waiting-room-settings-button"
 }

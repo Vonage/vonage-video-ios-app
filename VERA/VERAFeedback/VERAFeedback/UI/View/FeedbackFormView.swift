@@ -19,10 +19,26 @@ private enum FeedbackFormViewConstants {
 
 struct FeedbackFormView: View {
 
-    private static let successTitle = String(localized: "Your Jira ticket has been created.")
-    private static let closeButtonTitle = String(localized: "Close")
-    private static let sendButtonTitle = String(localized: "Send")
-    private static let doneButtonTitle = String(localized: "Done")
+    private static var successTitle: String {
+        String(
+            localized: "Your Jira ticket has been created.",
+            bundle: AppLanguageStore.shared.localizedBundle(in: .module), locale: AppLanguageStore.shared.locale)
+    }
+    private static var closeButtonTitle: String {
+        String(
+            localized: "Close", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
+    }
+    private static var sendButtonTitle: String {
+        String(
+            localized: "Send", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
+    }
+    private static var doneButtonTitle: String {
+        String(
+            localized: "Done", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
+    }
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.meetingRoomTheme) private var theme

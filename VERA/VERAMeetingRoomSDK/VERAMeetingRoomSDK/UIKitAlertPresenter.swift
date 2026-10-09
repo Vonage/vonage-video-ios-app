@@ -3,6 +3,7 @@
 //
 
 import UIKit
+import VERACommonUI
 import VERADomain
 
 /// Concrete UIKit implementation of ``AlertPresentable``.
@@ -34,7 +35,11 @@ public final class UIKitAlertPresenter: AlertPresentable {
             preferredStyle: .alert
         )
 
-        let confirmTitle = alertItem.okAction ?? String(localized: "OK")
+        let confirmTitle =
+            alertItem.okAction
+            ?? String(
+                localized: "OK", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
         alert.addAction(
             UIAlertAction(title: confirmTitle, style: .default) { _ in
                 alertItem.onConfirm?()

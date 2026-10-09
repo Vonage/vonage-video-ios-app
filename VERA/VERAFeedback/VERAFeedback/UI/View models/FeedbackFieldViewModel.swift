@@ -4,6 +4,7 @@
 
 import Foundation
 import Observation
+import VERACommonUI
 
 enum FeedbackFieldType {
     case text, info, image
@@ -16,7 +17,8 @@ protocol FieldValidatable {
 @Observable
 class FeedbackFieldViewModel: FieldValidatable {
     let maxChars: Int?
-    let title: String
+    private let titleKey: String
+    var title: String { titleKey.localized(bundle: .module) }
     let key: String
     var value: String
     var attachedImage: PlatformImage?
@@ -35,7 +37,7 @@ class FeedbackFieldViewModel: FieldValidatable {
         isRequired: Bool = true
     ) {
         self.maxChars = maxChars
-        self.title = title
+        self.titleKey = title
         self.key = key
         self.type = type
         self.value = value
@@ -65,13 +67,20 @@ class FeedbackFieldViewModel: FieldValidatable {
             return nil
         case .image:
             if isRequired, attachedImage == nil {
-                return "\(key) " + String(localized: "is required")
+                return "\(key.localized(bundle: .module)) "
+                    + String(
+                        localized: "is required", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)
             }
             return nil
         case .text:
             var message: String?
             if isRequired, valueWithoutWhitespaces.isEmpty {
-                message = "\(key) " + String(localized: "is required")
+                message =
+                    "\(key.localized(bundle: .module)) "
+                    + String(
+                        localized: "is required", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)
             }
             return message
         }

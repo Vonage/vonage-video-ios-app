@@ -10,7 +10,9 @@ extension NoiseSuppressionViewModel: BottomItemPresentable {
     public var id: String { "noise-suppression-button" }
 
     public var label: String {
-        String(localized: "Noise Suppression", bundle: .veraAudioEffects)
+        String(
+            localized: "Noise Suppression", bundle: AppLanguageStore.shared.localizedBundle(in: .veraAudioEffects),
+            locale: AppLanguageStore.shared.locale)
     }
 
     public var accessibilityIdentifier: String? {

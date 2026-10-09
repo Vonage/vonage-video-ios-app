@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERACommonUI
 
 /// Provides the resource bundle for the `VERASettings`  framework.
 extension Bundle {
@@ -32,6 +33,6 @@ extension String {
     /// - Parameter args: Format arguments to substitute in the localized string.
     /// - Returns: The formatted localized string.
     func localized(args: CVarArg...) -> String {
-        return String(format: localized, arguments: args)
+        return String(format: localized, locale: AppLanguageStore.shared.locale, arguments: args)
     }
 }

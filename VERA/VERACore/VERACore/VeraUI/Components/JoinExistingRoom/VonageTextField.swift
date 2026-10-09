@@ -145,7 +145,7 @@ struct VonageTextField: View {
             .animation(.easeInOut(duration: VonageTextFieldConstants.animationDuration), value: isFocused)
 
             if case .invalid(let error) = state {
-                Text(NSLocalizedString(error, bundle: .veraCore, comment: ""))
+                Text(error.localized(bundle: .veraCore))
                     .foregroundColor(VERACommonUIAsset.SemanticColors.error.swiftUIColor)
                     .adaptiveFont(.caption)
             }

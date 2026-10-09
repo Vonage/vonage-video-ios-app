@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 public enum MeetingRoomViewState: Equatable {
@@ -34,17 +35,20 @@ public struct ForceMuteConfirmation: Identifiable, Equatable {
     public var message: String {
         let messageFormat = String(
             localized: "Mute %@ for everyone in the call? Only %@ can unmute themselves.",
-            bundle: .module
-        )
+            bundle: AppLanguageStore.shared.localizedBundle(in: .module), locale: AppLanguageStore.shared.locale)
         return String(format: messageFormat, participantName, participantName)
     }
 
     public static var cancelButtonTitle: String {
-        String(localized: "Cancel", bundle: .module)
+        String(
+            localized: "Cancel", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
     }
 
     public static var muteButtonTitle: String {
-        String(localized: "Mute", bundle: .module)
+        String(
+            localized: "Mute", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+            locale: AppLanguageStore.shared.locale)
     }
 }
 
@@ -237,7 +241,9 @@ public final class MeetingRoomViewModel {
             guard let self, let currentCall = self.currentCall else { return }
             do {
                 try await currentCall.forceMuteParticipant(id: participantId)
-                let messageFormat = String(localized: "%@ was muted.", bundle: .module)
+                let messageFormat = String(
+                    localized: "%@ was muted.", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                    locale: AppLanguageStore.shared.locale)
                 self.toast = .init(
                     message: String(format: messageFormat, participantName),
                     mode: .success
@@ -456,7 +462,10 @@ extension MeetingRoomViewModel {
             .sink { [weak self] _ in
                 Task { @MainActor [weak self] in
                     self?.toast = ToastItem(
-                        message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
+                        message: String(
+                            localized: "You're muted. Tap the mic button to unmute.",
+                            bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                            locale: AppLanguageStore.shared.locale),
                         mode: .warning)
                 }
             }
@@ -470,11 +479,17 @@ extension MeetingRoomViewModel {
             switch archivingState {
             case .idle:
                 self.toast = .init(
-                    message: String(localized: "Session recording stopped", bundle: .module),
+                    message: String(
+                        localized: "Session recording stopped",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .info)
             case .archiving:
                 self.toast = .init(
-                    message: String(localized: "Session recording started", bundle: .module),
+                    message: String(
+                        localized: "Session recording started",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .info)
             }
         }
@@ -486,15 +501,24 @@ extension MeetingRoomViewModel {
             switch event {
             case .didBeginReconnecting:
                 self.toast = .init(
-                    message: String(localized: "Session did drop, started reconnection", bundle: .module),
+                    message: String(
+                        localized: "Session did drop, started reconnection",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .warning)
             case .didReconnect:
                 self.toast = .init(
-                    message: String(localized: "Session did reconnect", bundle: .module),
+                    message: String(
+                        localized: "Session did reconnect",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .info)
             case .muteForced:
                 self.toast = .init(
-                    message: String(localized: "You were muted by the host.", bundle: .module),
+                    message: String(
+                        localized: "You were muted by the host.",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .warning)
             case .error(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
@@ -502,7 +526,10 @@ extension MeetingRoomViewModel {
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
                 self.toast = .init(
-                    message: String(localized: "Session did disconnect", bundle: .module),
+                    message: String(
+                        localized: "Session did disconnect",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale),
                     mode: .failure)
                 self.scheduleDisconnection()
             default:

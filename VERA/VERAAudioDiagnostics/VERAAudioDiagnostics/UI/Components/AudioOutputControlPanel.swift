@@ -93,7 +93,9 @@
 
             let label = UILabel()
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.text = String(localized: "Audio Output", bundle: .module)
+            label.text = String(
+                localized: "Audio Output", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                locale: AppLanguageStore.shared.locale)
             label.textColor = VERACommonUIAsset.SemanticColors.onBackground.color
             label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
             label.isUserInteractionEnabled = false

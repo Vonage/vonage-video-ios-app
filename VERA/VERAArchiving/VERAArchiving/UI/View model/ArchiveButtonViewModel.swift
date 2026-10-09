@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 @Observable
@@ -65,11 +66,14 @@ public final class ArchiveButtonViewModel {
     private func showStartRecordingConfirmation() {
         showAlert(
             AlertItem(
-                title: String(localized: "Start Recording?", bundle: .veraArchiving),
+                title: String(
+                    localized: "Start Recording?", bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                    locale: AppLanguageStore.shared.locale),
                 message:
                     String(
                         localized: "start.recording.message",
-                        bundle: .veraArchiving)
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                        locale: AppLanguageStore.shared.locale)
             ) { [weak self] in
                 Task { @MainActor in
                     await self?.startArchiving()
@@ -82,9 +86,15 @@ public final class ArchiveButtonViewModel {
         showAlert(
             AlertItem(
                 title:
-                    String(localized: "Stop Recording?", bundle: .veraArchiving),
+                    String(
+                        localized: "Stop Recording?",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                        locale: AppLanguageStore.shared.locale),
                 message:
-                    String(localized: "stop.recording.message", bundle: .veraArchiving)
+                    String(
+                        localized: "stop.recording.message",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .veraArchiving),
+                        locale: AppLanguageStore.shared.locale)
             ) { [weak self] in
                 Task { @MainActor in
                     await self?.stopArchiving(withID: archiveID)

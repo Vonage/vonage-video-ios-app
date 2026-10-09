@@ -235,8 +235,12 @@ struct VideoPreviewView: View {
                         }
                     } label: {
                         Label {
-                            Text(String(localized: "Camera", bundle: .veraCore))
-                                .adaptiveFont(.bodyBase)
+                            Text(
+                                String(
+                                    localized: "Camera", bundle: AppLanguageStore.shared.localizedBundle(in: .veraCore),
+                                    locale: AppLanguageStore.shared.locale)
+                            )
+                            .adaptiveFont(.bodyBase)
                         } icon: {
                             VERACommonUIAsset.Images.videoLine.swiftUIImage
                         }

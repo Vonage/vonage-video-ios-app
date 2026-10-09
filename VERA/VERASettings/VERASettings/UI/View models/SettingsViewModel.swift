@@ -235,6 +235,7 @@ public final class SettingsViewModel {
     /// This resets both the local state and the persisted preferences.
     @MainActor
     public func resetToDefaults() async {
+        AppLanguageStore.shared.reset()
         await repository.reset()
         setAsDefault()
     }

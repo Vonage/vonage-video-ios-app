@@ -26,18 +26,25 @@ struct FeedbackImageFieldView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Layout.spacing) {
-            Text(feedbackFieldViewModel.value)
+            Text(feedbackFieldViewModel.value.localized(bundle: .module))
                 .font(.body)
                 .foregroundStyle(.primary)
 
             OutlinedButton(
-                text: Text(String(localized: "Capture screenshot")),
+                text: Text(
+                    String(
+                        localized: "Capture screenshot", bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)),
                 color: primaryColor,
                 onAction: { captureScreenshot() }
             )
 
             OutlinedButton(
-                text: Text(String(localized: "Add image from photo library")),
+                text: Text(
+                    String(
+                        localized: "Add image from photo library",
+                        bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                        locale: AppLanguageStore.shared.locale)),
                 color: primaryColor,
                 onAction: { isPhotoLibraryPresented = true }
             )
@@ -56,7 +63,11 @@ struct FeedbackImageFieldView: View {
                     }) {
                         HStack {
                             VERACommonUIAsset.Images.removeLine.swiftUIImage
-                            Text(String(localized: "Remove image"))
+                            Text(
+                                String(
+                                    localized: "Remove image",
+                                    bundle: AppLanguageStore.shared.localizedBundle(in: .module),
+                                    locale: AppLanguageStore.shared.locale))
                         }
                     }
 
