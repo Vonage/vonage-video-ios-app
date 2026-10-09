@@ -43,9 +43,9 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
             Spacer()
 
             AppVersionFooter()
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .padding(.horizontal)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .padding(.horizontal)
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         .if(ignoresKeyboard) { $0.ignoresSafeArea(.keyboard) }

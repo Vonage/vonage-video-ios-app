@@ -90,8 +90,8 @@ struct HorizontalContentView<Left: View, Right: View>: View {
 
                 if showFooter {
                     AppVersionFooter()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: footerHeight)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: footerHeight)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

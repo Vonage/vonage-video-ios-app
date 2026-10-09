@@ -56,7 +56,7 @@ struct GoodByeViewUITests {
         let sut = makeSUT()
 
         assertSnapshot(
-            of: sut,
+            of: sut.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
             as: .image(precision: 0.99, layout: .device(config: config)),
             named: deviceName,
             record: isRecording,
@@ -78,7 +78,7 @@ struct GoodByeViewUITests {
             .environment(\.colorScheme, scheme)
 
         assertSnapshot(
-            of: sut,
+            of: sut.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: schemeName,
             record: isRecording,
@@ -105,7 +105,7 @@ struct GoodByeViewUITests {
         column: UInt = #column
     ) {
         assertSnapshot(
-            of: view,
+            of: view.environment(\.appVersionDisplay, AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")),
             as: .image(precision: 0.99, layout: .device(config: .iPhone13)),
             named: named,
             record: isRecording,
