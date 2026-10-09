@@ -53,11 +53,11 @@ struct AppVersionFooter: View {
                         sdkVersion: versionDisplay?.sdkVersion ?? sdkVersion
                     )
                 )
+                .accessibilityIdentifier(LandingPageAccessibilityID.versionFooter)
                 .adaptiveFont(.caption)
                 .foregroundColor(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
             }
         }
-        .accessibilityIdentifier(LandingPageAccessibilityID.versionFooter)
     }
 }
 
