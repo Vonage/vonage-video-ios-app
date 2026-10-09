@@ -171,7 +171,8 @@ jobs:
     name: SonarCloud Analysis
     runs-on: macos-26
     needs: [unit-tests]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    # Fork PRs do not receive SONAR_TOKEN; analysis runs in trusted contexts.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     
     steps:
       - uses: actions/checkout@v6
