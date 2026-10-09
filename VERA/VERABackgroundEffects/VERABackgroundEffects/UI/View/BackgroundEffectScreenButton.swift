@@ -8,7 +8,7 @@ import VERACommonUI
 public struct BackgroundEffectScreenButton: View {
     @Environment(\.meetingRoomTheme) private var theme
 
-    @ObservedObject var viewModel: VideoEffectsViewModel
+    @Bindable var viewModel: VideoEffectsViewModel
 
     public init(viewModel: VideoEffectsViewModel) {
         self.viewModel = viewModel

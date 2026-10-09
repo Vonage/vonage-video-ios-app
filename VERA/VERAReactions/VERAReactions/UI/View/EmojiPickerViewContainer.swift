@@ -21,7 +21,7 @@ public struct EmojiPickerViewContainer: View {
 
     // MARK: - Properties
 
-    @ObservedObject private var viewModel: EmojiPickerContainerViewModel
+    private var viewModel: EmojiPickerContainerViewModel
 
     // MARK: - Initialization
 

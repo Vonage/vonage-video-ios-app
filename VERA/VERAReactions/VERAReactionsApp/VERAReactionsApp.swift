@@ -20,25 +20,25 @@ struct VERAReactionsApp: App {
 /// together through a shared repository — picking an emoji makes it float on screen.
 struct DemoReactionsView: View {
 
-    @StateObject private var buttonViewModel: EmojiButtonContainerViewModel
-    @StateObject private var horizontalPickerViewModel: EmojiPickerContainerViewModel
-    @StateObject private var overlayViewModel: FloatingEmojisOverlayViewModel
+    @State private var buttonViewModel: EmojiButtonContainerViewModel
+    @State private var horizontalPickerViewModel: EmojiPickerContainerViewModel
+    @State private var overlayViewModel: FloatingEmojisOverlayViewModel
 
     init() {
         let repository = DefaultReactionsRepository()
         let useCase = DemoSendReactionUseCase(repository: repository)
 
-        _buttonViewModel = StateObject(
+        _buttonViewModel = State(
             wrappedValue: EmojiButtonContainerViewModel(
                 sendReactionUseCase: useCase
             )
         )
-        _horizontalPickerViewModel = StateObject(
+        _horizontalPickerViewModel = State(
             wrappedValue: EmojiPickerContainerViewModel(
                 sendReactionUseCase: useCase
             )
         )
-        _overlayViewModel = StateObject(
+        _overlayViewModel = State(
             wrappedValue: FloatingEmojisOverlayViewModel(
                 reactionsRepository: repository
             )

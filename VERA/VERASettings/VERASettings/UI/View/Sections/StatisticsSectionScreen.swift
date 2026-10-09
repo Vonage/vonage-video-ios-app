@@ -19,7 +19,7 @@ enum StatsConstants {
 /// When ``statisticsViewModel`` is `nil` (waiting room), only the toggles appear.
 struct StatisticsSectionScreen: View {
 
-    @ObservedObject var viewModel: SettingsViewModel
+    @Bindable var viewModel: SettingsViewModel
     var statisticsViewModel: StatisticsViewModel?
     var isCompactLayout: Bool = false
     var showsSectionHeaders: Bool = true
@@ -134,15 +134,15 @@ struct StatisticsSectionContent: View {
 
 // MARK: - ParticipantsStatsSection
 
-/// Dedicated subview that holds `@ObservedObject` references to both view models,
+/// Dedicated subview that holds `@Bindable` references to both view models,
 /// so SwiftUI re-renders only the participant details when expansion state changes.
 ///
-/// `StatisticsSectionScreen` cannot hold `statisticsViewModel` as `@ObservedObject`
+/// `StatisticsSectionScreen` cannot hold `statisticsViewModel` as a bindable property
 /// because it is optional; extracting it here avoids that limitation.
 private struct ParticipantsStatsSection: View {
 
-    @ObservedObject var settingsViewModel: SettingsViewModel
-    @ObservedObject var statsViewModel: StatisticsViewModel
+    @Bindable var settingsViewModel: SettingsViewModel
+    @Bindable var statsViewModel: StatisticsViewModel
 
     @ViewBuilder
     var body: some View {

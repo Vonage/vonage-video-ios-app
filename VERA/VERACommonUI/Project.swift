@@ -13,13 +13,16 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERACommonUI",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACommonUI/**"],
             resources: [
                 "VERACommonUI/Resources/**",
                 "VERACommonUI/Resources/**/*.xcassets",
             ],
-            scripts: [.swiftLint(targetName: "VERACommonUI")],
+            scripts: [
+                .generateSPMAssets(),
+                .swiftLint(targetName: "VERACommonUI"),
+            ],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain")
             ],
@@ -30,7 +33,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERACommonUITests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACommonUITests/**"],
             dependencies: [
                 .target(name: "VERACommonUI")
@@ -42,7 +45,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERACommonUISnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERACommonUISnapshotTests/**"],
             dependencies: [
                 .target(name: "VERACommonUI"),

@@ -6,7 +6,7 @@ import os
 def generate_app_config():
     config_path = "./Config/app-config.json"
     output_path = "./VERAConfiguration/VERAConfiguration/AppConfig.swift"
-    
+
     # Create directory if it doesn't exist
     os.makedirs("./VERAConfiguration/VERAConfiguration", exist_ok=True)
 
@@ -24,8 +24,15 @@ def generate_app_config():
     # Extract configurations
     video = config['videoSettings']
     audio = config['audioSettings']
+    auth = config['authSettings']
     waiting = config['waitingRoomSettings']
     meeting = config['meetingRoomSettings']
+
+    # Extract metadata. Note: baseApiUrl is intentionally NOT emitted into
+    # AppConfig.swift. The API base URL has a single entry point: builder.sh
+    # reads baseApiUrl from app-config.json and injects it into
+    # EnvironmentConstants at build time (see generateEnvironmentConstants.sh).
+    metadata_version = config.get('metadata', {}).get('version', '1.0.0')
 
     # Helper to convert bool to Swift
     def bool_str(val):
@@ -38,7 +45,7 @@ def generate_app_config():
             "grid": ".grid"
         }
         return layout_map.get(val.lower(), ".activeSpeaker")
-        
+
     # Generate Swift code
     swift_code = f'''//
 // AppConfig.swift
@@ -49,6 +56,8 @@ import Foundation
 import VERADomain
 
 public struct AppConfig {{
+    public static let configVersion: String = "{metadata_version}"
+
     public struct VideoSettings {{
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
@@ -100,6 +109,19 @@ public struct AppConfig {{
         }}
     }}
 
+    public struct AuthSettings {{
+        public let allowAuthentication: Bool
+        public let idProviders: [String]
+
+        public init(
+            allowAuthentication: Bool = {bool_str(auth['allowAuthentication'])},
+            idProviders: [String] = {json.dumps(auth.get('idProviders', []))}
+        ) {{
+            self.allowAuthentication = allowAuthentication
+            self.idProviders = idProviders
+        }}
+    }}
+
     public struct MeetingRoomSettings {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
@@ -142,21 +164,25 @@ public struct AppConfig {{
 
     public static let videoSettings = VideoSettings()
     public static let audioSettings = AudioSettings()
+    public static let authSettings = AuthSettings()
     public static let waitingRoomSettings = WaitingRoomSettings()
     public static let meetingRoomSettings = MeetingRoomSettings()
 
     public let videoSettings: VideoSettings
     public let audioSettings: AudioSettings
+    public let authSettings: AuthSettings
     public let waitingRoomSettings: WaitingRoomSettings
     public let meetingRoomSettings: MeetingRoomSettings
 
     public init(
         videoSettings: VideoSettings = VideoSettings(),
         audioSettings: AudioSettings = AudioSettings(),
+        authSettings: AuthSettings = AuthSettings(),
         waitingRoomSettings: WaitingRoomSettings = WaitingRoomSettings(),
         meetingRoomSettings: MeetingRoomSettings = MeetingRoomSettings()
     ) {{
         self.audioSettings = audioSettings
+        self.authSettings = authSettings
         self.videoSettings = videoSettings
         self.waitingRoomSettings = waitingRoomSettings
         self.meetingRoomSettings = meetingRoomSettings
@@ -167,7 +193,7 @@ public struct AppConfig {{
     # Write file
     with open(output_path, 'w') as f:
         f.write(swift_code)
-    
+
     print("✅ Generated AppConfig.swift")
 
 if __name__ == "__main__":

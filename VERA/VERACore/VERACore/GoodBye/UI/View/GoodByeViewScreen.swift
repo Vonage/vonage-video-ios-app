@@ -7,7 +7,7 @@ import VERACommonUI
 import VERADomain
 
 struct GoodByeViewScreen<ContentView: View>: View {
-    @ObservedObject var viewModel: GoodByeViewModel
+    @Bindable var viewModel: GoodByeViewModel
     private let additionalContentView: () -> ContentView
 
     public init(

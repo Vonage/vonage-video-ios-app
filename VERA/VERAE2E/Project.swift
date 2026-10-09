@@ -10,7 +10,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERAE2E",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAE2E/**"],
             scripts: [.swiftLint(targetName: "VERAE2E")],
             dependencies: [

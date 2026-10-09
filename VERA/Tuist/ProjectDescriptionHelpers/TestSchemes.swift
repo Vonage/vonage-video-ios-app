@@ -40,6 +40,9 @@ public enum VERATestSchemes {
             testableTarget("VERADomainTests", in: "VERADomain"),
             testableTarget("VERAMeetingRoomTests", in: "VERAMeetingRoom"),
         ]
+        if isOktaEnabled() {
+            targets.append(testableTarget("VERAOKTATests", in: "VERAOKTA"))
+        }
         if isFeatureEnabled("meetingRoomSettings", "allowChat") {
             targets.append(testableTarget("VERAChatTests", in: "VERAChat"))
         }
@@ -52,7 +55,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
             targets.append(testableTarget("VERAReactionsTests", in: "VERAReactions"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERASettingsTests", in: "VERASettings"))
         }
         if isFeatureEnabled("meetingRoomSettings", "allowFeedback") {
@@ -80,7 +83,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowArchiving") {
             targets.append(testableTarget("VERAVonageArchivingPluginTests", in: "VERAVonageArchivingPlugin"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERAVonageSettingsPluginTests", in: "VERAVonageSettingsPlugin"))
         }
         if isFeatureEnabled("meetingRoomSettings", "allowScreenShare") {
@@ -118,7 +121,7 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
             targets.append(testableTarget("VERAReactionsSnapshotTests", in: "VERAReactions"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowSettings") {
+        if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERASettingsSnapshotTests", in: "VERASettings"))
         }
         if isFeatureEnabled("audioSettings", "allowAdvancedNoiseSuppression") {
@@ -154,5 +157,17 @@ public enum VERATestSchemes {
             fatalError("Could not read \(section).\(key) from app-config.json")
         }
         return value
+    }
+
+    /// Returns `true` when `authSettings.idProviders` contains `"okta"` in `app-config.json`.
+    private static func isOktaEnabled() -> Bool {
+        guard let configData = FileManager.default.contents(atPath: "./Config/app-config.json"),
+            let json = try? JSONSerialization.jsonObject(with: configData) as? [String: Any],
+            let authSettings = json["authSettings"] as? [String: Any],
+            let providers = authSettings["idProviders"] as? [String]
+        else {
+            return false
+        }
+        return providers.contains("okta")
     }
 }

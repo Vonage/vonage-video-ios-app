@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 
 /// Constants for floating emoji overlay behavior.
 private enum FloatingEmojisOverlayConstants {
@@ -34,15 +35,17 @@ private enum FloatingEmojisOverlayConstants {
 ///
 /// FloatingEmojisOverlayView(viewModel: viewModel)
 /// ```
-public final class FloatingEmojisOverlayViewModel: ObservableObject {
+@Observable
+public final class FloatingEmojisOverlayViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
     /// The currently visible floating emojis.
-    @Published public private(set) var floatingEmojis: [UIFloatingEmoji] = []
+    public private(set) var floatingEmojis: [UIFloatingEmoji] = []
 
     // MARK: - Private Properties
 
+    @ObservationIgnored
     private var subscriptions = Set<AnyCancellable>()
 
     // MARK: - Initialization

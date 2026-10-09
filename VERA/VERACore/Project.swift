@@ -13,7 +13,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERACore",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACore/**"],
             resources: [
                 "VERACore/Resources/**",
@@ -32,7 +32,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERATestHelpers",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERATestHelpers/**"],
             dependencies: [
                 .target(name: "VERACore")
@@ -44,7 +44,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERACore.tests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACoreTests/**"],
             dependencies: [
                 .target(name: "VERACore"),
@@ -57,7 +57,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERACore.snapshottests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERACoreSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERACore"),

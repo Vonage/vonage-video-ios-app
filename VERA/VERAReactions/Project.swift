@@ -14,7 +14,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAReactions",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAReactions/**"],
             resources: ["VERAReactions/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAReactions")],
@@ -30,7 +30,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .app,
             bundleId: "com.vonage.VERAReactionsApp",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERAReactionsApp",
@@ -50,7 +50,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAReactionsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAReactionsTests/**"],
             dependencies: [
                 .target(name: "VERAReactions")
@@ -64,7 +64,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAReactionsSnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAReactionsSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERAReactions"),

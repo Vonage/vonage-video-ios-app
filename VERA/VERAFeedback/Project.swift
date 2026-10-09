@@ -13,7 +13,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAFeedback",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAFeedback/**"],
             resources: ["VERAFeedback/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAFeedback")],
@@ -30,7 +30,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .app,
             bundleId: "com.vonage.VERAFeedbackApp",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERAFeedbackApp",
@@ -50,7 +50,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAFeedbackTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAFeedbackTests/**"],
             dependencies: [
                 .target(name: "VERAFeedback"),
@@ -65,7 +65,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERAFeedbackSnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAFeedbackSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERAFeedback"),

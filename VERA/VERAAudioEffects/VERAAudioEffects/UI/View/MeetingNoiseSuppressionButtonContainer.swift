@@ -8,7 +8,7 @@ import VERACommonUI
 
 public struct MeetingNoiseSuppressionButtonContainer: View {
 
-    @ObservedObject var viewModel: MeetingNoiseSuppressionViewModel
+    var viewModel: MeetingNoiseSuppressionViewModel
 
     public init(viewModel: MeetingNoiseSuppressionViewModel) {
         self.viewModel = viewModel

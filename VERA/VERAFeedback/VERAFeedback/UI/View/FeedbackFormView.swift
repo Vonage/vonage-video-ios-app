@@ -27,7 +27,7 @@ struct FeedbackFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.meetingRoomTheme) private var theme
 
-    @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
+    @Bindable var feedbackFormViewModel: FeedbackFormViewModel
 
     @FocusState private var focusedFieldIndex: Int?
 

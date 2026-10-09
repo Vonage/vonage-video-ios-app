@@ -11,7 +11,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERACocoaLumberjackLogger",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACocoaLumberjackLogger/**"],
             scripts: [.swiftLint(targetName: "VERACocoaLumberjackLogger")],
             dependencies: [
@@ -25,7 +25,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERACocoaLumberjackLoggerTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERACocoaLumberjackLoggerTests/**"],
             dependencies: [
                 .target(name: "VERACocoaLumberjackLogger"),

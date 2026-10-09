@@ -1,4 +1,11 @@
 {
+  "metadata": {
+    "name": "vonage",
+    "version": "1.0.0",
+    "created": "2026-09-07",
+    "description": "Default Vonage Video app configuration."
+  },
+  "baseApiUrl": "${BASE_API_URL}",
   "videoSettings": {
     "allowBackgroundEffects": true,
     "allowCameraControl": true,
@@ -10,6 +17,12 @@
     "allowAudioOnJoin": true,
     "allowMicrophoneControl": true,
     "allowAudioDiagnostics": true
+  },
+  "authSettings": {
+    "allowAuthentication": false,
+    "idProviders": [
+      "okta"
+    ]
   },
   "waitingRoomSettings": {
     "allowDeviceSelection": true,

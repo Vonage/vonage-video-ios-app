@@ -4,9 +4,11 @@
 
 import AVFoundation
 import Foundation
+import VERACommonUI
 import VERAConfiguration
 import VERACore
 import VERADomain
+import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
 import VERAVonage
@@ -34,13 +36,49 @@ import VERAVonageCallKitPlugin
     import VERAAudioDiagnostics
 #endif
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 final class DependencyContainer {
 
-    let httpClient: HTTPClient
+    private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
+        isE2EEnabled: E2EConfiguration.isEnabled
+    )()
 
-    init(httpClient: HTTPClient) {
-        self.httpClient = httpClient
-    }
+    var onUnauthorized: (@MainActor @Sendable () -> Void)?
+
+    #if OKTA_ENABLED
+        lazy var authManager: any OKTAAuthenticating = {
+            if E2EConfiguration.isEnabled {
+                return E2EAuthStateManager()
+            }
+            let okta = OktaAuthManager()
+            okta.restoreSession()
+            return okta
+        }()
+
+        lazy var httpClient: HTTPClient = {
+            let inner: any HTTPClient =
+                E2EConfiguration.isEnabled
+                ? baseHttpClient
+                : TokenInjectingHTTPClient(
+                    wrapped: baseHttpClient,
+                    tokenProvider: OktaTokenProvider(authManager: authManager)
+                )
+            #if AUTHENTICATION_ENABLED
+                return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
+                    await MainActor.run { self?.onUnauthorized?() }
+                }
+            #else
+                return inner
+            #endif
+        }()
+    #else
+        var httpClient: HTTPClient { baseHttpClient }
+    #endif
+
+    init() {}
 
     lazy var baseURL: URL = EnvironmentConstants.baseURL
 

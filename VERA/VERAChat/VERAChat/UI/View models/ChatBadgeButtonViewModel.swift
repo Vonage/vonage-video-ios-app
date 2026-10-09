@@ -4,14 +4,20 @@
 
 import Combine
 import Foundation
+import Observation
 
-public final class ChatBadgeButtonViewModel: ObservableObject {
+@Observable
+public final class ChatBadgeButtonViewModel {
 
-    @Published public private(set) var unreadMessagesCount: Int = 0
+    public private(set) var unreadMessagesCount: Int = 0
 
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
+    @ObservationIgnored
     private var totalMessageCount: Int = 0
+    @ObservationIgnored
     private var lastReadCount: Int = 0
+    @ObservationIgnored
     private var isChatVisible: Bool = false
 
     public init(chatMessagesObserver: ChatMessagesObserver) {

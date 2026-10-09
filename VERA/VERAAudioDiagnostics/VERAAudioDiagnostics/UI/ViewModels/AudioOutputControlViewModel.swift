@@ -4,26 +4,30 @@
 
 import Combine
 import Foundation
+import Observation
 
 /// ViewModel dedicated to the audio output control panel.
 ///
 /// Manages speaker testing and real-time audio level monitoring.
 /// Designed to be portable and reusable across different contexts (Settings, Waiting Room, etc.).
 @MainActor
-public final class AudioOutputControlViewModel: ObservableObject {
+@Observable
+public final class AudioOutputControlViewModel {
 
-    // MARK: - Published State
+    // MARK: - Observable State
 
     /// Current audio output level (0.0 to 1.0).
     /// Updated in real-time when testing audio output.
-    @Published public var currentAudioLevel: Float = 0.0
+    public var currentAudioLevel: Float = 0.0
 
     /// Whether audio is currently playing.
-    @Published public var isPlaying: Bool = false
+    public var isPlaying: Bool = false
 
     // MARK: - Dependencies
 
+    @ObservationIgnored
     private let speakerTestService: SpeakerTestService
+    @ObservationIgnored
     private var audioLevelCancellable: AnyCancellable?
 
     // MARK: - Initialization

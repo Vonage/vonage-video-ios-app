@@ -8,7 +8,7 @@ import VERACommonUI
 
 public struct MeetingBackgroundEffectScreenButton: View {
 
-    @ObservedObject var viewModel: VideoEffectsViewModel
+    var viewModel: VideoEffectsViewModel
     private let onShowEffects: (() -> Void)?
 
     public init(viewModel: VideoEffectsViewModel, onShowEffects: (() -> Void)? = nil) {

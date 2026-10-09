@@ -1,0 +1,61 @@
+# vera-runner: mock-only
+appId: ${APP_ID}
+---
+# Login dialog on 401 flow
+# Verifies that when the backend returns HTTP 401 for POST /v2/createSession,
+# the app presents the sign-in provider chooser (SignInView) instead of a
+# generic error alert.
+#
+# Requires: AUTHENTICATION_ENABLED and OKTA_ENABLED compilation flags active.
+# Depends on E2E mocks: forces the createSession endpoint to fail with 401 via
+# VERA_E2E_FAIL_ENDPOINT + VERA_E2E_FAIL_STATUS launch arguments.
+
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_FAIL_ENDPOINT: "createSession"
+      VERA_E2E_FAIL_STATUS: "401"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Enter a room and head to the waiting room
+- assertVisible:
+    id: "create-new-room-button"
+
+- tapOn:
+    id: "create-new-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Join the meeting — this triggers connect -> POST /v2/createSession, which the
+# mock forces to return 401.
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# The 401 must surface the sign-in provider chooser, not an error alert.
+- assertVisible:
+    id: "auth-sign-in-screen"
+
+- assertVisible:
+    id: "auth-sign-in-provider-okta"
+
+- takeScreenshot: 01-sign-in-dialog-on-401

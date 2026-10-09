@@ -7,8 +7,12 @@ permissions:
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'VERA/**'
 
 jobs:
   format-check:
@@ -38,15 +42,38 @@ jobs:
             -scheme VERAMeetingRoomSDK \
             -destination "generic/platform=iOS Simulator" | xcpretty
 
-  unit-tests:
+  tests:
+    name: tests (${{ matrix.name }})
     runs-on: macos-26
     needs: [format-check]
     defaults:
       run:
         shell: bash
-    outputs:
-      test-results: ${{ steps.tests.outcome }}
-    
+    strategy:
+      # Let every leg finish so one failure doesn't hide the others; a failed leg
+      # can be re-run on its own via "Re-run failed jobs".
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            scheme: VERAUnitTests-macOS
+            destination: platform=macOS
+            simulator: false
+            timeout: 25
+            extra_flags: ""
+          - name: iOS
+            scheme: VERAUnitTests-iOS
+            destination: platform=iOS Simulator,name=iPhone 17
+            simulator: true
+            timeout: 45
+            extra_flags: ""
+          - name: snapshots
+            scheme: VERASnapshotTests-iOS
+            destination: platform=iOS Simulator,name=iPhone 17
+            simulator: true
+            timeout: 45
+            extra_flags: -parallel-testing-enabled NO
+
     steps:
       - uses: actions/checkout@v6
     
@@ -71,12 +98,20 @@ jobs:
           cd VERA
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
+          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
+          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
+          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
+          jq '.authSettings.allowAuthentication = true | .authSettings.idProviders |= (if contains(["okta"]) then . else . + ["okta"] end)' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
+          ./Scripts/generateOktaConfig.sh
+          tuist install
           tuist generate --no-open
           cd ..
 
       - name: List available simulators
+        if: matrix.simulator
         run: |
           echo "📱 Available iOS Simulators:"
           xcrun simctl list devices
@@ -87,64 +122,49 @@ jobs:
             echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
           } >> $GITHUB_ENV
 
-      - name: Run unit tests (macOS)
-        id: unit-tests-macos
-        timeout-minutes: 25
-        run: |
-          echo "🧪 Running VERAUnitTests-macOS (all macOS unit test targets, single invocation)"
-          xcodebuild test \
-            -workspace VERA/VERA.xcworkspace \
-            -scheme VERAUnitTests-macOS \
-            -destination "platform=macOS" \
-            -derivedDataPath DerivedData \
-            -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERAUnitTests-macOS.xcresult \
-            $XCODE_COMMON_FLAGS | xcpretty
-
       - name: Preboot iOS Simulator
+        if: matrix.simulator
         run: |
-          set -euo pipefail
-          xcrun simctl boot "iPhone 17" || true 
+          xcrun simctl boot "iPhone 17" || true
 
-      - name: Run unit tests (iOS Simulator)
-        id: unit-tests-ios
-        timeout-minutes: 45
+      - name: Run ${{ matrix.scheme }}
+        timeout-minutes: ${{ matrix.timeout }}
         run: |
-          echo "🧪 Running VERAUnitTests-iOS (all iOS unit and plugin test targets, single invocation)"
+          echo "🧪 Running ${{ matrix.scheme }} on ${{ matrix.destination }} (single invocation)"
           xcodebuild test \
             -workspace VERA/VERA.xcworkspace \
-            -scheme VERAUnitTests-iOS \
-            -destination "platform=iOS Simulator,name=iPhone 17" \
+            -scheme "${{ matrix.scheme }}" \
+            -destination "${{ matrix.destination }}" \
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERAUnitTests-iOS.xcresult \
+            -resultBundlePath "TestResults/${{ matrix.scheme }}.xcresult" \
+            ${{ matrix.extra_flags }} \
             $XCODE_COMMON_FLAGS | xcpretty
 
-      - name: Run snapshot tests (iOS Simulator)
-        id: snapshot-tests-ios
-        timeout-minutes: 45
-        run: |
-          echo "📸 Running VERASnapshotTests-iOS (all snapshot test targets, single invocation)"
-          xcodebuild test \
-            -workspace VERA/VERA.xcworkspace \
-            -scheme VERASnapshotTests-iOS \
-            -destination "platform=iOS Simulator,name=iPhone 17" \
-            -derivedDataPath DerivedData \
-            -enableCodeCoverage YES \
-            -resultBundlePath DerivedData/VERASnapshotTests-iOS.xcresult \
-            -parallel-testing-enabled NO \
-            $XCODE_COMMON_FLAGS | xcpretty
-
-      - name: Upload all test results
+      - name: Upload test results
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: unit-test-results
-          path: |
-            DerivedData/VERAUnitTests-macOS.xcresult
-            DerivedData/VERAUnitTests-iOS.xcresult
-            DerivedData/VERASnapshotTests-iOS.xcresult
-          
+          name: test-results-${{ matrix.name }}
+          path: TestResults/
+          overwrite: true
+
+  # Aggregates into the single "unit-tests" status that branch protection
+  # requires and that sonarcloud / upload-testflight depend on. It runs even when a
+  # leg fails, so the required check always reports instead of staying pending.
+  unit-tests:
+    runs-on: ubuntu-24.04
+    needs: [tests]
+    if: always()
+    steps:
+      - name: Require every test leg to pass
+        run: |
+          echo "tests matrix result: ${{ needs.tests.result }}"
+          if [ "${{ needs.tests.result }}" != "success" ]; then
+            echo "::error::A test leg did not succeed. Check the tests (macOS / iOS / snapshots) jobs."
+            exit 1
+          fi
+
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: macos-26
@@ -159,7 +179,8 @@ jobs:
       - name: Download unit test results
         uses: actions/download-artifact@v8
         with:
-          name: unit-test-results
+          pattern: test-results-*
+          merge-multiple: true
           path: DerivedData/
     
       - name: Install dependencies
@@ -249,8 +270,15 @@ jobs:
           export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
           export CURRENT_PROJECT_VERSION=${{ steps.buildnumber.outputs.BUILD_NUMBER }}
           export BASE_API_URL=${{ secrets.BASE_API_URL }}
+          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
+          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
+          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
+          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
+          jq '.authSettings.allowAuthentication = true | .authSettings.idProviders |= (if contains(["okta"]) then . else . + ["okta"] end)' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
+          ./Scripts/generateOktaConfig.sh
+          tuist install
           tuist generate --no-open
           cd ..
 
@@ -264,7 +292,7 @@ jobs:
               -allowProvisioningUpdates \
               -archivePath $PWD/build/VERA.xcarchive \
               CURRENT_PROJECT_VERSION="${{ steps.buildnumber.outputs.BUILD_NUMBER }}" \
-              archive | xcpretty
+              archive
 
       - name: Export IPA
         run: |
@@ -272,7 +300,7 @@ jobs:
               -archivePath "$PWD/build/VERA.xcarchive" \
               -exportOptionsPlist "$PWD/VERA/ExportOptions.plist" \
               -allowProvisioningUpdates \
-              -exportPath "$PWD/build" | xcpretty
+              -exportPath "$PWD/build"
 
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v3.0.1

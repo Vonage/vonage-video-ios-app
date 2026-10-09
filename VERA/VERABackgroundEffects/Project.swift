@@ -4,16 +4,15 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERABackgroundEffects",
     options: defaultProjectOptions(),
-    packages: [
-        .vonageVideoTransformersSDK
-    ],
+    // Transformers SDK comes from Tuist/Package.swift via `.external` below.
+    packages: [],
     targets: [
         .target(
             name: "VERABackgroundEffects",
             destinations: .iOS,
             product: .framework,
             bundleId: "com.vonage.VERABackgroundEffects",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERABackgroundEffects/**"],
             resources: [
                 "VERABackgroundEffects/Resources/**"
@@ -22,8 +21,7 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAVonage", path: "../VERAVonage"),
                 .project(target: "VERACommonUI", path: "../VERACommonUI"),
-                .vonageVideoTransformersSDK,
-            ],
+            ] + TargetDependency.vonageVideoTransformersSDKDependencies,
             settings: createBaseBuildSettings()
         ),
         .target(
@@ -31,7 +29,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERABackgroundEffectsTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERABackgroundEffectsTests/**"],
             dependencies: [
                 .target(name: "VERABackgroundEffects"),
@@ -44,7 +42,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERABackgroundEffectsSnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERABackgroundEffectsSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERABackgroundEffects"),

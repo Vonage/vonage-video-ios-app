@@ -33,21 +33,20 @@ import VERAVonage
     import VERAAudioDiagnostics
 #endif
 
+#if OKTA_ENABLED
+    import VERAOKTA
+#endif
+
 @main
 struct VERAApp: App {
-    @StateObject var navigationCoordinator = NavigationCoordinator()
+    @State var navigationCoordinator = NavigationCoordinator()
 
     #if DEBUG
-        @StateObject private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
+        @State private var meetingRoomCustomizationProvider = MeetingRoomCustomizationProvider()
         @State private var isMeetingRoomCustomizationMenuPresented = false
     #endif
 
-    var dependencyContainer: DependencyContainer = {
-        let httpClient = AppHTTPClientProvider(
-            isE2EEnabled: E2EConfiguration.isEnabled
-        )
-        return DependencyContainer(httpClient: httpClient())
-    }()
+    var dependencyContainer = DependencyContainer()
 
     var handleUniversalLink: HandleUniversalLink {
         HandleUniversalLink(
@@ -94,8 +93,15 @@ struct VERAApp: App {
                         .alert(item: $navigationCoordinator.alertItem) { $0.view }
                 }
             }
-            .environmentObject(navigationCoordinator)
+            .environment(navigationCoordinator)
             .alert(item: $navigationCoordinator.alertItem) { $0.view }
+            .onAppear {
+                #if AUTHENTICATION_ENABLED
+                    dependencyContainer.onUnauthorized = {
+                        navigationCoordinator.showSignIn = true
+                    }
+                #endif
+            }
             .onOpenURL { url in
                 handleUniversalLink(url)
             }
@@ -131,10 +137,70 @@ struct VERAApp: App {
     #endif
 
     private func makeLandingPage() -> some View {
-        landingPageFactory.make { roomName in
+        let landing = landingPageFactory.make { roomName in
             navigationCoordinator.go(to: .waitingRoom(roomName))
         }
+
+        #if AUTHENTICATION_ENABLED
+            return
+                landing
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        #if OKTA_ENABLED
+                            NavBarAuthComponentButton(
+                                viewModel: makeOrGetNavBarAuthButtonViewModel()
+                            )
+                        #endif
+                    }
+                }
+                .sheet(isPresented: $navigationCoordinator.showSignIn) {
+                    #if OKTA_ENABLED
+                        SignInView(
+                            providers: [IDProvider(id: "okta", displayName: "Okta")],
+                            onProviderSelected: { provider in
+                                guard provider.id == "okta" else { return }
+                                guard
+                                    let window = UIApplication.shared.connectedScenes
+                                        .compactMap({ $0 as? UIWindowScene })
+                                        .flatMap(\.windows)
+                                        .first(where: \.isKeyWindow)
+                                else { return }
+                                try await dependencyContainer.authManager.signIn(from: window)
+                            }
+                        )
+                        .presentationDetents([.height(200)])
+                        .presentationDragIndicator(.visible)
+                    #endif
+                }
+        #else
+            return landing
+        #endif
     }
+
+    #if OKTA_ENABLED
+        @MainActor
+        private func makeOrGetNavBarAuthButtonViewModel() -> NavBarAuthButtonViewModel {
+            if let existing = navigationCoordinator.navBarAuthButtonViewModel {
+                return existing
+            }
+
+            let viewModel = NavBarAuthButtonViewModel(
+                authStateDataSource: dependencyContainer.authManager,
+                onLoginTapped: { [weak navigationCoordinator] in
+                    navigationCoordinator?.showSignIn = true
+                },
+                onLogoutTapped: {
+                    do {
+                        try await dependencyContainer.authManager.signOut()
+                    } catch {
+                        print("❌ Sign-out failed: \(error.localizedDescription)")
+                    }
+                }
+            )
+            navigationCoordinator.navBarAuthButtonViewModel = viewModel
+            return viewModel
+        }
+    #endif
 
     private func makeWaitingRoom(roomName: String) -> some View {
         var waitingRoomViewModel: WaitingRoomViewModel
@@ -205,9 +271,23 @@ struct VERAApp: App {
         #if SETTINGS_ENABLED
             // Settings button with icon-only design (no circular background).
             // Presents the in-app SettingsView as a sheet.
-            let settingsButton = settingsFactory.makeWaitingRoomButton()
-            buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            if dependencyContainer.appConfig.waitingRoomSettings.allowSettings {
+                let settingsButton = settingsFactory.makeWaitingRoomButton()
+                buttons.append(ViewHolder(id: "Settings", content: { settingsButton }))
+            }
         #endif
+
+        // Audio-output route selector (system AVRoutePicker), shown next to Settings.
+        // Reuses the meeting room's picker; gated by the waiting-room device-selection flag.
+        if dependencyContainer.appConfig.waitingRoomSettings.allowDeviceSelection {
+            buttons.append(
+                ViewHolder(id: AudioRoutePickerView.viewID) {
+                    AudioRoutePickerView.button(
+                        iconColor: VERACommonUIAsset.SemanticColors.secondary.color
+                    )
+                }
+            )
+        }
 
         return buttons
     }
@@ -218,30 +298,34 @@ struct VERAApp: App {
         var buttons: [ViewHolder] = []
 
         #if BACKGROUND_EFFECTS_ENABLED
-            let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.videoEffectsViewModel = viewModel
-
-            if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
-                let view = backgroundEffectFactory.makeEffectsButton(
-                    viewModel: videoEffectsViewModel
+            if dependencyContainer.appConfig.videoSettings.allowBackgroundEffects {
+                let (_, viewModel) = backgroundEffectFactory.makeEffectsButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
                 )
+                navigationCoordinator.videoEffectsViewModel = viewModel
 
-                buttons.append(ViewHolder(id: "Effects", content: { view }))
+                if let videoEffectsViewModel = navigationCoordinator.videoEffectsViewModel {
+                    let view = backgroundEffectFactory.makeEffectsButton(
+                        viewModel: videoEffectsViewModel
+                    )
+
+                    buttons.append(ViewHolder(id: "Effects", content: { view }))
+                }
             }
         #endif
 
         #if AUDIOEFFECTS_ENABLED
-            let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
-            )
-            navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
+            if dependencyContainer.appConfig.audioSettings.allowAdvancedNoiseSuppression {
+                let (_, audioViewModel) = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    getCurrentPublisher: dependencyContainer.cameraPreviewProviderRepository.getPublisher
+                )
+                navigationCoordinator.waitingNoiseSuppressionViewModel = audioViewModel
 
-            let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
-                viewModel: audioViewModel
-            )
-            buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+                let audioButton = audioEffectsFactory.makeWaitingNoiseSuppressionButton(
+                    viewModel: audioViewModel
+                )
+                buttons.append(ViewHolder(id: "NoiseSuppresion", content: { audioButton }))
+            }
         #endif
 
         return buttons
@@ -275,20 +359,31 @@ struct VERAApp: App {
                 }
         }
 
-        let currentVideoEffect =
-            navigationCoordinator.videoEffectsViewModel?.selectedEffect
-            ?? dependencyContainer.videoEffectRepository.load()
-        let currentNoiseSuppressionState = navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #if BACKGROUND_EFFECTS_ENABLED
+            let currentVideoEffect =
+                navigationCoordinator.videoEffectsViewModel?.selectedEffect
+                ?? dependencyContainer.videoEffectRepository.load()
+        #else
+            let currentVideoEffect: VideoEffect? = nil
+        #endif
+
+        #if AUDIOEFFECTS_ENABLED
+            let currentNoiseSuppressionState =
+                navigationCoordinator.waitingNoiseSuppressionViewModel?.state ?? .disabled
+        #else
+            let currentNoiseSuppressionState: NoiseSuppressionState? = nil
+        #endif
 
         let builder = MeetingRoomBuilder(
             baseURL: dependencyContainer.baseURL,
             roomName: request.roomName
         ).configuration(
             MeetingRoomConfiguration(
-                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: dependencyContainer.appConfig.videoSettings.allowCameraControl,
+                allowMicrophoneControl: dependencyContainer.appConfig.audioSettings.shouldShowMicrophoneControl,
+                allowCameraControl: dependencyContainer.appConfig.videoSettings.shouldShowCameraControl,
                 showParticipantList: dependencyContainer.appConfig.meetingRoomSettings.showParticipantList,
-                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture
+                allowPictureInPicture: dependencyContainer.appConfig.meetingRoomSettings.allowPictureInPicture,
+                allowDeviceSelection: dependencyContainer.appConfig.meetingRoomSettings.allowDeviceSelection
             )
         )
         .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)

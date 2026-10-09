@@ -4,7 +4,7 @@
 
 | Category | Technologies |
 |---|---|
-| **Core** | Xcode 26 · Swift 5.9 · Minimum iOS 16.0 · macOS 14.6 (test targets) |
+| **Core** | Xcode 26 · Swift 5.9 · Minimum iOS 17.0 · macOS 14.6 (test targets) |
 | **UI** | SwiftUI · Combine (reactive streams) · async/await preferred over callbacks |
 | **Architecture** | MVVM · Clean Architecture · Dependency Injection via composition root |
 | **Build System** | [Tuist](https://tuist.dev) for dynamic project generation · Swift Package Manager (SPM) |
@@ -21,21 +21,26 @@
 All commands must be run from within the `VERA/` directory unless noted otherwise.
 
 ### First-time setup
+
+Code generation + workspace generation are owned by `Scripts/builder.sh`:
+
 ```bash
-# Export required env vars
+# Export required env vars (needed for EnvironmentConstants/signing on first setup)
 export BASE_API_URL=https://api.example.net/
 export DEVELOPMENT_TEAM=AB0C12DE34
 export MARKETING_VERSION=1.0
 export CURRENT_PROJECT_VERSION=1
 
-# Run from VERA/ directory
-./Scripts/generateEnvironmentConstants.sh   # generates VERA/VERAApp/VERA/App/Generated/EnvironmentConstants.swift
-./Scripts/regenerateSigningConfig.sh        # generates VERA/Config/Signing.xcconfig
-python3 ./Scripts/generate-app-config.py    # generates VERAConfiguration/VERAConfiguration/AppConfig.swift
-python3 ./Scripts/generate-app-theme.py     # generates SemanticColors.xcassets in VERACommonUI
-
-tuist generate   # generates VERA.xcworkspace
+cd VERA
+./Scripts/builder.sh   # prerequisites, full codegen, tuist generate, opens Xcode
 ```
+
+After editing `Config/app-config.json` or `Config/theme.json`:
+```bash
+./Scripts/builder.sh --update   # regenerates AppConfig.swift + theme assets, then tuist generate
+```
+
+> A plain `tuist generate` does **not** regenerate the JSON-driven files. Use `builder.sh --update`. See `VERA/PREBUILTS_README.md`.
 
 ### Regenerate workspace after Project.swift changes
 ```bash
@@ -223,23 +228,21 @@ VERAVonageCallKitPlugin   – always included
 ```
 
 ### Feature flags
-`VERA/Config/app-config.json` controls which optional modules are compiled in. When `tuist generate` runs, `Project.swift` reads this file and:
-1. Adds the corresponding module targets as dependencies.
-2. Sets Swift compilation conditions (`CHAT_ENABLED`, `ARCHIVING_ENABLED`, `BACKGROUND_EFFECTS_ENABLED`, `CAPTIONS_ENABLED`, `REACTIONS_ENABLED`, `SETTINGS_ENABLED`, `SCREEN_SHARE_ENABLED`, `AUDIOEFFECTS_ENABLED`).
+`VERA/Config/app-config.json` controls which optional features are enabled. Regenerate with `./Scripts/builder.sh --update` after editing it (a plain `tuist generate` does not regenerate `AppConfig.swift`). Features are wired two ways:
 
-The mapping from JSON keys to flags:
+**Runtime (via `VERAMeetingRoomSDK`)** — chat, captions, reactions, screen share, picture-in-picture. Always linked; `DependencyContainer.meetingRoomEnabledFeatures` reads `AppConfig` and passes the enabled set to the SDK.
+
+**Compile-time** — when `tuist generate` runs, `Project.swift` reads the file, adds module dependencies, and sets Swift compilation conditions:
 | `app-config.json` key | Compilation condition |
 |---|---|
-| `meetingRoomSettings.allowChat` | `CHAT_ENABLED` |
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` |
-| `meetingRoomSettings.allowCaptions` | `CAPTIONS_ENABLED` |
-| `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` |
-| `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` |
+| `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` |
+| `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` |
 
-Code inside `#if CHAT_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
+Code inside `#if BACKGROUND_EFFECTS_ENABLED … #endif` blocks is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
 ### Dependency injection
 `DependencyContainer` in `VERAApp` is the single composition root. All repositories, use cases, and plugins are lazy properties here. Nothing else creates concrete dependencies — modules depend only on protocols defined in `VERADomain`.
@@ -287,7 +290,7 @@ Wireframe/           – Factory classes that wire Domain + Data + UI together
 - `Utils/` contains pure helpers (extensions, formatters) with no layer dependencies.
 
 ### Multi-platform targets
-Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 16+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
+Core framework modules (`VERACore`, `VERAMeetingRoom`, `VERADomain`, `VERACommonUI`, `VERAConfiguration`, `VERASettings`, `VERAScreenShare`) target both **iOS 17+** and **macOS 14.6+**, enabling fast unit-test runs on macOS without a simulator. iOS-specific modules (anything using the Vonage SDK, UIKit, or VonageVideoTransformers — e.g., `VERAVonage`, `VERAAudioEffects`, all plugin modules) are iOS-only.
 
 ### Testing helpers
 `VERATestHelpers` (a framework target inside `VERACore`) provides shared mocks and spies (`MockCall`, `MockSessionRepository`, etc.) for use across all test targets.

@@ -14,7 +14,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERAScreenShare",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAScreenShare/**"],
             resources: ["VERAScreenShare/Resources/**"],
             scripts: [.swiftLint(targetName: "VERAScreenShare")],
@@ -30,7 +30,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERAScreenShareTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERAScreenShareTests/**"],
             dependencies: [
                 .target(name: "VERAScreenShare")

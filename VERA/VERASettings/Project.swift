@@ -14,7 +14,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .framework,
             bundleId: "com.vonage.VERASettings",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERASettings/**"],
             resources: ["VERASettings/Resources/**"],
             scripts: [.swiftLint(targetName: "VERASettings")],
@@ -31,7 +31,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .app,
             bundleId: "com.vonage.VERASettingsApp",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             infoPlist: .extendingDefault(
                 with: [
                     "CFBundleName": "VERASettingsApp",
@@ -51,7 +51,7 @@ let project = Project(
             destinations: [.iPhone, .iPad, .mac],
             product: .unitTests,
             bundleId: "com.vonage.VERASettingsTests",
-            deploymentTargets: DeploymentTargets.multiplatform(iOS: "16.0", macOS: "14.6"),
+            deploymentTargets: multiplatformDeploymentTarget,
             sources: ["VERASettingsTests/**"],
             dependencies: [
                 .target(name: "VERASettings")
@@ -65,7 +65,7 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "com.vonage.VERASettingsSnapshotTests",
-            deploymentTargets: DeploymentTargets.iOS("16.0"),
+            deploymentTargets: iOSDeploymentTarget,
             sources: ["VERASettingsSnapshotTests/**"],
             dependencies: [
                 .target(name: "VERASettings"),
