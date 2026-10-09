@@ -29,6 +29,17 @@ public final class DefaultArchivesRepository: ArchivesRepository {
             return publisher
         }
 
+        func removePublisher(
+            _ publisher: CurrentValueSubject<[Archive], Error>,
+            for sessionKey: String
+        ) {
+            lock.lock()
+            defer { lock.unlock() }
+
+            guard cache[sessionKey] === publisher else { return }
+            cache.removeValue(forKey: sessionKey)
+        }
+
         func cancelExistingTask(for sessionKey: String) {
             lock.lock()
             defer { lock.unlock() }
@@ -98,8 +109,9 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                 } catch {
                     guard !Task.isCancelled else { return }
-                    publisher.send(completion: .failure(error))
+                    state.removePublisher(publisher, for: sessionKey)
                     state.removeTask(for: sessionKey)
+                    publisher.send(completion: .failure(error))
                     return
                 }
             } while !Task.isCancelled
