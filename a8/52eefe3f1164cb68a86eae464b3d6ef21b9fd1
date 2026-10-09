@@ -1,0 +1,21 @@
+sonar-project.properties
+  s_0199d8a08dc7b6::t_b40a5d2193771a 9
+VERA/Scripts/regenerateSigningConfig.sh
+  s_0199d8a08dc7b6::t_f7722be3314490 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "a852eefe3f1164cb68a86eae464b3d6ef21b9fd1",
+  "prompts": {},
+  "sessions": {
+    "s_0199d8a08dc7b6": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_c8308e60-f4ba-44de-a52f-e8cbc70fcbe1",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
