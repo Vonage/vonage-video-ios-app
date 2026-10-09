@@ -46,7 +46,26 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Wraps the underlying `UIView` from `OTPublisher` in a SwiftUI container so that
     /// publisher video can be embedded in SwiftUI layouts.
     public var view: AnyView {
-        AnyView(UIViewContainer(view: otPublisher.view!))
+        AnyView(
+            UIViewContainer(view: otPublisher.view!)
+                .scaleEffect(x: nativePreviewNeedsFlip ? -1 : 1, y: 1)
+        )
+    }
+
+    var selfViewIsMirrored: Bool { selfViewMirroringEnabled && cameraPosition == .front }
+
+    /// The SDK mirrors the physical front camera automatically. Its simulator demo is unmirrored.
+    private var nativePreviewNeedsFlip: Bool {
+        selfViewIsMirrored != (otPublisher.cameraPosition == .front)
+    }
+
+    /// Keeps the rear camera unmirrored and changes only the front-camera local preview.
+    public var selfViewMirroringEnabled: Bool = true {
+        didSet { updateSelfViewMirroring() }
+    }
+
+    func updateSelfViewMirroring() {
+        updateParticipant()
     }
 
     /// The underlying Vonage stream once publishing starts, otherwise `nil`.
@@ -110,12 +129,35 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         set { otPublisher.publishVideo = newValue }
     }
 
+    var onAdvancedNoiseSuppressionChanged: ((Bool) -> Void)?
+    var advancedNoiseSuppressionAvailable = true
+    private var lastNoiseSuppressionEnabled = false
+
+    var onCameraPositionChanged: ((CameraPosition) -> Void)?
+
+    /// The simulator has no camera, so preserve the requested position for its demo preview.
+    private var requestedCameraPosition: CameraPosition = .front
+
     /// Current camera position (front/back).
     ///
     /// Maps Vonage’s camera position to the app’s `CameraPosition` abstraction.
     public var cameraPosition: CameraPosition {
-        get { otPublisher.cameraPosition == .front ? .front : .back }
-        set { otPublisher.cameraPosition = newValue == .front ? .front : .back }
+        get {
+            #if targetEnvironment(simulator)
+                requestedCameraPosition
+            #else
+                otPublisher.cameraPosition == .front ? .front : .back
+            #endif
+        }
+        set {
+            let previous = cameraPosition
+            requestedCameraPosition = newValue
+            otPublisher.cameraPosition = newValue == .front ? .front : .back
+            updateSelfViewMirroring()
+            if cameraPosition != previous {
+                onCameraPositionChanged?(cameraPosition)
+            }
+        }
     }
 
     /// Switches camera to a specific device by ID.
@@ -124,9 +166,9 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     public func switchCamera(to cameraDeviceID: String) {
         switch cameraDeviceID {
         case VonageCameraDevice.front.rawValue:
-            otPublisher.cameraPosition = .front
+            cameraPosition = .front
         case VonageCameraDevice.back.rawValue:
-            otPublisher.cameraPosition = .back
+            cameraPosition = .back
         default:
             break
         }
@@ -263,6 +305,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         onStreamDestroyed = nil
         onError = nil
         onMuteForced = nil
+        onCameraPositionChanged = nil
+        onAdvancedNoiseSuppressionChanged = nil
     }
 
     // MARK: OTPublisherKitDelegate
@@ -383,6 +427,23 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     open func updateAudioTransformers() {
         otPublisher.audioTransformers = audioTransformers.map(\.transformer)
         updateParticipant()
+        let enabled = audioTransformers.contains { $0.key == "NoiseSuppression" }
+        if enabled != lastNoiseSuppressionEnabled {
+            lastNoiseSuppressionEnabled = enabled
+            onAdvancedNoiseSuppressionChanged?(enabled)
+        }
+    }
+
+    func setAdvancedNoiseSuppression(enabled: Bool) throws {
+        let enabled = enabled && advancedNoiseSuppressionAvailable
+        let current = audioTransformers.contains { $0.key == "NoiseSuppression" }
+        guard current != enabled else { return }
+        if enabled {
+            let transformer = try transformerFactory.makeAudioTransformer(for: "NoiseSuppression", params: "")
+            addAudioTransformer(transformer)
+        } else {
+            removeAudioTransformer("NoiseSuppression")
+        }
     }
 }
 

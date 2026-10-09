@@ -19,6 +19,9 @@ enum SettingsAccessibilityID {
 
     // MARK: - Video Section - Always Editable
 
+    static let cameraPicker = "settings-camera-picker"
+    static let selfViewMirrorToggle = "settings-self-view-mirror-toggle"
+    static let cameraContentHintPicker = "settings-camera-content-hint-picker"
     static let videoBitratePicker = "settings-video-bitrate-picker"
     static let videoDegradationPicker = "settings-video-degradation-picker"
 
@@ -33,6 +36,7 @@ enum SettingsAccessibilityID {
 
     // MARK: - Audio Section - Context-Dependent
 
+    static let advancedNoiseSuppressionToggle = "settings-advanced-noise-suppression-toggle"
     static let audioBitratePicker = "settings-audio-bitrate-picker"
     static let audioBitrateLocked = "settings-audio-bitrate-locked"
     static let opusDtxToggle = "settings-opus-dtx-toggle"
@@ -42,9 +46,22 @@ enum SettingsAccessibilityID {
     static let subscriberFallbackToggle = "settings-subscriber-fallback-toggle"
     static let subscriberFallbackLocked = "settings-subscriber-fallback-locked"
 
-    // MARK: - General Section
+    // MARK: - Screen Sharing
+
+    static let screenShareContentHintPicker = "settings-screen-share-content-hint-picker"
+    static let screenShareCodecPicker = "settings-screen-share-codec-picker"
+    static let screenShareFrameRatePicker = "settings-screen-share-frame-rate-picker"
+    static let screenShareResolutionPicker = "settings-screen-share-resolution-picker"
+    static let screenShareBitratePicker = "settings-screen-share-bitrate-picker"
+    static let screenShareCustomBitrateSlider = "settings-screen-share-custom-bitrate-slider"
+    static let scalableScreenShareToggle = "settings-scalable-screen-share-toggle"
+
+    // MARK: - General Overlay
 
     static let overlayStatsToggle = "settings-overlay-stats-toggle"
+
+    // MARK: - General Section
+
     static let resetDefaultsButton = "settings-reset-defaults-button"
     static let waitingRoomSettingsButton = "waiting-room-settings-button"
 }

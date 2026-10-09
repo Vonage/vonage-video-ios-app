@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// Value type representing all user-configurable publisher preferences.
 ///
@@ -45,37 +46,69 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public var opusDtxEnabled: Bool
 
+    /// Saved camera choice, shared by Settings and the camera controls.
+    public var cameraPosition: CameraPosition
+
+    /// Whether the front-camera self-view is mirrored locally.
+    public var selfViewMirroringEnabled: Bool
+
+    public var advancedNoiseSuppressionEnabled: Bool
+    public var cameraContentHint: VideoContentHint
+    public var screenShareContentHint: VideoContentHint
+    public var screenShareCodecMode: SettingsScreenShareCodecMode
+    public var screenShareCodecPreference: SettingsCodecPreference
+    public var screenShareFrameRate: SettingsVideoFrameRate?
+    public var screenShareResolution: SettingsScreenShareResolution?
+    public var screenShareBitratePreset: SettingsVideoBitratePreset?
+    public var screenShareMaxVideoBitrate: Int32
+    public var scalableScreenshareEnabled: Bool
+
+
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
     /// Creates a new publisher settings preferences instance.
     ///
     /// - Parameters:
-    ///   - videoResolution: The video resolution. Defaults to `.medium`.
+    ///   - videoResolution: The video resolution. Defaults to `.high` (1280×720).
     ///   - videoFrameRate: The video frame rate. Defaults to `.fps30`.
     ///   - codecPreference: The codec preference. Defaults to `.automatic`.
     ///   - audioBitratePreference: The maximum audio bitrate preference. Defaults to `.default`.
     ///   - videoBitratePreset: The video bitrate preset. Defaults to `.default`.
     ///   - maxVideoBitrate: The maximum video bitrate in bps. Defaults to 500,000.
-    ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
-    ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
+    ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `false`.
+    ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `false`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
-    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
+    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `false`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
+    ///   - selfViewMirroringEnabled: Front-camera preview mirroring. Defaults to `true`.
+    ///   - cameraPosition: Saved camera choice. Defaults to `.front`.
     public init(
-        videoResolution: SettingsVideoResolution = .medium,
+        videoResolution: SettingsVideoResolution = .high,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
         codecPreference: SettingsCodecPreference = .automatic,
         audioBitratePreference: SettingsAudioBitratePreference = .default,
         videoBitratePreset: SettingsVideoBitratePreset = .default,
         maxVideoBitrate: Int32 = 500_000,
-        publisherAudioFallbackEnabled: Bool = true,
-        subscriberAudioFallbackEnabled: Bool = true,
+        publisherAudioFallbackEnabled: Bool = false,
+        subscriberAudioFallbackEnabled: Bool = false,
         senderStatsEnabled: Bool = false,
-        statsOverlayEnabled: Bool = true,
+        statsOverlayEnabled: Bool = false,
         degradationPreference: SettingsDegradationPreference = .notSet,
-        opusDtxEnabled: Bool = true
+        opusDtxEnabled: Bool = true,
+        selfViewMirroringEnabled: Bool = true,
+        cameraPosition: CameraPosition = .front,
+        advancedNoiseSuppressionEnabled: Bool = false,
+        cameraContentHint: VideoContentHint = .automatic,
+        screenShareContentHint: VideoContentHint = .detail,
+        screenShareCodecMode: SettingsScreenShareCodecMode = .inherit,
+        screenShareCodecPreference: SettingsCodecPreference = .defaultManual,
+        screenShareFrameRate: SettingsVideoFrameRate? = nil,
+        screenShareResolution: SettingsScreenShareResolution? = nil,
+        screenShareBitratePreset: SettingsVideoBitratePreset? = nil,
+        screenShareMaxVideoBitrate: Int32 = 500_000,
+        scalableScreenshareEnabled: Bool = false
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -89,6 +122,19 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.selfViewMirroringEnabled = selfViewMirroringEnabled
+        self.cameraPosition = cameraPosition
+        self.advancedNoiseSuppressionEnabled = advancedNoiseSuppressionEnabled
+        self.cameraContentHint = cameraContentHint
+        self.screenShareContentHint = screenShareContentHint
+        self.screenShareCodecMode = screenShareCodecMode
+        self.screenShareCodecPreference = screenShareCodecPreference
+        self.screenShareFrameRate = screenShareFrameRate
+        self.screenShareResolution = screenShareResolution
+        self.screenShareBitratePreset = screenShareBitratePreset
+        self.screenShareMaxVideoBitrate = screenShareMaxVideoBitrate
+        self.scalableScreenshareEnabled = scalableScreenshareEnabled
+
     }
 
     // MARK: - Migration
@@ -129,6 +175,30 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
+        selfViewMirroringEnabled = try container.decodeIfPresent(Bool.self, forKey: .selfViewMirroringEnabled) ?? true
+
+        cameraPosition = try container.decodeIfPresent(CameraPosition.self, forKey: .cameraPosition) ?? .front
+        advancedNoiseSuppressionEnabled =
+            try container.decodeIfPresent(Bool.self, forKey: .advancedNoiseSuppressionEnabled) ?? false
+        cameraContentHint =
+            try container.decodeIfPresent(VideoContentHint.self, forKey: .cameraContentHint) ?? .automatic
+        screenShareContentHint =
+            try container.decodeIfPresent(VideoContentHint.self, forKey: .screenShareContentHint) ?? .detail
+
+        screenShareCodecMode =
+            try container.decodeIfPresent(SettingsScreenShareCodecMode.self, forKey: .screenShareCodecMode) ?? .inherit
+        screenShareCodecPreference =
+            try container.decodeIfPresent(SettingsCodecPreference.self, forKey: .screenShareCodecPreference)
+            ?? .defaultManual
+        screenShareFrameRate = try container.decodeIfPresent(SettingsVideoFrameRate.self, forKey: .screenShareFrameRate)
+        screenShareResolution = try container.decodeIfPresent(
+            SettingsScreenShareResolution.self, forKey: .screenShareResolution)
+        screenShareBitratePreset = try container.decodeIfPresent(
+            SettingsVideoBitratePreset.self, forKey: .screenShareBitratePreset)
+        screenShareMaxVideoBitrate =
+            try container.decodeIfPresent(Int32.self, forKey: .screenShareMaxVideoBitrate) ?? 500_000
+        scalableScreenshareEnabled =
+            try container.decodeIfPresent(Bool.self, forKey: .scalableScreenshareEnabled) ?? false
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -154,6 +224,19 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
+        case selfViewMirroringEnabled
+        case cameraPosition
+        case advancedNoiseSuppressionEnabled
+        case cameraContentHint
+        case screenShareContentHint
+        case screenShareCodecMode
+        case screenShareCodecPreference
+        case screenShareFrameRate
+        case screenShareResolution
+        case screenShareBitratePreset
+        case screenShareMaxVideoBitrate
+        case scalableScreenshareEnabled
+
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -176,6 +259,19 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
         try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encode(selfViewMirroringEnabled, forKey: .selfViewMirroringEnabled)
+        try container.encode(cameraPosition, forKey: .cameraPosition)
+        try container.encode(advancedNoiseSuppressionEnabled, forKey: .advancedNoiseSuppressionEnabled)
+        try container.encode(cameraContentHint, forKey: .cameraContentHint)
+        try container.encode(screenShareContentHint, forKey: .screenShareContentHint)
+        try container.encode(screenShareCodecMode, forKey: .screenShareCodecMode)
+        try container.encode(screenShareCodecPreference, forKey: .screenShareCodecPreference)
+        try container.encodeIfPresent(screenShareFrameRate, forKey: .screenShareFrameRate)
+        try container.encodeIfPresent(screenShareResolution, forKey: .screenShareResolution)
+        try container.encodeIfPresent(screenShareBitratePreset, forKey: .screenShareBitratePreset)
+        try container.encode(screenShareMaxVideoBitrate, forKey: .screenShareMaxVideoBitrate)
+        try container.encode(scalableScreenshareEnabled, forKey: .scalableScreenshareEnabled)
+
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -189,5 +285,18 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
             && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
+            && lhs.selfViewMirroringEnabled == rhs.selfViewMirroringEnabled
+            && lhs.cameraPosition == rhs.cameraPosition
+            && lhs.advancedNoiseSuppressionEnabled == rhs.advancedNoiseSuppressionEnabled
+            && lhs.cameraContentHint == rhs.cameraContentHint
+            && lhs.screenShareContentHint == rhs.screenShareContentHint
+            && lhs.screenShareCodecMode == rhs.screenShareCodecMode
+            && lhs.screenShareCodecPreference == rhs.screenShareCodecPreference
+            && lhs.screenShareFrameRate == rhs.screenShareFrameRate
+            && lhs.screenShareResolution == rhs.screenShareResolution
+            && lhs.screenShareBitratePreset == rhs.screenShareBitratePreset
+            && lhs.screenShareMaxVideoBitrate == rhs.screenShareMaxVideoBitrate
+            && lhs.scalableScreenshareEnabled == rhs.scalableScreenshareEnabled
+
     }
 }

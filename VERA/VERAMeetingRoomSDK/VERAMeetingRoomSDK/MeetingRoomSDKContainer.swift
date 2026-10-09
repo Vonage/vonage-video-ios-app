@@ -82,13 +82,30 @@ final class MeetingRoomSDKContainer {
     lazy var publisherFactory: any PublisherFactory = {
         let camera = DefaultCheckCameraAuthorizationStatusUseCase()
         let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
-        return configuration.allowPictureInPicture
+        let factory: VonagePublisherFactory =
+            configuration.allowPictureInPicture
             ? PictureInPictureVonagePublisherFactory(
                 checkCameraAuthorizationStatusUseCase: camera,
                 checkMicrophoneAuthorizationStatusUseCase: microphone)
             : VonagePublisherFactory(
                 checkCameraAuthorizationStatusUseCase: camera,
                 checkMicrophoneAuthorizationStatusUseCase: microphone)
+        factory.advancedNoiseSuppressionAvailable = enabledFeatures.contains(.audioEffects)
+        factory.onCameraPositionChanged = { [weak self] position in
+            guard let repository = self?.settingsRepository else { return }
+            Task { try? await repository.saveCameraPosition(position) }
+        }
+        factory.onAdvancedNoiseSuppressionInitialized = { [weak self] enabled in
+            self?.noiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
+        }
+        factory.onAdvancedNoiseSuppressionChanged = { [weak self] enabled in
+            guard let self else { return }
+            self.noiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
+            guard self.enabledFeatures.contains(.audioEffects) else { return }
+            let repository = self.settingsRepository
+            Task { try? await repository.saveAdvancedNoiseSuppression(enabled) }
+        }
+        return factory
     }()
 
     lazy var publisherRepository: any PublisherRepository = {
@@ -337,8 +354,38 @@ final class MeetingRoomSDKContainer {
 
     // MARK: - Settings Feature
 
-    lazy var settingsRepository: any PublisherSettingsRepository =
-        UserDefaultsSettingsRepository()
+    private var screenSharePreferencesCancellable: AnyCancellable?
+
+    lazy var settingsRepository: any PublisherSettingsRepository = {
+        let repository = UserDefaultsSettingsRepository()
+        if let identifier = appGroupIdentifier, let defaults = UserDefaults(suiteName: identifier) {
+            screenSharePreferencesCancellable = repository.preferencesPublisher
+                .removeDuplicates()
+                .sink { preferences in
+
+                    let codec =
+                        preferences.screenShareCodecMode == .inherit
+                        ? preferences.codecPreference : preferences.screenShareCodecPreference
+                    let manualCodec =
+                        preferences.screenShareCodecMode == .manual
+                        || (preferences.screenShareCodecMode == .inherit && codec.mode == .manual)
+                    let dimensions = preferences.screenShareResolution?.dimensions
+                    let settings = ScreenShareVideoSettings(
+                        contentHint: preferences.screenShareContentHint.rawValue,
+                        preferredCodecs: manualCodec ? codec.orderedCodecs.map(\.rawValue) : nil,
+                        frameRate: preferences.screenShareFrameRate?.rawValue, maxWidth: dimensions?.0,
+                        maxHeight: dimensions?.1,
+                        bitratePreset: preferences.screenShareBitratePreset?.rawValue,
+                        maxVideoBitrate: preferences.screenShareMaxVideoBitrate,
+                        scalableScreenshare: preferences.scalableScreenshareEnabled)
+                    if let data = try? JSONEncoder().encode(settings) {
+                        defaults.set(data, forKey: ScreenSharingKeys.videoSettings)
+                    }
+                }
+        }
+        Task { await repository.setup() }
+        return repository
+    }()
 
     lazy var statsRepository: any StatsRepository = InMemoryStatsRepository()
 
@@ -354,7 +401,8 @@ final class MeetingRoomSDKContainer {
 
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository
+        statsDataSource: statsRepository,
+        advancedNoiseSuppressionAvailable: enabledFeatures.contains(.audioEffects)
     )
 
     lazy var feedbackFactory = FeedbackFactory(
@@ -378,7 +426,8 @@ final class MeetingRoomSDKContainer {
         ),
         enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
             noiseSuppressionStatusDataSource: noiseSuppressionStatusDataSource
-        )
+        ),
+        statusDataSource: noiseSuppressionStatusDataSource
     )
 
     // MARK: - Feature Check

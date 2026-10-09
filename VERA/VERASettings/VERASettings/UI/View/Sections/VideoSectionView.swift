@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 private enum VideoUIConstants {
     static let spaceBetweenComponents = 8.0
@@ -47,11 +48,13 @@ struct VideoSectionView: View {
     @ViewBuilder
     private var compactBody: some View {
         VStack(alignment: .leading, spacing: 16) {
+            cameraContent
+            SettingsDivider()
+            mirroringContent
+            SettingsDivider()
             bitrateContent
             SettingsDivider()
-            degradationContent
-            SettingsDivider()
-            Text("Preferred Video Codec".localized)
+            Text("Codec".localized)
                 .font(.headline)
                 .foregroundStyle(VERACommonUIAsset.SemanticColors.textTertiary.swiftUIColor)
             codecContent
@@ -68,31 +71,36 @@ struct VideoSectionView: View {
             if isInActiveCall {
                 ActiveCallWarningText()
             }
+            SettingsDivider()
+            cameraContentHintContent
+            SettingsDivider()
+            degradationContent
+
         }
     }
 
     @ViewBuilder
     private var regularBody: some View {
         Section {
+            cameraContent
+        }
+
+        Section {
+            mirroringContent
+        } footer: {
+            Text("Mirrors your front-camera preview only. Remote video is unaffected.".localized)
+        }
+
+        Section {
             bitrateContent
-        } header: {
-            Text("Bitrate".localized)
         } footer: {
             Text(viewModel.videoBitratePreset.footerDescription)
         }
 
         Section {
-            degradationContent
-        } header: {
-            Text("Degradation Preference".localized)
-        } footer: {
-            Text(viewModel.settingsPreference.degradationPreference.footerDescription)
-        }
-
-        Section {
             codecContent
         } header: {
-            Text("Preferred Video Codec".localized)
+            Text("Codec".localized)
         } footer: {
             ActiveCallFooter(isInActiveCall: isInActiveCall, description: viewModel.codecMode.footerDescription)
         }
@@ -101,8 +109,6 @@ struct VideoSectionView: View {
         #endif
         Section {
             frameRateContent
-        } header: {
-            Text("Frame Rate".localized)
         } footer: {
             if isInActiveCall {
                 ActiveCallWarningText()
@@ -111,18 +117,52 @@ struct VideoSectionView: View {
 
         Section {
             resolutionContent
-        } header: {
-            Text("Resolution".localized)
         } footer: {
             if isInActiveCall {
                 ActiveCallWarningText()
             }
         }
+
+        Section {
+            cameraContentHintContent
+        }
+        Section {
+            degradationContent
+        } footer: {
+            Text(viewModel.settingsPreference.degradationPreference.footerDescription)
+        }
+    }
+
+    private var cameraContentHintContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Picker("Optimize for".localized, selection: $viewModel.settingsPreference.cameraContentHint) {
+                ForEach([VideoContentHint.automatic, .motion, .detail], id: \.self) { hint in
+                    Text(hint.displayName).tag(hint)
+                }
+            }
+            .accessibilityIdentifier(SettingsAccessibilityID.cameraContentHintPicker)
+            Text("Tells the encoder what matters most for this video. Applies immediately.".localized)
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    private var cameraContent: some View {
+        Picker("Camera".localized, selection: $viewModel.settingsPreference.cameraPosition) {
+            Text("Front Camera".localized).tag(CameraPosition.front)
+            Text("Rear Camera".localized).tag(CameraPosition.back)
+        }
+        .accessibilityIdentifier(SettingsAccessibilityID.cameraPicker)
+    }
+
+    private var mirroringContent: some View {
+        Toggle("Mirror my preview".localized, isOn: $viewModel.settingsPreference.selfViewMirroringEnabled)
+            .accessibilityIdentifier(SettingsAccessibilityID.selfViewMirrorToggle)
+            .accessibilityHint("Mirrors your front-camera preview only. Remote video is unaffected.".localized)
     }
 
     @ViewBuilder
     private var bitrateContent: some View {
-        Picker("Bitrate Preset".localized, selection: $viewModel.settingsPreference.videoBitratePreset) {
+        Picker("Bitrate".localized, selection: $viewModel.settingsPreference.videoBitratePreset) {
             ForEach(SettingsVideoBitratePreset.allCases) { preset in
                 Text(preset.displayName).tag(preset)
             }
@@ -187,7 +227,7 @@ struct VideoSectionView: View {
                 }
             }
         } else {
-            Picker("Mode".localized, selection: $viewModel.settingsPreference.codecPreference.mode) {
+            Picker("Codec".localized, selection: $viewModel.settingsPreference.codecPreference.mode) {
                 ForEach(SettingsCodecMode.allCases) { mode in
                     Text(mode.displayName).tag(mode)
                 }
@@ -203,6 +243,7 @@ struct VideoSectionView: View {
 
     @ViewBuilder
     private var manualCodecList: some View {
+        Text("Codec priority".localized).font(.headline)
         ManualCodecReorderView(
             orderedCodecs: viewModel.orderedCodecs,
             priorityLabel: priorityLabel(for:),
@@ -229,13 +270,13 @@ struct VideoSectionView: View {
     private var frameRateContent: some View {
         if isInActiveCall {
             LockedValueSection(
-                title: "Frame Rate".localized,
+                title: "Frame rate".localized,
                 value: viewModel.settingsPreference.videoFrameRate.displayName
             )
             .accessibilityIdentifier(SettingsAccessibilityID.frameRateLocked)
         } else {
-            Picker("Frame Rate".localized, selection: $viewModel.settingsPreference.videoFrameRate) {
-                ForEach(SettingsVideoFrameRate.allCases) { fps in
+            Picker("Frame rate".localized, selection: $viewModel.settingsPreference.videoFrameRate) {
+                ForEach(SettingsVideoFrameRate.allCases.reversed()) { fps in
                     Text(fps.displayName).tag(fps)
                 }
             }
@@ -253,7 +294,7 @@ struct VideoSectionView: View {
             .accessibilityIdentifier(SettingsAccessibilityID.resolutionLocked)
         } else {
             Picker("Resolution".localized, selection: $viewModel.settingsPreference.videoResolution) {
-                ForEach(SettingsVideoResolution.allCases) { res in
+                ForEach(SettingsVideoResolution.allCases.reversed()) { res in
                     Text(res.displayName).tag(res)
                 }
             }

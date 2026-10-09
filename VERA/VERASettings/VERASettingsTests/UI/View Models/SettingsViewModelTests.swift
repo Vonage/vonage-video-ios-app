@@ -17,15 +17,15 @@ struct SettingsViewModelTests {
         let repository = MockSettingsRepository()
         let viewModel = makeViewModel(repository: repository)
 
-        #expect(viewModel.settingsPreference.videoResolution == .medium)
+        #expect(viewModel.settingsPreference.videoResolution == .high)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
         #expect(viewModel.settingsPreference.codecPreference.mode == .automatic)
         #expect(viewModel.settingsPreference.audioBitratePreference == .default)
         #expect(viewModel.maxAudioBitrate == nil)
         #expect(viewModel.audioBitrateMode == .default)
         #expect(viewModel.videoBitratePreset == .default)
-        #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
-        #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
+        #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == false)
+        #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == false)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
@@ -69,6 +69,22 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
     }
 
+    @MainActor
+    @Test("Toolbar noise changes update an open Settings sheet without discarding pending edits")
+    func externalNoiseStatePreservesPendingEdits() async throws {
+        let repository = MockSettingsRepository()
+        let viewModel = makeViewModel(repository: repository, autoSaveDebounce: 0.05)
+        await viewModel.setup()
+        await awaitAutoSave(on: viewModel) {
+            viewModel.settingsPreference.videoResolution = .low
+            Task { try await repository.saveAdvancedNoiseSuppression(true) }
+        }
+        #expect(viewModel.settingsPreference.advancedNoiseSuppressionEnabled)
+        #expect(viewModel.settingsPreference.videoResolution == .low)
+        #expect(repository.lastSavedPreferences?.advancedNoiseSuppressionEnabled == true)
+        #expect(repository.lastSavedPreferences?.videoResolution == .low)
+    }
+
     // MARK: - Auto-Save Tests
 
     @Test("Setup ignores subsequent calls to prevent re-initialization")
@@ -82,7 +98,7 @@ struct SettingsViewModelTests {
 
         // Modify repository state by saving new preferences
         var newPreferences = PublisherSettingsPreferences.default
-        newPreferences.videoResolution = .high
+        newPreferences.videoResolution = .medium
         try await repository.save(newPreferences)
 
         // Second setup should be ignored (getPreferencesCallCount should not increment)
@@ -90,7 +106,7 @@ struct SettingsViewModelTests {
         #expect(repository.getPreferencesCallCount == 1)  // Still 1, not 2
 
         // viewModel should retain the original value, not reload
-        #expect(viewModel.settingsPreference.videoResolution == .medium)
+        #expect(viewModel.settingsPreference.videoResolution == .high)
 
         // Auto-save should still work (only one subscription was created)
         await awaitAutoSave(on: viewModel) {
@@ -307,12 +323,12 @@ struct SettingsViewModelTests {
 
         // Verify reset
         #expect(repository.resetCallCount == 1)
-        #expect(viewModel.settingsPreference.videoResolution == .medium)
+        #expect(viewModel.settingsPreference.videoResolution == .high)
         #expect(viewModel.settingsPreference.videoFrameRate == .fps30)
         #expect(viewModel.maxAudioBitrate == nil)
         #expect(viewModel.videoBitratePreset == .default)
-        #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == true)
-        #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == true)
+        #expect(viewModel.settingsPreference.publisherAudioFallbackEnabled == false)
+        #expect(viewModel.settingsPreference.subscriberAudioFallbackEnabled == false)
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
         #expect(viewModel.senderStatsEnabled == false)
         #expect(viewModel.settingsPreference.degradationPreference == .notSet)
@@ -431,7 +447,7 @@ struct SettingsViewModelTests {
         let viewModel = makeViewModel(repository: repository)
 
         viewModel.audioBitrateMode = .custom
-        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(40_000))
+        #expect(viewModel.settingsPreference.audioBitratePreference == .custom(128_000))
         #expect(viewModel.audioBitrateMode == .custom)
 
         viewModel.audioBitrateMode = .default

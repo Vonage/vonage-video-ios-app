@@ -8,6 +8,7 @@ import CoreVideo
 import Foundation
 import OpenTok
 import ReplayKit
+import VERAScreenShare
 
 /// Feeds ReplayKit `CMSampleBuffer` frames into the Vonage SDK.
 ///
@@ -21,13 +22,17 @@ import ReplayKit
 /// - Frames with near-identical timestamps (< 2 ms apart) are dropped to avoid
 ///   wasting encoder time on duplicate ReplayKit output.
 final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
-    var videoContentHint: OTVideoContentHint = .text
+    var videoContentHint: OTVideoContentHint = .detail
     var videoCaptureConsumer: OTVideoCaptureConsumer?
 
-    // Matches the Android implementation: cap the longest edge at 1280px.
-    // Dimensions must be multiples of edgeDimensionCommonFactor for codec alignment.
-    let maxEdgeSizeLimit: CGFloat = 1280
-    let edgeDimensionCommonFactor: CGFloat = 16
+    private let settings: ScreenShareVideoSettings
+    private var lastDeliveryTime: TimeInterval?
+
+    init(settings: ScreenShareVideoSettings = .init()) {
+        self.settings = settings
+        super.init()
+    }
+
 
     fileprivate var capturing: Bool = false
     fileprivate var isSessionReady: Bool = false
@@ -75,6 +80,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
 
     func stop() -> Int32 {
         capturing = false
+        lastDeliveryTime = nil
         retransmitTimer?.cancel()
         retransmitTimer = nil
         return 0
@@ -88,6 +94,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
     // bytesPerRow is populated by checkSize before the first consumeFrame.
     func captureSettings(_ videoFormat: OTVideoFormat) -> Int32 {
         videoFormat.pixelFormat = .ARGB
+        if let fps = settings.frameRate { videoFormat.estimatedFramesPerSecond = Double(fps) }
         return 0
     }
 
@@ -117,6 +124,8 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         frameLock.lock()
         defer { frameLock.unlock() }
 
+        let now = ProcessInfo.processInfo.systemUptime
+        if let last = lastDeliveryTime, now - last < settings.minimumFrameInterval { return }
         checkSize(width: Int(extent.width), height: Int(extent.height))
         guard let dstBuffer = pixelBuffer else { return }
 
@@ -141,6 +150,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
         videoFrame.planes = planes
         videoCaptureConsumer?.consumeFrame(videoFrame)
+        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
 
         CVPixelBufferUnlockBaseAddress(dstBuffer, [])
 
@@ -172,7 +182,8 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
 
         let timer = DispatchSource.makeTimerSource(flags: .strict, queue: retransmitQueue)
         timer.schedule(
-            deadline: .now() + .milliseconds(Self.retransmitIntervalMs),
+            deadline: .now()
+                + .milliseconds(max(Self.retransmitIntervalMs, Int(ceil(settings.minimumFrameInterval * 1000)))),
             leeway: .milliseconds(20)
         )
         timer.setEventHandler { [weak self] in
@@ -198,6 +209,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
         planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
         videoFrame.planes = planes
         videoCaptureConsumer?.consumeFrame(videoFrame)
+        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
 
         CVPixelBufferUnlockBaseAddress(dstBuffer, .readOnly)
 
@@ -220,22 +232,9 @@ extension CGImagePropertyOrientation {
 // MARK: - Buffer management
 
 extension ScreenShareVideoCapturer {
-    /// Returns output dimensions capped at `maxEdgeSizeLimit` on the longest edge,
-    /// rounded up to the nearest multiple of `edgeDimensionCommonFactor` for codec alignment.
+    /// Returns output dimensions within the independent screen-sharing bounds.
     fileprivate func outputSize(for inputWidth: Int, _ inputHeight: Int) -> (width: Int, height: Int) {
-        var w = CGFloat(inputWidth)
-        var h = CGFloat(inputHeight)
-        let longest = max(w, h)
-        if longest > maxEdgeSizeLimit {
-            let scale = maxEdgeSizeLimit / longest
-            w = (w * scale).rounded()
-            h = (h * scale).rounded()
-        }
-        let align = { (v: CGFloat) -> Int in
-            let r = v.truncatingRemainder(dividingBy: self.edgeDimensionCommonFactor)
-            return r == 0 ? Int(v) : Int(v + (self.edgeDimensionCommonFactor - r))
-        }
-        return (align(w), align(h))
+        settings.outputDimensions(width: inputWidth, height: inputHeight)
     }
 
     fileprivate func checkSize(width srcWidth: Int, height srcHeight: Int) {
@@ -251,6 +250,7 @@ extension ScreenShareVideoCapturer {
         // Recreate OTVideoFrame with a fresh format — mutating the existing format
         // in-place is unreliable because OTVideoFrame caches internal state at init time.
         let newFormat = OTVideoFormat(argbWithWidth: UInt32(width), height: UInt32(height))
+        if let fps = settings.frameRate { newFormat.estimatedFramesPerSecond = Double(fps) }
         newFormat.bytesPerRow.removeAllObjects()
         newFormat.bytesPerRow.addObjects(from: [width * 4])
         videoFrame = OTVideoFrame(format: newFormat)

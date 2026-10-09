@@ -70,6 +70,23 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
         subject.send(preferences)
     }
 
+    public func saveCameraPosition(_ position: CameraPosition) async {
+        var preferences = load(from: userDefaults) ?? subject.value
+        guard preferences.cameraPosition != position else { return }
+        preferences.cameraPosition = position
+        if let data = try? JSONEncoder().encode(preferences) {
+            userDefaults.set(data, forKey: Self.storeKey)
+        }
+        subject.send(preferences)
+    }
+
+    public func saveAdvancedNoiseSuppression(_ enabled: Bool) async {
+        var preferences = load(from: userDefaults) ?? subject.value
+        guard preferences.advancedNoiseSuppressionEnabled != enabled else { return }
+        preferences.advancedNoiseSuppressionEnabled = enabled
+        await save(preferences)
+    }
+
     /// Resets all preferences to their default values.
     ///
     /// Removes the persisted data from UserDefaults and emits the default preferences.

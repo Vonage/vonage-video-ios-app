@@ -35,59 +35,169 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 2000
 
-# Assert all editable controls are visible in Waiting Room context
-# Video Section - Always Editable (visible at top)
-- assertVisible:
-    id: "settings-video-bitrate-picker"
-
-- assertVisible:
-    id: "settings-video-degradation-picker"
-
-# Video Section - Context-Dependent (editable in Waiting Room)
-- assertVisible:
-    id: "settings-codec-mode-picker"
-
-- assertVisible:
-    id: "settings-frame-rate-picker"
-
-- assertVisible:
-    id: "settings-resolution-picker"
-
-# Screenshot: Video section with all controls editable
-- takeScreenshot: 01-settings-waiting-room-video-section
-
-# Scroll to reveal Audio Section
-- swipe:
-    direction: "UP"
-    duration: 500
-
-# Audio Section - Context-Dependent (editable in Waiting Room)
-- assertVisible:
-    id: "settings-audio-bitrate-picker"
-
-- assertVisible:
-    id: "settings-opus-dtx-toggle"
-
-- assertVisible:
-    id: "settings-publisher-fallback-toggle"
-
-- assertVisible:
-    id: "settings-subscriber-fallback-toggle"
-
-# Screenshot: Audio section with all controls editable
-- takeScreenshot: 02-settings-waiting-room-audio-section
-
-# Scroll to reveal General Section
-- swipe:
-    direction: "UP"
-    duration: 500
-
-# General Section
-- assertVisible:
-    id: "settings-overlay-stats-toggle"
-
+# General is the first section; reset remains restricted during a call.
 - assertVisible:
     id: "settings-reset-defaults-button"
 
-# Screenshot: General section with reset button visible
-- takeScreenshot: 03-settings-waiting-room-general-section
+- assertVisible:
+    id: "settings-overlay-stats-toggle"
+
+# Follow the shared Video control order, then the native degradation preference.
+- scrollUntilVisible:
+    element:
+      id: "settings-camera-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-camera-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-self-view-mirror-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-self-view-mirror-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-video-bitrate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-video-bitrate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-codec-mode-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-codec-mode-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-frame-rate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-frame-rate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-resolution-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-resolution-picker"
+
+
+- scrollUntilVisible:
+    element:
+      id: "settings-video-degradation-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-video-degradation-picker"
+
+- takeScreenshot: 01-settings-waiting-room-video-section
+
+# Screen Sharing is a separate section between Video and Audio.
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-content-hint-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-content-hint-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-codec-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-codec-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-frame-rate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-frame-rate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-resolution-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-resolution-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-screen-share-bitrate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-screen-share-bitrate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-scalable-screen-share-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-scalable-screen-share-toggle"
+
+# Audio follows Screen Sharing.
+- scrollUntilVisible:
+    element:
+      id: "settings-audio-bitrate-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-audio-bitrate-picker"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-advanced-noise-suppression-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-advanced-noise-suppression-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-opus-dtx-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-opus-dtx-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-publisher-fallback-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-publisher-fallback-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-subscriber-fallback-toggle"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-subscriber-fallback-toggle"
+
+- takeScreenshot: 02-settings-waiting-room-audio-section
+
+# Statistics is the final section.
+- scrollUntilVisible:
+    element:
+      text: "Statistics"
+    direction: DOWN
+    timeout: 20000
+- assertVisible: "Statistics"
