@@ -13,14 +13,14 @@ public struct ScreenShareVideoSettings: Codable, Equatable {
 
     public init(
         contentHint: Int = 2, preferredCodecs: [Int]? = nil, frameRate: Int? = nil,
-        maxWidth: Int? = nil, maxHeight: Int? = nil, bitratePreset: Int? = nil,
+        maxSize: (width: Int, height: Int)? = nil, bitratePreset: Int? = nil,
         maxVideoBitrate: Int32 = 500_000, scalableScreenshare: Bool = false
     ) {
         self.contentHint = contentHint
         self.preferredCodecs = preferredCodecs
         self.frameRate = frameRate
-        self.maxWidth = maxWidth
-        self.maxHeight = maxHeight
+        self.maxWidth = maxSize?.width
+        self.maxHeight = maxSize?.height
         self.bitratePreset = bitratePreset
         self.maxVideoBitrate = maxVideoBitrate
         self.scalableScreenshare = scalableScreenshare
