@@ -1,0 +1,38 @@
+VERA/Tuist/Package.swift
+  s_d156421ddd1ccf::t_f623d1bf8af4ae 1-6,10-25
+  s_d156421ddd1ccf::t_fa6bc199fd4ff0 7-9
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_d156421ddd1ccf::t_eece73bf2c73ed 7
+  s_d156421ddd1ccf::t_5f0c86155236e3 8
+VERA/VERAAudioEffects/Project.swift
+  s_d156421ddd1ccf::t_812198ff867db8 8
+  s_d156421ddd1ccf::t_c788eb4c28bba3 6
+VERA/VERABackgroundEffects/Project.swift
+  s_d156421ddd1ccf::t_c759f4ae4380f8 7
+  s_d156421ddd1ccf::t_18a871e5c3b208 8
+VERA/Project.swift
+  s_d156421ddd1ccf::t_9334e727807b6b 455-456
+  s_d156421ddd1ccf::t_bed27a9b5221b3 300
+  s_d156421ddd1ccf::t_3a232bcd4417b3 298
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  s_d156421ddd1ccf::t_e0ff44b8d7fb76 30
+  s_d156421ddd1ccf::t_3e217ce07c0fc2 27-29
+.gitignore
+  s_d156421ddd1ccf::t_4ca1c74c6842e9 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b6748cc00e6e89725dd1b23fc67af35f41d333d9",
+  "prompts": {},
+  "sessions": {
+    "s_d156421ddd1ccf": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_642b54b4-1978-4130-b3a2-da8798ae5619",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

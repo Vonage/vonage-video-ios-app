@@ -1,0 +1,66 @@
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  h_2499cc15b3806e 29,52
+  s_15257e01303f2e::t_dc6ea60a54699e 63
+  s_15257e01303f2e::t_fd612abafc815c 6
+VERA/Dependencies.json
+  s_15257e01303f2e::t_d89e4ea39847d4 2-10
+  s_15257e01303f2e::t_558d4aec28e665 1,11
+README.md
+  s_15257e01303f2e::t_75f7de47dea311 118-120
+  s_15257e01303f2e::t_da1d0f8fbf845c 114-115,121-124
+  s_15257e01303f2e::t_ee91f21c279440 113,117
+  s_15257e01303f2e::t_36e57673699bb1 111-112,116,125
+Package.swift
+  s_15257e01303f2e::t_f61048a731171b 21,35-36
+  s_15257e01303f2e::t_fe8830087d06ce 4
+  s_15257e01303f2e::t_772db3a8743020 22-26
+  s_15257e01303f2e::t_d51e5a360603f4 17-20,27-31,33-34
+  s_15257e01303f2e::t_2abe0ba7f450de 8-14
+  s_15257e01303f2e::t_900b35af45f9c0 7
+  s_15257e01303f2e::t_5e4f80660a206f 15-16
+  s_15257e01303f2e::t_8cd1d1f952acd2 32
+  s_15257e01303f2e::t_5b0dbd0a8ddd70 37
+  h_2499cc15b3806e 53,57
+.github/copilot-instructions.md
+  s_15257e01303f2e::t_062f9e33a6a5a6 323
+  s_15257e01303f2e::t_b2f07559bfd5da 322,330
+  s_15257e01303f2e::t_c2adbf23ee65c3 327-329
+  s_15257e01303f2e::t_89f88b9eec03a6 324-326
+VERA/Tuist/ProjectDescriptionHelpers/Package+OKTA.swift
+  s_15257e01303f2e::t_db76abc121093d 6
+VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift
+  s_15257e01303f2e::t_09e790b3779055 23
+  s_15257e01303f2e::t_cfc42f33c4a14d 1
+  s_15257e01303f2e::t_8bba429bd99c01 25-28,31-35
+  s_15257e01303f2e::t_d6c299bd86a9c8 7,22,29,38,46,48
+  s_15257e01303f2e::t_ae2a27604edcac 14-21,24,30,36-37
+  s_15257e01303f2e::t_4591bdca112462 49-54,56-57
+  s_15257e01303f2e::t_f0afa98130745b 45,58-59
+  s_15257e01303f2e::t_f2e57abfb3db4d 6,8-13
+  s_15257e01303f2e::t_d1a40654052331 2,4-5,39,60
+  s_15257e01303f2e::t_06a7fb6b067009 3
+  s_15257e01303f2e::t_6b08daf8d88cbf 40-44
+  s_15257e01303f2e::t_c95384cd48870f 47
+  s_15257e01303f2e::t_bb8b7b246d0762 55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "13c8e4a7f262f60bdad5e33cd87702558c296fde",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_15257e01303f2e": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_0ed6d6f7-bfc7-4a8a-9b32-14dce2e48a60",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

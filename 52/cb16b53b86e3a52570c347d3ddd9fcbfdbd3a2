@@ -1,0 +1,21 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_e840fe1a9c2c90::t_dbffe653083bd5 89-92
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureController.swift
+  s_e840fe1a9c2c90::t_dbffe653083bd5 71-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52cb16b53b86e3a52570c347d3ddd9fcbfdbd3a2",
+  "prompts": {},
+  "sessions": {
+    "s_e840fe1a9c2c90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c44af68e-643d-404b-ae4a-58f368c0d812",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

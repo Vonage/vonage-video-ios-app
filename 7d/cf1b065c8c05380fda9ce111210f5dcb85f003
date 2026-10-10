@@ -1,0 +1,27 @@
+VERA/Scripts/builder.sh
+  s_544dc80de7d67a::t_bdb12c7fe53b7d 187,189-192
+  s_544dc80de7d67a::t_c80210f566d70d 198,202
+VERA/Config/app-config.json
+  h_2499cc15b3806e 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7dcf1b065c8c05380fda9ce111210f5dcb85f003",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_544dc80de7d67a": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_6839cd3a-c842-44f8-8051-29555391f0fc",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}

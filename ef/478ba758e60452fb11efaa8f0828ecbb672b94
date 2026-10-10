@@ -1,0 +1,45 @@
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_4318e71bec3718::t_597dff6be52acc 41-42
+  s_e840fe1a9c2c90::t_9b2c71d5c7c054 38-40
+  s_4318e71bec3718::t_69e25c4b1e8c50 170-173
+  s_514d36addd0530::t_33c3bb47875ab5 43
+  s_e840fe1a9c2c90::t_ee98dd2ffb853f 310
+  s_4318e71bec3718::t_0a6d590084c62c 87-89,98,101-106
+  s_e840fe1a9c2c90::t_0a5591bdc1b6a8 92-93
+  s_4318e71bec3718::t_e0e96239d6a527 90
+  s_4318e71bec3718::t_6a9ecc091e38a1 107
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  s_514d36addd0530::t_889d39d6359d0b 21-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ef478ba758e60452fb11efaa8f0828ecbb672b94",
+  "prompts": {},
+  "sessions": {
+    "s_4318e71bec3718": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21c58aec-86bf-4f49-bd35-2ca1fb4872ae",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    },
+    "s_514d36addd0530": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2419a37-25ac-487f-bb3c-bd34c8764069",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    },
+    "s_e840fe1a9c2c90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c44af68e-643d-404b-ae4a-58f368c0d812",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
