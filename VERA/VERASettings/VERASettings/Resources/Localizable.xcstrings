@@ -2561,53 +2561,6 @@
         }
       }
     },
-    "Detail": {
-      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.detail (develop 77c9b91).",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sharp detail"
-          }
-        },
-        "en-US": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sharp detail"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scharfe Details"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dettaglio nitido"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detalle nítido"
-          }
-        },
-        "es-MX": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detalle nítido"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "鮮明な詳細"
-          }
-        }
-      }
-    },
     "Disabled": {
       "extractionState": "manual",
       "localizations": {
@@ -4871,53 +4824,6 @@
         }
       }
     },
-    "Motion": {
-      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.motion (develop 77c9b91).",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smooth motion"
-          }
-        },
-        "en-US": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smooth motion"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Flüssige Bewegung"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Movimento fluido"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Movimiento fluido"
-          }
-        },
-        "es-MX": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Movimiento fluido"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "滑らかな動き"
-          }
-        }
-      }
-    },
     "Network": {
       "extractionState": "manual",
       "localizations": {
@@ -5960,6 +5866,53 @@
         }
       }
     },
+    "Readable text": {
+      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.text (develop 77c9b91).",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Readable text"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Readable text"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lesbarer Text"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testo leggibile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto legible"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Texto legible"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読みやすいテキスト"
+          }
+        }
+      }
+    },
     "Real-Time Stats": {
       "extractionState": "stale",
       "localizations": {
@@ -6910,6 +6863,53 @@
         }
       }
     },
+    "Sharp detail": {
+      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.detail (develop 77c9b91).",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharp detail"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharp detail"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scharfe Details"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dettaglio nitido"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalle nítido"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalle nítido"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鮮明な詳細"
+          }
+        }
+      }
+    },
     "Show Overlay Stats": {
       "extractionState": "manual",
       "localizations": {
@@ -6953,6 +6953,53 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "統計を重ねて表示"
+          }
+        }
+      }
+    },
+    "Smooth motion": {
+      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.motion (develop 77c9b91).",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smooth motion"
+          }
+        },
+        "en-US": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smooth motion"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flüssige Bewegung"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movimento fluido"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movimiento fluido"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movimiento fluido"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑らかな動き"
           }
         }
       }
@@ -7287,53 +7334,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "このビデオで最も重要なものをエンコーダーに伝えます。すぐに適用されます。"
-          }
-        }
-      }
-    },
-    "Text": {
-      "comment": "Reused VERA web translation: advancedSettings.video.contentHint.options.text (develop 77c9b91).",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Readable text"
-          }
-        },
-        "en-US": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Readable text"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lesbarer Text"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Testo leggibile"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Texto legible"
-          }
-        },
-        "es-MX": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Texto legible"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "読みやすいテキスト"
           }
         }
       }
