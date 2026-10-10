@@ -1,6 +1,6 @@
 # Localization
 
-The app is fully prepared for internationalization using Xcode's **String Catalogs** (`.xcstrings`). All user-facing strings are localized through this mechanism.
+The app is fully prepared for internationalization using Xcode's **String Catalogs** (`.xcstrings`). User-facing translations are stored in this mechanism.
 
 ## How It Works
 
@@ -8,10 +8,10 @@ The `SWIFT_EMIT_LOC_STRINGS` build flag is enabled across all modules. During co
 
 ## Adding a New Language
 
-1. Open the root `Project.swift` and add the desired locale code to the `defaultKnownRegions` property:
+1. Update `supportedLanguages` in `VERA/Tuist/ProjectDescriptionHelpers/BuildSettingsConfig.swift` and the corresponding catalogs:
 
     ```swift
-    defaultKnownRegions: ["en", "es", /* add new locale here */]
+    supportedLanguages: ["en", "en-US", "de", "it", "es", "es-MX", "ja"]
     ```
 
 2. Build the project. The `SWIFT_EMIT_LOC_STRINGS` flag causes each String Catalog to be updated automatically with any new localizable strings discovered during compilation.
@@ -37,3 +37,35 @@ String keys should be descriptive and scoped to their screen or feature to avoid
 - Localized strings live in `.xcstrings` files alongside their module source.
 - Never hard-code user-visible strings outside of string catalogs.
 - Since `SWIFT_EMIT_LOC_STRINGS` is active, stale or missing keys are surfaced at build time.
+
+## Shipped languages and translation sources
+
+English, English (US), Deutsch, Italiano, Español, Español (México), and 日本語 match the web app.
+
+Matching translations come from
+[the web app's develop resources](https://github.com/Vonage/vonage-video-react-app/tree/77c9b91e844fbd76acca1fb22d31bccda56f9510/frontend/src/locales).
+Catalog comments identify the corresponding web key. Copying is limited to
+wording that has the same meaning on iOS; descriptions of browser-specific
+behavior are not reused for native controls. Web placeholders are adapted to
+the native printf argument types and order.
+
+New translations for iOS-only wording are drafts marked `needs_review` in the
+catalogs and should receive linguistic review. Spanish translations already
+present are retained where applicable, with mismatched formatting arguments
+corrected. Future languages or strings must be added consistently to every
+module's catalog and the Tuist language declaration.
+
+Run `python3 scripts/validate-localizations.py` to check full catalog coverage,
+format argument compatibility and language declarations.
+
+## Choosing the app language
+
+VERA uses the iOS system/per-app language setting. Select a supported language in
+the app’s iOS Settings page, or change the device’s preferred languages. Relaunch
+the app when testing a language change. The native bundle localization mechanism
+selects a matching shipped localization, with English as the development-language
+fallback. No in-app language picker or runtime locale override is introduced.
+
+For automated layout checks, configure the existing snapshot test environment for
+a specific language. Draft translations still require linguistic review; catalog
+validation checks coverage and formatting arguments, not translation quality.
