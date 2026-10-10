@@ -53,7 +53,19 @@ New translations for iOS-only wording are drafts marked `needs_review` in the
 catalogs and should receive linguistic review. Spanish translations already
 present are retained where applicable, with mismatched formatting arguments
 corrected. Future languages or strings must be added consistently to every
-module's catalog, the Tuist language declaration.
+module's catalog and the Tuist language declaration.
 
 Run `python3 scripts/validate-localizations.py` to check full catalog coverage,
-format argument compatibility and language declarations. Runtime language selection and its unit tests are provided in the follow-up selector PR.
+format argument compatibility and language declarations.
+
+## Choosing the app language
+
+VERA uses the iOS system/per-app language setting. Select a supported language in
+the app’s iOS Settings page, or change the device’s preferred languages. Relaunch
+the app when testing a language change. The native bundle localization mechanism
+selects a matching shipped localization, with English as the development-language
+fallback. No in-app language picker or runtime locale override is introduced.
+
+For automated layout checks, configure the existing snapshot test environment for
+a specific language. Draft translations still require linguistic review; catalog
+validation checks coverage and formatting arguments, not translation quality.
