@@ -13,7 +13,8 @@ struct UserDefaultsScreenShareCredentialsRepositoryTests {
     func videoPolicyRoundTrip() throws {
         let settings = ScreenShareVideoSettings(
             contentHint: 3, preferredCodecs: [2, 3, 1], frameRate: 7,
-            maxWidth: 1920, maxHeight: 1080, bitratePreset: 3, maxVideoBitrate: 2_000_000, scalableScreenshare: true)
+            maxSize: (width: 1920, height: 1080), bitratePreset: 3, maxVideoBitrate: 2_000_000,
+            scalableScreenshare: true)
         let decoded = try JSONDecoder().decode(ScreenShareVideoSettings.self, from: JSONEncoder().encode(settings))
         #expect(decoded == settings)
     }
@@ -22,12 +23,12 @@ struct UserDefaultsScreenShareCredentialsRepositoryTests {
     func contentOutputDimensions() {
         let normal = ScreenShareVideoSettings()
         #expect(normal.outputDimensions(width: 1920, height: 1080).width == 1280)
-        let hd = ScreenShareVideoSettings(maxWidth: 1280, maxHeight: 720)
+        let hd = ScreenShareVideoSettings(maxSize: (width: 1280, height: 720))
         let landscape = hd.outputDimensions(width: 1920, height: 1080)
         #expect(landscape.width == 1280 && landscape.height == 720)
         let portrait = hd.outputDimensions(width: 1080, height: 1920)
         #expect(portrait.width == 720 && portrait.height == 1280)
-        let fullHD = ScreenShareVideoSettings(maxWidth: 1920, maxHeight: 1080)
+        let fullHD = ScreenShareVideoSettings(maxSize: (width: 1920, height: 1080))
         let full = fullHD.outputDimensions(width: 3840, height: 2160)
         #expect(full.width == 1920 && full.height == 1072)
         let wide = hd.outputDimensions(width: 2400, height: 1080)
