@@ -73,6 +73,26 @@ struct PublisherSettingsRepositoryDefaultUpdateTests {
 
 @Suite("UserDefaultsSettingsRepository Tests")
 struct UserDefaultsSettingsRepositoryTests {
+    @Test("Web defaults apply to new settings while automatic audio remains SDK-managed")
+    func webDefaults() {
+        let preferences = PublisherSettingsPreferences.default
+        #expect(preferences.videoResolution == .high)
+        #expect(preferences.audioBitratePreference == .default)
+        #expect(!preferences.publisherAudioFallbackEnabled)
+        #expect(!preferences.subscriberAudioFallbackEnabled)
+        #expect(!preferences.statsOverlayEnabled)
+        #expect(!preferences.advancedNoiseSuppressionEnabled)
+        #expect(preferences.cameraContentHint == .automatic)
+        #expect(preferences.screenShareContentHint == .detail)
+        #expect(preferences.screenShareCodecMode == .inherit)
+        #expect(preferences.screenShareFrameRate == nil)
+        #expect(preferences.screenShareResolution == nil)
+        #expect(preferences.screenShareBitratePreset == nil)
+        #expect(preferences.screenShareMaxVideoBitrate == 500_000)
+        #expect(!preferences.scalableScreenshareEnabled)
+        #expect(SettingsSection.allCases == [.general, .video, .screenSharing, .audio, .stats])
+    }
+
     @Test("Noise suppression and separate content hints persist across restart and reset")
     func audioAndContentHintsPersist() async throws {
         let defaults = UserDefaults.ephemeral()

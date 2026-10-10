@@ -290,7 +290,9 @@ struct VonageCallTests {
             videoResolution: .high,
             videoFrameRate: .rate30FPS,
             maxAudioBitrate: 40000,
-            opusDtxEnabled: true
+            opusDtxEnabled: true,
+            selfViewMirroringEnabled: false,
+            cameraPosition: .back
         )
 
         try await sut.applyPublisherAdvancedSettings(advancedSettings)
@@ -308,6 +310,8 @@ struct VonageCallTests {
         #expect(recordedSettings.advancedSettings?.videoFrameRate == .rate30FPS)
         #expect(recordedSettings.advancedSettings?.maxAudioBitrate == 40000)
         #expect(recordedSettings.advancedSettings?.opusDtxEnabled == true)
+        #expect(recordedSettings.advancedSettings?.selfViewMirroringEnabled == false)
+        #expect(recordedSettings.advancedSettings?.cameraPosition == .back)
     }
 
     @Test
@@ -515,6 +519,27 @@ struct VonageCallTests {
 
         #expect(newPublisherSpy.audioTransformers.count == 2)
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
+    }
+
+    @Test("Republishing uses the requested noise state while preserving other audio effects", arguments: [false, true])
+    func republishUsesNewNoiseState(enabled: Bool) async throws {
+        let previous = VonagePublisherSpy()
+        let oldNoise = MockTransformer(key: "NoiseSuppression", transformer: NSObject())
+        let other = MockTransformer(key: "AudioEffect", transformer: NSObject())
+        previous.setAudioTransformers([oldNoise, other])
+        let replacement = VonagePublisherSpy()
+        let newNoise = MockTransformer(key: "NoiseSuppression", transformer: NSObject())
+        if enabled { replacement.addAudioTransformer(newNoise) }
+        let repository = MockPublisherRepository()
+        repository.publisherToReturn = replacement
+        let sut = makeSUT(session: VonageSessionSpy(), publisher: previous, publisherRepository: repository)
+        sut.setup()
+        try await sut.connect()
+        try await sut.applyPublisherAdvancedSettings(
+            .init(videoResolution: .high, advancedNoiseSuppressionEnabled: enabled))
+        #expect((replacement.audioTransformers.first as? MockTransformer) === other)
+        let noise = replacement.audioTransformers.first { $0.key == "NoiseSuppression" } as? MockTransformer
+        if enabled { #expect(noise === newNoise) } else { #expect(noise == nil) }
     }
 
     // MARK: - Test Helpers

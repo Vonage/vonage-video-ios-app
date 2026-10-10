@@ -70,31 +70,31 @@ public struct PublisherSettingsPreferences: Codable, Equatable {
     /// Creates a new publisher settings preferences instance.
     ///
     /// - Parameters:
-    ///   - videoResolution: The video resolution. Defaults to `.medium`.
+    ///   - videoResolution: The video resolution. Defaults to `.high` (1280×720).
     ///   - videoFrameRate: The video frame rate. Defaults to `.fps30`.
     ///   - codecPreference: The codec preference. Defaults to `.automatic`.
     ///   - audioBitratePreference: The maximum audio bitrate preference. Defaults to `.default`.
     ///   - videoBitratePreset: The video bitrate preset. Defaults to `.default`.
     ///   - maxVideoBitrate: The maximum video bitrate in bps. Defaults to 500,000.
-    ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `true`.
-    ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `true`.
+    ///   - publisherAudioFallbackEnabled: Publisher audio fallback flag. Defaults to `false`.
+    ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag. Defaults to `false`.
     ///   - senderStatsEnabled: Whether to show sender stats. Defaults to `false`.
-    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
+    ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `false`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
     ///   - selfViewMirroringEnabled: Front-camera preview mirroring. Defaults to `true`.
     ///   - cameraPosition: Saved camera choice. Defaults to `.front`.
     public init(
-        videoResolution: SettingsVideoResolution = .medium,
+        videoResolution: SettingsVideoResolution = .high,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
         codecPreference: SettingsCodecPreference = .automatic,
         audioBitratePreference: SettingsAudioBitratePreference = .default,
         videoBitratePreset: SettingsVideoBitratePreset = .default,
         maxVideoBitrate: Int32 = 500_000,
-        publisherAudioFallbackEnabled: Bool = true,
-        subscriberAudioFallbackEnabled: Bool = true,
+        publisherAudioFallbackEnabled: Bool = false,
+        subscriberAudioFallbackEnabled: Bool = false,
         senderStatsEnabled: Bool = false,
-        statsOverlayEnabled: Bool = true,
+        statsOverlayEnabled: Bool = false,
         degradationPreference: SettingsDegradationPreference = .notSet,
         opusDtxEnabled: Bool = true,
         selfViewMirroringEnabled: Bool = true,
