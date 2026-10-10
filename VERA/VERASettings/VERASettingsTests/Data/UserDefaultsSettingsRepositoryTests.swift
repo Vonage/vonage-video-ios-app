@@ -9,6 +9,68 @@ import VERADomain
 
 @testable import VERASettings
 
+@Suite("Publisher settings repository default updates")
+struct PublisherSettingsRepositoryDefaultUpdateTests {
+    @Test("Camera updates preserve content and audio preferences", arguments: CameraPosition.allCases)
+    func cameraUpdate(position: CameraPosition) async throws {
+        var preferences = PublisherSettingsPreferences.default
+        preferences.screenShareContentHint = .text
+        preferences.screenShareFrameRate = .fps7
+        preferences.advancedNoiseSuppressionEnabled = true
+        preferences.selfViewMirroringEnabled = false
+        let repository = MockSettingsRepository(initialPreferences: preferences)
+
+        try await repository.saveCameraPosition(position)
+
+        let expectedSaveCount = preferences.cameraPosition == position ? 0 : 1
+        preferences.cameraPosition = position
+        #expect(await repository.getPreferences() == preferences)
+        #expect(repository.saveCallCount == expectedSaveCount)
+    }
+
+    @Test("Noise updates preserve camera and content preferences", arguments: [false, true])
+    func noiseUpdate(enabled: Bool) async throws {
+        var preferences = PublisherSettingsPreferences.default
+        preferences.cameraPosition = .back
+        preferences.screenShareResolution = .fullHD
+        preferences.screenShareMaxVideoBitrate = 2_000_000
+        let repository = MockSettingsRepository(initialPreferences: preferences)
+
+        try await repository.saveAdvancedNoiseSuppression(enabled)
+
+        let expectedSaveCount = preferences.advancedNoiseSuppressionEnabled == enabled ? 0 : 1
+        preferences.advancedNoiseSuppressionEnabled = enabled
+        #expect(await repository.getPreferences() == preferences)
+        #expect(repository.saveCallCount == expectedSaveCount)
+    }
+
+    @Test("Failed camera persistence propagates the error and retains saved preferences")
+    func cameraSaveFailure() async {
+        let repository = MockSettingsRepository()
+        repository.shouldThrowOnSave = true
+
+        await #expect(throws: MockSettingsRepositoryError.self) {
+            try await repository.saveCameraPosition(.back)
+        }
+
+        #expect(await repository.getPreferences() == .default)
+        #expect(repository.saveCallCount == 1)
+    }
+
+    @Test("Failed noise persistence propagates the error and retains saved preferences")
+    func noiseSaveFailure() async {
+        let repository = MockSettingsRepository()
+        repository.shouldThrowOnSave = true
+
+        await #expect(throws: MockSettingsRepositoryError.self) {
+            try await repository.saveAdvancedNoiseSuppression(true)
+        }
+
+        #expect(await repository.getPreferences() == .default)
+        #expect(repository.saveCallCount == 1)
+    }
+}
+
 @Suite("UserDefaultsSettingsRepository Tests")
 struct UserDefaultsSettingsRepositoryTests {
     @Test("Noise suppression and separate content hints persist across restart and reset")
