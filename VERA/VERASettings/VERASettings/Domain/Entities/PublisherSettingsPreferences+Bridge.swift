@@ -22,7 +22,11 @@ extension PublisherSettingsPreferences {
             publisherAudioFallbackEnabled: publisherAudioFallbackEnabled,
             subscriberAudioFallbackEnabled: subscriberAudioFallbackEnabled,
             degradationPreference: degradationPreference.vonageDegradationPreference,
-            opusDtxEnabled: opusDtxEnabled
+            opusDtxEnabled: opusDtxEnabled,
+            selfViewMirroringEnabled: selfViewMirroringEnabled,
+            cameraPosition: cameraPosition,
+            advancedNoiseSuppressionEnabled: advancedNoiseSuppressionEnabled,
+            cameraContentHint: cameraContentHint
         )
     }
 }

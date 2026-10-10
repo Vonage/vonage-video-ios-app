@@ -11,6 +11,134 @@ import VERADomain
 
 @Suite("UserDefaultsSettingsRepository Tests")
 struct UserDefaultsSettingsRepositoryTests {
+    @Test("Noise suppression and separate content hints persist across restart and reset")
+    func audioAndContentHintsPersist() async throws {
+        let defaults = UserDefaults.ephemeral()
+        let repository = UserDefaultsSettingsRepository(userDefaults: defaults)
+        var preferences = PublisherSettingsPreferences.default
+        preferences.videoResolution = .medium
+        preferences.advancedNoiseSuppressionEnabled = true
+        preferences.cameraContentHint = .motion
+        preferences.screenShareContentHint = .text
+        preferences.screenShareCodecMode = .manual
+        preferences.screenShareCodecPreference.orderedCodecs = [.h264, .vp9, .vp8]
+        preferences.screenShareFrameRate = .fps7
+        preferences.screenShareResolution = .fullHD
+        preferences.screenShareBitratePreset = .custom
+        preferences.screenShareMaxVideoBitrate = 2_000_000
+        preferences.scalableScreenshareEnabled = true
+        await repository.save(preferences)
+        let reloaded = UserDefaultsSettingsRepository(userDefaults: defaults)
+        let restored = await reloaded.getPreferences()
+        #expect(restored == preferences)
+        #expect(restored.toPublisherAdvancedSettings().advancedNoiseSuppressionEnabled == true)
+        #expect(restored.toPublisherAdvancedSettings().cameraContentHint == .motion)
+        await reloaded.reset()
+        #expect(await reloaded.getPreferences() == .default)
+    }
+
+    @Test("Legacy resolution and bitrate survive addition of audio and content preferences")
+    func legacyAudioAndHintsMigration() async throws {
+        let defaults = UserDefaults.ephemeral()
+        let preferences = PublisherSettingsPreferences(
+            videoResolution: .medium, audioBitratePreference: .custom(40_000))
+        var payload = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(preferences)) as? [String: Any])
+        for key in [
+            "advancedNoiseSuppressionEnabled", "cameraContentHint", "screenShareContentHint", "screenShareCodecMode",
+            "screenShareCodecPreference", "screenShareFrameRate", "screenShareResolution", "screenShareBitratePreset",
+            "screenShareMaxVideoBitrate", "scalableScreenshareEnabled",
+        ] {
+            payload.removeValue(forKey: key)
+        }
+        defaults.set(
+            try JSONSerialization.data(withJSONObject: payload), forKey: "com.vonage.vera.publisherSettingsPreferences")
+        let repository = UserDefaultsSettingsRepository(userDefaults: defaults)
+        let restored = await repository.getPreferences()
+        #expect(restored.videoResolution == .medium)
+        #expect(restored.audioBitratePreference == .custom(40_000))
+        #expect(!restored.advancedNoiseSuppressionEnabled)
+        #expect(restored.cameraContentHint == .automatic)
+        #expect(restored.screenShareContentHint == .detail)
+    }
+
+    @Test("Toolbar noise changes retain other preferences")
+    func toolbarNoiseRetainsPreferences() async throws {
+        let repository = UserDefaultsSettingsRepository(userDefaults: .ephemeral())
+        var preferences = PublisherSettingsPreferences.default
+        preferences.cameraPosition = .back
+        preferences.screenShareContentHint = .text
+        preferences.screenShareCodecMode = .manual
+        preferences.screenShareCodecPreference.orderedCodecs = [.h264, .vp9, .vp8]
+        preferences.screenShareFrameRate = .fps7
+        preferences.screenShareResolution = .fullHD
+        preferences.screenShareBitratePreset = .custom
+        preferences.screenShareMaxVideoBitrate = 2_000_000
+        preferences.scalableScreenshareEnabled = true
+        await repository.save(preferences)
+        await repository.saveAdvancedNoiseSuppression(true)
+        let restored = await repository.getPreferences()
+        #expect(restored.cameraPosition == .back)
+        #expect(restored.screenShareContentHint == .text)
+        #expect(restored.advancedNoiseSuppressionEnabled)
+    }
+
+
+    @Test("Self-view mirror preference survives relaunch and reset")
+    func selfViewMirrorPersistsAndResets() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        var preferences = PublisherSettingsPreferences.default
+        preferences.selfViewMirroringEnabled = false
+        await repository.save(preferences)
+
+        let reloaded = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        let restored = await reloaded.getPreferences()
+        #expect(!restored.selfViewMirroringEnabled)
+        #expect(restored.toPublisherAdvancedSettings().selfViewMirroringEnabled == false)
+        await reloaded.reset()
+        #expect(await reloaded.getPreferences().selfViewMirroringEnabled)
+    }
+
+    @Test("Older settings retain their values when the mirror field is absent")
+    func legacySettingsDefaultMirroringWithoutLosingPreferences() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+        let preferences = PublisherSettingsPreferences(videoResolution: .high, videoFrameRate: .fps15)
+        var payload = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(preferences)) as? [String: Any]
+        )
+        payload.removeValue(forKey: "selfViewMirroringEnabled")
+        payload.removeValue(forKey: "cameraPosition")
+        userDefaults.set(
+            try JSONSerialization.data(withJSONObject: payload),
+            forKey: "com.vonage.vera.publisherSettingsPreferences"
+        )
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        let restored = await repository.getPreferences()
+        #expect(restored.selfViewMirroringEnabled)
+        #expect(restored.cameraPosition == .front)
+        #expect(restored.videoResolution == .high)
+        #expect(restored.videoFrameRate == .fps15)
+    }
+
+    @Test("Camera choice survives a new repository and camera updates retain other preferences")
+    func cameraChoicePersists() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        var preferences = PublisherSettingsPreferences(videoResolution: .high, videoFrameRate: .fps15)
+        preferences.selfViewMirroringEnabled = false
+        await repository.save(preferences)
+        await repository.saveCameraPosition(.back)
+        let reloaded = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        let restored = await reloaded.getPreferences()
+        #expect(restored.cameraPosition == .back)
+        #expect(restored.toPublisherAdvancedSettings().cameraPosition == .back)
+        #expect(restored.videoResolution == .high)
+        #expect(restored.videoFrameRate == .fps15)
+        #expect(!restored.selfViewMirroringEnabled)
+        await reloaded.reset()
+        #expect(await reloaded.getPreferences().cameraPosition == .front)
+    }
 
     // MARK: - Initialization Tests
 
@@ -54,6 +182,22 @@ struct UserDefaultsSettingsRepositoryTests {
         #expect(loadedPreferences == customPreferences)
         #expect(loadedPreferences.videoResolution == .high)
         #expect(loadedPreferences.senderStatsEnabled == true)
+    }
+
+    @Test("Persisted preferences are published before setup")
+    func persistedPreferencesArePublishedBeforeSetup() async {
+        let userDefaults = UserDefaults.ephemeral()
+        var persistedPreferences = PublisherSettingsPreferences.default
+        persistedPreferences.screenShareContentHint = .text
+        let sourceRepository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        await sourceRepository.save(persistedPreferences)
+
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        var receivedPreferences: [PublisherSettingsPreferences] = []
+        let cancellable = repository.preferencesPublisher.sink { receivedPreferences.append($0) }
+
+        #expect(receivedPreferences == [persistedPreferences])
+        withExtendedLifetime(cancellable) {}
     }
 
     @Test("Corrupted data falls back to defaults")

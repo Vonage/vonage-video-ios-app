@@ -8,7 +8,7 @@ import SwiftUI
 /// The available camera positions for a publisher.
 ///
 /// Use to control which physical camera is used for local video.
-public enum CameraPosition {
+public enum CameraPosition: String, CaseIterable, Codable, Hashable, Sendable {
     /// The device’s front-facing camera.
     case front
     /// The device’s back-facing camera.
@@ -93,4 +93,12 @@ public protocol VERATransformerFactory {
 public protocol VERATransformer {
     var key: String { get }
     var transformer: AnyObject { get }
+}
+
+/// Capture content hints supported by the native SDK.
+public enum VideoContentHint: Int, CaseIterable, Codable, Hashable, Sendable {
+    case automatic = 0
+    case motion = 1
+    case detail = 2
+    case text = 3
 }

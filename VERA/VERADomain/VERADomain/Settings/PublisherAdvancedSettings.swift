@@ -41,6 +41,15 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public let opusDtxEnabled: Bool?
 
+    /// Preferred camera for new publishers and live camera changes.
+    public let cameraPosition: CameraPosition?
+
+    /// Controls front-camera local preview mirroring; transmitted video is unaffected.
+    public let selfViewMirroringEnabled: Bool?
+
+    public let advancedNoiseSuppressionEnabled: Bool?
+    public let cameraContentHint: VideoContentHint?
+
     /// Creates new advanced publisher settings.
     ///
     /// All parameters are optional, allowing you to configure only the settings you need.
@@ -56,6 +65,8 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
     ///   - subscriberAudioFallbackEnabled: Subscriber audio fallback flag.
     ///   - degradationPreference: Degradation preference policy.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled.
+    ///   - selfViewMirroringEnabled: Whether the front-camera local preview is mirrored.
+    ///   - cameraPosition: Preferred camera position.
     public init(
         videoResolution: VideoResolution? = nil,
         videoFrameRate: VideoFrameRate? = nil,
@@ -66,7 +77,11 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         publisherAudioFallbackEnabled: Bool? = nil,
         subscriberAudioFallbackEnabled: Bool? = nil,
         degradationPreference: DegradationPreference? = nil,
-        opusDtxEnabled: Bool? = nil
+        opusDtxEnabled: Bool? = nil,
+        selfViewMirroringEnabled: Bool? = nil,
+        cameraPosition: CameraPosition? = nil,
+        advancedNoiseSuppressionEnabled: Bool? = nil,
+        cameraContentHint: VideoContentHint? = nil
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -78,6 +93,10 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         self.subscriberAudioFallbackEnabled = subscriberAudioFallbackEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.selfViewMirroringEnabled = selfViewMirroringEnabled
+        self.cameraPosition = cameraPosition
+        self.advancedNoiseSuppressionEnabled = advancedNoiseSuppressionEnabled
+        self.cameraContentHint = cameraContentHint
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -91,5 +110,9 @@ public struct PublisherAdvancedSettings: Equatable, Hashable {
         hasher.combine(subscriberAudioFallbackEnabled)
         hasher.combine(degradationPreference)
         hasher.combine(opusDtxEnabled)
+        hasher.combine(selfViewMirroringEnabled)
+        hasher.combine(cameraPosition)
+        hasher.combine(advancedNoiseSuppressionEnabled)
+        hasher.combine(cameraContentHint)
     }
 }
