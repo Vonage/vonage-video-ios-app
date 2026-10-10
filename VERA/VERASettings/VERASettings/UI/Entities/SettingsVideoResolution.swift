@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 /// The video capture resolution used by the publisher.
 ///
@@ -80,5 +81,32 @@ extension SettingsVideoResolution {
         case .high: "1280x720"
         case .high1080p: "1920x1080"
         }
+    }
+}
+
+extension VideoContentHint {
+    var displayName: String {
+        switch self {
+        case .automatic: "Automatic".localized
+        case .motion: "Smooth motion".localized
+        case .detail: "Sharp detail".localized
+        case .text: "Readable text".localized
+        }
+    }
+}
+
+/// Maximum output bounds for ReplayKit, matching VERA web's size options.
+public enum SettingsScreenShareResolution: String, Codable, CaseIterable, Identifiable {
+    case fullHD = "1920x1080"
+    case sxga = "1280x960"
+    case hd = "1280x720"
+    case vga = "640x480"
+    case nhd = "640x360"
+    case qvga = "320x240"
+    case low = "320x180"
+    public var id: Self { self }
+    public var dimensions: (width: Int, height: Int) {
+        let components = rawValue.split(separator: "x").compactMap { Int($0) }
+        return (components[0], components[1])
     }
 }
