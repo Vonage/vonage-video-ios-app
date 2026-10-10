@@ -92,8 +92,7 @@ final class MeetingRoomSDKContainer {
                 checkMicrophoneAuthorizationStatusUseCase: microphone)
         factory.advancedNoiseSuppressionAvailable = enabledFeatures.contains(.audioEffects)
         factory.onCameraPositionChanged = { [weak self] position in
-            guard let repository = self?.settingsRepository else { return }
-            Task { try? await repository.saveCameraPosition(position) }
+            self?.persistCameraPosition(position)
         }
         factory.onAdvancedNoiseSuppressionInitialized = { [weak self] enabled in
             self?.noiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
@@ -102,11 +101,20 @@ final class MeetingRoomSDKContainer {
             guard let self else { return }
             self.noiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
             guard self.enabledFeatures.contains(.audioEffects) else { return }
-            let repository = self.settingsRepository
-            Task { try? await repository.saveAdvancedNoiseSuppression(enabled) }
+            self.persistAdvancedNoiseSuppression(enabled)
         }
         return factory
     }()
+
+    private func persistCameraPosition(_ position: CameraPosition) {
+        let repository = settingsRepository
+        Task { try? await repository.saveCameraPosition(position) }
+    }
+
+    private func persistAdvancedNoiseSuppression(_ enabled: Bool) {
+        let repository = settingsRepository
+        Task { try? await repository.saveAdvancedNoiseSuppression(enabled) }
+    }
 
     lazy var publisherRepository: any PublisherRepository = {
         let repository = DefaultPublisherRepository(publisherFactory: publisherFactory)
@@ -373,8 +381,7 @@ final class MeetingRoomSDKContainer {
                     let settings = ScreenShareVideoSettings(
                         contentHint: preferences.screenShareContentHint.rawValue,
                         preferredCodecs: manualCodec ? codec.orderedCodecs.map(\.rawValue) : nil,
-                        frameRate: preferences.screenShareFrameRate?.rawValue, maxWidth: dimensions?.0,
-                        maxHeight: dimensions?.1,
+                        frameRate: preferences.screenShareFrameRate?.rawValue, maxSize: dimensions,
                         bitratePreset: preferences.screenShareBitratePreset?.rawValue,
                         maxVideoBitrate: preferences.screenShareMaxVideoBitrate,
                         scalableScreenshare: preferences.scalableScreenshareEnabled)

@@ -168,8 +168,7 @@ final class DependencyContainer {
                 let settings = ScreenShareVideoSettings(
                     contentHint: preferences.screenShareContentHint.rawValue,
                     preferredCodecs: manualCodec ? codec.orderedCodecs.map(\.rawValue) : nil,
-                    frameRate: preferences.screenShareFrameRate?.rawValue, maxWidth: dimensions?.0,
-                    maxHeight: dimensions?.1,
+                    frameRate: preferences.screenShareFrameRate?.rawValue, maxSize: dimensions,
                     bitratePreset: preferences.screenShareBitratePreset?.rawValue,
                     maxVideoBitrate: preferences.screenShareMaxVideoBitrate,
                     scalableScreenshare: preferences.scalableScreenshareEnabled)
