@@ -1,0 +1,79 @@
+name: Swift logger readiness
+
+on:
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'VERA/VERALogger/**'
+      - 'VERA/Tuist/**'
+      - 'VERA/Tuist.swift'
+      - '.github/workflows/swift-logger-readiness.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'VERA/VERALogger/**'
+      - 'VERA/Tuist/**'
+      - 'VERA/Tuist.swift'
+      - '.github/workflows/swift-logger-readiness.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  language-modes:
+    name: VERALogger Swift ${{ matrix.swift }}
+    runs-on: macos-26
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ['5', '6']
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify and report the compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          compiler_version=$(xcrun swiftc --version)
+          printf '%s\n' "$compiler_version"
+          if [[ "$compiler_version" != *'Apple Swift version 6.3.3 '* ]]; then
+            echo '::error::This readiness check requires Apple Swift 6.3.3.'
+            exit 1
+          fi
+          {
+            echo "### VERALogger: Swift ${{ matrix.swift }} language mode"
+            printf '\nCompiler: %s\n' "$compiler_version"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install Tuist
+        run: brew install tuist
+
+      - name: Generate only VERALogger
+        run: tuist generate --path VERA/VERALogger --no-open
+
+      - name: Run focused tests with complete checking
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p TestResults
+          xcodebuild test \
+            -workspace VERA/VERALogger/VERALogger.xcworkspace \
+            -scheme VERALoggerTests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -derivedDataPath DerivedData \
+            -resultBundlePath TestResults/VERALogger-swift${{ matrix.swift }}.xcresult \
+            -parallel-testing-enabled NO \
+            SWIFT_VERSION=${{ matrix.swift }} SWIFT_STRICT_CONCURRENCY=complete \
+            CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | tee TestResults/build.log
+
+      - name: Upload compiler and test evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logger-swift-${{ matrix.swift }}
+          path: TestResults/
