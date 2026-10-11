@@ -49,6 +49,23 @@ jobs:
             printf '\nCompiler: %s\n' "$compiler_version"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Prepare an iOS 26.5 Simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime_id=com.apple.CoreSimulator.SimRuntime.iOS-26-5
+          xcrun simctl list runtimes
+          if ! xcrun simctl list runtimes -j | jq -e --arg id "$runtime_id" \
+            '.runtimes[] | select(.identifier == $id and .isAvailable == true)' > /dev/null; then
+            xcodebuild -downloadPlatform iOS -buildVersion 26.5
+          fi
+          simulator_id=$(xcrun simctl create 'Swift readiness' \
+            com.apple.CoreSimulator.SimDeviceType.iPhone-17 "$runtime_id")
+          xcrun simctl boot "$simulator_id"
+          xcrun simctl bootstatus "$simulator_id" -b
+          echo "READINESS_SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
+          echo "Simulator: iPhone 17 / iOS 26.5 ($simulator_id)" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install Tuist
         run: brew install tuist
 
@@ -63,7 +80,7 @@ jobs:
           xcodebuild test \
             -workspace VERA/VERADomain/VERADomain.xcworkspace \
             -scheme VERADomainTests \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -destination "platform=iOS Simulator,id=$READINESS_SIMULATOR_ID" \
             -derivedDataPath DerivedData \
             -resultBundlePath TestResults/VERADomain-swift${{ matrix.swift }}.xcresult \
             -parallel-testing-enabled NO \
