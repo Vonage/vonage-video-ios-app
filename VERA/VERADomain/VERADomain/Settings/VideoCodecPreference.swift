@@ -11,7 +11,7 @@
 /// The preference can be either automatic (SDK decides) or manual (user-ordered list).
 ///
 /// - SeeAlso: ``VideoCodecType``, ``PublisherAdvancedSettings``
-public struct VideoCodecPreference: Equatable, Hashable {
+public struct VideoCodecPreference: Equatable, Hashable, Sendable {
     /// Whether codec selection should be automatic.
     /// - `true`: SDK automatically selects the best codec based on conditions
     /// - `false`: Use the manually ordered codec list in ``codecs``
