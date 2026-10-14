@@ -4,7 +4,7 @@
 
 import Foundation
 
-public enum ArchiveStatus: String {
+public enum ArchiveStatus: String, Sendable {
     case stopped, available, failed
 
     public init?(rawValue: String) {
@@ -30,7 +30,7 @@ public enum ArchiveStatus: String {
     }
 }
 
-public struct Archive: Equatable {
+public struct Archive: Equatable, Sendable {
     public let id: UUID
     public let name: String
     public let createdAt: Date
