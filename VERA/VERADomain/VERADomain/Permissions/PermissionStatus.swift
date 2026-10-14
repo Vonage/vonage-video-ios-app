@@ -8,7 +8,7 @@ import AVFoundation
 ///
 /// This enum provides a unified way to handle permission states across the application,
 /// abstracting away the underlying system-specific authorization status types.
-public enum PermissionStatus {
+public enum PermissionStatus: Sendable {
 
     /// The user has not yet been asked for permission.
     /// This is the initial state before any permission request has been made.
