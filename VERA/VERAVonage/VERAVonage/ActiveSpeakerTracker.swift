@@ -7,7 +7,7 @@ import Foundation
 import SwiftUI
 import VERADomain
 
-public struct ActiveSpeakerInfo: Equatable {
+public struct ActiveSpeakerInfo: Equatable, Sendable {
     public let participantId: String?
     /// The audio level of the active speaker (0.0 - 1.0)
     public let audioLevel: Float
