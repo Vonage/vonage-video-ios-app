@@ -63,7 +63,7 @@ public enum CallState: Sendable {
 ///
 /// Represents if the current call is being recording or not.
 /// Use it to drive recording related UI display.
-public enum ArchivingState: Equatable {
+public enum ArchivingState: Equatable, Sendable {
     case idle
     case archiving(ArchiveID)
 }
@@ -74,7 +74,7 @@ public typealias ArchiveID = String
 ///
 /// Represents whether the current call has captions enabled or not.
 /// Use it to drive captions-related UI display.
-public enum CaptionsState: Equatable {
+public enum CaptionsState: Equatable, Sendable {
     case enabled(CaptionsID?)
     case disabled
 }
@@ -94,7 +94,7 @@ public typealias CaptionsID = String
 ///
 /// Represents whether the current call has noise suppression enabled or not.
 /// Use it to drive noise suppression-related UI display.
-public enum NoiseSuppressionState: Equatable {
+public enum NoiseSuppressionState: Equatable, Sendable {
     case enabled
     case disabled
     case idle
