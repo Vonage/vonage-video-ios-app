@@ -4,6 +4,6 @@
 
 import Foundation
 
-public enum MeetingRoomLayout {
+public enum MeetingRoomLayout: Sendable {
     case activeSpeaker, grid
 }
