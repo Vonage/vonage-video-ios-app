@@ -8,7 +8,7 @@ public protocol RoomIdentifier: Equatable {
     var roomName: RoomName { get }
 }
 
-public struct PlainRoomIdentifier: RoomIdentifier {
+public struct PlainRoomIdentifier: RoomIdentifier, Sendable {
     public let roomName: RoomName
 
     public init(roomName: RoomName) {
@@ -16,7 +16,7 @@ public struct PlainRoomIdentifier: RoomIdentifier {
     }
 }
 
-public struct SessionKeyRoomIdentifier: RoomIdentifier {
+public struct SessionKeyRoomIdentifier: RoomIdentifier, Sendable {
     public var roomName: RoomName {
         SessionKeyParser.extractRoomName(from: sessionKey) ?? ""
     }
