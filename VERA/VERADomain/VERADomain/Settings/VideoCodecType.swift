@@ -14,7 +14,7 @@
 /// - `vp9` (3): Google's next-generation codec with improved compression
 ///
 /// - SeeAlso: ``VideoCodecPreference``, ``PublisherAdvancedSettings``
-public enum VideoCodecType: Int, Equatable {
+public enum VideoCodecType: Int, Equatable, Sendable {
     /// VP8 codec - Google's widely-supported open video codec.
     case vp8 = 1
 
