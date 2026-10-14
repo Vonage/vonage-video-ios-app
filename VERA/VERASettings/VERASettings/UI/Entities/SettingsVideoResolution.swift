@@ -31,7 +31,7 @@ import Foundation
 /// and efficient storage.
 ///
 /// - SeeAlso: ``VideoResolution``
-public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Identifiable {
+public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Identifiable, Sendable {
     /// Low resolution (352x288). Maps to `VideoResolution.low`.
     case low = 0
 
