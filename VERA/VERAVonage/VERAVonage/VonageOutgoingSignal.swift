@@ -9,7 +9,7 @@ import Foundation
 /// `OutgoingSignal` encapsulates a signal `type` and an optional `payload` string.
 /// Use it with ``VonageSignalChannel/emitSignal(_:)`` to broadcast custom events
 /// (e.g., chat messages, control commands) to peers in the session.
-public struct OutgoingSignal {
+public struct OutgoingSignal: Sendable {
     /// The signal type identifier (e.g., `"chat.message"`, `"control.muteAll"`).
     public let type: String
     /// Optional string payload to include with the signal.
