@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct VonageSignal {
+public struct VonageSignal: Sendable {
     public let type: String
     public let data: String?
     public let connectionId: String?
