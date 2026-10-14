@@ -25,6 +25,7 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     public lazy var participantsPublisher = participantsSubject.eraseToAnyPublisher()
 
     private let stateSubject: CurrentValueSubject<SessionState, Never>
+    private var mediaBeforeHold: SessionState?
     public lazy var statePublisher = stateSubject.eraseToAnyPublisher()
 
     private let callStateSubject = CurrentValueSubject<CallState, Never>(.idle)
@@ -77,8 +78,8 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     }
 
     public func toggleLocalVideo() {
-        let current = stateSubject.value
-        stateSubject.send(
+        let current = mediaBeforeHold ?? stateSubject.value
+        updateDesiredMedia(
             .init(
                 isPublishingAudio: current.isPublishingAudio,
                 isPublishingVideo: !current.isPublishingVideo))
@@ -87,14 +88,14 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     public func toggleLocalCamera() {}
 
     public func toggleLocalAudio() {
-        let current = stateSubject.value
+        let current = mediaBeforeHold ?? stateSubject.value
         let newIsPublishingAudio = !current.isPublishingAudio
-        stateSubject.send(
+        updateDesiredMedia(
             .init(
                 isPublishingAudio: newIsPublishingAudio,
                 isPublishingVideo: current.isPublishingVideo))
 
-        if !newIsPublishingAudio {
+        if !newIsPublishingAudio && !isOnHold {
             simulateSpeakingWhileMuted()
         } else {
             stopSpeakingWhileMutedSimulation()
@@ -102,21 +103,38 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     }
 
     public func muteLocalMedia(_ isMuted: Bool) {
-        self.isMuted = isMuted
-        stateSubject.send(
-            .init(
-                isPublishingAudio: !isMuted,
-                isPublishingVideo: !isMuted))
+        updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: !isMuted))
     }
 
     public func muteLocalAudio(_ isMuted: Bool) {
-        let current = stateSubject.value
-        stateSubject.send(.init(isPublishingAudio: !isMuted, isPublishingVideo: current.isPublishingVideo))
-        self.isMuted = isMuted && !current.isPublishingVideo
+        let current = mediaBeforeHold ?? stateSubject.value
+        updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: current.isPublishingVideo))
     }
 
     public func setOnHold(_ isOnHold: Bool) {
+        guard self.isOnHold != isOnHold else { return }
         self.isOnHold = isOnHold
+        if isOnHold {
+            mediaBeforeHold = stateSubject.value
+            stopSpeakingWhileMutedSimulation()
+            publishMedia(.init(isPublishingAudio: false, isPublishingVideo: false))
+        } else if let savedMedia = mediaBeforeHold {
+            mediaBeforeHold = nil
+            publishMedia(savedMedia)
+        }
+    }
+
+    private func updateDesiredMedia(_ state: SessionState) {
+        if isOnHold {
+            mediaBeforeHold = state
+        } else {
+            publishMedia(state)
+        }
+    }
+
+    private func publishMedia(_ state: SessionState) {
+        isMuted = !state.isPublishingAudio && !state.isPublishingVideo
+        stateSubject.send(state)
     }
 
     public func enableCaptions() async {
