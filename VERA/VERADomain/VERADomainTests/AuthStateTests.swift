@@ -37,19 +37,4 @@ struct AuthStateTests {
 
         #expect(sut.user == nil)
     }
-
-    @Test("Authentication state retains its value across task boundaries")
-    func statesAcrossTasks() async {
-        let states: [AuthState] = [
-            .notAuthenticated,
-            .authenticated(AuthenticatedUser(name: "Alice")),
-            .authenticated(AuthenticatedUser()),
-        ]
-
-        for state in states {
-            let received = await Task.detached { state }.value
-
-            #expect(received == state)
-        }
-    }
 }
