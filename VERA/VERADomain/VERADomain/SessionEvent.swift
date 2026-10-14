@@ -4,7 +4,7 @@
 
 import Foundation
 
-public enum SessionEvent {
+public enum SessionEvent: Sendable {
     case idle
     case connected
     case disconnected
