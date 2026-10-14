@@ -46,7 +46,7 @@ public struct ParticipantsState: Equatable {
 ///
 /// Represents lifecycle stages of a call from idle to disconnected.
 /// Use it to drive connection-related UI and guard call operations.
-public enum CallState {
+public enum CallState: Sendable {
     /// Initial state, no connection established.
     case idle
     /// The call is connected and active.
