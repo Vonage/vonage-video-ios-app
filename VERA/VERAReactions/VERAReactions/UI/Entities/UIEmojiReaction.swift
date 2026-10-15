@@ -20,7 +20,7 @@ import Foundation
 /// - `name`: Human-readable name for accessibility (localized if using nameKey)
 ///
 /// - SeeAlso: ``EmojiReaction`` for the domain model used in networking/persistence.
-public struct UIEmojiReaction: Identifiable, Equatable, Hashable {
+public struct UIEmojiReaction: Identifiable, Equatable, Hashable, Sendable {
     /// Unique identifier for the emoji
     public let id: UUID
 
