@@ -10,7 +10,7 @@ public enum ArchivingDataSourceError: Swift.Error {
     case invalidData
 }
 
-public struct StartArchivingDataSourceRequest {
+public struct StartArchivingDataSourceRequest: Sendable {
     public let sessionKey: String
     public let kind: ArchiveKind
 
@@ -20,7 +20,7 @@ public struct StartArchivingDataSourceRequest {
     }
 }
 
-public struct StopArchivingDataSourceRequest {
+public struct StopArchivingDataSourceRequest: Sendable {
     public let sessionKey: String
     public let archiveID: String
     public let kind: ArchiveKind
@@ -34,7 +34,7 @@ public struct StopArchivingDataSourceRequest {
 
 public typealias ArchiveID = String
 
-public struct StartArchivingDataSourceResponse {
+public struct StartArchivingDataSourceResponse: Sendable {
     public let archiveId: ArchiveID
 
     public init(archiveId: ArchiveID) {
@@ -42,7 +42,7 @@ public struct StartArchivingDataSourceResponse {
     }
 }
 
-public struct StopArchivingDataSourceResponse {
+public struct StopArchivingDataSourceResponse: Sendable {
     public let archiveId: ArchiveID
 
     public init(archiveId: ArchiveID) {

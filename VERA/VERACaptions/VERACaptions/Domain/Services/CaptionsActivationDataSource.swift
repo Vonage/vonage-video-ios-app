@@ -5,7 +5,7 @@
 import Foundation
 import VERADomain
 
-public struct EnableCaptionsDataSourceRequest {
+public struct EnableCaptionsDataSourceRequest: Sendable {
     public let sessionKey: String
 
     public init(sessionKey: String) {
@@ -13,7 +13,7 @@ public struct EnableCaptionsDataSourceRequest {
     }
 }
 
-public struct EnableCaptionsDataSourceResponse {
+public struct EnableCaptionsDataSourceResponse: Sendable {
     public let captionsId: CaptionsID?
 
     public init(captionsId: CaptionsID?) {

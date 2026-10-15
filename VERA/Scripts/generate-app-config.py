@@ -55,10 +55,10 @@ def generate_app_config():
 import Foundation
 import VERADomain
 
-public struct AppConfig {{
+public struct AppConfig: Sendable {{
     public static let configVersion: String = "{metadata_version}"
 
-    public struct VideoSettings {{
+    public struct VideoSettings: Sendable {{
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
         public let allowVideoOnJoin: Bool
@@ -77,7 +77,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AudioSettings {{
+    public struct AudioSettings: Sendable {{
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
@@ -96,7 +96,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct WaitingRoomSettings {{
+    public struct WaitingRoomSettings: Sendable {{
         public let allowDeviceSelection: Bool
         public let allowSettings: Bool
 
@@ -109,7 +109,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AuthSettings {{
+    public struct AuthSettings: Sendable {{
         public let allowAuthentication: Bool
         public let idProviders: [String]
 
@@ -122,7 +122,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct MeetingRoomSettings {{
+    public struct MeetingRoomSettings: Sendable {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
         public let allowChat: Bool

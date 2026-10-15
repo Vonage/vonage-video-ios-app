@@ -368,6 +368,8 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     func cleanUp() {
         onSessionDidConnect = nil
         onSessionDidDisconnect = nil
+        onSessionDidReconnect = nil
+        onSessionDidBeginReconnecting = nil
         onSessionFailure = nil
         onNewStream = nil
         onStreamDestroyed = nil

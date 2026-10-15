@@ -15,3 +15,7 @@ public struct TRPCResponse<T: Decodable>: Decodable {
 public struct TRPCResult<T: Decodable>: Decodable {
     public let data: T
 }
+
+extension TRPCResponse: Sendable where T: Sendable {}
+
+extension TRPCResult: Sendable where T: Sendable {}

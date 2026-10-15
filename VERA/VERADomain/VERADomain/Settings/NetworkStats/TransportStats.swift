@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Populated from `OTTransportStats` delivered via the SDK's
 /// media link stats delegates.
-public struct TransportStats: Equatable {
+public struct TransportStats: Equatable, Sendable {
     /// Estimated available connection bandwidth in bits per second.
     public let connectionEstimatedBandwidth: Int64
     /// Current network condition score.

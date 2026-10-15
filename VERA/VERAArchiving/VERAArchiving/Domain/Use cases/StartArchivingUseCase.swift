@@ -5,7 +5,7 @@
 import Foundation
 import VERADomain
 
-public struct StartArchivingRequest {
+public struct StartArchivingRequest: Sendable {
     public let sessionKey: String
     public let kind: ArchiveKind
 
