@@ -31,7 +31,7 @@ import Foundation
 /// and efficient storage.
 ///
 /// - SeeAlso: ``VideoFrameRate``
-public enum SettingsVideoFrameRate: Int, CaseIterable, Codable, Equatable, Identifiable {
+public enum SettingsVideoFrameRate: Int, CaseIterable, Codable, Equatable, Identifiable, Sendable {
     /// 1 frame per second. Maps to `VideoFrameRate.rate1FPS`.
     case fps1 = 1
 
