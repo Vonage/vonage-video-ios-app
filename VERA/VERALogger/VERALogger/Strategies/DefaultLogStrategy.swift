@@ -11,6 +11,7 @@ import Foundation
 /// os.Logger are unavailable.
 public struct DefaultLogStrategy: LoggerStrategy, Sendable {
 
+    // DateFormatter is thread-safe on supported iOS versions; configuration never changes after init.
     private final class FormatterStorage: @unchecked Sendable {
         private let formatter: DateFormatter
 

@@ -7,6 +7,7 @@ import SwiftUI
 import VERAMeetingRoom
 
 enum MeetingRoomUIProviderCombiner {
+    @MainActor
     static func combine(
         sdkProvider: any MeetingRoomUIProvider,
         customProvider: (any MeetingRoomUIProvider)?

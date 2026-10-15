@@ -19,8 +19,8 @@ public actor InMemoryStatsRepository: StatsRepository {
 
     // MARK: - Private
 
-    /// Subject that holds the current stats and broadcasts updates to observers.
-    private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    /// Owns the subject behind a narrowly audited Combine synchronization boundary.
+    private nonisolated let relay = StatsPublisherRelay()
 
     // MARK: - Init
 
@@ -31,9 +31,11 @@ public actor InMemoryStatsRepository: StatsRepository {
 
     /// A publisher that emits network statistics updates.
     ///
-    /// New subscribers immediately receive the most recent stats snapshot.
+    /// New subscribers immediately receive the most recent stats snapshot on the subscribing context.
+    /// Updates and clear send synchronously from this actor; delivery is not guaranteed to use the main thread.
+    /// UI observers must select their scheduler, for example with `receive(on:)`.
     public nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
-        subject.eraseToAnyPublisher()
+        relay.publisher
     }
 
     // MARK: - StatsWriter
@@ -42,11 +44,11 @@ public actor InMemoryStatsRepository: StatsRepository {
     ///
     /// - Parameter stats: The new network media statistics.
     public func updateStats(_ stats: NetworkMediaStats) async {
-        subject.send(stats)
+        relay.send(stats)
     }
 
     /// Clears all statistics and resets to empty values.
     public func clearStats() async {
-        subject.send(.empty)
+        relay.send(.empty)
     }
 }

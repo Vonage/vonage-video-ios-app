@@ -9,7 +9,7 @@ import Foundation
 /// Published by ``NetworkStatsProvider/networkStatsPublisher`` and consumed by the
 /// statistics UI in VERASettings. Each field is optional to accommodate partial updates
 /// (e.g. stats may arrive for the publisher before any subscriber connects).
-public struct NetworkMediaStats: Equatable {
+public struct NetworkMediaStats: Equatable, Sendable {
     /// Display name of the local publisher.
     public let publisherName: String
     /// Audio statistics for the local publisher (send direction).

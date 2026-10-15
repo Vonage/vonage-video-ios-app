@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct CameraDevice {
+public struct CameraDevice: Sendable {
     public let id: String
     public let name: String
 
