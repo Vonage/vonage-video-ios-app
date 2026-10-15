@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct StopArchivingRequest {
+public struct StopArchivingRequest: Sendable {
     public let sessionKey: String
     public let archiveID: String
 

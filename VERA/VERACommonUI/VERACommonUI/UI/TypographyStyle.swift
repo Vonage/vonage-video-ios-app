@@ -5,7 +5,7 @@
 //
 import SwiftUI
 
-public struct TypographyConfig {
+public struct TypographyConfig: Sendable {
     public let fontSize: CGFloat
     public let lineHeight: CGFloat
     public let weight: Font.Weight
@@ -19,7 +19,7 @@ public struct TypographyConfig {
     }
 }
 
-public enum TypographyStyle {
+public enum TypographyStyle: Sendable {
     case headline
     case subtitle
     case heading1
