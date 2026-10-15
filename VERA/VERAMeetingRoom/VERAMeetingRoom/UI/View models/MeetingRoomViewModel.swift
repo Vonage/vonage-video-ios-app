@@ -98,6 +98,8 @@ public final class MeetingRoomViewModel {
     @ObservationIgnored
     private let archivingPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
     @ObservationIgnored
+    private let transcriptionPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
+    @ObservationIgnored
     private let noiseSuppressionPublisher = CurrentValueSubject<NoiseSuppressionState, Never>(.idle)
 
     @ObservationIgnored
@@ -336,16 +338,17 @@ extension MeetingRoomViewModel {
                 activeSpeakerId: participantsState.activeParticipantId)
         }
 
-        Publishers.CombineLatest(
+        Publishers.CombineLatest3(
             Publishers.CombineLatest4(
                 sortedParticipantsPublisher,
                 sessionStatePublisher,
                 callStatePublisher,
                 archivingPublisher
             ),
+            transcriptionPublisher,
             noiseSuppressionPublisher
         )
-        .map { [weak self] state, noiseSuppressionState in
+        .map { [weak self] state, transcriptionState, noiseSuppressionState in
             let (participantsState, sessionState, callState, archivingState) = state
 
             guard let self else { return MeetingRoomState.initial }
@@ -363,6 +366,7 @@ extension MeetingRoomViewModel {
                 showParticipantList: configuration.showParticipantList,
                 callState: callState,
                 archivingState: archivingState,
+                transcriptionState: transcriptionState,
                 noiseSuppressionState: noiseSuppressionState
             )
         }
@@ -425,6 +429,13 @@ extension MeetingRoomViewModel {
             }
             .store(in: &cancellables)
 
+        call.transcriptionState
+            .dropFirst()
+            .sink { [weak self] transcriptionState in
+                self?.handleTranscriptionStateChange(transcriptionState)
+            }
+            .store(in: &cancellables)
+
         call.eventsPublisher
             .sink { [weak self] event in
                 self?.handleEvents(event)
@@ -475,6 +486,23 @@ extension MeetingRoomViewModel {
             case .archiving:
                 self.toast = .init(
                     message: String(localized: "Session recording started", bundle: .module),
+                    mode: .info)
+            }
+        }
+    }
+
+    fileprivate func handleTranscriptionStateChange(_ transcriptionState: ArchivingState) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.transcriptionPublisher.value = transcriptionState
+            switch transcriptionState {
+            case .idle:
+                self.toast = .init(
+                    message: String(localized: "Session transcription stopped", bundle: .module),
+                    mode: .info)
+            case .archiving:
+                self.toast = .init(
+                    message: String(localized: "Session transcription started", bundle: .module),
                     mode: .info)
             }
         }
