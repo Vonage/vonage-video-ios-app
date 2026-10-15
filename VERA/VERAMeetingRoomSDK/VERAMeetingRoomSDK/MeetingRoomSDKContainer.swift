@@ -154,7 +154,7 @@ final class MeetingRoomSDKContainer {
         if enabledFeatures.contains(.chat) {
             registry.registerPlugin(plugin: vonageChatPlugin)
         }
-        if enabledFeatures.contains(.archiving) {
+        if enabledFeatures.contains(.archiving) || enabledFeatures.contains(.postCallTranscription) {
             registry.registerPlugin(plugin: vonageArchivingPlugin)
         }
         if enabledFeatures.contains(.captions) {
@@ -218,15 +218,20 @@ final class MeetingRoomSDKContainer {
     lazy var archivingStatusDataSource: any ArchivingStatusDataSource =
         DefaultArchivingStatusDataSource()
 
+    lazy var transcriptionStatusDataSource: any ArchivingStatusDataSource =
+        DefaultArchivingStatusDataSource()
+
     lazy var vonageArchivingPlugin = VonageArchivingPlugin(
-        archivingStatusDataSource: archivingStatusDataSource)
+        archivingStatusDataSource: archivingStatusDataSource,
+        transcriptionStatusDataSource: transcriptionStatusDataSource)
 
     lazy var archivingDataSource: any ArchivingDataSource = {
         archivingDataSourceFactory(
             MeetingRoomArchivingDataSourceFactoryContext(
                 baseURL: baseURL,
                 httpClient: httpClient,
-                archivingStatusDataSource: archivingStatusDataSource))
+                archivingStatusDataSource: archivingStatusDataSource,
+                transcriptionStatusDataSource: transcriptionStatusDataSource))
     }()
 
     lazy var archivesDataSource: any ArchivesDataSource = HTTPArchivesDataSource(
@@ -242,6 +247,7 @@ final class MeetingRoomSDKContainer {
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
         archivingStatusDataSource: archivingStatusDataSource,
+        transcriptionStatusDataSource: transcriptionStatusDataSource,
         sessionKeyProvider: sessionKeyHolder)
 
     // MARK: - Background Effects Feature
