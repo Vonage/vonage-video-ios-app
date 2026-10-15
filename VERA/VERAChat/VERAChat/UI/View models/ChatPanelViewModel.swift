@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import Observation
 
-public struct ChatPanelState: Equatable {
+public struct ChatPanelState: Equatable, Sendable {
     public let messages: [UIChatMessage]
 
     public static let initial = ChatPanelState(messages: [])
@@ -16,7 +16,7 @@ public struct ChatPanelState: Equatable {
     }
 }
 
-public enum ChatPanelViewState: Equatable {
+public enum ChatPanelViewState: Equatable, Sendable {
     case content(ChatPanelState)
     case loading
 }
