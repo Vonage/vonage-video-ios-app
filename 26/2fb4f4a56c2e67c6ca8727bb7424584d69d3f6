@@ -1,0 +1,19 @@
+.maestro/flows/settings-meeting-room-context.yaml
+  s_4598f7c801d99b::t_335d34f7b5bfc7 55-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "262fb4f4a56c2e67c6ca8727bb7424584d69d3f6",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
