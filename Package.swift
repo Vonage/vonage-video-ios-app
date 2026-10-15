@@ -1,7 +1,39 @@
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
+import Foundation
 import PackageDescription
+
+// Versions come from VERA/Dependencies.json. Vonage SDKs must be bumped together.
+private extension String {
+    var version: Version {
+        guard let version = Version(self) else { fatalError("Invalid version '\(self)' in Dependencies.json") }
+        return version
+    }
+}
+
+/// Mirrors `VonageSDKVersions` in VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift.
+/// Duplicated on purpose: SPM manifests can't import other files or Tuist helpers.
+private struct VonageSDKVersions: Decodable {
+    let videoSDK: String
+    let videoTransformersSDK: String
+}
+
+/// Root of Dependencies.json. Only `vonage` is needed here; `thirdParty` is ignored.
+private struct Dependencies: Decodable {
+    let vonage: VonageSDKVersions
+}
+
+private let vonageSDK: VonageSDKVersions = {
+    let url = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .appendingPathComponent("VERA/Dependencies.json")
+    do {
+        return try JSONDecoder().decode(Dependencies.self, from: Data(contentsOf: url)).vonage
+    } catch {
+        fatalError("Invalid \(url.path): \(error)")
+    }
+}()
 
 let package = Package(
     name: "VERAMeetingRoomSDK",
@@ -18,11 +50,11 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Vonage/vonage-video-client-sdk-swift",
-            .upToNextMinor(from: "2.35.1")
+            .upToNextMinor(from: vonageSDK.videoSDK.version)
         ),
         .package(
             url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-            .upToNextMinor(from: "2.35.1")
+            .upToNextMinor(from: vonageSDK.videoTransformersSDK.version)
         ),
     ],
     targets: [

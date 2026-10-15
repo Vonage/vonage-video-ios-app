@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Populated from `OTPublisherKitVideoLayerStats` via the SDK's
 /// `networkStatsDelegate` callback.
-public struct VideoLayerStats: Equatable {
+public struct VideoLayerStats: Equatable, Sendable {
     /// Encoded frame width in pixels.
     public let width: Int32
     /// Encoded frame height in pixels.

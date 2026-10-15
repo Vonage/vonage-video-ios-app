@@ -4,17 +4,15 @@
 
 import Foundation
 import SwiftUI
+import VERACommonUI
 import VERAMeetingRoom
 
 extension ViewGenerator {
     static func avPicker() -> ViewGenerator {
         .init(
-            id: "Speaker",
+            id: AudioRoutePickerView.viewID,
             content: {
-                ZStack {
-                    AudioRoutePickerView()
-                        .frame(width: 44, height: 44)
-                }
+                AudioRoutePickerView.button()
             })
     }
 }

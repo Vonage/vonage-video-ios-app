@@ -824,6 +824,7 @@ step "6: Run tuist clean & generate"
 
 cd "$VERA_DIR"
 tuist clean
+tuist install
 tuist generate --no-open
 cd "$REPO_ROOT"
 

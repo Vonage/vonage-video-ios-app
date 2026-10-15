@@ -68,6 +68,30 @@ struct MeetingRoomBuilderTests {
         #expect(builder.currentConfiguration == defaultConfig)
     }
 
+    @Test("Device selection defaults to enabled and can be disabled via configuration")
+    func builderStoresDeviceSelectionFlag() {
+        // Default keeps the audio-output selector visible.
+        #expect(MeetingRoomConfiguration().allowDeviceSelection == true)
+
+        let builder = makeMeetingRoomBuilder()
+            .configuration(MeetingRoomConfiguration(allowDeviceSelection: false))
+        #expect(builder.currentConfiguration.allowDeviceSelection == false)
+    }
+
+    @Test("Audio route picker appears in the top bar only when device selection is enabled")
+    @MainActor
+    func deviceSelectionGatesTopTrailingButton() {
+        let enabled = makeMeetingRoomBuilder()
+            .configuration(MeetingRoomConfiguration(allowDeviceSelection: true))
+            .build()
+        #expect(enabled.viewModel.extraTopTrailingButtons.isEmpty == false)
+
+        let disabled = makeMeetingRoomBuilder()
+            .configuration(MeetingRoomConfiguration(allowDeviceSelection: false))
+            .build()
+        #expect(disabled.viewModel.extraTopTrailingButtons.isEmpty)
+    }
+
     @Test("Builder supports chaining all methods")
     func builderSupportsChaining() {
         let builder = makeMeetingRoomBuilder()

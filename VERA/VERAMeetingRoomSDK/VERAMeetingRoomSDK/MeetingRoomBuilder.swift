@@ -456,8 +456,9 @@ public final class MeetingRoomBuilder {
             }
         )
 
-        // 5. Set top trailing buttons (audio route picker)
-        meetingRoomViewModel.extraTopTrailingButtons = Self.topTrailingButtons
+        // 5. Set top trailing buttons (audio route picker), gated by device-selection config
+        meetingRoomViewModel.extraTopTrailingButtons =
+            _configuration.allowDeviceSelection ? Self.topTrailingButtons : []
 
         // 6. Compose the final view with all overlays
         let composedView = MeetingRoomComposedView(

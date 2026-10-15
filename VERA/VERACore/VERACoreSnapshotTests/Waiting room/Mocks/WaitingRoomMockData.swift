@@ -15,7 +15,10 @@ func makeWaitingRoomState(
     allowCameraControl: Bool = true,
     cameras: [UICameraDevice] = [],
     publisher: VERAPublisher? = MockVERAPublisher(),
-    allowAudioOutputTest: Bool = false
+    allowAudioOutputTest: Bool = false,
+    allowSettings: Bool = false,
+    allowBackgroundEffects: Bool = false,
+    allowAudioEffects: Bool = false
 ) -> WaitingRoomState {
     .init(
         roomName: roomName,
@@ -25,5 +28,8 @@ func makeWaitingRoomState(
         allowCameraControl: allowCameraControl,
         cameras: cameras,
         allowAudioOutputTest: allowAudioOutputTest,
+        allowSettings: allowSettings,
+        allowBackgroundEffects: allowBackgroundEffects,
+        allowAudioEffects: allowAudioEffects,
         publisher: publisher)
 }

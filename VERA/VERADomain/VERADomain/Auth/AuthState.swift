@@ -12,7 +12,7 @@ public struct AuthenticatedUser: Equatable, Sendable {
     }
 }
 
-public enum AuthState: Equatable {
+public enum AuthState: Equatable, Sendable {
     case notAuthenticated
     case authenticated(AuthenticatedUser)
 

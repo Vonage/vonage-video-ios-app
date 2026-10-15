@@ -22,7 +22,7 @@ public struct BackgroundEffectScreenButton: View {
         .sheet(isPresented: $viewModel.isSheetPresented) {
             VideoEffectsSheet(viewModel: viewModel)
                 .presentationDetents([.medium, .large])
-                .opaquePresentationBackground(theme.background)
+                .presentationBackground(theme.background)
         }
     }
 }

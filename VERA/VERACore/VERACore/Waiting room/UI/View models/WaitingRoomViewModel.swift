@@ -212,11 +212,14 @@ extension WaitingRoomViewModel {
                 roomName: roomName,
                 isMicrophoneEnabled: isMicrophoneEnabled,
                 isCameraEnabled: isCameraEnabled,
-                allowMicrophoneControl: AppConfig.audioSettings.allowMicrophoneControl,
-                allowCameraControl: AppConfig.videoSettings.allowCameraControl,
+                allowMicrophoneControl: AppConfig.audioSettings.shouldShowMicrophoneControl,
+                allowCameraControl: AppConfig.videoSettings.shouldShowCameraControl,
                 cameras: availableCameraDevices,
                 audioLevel: currentAudioLevel,
                 allowAudioOutputTest: AppConfig.audioSettings.allowAudioDiagnostics,
+                allowSettings: AppConfig.waitingRoomSettings.allowSettings,
+                allowBackgroundEffects: AppConfig.videoSettings.allowBackgroundEffects,
+                allowAudioEffects: AppConfig.audioSettings.allowAdvancedNoiseSuppression,
                 publisher: publisher
             )
         )
@@ -267,6 +270,13 @@ extension WaitingRoomViewModel {
             let publisher = try cameraPreviewProviderRepository.getPublisher()
             self.publisher = publisher
 
+            publisher.publishVideo =
+                AppConfig.videoSettings.allowVideoOnJoin
+                && checkCameraAuthorizationStatusUseCase().isAuthorized
+            publisher.publishAudio =
+                AppConfig.audioSettings.allowAudioOnJoin
+                && checkMicrophoneAuthorizationStatusUseCase().isAuthorized
+
             observeAudioLevel(publisher)
             updateUIState()
             onPublisherReady?()
@@ -297,6 +307,9 @@ extension WaitingRoomViewModel {
                 cameras: currentState.cameras,
                 audioLevel: level,
                 allowAudioOutputTest: currentState.allowAudioOutputTest,
+                allowSettings: currentState.allowSettings,
+                allowBackgroundEffects: currentState.allowBackgroundEffects,
+                allowAudioEffects: currentState.allowAudioEffects,
                 publisher: currentState.publisher))
     }
 

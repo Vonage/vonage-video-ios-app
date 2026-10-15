@@ -15,6 +15,9 @@ public struct WaitingRoomState: Equatable {
     public let cameras: [UICameraDevice]
     public let audioLevel: Float
     public let allowAudioOutputTest: Bool
+    public let allowSettings: Bool
+    public let allowBackgroundEffects: Bool
+    public let allowAudioEffects: Bool
     public weak var publisher: VERAPublisher?
 
     public init(
@@ -26,6 +29,9 @@ public struct WaitingRoomState: Equatable {
         cameras: [UICameraDevice],
         audioLevel: Float = 0.0,
         allowAudioOutputTest: Bool = false,
+        allowSettings: Bool = false,
+        allowBackgroundEffects: Bool = false,
+        allowAudioEffects: Bool = false,
         publisher: VERAPublisher?
     ) {
         self.roomName = roomName
@@ -36,6 +42,9 @@ public struct WaitingRoomState: Equatable {
         self.cameras = cameras
         self.audioLevel = audioLevel
         self.allowAudioOutputTest = allowAudioOutputTest
+        self.allowSettings = allowSettings
+        self.allowBackgroundEffects = allowBackgroundEffects
+        self.allowAudioEffects = allowAudioEffects
         self.publisher = publisher
     }
 
@@ -57,6 +66,9 @@ public struct WaitingRoomState: Equatable {
             && lhs.allowCameraControl == rhs.allowCameraControl
             && lhs.audioLevel == rhs.audioLevel
             && lhs.allowAudioOutputTest == rhs.allowAudioOutputTest
+            && lhs.allowSettings == rhs.allowSettings
+            && lhs.allowBackgroundEffects == rhs.allowBackgroundEffects
+            && lhs.allowAudioEffects == rhs.allowAudioEffects
             && lhs.publisher === rhs.publisher
     }
 }

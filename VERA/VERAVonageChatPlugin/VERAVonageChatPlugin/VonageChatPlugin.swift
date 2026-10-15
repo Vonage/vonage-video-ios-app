@@ -126,7 +126,7 @@ extension [String: Any] {
 /// A message payload used for Vonage signal transport.
 ///
 /// Encoded as JSON in the `OutgoingSignal.payload`, then mapped to domain `ChatMessage`.
-public struct VonageChatMessage: Codable {
+public struct VonageChatMessage: Codable, Sendable {
     /// Sender display name.
     public let participantName: String
     /// Message content.

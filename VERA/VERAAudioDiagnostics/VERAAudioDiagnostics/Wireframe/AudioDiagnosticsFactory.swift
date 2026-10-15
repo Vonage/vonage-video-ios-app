@@ -44,7 +44,7 @@
         /// The view is configured as a bottom sheet with:
         /// - Medium and large detent sizes
         /// - Hidden drag indicator (uses custom DragIndicatorView inside)
-        /// - Opaque background with semantic color
+        /// - Themed background with semantic color
         ///
         /// - Returns: A fully configured audio diagnostics view ready to be presented.
         @MainActor
@@ -53,7 +53,7 @@
                 makeView()
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.hidden)
-                    .opaquePresentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
+                    .presentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
             )
         }
 
@@ -77,7 +77,7 @@
                         AudioDiagnosticsView(viewModel: fallbackViewModel)
                             .presentationDetents([.medium, .large])
                             .presentationDragIndicator(.hidden)
-                            .opaquePresentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
+                            .presentationBackground(VERACommonUIAsset.SemanticColors.background.swiftUIColor)
                     )
                 }
                 return self.makeConfiguredView()

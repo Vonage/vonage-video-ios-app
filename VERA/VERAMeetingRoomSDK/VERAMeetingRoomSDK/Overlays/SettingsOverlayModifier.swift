@@ -22,7 +22,7 @@ struct SettingsOverlayModifier: ViewModifier {
                 .sheet(isPresented: $showSettings) {
                     SettingsSheetContent(factory: container.settingsFactory)
                         .presentationDetents([.large])
-                        .opaquePresentationBackground(theme.background)
+                        .presentationBackground(theme.background)
                 }
                 .overlay {
                     if let statsViewModel = statsOverlayViewModel {

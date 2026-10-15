@@ -32,7 +32,7 @@ struct MeetingRoomCustomizationMenu: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("Customize UI")
         }
-        .opaquePresentationBackground(theme.background)
+        .presentationBackground(theme.background)
     }
 }
 

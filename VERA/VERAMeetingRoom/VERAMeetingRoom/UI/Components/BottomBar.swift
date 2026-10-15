@@ -343,7 +343,7 @@ struct BottomBar: View {
         BottomBarOverflowSheet(buttons: buttons, onSelect: handleOverflowButtonSelection)
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
-            .opaquePresentationBackground(theme.background)
+            .presentationBackground(theme.background)
     }
 
     private func handleOverflowButtonSelection(_ button: BottomBarButton) {
