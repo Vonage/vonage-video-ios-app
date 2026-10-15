@@ -62,6 +62,19 @@ struct E2ECallFacadeMediaTests {
         #expect(call.isMuted)
     }
 
+    @Test func speakingWhileMutedSimulationResumesAfterHold() async throws {
+        let call = makeSUT(audioEnabled: true, cameraEnabled: false)
+        call.toggleLocalAudio()
+
+        call.setOnHold(true)
+        #expect(call._publisherAudioLevelPublisher.value == 0.0)
+        call.setOnHold(false)
+        try await Task.sleep(for: .milliseconds(500))
+
+        #expect(call._publisherAudioLevelPublisher.value == 0.5)
+        call.toggleLocalAudio()
+    }
+
     private func makeSUT(audioEnabled: Bool, cameraEnabled: Bool) -> E2ECallFacade {
         E2ECallFacade(publisherSettings: .init(publishAudio: audioEnabled, publishVideo: cameraEnabled))
     }

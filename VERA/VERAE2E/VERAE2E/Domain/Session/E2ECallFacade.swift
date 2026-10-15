@@ -26,6 +26,7 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
 
     private let stateSubject: CurrentValueSubject<SessionState, Never>
     private var mediaBeforeHold: SessionState?
+    private var wantsSpeakingWhileMutedSimulation = false
     public lazy var statePublisher = stateSubject.eraseToAnyPublisher()
 
     private let callStateSubject = CurrentValueSubject<CallState, Never>(.idle)
@@ -95,7 +96,8 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
                 isPublishingAudio: newIsPublishingAudio,
                 isPublishingVideo: current.isPublishingVideo))
 
-        if !newIsPublishingAudio && !isOnHold {
+        wantsSpeakingWhileMutedSimulation = !newIsPublishingAudio
+        if wantsSpeakingWhileMutedSimulation && !isOnHold {
             simulateSpeakingWhileMuted()
         } else {
             stopSpeakingWhileMutedSimulation()
@@ -121,6 +123,9 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
         } else if let savedMedia = mediaBeforeHold {
             mediaBeforeHold = nil
             publishMedia(savedMedia)
+            if wantsSpeakingWhileMutedSimulation && !savedMedia.isPublishingAudio {
+                simulateSpeakingWhileMuted()
+            }
         }
     }
 
