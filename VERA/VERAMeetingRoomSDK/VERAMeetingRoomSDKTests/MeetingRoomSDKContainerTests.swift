@@ -87,6 +87,20 @@ struct MeetingRoomSDKContainerTests {
         #expect(!plugins.contains { $0.pluginIdentifier == "VonageChatPlugin" })
     }
 
+    @Test("Plugin registry includes archiving plugin when only post-call transcription is enabled")
+    func pluginRegistryIncludesArchivingPluginForTranscription() {
+        let container = makeContainer(enabledFeatures: [.postCallTranscription])
+        let plugins = container.pluginRegistry.plugins
+        #expect(plugins.contains { $0.pluginIdentifier == "VonageArchivingPlugin" })
+    }
+
+    @Test("Plugin registry excludes archiving plugin when recording and transcription are disabled")
+    func pluginRegistryExcludesArchivingPluginWhenDisabled() {
+        let container = makeContainer(enabledFeatures: [])
+        let plugins = container.pluginRegistry.plugins
+        #expect(!plugins.contains { $0.pluginIdentifier == "VonageArchivingPlugin" })
+    }
+
     @Test("Plugin registry has no duplicates")
     func pluginRegistryNoDuplicates() {
         let container = makeContainer(enabledFeatures: Set(MeetingRoomFeature.allCases))
@@ -170,6 +184,25 @@ struct MeetingRoomSDKContainerTests {
 
         #expect(container.archivingDataSource is ArchivingDataSourceStub)
         #expect(didReceiveArchivingStatusDataSource)
+    }
+
+    @Test("Archiving data source factory receives a dedicated transcription status data source")
+    func archivingDataSourceFactoryReceivesTranscriptionStatusDataSource() throws {
+        var receivedContext: MeetingRoomArchivingDataSourceFactoryContext?
+        let factory = ArchivingDataSourceFactorySpy { context in
+            receivedContext = context
+            return ArchivingDataSourceStub()
+        }
+
+        let container = makeContainer(
+            enabledFeatures: [.postCallTranscription],
+            archivingDataSourceFactory: factory)
+        _ = container.archivingDataSource
+
+        let context = try #require(receivedContext)
+        let transcription = context.transcriptionStatusDataSource as AnyObject
+        #expect(transcription === container.transcriptionStatusDataSource as AnyObject)
+        #expect(transcription !== context.archivingStatusDataSource as AnyObject)
     }
 
     // MARK: - Helpers
@@ -283,6 +316,7 @@ private final class CallFacadeStub: CallFacade {
     var statePublisher = Just(SessionState(isPublishingAudio: true, isPublishingVideo: true)).eraseToAnyPublisher()
     var callState = Just(CallState.idle).eraseToAnyPublisher()
     var archivingState = Just(ArchivingState.idle).eraseToAnyPublisher()
+    var transcriptionState = Just(ArchivingState.idle).eraseToAnyPublisher()
     var captionsPublisher = Just([CaptionItem]()).eraseToAnyPublisher()
     var networkStatsPublisher = Just(NetworkMediaStats.empty).eraseToAnyPublisher()
 
