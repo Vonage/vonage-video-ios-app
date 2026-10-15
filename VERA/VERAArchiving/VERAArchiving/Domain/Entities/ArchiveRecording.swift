@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct ArchiveRecording {
+public struct ArchiveRecording: Sendable {
     public let url: URL
 
     public init(url: URL) {
