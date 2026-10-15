@@ -292,9 +292,100 @@ struct ArchiveButtonViewModelTests {
         #expect(stopUseCase.callCount == 1)
     }
 
+    // MARK: - Transcription
+
+    @Test
+    @MainActor
+    func transcriptionBottomItemPresentationUsesIdleState() {
+        let sut = makeSUT(kind: .transcription)
+
+        #expect(sut.id == "transcription-button")
+        #expect(sut.label == String(localized: "Start Transcription"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.startTranscriptionButton)
+        #expect(sut.isActive == false)
+        _ = sut.image
+    }
+
+    @Test
+    @MainActor
+    func transcriptionBottomItemPresentationUsesArchivingState() {
+        let sut = makeSUT(kind: .transcription)
+        sut.state = .archiving("transcription-id")
+
+        #expect(sut.id == "transcription-button")
+        #expect(sut.label == String(localized: "Stop Transcription"))
+        #expect(sut.accessibilityIdentifier == ArchivingAccessibilityID.stopTranscriptionButton)
+        #expect(sut.isActive)
+        _ = sut.image
+    }
+
+    @Test func recordingStartRequestsRecordingKind() async {
+        let startUseCase = SpyStartArchivingUseCase()
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(startArchivingUseCase: startUseCase, showAlert: alertSpy.capture)
+
+        sut.onTap()
+        alertSpy.capturedAlert?.onConfirm?()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(startUseCase.lastRequest?.kind == .recording)
+    }
+
+    @Test func transcriptionTapShowsStartTranscriptionConfirmation() async {
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(kind: .transcription, showAlert: alertSpy.capture)
+
+        sut.onTap()
+
+        #expect(alertSpy.capturedAlert?.title == String(localized: "Start Transcription?"))
+    }
+
+    @Test func transcriptionStartRequestsTranscriptionKind() async {
+        let startUseCase = SpyStartArchivingUseCase()
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(
+            kind: .transcription,
+            startArchivingUseCase: startUseCase,
+            showAlert: alertSpy.capture)
+
+        sut.onTap()
+        alertSpy.capturedAlert?.onConfirm?()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(startUseCase.callCount == 1)
+        #expect(startUseCase.lastRequest?.kind == .transcription)
+        #expect(startUseCase.lastRequest?.sessionKey == "heart-of-gold")
+    }
+
+    @Test func transcriptionStopSendsTranscriptionArchiveID() async {
+        let stopUseCase = SpyStopArchivingUseCase()
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let alertSpy = AlertSpy()
+        dataSource._archivingState.value = .archiving("transcription-123")
+        let sut = makeSUT(
+            kind: .transcription,
+            stopArchivingUseCase: stopUseCase,
+            archivingStatusDataSource: dataSource,
+            showAlert: alertSpy.capture)
+
+        sut.setup()
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
+
+        sut.onTap()
+        #expect(alertSpy.capturedAlert?.title == String(localized: "Stop Transcription?"))
+
+        alertSpy.capturedAlert?.onConfirm?()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(stopUseCase.callCount == 1)
+        #expect(stopUseCase.lastRequest?.archiveID == "transcription-123")
+        #expect(stopUseCase.lastRequest?.kind == .transcription)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
+        kind: ArchiveKind = .recording,
         sessionKey: String = "heart-of-gold",
         startArchivingUseCase: StartArchivingUseCase = SpyStartArchivingUseCase(),
         stopArchivingUseCase: StopArchivingUseCase = SpyStopArchivingUseCase(),
@@ -304,6 +395,7 @@ struct ArchiveButtonViewModelTests {
         let holder = DefaultSessionKeyHolder()
         holder.setSessionKey(sessionKey)
         return ArchiveButtonViewModel(
+            kind: kind,
             sessionKeyProvider: holder,
             startArchivingUseCase: startArchivingUseCase,
             stopArchivingUseCase: stopArchivingUseCase,
