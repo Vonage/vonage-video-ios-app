@@ -1,0 +1,23 @@
+VERA/VERADomain/VERADomain/CallFacade.swift
+  s_4598f7c801d99b::t_0561f4eef78e7d 151,153,155,157-158
+VERA/VERADomain/VERADomain/ArchiveKind.swift
+  s_4598f7c801d99b::t_88dae57174973d 1-26
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  s_4598f7c801d99b::t_163dff2e0fba65 30-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b39dcacdc4cfa1ff6fa0e2576b92f4878fbc5ef0",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
