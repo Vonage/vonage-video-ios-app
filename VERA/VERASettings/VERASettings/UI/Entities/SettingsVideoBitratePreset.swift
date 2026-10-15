@@ -34,7 +34,7 @@ import Foundation
 /// and efficient storage.
 ///
 /// - SeeAlso: ``VideoBitratePreset``
-public enum SettingsVideoBitratePreset: Int, Codable, Equatable, Identifiable, CaseIterable {
+public enum SettingsVideoBitratePreset: Int, Codable, Equatable, Identifiable, CaseIterable, Sendable {
 
     /// Default adaptive behaviour — no explicit limit (SDK value `0`).
     /// Maps to `VideoBitratePreset.default`.

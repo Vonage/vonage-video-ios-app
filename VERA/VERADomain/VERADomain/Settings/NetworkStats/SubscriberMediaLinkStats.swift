@@ -9,7 +9,7 @@ import Foundation
 ///
 /// Populated from `OTSubscriberKitMediaLinkStats` via the SDK's
 /// `OTSubscriberKitMediaLinkStatsDelegate` callback.
-public struct SubscriberMediaLinkStats: Equatable {
+public struct SubscriberMediaLinkStats: Equatable, Sendable {
     /// Transport statistics for this subscriber's downlink connection.
     public let transport: TransportStats
     /// Transport statistics for the remote publisher's uplink connection.

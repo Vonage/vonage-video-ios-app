@@ -38,6 +38,7 @@ public enum VERATestSchemes {
         var targets: [TestableTarget] = [
             testableTarget("VERACoreTests", in: "VERACore"),
             testableTarget("VERADomainTests", in: "VERADomain"),
+            testableTarget("VERAConfigurationTests", in: "VERAConfiguration"),
             testableTarget("VERAMeetingRoomTests", in: "VERAMeetingRoom"),
         ]
         if isOktaEnabled() {

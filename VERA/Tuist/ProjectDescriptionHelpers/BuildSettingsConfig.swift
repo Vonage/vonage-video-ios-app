@@ -20,7 +20,7 @@ public let multiplatformDeploymentTarget = DeploymentTargets.multiplatform(iOS: 
 public let veraAppBundleID = "com.vonage.VERA"
 
 /// The languages supported by the app, used in `defaultKnownRegions` and `CFBundleLocalizations`.
-public let supportedLanguages: [String] = ["en", "es"]
+public let supportedLanguages: [String] = ["en", "en-US", "de", "it", "es", "es-MX", "ja"]
 
 /// The primary development language for the app.
 public let developmentLanguage: String = "en"
