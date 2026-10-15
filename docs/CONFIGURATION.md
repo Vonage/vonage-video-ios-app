@@ -24,6 +24,8 @@ Meeting-room features (chat, captions, reactions, screen share) are **not** in t
 
 Code guarded by `#if ARCHIVING_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
+`meetingRoomSettings.allowPostCallTranscription` has no compilation condition. It is a runtime flag that enables `MeetingRoomFeature.postCallTranscription` in the meeting room SDK, which adds a Start/Stop transcription button next to the Record button. Transcription runs as a separate archive from the recording, so both can run at the same time. It requires a backend whose `startArchive` endpoint supports `withTranscription`.
+
 ### Regenerating AppConfig.swift
 
 After editing `app-config.json`, run from the `VERA/` directory:
