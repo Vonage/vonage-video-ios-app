@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct StartArchivingRequest {
+public struct StartArchivingRequest: Sendable {
     public let sessionKey: String
 
     public init(sessionKey: String) {
