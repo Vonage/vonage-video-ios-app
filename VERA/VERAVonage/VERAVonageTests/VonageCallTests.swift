@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -517,7 +518,101 @@ struct VonageCallTests {
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
     }
 
+    // MARK: - Archiving
+
+    @Test
+    func archiveStartedWithTranscriptionNameUpdatesOnlyTranscriptionState() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+    }
+
+    @Test
+    func archiveStartedWithoutNameIsTreatedAsRecording() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("recording-1", nil)
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+    }
+
+    @Test
+    func stoppingRecordingKeepsTranscriptionRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("recording-1")
+
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func stoppingTranscriptionKeepsRecordingRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("transcription-1")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+    }
+
+    @Test
+    func stoppingAnUntrackedArchiveKeepsRunningArchives() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("unknown-archive")
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func archiveEventsForwardTheArchiveKindToSignalHandlers() async throws {
+        let session = VonageSessionSpy()
+        let plugin = ArchivingSignalHandlerSpy()
+        let sut = makeSUT(session: session)
+        sut.assignPlugins([plugin])
+        sut.setup()
+        try await sut.connect()
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+        session.onArchiveStopped?("transcription-1")
+
+        let payloads = try plugin.signals.map { try #require($0.data) }
+        #expect(payloads.count == 2)
+        #expect(payloads.allSatisfy { $0.contains(#""kind":"transcription""#) })
+        #expect(payloads.first?.contains(#""archivingID":"transcription-1""#) == true)
+    }
+
     // MARK: - Test Helpers
+
+    private func makeConnectedSUT(session: VonageSessionSpy) async throws -> VonageCall {
+        let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
+        return sut
+    }
+
+    private func currentValue(
+        of publisher: AnyPublisher<ArchivingState, Never>
+    ) async -> ArchivingState? {
+        await publisher.values.first { _ in true }
+    }
 
     private func makeSUT(
         credentials: RoomCredentials = makeMockCredentials(),
@@ -555,6 +650,20 @@ private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
 }
 
+private final class ArchivingSignalHandlerSpy: VonagePlugin, VonageSignalHandler {
+    private(set) var signals: [VonageSignal] = []
+
+    var pluginIdentifier: String { "ArchivingSignalHandlerSpy" }
+
+    func callDidStart(_ userInfo: [String: Any]) async throws {}
+
+    func callDidEnd() async throws {}
+
+    func handleSignal(_ signal: VonageSignal) {
+        guard signal.type == "archiving" else { return }
+        signals.append(signal)
+    }
+}
 
 @Suite("SystemMediaStateTests", .serialized)
 @MainActor
