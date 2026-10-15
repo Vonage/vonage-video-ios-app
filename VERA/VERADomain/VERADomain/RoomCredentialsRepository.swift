@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct RoomCredentialsResponse: CustomStringConvertible {
+public struct RoomCredentialsResponse: CustomStringConvertible, Sendable {
     public let sessionId: String
     public let token: String
     public let apiKey: String
@@ -35,7 +35,7 @@ public struct RoomCredentialsResponse: CustomStringConvertible {
 }
 
 /// Response from `POST /v2/createSession`.
-public struct CreateSessionResponse: Decodable {
+public struct CreateSessionResponse: Decodable, Sendable {
     public let sessionId: String
     public let sessionKey: String
     public let applicationId: String
@@ -48,7 +48,7 @@ public struct CreateSessionResponse: Decodable {
 }
 
 /// Request body for `POST /v2/createSession`.
-public struct CreateSessionRequestBody: Encodable {
+public struct CreateSessionRequestBody: Encodable, Sendable {
     let roomName: String
 
     public init(roomName: String) {
@@ -57,7 +57,7 @@ public struct CreateSessionRequestBody: Encodable {
 }
 
 /// Response from `POST /v2/joinSession`.
-public struct JoinSessionResponse: Decodable {
+public struct JoinSessionResponse: Decodable, Sendable {
     public let token: String
     public let applicationId: String
 
@@ -68,7 +68,7 @@ public struct JoinSessionResponse: Decodable {
 }
 
 /// Request body for `POST /v2/joinSession`.
-public struct JoinSessionRequestBody: Encodable {
+public struct JoinSessionRequestBody: Encodable, Sendable {
     let sessionKey: String
 
     public init(sessionKey: String) {
@@ -76,7 +76,7 @@ public struct JoinSessionRequestBody: Encodable {
     }
 }
 
-public struct RoomCredentialsRequest {
+public struct RoomCredentialsRequest: Sendable {
     public let roomName: String
 
     public init(roomName: String) {

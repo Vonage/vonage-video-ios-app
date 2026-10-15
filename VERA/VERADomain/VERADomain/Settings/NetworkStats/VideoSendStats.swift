@@ -9,7 +9,7 @@ import Foundation
 /// Populated from `OTPublisherKitVideoNetworkStats` via the SDK's
 /// `networkStatsDelegate` callback. The SDK delivers an array of these
 /// (one per subscriber); values here represent the aggregate/first entry.
-public struct VideoSendStats: Equatable {
+public struct VideoSendStats: Equatable, Sendable {
     /// Total video packets sent since the stream started.
     public let packetsSent: Int64
     /// Total video packets lost as reported by the remote endpoint.
