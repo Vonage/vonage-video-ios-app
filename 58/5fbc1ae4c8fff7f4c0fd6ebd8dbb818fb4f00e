@@ -1,0 +1,27 @@
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/MeetingRoomViewUITests.swift
+  s_4598f7c801d99b::t_4f4c21d939fb64 27-28,39-45,111,128
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_4598f7c801d99b::t_1b80ea5e4c219e 51-57,118-121,313-321,389
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_4598f7c801d99b::t_8628eece80562c 1259-1325
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/MeetingRoomViewUITests/MeetingRoomView_State_ArchivingAndTranscribing.State_ArchivingAndTranscribing.png
+  s_4598f7c801d99b::t_2ac7b016afe4dd 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/MeetingRoomViewUITests/MeetingRoomView_State_Transcribing.State_Transcribing.png
+  s_4598f7c801d99b::t_455ff998fdf457 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "585fbc1ae4c8fff7f4c0fd6ebd8dbb818fb4f00e",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
