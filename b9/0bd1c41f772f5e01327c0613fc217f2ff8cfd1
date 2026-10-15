@@ -1,0 +1,27 @@
+VERA/VERAE2E/VERAE2E/Data/Archiving/E2EArchivingDataSource.swift
+  s_4598f7c801d99b::t_29b800033c42a5 12,16-17,21,28,31-32,40-44,47-52
+  s_4598f7c801d99b::t_5f6c7dc6e00a4e 53
+VERA/VERAE2E/VERAE2E/Domain/Session/E2ECallFacade.swift
+  s_4598f7c801d99b::t_1b80ea5e4c219e 36-38,155-156,161-163,168-174
+  s_4598f7c801d99b::t_879c6489212eac 175-176
+VERA/VERAE2E/VERAE2E/Domain/Archiving/E2EArchivingEvents.swift
+  s_4598f7c801d99b::t_1b80ea5e4c219e 6,11
+VERA/VERADomain/VERADomainTests/ArchiveKindTests.swift
+  s_4598f7c801d99b::t_21586f3517afb2 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b90bd1c41f772f5e01327c0613fc217f2ff8cfd1",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
