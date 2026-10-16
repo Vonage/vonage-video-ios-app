@@ -240,7 +240,7 @@ struct ParticipantVideoCardOverlays: View {
                             height: ParticipantVideoCardConstants.indicatorSize)
                 }
                 Spacer()
-                if isLocal {
+                if isLocal && isMicEnabled {
                     ZStack {
                         AudioLevelIndicatorView(
                             audioLevel: audioLevel,
