@@ -72,6 +72,7 @@ public enum VERATestSchemes {
     private static func iOSUnitTestTargets() -> [TestableTarget] {
         var targets: [TestableTarget] = [
             testableTarget("VERATests", in: "."),
+            testableTarget("VERAE2ETests", in: "VERAE2E"),
             testableTarget("VERAVonageTests", in: "VERAVonage"),
             testableTarget("VERACommonUITests", in: "VERACommonUI"),
             testableTarget("VERACocoaLumberjackLoggerTests", in: "VERACocoaLumberjackLogger"),
