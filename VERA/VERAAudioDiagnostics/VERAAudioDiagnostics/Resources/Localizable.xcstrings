@@ -1,132 +1,342 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "Audio": {
-      "comment": "Label for the audio output test selector button next to the Camera selector in the waiting room",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Audio" : {
+      "comment" : "Label for the audio output test selector button next to the Camera selector in the waiting room\nWeb translation: advancedSettings.tabs.audio (vonage-video-react-app develop 77c9b91).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オーディオ"
           }
         }
       }
     },
-    "Audio Output": {
-      "comment": "Label for the audio output selector row",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio Output"
+    "Audio Output" : {
+      "comment" : "Label for the audio output selector row",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Output"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Salida de Audio"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salida de Audio"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Output"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Audioausgabe"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Uscita audio"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Salida de audio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "音声出力"
           }
         }
       }
     },
-    "Audio Output Test": {
-      "comment": "Title of the audio diagnostics dialog",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Audio Output Test"
+    "Audio Output Test" : {
+      "comment" : "Title of the audio diagnostics dialog",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Output Test"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prueba de Salida de Audio"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba de Salida de Audio"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio Output Test"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Audioausgabetest"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Test dell'uscita audio"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Prueba de salida de audio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "音声出力テスト"
           }
         }
       }
     },
-    "OUT": {
-      "comment": "Label above the audio level bar indicating output level",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OUT"
+    "OUT" : {
+      "comment" : "Label above the audio level bar indicating output level",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OUT"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SALIDA"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SALIDA"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OUT"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "AUSGANG"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "USCITA"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "SALIDA"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "出力"
           }
         }
       }
     },
-    "Play": {
-      "comment": "Button label to start playing test audio",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Play"
+    "Play" : {
+      "comment" : "Button label to start playing test audio",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reproducir"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Abspielen"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Riproduci"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Reproducir"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "再生"
           }
         }
       }
     },
-    "Select your audio output device and tap Play to verify it is working correctly.": {
-      "comment": "Description text in the audio diagnostics dialog",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Select your audio output device and tap Play to verify it is working correctly."
+    "Select your audio output device and tap Play to verify it is working correctly." : {
+      "comment" : "Description text in the audio diagnostics dialog",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select your audio output device and tap Play to verify it is working correctly."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Selecciona tu dispositivo de salida de audio y presiona Reproducir para verificar que funciona correctamente."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona tu dispositivo de salida de audio y presiona Reproducir para verificar que funciona correctamente."
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select your audio output device and tap Play to verify it is working correctly."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Wählen Sie Ihr Audioausgabegerät und tippen Sie auf Abspielen, um dessen Funktion zu prüfen."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seleziona il dispositivo di uscita audio e tocca Riproduci per verificarne il funzionamento."
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Selecciona el dispositivo de salida de audio y toca Reproducir para comprobar que funciona correctamente."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "音声出力デバイスを選択し、「再生」をタップして正常に動作するか確認してください。"
           }
         }
       }
     },
-    "Stop": {
-      "comment": "Button label to stop playing test audio",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop"
+    "Stop" : {
+      "comment" : "Button label to stop playing test audio",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Detener"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detener"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Stoppen"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Interrompi"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Detener"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "停止"
           }
         }
       }
     }
   },
-  "version": "1.1"
+  "version" : "1.1"
 }

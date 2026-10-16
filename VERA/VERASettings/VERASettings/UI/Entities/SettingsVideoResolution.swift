@@ -32,7 +32,7 @@ import VERADomain
 /// and efficient storage.
 ///
 /// - SeeAlso: ``VideoResolution``
-public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Identifiable {
+public enum SettingsVideoResolution: Int, CaseIterable, Codable, Equatable, Identifiable, Sendable {
     /// Low resolution (352x288). Maps to `VideoResolution.low`.
     case low = 0
 
@@ -91,12 +91,9 @@ extension VideoContentHint {
 /// Maximum output bounds for ReplayKit, matching VERA web's size options.
 public enum SettingsScreenShareResolution: String, Codable, CaseIterable, Identifiable {
     case fullHD = "1920x1080"
-    case sxga = "1280x960"
     case hd = "1280x720"
     case vga = "640x480"
-    case nhd = "640x360"
-    case qvga = "320x240"
-    case low = "320x180"
+    case low = "352x288"
     public var id: Self { self }
     public var dimensions: (width: Int, height: Int) {
         let components = rawValue.split(separator: "x").compactMap { Int($0) }

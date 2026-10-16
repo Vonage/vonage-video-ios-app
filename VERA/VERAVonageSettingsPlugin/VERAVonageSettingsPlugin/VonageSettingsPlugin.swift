@@ -16,7 +16,7 @@ import VERAVonage
 ///    publisher stats remain available, and uses `senderStatsEnabled` to toggle
 ///    the richer subscriber-only stats requests.
 /// 2. **Stats forwarding** – Subscribes to ``CallFacade/networkStatsPublisher``
-///    and writes every update to the ``StatsWriter`` so that downstream view
+///    and forwards received snapshots to the ``StatsWriter`` so that downstream view
 ///    models can display real-time metrics.
 /// 3. **Publisher settings relay** – Observes changes to resolution, frame rate, codec,
 ///    audio bitrate, and audio fallback. When any of these SDK-level settings change,
@@ -34,8 +34,9 @@ import VERAVonage
 ///                       └─ subscribe to call.networkStatsPublisher → statsWriter
 ///
 /// callDidEnd     ──► cancelObservables()
-///                       ├─ clear stats via statsWriter
-///                       └─ cancel all Combine subscriptions
+///                       ├─ cancel subscriptions and stats forwarding
+///                       ├─ await an in-flight stats write
+///                       └─ clear stats before the next source starts
 /// ```
 ///
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``StatsWriter``
@@ -49,17 +50,14 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     private var updateLiveSettingsTask: Task<Void, Never>?
     /// Invalidates live-update tasks whose repository emissions arrive out of order.
     private var liveSettingsGeneration = 0
-    /// Tracks the stats-forwarding Task so it can be cancelled on call end.
-    private var statsTask: Task<Void, Never>?
+    /// Orders stats writes, final clear, and subsequent source subscriptions.
+    private let statsForwarding: StatsForwardingLifecycle
 
     /// The active call façade, injected by the plugin coordinator.
     public weak var call: (any CallFacade)?
 
     /// Reactive source of publisher settings preferences (includes `senderStatsEnabled`).
     private let settingsRepository: PublisherSettingsRepository
-
-    /// Write-only entry point for pushing live network stats to the settings module.
-    private let statsWriter: StatsWriter
 
     /// A stable identifier for this plugin instance.
     public var pluginIdentifier: String { String(describing: type(of: self)) }
@@ -74,7 +72,7 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
         statsWriter: StatsWriter
     ) {
         self.settingsRepository = settingsRepository
-        self.statsWriter = statsWriter
+        self.statsForwarding = StatsForwardingLifecycle(writer: statsWriter)
     }
 
     // MARK: - VonagePluginCallLifeCycle
@@ -85,7 +83,7 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// - Parameter userInfo: Contextual info passed by the plugin coordinator (unused).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        initObservers()
+        await initObservers()
         call?.enableNetworkStats()
         let currentPreferences = await settingsRepository.getPreferences()
         if currentPreferences.senderStatsEnabled {
@@ -97,14 +95,15 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Called when the call ends and the Vonage session is disconnecting.
     ///
-    /// Clears stats data and cancels all subscriptions.
+    /// Cancels subscriptions, waits for in-flight stats writes, then clears stats.
+    /// A custom writer must complete its awaited write for teardown to finish.
     public func callDidEnd() async throws {
         await cancelObservables()
     }
 
     // MARK: - Private
 
-    private func initObservers() {
+    private func initObservers() async {
         // Observe the sender stats toggle and enable/disable network stats collection.
         settingsRepository.preferencesPublisher
             .map(\.senderStatsEnabled)
@@ -156,29 +155,22 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
             }
             .store(in: &cancellables)
 
-        // Forward network stats from the call to the settings data layer.
-        // Uses a stored Task with `for await` so that each `statsWriter.updateStats`
-        // call completes before processing the next value, avoiding fire-and-forget races.
+        // Source changes are queued behind any previous forwarding/clear operation.
         if let publisher = call?.networkStatsPublisher {
-            statsTask = Task { [weak self] in
-                for await stats in publisher.values {
-                    guard let self else { return }
-                    await self.statsWriter.updateStats(stats)
-                }
-            }
+            let start = await statsForwarding.start(publisher)
+            await start.value
         }
     }
 
     private func cancelObservables() async {
-        statsTask?.cancel()
-        statsTask = nil
         applySettingsTask?.cancel()
         applySettingsTask = nil
         liveSettingsGeneration += 1
         updateLiveSettingsTask?.cancel()
         updateLiveSettingsTask = nil
         cancellables.removeAll()
-        await statsWriter.clearStats()
+        let stop = await statsForwarding.stop()
+        await stop.value
     }
 }
 

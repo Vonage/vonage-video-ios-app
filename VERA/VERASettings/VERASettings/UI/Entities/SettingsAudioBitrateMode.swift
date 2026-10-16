@@ -5,7 +5,7 @@
 import Foundation
 
 /// How the user wants the audio bitrate to be selected.
-public enum SettingsAudioBitrateMode: String, Equatable, CaseIterable, Identifiable {
+public enum SettingsAudioBitrateMode: String, Equatable, CaseIterable, Identifiable, Sendable {
     /// Let the SDK choose the audio bitrate automatically.
     case `default`
 

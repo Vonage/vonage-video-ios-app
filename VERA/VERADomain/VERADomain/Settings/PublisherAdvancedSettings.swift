@@ -10,7 +10,7 @@
 /// This type is converted to OpenTok SDK settings in VERAVonage module.
 ///
 /// - SeeAlso: ``PublisherSettings``, ``VideoResolution``, ``VideoFrameRate``, ``VideoCodecPreference``
-public struct PublisherAdvancedSettings: Equatable, Hashable {
+public struct PublisherAdvancedSettings: Equatable, Hashable, Sendable {
     /// The desired video capture resolution.
     public let videoResolution: VideoResolution?
 

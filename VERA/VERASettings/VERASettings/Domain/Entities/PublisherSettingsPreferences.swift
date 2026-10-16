@@ -9,7 +9,7 @@ import VERADomain
 ///
 /// This is the "output" of the Settings module — a pure data packet that is persisted
 /// to `UserDefaults` and read by the publisher factory when creating a new publisher.
-public struct PublisherSettingsPreferences: Codable, Equatable {
+public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     /// The desired video resolution for the publisher stream.
     public var videoResolution: SettingsVideoResolution
 

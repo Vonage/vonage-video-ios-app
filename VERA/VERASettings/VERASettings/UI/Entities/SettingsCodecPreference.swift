@@ -21,7 +21,7 @@ import Foundation
 /// This bridging pattern ensures VERADomain remains independent from VERASettings.
 ///
 /// - SeeAlso: ``SettingsCodecMode``, ``SettingsVideoCodec``, ``VideoCodecPreference``
-public struct SettingsCodecPreference: Codable, Equatable {
+public struct SettingsCodecPreference: Codable, Equatable, Sendable {
 
     /// The selection mode — automatic or manual.
     public var mode: SettingsCodecMode
@@ -59,7 +59,7 @@ extension SettingsCodecPreference {
 }
 
 /// How the user wants the video codec to be selected.
-public enum SettingsCodecMode: String, Codable, Equatable, CaseIterable, Identifiable {
+public enum SettingsCodecMode: String, Codable, Equatable, CaseIterable, Identifiable, Sendable {
     /// Let the SDK choose the best codec automatically.
     case automatic
     /// The user specifies an ordered list of preferred codecs.

@@ -52,7 +52,7 @@ import Foundation
 /// and efficient storage.
 ///
 /// - SeeAlso: ``SettingsCodecPreference``, ``SettingsCodecMode``, ``VideoCodecType``
-public enum SettingsVideoCodec: Int, CaseIterable, Codable, Equatable, Identifiable {
+public enum SettingsVideoCodec: Int, CaseIterable, Codable, Equatable, Identifiable, Sendable {
     /// VP8 codec - Google's widely-supported open video codec.
     case vp8 = 1
 

@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Each case represents one navigation item. The order of ``allCases``
 /// determines the display order in both compact and sidebar layouts.
-public enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
+public enum SettingsSection: String, CaseIterable, Identifiable, Hashable, Sendable {
     case general = "General"
     case video = "Video"
     case screenSharing = "Screen Sharing"
