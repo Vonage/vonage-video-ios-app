@@ -296,6 +296,9 @@ public final class VonageCall: CallFacade {
     // MARK: Publisher
 
     private func publishToSession() {
+        publisher.onError = { [weak self] error in
+            self?._eventsPublisher.send(.error(error))
+        }
         guard !publisher.hasSession else { return }
         do {
             try requireSession().publish(publisher: publisher)
