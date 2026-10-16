@@ -69,7 +69,6 @@ struct SettingsViewModelTests {
         #expect(viewModel.settingsPreference.opusDtxEnabled == true)
     }
 
-    @MainActor
     @Test("Toolbar noise changes update an open Settings sheet without discarding pending edits")
     func externalNoiseStatePreservesPendingEdits() async throws {
         let repository = MockSettingsRepository()
