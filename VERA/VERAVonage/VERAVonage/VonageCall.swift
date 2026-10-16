@@ -348,7 +348,7 @@ public final class VonageCall: CallFacade {
     private func setupActiveSpeakerObservation() {
         activeSpeakerTracker.$activeSpeaker
             .removeDuplicates()
-            .sink { _ in
+            .sink { [weak self] _ in
                 Task { [weak self] in
                     guard let self else { return }
                     let state = await self.callStateManager.getCurrentState()
@@ -433,7 +433,7 @@ public final class VonageCall: CallFacade {
 
     private func setupSubscriberObservation(_ subscriber: VonageSubscriber) {
         subscriber.$participant
-            .sink { participant in
+            .sink { [weak self] participant in
                 Task { [weak self] in
                     guard let self = self else { return }
                     let state = await self.callStateManager.updateParticipant(participant)
@@ -445,9 +445,9 @@ public final class VonageCall: CallFacade {
 
     private func setupAudioLevelObservation(_ subscriber: VonageSubscriber) {
         subscriber.$audioLevel
-            .sink { audioLevel in
-                Task { [weak self] in
-                    guard let self = self else { return }
+            .sink { [weak self, weak subscriber] audioLevel in
+                Task { [weak self, weak subscriber] in
+                    guard let self, let subscriber else { return }
                     let speakerInfo = SpeakerInfo(
                         id: subscriber.participant.id,
                         audioLevel: audioLevel,
