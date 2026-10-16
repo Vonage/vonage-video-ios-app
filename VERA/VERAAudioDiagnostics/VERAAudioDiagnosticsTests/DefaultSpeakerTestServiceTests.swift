@@ -618,3 +618,127 @@ struct DefaultSpeakerTestServiceTests {
         cancellable.cancel()
     }
 }
+
+
+#if os(iOS)
+    @Suite("Speaker route lifecycle", .serialized)
+    @MainActor
+    struct SpeakerRouteLifecycleTests {
+        private func makeSUT() throws -> (DefaultSpeakerTestService, RoutePlaybackSpy, NotificationCenter) {
+            let data = try #require(DefaultGenerateTonePlayerUseCase()().data)
+            let player = try RoutePlaybackSpy(data: data)
+            let center = NotificationCenter()
+            return (
+                DefaultSpeakerTestService(
+                    generateTonePlayerUseCase: RoutePlayerFactory(player: player),
+                    notificationCenter: center), player, center
+            )
+        }
+
+        private func changeRoute(_ center: NotificationCenter) {
+            center.post(
+                name: AVAudioSession.routeChangeNotification, object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.newDeviceAvailable.rawValue
+                ])
+        }
+
+        @Test func routeChangeRestartsActivePlayback() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            changeRoute(center)
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 2)
+        }
+
+        @Test func stoppingObservationRemovesTheRouteCallbackWhilePlaybackContinues() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            sut.stopObservingAudioRoutes()
+            changeRoute(center)
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 1)
+        }
+
+        @Test func repeatedStartStopDoesNotAccumulateRouteCallbacks() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            for _ in 0..<3 {
+                sut.playTestSound()
+                sut.stopTestSound()
+            }
+            sut.playTestSound()
+            sut.startObservingAudioRoutes()
+            changeRoute(center)
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 5)
+        }
+
+        @Test func stoppingPlaybackCancelsPendingRouteRestart() async throws {
+            let (sut, player, center) = try makeSUT()
+            sut.playTestSound()
+            changeRoute(center)
+            sut.stopTestSound()
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 1)
+            #expect(!player.isPlaying)
+        }
+
+        @Test func stoppedRunCannotRestartANewPlaybackRun() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            changeRoute(center)
+            sut.stopTestSound()
+            sut.playTestSound()
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 2)
+        }
+
+        @Test func routePauseDuringMeteringDoesNotCancelPlaybackIntent() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            sut.playTestSound()
+            player.stop()
+            center.post(
+                name: AVAudioSession.routeChangeNotification, object: nil,
+                userInfo: [
+                    AVAudioSessionRouteChangeReasonKey: AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue
+                ])
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 2)
+            #expect(player.isPlaying)
+        }
+
+        @Test func failedPlaybackDoesNotRespondToRouteChanges() async throws {
+            let (sut, player, center) = try makeSUT()
+            defer { sut.stopTestSound() }
+            player.playSucceeds = false
+            sut.playTestSound()
+            changeRoute(center)
+            try await Task.sleep(for: .milliseconds(250))
+            #expect(player.playCount == 1)
+        }
+    }
+
+    private final class RoutePlaybackSpy: AVAudioPlayer {
+        var playCount = 0
+        var playSucceeds = true
+        private var simulatedPlayback = false
+        override var isPlaying: Bool { simulatedPlayback }
+        override func play() -> Bool {
+            playCount += 1
+            simulatedPlayback = playSucceeds
+            return playSucceeds
+        }
+        override func stop() { simulatedPlayback = false }
+    }
+
+    private final class RoutePlayerFactory: GenerateTonePlayerUseCase, @unchecked Sendable {
+        let player: AVAudioPlayer
+        init(player: AVAudioPlayer) { self.player = player }
+        func callAsFunction() throws -> AVAudioPlayer { player }
+    }
+#endif
