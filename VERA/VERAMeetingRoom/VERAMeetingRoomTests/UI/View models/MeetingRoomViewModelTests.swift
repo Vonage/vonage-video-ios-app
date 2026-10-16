@@ -1256,6 +1256,73 @@ struct MeetingRoomViewModelTests {
         #expect(updatedState?.archivingState == .idle)
     }
 
+    // MARK: - Transcription State Change Tests
+
+    @Test("Given transcription starts, Then an info toast with 'transcription started' is shown")
+    @MainActor
+    func transcriptionStartedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._transcriptionState.send(.archiving("transcription-123"))
+
+        let toast = await waitForToast(sut) { $0 != nil }
+
+        #expect(toast?.message == "Session transcription started")
+        #expect(toast?.mode == .info)
+    }
+
+    @Test("Given transcription stops, Then an info toast with 'transcription stopped' is shown")
+    @MainActor
+    func transcriptionStoppedShowsInfoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0 != nil }
+        sut.toast = nil
+
+        mockCall._transcriptionState.send(.idle)
+
+        let toast = await waitForToast(sut) { $0 != nil }
+
+        #expect(toast?.message == "Session transcription stopped")
+        #expect(toast?.mode == .info)
+    }
+
+    @Test("Given transcription starts while recording, Then both archives are active in the view state")
+    @MainActor
+    func transcriptionAndRecordingAreTrackedIndependently() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        let initialState = try await getContentState(sut)
+        #expect(initialState.transcriptionState == .idle)
+
+        mockCall._archivingState.send(.archiving("recording-1"))
+        mockCall._transcriptionState.send(.archiving("transcription-1"))
+
+        let bothActive = try? await waitForContentState(sut) {
+            $0.archivingState.isArchiving && $0.transcriptionState.isArchiving
+        }
+        #expect(bothActive?.archivingState == .archiving("recording-1"))
+        #expect(bothActive?.transcriptionState == .archiving("transcription-1"))
+
+        mockCall._archivingState.send(.idle)
+
+        let recordingStopped = try? await waitForContentState(sut) { !$0.archivingState.isArchiving }
+        #expect(recordingStopped?.transcriptionState == .archiving("transcription-1"))
+    }
+
     // MARK: - Session Event Tests
 
     @Test("Given session begins reconnecting, Then a warning toast is shown")
