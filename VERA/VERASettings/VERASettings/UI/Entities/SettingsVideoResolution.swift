@@ -60,14 +60,7 @@ extension SettingsVideoResolution {
     ///
     /// - Returns: A formatted string like "Low (352x288)" or "HD 720p (1280x720)".
     public var displayName: String {
-        let displayName =
-            switch self {
-            case .low: "Low"
-            case .medium: "Medium"
-            case .high: "HD 720p"
-            case .high1080p: "Full HD 1080p"
-            }
-        return "\(displayName.localized) (\(dimensionString))"
+        dimensionString
     }
 
     /// The dimension string expected by ``VonagePublisherFactory`` for mapping

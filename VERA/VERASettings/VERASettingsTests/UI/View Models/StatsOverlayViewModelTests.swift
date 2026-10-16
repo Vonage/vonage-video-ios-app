@@ -31,9 +31,9 @@ struct StatsOverlayViewModelTests {
         _ = viewModel
     }
 
-    @Test("Setup should observe default active overlay preference")
+    @Test("Setup should observe an explicitly enabled overlay preference")
     func testSetupObservesDefaultActiveOverlayPreference() async throws {
-        let repository = MockSettingsRepository()
+        let repository = MockSettingsRepository(initialPreferences: .init(statsOverlayEnabled: true))
         let dataSource = MockStatsDataSource()
         let viewModel = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: dataSource)
         viewModel.setup()

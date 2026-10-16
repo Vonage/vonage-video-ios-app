@@ -11,6 +11,7 @@ import VERADomain
 import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
+import VERAScreenShare
 import VERAVonage
 import VERAVonageCallKitPlugin
 
@@ -91,13 +92,37 @@ final class DependencyContainer {
     lazy var publisherFactory: any PublisherFactory = {
         let camera = DefaultCheckCameraAuthorizationStatusUseCase()
         let microphone = DefaultCheckMicrophoneAuthorizationStatusUseCase()
-        return appConfig.meetingRoomSettings.allowPictureInPicture
+        let factory: VonagePublisherFactory =
+            appConfig.meetingRoomSettings.allowPictureInPicture
             ? PictureInPictureVonagePublisherFactory(
                 checkCameraAuthorizationStatusUseCase: camera,
                 checkMicrophoneAuthorizationStatusUseCase: microphone)
             : VonagePublisherFactory(
                 checkCameraAuthorizationStatusUseCase: camera,
                 checkMicrophoneAuthorizationStatusUseCase: microphone)
+        #if AUDIOEFFECTS_ENABLED
+            factory.advancedNoiseSuppressionAvailable = appConfig.audioSettings.allowAdvancedNoiseSuppression
+            factory.onAdvancedNoiseSuppressionInitialized = { [weak self] enabled in
+                self?.defaultNoiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
+            }
+            factory.onAdvancedNoiseSuppressionChanged = { [weak self] enabled in
+                self?.defaultNoiseSuppressionStatusDataSource.set(state: enabled ? .enabled : .disabled)
+                #if SETTINGS_ENABLED
+                    guard let self, self.appConfig.audioSettings.allowAdvancedNoiseSuppression else { return }
+                    let repository = self.settingsRepository
+                    Task { try? await repository.saveAdvancedNoiseSuppression(enabled) }
+                #endif
+            }
+        #else
+            factory.advancedNoiseSuppressionAvailable = false
+        #endif
+        #if SETTINGS_ENABLED
+            factory.onCameraPositionChanged = { [weak self] position in
+                guard let repository = self?.settingsRepository else { return }
+                Task { try? await repository.saveCameraPosition(position) }
+            }
+        #endif
+        return factory
     }()
 
     lazy var appConfig = AppConfig()
@@ -129,6 +154,28 @@ final class DependencyContainer {
             let adapter = PublisherAdvancedSettingsAdapter()
             adapter.onChange = { [weak self] in
                 self?.cameraPreviewProviderRepository.resetPublisher()
+            }
+            adapter.onPreferencesChange = { [weak self] preferences in
+                guard let self else { return }
+
+                let codec =
+                    preferences.screenShareCodecMode == .inherit
+                    ? preferences.codecPreference : preferences.screenShareCodecPreference
+                let manualCodec =
+                    preferences.screenShareCodecMode == .manual
+                    || (preferences.screenShareCodecMode == .inherit && codec.mode == .manual)
+                let dimensions = preferences.screenShareResolution?.dimensions
+                let settings = ScreenShareVideoSettings(
+                    contentHint: preferences.screenShareContentHint.rawValue,
+                    preferredCodecs: manualCodec ? codec.orderedCodecs.map(\.rawValue) : nil,
+                    frameRate: preferences.screenShareFrameRate?.rawValue, maxSize: dimensions,
+                    bitratePreset: preferences.screenShareBitratePreset?.rawValue,
+                    maxVideoBitrate: preferences.screenShareMaxVideoBitrate,
+                    scalableScreenshare: preferences.scalableScreenshareEnabled)
+                if let data = try? JSONEncoder().encode(settings) {
+                    self.userDefaults.set(data, forKey: ScreenSharingKeys.videoSettings)
+                }
+
             }
             adapter.setup(with: settingsRepository.preferencesPublisher)
             return adapter
@@ -264,7 +311,8 @@ final class DependencyContainer {
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: InMemoryStatsRepository())
+            statsDataSource: InMemoryStatsRepository(),
+            advancedNoiseSuppressionAvailable: appConfig.audioSettings.allowAdvancedNoiseSuppression)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)
@@ -279,7 +327,8 @@ final class DependencyContainer {
             ),
             enableNoiseSuppressionUseCase: DefaultEnableNoiseSuppressionUseCase(
                 noiseSuppressionStatusDataSource: defaultNoiseSuppressionStatusDataSource
-            )
+            ),
+            statusDataSource: defaultNoiseSuppressionStatusDataSource
         )
     #endif
 }

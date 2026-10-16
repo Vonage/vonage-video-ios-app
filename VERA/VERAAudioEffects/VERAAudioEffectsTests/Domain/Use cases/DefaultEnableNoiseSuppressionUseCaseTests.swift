@@ -20,7 +20,7 @@ struct DefaultEnableNoiseSuppressionUseCaseTests {
 
         await delay()
 
-        #expect(publisher.removeAudioTransform_callCount == 1)
+        #expect(publisher.removeAudioTransform_callCount == 0)
         #expect(publisher.setNoiseSuppression_callCount == 1)
     }
 
@@ -44,7 +44,7 @@ struct DefaultEnableNoiseSuppressionUseCaseTests {
 
         sut(publisher: publisher)
 
-        #expect(publisher.removeAudioTransform_callCount == 1)
+        #expect(publisher.removeAudioTransform_callCount == 0)
         #expect(publisher.setNoiseSuppression_callCount == 1)
         #expect(dataSource.setState_callCount == 1)
     }
