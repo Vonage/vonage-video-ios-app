@@ -106,11 +106,13 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
 
     public func muteLocalMedia(_ isMuted: Bool) {
         updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: !isMuted))
+        stopSpeakingWhileMutedSimulationIfUnmuted(isMuted)
     }
 
     public func muteLocalAudio(_ isMuted: Bool) {
         let current = mediaBeforeHold ?? stateSubject.value
         updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: current.isPublishingVideo))
+        stopSpeakingWhileMutedSimulationIfUnmuted(isMuted)
     }
 
     public func setOnHold(_ isOnHold: Bool) {
@@ -243,5 +245,13 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
         speakingWhileMutedTimer?.invalidate()
         speakingWhileMutedTimer = nil
         _publisherAudioLevelPublisher.send(0.0)
+    }
+
+    /// System unmutes must end a simulation started by `toggleLocalAudio()`,
+    /// otherwise loud samples keep flowing while audio is published.
+    private func stopSpeakingWhileMutedSimulationIfUnmuted(_ isMuted: Bool) {
+        guard !isMuted, wantsSpeakingWhileMutedSimulation else { return }
+        wantsSpeakingWhileMutedSimulation = false
+        stopSpeakingWhileMutedSimulation()
     }
 }

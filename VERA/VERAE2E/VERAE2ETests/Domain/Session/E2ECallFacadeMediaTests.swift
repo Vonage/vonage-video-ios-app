@@ -75,6 +75,23 @@ struct E2ECallFacadeMediaTests {
         call.toggleLocalAudio()
     }
 
+    @Test(arguments: [false, true])
+    func systemUnmuteStopsSpeakingWhileMutedSimulation(unmutesAllMedia: Bool) async throws {
+        let call = makeSUT(audioEnabled: true, cameraEnabled: false)
+        call.toggleLocalAudio()
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(call._publisherAudioLevelPublisher.value == 0.5)
+
+        if unmutesAllMedia {
+            call.muteLocalMedia(false)
+        } else {
+            call.muteLocalAudio(false)
+        }
+        try await Task.sleep(for: .milliseconds(500))
+
+        #expect(call._publisherAudioLevelPublisher.value == 0.0, "simulation keeps running after a system unmute")
+    }
+
     private func makeSUT(audioEnabled: Bool, cameraEnabled: Bool) -> E2ECallFacade {
         E2ECallFacade(publisherSettings: .init(publishAudio: audioEnabled, publishVideo: cameraEnabled))
     }

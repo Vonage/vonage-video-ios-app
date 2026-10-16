@@ -570,6 +570,7 @@ struct SystemMediaStateTests {
     @Test func reviewCallKitUnmutePreservesDisabledCamera() async throws {
         let call = makeCall()
         call.publisher.publishVideo = false
+        call.setup()
         call.muteLocalAudio(true)
         try await Task.sleep(for: .milliseconds(100))
         call.muteLocalAudio(false)
