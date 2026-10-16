@@ -89,7 +89,7 @@ extension VideoContentHint {
 }
 
 /// Maximum output bounds for ReplayKit, matching VERA web's size options.
-public enum SettingsScreenShareResolution: String, Codable, CaseIterable, Identifiable {
+public enum SettingsScreenShareResolution: String, Codable, CaseIterable, Identifiable, Sendable {
     case fullHD = "1920x1080"
     case hd = "1280x720"
     case vga = "640x480"

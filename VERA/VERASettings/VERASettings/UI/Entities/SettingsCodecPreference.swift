@@ -92,7 +92,7 @@ extension SettingsCodecMode {
 }
 
 /// Screen sharing may inherit only the camera codec policy; other controls remain independent.
-public enum SettingsScreenShareCodecMode: String, Codable, CaseIterable, Identifiable {
+public enum SettingsScreenShareCodecMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case inherit, automatic, manual
     public var id: Self { self }
     public var displayName: String {
