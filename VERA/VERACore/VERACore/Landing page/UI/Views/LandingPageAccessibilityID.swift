@@ -8,4 +8,5 @@ enum LandingPageAccessibilityID {
     static let joinWaitingRoomButton = "join-waiting-room-button"
     static let createNewRoomButton = "create-new-room-button"
     static let githubRepoButton = "github-repo-button"
+    static let versionFooter = "version-footer"
 }

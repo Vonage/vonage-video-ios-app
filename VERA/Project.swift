@@ -475,6 +475,7 @@ let project = Project(
                     "UIBackgroundModes": .array(["audio", "voip"]),
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
+                    "VonageVideoSDKVersion": .string(DependencyVersions.vonageVideoSDK.description),
                     "ITSAppUsesNonExemptEncryption": false,
                     "NSCameraReactionEffectGesturesEnabledDefault": false,
                     "CFBundleURLTypes": .array([

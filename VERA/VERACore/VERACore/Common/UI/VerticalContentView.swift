@@ -42,12 +42,10 @@ struct VerticalContentView<Top: View, Bottom: View>: View {
 
             Spacer()
 
-            HStack(spacing: 8) {
-                GHRepoButton()
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .padding(.horizontal)
+            AppVersionFooter()
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .padding(.horizontal)
         }
         .background(VERACommonUIAsset.SemanticColors.surface.swiftUIColor)
         .if(ignoresKeyboard) { $0.ignoresSafeArea(.keyboard) }

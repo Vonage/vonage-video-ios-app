@@ -10,6 +10,13 @@ appId: ${APP_ID}
 - assertVisible:
     id: "landing-screen"
 
+# Verify both versions resolve from the installed app bundle.
+- assertVisible:
+    id: "version-footer"
+
+- assertVisible:
+    text: 'v[0-9].* \(SDK [0-9].*\)'
+
 # Verify GitHub button is visible
 - assertVisible:
     id: "github-repo-button"

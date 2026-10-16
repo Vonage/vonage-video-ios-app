@@ -6,10 +6,18 @@ import SnapshotTesting
 import SwiftUI
 import Testing
 
+@testable import VERACore
+
 // MARK: - iOS Snapshot Testing Helpers
 
 /// Helper for testing SwiftUI views
 enum SnapshotTestHelper {
+
+    /// Fixed rendering fixtures, independent of the app bundle and SDK dependency versions.
+    /// Keep these values unchanged when either released version is bumped.
+    static var footerVersions: AppVersionDisplay {
+        AppVersionDisplay(appVersion: "1.3", sdkVersion: "2.35.1")
+    }
 
     /// Test a SwiftUI view with size that fits
     static func assertViewSnapshot<V: View>(

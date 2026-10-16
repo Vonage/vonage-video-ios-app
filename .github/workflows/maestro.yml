@@ -20,6 +20,15 @@ jobs:
     name: Run Maestro UI Tests
     runs-on: macos-26-xlarge
     timeout-minutes: 60
+    # The default runner uses E2E mocks; these are configuration fixtures only.
+    env:
+      BASE_API_URL: ${{ secrets.BASE_API_URL || 'https://ci.vera.invalid/' }}
+      DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+      CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+      OKTA_ISSUER_URL: ${{ secrets.OKTA_ISSUER_URL || 'https://idp.vera.invalid/' }}
+      OKTA_CLIENT_ID: ${{ secrets.OKTA_CLIENT_ID || 'vera-ci' }}
+      OKTA_REDIRECT_URI: ${{ secrets.OKTA_REDIRECT_URI || 'https://ci.vera.invalid/api/auth/callback/okta' }}
+      OKTA_LOGOUT_REDIRECT_URI: ${{ secrets.OKTA_LOGOUT_REDIRECT_URI || 'https://ci.vera.invalid/' }}
 
     steps:
       - name: Checkout code
@@ -67,14 +76,6 @@ jobs:
       - name: Generate project with Tuist
         run: |
           cd VERA
-          export DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }}
-          export BASE_API_URL=${{ secrets.BASE_API_URL }}
-          export MARKETING_VERSION=1.0
-          export CURRENT_PROJECT_VERSION=${{ github.run_number }}
-          export OKTA_ISSUER_URL=${{ secrets.OKTA_ISSUER_URL }}
-          export OKTA_CLIENT_ID=${{ secrets.OKTA_CLIENT_ID }}
-          export OKTA_REDIRECT_URI=${{ secrets.OKTA_REDIRECT_URI }}
-          export OKTA_LOGOUT_REDIRECT_URI=${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
           jq '.authSettings.allowAuthentication = true | .authSettings.idProviders |= (if contains(["okta"]) then . else . + ["okta"] end)' Config/app-config.json > Config/app-config.tmp && mv Config/app-config.tmp Config/app-config.json
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
@@ -90,16 +91,6 @@ jobs:
 
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
-        env:
-          BASE_API_URL: ${{ secrets.BASE_API_URL }}
-          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
-          MARKETING_VERSION: "1.0"
-          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
-          OKTA_ISSUER_URL: ${{ secrets.OKTA_ISSUER_URL }}
-          OKTA_CLIENT_ID: ${{ secrets.OKTA_CLIENT_ID }}
-          OKTA_REDIRECT_URI: ${{ secrets.OKTA_REDIRECT_URI }}
-          OKTA_LOGOUT_REDIRECT_URI: ${{ secrets.OKTA_LOGOUT_REDIRECT_URI }}
-          XCODE_COMMON_FLAGS: ${{ env.XCODE_COMMON_FLAGS }}
 
       - name: List Maestro test artifacts
         if: always()
@@ -153,7 +144,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Comment PR with Results
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
         uses: actions/github-script@v7
         with:
           script: |
