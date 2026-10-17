@@ -15,14 +15,15 @@ import Foundation
 /// Uses each sample's `timestamp` (not the wall clock), so tests and
 /// simulated providers can compress time.
 ///
-/// Not thread-safe; call from one actor/queue.
+/// Call from the main actor.
+@MainActor
 public final class OnTheGoMotionDetector {
 
     /// Default sustained-motion threshold in seconds.
     public static let defaultSustainedMotionThreshold: TimeInterval = 20
 
     /// Called once when sustained motion reaches the threshold.
-    public var onSustainedMotion: (() -> Void)?
+    public var onSustainedMotion: (@MainActor () -> Void)?
 
     /// Whether the detector has already fired since the last ``reset()``.
     public private(set) var hasFired = false
@@ -30,7 +31,15 @@ public final class OnTheGoMotionDetector {
     private let threshold: TimeInterval
     private var runStart: Date?
 
-    public init(threshold: TimeInterval = defaultSustainedMotionThreshold) {
+    /// Uses ``defaultSustainedMotionThreshold``.
+    ///
+    /// Kept off the parameter list because default arguments are nonisolated
+    /// and this type is main-actor isolated.
+    public convenience init() {
+        self.init(threshold: Self.defaultSustainedMotionThreshold)
+    }
+
+    public init(threshold: TimeInterval) {
         self.threshold = threshold
     }
 

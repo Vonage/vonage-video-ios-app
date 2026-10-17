@@ -88,12 +88,16 @@ public struct OnTheGoCallSnapshot: Equatable {
     }
 
     /// The empty, not-in-a-call snapshot.
-    public static let disconnected = OnTheGoCallSnapshot(
-        isConnected: false,
-        isMicEnabled: false,
-        isCameraEnabled: false,
-        participantCount: 0,
-        activeSpeakerName: nil,
-        screenShareParticipant: nil
-    )
+    ///
+    /// Computed so the non-Sendable value is not stored as shared static state.
+    public static var disconnected: OnTheGoCallSnapshot {
+        OnTheGoCallSnapshot(
+            isConnected: false,
+            isMicEnabled: false,
+            isCameraEnabled: false,
+            participantCount: 0,
+            activeSpeakerName: nil,
+            screenShareParticipant: nil
+        )
+    }
 }

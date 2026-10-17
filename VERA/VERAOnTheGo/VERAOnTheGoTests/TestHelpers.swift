@@ -9,6 +9,7 @@ import Foundation
 
 // MARK: - FakeMotionActivityProvider
 
+@MainActor
 final class FakeMotionActivityProvider: MotionActivityProviding {
     var isAvailable = true
     var authorizationStatus: MotionAuthorizationStatus = .authorized
@@ -17,9 +18,9 @@ final class FakeMotionActivityProvider: MotionActivityProviding {
     private(set) var stopCount = 0
     private(set) var isRunning = false
 
-    private var handler: (@Sendable (MotionSample) -> Void)?
+    private var handler: (@MainActor (MotionSample) -> Void)?
 
-    func start(_ handler: @escaping @Sendable (MotionSample) -> Void) {
+    func start(_ handler: @escaping @MainActor (MotionSample) -> Void) {
         startCount += 1
         isRunning = true
         self.handler = handler
@@ -31,8 +32,8 @@ final class FakeMotionActivityProvider: MotionActivityProviding {
         handler = nil
     }
 
-    /// Feeds a sample as if it came from the device. Delivers on the calling
-    /// thread — tests run on the main actor, matching the real contract.
+    /// Feeds a sample as if it came from the device. Tests run on the main
+    /// actor, matching the real contract.
     func emit(_ sample: MotionSample) {
         handler?(sample)
     }
@@ -40,6 +41,7 @@ final class FakeMotionActivityProvider: MotionActivityProviding {
 
 // MARK: - InMemoryOnTheGoPreferencesRepository
 
+@MainActor
 final class InMemoryOnTheGoPreferencesRepository: OnTheGoPreferencesRepository {
     private let subject: CurrentValueSubject<Bool, Never>
 
@@ -60,6 +62,7 @@ final class InMemoryOnTheGoPreferencesRepository: OnTheGoPreferencesRepository {
 // MARK: - SpyCallActions
 
 /// Records every call the view model makes through ``OnTheGoCallActions``.
+@MainActor
 final class SpyCallActions {
     private(set) var toggleMicCount = 0
     private(set) var toggleCameraCount = 0
@@ -77,12 +80,13 @@ final class SpyCallActions {
 // MARK: - ManualTimeoutScheduler
 
 /// Captures the scheduled timeout closure so tests can fire it deterministically.
+@MainActor
 final class ManualTimeoutScheduler {
-    private(set) var scheduledWork: (() -> Void)?
+    private(set) var scheduledWork: (@MainActor () -> Void)?
     private(set) var scheduledInterval: TimeInterval?
     private(set) var cancelled = false
 
-    var schedule: (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable {
+    var schedule: @MainActor (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable {
         { interval, work in
             self.scheduledInterval = interval
             self.scheduledWork = work

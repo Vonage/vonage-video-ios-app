@@ -472,6 +472,8 @@ let project = Project(
                         "VERA needs access to your camera to share your video during video calls and meetings.",
                     "NSMicrophoneUsageDescription":
                         "VERA needs access to your microphone to share your audio during video calls and meetings.",
+                    "NSMotionUsageDescription":
+                        "VERA uses motion activity to suggest On-the-Go mode when you are walking, cycling, or driving during a call.",
                     "UIBackgroundModes": .array(["audio", "voip"]),
                     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",

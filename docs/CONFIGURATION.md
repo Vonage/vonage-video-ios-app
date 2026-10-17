@@ -20,6 +20,7 @@ The app is configured through two primary mechanisms: **feature flags** in `app-
 | `meetingRoomSettings.allowEmojis` | `REACTIONS_ENABLED` | VERAReactions + VERAVonageReactionsPlugin |
 | `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` | VERASettings + VERAVonageSettingsPlugin |
 | `meetingRoomSettings.allowScreenShare` | `SCREEN_SHARE_ENABLED` | VERAScreenShare + VERAVonageScreenSharePlugin |
+| `meetingRoomSettings.allowOnTheGo` | runtime (`MeetingRoomFeature.onTheGo`) | VERAOnTheGo |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` | VERAAudioEffects |
 
 Code guarded by `#if CHAT_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.

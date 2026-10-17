@@ -12,14 +12,23 @@ import SwiftUI
 public struct SettingsSheetContent: View {
     @State private var viewModel: SettingsViewModel
     @State private var statisticsViewModel: StatisticsViewModel
+    private let additionalContent: AnyView
 
-    public init(factory: SettingsFactory) {
+    public init(
+        factory: SettingsFactory,
+        additionalContent: AnyView = AnyView(EmptyView())
+    ) {
         let (vm, statsVM) = factory.makeMeetingRoomViewModels()
         _viewModel = State(wrappedValue: vm)
         _statisticsViewModel = State(wrappedValue: statsVM)
+        self.additionalContent = additionalContent
     }
 
     public var body: some View {
-        SettingsView(viewModel: viewModel, statisticsViewModel: statisticsViewModel)
+        SettingsView(
+            viewModel: viewModel,
+            statisticsViewModel: statisticsViewModel,
+            additionalContent: additionalContent
+        )
     }
 }

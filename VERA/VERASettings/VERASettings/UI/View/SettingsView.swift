@@ -43,6 +43,10 @@ public struct SettingsView: View {
     /// Whether the screen is being shown while a call is already active.
     private let callContext: CallContext
 
+    /// Extra form content appended after the General section. Hosts use this
+    /// for feature rows that are not part of the core settings model.
+    private let additionalContent: AnyView
+
     /// Currently selected section in the sidebar (iPad/Mac only).
     @State private var selectedSection: SettingsSection?
 
@@ -64,11 +68,13 @@ public struct SettingsView: View {
     public init(
         viewModel: SettingsViewModel,
         selectedSection: SettingsSection = .general,
-        callContext: CallContext = .waitingRoom
+        callContext: CallContext = .waitingRoom,
+        additionalContent: AnyView = AnyView(EmptyView())
     ) {
         self.viewModel = viewModel
         self.statisticsViewModel = StatisticsViewModel.placeholder
         self.callContext = callContext
+        self.additionalContent = additionalContent
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -82,11 +88,13 @@ public struct SettingsView: View {
         viewModel: SettingsViewModel,
         statisticsViewModel: StatisticsViewModel,
         selectedSection: SettingsSection = .general,
-        callContext: CallContext = .activeCall
+        callContext: CallContext = .activeCall,
+        additionalContent: AnyView = AnyView(EmptyView())
     ) {
         self.viewModel = viewModel
         self.statisticsViewModel = statisticsViewModel
         self.callContext = callContext
+        self.additionalContent = additionalContent
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -152,6 +160,8 @@ public struct SettingsView: View {
                     Text("General".localized)
                         .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
                 }
+
+                additionalContent
             }
             .navigationTitle("Settings".localized)
             .toolbar {
@@ -229,6 +239,7 @@ public struct SettingsView: View {
                     isInActiveCall: callContext.isInActiveCall,
                     statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled
                 )
+                additionalContent
             case .video:
                 VideoSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
             case .audio:

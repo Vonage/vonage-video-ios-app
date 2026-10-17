@@ -6,6 +6,7 @@ import Combine
 import Foundation
 
 /// ``OnTheGoPreferencesRepository`` persisted in `UserDefaults`.
+@MainActor
 public final class UserDefaultsOnTheGoPreferencesRepository: OnTheGoPreferencesRepository {
 
     /// The UserDefaults key backing ``suggestWhenMoving``.

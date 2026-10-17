@@ -35,6 +35,7 @@
     "allowDeviceSelection": true,
     "allowEmojis": true,
     "allowFeedback": true,
+    "allowOnTheGo": true,
     "allowPictureInPicture": true,
     "allowScreenShare": true,
     "allowSettings": true,

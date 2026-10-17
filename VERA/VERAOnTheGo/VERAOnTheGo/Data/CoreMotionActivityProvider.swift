@@ -10,6 +10,7 @@
     ///
     /// iOS only — CoreMotion is unavailable on macOS, so callers pass `nil`
     /// there instead.
+    @MainActor
     public final class CoreMotionActivityProvider: MotionActivityProviding {
 
         private let activityManager = CMMotionActivityManager()
@@ -31,10 +32,13 @@
             }
         }
 
-        public func start(_ handler: @escaping @Sendable (MotionSample) -> Void) {
+        public func start(_ handler: @escaping @MainActor (MotionSample) -> Void) {
             activityManager.startActivityUpdates(to: .main) { activity in
                 guard let activity else { return }
-                handler(MotionSample(activity))
+                let sample = MotionSample(activity)
+                Task { @MainActor in
+                    handler(sample)
+                }
             }
         }
 

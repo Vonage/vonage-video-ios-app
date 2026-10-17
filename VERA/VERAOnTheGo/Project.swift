@@ -76,6 +76,12 @@ let project = Project(
     ],
     schemes: [
         .scheme(
+            name: "VERAOnTheGoApp",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERAOnTheGoApp"]),
+            runAction: .runAction(configuration: .debug)
+        ),
+        .scheme(
             name: "VERAOnTheGoTests",
             shared: true,
             buildAction: .buildAction(targets: ["VERAOnTheGoTests"]),

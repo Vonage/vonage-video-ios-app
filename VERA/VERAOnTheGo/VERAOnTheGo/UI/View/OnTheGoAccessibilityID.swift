@@ -36,4 +36,6 @@ public enum OnTheGoAccessibilityID {
     public static let suggestWhenMovingToggle = "onthego-suggest-when-moving-toggle"
     /// The settings screen's open-iOS-Settings button.
     public static let openSettingsButton = "onthego-open-settings-button"
+    /// The meeting-room more-menu button that enters On-the-Go manually.
+    public static let moreMenuButton = "on-the-go-button"
 }

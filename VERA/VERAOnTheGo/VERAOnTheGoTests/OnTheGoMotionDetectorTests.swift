@@ -8,6 +8,7 @@ import Testing
 @testable import VERAOnTheGo
 
 @Suite("OnTheGoMotionDetector Tests")
+@MainActor
 struct OnTheGoMotionDetectorTests {
 
     @Test("Moving for the full 20 s threshold fires exactly once")

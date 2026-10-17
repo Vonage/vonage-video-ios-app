@@ -9,6 +9,7 @@ import Foundation
 /// samples whose *timestamps* are spaced 5 s apart every 0.5 real seconds, so
 /// the default 20 s sustained-motion threshold is crossed ~2 s after the first
 /// sample.
+@MainActor
 public final class SimulatedMotionActivityProvider: MotionActivityProviding {
 
     /// Real seconds to wait before the first simulated sample.
@@ -36,7 +37,7 @@ public final class SimulatedMotionActivityProvider: MotionActivityProviding {
 
     public var authorizationStatus: MotionAuthorizationStatus { .authorized }
 
-    public func start(_ handler: @escaping @Sendable (MotionSample) -> Void) {
+    public func start(_ handler: @escaping @MainActor (MotionSample) -> Void) {
         task?.cancel()
         task = Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))

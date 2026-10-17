@@ -9,18 +9,18 @@ import Foundation
 /// ``OnTheGoCallSnapshot`` (single source of truth).
 public struct OnTheGoCallActions {
     /// Toggles the local microphone.
-    public var toggleMic: () -> Void
+    public var toggleMic: @MainActor () -> Void
 
     /// Toggles the local camera.
-    public var toggleCamera: () -> Void
+    public var toggleCamera: @MainActor () -> Void
 
     /// Leaves the call.
-    public var endCall: () -> Void
+    public var endCall: @MainActor () -> Void
 
     public init(
-        toggleMic: @escaping () -> Void,
-        toggleCamera: @escaping () -> Void,
-        endCall: @escaping () -> Void
+        toggleMic: @escaping @MainActor () -> Void,
+        toggleCamera: @escaping @MainActor () -> Void,
+        endCall: @escaping @MainActor () -> Void
     ) {
         self.toggleMic = toggleMic
         self.toggleCamera = toggleCamera

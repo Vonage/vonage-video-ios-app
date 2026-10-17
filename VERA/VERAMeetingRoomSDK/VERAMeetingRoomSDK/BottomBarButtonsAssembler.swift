@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import SwiftUI
 import VERAArchiving
 import VERAAudioDiagnostics
 import VERAAudioEffects
@@ -14,6 +15,7 @@ import VERAChat
 import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
+import VERAOnTheGo
 import VERAReactions
 
 /// Assembles bottom bar buttons based on runtime feature configuration.
@@ -32,6 +34,7 @@ final class BottomBarButtonsAssembler {
     private var isEffectsPresented = false
     private var isFeedbackFormPresented = false
     private var isAudioDiagnosticsPresented = false
+    private var isOnTheGoActive = false
 
     // Feature view models created during meeting room setup
     var videoEffectsViewModel: VideoEffectsViewModel? {
@@ -68,6 +71,7 @@ final class BottomBarButtonsAssembler {
     var onShowChat: (() -> Void)?
     var onShowReactions: (() -> Void)?
     var onShowSettings: (() -> Void)?
+    var onEnterOnTheGo: (() -> Void)?
     var onShowFeedbackForm: (() -> Void)?
     var onShowEffects: (() -> Void)?
     var onShowAudioDiagnostics: (() -> Void)?
@@ -118,6 +122,10 @@ final class BottomBarButtonsAssembler {
 
         if enabledFeatures.contains(.screenShare) {
             buttons.append(makeScreenShareButton())
+        }
+
+        if enabledFeatures.contains(.onTheGo) {
+            buttons.append(makeOnTheGoButton())
         }
 
         if enabledFeatures.contains(.settings) {
@@ -206,6 +214,20 @@ final class BottomBarButtonsAssembler {
         return .init(item)
     }
 
+    private func makeOnTheGoButton() -> BottomBarButton {
+        BottomBarButton(
+            id: OnTheGoAccessibilityID.moreMenuButton,
+            label: String(localized: "On-the-Go", bundle: .veraOnTheGo),
+            accessibilityIdentifier: OnTheGoAccessibilityID.moreMenuButton,
+            image: Image(systemName: "figure.walk"),
+            isActive: isOnTheGoActive,
+            overflowSelectionBehavior: .dismissBeforeAction,
+            action: { [weak self] in
+                self?.onEnterOnTheGo?()
+            }
+        )
+    }
+
     private func makeSettingsButton() -> BottomBarButton {
         let item = SettingsBottomItemPresenter { [weak self] in
             self?.onShowSettings?()
@@ -271,6 +293,13 @@ final class BottomBarButtonsAssembler {
         guard isFeedbackFormPresented != isPresented else { return }
 
         isFeedbackFormPresented = isPresented
+        buttonsDidChangeSubject.send()
+    }
+
+    func setOnTheGoActive(_ isActive: Bool) {
+        guard isOnTheGoActive != isActive else { return }
+
+        isOnTheGoActive = isActive
         buttonsDidChangeSubject.send()
     }
 

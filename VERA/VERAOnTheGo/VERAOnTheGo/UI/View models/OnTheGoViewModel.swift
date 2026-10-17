@@ -59,7 +59,7 @@ public final class OnTheGoViewModel {
     private let motionProvider: MotionActivityProviding?
     private let detector: OnTheGoMotionDetector
     private let actions: OnTheGoCallActions
-    private let scheduleTimeout: (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable
+    private let scheduleTimeout: @MainActor (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable
 
     // MARK: - Private state
 
@@ -98,28 +98,37 @@ public final class OnTheGoViewModel {
         configuration: OnTheGoConfiguration,
         preferences: OnTheGoPreferencesRepository,
         motionProvider: MotionActivityProviding?,
-        detector: OnTheGoMotionDetector = .init(),
+        detector: OnTheGoMotionDetector? = nil,
         actions: OnTheGoCallActions,
-        scheduleTimeout: @escaping (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable =
-            OnTheGoViewModel.defaultTimeoutScheduler
+        scheduleTimeout: (@MainActor (TimeInterval, @escaping @MainActor () -> Void) -> AnyCancellable)? = nil
     ) {
         self.configuration = configuration
         self.preferences = preferences
         self.motionProvider = motionProvider
+        let detector = detector ?? OnTheGoMotionDetector()
         self.detector = detector
         self.actions = actions
-        self.scheduleTimeout = scheduleTimeout
+        // Applied in the body: default arguments are nonisolated, so they
+        // cannot reference this main-actor scheduler.
+        self.scheduleTimeout = scheduleTimeout ?? Self.defaultTimeoutScheduler
 
         detector.onSustainedMotion = { [weak self] in
-            guard let self else { return }
-            MainActor.assumeIsolated { self.handleSustainedMotion() }
+            self?.handleSustainedMotion()
         }
 
-        // The repository contract is to emit on the main thread.
+        // The repository emits on the main actor, synchronously. Stay on that
+        // turn so a preference change stops detection before the setter returns.
         preferencesCancellable = preferences.suggestWhenMovingPublisher
             .sink { [weak self] _ in
-                guard let self else { return }
-                MainActor.assumeIsolated { self.reevaluateMotionDetection() }
+                if Thread.isMainThread {
+                    MainActor.assumeIsolated {
+                        self?.reevaluateMotionDetection()
+                    }
+                } else {
+                    Task { @MainActor in
+                        self?.reevaluateMotionDetection()
+                    }
+                }
             }
     }
 
@@ -247,8 +256,8 @@ public final class OnTheGoViewModel {
     private func reevaluateMotionDetection() {
         if shouldDetectMotion, !isMotionDetectionRunning {
             isMotionDetectionRunning = true
-            motionProvider?.start { [detector] sample in
-                MainActor.assumeIsolated { detector.ingest(sample) }
+            motionProvider?.start { [weak self] sample in
+                self?.detector.ingest(sample)
             }
         } else if !shouldDetectMotion, isMotionDetectionRunning {
             isMotionDetectionRunning = false
