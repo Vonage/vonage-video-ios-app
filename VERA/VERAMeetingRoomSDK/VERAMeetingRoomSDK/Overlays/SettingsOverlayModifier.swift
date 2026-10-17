@@ -15,14 +15,18 @@ struct SettingsOverlayModifier: ViewModifier {
     @Binding var showSettings: Bool
     let statsOverlayViewModel: StatsOverlayViewModel?
     let container: MeetingRoomSDKContainer
+    var additionalSettingsContent: AnyView = AnyView(EmptyView())
 
     func body(content: Content) -> some View {
         if isEnabled {
             content
                 .sheet(isPresented: $showSettings) {
-                    SettingsSheetContent(factory: container.settingsFactory)
-                        .presentationDetents([.large])
-                        .presentationBackground(theme.background)
+                    SettingsSheetContent(
+                        factory: container.settingsFactory,
+                        additionalContent: additionalSettingsContent
+                    )
+                    .presentationDetents([.large])
+                    .presentationBackground(theme.background)
                 }
                 .overlay {
                     if let statsViewModel = statsOverlayViewModel {

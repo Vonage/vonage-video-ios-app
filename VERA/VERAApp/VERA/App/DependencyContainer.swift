@@ -174,6 +174,7 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
+        if appConfig.meetingRoomSettings.allowOnTheGo { features.insert(.onTheGo) }
         if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
         #if !os(macOS)
             if appConfig.meetingRoomSettings.allowPictureInPicture {

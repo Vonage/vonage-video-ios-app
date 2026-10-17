@@ -26,6 +26,7 @@ The Vonage iOS reference app is built with a modular architecture. The app is or
 - **VERACaptions**: Live captions UI and captions state handling.
 - **VERAReactions**: Emoji reaction picker and floating reaction overlay.
 - **VERASettings**: In-call settings, publisher configuration, and stats UI.
+- **VERAOnTheGo**: Audio-first call mode suggested while the user is moving.
 - **VERAScreenShare**: Screen sharing UI and credential storage support.
 - **VERAAudioEffects**: Advanced noise suppression integration.
 - **VERAFeedback**: Feedback UI and standalone demo support.

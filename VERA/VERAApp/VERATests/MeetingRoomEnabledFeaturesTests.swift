@@ -34,7 +34,8 @@ struct MeetingRoomEnabledFeaturesTests {
             feedback: true,
             pictureInPicture: true,
             screenShare: true,
-            settings: true)
+            settings: true,
+            onTheGo: true)
 
         #expect(sut.meetingRoomEnabledFeatures == Set(MeetingRoomFeature.allCases))
     }
@@ -86,7 +87,8 @@ struct MeetingRoomEnabledFeaturesTests {
             feedback: true,
             pictureInPicture: true,
             screenShare: true,
-            settings: true)
+            settings: true,
+            onTheGo: true)
         #expect(all.meetingRoomEnabledFeatures.contains(.callKit))
     }
 
@@ -156,7 +158,8 @@ struct MeetingRoomEnabledFeaturesTests {
             feedback: json.meetingRoomSettings.allowFeedback,
             pictureInPicture: json.meetingRoomSettings.allowPictureInPicture,
             screenShare: json.meetingRoomSettings.allowScreenShare,
-            settings: json.meetingRoomSettings.allowSettings)
+            settings: json.meetingRoomSettings.allowSettings,
+            onTheGo: json.meetingRoomSettings.allowOnTheGo)
 
         let features = sut.meetingRoomEnabledFeatures
 
@@ -169,6 +172,7 @@ struct MeetingRoomEnabledFeaturesTests {
         #expect(features.contains(.feedback) == json.meetingRoomSettings.allowFeedback)
         #expect(features.contains(.pictureInPicture) == json.meetingRoomSettings.allowPictureInPicture)
         #expect(features.contains(.screenShare) == json.meetingRoomSettings.allowScreenShare)
+        #expect(features.contains(.onTheGo) == json.meetingRoomSettings.allowOnTheGo)
         #expect(features.contains(.backgroundEffects) == json.videoSettings.allowBackgroundEffects)
         #expect(features.contains(.audioEffects) == json.audioSettings.allowAdvancedNoiseSuppression)
         #expect(features.contains(.audioDiagnostics) == json.audioSettings.allowAudioDiagnostics)
@@ -193,6 +197,7 @@ struct MeetingRoomEnabledFeaturesTests {
         if json.meetingRoomSettings.allowFeedback { expected.insert(.feedback) }
         if json.meetingRoomSettings.allowPictureInPicture { expected.insert(.pictureInPicture) }
         if json.meetingRoomSettings.allowScreenShare { expected.insert(.screenShare) }
+        if json.meetingRoomSettings.allowOnTheGo { expected.insert(.onTheGo) }
         if json.videoSettings.allowBackgroundEffects { expected.insert(.backgroundEffects) }
         if json.audioSettings.allowAdvancedNoiseSuppression { expected.insert(.audioEffects) }
         if json.audioSettings.allowAudioDiagnostics { expected.insert(.audioDiagnostics) }
@@ -208,7 +213,8 @@ struct MeetingRoomEnabledFeaturesTests {
             feedback: json.meetingRoomSettings.allowFeedback,
             pictureInPicture: json.meetingRoomSettings.allowPictureInPicture,
             screenShare: json.meetingRoomSettings.allowScreenShare,
-            settings: json.meetingRoomSettings.allowSettings)
+            settings: json.meetingRoomSettings.allowSettings,
+            onTheGo: json.meetingRoomSettings.allowOnTheGo)
 
         #expect(sut.meetingRoomEnabledFeatures == expected)
     }
@@ -231,7 +237,8 @@ extension MeetingRoomEnabledFeaturesTests {
         feedback: Bool = false,
         pictureInPicture: Bool = false,
         screenShare: Bool = false,
-        settings: Bool = false
+        settings: Bool = false,
+        onTheGo: Bool = false
     ) -> DependencyContainer {
         let config = AppConfig(
             videoSettings: AppConfig.VideoSettings(
@@ -245,6 +252,7 @@ extension MeetingRoomEnabledFeaturesTests {
                 allowChat: chat,
                 allowEmojis: emojis,
                 allowFeedback: feedback,
+                allowOnTheGo: onTheGo,
                 allowPictureInPicture: pictureInPicture,
                 allowScreenShare: screenShare,
                 allowSettings: settings))
@@ -268,6 +276,7 @@ extension MeetingRoomEnabledFeaturesTests {
         case .backgroundEffects: return makeContainer(backgroundEffects: true)
         case .audioEffects: return makeContainer(advancedNoiseSuppression: true)
         case .audioDiagnostics: return makeContainer(audioDiagnostics: true)
+        case .onTheGo: return makeContainer(onTheGo: true)
         case .callKit: return makeContainer()
         }
     }
@@ -315,6 +324,7 @@ struct AppConfigFixture: Decodable {
         let allowPictureInPicture: Bool
         let allowScreenShare: Bool
         let allowSettings: Bool
+        let allowOnTheGo: Bool
     }
 
     let videoSettings: VideoSettings

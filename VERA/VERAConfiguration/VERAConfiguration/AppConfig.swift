@@ -80,6 +80,7 @@ public struct AppConfig: Sendable {
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowFeedback: Bool
+        public let allowOnTheGo: Bool
         public let allowPictureInPicture: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
@@ -93,6 +94,7 @@ public struct AppConfig: Sendable {
             allowDeviceSelection: Bool = true,
             allowEmojis: Bool = true,
             allowFeedback: Bool = true,
+            allowOnTheGo: Bool = true,
             allowPictureInPicture: Bool = true,
             allowScreenShare: Bool = true,
             defaultLayoutMode: MeetingRoomLayout = .activeSpeaker,
@@ -105,6 +107,7 @@ public struct AppConfig: Sendable {
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
             self.allowFeedback = allowFeedback
+            self.allowOnTheGo = allowOnTheGo
             self.allowPictureInPicture = allowPictureInPicture
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode

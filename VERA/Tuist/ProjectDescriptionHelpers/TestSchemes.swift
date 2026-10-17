@@ -40,6 +40,7 @@ public enum VERATestSchemes {
             testableTarget("VERADomainTests", in: "VERADomain"),
             testableTarget("VERAConfigurationTests", in: "VERAConfiguration"),
             testableTarget("VERAMeetingRoomTests", in: "VERAMeetingRoom"),
+            testableTarget("VERAOnTheGoTests", in: "VERAOnTheGo"),
         ]
         if isOktaEnabled() {
             targets.append(testableTarget("VERAOKTATests", in: "VERAOKTA"))
@@ -110,6 +111,7 @@ public enum VERATestSchemes {
             testableTarget("VERACoreSnapshotTests", in: "VERACore"),
             testableTarget("VERAMeetingRoomSnapshotTests", in: "VERAMeetingRoom"),
             testableTarget("VERACommonUISnapshotTests", in: "VERACommonUI"),
+            testableTarget("VERAOnTheGoSnapshotTests", in: "VERAOnTheGo"),
         ]
         if isFeatureEnabled("meetingRoomSettings", "allowChat") {
             targets.append(testableTarget("VERAChatSnapshotTests", in: "VERAChat"))

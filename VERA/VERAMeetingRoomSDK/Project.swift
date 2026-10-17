@@ -38,6 +38,7 @@ let project = Project(
                 .project(target: "VERAVonageCaptionsPlugin", path: "../VERAVonageCaptionsPlugin"),
                 .project(target: "VERAReactions", path: "../VERAReactions"),
                 .project(target: "VERAVonageReactionsPlugin", path: "../VERAVonageReactionsPlugin"),
+                .project(target: "VERAOnTheGo", path: "../VERAOnTheGo"),
                 .project(target: "VERASettings", path: "../VERASettings"),
                 .project(target: "VERAVonageSettingsPlugin", path: "../VERAVonageSettingsPlugin"),
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
@@ -63,6 +64,8 @@ let project = Project(
                         "VERAMeetingRoomSDKApp needs access to your camera to share your video during video calls.",
                     "NSMicrophoneUsageDescription":
                         "VERAMeetingRoomSDKApp needs access to your microphone to share your audio during video calls.",
+                    "NSMotionUsageDescription":
+                        "VERAMeetingRoomSDKApp uses motion activity to suggest On-the-Go mode when you are walking, cycling, or driving during a call.",
                     "UIBackgroundModes": .array(["audio", "voip"]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAMeetingRoomSDKApp/**"],

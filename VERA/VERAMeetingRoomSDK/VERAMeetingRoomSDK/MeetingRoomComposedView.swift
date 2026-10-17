@@ -13,6 +13,7 @@ import VERACommonUI
 import VERADomain
 import VERAFeedback
 import VERAMeetingRoom
+import VERAOnTheGo
 import VERAReactions
 import VERAScreenShare
 import VERASettings
@@ -70,14 +71,56 @@ struct MeetingRoomComposedView: View {
     @State private var showEffects = false
     @State private var showAudioDiagnostics = false
     @State private var isPictureInPictureBound = false
+    @State private var onTheGoModel: OnTheGoMeetingRoomModel?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
+        Group {
+            if onTheGoModel?.viewModel.state == .active, let onTheGoModel {
+                OnTheGoView(viewModel: onTheGoModel.viewModel)
+            } else {
+                meetingRoom
+            }
+        }
+        .background(
+            pictureInPictureAnchor
+                .frame(height: MeetingRoomComposedConstants.anchorViewHeight)
+        )
+        .onAppear { syncOnTheGo() }
+        .onChange(of: viewModel.state) { _ in
+            syncOnTheGo()
+        }
+        .onChange(of: onTheGoModel?.viewModel.state) { _ in
+            syncOnTheGo()
+        }
+        .task {
+            if enabledFeatures.contains(.pictureInPicture) {
+                await bindPictureInPictureIfNeeded()
+            }
+        }
+        .onChange(of: scenePhase) { phase in
+            #if !os(macOS)
+                guard enabledFeatures.contains(.pictureInPicture) else { return }
+                switch phase {
+                case .background:
+                    pictureInPictureOrchestrator.requestPictureInPicture()
+                case .active:
+                    pictureInPictureOrchestrator.stopPictureInPicture()
+                default:
+                    break
+                }
+            #endif
+        }
+    }
+
+    private var meetingRoom: some View {
         meetingRoomFactory.make(viewModel: viewModel, uiProvider: uiProvider)
-            .background(
-                pictureInPictureAnchor
-                    .frame(height: MeetingRoomComposedConstants.anchorViewHeight)
-            )
+            .overlay(alignment: .top) {
+                if onTheGoModel?.viewModel.state == .suggested, let onTheGoModel {
+                    OnTheGoSuggestionBanner(viewModel: onTheGoModel.viewModel)
+                        .padding(.top, 8)
+                }
+            }
             .modifier(
                 ChatSheetModifier(
                     isEnabled: enabledFeatures.contains(.chat),
@@ -109,7 +152,8 @@ struct MeetingRoomComposedView: View {
                     isEnabled: enabledFeatures.contains(.settings),
                     showSettings: $showSettings,
                     statsOverlayViewModel: statsOverlayViewModel,
-                    container: container
+                    container: container,
+                    additionalSettingsContent: onTheGoSettingsContent
                 )
             )
             .modifier(
@@ -158,24 +202,26 @@ struct MeetingRoomComposedView: View {
             .onChange(of: showAudioDiagnostics) { isPresented in
                 buttonsAssembler.setAudioDiagnosticsPresented(isPresented)
             }
-            .task {
-                if enabledFeatures.contains(.pictureInPicture) {
-                    await bindPictureInPictureIfNeeded()
-                }
+    }
+
+    private var onTheGoSettingsContent: AnyView {
+        guard enabledFeatures.contains(.onTheGo), let onTheGoModel else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(onTheGoModel.factory.makeSettingsRow())
+    }
+
+    private func syncOnTheGo() {
+        guard enabledFeatures.contains(.onTheGo) else { return }
+        if onTheGoModel == nil {
+            let model = OnTheGoMeetingRoomModel(meetingRoom: viewModel)
+            onTheGoModel = model
+            buttonsAssembler.onEnterOnTheGo = { [weak model] in
+                model?.viewModel.enterManually()
             }
-            .onChange(of: scenePhase) { phase in
-                #if !os(macOS)
-                    guard enabledFeatures.contains(.pictureInPicture) else { return }
-                    switch phase {
-                    case .background:
-                        pictureInPictureOrchestrator.requestPictureInPicture()
-                    case .active:
-                        pictureInPictureOrchestrator.stopPictureInPicture()
-                    default:
-                        break
-                    }
-                #endif
-            }
+        }
+        onTheGoModel?.push(viewModel.state)
+        buttonsAssembler.setOnTheGoActive(onTheGoModel?.viewModel.state == .active)
     }
 
     /// Stable, always-mounted PiP anchor spanning the meeting room content. The PiP window morphs

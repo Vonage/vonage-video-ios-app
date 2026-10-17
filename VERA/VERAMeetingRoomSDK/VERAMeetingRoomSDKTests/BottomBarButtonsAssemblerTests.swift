@@ -123,6 +123,43 @@ struct BottomBarButtonsAssemblerTests {
         cancellable.cancel()
     }
 
+    @Test("On-the-Go feature produces one button")
+    @MainActor
+    func onTheGoFeatureProducesOneButton() {
+        let features: Set<MeetingRoomFeature> = [.onTheGo]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+
+        let buttons = assembler.buildButtons()
+        #expect(buttons.count == 1)
+        #expect(buttons.first?.id == "on-the-go-button")
+        #expect(buttons.first?.label == "On-the-Go")
+        #expect(buttons.first?.isActive == false)
+        #expect(buttons.first?.overflowSelectionBehavior == .dismissBeforeAction)
+
+        var entered = false
+        assembler.onEnterOnTheGo = { entered = true }
+        buttons.first?.action()
+        #expect(entered)
+    }
+
+    @Test("On-the-Go button is active while the mode is active")
+    @MainActor
+    func onTheGoButtonIsActiveWhenModeIsActive() {
+        let features: Set<MeetingRoomFeature> = [.onTheGo]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+
+        assembler.setOnTheGoActive(true)
+        #expect(assembler.buildButtons().first?.isActive == true)
+    }
+
     @Test("Settings feature produces one button")
     @MainActor
     func settingsFeatureProducesOneButton() {

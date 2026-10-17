@@ -50,4 +50,7 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
 
     /// Picture-in-Picture when the app moves to the background during a call.
     case pictureInPicture
+
+    /// Audio-first call mode, suggested automatically while the user is moving.
+    case onTheGo
 }

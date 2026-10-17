@@ -129,6 +129,7 @@ public struct AppConfig: Sendable {{
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowFeedback: Bool
+        public let allowOnTheGo: Bool
         public let allowPictureInPicture: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
@@ -142,6 +143,7 @@ public struct AppConfig: Sendable {{
             allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowFeedback: Bool = {bool_str(meeting['allowFeedback'])},
+            allowOnTheGo: Bool = {bool_str(meeting['allowOnTheGo'])},
             allowPictureInPicture: Bool = {bool_str(meeting['allowPictureInPicture'])},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
             defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
@@ -154,6 +156,7 @@ public struct AppConfig: Sendable {{
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
             self.allowFeedback = allowFeedback
+            self.allowOnTheGo = allowOnTheGo
             self.allowPictureInPicture = allowPictureInPicture
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode

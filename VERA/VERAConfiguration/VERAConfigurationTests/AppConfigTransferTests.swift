@@ -57,6 +57,7 @@ struct AppConfigTransferTests {
             allowDeviceSelection: !enabled,
             allowEmojis: enabled,
             allowFeedback: !enabled,
+            allowOnTheGo: !enabled,
             allowPictureInPicture: enabled,
             allowScreenShare: !enabled,
             defaultLayoutMode: enabled ? .grid : .activeSpeaker,
@@ -109,6 +110,7 @@ struct AppConfigTransferTests {
         #expect(received.meetingRoomSettings.defaultLayoutMode == expected.meetingRoomSettings.defaultLayoutMode)
         #expect(received.meetingRoomSettings.showParticipantList == expected.meetingRoomSettings.showParticipantList)
         #expect(received.meetingRoomSettings.allowSettings == expected.meetingRoomSettings.allowSettings)
+        #expect(received.meetingRoomSettings.allowOnTheGo == expected.meetingRoomSettings.allowOnTheGo)
     }
 }
 
