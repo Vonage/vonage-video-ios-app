@@ -76,14 +76,17 @@ public actor E2EBackendStore {
     }
 
     private func startArchive(requestBody: Data?) throws -> Data {
-        let sessionKey = try sessionKey(from: requestBody)
+        let body = try E2EHTTPRequestBodyDecoder.decode(requestBody)
+        let sessionKey = body["sessionKey"] as? String ?? "e2e-session-key"
+        let withTranscription = body["withTranscription"] as? Bool ?? false
         let archive = E2EArchive(
             id: UUID().uuidString.lowercased(),
-            name: "E2E archive",
+            name: withTranscription ? "transcription" : "E2E archive",
             sessionKey: sessionKey,
             status: "started",
             createdAt: Date().timeIntervalSince1970,
-            url: nil
+            url: nil,
+            transcription: withTranscription ? E2ETranscription() : nil
         )
 
         archivesBySessionKey[sessionKey, default: []].append(archive)
@@ -153,8 +156,21 @@ public actor E2EBackendStore {
         let archives = archivesBySessionKey[sessionKey] ?? []
         let availableArchives = archives.map { archive in
             var archive = archive
-            archive.status = "available"
-            archive.url = archive.url ?? "https://example.com/e2e/archive-\(archive.id).mp4"
+            if var transcription = archive.transcription {
+                // The audio archive is done, but its transcript keeps processing for a few polls.
+                archive.status = "uploaded"
+                archive.url = nil
+                if transcription.pendingPolls > 0 {
+                    transcription.pendingPolls -= 1
+                } else {
+                    transcription.status = "available"
+                    transcription.url = transcriptURL(archiveId: archive.id)
+                }
+                archive.transcription = transcription
+            } else {
+                archive.status = "available"
+                archive.url = archive.url ?? "https://example.com/e2e/archive-\(archive.id).mp4"
+            }
             return archive
         }
 
@@ -176,8 +192,9 @@ public actor E2EBackendStore {
 
     private func remoteArchive(_ archive: E2EArchive) -> [String: Any] {
         let session = sessionsByKey[archive.sessionKey] ?? fallbackSession(sessionKey: archive.sessionKey)
+        let isTranscription = archive.transcription != nil
 
-        return [
+        var remoteArchive: [String: Any] = [
             "id": archive.id,
             "status": archive.status,
             "name": archive.name,
@@ -188,11 +205,11 @@ public actor E2EBackendStore {
             "createdAt": archive.createdAt * 1000,
             "size": 1_024_000,
             "duration": 10,
-            "outputMode": "composed",
+            "outputMode": isTranscription ? "individual" : "composed",
             "streamMode": "auto",
             "hasAudio": true,
-            "hasVideo": true,
-            "hasTranscription": false,
+            "hasVideo": !isTranscription,
+            "hasTranscription": isTranscription,
             "sha256sum": "e2e-sha256",
             "password": "",
             "updatedAt": Date().timeIntervalSince1970,
@@ -201,6 +218,24 @@ public actor E2EBackendStore {
             "resolution": "640x480",
             "url": archive.url as Any,
         ]
+
+        if let transcription = archive.transcription {
+            remoteArchive["transcription"] = [
+                "status": transcription.status,
+                "url": transcription.url as Any,
+            ]
+        }
+
+        return remoteArchive
+    }
+
+    /// Serves the transcript as a local empty zip so it downloads without a network.
+    private func transcriptURL(archiveId: String) -> String {
+        let emptyZip = Data([0x50, 0x4B, 0x05, 0x06] + Array(repeating: 0, count: 18))
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("e2e-transcription-\(archiveId).zip")
+        try? emptyZip.write(to: fileURL)
+        return fileURL.absoluteString
     }
 
     private func sessionKey(from requestBody: Data?) throws -> String {
