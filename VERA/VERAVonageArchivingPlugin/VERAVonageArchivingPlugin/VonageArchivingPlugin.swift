@@ -10,13 +10,13 @@ import VERAVonage
 /// Monitors and manages archiving status for an active Vonage call.
 ///
 /// This plugin listens to archiving signals from the Vonage session and updates
-/// the archiving status data sources, allowing the application to react to when
+/// the archiving status data source, allowing the application to react to when
 /// call recording or post-call transcription starts or stops.
 ///
 /// ## Responsibilities
 /// - Receives archiving signals from Vonage session
-/// - Updates the recording or transcription `ArchivingStatusDataSource` based on the archive kind
-/// - Resets both statuses when the call ends
+/// - Updates `ArchivingStatusDataSource` with the state of the signalled archive kind
+/// - Resets every archive kind when the call ends
 ///
 /// - Important: The plugin automatically handles archiving signals of type "archiving"
 ///   with data values "start" or "stop". Signals without a kind are treated as recordings.
@@ -30,7 +30,6 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
     }
 
     private let archivingStatusDataSource: ArchivingStatusDataSource
-    private let transcriptionStatusDataSource: ArchivingStatusDataSource
 
     /// A stable identifier for this plugin instance.
     ///
@@ -39,15 +38,10 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
     /// Creates a new archiving plugin instance.
     ///
-    /// - Parameters:
-    ///   - archivingStatusDataSource: The data source updated with recording status changes.
-    ///   - transcriptionStatusDataSource: The data source updated with post-call transcription status changes.
-    public init(
-        archivingStatusDataSource: ArchivingStatusDataSource,
-        transcriptionStatusDataSource: ArchivingStatusDataSource
-    ) {
+    /// - Parameter archivingStatusDataSource: The data source updated with recording and
+    ///   post-call transcription status changes.
+    public init(archivingStatusDataSource: ArchivingStatusDataSource) {
         self.archivingStatusDataSource = archivingStatusDataSource
-        self.transcriptionStatusDataSource = transcriptionStatusDataSource
     }
 
     /// Lifecycle callback invoked when the call starts and the session is connected.
@@ -62,10 +56,9 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
     /// Lifecycle callback invoked when the call ends and the session is disconnecting.
     ///
-    /// Resets the archiving status data sources to clear any active archiving state.
+    /// Resets the archiving status data source to clear any active archiving state.
     public func callDidEnd() async throws {
         archivingStatusDataSource.reset()
-        transcriptionStatusDataSource.reset()
     }
 
     public func handleSignal(_ signal: VERAVonage.VonageSignal) {
@@ -77,24 +70,17 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
             return
         }
 
-        let statusDataSource = statusDataSource(for: ArchiveKind(archiveName: payload.kind))
+        let kind = ArchiveKind(archiveName: payload.kind)
 
         switch payload.action {
         case "start":
             if let archivingID = payload.archivingID {
-                statusDataSource.set(archivingState: .archiving(archivingID))
+                archivingStatusDataSource.set(archivingState: .archiving(archivingID), for: kind)
             }
         case "stop":
-            statusDataSource.set(archivingState: .idle)
+            archivingStatusDataSource.set(archivingState: .idle, for: kind)
         default:
             break
-        }
-    }
-
-    private func statusDataSource(for kind: ArchiveKind) -> ArchivingStatusDataSource {
-        switch kind {
-        case .recording: archivingStatusDataSource
-        case .transcription: transcriptionStatusDataSource
         }
     }
 

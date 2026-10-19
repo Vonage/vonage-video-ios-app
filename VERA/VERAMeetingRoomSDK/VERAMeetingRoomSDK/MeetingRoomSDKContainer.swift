@@ -218,20 +218,15 @@ final class MeetingRoomSDKContainer {
     lazy var archivingStatusDataSource: any ArchivingStatusDataSource =
         DefaultArchivingStatusDataSource()
 
-    lazy var transcriptionStatusDataSource: any ArchivingStatusDataSource =
-        DefaultArchivingStatusDataSource()
-
     lazy var vonageArchivingPlugin = VonageArchivingPlugin(
-        archivingStatusDataSource: archivingStatusDataSource,
-        transcriptionStatusDataSource: transcriptionStatusDataSource)
+        archivingStatusDataSource: archivingStatusDataSource)
 
     lazy var archivingDataSource: any ArchivingDataSource = {
         archivingDataSourceFactory(
             MeetingRoomArchivingDataSourceFactoryContext(
                 baseURL: baseURL,
                 httpClient: httpClient,
-                archivingStatusDataSource: archivingStatusDataSource,
-                transcriptionStatusDataSource: transcriptionStatusDataSource))
+                archivingStatusDataSource: archivingStatusDataSource))
     }()
 
     lazy var archivesDataSource: any ArchivesDataSource = HTTPArchivesDataSource(
@@ -247,7 +242,6 @@ final class MeetingRoomSDKContainer {
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
         archivingStatusDataSource: archivingStatusDataSource,
-        transcriptionStatusDataSource: transcriptionStatusDataSource,
         sessionKeyProvider: sessionKeyHolder)
 
     // MARK: - Background Effects Feature

@@ -10,18 +10,15 @@ public struct MeetingRoomArchivingDataSourceFactoryContext {
     public let baseURL: URL
     public let httpClient: any HTTPClient
     public let archivingStatusDataSource: any ArchivingStatusDataSource
-    public let transcriptionStatusDataSource: any ArchivingStatusDataSource
 
     public init(
         baseURL: URL,
         httpClient: any HTTPClient,
-        archivingStatusDataSource: any ArchivingStatusDataSource,
-        transcriptionStatusDataSource: any ArchivingStatusDataSource = DefaultArchivingStatusDataSource()
+        archivingStatusDataSource: any ArchivingStatusDataSource
     ) {
         self.baseURL = baseURL
         self.httpClient = httpClient
         self.archivingStatusDataSource = archivingStatusDataSource
-        self.transcriptionStatusDataSource = transcriptionStatusDataSource
     }
 }
 

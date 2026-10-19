@@ -186,8 +186,8 @@ struct MeetingRoomSDKContainerTests {
         #expect(didReceiveArchivingStatusDataSource)
     }
 
-    @Test("Archiving data source factory receives a dedicated transcription status data source")
-    func archivingDataSourceFactoryReceivesTranscriptionStatusDataSource() throws {
+    @Test("Archiving data source factory shares the container's status data source")
+    func archivingDataSourceFactorySharesStatusDataSource() throws {
         var receivedContext: MeetingRoomArchivingDataSourceFactoryContext?
         let factory = ArchivingDataSourceFactorySpy { context in
             receivedContext = context
@@ -200,9 +200,7 @@ struct MeetingRoomSDKContainerTests {
         _ = container.archivingDataSource
 
         let context = try #require(receivedContext)
-        let transcription = context.transcriptionStatusDataSource as AnyObject
-        #expect(transcription === container.transcriptionStatusDataSource as AnyObject)
-        #expect(transcription !== context.archivingStatusDataSource as AnyObject)
+        #expect(context.archivingStatusDataSource as AnyObject === container.archivingStatusDataSource as AnyObject)
     }
 
     // MARK: - Helpers

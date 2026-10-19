@@ -9,23 +9,20 @@ import VERADomain
 public final class E2EArchivingDataSource: ArchivingDataSource {
     private let decorated: any ArchivingDataSource
     private let archivingStatusDataSource: any ArchivingStatusDataSource
-    private let transcriptionStatusDataSource: any ArchivingStatusDataSource
 
     public init(
         decorated: any ArchivingDataSource,
-        archivingStatusDataSource: any ArchivingStatusDataSource,
-        transcriptionStatusDataSource: any ArchivingStatusDataSource
+        archivingStatusDataSource: any ArchivingStatusDataSource
     ) {
         self.decorated = decorated
         self.archivingStatusDataSource = archivingStatusDataSource
-        self.transcriptionStatusDataSource = transcriptionStatusDataSource
     }
 
     public func startArchiving(
         _ request: StartArchivingDataSourceRequest
     ) async throws -> StartArchivingDataSourceResponse {
         let response = try await decorated.startArchiving(request)
-        statusDataSource(for: request.kind).set(archivingState: .archiving(response.archiveId))
+        archivingStatusDataSource.set(archivingState: .archiving(response.archiveId), for: request.kind)
         NotificationCenter.default.post(
             name: E2EArchivingEvents.didStart,
             object: response.archiveId,
@@ -37,7 +34,7 @@ public final class E2EArchivingDataSource: ArchivingDataSource {
         _ request: StopArchivingDataSourceRequest
     ) async throws -> StopArchivingDataSourceResponse {
         let response = try await decorated.stopArchiving(request)
-        statusDataSource(for: request.kind).set(archivingState: .idle)
+        archivingStatusDataSource.set(archivingState: .idle, for: request.kind)
         NotificationCenter.default.post(
             name: E2EArchivingEvents.didStop,
             object: nil,
@@ -45,10 +42,4 @@ public final class E2EArchivingDataSource: ArchivingDataSource {
         return response
     }
 
-    private func statusDataSource(for kind: ArchiveKind) -> any ArchivingStatusDataSource {
-        switch kind {
-        case .recording: archivingStatusDataSource
-        case .transcription: transcriptionStatusDataSource
-        }
-    }
 }

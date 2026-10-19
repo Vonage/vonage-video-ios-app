@@ -7,6 +7,7 @@ import Foundation
 import Testing
 import VERAArchiving
 import VERAArchivingTestHelpers
+import VERADomain
 import VERAVonage
 import VERAVonageArchivingPlugin
 
@@ -35,14 +36,17 @@ struct VonageArchivingPluginTests {
         #expect(dataSource.resetCallCount == 1)
     }
 
-    @Test("Call did end resets transcription status")
-    func callDidEndResetsTranscriptionStatus() async throws {
-        let transcriptionDataSource = ArchivingStatusDataSourceSpy()
-        let sut = makeSUT(transcriptionStatusDataSource: transcriptionDataSource)
+    @Test("Call did end clears running recording and transcription")
+    func callDidEndClearsEveryArchiveKind() async throws {
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
+        sut.handleSignal(makeStartSignal(archiveID: "recording-1", kind: "recording"))
+        sut.handleSignal(makeStartSignal(archiveID: "transcription-1", kind: "transcription"))
 
         try await sut.callDidEnd()
 
-        #expect(transcriptionDataSource.resetCallCount == 1)
+        #expect(dataSource._archivingState.value == .idle)
+        #expect(dataSource._transcriptionState.value == .idle)
     }
 
     // MARK: - Signal Handling Tests
@@ -59,6 +63,7 @@ struct VonageArchivingPluginTests {
 
         #expect(dataSource.setCallCount == 1)
         #expect(dataSource.lastArchivingStatus == .archiving(archiveID))
+        #expect(dataSource.lastArchiveKind == .recording)
     }
 
     @Test("Handles archiving stop signal correctly")
@@ -129,64 +134,54 @@ struct VonageArchivingPluginTests {
 
     // MARK: - Transcription Signal Handling Tests
 
-    @Test("Routes transcription start signal to the transcription status only")
-    func routesTranscriptionStartSignalToTranscriptionStatus() async throws {
-        let recordingDataSource = ArchivingStatusDataSourceSpy()
-        let transcriptionDataSource = ArchivingStatusDataSourceSpy()
-        let sut = makeSUT(
-            archivingStatusDataSource: recordingDataSource,
-            transcriptionStatusDataSource: transcriptionDataSource)
+    @Test("Routes transcription start signal to the transcription state only")
+    func routesTranscriptionStartSignalToTranscriptionState() async throws {
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.handleSignal(makeStartSignal(archiveID: "transcription-1", kind: "transcription"))
 
-        #expect(transcriptionDataSource.lastArchivingStatus == .archiving("transcription-1"))
-        #expect(recordingDataSource.setCallCount == 0)
+        #expect(dataSource.lastArchiveKind == .transcription)
+        #expect(dataSource._transcriptionState.value == .archiving("transcription-1"))
+        #expect(dataSource._archivingState.value == .idle)
     }
 
-    @Test("Routes recording start signal with explicit kind to the recording status only")
-    func routesRecordingStartSignalToRecordingStatus() async throws {
-        let recordingDataSource = ArchivingStatusDataSourceSpy()
-        let transcriptionDataSource = ArchivingStatusDataSourceSpy()
-        let sut = makeSUT(
-            archivingStatusDataSource: recordingDataSource,
-            transcriptionStatusDataSource: transcriptionDataSource)
+    @Test("Routes recording start signal with explicit kind to the recording state only")
+    func routesRecordingStartSignalToRecordingState() async throws {
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.handleSignal(makeStartSignal(archiveID: "recording-1", kind: "recording"))
 
-        #expect(recordingDataSource.lastArchivingStatus == .archiving("recording-1"))
-        #expect(transcriptionDataSource.setCallCount == 0)
+        #expect(dataSource.lastArchiveKind == .recording)
+        #expect(dataSource._archivingState.value == .archiving("recording-1"))
+        #expect(dataSource._transcriptionState.value == .idle)
     }
 
     @Test("Stopping the recording keeps a running transcription")
     func stoppingRecordingKeepsTranscription() async throws {
-        let recordingDataSource = ArchivingStatusDataSourceSpy()
-        let transcriptionDataSource = ArchivingStatusDataSourceSpy()
-        let sut = makeSUT(
-            archivingStatusDataSource: recordingDataSource,
-            transcriptionStatusDataSource: transcriptionDataSource)
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.handleSignal(makeStartSignal(archiveID: "recording-1", kind: "recording"))
         sut.handleSignal(makeStartSignal(archiveID: "transcription-1", kind: "transcription"))
         sut.handleSignal(makeStopSignal(kind: "recording"))
 
-        #expect(recordingDataSource.lastArchivingStatus == .idle)
-        #expect(transcriptionDataSource.lastArchivingStatus == .archiving("transcription-1"))
+        #expect(dataSource._archivingState.value == .idle)
+        #expect(dataSource._transcriptionState.value == .archiving("transcription-1"))
     }
 
     @Test("Stopping the transcription keeps a running recording")
     func stoppingTranscriptionKeepsRecording() async throws {
-        let recordingDataSource = ArchivingStatusDataSourceSpy()
-        let transcriptionDataSource = ArchivingStatusDataSourceSpy()
-        let sut = makeSUT(
-            archivingStatusDataSource: recordingDataSource,
-            transcriptionStatusDataSource: transcriptionDataSource)
+        let dataSource = ArchivingStatusDataSourceSpy()
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.handleSignal(makeStartSignal(archiveID: "recording-1", kind: "recording"))
         sut.handleSignal(makeStartSignal(archiveID: "transcription-1", kind: "transcription"))
         sut.handleSignal(makeStopSignal(kind: "transcription"))
 
-        #expect(transcriptionDataSource.lastArchivingStatus == .idle)
-        #expect(recordingDataSource.lastArchivingStatus == .archiving("recording-1"))
+        #expect(dataSource._transcriptionState.value == .idle)
+        #expect(dataSource._archivingState.value == .archiving("recording-1"))
     }
 
     @Test("Plugin identifier returns correct value")
@@ -200,12 +195,9 @@ struct VonageArchivingPluginTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        archivingStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy(),
-        transcriptionStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy()
+        archivingStatusDataSource: ArchivingStatusDataSource
     ) -> VonageArchivingPlugin {
-        VonageArchivingPlugin(
-            archivingStatusDataSource: archivingStatusDataSource,
-            transcriptionStatusDataSource: transcriptionStatusDataSource)
+        VonageArchivingPlugin(archivingStatusDataSource: archivingStatusDataSource)
     }
 
     private func makeStartSignal(archiveID: String, kind: String) -> VonageSignal {

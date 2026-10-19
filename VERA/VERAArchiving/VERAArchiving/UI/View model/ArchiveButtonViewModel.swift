@@ -54,7 +54,7 @@ public final class ArchiveButtonViewModel {
         guard !initiated else { return }
         initiated = true
 
-        archivingStatusDataSource.archivingState
+        archivingStatusDataSource.archivingState(for: kind)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 self?.state = status

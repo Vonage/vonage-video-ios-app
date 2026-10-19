@@ -10,23 +10,17 @@ public final class ArchivingFactory {
     private let archivesRepository: ArchivesRepository
     private let archivingDataSource: ArchivingDataSource
     private let archivingStatusDataSource: ArchivingStatusDataSource
-    private let transcriptionStatusDataSource: ArchivingStatusDataSource
     private let sessionKeyProvider: SessionKeyProvider
 
-    /// - Parameters:
-    ///   - archivingStatusDataSource: Status of the recording archive.
-    ///   - transcriptionStatusDataSource: Status of the post-call transcription archive.
     public init(
         archivesRepository: ArchivesRepository,
         archivingDataSource: ArchivingDataSource,
         archivingStatusDataSource: ArchivingStatusDataSource,
-        transcriptionStatusDataSource: ArchivingStatusDataSource = DefaultArchivingStatusDataSource(),
         sessionKeyProvider: SessionKeyProvider
     ) {
         self.archivesRepository = archivesRepository
         self.archivingDataSource = archivingDataSource
         self.archivingStatusDataSource = archivingStatusDataSource
-        self.transcriptionStatusDataSource = transcriptionStatusDataSource
         self.sessionKeyProvider = sessionKeyProvider
     }
 
@@ -46,7 +40,7 @@ public final class ArchivingFactory {
                 archivingDataSource: archivingDataSource),
             stopArchivingUseCase: DefaultStopArchivingUseCase(
                 archivingDataSource: archivingDataSource),
-            archivingStatusDataSource: statusDataSource(for: kind),
+            archivingStatusDataSource: archivingStatusDataSource,
             showAlert: showAlert)
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
@@ -55,13 +49,6 @@ public final class ArchivingFactory {
         viewModel: ArchiveButtonViewModel
     ) -> some View {
         ArchiveScreenButton(viewModel: viewModel)
-    }
-
-    private func statusDataSource(for kind: ArchiveKind) -> ArchivingStatusDataSource {
-        switch kind {
-        case .recording: archivingStatusDataSource
-        case .transcription: transcriptionStatusDataSource
-        }
     }
 
     public func make(

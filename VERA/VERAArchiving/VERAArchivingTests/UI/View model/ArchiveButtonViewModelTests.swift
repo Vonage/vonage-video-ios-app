@@ -357,11 +357,35 @@ struct ArchiveButtonViewModelTests {
         #expect(startUseCase.lastRequest?.sessionKey == "heart-of-gold")
     }
 
+    @Test func transcriptionButtonIgnoresRecordingState() async {
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._archivingState.value = .archiving("recording-1")
+        let sut = makeSUT(kind: .transcription, archivingStatusDataSource: dataSource)
+
+        sut.setup()
+        dataSource._transcriptionState.value = .archiving("transcription-1")
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
+
+        #expect(state == .archiving("transcription-1"))
+    }
+
+    @Test func recordingButtonIgnoresTranscriptionState() async {
+        let dataSource = ArchivingStatusDataSourceSpy()
+        dataSource._transcriptionState.value = .archiving("transcription-1")
+        let sut = makeSUT(archivingStatusDataSource: dataSource)
+
+        sut.setup()
+        dataSource._archivingState.value = .archiving("recording-1")
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
+
+        #expect(state == .archiving("recording-1"))
+    }
+
     @Test func transcriptionStopSendsTranscriptionArchiveID() async {
         let stopUseCase = SpyStopArchivingUseCase()
         let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
-        dataSource._archivingState.value = .archiving("transcription-123")
+        dataSource._transcriptionState.value = .archiving("transcription-123")
         let sut = makeSUT(
             kind: .transcription,
             stopArchivingUseCase: stopUseCase,

@@ -17,7 +17,6 @@ struct E2EMeetingRoomArchivingDataSourceFactory:
             httpClient: context.httpClient)
         return E2EArchivingDataSource(
             decorated: defaultDataSource,
-            archivingStatusDataSource: context.archivingStatusDataSource,
-            transcriptionStatusDataSource: context.transcriptionStatusDataSource)
+            archivingStatusDataSource: context.archivingStatusDataSource)
     }
 }
