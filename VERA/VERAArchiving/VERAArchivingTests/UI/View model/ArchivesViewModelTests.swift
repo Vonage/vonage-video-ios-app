@@ -111,6 +111,35 @@ struct ArchivesViewModelTests {
         #expect(error != nil)
     }
 
+    @Test func loadDataClearsErrorFromEarlierLoad() async {
+        let repository = SpyArchivesRepository()
+        repository.shouldFail = true
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        let failedLoadError = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+        #expect(failedLoadError != nil)
+
+        repository.shouldFail = false
+        await sut.loadData()
+
+        #expect(await MainActor.run { sut.error } == nil)
+    }
+
+    @Test func loadDataIgnoresUpdatesFromEarlierLoad() async {
+        let repository = SpyArchivesRepository()
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        let earlierSubject = repository.subject
+        await sut.loadData()
+
+        earlierSubject.send(makeArchives())
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(await MainActor.run { sut.archives }.isEmpty)
+    }
+
     @Test func mapToUIArchiveCreatesCorrectUIData() {
         let archive = Archive(
             id: UUID(),
@@ -440,7 +469,8 @@ final class SpyArchivesRepository: ArchivesRepository {
     var getArchivesCallCount = 0
     var lastSessionKey: String?
     var shouldFail = false
-    let subject = PassthroughSubject<[Archive], Error>()
+    /// Publisher returned by the latest `getArchives` call; each call gets a new one.
+    private(set) var subject = PassthroughSubject<[Archive], Error>()
 
     func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
         getArchivesCallCount += 1
@@ -451,6 +481,7 @@ final class SpyArchivesRepository: ArchivesRepository {
                 .eraseToAnyPublisher()
         }
 
+        subject = PassthroughSubject<[Archive], Error>()
         return subject.eraseToAnyPublisher()
     }
 }

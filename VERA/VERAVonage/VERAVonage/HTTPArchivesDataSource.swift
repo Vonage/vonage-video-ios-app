@@ -60,6 +60,7 @@ public struct RemoteArchive: Decodable {
     public let reason: String?
     public let sessionId: String?
     public let applicationId: String?
+    /// Milliseconds since the Unix epoch.
     public let createdAt: TimeInterval
     public let size: Int
     public let duration: Int
@@ -90,7 +91,7 @@ public struct RemoteArchive: Decodable {
         return .init(
             id: uuid,
             name: name,
-            createdAt: Date(timeIntervalSince1970: createdAt),
+            createdAt: Date(timeIntervalSince1970: createdAt / 1000),
             status: ArchiveStatus(value: status),
             url: url?.toURL,
             size: size,
