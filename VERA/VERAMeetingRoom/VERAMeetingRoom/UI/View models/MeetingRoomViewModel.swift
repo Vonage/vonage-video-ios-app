@@ -423,6 +423,7 @@ extension MeetingRoomViewModel {
             .store(in: &cancellables)
 
         call.archivingState
+            .removeDuplicates()
             .dropFirst()
             .sink { [weak self] archivingState in
                 self?.handleArchivingStateChange(archivingState)
@@ -430,6 +431,7 @@ extension MeetingRoomViewModel {
             .store(in: &cancellables)
 
         call.transcriptionState
+            .removeDuplicates()
             .dropFirst()
             .sink { [weak self] transcriptionState in
                 self?.handleTranscriptionStateChange(transcriptionState)

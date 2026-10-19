@@ -1296,6 +1296,67 @@ struct MeetingRoomViewModelTests {
         #expect(toast?.mode == .info)
     }
 
+    @Test("Given transcription is already stopped, When idle is emitted again, Then no toast is shown")
+    @MainActor
+    func repeatedTranscriptionIdleShowsNoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0 != nil }
+        mockCall._transcriptionState.send(.idle)
+        _ = await waitForToast(sut) { $0?.message == "Session transcription stopped" }
+        sut.toast = nil
+
+        mockCall._transcriptionState.send(.idle)
+
+        let toast = await waitForToast(sut, timeout: .milliseconds(300)) { $0 != nil }
+        #expect(toast == nil)
+    }
+
+    @Test("Given transcription is running, When the same state is emitted again, Then no toast is shown")
+    @MainActor
+    func repeatedTranscriptionStartShowsNoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0 != nil }
+        sut.toast = nil
+
+        mockCall._transcriptionState.send(.archiving("transcription-123"))
+
+        let toast = await waitForToast(sut, timeout: .milliseconds(300)) { $0 != nil }
+        #expect(toast == nil)
+    }
+
+    @Test("Given recording is already stopped, When idle is emitted again, Then no toast is shown")
+    @MainActor
+    func repeatedRecordingIdleShowsNoToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let mockCall = connectToRoomUseCase.call
+
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        mockCall._archivingState.send(.archiving("archive-123"))
+        _ = await waitForToast(sut) { $0 != nil }
+        mockCall._archivingState.send(.idle)
+        _ = await waitForToast(sut) { $0?.message == "Session recording stopped" }
+        sut.toast = nil
+
+        mockCall._archivingState.send(.idle)
+
+        let toast = await waitForToast(sut, timeout: .milliseconds(300)) { $0 != nil }
+        #expect(toast == nil)
+    }
+
     @Test("Given transcription starts while recording, Then both archives are active in the view state")
     @MainActor
     func transcriptionAndRecordingAreTrackedIndependently() async throws {
