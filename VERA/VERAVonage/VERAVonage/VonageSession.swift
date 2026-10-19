@@ -83,12 +83,10 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
     /// Creates a new session wrapper.
     ///
     /// - Parameters:
-    ///   - session: An unconnected `OTSession` instance. Delegate callbacks are normalized
-    ///     to the main queue; callers retaining the session must preserve that queue while wrapped.
+    ///   - session: An unconnected `OTSession` instance configured to deliver callbacks on
+    ///     the main queue. Use `VonageSessionFactory` for the standard configuration.
     ///   - credentials: The credentials used to connect the session and shared with plugins.
     public init(session: OTSession, credentials: RoomCredentials) {
-        // Establish the callback queue before callers connect or register this wrapper as delegate.
-        session.apiQueue = .main
         self.session = session
         self.credentials = credentials
     }

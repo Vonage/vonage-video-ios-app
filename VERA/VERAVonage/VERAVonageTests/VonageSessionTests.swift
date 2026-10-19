@@ -12,10 +12,12 @@ import VERADomain
 @Suite("VonageSession tests")
 struct VonageSessionTests {
 
-    @Test("Wrapping an injected session normalizes delegate delivery to the main queue")
-    func injectedSessionUsesMainCallbackQueue() {
+    @MainActor
+    @Test("Wrapping an injected session preserves its configured callback queue")
+    func injectedSessionPreservesCallbackQueue() {
         let session = makeOTSession()
-        session.apiQueue = DispatchQueue(label: "vera.session.injected-callbacks")
+        let callbackQueue = DispatchQueue(label: "vera.session.injected-callbacks")
+        session.apiQueue = callbackQueue
         let sut = VonageSession(
             session: session,
             credentials: RoomCredentials(
@@ -27,7 +29,7 @@ struct VonageSessionTests {
             )
         )
 
-        #expect(session.apiQueue === DispatchQueue.main)
+        #expect(session.apiQueue === callbackQueue)
         withExtendedLifetime(sut) {}
     }
 
