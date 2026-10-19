@@ -89,6 +89,8 @@ public final class MeetingRoomViewModel {
     /// Tracks the fallback disconnection task so it can be cancelled on normal call end.
     @MainActor @ObservationIgnored private var disconnectionTask: Task<Void, Never>?
 
+    @MainActor @ObservationIgnored private var isSessionInterrupted = false
+
     @ObservationIgnored
     private let layoutPublisher = CurrentValueSubject<MeetingRoomLayout, Never>(.activeSpeaker)
     @ObservationIgnored
@@ -499,6 +501,11 @@ extension MeetingRoomViewModel {
             self.transcriptionPublisher.value = transcriptionState
             switch transcriptionState {
             case .idle:
+                // A reset during interruption or teardown is not a transcription-stop notification.
+                guard !self.isSessionInterrupted,
+                    self.callStatePublisher.value != .disconnecting,
+                    self.callStatePublisher.value != .disconnected
+                else { return }
                 self.toast = .init(
                     message: String(localized: "Session transcription stopped", bundle: .module),
                     mode: .info)
@@ -515,10 +522,12 @@ extension MeetingRoomViewModel {
             guard let self else { return }
             switch event {
             case .didBeginReconnecting:
+                self.isSessionInterrupted = true
                 self.toast = .init(
                     message: String(localized: "Session did drop, started reconnection", bundle: .module),
                     mode: .warning)
             case .didReconnect:
+                self.isSessionInterrupted = false
                 self.toast = .init(
                     message: String(localized: "Session did reconnect", bundle: .module),
                     mode: .info)
@@ -531,6 +540,7 @@ extension MeetingRoomViewModel {
             case .sessionFailure(let error):
                 self.toast = .init(message: error.localizedDescription, mode: .failure)
             case .disconnected:
+                self.isSessionInterrupted = true
                 self.toast = .init(
                     message: String(localized: "Session did disconnect", bundle: .module),
                     mode: .failure)

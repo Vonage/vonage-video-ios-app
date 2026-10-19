@@ -1384,6 +1384,90 @@ struct MeetingRoomViewModelTests {
         #expect(recordingStopped?.transcriptionState == .archiving("transcription-1"))
     }
 
+    @Test(
+        "Transcription reset during teardown does not show a stop notification",
+        arguments: [CallState.disconnecting, .disconnected])
+    @MainActor
+    func transcriptionResetDuringTeardownIsSilent(callState: CallState) async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = connectToRoomUseCase.call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+        call._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0?.message == "Session transcription started" }
+        sut.toast = nil
+
+        call._callState.send(callState)
+        call._transcriptionState.send(.idle)
+        await delay()
+
+        #expect(sut.toast == nil)
+    }
+
+    @Test("A transcription reset preserves the unexpected-disconnection error")
+    @MainActor
+    func transcriptionResetPreservesDisconnectError() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = connectToRoomUseCase.call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+        call._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0?.message == "Session transcription started" }
+        sut.toast = nil
+        call._eventsPublisher.send(.disconnected)
+        _ = await waitForToast(sut) { $0?.mode == .failure }
+        let errorMessage = sut.toast?.message
+
+        call._transcriptionState.send(.idle)
+        await delay()
+
+        #expect(sut.toast?.mode == .failure)
+        #expect(sut.toast?.message == errorMessage)
+    }
+
+    @Test("Reconnection suppresses reset notifications and restores real stop notifications")
+    @MainActor
+    func transcriptionNotificationsResumeAfterReconnect() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = connectToRoomUseCase.call
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+        call._transcriptionState.send(.archiving("transcription-123"))
+        _ = await waitForToast(sut) { $0?.message == "Session transcription started" }
+        call._eventsPublisher.send(.didBeginReconnecting)
+        _ = await waitForToast(sut) { $0?.mode == .warning }
+        let warningMessage = sut.toast?.message
+
+        call._transcriptionState.send(.idle)
+        await delay()
+        #expect(sut.toast?.mode == .warning)
+        #expect(sut.toast?.message == warningMessage)
+
+        call._eventsPublisher.send(.didReconnect)
+        _ = await waitForToast(sut) { $0?.mode == .info }
+        call._transcriptionState.send(.archiving("transcription-456"))
+        _ = await waitForToast(sut) { $0?.message == "Session transcription started" }
+        sut.toast = nil
+        call._transcriptionState.send(.idle)
+        let toast = await waitForToast(sut) { $0?.message == "Session transcription stopped" }
+        #expect(toast?.mode == .info)
+    }
+
+    @Test("A real stop is announced when joining an already-transcribing call")
+    @MainActor
+    func transcriptionStopAfterActiveInitialSnapshotShowsToast() async throws {
+        let connectToRoomUseCase = makeMockConnectToRoomUseCase()
+        let call = connectToRoomUseCase.call
+        call._transcriptionState.send(.archiving("already-running"))
+        let sut = makeSUT(connectToRoomUseCase: connectToRoomUseCase)
+        await sut.loadUI()
+
+        call._transcriptionState.send(.idle)
+
+        let toast = await waitForToast(sut) { $0?.message == "Session transcription stopped" }
+        #expect(toast?.mode == .info)
+    }
+
     // MARK: - Session Event Tests
 
     @Test("Given session begins reconnecting, Then a warning toast is shown")
