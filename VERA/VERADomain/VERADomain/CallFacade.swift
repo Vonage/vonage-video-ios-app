@@ -174,6 +174,11 @@ public protocol CallConnectable: AnyObject {
     func disconnect() async throws
 }
 
+/// Optional microphone-only control for system mute actions, which must preserve video choices.
+public protocol AudioMuteControllable: AnyObject {
+    func muteLocalAudio(_ isMuted: Bool)
+}
+
 /// Controls local media publishing and mute state.
 ///
 /// Conformers should reflect changes via their ``SessionStatePublisherProvider/statePublisher``.
