@@ -29,9 +29,12 @@ struct ArchiveList: View {
     @Environment(\.meetingRoomTheme) private var theme
 
     let archives: [ArchiveUIData]
+    /// Archives whose download is in progress; their rows show a spinner instead of the button.
+    let downloadingArchiveIDs: Set<UUID>
 
-    init(archives: [ArchiveUIData] = []) {
+    init(archives: [ArchiveUIData] = [], downloadingArchiveIDs: Set<UUID> = []) {
         self.archives = archives
+        self.downloadingArchiveIDs = downloadingArchiveIDs
     }
 
     var body: some View {
@@ -71,6 +74,12 @@ struct ArchiveList: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
                             switch archive.downloadState {
+                            case .ready where downloadingArchiveIDs.contains(archive.id), .preparing:
+                                ProgressView()
+                                    .frame(
+                                        width: ArchiveListConstants.progressViewSize,
+                                        height: ArchiveListConstants.progressViewSize
+                                    )
                             case .ready:
                                 Button {
                                     archive.onDownload?()
@@ -84,12 +93,6 @@ struct ArchiveList: View {
                                     }
                                     .accessibilityIdentifier(archive.kind.downloadButtonAccessibilityID)
                                 }
-                            case .preparing:
-                                ProgressView()
-                                    .frame(
-                                        width: ArchiveListConstants.progressViewSize,
-                                        height: ArchiveListConstants.progressViewSize
-                                    )
                             case .unavailable:
                                 VERACommonUIAsset.Images.errorLine.swiftUIImage
                                     .foregroundStyle(theme.error)

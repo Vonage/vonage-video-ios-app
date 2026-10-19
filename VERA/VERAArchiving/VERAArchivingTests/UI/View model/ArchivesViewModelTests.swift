@@ -368,6 +368,46 @@ struct ArchivesViewModelTests {
         #expect(await MainActor.run { sut.sharedTranscript } == nil)
     }
 
+    @Test func downloadTranscriptionMarksArchiveDownloadingUntilFinished() async {
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
+        downloadUseCase.delay = .milliseconds(300)
+        let archive = makeArchive(kind: .transcription)
+        let sut = makeSUT(downloadTranscriptionUseCase: downloadUseCase)
+
+        sut.downloadArchive(archive)
+
+        let inProgress = await poll(read: { await MainActor.run { sut.downloadingArchiveIDs } }) { !$0.isEmpty }
+        #expect(inProgress == [archive.id])
+
+        let finished = await poll(read: { await MainActor.run { sut.downloadingArchiveIDs } }) { $0.isEmpty }
+        #expect(finished.isEmpty)
+        #expect(await MainActor.run { sut.sharedTranscript }?.id == archive.id)
+    }
+
+    @Test func downloadTranscriptionIgnoresRepeatedTapsWhileDownloading() async {
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
+        downloadUseCase.delay = .milliseconds(300)
+        let archive = makeArchive(kind: .transcription)
+        let sut = makeSUT(downloadTranscriptionUseCase: downloadUseCase)
+
+        sut.downloadArchive(archive)
+        sut.downloadArchive(archive)
+
+        _ = await poll(read: { await MainActor.run { sut.sharedTranscript } }) { $0 != nil }
+        #expect(downloadUseCase.callCount == 1)
+    }
+
+    @Test func downloadTranscriptionClearsDownloadingStateOnFailure() async {
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
+        downloadUseCase.shouldThrowError = true
+        let sut = makeSUT(downloadTranscriptionUseCase: downloadUseCase)
+
+        sut.downloadArchive(makeArchive(kind: .transcription))
+
+        _ = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+        #expect(await MainActor.run { sut.downloadingArchiveIDs }.isEmpty)
+    }
+
     @Test func downloadTranscriptionSetsErrorOnFailure() async {
         let downloadUseCase = SpyDownloadTranscriptionUseCase()
         downloadUseCase.shouldThrowError = true
@@ -505,10 +545,13 @@ final class SpyDownloadTranscriptionUseCase: DownloadTranscriptionUseCase {
     var callCount = 0
     var lastArchive: Archive?
     var shouldThrowError = false
+    /// How long each download takes, so tests can observe the in-progress state.
+    var delay: Duration = .zero
 
     func callAsFunction(_ archive: Archive) async throws -> ArchiveTranscript {
         callCount += 1
         lastArchive = archive
+        try await Task.sleep(for: delay)
 
         if shouldThrowError {
             throw NSError(domain: "test", code: -1)

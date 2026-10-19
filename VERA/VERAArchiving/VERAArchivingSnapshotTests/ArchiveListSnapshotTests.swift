@@ -28,6 +28,7 @@ struct ArchiveListSnapshotTests {
             "Transcriptions",
             "TranscriptionPreparing",
             "Unavailable",
+            "DownloadInProgress",
         ])
     func contentStates(variant: String) throws {
         let sut: ArchiveList
@@ -45,6 +46,10 @@ struct ArchiveListSnapshotTests {
             sut = makeSUT(archives: samplePreparingTranscriptionArchives)
         case "Unavailable":
             sut = makeSUT(archives: sampleUnavailableArchives)
+        case "DownloadInProgress":
+            sut = ArchiveList(
+                archives: sampleTranscriptionArchives,
+                downloadingArchiveIDs: [UUID(uuidString: "00000000-0000-0000-0000-000000000001")!])
         default:
             return
         }

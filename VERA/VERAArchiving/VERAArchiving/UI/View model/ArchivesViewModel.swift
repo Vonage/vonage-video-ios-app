@@ -24,6 +24,8 @@ public final class ArchivesViewModel {
     @MainActor public var error: AlertItem?
     /// A downloaded transcript waiting to be shared or saved by the user.
     @MainActor public var sharedTranscript: ArchiveTranscript?
+    /// Archives whose download is in progress.
+    @MainActor public private(set) var downloadingArchiveIDs: Set<UUID> = []
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
@@ -86,9 +88,12 @@ public final class ArchivesViewModel {
     }
 
     /// Opens a recording, or downloads a transcript and offers it for sharing.
+    ///
+    /// Requests for an archive that is already downloading are ignored.
     public func downloadArchive(_ archive: Archive) {
         Task { @MainActor [weak self] in
-            guard let self else { return }
+            guard let self, downloadingArchiveIDs.insert(archive.id).inserted else { return }
+            defer { downloadingArchiveIDs.remove(archive.id) }
             do {
                 switch archive.kind {
                 case .recording:
