@@ -6,6 +6,7 @@ import Foundation
 import Testing
 import VERAArchiving
 
+@MainActor
 @Suite("Stop archiving use case tests")
 struct StopArchivingUseCaseTests {
 
@@ -54,8 +55,8 @@ struct StopArchivingUseCaseTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        archivingDataSource: any ArchivingDataSource = MockArchivingDataSource()
+        archivingDataSource: (any ArchivingDataSource)? = nil
     ) -> StopArchivingUseCase {
-        DefaultStopArchivingUseCase(archivingDataSource: archivingDataSource)
+        DefaultStopArchivingUseCase(archivingDataSource: archivingDataSource ?? MockArchivingDataSource())
     }
 }

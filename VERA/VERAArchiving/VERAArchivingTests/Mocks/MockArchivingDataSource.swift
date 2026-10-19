@@ -5,6 +5,7 @@
 import Foundation
 import VERAArchiving
 
+@MainActor
 public final class MockArchivingDataSource: ArchivingDataSource {
     var error: Error?
     var lastSessionKey: String?

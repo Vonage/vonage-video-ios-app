@@ -9,6 +9,7 @@ import VERAArchiving
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Archives view model tests")
 struct ArchivesViewModelTests {
 
@@ -23,7 +24,7 @@ struct ArchivesViewModelTests {
     @Test func initialErrorIsNil() async {
         let sut = makeSUT()
 
-        let error = await MainActor.run { sut.error }
+        let error = sut.error
 
         #expect(error == nil as AlertItem?)
     }
@@ -50,7 +51,7 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }, until: { !$0.isEmpty })
 
         #expect(uiArchives.count == 2)
     }
@@ -63,7 +64,7 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }, until: { !$0.isEmpty })
 
         // First archive should be the last one (reversed)
         #expect(uiArchives.first?.id == archives.last?.id)
@@ -78,7 +79,7 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }, until: { !$0.isEmpty })
 
         // Verify indices are assigned correctly (first item gets highest index)
         #expect(uiArchives.first?.title.contains("2") == true)
@@ -106,9 +107,9 @@ struct ArchivesViewModelTests {
 
         await sut.loadData()
 
-        let error = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+        let hasError = await poll(read: { await MainActor.run { sut.error != nil } }, until: { $0 })
 
-        #expect(error != nil)
+        #expect(hasError)
     }
 
     @Test func mapToUIArchiveCreatesCorrectUIData() {
@@ -220,9 +221,9 @@ struct ArchivesViewModelTests {
 
         sut.downloadArchive(archive)
 
-        let error = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+        let hasError = await poll(read: { await MainActor.run { sut.error != nil } }, until: { $0 })
 
-        #expect(error != nil)
+        #expect(hasError)
     }
 
     @Test func uiArchiveOnDownloadTriggersDownloadArchive() async {
@@ -237,7 +238,7 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }, until: { !$0.isEmpty })
 
         uiArchives.first?.onDownload?()
 
@@ -250,15 +251,15 @@ struct ArchivesViewModelTests {
 
     private func makeSUT(
         sessionKey: String = "heart-of-gold",
-        archivesRepository: ArchivesRepository = SpyArchivesRepository(),
-        playRecordingUseCase: PlayRecordingUseCase = SpyPlayRecordingUseCase()
+        archivesRepository: ArchivesRepository? = nil,
+        playRecordingUseCase: PlayRecordingUseCase? = nil
     ) -> ArchivesViewModel {
         let holder = DefaultSessionKeyHolder()
         holder.setSessionKey(sessionKey)
         return ArchivesViewModel(
             sessionKeyProvider: holder,
-            archivesRepository: archivesRepository,
-            playRecordingUseCase: playRecordingUseCase
+            archivesRepository: archivesRepository ?? SpyArchivesRepository(),
+            playRecordingUseCase: playRecordingUseCase ?? SpyPlayRecordingUseCase()
         )
     }
 
