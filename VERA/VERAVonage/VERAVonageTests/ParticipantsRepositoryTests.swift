@@ -55,6 +55,19 @@ struct ParticipantsRepositoryTests {
         #expect(await sut.all.isEmpty)
     }
 
+    @Test("The call manager returns cleared state after a late participant update")
+    func callManagerDoesNotRestoreParticipantsAfterCleanup() async {
+        let sut = CallStateManager(activeSpeakerTracker: ActiveSpeakerTracker())
+        await sut.cleanUpParticipants()
+
+        let state = await sut.updateParticipant(makeParticipant(id: "arthur", name: "Late Arthur"))
+
+        #expect(state.participants.isEmpty)
+        #expect(state.localParticipant == nil)
+        #expect(state.activeParticipantId == nil)
+        #expect(await sut.getSubscriber(id: "arthur") == nil)
+    }
+
     private func makeParticipant(id: String, name: String) -> Participant {
         Participant(
             id: id,
