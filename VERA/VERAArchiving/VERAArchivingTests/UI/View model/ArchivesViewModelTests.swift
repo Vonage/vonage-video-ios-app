@@ -111,35 +111,6 @@ struct ArchivesViewModelTests {
         #expect(error != nil)
     }
 
-    @Test func loadDataClearsErrorFromEarlierLoad() async {
-        let repository = SpyArchivesRepository()
-        repository.shouldFail = true
-        let sut = makeSUT(archivesRepository: repository)
-
-        await sut.loadData()
-        let failedLoadError = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
-        #expect(failedLoadError != nil)
-
-        repository.shouldFail = false
-        await sut.loadData()
-
-        #expect(await MainActor.run { sut.error } == nil)
-    }
-
-    @Test func loadDataIgnoresUpdatesFromEarlierLoad() async {
-        let repository = SpyArchivesRepository()
-        let sut = makeSUT(archivesRepository: repository)
-
-        await sut.loadData()
-        let earlierSubject = repository.subject
-        await sut.loadData()
-
-        earlierSubject.send(makeArchives())
-        try? await Task.sleep(for: .milliseconds(100))
-
-        #expect(await MainActor.run { sut.archives }.isEmpty)
-    }
-
     @Test func mapToUIArchiveCreatesCorrectUIData() {
         let archive = Archive(
             id: UUID(),
@@ -336,19 +307,49 @@ struct ArchivesViewModelTests {
         #expect(uiArchive.downloadState == .unavailable)
     }
 
-    @Test func downloadArchiveOpensTranscriptionsThroughPlayRecordingUseCase() async {
+    @Test func downloadTranscriptionSharesDownloadedTranscript() async {
         let playUseCase = SpyPlayRecordingUseCase()
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
         let archive = makeArchive(
             kind: .transcription,
             transcription: ArchiveTranscription(
                 status: .available, url: URL(string: "https://example.com/transcript.zip")))
-        let sut = makeSUT(playRecordingUseCase: playUseCase)
+        let sut = makeSUT(playRecordingUseCase: playUseCase, downloadTranscriptionUseCase: downloadUseCase)
 
         sut.downloadArchive(archive)
 
-        let callCount = await poll(read: { playUseCase.callCount }) { $0 == 1 }
-        #expect(callCount == 1)
-        #expect(playUseCase.lastArchive?.id == archive.id)
+        let transcript = await poll(read: { await MainActor.run { sut.sharedTranscript } }) { $0 != nil }
+
+        #expect(transcript?.id == archive.id)
+        #expect(downloadUseCase.lastArchive?.id == archive.id)
+        #expect(playUseCase.callCount == 0)
+    }
+
+    @Test func downloadRecordingDoesNotDownloadTranscript() async {
+        let playUseCase = SpyPlayRecordingUseCase()
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
+        let sut = makeSUT(playRecordingUseCase: playUseCase, downloadTranscriptionUseCase: downloadUseCase)
+
+        sut.downloadArchive(makeArchive(kind: .recording))
+
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(playUseCase.callCount == 1)
+        #expect(downloadUseCase.callCount == 0)
+        #expect(await MainActor.run { sut.sharedTranscript } == nil)
+    }
+
+    @Test func downloadTranscriptionSetsErrorOnFailure() async {
+        let downloadUseCase = SpyDownloadTranscriptionUseCase()
+        downloadUseCase.shouldThrowError = true
+        let sut = makeSUT(downloadTranscriptionUseCase: downloadUseCase)
+
+        sut.downloadArchive(makeArchive(kind: .transcription))
+
+        let error = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+
+        #expect(error != nil)
+        #expect(await MainActor.run { sut.sharedTranscript } == nil)
     }
 
     @Test func uiArchiveOnDownloadTriggersDownloadArchive() async {
@@ -377,14 +378,16 @@ struct ArchivesViewModelTests {
     private func makeSUT(
         sessionKey: String = "heart-of-gold",
         archivesRepository: ArchivesRepository = SpyArchivesRepository(),
-        playRecordingUseCase: PlayRecordingUseCase = SpyPlayRecordingUseCase()
+        playRecordingUseCase: PlayRecordingUseCase = SpyPlayRecordingUseCase(),
+        downloadTranscriptionUseCase: DownloadTranscriptionUseCase = SpyDownloadTranscriptionUseCase()
     ) -> ArchivesViewModel {
         let holder = DefaultSessionKeyHolder()
         holder.setSessionKey(sessionKey)
         return ArchivesViewModel(
             sessionKeyProvider: holder,
             archivesRepository: archivesRepository,
-            playRecordingUseCase: playRecordingUseCase
+            playRecordingUseCase: playRecordingUseCase,
+            downloadTranscriptionUseCase: downloadTranscriptionUseCase
         )
     }
 
@@ -437,8 +440,7 @@ final class SpyArchivesRepository: ArchivesRepository {
     var getArchivesCallCount = 0
     var lastSessionKey: String?
     var shouldFail = false
-    /// Publisher returned by the latest `getArchives` call; each call gets a new one.
-    private(set) var subject = PassthroughSubject<[Archive], Error>()
+    let subject = PassthroughSubject<[Archive], Error>()
 
     func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
         getArchivesCallCount += 1
@@ -449,7 +451,6 @@ final class SpyArchivesRepository: ArchivesRepository {
                 .eraseToAnyPublisher()
         }
 
-        subject = PassthroughSubject<[Archive], Error>()
         return subject.eraseToAnyPublisher()
     }
 }
@@ -466,5 +467,22 @@ final class SpyPlayRecordingUseCase: PlayRecordingUseCase {
         if shouldThrowError {
             throw NSError(domain: "test", code: -1)
         }
+    }
+}
+
+final class SpyDownloadTranscriptionUseCase: DownloadTranscriptionUseCase {
+    var callCount = 0
+    var lastArchive: Archive?
+    var shouldThrowError = false
+
+    func callAsFunction(_ archive: Archive) async throws -> ArchiveTranscript {
+        callCount += 1
+        lastArchive = archive
+
+        if shouldThrowError {
+            throw NSError(domain: "test", code: -1)
+        }
+
+        return ArchiveTranscript(id: archive.id, fileURL: URL(fileURLWithPath: "/tmp/transcript.zip"))
     }
 }
