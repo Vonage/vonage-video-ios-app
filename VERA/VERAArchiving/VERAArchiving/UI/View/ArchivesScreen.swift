@@ -13,6 +13,9 @@ public struct ArchivesScreen: View {
         CardView {
             ArchiveList(archives: viewModel.archives)
         }
+        .sheet(item: $viewModel.sharedTranscript) { transcript in
+            ShareSheet(fileURL: transcript.fileURL)
+        }
         .alert(item: $viewModel.error) { $0.view }
     }
 }
