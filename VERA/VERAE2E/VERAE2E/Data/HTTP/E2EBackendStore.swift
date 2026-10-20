@@ -184,7 +184,8 @@ public actor E2EBackendStore {
             "reason": NSNull(),
             "sessionId": session.sessionId,
             "applicationId": session.applicationId,
-            "createdAt": archive.createdAt,
+            // The real backend reports milliseconds since the Unix epoch.
+            "createdAt": archive.createdAt * 1000,
             "size": 1_024_000,
             "duration": 10,
             "outputMode": "composed",

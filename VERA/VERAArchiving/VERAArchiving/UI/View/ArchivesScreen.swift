@@ -7,11 +7,12 @@ import VERACommonUI
 
 public struct ArchivesScreen: View {
 
-    var viewModel: ArchivesViewModel
+    @Bindable var viewModel: ArchivesViewModel
 
     public var body: some View {
         CardView {
             ArchiveList(archives: viewModel.archives)
         }
+        .alert(item: $viewModel.error) { $0.view }
     }
 }

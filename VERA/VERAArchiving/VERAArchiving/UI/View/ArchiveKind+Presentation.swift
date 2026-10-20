@@ -81,4 +81,41 @@ extension ArchiveKind {
         case .transcription: String(localized: "stop.transcription.message", bundle: .veraArchiving)
         }
     }
+
+    // MARK: - Goodbye page list
+
+    func listTitle(index: Int) -> String {
+        switch self {
+        case .recording: String(localized: "Recording \(index)", bundle: .veraArchiving)
+        case .transcription: String(localized: "Transcription \(index)", bundle: .veraArchiving)
+        }
+    }
+
+    var preparingTitle: String {
+        switch self {
+        case .recording: String(localized: "Your recording is being prepared", bundle: .veraArchiving)
+        case .transcription: String(localized: "Your transcription is being prepared", bundle: .veraArchiving)
+        }
+    }
+
+    var listIcon: Image {
+        switch self {
+        case .recording: VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
+        case .transcription: VERACommonUIAsset.Images.textLine.swiftUIImage
+        }
+    }
+
+    var listItemAccessibilityID: String {
+        switch self {
+        case .recording: ArchivingAccessibilityID.archiveItem
+        case .transcription: ArchivingAccessibilityID.transcriptionItem
+        }
+    }
+
+    var downloadButtonAccessibilityID: String {
+        switch self {
+        case .recording: ArchivingAccessibilityID.downloadButton
+        case .transcription: ArchivingAccessibilityID.transcriptionDownloadButton
+        }
+    }
 }

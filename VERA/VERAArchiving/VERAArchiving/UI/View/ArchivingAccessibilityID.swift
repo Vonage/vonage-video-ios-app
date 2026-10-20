@@ -11,4 +11,6 @@ public enum ArchivingAccessibilityID {
     public static let archiveList = "archiving-archive-list"
     public static let archiveItem = "archiving-archive-item"
     public static let downloadButton = "archiving-download-button"
+    public static let transcriptionItem = "archiving-transcription-item"
+    public static let transcriptionDownloadButton = "archiving-transcription-download-button"
 }

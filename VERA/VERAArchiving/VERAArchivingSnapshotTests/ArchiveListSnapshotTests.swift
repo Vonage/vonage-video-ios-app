@@ -25,6 +25,9 @@ struct ArchiveListSnapshotTests {
             "Empty",
             "Populated",
             "Downloading",
+            "Transcriptions",
+            "TranscriptionPreparing",
+            "Unavailable",
         ])
     func contentStates(variant: String) throws {
         let sut: ArchiveList
@@ -36,6 +39,12 @@ struct ArchiveListSnapshotTests {
             sut = makeSUT(archives: sampleDownloadableArchives)
         case "Downloading":
             sut = makeSUT(archives: sampleDownloadingArchives)
+        case "Transcriptions":
+            sut = makeSUT(archives: sampleTranscriptionArchives)
+        case "TranscriptionPreparing":
+            sut = makeSUT(archives: samplePreparingTranscriptionArchives)
+        case "Unavailable":
+            sut = makeSUT(archives: sampleUnavailableArchives)
         default:
             return
         }
@@ -94,13 +103,13 @@ struct ArchiveListSnapshotTests {
                 id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
                 title: "Recording 1",
                 subtitle: "Started at: Mon, Aug 4 12:09 PM",
-                isDownloadable: true
+                downloadState: .ready
             ),
             ArchiveUIData(
                 id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
                 title: "Recording 2",
                 subtitle: "Started at: Mon, Aug 4 12:30 PM",
-                isDownloadable: true
+                downloadState: .ready
             ),
         ]
     }
@@ -111,13 +120,67 @@ struct ArchiveListSnapshotTests {
                 id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
                 title: "Recording 1",
                 subtitle: "Started at: Mon, Aug 4 12:09 PM",
-                isDownloadable: true
+                downloadState: .ready
             ),
             ArchiveUIData(
                 id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
-                title: "Recording 2",
-                subtitle: "Started at: Mon, Aug 4 12:30 PM",
-                isDownloadable: false
+                title: "Your recording is being prepared",
+                subtitle: "Please wait while we prepare your downloads",
+                downloadState: .preparing
+            ),
+        ]
+    }
+
+    private var sampleTranscriptionArchives: [ArchiveUIData] {
+        [
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                kind: .transcription,
+                title: "Transcription 1",
+                subtitle: "0:30 • 120.0 KB • Created: Mon, Aug 4 12:30 PM",
+                downloadState: .ready
+            ),
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+                title: "Recording 1",
+                subtitle: "0:30 • 1.0 MB • Created: Mon, Aug 4 12:09 PM",
+                downloadState: .ready
+            ),
+        ]
+    }
+
+    private var samplePreparingTranscriptionArchives: [ArchiveUIData] {
+        [
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                kind: .transcription,
+                title: "Your transcription is being prepared",
+                subtitle: "Please wait while we prepare your downloads",
+                downloadState: .preparing
+            ),
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+                title: "Recording 1",
+                subtitle: "0:30 • 1.0 MB • Created: Mon, Aug 4 12:09 PM",
+                downloadState: .ready
+            ),
+        ]
+    }
+
+    private var sampleUnavailableArchives: [ArchiveUIData] {
+        [
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                kind: .transcription,
+                title: "Transcription 1",
+                subtitle: "0:30 • 120.0 KB • Created: Mon, Aug 4 12:30 PM",
+                downloadState: .unavailable
+            ),
+            ArchiveUIData(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
+                title: "Recording 1",
+                subtitle: "0:30 • 1.0 MB • Created: Mon, Aug 4 12:09 PM",
+                downloadState: .unavailable
             ),
         ]
     }

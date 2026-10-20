@@ -111,6 +111,35 @@ struct ArchivesViewModelTests {
         #expect(error != nil)
     }
 
+    @Test func loadDataClearsErrorFromEarlierLoad() async {
+        let repository = SpyArchivesRepository()
+        repository.shouldFail = true
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        let failedLoadError = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
+        #expect(failedLoadError != nil)
+
+        repository.shouldFail = false
+        await sut.loadData()
+
+        #expect(await MainActor.run { sut.error } == nil)
+    }
+
+    @Test func loadDataIgnoresUpdatesFromEarlierLoad() async {
+        let repository = SpyArchivesRepository()
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        let earlierSubject = repository.subject
+        await sut.loadData()
+
+        earlierSubject.send(makeArchives())
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(await MainActor.run { sut.archives }.isEmpty)
+    }
+
     @Test func mapToUIArchiveCreatesCorrectUIData() {
         let archive = Archive(
             id: UUID(),
@@ -129,7 +158,7 @@ struct ArchivesViewModelTests {
         #expect(uiArchive.title.contains("5"))
         #expect(uiArchive.subtitle.contains("0:06"))
         #expect(uiArchive.subtitle.contains("3.2 MB"))
-        #expect(uiArchive.isDownloadable == true)
+        #expect(uiArchive.downloadState == .ready)
     }
 
     @Test func mapToUIArchiveFormatsSmallSizeInKB() {
@@ -180,7 +209,7 @@ struct ArchivesViewModelTests {
 
         let uiArchive = sut.mapToUIArchive(archive, index: 1)
 
-        #expect(uiArchive.isDownloadable == false)
+        #expect(uiArchive.downloadState == .preparing)
     }
 
     @Test func downloadArchiveCallsPlayRecordingUseCase() async {
@@ -225,6 +254,103 @@ struct ArchivesViewModelTests {
         #expect(error != nil)
     }
 
+    @Test func loadDataNumbersRecordingsAndTranscriptionsSeparately() async {
+        let repository = SpyArchivesRepository()
+        let archives = [
+            makeArchive(kind: .recording),
+            makeArchive(kind: .transcription),
+            makeArchive(kind: .recording),
+        ]
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        repository.subject.send(archives)
+
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
+
+        #expect(uiArchives.map(\.title) == ["Recording 2", "Transcription 1", "Recording 1"])
+        #expect(uiArchives.map(\.kind) == [.recording, .transcription, .recording])
+    }
+
+    @Test func mapToUIArchiveShowsTranscriptionReadyWhenTranscriptIsAvailable() {
+        let archive = makeArchive(
+            kind: .transcription,
+            status: .uploaded,
+            url: nil,
+            transcription: ArchiveTranscription(
+                status: .available, url: URL(string: "https://example.com/transcript.zip")))
+        let sut = makeSUT()
+
+        let uiArchive = sut.mapToUIArchive(archive, index: 3)
+
+        #expect(uiArchive.kind == .transcription)
+        #expect(uiArchive.title == "Transcription 3")
+        #expect(uiArchive.downloadState == .ready)
+    }
+
+    @Test func mapToUIArchiveShowsTranscriptionPreparingWhileTranscriptIsPending() {
+        let archive = makeArchive(
+            kind: .transcription,
+            status: .uploaded,
+            transcription: ArchiveTranscription(status: .started, url: nil))
+        let sut = makeSUT()
+
+        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+
+        #expect(uiArchive.downloadState == .preparing)
+        #expect(uiArchive.title == "Your transcription is being prepared")
+        #expect(uiArchive.subtitle == "Please wait while we prepare your downloads")
+    }
+
+    @Test func mapToUIArchiveShowsRecordingPreparingWhileArchiveIsPending() {
+        let archive = makeArchive(kind: .recording, status: .stopped, url: nil)
+        let sut = makeSUT()
+
+        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+
+        #expect(uiArchive.downloadState == .preparing)
+        #expect(uiArchive.title == "Your recording is being prepared")
+    }
+
+    @Test(arguments: [ArchiveStatus.failed, .expired, .deleted, .uploaded])
+    func mapToUIArchiveShowsRecordingUnavailableForFinishedNonDownloadableStatuses(status: ArchiveStatus) {
+        let archive = makeArchive(kind: .recording, status: status, url: nil)
+        let sut = makeSUT()
+
+        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+
+        #expect(uiArchive.downloadState == .unavailable)
+        #expect(uiArchive.title == "Recording 1")
+    }
+
+    @Test func mapToUIArchiveShowsTranscriptionUnavailableWhenTranscriptFailed() {
+        let archive = makeArchive(
+            kind: .transcription,
+            status: .available,
+            url: URL(string: "https://example.com/audio.zip"),
+            transcription: ArchiveTranscription(status: .failed, url: nil))
+        let sut = makeSUT()
+
+        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+
+        #expect(uiArchive.downloadState == .unavailable)
+    }
+
+    @Test func downloadArchiveOpensTranscriptionsThroughPlayRecordingUseCase() async {
+        let playUseCase = SpyPlayRecordingUseCase()
+        let archive = makeArchive(
+            kind: .transcription,
+            transcription: ArchiveTranscription(
+                status: .available, url: URL(string: "https://example.com/transcript.zip")))
+        let sut = makeSUT(playRecordingUseCase: playUseCase)
+
+        sut.downloadArchive(archive)
+
+        let callCount = await poll(read: { playUseCase.callCount }) { $0 == 1 }
+        #expect(callCount == 1)
+        #expect(playUseCase.lastArchive?.id == archive.id)
+    }
+
     @Test func uiArchiveOnDownloadTriggersDownloadArchive() async {
         let playUseCase = SpyPlayRecordingUseCase()
         let repository = SpyArchivesRepository()
@@ -262,6 +388,25 @@ struct ArchivesViewModelTests {
         )
     }
 
+    private func makeArchive(
+        kind: ArchiveKind,
+        status: ArchiveStatus = .available,
+        url: URL? = URL(string: "https://example.com/archive"),
+        transcription: ArchiveTranscription? = nil
+    ) -> Archive {
+        Archive(
+            id: UUID(),
+            name: kind.rawValue,
+            createdAt: Date(timeIntervalSince1970: 1_737_395_160),
+            status: status,
+            url: url,
+            size: 1_048_576,
+            duration: 30,
+            kind: kind,
+            transcription: transcription
+        )
+    }
+
     private func makeArchives() -> [Archive] {
         [
             Archive(
@@ -292,7 +437,8 @@ final class SpyArchivesRepository: ArchivesRepository {
     var getArchivesCallCount = 0
     var lastSessionKey: String?
     var shouldFail = false
-    let subject = PassthroughSubject<[Archive], Error>()
+    /// Publisher returned by the latest `getArchives` call; each call gets a new one.
+    private(set) var subject = PassthroughSubject<[Archive], Error>()
 
     func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error> {
         getArchivesCallCount += 1
@@ -303,6 +449,7 @@ final class SpyArchivesRepository: ArchivesRepository {
                 .eraseToAnyPublisher()
         }
 
+        subject = PassthroughSubject<[Archive], Error>()
         return subject.eraseToAnyPublisher()
     }
 }
