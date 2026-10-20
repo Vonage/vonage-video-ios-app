@@ -1,0 +1,23 @@
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivesScreen.swift
+  s_6fcba32ee9a98b::t_abb4fb85523800 17
+  s_6fcba32ee9a98b::t_a2cd14f5eb2fba 10,16,18-19
+VERA/VERAArchiving/VERAArchiving/UI/Components/ShareSheet.swift
+  s_6fcba32ee9a98b::t_a2cd14f5eb2fba 1-9,11,13-14,16-20,22,24-25,28-30
+  s_6fcba32ee9a98b::t_abb4fb85523800 10,12,15,21,23,26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7e1f9bd5ed391ce171b72761f8d7122e06bb1886",
+  "prompts": {},
+  "sessions": {
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivesRepository.swift
+  s_6fcba32ee9a98b::t_13005c809d43ee 90-92
+VERA/VERAArchiving/VERAArchiving/Data/URLSessionArchiveFileDownloader.swift
+  s_6fcba32ee9a98b::t_f087b21ae14b1a 7,34-36
+  s_6fcba32ee9a98b::t_5eb37221b9d13c 1-6,8-33,37-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ae68cbea3298324feb59b8e41f53c08e645c29e5",
+  "prompts": {},
+  "sessions": {
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
