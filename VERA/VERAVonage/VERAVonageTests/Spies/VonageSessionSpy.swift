@@ -35,7 +35,7 @@ class VonageSessionSpy: VonageSession {
     public override func connect() throws {
         connectCalled = true
         recordedTokens.append(token)
-        try super.connect()
+        // This spy simulates the connection; dummy credentials must never reach the SDK network stack.
 
         // Simulate successful connection by triggering the callback
         onSessionDidConnect?()
@@ -43,7 +43,6 @@ class VonageSessionSpy: VonageSession {
 
     public override func disconnect() throws {
         disconnectCalled = true
-        try super.disconnect()
     }
 
     public override func unpublish(publisher: VonagePublisher) throws {

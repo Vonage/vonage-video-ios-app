@@ -9,6 +9,7 @@ import VERADomain
 @testable import VERAVonage
 
 @Suite("VonageSession tests")
+@MainActor
 struct VonageSessionTests {
 
     // MARK: - Metadata
