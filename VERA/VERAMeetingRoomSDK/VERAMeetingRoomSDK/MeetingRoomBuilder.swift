@@ -500,6 +500,7 @@ public final class MeetingRoomBuilder {
 
     // MARK: - Top Trailing Buttons
 
+    @MainActor
     private static var topTrailingButtons: [ViewGenerator] {
         [ViewGenerator.avPicker()]
     }
