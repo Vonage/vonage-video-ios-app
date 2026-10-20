@@ -52,12 +52,9 @@ final class MeetingRoomSDKContainer {
         publisherSettings: PublisherSettings? = nil,
         appGroupIdentifier: String? = nil,
         broadcastExtensionBundleId: String? = nil,
-        httpClientFactory: any MeetingRoomHTTPClientFactory =
-            DefaultMeetingRoomHTTPClientFactory(),
-        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
-            DefaultMeetingRoomSessionRepositoryFactory(),
-        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
-            DefaultMeetingRoomArchivingDataSourceFactory()
+        httpClientFactory: (any MeetingRoomHTTPClientFactory)? = nil,
+        sessionRepositoryFactory: (any MeetingRoomSessionRepositoryFactory)? = nil,
+        archivingDataSourceFactory: (any MeetingRoomArchivingDataSourceFactory)? = nil
     ) {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
@@ -65,9 +62,9 @@ final class MeetingRoomSDKContainer {
         self.initialPublisherSettings = publisherSettings
         self.appGroupIdentifier = appGroupIdentifier
         self.broadcastExtensionBundleId = broadcastExtensionBundleId
-        self.httpClientFactory = httpClientFactory
-        self.sessionRepositoryFactory = sessionRepositoryFactory
-        self.archivingDataSourceFactory = archivingDataSourceFactory
+        self.httpClientFactory = httpClientFactory ?? DefaultMeetingRoomHTTPClientFactory()
+        self.sessionRepositoryFactory = sessionRepositoryFactory ?? DefaultMeetingRoomSessionRepositoryFactory()
+        self.archivingDataSourceFactory = archivingDataSourceFactory ?? DefaultMeetingRoomArchivingDataSourceFactory()
     }
 
     // MARK: - Core Dependencies

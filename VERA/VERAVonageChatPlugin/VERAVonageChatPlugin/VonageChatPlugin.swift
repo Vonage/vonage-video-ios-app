@@ -48,7 +48,11 @@ public final class VonageChatPlugin: VonagePlugin, VonageSignalHandler, VonageSi
     /// Creates a chat plugin.
     ///
     /// - Parameter repository: A messages repository. Defaults to `DefaultChatMessagesRepository()`.
-    public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
+    public convenience init() {
+        self.init(repository: DefaultChatMessagesRepository())
+    }
+
+    public init(repository: ChatMessagesRepository) {
         self.repository = repository
     }
 

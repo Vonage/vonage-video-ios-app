@@ -176,12 +176,9 @@ struct MeetingRoomSDKContainerTests {
 
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>,
-        httpClientFactory: any MeetingRoomHTTPClientFactory =
-            DefaultMeetingRoomHTTPClientFactory(),
-        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
-            DefaultMeetingRoomSessionRepositoryFactory(),
-        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
-            DefaultMeetingRoomArchivingDataSourceFactory()
+        httpClientFactory: (any MeetingRoomHTTPClientFactory)? = nil,
+        sessionRepositoryFactory: (any MeetingRoomSessionRepositoryFactory)? = nil,
+        archivingDataSourceFactory: (any MeetingRoomArchivingDataSourceFactory)? = nil
     ) -> MeetingRoomSDKContainer {
         MeetingRoomSDKContainer(
             baseURL: Self.testBaseURL,
