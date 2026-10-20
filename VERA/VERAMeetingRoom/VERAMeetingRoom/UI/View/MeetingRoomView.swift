@@ -32,13 +32,13 @@ private enum MeetingRoomViewConstants {
     static let presentantionContentSpacing: CGFloat = 16
 }
 
-public struct ViewGenerator: Identifiable {
+public struct ViewGenerator: Identifiable, Sendable {
     public let id: String
-    public let content: () -> AnyView
+    public let content: @MainActor @Sendable () -> AnyView
 
     public init<Content: View>(
         id: String = UUID().uuidString,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping @MainActor @Sendable () -> Content
     ) {
         self.id = id
         self.content = { AnyView(content()) }
