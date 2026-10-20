@@ -1,0 +1,25 @@
+VERA/VERAVonage/VERAVonageTests/PictureInPictureParticipantSelectorTests.swift
+  s_965fb745fea156::t_fdc56a2551c1b0 89-90,97-132,160-161,168,171-179,219-244
+  s_965fb745fea156::t_81bf4343423a7f 245
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_965fb745fea156::t_65ac45b6263d11 221-224
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureParticipantSelector.swift
+  s_965fb745fea156::t_396f3bfac07b8f 23-25,27-30,49-52,54-57,73-79,96-101
+  s_965fb745fea156::t_ec19d3a8ff280f 102-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90b8dfdf083b6632caea08188e44cb74add2c35d",
+  "prompts": {},
+  "sessions": {
+    "s_965fb745fea156": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "970e9571-1f81-459d-a955-c79b197b9eb9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
