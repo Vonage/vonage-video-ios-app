@@ -218,7 +218,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         if targetId != pipTargetParticipantId {
             let now = Date()
-            if let last = lastInPipRetargetAt,
+            let bypassesDebounce =
+                PictureInPictureParticipantSelector.isScreenshare(participantId: targetId, in: state)
+                || !PictureInPictureParticipantSelector.contains(participantId: pipTargetParticipantId, in: state)
+            if !bypassesDebounce, let last = lastInPipRetargetAt,
                 now.timeIntervalSince(last) < Self.minimumInPipRetargetInterval
             {
                 // Fall through to keep the current target's placeholder in sync.
