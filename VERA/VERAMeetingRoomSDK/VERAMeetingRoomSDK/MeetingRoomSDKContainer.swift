@@ -205,6 +205,7 @@ final class MeetingRoomSDKContainer {
     lazy var sendChatMessageUseCase: SendChatMessageUseCase =
         VonageSendChatMessageUseCase(vonageChatPlugin: vonageChatPlugin)
 
+    @MainActor
     lazy var chatBadgeButtonViewModel = ChatBadgeButtonViewModel(
         chatMessagesObserver: chatMessagesRepository)
 

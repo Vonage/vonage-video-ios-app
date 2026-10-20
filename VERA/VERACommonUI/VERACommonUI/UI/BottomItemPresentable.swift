@@ -75,13 +75,13 @@ public enum BottomBarOverflowSelectionBehavior: Equatable {
 
 public struct BottomBarButtonAccessory {
     public let placement: BottomBarButtonAccessoryPlacement
-    public let content: () -> AnyView
+    public let content: @MainActor @Sendable () -> AnyView
     public let allowsHitTesting: Bool
 
     public init<Content: View>(
         placement: BottomBarButtonAccessoryPlacement,
         allowsHitTesting: Bool = false,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping @MainActor @Sendable () -> Content
     ) {
         self.placement = placement
         self.content = { AnyView(content()) }
