@@ -6,42 +6,57 @@ import Foundation
 import VERAArchiving
 import VERADomain
 
-public final class MockArchivesDataSource: ArchivesDataSource {
-    public var archivesToReturn: [Archive] = []
-    public var responses: [[Archive]] = []
-    public var shouldThrowError = false
-    public var callCount = 0
+public final class MockArchivesDataSource: ArchivesDataSource, @unchecked Sendable {
+    private let lock = NSLock()
+    private var storedArchives: [Archive]
+    private var storedResponses: [[Archive]]
+    private var storedShouldThrow: Bool
+    private var storedCallCount: Int
+
+    public var archivesToReturn: [Archive] {
+        get { withLock { storedArchives } }
+        set { withLock { storedArchives = newValue } }
+    }
+    public var responses: [[Archive]] {
+        get { withLock { storedResponses } }
+        set { withLock { storedResponses = newValue } }
+    }
+    public var shouldThrowError: Bool {
+        get { withLock { storedShouldThrow } }
+        set { withLock { storedShouldThrow = newValue } }
+    }
+    public var callCount: Int {
+        get { withLock { storedCallCount } }
+        set { withLock { storedCallCount = newValue } }
+    }
 
     public init(
-        archivesToReturn: [Archive] = [],
-        responses: [[Archive]] = [],
-        shouldThrowError: Bool = false,
-        callCount: Int = 0
+        archivesToReturn: [Archive] = [], responses: [[Archive]] = [],
+        shouldThrowError: Bool = false, callCount: Int = 0
     ) {
-        self.archivesToReturn = archivesToReturn
-        self.responses = responses
-        self.shouldThrowError = shouldThrowError
-        self.callCount = callCount
+        storedArchives = archivesToReturn
+        storedResponses = responses
+        storedShouldThrow = shouldThrowError
+        storedCallCount = callCount
+    }
+
+    private func withLock<T>(_ body: () throws -> T) rethrows -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return try body()
     }
 
     public func getArchives(sessionKey: String) async throws -> [Archive] {
-        callCount += 1
-
-        if shouldThrowError {
-            throw MockArchivesDataSourceError()
+        try withLock {
+            storedCallCount += 1
+            if storedShouldThrow { throw MockArchivesDataSourceError() }
+            if !storedResponses.isEmpty {
+                return storedResponses[min(storedCallCount - 1, storedResponses.count - 1)]
+            }
+            return storedArchives
         }
-
-        if !responses.isEmpty {
-            let responseIndex = min(callCount - 1, responses.count - 1)
-            return responses[responseIndex]
-        }
-
-        return archivesToReturn
     }
 }
 
 public struct MockArchivesDataSourceError: Error {}
-
-public func makeMockArchivesDataSource() -> MockArchivesDataSource {
-    MockArchivesDataSource()
-}
+public func makeMockArchivesDataSource() -> MockArchivesDataSource { MockArchivesDataSource() }
