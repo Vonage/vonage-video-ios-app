@@ -6,7 +6,11 @@ import Foundation
 /// outside the lock on MainActor, so reentrant callbacks cannot deadlock. Audio levels and
 /// dimensions may replace their last pending value; control and caption events remain ordered.
 final class MainActorEventQueue<Event: Sendable>: @unchecked Sendable {
+    typealias DrainOperation = @MainActor @Sendable () -> Void
+
     private let lock = NSLock()
+    /// Schedules a deferred UI drain. Tests control this boundary without blocking MainActor.
+    private let scheduleDrain: @Sendable (@escaping DrainOperation) -> Void
     /// Runs under the buffer lock before coalescing. It must be constructed in a nonisolated
     /// context; the plain closure type cannot prove this, so callers use nonisolated factories.
     /// Captured value-processing state belongs exclusively to this queue's lock. The operation
@@ -18,8 +22,14 @@ final class MainActorEventQueue<Event: Sendable>: @unchecked Sendable {
     @MainActor private var handler: (@MainActor (Event) -> Void)?
     @MainActor private var generation: UInt64 = 0
 
-    @MainActor init(transformEvent: @escaping (Event) -> Event = { $0 }) {
+    @MainActor init(
+        transformEvent: @escaping (Event) -> Event = { $0 },
+        scheduleDrain: @escaping @Sendable (@escaping DrainOperation) -> Void = { operation in
+            DispatchQueue.main.async(execute: operation)
+        }
+    ) {
         self.transformEvent = transformEvent
+        self.scheduleDrain = scheduleDrain
     }
 
     @MainActor func setHandler(_ handler: @escaping @MainActor (Event) -> Void) {
@@ -54,7 +64,7 @@ final class MainActorEventQueue<Event: Sendable>: @unchecked Sendable {
         if Thread.isMainThread {
             MainActor.assumeIsolated { drain() }
         } else {
-            DispatchQueue.main.async { self.drain() }
+            scheduleDrain { self.drain() }
         }
     }
 
@@ -85,6 +95,6 @@ final class MainActorEventQueue<Event: Sendable>: @unchecked Sendable {
         let hasMore = !pending.isEmpty
         if !hasMore { scheduled = false }
         lock.unlock()
-        if hasMore { DispatchQueue.main.async { self.drain() } }
+        if hasMore { scheduleDrain { self.drain() } }
     }
 }
