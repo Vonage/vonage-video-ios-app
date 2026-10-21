@@ -1,0 +1,22 @@
+.github/copilot-instructions.md
+  s_a7761915ea119b::t_4d966df6541177 7,24-26,28,34-36,38-40,43-44,231,233,235,245,293,325-332
+  s_a7761915ea119b::t_ffe048c36a2548 333
+.github/instructions/config-generation.instructions.md
+  s_a7761915ea119b::t_4d966df6541177 9,17,19-24,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6092887fdb114d7697199698844564e9c15123a4",
+  "prompts": {},
+  "sessions": {
+    "s_a7761915ea119b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c141232-65a9-4216-8adb-d89f70282ba0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
