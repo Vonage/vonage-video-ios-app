@@ -21,9 +21,9 @@ extension CaptionItem {
             : speakerName
 
         var boldPart = AttributedString(name + ": ")
-        boldPart[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default).bold()
+        boldPart.font = .system(.footnote, design: .default).bold()
         var regularPart = AttributedString(text)
-        regularPart[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default)
+        regularPart.font = .system(.footnote, design: .default)
 
         let localizedFormat = String(localized: "user_say", bundle: .veraCaptions)
 

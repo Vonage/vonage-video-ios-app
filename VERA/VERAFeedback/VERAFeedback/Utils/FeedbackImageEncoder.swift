@@ -22,29 +22,6 @@ enum FeedbackImageEncoder {
     static let minimumJPEGQuality: CGFloat = 0.4
     static let minimumDimension: CGFloat = 480
 
-    /// Keeps compression off the UI actor while retaining the existing encoder's sizing,
-    /// orientation and JPEG quality behavior. The injectable encoder also verifies executor
-    /// ownership without changing the public report API.
-    @MainActor
-    static func encodeForUpload(
-        _ image: PlatformImage?,
-        encode: @escaping @Sendable (PlatformImage) -> String = { encodeToBase64($0) }
-    ) async -> String {
-        guard let image else { return "" }
-        #if canImport(UIKit)
-            // UIImage is declared Sendable by UIKit; the original immutable image can be shared.
-            return await Task.detached(priority: .utility) { encode(image) }.value
-        #elseif canImport(AppKit)
-            // NSImage is not Sendable. Snapshot its representations on the owner, then construct
-            // an image confined to the worker. No live AppKit image crosses this boundary.
-            guard let snapshot = image.tiffRepresentation else { return "" }
-            return await Task.detached(priority: .utility) {
-                guard let workerImage = NSImage(data: snapshot) else { return "" }
-                return encode(workerImage)
-            }.value
-        #endif
-    }
-
     /// Encodes a screenshot for the feedback API as a Base64 JPEG string.
     static func encodeToBase64(_ image: PlatformImage?) -> String {
         guard let image, let data = compressedJPEGData(from: image) else { return "" }

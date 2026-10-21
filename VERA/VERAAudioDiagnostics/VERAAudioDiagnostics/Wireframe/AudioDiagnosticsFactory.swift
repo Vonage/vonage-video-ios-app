@@ -14,7 +14,6 @@
     ///
     /// The factory holds a shared ``SpeakerTestService`` to ensure consistent audio testing
     /// across all instances.
-    @MainActor
     public final class AudioDiagnosticsFactory {
 
         /// Service used to play a test tone through the device's current audio output.

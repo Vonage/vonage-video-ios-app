@@ -4,12 +4,12 @@
 
 import Foundation
 
-public struct UICameraDevice: Identifiable, Equatable, Sendable {
+public struct UICameraDevice: Identifiable, Equatable {
     public let id: String
     public let name: String
     public let iconName: String
 
-    public var onTap: (@MainActor @Sendable () -> Void)?
+    public var onTap: (() -> Void)?
 
     public init(id: String, name: String, iconName: String) {
         self.id = id

@@ -9,7 +9,6 @@ import VERADomain
 
 @testable import VERASettings
 
-@MainActor
 @Suite("Settings ViewModel Tests")
 struct SettingsViewModelTests {
 

@@ -5,7 +5,7 @@
 import Combine
 import Foundation
 
-public protocol CaptionsStatusDataSource: Sendable {
+public protocol CaptionsStatusDataSource {
     var captionsState: AnyPublisher<CaptionsState, Never> { get }
     func set(captionsState: CaptionsState)
     func reset()

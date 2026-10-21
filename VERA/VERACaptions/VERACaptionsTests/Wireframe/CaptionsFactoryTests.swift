@@ -9,9 +9,8 @@ import VERADomain
 
 @testable import VERACaptions
 
-@MainActor
 @Suite("CaptionsFactory Tests")
-
+@MainActor
 struct CaptionsFactoryTests {
 
     @Test("makeCaptionsButton returns a configured view model")
@@ -77,8 +76,7 @@ struct CaptionsFactoryTests {
 
 // MARK: - Test Doubles
 
-@MainActor
-private final class MockCaptionsActivationDataSource: CaptionsActivationDataSource {
+private final class MockCaptionsActivationDataSource: CaptionsActivationDataSource, @unchecked Sendable {
     func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse {

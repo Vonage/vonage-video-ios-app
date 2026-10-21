@@ -6,9 +6,7 @@ import Combine
 import Foundation
 
 public final class NullCaptionsStatusDataSource: CaptionsStatusDataSource {
-    public var captionsState: AnyPublisher<CaptionsState, Never> {
-        Just(.disabled).eraseToAnyPublisher()
-    }
+    public var captionsState: AnyPublisher<CaptionsState, Never> = CurrentValueSubject(.disabled).eraseToAnyPublisher()
 
     public init() {
     }

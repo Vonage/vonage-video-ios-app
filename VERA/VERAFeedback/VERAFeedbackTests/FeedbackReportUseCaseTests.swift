@@ -7,7 +7,6 @@ import Testing
 
 @testable import VERAFeedback
 
-@MainActor
 @Suite("Feedback report use case tests")
 struct FeedbackReportUseCaseTests {
 
@@ -74,10 +73,8 @@ struct FeedbackReportUseCaseTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        feedbackReportDataSource: (any FeedbackReportDataSource)? = nil
+        feedbackReportDataSource: any FeedbackReportDataSource = MockFeedbackReportDataSource()
     ) -> FeedbackReportUseCase {
-        DefaultFeedbackReportUseCase(
-            feedbackReportDataSource: feedbackReportDataSource ?? MockFeedbackReportDataSource()
-        )
+        DefaultFeedbackReportUseCase(feedbackReportDataSource: feedbackReportDataSource)
     }
 }

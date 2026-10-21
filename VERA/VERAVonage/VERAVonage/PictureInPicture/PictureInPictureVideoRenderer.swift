@@ -8,34 +8,76 @@ import OSLog
 import OpenTok
 import UIKit
 
-/// UI layers and avatar drawing are main-actor owned; borrowed SDK frames are
-/// converted synchronously on their delivery thread without retaining frame planes.
+/// Custom `OTVideoRender` that displays inline video and feeds frames into PiP.
 final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "PictureInPicture")
-    let inlineDisplayLayer: AVSampleBufferDisplayLayer
-    private nonisolated let frames: FrameState
 
+    lazy var inlineDisplayLayer: AVSampleBufferDisplayLayer = {
+        let layer = AVSampleBufferDisplayLayer()
+        layer.videoGravity = .resizeAspect
+        return layer
+    }()
+    /// The PiP window's display layer while this renderer's participant is the PiP target — wired
+    /// and cleared by `PictureInPictureController.attachFeed(to:)`, which guarantees only one
+    /// renderer holds it at a time (two holders would interleave their frames in the PiP window).
+    /// Written on the main actor, read on OpenTok's video thread — guarded by `frameLock`.
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer? {
-        didSet { frames.setPiPRenderer(pipBufferDisplayLayer?.sampleBufferRenderer) }
+        get { withFrameLock { _pipBufferDisplayLayer } }
+        set { withFrameLock { _pipBufferDisplayLayer = newValue } }
+    }
+    private var _pipBufferDisplayLayer: AVSampleBufferDisplayLayer?
+
+    private(set) var renderedFrameCount = 0
+
+    /// Horizontally mirrors frames at the pixel level so the tile and PiP window agree. Only the
+    /// local publisher sets this `true` (front camera, selfie-preview convention); remote
+    /// subscribers never mirror, so their video — and any text they show — stays true-orientation.
+    /// Written on the main actor, read on the video thread — guarded by `frameLock`.
+    var isMirrored: Bool {
+        get { withFrameLock { _isMirrored } }
+        set { withFrameLock { _isMirrored = newValue } }
+    }
+    private var _isMirrored = false
+
+    private let frameLock = NSLock()
+    private let accelerator = YUVToARGBAccelerator()
+
+    /// Runs `body` while holding `frameLock`. All cross-thread fields (`_pipBufferDisplayLayer`,
+    /// `_isMirrored`, `_isPlaceholderActive`) are read/written only under this lock; the video-thread
+    /// hot path holds it for its whole critical section and touches the raw `_` fields directly.
+    private func withFrameLock<T>(_ body: () -> T) -> T {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+        return body()
     }
 
-    var renderedFrameCount: Int { frames.frameCount }
-    var isMirrored: Bool {
-        get { frames.isMirrored }
-        set { frames.setMirrored(newValue) }
-    }
-    var isPlaceholderActive: Bool { frames.isPlaceholderActive }
+    /// Reused pool for the BGRA destination buffers so a live frame doesn't allocate a fresh
+    /// `CVPixelBuffer` every time. Recreated only when the frame dimensions change; the pool
+    /// recycles buffers once the enqueued sample buffer is released.
+    private var pixelBufferPool: CVPixelBufferPool?
+    private var poolWidth = 0
+    private var poolHeight = 0
+
+    // MARK: - Placeholder (camera-off avatar)
+
+    /// Canvas size of the generated avatar placeholder shown in the PiP window (16:9, matching the
+    /// window's aspect). Its 0.55 circle ratio matches the tile's camera-off avatar
+    /// (`ParticipantVideoCardConstants.avatarHeightFraction`) so the two surfaces read alike.
     private static let placeholderSize = CGSize(width: 640, height: 360)
     private var placeholderTimer: DispatchSourceTimer?
     private var placeholderName: String?
+    private var placeholderPixelBuffer: CVPixelBuffer?
+
+    /// Written on the main actor (start/stop), read on the video thread — guarded by `frameLock`.
+    private(set) var isPlaceholderActive: Bool {
+        get { withFrameLock { _isPlaceholderActive } }
+        set { withFrameLock { _isPlaceholderActive = newValue } }
+    }
+    private var _isPlaceholderActive = false
 
     override init(frame: CGRect) {
-        let displayLayer = AVSampleBufferDisplayLayer()
-        displayLayer.videoGravity = .resizeAspect
-        inlineDisplayLayer = displayLayer
-        frames = FrameState(inlineRenderer: displayLayer.sampleBufferRenderer)
         super.init(frame: frame)
-        layer.addSublayer(displayLayer)
+        setup()
     }
 
     @available(*, unavailable)
@@ -43,44 +85,188 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private func setup() {
+        layer.addSublayer(inlineDisplayLayer)
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         inlineDisplayLayer.frame = bounds
     }
 
+    // MARK: - Placeholder
+
+    /// Starts feeding an avatar placeholder (initials on the participant's color) so the PiP
+    /// window has content while the target's camera is off. Only the PiP window displays it — the
+    /// meeting-room tile shows the SwiftUI initials card instead (its renderer view is not even
+    /// mounted while the camera is off).
     func startPlaceholder(name: String) {
         if isPlaceholderActive, placeholderName == name { return }
+
         Self.logger.debug("renderer.startPlaceholder")
+        isPlaceholderActive = true
         placeholderName = name
-        frames.setPlaceholder(makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize), active: true)
+        placeholderPixelBuffer = makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize)
+
         placeholderTimer?.cancel()
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now(), repeating: .milliseconds(200))
         timer.setEventHandler { [weak self] in
-            // The timer is explicitly registered on DispatchQueue.main.
-            MainActor.assumeIsolated { self?.frames.enqueuePlaceholder() }
+            self?.enqueuePlaceholderFrame()
         }
         placeholderTimer = timer
         timer.resume()
     }
 
+    /// Refreshes the placeholder image when the participant's name changes.
     func updatePlaceholderName(_ name: String) {
         guard isPlaceholderActive, placeholderName != name else { return }
         placeholderName = name
-        frames.setPlaceholder(makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize), active: true)
+        placeholderPixelBuffer = makePlaceholderPixelBuffer(name: name, size: Self.placeholderSize)
     }
 
     func stopPlaceholder() {
         guard isPlaceholderActive else { return }
         Self.logger.debug("renderer.stopPlaceholder")
-        frames.setPlaceholder(nil, active: false)
+        isPlaceholderActive = false
         placeholderName = nil
+        placeholderPixelBuffer = nil
         placeholderTimer?.cancel()
         placeholderTimer = nil
     }
 
-    nonisolated func renderVideoFrame(_ frame: OTVideoFrame) {
-        frames.render(frame)
+    private func enqueuePlaceholderFrame() {
+        frameLock.lock()
+        defer { frameLock.unlock() }
+
+        guard _isPlaceholderActive,
+            let placeholderPixelBuffer,
+            let sampleBuffer = createSampleBuffer(from: placeholderPixelBuffer)
+        else { return }
+
+        renderedFrameCount += 1
+        enqueue(sampleBuffer, to: inlineDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
+        }
+    }
+
+    func renderVideoFrame(_ frame: OTVideoFrame) {
+        guard let format = frame.format, format.pixelFormat == .I420 else { return }
+
+        frameLock.lock()
+        defer { frameLock.unlock() }
+
+        // While the avatar placeholder is active the orchestrator is the source of truth for the
+        // camera state. Drop incoming frames (including trailing frames delivered right after a
+        // camera-off) so they can't cancel the placeholder or freeze PiP on a stale frame. The
+        // orchestrator explicitly stops the placeholder when the camera is re-enabled. Checked
+        // under `frameLock` so the placeholder start/stop on the main actor can't race this read.
+        if _isPlaceholderActive { return }
+
+        guard
+            let sampleBuffer = createSampleBuffer(
+                from: frame,
+                width: Int(format.imageWidth),
+                height: Int(format.imageHeight)
+            )
+        else { return }
+
+        renderedFrameCount += 1
+        // Sparse heartbeat (~every 4s at 30fps) to tell "frames stopped arriving" apart from
+        // "frames arrive but don't display" when diagnosing frozen video.
+        if renderedFrameCount == 1 || renderedFrameCount % 120 == 0 {
+            let message =
+                "renderer.frame #\(renderedFrameCount) "
+                + "\(Int(format.imageWidth))x\(Int(format.imageHeight)) "
+                + "pipLayer=\(_pipBufferDisplayLayer != nil)"
+            Self.logger.debug("\(message, privacy: .public)")
+        }
+        enqueue(sampleBuffer, to: inlineDisplayLayer)
+        if let _pipBufferDisplayLayer {
+            enqueue(sampleBuffer, to: _pipBufferDisplayLayer)
+        }
+    }
+
+    private func enqueue(_ sampleBuffer: CMSampleBuffer, to layer: AVSampleBufferDisplayLayer) {
+        // A failed layer silently drops every subsequent enqueue; only a flush revives it.
+        // `requiresFlushToResumeDecoding` does not cover the `.failed` state.
+        if layer.status == .failed || layer.requiresFlushToResumeDecoding {
+            layer.flush()
+        }
+        layer.enqueue(sampleBuffer)
+    }
+
+    private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
+        guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
+        _ = accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: _isMirrored)
+        return createSampleBuffer(from: pixelBuffer)
+    }
+
+    /// Returns a BGRA pixel buffer from a size-matched pool, (re)creating the pool only when the
+    /// frame dimensions change. Called under `frameLock`, so the pool state needs no extra locking.
+    private func dequeuePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
+        if pixelBufferPool == nil || width != poolWidth || height != poolHeight {
+            let attributes: [String: Any] = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferIOSurfacePropertiesKey as String: [:],
+            ]
+            var pool: CVPixelBufferPool?
+            guard
+                CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes as CFDictionary, &pool)
+                    == kCVReturnSuccess
+            else {
+                return nil
+            }
+            pixelBufferPool = pool
+            poolWidth = width
+            poolHeight = height
+        }
+
+        guard let pixelBufferPool else { return nil }
+        var pixelBuffer: CVPixelBuffer?
+        guard
+            CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
+                == kCVReturnSuccess
+        else {
+            return nil
+        }
+        return pixelBuffer
+    }
+
+    private func createSampleBuffer(from pixelBuffer: CVPixelBuffer) -> CMSampleBuffer? {
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, []) }
+
+        var sampleBuffer: CMSampleBuffer?
+        let now = CMTimeMakeWithSeconds(CACurrentMediaTime(), preferredTimescale: 1000)
+        var timingInfo = CMSampleTimingInfo(
+            duration: CMTimeMake(value: 1, timescale: 1000),
+            presentationTimeStamp: now,
+            decodeTimeStamp: now
+        )
+
+        var formatDescription: CMFormatDescription?
+        CMVideoFormatDescriptionCreateForImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: pixelBuffer,
+            formatDescriptionOut: &formatDescription
+        )
+
+        guard let formatDescription else { return nil }
+
+        let status = CMSampleBufferCreateReadyWithImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: pixelBuffer,
+            formatDescription: formatDescription,
+            sampleTiming: &timingInfo,
+            sampleBufferOut: &sampleBuffer
+        )
+
+        guard status == noErr else { return nil }
+        return sampleBuffer
     }
 
     // MARK: - Placeholder drawing
@@ -198,159 +384,5 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         case 1: return String(parts[0]).uppercased()
         default: return "\(parts.first!)\(parts.last!)".uppercased()
         }
-    }
-
-    /// The unchecked boundary contains only synchronized conversion state and AVFoundation's
-    /// background-safe sample-buffer renderers. UI layers and borrowed OTVideoFrame values never
-    /// escape into asynchronous work. Every mutable field is protected by lock, including reads.
-    /// https://developer.apple.com/documentation/avfoundation/avsamplebufferdisplaylayer/samplebufferrenderer
-    private final class FrameState: @unchecked Sendable {
-        private let lock = NSLock()
-        private let inlineRenderer: AVSampleBufferVideoRenderer
-        private var pipRenderer: AVSampleBufferVideoRenderer?
-        private let accelerator: YUVToARGBAccelerator
-        private var mirrored = false
-        private var placeholderActive = false
-        private var placeholder: CVPixelBuffer?
-        private var count = 0
-        private var pixelBufferPool: CVPixelBufferPool?
-        private var poolWidth = 0
-        private var poolHeight = 0
-
-        @MainActor init(inlineRenderer: AVSampleBufferVideoRenderer) {
-            accelerator = YUVToARGBAccelerator()
-            self.inlineRenderer = inlineRenderer
-        }
-
-        private func withLock<T>(_ body: () -> T) -> T {
-            lock.lock()
-            defer { lock.unlock() }
-            return body()
-        }
-
-        var frameCount: Int { withLock { count } }
-        var isMirrored: Bool { withLock { mirrored } }
-        var isPlaceholderActive: Bool { withLock { placeholderActive } }
-
-        func setPiPRenderer(_ renderer: AVSampleBufferVideoRenderer?) {
-            withLock { pipRenderer = renderer }
-        }
-
-        func setMirrored(_ value: Bool) { withLock { mirrored = value } }
-
-        func setPlaceholder(_ buffer: CVPixelBuffer?, active: Bool) {
-            withLock {
-                placeholder = buffer
-                placeholderActive = active
-            }
-        }
-
-        func enqueuePlaceholder() {
-            withLock {
-                guard placeholderActive, let placeholder,
-                    let sample = createSampleBuffer(from: placeholder)
-                else { return }
-                display(sample)
-            }
-        }
-
-        func render(_ frame: OTVideoFrame) {
-            guard let format = frame.format, format.pixelFormat == .I420 else { return }
-            withLock {
-                // Placeholder changes, conversion and enqueue are serialized, so trailing
-                // camera frames cannot replace the avatar after camera-off.
-                guard !placeholderActive,
-                    let sample = createSampleBuffer(
-                        from: frame, width: Int(format.imageWidth), height: Int(format.imageHeight))
-                else { return }
-                display(sample)
-            }
-        }
-
-        private func display(_ sample: CMSampleBuffer) {
-            count += 1
-            enqueue(sample, to: inlineRenderer)
-            if let pipRenderer { enqueue(sample, to: pipRenderer) }
-        }
-
-        private func enqueue(_ sample: CMSampleBuffer, to renderer: AVSampleBufferVideoRenderer) {
-            if renderer.status == .failed || renderer.requiresFlushToResumeDecoding {
-                renderer.flush()
-            }
-            renderer.enqueue(sample)
-        }
-
-        private func createSampleBuffer(from frame: OTVideoFrame, width: Int, height: Int) -> CMSampleBuffer? {
-            guard let pixelBuffer = dequeuePixelBuffer(width: width, height: height) else { return nil }
-            guard accelerator.convertFrameVImageYUV(frame, to: pixelBuffer, mirrored: mirrored) == 0 else { return nil }
-            return createSampleBuffer(from: pixelBuffer)
-        }
-
-        /// Returns a BGRA pixel buffer from a size-matched pool, (re)creating the pool only when the
-        /// frame dimensions change. Called under `frameLock`, so the pool state needs no extra locking.
-        private func dequeuePixelBuffer(width: Int, height: Int) -> CVPixelBuffer? {
-            if pixelBufferPool == nil || width != poolWidth || height != poolHeight {
-                let attributes: [String: Any] = [
-                    kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-                    kCVPixelBufferWidthKey as String: width,
-                    kCVPixelBufferHeightKey as String: height,
-                    kCVPixelBufferIOSurfacePropertiesKey as String: [:],
-                ]
-                var pool: CVPixelBufferPool?
-                guard
-                    CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes as CFDictionary, &pool)
-                        == kCVReturnSuccess
-                else {
-                    return nil
-                }
-                pixelBufferPool = pool
-                poolWidth = width
-                poolHeight = height
-            }
-
-            guard let pixelBufferPool else { return nil }
-            var pixelBuffer: CVPixelBuffer?
-            guard
-                CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pixelBufferPool, &pixelBuffer)
-                    == kCVReturnSuccess
-            else {
-                return nil
-            }
-            return pixelBuffer
-        }
-
-        private func createSampleBuffer(from pixelBuffer: CVPixelBuffer) -> CMSampleBuffer? {
-            CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-            defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
-
-            var sampleBuffer: CMSampleBuffer?
-            let now = CMTimeMakeWithSeconds(CACurrentMediaTime(), preferredTimescale: 1000)
-            var timingInfo = CMSampleTimingInfo(
-                duration: CMTimeMake(value: 1, timescale: 1000),
-                presentationTimeStamp: now,
-                decodeTimeStamp: now
-            )
-
-            var formatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(
-                allocator: kCFAllocatorDefault,
-                imageBuffer: pixelBuffer,
-                formatDescriptionOut: &formatDescription
-            )
-
-            guard let formatDescription else { return nil }
-
-            let status = CMSampleBufferCreateReadyWithImageBuffer(
-                allocator: kCFAllocatorDefault,
-                imageBuffer: pixelBuffer,
-                formatDescription: formatDescription,
-                sampleTiming: &timingInfo,
-                sampleBufferOut: &sampleBuffer
-            )
-
-            guard status == noErr else { return nil }
-            return sampleBuffer
-        }
-
     }
 }

@@ -53,9 +53,6 @@ public enum VERATestSchemes {
         if isFeatureEnabled("meetingRoomSettings", "allowScreenShare") {
             targets.append(testableTarget("VERAScreenShareTests", in: "VERAScreenShare"))
         }
-        if isFeatureEnabled("meetingRoomSettings", "allowCaptions") {
-            targets.append(testableTarget("VERACaptionsTests", in: "VERACaptions"))
-        }
         if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
             targets.append(testableTarget("VERAReactionsTests", in: "VERAReactions"))
         }
@@ -87,12 +84,6 @@ public enum VERATestSchemes {
         }
         if isFeatureEnabled("meetingRoomSettings", "allowArchiving") {
             targets.append(testableTarget("VERAVonageArchivingPluginTests", in: "VERAVonageArchivingPlugin"))
-        }
-        if isFeatureEnabled("meetingRoomSettings", "allowCaptions") {
-            targets.append(testableTarget("VERAVonageCaptionsPluginTests", in: "VERAVonageCaptionsPlugin"))
-        }
-        if isFeatureEnabled("meetingRoomSettings", "allowEmojis") {
-            targets.append(testableTarget("VERAVonageReactionsPluginTests", in: "VERAVonageReactionsPlugin"))
         }
         if isFeatureEnabled("waitingRoomSettings", "allowSettings") {
             targets.append(testableTarget("VERAVonageSettingsPluginTests", in: "VERAVonageSettingsPlugin"))

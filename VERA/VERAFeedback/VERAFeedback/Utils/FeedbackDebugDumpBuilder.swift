@@ -12,8 +12,13 @@ import Foundation
 
 enum FeedbackDebugDumpBuilder {
 
+    private static let connectionCreationTimeFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
     /// Builds a diagnostic dump similar to the Android feedback implementation.
-    @MainActor
     static func debugDump(session: FeedbackSessionDebugInfo = .empty) -> String {
         """
         \n
@@ -25,7 +30,6 @@ enum FeedbackDebugDumpBuilder {
         """
     }
 
-    @MainActor
     private static func platformDebugInfo() -> String {
         #if canImport(UIKit)
             """
@@ -51,11 +55,8 @@ enum FeedbackDebugDumpBuilder {
 
     private static func sessionDebugInfo(_ session: FeedbackSessionDebugInfo) -> String {
         let creationTime =
-            session.connectionCreationTime.map { date in
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                return formatter.string(from: date)
-            } ?? "null"
+            session.connectionCreationTime.map(connectionCreationTimeFormatter.string)
+            ?? "null"
 
         return """
             Session: \(session.sessionId ?? "null")

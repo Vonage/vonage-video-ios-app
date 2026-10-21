@@ -281,7 +281,7 @@ struct NoiseSuppressionButtonViewModelTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        getCurrentPublisher: @escaping GetPublisher = { PublisherSpy() },
+        getCurrentPublisher: @escaping () throws -> VERAPublisher = { PublisherSpy() },
         disableUseCase: DisableNoiseSuppressionUseCase = DisableUseCaseSpy(),
         enableUseCase: EnableNoiseSuppressionUseCase = EnableUseCaseSpy()
     ) -> NoiseSuppressionViewModel {

@@ -15,7 +15,7 @@ struct PictureInPictureControllerTests {
 
     private struct StubError: Swift.Error {}
 
-    private func makeAVController() -> AVPictureInPictureController? {
+    private func makeAVController() -> AVPictureInPictureController {
         let contentViewController = AVPictureInPictureVideoCallViewController()
         let source = AVPictureInPictureController.ContentSource(
             activeVideoCallSourceView: UIView(),
@@ -62,7 +62,57 @@ struct PictureInPictureControllerTests {
         sut.configure(with: UIView())
         let renderer = PictureInPictureVideoRenderer()
 
-        sut.attachFeed(to: renderer)  // wires when configured; no-op otherwise (simulator)
+        sut.attachFeed(to: renderer)
+    }
+
+    @Test("routeFeed wires the shared PiP layer into the renderer")
+    func routeFeedWiresLayer() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: renderer)
+
+        #expect(renderer.pipBufferDisplayLayer != nil)
+    }
+
+    @Test("routeFeed moves the feed so only the newest renderer holds the PiP layer")
+    func routeFeedDetachesPreviousRenderer() {
+        let sut = PictureInPictureController()
+        let first = PictureInPictureVideoRenderer()
+        let second = PictureInPictureVideoRenderer()
+        let third = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: first)
+        let sharedLayer = first.pipBufferDisplayLayer
+        sut.routeFeed(to: second)
+        sut.routeFeed(to: third)
+
+        #expect(sharedLayer != nil)
+        #expect(first.pipBufferDisplayLayer == nil)
+        #expect(second.pipBufferDisplayLayer == nil)
+        #expect(third.pipBufferDisplayLayer === sharedLayer)
+    }
+
+    @Test("routeFeed to the current renderer keeps its feed")
+    func routeFeedSameRendererIsStable() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+
+        sut.routeFeed(to: renderer)
+        sut.routeFeed(to: renderer)
+
+        #expect(renderer.pipBufferDisplayLayer != nil)
+    }
+
+    @Test("tearDown detaches the feeding renderer")
+    func tearDownDetachesFeed() {
+        let sut = PictureInPictureController()
+        let renderer = PictureInPictureVideoRenderer()
+        sut.routeFeed(to: renderer)
+
+        sut.tearDown()
+
+        #expect(renderer.pipBufferDisplayLayer == nil)
     }
 
     @Test("attachFeed is a no-op when not configured")
@@ -90,23 +140,42 @@ struct PictureInPictureControllerTests {
         _ = sut.canStartPictureInPicture
     }
 
-    @Test(
-        "Callbacks from an unrelated controller cannot start or stop this lifetime",
-        .enabled(if: AVPictureInPictureController.isPictureInPictureSupported())
-    )
-    func unrelatedControllerCallbacksAreIgnored() throws {
+    @Test("Delegate callbacks update state and fire the closures")
+    func delegateCallbacks() {
         let sut = PictureInPictureController()
-        let controller = try #require(makeAVController())
-        var callbacks = 0
-        sut.onPictureInPictureStateDidStart = { callbacks += 1 }
-        sut.onPictureInPictureStateDidStop = { callbacks += 1 }
-        sut.onPictureInPictureFailed = { _ in callbacks += 1 }
+        sut.configure(with: UIView())
+        let controller = makeAVController()
+
+        var started = false
+        var stopped = false
+        var possibleChanged = false
+        var failed = false
+        sut.onPictureInPictureStateDidStart = { started = true }
+        sut.onPictureInPictureStateDidStop = { stopped = true }
+        sut.onPictureInPicturePossibleDidChange = { possibleChanged = true }
+        sut.onPictureInPictureFailed = { _ in failed = true }
 
         sut.pictureInPictureControllerWillStartPictureInPicture(controller)
-        sut.pictureInPictureControllerDidStopPictureInPicture(controller)
-        sut.pictureInPictureController(controller, failedToStartPictureInPictureWithError: StubError())
+        #expect(sut.isInPictureInPicture == true)
+        #expect(started)
 
-        #expect(!sut.isInPictureInPicture)
-        #expect(callbacks == 0)
+        sut.pictureInPictureControllerDidStartPictureInPicture(controller)
+
+        sut.pictureInPictureControllerDidStopPictureInPicture(controller)
+        #expect(sut.isInPictureInPicture == false)
+        #expect(stopped)
+
+        sut.pictureInPictureControllerIsPictureInPicturePossibleDidChange(controller)
+        #expect(possibleChanged)
+
+        var restored = false
+        sut.pictureInPictureController(
+            controller,
+            restoreUserInterfaceForPictureInPictureStopWithCompletionHandler: { restored = $0 })
+        #expect(restored)
+
+        sut.pictureInPictureController(controller, failedToStartPictureInPictureWithError: StubError())
+        #expect(failed)
+        #expect(sut.isInPictureInPicture == false)
     }
 }

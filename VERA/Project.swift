@@ -494,13 +494,9 @@ let project = Project(
             destinations: .iOS,
             product: .unitTests,
             bundleId: "\(veraAppBundleID)Tests",
-            sources: [
-                "VERAApp/VERATests/**",
-                "VERAApp/BroadcastExtension/ScreenShareVideoCapturer.swift",
-            ],
+            sources: ["VERAApp/VERATests/**"],
             dependencies: [
-                .target(name: "VERA"),
-                .project(target: "VERAVonage", path: "VERAVonage"),
+                .target(name: "VERA")
             ]
         ),
     ],

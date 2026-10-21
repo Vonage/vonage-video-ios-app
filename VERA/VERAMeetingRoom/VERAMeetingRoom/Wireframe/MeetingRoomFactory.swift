@@ -39,19 +39,6 @@ public class MeetingRoomFactory {
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
     }
 
-    /// Creates a meeting room with the default UI provider on its owning actor.
-    @MainActor
-    public func make(
-        roomName: RoomName,
-        onActionHandler: @escaping ActionHandler
-    ) -> (view: some View, viewModel: MeetingRoomViewModel) {
-        make(
-            roomName: roomName,
-            uiProvider: DefaultMeetingRoomUIProvider(),
-            onActionHandler: onActionHandler
-        )
-    }
-
     /// Creates a meeting room view and view model for the supplied room.
     ///
     /// - Parameters:
@@ -62,7 +49,7 @@ public class MeetingRoomFactory {
     @MainActor
     public func make(
         roomName: RoomName,
-        uiProvider: any MeetingRoomUIProvider,
+        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider(),
         onActionHandler: @escaping ActionHandler
     ) -> (view: some View, viewModel: MeetingRoomViewModel) {
         let viewModel = MeetingRoomViewModel(

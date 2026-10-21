@@ -9,7 +9,7 @@ import ReplayKit
 import VERAScreenShare
 
 /// Darwin notification name used to signal the broadcast extension to stop.
-private var stopBroadcastNotificationName: CFString { "com.vonage.VERA.stopBroadcast" as CFString }
+private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
 
 /// Broadcast Upload Extension entry point.
 ///
@@ -33,132 +33,21 @@ private var stopBroadcastNotificationName: CFString { "com.vonage.VERA.stopBroad
 ///
 /// - SeeAlso: ``ScreenShareVideoCapturer``, ``ScreenShareCredentialsStore``
 final class BroadcastSampleHandler: RPBroadcastSampleHandler {
-    private let videoCapturer: ScreenShareVideoCapturer
-    private let controlOwner: BroadcastControlOwner
 
-    override init() {
-        let capturer = ScreenShareVideoCapturer()
-        let finisher = ReplayKitFinishBridge()
-        videoCapturer = capturer
-        controlOwner = BroadcastControlOwner(capturer: capturer, finisher: finisher)
-        super.init()
-        finisher.attach(self)
-    }
+    private let logger = Logger(
+        subsystem: "com.vonage.VERA.BroadcastExtension",
+        category: "BroadcastSampleHandler")
 
-    deinit {
-        videoCapturer.close()
-        let owner = controlOwner
-        DispatchQueue.main.async { owner.finish() }
-    }
-
-    override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
-        let owner = controlOwner
-        DispatchQueue.main.async { owner.start() }
-    }
-
-    override func broadcastPaused() {
-        videoCapturer.setPaused(true)
-        let owner = controlOwner
-        DispatchQueue.main.async { owner.setPublisherPaused(true) }
-    }
-
-    override func broadcastResumed() {
-        videoCapturer.setPaused(false)
-        let owner = controlOwner
-        DispatchQueue.main.async { owner.setPublisherPaused(false) }
-    }
-
-    override func broadcastFinished() {
-        // Close admission on the ReplayKit callback queue. Its main-owner cleanup
-        // then joins admitted consumer calls without retaining or transferring this handler.
-        videoCapturer.close()
-        let owner = controlOwner
-        DispatchQueue.main.async { owner.finish() }
-    }
-
-    override func processSampleBuffer(
-        _ sampleBuffer: CMSampleBuffer,
-        with sampleBufferType: RPSampleBufferType
-    ) {
-        guard sampleBufferType == .video else { return }
-        guard CMSampleBufferIsValid(sampleBuffer), CMSampleBufferDataIsReady(sampleBuffer) else { return }
-        videoCapturer.consumeVideoSampleBuffer(sampleBuffer)
-    }
-}
-
-/// The only ReplayKit interoperability escape hatch. The weak reference is set once
-/// during handler initialization and accessed under a lock. It never leaves this bridge:
-/// only the framework's finish method is invoked, synchronously on MainActor. No inherited
-/// RPBroadcastSampleHandler state is asserted to be Sendable or exposed to worker tasks.
-private final class ReplayKitFinishBridge: @unchecked Sendable {
-    private let lock = NSLock()
-    private weak var handler: RPBroadcastSampleHandler?
-
-    func attach(_ handler: RPBroadcastSampleHandler) {
-        lock.withLock { self.handler = handler }
-    }
-
-    @MainActor
-    func finish(domain: String, code: Int, message: String) {
-        let handler = lock.withLock { self.handler }
-        handler?.finishBroadcastWithError(
-            NSError(domain: domain, code: code, userInfo: [NSLocalizedDescriptionKey: message]))
-    }
-}
-
-/// Constructible from ReplayKit's initializer using only owned Sendable dependencies.
-/// All lazily created SDK state stays inside the MainActor controller.
-@MainActor
-private final class BroadcastControlOwner {
-    private let capturer: ScreenShareVideoCapturer
-    private let finisher: ReplayKitFinishBridge
-    private lazy var control = BroadcastControl(capturer: capturer, finisher: finisher)
-    private var finishScheduled = false
-
-    nonisolated init(capturer: ScreenShareVideoCapturer, finisher: ReplayKitFinishBridge) {
-        self.capturer = capturer
-        self.finisher = finisher
-    }
-
-    func start() { control.startBroadcast() }
-    func setPublisherPaused(_ paused: Bool) { control.setPublisherPaused(paused) }
-
-    func finish() {
-        guard !finishScheduled else { return }
-        finishScheduled = true
-        capturer.closeOnMainActor { [self] in control.tearDown() }
-    }
-}
-
-@MainActor
-private final class BroadcastControl: NSObject {
-    nonisolated private let logger = Logger(
-        subsystem: "com.vonage.VERA.BroadcastExtension", category: "BroadcastSampleHandler")
-    nonisolated private let videoCapturer: ScreenShareVideoCapturer
-    private let finisher: ReplayKitFinishBridge
     private var session: OTSession?
     private var publisher: OTPublisherKit?
+    private let videoCapturer = ScreenShareVideoCapturer()
     private var didTearDown = false
+    private var shouldProcessVideoSamples = false
     private var store: UserDefaultsScreenShareCredentialsRepository?
 
-    init(capturer: ScreenShareVideoCapturer, finisher: ReplayKitFinishBridge) {
-        videoCapturer = capturer
-        self.finisher = finisher
-        super.init()
-    }
+    // MARK: - Broadcast lifecycle
 
-    func setPublisherPaused(_ paused: Bool) {
-        guard !didTearDown else { return }
-        publisher?.publishVideo = !paused
-    }
-
-    private func finishBroadcastWithError(_ error: Error) {
-        let description = error as NSError
-        finisher.finish(domain: description.domain, code: description.code, message: description.localizedDescription)
-    }
-
-    func startBroadcast() {
-        guard !didTearDown, !videoCapturer.isClosed else { return }
+    override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         logger.debug("broadcastStarted")
 
         registerStopBroadcastNotification()
@@ -210,7 +99,6 @@ private final class BroadcastControl: NSObject {
             return
         }
 
-        otSession.apiQueue = .main
         self.session = otSession
 
         var connectError: OTError?
@@ -222,6 +110,24 @@ private final class BroadcastControl: NSObject {
         }
     }
 
+    override func broadcastPaused() {
+        logger.debug("broadcastPaused")
+        shouldProcessVideoSamples = false
+        publisher?.publishVideo = false
+    }
+
+    override func broadcastResumed() {
+        logger.debug("broadcastResumed")
+        shouldProcessVideoSamples = publisher != nil
+        publisher?.publishVideo = true
+    }
+
+    override func broadcastFinished() {
+        logger.debug("broadcastFinished")
+        shouldProcessVideoSamples = false
+        tearDown()
+    }
+
     /// Register observer for stop notification from main app
     private func registerStopBroadcastNotification() {
         CFNotificationCenterAddObserver(
@@ -229,7 +135,7 @@ private final class BroadcastControl: NSObject {
             Unmanaged.passUnretained(self).toOpaque(),
             { _, observer, _, _, _ in
                 guard let observer = observer else { return }
-                let handler = Unmanaged<BroadcastControl>.fromOpaque(observer).takeUnretainedValue()
+                let handler = Unmanaged<BroadcastSampleHandler>.fromOpaque(observer).takeUnretainedValue()
                 handler.stopBroadcastFromNotification()
             },
             stopBroadcastNotificationName,
@@ -243,7 +149,7 @@ private final class BroadcastControl: NSObject {
     /// Only calls `finishBroadcastWithError` — ReplayKit will stop sending frames
     /// and then call `broadcastFinished()`, which performs the actual `tearDown()`.
     /// This avoids disconnecting the OTSession while frames are still arriving.
-    nonisolated private func stopBroadcastFromNotification() {
+    private func stopBroadcastFromNotification() {
         logger.debug("Received stop broadcast notification from main app")
 
         DispatchQueue.main.async { [self] in
@@ -257,10 +163,9 @@ private final class BroadcastControl: NSObject {
 
     /// Tears down the Vonage session and removes the Darwin notification observer.
     /// Guarded against reentrancy — safe to call multiple times.
-    func tearDown() {
+    private func tearDown() {
         guard !didTearDown else { return }
         didTearDown = true
-        videoCapturer.close()
 
         CFNotificationCenterRemoveObserver(
             CFNotificationCenterGetDarwinNotifyCenter(),
@@ -278,24 +183,27 @@ private final class BroadcastControl: NSObject {
         publisher = nil
     }
 
+    override func processSampleBuffer(
+        _ sampleBuffer: CMSampleBuffer,
+        with sampleBufferType: RPSampleBufferType
+    ) {
+        guard sampleBufferType == .video else { return }
+        guard shouldProcessVideoSamples, !didTearDown else { return }
+        guard CMSampleBufferIsValid(sampleBuffer), CMSampleBufferDataIsReady(sampleBuffer) else { return }
+
+        videoCapturer.consumeVideoSampleBuffer(sampleBuffer)
+    }
 }
 
 // MARK: - OTSessionDelegate
 
-extension BroadcastControl: OTSessionDelegate {
+extension BroadcastSampleHandler: OTSessionDelegate {
 
-    nonisolated func sessionDidConnect(_ session: OTSession) {
-        // This private session is configured with apiQueue = .main before connecting.
-        // Handle it inline so a later disconnect cannot overtake queued publication.
-        MainActor.assumeIsolated {
-            publishScreenShare()
-        }
-    }
-
-    private func publishScreenShare() {
-        guard !didTearDown, !videoCapturer.isClosed, let session else { return }
+    func sessionDidConnect(_ session: OTSession) {
         logger.debug("sessionDidConnect")
         videoCapturer.sessionDidConnect()
+
+        shouldProcessVideoSamples = true
 
         let settings = OTPublisherSettings()
         settings.scalableScreenshare = true
@@ -328,7 +236,6 @@ extension BroadcastControl: OTSessionDelegate {
         otPublisher.videoCapture = videoCapturer
         otPublisher.videoCapture?.videoContentHint = .text
         otPublisher.publishAudio = false
-        otPublisher.publishVideo = !videoCapturer.isPaused
 
         self.publisher = otPublisher
 
@@ -340,53 +247,41 @@ extension BroadcastControl: OTSessionDelegate {
         }
     }
 
-    nonisolated func sessionDidDisconnect(_ session: OTSession) {
+    func sessionDidDisconnect(_ session: OTSession) {
         logger.debug("sessionDidDisconnect")
+        shouldProcessVideoSamples = false
         videoCapturer.sessionDidDisconnect()
     }
 
-    nonisolated func session(_ session: OTSession, didFailWithError error: OTError) {
+    func session(_ session: OTSession, didFailWithError error: OTError) {
+        logger.error("session didFailWithError: \(error.localizedDescription)")
         videoCapturer.sessionDidDisconnect()
-        finishAfterSDKFailure(message: error.localizedDescription, code: error.code)
+        shouldProcessVideoSamples = false
+        finishBroadcastWithError(error)
     }
 
-    nonisolated func session(_ session: OTSession, streamCreated stream: OTStream) {
+    func session(_ session: OTSession, streamCreated stream: OTStream) {
         logger.debug("streamCreated: \(stream.streamId)")
     }
 
-    nonisolated func session(_ session: OTSession, streamDestroyed stream: OTStream) {
+    func session(_ session: OTSession, streamDestroyed stream: OTStream) {
         logger.debug("streamDestroyed: \(stream.streamId)")
     }
 }
 
 // MARK: - OTPublisherDelegate
 
-extension BroadcastControl: OTPublisherDelegate {
-    nonisolated func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
-        videoCapturer.sessionDidDisconnect()
-        finishAfterSDKFailure(message: error.localizedDescription, code: error.code)
+extension BroadcastSampleHandler: OTPublisherDelegate {
+    func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
+        logger.error("publisher didFailWithError: \(error.localizedDescription)")
+        finishBroadcastWithError(error)
     }
 
-    nonisolated func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
+    func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
         logger.debug("publisher streamCreated: \(stream.streamId)")
     }
 
-    nonisolated func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
+    func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
         logger.debug("publisher streamDestroyed: \(stream.streamId)")
-    }
-}
-
-extension BroadcastControl {
-    nonisolated private func finishAfterSDKFailure(message: String, code: Int) {
-        // Copy diagnostic values while the SDK-owned error is borrowed; never enqueue it.
-        DispatchQueue.main.async { [weak self] in
-            guard let self, !didTearDown else { return }
-            logger.error("Broadcast SDK failure: \(message)")
-            finishBroadcastWithError(
-                NSError(
-                    domain: "VERABroadcastExtension",
-                    code: code,
-                    userInfo: [NSLocalizedDescriptionKey: message]))
-        }
     }
 }

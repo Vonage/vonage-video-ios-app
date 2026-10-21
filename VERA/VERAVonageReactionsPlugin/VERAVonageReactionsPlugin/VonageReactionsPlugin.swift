@@ -92,11 +92,7 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     /// Creates a reactions plugin.
     ///
     /// - Parameter repository: A reactions repository. Defaults to `DefaultReactionsRepository()`.
-    public convenience init() {
-        self.init(repository: DefaultReactionsRepository())
-    }
-
-    public init(repository: ReactionsRepository) {
+    public init(repository: ReactionsRepository = DefaultReactionsRepository()) {
         self.repository = repository
     }
 

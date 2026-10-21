@@ -24,7 +24,6 @@ public final class ArchivingFactory {
         self.sessionKeyProvider = sessionKeyProvider
     }
 
-    @MainActor
     public func makeArchivingButton(
         showAlert: @escaping (AlertItem) -> Void
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
@@ -39,14 +38,12 @@ public final class ArchivingFactory {
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
 
-    @MainActor
     public func makeArchivingButton(
         viewModel: ArchiveButtonViewModel
     ) -> some View {
         ArchiveScreenButton(viewModel: viewModel)
     }
 
-    @MainActor
     public func make(
         onPlay: @escaping (ArchiveRecording) -> Void
     ) -> (view: some View, viewModel: ArchivesViewModel) {
@@ -59,7 +56,6 @@ public final class ArchivingFactory {
         return (make(viewModel: viewModel), viewModel)
     }
 
-    @MainActor
     public func make(
         viewModel: ArchivesViewModel
     ) -> some View {

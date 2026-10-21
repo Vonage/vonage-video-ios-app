@@ -9,7 +9,6 @@ import Foundation
 ///
 /// Implement this protocol to provide speaker testing functionality
 /// that can be verified against the device's active audio route.
-@MainActor
 public protocol SpeakerTestService: Sendable {
     /// Plays a short test tone through the current audio output route.
     func playTestSound()

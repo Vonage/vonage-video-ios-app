@@ -2,7 +2,6 @@
 //  Created by Vonage on 24/9/26.
 //
 
-import Foundation
 import OpenTok
 import Testing
 import VERADomain
@@ -11,27 +10,6 @@ import VERADomain
 
 @Suite("VonageSession tests")
 struct VonageSessionTests {
-
-    @MainActor
-    @Test("Wrapping an injected session preserves its configured callback queue")
-    func injectedSessionPreservesCallbackQueue() {
-        let session = makeOTSession()
-        let callbackQueue = DispatchQueue(label: "vera.session.injected-callbacks")
-        session.apiQueue = callbackQueue
-        let sut = VonageSession(
-            session: session,
-            credentials: RoomCredentials(
-                sessionId: "sessionId",
-                token: "token",
-                applicationId: "applicationId",
-                roomName: "heart-of-gold",
-                sessionKey: "sessionKey"
-            )
-        )
-
-        #expect(session.apiQueue === callbackQueue)
-        withExtendedLifetime(sut) {}
-    }
 
     // MARK: - Metadata
 

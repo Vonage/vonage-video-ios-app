@@ -20,7 +20,7 @@ public protocol MeetingRoomDestination {
         message: String,
         confirmTitle: String,
         cancelTitle: String,
-        onConfirm: @escaping @MainActor () -> Void
+        onConfirm: @escaping () -> Void
     )
 
     func goToSettings()
@@ -75,7 +75,7 @@ public struct MeetingRoomNavigation: MeetingRoomDestination {
         message: String,
         confirmTitle: String,
         cancelTitle: String,
-        onConfirm: @escaping @MainActor () -> Void
+        onConfirm: @escaping () -> Void
     ) {
         let alert = AlertItem(
             title: message,

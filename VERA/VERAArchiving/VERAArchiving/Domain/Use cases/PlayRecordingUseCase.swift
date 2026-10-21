@@ -5,7 +5,6 @@
 import Foundation
 import VERADomain
 
-@MainActor
 public protocol PlayRecordingUseCase {
     func callAsFunction(_ archive: Archive) async throws
 }

@@ -45,7 +45,7 @@ public struct StopArchivingDataSourceResponse: Sendable {
     }
 }
 
-public protocol ArchivingDataSource: Sendable {
+public protocol ArchivingDataSource {
     func startArchiving(
         _ request: StartArchivingDataSourceRequest
     ) async throws -> StartArchivingDataSourceResponse

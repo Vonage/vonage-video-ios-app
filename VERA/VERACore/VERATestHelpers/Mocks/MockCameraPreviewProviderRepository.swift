@@ -39,7 +39,7 @@ public final class MockCameraPreviewProviderRepository: CameraPreviewProviderRep
 }
 
 public func makeMockCameraPreviewProviderRepository(
-    publisher: MockVERAPublisher? = nil
+    publisher: MockVERAPublisher = .init()
 ) -> MockCameraPreviewProviderRepository {
-    MockCameraPreviewProviderRepository(publisher: publisher ?? .init())
+    MockCameraPreviewProviderRepository(publisher: publisher)
 }

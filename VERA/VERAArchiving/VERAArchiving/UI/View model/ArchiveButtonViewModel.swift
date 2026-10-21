@@ -5,10 +5,8 @@
 import Combine
 import Foundation
 import Observation
-import VERACommonUI
 import VERADomain
 
-@MainActor
 @Observable
 public final class ArchiveButtonViewModel {
     @ObservationIgnored
@@ -48,7 +46,8 @@ public final class ArchiveButtonViewModel {
         initiated = true
 
         archivingStatusDataSource.archivingState
-            .sinkOnMainActor { [weak self] status in
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
                 self?.state = status
             }
             .store(in: &cancellables)

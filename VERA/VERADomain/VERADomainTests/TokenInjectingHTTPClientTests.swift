@@ -8,7 +8,6 @@ import Testing
 @testable import VERADomain
 
 @Suite("TokenInjectingHTTPClient Tests")
-@MainActor
 struct TokenInjectingHTTPClientTests {
 
     @Test
@@ -82,11 +81,10 @@ struct TokenInjectingHTTPClientTests {
     // MARK: - Helpers
 
     private func makeSUT(
-        wrapped: HTTPClientSpy? = nil,
+        wrapped: HTTPClientSpy = HTTPClientSpy(),
         tokenProvider: TokenProvider = MockTokenProvider(token: nil)
     ) -> TokenInjectingHTTPClient {
-        let wrapped = wrapped ?? HTTPClientSpy()
-        return TokenInjectingHTTPClient(wrapped: wrapped, tokenProvider: tokenProvider)
+        TokenInjectingHTTPClient(wrapped: wrapped, tokenProvider: tokenProvider)
     }
 
     private func anyURL() -> URL {
@@ -96,7 +94,6 @@ struct TokenInjectingHTTPClientTests {
 
 // MARK: - Test Doubles
 
-@MainActor
 private final class HTTPClientSpy: HTTPClient {
     var receivedURLs: [URL] = []
     var receivedHeaders: [[String: String]] = []
@@ -120,7 +117,7 @@ private final class HTTPClientSpy: HTTPClient {
     }
 }
 
-private final class MockTokenProvider: TokenProvider {
+private final class MockTokenProvider: TokenProvider, @unchecked Sendable {
     private let stubbedToken: String?
 
     init(token: String?) {

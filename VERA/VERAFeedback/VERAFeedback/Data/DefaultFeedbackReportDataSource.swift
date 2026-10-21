@@ -40,13 +40,12 @@ public struct DefaultFeedbackReportDataSource: FeedbackReportDataSource {
     ) async throws -> FeedbackReportDataSourceResponse {
         let url = baseURL.appendingPathComponent("feedback/report")
 
-        let attachment = await FeedbackImageEncoder.encodeForUpload(request.image)
         let body = try JSONEncoder().encode(
             FeedbackReportDataRequest(
                 title: request.title,
                 name: request.name,
                 issue: request.issue + request.debugDump,
-                attachment: attachment
+                attachment: FeedbackImageEncoder.encodeToBase64(request.image)
             )
         )
 

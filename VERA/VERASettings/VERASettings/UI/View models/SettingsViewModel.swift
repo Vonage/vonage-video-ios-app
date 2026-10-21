@@ -5,7 +5,6 @@
 import Combine
 import Foundation
 import Observation
-import VERACommonUI
 import os.log
 
 /// Constants used throughout the settings system.
@@ -25,7 +24,6 @@ public enum AudioSettingsConstants {
 /// react immediately via ``PublisherSettingsRepository/preferencesPublisher``.
 ///
 @Observable
-@MainActor
 public final class SettingsViewModel {
 
     // MARK: - Observable state
@@ -239,7 +237,7 @@ public final class SettingsViewModel {
             settingsPreferenceSubject
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
-            .sinkOnMainActor { [weak self] _ in
+            .sink { [weak self] _ in
                 self?.autoSaveTask?.cancel()
                 self?.autoSaveTask = Task {
                     await self?.persistCurrentState()

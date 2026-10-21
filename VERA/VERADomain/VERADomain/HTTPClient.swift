@@ -4,7 +4,7 @@
 
 import Foundation
 
-public protocol HTTPClient: Sendable {
+public protocol HTTPClient {
     func get(
         _ url: URL,
         additionalHeaders: [String: String]

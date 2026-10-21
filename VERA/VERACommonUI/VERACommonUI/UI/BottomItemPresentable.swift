@@ -34,7 +34,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
     public let overflowPresentation: BottomBarOverflowPresentation
     public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
 
-    private let action: @MainActor () -> Void
+    private let action: () -> Void
 
     public init(
         id: String? = nil,
@@ -45,7 +45,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
         accessory: BottomBarButtonAccessory? = nil,
         overflowPresentation: BottomBarOverflowPresentation = .gridItem,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
-        action: @escaping @MainActor () -> Void
+        action: @escaping () -> Void
     ) {
         self.id = id ?? label
         self.label = label
@@ -65,7 +65,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
 
 public enum BottomBarOverflowPresentation {
     case gridItem
-    case headerContent(@MainActor () -> AnyView)
+    case headerContent(() -> AnyView)
 }
 
 public enum BottomBarOverflowSelectionBehavior: Equatable {

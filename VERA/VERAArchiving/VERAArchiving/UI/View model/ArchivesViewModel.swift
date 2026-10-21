@@ -5,10 +5,8 @@
 import Combine
 import Foundation
 import Observation
-import VERACommonUI
 import VERADomain
 
-@MainActor
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
@@ -20,8 +18,8 @@ public final class ArchivesViewModel {
     @ObservationIgnored
     private let playRecordingUseCase: PlayRecordingUseCase
 
-    public var archives: [ArchiveUIData] = []
-    public var error: AlertItem?
+    @MainActor public var archives: [ArchiveUIData] = []
+    @MainActor public var error: AlertItem?
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
@@ -33,18 +31,31 @@ public final class ArchivesViewModel {
         self.playRecordingUseCase = playRecordingUseCase
     }
 
+    @BackgroundActor
     public func loadData() async {
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
-            .sinkOnMainActor(
+            .receive(on: DispatchQueue.main)
+            .map { [weak self] archives in
+                guard let self else { return [] }
+                return
+                    archives
+                    .reversed()
+                    .enumerated()
+                    .map { index, archive in
+                        self.mapToUIArchive(archive, index: archives.count - index)
+                    }
+            }
+            .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        self?.error = AlertItem.goodbyeError(error.localizedDescription)
+                        Task { @MainActor [weak self] in
+                            self?.error = AlertItem.goodbyeError(error.localizedDescription)
+                        }
                     }
                 },
                 receiveValue: { [weak self] archives in
-                    guard let self else { return }
-                    self.archives = archives.reversed().enumerated().map { index, archive in
-                        self.mapToUIArchive(archive, index: archives.count - index)
+                    Task { @MainActor [weak self] in
+                        self?.archives = archives
                     }
                 }
             )
@@ -64,7 +75,9 @@ public final class ArchivesViewModel {
             do {
                 try await self?.playRecordingUseCase(archive)
             } catch {
-                self?.error = AlertItem.downloadError(error.localizedDescription)
+                Task { @MainActor [weak self] in
+                    self?.error = AlertItem.downloadError(error.localizedDescription)
+                }
             }
         }
     }

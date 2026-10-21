@@ -10,52 +10,17 @@ import UIKit
 @MainActor
 final class PictureInPictureController: NSObject {
 
-    private struct Callback: Sendable {
-        let controllerID: ObjectIdentifier
-        let event: PictureInPictureControllerEvent
-    }
-    nonisolated private let callbacks: MainActorEventQueue<Callback>
-    private let lifecycle = PictureInPictureControllerLifecycle()
-
-    override init() {
-        callbacks = MainActorEventQueue()
-        super.init()
-        lifecycle.onDidStartRendering = { [weak self] in
-            guard let renderer = self?.sampleBufferVideoCallView.sampleBufferDisplayLayer.sampleBufferRenderer else {
-                return
-            }
-            if renderer.requiresFlushToResumeDecoding { renderer.flush() }
-        }
-        configureCallbackDelivery()
-    }
-
-    private func configureCallbackDelivery() {
-        callbacks.activate { [weak self] callback in
-            self?.lifecycle.receive(callback.event, controllerID: callback.controllerID)
-        }
-    }
-
     private var pipController: AVPictureInPictureController?
     private let sampleBufferVideoCallView = PictureInPictureSampleBufferView()
 
-    var isInPictureInPicture: Bool { lifecycle.isInPictureInPicture }
+    private weak var currentFeedRenderer: PictureInPictureVideoRenderer?
+
+    private(set) var isInPictureInPicture = false
     var isConfigured: Bool { pipController != nil }
-    var onPictureInPicturePossibleDidChange: (() -> Void)? {
-        get { lifecycle.onPossibleDidChange }
-        set { lifecycle.onPossibleDidChange = newValue }
-    }
-    var onPictureInPictureStateDidStart: (() -> Void)? {
-        get { lifecycle.onStateDidStart }
-        set { lifecycle.onStateDidStart = newValue }
-    }
-    var onPictureInPictureStateDidStop: (() -> Void)? {
-        get { lifecycle.onStateDidStop }
-        set { lifecycle.onStateDidStop = newValue }
-    }
-    var onPictureInPictureFailed: ((Error) -> Void)? {
-        get { lifecycle.onFailed }
-        set { lifecycle.onFailed = newValue }
-    }
+    var onPictureInPicturePossibleDidChange: (() -> Void)?
+    var onPictureInPictureStateDidStart: (() -> Void)?
+    var onPictureInPictureStateDidStop: (() -> Void)?
+    var onPictureInPictureFailed: ((Error) -> Void)?
 
     var isPictureInPictureSupported: Bool {
         AVPictureInPictureController.isPictureInPictureSupported()
@@ -95,8 +60,6 @@ final class PictureInPictureController: NSObject {
         )
 
         pipController = AVPictureInPictureController(contentSource: contentSource)
-        lifecycle.activate(controllerID: pipController.map { ObjectIdentifier($0) })
-        configureCallbackDelivery()
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
     }
@@ -109,6 +72,14 @@ final class PictureInPictureController: NSObject {
     /// PiP target changes between renderers while PiP stays active — e.g. publisher ↔ remote).
     func attachFeed(to videoRenderer: PictureInPictureVideoRenderer) {
         guard isConfigured else { return }
+        routeFeed(to: videoRenderer)
+    }
+
+    func routeFeed(to videoRenderer: PictureInPictureVideoRenderer) {
+        if currentFeedRenderer !== videoRenderer {
+            currentFeedRenderer?.pipBufferDisplayLayer = nil
+        }
+        currentFeedRenderer = videoRenderer
         videoRenderer.pipBufferDisplayLayer = sampleBufferVideoCallView.sampleBufferDisplayLayer
     }
 
@@ -117,55 +88,61 @@ final class PictureInPictureController: NSObject {
     }
 
     func tearDown() {
-        callbacks.invalidate()
+        currentFeedRenderer?.pipBufferDisplayLayer = nil
+        currentFeedRenderer = nil
         pipController?.delegate = nil
         pipController = nil
-        lifecycle.activate(controllerID: nil)
-        let renderer = sampleBufferVideoCallView.sampleBufferDisplayLayer.sampleBufferRenderer
-        if renderer.requiresFlushToResumeDecoding {
-            renderer.flush()
+        isInPictureInPicture = false
+        let layer = sampleBufferVideoCallView.sampleBufferDisplayLayer
+        if layer.requiresFlushToResumeDecoding {
+            layer.flush()
         }
     }
 
 }
 
 extension PictureInPictureController: AVPictureInPictureControllerDelegate {
-    nonisolated func pictureInPictureControllerIsPictureInPicturePossibleDidChange(
+    func pictureInPictureControllerIsPictureInPicturePossibleDidChange(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        callbacks.send(Callback(controllerID: ObjectIdentifier(pictureInPictureController), event: .possibleChanged))
+        onPictureInPicturePossibleDidChange?()
     }
 
-    nonisolated func pictureInPictureControllerWillStartPictureInPicture(
+    func pictureInPictureControllerWillStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        callbacks.send(Callback(controllerID: ObjectIdentifier(pictureInPictureController), event: .willStart))
+        isInPictureInPicture = true
+        onPictureInPictureStateDidStart?()
     }
 
-    nonisolated func pictureInPictureControllerDidStartPictureInPicture(
+    func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        callbacks.send(Callback(controllerID: ObjectIdentifier(pictureInPictureController), event: .didStart))
+        if sampleBufferVideoCallView.sampleBufferDisplayLayer.requiresFlushToResumeDecoding {
+            sampleBufferVideoCallView.sampleBufferDisplayLayer.flush()
+        }
     }
 
-    nonisolated func pictureInPictureControllerDidStopPictureInPicture(
+    func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        callbacks.send(Callback(controllerID: ObjectIdentifier(pictureInPictureController), event: .didStop))
+        isInPictureInPicture = false
+        onPictureInPictureStateDidStop?()
     }
 
-    nonisolated func pictureInPictureController(
+    func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
     ) {
-        // This existing response touches no UI state and stays on the caller's executor.
         completionHandler(true)
     }
 
-    nonisolated func pictureInPictureController(
+    func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
-        callbacks.send(Callback(controllerID: ObjectIdentifier(pictureInPictureController), event: .failed(error)))
+        isInPictureInPicture = false
+        onPictureInPictureFailed?(error)
+        onPictureInPictureStateDidStop?()
     }
 }

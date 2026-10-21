@@ -5,7 +5,6 @@
 import Combine
 import Foundation
 import Observation
-import VERACommonUI
 import VERADomain
 
 /// View model that drives the captions toggle button.
@@ -32,7 +31,6 @@ import VERADomain
 /// ```
 ///
 /// - SeeAlso: ``CaptionsButtonContainer``, ``CaptionsButton``, ``CaptionsFactory``
-@MainActor
 @Observable
 public final class CaptionsButtonViewModel {
     @ObservationIgnored
@@ -92,7 +90,8 @@ public final class CaptionsButtonViewModel {
         initiated = true
 
         captionsStatusDataSource.captionsState
-            .sinkOnMainActor { [weak self] status in
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
                 self?.state = status
             }
             .store(in: &cancellables)

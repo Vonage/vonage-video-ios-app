@@ -12,7 +12,6 @@ public class GoodByePageFactory {
         self.userRepository = userRepository
     }
 
-    @MainActor
     public func make<ContentView: View>(
         roomName: RoomName,
         onReenter: @escaping () -> Void,
@@ -32,7 +31,6 @@ public class GoodByePageFactory {
         )
     }
 
-    @MainActor
     public func make<ContentView: View>(
         viewModel: GoodByeViewModel,
         @ViewBuilder additionalContentView: @escaping () -> ContentView

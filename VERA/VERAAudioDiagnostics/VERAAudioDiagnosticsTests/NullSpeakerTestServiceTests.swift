@@ -7,7 +7,6 @@ import Testing
 
 @testable import VERAAudioDiagnostics
 
-@MainActor
 @Suite("NullSpeakerTestService tests")
 struct NullSpeakerTestServiceTests {
 

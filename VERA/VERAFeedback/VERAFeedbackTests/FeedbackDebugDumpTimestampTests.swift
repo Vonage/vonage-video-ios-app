@@ -36,7 +36,7 @@ struct FeedbackDebugDumpTimestampTests {
                             connectionId: "connection-\(index)",
                             connectionCreationTime: Date(timeIntervalSince1970: Double(index) + 0.125)
                         )
-                        return (index, await FeedbackDebugDumpBuilder.debugDump(session: session))
+                        return (index, FeedbackDebugDumpBuilder.debugDump(session: session))
                     }
                 }
 

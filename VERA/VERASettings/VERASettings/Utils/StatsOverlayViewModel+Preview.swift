@@ -11,10 +11,10 @@
 
     final actor PreviewStatsDataSource: StatsDataSource {
 
-        private nonisolated let subject = CurrentValueRelay<NetworkMediaStats, Never>(.mock)
+        private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.mock)
 
         nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
-            subject.publisher
+            subject.eraseToAnyPublisher()
         }
 
         func updateStats(_ stats: NetworkMediaStats) async {

@@ -6,76 +6,18 @@ import Foundation
 import VERADomain
 
 public final class MockHTTPClient: HTTPClient {
-    private struct State: Sendable {
-        var data: Data = Data()
-        var dataSequence: [Data] = []
-        var shouldThrowError: Bool = false
-        var shouldThrowErrorOnCallNumber: Int? = nil
-        var delaySeconds: TimeInterval = 0
-        var callCount: Int = 0
-        var recordedURL: URL? = nil
-        var recordedURLs: [URL] = []
-        var recordedHeaders: [String: String] = [:]
-        var recordedData: Data? = nil
-        var recordedDataSequence: [Data] = []
-    }
+    public var data = Data()
+    public var dataSequence: [Data] = []
+    public var shouldThrowError = false
+    public var shouldThrowErrorOnCallNumber: Int?
+    public var delaySeconds: TimeInterval = 0
+    public var callCount = 0
+    public var recordedURL: URL!
+    public var recordedURLs: [URL] = []
+    public var recordedHeaders: [String: String] = [:]
+    public var recordedData: Data?
+    public var recordedDataSequence: [Data] = []
 
-    private let state = TestLockedValue(State())
-
-    public var data: Data {
-        get { state.withValue { $0.data } }
-        set { state.withValue { $0.data = newValue } }
-    }
-
-    public var dataSequence: [Data] {
-        get { state.withValue { $0.dataSequence } }
-        set { state.withValue { $0.dataSequence = newValue } }
-    }
-
-    public var shouldThrowError: Bool {
-        get { state.withValue { $0.shouldThrowError } }
-        set { state.withValue { $0.shouldThrowError = newValue } }
-    }
-
-    public var shouldThrowErrorOnCallNumber: Int? {
-        get { state.withValue { $0.shouldThrowErrorOnCallNumber } }
-        set { state.withValue { $0.shouldThrowErrorOnCallNumber = newValue } }
-    }
-
-    public var delaySeconds: TimeInterval {
-        get { state.withValue { $0.delaySeconds } }
-        set { state.withValue { $0.delaySeconds = newValue } }
-    }
-
-    public var callCount: Int {
-        get { state.withValue { $0.callCount } }
-        set { state.withValue { $0.callCount = newValue } }
-    }
-
-    public var recordedURL: URL! {
-        get { state.withValue { $0.recordedURL } }
-        set { state.withValue { $0.recordedURL = newValue } }
-    }
-
-    public var recordedURLs: [URL] {
-        get { state.withValue { $0.recordedURLs } }
-        set { state.withValue { $0.recordedURLs = newValue } }
-    }
-
-    public var recordedHeaders: [String: String] {
-        get { state.withValue { $0.recordedHeaders } }
-        set { state.withValue { $0.recordedHeaders = newValue } }
-    }
-
-    public var recordedData: Data? {
-        get { state.withValue { $0.recordedData } }
-        set { state.withValue { $0.recordedData = newValue } }
-    }
-
-    public var recordedDataSequence: [Data] {
-        get { state.withValue { $0.recordedDataSequence } }
-        set { state.withValue { $0.recordedDataSequence = newValue } }
-    }
     public init(
         data: Data = Data(),
         shouldThrowError: Bool = false,
@@ -102,31 +44,30 @@ public final class MockHTTPClient: HTTPClient {
 
     private func recordAndReturn(url: URL, additionalHeaders: [String: String] = [:], data: Data?) async throws -> Data
     {
-        let response = state.withValue { state -> (Data, Bool, TimeInterval) in
-            state.callCount += 1
-            state.recordedURL = url
-            state.recordedURLs.append(url)
-            if let data {
-                state.recordedData = data
-                state.recordedDataSequence.append(data)
-            }
-            for (key, value) in additionalHeaders {
-                state.recordedHeaders = [key: value]
-            }
-            let shouldThrow = state.shouldThrowError || state.shouldThrowErrorOnCallNumber == state.callCount
-            let result =
-                state.dataSequence.isEmpty
-                ? state.data
-                : state.dataSequence[min(state.callCount - 1, state.dataSequence.count - 1)]
-            return (result, shouldThrow, state.delaySeconds)
+        callCount += 1
+        recordedURL = url
+        recordedURLs.append(url)
+        if let data {
+            recordedData = data
+            recordedDataSequence.append(data)
         }
-        if response.2 > 0 {
-            try await Task.sleep(nanoseconds: UInt64(response.2 * 1_000_000_000))
+
+        additionalHeaders.forEach { (key, value) in
+            recordedHeaders = [key: value]
         }
-        if response.1 {
+
+        if delaySeconds > 0 {
+            try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
+        }
+
+        if shouldThrowError || shouldThrowErrorOnCallNumber == callCount {
             throw MockHTTPError()
         }
-        return response.0
+
+        if !dataSequence.isEmpty {
+            return dataSequence[min(callCount - 1, dataSequence.count - 1)]
+        }
+        return self.data
     }
 }
 

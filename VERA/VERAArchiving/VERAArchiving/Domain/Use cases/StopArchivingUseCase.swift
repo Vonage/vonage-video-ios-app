@@ -14,7 +14,7 @@ public struct StopArchivingRequest: Sendable {
     }
 }
 
-public protocol StopArchivingUseCase: Sendable {
+public protocol StopArchivingUseCase {
     func callAsFunction(_ request: StopArchivingRequest) async throws
 }
 

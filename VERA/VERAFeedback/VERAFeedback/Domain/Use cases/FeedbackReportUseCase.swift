@@ -28,7 +28,6 @@ public struct FeedbackReportRequest {
 
 public typealias FeedbackReportResult = FeedbackReportDataSourceResponse
 
-@MainActor
 public protocol FeedbackReportUseCase {
     func callAsFunction(_ request: FeedbackReportRequest) async throws -> FeedbackReportResult
 }

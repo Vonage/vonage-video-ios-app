@@ -7,9 +7,7 @@ import Testing
 import VERACore
 import VERADomain
 
-@testable import VERATestHelpers
-
-@Suite("URL Session HTTP client tests", .serialized)
+@Suite("URL Session HTTP client tests")
 final class URLSessionHTTPClientTests {
 
     // MARK: - GET Tests
@@ -420,25 +418,19 @@ final class URLSessionHTTPClientTests {
 
     // MARK: - Spy
 
-    private final class URLSessionHTTPClientSpy: Sendable {
-        private struct State: Sendable {
-            var requestedURLs: [URL] = []
-            var requestedBodies: [Data] = []
-            var requestedRequests: [URLRequest] = []
-            var stubs: [URL: Stub] = [:]
-        }
-        private let state = TestLockedValue(State())
-        var requestedURLs: [URL] { state.withValue { $0.requestedURLs } }
-        var requestedBodies: [Data] { state.withValue { $0.requestedBodies } }
-        var requestedRequests: [URLRequest] { state.withValue { $0.requestedRequests } }
+    private final class URLSessionHTTPClientSpy {
+        private(set) var requestedURLs: [URL] = []
+        private(set) var requestedBodies: [Data] = []
+        private(set) var requestedRequests: [URLRequest] = []
+        private var stubs: [URL: Stub] = [:]
 
-        struct Stub: Sendable {
+        struct Stub {
             let response: URLResponse
             let data: Data
         }
 
         func stub(url: URL, response: URLResponse, data: Data) {
-            state.withValue { $0.stubs[url] = Stub(response: response, data: data) }
+            stubs[url] = Stub(response: response, data: data)
         }
 
         func stub(url: URL, statusCode: Int, data: Data) {
@@ -451,24 +443,23 @@ final class URLSessionHTTPClientTests {
         }
 
         func record(_ request: URLRequest) {
-            // Consume a request's stream outside the observation lock.
-            let body: Data
-            if let data = request.httpBody {
-                body = data
-            } else if let stream = request.httpBodyStream {
-                body = data(from: stream)
-            } else {
-                body = Data()
+            if let url = request.url {
+                requestedURLs.append(url)
             }
-            state.withValue {
-                if let url = request.url { $0.requestedURLs.append(url) }
-                $0.requestedRequests.append(request)
-                $0.requestedBodies.append(body)
+            requestedRequests.append(request)
+
+            // Extract body from httpBodyStream if httpBody is nil
+            if let bodyData = request.httpBody {
+                requestedBodies.append(bodyData)
+            } else if let stream = request.httpBodyStream {
+                requestedBodies.append(data(from: stream))
+            } else {
+                requestedBodies.append(Data())
             }
         }
 
         func response(for url: URL) -> Stub? {
-            state.withValue { $0.stubs[url] }
+            return stubs[url]
         }
 
         private func data(from stream: InputStream) -> Data {
@@ -492,13 +483,7 @@ final class URLSessionHTTPClientTests {
     }
 
     private final class URLProtocolStub: URLProtocol {
-        // This suite serializes the lifetime of its per-test registration; URLSession's
-        // callbacks and assertions still access observations through synchronized storage.
-        private static let storage = TestLockedValue<URLSessionHTTPClientSpy?>(nil)
-        static var stub: URLSessionHTTPClientSpy? {
-            get { storage.withValue { $0 } }
-            set { storage.withValue { $0 = newValue } }
-        }
+        static var stub: URLSessionHTTPClientSpy?
 
         override class func canInit(with request: URLRequest) -> Bool {
             return true
@@ -529,21 +514,16 @@ final class URLSessionHTTPClientTests {
         override func stopLoading() {}
     }
 
-    private final class HTTPClientInterceptorSpy: HTTPClientInterceptor {
-        private struct State: Sendable {
-            var successEvents: [HTTPClientSuccessEvent] = []
-            var events: [HTTPClientFailureEvent] = []
-        }
-        private let state = TestLockedValue(State())
-        var successEvents: [HTTPClientSuccessEvent] { state.withValue { $0.successEvents } }
-        var events: [HTTPClientFailureEvent] { state.withValue { $0.events } }
+    private final class HTTPClientInterceptorSpy: HTTPClientInterceptor, @unchecked Sendable {
+        private(set) var successEvents: [HTTPClientSuccessEvent] = []
+        private(set) var events: [HTTPClientFailureEvent] = []
 
         func didSucceed(_ event: HTTPClientSuccessEvent) {
-            state.withValue { $0.successEvents.append(event) }
+            successEvents.append(event)
         }
 
         func didFail(_ event: HTTPClientFailureEvent) {
-            state.withValue { $0.events.append(event) }
+            events.append(event)
         }
     }
 }

@@ -12,7 +12,6 @@ import Testing
 @testable import VERADomain
 @testable import VERASettings
 
-@MainActor
 @Suite("StatsOverlayViewModel Tests")
 struct StatsOverlayViewModelTests {
 

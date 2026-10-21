@@ -6,7 +6,6 @@ import Foundation
 import VERAArchiving
 import VERADomain
 
-@MainActor
 public final class MockArchivesDataSource: ArchivesDataSource {
     public var archivesToReturn: [Archive] = []
     public var responses: [[Archive]] = []
@@ -43,7 +42,6 @@ public final class MockArchivesDataSource: ArchivesDataSource {
 
 public struct MockArchivesDataSourceError: Error {}
 
-@MainActor
 public func makeMockArchivesDataSource() -> MockArchivesDataSource {
     MockArchivesDataSource()
 }

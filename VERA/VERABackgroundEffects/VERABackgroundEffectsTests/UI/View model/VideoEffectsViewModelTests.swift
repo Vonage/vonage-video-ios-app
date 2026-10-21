@@ -145,14 +145,12 @@ struct VideoEffectsViewModelTests {
 
     @Test("remainingSlots updates on main from background publisher emission")
     func remainingSlotsUpdatesOnMainFromBackgroundPublisherEmission() async {
-        let remainingSlots = Just(7)
-            .subscribe(on: DispatchQueue(label: "VideoEffectsViewModelTests.background"))
-            .map { @Sendable value in
-                #expect(!Thread.isMainThread)
-                return value
-            }
-            .eraseToAnyPublisher()
-        let sut = makeSUT(remainingSlotsPublisher: remainingSlots)
+        let userRepo = MockUserBackgroundRepository(items: [])
+        let sut = makeSUT(userBackgroundRepository: userRepo)
+
+        DispatchQueue.global().async {
+            userRepo.sendRemainingSlots(7)
+        }
         await delay()
 
         #expect(sut.remainingSlots == 7)
@@ -388,8 +386,7 @@ struct VideoEffectsViewModelTests {
         getCurrentPublisher: @escaping () throws -> VERAPublisher = { PublisherSpy() },
         backgroundEffectsRepository: BackgroundEffectsRepository = MockBackgroundEffectsRepository(),
         userBackgroundRepository: UserBackgroundRepository = MockUserBackgroundRepository(),
-        videoEffectRepository: VideoEffectRepository = MockVideoEffectRepository(),
-        remainingSlotsPublisher: AnyPublisher<Int, Never>? = nil
+        videoEffectRepository: VideoEffectRepository = MockVideoEffectRepository()
     ) -> VideoEffectsViewModel {
         let getBackgrounds = DefaultGetBackgroundsUseCase(
             backgroundEffectsRepository: backgroundEffectsRepository,
@@ -406,7 +403,7 @@ struct VideoEffectsViewModelTests {
             getBackgroundsUseCase: getBackgrounds,
             addBackgroundUseCase: addBackground,
             deleteBackgroundUseCase: deleteBackground,
-            remainingSlotsPublisher: remainingSlotsPublisher ?? userBackgroundRepository.remainingSlotsPublisher,
+            remainingSlotsPublisher: userBackgroundRepository.remainingSlotsPublisher,
             videoEffectRepository: videoEffectRepository
         )
     }

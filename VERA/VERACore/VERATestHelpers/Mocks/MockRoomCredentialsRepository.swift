@@ -6,9 +6,9 @@ import Foundation
 import VERACore
 import VERADomain
 
-public final class MockRoomCredentialsRepository: RoomCredentialsRepository {
+public class MockRoomCredentialsRepository: RoomCredentialsRepository {
 
-    private let response: RoomCredentialsResponse
+    private var response: RoomCredentialsResponse
 
     public init(response: RoomCredentialsResponse) {
         self.response = response

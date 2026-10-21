@@ -5,7 +5,6 @@
 import Combine
 import Foundation
 import Observation
-import VERACommonUI
 import VERADomain
 
 /// Default values shared between ``CaptionsViewModel`` and its consumers.
@@ -37,7 +36,6 @@ public enum CaptionsConstants {
 /// ```
 ///
 /// - SeeAlso: ``CaptionsViewContainer``, ``CaptionsView``, ``CaptionsFactory``
-@MainActor
 @Observable
 public final class CaptionsViewModel {
 
@@ -89,7 +87,8 @@ public final class CaptionsViewModel {
     /// ``UICaptionItem`` values.
     public func initObservers() {
         captionsObserver.captionsReceived
-            .sinkOnMainActor { [weak self] captions in
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] captions in
                 self?.handleCaptions(captions)
             }
             .store(in: &cancellables)

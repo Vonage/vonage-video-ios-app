@@ -10,7 +10,6 @@ import VERAArchivingTestHelpers
 import VERADomain
 import VERATestHelpers
 
-@MainActor
 @Suite("Archive button view model tests")
 struct ArchiveButtonViewModelTests {
 
@@ -28,7 +27,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await poll(read: { await MainActor.run { sut.state } }, until: { _ in true })
+        let state = await poll(read: { sut.state }) { _ in true }
 
         #expect(state == .idle)
         #expect(dataSource.archivingStatusCallCount == 1)
@@ -42,7 +41,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
 
         #expect(state == .archiving(archiveID))
     }
@@ -54,7 +53,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.setup()
 
-        let state = await poll(read: { await MainActor.run { sut.state } }, until: { _ in true })
+        let state = await poll(read: { sut.state }) { _ in true }
 
         #expect(state == .idle)
     }
@@ -142,7 +141,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
 
@@ -172,7 +171,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
 
@@ -207,7 +206,7 @@ struct ArchiveButtonViewModelTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         dataSource._archivingState.value = .archiving("new-archive-456")
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
@@ -239,14 +238,14 @@ struct ArchiveButtonViewModelTests {
 
         // Stop archiving
         dataSource._archivingState.value = .archiving("archive-789")
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Try to start again
         dataSource._archivingState.value = .idle
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { !$0.isArchiving })
+        _ = await poll(read: { sut.state }) { !$0.isArchiving }
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
@@ -284,7 +283,7 @@ struct ArchiveButtonViewModelTests {
         )
 
         sut.setup()
-        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
@@ -297,8 +296,8 @@ struct ArchiveButtonViewModelTests {
 
     private func makeSUT(
         sessionKey: String = "heart-of-gold",
-        startArchivingUseCase: StartArchivingUseCase? = nil,
-        stopArchivingUseCase: StopArchivingUseCase? = nil,
+        startArchivingUseCase: StartArchivingUseCase = SpyStartArchivingUseCase(),
+        stopArchivingUseCase: StopArchivingUseCase = SpyStopArchivingUseCase(),
         archivingStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy(),
         showAlert: @escaping (AlertItem) -> Void = { _ in }
     ) -> ArchiveButtonViewModel {
@@ -306,8 +305,8 @@ struct ArchiveButtonViewModelTests {
         holder.setSessionKey(sessionKey)
         return ArchiveButtonViewModel(
             sessionKeyProvider: holder,
-            startArchivingUseCase: startArchivingUseCase ?? SpyStartArchivingUseCase(),
-            stopArchivingUseCase: stopArchivingUseCase ?? SpyStopArchivingUseCase(),
+            startArchivingUseCase: startArchivingUseCase,
+            stopArchivingUseCase: stopArchivingUseCase,
             archivingStatusDataSource: archivingStatusDataSource,
             showAlert: showAlert
         )
@@ -324,7 +323,6 @@ final class AlertSpy {
     }
 }
 
-@MainActor
 final class SpyStartArchivingUseCase: StartArchivingUseCase {
     var callCount = 0
     var lastRequest: StartArchivingRequest?
@@ -343,7 +341,6 @@ final class SpyStartArchivingUseCase: StartArchivingUseCase {
     }
 }
 
-@MainActor
 final class SpyStopArchivingUseCase: StopArchivingUseCase {
     var callCount = 0
     var lastRequest: StopArchivingRequest?

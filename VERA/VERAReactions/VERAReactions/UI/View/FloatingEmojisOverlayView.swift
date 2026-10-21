@@ -4,7 +4,6 @@
 
 import Combine
 import SwiftUI
-import VERADomain
 
 /// An overlay view that displays floating animated emojis from incoming reactions.
 ///
@@ -93,33 +92,24 @@ public struct FloatingEmojisOverlayView: View {
         FloatingEmojisOverlayPreview()
     }
 
-    @MainActor
-    private final class PreviewReactionsObserver: ReactionsObserver {
-        private nonisolated let subject = EventRelay<EmojiReaction, Never>()
+    private final class PreviewReactionsObserver: ReactionsObserver, @unchecked Sendable {
+        private let subject = PassthroughSubject<EmojiReaction, Never>()
 
-        nonisolated var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-            subject.publisher
+        var reactionReceived: AnyPublisher<EmojiReaction, Never> {
+            subject.eraseToAnyPublisher()
         }
-
-        private var index = 0
 
         init() {
             let emojis = ["🎉", "👍", "❤️", "😂", "🔥"]
-            Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] timer in
-                guard let self else {
-                    timer.invalidate()
-                    return
-                }
-                // Created on MainActor, so the timer fires on the main run loop.
-                MainActor.assumeIsolated {
-                    let reaction = EmojiReaction(
-                        participantName: "Preview User",
-                        emoji: emojis[self.index % emojis.count],
-                        isMe: Bool.random()
-                    )
-                    self.subject.send(reaction)
-                    self.index += 1
-                }
+            var index = 0
+            Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
+                let reaction = EmojiReaction(
+                    participantName: "Preview User",
+                    emoji: emojis[index % emojis.count],
+                    isMe: Bool.random()
+                )
+                self?.subject.send(reaction)
+                index += 1
             }
         }
     }

@@ -9,7 +9,6 @@ import VERADomain
 
 @testable import VERACaptions
 
-@MainActor
 @Suite("DefaultEnableCaptionsUseCase Tests")
 struct DefaultEnableCaptionsUseCaseTests {
 
@@ -71,8 +70,7 @@ struct DefaultEnableCaptionsUseCaseTests {
 
 // MARK: - Test Doubles
 
-@MainActor
-private final class MockCaptionsActivationDataSource: CaptionsActivationDataSource {
+private final class MockCaptionsActivationDataSource: CaptionsActivationDataSource, @unchecked Sendable {
     var enableCallCount = 0
     var lastSessionKey: String?
     var enableResult: Result<EnableCaptionsDataSourceResponse, Error> = .success(.init(captionsId: "default-id"))

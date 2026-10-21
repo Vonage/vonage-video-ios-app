@@ -23,7 +23,6 @@ public struct GoodByeNavigation {
 }
 
 @Observable
-@MainActor
 public final class GoodByeViewModel {
     @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()

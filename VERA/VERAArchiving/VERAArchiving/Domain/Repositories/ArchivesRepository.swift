@@ -6,7 +6,6 @@ import Combine
 import Foundation
 import VERADomain
 
-@MainActor
 public protocol ArchivesRepository {
     func getArchives(sessionKey: String) async -> AnyPublisher<[Archive], Error>
 }

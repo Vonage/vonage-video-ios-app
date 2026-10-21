@@ -12,7 +12,7 @@ public struct StartArchivingRequest: Sendable {
     }
 }
 
-public protocol StartArchivingUseCase: Sendable {
+public protocol StartArchivingUseCase {
     func callAsFunction(_ request: StartArchivingRequest) async throws -> ArchiveID
 }
 
