@@ -10,7 +10,7 @@ import VERACommonUI
 /// Returns `Section` blocks intended to be embedded inside a parent `Form`.
 struct AudioSectionView: View {
 
-    @ObservedObject var viewModel: SettingsViewModel
+    @Bindable var viewModel: SettingsViewModel
     private let isInActiveCall: Bool
     private let isCompactLayout: Bool
 

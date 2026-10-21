@@ -296,6 +296,14 @@ else
     
     echo -e "${GREEN}✓ Generation scripts completed${NC}\n"
     
+    # Fetch Tuist-managed SPM dependencies (Tuist/Package.swift) before generating.
+    echo -e "${BLUE}📦 Installing Tuist dependencies...${NC}"
+    if ! tuist install; then
+        echo -e "${RED}❌ Tuist install failed${NC}"
+        cd ..
+        exit 1
+    fi
+
     # Generate workspace with Tuist
     echo -e "${BLUE}🏗️  Generating Xcode workspace with Tuist...${NC}"
     if ! tuist generate --no-open; then

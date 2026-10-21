@@ -10,7 +10,7 @@ private enum NavBarAuthButtonConstants {
 }
 
 public struct NavBarAuthButton: View {
-    @ObservedObject private var viewModel: NavBarAuthButtonViewModel
+    @Bindable private var viewModel: NavBarAuthButtonViewModel
 
     public init(viewModel: NavBarAuthButtonViewModel) {
         self.viewModel = viewModel

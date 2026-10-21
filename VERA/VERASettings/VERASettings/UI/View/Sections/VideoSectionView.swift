@@ -21,7 +21,7 @@ private enum VideoConstants {
 /// Returns `Section` blocks intended to be embedded inside a parent `Form`.
 struct VideoSectionView: View {
 
-    @ObservedObject var viewModel: SettingsViewModel
+    @Bindable var viewModel: SettingsViewModel
     private let isInActiveCall: Bool
     private let isCompactLayout: Bool
     @State private var sliderValue: Double = VideoConstants.currentVideoBitrateStep

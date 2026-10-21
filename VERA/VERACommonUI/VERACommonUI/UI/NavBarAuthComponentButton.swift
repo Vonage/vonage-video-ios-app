@@ -5,7 +5,7 @@
 import SwiftUI
 
 public struct NavBarAuthComponentButton: View {
-    @ObservedObject private var viewModel: NavBarAuthButtonViewModel
+    private var viewModel: NavBarAuthButtonViewModel
 
     public init(viewModel: NavBarAuthButtonViewModel) {
         self.viewModel = viewModel

@@ -24,8 +24,8 @@ import VERADomain
 ///
 /// Generics:
 /// - `Factory`: A `SessionFactory` producing `VonageSession` instances (`Factory.Session == VonageSession`)
-public final class VonageSessionRepository<Factory: SessionFactory>: SessionRepository
-where Factory.Session == VonageSession {
+public final class VonageSessionRepository<Provider: SessionProvider>: SessionRepository
+where Provider.Session == VonageSession {
 
     /// Errors that can occur while creating a session.
     enum Error: Swift.Error {
@@ -35,8 +35,8 @@ where Factory.Session == VonageSession {
 
     private var cancellables = Set<AnyCancellable>()
 
-    /// Factory used to construct Vonage sessions for given credentials.
-    private let sessionFactory: Factory
+    /// Provider used to construct Vonage sessions for given credentials.
+    private let sessionProvider: Provider
     /// Repository that provides the local media publisher instance.
     private let publisherRepository: PublisherRepository
     /// Registry containing Vonage plugins to attach to each call.
@@ -52,16 +52,16 @@ where Factory.Session == VonageSession {
     /// Creates a new repository with its dependencies.
     ///
     /// - Parameters:
-    ///   - sessionFactory: Factory that produces configured ``VonageSession`` instances.
+    ///   - sessionProvider: Provider that produces configured ``VonageSession`` instances.
     ///   - publisherRepository: Repository that yields the local publisher.
     ///   - pluginRegistry: Registry providing plugins to assign to each call.
     public init(
-        sessionFactory: Factory,
+        sessionProvider: Provider,
         publisherRepository: PublisherRepository,
         pluginRegistry: VonagePluginRegistry,
         statsCollector: StatsCollector
     ) {
-        self.sessionFactory = sessionFactory
+        self.sessionProvider = sessionProvider
         self.publisherRepository = publisherRepository
         self.pluginRegistry = pluginRegistry
         self.statsCollector = statsCollector
@@ -69,29 +69,22 @@ where Factory.Session == VonageSession {
 
     /// Creates and configures an Vonage call session.
     ///
-    /// Builds a new ``VonageSession`` using the factory, resolves the local publisher,
-    /// constructs an ``VonageCall``, performs setup, assigns plugins, and binds to the
-    /// call's `callState` to perform cleanup on disconnection.
+    /// Resolves the local publisher, constructs an ``VonageCall`` that will build its
+    /// session lazily via the injected provider, performs setup, assigns plugins, and
+    /// binds to the call's `callState` to perform cleanup on disconnection.
     ///
-    /// - Parameter credentials: Room credentials used by the session (ID, token, room name).
+    /// - Parameter roomName: The room to create a session for.
     /// - Returns: A configured ``CallFacade`` representing the active call.
-    /// - Throws: ``Error/publisherCastingError`` if the resolved publisher is not `VonagePublisher`,
-    ///   or any error thrown by the session factory.
-    ///
-    /// ## Implementation Details
-    /// - Calls `sessionFactory.make(_:)` to build the session
-    /// - Obtains the publisher from `publisherRepository.getPublisher()`
-    /// - Creates an `VonageCall`, calls `setup()`, and assigns plugins
-    /// - Subscribes to `call.callState` to clear session and reset publisher on disconnect
-    public func createSession(_ credentials: VERADomain.RoomCredentials) throws -> CallFacade {
-        let newSession = try sessionFactory.make(credentials)
+    /// - Throws: ``Error/publisherCastingError`` if the resolved publisher is not `VonagePublisher`.
+    public func createSession(for roomName: RoomName) async throws -> CallFacade {
         guard let publisher = try publisherRepository.getPublisher() as? VonagePublisher else {
             throw Error.publisherCastingError
         }
 
+        let sessionProvider = sessionProvider
         let call = VonageCall(
-            credentials: credentials,
-            session: newSession,
+            roomName: roomName,
+            makeSession: { try await sessionProvider.makeSession(for: $0) },
             publisher: publisher,
             publisherRepository: publisherRepository,
             statsCollector: statsCollector

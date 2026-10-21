@@ -4,9 +4,8 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAMeetingRoomSDK",
     options: defaultProjectOptions(),
-    packages: [
-        .vonageVideoTransformersSDK
-    ],
+    // Transformers SDK comes from Tuist/Package.swift via `.external` below.
+    packages: [],
     targets: [
         .target(
             name: "VERAMeetingRoomSDK",

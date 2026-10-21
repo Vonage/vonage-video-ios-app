@@ -4,38 +4,47 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 /// View model that observes real-time network statistics for the Statistics section.
 ///
 /// Subscribes to ``StatsDataSource/statsPublisher`` and formats the latest
 /// ``NetworkMediaStats`` into display-ready strings for the statistics table.
-public final class StatisticsViewModel: ObservableObject {
+@Observable
+public final class StatisticsViewModel {
 
-    // MARK: - Published state
+    // MARK: - Observable state
 
     /// The current network media statistics.
-    @Published public var stats: NetworkMediaStats = .empty
+    public var stats: NetworkMediaStats = .empty
 
     /// Whether sender statistics are currently enabled.
-    @Published public var isStatsEnabled: Bool = false
+    public var isStatsEnabled: Bool = false
 
     /// Whether the publisher DisclosureGroup is expanded.
-    @Published public var isPublisherExpanded: Bool = false
+    public var isPublisherExpanded: Bool = false
 
     /// Set of subscriber connection IDs whose DisclosureGroups are expanded.
-    @Published public var expandedSubscribers: Set<String> = []
+    public var expandedSubscribers: Set<String> = []
 
     // MARK: - Dependencies
 
     /// Data source providing real-time network statistics.
+    @ObservationIgnored
     private let statsDataSource: StatsDataSource
 
     /// Repository providing settings preferences.
+    @ObservationIgnored
     private let settingsRepository: PublisherSettingsRepository
 
     /// Tracks whether the view model has been initialized.
+    @ObservationIgnored
     private var isInitialized: Bool = false
+
+    /// Retains the Combine subscriptions feeding the observable state.
+    @ObservationIgnored
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
@@ -64,11 +73,17 @@ public final class StatisticsViewModel: ObservableObject {
             .map(\.senderStatsEnabled)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
-            .assign(to: &$isStatsEnabled)
+            .sink { [weak self] isEnabled in
+                self?.isStatsEnabled = isEnabled
+            }
+            .store(in: &cancellables)
 
         statsDataSource.statsPublisher
             .receive(on: DispatchQueue.main)
-            .assign(to: &$stats)
+            .sink { [weak self] stats in
+                self?.stats = stats
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Formatting

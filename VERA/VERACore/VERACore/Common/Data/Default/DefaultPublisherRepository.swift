@@ -30,6 +30,7 @@ public final class DefaultPublisherRepository: PublisherRepository {
     }
 
     public func recreatePublisher(_ settings: PublisherSettings) throws {
-        publisher = try publisherFactory.make(settings)
+        let newPublisher = try publisherFactory.make(settings)
+        publisher = newPublisher
     }
 }

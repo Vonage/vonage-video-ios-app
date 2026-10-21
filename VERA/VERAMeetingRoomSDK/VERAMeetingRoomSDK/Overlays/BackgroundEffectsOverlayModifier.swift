@@ -18,7 +18,7 @@ struct BackgroundEffectsOverlayModifier: ViewModifier {
                 .sheet(isPresented: $showEffects) {
                     VideoEffectsSheet(viewModel: viewModel)
                         .presentationDetents([.medium, .large])
-                        .opaquePresentationBackground(theme.background)
+                        .presentationBackground(theme.background)
                 }
         } else {
             content

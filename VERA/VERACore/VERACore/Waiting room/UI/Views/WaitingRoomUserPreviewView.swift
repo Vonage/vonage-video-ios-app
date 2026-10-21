@@ -18,9 +18,9 @@ import VERACommonUI
 ///     SettingsToolbarButton { ... }
 /// }
 /// ```
-public struct ViewHolder: Identifiable {
+public struct ViewHolder: Identifiable, Sendable {
     public let id: String
-    public let content: () -> AnyView
+    public let content: @MainActor @Sendable () -> AnyView
 
     /// Creates a new view holder.
     ///
@@ -29,7 +29,7 @@ public struct ViewHolder: Identifiable {
     ///   - content: A closure that creates the wrapped view content.
     public init<Content: View>(
         id: String,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping @MainActor @Sendable () -> Content
     ) {
         self.id = id
         self.content = { AnyView(content()) }
@@ -64,7 +64,8 @@ struct WaitingRoomUserPreviewView: View {
 
     var body: some View {
         ZStack {
-            if let publisher = state.publisher {
+            // Show the live preview only when video is enabled, so it never leaks behind the avatar.
+            if state.isCameraEnabled, let publisher = state.publisher {
                 PublisherVideoView(videoView: publisher.view)
             } else {
                 PublisherVideoView(videoView: nil)

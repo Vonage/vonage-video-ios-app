@@ -2,13 +2,12 @@
 //  Created by Vonage on 14/7/25.
 //
 
-import Combine
 import SwiftUI
 import VERACommonUI
 import VERADomain
 
 public struct WaitingRoomScreen: View {
-    @ObservedObject private var viewModel: WaitingRoomViewModel
+    @Bindable private var viewModel: WaitingRoomViewModel
 
     public init(
         viewModel: WaitingRoomViewModel

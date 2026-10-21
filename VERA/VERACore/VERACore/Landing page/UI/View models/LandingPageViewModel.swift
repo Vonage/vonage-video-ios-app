@@ -2,7 +2,7 @@
 //  Created by Vonage on 7/8/25.
 //
 
-import Combine
+import Observation
 import VERADomain
 
 public typealias LandingPageError = String
@@ -13,13 +13,16 @@ public enum LandingPageViewState: Equatable {
 }
 
 @MainActor
-public final class LandingPageViewModel: ObservableObject {
+@Observable
+public final class LandingPageViewModel {
 
+    @ObservationIgnored
     private let tryJoinRoomUseCase: TryJoinRoomUseCase
+    @ObservationIgnored
     private let tryCreatingANewRoomUseCase: TryCreatingANewRoomUseCase
 
-    @Published public var state: LandingPageViewState = .content
-    @Published public var error: AlertItem?
+    public var state: LandingPageViewState = .content
+    public var error: AlertItem?
 
     public init(
         tryJoinRoomUseCase: TryJoinRoomUseCase,

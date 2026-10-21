@@ -48,7 +48,7 @@ public struct StatsOverlayView: View {
     @Environment(\.meetingRoomTheme) private var theme
 
     /// View model driving the overlay's visibility and stats text.
-    @ObservedObject var viewModel: StatsOverlayViewModel
+    var viewModel: StatsOverlayViewModel
 
     /// Creates a new stats overlay view.
     ///

@@ -9,7 +9,7 @@ import VERACommonUI
 ///
 /// Returns `Section` blocks intended to be embedded inside a parent `Form`.
 struct GeneralSectionView: View {
-    @ObservedObject var viewModel: SettingsViewModel
+    var viewModel: SettingsViewModel
     @Binding var statsOverlayEnabled: Bool
     private let isInActiveCall: Bool
     private let isCompactLayout: Bool

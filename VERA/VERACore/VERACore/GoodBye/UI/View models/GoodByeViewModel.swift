@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 public typealias GoodByeError = String
@@ -21,13 +22,17 @@ public struct GoodByeNavigation {
     }
 }
 
-public final class GoodByeViewModel: ObservableObject {
+@Observable
+public final class GoodByeViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
     public let roomName: RoomName
+    @ObservationIgnored
     private let userRepository: UserRepository
+    @ObservationIgnored
     private let goodByeNavigation: GoodByeNavigation
 
-    @MainActor @Published public var error: AlertItem?
+    @MainActor public var error: AlertItem?
 
     init(
         roomName: RoomName,

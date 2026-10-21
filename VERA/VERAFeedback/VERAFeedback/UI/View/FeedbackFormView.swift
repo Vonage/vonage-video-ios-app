@@ -27,7 +27,7 @@ struct FeedbackFormView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.meetingRoomTheme) private var theme
 
-    @ObservedObject var feedbackFormViewModel: FeedbackFormViewModel
+    @Bindable var feedbackFormViewModel: FeedbackFormViewModel
 
     @FocusState private var focusedFieldIndex: Int?
 
@@ -240,14 +240,8 @@ private struct FeedbackScrollContentInset: ViewModifier {
     let bottomInset: CGFloat
 
     func body(content: Content) -> some View {
-        if #available(iOS 17.0, *) {
-            content
-                .contentMargins(.top, topInset, for: .scrollContent)
-                .contentMargins(.bottom, bottomInset, for: .scrollContent)
-        } else {
-            content
-                .padding(.top, topInset)
-                .padding(.bottom, bottomInset)
-        }
+        content
+            .contentMargins(.top, topInset, for: .scrollContent)
+            .contentMargins(.bottom, bottomInset, for: .scrollContent)
     }
 }

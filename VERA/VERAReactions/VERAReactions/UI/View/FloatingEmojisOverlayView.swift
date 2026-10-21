@@ -25,7 +25,7 @@ public struct FloatingEmojisOverlayView: View {
     // MARK: - Properties
 
     /// The ViewModel providing the active floating emojis.
-    @ObservedObject private var viewModel: FloatingEmojisOverlayViewModel
+    private var viewModel: FloatingEmojisOverlayViewModel
 
 
     // MARK: - Initialization

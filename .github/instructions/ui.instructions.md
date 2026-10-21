@@ -41,4 +41,4 @@ applyTo: "VERA/**/VERACommonUI/**/*,VERA/**/VERACore/**/*"
 
 ### Platform considerations
 - Guard iOS 26+ glass morphism effects behind `if #available` with opaque material fallbacks.
-- `VERACommonUI` and `VERACore` target both iOS 16+ and macOS 14.6+ — avoid UIKit-only APIs.
+- `VERACommonUI` and `VERACore` target both iOS 17+ and macOS 14.6+ — avoid UIKit-only APIs.

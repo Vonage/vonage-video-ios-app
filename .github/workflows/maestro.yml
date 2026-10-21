@@ -79,6 +79,7 @@ jobs:
           ./Scripts/generateEnvironmentConstants.sh
           ./Scripts/regenerateSigningConfig.sh
           ./Scripts/generateOktaConfig.sh
+          tuist install
           tuist generate --no-open
           cd ..
 

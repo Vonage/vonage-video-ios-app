@@ -96,7 +96,7 @@ This application provides features for common conferencing use cases, such as:
 
 | Requirement | Version |
 |---|---|
-| iOS deployment target | 16.0+ |
+| iOS deployment target | 17.0+ |
 | Xcode | 26 |
 | Tuist | latest |
 | SwiftLint | latest |
@@ -108,11 +108,27 @@ Core framework modules also target **macOS 14.6+** to enable fast unit-test runs
 
 This app has been tested with **Vonage Video SDK 2.32** and **2.33**. Use the latest available SDK version where possible.
 
+## Updating a dependency version
+
+All external dependency versions live in one file: `VERA/Dependencies.json`.
+Both the root `Package.swift` and the Tuist helper
+`VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift` read it directly.
+
+1. Edit the version in `VERA/Dependencies.json`.
+2. Vonage SDKs live under the `vonage` key. If you change `videoSDK`, also change
+   `videoTransformersSDK` to the same version (Client SDK team requirement).
+   Other dependencies live under `thirdParty`.
+3. Run `tuist generate` from `VERA/` and verify the project builds and tests pass.
+   If Xcode/SPM keeps resolving the old version, reset the package cache
+   (File ▸ Packages ▸ Reset Package Caches), since manifest caching only tracks
+   `Package.swift` itself.
+
 ## Documentation
 
 | Guide | Description |
 |---|---|
 | [Getting Started](docs/GETTING_STARTED.md) | Prerequisites, environment setup, and first run |
+| [Building the Starter Kit (Prebuilts)](VERA/PREBUILTS_README.md) | One-command build via `builder.sh` and the config/theme workflow |
 | [Architecture](docs/ARCHITECTURE.md) | Project architecture, module overview, Clean Architecture layers, DI, and key patterns |
 | [Authentication](docs/AUTHENTICATION.md) | Okta integration, token injection, and identity provider setup |
 | [Configuration](docs/CONFIGURATION.md) | Feature flags, theme tokens, signing, and SDK version |

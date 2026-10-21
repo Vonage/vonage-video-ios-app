@@ -4,8 +4,10 @@
 
 import Combine
 import Foundation
+import Observation
+import VERACommonUI
 
-public struct ChatPanelState: Equatable {
+public struct ChatPanelState: Equatable, Sendable {
     public let messages: [UIChatMessage]
 
     public static let initial = ChatPanelState(messages: [])
@@ -15,18 +17,22 @@ public struct ChatPanelState: Equatable {
     }
 }
 
-public enum ChatPanelViewState: Equatable {
+public enum ChatPanelViewState: Equatable, Sendable {
     case content(ChatPanelState)
     case loading
 }
 
-public final class ChatPanelViewModel: ObservableObject {
+@MainActor
+@Observable
+public final class ChatPanelViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
-    @Published public var state: ChatPanelViewState = .loading
+    public var state: ChatPanelViewState = .loading
 
     private let chatMessagesRepository: ChatMessagesRepository
     private let sendChatMessageUseCase: SendChatMessageUseCase
+    @ObservationIgnored
     private var isInitialised = false
 
     public init(
@@ -42,11 +48,10 @@ public final class ChatPanelViewModel: ObservableObject {
         isInitialised = true
 
         chatMessagesRepository.observeMessages()
-            .map { messages in
+            .map { @Sendable messages in
                 messages.map { $0.toUIChatMessage }
             }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] messages in
+            .sinkOnMainActor { [weak self] messages in
                 guard let self else { return }
                 self.state = .content(.init(messages: messages))
             }

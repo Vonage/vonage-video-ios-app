@@ -19,7 +19,10 @@ let project = Project(
                 "VERACommonUI/Resources/**",
                 "VERACommonUI/Resources/**/*.xcassets",
             ],
-            scripts: [.swiftLint(targetName: "VERACommonUI")],
+            scripts: [
+                .generateSPMAssets(),
+                .swiftLint(targetName: "VERACommonUI"),
+            ],
             dependencies: [
                 .project(target: "VERADomain", path: "../VERADomain")
             ],

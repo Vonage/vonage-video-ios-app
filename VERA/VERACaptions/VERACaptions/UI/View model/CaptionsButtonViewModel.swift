@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import Observation
 import VERADomain
 
 /// View model that drives the captions toggle button.
@@ -30,27 +31,34 @@ import VERADomain
 /// ```
 ///
 /// - SeeAlso: ``CaptionsButtonContainer``, ``CaptionsButton``, ``CaptionsFactory``
-public final class CaptionsButtonViewModel: ObservableObject {
+@Observable
+public final class CaptionsButtonViewModel {
+    @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
 
     /// The current captions activation state, observed by the button view.
-    @Published public var state: CaptionsState = .disabled
+    public var state: CaptionsState = .disabled
 
     /// An optional toast shown when enabling captions fails.
     ///
     /// The host view (e.g. `MeetingRoomView`) should observe this property
     /// and present the toast to the user.
-    @Published public var toast: ToastItem?
+    public var toast: ToastItem?
 
     /// The session key provider for reading the JWT for ``EnableCaptionsUseCase``.
+    @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
     /// Use case responsible for enabling captions via the backend.
+    @ObservationIgnored
     private let enableCaptionsUseCase: EnableCaptionsUseCase
     /// Use case responsible for disabling captions locally.
+    @ObservationIgnored
     private let disableCaptionsUseCase: DisableCaptionsUseCase
     /// Reactive source of the current captions activation state.
+    @ObservationIgnored
     private let captionsStatusDataSource: CaptionsStatusDataSource
     /// Guard flag ensuring ``setup()`` only subscribes once.
+    @ObservationIgnored
     private var initiated = false
 
     /// Creates a new button view model.

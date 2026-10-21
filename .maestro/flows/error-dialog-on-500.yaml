@@ -1,0 +1,55 @@
+# vera-runner: mock-only
+appId: ${APP_ID}
+---
+# Error (non-401) does NOT show the login dialog
+# Complements login-dialog-on-401: verifies that a non-auth failure (HTTP 500)
+# on POST /v2/createSession does NOT present the sign-in provider chooser.
+# The generic error alert is shown instead, so the sign-in screen must stay hidden.
+#
+# Requires: AUTHENTICATION_ENABLED and OKTA_ENABLED compilation flags active.
+# Depends on E2E mocks: forces the createSession endpoint to fail with 500.
+
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_FAIL_ENDPOINT: "createSession"
+      VERA_E2E_FAIL_STATUS: "500"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+- assertVisible:
+    id: "create-new-room-button"
+
+- tapOn:
+    id: "create-new-room-button"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "waiting-room-screen"
+
+# Join the meeting — triggers POST /v2/createSession, which the mock fails with 500.
+- tapOn:
+    id: "username-input"
+
+- inputText: "Test User"
+
+- tapOn:
+    id: "join-meeting-button"
+
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# A non-401 failure must NOT surface the sign-in provider chooser.
+- assertNotVisible:
+    id: "auth-sign-in-screen"
+
+- takeScreenshot: 01-no-sign-in-dialog-on-500

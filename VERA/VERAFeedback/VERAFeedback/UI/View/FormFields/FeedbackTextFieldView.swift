@@ -15,7 +15,7 @@ struct FeedbackTextFieldView: View {
         static let errorColor = VERACommonUIAsset.SemanticColors.error.swiftUIColor
     }
 
-    @ObservedObject var feedbackFieldViewModel: FeedbackFieldViewModel
+    @Bindable var feedbackFieldViewModel: FeedbackFieldViewModel
     let showValidationErrors: Bool
     let fieldIndex: Int
     var focusedFieldIndex: FocusState<Int?>.Binding

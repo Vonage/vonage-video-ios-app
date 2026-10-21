@@ -39,14 +39,15 @@ public final class E2EHTTPClient: HTTPClient {
         }
 
         if E2EConfiguration.failedEndpoint == endpoint {
+            let statusCode = E2EConfiguration.failedStatusCode
             let responseBody = E2EHTTPResponseBuilder.errorBody(for: endpoint.rawValue)
             logFailure(
                 method: method,
                 url: url,
-                statusCode: 500,
+                statusCode: statusCode,
                 requestBody: requestBody,
                 responseBody: responseBody)
-            throw HTTPClientError.httpError(statusCode: 500)
+            throw HTTPClientError.httpError(statusCode: statusCode)
         }
 
         let responseBody = try await store.response(for: endpoint, requestBody: requestBody)

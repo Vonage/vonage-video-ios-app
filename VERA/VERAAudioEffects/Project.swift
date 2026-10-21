@@ -3,9 +3,9 @@ import ProjectDescriptionHelpers
 
 let project = Project(
     name: "VERAAudioEffects",
+    // Transformers SDK comes from Tuist/Package.swift via `.external` below.
     packages: [
-        .swiftSnapshotTesting,
-        .vonageVideoTransformersSDK,
+        .swiftSnapshotTesting
     ],
     targets: [
         // MARK: - Framework Target

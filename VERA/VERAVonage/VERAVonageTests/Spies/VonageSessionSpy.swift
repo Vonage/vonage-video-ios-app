@@ -4,6 +4,7 @@
 
 import Foundation
 import OpenTok
+import VERADomain
 import VERAVonage
 
 class VonageSessionSpy: VonageSession {
@@ -17,26 +18,30 @@ class VonageSessionSpy: VonageSession {
     var unpublishedPublishers: [VonagePublisher] = []
     var forceMutedStreams: [OTStream] = []
 
-    init() {
+    init(token: String = "token") {
         super.init(
             session: OTSession(
                 applicationId: "applicationId",
                 sessionId: "sessionId",
-                delegate: nil)!)
+                delegate: nil)!,
+            credentials: RoomCredentials(
+                sessionId: "sessionId",
+                token: token,
+                applicationId: "applicationId",
+                roomName: "roomName",
+                sessionKey: "sessionKey"))
     }
 
-    public override func connect(with token: String) throws {
+    public override func connect() throws {
         connectCalled = true
         recordedTokens.append(token)
-        try super.connect(with: token)
-
+        // Unit callers use synthetic credentials; simulate lifecycle without starting SDK transport.
         // Simulate successful connection by triggering the callback
         onSessionDidConnect?()
     }
 
     public override func disconnect() throws {
         disconnectCalled = true
-        try super.disconnect()
     }
 
     public override func unpublish(publisher: VonagePublisher) throws {

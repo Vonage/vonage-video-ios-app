@@ -7,6 +7,7 @@ import Foundation
 import Testing
 import VERAArchiving
 import VERADomain
+import VERATestHelpers
 
 @Suite("Archives view model tests")
 struct ArchivesViewModelTests {
@@ -14,15 +15,15 @@ struct ArchivesViewModelTests {
     @Test func initialArchivesAreEmpty() async {
         let sut = makeSUT()
 
-        let archives = await sut.$archives.values.first { _ in true }
+        let archives = await MainActor.run { sut.archives }
 
-        #expect(archives?.isEmpty == true)
+        #expect(archives.isEmpty == true)
     }
 
     @Test func initialErrorIsNil() async {
         let sut = makeSUT()
 
-        let error = await sut.$error.values.first { _ in true }
+        let error = await MainActor.run { sut.error }
 
         #expect(error == nil as AlertItem?)
     }
@@ -49,9 +50,9 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
 
-        #expect(uiArchives?.count == 2)
+        #expect(uiArchives.count == 2)
     }
 
     @Test func loadDataReversesArchivesOrder() async {
@@ -62,11 +63,11 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
 
         // First archive should be the last one (reversed)
-        #expect(uiArchives?.first?.id == archives.last?.id)
-        #expect(uiArchives?.last?.id == archives.first?.id)
+        #expect(uiArchives.first?.id == archives.last?.id)
+        #expect(uiArchives.last?.id == archives.first?.id)
     }
 
     @Test func loadDataAssignsCorrectIndexes() async {
@@ -77,11 +78,11 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
 
         // Verify indices are assigned correctly (first item gets highest index)
-        #expect(uiArchives?.first?.title.contains("2") == true)
-        #expect(uiArchives?.last?.title.contains("1") == true)
+        #expect(uiArchives.first?.title.contains("2") == true)
+        #expect(uiArchives.last?.title.contains("1") == true)
     }
 
     @Test func loadDataHandlesEmptyArchives() async {
@@ -93,9 +94,9 @@ struct ArchivesViewModelTests {
 
         try? await Task.sleep(for: .milliseconds(100))
 
-        let uiArchives = await sut.$archives.values.first { _ in true }
+        let uiArchives = await MainActor.run { sut.archives }
 
-        #expect(uiArchives?.isEmpty == true)
+        #expect(uiArchives.isEmpty == true)
     }
 
     @Test func loadDataSetsErrorOnFailure() async {
@@ -105,7 +106,7 @@ struct ArchivesViewModelTests {
 
         await sut.loadData()
 
-        let error = await sut.$error.values.first { $0 != nil }
+        let error = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
 
         #expect(error != nil)
     }
@@ -219,7 +220,7 @@ struct ArchivesViewModelTests {
 
         sut.downloadArchive(archive)
 
-        let error = await sut.$error.values.first { $0 != nil }
+        let error = await poll(read: { await MainActor.run { sut.error } }) { $0 != nil }
 
         #expect(error != nil)
     }
@@ -236,9 +237,9 @@ struct ArchivesViewModelTests {
         await sut.loadData()
         repository.subject.send(archives)
 
-        let uiArchives = await sut.$archives.values.first { !$0.isEmpty }
+        let uiArchives = await poll(read: { await MainActor.run { sut.archives } }) { !$0.isEmpty }
 
-        uiArchives?.first?.onDownload?()
+        uiArchives.first?.onDownload?()
 
         try? await Task.sleep(for: .milliseconds(100))
 

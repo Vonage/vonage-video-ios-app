@@ -13,12 +13,10 @@ public class MeetingRoomFactory {
     private let currentCallParticipantsRepository: CurrentCallParticipantsRepository
     private let sessionRepository: SessionRepository
     private let publisherRepository: PublisherRepository
-    private let roomCredentialsRepository: RoomCredentialsRepository
     private let captionsStatusDataSource: CaptionsStatusDataSource
     private let noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource
     private let pinnedParticipantsDataSource: PinnedParticipantsDataSource
     private let configuration: MeetingRoomConfiguration
-    private let sessionKeyHolder: SessionKeyHolder
 
     /// Creates a meeting room factory with its required dependencies.
     public init(
@@ -27,22 +25,18 @@ public class MeetingRoomFactory {
         currentCallParticipantsRepository: CurrentCallParticipantsRepository,
         sessionRepository: SessionRepository,
         publisherRepository: PublisherRepository,
-        roomCredentialsRepository: RoomCredentialsRepository,
         captionsStatusDataSource: CaptionsStatusDataSource,
         noiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource,
-        pinnedParticipantsDataSource: PinnedParticipantsDataSource,
-        sessionKeyHolder: SessionKeyHolder
+        pinnedParticipantsDataSource: PinnedParticipantsDataSource
     ) {
         self.baseURL = baseURL
         self.configuration = configuration
         self.currentCallParticipantsRepository = currentCallParticipantsRepository
         self.sessionRepository = sessionRepository
         self.publisherRepository = publisherRepository
-        self.roomCredentialsRepository = roomCredentialsRepository
         self.captionsStatusDataSource = captionsStatusDataSource
         self.noiseSuppressionStatusDataSource = noiseSuppressionStatusDataSource
         self.pinnedParticipantsDataSource = pinnedParticipantsDataSource
-        self.sessionKeyHolder = sessionKeyHolder
     }
 
     /// Creates a meeting room view and view model for the supplied room.
@@ -62,9 +56,7 @@ public class MeetingRoomFactory {
             roomName: roomName,
             baseURL: baseURL,
             connectToRoomUseCase: DefaultConnectToRoomUseCase(
-                sessionRepository: sessionRepository,
-                roomCredentialsRepository: roomCredentialsRepository,
-                sessionKeyWriter: sessionKeyHolder
+                sessionRepository: sessionRepository
             ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(sessionRepository: sessionRepository),
             checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase(),

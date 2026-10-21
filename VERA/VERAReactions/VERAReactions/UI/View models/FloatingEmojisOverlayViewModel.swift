@@ -4,6 +4,8 @@
 
 import Combine
 import Foundation
+import Observation
+import VERACommonUI
 
 /// Constants for floating emoji overlay behavior.
 private enum FloatingEmojisOverlayConstants {
@@ -34,15 +36,18 @@ private enum FloatingEmojisOverlayConstants {
 ///
 /// FloatingEmojisOverlayView(viewModel: viewModel)
 /// ```
-public final class FloatingEmojisOverlayViewModel: ObservableObject {
+@MainActor
+@Observable
+public final class FloatingEmojisOverlayViewModel {
 
-    // MARK: - Published Properties
+    // MARK: - Observable Properties
 
     /// The currently visible floating emojis.
-    @Published public private(set) var floatingEmojis: [UIFloatingEmoji] = []
+    public private(set) var floatingEmojis: [UIFloatingEmoji] = []
 
     // MARK: - Private Properties
 
+    @ObservationIgnored
     private var subscriptions = Set<AnyCancellable>()
 
     // MARK: - Initialization
@@ -51,8 +56,7 @@ public final class FloatingEmojisOverlayViewModel: ObservableObject {
     /// - Parameter reactionsRepository: The repository to observe for incoming reactions.
     public init(reactionsRepository: any ReactionsObserver) {
         reactionsRepository.reactionReceived
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] reaction in
+            .sinkOnMainActor { [weak self] reaction in
                 self?.addFloatingEmoji(reaction)
             }
             .store(in: &subscriptions)

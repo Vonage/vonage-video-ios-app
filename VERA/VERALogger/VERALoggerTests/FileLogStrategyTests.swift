@@ -105,6 +105,26 @@ struct FileLogStrategyTests {
 
     // MARK: - File Creation
 
+    @Test("Concurrent callers append complete lines without dropping events")
+    func concurrentWrites() async throws {
+        let logFileURL = makeLogFileURL()
+        defer { cleanup(logFileURL) }
+        let strategy = FileLogStrategy(fileURL: logFileURL, maxFileSize: 1_000_000)
+        await withTaskGroup(of: Void.self) { group in
+            for index in 0..<256 {
+                group.addTask {
+                    strategy.log(LogEvent(level: .info, tag: "Concurrent", message: "event-\(index)"))
+                }
+            }
+        }
+
+        let content = try String(contentsOf: logFileURL, encoding: .utf8)
+        let lines = content.split(separator: "\n")
+        let messages = lines.compactMap { $0.components(separatedBy: "Concurrent: ").last }
+        #expect(lines.count == 256)
+        #expect(Set(messages) == Set((0..<256).map { "event-\($0)" }))
+    }
+
     @Test("Creates file if it does not exist")
     func createsFileIfNotExists() throws {
         let logFileURL = makeLogFileURL()

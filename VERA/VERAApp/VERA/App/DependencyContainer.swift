@@ -46,6 +46,8 @@ final class DependencyContainer {
         isE2EEnabled: E2EConfiguration.isEnabled
     )()
 
+    var onUnauthorized: (@MainActor @Sendable () -> Void)?
+
     #if OKTA_ENABLED
         lazy var authManager: any OKTAAuthenticating = {
             if E2EConfiguration.isEnabled {
@@ -57,13 +59,20 @@ final class DependencyContainer {
         }()
 
         lazy var httpClient: HTTPClient = {
-            if E2EConfiguration.isEnabled {
-                return baseHttpClient
-            }
-            return TokenInjectingHTTPClient(
-                wrapped: baseHttpClient,
-                tokenProvider: OktaTokenProvider(authManager: authManager)
-            )
+            let inner: any HTTPClient =
+                E2EConfiguration.isEnabled
+                ? baseHttpClient
+                : TokenInjectingHTTPClient(
+                    wrapped: baseHttpClient,
+                    tokenProvider: OktaTokenProvider(authManager: authManager)
+                )
+            #if AUTHENTICATION_ENABLED
+                return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
+                    await MainActor.run { self?.onUnauthorized?() }
+                }
+            #else
+                return inner
+            #endif
         }()
     #else
         var httpClient: HTTPClient { baseHttpClient }

@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Observation
 import SwiftUI
 import VERACommonUI
 import VERAMeetingRoom
@@ -63,14 +64,16 @@ struct MeetingRoomCustomizationButtonPresenter: BottomItemPresentable {
 }
 
 @MainActor
-final class MeetingRoomCustomizationProvider: ObservableObject, @MainActor MeetingRoomUIProvider {
-    @Published private(set) var items: [MeetingRoomCustomizationButtonItem] = []
-    @Published private(set) var isCustomBottomBarEnabled = false
+@Observable
+final class MeetingRoomCustomizationProvider: MeetingRoomUIProvider {
+    private(set) var items: [MeetingRoomCustomizationButtonItem] = []
+    private(set) var isCustomBottomBarEnabled = false
 
     private let updatesSubject = PassthroughSubject<Void, Never>()
     public var updates: AnyPublisher<Void, Never> {
         updatesSubject.eraseToAnyPublisher()
     }
+    @ObservationIgnored
     private var nextButtonNumber = 1
 
     func bottomBarButtons() -> [BottomBarButton] {

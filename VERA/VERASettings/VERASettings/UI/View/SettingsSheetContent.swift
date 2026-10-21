@@ -4,19 +4,19 @@
 
 import SwiftUI
 
-/// Wrapper view that owns the settings view models via `@StateObject`.
+/// Wrapper view that owns the settings view models via `@State`.
 ///
-/// `@StateObject` ensures the view models are created once when the sheet
+/// `@State` ensures the view models are created once when the sheet
 /// appears and survive any parent re-renders while the sheet is presented.
 /// They are automatically destroyed when the sheet is dismissed.
 public struct SettingsSheetContent: View {
-    @StateObject private var viewModel: SettingsViewModel
-    @StateObject private var statisticsViewModel: StatisticsViewModel
+    @State private var viewModel: SettingsViewModel
+    @State private var statisticsViewModel: StatisticsViewModel
 
     public init(factory: SettingsFactory) {
         let (vm, statsVM) = factory.makeMeetingRoomViewModels()
-        _viewModel = StateObject(wrappedValue: vm)
-        _statisticsViewModel = StateObject(wrappedValue: statsVM)
+        _viewModel = State(wrappedValue: vm)
+        _statisticsViewModel = State(wrappedValue: statsVM)
     }
 
     public var body: some View {

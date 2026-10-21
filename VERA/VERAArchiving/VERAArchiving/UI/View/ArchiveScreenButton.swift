@@ -6,7 +6,7 @@ import SwiftUI
 
 public struct ArchiveScreenButton: View {
 
-    @ObservedObject var viewModel: ArchiveButtonViewModel
+    var viewModel: ArchiveButtonViewModel
 
     public init(viewModel: ArchiveButtonViewModel) {
         self.viewModel = viewModel

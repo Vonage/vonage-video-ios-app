@@ -35,10 +35,10 @@ public struct SettingsView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
     /// View model managing settings state and user actions.
-    @ObservedObject var viewModel: SettingsViewModel
+    @Bindable var viewModel: SettingsViewModel
 
     /// View model for real-time statistics (placeholder when not in a meeting).
-    @ObservedObject private var statisticsViewModel: StatisticsViewModel
+    private var statisticsViewModel: StatisticsViewModel
 
     /// Whether the screen is being shown while a call is already active.
     private let callContext: CallContext

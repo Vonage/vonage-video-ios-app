@@ -38,7 +38,10 @@ struct AppDependencyProvidersTests {
     func dependencyContainerExposesHTTPClient() {
         let sut = DependencyContainer()
 
-        #expect(sut.httpClient is URLSessionHTTPClient || sut.httpClient is TokenInjectingHTTPClient)
+        #expect(
+            sut.httpClient is UnauthorizedHandlingHTTPClient
+                || sut.httpClient is TokenInjectingHTTPClient
+                || sut.httpClient is URLSessionHTTPClient)
     }
 
     @Test("Shared meeting room HTTP client factory returns injected HTTP client")

@@ -215,11 +215,9 @@ struct MeetingRoomComposedViewTests {
             currentCallParticipantsRepository: makeMockCurrentCallParticipantsRepository(),
             sessionRepository: makeMockSessionRepository(),
             publisherRepository: makeMockVERAPublisherRepository(),
-            roomCredentialsRepository: makeMockRoomCredentialsRepository(),
             captionsStatusDataSource: NullCaptionsStatusDataSource(),
             noiseSuppressionStatusDataSource: makeMockNoiseSuppressionStatusDataSource(),
-            pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource(),
-            sessionKeyHolder: DefaultSessionKeyHolder()
+            pinnedParticipantsDataSource: DefaultPinnedParticipantsDataSource()
         )
     }
 
@@ -229,9 +227,7 @@ struct MeetingRoomComposedViewTests {
             roomName: "test-room",
             baseURL: Self.testBaseURL,
             connectToRoomUseCase: DefaultConnectToRoomUseCase(
-                sessionRepository: makeMockSessionRepository(),
-                roomCredentialsRepository: makeMockRoomCredentialsRepository(),
-                sessionKeyWriter: DefaultSessionKeyHolder()
+                sessionRepository: makeMockSessionRepository()
             ),
             disconnectRoomUseCase: DefaultDisconnectRoomUseCase(
                 sessionRepository: makeMockSessionRepository()

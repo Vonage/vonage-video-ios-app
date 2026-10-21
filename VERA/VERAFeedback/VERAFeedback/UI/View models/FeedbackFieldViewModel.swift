@@ -2,7 +2,8 @@
 //  Created by Vonage on 10/06/2026.
 //
 
-import Combine
+import Foundation
+import Observation
 
 enum FeedbackFieldType {
     case text, info, image
@@ -12,12 +13,13 @@ protocol FieldValidatable {
     var isValid: Bool { get }
     var validationMessage: String? { get }
 }
-class FeedbackFieldViewModel: ObservableObject, FieldValidatable {
+@Observable
+class FeedbackFieldViewModel: FieldValidatable {
     let maxChars: Int?
     let title: String
     let key: String
-    @Published var value: String
-    @Published var attachedImage: PlatformImage?
+    var value: String
+    var attachedImage: PlatformImage?
     var type: FeedbackFieldType
     var isRequired: Bool
     private var valueWithoutWhitespaces: String {

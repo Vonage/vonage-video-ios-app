@@ -6,7 +6,7 @@ import os
 def generate_app_config():
     config_path = "./Config/app-config.json"
     output_path = "./VERAConfiguration/VERAConfiguration/AppConfig.swift"
-    
+
     # Create directory if it doesn't exist
     os.makedirs("./VERAConfiguration/VERAConfiguration", exist_ok=True)
 
@@ -28,6 +28,12 @@ def generate_app_config():
     waiting = config['waitingRoomSettings']
     meeting = config['meetingRoomSettings']
 
+    # Extract metadata. Note: baseApiUrl is intentionally NOT emitted into
+    # AppConfig.swift. The API base URL has a single entry point: builder.sh
+    # reads baseApiUrl from app-config.json and injects it into
+    # EnvironmentConstants at build time (see generateEnvironmentConstants.sh).
+    metadata_version = config.get('metadata', {}).get('version', '1.0.0')
+
     # Helper to convert bool to Swift
     def bool_str(val):
         return "true" if val else "false"
@@ -39,7 +45,7 @@ def generate_app_config():
             "grid": ".grid"
         }
         return layout_map.get(val.lower(), ".activeSpeaker")
-        
+
     # Generate Swift code
     swift_code = f'''//
 // AppConfig.swift
@@ -49,8 +55,10 @@ def generate_app_config():
 import Foundation
 import VERADomain
 
-public struct AppConfig {{
-    public struct VideoSettings {{
+public struct AppConfig: Sendable {{
+    public static let configVersion: String = "{metadata_version}"
+
+    public struct VideoSettings: Sendable {{
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
         public let allowVideoOnJoin: Bool
@@ -69,7 +77,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AudioSettings {{
+    public struct AudioSettings: Sendable {{
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
@@ -88,7 +96,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct WaitingRoomSettings {{
+    public struct WaitingRoomSettings: Sendable {{
         public let allowDeviceSelection: Bool
         public let allowSettings: Bool
 
@@ -101,7 +109,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AuthSettings {{
+    public struct AuthSettings: Sendable {{
         public let allowAuthentication: Bool
         public let idProviders: [String]
 
@@ -114,7 +122,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct MeetingRoomSettings {{
+    public struct MeetingRoomSettings: Sendable {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
         public let allowChat: Bool
@@ -185,7 +193,7 @@ public struct AppConfig {{
     # Write file
     with open(output_path, 'w') as f:
         f.write(swift_code)
-    
+
     print("✅ Generated AppConfig.swift")
 
 if __name__ == "__main__":

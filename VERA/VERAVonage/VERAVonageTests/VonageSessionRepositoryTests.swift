@@ -16,40 +16,41 @@ struct VonageSessionRepositoryTests {
 
     @Test
     func createsSessionSuccessfully() async throws {
-        let sessionFactory = MockVonageSessionFactory()
+        let sessionProvider = MockVonageSessionProvider()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = VonagePluginRegistry()
         let statsCollector = MockStatsCollector()
 
         let sut = makeSUT(
-            sessionFactory: sessionFactory,
+            sessionProvider: sessionProvider,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry,
             statsCollector: statsCollector
         )
 
-        let credentials = makeMockCredentials()
-        _ = try sut.createSession(credentials)
+        let call = try await sut.createSession(for: "a-room")
 
-        #expect(sessionFactory.makeCalled)
+        #expect(sut.currentCall != nil)
+        // The session is created lazily on connect, not at createSession time.
+        #expect(!sessionProvider.makeSessionCalled)
+        _ = call
     }
 
     @Test
     func clearsSessionSuccessfully() async throws {
-        let sessionFactory = MockVonageSessionFactory()
+        let sessionProvider = MockVonageSessionProvider()
         let publisherRepository = MockPublisherRepository()
         let pluginRegistry = VonagePluginRegistry()
         let statsCollector = MockStatsCollector()
 
         let sut = makeSUT(
-            sessionFactory: sessionFactory,
+            sessionProvider: sessionProvider,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry,
             statsCollector: statsCollector
         )
 
-        let credentials = makeMockCredentials()
-        _ = try sut.createSession(credentials)
+        _ = try await sut.createSession(for: "a-room")
 
         #expect(sut.currentCall != nil)
 
@@ -60,14 +61,14 @@ struct VonageSessionRepositoryTests {
 
     // MARK: - Test Helpers
 
-    private func makeSUT<Factory: SessionFactory>(
-        sessionFactory: Factory,
+    private func makeSUT<Provider: SessionProvider>(
+        sessionProvider: Provider,
         publisherRepository: PublisherRepository,
         pluginRegistry: VonagePluginRegistry,
         statsCollector: StatsCollector
-    ) -> VonageSessionRepository<Factory> where Factory.Session == VonageSession {
+    ) -> VonageSessionRepository<Provider> where Provider.Session == VonageSession {
         VonageSessionRepository(
-            sessionFactory: sessionFactory,
+            sessionProvider: sessionProvider,
             publisherRepository: publisherRepository,
             pluginRegistry: pluginRegistry,
             statsCollector: statsCollector

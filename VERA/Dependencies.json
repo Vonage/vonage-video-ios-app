@@ -1,0 +1,11 @@
+{
+  "vonage": {
+    "videoSDK": "2.35.1",
+    "videoTransformersSDK": "2.35.1"
+  },
+  "thirdParty": {
+    "swiftSnapshotTesting": "1.18.4",
+    "cocoaLumberjack": "3.8.5",
+    "oktaMobileSwift": "2.1.5"
+  }
+}

@@ -99,7 +99,7 @@ public final class SettingsFactory {
 
     /// Creates the view models for the meeting room settings without building the view.
     ///
-    /// Used by ``SettingsSheetContent`` to own the view models via `@StateObject`,
+    /// Used by ``SettingsSheetContent`` to own the view models via `@State`,
     /// ensuring they survive parent re-renders while the sheet is presented.
     ///
     /// - Returns: A tuple of the settings view model and the statistics view model.

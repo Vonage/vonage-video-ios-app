@@ -8,6 +8,7 @@ import Testing
 import VERAChat
 import VERAChatAppTestHelpers
 
+@MainActor
 @Suite("Chat panel view model tests")
 struct ChatPanelViewModelTests {
 
@@ -24,18 +25,11 @@ struct ChatPanelViewModelTests {
         let sendMessageUseCase = makeSendChatMessageUseCase(repository: repository)
         let sut = makeSUT(sendChatMessageUseCase: sendMessageUseCase)
 
-        var value = await sut.$state.values.first { _ in true }
-
-        #expect(value == .loading)
+        #expect(sut.state == .loading)
 
         sut.loadData()
 
-        value = await sut.$state.values.first { state in
-            if case .content = state {
-                return true
-            }
-            return false
-        }
+        let value = await waitForContent(sut)
 
         #expect(value == .content(.initial))
     }
@@ -49,18 +43,11 @@ struct ChatPanelViewModelTests {
             repository: repository,
             sendChatMessageUseCase: sendMessageUseCase)
 
-        var value = await sut.$state.values.first { _ in true }
-
-        #expect(value == .loading)
+        #expect(sut.state == .loading)
 
         sut.loadData()
 
-        value = await sut.$state.values.first { state in
-            if case .content = state {
-                return true
-            }
-            return false
-        }
+        let value = await waitForContent(sut)
 
         guard case .content(let chatState) = value else {
             Issue.record("Expected content state")
@@ -86,7 +73,9 @@ struct ChatPanelViewModelTests {
 
         sut.sendMessage("Don't panic!")
 
-        let messages = await repository.observeMessages().values.first { _ in true }
+        var messages: [ChatMessage]?
+        let subscription = repository.observeMessages().first().sink { messages = $0 }
+        defer { subscription.cancel() }
         #expect(messages!.first!.message == "Don't panic!")
     }
 
@@ -99,6 +88,22 @@ struct ChatPanelViewModelTests {
         .init(
             chatMessagesRepository: repository,
             sendChatMessageUseCase: sendChatMessageUseCase)
+    }
+
+    /// Polls `state` on the main actor until it becomes `.content` or the timeout elapses.
+    /// Replaces the old `@Published.values` async sequence after the `@Observable` migration.
+    @discardableResult
+    private func waitForContent(
+        _ sut: ChatPanelViewModel,
+        timeout: Duration = .seconds(2)
+    ) async -> ChatPanelViewState {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while ContinuousClock.now < deadline {
+            let state = await MainActor.run { sut.state }
+            if case .content = state { return state }
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return await MainActor.run { sut.state }
     }
 
     func makeSendChatMessageUseCase(

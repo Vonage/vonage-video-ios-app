@@ -87,6 +87,7 @@ SWIFT_FILES=$(find ./VERA -name "*.swift" -type f \
     -not -path "*/Carthage/*" \
     -not -path "*/xcuserdata/*" \
     -not -path "*/Derived/Sources/*" \
+    -not -path "*/Generated/*" \
     -not -path "*/project.xcworkspace/*" \
     2>/dev/null | sort)
 

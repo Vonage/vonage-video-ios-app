@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -18,7 +19,7 @@ struct VonageCallTests {
     @Test
     func connectCallsSessionConnectWithAnSpecificToken() async throws {
         let aToken = "random-token"
-        let session = VonageSessionSpy()
+        let session = VonageSessionSpy(token: aToken)
         let sut = makeSUT(
             credentials: makeMockCredentials(
                 token: aToken
@@ -27,7 +28,7 @@ struct VonageCallTests {
 
         #expect(session.connectCalled == false)
         #expect(session.recordedTokens.isEmpty)
-        sut.connect()
+        try await sut.connect()
         #expect(session.connectCalled == true)
         #expect(session.recordedTokens == [aToken])
     }
@@ -38,7 +39,7 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let event = await sut.eventsPublisher.values.first { event in
             if case .error = event { return true }
@@ -74,6 +75,27 @@ struct VonageCallTests {
         }
     }
 
+    @Test
+    func connectRethrowsAndDisconnectsWhenSessionCreationFails() async throws {
+        enum MakeSessionError: Swift.Error { case failed }
+        let publisherRepository = MockPublisherRepository()
+        let sut = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in throw MakeSessionError.failed },
+            publisher: VonagePublisherSpy(),
+            publisherRepository: publisherRepository,
+            statsCollector: MockStatsCollector()
+        )
+        sut.setup()
+
+        await #expect(throws: MakeSessionError.self) {
+            try await sut.connect()
+        }
+
+        let state = await sut.callState.values.first { $0 == .disconnected }
+        #expect(state == .disconnected)
+    }
+
     // MARK: - Participant moderation tests
 
     @Test
@@ -94,6 +116,8 @@ struct VonageCallTests {
         let stream = makeOpaqueStream()
         let session = VonageSessionSpy()
         let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
         sut.participantStreamResolver = { id in
             #expect(id == "participant-id")
             return stream
@@ -106,11 +130,13 @@ struct VonageCallTests {
     }
 
     @Test
-    func forceMuteParticipantPropagatesSessionError() async {
+    func forceMuteParticipantPropagatesSessionError() async throws {
         let stream = makeOpaqueStream()
         let session = VonageSessionSpy()
         session.forceMuteError = ForceMuteTestError.requestFailed
         let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
         sut.participantStreamResolver = { _ in stream }
 
         await #expect(throws: ForceMuteTestError.requestFailed) {
@@ -151,7 +177,7 @@ struct VonageCallTests {
         let publisherSpy = VonagePublisherSpy()
         let sut = makeSUT(publisher: publisherSpy)
         sut.setup()
-        sut.connect()
+        try await sut.connect()
 
         publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
 
@@ -259,7 +285,7 @@ struct VonageCallTests {
         sut.setup()
 
         // Connect to enable settings application
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(
             videoResolution: .high,
@@ -297,7 +323,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -319,7 +345,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -345,7 +371,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
         sut.enableNetworkStats()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
@@ -371,7 +397,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -389,7 +415,7 @@ struct VonageCallTests {
             publisher: publisherSpy
         )
         sut.setup()
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(
             videoBitratePreset: .customBitrate,
@@ -421,7 +447,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         let advancedSettings = PublisherAdvancedSettings(videoResolution: .high)
 
@@ -449,7 +475,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         await delay()
 
@@ -480,7 +506,7 @@ struct VonageCallTests {
         )
         sut.setup()
 
-        sut.connect()
+        try await sut.connect()
 
         await delay()
 
@@ -502,8 +528,8 @@ struct VonageCallTests {
         statsCollector: StatsCollector = MockStatsCollector()
     ) -> VonageCall {
         VonageCall(
-            credentials: credentials,
-            session: session,
+            roomName: credentials.roomName,
+            makeSession: { _ in session },
             publisher: publisher,
             publisherRepository: publisherRepository,
             statsCollector: statsCollector
@@ -520,11 +546,159 @@ struct VonageCallTests {
                 applicationId: "applicationId",
                 sessionId: "sessionId",
                 delegate: nil
-            )!
+            )!,
+            credentials: makeMockCredentials()
         )
     }
 }
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+
+@Suite("SystemMediaStateTests", .serialized)
+@MainActor
+struct SystemMediaStateTests {
+    private func makeCall(_ session: VonageSession = SystemMediaStateTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewCallKitUnmutePreservesDisabledCamera() async throws {
+        let call = makeCall()
+        call.publisher.publishVideo = false
+        call.setup()
+        call.muteLocalAudio(true)
+        try await Task.sleep(for: .milliseconds(100))
+        call.muteLocalAudio(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishVideo, "system unmute switches a disabled camera on")
+    }
+
+    @Test func reviewMuteLocalMediaPublishesState() async throws {
+        let call = makeCall()
+        var latest: SessionState = .initial
+        let observation = call.statePublisher.sink { latest = $0 }
+        call.setup()
+        call.muteLocalMedia(true)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(!call.publisher.publishAudio && !call.publisher.publishVideo)
+        #expect(
+            !latest.isPublishingAudio && !latest.isPublishingVideo,
+            "CallKit media changes do not update the UI state publisher")
+        observation.cancel()
+    }
+
+    @Test(arguments: [true, false])
+    func systemMutePreservesVideoAndPublishesState(cameraEnabled: Bool) async throws {
+        let call = makeCall()
+        call.publisher.publishVideo = cameraEnabled
+        var state: SessionState = .initial
+        let observation = call.statePublisher.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        call.muteLocalAudio(true)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishAudio)
+        #expect(call.publisher.publishVideo == cameraEnabled)
+        #expect(!state.isPublishingAudio && state.isPublishingVideo == cameraEnabled)
+        call.muteLocalAudio(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(call.publisher.publishAudio)
+        #expect(call.publisher.publishVideo == cameraEnabled)
+        #expect(state.isPublishingAudio && state.isPublishingVideo == cameraEnabled)
+    }
+
+    @Test(arguments: [true, false])
+    func holdAndResumePublishActualMediaState(audioInitiallyEnabled: Bool) async throws {
+        let call = makeCall()
+        call.publisher.publishAudio = audioInitiallyEnabled
+        call.publisher.publishVideo = false
+        var state: SessionState = .initial
+        let observation = call.statePublisher.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        call.setOnHold(true)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!state.isPublishingAudio && !state.isPublishingVideo)
+        call.muteLocalAudio(audioInitiallyEnabled)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishAudio && !call.publisher.publishVideo)
+        call.setOnHold(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(state.isPublishingAudio == !audioInitiallyEnabled)
+        #expect(!state.isPublishingVideo)
+    }
+}
+
+private final class SystemMediaStateTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+@Suite("CallObserverLifetimeTests", .serialized)
+@MainActor
+struct CallObserverLifetimeTests {
+    private func makeCall(_ session: VonageSession = CallObserverLifetimeTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewSetupCallReleasesWhenOwnerDropsIt() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call?.setup()
+        try await Task.sleep(for: .milliseconds(100))
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil, "setup observer keeps call alive after its owner releases it")
+    }
+
+    @Test func reviewCallWithoutObserversReleases() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call = nil
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(observed == nil)
+    }
+
+    @Test func reviewNormalDisconnectReleasesCall() async throws {
+        let session = CallObserverLifetimeTestsSession()
+        var call: VonageCall? = makeCall(session)
+        weak var observed = call
+        call?.setup()
+        try await call?.connect()
+        session.onSessionDidConnect?()
+        try await Task.sleep(for: .milliseconds(100))
+        try await call?.disconnect()
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil)
+    }
+}
+
+private final class CallObserverLifetimeTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
 }

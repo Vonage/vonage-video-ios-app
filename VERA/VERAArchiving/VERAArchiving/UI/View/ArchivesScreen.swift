@@ -7,7 +7,7 @@ import VERACommonUI
 
 public struct ArchivesScreen: View {
 
-    @ObservedObject var viewModel: ArchivesViewModel
+    var viewModel: ArchivesViewModel
 
     public var body: some View {
         CardView {
