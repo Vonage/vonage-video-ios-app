@@ -36,6 +36,7 @@
     "allowEmojis": true,
     "allowFeedback": true,
     "allowPictureInPicture": true,
+    "allowPostCallTranscription": true,
     "allowScreenShare": true,
     "allowSettings": true,
     "defaultLayoutMode": "activespeaker",
