@@ -1,0 +1,27 @@
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EBackendStore.swift
+  s_6fcba32ee9a98b::t_c00b688ed2d117 79-81,84,88-89,159-166,168-173,195,197,208,211-212,221-229
+  s_6fcba32ee9a98b::t_6296311af627a0 233,237
+  s_6fcba32ee9a98b::t_473a31d0362be2 167,230-232,234-236,238
+VERA/VERADomain/VERADomainTests/ArchiveTests.swift
+  s_6fcba32ee9a98b::t_de90c9d5ce040a 88-96
+  s_6fcba32ee9a98b::t_6fb75d554a1d07 1-36,45-66,68-87,97-98
+  s_6fcba32ee9a98b::t_6296311af627a0 37-44,67
+VERA/VERAE2E/VERAE2E/Domain/Models/E2EModels.swift
+  s_6fcba32ee9a98b::t_c00b688ed2d117 21-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df2305468b1fc78b85faf7778865c7c94adf0271",
+  "prompts": {},
+  "sessions": {
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

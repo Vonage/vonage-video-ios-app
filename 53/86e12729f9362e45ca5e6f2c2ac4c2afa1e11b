@@ -1,0 +1,32 @@
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageReactionsPluginTests.swift
+  s_4598f7c801d99b::t_163dff2e0fba65 545-546
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  s_4598f7c801d99b::t_4d695748c61627 337-341
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_4598f7c801d99b::t_cc1e7b7a812e6f 5,521-601,604-616,652-665
+  s_4598f7c801d99b::t_0b6da1f4065c33 666
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPluginTests/VonageArchivingPluginTests.swift
+  s_4598f7c801d99b::t_1b73019acfc15c 38-47,130-191,203-204,206-218
+VERA/VERAVonage/VERAVonage/Extensions/VonageSignal+ArchivingState.swift
+  s_4598f7c801d99b::t_c6178b6a5e4d10 6,9,12,16,19
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  s_4598f7c801d99b::t_163dff2e0fba65 25-26
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPlugin/VonageArchivingPlugin.swift
+  s_4598f7c801d99b::t_e278abbbe9a6dd 13-14,18-19,22,33,42-48,50,65,68,80-81,85,88,94-100,113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5386e12729f9362e45ca5e6f2c2ac4c2afa1e11b",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
