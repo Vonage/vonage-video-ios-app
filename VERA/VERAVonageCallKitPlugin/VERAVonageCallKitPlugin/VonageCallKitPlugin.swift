@@ -141,7 +141,11 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
             self?.call?.setOnHold(isOnHold)
         }
         providerDelegate?.onMute = { [weak self] isMuted in
-            self?.call?.muteLocalMedia(isMuted)
+            if let audioControl = self?.call as? any AudioMuteControllable {
+                audioControl.muteLocalAudio(isMuted)
+            } else {
+                self?.call?.muteLocalMedia(isMuted)
+            }
         }
 
     }
