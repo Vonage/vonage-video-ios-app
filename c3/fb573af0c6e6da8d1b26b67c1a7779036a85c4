@@ -1,0 +1,23 @@
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StopArchivingUseCase.swift"
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 6,11,13,16,36-37
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 6,10,12,14,32
+VERA/Config/app-config.json
+  s_4598f7c801d99b::t_528b9a701f7878 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c3fb573af0c6e6da8d1b26b67c1a7779036a85c4",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

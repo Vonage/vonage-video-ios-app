@@ -1,0 +1,22 @@
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_4598f7c801d99b::t_aafe57b0128a34 347-364,370-381,442-459,465-476,537-554,560-571,632-649,655-666,726-743,749-760,820-837,843-854
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  s_4598f7c801d99b::t_aafe57b0128a34 823-836,838-842,844-846,852-854,856-860,862-863,870-883,885-889,891-893,899-901,903-907,909-910
+  s_4598f7c801d99b::t_7bf0812a3512c9 837,843,855,861,884,890,902,908
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1fdf09dc669bc9cd0513d980d6251b5419279c55",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
