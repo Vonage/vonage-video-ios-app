@@ -55,7 +55,7 @@ struct ArchivesViewModelTests {
         #expect(uiArchives.count == 2)
     }
 
-    @Test func loadDataReversesArchivesOrder() async {
+    @Test func loadDataListsNewestArchiveFirst() async {
         let repository = SpyArchivesRepository()
         let archives = makeArchives()
         let sut = makeSUT(archivesRepository: repository)
@@ -256,10 +256,11 @@ struct ArchivesViewModelTests {
 
     @Test func loadDataNumbersRecordingsAndTranscriptionsSeparately() async {
         let repository = SpyArchivesRepository()
+        // Newest first, as returned by `searchArchives`.
         let archives = [
-            makeArchive(kind: .recording),
-            makeArchive(kind: .transcription),
-            makeArchive(kind: .recording),
+            makeArchive(kind: .recording, createdAt: Date(timeIntervalSince1970: 300)),
+            makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 200)),
+            makeArchive(kind: .recording, createdAt: Date(timeIntervalSince1970: 100)),
         ]
         let sut = makeSUT(archivesRepository: repository)
 
@@ -270,6 +271,29 @@ struct ArchivesViewModelTests {
 
         #expect(uiArchives.map(\.title) == ["Recording 2", "Transcription 1", "Recording 1"])
         #expect(uiArchives.map(\.kind) == [.recording, .transcription, .recording])
+    }
+
+    @Test func mapToUIArchivesListsNewestFirstAndNumbersOldestAsOne() {
+        let first = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 100))
+        let second = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 200))
+        let sut = makeSUT()
+
+        let uiArchives = sut.mapToUIArchives([second, first])
+
+        #expect(uiArchives.map(\.id) == [second.id, first.id])
+        #expect(uiArchives.map(\.title) == ["Transcription 2", "Transcription 1"])
+    }
+
+    @Test func mapToUIArchivesDoesNotDependOnResponseOrder() {
+        let first = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 100))
+        let second = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 200))
+        let sut = makeSUT()
+
+        let newestFirst = sut.mapToUIArchives([second, first])
+        let oldestFirst = sut.mapToUIArchives([first, second])
+
+        #expect(newestFirst.map(\.id) == oldestFirst.map(\.id))
+        #expect(newestFirst.map(\.title) == oldestFirst.map(\.title))
     }
 
     @Test func mapToUIArchiveShowsTranscriptionReadyWhenTranscriptIsAvailable() {
@@ -464,12 +488,13 @@ struct ArchivesViewModelTests {
         kind: ArchiveKind,
         status: ArchiveStatus = .available,
         url: URL? = URL(string: "https://example.com/archive"),
-        transcription: ArchiveTranscription? = nil
+        transcription: ArchiveTranscription? = nil,
+        createdAt: Date = Date(timeIntervalSince1970: 1_737_395_160)
     ) -> Archive {
         Archive(
             id: UUID(),
             name: kind.rawValue,
-            createdAt: Date(timeIntervalSince1970: 1_737_395_160),
+            createdAt: createdAt,
             status: status,
             url: url,
             size: 1_048_576,
