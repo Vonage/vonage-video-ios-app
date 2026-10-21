@@ -48,6 +48,13 @@ final class BottomBarButtonsAssembler {
             bindArchiveUpdates(archiveButtonViewModel)
         }
     }
+    var transcriptionButtonViewModel: ArchiveButtonViewModel? {
+        didSet {
+            guard hasChanged(from: oldValue, to: transcriptionButtonViewModel) else { return }
+
+            bindTranscriptionUpdates(transcriptionButtonViewModel)
+        }
+    }
     var captionsButtonViewModel: CaptionsButtonViewModel? {
         didSet {
             guard hasChanged(from: oldValue, to: captionsButtonViewModel) else { return }
@@ -105,6 +112,10 @@ final class BottomBarButtonsAssembler {
         }
 
         if enabledFeatures.contains(.archiving), let viewModel = archiveButtonViewModel {
+            buttons.append(makeArchiveButton(viewModel))
+        }
+
+        if enabledFeatures.contains(.postCallTranscription), let viewModel = transcriptionButtonViewModel {
             buttons.append(makeArchiveButton(viewModel))
         }
 
@@ -299,6 +310,15 @@ final class BottomBarButtonsAssembler {
         ) { $0.state }
     }
 
+    private func bindTranscriptionUpdates(_ viewModel: ArchiveButtonViewModel?) {
+        guard let viewModel else { return }
+
+        observeChanges(
+            viewModel,
+            while: { [weak self] in self?.transcriptionButtonViewModel === viewModel }
+        ) { $0.state }
+    }
+
     private func bindCaptionsUpdates(_ viewModel: CaptionsButtonViewModel?) {
         guard let viewModel else { return }
 
@@ -366,6 +386,7 @@ final class BottomBarButtonsAssembler {
     func cleanUp() {
         videoEffectsViewModel = nil
         archiveButtonViewModel = nil
+        transcriptionButtonViewModel = nil
         captionsButtonViewModel = nil
         emojiButtonContainerViewModel = nil
         meetingNoiseSuppressionButtonViewModel = nil
