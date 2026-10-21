@@ -1,0 +1,430 @@
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_c70d88110fff10::t_b77c1fe866235e 602-625
+.maestro/flows/settings-waiting-room-context.yaml
+  s_496e1b6c7a4a2d::t_4001560a73bff0 79-86
+VERA/VERASettings/VERASettings/UI/View/Sections/CaptionsSectionView.swift
+  s_7768f6b7047ead::t_c99a382cfe91a4 1-67
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/VonageSettingsPlugin.swift
+  s_74b30de6092574::t_bcb09875bf0b7b 190-191
+  s_71eff7d57a6b5e::t_175755c983a7eb 53-54
+  s_960808d8890ee2::t_6df5445ad2298d 160-176
+.maestro/flows/settings-meeting-room-context.yaml
+  s_0f457f8499adf2::t_20e92c290ac4b4 113-121
+VERA/VERADomain/VERADomain/CallFacade.swift
+  s_cc7a535a5853f6::t_84bbc6195c9155 184-191
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_d964d4a3e20ca6::t_1c78f42d63d0ab 358-359
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  s_e6d0432b9af648::t_3e385d301035a0 259-260
+  s_d24944435c899f::t_540468c01be8c6 151-159
+  s_4ce718082a39f8::t_94f33b799dc9f3 96-97,102
+  s_56e37f9232b501::t_a50a0fb42468a8 46-53
+  s_2421ebf36c14dd::t_be2cb83b19e9c3 205-206
+  s_33c42ee4f4cf7b::t_5ed07d927e50a3 72,76-77,82
+  s_620666967f33a4::t_d63386780d8c89 219
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  s_5e450787d39692::t_37efde0e023bb3 247-248
+  s_21756af239889e::t_28d3353e248dd3 267-268,274-278
+  s_0ad0132fcd8d5e::t_f2e9fdf6b74a25 160-197
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_b3268942c66ff4::t_1b5c5f4d15a98e 30-32,38,41-42,46
+  s_d4f6d5dc7cd8fd::t_0d9ba1cfeab8fa 60
+  s_64276a26496cf7::t_426090af9d552d 102-103
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  s_64a1d03dd03a91::t_00d2b105283e7a 196-387
+VERA/VERAApp/VERA/App/PublisherAdvancedSettingsAdapter.swift
+  s_ceee4817469cd8::t_4e423447cafbd5 33-37
+VERA/VERASettings/VERASettings/UI/View/SettingsSheetContent.swift
+  s_847925a4174c49::t_7da45246e7cb58 15,21,25-29
+VERA/VERASettings/VERASettingsTests/UI/Entities/SettingsSectionTransferTests.swift
+  s_7a584d7c093810::t_b5cd6143681634 17,19-20
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/VonageSettingsPluginTests.swift
+  s_94cb4877163082::t_097adee7266f19 161-180
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_ddc87e0b4b3f1b::t_19e4910a4b8c74 26
+  s_6aa63500c5418d::t_70c00d32ff7d73 429-430
+  s_10168d3c5dbc87::t_3f1b7e59cf642d 993-1007
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  s_b8b9eba55c0189::t_17719d39aede88 1-33
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  s_74ce67f5ab131e::t_3c48a9bf38f5a0 48-52,71,84-85,99,140,166,189,203
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_7cb3586fd5cba5::t_9a3ca010e95fb7 268-269
+VERA/VERASettings/VERASettings/UI/Entities/SettingsSection.swift
+  s_89774cbd0c7a48::t_c20bfc2a2b78de 15
+  s_b0605fae7d71ab::t_cf4feaec631f83 34
+VERA/VERAApp/VERATests/PublisherAdvancedSettingsAdapterTests.swift
+  s_1b4ca82282e043::t_0f19baaf804306 5-6
+  s_7227c9e5c3f035::t_fbb8099a6e7416 1-4,7-42
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  s_8ffebc4f5262db::t_fd450082af6dd6 45-47
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_235f94dba4f039::t_edfdcdc6cdd8da 277-281
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  s_dc5fe240b4555d::t_6f1ce069548777 42-44
+  s_85608d7d97c7a7::t_445694e57f9fd8 1-41,45-59
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  s_c873f2ab108d1a::t_8d52faa0ae78a8 89-90,95,97,99-100
+  s_113b499bc2740d::t_0721957a2fdcc3 51
+  s_fbf0068697c8fd::t_c4c68734c84165 91-94,96,98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "65b0d4a8013ae4094555e4430afd1329be7e4f9a",
+  "prompts": {},
+  "sessions": {
+    "s_0ad0132fcd8d5e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792608015711547000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_0f457f8499adf2": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792609159294148000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_10168d3c5dbc87": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602424520039000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_113b499bc2740d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606785812107000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_1b4ca82282e043": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792607887075389000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_21756af239889e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792608004439612000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_235f94dba4f039": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602385511223000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_2421ebf36c14dd": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604746014546000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_33c42ee4f4cf7b": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604721672140000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_496e1b6c7a4a2d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792609156443187000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_4ce718082a39f8": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604729362622000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_56e37f9232b501": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604712266701000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_5e450787d39692": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792608000324688000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_620666967f33a4": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604748011459000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_64276a26496cf7": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604770617811000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_64a1d03dd03a91": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604849571799000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_6aa63500c5418d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602405556787000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_71eff7d57a6b5e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606702874816000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_7227c9e5c3f035": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792607757541931000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_74b30de6092574": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606709212022000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_74ce67f5ab131e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604634795520000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_7768f6b7047ead": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604674607759000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_7a584d7c093810": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604852722369000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_7cb3586fd5cba5": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606724214656000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_847925a4174c49": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604785542512000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_85608d7d97c7a7": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604882421571000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_89774cbd0c7a48": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604647369903000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_8ffebc4f5262db": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604682133551000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_94cb4877163082": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606797520750000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_960808d8890ee2": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606707236933000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_b0605fae7d71ab": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604657860916000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_b3268942c66ff4": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604765995527000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_b8b9eba55c0189": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604639464723000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_c70d88110fff10": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602441092444000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_c873f2ab108d1a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606773651707000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_cc7a535a5853f6": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602382666953000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_ceee4817469cd8": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606744384753000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_d24944435c899f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604738026114000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_d4f6d5dc7cd8fd": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604768384244000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_d964d4a3e20ca6": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606719741673000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_dc5fe240b4555d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792614115545191000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_ddc87e0b4b3f1b": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792602398532280000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_e6d0432b9af648": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792604750295536000",
+        "model": "unknown"
+      },
+      "human_author": null
+    },
+    "s_fbf0068697c8fd": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792606783222927000",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}
