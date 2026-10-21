@@ -118,6 +118,7 @@ struct MainActorEventQueueTests {
             }
             queue.send(0)
         }
+        queue.invalidate()
         #expect(received == Array(0...130))
         #expect(countAtSentinel == 65)
     }
