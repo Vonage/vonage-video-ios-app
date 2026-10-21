@@ -801,6 +801,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
                 videoFrameRate: advancedSettings.videoFrameRate,
                 preferredVideoCodecs: advancedSettings.preferredVideoCodecs,
                 maxAudioBitrate: advancedSettings.maxAudioBitrate,
+                videoBitratePreset: advancedSettings.videoBitratePreset,
                 maxVideoBitrate: advancedSettings.maxVideoBitrate,
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
                 subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,
