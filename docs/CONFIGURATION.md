@@ -24,6 +24,10 @@ Meeting-room features (chat, captions, reactions, screen share) are **not** in t
 
 Code guarded by `#if ARCHIVING_ENABLED … #endif` is only compiled when that flag is active. `DependencyContainer.swift` follows the same pattern to conditionally instantiate feature objects.
 
+`meetingRoomSettings.allowPostCallTranscription` has no compilation condition. It is a runtime flag that enables `MeetingRoomFeature.postCallTranscription` in the meeting room SDK, which adds a Start/Stop transcription button next to the Record button. Transcription runs as a separate archive from the recording, so both can run at the same time. It requires a backend whose `startArchive` endpoint supports `withTranscription`.
+
+When the meeting ends, the goodbye page lists the transcript under **Download session content** as a "Transcription N" row next to any "Recording N" rows. Transcription archives are the individual-stream archives with `hasTranscription` set; their download comes from the nested `transcription` object returned by `searchArchives`, not from the archive's own `url`. The list keeps polling until every archive and transcript has left the `requested`/`started`/`paused`/`stopped` statuses, so a transcript still processing after its parent archive is `uploaded` or `available` keeps the row in its loading state. Tapping **Download** on a transcription saves the zip to a temporary file and opens the share sheet, instead of opening the recording URL.
+
 ### Regenerating AppConfig.swift
 
 After editing `app-config.json`, run from the `VERA/` directory:
