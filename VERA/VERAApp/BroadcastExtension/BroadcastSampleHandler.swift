@@ -28,8 +28,8 @@ private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as C
 ///
 /// ## Memory
 /// The extension process has a hard ~50 MB memory ceiling. The custom capturer
-/// passes frames directly to the SDK without extra copies; keep resolution ≤ 1280 px
-/// on the longest edge when downscaling is needed.
+/// passes frames directly to the SDK without extra copies; the default capture policy caps the longest edge at 1280 px. Higher explicit
+/// output bounds require memory validation on a physical device.
 ///
 /// - SeeAlso: ``ScreenShareVideoCapturer``, ``ScreenShareCredentialsStore``
 final class BroadcastSampleHandler: RPBroadcastSampleHandler {
@@ -40,7 +40,8 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
 
     private var session: OTSession?
     private var publisher: OTPublisherKit?
-    private let videoCapturer = ScreenShareVideoCapturer()
+    private var videoSettings = ScreenShareVideoSettings()
+    private var videoCapturer = ScreenShareVideoCapturer()
     private var didTearDown = false
     private var shouldProcessVideoSamples = false
     private var store: UserDefaultsScreenShareCredentialsRepository?
@@ -62,6 +63,12 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
             return
         }
 
+        if let data = userDefaults.data(forKey: ScreenSharingKeys.videoSettings),
+            let settings = try? JSONDecoder().decode(ScreenShareVideoSettings.self, from: data)
+        {
+            videoSettings = settings
+        }
+        videoCapturer = ScreenShareVideoCapturer(settings: videoSettings)
         let store = UserDefaultsScreenShareCredentialsRepository(userDefaults: userDefaults)
         self.store = store
 
@@ -206,11 +213,10 @@ extension BroadcastSampleHandler: OTSessionDelegate {
         shouldProcessVideoSamples = true
 
         let settings = OTPublisherSettings()
-        settings.scalableScreenshare = true
-        settings.videoCodecPreference = .manual(withCodecs: [
-            NSNumber(value: OTVideoCodecType.H264.rawValue),
-            NSNumber(value: OTVideoCodecType.VP8.rawValue),
-        ])
+        settings.scalableScreenshare = videoSettings.scalableScreenshare
+        if let codecs = videoSettings.preferredCodecs {
+            settings.videoCodecPreference = .manual(withCodecs: codecs.map { NSNumber(value: $0) })
+        }
 
         if let credentials = store?.load(), !credentials.username.isEmpty {
             settings.name = "\(credentials.username)'s screen"
@@ -234,7 +240,14 @@ extension BroadcastSampleHandler: OTSessionDelegate {
         }
         otPublisher.videoType = .screen
         otPublisher.videoCapture = videoCapturer
-        otPublisher.videoCapture?.videoContentHint = .text
+        otPublisher.videoCapture?.videoContentHint = OTVideoContentHint(rawValue: videoSettings.contentHint) ?? .detail
+        if let rawPreset = videoSettings.bitratePreset, let preset = OTVideoBitratePreset(rawValue: rawPreset) {
+            if preset == .custom {
+                otPublisher.maxVideoBitrate = max(5_000, min(videoSettings.maxVideoBitrate, 10_000_000))
+            } else {
+                otPublisher.videoBitratePreset = preset
+            }
+        }
         otPublisher.publishAudio = false
 
         self.publisher = otPublisher

@@ -7,13 +7,10 @@ import VERACommonUI
 
 /// Adaptive settings dashboard.
 ///
-/// - **iPad / Mac** (`pad` or `mac` idiom): `NavigationSplitView` with a sidebar
-///   list and a detail pane showing the selected section.
-/// - **iPhone** (`phone` idiom): A single scrollable `Form` containing
-///   every section inline — no drill-down navigation required.
+/// - **Regular width**: `NavigationSplitView` with a sidebar list and a detail pane.
+/// - **Compact width**: A single scrollable `Form` containing every section inline.
 ///
-/// Device idiom is used instead of `horizontalSizeClass` because iPad sheets
-/// report `.compact` size class, which would incorrectly trigger the iPhone layout.
+/// Both layouts use the same section order.
 ///
 /// Sections are defined in ``SettingsSection``.
 public struct SettingsView: View {
@@ -113,44 +110,8 @@ public struct SettingsView: View {
     private var compactLayout: some View {
         NavigationStack {
             Form {
-                Section {
-                    VideoSectionView(
-                        viewModel: viewModel,
-                        isInActiveCall: callContext.isInActiveCall,
-                        isCompactLayout: true
-                    )
-                } header: {
-                    Text("Video".localized)
-                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
-                }
-
-                Section {
-                    AudioSectionView(
-                        viewModel: viewModel,
-                        isInActiveCall: callContext.isInActiveCall,
-                        isCompactLayout: true
-                    )
-                } header: {
-                    Text("Audio".localized)
-                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
-                }
-
-                StatisticsSectionScreen(
-                    viewModel: viewModel,
-                    statisticsViewModel: currentStatisticsViewModel,
-                    isCompactLayout: true
-                )
-
-                Section {
-                    GeneralSectionView(
-                        viewModel: viewModel,
-                        isInActiveCall: callContext.isInActiveCall,
-                        statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled,
-                        isCompactLayout: true
-                    )
-                } header: {
-                    Text("General".localized)
-                        .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                ForEach(SettingsSection.allCases) { section in
+                    compactSection(for: section)
                 }
             }
             .navigationTitle("Settings".localized)
@@ -222,30 +183,61 @@ public struct SettingsView: View {
     @ViewBuilder
     private func detailView(for section: SettingsSection) -> some View {
         Form {
-            switch section {
-            case .general:
-                GeneralSectionView(
-                    viewModel: viewModel,
-                    isInActiveCall: callContext.isInActiveCall,
-                    statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled
-                )
-            case .video:
-                VideoSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
-            case .audio:
-                AudioSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
-            case .stats:
-                StatisticsSectionScreen(
-                    viewModel: viewModel,
-                    statisticsViewModel: currentStatisticsViewModel,
-                    isCompactLayout: false,
-                    showsSectionHeaders: false
-                )
-            }
+            sectionContent(for: section, isCompactLayout: false)
         }
         .scrollContentBackground(.hidden)
         .id(section)
         .navigationTitle(section.displayName)
     }
+
+    @ViewBuilder
+    private func compactSection(for section: SettingsSection) -> some View {
+        if section == .stats {
+            sectionContent(for: section, isCompactLayout: true)
+        } else {
+            Section {
+                sectionContent(for: section, isCompactLayout: true)
+            } header: {
+                Text(section.displayName)
+                    .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func sectionContent(for section: SettingsSection, isCompactLayout: Bool) -> some View {
+        switch section {
+        case .general:
+            GeneralSectionView(
+                viewModel: viewModel,
+                isInActiveCall: callContext.isInActiveCall,
+                statsOverlayEnabled: $viewModel.settingsPreference.statsOverlayEnabled,
+                isCompactLayout: isCompactLayout
+            )
+        case .video:
+            VideoSectionView(
+                viewModel: viewModel,
+                isInActiveCall: callContext.isInActiveCall,
+                isCompactLayout: isCompactLayout
+            )
+        case .screenSharing:
+            ScreenSharingSectionView(viewModel: viewModel, isCompactLayout: isCompactLayout)
+        case .audio:
+            AudioSectionView(
+                viewModel: viewModel,
+                isInActiveCall: callContext.isInActiveCall,
+                isCompactLayout: isCompactLayout
+            )
+        case .stats:
+            StatisticsSectionScreen(
+                viewModel: viewModel,
+                statisticsViewModel: currentStatisticsViewModel,
+                isCompactLayout: isCompactLayout,
+                showsSectionHeaders: isCompactLayout
+            )
+        }
+    }
+
 }
 
 // MARK: - Previews

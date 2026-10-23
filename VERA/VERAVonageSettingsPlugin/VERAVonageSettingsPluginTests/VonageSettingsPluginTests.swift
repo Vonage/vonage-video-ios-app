@@ -231,7 +231,7 @@ struct VonageSettingsPluginTests {
         try await sut.callDidStart([:])
 
         await mocks.repository.updatePreferences { preferences in
-            preferences.videoResolution = .high
+            preferences.videoResolution = .medium
         }
         await delay()
 
@@ -447,6 +447,68 @@ struct VonageSettingsPluginTests {
 
         // Test passes if no crash occurs
         #expect(true)
+    }
+
+    @Test("Changing the camera selection applies live without republishing")
+    func cameraSelectionDoesNotRepublish() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        try await sut.callDidStart([:])
+        await mocks.repository.updatePreferences { preferences in
+            preferences.cameraPosition = .back
+        }
+        await delay()
+
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.cameraPosition == .back)
+        try await sut.callDidEnd()
+    }
+
+
+    @Test("Changing self-view mirroring applies live without republishing")
+    func selfViewMirroringDoesNotRepublish() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        try await sut.callDidStart([:])
+        await mocks.repository.updatePreferences { preferences in
+            preferences.selfViewMirroringEnabled = false
+        }
+        await delay()
+
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.selfViewMirroringEnabled == false)
+        try await sut.callDidEnd()
+    }
+
+    @Test("Noise suppression and camera hints apply live without republishing")
+    func audioAndContentHintsApplyLive() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        try await sut.callDidStart([:])
+        await mocks.repository.updatePreferences { preferences in
+            preferences.advancedNoiseSuppressionEnabled = true
+            preferences.cameraContentHint = .text
+        }
+        await delay()
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        #expect(mocks.call.lastLiveSettings?.advancedNoiseSuppressionEnabled == true)
+        #expect(mocks.call.lastLiveSettings?.cameraContentHint == .text)
+        await mocks.repository.updatePreferences { preferences in
+            preferences.screenShareContentHint = .motion
+            preferences.screenShareCodecMode = .manual
+            preferences.screenShareFrameRate = .fps7
+            preferences.screenShareResolution = .fullHD
+            preferences.screenShareBitratePreset = .custom
+            preferences.screenShareMaxVideoBitrate = 2_000_000
+            preferences.scalableScreenshareEnabled = true
+        }
+        await delay()
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == 0)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == 1)
+        try await sut.callDidEnd()
     }
 
     // MARK: - Helpers

@@ -36,12 +36,17 @@ struct PublisherPreferencesTransferTests {
                     videoResolution: .high, videoFrameRate: .fps15,
                     codecPreference: .init(mode: .manual, orderedCodecs: [.h264]),
                     audioBitratePreference: .custom(64_000), maxVideoBitrate: 0,
-                    publisherAudioFallbackEnabled: false, subscriberAudioFallbackEnabled: false
+                    publisherAudioFallbackEnabled: false, subscriberAudioFallbackEnabled: false,
+                    statsOverlayEnabled: true
                 )
             ),
             (
                 #"{"videoResolution":1,"videoFrameRate":30,"audioFallbackEnabled":true}"#,
-                .init(maxVideoBitrate: 0)
+                .init(
+                    videoResolution: .medium, maxVideoBitrate: 0,
+                    publisherAudioFallbackEnabled: true, subscriberAudioFallbackEnabled: true,
+                    statsOverlayEnabled: true
+                )
             ),
         ]
         let storage = PublisherPreferenceStorage()
@@ -55,7 +60,7 @@ struct PublisherPreferencesTransferTests {
             #expect(object["preferredVideoCodec"] == nil)
             #expect(object["maxAudioBitrate"] == nil)
             #expect(object["audioFallbackEnabled"] == nil)
-            #expect(object.count == 12)
+            #expect(object.count == 21)
             #expect(try JSONDecoder().decode(PublisherSettingsPreferences.self, from: encoded) == expected)
         }
     }
