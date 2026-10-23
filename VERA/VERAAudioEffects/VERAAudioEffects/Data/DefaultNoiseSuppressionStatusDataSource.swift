@@ -5,15 +5,16 @@
 import Combine
 import VERADomain
 
-public final class DefaultNoiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource, @unchecked Sendable {
+public final class DefaultNoiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource {
 
-    private var _noiseSuppressionState = CurrentValueSubject<NoiseSuppressionState, Never>(.disabled)
-    public lazy var noiseSuppressionState: AnyPublisher<NoiseSuppressionState, Never> =
-        _noiseSuppressionState.eraseToAnyPublisher()
+    private let _noiseSuppressionState = CurrentValueRelay<NoiseSuppressionState, Never>(.disabled)
+    public var noiseSuppressionState: AnyPublisher<NoiseSuppressionState, Never> {
+        _noiseSuppressionState.publisher
+    }
 
     public init() {}
 
     public func set(state: NoiseSuppressionState) {
-        _noiseSuppressionState.value = state
+        _noiseSuppressionState.send(state)
     }
 }

@@ -8,6 +8,7 @@ import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
+@MainActor
 @Suite("Feedback session debug info tests")
 struct FeedbackSessionDebugInfoCurrentCallTests {
 
@@ -98,36 +99,36 @@ private final class TestStatsCollector: NSObject, StatsCollector {
 
     func removeSubscriber(connectionId: String) {}
 
-    func publisher(
+    nonisolated func publisher(
         _ publisher: OTPublisherKit,
         videoNetworkStatsUpdated stats: [OTPublisherKitVideoNetworkStats]
     ) {}
 
-    func publisher(
+    nonisolated func publisher(
         _ publisher: OTPublisherKit,
         audioNetworkStatsUpdated stats: [OTPublisherKitAudioNetworkStats]
     ) {}
 
-    func subscriber(
+    nonisolated func subscriber(
         _ subscriber: OTSubscriberKit,
         videoNetworkStatsUpdated stats: [OTSubscriberKitVideoNetworkStats]
     ) {}
 
-    func subscriber(
+    nonisolated func subscriber(
         _ subscriber: OTSubscriberKit,
         audioNetworkStatsUpdated stats: [OTSubscriberKitAudioNetworkStats]
     ) {}
 
-    func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {}
+    nonisolated func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {}
 
-    func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
+    nonisolated func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
 
-    func publisher(
+    nonisolated func publisher(
         _ publisher: OTPublisherKit,
         mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
     ) {}
 
-    func subscriber(
+    nonisolated func subscriber(
         _ subscriber: OTSubscriberKit,
         mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
     ) {}

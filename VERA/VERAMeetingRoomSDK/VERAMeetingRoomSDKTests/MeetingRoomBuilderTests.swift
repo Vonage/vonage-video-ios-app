@@ -13,6 +13,7 @@ import VERAMeetingRoom
 
 @testable import VERAMeetingRoomSDK
 
+@MainActor
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
