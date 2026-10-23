@@ -14,6 +14,7 @@ public struct JoinRoomRequest: Sendable {
     }
 }
 
+@MainActor
 public final class JoinRoomUseCase {
 
     private let userRepository: UserRepository

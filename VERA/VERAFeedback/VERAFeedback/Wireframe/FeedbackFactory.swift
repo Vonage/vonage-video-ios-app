@@ -5,6 +5,7 @@
 import Foundation
 import VERADomain
 
+@MainActor
 public final class FeedbackFactory {
 
     private let feedbackReportDataSource: FeedbackReportDataSource
@@ -22,6 +23,7 @@ public final class FeedbackFactory {
             )
     }
 
+    @MainActor
     public func makeFeedbackReportUseCase() -> FeedbackReportUseCase {
         DefaultFeedbackReportUseCase(feedbackReportDataSource: feedbackReportDataSource)
     }

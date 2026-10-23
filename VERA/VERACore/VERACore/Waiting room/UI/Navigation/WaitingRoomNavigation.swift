@@ -5,7 +5,8 @@
 import VERACommonUI
 import VERADomain
 
-public protocol WaitingRoomDestination {
+@MainActor
+public protocol WaitingRoomDestination: Sendable {
     func presentAlertError(with message: String)
 
     func presentCameraPermissionAlert()

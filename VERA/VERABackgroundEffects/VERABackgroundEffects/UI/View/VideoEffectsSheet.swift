@@ -210,7 +210,7 @@ public struct VideoEffectsSheet: View {
                     maxSelectionCount: viewModel.remainingSlots,
                     matching: .images
                 ) {
-                    addImageTileLabel
+                    Self.addImageTileLabel
                 }
                 .onChange(of: selectedPhotos) { newItems in
                     viewModel.addBackgrounds(newItems)
@@ -220,7 +220,7 @@ public struct VideoEffectsSheet: View {
                 Button {
                     viewModel.showMaxImagesError()
                 } label: {
-                    addImageTileLabel
+                    Self.addImageTileLabel
                 }
                 .buttonStyle(.plain)
             }
@@ -241,7 +241,7 @@ public struct VideoEffectsSheet: View {
         }
     }
 
-    private var addImageTileLabel: some View {
+    private nonisolated static var addImageTileLabel: some View {
         VStack {
             Image(systemName: "plus")
                 .font(.title2)

@@ -8,6 +8,7 @@ import VERACore
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Joing room use case tests")
 struct JoinRoomUseCaseTests {
 

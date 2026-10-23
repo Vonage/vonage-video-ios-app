@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import SwiftUI
 import Testing
 import VERADomain
 
@@ -19,9 +20,9 @@ struct CaptionsViewModelTests {
     /// so tests can assert equality on the `text` property.
     private func expectedText(speaker: String, text: String) -> AttributedString {
         var bold = AttributedString(speaker + ": ")
-        bold.font = .system(.footnote, design: .default).bold()
+        bold[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default).bold()
         var regular = AttributedString(text)
-        regular.font = .system(.footnote, design: .default)
+        regular[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default)
         return bold + regular
     }
 
@@ -299,6 +300,23 @@ struct CaptionsViewModelTests {
         #expect(sut.captions.isEmpty)
     }
 
+    @Test("Background captions are mapped and displayed on the UI actor")
+    func backgroundCaptionsDelivery() async throws {
+        let caption = CaptionItem(id: "background", speakerName: "Alice", text: "Background update")
+        let sut = CaptionsViewModel(captionsObserver: BackgroundCaptionsObserver(caption: caption))
+        sut.initObservers()
+
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while sut.captions.isEmpty && ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+
+        MainActor.preconditionIsolated()
+        #expect(sut.captions.map(\.id) == [caption.id])
+        #expect(sut.captions.first?.text == expectedText(speaker: "Alice", text: "Background update"))
+        sut.cancelObservers()
+    }
+
     // MARK: - Helpers
 
     private func makeSUT() -> (CaptionsViewModel, MockCaptionsObserver) {
@@ -342,11 +360,11 @@ struct CaptionsViewModelTests {
 // MARK: - Test Doubles
 
 /// Mock observer that publishes captions for deterministic testing.
-private final class MockCaptionsObserver: CaptionsObserver, @unchecked Sendable {
-    nonisolated(unsafe) private let subject = CurrentValueSubject<[CaptionItem], Never>([])
+private final class MockCaptionsObserver: CaptionsObserver {
+    private let subject = CurrentValueRelay<[CaptionItem], Never>([])
 
     nonisolated var captionsReceived: AnyPublisher<[CaptionItem], Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func send(_ captions: [CaptionItem]) {
@@ -355,3 +373,13 @@ private final class MockCaptionsObserver: CaptionsObserver, @unchecked Sendable 
 }
 
 private struct WaitTimeoutError: Error {}
+
+private struct BackgroundCaptionsObserver: CaptionsObserver {
+    let caption: CaptionItem
+
+    var captionsReceived: AnyPublisher<[CaptionItem], Never> {
+        Just([caption])
+            .subscribe(on: DispatchQueue(label: "CaptionsViewModelTests.background"))
+            .eraseToAnyPublisher()
+    }
+}

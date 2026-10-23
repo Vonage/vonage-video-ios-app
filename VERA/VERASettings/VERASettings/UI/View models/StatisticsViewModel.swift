@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 /// View model that observes real-time network statistics for the Statistics section.
@@ -12,6 +13,7 @@ import VERADomain
 /// Subscribes to ``StatsDataSource/statsPublisher`` and formats the latest
 /// ``NetworkMediaStats`` into display-ready strings for the statistics table.
 @Observable
+@MainActor
 public final class StatisticsViewModel {
 
     // MARK: - Observable state
@@ -70,17 +72,15 @@ public final class StatisticsViewModel {
         isInitialized = true
 
         settingsRepository.preferencesPublisher
-            .map(\.senderStatsEnabled)
+            .map { @Sendable in $0.senderStatsEnabled }
             .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isEnabled in
+            .sinkOnMainActor { [weak self] isEnabled in
                 self?.isStatsEnabled = isEnabled
             }
             .store(in: &cancellables)
 
         statsDataSource.statsPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] stats in
+            .sinkOnMainActor { [weak self] stats in
                 self?.stats = stats
             }
             .store(in: &cancellables)

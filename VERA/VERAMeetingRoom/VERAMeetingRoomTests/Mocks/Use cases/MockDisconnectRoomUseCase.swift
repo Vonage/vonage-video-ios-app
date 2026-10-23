@@ -8,6 +8,7 @@ import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
+@MainActor
 public func makeMockDisconnectRoomUseCase() -> MockDisconnectRoomUseCase {
     MockDisconnectRoomUseCase()
 }
@@ -25,6 +26,7 @@ public final class MockDisconnectRoomUseCase: DisconnectRoomUseCase {
     }
 }
 
+@MainActor
 public func makeFailingMockDisconnectRoomUseCase(
     sessionRepository: SessionRepository,
     publisherRepository: PublisherRepository
