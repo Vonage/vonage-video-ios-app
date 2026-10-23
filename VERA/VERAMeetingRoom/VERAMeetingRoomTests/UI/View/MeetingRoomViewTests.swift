@@ -157,6 +157,7 @@ struct MeetingRoomViewTests {
         ).bottomBarControls
     }
 
+    @MainActor
     private func makeState(
         isMicEnabled: Bool = false,
         isCameraEnabled: Bool = false,

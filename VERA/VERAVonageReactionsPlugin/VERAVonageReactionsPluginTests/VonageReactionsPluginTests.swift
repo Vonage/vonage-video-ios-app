@@ -11,6 +11,7 @@ import VERAVonage
 
 @testable import VERAVonageReactionsPlugin
 
+@MainActor
 @Suite("VonageReactionsPlugin Tests")
 struct VonageReactionsPluginTests {
 
@@ -378,6 +379,47 @@ struct VonageReactionsPluginTests {
         _ = cancellable
     }
 
+    @Test("Old teardown preserves a replacement call's participant snapshot", .timeLimit(.minutes(1)))
+    func preservesReplacementParticipantsDuringSuspendedCleanup() async throws {
+        let repository = MockReactionsRepository()
+        let gate = ReactionWriteGate()
+        repository.beforeWrite = { await gate.block() }
+        let sut = VonageReactionsPlugin(repository: repository)
+        let oldCall = MockCallFacade()
+        sut.call = oldCall
+        try await sut.callDidStart([:])
+        sut.handleSignal(VonageSignal(type: "emoji", data: "{\"emoji\":\"👍\",\"time\":1739188800000}"))
+        await gate.waitForWrite()
+        let ending = Task { try await sut.callDidEnd() }
+        await gate.waitForCancellation()
+        let newCall = MockCallFacade()
+        newCall._participantsPublisher.send(
+            ParticipantsState(
+                localParticipant: nil,
+                participants: [makeParticipant(id: "new", connectionId: "new-connection", name: "New room")],
+                activeParticipantId: nil))
+        sut.call = newCall
+        // Process the replacement publisher's main-queue delivery before old teardown resumes.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
+        await gate.release()
+        try await ending.value
+        repository.beforeWrite = nil
+        try await sut.callDidStart([:])
+        let received = Accumulator<EmojiReaction>()
+        let subscription = repository.reactionReceived.sink { received.append($0) }
+
+        sut.handleSignal(
+            VonageSignal(
+                type: "emoji", data: "{\"emoji\":\"🎉\",\"time\":1739188800000}", connectionId: "new-connection"))
+        try await waitUntil { received.count == 1 }
+
+        #expect(received.first?.participantName == "New room")
+        _ = subscription
+        try await sut.callDidEnd()
+    }
+
     // MARK: - Plugin Identifier
 
     @Test("pluginIdentifier returns correct value")
@@ -426,7 +468,8 @@ struct VonageReactionsPluginTests {
         // All signals were processed — none dropped
         #expect(received.count == burstCount)
 
-        // Every emoji arrived (order may vary due to unstructured Task per reaction)
+        // One worker awaits each write, so a burst preserves its input order.
+        #expect(received.values.map(\.emoji) == emojis)
         let receivedEmojis = Set(received.values.map(\.emoji))
         for emoji in emojis {
             #expect(receivedEmojis.contains(emoji))
@@ -484,10 +527,8 @@ struct VonageReactionsPluginTests {
 
 /// Accumulator for collecting values emitted by a publisher.
 /// Used as a `let` binding so it can be safely captured in `@Sendable` closures.
-/// Thread-safe via `NSLock`: the upstream Combine pipeline dispatches reactions
-/// through unstructured `Task` blocks that may run concurrently on the
-/// cooperative thread pool.
-final class Accumulator<T>: @unchecked Sendable {
+/// The lock protects recorded values if the repository publishes from another executor.
+final class Accumulator<T: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var _values: [T] = []
 
@@ -501,7 +542,7 @@ final class Accumulator<T>: @unchecked Sendable {
     }
 }
 
-final class MockSignalChannel: VonageSignalChannel, @unchecked Sendable {
+final class MockSignalChannel: VonageSignalChannel {
     var emittedSignals: [OutgoingSignal] = []
 
     func emitSignal(_ signal: OutgoingSignal) throws {
@@ -509,19 +550,22 @@ final class MockSignalChannel: VonageSignalChannel, @unchecked Sendable {
     }
 }
 
-final class MockReactionsRepository: ReactionsRepository, @unchecked Sendable {
-    private let subject = PassthroughSubject<EmojiReaction, Never>()
+@MainActor
+final class MockReactionsRepository: ReactionsRepository {
+    var beforeWrite: (@MainActor () async -> Void)?
+    private nonisolated let subject = EventRelay<EmojiReaction, Never>()
 
-    var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-        subject.eraseToAnyPublisher()
+    nonisolated var reactionReceived: AnyPublisher<EmojiReaction, Never> {
+        subject.publisher
     }
 
     func addReaction(_ reaction: EmojiReaction) async {
+        await beforeWrite?()
         subject.send(reaction)
     }
 }
 
-final class MockCallFacade: CallFacade, @unchecked Sendable {
+final class MockCallFacade: CallFacade {
 
     let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =
@@ -570,4 +614,37 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func disableSubscriberExtraStats() {}
     func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
     func updateLivePublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async {}
+}
+
+
+/// Coordinates an intentionally cancellation-ignoring write without timing sleeps.
+private actor ReactionWriteGate {
+    private let started = AsyncStream<Void>.makeStream()
+    private let cancelled = AsyncStream<Void>.makeStream()
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    func block() async {
+        let cancellation = cancelled.continuation
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                self.continuation = continuation
+                started.continuation.yield(())
+            }
+        } onCancel: {
+            cancellation.yield(())
+        }
+    }
+
+    func waitForWrite() async {
+        for await _ in started.stream { return }
+    }
+
+    func waitForCancellation() async {
+        for await _ in cancelled.stream { return }
+    }
+
+    func release() {
+        continuation?.resume()
+        continuation = nil
+    }
 }

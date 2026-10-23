@@ -243,6 +243,7 @@ let package = Package(
         .target(
             name: "VERAVonageReactionsPlugin",
             dependencies: [
+                "VERACommonUI",
                 "VERAReactions",
                 "VERAVonage",
             ],

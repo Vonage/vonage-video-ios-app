@@ -3,6 +3,7 @@
 //
 
 import Combine
+import Foundation
 import OpenTok
 import VERADomain
 import VERAVonage
@@ -22,6 +23,7 @@ import VERAVonage
 /// ``NetworkMediaStats`` emission.
 ///
 /// - SeeAlso: ``VonageCall``, ``NetworkStatsProvider``
+@MainActor
 public final class NetworkStatsCollector: NSObject, StatsCollector {
 
     // MARK: - Publishers
@@ -34,14 +36,27 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     }
 
     /// Holds domain values only; SDK mapping, requests and synchronous emission stay here.
-    private var state = NetworkStatsState()
+    nonisolated private let storage: NetworkStatsStorage
+    private var subscribers: [String: OTSubscriberKit] = [:]
+
+    public override init() {
+        storage = NetworkStatsStorage()
+        super.init()
+        storage.setHandler { [weak self] snapshot, retryIDs in
+            guard let self else { return }
+            self.subject.send(snapshot)
+            for id in retryIDs {
+                if let subscriber = self.subscribers[id] { self.requestRtcStats(from: subscriber) }
+            }
+        }
+    }
 
     // MARK: - Reset
 
     /// Clears all cached stats and emits ``NetworkMediaStats/empty``.
     public func reset() {
-        state.reset()
-        subject.send(.empty)
+        subscribers.removeAll()
+        storage.reset()
     }
 
     // MARK: - Subscriber Removal
@@ -50,8 +65,8 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     ///
     /// - Parameter connectionId: The connection ID of the subscriber to remove.
     public func removeSubscriber(connectionId: String) {
-        state.removeSubscriber(connectionId: connectionId)
-        emitCurrent()
+        subscribers[connectionId] = nil
+        storage.removeSubscriber(connectionId: connectionId)
     }
 
     // MARK: - RTC Stats Requests
@@ -60,6 +75,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     ///
     /// The result arrives asynchronously via the ``publisher(_:rtcStatsReport:)`` delegate method.
     public func requestRtcStats(from publisher: OTPublisherKit) {
+        storage.registerPublisher(ObjectIdentifier(publisher))
         publisher.rtcStatsReportDelegate = self
         publisher.getRtcStatsReport()
     }
@@ -68,6 +84,9 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     ///
     /// The result arrives asynchronously via the ``subscriber(_:rtcStatsReport:)`` delegate method.
     public func requestRtcStats(from subscriber: OTSubscriberKit) {
+        let id = connectionId(for: subscriber)
+        subscribers[id] = subscriber
+        storage.registerSubscriber(ObjectIdentifier(subscriber), connectionId: id)
         subscriber.rtcStatsReportDelegate = self
         var error: OTError?
         subscriber.getRtcStatsReport(&error)
@@ -76,181 +95,187 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     // MARK: - OTPublisherKitNetworkStatsDelegate
 
     /// Handles video send statistics updates from the publisher.
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         videoNetworkStatsUpdated stats: [OTPublisherKitVideoNetworkStats]
     ) {
         guard let first = stats.first else { return }
-        state.updatePublisherName(publisher.name ?? "")
+        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
+            state.updatePublisherName(publisher.name ?? "")
 
-        let layers = mergedVideoLayers(from: stats)
-        let primaryLayer = first.videoLayers.first
+            let layers = mergedVideoLayers(from: stats)
+            let primaryLayer = first.videoLayers.first
 
-        state.updatePublisherVideo(
-            VideoSendStats(
-                packetsSent: first.videoPacketsSent,
-                packetsLost: first.videoPacketsLost,
-                bytesSent: first.videoBytesSent,
-                timestamp: first.timestamp,
-                videoCodec: primaryLayer?.codec ?? layers.first?.codec,
-                videoFrameRate: primaryLayer?.encodedFrameRate ?? layers.first?.encodedFrameRate ?? 0,
-                startTime: first.startTime,
-                videoLayers: layers
-            ))
-        emitCurrent()
+            state.updatePublisherVideo(
+                VideoSendStats(
+                    packetsSent: first.videoPacketsSent,
+                    packetsLost: first.videoPacketsLost,
+                    bytesSent: first.videoBytesSent,
+                    timestamp: first.timestamp,
+                    videoCodec: primaryLayer?.codec ?? layers.first?.codec,
+                    videoFrameRate: primaryLayer?.encodedFrameRate ?? layers.first?.encodedFrameRate ?? 0,
+                    startTime: first.startTime,
+                    videoLayers: layers
+                ))
+        }
     }
 
     /// Handles audio send statistics updates from the publisher.
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         audioNetworkStatsUpdated stats: [OTPublisherKitAudioNetworkStats]
     ) {
         guard let first = stats.first else { return }
+        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
 
-        state.updatePublisherAudio(
-            AudioSendStats(
-                packetsSent: first.audioPacketsSent,
-                packetsLost: first.audioPacketsLost,
-                bytesSent: first.audioBytesSent,
-                timestamp: first.timestamp,
-                audioCodec: state.publisherAudioCodec,
-                startTime: first.startTime
-            ))
-        emitCurrent()
+            state.updatePublisherAudio(
+                AudioSendStats(
+                    packetsSent: first.audioPacketsSent,
+                    packetsLost: first.audioPacketsLost,
+                    bytesSent: first.audioBytesSent,
+                    timestamp: first.timestamp,
+                    audioCodec: state.publisherAudioCodec,
+                    startTime: first.startTime
+                ))
+        }
     }
 
     // MARK: - Publisher Media Link Stats
 
     /// Handles publisher media link stats with transport-level metrics.
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
     ) {
         guard let first = mediaLinkStats.first else { return }
+        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
 
-        state.updatePublisherMediaLink(
-            PublisherMediaLinkStats(
-                transport: mapTransport(first.transport)
-            ))
-        emitCurrent()
+            state.updatePublisherMediaLink(
+                PublisherMediaLinkStats(
+                    transport: mapTransport(first.transport)
+                ))
+        }
     }
 
     // MARK: - OTSubscriberKitNetworkStatsDelegate
 
     /// Handles video receive statistics updates from a subscriber.
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         videoNetworkStatsUpdated stats: OTSubscriberKitVideoNetworkStats
     ) {
         let connectionId = connectionId(for: subscriber)
-        ensureSubscriber(connectionId, subscriber: subscriber)
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
+            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
 
-        let sdkCodec = (stats.codec?.isEmpty == false) ? stats.codec : nil
-        let videoCodec = sdkCodec ?? state.subscriberVideoCodec(connectionId)
+            let sdkCodec = (stats.codec?.isEmpty == false) ? stats.codec : nil
+            let videoCodec = sdkCodec ?? state.subscriberVideoCodec(connectionId)
 
-        // Re-request RTC stats until the video codec is resolved.
-        if videoCodec == nil {
-            requestRtcStats(from: subscriber)
+            // Re-request RTC stats until the video codec is resolved.
+            if videoCodec == nil {
+                retryIDs.insert(connectionId)
+            }
+
+            state.updateSubscriberVideo(
+                VideoReceiveStats(
+                    packetsReceived: UInt64(stats.videoPacketsReceived),
+                    packetsLost: UInt64(stats.videoPacketsLost),
+                    bytesReceived: UInt64(stats.videoBytesReceived),
+                    timestamp: stats.timestamp,
+                    width: stats.width,
+                    height: stats.height,
+                    decodedFrameRate: stats.decodedFrameRate,
+                    bitrate: stats.bitrate,
+                    totalBitrate: stats.totalBitrate,
+                    codec: videoCodec,
+                    pauseCount: stats.pauseCount,
+                    totalPausesDuration: stats.totalPausesDuration,
+                    freezeCount: stats.freezeCount,
+                    totalFreezesDuration: stats.totalFreezesDuration
+                ), connectionId: connectionId)
         }
-
-        state.updateSubscriberVideo(
-            VideoReceiveStats(
-                packetsReceived: UInt64(stats.videoPacketsReceived),
-                packetsLost: UInt64(stats.videoPacketsLost),
-                bytesReceived: UInt64(stats.videoBytesReceived),
-                timestamp: stats.timestamp,
-                width: stats.width,
-                height: stats.height,
-                decodedFrameRate: stats.decodedFrameRate,
-                bitrate: stats.bitrate,
-                totalBitrate: stats.totalBitrate,
-                codec: videoCodec,
-                pauseCount: stats.pauseCount,
-                totalPausesDuration: stats.totalPausesDuration,
-                freezeCount: stats.freezeCount,
-                totalFreezesDuration: stats.totalFreezesDuration
-            ), connectionId: connectionId)
-        emitCurrent()
     }
 
     /// Handles audio receive statistics updates from a subscriber.
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         audioNetworkStatsUpdated stats: OTSubscriberKitAudioNetworkStats
     ) {
         let connectionId = connectionId(for: subscriber)
-        ensureSubscriber(connectionId, subscriber: subscriber)
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
+            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
 
-        let audioCodec = state.subscriberAudioCodec(connectionId)
+            let audioCodec = state.subscriberAudioCodec(connectionId)
 
-        // Re-request RTC stats until the audio codec is resolved.
-        if audioCodec == nil {
-            requestRtcStats(from: subscriber)
+            // Re-request RTC stats until the audio codec is resolved.
+            if audioCodec == nil {
+                retryIDs.insert(connectionId)
+            }
+
+            state.updateSubscriberAudio(
+                AudioReceiveStats(
+                    packetsReceived: Int64(stats.audioPacketsReceived),
+                    packetsLost: Int64(stats.audioPacketsLost),
+                    bytesReceived: Int64(stats.audioBytesReceived),
+                    timestamp: stats.timestamp,
+                    audioCodec: audioCodec,
+                    estimatedBandwidth: nil
+                ), connectionId: connectionId)
         }
-
-        state.updateSubscriberAudio(
-            AudioReceiveStats(
-                packetsReceived: Int64(stats.audioPacketsReceived),
-                packetsLost: Int64(stats.audioPacketsLost),
-                bytesReceived: Int64(stats.audioBytesReceived),
-                timestamp: stats.timestamp,
-                audioCodec: audioCodec,
-                estimatedBandwidth: nil
-            ), connectionId: connectionId)
-        emitCurrent()
     }
 
     // MARK: - Subscriber Media Link Stats
 
     /// Handles subscriber media link stats with transport and degradation metrics.
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
     ) {
         let connectionId = connectionId(for: subscriber)
-        ensureSubscriber(connectionId, subscriber: subscriber)
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
+            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
 
-        state.updateSubscriberMediaLink(
-            SubscriberMediaLinkStats(
-                transport: mapTransport(mediaLinkStats.transport),
-                remotePublisherTransport: mapTransport(mediaLinkStats.remotePublisherTransport),
-                networkDegradationSource: mapDegradationSource(mediaLinkStats.networkDegradationSource)
-            ), connectionId: connectionId)
-        emitCurrent()
+            state.updateSubscriberMediaLink(
+                SubscriberMediaLinkStats(
+                    transport: mapTransport(mediaLinkStats.transport),
+                    remotePublisherTransport: mapTransport(mediaLinkStats.remotePublisherTransport),
+                    networkDegradationSource: mapDegradationSource(mediaLinkStats.networkDegradationSource)
+                ), connectionId: connectionId)
+        }
     }
 
     // MARK: - OTPublisherKitRtcStatsReportDelegate
 
     /// Handles RTC stats report from the publisher to extract audio codec.
-    public func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {
-        for stat in stats {
-            extractAudioCodec(from: stat.jsonArrayOfReports)
+    nonisolated public func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {
+        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
+            for stat in stats {
+                if let codecs = NetworkStatsCodecReport.parse(stat.jsonArrayOfReports, direction: .outbound) {
+                    state.updatePublisherCodecs(codecs)
+                }
+            }
         }
-        emitCurrent()
     }
 
     // MARK: - OTSubscriberKitRtcStatsReportDelegate
 
     /// Handles RTC stats report from a subscriber to extract audio and video codecs.
-    public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {
-        let connId = connectionId(for: subscriber)
-        extractSubscriberCodecs(from: jsonArrayString, connectionId: connId)
-        emitCurrent()
+    nonisolated public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {
+        let connectionId = connectionId(for: subscriber)
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
+            if let codecs = NetworkStatsCodecReport.parse(jsonArrayString, direction: .inbound) {
+                state.updateSubscriberCodecs(codecs, connectionId: connectionId)
+            }
+        }
     }
 
     // MARK: - Private Helpers
 
-    private func connectionId(for subscriber: OTSubscriberKit) -> String {
+    nonisolated private func connectionId(for subscriber: OTSubscriberKit) -> String {
         subscriber.stream?.connection.connectionId ?? ""
     }
 
-    private func ensureSubscriber(_ connectionId: String, subscriber: OTSubscriberKit) {
-        if !state.hasSubscriber(connectionId) {
-            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
-        }
-    }
-
-    private func mapTransport(_ transport: OTTransportStats) -> TransportStats {
+    nonisolated private func mapTransport(_ transport: OTTransportStats) -> TransportStats {
         TransportStats(
             connectionEstimatedBandwidth: transport.connectionEstimatedBandwidth,
             networkCondition: mapNetworkCondition(transport.networkCondition),
@@ -258,7 +283,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         )
     }
 
-    private func mapNetworkCondition(_ condition: OTNetworkCondition) -> NetworkCondition {
+    nonisolated private func mapNetworkCondition(_ condition: OTNetworkCondition) -> NetworkCondition {
         switch condition {
         case .critical: .critical
         case .warning: .warning
@@ -269,7 +294,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         }
     }
 
-    private func mapConditionReason(_ reason: OTNetworkReason) -> NetworkConditionReason {
+    nonisolated private func mapConditionReason(_ reason: OTNetworkReason) -> NetworkConditionReason {
         switch reason {
         case .bandwidth: .bandwidth
         case .packetLoss: .packetLoss
@@ -278,7 +303,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         }
     }
 
-    private func mapDegradationSource(_ source: OTNetworkDegradationSource) -> NetworkDegradationSource {
+    nonisolated private func mapDegradationSource(_ source: OTNetworkDegradationSource) -> NetworkDegradationSource {
         switch source {
         case .local: .local
         case .remote: .remote
@@ -287,7 +312,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         }
     }
 
-    private func mapQualityLimitation(
+    nonisolated private func mapQualityLimitation(
         _ reason: OTPublisherVideoEventReason
     ) -> QualityLimitationReason {
         switch reason {
@@ -305,7 +330,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         let scalabilityMode: String
     }
 
-    private func mergedVideoLayers(
+    nonisolated private func mergedVideoLayers(
         from stats: [OTPublisherKitVideoNetworkStats]
     ) -> [VideoLayerStats] {
         var layersByKey: [VideoLayerKey: (timestamp: Double, layer: VideoLayerStats)] = [:]
@@ -346,24 +371,4 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         }
     }
 
-    /// Extracts audio and video codecs from a subscriber's RTC stats JSON report.
-    ///
-    /// Uses `inbound-rtp` entries to find both codecs for a specific subscriber.
-    private func extractSubscriberCodecs(from jsonArrayString: String, connectionId: String) {
-        guard let codecs = NetworkStatsCodecReport.parse(jsonArrayString, direction: .inbound) else { return }
-        state.updateSubscriberCodecs(codecs, connectionId: connectionId)
-    }
-
-    /// Extracts publisher audio codecs, retaining the prior value when no matching codec is present.
-    private func extractAudioCodec(from jsonArrayString: String) {
-        guard let codecs = NetworkStatsCodecReport.parse(jsonArrayString, direction: .outbound) else { return }
-        state.updatePublisherCodecs(codecs)
-    }
-
-    // MARK: - Emit
-
-    /// Assembles the latest cached stats into a ``NetworkMediaStats`` and emits it.
-    private func emitCurrent() {
-        subject.send(state.snapshot)
-    }
 }
