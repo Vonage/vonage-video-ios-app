@@ -195,6 +195,54 @@ struct VonageCallKitPluginTests {
             ])
     }
 
+    @Test func callDidStartWhenCallKitUnsupportedShouldNotStartCall() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController, isCallKitSupported: false)
+
+        try await sut.callDidStart([
+            VonageCallParams.roomName.rawValue: "a-room-name",
+            VonageCallParams.callID.rawValue: UUID().uuidString,
+        ])
+
+        #expect(mockController.recordedActions.isEmpty)
+        #expect(sut.currentCallID == nil)
+    }
+
+    @Test func callDidStartWhenCallKitUnsupportedShouldStillRejectInvalidUUID() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController, isCallKitSupported: false)
+
+        await #expect(throws: VonageCallKitPlugin.Error.invalidCallID) {
+            try await sut.callDidStart([
+                VonageCallParams.roomName.rawValue: "a-room-name",
+                VonageCallParams.callID.rawValue: "invalid-uuid",
+            ])
+        }
+
+        #expect(mockController.recordedActions.isEmpty)
+    }
+
+    @Test func callDidEndWhenCallKitUnsupportedShouldNotEndCall() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT(callController: mockController, isCallKitSupported: false)
+
+        try await sut.callDidStart([
+            VonageCallParams.roomName.rawValue: "a-room-name",
+            VonageCallParams.callID.rawValue: UUID().uuidString,
+        ])
+        try await sut.callDidEnd()
+
+        #expect(mockController.recordedActions.isEmpty)
+    }
+
+    @Test func callKitIsUnsupportedByDefaultOnlyOnSimulator() {
+        #if targetEnvironment(simulator)
+            #expect(!VonageCallKitPlugin.isCallKitSupportedByDefault)
+        #else
+            #expect(VonageCallKitPlugin.isCallKitSupportedByDefault)
+        #endif
+    }
+
     @Test func callDidEndWithoutCurrentCallIDShouldNotCallEndOnCallManager() async throws {
         let mockController = MockCallController()
         let sut = makeSUT(callController: mockController)
@@ -306,8 +354,11 @@ struct VonageCallKitPluginTests {
 
     // MARK: SUT
 
-    func makeSUT(callController: MockCallController? = nil) -> VonageCallKitPlugin {
-        let plugin = VonageCallKitPlugin()
+    func makeSUT(
+        callController: MockCallController? = nil,
+        isCallKitSupported: Bool = true
+    ) -> VonageCallKitPlugin {
+        let plugin = VonageCallKitPlugin(isCallKitSupported: isCallKitSupported)
         if let callController = callController {
             plugin.callManager = VERACallManager(callController: callController)
         }
