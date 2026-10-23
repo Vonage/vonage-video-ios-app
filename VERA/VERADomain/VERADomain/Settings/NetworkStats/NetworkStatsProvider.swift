@@ -14,7 +14,8 @@ import Foundation
 /// and ``disableNetworkStats()``.
 ///
 /// - SeeAlso: ``NetworkMediaStats``, ``CallFacade``
-public protocol NetworkStatsProvider: AnyObject {
+@MainActor
+public protocol NetworkStatsProvider: AnyObject, Sendable {
     /// A publisher that emits aggregated network statistics, never fails.
     ///
     /// Emits ``NetworkMediaStats/empty`` when stats collection is disabled or

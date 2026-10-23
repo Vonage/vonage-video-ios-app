@@ -4,7 +4,8 @@
 
 import Foundation
 
-public protocol SessionRepository {
+@MainActor
+public protocol SessionRepository: Sendable {
     var currentCall: (any CallFacade)? { get }
 
     func createSession(for roomName: RoomName) async throws -> any CallFacade

@@ -43,7 +43,11 @@ public func defaultProjectOptions() -> Project.Options {
 }
 
 public func baseBuildSettings() -> [String: SettingValue] {
-    [
+    let languageMode = Environment.swiftLanguageMode.getString(default: "6.0")
+    precondition(["5.0", "6.0"].contains(languageMode), "TUIST_SWIFT_LANGUAGE_MODE must be 5.0 or 6.0")
+    return [
+        "SWIFT_VERSION": .string(languageMode),
+        "SWIFT_STRICT_CONCURRENCY": "complete",
         "COMPILATION_CACHE_ENABLE_CACHING": "YES",
         "SWIFT_ENABLE_COMPILE_CACHE": "YES",
         "CLANG_ENABLE_COMPILE_CACHE": "YES",

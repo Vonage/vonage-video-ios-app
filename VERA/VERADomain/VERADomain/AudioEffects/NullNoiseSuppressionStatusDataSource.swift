@@ -6,8 +6,9 @@ import Combine
 
 public final class NullNoiseSuppressionStatusDataSource: NoiseSuppressionStatusDataSource {
 
-    public var noiseSuppressionState: AnyPublisher<NoiseSuppressionState, Never> = CurrentValueSubject(.disabled)
-        .eraseToAnyPublisher()
+    public var noiseSuppressionState: AnyPublisher<NoiseSuppressionState, Never> {
+        Just(.disabled).eraseToAnyPublisher()
+    }
 
     public init() {}
 

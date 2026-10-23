@@ -8,6 +8,7 @@ import VERADomain
 @testable import VERAVonageSettingsPlugin
 
 /// Exercises the actual collector subject without constructing publisher/subscriber SDK objects.
+@MainActor
 @Suite("Network statistics synchronous delivery")
 struct NetworkStatsEmissionTests {
     @Test("Initial replay, repeated resets and unknown removal deliver before returning")

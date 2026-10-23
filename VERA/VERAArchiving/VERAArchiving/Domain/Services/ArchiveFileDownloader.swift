@@ -5,7 +5,7 @@
 import Foundation
 
 /// Downloads a remote archive file, such as a transcript zip, to local storage.
-public protocol ArchiveFileDownloader {
+public protocol ArchiveFileDownloader: Sendable {
     /// Downloads the file at `url`.
     ///
     /// - Parameters:

@@ -14,7 +14,8 @@ public struct URLSessionArchiveFileDownloader: ArchiveFileDownloader {
     }
 
     private let session: URLSession
-    private let fileManager: FileManager
+    /// FileManager's methods are documented as safe to call from multiple threads.
+    nonisolated(unsafe) private let fileManager: FileManager
 
     public init(session: URLSession = .shared, fileManager: FileManager = .default) {
         self.session = session

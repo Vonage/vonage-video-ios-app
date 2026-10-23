@@ -5,6 +5,7 @@
 import Foundation
 import VERADomain
 
+@MainActor
 public protocol DownloadTranscriptionUseCase {
     func callAsFunction(_ archive: Archive) async throws -> ArchiveTranscript
 }

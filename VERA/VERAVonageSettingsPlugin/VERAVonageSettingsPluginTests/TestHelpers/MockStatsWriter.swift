@@ -5,7 +5,8 @@
 import VERADomain
 import VERASettings
 
-final class MockStatsWriter: StatsWriter, @unchecked Sendable {
+@MainActor
+final class MockStatsWriter: StatsWriter {
 
     var updateStatsCallCount = 0
     var clearStatsCallCount = 0

@@ -13,6 +13,7 @@ import VERADomain
 /// session settings that optimize multi-participant rooms (single peer connection)
 /// and support seamless migration. It then wraps the underlying `OTSession` in
 /// an `VonageSession` which conforms to `Session`.
+@MainActor
 public final class VonageSessionFactory: SessionFactory {
 
     /// Errors that can occur during Vonage session creation.

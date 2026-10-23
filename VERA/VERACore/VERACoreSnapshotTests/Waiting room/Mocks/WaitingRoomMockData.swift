@@ -7,6 +7,7 @@ import VERACore
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 func makeWaitingRoomState(
     roomName: String = "dont-panic",
     isMicrophoneEnabled: Bool = true,

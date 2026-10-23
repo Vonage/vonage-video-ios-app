@@ -18,6 +18,7 @@ import VERAReactions
 ///     try? useCase(emoji.emoji)
 /// }
 /// ```
+@MainActor
 public final class VonageSendReactionUseCase: SendReactionUseCase {
 
     private let plugin: VonageReactionsPlugin

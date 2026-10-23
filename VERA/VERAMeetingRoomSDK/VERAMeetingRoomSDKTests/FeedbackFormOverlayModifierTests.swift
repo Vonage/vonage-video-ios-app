@@ -90,21 +90,22 @@ private struct OverlayTestHost: View {
                     )
                 )
             )
-            .onAppear { box.value = showFeedbackForm }
+            .onAppear { box?.value = showFeedbackForm }
     }
 }
 
+@MainActor
 private final class Box<T> {
     var value: T
     init(_ value: T) { self.value = value }
 }
 
 private struct OverlayTestBoxKey: EnvironmentKey {
-    static let defaultValue: Box<Bool> = Box(false)
+    static let defaultValue: Box<Bool>? = nil
 }
 
 extension EnvironmentValues {
-    fileprivate var overlayTestBox: Box<Bool> {
+    fileprivate var overlayTestBox: Box<Bool>? {
         get { self[OverlayTestBoxKey.self] }
         set { self[OverlayTestBoxKey.self] = newValue }
     }

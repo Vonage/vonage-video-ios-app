@@ -20,6 +20,7 @@ import VERAVonage
 ///
 /// - Important: Set `channel` before sending messages; otherwise throws ``VonageChatPlugin/Error/missingChannel``.
 /// - SeeAlso: ``VonagePlugin``, ``VonageSignalHandler``, ``VonageSignalEmitter``, ``VonageSignal``, ``OutgoingSignal``
+@MainActor
 public final class VonageChatPlugin: VonagePlugin, VonageSignalHandler, VonageSignalEmitter {
 
     private static let logger = Logger(subsystem: "com.vonage.vera", category: "Chat")
@@ -48,7 +49,11 @@ public final class VonageChatPlugin: VonagePlugin, VonageSignalHandler, VonageSi
     /// Creates a chat plugin.
     ///
     /// - Parameter repository: A messages repository. Defaults to `DefaultChatMessagesRepository()`.
-    public init(repository: ChatMessagesRepository = DefaultChatMessagesRepository()) {
+    public convenience init() {
+        self.init(repository: DefaultChatMessagesRepository())
+    }
+
+    public init(repository: ChatMessagesRepository) {
         self.repository = repository
     }
 

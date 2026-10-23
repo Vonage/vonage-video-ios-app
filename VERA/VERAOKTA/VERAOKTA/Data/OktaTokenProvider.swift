@@ -6,7 +6,7 @@ import Foundation
 import VERADomain
 import os
 
-public final class OktaTokenProvider: TokenProvider, @unchecked Sendable {
+public final class OktaTokenProvider: TokenProvider {
 
     private let authManager: any OKTAAuthenticating
 
