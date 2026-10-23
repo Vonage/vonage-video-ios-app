@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERACommonUI
 import VERADomain
 import VERAReactions
 import VERAVonage
@@ -28,6 +29,7 @@ import VERAVonage
 /// - Important: Set `channel` before sending reactions; otherwise throws
 ///   ``VonageReactionsPlugin/Error/missingChannel``.
 /// - SeeAlso: ``VonagePlugin``, ``VonageSignalHandler``, ``VonageSignalEmitter``, ``VonagePluginCallHolder``
+@MainActor
 public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, VonageSignalEmitter, VonagePluginCallHolder
 {
 
@@ -74,12 +76,17 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     /// Subscription for participants publisher.
     private var participantsCancellable: AnyCancellable?
+    private var participantsObservationGeneration = UUID()
 
     /// Incoming signal pipeline serialized onto the main queue.
     private let signalSubject = PassthroughSubject<VonageSignal, Never>()
 
     /// Subscription for the signal processing pipeline.
     private var signalCancellable: AnyCancellable?
+    private var reactionsTask: Task<Void, Never>?
+    private var reactionsContinuation: AsyncStream<EmojiReaction>.Continuation?
+    private var lifecycleTask: Task<Void, Never>?
+    private enum LifecycleOperation { case start, end }
 
     /// Repository used to publish and observe reactions.
     public let repository: ReactionsRepository
@@ -92,8 +99,17 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     /// Creates a reactions plugin.
     ///
     /// - Parameter repository: A reactions repository. Defaults to `DefaultReactionsRepository()`.
-    public init(repository: ReactionsRepository = DefaultReactionsRepository()) {
+    public convenience init() {
+        self.init(repository: DefaultReactionsRepository())
+    }
+
+    public init(repository: ReactionsRepository) {
         self.repository = repository
+    }
+
+    deinit {
+        reactionsTask?.cancel()
+        lifecycleTask?.cancel()
     }
 
     // MARK: - VonagePluginCallLifeCycle
@@ -102,15 +118,14 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
     ///
     /// - Parameter userInfo: Metadata including call context.
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        // No per-call state needed; participant names resolved via CallFacade.
-        observeSignals()
+        await enqueueLifecycle(.start)
     }
 
     /// Lifecycle callback when the call ends.
     ///
     /// Cancels signal observation and clears local state.
     public func callDidEnd() async throws {
-        cleanUp()
+        await enqueueLifecycle(.end)
     }
 
     // MARK: - VonageSignalHandler
@@ -154,42 +169,76 @@ public final class VonageReactionsPlugin: VonagePlugin, VonageSignalHandler, Von
 
     // MARK: - Private
 
-    private func cleanUp() {
+    private func enqueueLifecycle(_ operation: LifecycleOperation) async {
+        let previous = lifecycleTask
+        let task = Task { @MainActor [weak self] in
+            await previous?.value
+            guard !Task.isCancelled, let self else { return }
+            switch operation {
+            case .start:
+                await self.stopSignalForwarding()
+                self.observeSignals()
+            case .end:
+                await self.cleanUp()
+            }
+        }
+        lifecycleTask = task
+        await task.value
+    }
+
+    private func cleanUp() async {
+        let retiredObservation = participantsObservationGeneration
         participantsCancellable?.cancel()
         participantsCancellable = nil
-        signalCancellable?.cancel()
-        signalCancellable = nil
+        await stopSignalForwarding()
+        // A replacement call may install its observation while the old writer is finishing.
+        guard participantsObservationGeneration == retiredObservation else { return }
         participants = []
         localConnectionId = nil
     }
 
-    private func observeSignals() {
+    private func stopSignalForwarding() async {
         signalCancellable?.cancel()
-        signalCancellable =
-            signalSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] signal in
-                guard let self else { return }
-                do {
-                    let reaction = try self.mapSignalToReaction(signal)
-                    Task {
-                        await self.repository.addReaction(reaction)
-                    }
-                } catch {
-                    print("[VonageReactionsPlugin] Failed to parse reaction: \(error.localizedDescription)")
-                }
+        signalCancellable = nil
+        reactionsContinuation?.finish()
+        reactionsContinuation = nil
+        let pending = reactionsTask
+        reactionsTask = nil
+        pending?.cancel()
+        await pending?.value
+    }
+
+    private func observeSignals() {
+        let reactions = AsyncStream<EmojiReaction>.makeStream()
+        reactionsContinuation = reactions.continuation
+        let repository = repository
+        reactionsTask = Task {
+            for await reaction in reactions.stream {
+                guard !Task.isCancelled else { return }
+                await repository.addReaction(reaction)
             }
+        }
+        signalCancellable = signalSubject.sinkOnMainActor { [weak self] signal in
+            guard let self else { return }
+            do {
+                self.reactionsContinuation?.yield(try self.mapSignalToReaction(signal))
+            } catch {
+                print("[VonageReactionsPlugin] Failed to parse reaction: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func observeParticipants() {
         participantsCancellable?.cancel()
+        participantsObservationGeneration = UUID()
+        participants = []
+        localConnectionId = nil
         participantsCancellable = call?.participantsPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
+            .sinkOnMainActor { [weak self] state in
                 var allParticipants = state.participants
+                self?.localConnectionId = state.localParticipant?.connectionId
                 if let local = state.localParticipant {
                     allParticipants.append(local)
-                    self?.localConnectionId = local.connectionId
                 }
                 self?.participants = allParticipants
             }

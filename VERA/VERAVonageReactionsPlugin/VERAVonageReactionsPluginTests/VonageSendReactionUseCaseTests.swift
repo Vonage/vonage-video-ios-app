@@ -8,6 +8,7 @@ import VERAVonage
 
 @testable import VERAVonageReactionsPlugin
 
+@MainActor
 @Suite("VonageSendReactionUseCase Tests")
 struct VonageSendReactionUseCaseTests {
 

@@ -5,7 +5,8 @@
 import VERACommonUI
 import VERADomain
 
-public protocol MeetingRoomDestination {
+@MainActor
+public protocol MeetingRoomDestination: Sendable {
     func onNext()
 
     func onBack()
@@ -20,7 +21,7 @@ public protocol MeetingRoomDestination {
         message: String,
         confirmTitle: String,
         cancelTitle: String,
-        onConfirm: @escaping () -> Void
+        onConfirm: @escaping @MainActor () -> Void
     )
 
     func goToSettings()
@@ -75,7 +76,7 @@ public struct MeetingRoomNavigation: MeetingRoomDestination {
         message: String,
         confirmTitle: String,
         cancelTitle: String,
-        onConfirm: @escaping () -> Void
+        onConfirm: @escaping @MainActor () -> Void
     ) {
         let alert = AlertItem(
             title: message,

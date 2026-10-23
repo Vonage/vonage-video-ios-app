@@ -8,6 +8,7 @@ import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
+@MainActor
 @Suite("Disconnect room use case tests")
 struct DisconnectRoomUseCaseTests {
 
