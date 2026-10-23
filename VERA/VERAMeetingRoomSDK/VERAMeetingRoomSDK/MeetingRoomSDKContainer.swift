@@ -347,8 +347,10 @@ final class MeetingRoomSDKContainer {
         settingsRepository: settingsRepository,
         statsWriter: statsRepository)
 
+    @MainActor
     lazy var defaultSpeakerTestService = DefaultSpeakerTestService()
 
+    @MainActor
     lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(
         speakerTestService: defaultSpeakerTestService
     )
