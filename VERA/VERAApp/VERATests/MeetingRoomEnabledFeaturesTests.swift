@@ -16,6 +16,7 @@ import VERAConfiguration
 /// - Note: These tests run on the iOS destination, so `pictureInPicture` (gated by
 ///   `#if !os(macOS)`) and `screenShare` (gated by `!isiOSAppOnMac`) are expected to be
 ///   enabled when their flags are `true`.
+@MainActor
 @Suite("Meeting room enabled features")
 struct MeetingRoomEnabledFeaturesTests {
 

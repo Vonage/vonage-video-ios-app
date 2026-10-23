@@ -31,6 +31,7 @@ import VERADomain
 /// ```
 ///
 /// - SeeAlso: ``CaptionsButtonContainer``, ``CaptionsButton``, ``CaptionsFactory``
+@MainActor
 @Observable
 public final class CaptionsButtonViewModel {
     @ObservationIgnored

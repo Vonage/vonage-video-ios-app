@@ -82,11 +82,11 @@ struct ChatPanelViewModelTests {
     // MARK: SUT
 
     func makeSUT(
-        repository: ChatMessagesRepository = SpyChatMessagesRepository(),
+        repository: ChatMessagesRepository? = nil,
         sendChatMessageUseCase: SendChatMessageUseCase
     ) -> ChatPanelViewModel {
         .init(
-            chatMessagesRepository: repository,
+            chatMessagesRepository: repository ?? SpyChatMessagesRepository(),
             sendChatMessageUseCase: sendChatMessageUseCase)
     }
 

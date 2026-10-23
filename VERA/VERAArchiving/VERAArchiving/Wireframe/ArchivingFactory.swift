@@ -34,6 +34,7 @@ public final class ArchivingFactory {
     /// - Parameters:
     ///   - kind: Whether the control drives the recording or the post-call transcription.
     ///   - showAlert: Presents the start/stop confirmation dialogs.
+    @MainActor
     public func makeArchivingButton(
         kind: ArchiveKind = .recording,
         showAlert: @escaping (AlertItem) -> Void
@@ -50,6 +51,7 @@ public final class ArchivingFactory {
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
 
+    @MainActor
     public func makeArchivingButton(
         viewModel: ArchiveButtonViewModel
     ) -> some View {

@@ -6,9 +6,11 @@ import Combine
 import Foundation
 
 #if SETTINGS_ENABLED
+    import VERACommonUI
     import VERADomain
     import VERASettings
 
+    @MainActor
     final class PublisherAdvancedSettingsAdapter {
 
         var onChange: (() -> Void)?
@@ -20,8 +22,7 @@ import Foundation
         func setup(with preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never>) {
             cancellable =
                 preferencesPublisher
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] preferences in
+                .sinkOnMainActor { [weak self] preferences in
                     self?.apply(preferences)
                 }
         }

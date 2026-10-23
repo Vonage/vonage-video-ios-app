@@ -7,19 +7,19 @@ import VERADomain
 
 @testable import VERASettings
 
-final class MockStatsDataSource: StatsDataSource {
+actor MockStatsDataSource: StatsDataSource {
 
-    private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
+    private nonisolated let subject: CurrentValueRelay<NetworkMediaStats, Never>
 
-    nonisolated(unsafe) private(set) var startCallCount = 0
-    nonisolated(unsafe) private(set) var stopCallCount = 0
+    private(set) var startCallCount = 0
+    private(set) var stopCallCount = 0
 
     init(initialStats: NetworkMediaStats = .empty) {
-        self.subject = CurrentValueSubject(initialStats)
+        self.subject = CurrentValueRelay(initialStats)
     }
 
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func start() {

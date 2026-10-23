@@ -8,6 +8,7 @@ import VERACore
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Joing room use case tests")
 struct JoinRoomUseCaseTests {
 
@@ -65,12 +66,13 @@ struct JoinRoomUseCaseTests {
 
     private func makeSUT(
         userRepository: UserRepository = makeMockUserRepository(),
-        cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository? = nil,
         advancedSettingsUseCase: PublisherAdvancedSettingsUseCase = makePublisherAdvancedSettingsUseCase(),
     ) -> JoinRoomUseCase {
         JoinRoomUseCase(
             userRepository: userRepository,
-            cameraPreviewProviderRepository: cameraPreviewProviderRepository,
+            cameraPreviewProviderRepository: cameraPreviewProviderRepository
+                ?? makeMockCameraPreviewProviderRepository(),
             advancedSettingsUseCase: advancedSettingsUseCase)
     }
 }
