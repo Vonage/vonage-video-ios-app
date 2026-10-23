@@ -39,12 +39,12 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        try await sut.connect()
-
-        let event = await sut.eventsPublisher.values.first { event in
-            if case .error = event { return true }
-            return false
+        var event: SessionEvent?
+        let observation = sut.eventsPublisher.sink { value in
+            if case .error = value { event = value }
         }
+        defer { observation.cancel() }
+        try await sut.connect()
 
         switch event {
         case .error(let error):
@@ -60,12 +60,12 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        try? await sut.disconnect()
-
-        let event = await sut.eventsPublisher.values.first { event in
-            if case .error = event { return true }
-            return false
+        var event: SessionEvent?
+        let observation = sut.eventsPublisher.sink { value in
+            if case .error = value { event = value }
         }
+        defer { observation.cancel() }
+        try? await sut.disconnect()
 
         switch event {
         case .error: break
@@ -88,12 +88,14 @@ struct VonageCallTests {
         )
         sut.setup()
 
+        var states: [CallState] = []
+        let observation = sut.callState.sink { states.append($0) }
+        defer { observation.cancel() }
         await #expect(throws: MakeSessionError.self) {
             try await sut.connect()
         }
 
-        let state = await sut.callState.values.first { $0 == .disconnected }
-        #expect(state == .disconnected)
+        #expect(states == [.idle, .connecting, .disconnected])
     }
 
     // MARK: - Participant moderation tests
@@ -172,28 +174,33 @@ struct VonageCallTests {
         }
     }
 
-    @Test
+    @Test("Moderator mute publishes local state and its event", .timeLimit(.minutes(1)))
     func publisherMuteForcedUpdatesLocalStateAndPublishesEvent() async throws {
         let publisherSpy = VonagePublisherSpy()
         let sut = makeSUT(publisher: publisherSpy)
         sut.setup()
         try await sut.connect()
 
-        publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
-
-        let state = await sut.statePublisher.values.first { !$0.isPublishingAudio }
-        let event = await sut.eventsPublisher.values.first { event in
-            if case .muteForced = event { return true }
-            return false
+        var state: SessionState?
+        var receivedMuteForced = false
+        let muteForcedPublished = ValueWorkerTestGate()
+        let stateObservation = sut.statePublisher.sink { state = $0 }
+        let eventObservation = sut.eventsPublisher.sink { event in
+            if case .muteForced = event {
+                receivedMuteForced = true
+                Task { await muteForcedPublished.open() }
+            }
         }
+        defer {
+            stateObservation.cancel()
+            eventObservation.cancel()
+        }
+        publisherSpy.muteForced(publisherSpy.exposedOTPublisher)
+        await muteForcedPublished.wait()
 
         #expect(publisherSpy.publishAudio == false)
         #expect(state?.isPublishingAudio == false)
-        if case .muteForced = event {
-            #expect(true)
-        } else {
-            Issue.record("Expected muteForced event")
-        }
+        #expect(receivedMuteForced)
     }
 
     // MARK: - Network Stats Tests
@@ -518,6 +525,44 @@ struct VonageCallTests {
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
     }
 
+    @Test("A plugin failure is reported while every plugin still starts, ends, and releases its call")
+    func pluginFailuresDoNotInterruptOtherPluginLifecycles() async throws {
+        let session = VonageSessionSpy()
+        let failing = LifecycleFailurePlugin(shouldFail: true)
+        let healthy = LifecycleFailurePlugin(shouldFail: false)
+        let sut = makeSUT(session: session)
+        let startFailureReported = ValueWorkerTestGate()
+        var errors: [LifecycleFailurePlugin.Failure] = []
+        var state: CallState = .idle
+        let eventObservation = sut.eventsPublisher.sink { event in
+            guard case .error(let error) = event,
+                let failure = error as? LifecycleFailurePlugin.Failure
+            else { return }
+            errors.append(failure)
+            if failure == .start { Task { await startFailureReported.open() } }
+        }
+        let stateObservation = sut.callState.sink { state = $0 }
+        sut.assignPlugins([failing, healthy])
+        sut.setup()
+        try await sut.connect()
+        await startFailureReported.wait()
+        #expect(state == .connected)
+        #expect(failing.call === sut)
+        #expect(failing.channel === session)
+
+        try await sut.disconnect()
+
+        #expect(errors == [.start, .end])
+        #expect(failing.actions == ["start", "end"])
+        #expect(healthy.actions == ["start", "end"])
+        #expect(failing.call == nil && healthy.call == nil)
+        #expect(failing.channel == nil && healthy.channel == nil)
+        #expect(sut.plugins.isEmpty)
+        #expect(state == .disconnected)
+        #expect(session.disconnectCalled)
+        withExtendedLifetime((eventObservation, stateObservation)) {}
+    }
+
     // MARK: - Archiving
 
     @Test
@@ -809,4 +854,91 @@ private final class CallObserverLifetimeTestsSession: VonageSession {
     override func disconnect() throws { disconnectCount += 1 }
     override func publish(publisher: VonagePublisher) throws {}
     override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+
+@MainActor
+@Suite("Plugin initialization and disconnect ordering", .timeLimit(.minutes(1)))
+struct CallPluginLifecycleOrderingTests {
+    @Test("Disconnect joins cancellation-ignoring initialization and ignores late connect callbacks")
+    func disconnectFinishesInitializationBeforeEndingPlugin() async throws {
+        let session = CallObserverLifetimeTestsSession()
+        let plugin = SuspendedStartPlugin()
+        let publisher = VonagePublisherSpy()
+        let collector = MockStatsCollector()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: publisher, publisherRepository: MockPublisherRepository(),
+            statsCollector: collector)
+        var states: [CallState] = []
+        let observation = call.callState.sink { states.append($0) }
+        call.assignPlugins([plugin])
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        await plugin.startEntered.wait()
+        var didEnd = false
+        let end = Task {
+            try await call.disconnect()
+            didEnd = true
+        }
+        await plugin.startCancelled.wait()
+        #expect(!didEnd)
+        #expect(plugin.actions == ["start:begin"])
+        session.onSessionDidConnect?()
+        #expect(states.last == .disconnecting)
+        call.enableNetworkStats()
+        call.enableSubscriberExtraStats()
+        #expect(collector.requestRtcStatsFromPublisherCallCount == 0)
+        #expect(publisher.exposedOTPublisher.networkStatsDelegate == nil)
+        await plugin.releaseStart.open()
+        try await end.value
+        #expect(plugin.actions == ["start:begin", "start:finished", "end"])
+        #expect(states.last == .disconnected)
+        withExtendedLifetime(observation) {}
+    }
+}
+
+@MainActor
+private final class SuspendedStartPlugin: VonagePlugin {
+    let startEntered = ValueWorkerTestGate()
+    let startCancelled = ValueWorkerTestGate()
+    let releaseStart = ValueWorkerTestGate()
+    var actions: [String] = []
+    var pluginIdentifier: String { "SuspendedStartPlugin" }
+
+    func callDidStart(_ userInfo: [String: Any]) async throws {
+        actions.append("start:begin")
+        await startEntered.open()
+        await withTaskCancellationHandler {
+            await releaseStart.wait()
+        } onCancel: {
+            Task { await self.startCancelled.open() }
+        }
+        actions.append("start:finished")
+    }
+
+    func callDidEnd() async throws { actions.append("end") }
+}
+
+@MainActor
+private final class LifecycleFailurePlugin: VonagePlugin, VonagePluginCallHolder, VonageSignalEmitter {
+    enum Failure: Error, Equatable { case start, end }
+    var call: CallFacade?
+    var channel: VonageSignalChannel?
+    var actions: [String] = []
+    private let shouldFail: Bool
+    var pluginIdentifier: String { shouldFail ? "failing" : "healthy" }
+
+    init(shouldFail: Bool) { self.shouldFail = shouldFail }
+
+    func callDidStart(_ userInfo: [String: Any]) async throws {
+        actions.append("start")
+        if shouldFail { throw Failure.start }
+    }
+
+    func callDidEnd() async throws {
+        actions.append("end")
+        if shouldFail { throw Failure.end }
+    }
 }

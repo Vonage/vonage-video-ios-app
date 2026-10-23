@@ -23,7 +23,8 @@ import VERADomain
 ///
 /// Internally, it delegates to `OTSession` and forwards Vonage delegate events to your
 /// closures so you can compose higher-level behaviors elsewhere (e.g., in your call façade).
-open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
+@MainActor
+open class VonageSession: NSObject, VonageSignalChannel {
     /// Test seam for exercising force-mute success and failure without a live SDK session.
     var forceMuteStreamOperation: ((OTStream) -> OTError?)?
 
@@ -380,3 +381,12 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         session.delegate = nil
     }
 }
+
+// The wrapper configures OTSession.apiQueue = .main before delegate registration. This
+// Objective-C witness boundary uses runtime actor checking on Swift 6; it does not transfer
+// borrowed SDK streams/connections to another executor or rely on the SDK's default queue.
+#if compiler(>=6.0)
+    extension VonageSession: @preconcurrency OTSessionDelegate {}
+#else
+    extension VonageSession: OTSessionDelegate {}
+#endif

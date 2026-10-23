@@ -16,8 +16,25 @@ import VERAConfiguration
 /// - Note: These tests run on the iOS destination, so `pictureInPicture` (gated by
 ///   `#if !os(macOS)`) and `screenShare` (gated by `!isiOSAppOnMac`) are expected to be
 ///   enabled when their flags are `true`.
+@MainActor
 @Suite("Meeting room enabled features")
 struct MeetingRoomEnabledFeaturesTests {
+
+    @Test("Mocked E2E calls omit native CallKit and preserve configured UI features")
+    func e2eCallsDoNotRegisterWithCallKit() {
+        let sut = makeContainer(audioDiagnostics: true, captions: true, chat: true)
+        #expect(
+            sut.meetingRoomFeatures(isE2EEnabled: true)
+                == sut.meetingRoomEnabledFeatures.subtracting([.callKit]))
+        #expect(sut.meetingRoomFeatures(isE2EEnabled: true).contains(.audioDiagnostics))
+    }
+
+    @Test("Normal calls retain native CallKit and all configured features")
+    func normalCallsKeepCallKit() {
+        let sut = makeContainer(captions: true, chat: true)
+        #expect(sut.meetingRoomFeatures(isE2EEnabled: false) == sut.meetingRoomEnabledFeatures)
+        #expect(sut.meetingRoomFeatures(isE2EEnabled: false).contains(.callKit))
+    }
 
     // MARK: - Full configurations
 
@@ -95,7 +112,7 @@ struct MeetingRoomEnabledFeaturesTests {
     // MARK: - One flag at a time
 
     /// Every toggleable meeting room flag, paired with the feature it should enable.
-    static let singleFeatureCases: [MeetingRoomFeature] =
+    nonisolated static let singleFeatureCases: [MeetingRoomFeature] =
         MeetingRoomFeature.allCases.filter { $0 != .callKit }
 
     @Test(

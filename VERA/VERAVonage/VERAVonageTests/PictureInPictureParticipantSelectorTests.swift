@@ -273,6 +273,7 @@ struct PictureInPictureParticipantSelectorTests {
 
 // MARK: - Helpers
 
+@MainActor
 private func makeParticipant(
     id: String,
     cameraEnabled: Bool = true,

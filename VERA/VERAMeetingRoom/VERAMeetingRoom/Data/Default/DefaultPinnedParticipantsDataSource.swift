@@ -14,12 +14,12 @@ public actor DefaultPinnedParticipantsDataSource: PinnedParticipantsDataSource {
 
     // MARK: - Private Properties
 
-    private nonisolated let pinnedIdsSubject = CurrentValueSubject<Set<String>, Never>([])
+    private nonisolated let pinnedIdsSubject = CurrentValueRelay<Set<String>, Never>([])
 
     // MARK: - PinnedParticipantsDataSource
 
     public nonisolated var pinnedParticipantIds: AnyPublisher<Set<String>, Never> {
-        pinnedIdsSubject.eraseToAnyPublisher()
+        pinnedIdsSubject.publisher
     }
 
     // MARK: - Initialization

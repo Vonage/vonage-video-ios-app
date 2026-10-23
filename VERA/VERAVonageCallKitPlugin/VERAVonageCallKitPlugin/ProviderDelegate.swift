@@ -16,6 +16,7 @@ import VERACommonUI
 /// to the concrete `CXProvider` type, enabling dependency injection and unit tests.
 ///
 /// - SeeAlso: ``ProviderDelegate``
+@MainActor
 protocol CXProviderProtocol {
     func setDelegate(_ delegate: CXProviderDelegate?, queue: DispatchQueue?)
     func reportCall(with UUID: UUID, updated update: CXCallUpdate)
@@ -40,7 +41,8 @@ extension CXProvider: CXProviderProtocol {}
 /// - Important: Use `sessionManager.preconfigureAudioSessionForCall(withMode:)` during start call
 ///   to ensure proper audio activation for system-elevated sessions.
 /// - SeeAlso: ``CXProviderProtocol``
-final class ProviderDelegate: NSObject, CXProviderDelegate {
+@MainActor
+final class ProviderDelegate: NSObject {
 
     /// The underlying CallKit provider abstraction.
     private let provider: CXProviderProtocol
@@ -81,7 +83,7 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
 
         super.init()
 
-        self.provider.setDelegate(self, queue: nil)
+        self.provider.setDelegate(self, queue: .main)
     }
 
     /// The app's CallKit provider configuration.
@@ -223,3 +225,11 @@ final class ProviderDelegate: NSObject, CXProviderDelegate {
         provider.reportOutgoingCall(with: callUUID, connectedAt: Date())
     }
 }
+
+// The provider is configured with queue: .main before registering this delegate.
+// Swift 6 runtime witness checks enforce that per-provider ownership contract.
+#if compiler(>=6.0)
+    extension ProviderDelegate: @preconcurrency CXProviderDelegate {}
+#else
+    extension ProviderDelegate: CXProviderDelegate {}
+#endif

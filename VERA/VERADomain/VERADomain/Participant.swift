@@ -11,6 +11,9 @@ import SwiftUI
 /// `view` for rendering. It optionally carries visibility callbacks (`onAppear`/`onDisappear`)
 /// to support bandwidth optimization strategies.
 ///
+/// Rendering and visibility callbacks belong to the main actor. Immutable metadata
+/// remains readable from other actors without accessing the renderable view.
+///
 /// ## Overview
 ///
 /// Use this type to:
@@ -19,38 +22,39 @@ import SwiftUI
 /// - Compute aspect ratios for layout
 /// - Track whether a participant is local (`isRemote == false`) or remote
 /// - Wire visibility callbacks for subscription control
+@MainActor
 public struct Participant: Identifiable, Hashable, Equatable, CustomStringConvertible {
     /// Stable identifier for the participant (stream ID, publisher ID, etc.).
-    public let id: String
+    public nonisolated let id: String
     /// The connection identifier from the Vonage session, used for signal sender resolution.
-    public let connectionId: String?
+    public nonisolated let connectionId: String?
     /// Display name shown in UI.
-    public let name: String
+    public nonisolated let name: String
     /// Whether the participant’s microphone is enabled.
-    public let isMicEnabled: Bool
+    public nonisolated let isMicEnabled: Bool
     /// Whether the participant’s camera is enabled.
-    public let isCameraEnabled: Bool
+    public nonisolated let isCameraEnabled: Bool
     /// A SwiftUI-compatible view used to render the participant’s video.
     public let view: AnyView
     /// The raw video dimensions used for ratio calculations and layout.
-    public let videoDimensions: CGSize
+    public nonisolated let videoDimensions: CGSize
     /// `true` when the participant is remote; `false` for the local publisher.
-    public let isRemote: Bool
+    public nonisolated let isRemote: Bool
     /// Creation timestamp for ordering or diagnostics.
-    public let creationTime: Date
+    public nonisolated let creationTime: Date
     /// `true` when the participant is sharing their screen.
-    public let isScreenshare: Bool
+    public nonisolated let isScreenshare: Bool
     /// The current audio level of the participant (0.0 to 1.0).
-    public let audioLevel: Float
+    public nonisolated let audioLevel: Float
 
     /// Optional callback invoked when this participant’s view appears on screen.
     ///
     /// Use to enable video subscription for remote participants when visible.
-    public var onAppear: (() -> Void)?
+    public var onAppear: (@MainActor () -> Void)?
     /// Optional callback invoked when this participant’s view disappears from screen.
     ///
     /// Use to disable video subscription for remote participants when hidden.
-    public var onDisappear: (() -> Void)?
+    public var onDisappear: (@MainActor () -> Void)?
 
     /// Creates a new participant value.
     ///
@@ -112,7 +116,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     /// Equality comparing identity and core properties.
     ///
     /// Excludes visibility callbacks from equality.
-    public static func == (lhs: Participant, rhs: Participant) -> Bool {
+    public nonisolated static func == (lhs: Participant, rhs: Participant) -> Bool {
         lhs.id == rhs.id && lhs.connectionId == rhs.connectionId && lhs.name == rhs.name
             && lhs.isMicEnabled == rhs.isMicEnabled
             && lhs.isCameraEnabled == rhs.isCameraEnabled && lhs.videoDimensions == rhs.videoDimensions
@@ -125,7 +129,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     /// Hashes identity and core properties for set/dictionary usage.
     ///
     /// Excludes visibility callbacks from hashing.
-    public func hash(into hasher: inout Hasher) {
+    public nonisolated func hash(into hasher: inout Hasher) {
         hasher.combine(id)
         hasher.combine(connectionId)
         hasher.combine(name)
@@ -145,7 +149,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     /// - Behavior:
     ///   - If height is zero, returns a default of `16:9`
     ///   - If the ratio is less than 1 (portrait), normalizes to `4:3` (≈1.33)
-    public var containerAspectRatio: Double {
+    public nonisolated var containerAspectRatio: Double {
         let dimensions = videoDimensions
         guard dimensions.height > 0 else { return 16.0 / 9.0 }
         var ratio = Double(dimensions.width / dimensions.height)
@@ -158,7 +162,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     /// The raw aspect ratio derived from the video dimensions.
     ///
     /// Returns `16:9` if height is zero to avoid division by zero.
-    public var aspectRatio: Double {
+    public nonisolated var aspectRatio: Double {
         guard videoDimensions.height > 0 else { return 16.0 / 9.0 }
         return Double(videoDimensions.width / videoDimensions.height)
     }
@@ -166,7 +170,7 @@ public struct Participant: Identifiable, Hashable, Equatable, CustomStringConver
     // MARK: - CustomStringConvertible
 
     /// Human-readable description for logging and diagnostics.
-    public var description: String {
+    public nonisolated var description: String {
         return """
             Participant(id: "\(id)", name: "\(name)", isMicEnabled: \(isMicEnabled), \
             isCameraEnabled: \(isCameraEnabled) \

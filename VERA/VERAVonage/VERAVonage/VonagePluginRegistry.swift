@@ -16,6 +16,7 @@ import Foundation
 /// - Maintain a list of plugins conforming to ``VonagePlugin``
 /// - Prevent duplicates based on ``VonagePluginID/pluginIdentifier``
 /// - Provide the registered plugins to the call at creation time
+@MainActor
 public final class VonagePluginRegistry {
 
     /// The deduplicated list of registered plugins.

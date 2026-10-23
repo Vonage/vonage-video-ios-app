@@ -17,10 +17,12 @@ final class MockCXProvider: CXProviderProtocol {
 
     var recordedActions: [Action] = []
     weak var delegate: CXProviderDelegate?
+    private(set) var delegateQueue: DispatchQueue?
 
     func setDelegate(_ delegate: CXProviderDelegate?, queue: DispatchQueue?) {
         recordedActions.append(.setDelegate)
         self.delegate = delegate
+        delegateQueue = queue
     }
 
     func reportCall(with UUID: UUID, updated update: CXCallUpdate) {

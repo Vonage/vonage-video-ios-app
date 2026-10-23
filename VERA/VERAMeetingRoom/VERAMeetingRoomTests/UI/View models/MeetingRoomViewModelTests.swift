@@ -8,9 +8,11 @@ import SwiftUI
 import Testing
 import VERACommonUI
 import VERADomain
-import VERAMeetingRoom
 import VERATestHelpers
 
+@testable import VERAMeetingRoom
+
+@MainActor
 @Suite("MeetingRoomViewModel tests")
 struct MeetingRoomViewModelTests {
 
@@ -544,6 +546,9 @@ struct MeetingRoomViewModelTests {
 
         await sut.loadUI()
 
+        // Initial status subscriptions also refresh buttons; settle them before measuring
+        // the single refresh caused by the explicit provider update below.
+        _ = try await getContentState(sut)
         let baselineCallCount = bottomBarButtonsCallCount
 
         updates.send(())
@@ -589,6 +594,7 @@ struct MeetingRoomViewModelTests {
 
         await sut.loadUI()
 
+        _ = try await getContentState(sut)
         let baselineCallCount = getExternalButtonsCallCount
 
         externalButtonsUpdates.send(())
@@ -704,15 +710,17 @@ struct MeetingRoomViewModelTests {
         var navigateToSettingsAlert = false
 
         await confirmation("Alert should presented for settings") { confirm in
-            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase) {
-                action in
-                switch action {
-                case .presentAlert(let item):
-                    navigateToSettingsAlert = item.title == "Check Settings"
-                    confirm()
-                default: break
-                }
-            }
+            let sut = makeSUT(
+                roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase,
+                actionHandler: {
+                    action in
+                    switch action {
+                    case .presentAlert(let item):
+                        navigateToSettingsAlert = item.title == "Check Settings"
+                        confirm()
+                    default: break
+                    }
+                })
             sut.onToggleMic()
         }
 
@@ -722,6 +730,7 @@ struct MeetingRoomViewModelTests {
     @Test(
         "Given toggling the microphone presents a settings alert, When the user confirms, Then the app navigates to App Settings"
     )
+    @MainActor
     func toogleMicShouldShowSettingsMessageConfirmAndMoveToAppSetting() async {
         let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .denied)
 
@@ -729,17 +738,19 @@ struct MeetingRoomViewModelTests {
         var navigateToSettingsAlert = false
 
         await confirmation("App settings should be presented") { confirm in
-            let sut = makeSUT(roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase) {
-                action in
-                switch action {
-                case .presentAlert(let item):
-                    item.onConfirm?()
-                case .navigateToSettings:
-                    navigateToSettingsAlert = true
-                    confirm()
-                default: break
-                }
-            }
+            let sut = makeSUT(
+                roomName: roomName, checkMicrophoneAuthorizationStatusUseCase: mockCheckMicUseCase,
+                actionHandler: {
+                    action in
+                    switch action {
+                    case .presentAlert(let item):
+                        item.onConfirm?()
+                    case .navigateToSettings:
+                        navigateToSettingsAlert = true
+                        confirm()
+                    default: break
+                    }
+                })
             sut.onToggleMic()
         }
 
@@ -753,15 +764,17 @@ struct MeetingRoomViewModelTests {
         var navigateToSettingsAlert = false
 
         await confirmation("Alert Setting should presented") { confirm in
-            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase) {
-                action in
-                switch action {
-                case .presentAlert(let item):
-                    navigateToSettingsAlert = item.title == "Check Settings"
-                    confirm()
-                default: break
-                }
-            }
+            let sut = makeSUT(
+                roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase,
+                actionHandler: {
+                    action in
+                    switch action {
+                    case .presentAlert(let item):
+                        navigateToSettingsAlert = item.title == "Check Settings"
+                        confirm()
+                    default: break
+                    }
+                })
             sut.onToggleCamera()
         }
 
@@ -771,6 +784,7 @@ struct MeetingRoomViewModelTests {
     @Test(
         "Given toggling the camera presents the Alert Settings, When the user confirms, Then the app navigates to App Settings"
     )
+    @MainActor
     func toogleCameraShouldShowSettingsMessageUserConfirmsAndNavigatesToAppSetting() async {
         let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .denied)
 
@@ -778,17 +792,19 @@ struct MeetingRoomViewModelTests {
         var navigateToSettingsAlert = false
 
         await confirmation("App settings should be presented") { confirm in
-            let sut = makeSUT(roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase) {
-                action in
-                switch action {
-                case .presentAlert(let item):
-                    item.onConfirm?()
-                case .navigateToSettings:
-                    navigateToSettingsAlert = true
-                    confirm()
-                default: break
-                }
-            }
+            let sut = makeSUT(
+                roomName: roomName, checkCameraAuthorizationStatusUseCase: mockCheckCameraUseCase,
+                actionHandler: {
+                    action in
+                    switch action {
+                    case .presentAlert(let item):
+                        item.onConfirm?()
+                    case .navigateToSettings:
+                        navigateToSettingsAlert = true
+                        confirm()
+                    default: break
+                    }
+                })
             sut.onToggleCamera()
         }
 
@@ -1145,8 +1161,8 @@ struct MeetingRoomViewModelTests {
             mockCall._publisherAudioLevel.send(0.8)
         }
 
-        // Allow the Combine pipeline to flush
-        await Task.yield()
+        // Wait for observable UI delivery rather than assuming one yield drains the queue.
+        _ = try await waitForContentState(sut) { $0.isMicEnabled }
 
         #expect(sut.toast == nil)
     }
@@ -1169,6 +1185,24 @@ struct MeetingRoomViewModelTests {
         let toast = await waitForToast(sut) { $0 != nil }
 
         #expect(toast?.message != nil)
+        #expect(toast?.mode == .warning)
+    }
+
+    @Test("Audio samples from a background callback safely show the muted warning")
+    func backgroundAudioSamplesShowMutedWarning() async throws {
+        let connect = makeMockConnectToRoomUseCase()
+        let sut = makeSUT(connectToRoomUseCase: connect)
+        await sut.loadUI()
+        let audio = connect.call._publisherAudioLevel
+        let sampleCount = SpeakingWhileMutedDetector.triggerThreshold
+
+        await Task.detached {
+            for _ in 0..<sampleCount {
+                audio.send(0.8)
+            }
+        }.value
+
+        let toast = await waitForToast(sut) { $0?.mode == .warning }
         #expect(toast?.mode == .warning)
     }
 
@@ -1584,6 +1618,70 @@ struct MeetingRoomViewModelTests {
         #expect(disconnectRoomUseCase.recordedActions == [.disconnect])
     }
 
+    @Test(
+        "A late disconnected event cannot schedule fallback after teardown begins",
+        arguments: [CallState.disconnecting, .disconnected])
+    func terminalStatePreventsLateFallback(_ state: CallState) async throws {
+        let connect = makeMockConnectToRoomUseCase()
+        let disconnect = makeMockDisconnectRoomUseCase()
+        let sut = makeSUT(connectToRoomUseCase: connect, disconnectRoomUseCase: disconnect)
+        sut.disconnectionTimeout = .milliseconds(100)
+        await sut.loadUI()
+        connect.call._callState.send(state)
+        _ = try await waitForContentState(sut) { $0.callState == state }
+        connect.call._eventsPublisher.send(.disconnected)
+        _ = await waitForToast(sut) { $0?.mode == .failure }
+
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(disconnect.recordedActions.isEmpty)
+    }
+
+    @Test(
+        "Beginning teardown cancels a pending fallback disconnection",
+        arguments: [CallState.disconnecting, .disconnected])
+    func terminalStateCancelsPendingFallback(_ state: CallState) async throws {
+        let connect = makeMockConnectToRoomUseCase()
+        let disconnect = makeMockDisconnectRoomUseCase()
+        let sut = makeSUT(connectToRoomUseCase: connect, disconnectRoomUseCase: disconnect)
+        let delay = ControlledDisconnectionDelay()
+        sut.disconnectionDelay = delay.sleep
+        defer { delay.advance() }
+        await sut.loadUI()
+        connect.call._eventsPublisher.send(.disconnected)
+        _ = await waitForToast(sut) { $0?.mode == .failure }
+        let fallback = try #require(sut.disconnectionTask)
+        let started = await pollUI(read: { delay.isWaiting }, until: { $0 })
+        try #require(started)
+
+        connect.call._callState.send(state)
+        _ = try await waitForContentState(sut) { $0.callState == state }
+        #expect(fallback.isCancelled)
+
+        // Release the suspended timer only after teardown has been delivered. Joining the
+        // actual fallback proves it cannot disconnect, regardless of CI scheduling speed.
+        delay.advance()
+        await fallback.value
+        #expect(disconnect.recordedActions.isEmpty)
+    }
+
+    @Test("Duplicate disconnect events leave only one fallback task")
+    func duplicateEventsDoNotLeaveMultipleFallbacks() async throws {
+        let connect = makeMockConnectToRoomUseCase()
+        let disconnect = makeMockDisconnectRoomUseCase()
+        let sut = makeSUT(connectToRoomUseCase: connect, disconnectRoomUseCase: disconnect)
+        sut.disconnectionTimeout = .milliseconds(100)
+        await sut.loadUI()
+        connect.call._eventsPublisher.send(.disconnected)
+        _ = await waitForToast(sut) { $0?.mode == .failure }
+        connect.call._eventsPublisher.send(.disconnected)
+
+        _ = await pollUI(
+            read: { disconnect.recordedActions.count },
+            until: { $0 > 0 })
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(disconnect.recordedActions == [.disconnect])
+    }
+
     @Test("Given an idle event, Then no toast is shown")
     @MainActor
     func idleEventDoesNotShowToast() async throws {
@@ -1695,17 +1793,43 @@ struct MeetingRoomViewModelTests {
 
     // MARK: Helper
 
+    // UI state can contain render closures and views. Keep both reads and predicates
+    // on the UI actor instead of transferring those values through the generic poller.
+    @MainActor
+    private func pollUI<Value>(
+        timeout: Duration = .seconds(2),
+        read: @MainActor () -> Value,
+        until predicate: @MainActor (Value) -> Bool
+    ) async -> Value {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        var value = read()
+        while !predicate(value) && !Task.isCancelled {
+            guard ContinuousClock.now < deadline else { return value }
+            do {
+                try await Task.sleep(for: .milliseconds(10))
+            } catch {
+                return value
+            }
+            value = read()
+        }
+        return value
+    }
+
+
     /// Polls `state` on the main actor until a `.content` state satisfying `predicate`
     /// appears, or the timeout elapses. Throws if no matching content state is reached.
     func waitForContentState(
         _ sut: MeetingRoomViewModel,
         timeout: Duration = .seconds(2),
-        predicate: @escaping (MeetingRoomState) -> Bool = { _ in true }
+        predicate: @escaping @MainActor (MeetingRoomState) -> Bool = { _ in true }
     ) async throws -> MeetingRoomState {
-        let content = await poll(
+        let content = await pollUI(
             timeout: timeout,
-            read: { await MainActor.run { sut.state.contentState } },
-            until: { $0.map(predicate) ?? false }
+            read: { sut.state.contentState },
+            until: { content in
+                guard let content else { return false }
+                return predicate(content)
+            }
         )
         guard let content, predicate(content) else { throw Error.nilValue }
         return content
@@ -1720,11 +1844,11 @@ struct MeetingRoomViewModelTests {
     func waitForToast(
         _ sut: MeetingRoomViewModel,
         timeout: Duration = .seconds(2),
-        predicate: @escaping (ToastItem?) -> Bool
+        predicate: @escaping @MainActor (ToastItem?) -> Bool
     ) async -> ToastItem? {
-        await poll(
+        await pollUI(
             timeout: timeout,
-            read: { await MainActor.run { sut.toast } },
+            read: { sut.toast },
             until: predicate
         )
     }
@@ -1782,4 +1906,26 @@ extension MeetingRoomViewState {
 
 private enum MockForceMuteError: Swift.Error {
     case requestFailed
+}
+
+/// A manually released timer keeps cancellation tests independent of elapsed wall time.
+@MainActor
+private final class ControlledDisconnectionDelay {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var advanced = false
+    var isWaiting: Bool { continuation != nil }
+
+    func sleep(_ duration: Duration) async throws {
+        if !advanced {
+            await withCheckedContinuation { continuation = $0 }
+        }
+        try Task.checkCancellation()
+    }
+
+    func advance() {
+        advanced = true
+        let pending = continuation
+        continuation = nil
+        pending?.resume()
+    }
 }

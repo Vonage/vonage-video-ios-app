@@ -4,6 +4,8 @@
 
 import Foundation
 
+/// Shares preferences with the UI composition root on its owning actor.
+@MainActor
 public final class UserDefaultsUserRepository: UserRepository {
 
     private let userDefaults: UserDefaults
