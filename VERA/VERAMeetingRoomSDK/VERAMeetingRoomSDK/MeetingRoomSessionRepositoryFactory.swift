@@ -34,7 +34,8 @@ public struct MeetingRoomSessionRepositoryFactoryContext {
     }
 }
 
-public protocol MeetingRoomSessionRepositoryFactory {
+@MainActor
+public protocol MeetingRoomSessionRepositoryFactory: Sendable {
     func callAsFunction(
         _ context: MeetingRoomSessionRepositoryFactoryContext
     ) -> any SessionRepository

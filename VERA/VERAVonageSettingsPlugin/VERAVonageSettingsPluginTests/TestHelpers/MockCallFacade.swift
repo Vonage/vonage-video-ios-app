@@ -5,7 +5,7 @@
 import Combine
 import VERADomain
 
-final class MockCallFacade: CallFacade, @unchecked Sendable {
+final class MockCallFacade: CallFacade {
 
     let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
     lazy var eventsPublisher: AnyPublisher<SessionEvent, Never> = _eventsPublisher.eraseToAnyPublisher()
@@ -75,9 +75,12 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
         disableSubscriberExtraStatsCallCount += 1
     }
 
+    var onApplySettings: (@MainActor (PublisherAdvancedSettings) async -> Void)?
+
     func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {
         applyPublisherAdvancedSettingsCallCount += 1
         lastAppliedSettings = settings
+        await onApplySettings?(settings)
     }
 
     func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {

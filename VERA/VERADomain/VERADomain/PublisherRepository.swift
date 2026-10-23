@@ -4,7 +4,8 @@
 
 import Foundation
 
-public protocol PublisherRepository {
+@MainActor
+public protocol PublisherRepository: Sendable {
     func getPublisher() throws -> VERAPublisher
     func resetPublisher()
     func recreatePublisher(_ settings: PublisherSettings) throws

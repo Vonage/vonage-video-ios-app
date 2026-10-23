@@ -386,7 +386,9 @@ struct VERAApp: App {
                 allowDeviceSelection: dependencyContainer.appConfig.meetingRoomSettings.allowDeviceSelection
             )
         )
-        .enabledFeatures(dependencyContainer.meetingRoomEnabledFeatures)
+        .enabledFeatures(
+            dependencyContainer.meetingRoomFeatures(isE2EEnabled: E2EConfiguration.isEnabled)
+        )
         .publisherSettings(
             request.publisherSettings
                 .initialVideoEffect(currentVideoEffect)

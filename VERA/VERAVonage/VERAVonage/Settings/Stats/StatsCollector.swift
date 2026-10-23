@@ -6,6 +6,7 @@ import Combine
 import OpenTok
 import VERADomain
 
+@MainActor
 public protocol StatsCollector: OTPublisherKitNetworkStatsDelegate,
     OTSubscriberKitNetworkStatsDelegate,
     OTPublisherKitRtcStatsReportDelegate,

@@ -5,7 +5,8 @@
 import Foundation
 
 /// Provides moderation controls for force-muting remote participants.
-public protocol ParticipantForceMuting: AnyObject {
+@MainActor
+public protocol ParticipantForceMuting: AnyObject, Sendable {
     /// Forces the remote participant identified by `id` to stop publishing audio.
     func forceMuteParticipant(id: String) async throws
 }

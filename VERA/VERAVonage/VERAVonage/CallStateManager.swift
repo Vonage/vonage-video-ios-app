@@ -51,7 +51,7 @@ final actor CallStateManager {
         let subscriber = await subscribersRepository.getSubscriber(id: id)
         await subscribersRepository.removeSubscriber(id: id)
         await participantsRepository.removeParticipant(id: id)
-        subscriber?.cleanUp()
+        await subscriber?.cleanUp()
         await recalculateActiveSpeaker()
         let state = await getCurrentState()
         return (subscriber, state)
@@ -62,8 +62,6 @@ final actor CallStateManager {
     /// - Parameter participant: The participant with updated properties (e.g., mic/camera).
     /// - Returns: The updated ``ParticipantsState`` snapshot.
     func updateParticipant(_ participant: Participant) async -> ParticipantsState {
-        // An in-flight subscriber update must not recreate a participant after removal.
-        // The repository checks membership and replaces the value in one actor operation.
         await participantsRepository.updateExistingParticipant(participant)
         return await getCurrentState()
     }
@@ -74,8 +72,8 @@ final actor CallStateManager {
     /// the `activeSpeaker` based on audio level and microphone state.
     ///
     /// - Parameter speakerInfo: The participant’s audio level and mic status.
-    func updateActiveSpeaker(_ speakerInfo: SpeakerInfo) {
-        activeSpeakerTracker.updatedParticipant(speakerInfo)
+    func updateActiveSpeaker(_ speakerInfo: SpeakerInfo) async {
+        await activeSpeakerTracker.updatedParticipant(speakerInfo)
     }
 
     /// Returns the current participants state, including the active participant ID.
@@ -88,7 +86,7 @@ final actor CallStateManager {
         .init(
             localParticipant: nil,
             participants: await participantsRepository.all,
-            activeParticipantId: activeSpeakerTracker.activeSpeaker.participantId
+            activeParticipantId: await activeSpeakerTracker.activeSpeaker.participantId
         )
     }
 
@@ -97,7 +95,7 @@ final actor CallStateManager {
     /// Builds `SpeakerInfo` from repository entries and delegates to the tracker.
     private func recalculateActiveSpeaker() async {
         let participants = await participantsRepository.all
-        activeSpeakerTracker.calculateActiveSpeaker(
+        await activeSpeakerTracker.calculateActiveSpeaker(
             from: participants.map {
                 SpeakerInfo(id: $0.id, audioLevel: 0, isMicEnabled: $0.isMicEnabled)
             }
@@ -108,7 +106,7 @@ final actor CallStateManager {
     ///
     /// Invokes `cleanUp()` on each subscriber and resets both repositories.
     func cleanUpParticipants() async {
-        await subscribersRepository.all.forEach { $0.cleanUp() }
+        for subscriber in await subscribersRepository.all { await subscriber.cleanUp() }
         await subscribersRepository.reset()
         await participantsRepository.reset()
     }
@@ -117,15 +115,15 @@ final actor CallStateManager {
     ///
     /// - Parameter isOnHold: `true` to hold; `false` to resume.
     func setOnHold(_ isOnHold: Bool) async {
-        await subscribersRepository.all.forEach { $0.setOnHold(isOnHold) }
+        for subscriber in await subscribersRepository.all { await subscriber.setOnHold(isOnHold) }
     }
 
     func enableCaptions() async {
-        await subscribersRepository.all.forEach { $0.enableCaptions() }
+        for subscriber in await subscribersRepository.all { await subscriber.enableCaptions() }
     }
 
     func disableCaptions() async {
-        await subscribersRepository.all.forEach { $0.disableCaptions() }
+        for subscriber in await subscribersRepository.all { await subscriber.disableCaptions() }
     }
 
     /// Returns all current subscribers for iteration (e.g., wiring stats delegates).

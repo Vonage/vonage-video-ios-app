@@ -8,7 +8,8 @@ import VERASettings
 
 /// Orders statistics source replacement and cleanup without changing plugin protocols.
 /// An awaited writer may ignore cancellation: it must finish before the final clear.
-actor StatsForwardingLifecycle {
+@MainActor
+final class StatsForwardingLifecycle {
     private let writer: StatsWriter
     private var forwardingTask: Task<Void, Never>?
     private var lifecycleTask: Task<Void, Never>?
@@ -30,7 +31,7 @@ actor StatsForwardingLifecycle {
                 await finishForwarding()
             }
             // Capture only the writer/source: an idle stream must not retain this owner.
-            forwardingTask = Task.detached { [writer] in
+            forwardingTask = Task { [writer] in
                 for await stats in publisher.values {
                     guard !Task.isCancelled else { return }
                     await writer.updateStats(stats)

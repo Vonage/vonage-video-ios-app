@@ -17,7 +17,8 @@ public struct SignInResult: Sendable {
 }
 
 /// Abstracts the Okta browser sign-in and credential storage for testability.
-public protocol BrowserSignInProvider {
+@MainActor
+public protocol BrowserSignInProvider: Sendable {
     /// Performs browser-based sign-in. Returns nil if no token was issued.
     func signIn(from anchor: ASPresentationAnchor) async throws -> SignInResult?
 

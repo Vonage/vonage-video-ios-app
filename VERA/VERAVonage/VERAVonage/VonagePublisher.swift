@@ -26,17 +26,29 @@ import VERADomain
 ///
 /// It also maintains a `Participant` representation of the local publisher for consistent
 /// UI and domain integration across the app.
+@MainActor
 open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// The underlying Vonage publisher.
     public let otPublisher: OTPublisher
     /// The class that will create the transformer instances
     public let transformerFactory: VERATransformerFactory
 
+    private enum CallbackEvent: Sendable {
+        case audioLevel(Float)
+        case dimensions(CGSize)
+        case streamChanged
+        case failed(any Error)
+        case created
+        case destroyed
+        case muteForced
+        case appDidBecomeActive
+    }
+    nonisolated private let callbackEvents: MainActorEventQueue<CallbackEvent>
+    private var observationsConfigured = false
+    private var isCleanedUp = false
+
     /// Internal subscription storage for Combine pipelines.
     var cancellables = Set<AnyCancellable>()
-
-    /// Smooths raw audio level samples for UI visualization.
-    private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
 
     /// A stable identifier for the local publisher participant.
     let id = "publisherID"
@@ -148,6 +160,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         transformerFactory: VERATransformerFactory,
         initialDimensions: CGSize = .zero
     ) {
+        callbackEvents = MainActorEventQueue(transformEvent: Self.makeCallbackTransform())
         otPublisher = publisher
         self.transformerFactory = transformerFactory
         videoDimensions = initialDimensions
@@ -163,12 +176,67 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
             audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: publisher.view!)))
         super.init()
+        configureCallbackDelivery()
         otPublisher.audioLevelDelegate = self
         observeAppDidBecomeActive()
     }
 
-    deinit {
-        cleanUp()
+    // Create this closure outside MainActor inference: it executes on SDK callback threads.
+    // Its fresh mutable tracker is confined to the event queue's synchronous buffer lock.
+    nonisolated private static func makeCallbackTransform() -> (CallbackEvent) -> CallbackEvent {
+        let audioLevelTracker = MovingAvgAudioLevelTracker()
+        return { event in
+            guard case .audioLevel(let level) = event else { return event }
+            let result = audioLevelTracker.track(level)
+            return .audioLevel(round(result.logMovingAvg * 100) / 100)
+        }
+    }
+
+    /// Shared value boundary for SDK audio callbacks; no borrowed SDK object crosses executors.
+    nonisolated func receiveAudioLevel(_ audioLevel: Float) {
+        callbackEvents.send(.audioLevel(audioLevel), replacing: "audio")
+    }
+
+    private func configureCallbackDelivery() {
+        callbackEvents.activate { [weak self] event in
+            guard let self else { return }
+            switch event {
+            case .audioLevel(let level):
+                self.audioLevel = level
+            case .dimensions(let dimensions):
+                self.videoDimensions = dimensions
+                self.updateParticipant()
+            case .streamChanged:
+                self.updateParticipant()
+            case .failed(let error): self.onError?(error)
+            case .created: self.onStreamCreated?()
+            case .destroyed: self.onStreamDestroyed?()
+            case .muteForced:
+                self.publishAudio = false
+                self.updateParticipant()
+                self.onMuteForced?()
+            case .appDidBecomeActive:
+                if !self.videoTransformers.isEmpty { self.updateVideoTransformers() }
+            }
+        }
+    }
+
+    #if compiler(>=6.2)
+        isolated deinit {
+            cleanUp()
+        }
+    #else
+        // Explicit lifecycle cleanup runs on MainActor. Older compilers use natural ARC
+        // release here: AnyCancellable cancels on destruction and SDK delegates are weak.
+    #endif
+
+    /// Starts the next callback lifetime before native publish can synchronously call a delegate.
+    /// KVO setup remains separate because the SDK stream does not exist until publishing starts.
+    func prepareCallbackDelivery() {
+        guard isCleanedUp else { return }
+        configureCallbackDelivery()
+        observeAppDidBecomeActive()
+        isCleanedUp = false
     }
 
     /// Sets up reactive observation of stream properties and updates the participant model.
@@ -178,35 +246,37 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// - Important: Call after the publisher has a stream to ensure KVO publishers are available.
     func setup() {
+        guard !observationsConfigured else { return }
+        observationsConfigured = true
+        prepareCallbackDelivery()
         stream?
             .publisher(for: \.videoDimensions)
             .removeDuplicates()
-            .sink { [weak self] newSize in
-                self?.videoDimensions = newSize
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] newSize in
+                self?.callbackEvents.send(.dimensions(newSize), replacing: "dimensions")
             }
             .store(in: &cancellables)
 
         stream?
             .publisher(for: \.hasAudio)
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.streamChanged, replacing: "stream")
             }
             .store(in: &cancellables)
 
         stream?
             .publisher(for: \.hasVideo)
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.streamChanged, replacing: "stream")
             }
             .store(in: &cancellables)
 
         $audioLevel
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.streamChanged, replacing: "stream")
             }
             .store(in: &cancellables)
 
@@ -264,6 +334,9 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// Also replaces the participant’s `view` with an empty placeholder to release UI resources.
     open func cleanUp() {
+        observationsConfigured = false
+        isCleanedUp = true
+        callbackEvents.invalidate()
         participant = participant.withEmptyView
 
         cancellables.removeAll()
@@ -279,29 +352,27 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     /// Vonage publisher delegate callback for errors.
     ///
     /// Forwards the error to ``onError`` for external handling.
-    public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
-        onError?(error)
+    nonisolated public func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
+        callbackEvents.send(.failed(error))
     }
 
     /// Vonage publisher delegate callback when the stream is created.
     ///
     /// Use to trigger post-publish actions, like informing the call façade.
-    public func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
-        onStreamCreated?()
+    nonisolated public func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
+        callbackEvents.send(.created)
     }
 
     /// Vonage publisher delegate callback when the stream is destroyed.
     ///
     /// Use to trigger teardown or UI updates.
-    public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
-        onStreamDestroyed?()
+    nonisolated public func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
+        callbackEvents.send(.destroyed)
     }
 
     /// Vonage publisher delegate callback when this local publisher is force-muted by a moderator.
-    public func muteForced(_ publisher: OTPublisherKit) {
-        publishAudio = false
-        updateParticipant()
-        onMuteForced?()
+    nonisolated public func muteForced(_ publisher: OTPublisherKit) {
+        callbackEvents.send(.muteForced)
     }
 
     // MARK: Transformers
@@ -342,9 +413,8 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     private func observeAppDidBecomeActive() {
         NotificationCenter.default
             .publisher(for: UIApplication.didBecomeActiveNotification)
-            .sink { [weak self] _ in
-                guard let self, !self.videoTransformers.isEmpty else { return }
-                self.updateVideoTransformers()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.appDidBecomeActive, replacing: "app-active")
             }
             .store(in: &cancellables)
     }
@@ -401,8 +471,7 @@ extension VonagePublisher: OTPublisherKitAudioLevelDelegate {
     /// Vonage publisher audio level delegate callback.
     ///
     /// Smooths the raw audio level via a log-moving average and publishes the result.
-    public func publisher(_ publisher: OTPublisherKit, audioLevelUpdated audioLevel: Float) {
-        let result = movingAvgAudioLevelTracker.track(audioLevel)
-        self.audioLevel = round(result.logMovingAvg * 100) / 100
+    nonisolated public func publisher(_ publisher: OTPublisherKit, audioLevelUpdated audioLevel: Float) {
+        receiveAudioLevel(audioLevel)
     }
 }

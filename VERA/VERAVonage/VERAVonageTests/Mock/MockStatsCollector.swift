@@ -47,46 +47,46 @@ public final class MockStatsCollector: NSObject, StatsCollector {
 
     // MARK: - OTPublisherKitNetworkStatsDelegate
 
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         videoNetworkStatsUpdated stats: [OTPublisherKitVideoNetworkStats]
     ) {}
 
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         audioNetworkStatsUpdated stats: [OTPublisherKitAudioNetworkStats]
     ) {}
 
     // MARK: - OTSubscriberKitNetworkStatsDelegate
 
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         videoNetworkStatsUpdated stats: OTSubscriberKitVideoNetworkStats
     ) {}
 
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         audioNetworkStatsUpdated stats: OTSubscriberKitAudioNetworkStats
     ) {}
 
     // MARK: - OTPublisherKitRtcStatsReportDelegate
 
-    public func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {}
+    nonisolated public func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {}
 
     // MARK: - OTSubscriberKitRtcStatsReportDelegate
 
-    public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
+    nonisolated public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {}
 
     // MARK: - Publisher Media Link Stats
 
-    public func publisher(
+    nonisolated public func publisher(
         _ publisher: OTPublisherKit,
         mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
     ) {}
 
     // MARK: - Subscriber Media Link Stats
 
-    public func subscriber(
+    nonisolated public func subscriber(
         _ subscriber: OTSubscriberKit,
         mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
     ) {}

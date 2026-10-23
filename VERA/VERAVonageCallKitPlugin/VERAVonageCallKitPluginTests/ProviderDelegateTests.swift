@@ -9,6 +9,7 @@ import Testing
 
 @testable import VERAVonageCallKitPlugin
 
+@MainActor
 @Suite("ProviderDelegate tests")
 struct ProviderDelegateTests {
 
@@ -22,6 +23,7 @@ struct ProviderDelegateTests {
             #expect(mockProvider.recordedActions.contains(.setDelegate))
             #expect(mockProvider.delegate != nil)
             #expect(mockProvider.delegate === sut)
+            #expect(mockProvider.delegateQueue === DispatchQueue.main)
         }
     }
 

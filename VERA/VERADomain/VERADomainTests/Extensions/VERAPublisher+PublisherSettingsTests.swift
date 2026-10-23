@@ -9,6 +9,7 @@ import Testing
 import VERADomain
 
 @Suite("VERAPublisher+PublisherSettings tests")
+@MainActor
 struct VERAPublisherPublisherSettingsTests {
 
     @Test("Given default parameters, publisherSettings returns settings with empty username and no advanced settings")

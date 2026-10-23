@@ -44,6 +44,7 @@ public func defaultProjectOptions() -> Project.Options {
 
 public func baseBuildSettings() -> [String: SettingValue] {
     [
+        "SWIFT_STRICT_CONCURRENCY": "complete",
         "COMPILATION_CACHE_ENABLE_CACHING": "YES",
         "SWIFT_ENABLE_COMPILE_CACHE": "YES",
         "CLANG_ENABLE_COMPILE_CACHE": "YES",

@@ -21,6 +21,7 @@ import VERAVonage
 /// - Important: The plugin automatically handles archiving signals of type "archiving"
 ///   with data values "start" or "stop". Signals without a kind are treated as recordings.
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``,  ``VonageSignalHandler``
+@MainActor
 public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
     /// Supported signal types for this plugin.

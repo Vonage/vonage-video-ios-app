@@ -5,9 +5,10 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
-public enum MeetingRoomViewState: Equatable {
+public enum MeetingRoomViewState: Equatable, Sendable {
     case loading
     case content(MeetingRoomState)
 }
@@ -49,9 +50,14 @@ public struct ForceMuteConfirmation: Identifiable, Equatable {
 }
 
 @Observable
+@MainActor
 public final class MeetingRoomViewModel {
 
-    private static let disconnectionTimeoutInSeconds = 6
+    // Kept per instance so bounded fallback behavior can be exercised without a global test clock.
+    @ObservationIgnored var disconnectionTimeout: Duration = .seconds(6)
+    @ObservationIgnored var disconnectionDelay: @MainActor (Duration) async throws -> Void = {
+        try await Task.sleep(for: $0)
+    }
 
     @ObservationIgnored
     private var cancellables = Set<AnyCancellable>()
@@ -87,7 +93,7 @@ public final class MeetingRoomViewModel {
     @MainActor public var isArchiving = false
 
     /// Tracks the fallback disconnection task so it can be cancelled on normal call end.
-    @MainActor @ObservationIgnored private var disconnectionTask: Task<Void, Never>?
+    @MainActor @ObservationIgnored private(set) var disconnectionTask: Task<Void, Never>?
 
     @MainActor @ObservationIgnored private var isSessionInterrupted = false
 
@@ -148,10 +154,8 @@ public final class MeetingRoomViewModel {
         initialised = true
 
         uiProvider.updates
-            .sink { [weak self] in
-                Task { @MainActor [weak self] in
-                    self?.updateExtraButtons()
-                }
+            .sinkOnMainActor { [weak self] in
+                self?.updateExtraButtons()
             }
             .store(in: &cancellables)
 
@@ -269,75 +273,76 @@ public final class MeetingRoomViewModel {
 extension MeetingRoomViewModel {
 
     fileprivate func handleNoiseSuppressionChange(_ noiseSuppressionState: NoiseSuppressionState) {
-        Task { @MainActor [weak self] in
-            self?.noiseSuppressionPublisher.value = noiseSuppressionState
-        }
+        noiseSuppressionPublisher.value = noiseSuppressionState
     }
 
     fileprivate func navigateBackIfNeeded(_ callState: CallState) {
-        guard callState == .disconnected else { return }
-        Task { @MainActor [weak self] in
-            self?.disconnectionTask?.cancel()
-            self?.disconnectionTask = nil
-            self?.meetingRoomNavigation.onNext()
+        if callState == .disconnecting || callState == .disconnected {
+            disconnectionTask?.cancel()
+            disconnectionTask = nil
         }
+        guard callState == .disconnected else { return }
+        meetingRoomNavigation.onNext()
     }
 
     fileprivate func observeSessionState(_ participantsPublisher: AnyPublisher<ParticipantsState, Never>) {
         let sortedParticipantsPublisher = Publishers.CombineLatest3(
-            participantsPublisher.removeDuplicates(),
+            // Each upstream enters the UI scheduler before the UI-state mapping below.
+            participantsPublisher.removeDuplicates().receive(on: DispatchQueue.main),
             layoutPublisher,
-            pinnedParticipantsDataSource.pinnedParticipantIds
+            pinnedParticipantsDataSource.pinnedParticipantIds.receive(on: DispatchQueue.main)
         )
         .map { [weak self] participantsState, layout, pinnedIds -> MeetingRoomParticipantsState in
-            guard let self else {
+            MainActor.assumeIsolated {
+                guard let self else {
+                    return MeetingRoomParticipantsState(
+                        participants: [],
+                        layout: .activeSpeaker,
+                        activeSpeakerId: nil)
+                }
+                let currentParticipantIds = Set(participantsState.participants.map(\.id))
+                let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
+
+                if activePinnedIds != pinnedIds {
+                    Task { [weak self] in
+                        await self?.pinnedParticipantsDataSource.removeParticipants(notIn: currentParticipantIds)
+                    }
+                }
+
+                let uiParticipants = participantsState.participants.map { participant in
+                    self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
+                }
+
+                let localUIParticipant = participantsState.localParticipant.map { participant in
+                    UIParticipant(participant: participant)
+                }
+
+                var sortedParticipants: [UIParticipant]
+                if layout == .activeSpeaker {
+                    sortedParticipants = uiParticipants.sortedByDisplayPriority(
+                        activeSpeakerId: participantsState.activeParticipantId)
+                    if let localUIParticipant {
+                        if sortedParticipants.isEmpty {
+                            sortedParticipants.append(localUIParticipant)
+                        } else {
+                            sortedParticipants.insert(localUIParticipant, at: 1)
+                        }
+                    }
+                } else {
+                    sortedParticipants = uiParticipants.sortedByCreationDate()
+                    if let localUIParticipant {
+                        if sortedParticipants.isEmpty {
+                            sortedParticipants.append(localUIParticipant)
+                        } else {
+                            sortedParticipants.insert(localUIParticipant, at: 0)
+                        }
+                    }
+                }
                 return MeetingRoomParticipantsState(
-                    participants: [],
-                    layout: .activeSpeaker,
-                    activeSpeakerId: nil)
-            }
-            let currentParticipantIds = Set(participantsState.participants.map(\.id))
-            let activePinnedIds = pinnedIds.intersection(currentParticipantIds)
-
-            if activePinnedIds != pinnedIds {
-                Task { [weak self] in
-                    await self?.pinnedParticipantsDataSource.removeParticipants(notIn: currentParticipantIds)
-                }
-            }
-
-            let uiParticipants = participantsState.participants.map { participant in
-                self.mapToUIParticipant(participant, pinnedIds: activePinnedIds)
-            }
-
-            let localUIParticipant = participantsState.localParticipant.map { participant in
-                UIParticipant(participant: participant)
-            }
-
-            var sortedParticipants: [UIParticipant]
-            if layout == .activeSpeaker {
-                sortedParticipants = uiParticipants.sortedByDisplayPriority(
+                    participants: sortedParticipants,
+                    layout: layout,
                     activeSpeakerId: participantsState.activeParticipantId)
-                if let localUIParticipant {
-                    if sortedParticipants.isEmpty {
-                        sortedParticipants.append(localUIParticipant)
-                    } else {
-                        sortedParticipants.insert(localUIParticipant, at: 1)
-                    }
-                }
-            } else {
-                sortedParticipants = uiParticipants.sortedByCreationDate()
-                if let localUIParticipant {
-                    if sortedParticipants.isEmpty {
-                        sortedParticipants.append(localUIParticipant)
-                    } else {
-                        sortedParticipants.insert(localUIParticipant, at: 0)
-                    }
-                }
             }
-            return MeetingRoomParticipantsState(
-                participants: sortedParticipants,
-                layout: layout,
-                activeSpeakerId: participantsState.activeParticipantId)
         }
 
         Publishers.CombineLatest3(
@@ -351,32 +356,33 @@ extension MeetingRoomViewModel {
             noiseSuppressionPublisher
         )
         .map { [weak self] state, transcriptionState, noiseSuppressionState in
-            let (participantsState, sessionState, callState, archivingState) = state
+            MainActor.assumeIsolated {
+                let (participantsState, sessionState, callState, archivingState) = state
 
-            guard let self else { return MeetingRoomState.initial }
-            return MeetingRoomState(
-                roomName: self.roomName,
-                roomURL: baseURL.meetingRoomURL(roomName),
-                isMicEnabled: sessionState.isPublishingAudio
-                    && checkMicrophoneAuthorizationStatusUseCase().isAuthorized,
-                isCameraEnabled: sessionState.isPublishingVideo && checkCameraAuthorizationStatusUseCase().isAuthorized,
-                participants: participantsState.participants,
-                layout: participantsState.layout,
-                activeSpeakerId: participantsState.activeSpeakerId,
-                allowMicrophoneControl: configuration.allowMicrophoneControl,
-                allowCameraControl: configuration.allowCameraControl,
-                showParticipantList: configuration.showParticipantList,
-                callState: callState,
-                archivingState: archivingState,
-                transcriptionState: transcriptionState,
-                noiseSuppressionState: noiseSuppressionState
-            )
+                guard let self else { return MeetingRoomState.initial }
+                return MeetingRoomState(
+                    roomName: self.roomName,
+                    roomURL: self.baseURL.meetingRoomURL(self.roomName),
+                    isMicEnabled: sessionState.isPublishingAudio
+                        && self.checkMicrophoneAuthorizationStatusUseCase().isAuthorized,
+                    isCameraEnabled: sessionState.isPublishingVideo
+                        && self.checkCameraAuthorizationStatusUseCase().isAuthorized,
+                    participants: participantsState.participants,
+                    layout: participantsState.layout,
+                    activeSpeakerId: participantsState.activeSpeakerId,
+                    allowMicrophoneControl: self.configuration.allowMicrophoneControl,
+                    allowCameraControl: self.configuration.allowCameraControl,
+                    showParticipantList: self.configuration.showParticipantList,
+                    callState: callState,
+                    archivingState: archivingState,
+                    transcriptionState: transcriptionState,
+                    noiseSuppressionState: noiseSuppressionState
+                )
+            }
         }
         .removeDuplicates()
-        .sink { [weak self] newState in
-            Task { @MainActor in
-                self?.state = .content(newState)
-            }
+        .sinkOnMainActor { [weak self] newState in
+            self?.state = .content(newState)
         }
         .store(in: &cancellables)
     }
@@ -412,13 +418,13 @@ extension MeetingRoomViewModel {
         observeSessionState(call.participantsPublisher)
 
         call.statePublisher
-            .sink { [weak self] state in
+            .sinkOnMainActor { [weak self] state in
                 self?.sessionStatePublisher.send(state)
             }
             .store(in: &cancellables)
 
         call.callState
-            .sink { [weak self] callState in
+            .sinkOnMainActor { [weak self] callState in
                 self?.callStatePublisher.send(callState)
                 self?.navigateBackIfNeeded(callState)
             }
@@ -427,7 +433,7 @@ extension MeetingRoomViewModel {
         call.archivingState
             .removeDuplicates()
             .dropFirst()
-            .sink { [weak self] archivingState in
+            .sinkOnMainActor { [weak self] archivingState in
                 self?.handleArchivingStateChange(archivingState)
             }
             .store(in: &cancellables)
@@ -441,57 +447,52 @@ extension MeetingRoomViewModel {
             .store(in: &cancellables)
 
         call.eventsPublisher
-            .sink { [weak self] event in
+            .sinkOnMainActor { [weak self] event in
                 self?.handleEvents(event)
             }
             .store(in: &cancellables)
 
         captionsStatusDataSource.captionsState
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in
-                    self?.updateExtraButtons()
-                }
+            .sinkOnMainActor { [weak self] _ in
+                self?.updateExtraButtons()
             }
             .store(in: &cancellables)
 
         noiseSuppressionStatusDataSource.noiseSuppressionState
-            .sink { [weak self] state in
+            .sinkOnMainActor { [weak self] state in
                 self?.handleNoiseSuppressionChange(state)
             }
             .store(in: &cancellables)
 
         let detector = SpeakingWhileMutedDetector(
-            isMicEnabled: sessionStatePublisher.map(\.isPublishingAudio).eraseToAnyPublisher(),
+            // Read microphone changes at the same source boundary as audio samples. The
+            // UI-forwarded session state may still be queued when the next sample arrives.
+            isMicEnabled: call.statePublisher.map(\.isPublishingAudio).eraseToAnyPublisher(),
             audioLevel: call.publisherAudioLevelPublisher
         )
         speakingWhileMutedDetector = detector
 
         detector.isSpeakingWhileMuted
-            .filter { $0 == true }
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in
-                    self?.toast = ToastItem(
-                        message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
-                        mode: .warning)
-                }
+            .filter { @Sendable in $0 }
+            .sinkOnMainActor { [weak self] _ in
+                self?.toast = ToastItem(
+                    message: String(localized: "You're muted. Tap the mic button to unmute.", bundle: .module),
+                    mode: .warning)
             }
             .store(in: &cancellables)
     }
 
     fileprivate func handleArchivingStateChange(_ archivingState: ArchivingState) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            self.archivingPublisher.value = archivingState
-            switch archivingState {
-            case .idle:
-                self.toast = .init(
-                    message: String(localized: "Session recording stopped", bundle: .module),
-                    mode: .info)
-            case .archiving:
-                self.toast = .init(
-                    message: String(localized: "Session recording started", bundle: .module),
-                    mode: .info)
-            }
+        self.archivingPublisher.value = archivingState
+        switch archivingState {
+        case .idle:
+            self.toast = .init(
+                message: String(localized: "Session recording stopped", bundle: .module),
+                mode: .info)
+        case .archiving:
+            self.toast = .init(
+                message: String(localized: "Session recording started", bundle: .module),
+                mode: .info)
         }
     }
 
@@ -518,36 +519,33 @@ extension MeetingRoomViewModel {
     }
 
     fileprivate func handleEvents(_ event: SessionEvent) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            switch event {
-            case .didBeginReconnecting:
-                self.isSessionInterrupted = true
-                self.toast = .init(
-                    message: String(localized: "Session did drop, started reconnection", bundle: .module),
-                    mode: .warning)
-            case .didReconnect:
-                self.isSessionInterrupted = false
-                self.toast = .init(
-                    message: String(localized: "Session did reconnect", bundle: .module),
-                    mode: .info)
-            case .muteForced:
-                self.toast = .init(
-                    message: String(localized: "You were muted by the host.", bundle: .module),
-                    mode: .warning)
-            case .error(let error):
-                self.toast = .init(message: error.localizedDescription, mode: .failure)
-            case .sessionFailure(let error):
-                self.toast = .init(message: error.localizedDescription, mode: .failure)
-            case .disconnected:
-                self.isSessionInterrupted = true
-                self.toast = .init(
-                    message: String(localized: "Session did disconnect", bundle: .module),
-                    mode: .failure)
-                self.scheduleDisconnection()
-            default:
-                break
-            }
+        switch event {
+        case .didBeginReconnecting:
+            self.isSessionInterrupted = true
+            self.toast = .init(
+                message: String(localized: "Session did drop, started reconnection", bundle: .module),
+                mode: .warning)
+        case .didReconnect:
+            self.isSessionInterrupted = false
+            self.toast = .init(
+                message: String(localized: "Session did reconnect", bundle: .module),
+                mode: .info)
+        case .muteForced:
+            self.toast = .init(
+                message: String(localized: "You were muted by the host.", bundle: .module),
+                mode: .warning)
+        case .error(let error):
+            self.toast = .init(message: error.localizedDescription, mode: .failure)
+        case .sessionFailure(let error):
+            self.toast = .init(message: error.localizedDescription, mode: .failure)
+        case .disconnected:
+            self.isSessionInterrupted = true
+            self.toast = .init(
+                message: String(localized: "Session did disconnect", bundle: .module),
+                mode: .failure)
+            self.scheduleDisconnection()
+        default:
+            break
         }
     }
 
@@ -558,14 +556,24 @@ extension MeetingRoomViewModel {
     /// (`navigateBackIfNeeded`), preventing a 6-second strong retain on `self`.
     @MainActor
     fileprivate func scheduleDisconnection() {
+        guard !isTearingDown else { return }
+        disconnectionTask?.cancel()
+        let timeout = disconnectionTimeout
+        let delay = disconnectionDelay
         disconnectionTask = Task { [weak self] in
             do {
-                try await Task.sleep(for: .seconds(MeetingRoomViewModel.disconnectionTimeoutInSeconds))
+                try await delay(timeout)
             } catch {
                 return  // Task was cancelled — normal call end already handled cleanup
             }
-            try? await self?.disconnectRoomUseCase()
+            guard let self, !Task.isCancelled, !self.isTearingDown else { return }
+            self.disconnectionTask = nil
+            try? await self.disconnectRoomUseCase()
         }
+    }
+
+    private var isTearingDown: Bool {
+        callStatePublisher.value == .disconnecting || callStatePublisher.value == .disconnected
     }
 
     @MainActor
