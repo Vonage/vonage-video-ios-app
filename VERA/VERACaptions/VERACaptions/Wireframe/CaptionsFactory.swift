@@ -43,11 +43,13 @@ public final class CaptionsFactory {
         CaptionsButtonContainer(viewModel: viewModel)
     }
 
+    @MainActor
     public func makeCaptionsView() -> (view: some View, viewModel: CaptionsViewModel) {
         let viewModel = CaptionsViewModel(captionsObserver: captionsRepository)
         return (makeCaptionsView(viewModel: viewModel), viewModel)
     }
 
+    @MainActor
     public func makeCaptionsView(
         viewModel: CaptionsViewModel
     ) -> some View {
