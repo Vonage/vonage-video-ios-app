@@ -28,16 +28,24 @@ import VERAVonage
 ///                       └─ subscribe to call.captionsPublisher
 ///
 /// callDidEnd     ──► cancelObservables()
-///                       ├─ reset captionsStatusDataSource
-///                       ├─ clear captionsRepository
-///                       └─ cancel all Combine subscriptions
+///                       ├─ cancel subscriptions and workers
+///                       ├─ await any in-flight write
+///                       ├─ disable and reset captions status
+///                       └─ clear captionsRepository
 /// ```
 ///
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``CaptionsStatusDataSource``
+@MainActor
 public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     private var cancellables = Set<AnyCancellable>()
     /// Tracks the caption-forwarding Task so it can be cancelled on call end.
     private var captionsTask: Task<Void, Never>?
+    private var activationTask: Task<Void, Never>?
+    private var captionsContinuation: AsyncStream<[CaptionItem]>.Continuation?
+    private var activationContinuation: AsyncStream<CaptionsState>.Continuation?
+    private var lifecycleTask: Task<Void, Never>?
+
+    private enum LifecycleOperation { case start, end }
 
     /// The active call façade, injected by the plugin coordinator after initialisation.
     ///
@@ -71,6 +79,12 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
         self.captionsRepository = captionsRepository
     }
 
+    deinit {
+        captionsTask?.cancel()
+        activationTask?.cancel()
+        lifecycleTask?.cancel()
+    }
+
     /// Called when the call starts and the Vonage session is connected.
     ///
     /// Sets up two Combine subscriptions:
@@ -82,61 +96,88 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Parameter userInfo: Contextual info passed by the plugin coordinator
     ///   (not used by this plugin).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
-        initObservers()
+        await enqueueLifecycle(.start)
     }
 
     /// Called when the call ends and the Vonage session is disconnecting.
     ///
     /// Performs cleanup in order:
-    /// 1. Resets ``CaptionsStatusDataSource`` to `.disabled`.
-    /// 2. Clears any remaining captions in the repository.
-    /// 3. Cancels all active Combine subscriptions to prevent further updates.
+    /// 1. Cancels subscriptions and joins pending forwarding and activation work.
+    /// 2. Disables captions and resets ``CaptionsStatusDataSource``.
+    /// 3. Clears the repository after the final in-flight write completes.
     public func callDidEnd() async throws {
-        try await cancelObservables()
+        await enqueueLifecycle(.end)
     }
 
     // MARK: - Private
 
-    /// Tears down all state related to the current call session.
-    private func cancelObservables() async throws {
-        captionsTask?.cancel()
-        await captionsTask?.value
-        captionsTask = nil
-        captionsStatusDataSource.reset()
-        await captionsRepository.updateCaptions([])
-        cancellables.removeAll()
-    }
-
-    /// Creates the two Combine pipelines that power this plugin.
-    private func initObservers() {
-        captionsStatusDataSource.captionsState
-            .sink { [weak self] state in
-                self?.processNewState(state)
-            }
-            .store(in: &cancellables)
-
-        // Forward captions from the call to the repository.
-        // Uses a stored Task with `for await` so that each write completes
-        // before processing the next value, avoiding fire-and-forget races.
-        if let publisher = call?.captionsPublisher {
-            captionsTask?.cancel()
-            captionsTask = Task { [weak self] in
-                for await captions in publisher.values {
-                    guard let self else { return }
-                    await self.captionsRepository.updateCaptions(captions)
-                }
+    /// Serializes lifecycle calls across suspension points, including a restart during teardown.
+    private func enqueueLifecycle(_ operation: LifecycleOperation) async {
+        let previous = lifecycleTask
+        let activeCall = call
+        let task = Task { @MainActor [weak self, weak activeCall] in
+            await previous?.value
+            guard !Task.isCancelled, let self else { return }
+            await self.cancelObservables()
+            switch operation {
+            case .start:
+                self.initObservers(activeCall: activeCall)
+            case .end:
+                await activeCall?.disableCaptions()
+                self.captionsStatusDataSource.reset()
+                await self.captionsRepository.updateCaptions([])
             }
         }
+        lifecycleTask = task
+        await task.value
     }
 
-    /// Reacts to a captions state change by enabling or disabling captions on the call.
-    ///
-    /// - Parameter state: The new captions activation state.
-    private func processNewState(_ state: CaptionsState) {
-        Task {
-            switch state {
-            case .enabled: await call?.enableCaptions()
-            case .disabled: await call?.disableCaptions()
+    /// Stops inputs first, then joins any suspended write before the final clear.
+    private func cancelObservables() async {
+        cancellables.removeAll()
+        captionsContinuation?.finish()
+        activationContinuation?.finish()
+        captionsContinuation = nil
+        activationContinuation = nil
+        let captionsTask = captionsTask
+        let activationTask = activationTask
+        self.captionsTask = nil
+        self.activationTask = nil
+        captionsTask?.cancel()
+        activationTask?.cancel()
+        await captionsTask?.value
+        await activationTask?.value
+    }
+
+    private func initObservers(activeCall: (any CallFacade)?) {
+        // Caption arrays describe the full current snapshot. While a write is suspended,
+        // retain only the newest pending snapshot instead of growing a transcription backlog.
+        let captions = AsyncStream<[CaptionItem]>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        captionsContinuation = captions.continuation
+        activeCall?.captionsPublisher
+            .sink { @Sendable snapshot in captions.continuation.yield(snapshot) }
+            .store(in: &cancellables)
+        let repository = captionsRepository
+        captionsTask = Task {
+            for await snapshot in captions.stream {
+                guard !Task.isCancelled else { return }
+                await repository.updateCaptions(snapshot)
+            }
+        }
+
+        // Activation commands run sequentially, so a slow enable cannot overtake disable.
+        let activation = AsyncStream<CaptionsState>.makeStream()
+        activationContinuation = activation.continuation
+        captionsStatusDataSource.captionsState
+            .sink { @Sendable state in activation.continuation.yield(state) }
+            .store(in: &cancellables)
+        activationTask = Task { @MainActor [weak activeCall] in
+            for await state in activation.stream {
+                guard !Task.isCancelled, let activeCall else { return }
+                switch state {
+                case .enabled: await activeCall.enableCaptions()
+                case .disabled: await activeCall.disableCaptions()
+                }
             }
         }
     }

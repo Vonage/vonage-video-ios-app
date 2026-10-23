@@ -12,30 +12,33 @@ struct ForceMuteE2EFixture: E2EScenarioFixture {
     static let participantID = "e2e-remote-participant"
     static let participantName = "Remote Participant"
 
-    let participantsState = ParticipantsState(
-        localParticipant: Participant(
-            id: localPublisherID,
-            name: localPublisherName,
-            isMicEnabled: true,
-            isCameraEnabled: false,
-            videoDimensions: .init(width: 640, height: 480),
-            isRemote: false,
-            creationTime: Date(timeIntervalSince1970: 1_754_638_878),
-            isScreenshare: false,
-            view: AnyView(EmptyView())
-        ),
-        participants: [
-            Participant(
-                id: participantID,
-                name: participantName,
+    @MainActor
+    var participantsState: ParticipantsState {
+        ParticipantsState(
+            localParticipant: Participant(
+                id: Self.localPublisherID,
+                name: Self.localPublisherName,
                 isMicEnabled: true,
                 isCameraEnabled: false,
                 videoDimensions: .init(width: 640, height: 480),
-                isRemote: true,
-                creationTime: Date(timeIntervalSince1970: 1_754_638_879),
+                isRemote: false,
+                creationTime: Date(timeIntervalSince1970: 1_754_638_878),
                 isScreenshare: false,
                 view: AnyView(EmptyView())
-            )
-        ],
-        activeParticipantId: nil)
+            ),
+            participants: [
+                Participant(
+                    id: Self.participantID,
+                    name: Self.participantName,
+                    isMicEnabled: true,
+                    isCameraEnabled: false,
+                    videoDimensions: .init(width: 640, height: 480),
+                    isRemote: true,
+                    creationTime: Date(timeIntervalSince1970: 1_754_638_879),
+                    isScreenshare: false,
+                    view: AnyView(EmptyView())
+                )
+            ],
+            activeParticipantId: nil)
+    }
 }

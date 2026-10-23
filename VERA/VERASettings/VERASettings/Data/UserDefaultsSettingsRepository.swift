@@ -23,11 +23,11 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
     private let userDefaults: UserDefaults
 
     /// Subject that holds the current settings and notifies observers of changes.
-    private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
+    private nonisolated let subject: CurrentValueRelay<PublisherSettingsPreferences, Never>
 
     /// A publisher that emits the current preferences whenever they change.
     public nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     // MARK: - Init
@@ -37,7 +37,7 @@ public actor UserDefaultsSettingsRepository: PublisherSettingsRepository {
     /// - Parameter userDefaults: The UserDefaults instance to use. Defaults to `.standard`.
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        self.subject = CurrentValueSubject(.default)
+        self.subject = CurrentValueRelay(.default)
     }
 
     public func setup() async {

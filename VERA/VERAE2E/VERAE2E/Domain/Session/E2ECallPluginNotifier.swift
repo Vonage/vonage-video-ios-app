@@ -5,6 +5,7 @@
 import VERADomain
 import VERAVonage
 
+@MainActor
 final class E2ECallPluginNotifier {
     private let plugins: [any VonagePlugin]
     private let callParams: [String: Any]
@@ -35,6 +36,7 @@ final class E2ECallPluginNotifier {
 
     func notifyCallDidStart() async {
         for plugin in plugins {
+            guard !Task.isCancelled else { return }
             try? await plugin.callDidStart(callParams)
         }
     }

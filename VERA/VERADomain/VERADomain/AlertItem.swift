@@ -10,12 +10,12 @@ public struct AlertItem: Identifiable, Equatable {
     public let message: String
     public let okAction: String?
     public let cancelAction: String?
-    public let onConfirm: (() -> Void)?
+    public let onConfirm: (@MainActor () -> Void)?
 
     public init(
         title: String,
         message: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) {
         self.title = title
         self.message = message
@@ -29,7 +29,7 @@ public struct AlertItem: Identifiable, Equatable {
         message: String,
         okAction: String,
         cancelAction: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) {
         self.title = title
         self.message = message
@@ -38,15 +38,15 @@ public struct AlertItem: Identifiable, Equatable {
         self.cancelAction = cancelAction
     }
 
-    public static func cameraPermissionAlert(onConfirm: @escaping (() -> Void)) -> AlertItem {
+    public static func cameraPermissionAlert(onConfirm: @escaping @MainActor () -> Void) -> AlertItem {
         getAlertWithText(message: "Please review camera permissions in settings.", onConfirm: onConfirm)
     }
 
-    public static func microphonePermissionAlert(onConfirm: @escaping (() -> Void)) -> AlertItem {
+    public static func microphonePermissionAlert(onConfirm: @escaping @MainActor () -> Void) -> AlertItem {
         getAlertWithText(message: "Please review microphone permissions in settings.", onConfirm: onConfirm)
     }
 
-    public static func getAlertWithText(message: String, onConfirm: @escaping (() -> Void)) -> AlertItem {
+    public static func getAlertWithText(message: String, onConfirm: @escaping @MainActor () -> Void) -> AlertItem {
         AlertItem(
             title: "Check Settings",
             message: message,
@@ -58,7 +58,7 @@ public struct AlertItem: Identifiable, Equatable {
 
     public static func genericError(
         _ errorMessage: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) -> AlertItem {
         AlertItem(
             title: "Error",
@@ -69,7 +69,7 @@ public struct AlertItem: Identifiable, Equatable {
 
     public static func roomCredentialsError(
         _ errorMessage: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) -> AlertItem {
         AlertItem(
             title: "Connection Error",
@@ -80,7 +80,7 @@ public struct AlertItem: Identifiable, Equatable {
 
     public static func goodbyeError(
         _ errorMessage: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) -> AlertItem {
         AlertItem(
             title: "Error",
@@ -91,7 +91,7 @@ public struct AlertItem: Identifiable, Equatable {
 
     public static func downloadError(
         _ errorMessage: String,
-        onConfirm: (() -> Void)? = nil
+        onConfirm: (@MainActor () -> Void)? = nil
     ) -> AlertItem {
         AlertItem(
             title: "Error",

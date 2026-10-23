@@ -8,6 +8,7 @@ import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
+@MainActor
 public func makeMockConnectToRoomUseCase() -> MockConnectToRoomUseCase {
     MockConnectToRoomUseCase()
 }
@@ -29,6 +30,7 @@ public final class MockConnectToRoomUseCase: ConnectToRoomUseCase {
     }
 }
 
+@MainActor
 public func makeFailingMockConnectToRoomUseCase() -> MockFailingConnectToRoomUseCase {
     MockFailingConnectToRoomUseCase()
 }
@@ -45,6 +47,7 @@ public final class MockFailingConnectToRoomUseCase: ConnectToRoomUseCase {
     }
 }
 
+@MainActor
 public func makeThrowingConnectToRoomUseCase(error: Swift.Error) -> ThrowingConnectToRoomUseCase {
     ThrowingConnectToRoomUseCase(error: error)
 }
