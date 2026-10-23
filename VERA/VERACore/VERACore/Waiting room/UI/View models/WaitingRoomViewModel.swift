@@ -240,8 +240,8 @@ extension WaitingRoomViewModel {
             id: device.id,
             name: device.name,
             iconName: "person.fill.viewfinder")
-        device.onTap = { [weak self] in
-            self?.publisher?.switchCamera(to: device.id)
+        device.onTap = { [weak self, id = device.id] in
+            self?.publisher?.switchCamera(to: id)
         }
         return device
     }
@@ -251,8 +251,8 @@ extension WaitingRoomViewModel {
             id: device.id,
             name: device.name,
             iconName: "iphone.rear.camera")
-        device.onTap = { [weak self] in
-            self?.publisher?.switchCamera(to: device.id)
+        device.onTap = { [weak self, id = device.id] in
+            self?.publisher?.switchCamera(to: id)
         }
         return device
     }
