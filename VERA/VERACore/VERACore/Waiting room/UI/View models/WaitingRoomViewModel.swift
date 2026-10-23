@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERAConfiguration
 import VERADomain
 
@@ -159,26 +160,18 @@ public final class WaitingRoomViewModel {
 extension WaitingRoomViewModel {
 
     fileprivate func observeCameraDevices() {
-        cameraDevicesRepository.observeAvailableDevices.receive(
-            on: DispatchQueue.main
-        )
-        .map { [weak self] cameraDevices -> [UICameraDevice] in
-            guard let self else { return [] }
-            return cameraDevices.map {
-                self.makeUICameraDevice(device: $0)
+        cameraDevicesRepository.observeAvailableDevices
+            .sinkOnMainActor { [weak self] cameraDevices in
+                guard let self else { return }
+                availableCameraDevices = cameraDevices.map { self.makeUICameraDevice(device: $0) }
+                updateUIState()
             }
-        }
-        .sink { [weak self] in
-            self?.availableCameraDevices = $0
-            self?.updateUIState()
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
     }
 
     fileprivate func observeCameraPreviewReset() {
         cameraPreviewProviderRepository.didResetPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
+            .sinkOnMainActor { [weak self] in
                 self?.startVideoPreview()
             }
             .store(in: &cancellables)
@@ -240,8 +233,8 @@ extension WaitingRoomViewModel {
             id: device.id,
             name: device.name,
             iconName: "person.fill.viewfinder")
-        device.onTap = { [weak self] in
-            self?.publisher?.switchCamera(to: device.id)
+        device.onTap = { [weak self, id = device.id] in
+            self?.publisher?.switchCamera(to: id)
         }
         return device
     }
@@ -251,8 +244,8 @@ extension WaitingRoomViewModel {
             id: device.id,
             name: device.name,
             iconName: "iphone.rear.camera")
-        device.onTap = { [weak self] in
-            self?.publisher?.switchCamera(to: device.id)
+        device.onTap = { [weak self, id = device.id] in
+            self?.publisher?.switchCamera(to: id)
         }
         return device
     }
@@ -288,8 +281,7 @@ extension WaitingRoomViewModel {
 
     fileprivate func observeAudioLevel(_ publisher: VERAPublisher) {
         publisher.audioLevelPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] level in
+            .sinkOnMainActor { [weak self] level in
                 self?.updateAudioLevel(level)
             }
             .store(in: &cancellables)

@@ -178,14 +178,14 @@ struct NavBarAuthButtonViewModelTests {
 // MARK: - Test Doubles
 
 @MainActor
-private final class MockAuthStateDataSource: AuthStateDataSource, @unchecked Sendable {
-    let subject: CurrentValueSubject<AuthState, Never>
+private final class MockAuthStateDataSource: AuthStateDataSource {
+    nonisolated let subject: CurrentValueRelay<AuthState, Never>
 
     nonisolated var authStatePublisher: AnyPublisher<AuthState, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     init(initialState: AuthState = .notAuthenticated) {
-        self.subject = CurrentValueSubject(initialState)
+        self.subject = CurrentValueRelay(initialState)
     }
 }

@@ -79,6 +79,9 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - **Caption data** – forwards ``CallFacade/captionsPublisher`` updates
     ///   to the ``CaptionsWriter``.
     ///
+    /// Repeated starts keep the current observers and any in-flight caption write.
+    /// Call `callDidEnd()` before starting another call session.
+    ///
     /// - Parameter userInfo: Contextual info passed by the plugin coordinator
     ///   (not used by this plugin).
     public func callDidStart(_ userInfo: [String: Any]) async throws {
@@ -109,6 +112,9 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Creates the two Combine pipelines that power this plugin.
     private func initObservers() {
+        // Lifecycle notifications may repeat; retain one subscription/worker pair until call end.
+        guard cancellables.isEmpty else { return }
+
         captionsStatusDataSource.captionsState
             .sink { [weak self] state in
                 self?.processNewState(state)
@@ -119,9 +125,15 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
         // Uses a stored Task with `for await` so that each write completes
         // before processing the next value, avoiding fire-and-forget races.
         if let publisher = call?.captionsPublisher {
+            // Subscribe before returning so an immediate caption update is buffered even
+            // when the forwarding task has not yet been scheduled.
+            let captions = AsyncStream<[CaptionItem]>.makeStream(bufferingPolicy: .bufferingNewest(1))
+            publisher
+                .sink { snapshot in captions.continuation.yield(snapshot) }
+                .store(in: &cancellables)
             captionsTask?.cancel()
             captionsTask = Task { [weak self] in
-                for await captions in publisher.values {
+                for await captions in captions.stream {
                     guard let self else { return }
                     await self.captionsRepository.updateCaptions(captions)
                 }
