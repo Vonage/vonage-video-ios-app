@@ -42,6 +42,9 @@ enum SettingsAccessibilityID {
     static let subscriberFallbackToggle = "settings-subscriber-fallback-toggle"
     static let subscriberFallbackLocked = "settings-subscriber-fallback-locked"
 
+    // MARK: - Captions Section - Always Editable
+    static let captionsLanguagePicker = "settings-captions-language-picker"
+
     // MARK: - General Section
 
     static let overlayStatsToggle = "settings-overlay-stats-toggle"

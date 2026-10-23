@@ -27,17 +27,23 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Whether settings screens show the Captions section (captions enabled for the deployment).
+    public let isCaptionsTranslationAvailable: Bool
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - isCaptionsTranslationAvailable: Whether to show the Captions section. Defaults to `false`.
     public init(
         repository: PublisherSettingsRepository,
-        statsDataSource: StatsDataSource
+        statsDataSource: StatsDataSource,
+        isCaptionsTranslationAvailable: Bool = false
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
+        self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
     }
 
     // MARK: - Settings View
@@ -51,7 +57,7 @@ public final class SettingsFactory {
     @MainActor
     public func makeSettingsView() -> SettingsView {
         let viewModel = SettingsViewModel(repository: repository)
-        return SettingsView(viewModel: viewModel)
+        return SettingsView(viewModel: viewModel, isCaptionsTranslationAvailable: isCaptionsTranslationAvailable)
     }
 
     // MARK: - Waiting Room Button
@@ -93,7 +99,8 @@ public final class SettingsFactory {
         let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
         return .init(
             viewModel: viewModel,
-            statisticsViewModel: statisticsViewModel
+            statisticsViewModel: statisticsViewModel,
+            isCaptionsTranslationAvailable: isCaptionsTranslationAvailable
         )
     }
 

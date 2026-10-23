@@ -274,6 +274,11 @@ public class VonageSubscriber: NSObject {
     func disableCaptions() {
         otSubscriber.subscribeToCaptions = false
     }
+
+    /// Sets the BCP-47 language this subscriber's captions are translated into; `nil` keeps the original.
+    func setCaptionsTranslationLanguage(_ languageCode: String?) {
+        otSubscriber.captionsTranslationLanguage = languageCode
+    }
 }
 
 // MARK: - OTSubscriberDelegate

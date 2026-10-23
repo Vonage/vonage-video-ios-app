@@ -45,6 +45,11 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public var opusDtxEnabled: Bool
 
+    /// BCP-47 language remote captions are translated into; `nil` keeps the original language.
+    ///
+    /// Not a publisher setting: it is applied to subscribers and never triggers a republish.
+    public var captionsTranslationLanguage: String?
+
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
@@ -63,6 +68,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
+    ///   - captionsTranslationLanguage: Captions translation language. Defaults to `nil` (original).
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -75,7 +81,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         senderStatsEnabled: Bool = false,
         statsOverlayEnabled: Bool = true,
         degradationPreference: SettingsDegradationPreference = .notSet,
-        opusDtxEnabled: Bool = true
+        opusDtxEnabled: Bool = true,
+        captionsTranslationLanguage: String? = nil
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -89,6 +96,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.captionsTranslationLanguage = captionsTranslationLanguage
     }
 
     // MARK: - Migration
@@ -129,6 +137,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
+        captionsTranslationLanguage = try container.decodeIfPresent(String.self, forKey: .captionsTranslationLanguage)
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -154,6 +163,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
+        case captionsTranslationLanguage
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -176,6 +186,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encodeIfPresent(captionsTranslationLanguage, forKey: .captionsTranslationLanguage)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -189,5 +200,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
             && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
+            && lhs.captionsTranslationLanguage == rhs.captionsTranslationLanguage
     }
 }

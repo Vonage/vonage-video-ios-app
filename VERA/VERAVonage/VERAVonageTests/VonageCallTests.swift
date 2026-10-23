@@ -599,6 +599,30 @@ struct VonageCallTests {
         #expect(payloads.first?.contains(#""archivingID":"transcription-1""#) == true)
     }
 
+    // MARK: - Captions translation
+
+    @Test("Captions translation language is kept for late joiners and nil restores the original")
+    func captionsTranslationLanguageIsStoredAndReset() {
+        let sut = makeSUT()
+
+        sut.setCaptionsTranslationLanguage("es-ES")
+        #expect(sut.captionsTranslationLanguage == "es-ES")
+
+        sut.setCaptionsTranslationLanguage(nil)
+        #expect(sut.captionsTranslationLanguage == nil)
+    }
+
+    @Test("Subscribers forward the translation language to the SDK subscriber")
+    func subscriberForwardsTranslationLanguageToSDK() throws {
+        guard let subscriber = try? VonageSubscriberFactory().makeSubscriber(OTStream()) else { return }
+
+        subscriber.setCaptionsTranslationLanguage("fr-FR")
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == "fr-FR")
+
+        subscriber.setCaptionsTranslationLanguage(nil)
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == nil)
+    }
+
     // MARK: - Test Helpers
 
     private func makeConnectedSUT(session: VonageSessionSpy) async throws -> VonageCall {

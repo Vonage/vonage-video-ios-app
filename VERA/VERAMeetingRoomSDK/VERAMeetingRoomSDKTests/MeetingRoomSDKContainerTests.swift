@@ -117,6 +117,21 @@ struct MeetingRoomSDKContainerTests {
         #expect(container.enabledFeatures == features)
     }
 
+    @Test(
+        "Captions translation needs both captions and captionsTranslation",
+        arguments: [
+            (Set<MeetingRoomFeature>([.captions, .captionsTranslation]), true),
+            (Set<MeetingRoomFeature>([.captions]), false),
+            (Set<MeetingRoomFeature>([.captionsTranslation]), false),
+            (Set<MeetingRoomFeature>(), false),
+        ])
+    func captionsTranslationRequiresCaptions(features: Set<MeetingRoomFeature>, expected: Bool) {
+        let container = makeContainer(enabledFeatures: features)
+
+        #expect(container.isCaptionsTranslationEnabled == expected)
+        #expect(container.settingsFactory.isCaptionsTranslationAvailable == expected)
+    }
+
     @Test("Container stores configuration")
     func containerStoresConfiguration() {
         let config = MeetingRoomConfiguration(
