@@ -24,6 +24,7 @@ public final class CaptionsFactory {
         self.sessionKeyProvider = sessionKeyProvider
     }
 
+    @MainActor
     public func makeCaptionsButton() -> (view: some View, viewModel: CaptionsButtonViewModel) {
         let viewModel = CaptionsButtonViewModel(
             sessionKeyProvider: sessionKeyProvider,
@@ -37,6 +38,7 @@ public final class CaptionsFactory {
         return (makeCaptionsButton(viewModel: viewModel), viewModel)
     }
 
+    @MainActor
     public func makeCaptionsButton(
         viewModel: CaptionsButtonViewModel
     ) -> some View {
