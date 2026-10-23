@@ -1,0 +1,38 @@
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  s_1bb72729ee5d42::t_01b1d3ab089d09 9-14,17-21,28
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  s_280c4377f57e6c::t_1a435cebaa6682 35-36,39
+  s_e9f4ed04dc9801::t_7112a7a4b74364 86-88,90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "07f6f47cc16ffb3641bb771051ebb26d9997739f",
+  "prompts": {},
+  "sessions": {
+    "s_1bb72729ee5d42": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792753875685284000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_280c4377f57e6c": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792753929628513000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_e9f4ed04dc9801": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792754148647041000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
