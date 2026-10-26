@@ -57,6 +57,34 @@ struct DefaultArchivingDataSourceTests {
         #expect(httpClient.recordedData != nil)
     }
 
+    @Test("Start recording omits withTranscription from the request body")
+    func startRecordingOmitsWithTranscription() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.data = try makeStartArchivingJSONResponse()
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        _ = try await sut.startArchiving(makeStartArchivingRequest(kind: .recording))
+
+        let body = try recordedBody(httpClient)
+        #expect(body["sessionKey"] as? String == "test-session-key")
+        #expect(body["withTranscription"] == nil)
+    }
+
+    @Test("Start transcription sends withTranscription true in the request body")
+    func startTranscriptionSendsWithTranscription() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.data = try makeStartArchivingJSONResponse()
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        _ = try await sut.startArchiving(makeStartArchivingRequest(kind: .transcription))
+
+        let body = try recordedBody(httpClient)
+        #expect(body["sessionKey"] as? String == "test-session-key")
+        #expect(body["withTranscription"] as? Bool == true)
+    }
+
     @Test("Start archiving throws error on invalid JSON")
     func startArchivingThrowsErrorOnInvalidJSON() async throws {
         let httpClient = MockHTTPClient()
@@ -139,6 +167,24 @@ struct DefaultArchivingDataSourceTests {
         #expect(httpClient.recordedData != nil)
     }
 
+    @Test("Stop transcription sends the explicit archive id in the request body")
+    func stopTranscriptionSendsArchiveID() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.data = try makeStopArchivingJSONResponse()
+
+        let sut = makeSUT(httpClient: httpClient)
+
+        _ = try await sut.stopArchiving(
+            StopArchivingDataSourceRequest(
+                sessionKey: "test-session-key",
+                archiveID: "transcription-1",
+                kind: .transcription))
+
+        let body = try recordedBody(httpClient)
+        #expect(body["archiveId"] as? String == "transcription-1")
+        #expect(body["sessionKey"] as? String == "test-session-key")
+    }
+
     @Test("Stop archiving throws error on invalid JSON")
     func stopArchivingThrowsErrorOnInvalidJSON() async throws {
         let httpClient = MockHTTPClient()
@@ -189,9 +235,15 @@ struct DefaultArchivingDataSourceTests {
     }
 
     private func makeStartArchivingRequest(
-        sessionKey: String = "test-session-key"
+        sessionKey: String = "test-session-key",
+        kind: ArchiveKind = .recording
     ) -> StartArchivingDataSourceRequest {
-        StartArchivingDataSourceRequest(sessionKey: sessionKey)
+        StartArchivingDataSourceRequest(sessionKey: sessionKey, kind: kind)
+    }
+
+    private func recordedBody(_ httpClient: MockHTTPClient) throws -> [String: Any] {
+        let data = try #require(httpClient.recordedData)
+        return try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
     }
 
     private func makeStopArchivingRequest(

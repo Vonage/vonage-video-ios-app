@@ -173,6 +173,7 @@ final class DependencyContainer {
         var features: Set<MeetingRoomFeature> = []
         if appConfig.meetingRoomSettings.allowChat { features.insert(.chat) }
         if appConfig.meetingRoomSettings.allowArchiving { features.insert(.archiving) }
+        if appConfig.meetingRoomSettings.allowPostCallTranscription { features.insert(.postCallTranscription) }
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
