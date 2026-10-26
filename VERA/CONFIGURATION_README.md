@@ -1,36 +1,23 @@
 # VERA Dynamic Configuration System
 
-This system allows enabling or disabling VERA application features through JSON configuration, specifically the chat module.
+This system allows enabling or disabling VERA application features through JSON configuration.
 
 ## Important Files
 
 - `./Config/app-config.json`: Main configuration file
 - `Scripts/generate-app-config.py`: Generates Swift code from JSON configuration
-- `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift`: Auto-generated code (do not edit manually)
+- `VERAConfiguration/VERAConfiguration/AppConfig.swift`: Auto-generated code (committed; do not edit manually)
 
 ## How It Works
 
-1. **Build time**: The Python script reads `app-config.json` and generates Swift code
-2. **Conditional dependencies**: `Project.swift` reads the configuration and adds dependencies only if chat is enabled
-3. **Conditional compilation**: Code uses `#if CHAT_ENABLED` to include or exclude chat functionality
+Configuration gates features through two mechanisms:
 
-## Chat Configuration
+1. **Runtime gating (meeting-room features)** — chat, captions, reactions, screen share, and the other in-call features are always compiled (linked via `VERAMeetingRoomSDK`) and enabled at runtime. `DependencyContainer.meetingRoomEnabledFeatures` (in `VERAApp`) maps `AppConfig` keys to `MeetingRoomFeature` cases, and `MeetingRoomSDKContainer` gates plugin registration and UI on `enabledFeatures.contains(_:)`.
+2. **Compile-time flags (app-level features)** — `Project.swift` reads `app-config.json` at `tuist generate` time, adds the corresponding module targets as app dependencies, and sets Swift compilation conditions on the VERA app target: `ARCHIVING_ENABLED`, `BACKGROUND_EFFECTS_ENABLED`, `SETTINGS_ENABLED`, `AUDIOEFFECTS_ENABLED`, `AUDIODIAGNOSTICS_ENABLED`, `FEEDBACK_ENABLED`.
 
-In `app-config.json`, the chat configuration is located at:
+## Example: Enable/Disable Chat
 
-```json
-{
-  "meetingRoomSettings": {
-    "allowChat": true  // true = enables chat, false = disables chat
-  }
-}
-```
-
-## Usage
-
-### Enable/Disable Chat
-
-Manually edit the `app-config.json` file:
+In `app-config.json`:
 
 ```json
 {
@@ -116,7 +103,7 @@ python3 Scripts/generate-app-config.py
 3. Verify that the file `VERAConfiguration/VERAConfiguration/Generated/AppConfig.swift` has been created
 
 ### Build Settings Not Applied
-1. Check that `CHAT_ENABLED` appears in **Swift Compiler - Custom Flags** → **Active Compilation Conditions**
+1. Check that the app-level flag (e.g. `ARCHIVING_ENABLED`) appears in **Swift Compiler - Custom Flags** → **Active Compilation Conditions**
 2. Verify the script output shows "Chat enabled: true" during `tuist generate`
 3. Clean and regenerate: `tuist clean && tuist generate`
 

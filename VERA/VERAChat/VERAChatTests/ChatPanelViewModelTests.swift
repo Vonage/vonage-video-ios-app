@@ -8,6 +8,7 @@ import Testing
 import VERAChat
 import VERAChatAppTestHelpers
 
+@MainActor
 @Suite("Chat panel view model tests")
 struct ChatPanelViewModelTests {
 
@@ -72,7 +73,9 @@ struct ChatPanelViewModelTests {
 
         sut.sendMessage("Don't panic!")
 
-        let messages = await repository.observeMessages().values.first { _ in true }
+        var messages: [ChatMessage]?
+        let subscription = repository.observeMessages().first().sink { messages = $0 }
+        defer { subscription.cancel() }
         #expect(messages!.first!.message == "Don't panic!")
     }
 

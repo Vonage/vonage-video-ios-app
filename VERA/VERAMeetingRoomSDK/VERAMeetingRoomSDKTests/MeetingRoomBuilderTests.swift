@@ -16,7 +16,7 @@ import VERAMeetingRoom
 @Suite("MeetingRoomBuilder tests")
 struct MeetingRoomBuilderTests {
 
-    private let currentNumberOfFeatures = 12
+    private let currentNumberOfFeatures = 13
 
     let testBaseURL = URL(string: "https://api.example.com")!
     let testRoomName: String = "test-room"
