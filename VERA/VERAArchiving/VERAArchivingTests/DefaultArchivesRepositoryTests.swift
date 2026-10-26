@@ -7,6 +7,7 @@ import Foundation
 import Testing
 import VERAArchiving
 import VERADomain
+import VERATestHelpers
 
 @Suite("Default archives repository tests")
 struct DefaultArchivesRepositoryTests {
@@ -186,6 +187,92 @@ struct DefaultArchivesRepositoryTests {
         #expect(mockDataSource.callCount == 1)
     }
 
+    @Test("Should keep polling while the transcript is pending even if the parent archive is uploaded")
+    func pollsUntilTranscriptIsAvailableAfterParentArchiveIsUploaded() async throws {
+        let archiveId = UUID()
+        let pendingTranscript = makeArchive(
+            id: archiveId,
+            status: .uploaded,
+            kind: .transcription,
+            transcription: ArchiveTranscription(status: .started, url: nil))
+        let readyTranscript = makeArchive(
+            id: archiveId,
+            status: .uploaded,
+            kind: .transcription,
+            transcription: ArchiveTranscription(
+                status: .available, url: URL(string: "https://example.com/transcript.zip")))
+
+        let mockDataSource = MockArchivesDataSource()
+        mockDataSource.responses = [[pendingTranscript], [pendingTranscript], [readyTranscript]]
+
+        let sut = makeSUT(archivesDataSource: mockDataSource)
+        let publisher = await sut.getArchives(sessionKey: "test-room")
+
+        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+
+        #expect(values[0][0].transcription?.status == .started)
+        #expect(values[2][0].transcription?.status == .available)
+
+        // Wait to ensure polling stopped once the transcript became available
+        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+        #expect(mockDataSource.callCount == 3)
+    }
+
+    @Test("Should keep polling while the transcript is requested even if the parent archive is available")
+    func pollsWhileTranscriptIsRequestedAfterParentArchiveIsAvailable() async throws {
+        let pendingTranscript = makeArchive(
+            id: UUID(),
+            status: .available,
+            kind: .transcription,
+            transcription: ArchiveTranscription(status: .requested, url: nil))
+
+        let mockDataSource = MockArchivesDataSource()
+        mockDataSource.archivesToReturn = [pendingTranscript]
+
+        let sut = makeSUT(archivesDataSource: mockDataSource)
+        _ = await sut.getArchives(sessionKey: "test-room")
+
+        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 3 }
+        #expect(callCount >= 3)
+    }
+
+    @Test("Should keep polling for pending archives when another archive failed")
+    func keepsPollingPendingArchivesWhenAnotherArchiveFailed() async throws {
+        let failedArchive = makeArchive(id: UUID(), status: .failed)
+        let pendingArchive = makeArchive(id: UUID(), status: .stopped)
+
+        let mockDataSource = MockArchivesDataSource()
+        mockDataSource.archivesToReturn = [failedArchive, pendingArchive]
+
+        let sut = makeSUT(archivesDataSource: mockDataSource)
+        _ = await sut.getArchives(sessionKey: "test-room")
+
+        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 2 }
+        #expect(callCount >= 2)
+    }
+
+    @Test("Should stop polling when archives finished without becoming available")
+    func stopsPollingWhenArchivesFinishedWithoutBecomingAvailable() async throws {
+        let mockDataSource = MockArchivesDataSource()
+        mockDataSource.archivesToReturn = [
+            makeArchive(id: UUID(), status: .uploaded),
+            makeArchive(id: UUID(), status: .expired),
+            makeArchive(
+                id: UUID(),
+                status: .uploaded,
+                kind: .transcription,
+                transcription: ArchiveTranscription(status: .failed, url: nil)),
+        ]
+
+        let sut = makeSUT(archivesDataSource: mockDataSource)
+        let publisher = await sut.getArchives(sessionKey: "test-room")
+
+        _ = try await publisher.values.first { $0.count == 3 }
+
+        try await Task.sleep(nanoseconds: 500_000_000)  // 500ms
+        #expect(mockDataSource.callCount == 1)
+    }
+
     @Test("Should handle data source errors")
     func handlesDataSourceErrors() async throws {
         let mockDataSource = MockArchivesDataSource()
@@ -196,6 +283,26 @@ struct DefaultArchivesRepositoryTests {
 
         let error = try await awaitError(from: publisher)
         #expect(error is MockArchivesDataSourceError)
+    }
+
+    @Test("Should start a fresh publisher for the same room after a failure")
+    func recoversAfterFailureForSameRoom() async throws {
+        let expectedArchive = makeArchive(id: UUID(), status: .available)
+        let mockDataSource = MockArchivesDataSource()
+        mockDataSource.shouldThrowError = true
+
+        let sut = makeSUT(archivesDataSource: mockDataSource)
+
+        let failedPublisher = await sut.getArchives(sessionKey: "test-room")
+        let error = try await awaitError(from: failedPublisher)
+        #expect(error is MockArchivesDataSourceError)
+
+        mockDataSource.shouldThrowError = false
+        mockDataSource.archivesToReturn = [expectedArchive]
+        let retryPublisher = await sut.getArchives(sessionKey: "test-room")
+
+        let archives = try await awaitFirstNonEmptyValue(from: retryPublisher)
+        #expect(archives.map(\.id) == [expectedArchive.id])
     }
 
     @Test("Should cache publishers for same room")
@@ -262,7 +369,9 @@ struct DefaultArchivesRepositoryTests {
         createdAt: Date = Date(),
         url: URL? = nil,
         size: Int = 0,
-        duration: Int = 0
+        duration: Int = 0,
+        kind: ArchiveKind = .recording,
+        transcription: ArchiveTranscription? = nil
     ) -> Archive {
         Archive(
             id: id,
@@ -271,7 +380,9 @@ struct DefaultArchivesRepositoryTests {
             status: status,
             url: url,
             size: size,
-            duration: duration
+            duration: duration,
+            kind: kind,
+            transcription: transcription
         )
     }
 

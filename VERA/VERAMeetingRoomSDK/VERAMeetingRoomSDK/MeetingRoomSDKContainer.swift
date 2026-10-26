@@ -154,7 +154,7 @@ final class MeetingRoomSDKContainer {
         if enabledFeatures.contains(.chat) {
             registry.registerPlugin(plugin: vonageChatPlugin)
         }
-        if enabledFeatures.contains(.archiving) {
+        if enabledFeatures.contains(.archiving) || enabledFeatures.contains(.postCallTranscription) {
             registry.registerPlugin(plugin: vonageArchivingPlugin)
         }
         if enabledFeatures.contains(.captions) {
@@ -205,6 +205,7 @@ final class MeetingRoomSDKContainer {
     lazy var sendChatMessageUseCase: SendChatMessageUseCase =
         VonageSendChatMessageUseCase(vonageChatPlugin: vonageChatPlugin)
 
+    @MainActor
     lazy var chatBadgeButtonViewModel = ChatBadgeButtonViewModel(
         chatMessagesObserver: chatMessagesRepository)
 

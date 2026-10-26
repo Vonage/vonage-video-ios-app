@@ -47,16 +47,30 @@
                 }
             }
 
-            actionTrigger
-                .sink { [weak coordinator = context.coordinator] in
-                    coordinator?.broadcastButton?.sendActions(for: .touchUpInside)
-                }
-                .store(in: &context.coordinator.cancellables)
+            context.coordinator.observe(actionTrigger: actionTrigger)
         }
 
+        public static func dismantleUIView(_ uiView: RPSystemBroadcastPickerView, coordinator: Coordinator) {
+            coordinator.stopObserving()
+        }
+
+        @MainActor
         public class Coordinator {
             weak var broadcastButton: UIButton?
-            var cancellables = Set<AnyCancellable>()
+            private var cancellable: AnyCancellable?
+
+            func observe(actionTrigger: PassthroughSubject<Void, Never>) {
+                cancellable?.cancel()
+                cancellable = actionTrigger.sinkOnMainActor { [weak self] in
+                    self?.broadcastButton?.sendActions(for: .touchUpInside)
+                }
+            }
+
+            func stopObserving() {
+                cancellable?.cancel()
+                cancellable = nil
+                broadcastButton = nil
+            }
         }
     }
 
