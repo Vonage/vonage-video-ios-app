@@ -9,6 +9,7 @@ import VERAChat
 import VERAChatAppTestHelpers
 import VERACommonUI
 
+@MainActor
 @Suite("Chat badge button view model tests")
 struct ChatBadgeButtonViewModelTests {
 
