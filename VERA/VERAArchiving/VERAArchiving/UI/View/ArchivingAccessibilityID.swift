@@ -6,7 +6,11 @@ public enum ArchivingAccessibilityID {
     public static let startRecordingButton = "archiving-start-recording-button"
     public static let stopRecordingButton = "archiving-stop-recording-button"
     public static let recordingIndicator = "archiving-recording-indicator"
+    public static let startTranscriptionButton = "archiving-start-transcription-button"
+    public static let stopTranscriptionButton = "archiving-stop-transcription-button"
     public static let archiveList = "archiving-archive-list"
     public static let archiveItem = "archiving-archive-item"
     public static let downloadButton = "archiving-download-button"
+    public static let transcriptionItem = "archiving-transcription-item"
+    public static let transcriptionDownloadButton = "archiving-transcription-download-button"
 }

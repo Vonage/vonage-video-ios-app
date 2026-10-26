@@ -49,6 +49,13 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
             pollingTasks.removeValue(forKey: sessionKey)
         }
+
+        func removePublisher(for sessionKey: String) {
+            lock.lock()
+            defer { lock.unlock() }
+
+            cache.removeValue(forKey: sessionKey)
+        }
     }
 
     public init(
@@ -87,8 +94,9 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                     publisher.value = archives
 
-                    // Stop polling if all archives are available or if any failed
-                    if Self.shouldStopPolling(archives) {
+                    // Stop polling once no archive or transcript is still being produced.
+                    // A transcript keeps processing after its parent archive is uploaded or available.
+                    if !archives.contains(where: \.isPending) {
                         state.removeTask(for: sessionKey)
                         return
                     }
@@ -98,6 +106,8 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                 } catch {
                     guard !Task.isCancelled else { return }
+                    // A failed publisher cannot emit again, so the next request starts a fresh one.
+                    state.removePublisher(for: sessionKey)
                     publisher.send(completion: .failure(error))
                     state.removeTask(for: sessionKey)
                     return
@@ -106,17 +116,5 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         }
 
         state.setTask(task, for: sessionKey)
-    }
-
-    private static func shouldStopPolling(_ archives: [Archive]) -> Bool {
-        guard !archives.isEmpty else { return true }
-
-        // Stop if any archive failed (they won't become available)
-        if archives.contains(where: { $0.status == .failed }) {
-            return true
-        }
-
-        // Stop if all archives are available for download
-        return archives.allSatisfy { $0.status == .available }
     }
 }
