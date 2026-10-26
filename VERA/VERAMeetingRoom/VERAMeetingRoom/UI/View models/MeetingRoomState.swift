@@ -25,6 +25,7 @@ public struct MeetingRoomState: Equatable {
     public let activeSpeakerId: String?
     public let callState: CallState
     public let archivingState: ArchivingState
+    public let transcriptionState: ArchivingState
     public let noiseSuppressionState: NoiseSuppressionState
 
     public var participantsCount: Int {
@@ -44,6 +45,7 @@ public struct MeetingRoomState: Equatable {
         showParticipantList: Bool,
         callState: CallState,
         archivingState: ArchivingState,
+        transcriptionState: ArchivingState = .idle,
         noiseSuppressionState: NoiseSuppressionState
     ) {
         self.roomName = roomName
@@ -58,6 +60,7 @@ public struct MeetingRoomState: Equatable {
         self.showParticipantList = showParticipantList
         self.callState = callState
         self.archivingState = archivingState
+        self.transcriptionState = transcriptionState
         self.noiseSuppressionState = noiseSuppressionState
     }
 
