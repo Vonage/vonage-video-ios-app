@@ -5,7 +5,8 @@
 import Foundation
 import VERADomain
 
-public protocol ConnectToRoomUseCase {
+@MainActor
+public protocol ConnectToRoomUseCase: Sendable {
     func callAsFunction(roomName: RoomName) async throws -> CallFacade
 }
 

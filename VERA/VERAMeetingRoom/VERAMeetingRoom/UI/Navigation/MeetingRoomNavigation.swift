@@ -5,7 +5,8 @@
 import VERACommonUI
 import VERADomain
 
-public protocol MeetingRoomDestination {
+@MainActor
+public protocol MeetingRoomDestination: Sendable {
     func onNext()
 
     func onBack()

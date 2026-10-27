@@ -4,7 +4,8 @@
 
 import Foundation
 
-public protocol SessionFactory {
+@MainActor
+public protocol SessionFactory: Sendable {
     associatedtype Session
     func make(_ credentials: RoomCredentials) throws -> Session
 }

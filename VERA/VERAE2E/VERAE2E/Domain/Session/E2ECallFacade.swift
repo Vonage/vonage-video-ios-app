@@ -4,9 +4,11 @@
 
 import Combine
 import Foundation
+import VERACommonUI
 import VERADomain
 import VERAVonage
 
+@MainActor
 public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     public lazy var _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
     public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
@@ -14,6 +16,8 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     private var cancellables = Set<AnyCancellable>()
     private let scenario: any E2ETestScenario
     private let pluginNotifier: E2ECallPluginNotifier
+    private var pluginStartTask: Task<Void, Never>?
+    private var disconnectTask: Task<Void, Never>?
 
     private let networkStatsSubject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     public lazy var networkStatsPublisher = networkStatsSubject.eraseToAnyPublisher()
@@ -67,18 +71,38 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     }
 
     public func connect() async throws {
+        guard callStateSubject.value == .idle else { return }
         callStateSubject.send(.connecting)
         callStateSubject.send(.connected)
         eventsSubject.send(.connected)
-        Task { await pluginNotifier.notifyCallDidStart() }
+        pluginStartTask = Task { [weak self] in
+            guard let self, !Task.isCancelled, callStateSubject.value == .connected else { return }
+            await pluginNotifier.notifyCallDidStart()
+        }
     }
 
     public func disconnect() async throws {
+        if let disconnectTask {
+            await disconnectTask.value
+            return
+        }
+        guard callStateSubject.value == .connected else { return }
         callStateSubject.send(.disconnecting)
-        await pluginNotifier.notifyCallDidEnd()
-        callStateSubject.send(.disconnected)
-        eventsSubject.send(.disconnected)
-        pluginNotifier.unassign()
+        stopSpeakingWhileMutedSimulation()
+        let pluginStart = pluginStartTask
+        pluginStartTask = nil
+        let teardown = Task { [self] in
+            // A plugin may ignore cancellation while awaiting SDK or HTTP completion.
+            // Its final teardown must run after that initialization has actually returned.
+            pluginStart?.cancel()
+            await pluginStart?.value
+            await pluginNotifier.notifyCallDidEnd()
+            pluginNotifier.unassign()
+            callStateSubject.send(.disconnected)
+            eventsSubject.send(.disconnected)
+        }
+        disconnectTask = teardown
+        await teardown.value
     }
 
     public func toggleLocalVideo() {
@@ -182,24 +206,29 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
 
     private func observeArchivingEvents() {
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStart)
-            .sink { [weak self] notification in
-                guard let self, let archiveId = notification.object as? String else { return }
-                self.archivingSubject(for: notification).send(.archiving(archiveId))
+            .compactMap { @Sendable notification -> (ArchiveKind?, String)? in
+                guard let archiveId = notification.object as? String else { return nil }
+                return (notification.userInfo?[E2EArchivingEvents.kindKey] as? ArchiveKind, archiveId)
+            }
+            .sinkOnMainActor { [weak self] kind, archiveId in
+                self?.archivingSubject(for: kind).send(.archiving(archiveId))
             }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStop)
-            .sink { [weak self] notification in
-                guard let self else { return }
-                self.archivingSubject(for: notification).send(.idle)
+            .map { @Sendable notification in
+                notification.userInfo?[E2EArchivingEvents.kindKey] as? ArchiveKind
+            }
+            .sinkOnMainActor { [weak self] kind in
+                self?.archivingSubject(for: kind).send(.idle)
             }
             .store(in: &cancellables)
     }
 
     private func archivingSubject(
-        for notification: Notification
+        for kind: ArchiveKind?
     ) -> CurrentValueSubject<ArchivingState, Never> {
-        switch notification.userInfo?[E2EArchivingEvents.kindKey] as? ArchiveKind {
+        switch kind {
         case .transcription: transcriptionStateSubject
         case .recording, nil: archivingStateSubject
         }
@@ -250,7 +279,9 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
             withTimeInterval: 0.3,
             repeats: true
         ) { [weak self] _ in
-            self?._publisherAudioLevelPublisher.send(0.5)
+            MainActor.assumeIsolated {
+                self?._publisherAudioLevelPublisher.send(0.5)
+            }
         }
     }
 

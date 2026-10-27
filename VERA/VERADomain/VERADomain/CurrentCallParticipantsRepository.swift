@@ -4,7 +4,8 @@
 
 import Combine
 
-public protocol CurrentCallParticipantsRepository {
+@MainActor
+public protocol CurrentCallParticipantsRepository: Sendable {
     func getCurrentCallParticipants() -> AnyPublisher<[Participant], Never>
     func updateParticipants(_ participants: [Participant])
 }

@@ -11,6 +11,7 @@ import VERATestHelpers
 
 @testable import VERAVonage
 
+@MainActor
 @Suite("VonagePublisher Background Restore Tests")
 struct VonagePublisherBackgroundRestoreTests {
 

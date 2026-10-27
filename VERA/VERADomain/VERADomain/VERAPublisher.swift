@@ -28,7 +28,8 @@ public enum CameraPosition: Sendable {
 /// - Clean up resources when no longer needed
 ///
 /// - SeeAlso: ``CameraPosition``
-public protocol VERAPublisher: AnyObject {
+@MainActor
+public protocol VERAPublisher: AnyObject, Sendable {
     /// A SwiftUI-compatible view rendering the publisher’s video.
     ///
     /// Wraps the underlying platform view in `AnyView` to integrate with SwiftUI.
@@ -85,12 +86,14 @@ public protocol VERAPublisher: AnyObject {
     var audioLevelPublisher: AnyPublisher<Float, Never> { get }
 }
 
-public protocol VERATransformerFactory {
+@MainActor
+public protocol VERATransformerFactory: Sendable {
     func makeVideoTransformer(for key: String, params: String) throws -> VERATransformer
     func makeAudioTransformer(for key: String, params: String) throws -> VERATransformer
 }
 
-public protocol VERATransformer {
+@MainActor
+public protocol VERATransformer: Sendable {
     var key: String { get }
     var transformer: AnyObject { get }
 }
