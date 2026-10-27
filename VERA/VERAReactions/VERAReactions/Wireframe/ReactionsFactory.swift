@@ -32,6 +32,7 @@ public final class ReactionsFactory {
     ///
     /// - Parameter viewModel: The existing view model to use.
     /// - Returns: A configured EmojiButtonContainer view.
+    @MainActor
     public func makeEmojiButtonContainer(
         viewModel: EmojiButtonContainerViewModel
     ) -> EmojiButtonContainer {
@@ -44,6 +45,7 @@ public final class ReactionsFactory {
     /// or additional control over the picker behavior.
     ///
     /// - Returns: A tuple containing the configured view and its view model.
+    @MainActor
     public func makeEmojiPickerContainer() -> (view: EmojiPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
     {
         let viewModel = EmojiPickerContainerViewModel(
@@ -60,6 +62,7 @@ public final class ReactionsFactory {
     ///
     /// - Parameter viewModel: The existing view model to use.
     /// - Returns: A configured EmojiHorizontalPickerViewContainer view.
+    @MainActor
     public func makeEmojiHorizontalPickerContainer(
         viewModel: EmojiPickerContainerViewModel
     ) -> EmojiHorizontalPickerViewContainer {
@@ -69,6 +72,7 @@ public final class ReactionsFactory {
     /// Creates a horizontal emoji picker component with its view model.
     ///
     /// - Returns: A tuple containing the configured view and its view model.
+    @MainActor
     public func makeEmojiHorizontalPickerContainer()
         -> (view: EmojiHorizontalPickerViewContainer, viewModel: EmojiPickerContainerViewModel)
     {
@@ -86,6 +90,7 @@ public final class ReactionsFactory {
     ///
     /// - Parameter configuration: The configuration for the emoji picker. Defaults to `.default`.
     /// - Returns: A tuple containing the configured container view and its view model.
+    @MainActor
     public func makeEmojiButton(
         configuration: EmojiPickerConfiguration = .default
     ) -> (view: EmojiButtonContainer, viewModel: EmojiButtonContainerViewModel) {
@@ -103,6 +108,7 @@ public final class ReactionsFactory {
     /// incoming emoji as a floating bubble that rises and fades out.
     ///
     /// - Returns: A tuple containing the configured overlay view and its view model.
+    @MainActor
     public func makeFloatingEmojisOverlay()
         -> (view: FloatingEmojisOverlayView, viewModel: FloatingEmojisOverlayViewModel)
     {

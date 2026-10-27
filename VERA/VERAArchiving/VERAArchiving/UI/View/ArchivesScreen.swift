@@ -7,11 +7,15 @@ import VERACommonUI
 
 public struct ArchivesScreen: View {
 
-    var viewModel: ArchivesViewModel
+    @Bindable var viewModel: ArchivesViewModel
 
     public var body: some View {
         CardView {
-            ArchiveList(archives: viewModel.archives)
+            ArchiveList(archives: viewModel.archives, downloadingArchiveIDs: viewModel.downloadingArchiveIDs)
         }
+        .sheet(item: $viewModel.sharedTranscript) { transcript in
+            ShareSheet(fileURL: transcript.fileURL)
+        }
+        .alert(item: $viewModel.error) { $0.view }
     }
 }
