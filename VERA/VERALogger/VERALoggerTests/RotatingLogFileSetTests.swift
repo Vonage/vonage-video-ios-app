@@ -33,6 +33,11 @@ struct RotatingLogFileSetTests {
         (try? String(contentsOf: url, encoding: .utf8)) ?? ""
     }
 
+    private func fileSize(of url: URL) -> UInt64 {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        return attributes?[.size] as? UInt64 ?? 0
+    }
+
     // MARK: - Writing
 
     @Test("Writing creates a single file named after the session timestamp")
@@ -80,6 +85,33 @@ struct RotatingLogFileSetTests {
         #expect(contents(of: urls[1]) == "next")
         // The five files of a session share one timestamp.
         #expect(timestamp(of: urls[0]) == timestamp(of: urls[1]))
+    }
+
+    @Test("An oversized first write is split across bounded files")
+    func splitsOversizedFirstWriteAcrossFiles() async {
+        let directory = makeDirectory()
+        defer { cleanup(directory) }
+        let sut = makeSUT(directory: directory)
+
+        await sut.write(Data(repeating: 0x61, count: 100))
+        let urls = await sut.fileURLs()
+
+        #expect(urls.count == 5)
+        #expect(urls.allSatisfy { fileSize(of: $0) <= 10 })
+    }
+
+    @Test("An oversized write after a full file is split across bounded files")
+    func splitsOversizedWriteAfterFullFile() async {
+        let directory = makeDirectory()
+        defer { cleanup(directory) }
+        let sut = makeSUT(directory: directory)
+
+        await sut.write(Data(repeating: 0x61, count: 10))
+        await sut.write(Data(repeating: 0x62, count: 25))
+        let urls = await sut.fileURLs()
+
+        #expect(urls.count == 4)
+        #expect(urls.map { fileSize(of: $0) } == [10, 10, 10, 5])
     }
 
     @Test("The set never grows beyond the maximum number of files")

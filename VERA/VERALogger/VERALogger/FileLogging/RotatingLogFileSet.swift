@@ -89,19 +89,29 @@ public actor RotatingLogFileSet {
     ///
     /// - Parameter data: Raw bytes to append.
     public func write(_ data: Data) {
-        guard !data.isEmpty else { return }
+        guard !data.isEmpty, maxFileSize > 0 else { return }
         do {
             try prepareIfNeeded()
-            // A chunk larger than the limit is still written whole rather than cycling
-            // through every file of the set, which would discard all previous contents.
-            if currentFileSize > 0, currentFileSize + UInt64(data.count) > maxFileSize {
-                try rotate()
+
+            var offset = 0
+            while offset < data.count {
+                if currentFileSize >= maxFileSize {
+                    try rotate()
+                }
+
+                let availableSize = maxFileSize - currentFileSize
+                let chunkSize = Int(min(availableSize, UInt64(data.count - offset)))
+                let endOffset = offset + chunkSize
+                let chunk = data.subdata(in: offset..<endOffset)
+                do {
+                    let handle = try FileHandle(forWritingTo: currentFileURL())
+                    defer { try? handle.close() }
+                    try handle.seekToEnd()
+                    try handle.write(contentsOf: chunk)
+                }
+                currentFileSize += UInt64(chunkSize)
+                offset = endOffset
             }
-            let handle = try FileHandle(forWritingTo: currentFileURL())
-            defer { try? handle.close() }
-            try handle.seekToEnd()
-            try handle.write(contentsOf: data)
-            currentFileSize += UInt64(data.count)
         } catch {
             // Intentionally ignored — logging should never crash the app.
         }
