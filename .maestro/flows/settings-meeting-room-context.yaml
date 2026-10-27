@@ -52,6 +52,16 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 2000
 
+# Scroll down in the overflow sheet until the Settings button is visible
+- scrollUntilVisible:
+    element:
+      id: "meeting-room-settings-button"
+    direction: DOWN
+    timeout: 5000
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
 # Now tap the settings button from the overflow menu
 - tapOn:
     id: "meeting-room-settings-button"
