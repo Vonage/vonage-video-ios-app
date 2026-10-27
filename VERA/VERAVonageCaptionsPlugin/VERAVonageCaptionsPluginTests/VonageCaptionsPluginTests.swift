@@ -105,6 +105,72 @@ struct VonageCaptionsPluginTests {
         #expect(mocks.repository.updateCallCount > countAfterFirst)
     }
 
+    @Test("Background delivery enters actor workers without inheriting UI isolation")
+    func acceptsBackgroundCaptionAndActivationPublishers() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        try await sut.callDidStart([:])
+        let source = mocks.statusDataSource
+        let captionRelay = mocks.call._captionsPublisher
+        let captions = [CaptionItem(speakerName: "Alice", text: "Background delivery")]
+
+        await Task.detached {
+            source.set(captionsState: .enabled("background"))
+            captionRelay.send(captions)
+        }.value
+        try await waitUntil {
+            mocks.call.areCaptionsEnabled && mocks.repository.lastCaptions == captions
+        }
+
+        #expect(mocks.repository.lastCaptions == captions)
+        #expect(mocks.call.areCaptionsEnabled)
+        try await sut.callDidEnd()
+    }
+
+    @Test("Repeated starts keep one live subscription pair")
+    func repeatedStartsKeepOneSubscriptionPair() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        for _ in 0..<3 { try await sut.callDidStart([:]) }
+        #expect(mocks.call.captionSubscriptions.activeCount == 1)
+        #expect(mocks.statusDataSource.subscriptions.activeCount == 1)
+        let captions = [CaptionItem(speakerName: "Alice", text: "Still listening")]
+        mocks.call._captionsPublisher.send(captions)
+        try await waitUntil { mocks.repository.lastCaptions == captions }
+        try await sut.callDidEnd()
+        #expect(mocks.call.captionSubscriptions.activeCount == 0)
+        #expect(mocks.statusDataSource.subscriptions.activeCount == 0)
+    }
+
+    @Test("Restart joins an in-flight write before installing replacement observers", .timeLimit(.minutes(1)))
+    func repeatedStartWhileCaptionWriteIsSuspended() async throws {
+        let (_, mocks) = makeSUT()
+        let writer = BlockingCaptionsWriter()
+        let sut = VonageCaptionsPlugin(
+            captionsStatusDataSource: mocks.statusDataSource, captionsRepository: writer)
+        sut.call = mocks.call
+        try await sut.callDidStart([:])
+        let first = [CaptionItem(speakerName: "Alice", text: "First")]
+        mocks.call._captionsPublisher.send(first)
+        await writer.waitForBlockedWrite()
+        let restart = Task { try await sut.callDidStart([:]) }
+        await writer.waitForCancellation()
+        #expect(mocks.call.captionSubscriptions.activeCount == 0)
+        #expect(mocks.statusDataSource.subscriptions.activeCount == 0)
+        await writer.releaseBlockedWrite()
+        try await restart.value
+        #expect(mocks.call.captionSubscriptions.activeCount == 1)
+        #expect(mocks.statusDataSource.subscriptions.activeCount == 1)
+        let second = [CaptionItem(speakerName: "Bob", text: "Second")]
+        mocks.call._captionsPublisher.send(second)
+        await writer.waitForUpdates(2)
+        try await sut.callDidEnd()
+        #expect(await writer.updates == [first, second, []])
+        #expect(await writer.maximumConcurrentWrites == 1)
+        #expect(mocks.call.captionSubscriptions.activeCount == 0)
+        #expect(mocks.statusDataSource.subscriptions.activeCount == 0)
+    }
+
     // MARK: - Call Did End
 
     @Test("callDidEnd resets captions status data source")
@@ -195,6 +261,97 @@ struct VonageCaptionsPluginTests {
         #expect(mocks.repository.lastCaptions == [])
     }
 
+    @Test("A slow caption writer retains only the newest pending snapshot", .timeLimit(.minutes(1)))
+    func coalescesPendingSnapshotsWithoutConcurrentWrites() async throws {
+        let writer = BlockingCaptionsWriter()
+        let call = MockCallFacade()
+        let sut = VonageCaptionsPlugin(
+            captionsStatusDataSource: SpyCaptionsStatusDataSource(), captionsRepository: writer)
+        sut.call = call
+        try await sut.callDidStart([:])
+        let first = [CaptionItem(speakerName: "Alice", text: "First")]
+        let newest = [CaptionItem(speakerName: "Alice", text: "Newest")]
+        call._captionsPublisher.send(first)
+        await writer.waitForBlockedWrite()
+
+        for index in 0..<100 {
+            call._captionsPublisher.send([CaptionItem(speakerName: "Alice", text: "Pending \(index)")])
+        }
+        call._captionsPublisher.send(newest)
+        await writer.releaseBlockedWrite()
+        await writer.waitForUpdates(2)
+
+        #expect(await writer.updates == [first, newest])
+        #expect(await writer.maximumConcurrentWrites == 1)
+        try await sut.callDidEnd()
+        #expect(await writer.updates == [first, newest, []])
+    }
+
+    @Test("Teardown joins an in-flight caption write before clearing", .timeLimit(.minutes(1)))
+    func joinsInFlightWriteBeforeFinalClear() async throws {
+        let writer = BlockingCaptionsWriter()
+        let call = MockCallFacade()
+        let sut = VonageCaptionsPlugin(
+            captionsStatusDataSource: SpyCaptionsStatusDataSource(), captionsRepository: writer)
+        sut.call = call
+        try await sut.callDidStart([:])
+        let first = [CaptionItem(speakerName: "Alice", text: "Writing")]
+        call._captionsPublisher.send(first)
+        await writer.waitForBlockedWrite()
+        call._captionsPublisher.send([CaptionItem(speakerName: "Alice", text: "Queued")])
+
+        let ending = Task { try await sut.callDidEnd() }
+        await writer.waitForCancellation()
+        #expect(await writer.updates.isEmpty)
+        call._captionsPublisher.send([CaptionItem(speakerName: "Alice", text: "After cancellation")])
+        await writer.releaseBlockedWrite()
+        try await ending.value
+
+        #expect(await writer.updates == [first, []])
+        #expect(await writer.maximumConcurrentWrites == 1)
+    }
+
+    @Test("Finishing an old call does not disable its replacement", .timeLimit(.minutes(1)))
+    func teardownUsesItsOriginalCallAfterSuspension() async throws {
+        let writer = BlockingCaptionsWriter()
+        let oldCall = MockCallFacade()
+        let newCall = MockCallFacade()
+        let sut = VonageCaptionsPlugin(
+            captionsStatusDataSource: SpyCaptionsStatusDataSource(), captionsRepository: writer)
+        sut.call = oldCall
+        try await sut.callDidStart([:])
+        oldCall._captionsPublisher.send([CaptionItem(speakerName: "Old room", text: "Writing")])
+        await writer.waitForBlockedWrite()
+        let ending = Task { try await sut.callDidEnd() }
+        await writer.waitForCancellation()
+        oldCall.areCaptionsEnabled = true
+        newCall.areCaptionsEnabled = true
+        sut.call = newCall
+
+        await writer.releaseBlockedWrite()
+        try await ending.value
+
+        #expect(!oldCall.areCaptionsEnabled)
+        #expect(newCall.areCaptionsEnabled)
+        #expect(newCall.recordedActions.isEmpty)
+    }
+
+    @Test("Running observers do not retain the plugin")
+    func releasesPluginWhileObserversAreRunning() async throws {
+        let source = SpyCaptionsStatusDataSource()
+        let repository = SpyCaptionsWriter()
+        let call = MockCallFacade()
+        var plugin: VonageCaptionsPlugin? = VonageCaptionsPlugin(
+            captionsStatusDataSource: source, captionsRepository: repository)
+        plugin?.call = call
+        try await plugin?.callDidStart([:])
+        weak var releasedPlugin = plugin
+
+        plugin = nil
+
+        #expect(releasedPlugin == nil)
+    }
+
     // MARK: - Helpers
 
     private struct Mocks {
@@ -224,35 +381,16 @@ struct VonageCaptionsPluginTests {
 
     // MARK: - Test Helpers
 
-    /// Waits for a condition to become true by yielding to the main actor's run loop.
-    ///
-    /// Instead of polling with sleeps, this yields control back to the main actor
-    /// multiple times, allowing pending work (like Combine sink closures) to execute.
-    /// This is deterministic and avoids race conditions under varying system loads.
+    /// Allows queued forwarding work to run until the condition holds or the deadline expires.
     private func waitUntil(
-        timeout: TimeInterval = 0.5,
+        timeout: Duration = .seconds(2),
         _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
-        let deadline = Date().addingTimeInterval(timeout)
-        var iterations = 0
-        let maxIterations = 100  // Safety limit
-
-        while iterations < maxIterations {
-            // Check condition on MainActor
-            if await condition() {
-                return
-            }
-
-            guard Date() < deadline else {
-                throw WaitTimeoutError()
-            }
-
-            // Yield to allow MainActor work to process
-            await Task.yield()
-            iterations += 1
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while !(await condition()) {
+            guard ContinuousClock.now < deadline else { throw WaitTimeoutError() }
+            try await Task.sleep(for: .milliseconds(1))
         }
-
-        throw WaitTimeoutError()
     }
 
     private struct WaitTimeoutError: Error, CustomStringConvertible {
@@ -264,29 +402,37 @@ struct VonageCaptionsPluginTests {
 
 /// Spy data source that publishes state changes for deterministic testing.
 private final class SpyCaptionsStatusDataSource: CaptionsStatusDataSource, @unchecked Sendable {
-    nonisolated(unsafe) private let subject = CurrentValueSubject<CaptionsState, Never>(.disabled)
+    private let subject = CurrentValueRelay<CaptionsState, Never>(.disabled)
+    private let lock = NSLock()
+    private var resets = 0
 
-    nonisolated var captionsState: AnyPublisher<CaptionsState, Never> {
-        subject.eraseToAnyPublisher()
+    let subscriptions = SubscriptionCounter()
+
+    var captionsState: AnyPublisher<CaptionsState, Never> {
+        subject.publisher.handleEvents(
+            receiveSubscription: { [subscriptions] _ in subscriptions.started() },
+            receiveCancel: { [subscriptions] in subscriptions.ended() }
+        ).eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var resetCallCount = 0
+    var resetCallCount: Int { lock.withLock { resets } }
 
     func set(captionsState: CaptionsState) {
         subject.send(captionsState)
     }
 
     func reset() {
-        resetCallCount += 1
+        lock.withLock { resets += 1 }
         subject.send(.disabled)
     }
 }
 
 /// Spy repository that tracks caption updates for deterministic testing.
-private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
-    nonisolated(unsafe) var updateCallCount = 0
-    nonisolated(unsafe) var lastCaptions: [CaptionItem]?
-    nonisolated(unsafe) var allUpdates: [[CaptionItem]] = []
+@MainActor
+private final class SpyCaptionsWriter: CaptionsWriter {
+    var updateCallCount = 0
+    var lastCaptions: [CaptionItem]?
+    var allUpdates: [[CaptionItem]] = []
 
     func updateCaptions(_ captions: [CaptionItem]) async {
         updateCallCount += 1
@@ -296,58 +442,63 @@ private final class SpyCaptionsWriter: CaptionsWriter, @unchecked Sendable {
 }
 
 /// Mock call facade that publishes events for deterministic testing.
-private final class MockCallFacade: CallFacade, @unchecked Sendable {
+private final class MockCallFacade: CallFacade {
 
-    nonisolated(unsafe) let _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
-    nonisolated var publisherAudioLevelPublisher: AnyPublisher<Float, Never> {
+    let _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
+    var publisherAudioLevelPublisher: AnyPublisher<Float, Never> {
         _publisherAudioLevelPublisher.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
-    nonisolated var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> {
+    let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> {
         _networkStatsPublisher.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
-    nonisolated var eventsPublisher: AnyPublisher<SessionEvent, Never> {
+    let _eventsPublisher = CurrentValueSubject<SessionEvent, Never>(.idle)
+    var eventsPublisher: AnyPublisher<SessionEvent, Never> {
         _eventsPublisher.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(
+    let _participantsPublisher = CurrentValueSubject<ParticipantsState, Never>(
         ParticipantsState.empty)
-    nonisolated var participantsPublisher: AnyPublisher<ParticipantsState, Never> {
+    var participantsPublisher: AnyPublisher<ParticipantsState, Never> {
         _participantsPublisher.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) let _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
-    nonisolated var statePublisher: AnyPublisher<SessionState, Never> {
+    let _statePublisher = CurrentValueSubject<SessionState, Never>(SessionState.initial)
+    var statePublisher: AnyPublisher<SessionState, Never> {
         _statePublisher.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
-    nonisolated var callState: AnyPublisher<CallState, Never> {
+    var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
+    var callState: AnyPublisher<CallState, Never> {
         _callState.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
-    nonisolated var archivingState: AnyPublisher<ArchivingState, Never> {
+    var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    var archivingState: AnyPublisher<ArchivingState, Never> {
         _archivingState.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
-    nonisolated var transcriptionState: AnyPublisher<ArchivingState, Never> {
+    var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    var transcriptionState: AnyPublisher<ArchivingState, Never> {
         _transcriptionState.eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
-    nonisolated var captionsPublisher: AnyPublisher<[CaptionItem], Never> {
-        _captionsPublisher.eraseToAnyPublisher()
+    let _captionsPublisher = EventRelay<[CaptionItem], Never>()
+    let captionSubscriptions = SubscriptionCounter()
+
+    var captionsPublisher: AnyPublisher<[CaptionItem], Never> {
+        _captionsPublisher.publisher.handleEvents(
+            receiveSubscription: { [captionSubscriptions] _ in captionSubscriptions.started() },
+            receiveCancel: { [captionSubscriptions] in captionSubscriptions.ended() }
+        ).eraseToAnyPublisher()
     }
 
-    nonisolated(unsafe) var recordedActions: [CallActions] = []
-    nonisolated(unsafe) var isMuted: Bool = false
-    nonisolated(unsafe) var isOnHold: Bool = false
-    nonisolated(unsafe) var areCaptionsEnabled = false
+    var recordedActions: [CallActions] = []
+    var isMuted: Bool = false
+    var isOnHold: Bool = false
+    var areCaptionsEnabled = false
 
     enum CallActions: String {
         case connect, disconnect, toggleLocalVideo, toggleLocalAudio
@@ -384,4 +535,72 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     func applyPublisherAdvancedSettings(_ settings: VERADomain.PublisherAdvancedSettings) async throws {}
     func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {}
+}
+
+
+/// Suspends the first write to exercise stream backpressure without timing assumptions.
+private actor BlockingCaptionsWriter: CaptionsWriter {
+    private(set) var updates: [[CaptionItem]] = []
+    private(set) var maximumConcurrentWrites = 0
+    private var activeWrites = 0
+    private let cancellations = AsyncStream<Void>.makeStream()
+    private var hasBlocked = false
+    private var blockedWrite: CheckedContinuation<Void, Never>?
+    private var blockedWaiters: [CheckedContinuation<Void, Never>] = []
+    private var updateWaiters: [(Int, CheckedContinuation<Void, Never>)] = []
+
+    func updateCaptions(_ captions: [CaptionItem]) async {
+        activeWrites += 1
+        maximumConcurrentWrites = max(maximumConcurrentWrites, activeWrites)
+        if !hasBlocked {
+            hasBlocked = true
+            let cancellation = cancellations.continuation
+            await withTaskCancellationHandler {
+                await withCheckedContinuation { continuation in
+                    blockedWrite = continuation
+                    for waiter in blockedWaiters {
+                        waiter.resume()
+                    }
+                    blockedWaiters.removeAll()
+                }
+            } onCancel: {
+                cancellation.yield(())
+            }
+        }
+        updates.append(captions)
+        activeWrites -= 1
+        let ready = updateWaiters.filter { $0.0 <= updates.count }
+        updateWaiters.removeAll { $0.0 <= updates.count }
+        for (_, waiter) in ready {
+            waiter.resume()
+        }
+    }
+
+    func waitForBlockedWrite() async {
+        guard blockedWrite == nil else { return }
+        await withCheckedContinuation { blockedWaiters.append($0) }
+    }
+
+    func waitForCancellation() async {
+        for await _ in cancellations.stream { return }
+    }
+
+    func releaseBlockedWrite() {
+        blockedWrite?.resume()
+        blockedWrite = nil
+    }
+
+    func waitForUpdates(_ count: Int) async {
+        guard updates.count < count else { return }
+        await withCheckedContinuation { updateWaiters.append((count, $0)) }
+    }
+}
+
+/// Tracks actual Combine subscription lifetimes across repeated lifecycle notifications.
+private final class SubscriptionCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    var activeCount: Int { lock.withLock { count } }
+    func started() { lock.withLock { count += 1 } }
+    func ended() { lock.withLock { count -= 1 } }
 }

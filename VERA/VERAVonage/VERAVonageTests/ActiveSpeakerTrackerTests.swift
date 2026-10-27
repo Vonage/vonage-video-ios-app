@@ -10,6 +10,7 @@ import VERAMeetingRoom
 import VERATestHelpers
 import VERAVonage
 
+@MainActor
 @Suite("ActiveSpeakerTracker tests")
 struct ActiveSpeakerTrackerTests {
 

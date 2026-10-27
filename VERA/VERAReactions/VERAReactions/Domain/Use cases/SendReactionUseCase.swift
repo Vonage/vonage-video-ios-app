@@ -17,6 +17,7 @@ import Foundation
 ///     try? sendReaction(emoji)
 /// }
 /// ```
+@MainActor
 public protocol SendReactionUseCase {
     /// Sends an emoji reaction to all call participants.
     /// - Parameter emoji: The emoji to send.

@@ -11,6 +11,6 @@ import Foundation
 /// This keeps alert presentation decoupled from view models and
 /// business logic, following the dependency rule.
 @MainActor
-public protocol AlertPresentable: AnyObject {
+public protocol AlertPresentable: AnyObject, Sendable {
     func presentAlert(_ alertItem: AlertItem)
 }

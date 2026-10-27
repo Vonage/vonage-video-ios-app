@@ -8,12 +8,13 @@ import VERADomain
 
 @testable import VERAOKTA
 
-final class MockOKTAAuthenticating: OKTAAuthenticating, @unchecked Sendable {
+@MainActor
+final class MockOKTAAuthenticating: OKTAAuthenticating {
 
-    var authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
+    nonisolated let authStateSubject = CurrentValueRelay<AuthState, Never>(.notAuthenticated)
 
-    var authStatePublisher: AnyPublisher<AuthState, Never> {
-        authStateSubject.eraseToAnyPublisher()
+    nonisolated var authStatePublisher: AnyPublisher<AuthState, Never> {
+        authStateSubject.publisher
     }
 
     var signInCallCount = 0

@@ -7,6 +7,7 @@ import Foundation
 /// Pure focus-navigation helpers for the feedback form keyboard toolbar.
 enum FeedbackFormFocusNavigation {
 
+    @MainActor
     static func textFieldIndices(in fields: [FeedbackFieldViewModel]) -> [Int] {
         fields.indices.filter { fields[$0].type == .text }
     }

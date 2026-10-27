@@ -7,6 +7,7 @@ import VERAScreenShare
 
 @testable import VERAVonageScreenSharePlugin
 
+@MainActor
 @Suite("VonageScreenSharePlugin Tests")
 struct VonageScreenSharePluginTests {
 

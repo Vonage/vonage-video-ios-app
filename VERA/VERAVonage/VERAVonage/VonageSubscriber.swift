@@ -45,15 +45,25 @@ private enum SubscriberConstants {
 /// - A delayed reinforcement re-enables video a short time after appear to stabilize during UI transitions
 ///
 /// Visibility changes are wired via the associated ``Participant``’s `onAppear` and `onDisappear` handlers.
+@MainActor
 public class VonageSubscriber: NSObject {
     /// The underlying Vonage subscriber.
     let otSubscriber: OTSubscriber
 
+    private enum CallbackEvent: Sendable {
+        case audioLevel(Float)
+        case dimensions(CGSize)
+        case streamChanged
+        case failed
+        case connected
+        case caption(VonageCaption)
+    }
+    nonisolated private let callbackEvents: MainActorEventQueue<CallbackEvent>
+    private var observationsConfigured = false
+    private var isCleanedUp = false
+
     /// Internal subscription storage for Combine pipelines.
     private var cancellables = Set<AnyCancellable>()
-
-    /// Tracks audio levels using a log-moving average for smoother UI.
-    private let movingAvgAudioLevelTracker = MovingAvgAudioLevelTracker()
 
     /// Stable identifier for the remote stream.
     let id: String
@@ -104,6 +114,7 @@ public class VonageSubscriber: NSObject {
     ///
     /// - Parameter subscriber: The configured `OTSubscriber` to wrap.
     init(subscriber: OTSubscriber) {
+        callbackEvents = MainActorEventQueue(transformEvent: Self.makeCallbackTransform())
         otSubscriber = subscriber
         let stream = subscriber.stream!
         self.stream = stream
@@ -121,40 +132,91 @@ public class VonageSubscriber: NSObject {
             audioLevel: 0.0,
             view: AnyView(UIViewContainer(view: subscriber.view!)))
         super.init()
+        configureCallbackDelivery()
     }
 
-    deinit {
-        cleanUp()
+    // Create this closure outside MainActor inference: it executes on SDK callback threads.
+    // Its fresh mutable tracker is confined to the event queue's synchronous buffer lock.
+    nonisolated private static func makeCallbackTransform() -> (CallbackEvent) -> CallbackEvent {
+        let audioLevelTracker = MovingAvgAudioLevelTracker()
+        return { event in
+            guard case .audioLevel(let level) = event else { return event }
+            let result = audioLevelTracker.track(level)
+            return .audioLevel(round(result.logMovingAvg * 100) / 100)
+        }
     }
+
+    /// Shared value boundary for SDK audio callbacks; no borrowed SDK object crosses executors.
+    nonisolated func receiveAudioLevel(_ audioLevel: Float) {
+        callbackEvents.send(.audioLevel(audioLevel), replacing: "audio")
+    }
+
+    private func configureCallbackDelivery() {
+        callbackEvents.activate { [weak self] event in
+            guard let self else { return }
+            switch event {
+            case .audioLevel(let level):
+                self.audioLevel = level
+            case .dimensions(let dimensions):
+                self.videoDimensions = dimensions
+                self.updateParticipant()
+            case .streamChanged:
+                self.updateParticipant()
+            case .failed: self.onError?()
+            case .connected:
+                self.subscriberDidConnect = true
+                self.updateParticipant()
+                self.onConnected?()
+            case .caption(let caption): self.onCaption?(caption)
+            }
+        }
+    }
+
+    #if compiler(>=6.2)
+        isolated deinit {
+            cleanUp()
+        }
+    #else
+        // Explicit lifecycle cleanup still runs on MainActor. At destruction, ARC releases
+        // callback/view storage and cancelling subscriptions; the SDK delegates are weak.
+        deinit {
+            disableTask?.cancel()
+        }
+    #endif
 
     /// Sets up reactive observation of stream properties and updates the participant model.
     ///
     /// - Important: Call after the subscriber has a stream to ensure KVO publishers are available.
     func setup() {
+        guard !observationsConfigured else { return }
+        observationsConfigured = true
+        if isCleanedUp {
+            configureCallbackDelivery()
+            isCleanedUp = false
+        }
         otSubscriber.viewScaleBehavior = .fill
 
         stream
             .publisher(for: \.videoDimensions)
             .removeDuplicates()
-            .sink { [weak self] newSize in
-                self?.videoDimensions = newSize
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] newSize in
+                self?.callbackEvents.send(.dimensions(newSize), replacing: "dimensions")
             }
             .store(in: &cancellables)
 
         stream
             .publisher(for: \.hasAudio)
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.streamChanged, replacing: "stream")
             }
             .store(in: &cancellables)
 
         stream
             .publisher(for: \.hasVideo)
             .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.updateParticipant()
+            .sink { @Sendable [weak self] _ in
+                self?.callbackEvents.send(.streamChanged, replacing: "stream")
             }
             .store(in: &cancellables)
 
@@ -250,6 +312,9 @@ public class VonageSubscriber: NSObject {
     ///
     /// Also replaces the participant’s `view` with an empty placeholder to release UI resources.
     func cleanUp() {
+        observationsConfigured = false
+        isCleanedUp = true
+        callbackEvents.invalidate()
         participant = participant.withEmptyView
 
         onError = nil
@@ -283,19 +348,15 @@ extension VonageSubscriber: OTSubscriberDelegate {
     ///
     /// Sets the `subscriberDidConnect` flag, enabling visibility-driven subscription changes,
     /// and refreshes the participant model.
-    public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
-        subscriberDidConnect = true
-
-        updateParticipant()
-
-        onConnected?()
+    nonisolated public func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
+        callbackEvents.send(.connected)
     }
 
     /// Vonage subscriber delegate callback for errors.
     ///
     /// Forwards the error event to ``onError`` for external handling.
-    public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-        onError?()
+    nonisolated public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
+        callbackEvents.send(.failed)
     }
 }
 
@@ -305,9 +366,8 @@ extension VonageSubscriber: OTSubscriberKitAudioLevelDelegate {
     /// Vonage audio level delegate callback.
     ///
     /// Smooths the raw audio level via a log-moving average and publishes the result.
-    public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
-        let result = movingAvgAudioLevelTracker.track(audioLevel)
-        self.audioLevel = round(result.logMovingAvg * 100) / 100
+    nonisolated public func subscriber(_ subscriber: OTSubscriberKit, audioLevelUpdated audioLevel: Float) {
+        receiveAudioLevel(audioLevel)
     }
 }
 
@@ -317,9 +377,9 @@ extension VonageSubscriber: OTSubscriberKitCaptionsDelegate {
     /// Vonage captions delegate callback.
     ///
     /// Receives live captions; implementation can be extended to publish captions to the UI.
-    public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {
+    nonisolated public func subscriber(_ subscriber: OTSubscriberKit, caption text: String, isFinal: Bool) {
         let name = subscriber.stream?.name
         let id = subscriber.stream?.streamId
-        onCaption?(.init(id: id, name: name, text: text, isFinal: isFinal, isRemote: true))
+        callbackEvents.send(.caption(.init(id: id, name: name, text: text, isFinal: isFinal, isRemote: true)))
     }
 }

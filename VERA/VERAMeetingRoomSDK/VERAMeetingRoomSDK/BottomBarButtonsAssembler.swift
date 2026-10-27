@@ -337,10 +337,10 @@ final class BottomBarButtonsAssembler {
         ) { $0.selectedEffect }
     }
 
-    private func observeChanges<Object: AnyObject, Value>(
+    private func observeChanges<Object: AnyObject & Sendable, Value>(
         _ object: Object,
-        while isCurrent: @escaping () -> Bool = { true },
-        read: @escaping (Object) -> Value
+        while isCurrent: @escaping @MainActor @Sendable () -> Bool = { true },
+        read: @escaping @MainActor @Sendable (Object) -> Value
     ) {
         withObservationTracking { [weak object] in
             guard let object else { return }
@@ -358,10 +358,10 @@ final class BottomBarButtonsAssembler {
         }
     }
 
-    private func forwardChange<Object: AnyObject, Value>(
+    private func forwardChange<Object: AnyObject & Sendable, Value>(
         _ object: Object?,
-        isCurrent: @escaping () -> Bool,
-        read: @escaping (Object) -> Value
+        isCurrent: @escaping @MainActor @Sendable () -> Bool,
+        read: @escaping @MainActor @Sendable (Object) -> Value
     ) {
         guard let object, isCurrent() else { return }
         buttonsDidChangeSubject.send()

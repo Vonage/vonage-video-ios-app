@@ -10,6 +10,7 @@ import VERATestHelpers
 
 @testable import VERAVonage
 
+@MainActor
 @Suite("VonageSessionProvider tests")
 struct VonageSessionProviderTests {
 

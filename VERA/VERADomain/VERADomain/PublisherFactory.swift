@@ -4,6 +4,7 @@
 
 import Foundation
 
-public protocol PublisherFactory {
+@MainActor
+public protocol PublisherFactory: Sendable {
     func make(_ settings: PublisherSettings) throws -> VERAPublisher
 }

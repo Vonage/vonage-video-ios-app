@@ -9,10 +9,20 @@ on:
     branches: [ main, develop ]
     paths:
       - 'VERA/**'
+      - 'Package.swift'
+      - 'scripts/select-package-language-mode.py'
+      - 'scripts/verify-package-language-modes.py'
+      - 'Tests/ConsumerCompatibility/**'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'VERA/**'
+      - 'Package.swift'
+      - 'scripts/select-package-language-mode.py'
+      - 'scripts/verify-package-language-modes.py'
+      - 'Tests/ConsumerCompatibility/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
   format-check:
@@ -32,23 +42,67 @@ jobs:
         run: |
           chmod +x scripts/format.sh
           ./scripts/format.sh --check
+          swift-format lint --strict --recursive Tests/ConsumerCompatibility
 
-  spm-build:
+  spm-modes:
     runs-on: macos-26
     needs: [format-check]
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ["5.0", "6.0"]
+    env:
+      TUIST_SWIFT_LANGUAGE_MODE: ${{ matrix.swift }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v6
+
+      - name: Record compiler and selected language mode
+        run: |
+          xcodebuild -version
+          swift --version
+          echo "Owned package language mode: $TUIST_SWIFT_LANGUAGE_MODE"
+
+      - name: Select the package language mode explicitly
+        run: python3 scripts/select-package-language-mode.py "$TUIST_SWIFT_LANGUAGE_MODE"
 
       - name: Build SPM package (VERAMeetingRoomSDK) for iOS
         run: |
           xcodebuild build \
             -scheme VERAMeetingRoomSDK \
-            -destination "generic/platform=iOS Simulator" | xcpretty
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO | tee PackageBuild.log | xcpretty
+
+      - name: Compile Swift 5 and Swift 6 public API consumers
+        run: |
+          xcodebuild build-for-testing \
+            -scheme VERAMeetingRoomSDK \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO | tee PackageTestsBuild.log | xcpretty
+
+      - name: Verify the actual SDK and customer compiler modes
+        run: |
+          python3 scripts/verify-package-language-modes.py \
+            "$TUIST_SWIFT_LANGUAGE_MODE" PackageBuild.log PackageTestsBuild.log
+
+  spm-build:
+    runs-on: ubuntu-24.04
+    needs: [spm-modes]
+    if: always()
+    steps:
+      - name: Require both package language modes to pass
+        env:
+          PACKAGE_RESULT: ${{ needs.spm-modes.result }}
+        run: test "$PACKAGE_RESULT" = success
 
   tests:
-    name: tests (${{ matrix.name }})
+    name: tests (${{ matrix.name }}, Swift ${{ matrix.swift }})
     runs-on: macos-26
     needs: [format-check]
+    env:
+      TUIST_SWIFT_LANGUAGE_MODE: ${{ matrix.swift }}
     defaults:
       run:
         shell: bash
@@ -59,18 +113,35 @@ jobs:
       matrix:
         include:
           - name: macOS
+            swift: "5.0"
             scheme: VERAUnitTests-macOS
             destination: platform=macOS
             simulator: false
             timeout: 25
             extra_flags: ""
           - name: iOS
+            swift: "5.0"
+            scheme: VERAUnitTests-iOS
+            destination: platform=iOS Simulator,name=iPhone 17
+            simulator: true
+            timeout: 45
+            extra_flags: ""
+          - name: macOS
+            swift: "6.0"
+            scheme: VERAUnitTests-macOS
+            destination: platform=macOS
+            simulator: false
+            timeout: 25
+            extra_flags: ""
+          - name: iOS
+            swift: "6.0"
             scheme: VERAUnitTests-iOS
             destination: platform=iOS Simulator,name=iPhone 17
             simulator: true
             timeout: 45
             extra_flags: ""
           - name: snapshots
+            swift: "6.0"
             scheme: VERASnapshotTests-iOS
             destination: platform=iOS Simulator,name=iPhone 17
             simulator: true
@@ -80,6 +151,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
     
+      - name: Record compiler and selected language mode
+        run: |
+          xcodebuild -version
+          swift --version
+          echo "Owned Tuist language mode: $TUIST_SWIFT_LANGUAGE_MODE"
+
       - name: Pull LFS files
         run: git lfs pull
     
@@ -130,6 +207,18 @@ jobs:
         run: |
           xcrun simctl boot "iPhone 17" || true
 
+      - name: Compile the app and broadcast extension
+        if: matrix.name == 'iOS'
+        timeout-minutes: 25
+        run: |
+          xcodebuild build \
+            -workspace VERA/VERA.xcworkspace \
+            -scheme VERA \
+            -destination "${{ matrix.destination }}" \
+            -derivedDataPath DerivedData \
+            COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO | xcpretty
+
       - name: Run ${{ matrix.scheme }}
         timeout-minutes: ${{ matrix.timeout }}
         run: |
@@ -140,7 +229,7 @@ jobs:
             -destination "${{ matrix.destination }}" \
             -derivedDataPath DerivedData \
             -enableCodeCoverage YES \
-            -resultBundlePath "TestResults/${{ matrix.scheme }}.xcresult" \
+            -resultBundlePath "TestResults/${{ matrix.scheme }}-swift${{ matrix.swift }}.xcresult" \
             ${{ matrix.extra_flags }} \
             $XCODE_COMMON_FLAGS | xcpretty
 
@@ -148,7 +237,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: test-results-${{ matrix.name }}
+          name: test-results-${{ matrix.name }}-swift${{ matrix.swift }}
           path: TestResults/
           overwrite: true
 
@@ -157,14 +246,14 @@ jobs:
   # leg fails, so the required check always reports instead of staying pending.
   unit-tests:
     runs-on: ubuntu-24.04
-    needs: [tests]
+    needs: [tests, spm-build]
     if: always()
     steps:
       - name: Require every test leg to pass
         run: |
           echo "tests matrix result: ${{ needs.tests.result }}"
-          if [ "${{ needs.tests.result }}" != "success" ]; then
-            echo "::error::A test leg did not succeed. Check the tests (macOS / iOS / snapshots) jobs."
+          if [ "${{ needs.tests.result }}" != "success" ] || [ "${{ needs.spm-build.result }}" != "success" ]; then
+            echo "::error::A test or package language-mode leg did not succeed. Check the matrix jobs."
             exit 1
           fi
 

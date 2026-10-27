@@ -156,3 +156,7 @@ Please also read our [Code of Conduct](CODE_OF_CONDUCT.md).
 ## Further Reading
 
 - Developer documentation: <https://developer.vonage.com>
+
+### Swift language modes
+
+See [Swift 6 integration and compatibility](docs/SWIFT6_MIGRATION.md) for Swift 5 host applications, Swift 6 callers, ownership requirements and the validation limits.

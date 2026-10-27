@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import Foundation
@@ -243,6 +243,7 @@ let package = Package(
         .target(
             name: "VERAVonageReactionsPlugin",
             dependencies: [
+                "VERACommonUI",
                 "VERAReactions",
                 "VERAVonage",
             ],
@@ -311,6 +312,19 @@ let package = Package(
         // MARK: - Tests
 
         .testTarget(
+            name: "Swift5CustomerTests",
+            dependencies: ["VERAMeetingRoomSDK"],
+            path: "Tests/ConsumerCompatibility/Swift5CustomerTests",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .testTarget(
+            name: "Swift6CustomerTests",
+            dependencies: ["VERAMeetingRoomSDK"],
+            path: "Tests/ConsumerCompatibility/Swift6CustomerTests",
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+
+        .testTarget(
             name: "VERAMeetingRoomSDKTests",
             dependencies: [
                 "VERAMeetingRoomSDK",
@@ -318,5 +332,6 @@ let package = Package(
             ],
             path: "VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests"
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )

@@ -7,15 +7,16 @@ import Foundation
 import VERADomain
 import os
 
-public final class OktaAuthManager: OKTAAuthenticating, @unchecked Sendable {
+@MainActor
+public final class OktaAuthManager: OKTAAuthenticating {
 
-    private let authStateSubject = CurrentValueSubject<AuthState, Never>(.notAuthenticated)
+    nonisolated private let authStateSubject = CurrentValueRelay<AuthState, Never>(.notAuthenticated)
     private let browserSignIn: BrowserSignInProvider
 
-    public var authState: AuthState { authStateSubject.value }
+    nonisolated public var authState: AuthState { authStateSubject.value }
 
-    public var authStatePublisher: AnyPublisher<AuthState, Never> {
-        authStateSubject.eraseToAnyPublisher()
+    nonisolated public var authStatePublisher: AnyPublisher<AuthState, Never> {
+        authStateSubject.publisher
     }
 
     private static let logger = Logger(
@@ -23,11 +24,14 @@ public final class OktaAuthManager: OKTAAuthenticating, @unchecked Sendable {
         category: "okta"
     )
 
-    public init(browserSignIn: BrowserSignInProvider = DefaultBrowserSignInProvider()) {
+    public convenience init() {
+        self.init(browserSignIn: DefaultBrowserSignInProvider())
+    }
+
+    public init(browserSignIn: BrowserSignInProvider) {
         self.browserSignIn = browserSignIn
     }
 
-    @MainActor
     public func signIn(from anchor: ASPresentationAnchor) async throws {
         Self.logger.info("Starting Okta browser sign-in")
 

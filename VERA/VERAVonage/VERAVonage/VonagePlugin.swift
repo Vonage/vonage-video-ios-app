@@ -11,7 +11,8 @@ import VERADomain
 /// control commands). Use alongside a signal channel/emitter to route signals into your feature.
 ///
 /// - SeeAlso: ``VonageSignalChannel``, ``VonageSignalEmitter``, ``VonageSignal``
-public protocol VonageSignalHandler {
+@MainActor
+public protocol VonageSignalHandler: Sendable {
     /// Processes an incoming signal.
     ///
     /// - Parameter signal: The received ``VonageSignal`` containing type and optional payload.
@@ -24,7 +25,8 @@ public protocol VonageSignalHandler {
 /// the session wrapper and injected into plugins or features that need to broadcast events.
 ///
 /// - SeeAlso: ``VonageSignalEmitter``, ``OutgoingSignal``
-public protocol VonageSignalChannel: AnyObject {
+@MainActor
+public protocol VonageSignalChannel: AnyObject, Sendable {
     /// Sends an outgoing signal to the session.
     ///
     /// - Parameter signal: The ``OutgoingSignal`` to emit.
@@ -38,7 +40,8 @@ public protocol VonageSignalChannel: AnyObject {
 /// The channel is usually assigned when the call connects and cleared on disconnect.
 ///
 /// - SeeAlso: ``VonageSignalChannel``
-public protocol VonageSignalEmitter: AnyObject {
+@MainActor
+public protocol VonageSignalEmitter: AnyObject, Sendable {
     /// The channel used to emit signals; may be `nil` when not connected.
     var channel: VonageSignalChannel? { get set }
 }
@@ -53,7 +56,8 @@ public protocol VonageSignalEmitter: AnyObject {
 /// - ``callDidEnd()``: Called during disconnect to allow cleanup.
 ///
 /// - SeeAlso: ``VonagePluginCallHolder``, ``VonagePluginID``, ``VonagePlugin``
-public protocol VonagePluginCallLifeCycle {
+@MainActor
+public protocol VonagePluginCallLifeCycle: Sendable {
     /// Called when the call starts and the session is connected.
     ///
     /// - Parameter userInfo: Contextual information such as username, room name, and call ID.
@@ -72,7 +76,8 @@ public protocol VonagePluginCallLifeCycle {
 /// so plugins can access publishers, perform actions, or emit signals.
 ///
 /// - SeeAlso: ``VonagePluginCallLifeCycle``
-public protocol VonagePluginCallHolder: AnyObject {
+@MainActor
+public protocol VonagePluginCallHolder: AnyObject, Sendable {
     /// The active call façade, or `nil` when disconnected.
     var call: CallFacade? { get set }
 }
@@ -80,7 +85,8 @@ public protocol VonagePluginCallHolder: AnyObject {
 /// Identifies a plugin with a stable string identifier.
 ///
 /// Use to log lifecycle events, diagnostics, and to manage plugin collections.
-public protocol VonagePluginID {
+@MainActor
+public protocol VonagePluginID: Sendable {
     /// A unique identifier for the plugin (e.g., `"chat"`, `"callkit"`).
     var pluginIdentifier: String { get }
 }

@@ -7,6 +7,7 @@ import Testing
 import VERAArchiving
 import VERADomain
 
+@MainActor
 @Suite("Download transcription use case tests")
 struct DownloadTranscriptionUseCaseTests {
 
@@ -86,15 +87,27 @@ struct DownloadTranscriptionUseCaseTests {
     }
 }
 
-private final class SpyArchiveFileDownloader: ArchiveFileDownloader {
-    var requestedURLs: [URL] = []
-    var requestedFileNames: [String] = []
-    var error: Error?
+/// The lock protects the recorded requests; downloads run off the test's actor.
+private final class SpyArchiveFileDownloader: ArchiveFileDownloader, @unchecked Sendable {
+    private let lock = NSLock()
+    private var _requestedURLs: [URL] = []
+    private var _requestedFileNames: [String] = []
+    private var _error: Error?
     let fileURL = URL(fileURLWithPath: "/tmp/transcript.zip")
 
+    var requestedURLs: [URL] { lock.withLock { _requestedURLs } }
+    var requestedFileNames: [String] { lock.withLock { _requestedFileNames } }
+    var error: Error? {
+        get { lock.withLock { _error } }
+        set { lock.withLock { _error = newValue } }
+    }
+
     func download(from url: URL, fileName: String) async throws -> URL {
-        requestedURLs.append(url)
-        requestedFileNames.append(fileName)
+        let error = lock.withLock {
+            _requestedURLs.append(url)
+            _requestedFileNames.append(fileName)
+            return _error
+        }
         if let error { throw error }
         return fileURL
     }

@@ -38,6 +38,7 @@ extension SpeakerInfo {
 /// - Audio level must meet the minimum threshold to become active speaker
 /// - The participant with the highest qualifying audio level becomes active speaker
 /// - Current active speaker's audio level is always updated, even if below threshold
+@MainActor
 public final class ActiveSpeakerTracker: ObservableObject {
     private let minimumAudioLevelThreshold: Float
 
