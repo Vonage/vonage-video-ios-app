@@ -235,7 +235,7 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         _ = await sut.getArchives(sessionKey: "test-room")
 
-        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 3 }
+        let callCount = await poll(read: { await mockDataSource.callCount }) { $0 >= 3 }
         #expect(callCount >= 3)
     }
 
@@ -250,7 +250,7 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         _ = await sut.getArchives(sessionKey: "test-room")
 
-        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 2 }
+        let callCount = await poll(read: { await mockDataSource.callCount }) { $0 >= 2 }
         #expect(callCount >= 2)
     }
 
