@@ -11,7 +11,8 @@ import VERADomain
 /// providing a single `callAsFunction()` entry point to trigger a disconnect on the active call.
 ///
 /// - SeeAlso: ``DefaultDisconnectRoomUseCase``, ``SessionRepository``, ``CallFacade/disconnect()``
-public protocol DisconnectRoomUseCase {
+@MainActor
+public protocol DisconnectRoomUseCase: Sendable {
     /// Disconnects the current call, if any.
     ///
     /// - Throws: Any error thrown by the underlying call’s `disconnect()` implementation.
