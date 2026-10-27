@@ -19,21 +19,35 @@ public final class ArchivesViewModel {
     private let archivesRepository: ArchivesRepository
     @ObservationIgnored
     private let playRecordingUseCase: PlayRecordingUseCase
+    @ObservationIgnored
+    private let downloadTranscriptionUseCase: DownloadTranscriptionUseCase
 
     public var archives: [ArchiveUIData] = []
     public var error: AlertItem?
+    /// A downloaded transcript waiting to be shared or saved by the user.
+    public var sharedTranscript: ArchiveTranscript?
+    /// Archives whose download is in progress.
+    public private(set) var downloadingArchiveIDs: Set<UUID> = []
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
         archivesRepository: ArchivesRepository,
         playRecordingUseCase: PlayRecordingUseCase,
+        downloadTranscriptionUseCase: DownloadTranscriptionUseCase
     ) {
         self.sessionKeyProvider = sessionKeyProvider
         self.archivesRepository = archivesRepository
         self.playRecordingUseCase = playRecordingUseCase
+        self.downloadTranscriptionUseCase = downloadTranscriptionUseCase
     }
 
+    /// Starts loading the archives of the current session, replacing any earlier load.
+    ///
+    /// Clears the previous load's error so it is not shown again for a later meeting.
     public func loadData() async {
+        cancellables.removeAll()
+        error = nil
+
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
             .sinkOnMainActor(
                 receiveCompletion: { [weak self] completion in
@@ -43,12 +57,20 @@ public final class ArchivesViewModel {
                 },
                 receiveValue: { [weak self] archives in
                     guard let self else { return }
-                    self.archives = archives.reversed().enumerated().map { index, archive in
-                        self.mapToUIArchive(archive, index: archives.count - index)
-                    }
+                    self.archives = self.mapToUIArchives(archives)
                 }
             )
             .store(in: &cancellables)
+    }
+
+    public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
+        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
+        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
+        return newestFirst.map { archive in
+            let index = nextIndexByKind[archive.kind, default: 0]
+            nextIndexByKind[archive.kind] = index - 1
+            return mapToUIArchive(archive, index: index)
+        }
     }
 
     public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {
@@ -59,12 +81,22 @@ public final class ArchivesViewModel {
         return uiArchive
     }
 
+    /// Opens a recording, or downloads a transcript and offers it for sharing.
+    ///
+    /// Requests for an archive that is already downloading are ignored.
     public func downloadArchive(_ archive: Archive) {
         Task { @MainActor [weak self] in
+            guard let self, downloadingArchiveIDs.insert(archive.id).inserted else { return }
+            defer { downloadingArchiveIDs.remove(archive.id) }
             do {
-                try await self?.playRecordingUseCase(archive)
+                switch archive.kind {
+                case .recording:
+                    try await playRecordingUseCase(archive)
+                case .transcription:
+                    sharedTranscript = try await downloadTranscriptionUseCase(archive)
+                }
             } catch {
-                self?.error = AlertItem.downloadError(error.localizedDescription)
+                self.error = AlertItem.downloadError(error.localizedDescription)
             }
         }
     }
@@ -90,11 +122,20 @@ extension Archive {
     }
 
     func toUIArchive(with index: Int) -> ArchiveUIData {
-        .init(
+        if isPending {
+            return .init(
+                id: id,
+                kind: kind,
+                title: kind.preparingTitle,
+                subtitle: String(localized: "Please wait while we prepare your downloads", bundle: .veraArchiving),
+                downloadState: .preparing)
+        }
+        return .init(
             id: id,
-            title: String(localized: "Recording \(index)", bundle: .veraArchiving),
+            kind: kind,
+            title: kind.listTitle(index: index),
             subtitle: subtitle,
-            isDownloadable: status == .available)
+            downloadState: downloadURL == nil ? .unavailable : .ready)
     }
 
     private func formatDuration(_ seconds: Int) -> String {

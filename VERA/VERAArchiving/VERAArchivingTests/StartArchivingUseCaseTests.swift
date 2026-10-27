@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERAArchiving
+import VERADomain
 
 @MainActor
 @Suite("Start archiving use case tests")
@@ -58,6 +59,24 @@ struct StartArchivingUseCaseTests {
         _ = try await sut(.init(sessionKey: sessionKey))
 
         #expect(dataSourceMock.lastSessionKey == sessionKey)
+    }
+
+    @Test func startArchivingDefaultsToRecordingKind() async throws {
+        let dataSourceMock = MockArchivingDataSource()
+        let sut = makeSUT(archivingDataSource: dataSourceMock)
+
+        _ = try await sut(.init(sessionKey: "heart-of-gold"))
+
+        #expect(dataSourceMock.lastStartKind == .recording)
+    }
+
+    @Test func startArchivingPassesTheTranscriptionKind() async throws {
+        let dataSourceMock = MockArchivingDataSource()
+        let sut = makeSUT(archivingDataSource: dataSourceMock)
+
+        _ = try await sut(.init(sessionKey: "heart-of-gold", kind: .transcription))
+
+        #expect(dataSourceMock.lastStartKind == .transcription)
     }
 
     // MARK: - Test Helpers

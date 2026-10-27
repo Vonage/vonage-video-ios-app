@@ -3,12 +3,15 @@
 //
 
 import Foundation
+import VERADomain
 
 public struct StartArchivingRequest: Sendable {
     public let sessionKey: String
+    public let kind: ArchiveKind
 
-    public init(sessionKey: String) {
+    public init(sessionKey: String, kind: ArchiveKind = .recording) {
         self.sessionKey = sessionKey
+        self.kind = kind
     }
 }
 
@@ -26,7 +29,7 @@ public final class DefaultStartArchivingUseCase: StartArchivingUseCase {
     public func callAsFunction(
         _ request: StartArchivingRequest
     ) async throws -> ArchiveID {
-        let request = StartArchivingDataSourceRequest(sessionKey: request.sessionKey)
+        let request = StartArchivingDataSourceRequest(sessionKey: request.sessionKey, kind: request.kind)
         let response = try await archivingDataSource.startArchiving(request)
         return response.archiveId
     }

@@ -8,6 +8,10 @@ import Observation
 import VERACommonUI
 import VERADomain
 
+/// Drives the start/stop control of a session archive.
+///
+/// The same view model controls both the recording and the post-call transcription,
+/// which run as separate concurrent archives. ``kind`` selects which one.
 @MainActor
 @Observable
 public final class ArchiveButtonViewModel {
@@ -15,6 +19,9 @@ public final class ArchiveButtonViewModel {
     private var cancellables = Set<AnyCancellable>()
 
     public var state: ArchivingState = .idle
+
+    @ObservationIgnored
+    public let kind: ArchiveKind
 
     @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
@@ -30,12 +37,14 @@ public final class ArchiveButtonViewModel {
     private var initiated = false
 
     public init(
+        kind: ArchiveKind = .recording,
         sessionKeyProvider: SessionKeyProvider,
         startArchivingUseCase: StartArchivingUseCase,
         stopArchivingUseCase: StopArchivingUseCase,
         archivingStatusDataSource: ArchivingStatusDataSource,
         showAlert: @escaping (AlertItem) -> Void
     ) {
+        self.kind = kind
         self.sessionKeyProvider = sessionKeyProvider
         self.startArchivingUseCase = startArchivingUseCase
         self.stopArchivingUseCase = stopArchivingUseCase
@@ -47,7 +56,7 @@ public final class ArchiveButtonViewModel {
         guard !initiated else { return }
         initiated = true
 
-        archivingStatusDataSource.archivingState
+        archivingStatusDataSource.archivingState(for: kind)
             .sinkOnMainActor { [weak self] status in
                 self?.state = status
             }
@@ -57,20 +66,17 @@ public final class ArchiveButtonViewModel {
     public func onTap() {
         switch state {
         case .archiving(let archiveID):
-            showStopRecordingConfirmation(archiveID: archiveID)
+            showStopConfirmation(archiveID: archiveID)
         case .idle:
-            showStartRecordingConfirmation()
+            showStartConfirmation()
         }
     }
 
-    private func showStartRecordingConfirmation() {
+    private func showStartConfirmation() {
         showAlert(
             AlertItem(
-                title: String(localized: "Start Recording?", bundle: .veraArchiving),
-                message:
-                    String(
-                        localized: "start.recording.message",
-                        bundle: .veraArchiving)
+                title: kind.startConfirmationTitle,
+                message: kind.startConfirmationMessage
             ) { [weak self] in
                 Task { @MainActor in
                     await self?.startArchiving()
@@ -79,13 +85,11 @@ public final class ArchiveButtonViewModel {
         )
     }
 
-    private func showStopRecordingConfirmation(archiveID: String) {
+    private func showStopConfirmation(archiveID: String) {
         showAlert(
             AlertItem(
-                title:
-                    String(localized: "Stop Recording?", bundle: .veraArchiving),
-                message:
-                    String(localized: "stop.recording.message", bundle: .veraArchiving)
+                title: kind.stopConfirmationTitle,
+                message: kind.stopConfirmationMessage
             ) { [weak self] in
                 Task { @MainActor in
                     await self?.stopArchiving(withID: archiveID)
@@ -97,7 +101,8 @@ public final class ArchiveButtonViewModel {
     @MainActor
     private func startArchiving() async {
         do {
-            _ = try await startArchivingUseCase(.init(sessionKey: sessionKeyProvider.sessionKey))
+            _ = try await startArchivingUseCase(
+                .init(sessionKey: sessionKeyProvider.sessionKey, kind: kind))
         } catch {
         }
     }
@@ -105,7 +110,8 @@ public final class ArchiveButtonViewModel {
     @MainActor
     private func stopArchiving(withID id: String) async {
         do {
-            try await stopArchivingUseCase(.init(sessionKey: sessionKeyProvider.sessionKey, archiveID: id))
+            try await stopArchivingUseCase(
+                .init(sessionKey: sessionKeyProvider.sessionKey, archiveID: id, kind: kind))
         } catch {
         }
     }

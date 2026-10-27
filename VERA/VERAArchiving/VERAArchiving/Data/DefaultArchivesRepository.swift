@@ -72,13 +72,16 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         switch result {
         case .success(let archives):
             cache[sessionKey]?.send(archives)
-            if Self.shouldStopPolling(archives) {
+            // Stop polling once no archive or transcript is still being produced.
+            // A transcript keeps processing after its parent archive is uploaded or available.
+            if !archives.contains(where: \.isPending) {
                 finishPolling(sessionKey: sessionKey, generation: generation)
                 return false
             }
             return true
         case .failure(let error):
-            cache[sessionKey]?.send(completion: .failure(error))
+            // A failed publisher cannot emit again, so the next request starts a fresh one.
+            cache.removeValue(forKey: sessionKey)?.send(completion: .failure(error))
             finishPolling(sessionKey: sessionKey, generation: generation)
             return false
         }
@@ -88,11 +91,5 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         guard pollingGenerations[sessionKey] == generation else { return }
         pollingTasks.removeValue(forKey: sessionKey)
         pollingGenerations.removeValue(forKey: sessionKey)
-    }
-
-    private static func shouldStopPolling(_ archives: [Archive]) -> Bool {
-        guard !archives.isEmpty else { return true }
-        if archives.contains(where: { $0.status == .failed }) { return true }
-        return archives.allSatisfy { $0.status == .available }
     }
 }
