@@ -21,7 +21,7 @@ public struct EnableCaptionsDataSourceResponse: Sendable {
     }
 }
 
-public protocol CaptionsActivationDataSource {
+public protocol CaptionsActivationDataSource: Sendable {
     func enableCaptions(
         _ request: EnableCaptionsDataSourceRequest
     ) async throws -> EnableCaptionsDataSourceResponse
