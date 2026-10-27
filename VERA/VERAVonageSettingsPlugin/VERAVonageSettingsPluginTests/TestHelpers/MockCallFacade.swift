@@ -22,6 +22,8 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     let _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+    let _transcriptionState = CurrentValueSubject<ArchivingState, Never>(.idle)
+    lazy var transcriptionState: AnyPublisher<ArchivingState, Never> = _transcriptionState.eraseToAnyPublisher()
 
     let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()

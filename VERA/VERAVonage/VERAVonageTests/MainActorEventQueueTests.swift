@@ -56,53 +56,120 @@ struct MainActorEventQueueTests {
         #expect(received == [0])
     }
 
-    @Test("A sustained control burst yields to other UI work after a bounded batch")
+    @Test("A busy UI coalesces display delivery after processing every audio sample")
+    func audioSmoothingPrecedesCoalescing() async {
+        let scheduler = ControlledDrainScheduler()
+        let queue = MainActorEventQueue<Float>(
+            transformEvent: Self.makeAudioTransform(), scheduleDrain: { scheduler.schedule($0) })
+        let levels: [Float] = [1, 0.5, 0.25, 0.1]
+        let reference = MovingAvgAudioLevelTracker()
+        let expected = levels.map { reference.track($0).logMovingAvg }.last!
+        var received: [Float] = []
+        queue.setHandler { received.append($0) }
+
+        await Task.detached {
+            for level in levels { queue.send(level, replacing: "audio") }
+        }.value
+        #expect(received.isEmpty)
+        #expect(scheduler.runNext())
+
+        #expect(received.count == 1)
+        #expect(received.first == expected)
+        #expect(expected != MovingAvgAudioLevelTracker().track(levels.last!).logMovingAvg)
+        #expect(!scheduler.runNext())
+    }
+
+    @Test("A sustained control burst is drained in bounded batches")
     func controlBurstYieldsBetweenBatches() async {
+        let scheduler = ControlledDrainScheduler()
+        let queue = MainActorEventQueue<Int>(scheduleDrain: { scheduler.schedule($0) })
+        var received: [Int] = []
+        queue.setHandler { received.append($0) }
+        await Task.detached {
+            for value in 0..<130 { queue.send(value) }
+        }.value
+
+        #expect(received.isEmpty)
+        #expect(scheduler.runNext())
+        #expect(received == Array(0..<64))
+        #expect(scheduler.runNext())
+        #expect(received == Array(0..<128))
+        #expect(scheduler.runNext())
+        #expect(received == Array(0..<130))
+        #expect(!scheduler.runNext())
+    }
+
+    @Test("The default drain scheduler lets other UI work run between batches")
+    func defaultSchedulerYieldsBetweenBatches() async {
         let queue = MainActorEventQueue<Int>()
-        let produced = DispatchSemaphore(value: 0)
         var received: [Int] = []
         var countAtSentinel: Int?
         await withCheckedContinuation { continuation in
             queue.setHandler { value in
                 received.append(value)
-                if value == 129 { continuation.resume() }
+                if value == 0 {
+                    // Reentrant sends queue the whole burst without blocking a producer or actor.
+                    for next in 1...130 { queue.send(next) }
+                }
+                if value == 1 {
+                    DispatchQueue.main.async { countAtSentinel = received.count }
+                }
+                if value == 130 { continuation.resume() }
             }
-            DispatchQueue.global().async {
-                for value in 0..<130 { queue.send(value) }
-                produced.signal()
-            }
-            #expect(produced.wait(timeout: .now() + 2) == .success)
-            DispatchQueue.main.async { countAtSentinel = received.count }
+            queue.send(0)
         }
-        #expect(received == Array(0..<130))
-        #expect(countAtSentinel == 64)
+        queue.invalidate()
+        #expect(received == Array(0...130))
+        #expect(countAtSentinel == 65)
     }
 
     @Test("Explicit setup starts a new callback lifetime without replaying invalidated values")
     func activationDropsTheOldBatch() async {
-        let queue = MainActorEventQueue<Int>()
-        let produced = DispatchSemaphore(value: 0)
+        let scheduler = ControlledDrainScheduler()
+        let queue = MainActorEventQueue<Int>(scheduleDrain: { scheduler.schedule($0) })
         var oldValues: [Int] = []
         var newValues: [Int] = []
-        await withCheckedContinuation { continuation in
-            queue.setHandler { value in
-                oldValues.append(value)
-                queue.invalidate()
-                queue.send(500)
-                queue.activate { value in
-                    newValues.append(value)
-                    continuation.resume()
-                }
-                queue.send(1000)
-            }
-            DispatchQueue.global().async {
-                for value in 0..<100 { queue.send(value) }
-                produced.signal()
-            }
-            #expect(produced.wait(timeout: .now() + 2) == .success)
+        queue.setHandler { value in
+            oldValues.append(value)
+            queue.invalidate()
+            queue.send(500)
+            queue.activate { newValues.append($0) }
+            queue.send(1000)
         }
+        await Task.detached {
+            for value in 0..<100 { queue.send(value) }
+        }.value
+
+        #expect(scheduler.runNext())
         #expect(oldValues == [0])
+        #expect(newValues.isEmpty)
+        #expect(scheduler.runNext())
         #expect(newValues == [1000])
+        #expect(!scheduler.runNext())
     }
 
+    // The queue invokes this lock-confined transformation on producer threads.
+    nonisolated private static func makeAudioTransform() -> (Float) -> Float {
+        let tracker = MovingAvgAudioLevelTracker()
+        return { tracker.track($0).logMovingAvg }
+    }
+}
+
+/// Only pending operations cross producer threads; every access uses the same lock.
+/// Drains are taken out of the lock and executed exclusively by MainActor test code.
+private final class ControlledDrainScheduler: @unchecked Sendable {
+    private let lock = NSLock()
+    private var pending: [@MainActor @Sendable () -> Void] = []
+
+    func schedule(_ operation: @escaping @MainActor @Sendable () -> Void) {
+        lock.withLock { pending.append(operation) }
+    }
+
+    @MainActor @discardableResult
+    func runNext() -> Bool {
+        let operation = lock.withLock { pending.isEmpty ? nil : pending.removeFirst() }
+        guard let operation else { return false }
+        operation()
+        return true
+    }
 }

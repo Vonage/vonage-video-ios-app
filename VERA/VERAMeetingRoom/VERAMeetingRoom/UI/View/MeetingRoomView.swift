@@ -115,6 +115,9 @@ public struct MeetingRoomView: View {
                         if state.archivingState.isArchiving {
                             recordingIndicator
                         }
+                        if state.transcriptionState.isArchiving {
+                            transcriptionIndicator
+                        }
                         if state.noiseSuppressionState.isEnabled {
                             noiseSuppressionIndicator
                         }
@@ -251,6 +254,17 @@ public struct MeetingRoomView: View {
                 )
         }
         .accessibilityIdentifier(MeetingRoomAccessibilityID.recordingIndicator)
+    }
+
+    private var transcriptionIndicator: some View {
+        VERACommonUIAsset.Images.textLine.swiftUIImage
+            .resizable()
+            .frame(
+                width: MeetingRoomViewConstants.recordingIconSize,
+                height: MeetingRoomViewConstants.recordingIconSize
+            )
+            .foregroundStyle(theme.error)
+            .accessibilityIdentifier(MeetingRoomAccessibilityID.transcriptionIndicator)
     }
 
     private var noiseSuppressionIndicator: some View {
@@ -527,6 +541,7 @@ public struct MeetingRoomView: View {
             showParticipantList: true,
             callState: .connected,
             archivingState: .archiving(""),
+            transcriptionState: .archiving(""),
             noiseSuppressionState: .disabled
         ),
         actions: .init())
