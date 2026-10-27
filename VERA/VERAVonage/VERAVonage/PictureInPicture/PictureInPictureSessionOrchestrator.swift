@@ -37,6 +37,9 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     private var lastInPipRetargetAt: Date?
     private static let minimumInPipRetargetInterval: TimeInterval = 1.5
 
+    private var participantsTask: Task<Void, Never>?
+    private var participantsContinuation: AsyncStream<ParticipantsState>.Continuation?
+
     /// The current target's renderer: feeds the PiP window, hosts the camera-off placeholder, and
     /// its view is the controller's anchor.
     private var activePipRenderer: PictureInPictureVideoRenderer?
@@ -80,6 +83,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         }
         self.call = call
 
+        let (states, continuation) = AsyncStream.makeStream(
+            of: ParticipantsState.self, bufferingPolicy: .bufferingNewest(1))
+        participantsContinuation = continuation
+
         call.participantsPublisher
             // Drop high-frequency audio-level churn: only react when something that can change the
             // PiP target/placeholder changes (participant set, camera states, active speaker, local
@@ -89,13 +96,15 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
                 PictureInPictureParticipantSelector.signature(for: $0)
                     == PictureInPictureParticipantSelector.signature(for: $1)
             }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                Task { @MainActor [weak self] in
-                    await self?.updatePipTarget(for: state)
-                }
-            }
+            .sink { continuation.yield($0) }
             .store(in: &cancellables)
+
+        participantsTask = Task { @MainActor [weak self] in
+            for await state in states {
+                guard let self else { return }
+                await self.updatePipTarget(for: state)
+            }
+        }
 
         observeRecordingState(call.archivingState)
 
@@ -175,6 +184,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
     public func tearDown() {
         cancellables.removeAll()
+        participantsContinuation?.finish()
+        participantsContinuation = nil
+        participantsTask?.cancel()
+        participantsTask = nil
         lastInPipRetargetAt = nil
         activePipRenderer?.stopPlaceholder()
         activePipRenderer = nil
@@ -223,7 +236,10 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
 
         if targetId != pipTargetParticipantId {
             let now = Date()
-            if let last = lastInPipRetargetAt,
+            let bypassesDebounce =
+                PictureInPictureParticipantSelector.isScreenshare(participantId: targetId, in: state)
+                || !PictureInPictureParticipantSelector.contains(participantId: pipTargetParticipantId, in: state)
+            if !bypassesDebounce, let last = lastInPipRetargetAt,
                 now.timeIntervalSince(last) < Self.minimumInPipRetargetInterval
             {
                 // Fall through to keep the current target's placeholder in sync.
@@ -311,9 +327,6 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
         activePipRenderer = renderer
         pipTargetParticipantId = targetId
 
-        if previousRenderer !== renderer {
-            previousRenderer?.pipBufferDisplayLayer = nil
-        }
         pipController.attachFeed(to: renderer)
 
         if pipTargetCameraEnabled {
