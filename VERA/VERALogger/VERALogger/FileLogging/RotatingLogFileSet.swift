@@ -157,7 +157,10 @@ public actor RotatingLogFileSet {
 
         let url = currentFileURL()
         if !FileManager.default.fileExists(atPath: url.path) {
-            FileManager.default.createFile(atPath: url.path, contents: nil)
+            guard FileManager.default.createFile(atPath: url.path, contents: nil) else {
+                sessionTimestamp = nil
+                throw CocoaError(.fileWriteUnknown)
+            }
         }
         currentFileSize = fileSize(of: url)
     }
