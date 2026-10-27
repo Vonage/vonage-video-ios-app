@@ -7,6 +7,7 @@ import Testing
 import VERAArchiving
 import VERADomain
 
+@MainActor
 @Suite("Play recording use case tests")
 struct PlayRecordingUseCaseTests {
 

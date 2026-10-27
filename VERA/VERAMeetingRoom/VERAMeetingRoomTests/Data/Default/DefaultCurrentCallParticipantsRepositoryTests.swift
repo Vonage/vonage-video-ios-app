@@ -2,6 +2,7 @@
 //  Created by Vonage on 29/7/25.
 //
 
+import Combine
 import Foundation
 import SwiftUI
 import Testing
@@ -9,17 +10,14 @@ import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
+@MainActor
 @Suite("DefaultCurrentCallParticipantsRepository tests")
 struct DefaultCurrentCallParticipantsRepositoryTests {
 
     @Test func initialIsEmpty() async throws {
         let sut = makeSUT()
         let publisher = sut.getCurrentCallParticipants()
-        var initialParticipants: [Participant]?
-        for await value in publisher.values {
-            initialParticipants = value
-            break
-        }
+        let initialParticipants = currentParticipants(from: publisher)
         #expect(initialParticipants == [])
     }
 
@@ -28,11 +26,7 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
         let participant = makeMockParticipant(id: "1", name: "Arthur Dent")
         sut.updateParticipants([participant])
         let publisher = sut.getCurrentCallParticipants()
-        var published: [Participant]?
-        for await value in publisher.values {
-            published = value
-            break
-        }
+        let published = currentParticipants(from: publisher)
         #expect(published == [participant])
     }
 
@@ -43,15 +37,19 @@ struct DefaultCurrentCallParticipantsRepositoryTests {
         sut.updateParticipants([p1])
         sut.updateParticipants([p2])
         let publisher = sut.getCurrentCallParticipants()
-        var published: [Participant]?
-        for await value in publisher.values {
-            published = value
-            break
-        }
+        let published = currentParticipants(from: publisher)
         #expect(published == [p2])
     }
 
     // MARK: - Test Helpers
+
+    /// The UI-owned repository synchronously replays its current participant snapshot.
+    private func currentParticipants(from publisher: AnyPublisher<[Participant], Never>) -> [Participant]? {
+        var participants: [Participant]?
+        let subscription = publisher.first().sink { participants = $0 }
+        defer { subscription.cancel() }
+        return participants
+    }
 
     private func makeSUT() -> DefaultCurrentCallParticipantsRepository {
         .init()

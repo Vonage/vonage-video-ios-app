@@ -137,7 +137,7 @@ struct MeetingRoomComposedViewTests {
     private func makeSUT(
         enabledFeatures: Set<MeetingRoomFeature> = [],
         container: MeetingRoomSDKContainer? = nil,
-        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
+        uiProvider: (any MeetingRoomUIProvider)? = nil
     ) -> MeetingRoomComposedView {
         let actualContainer = container ?? makeContainer(enabledFeatures: enabledFeatures)
         let assembler = BottomBarButtonsAssembler(container: actualContainer, enabledFeatures: enabledFeatures)
@@ -146,7 +146,7 @@ struct MeetingRoomComposedViewTests {
         return MeetingRoomComposedView(
             meetingRoomFactory: factory,
             viewModel: viewModel,
-            uiProvider: uiProvider,
+            uiProvider: uiProvider ?? DefaultMeetingRoomUIProvider(),
             container: actualContainer,
             pictureInPictureOrchestrator: PictureInPictureSessionOrchestrator(),
             enabledFeatures: enabledFeatures,
@@ -199,6 +199,7 @@ struct MeetingRoomComposedViewTests {
         await delay()
     }
 
+    @MainActor
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>
     ) -> MeetingRoomSDKContainer {
@@ -208,6 +209,7 @@ struct MeetingRoomComposedViewTests {
         )
     }
 
+    @MainActor
     private func makeMeetingRoomFactory() -> MeetingRoomFactory {
         MeetingRoomFactory(
             baseURL: Self.testBaseURL,

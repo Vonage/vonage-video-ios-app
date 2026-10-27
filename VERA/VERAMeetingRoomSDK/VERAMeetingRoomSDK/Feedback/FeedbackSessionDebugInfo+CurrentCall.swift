@@ -8,6 +8,7 @@ import VERAVonage
 
 extension FeedbackSessionDebugInfo {
     /// Builds session debug info from the current call, when available.
+    @MainActor
     public static func fromCurrentCall(in sessionRepository: SessionRepository) -> FeedbackSessionDebugInfo {
         guard let call = sessionRepository.currentCall as? VonageCall,
             let session = call.session
