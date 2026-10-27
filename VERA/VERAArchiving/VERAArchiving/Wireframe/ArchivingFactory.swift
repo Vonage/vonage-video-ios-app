@@ -11,23 +11,35 @@ public final class ArchivingFactory {
     private let archivingDataSource: ArchivingDataSource
     private let archivingStatusDataSource: ArchivingStatusDataSource
     private let sessionKeyProvider: SessionKeyProvider
+    private let archiveFileDownloader: ArchiveFileDownloader
 
+    /// - Parameters:
+    ///   - archiveFileDownloader: Downloads transcript zips on the goodbye page.
     public init(
         archivesRepository: ArchivesRepository,
         archivingDataSource: ArchivingDataSource,
         archivingStatusDataSource: ArchivingStatusDataSource,
-        sessionKeyProvider: SessionKeyProvider
+        sessionKeyProvider: SessionKeyProvider,
+        archiveFileDownloader: ArchiveFileDownloader = URLSessionArchiveFileDownloader()
     ) {
         self.archivesRepository = archivesRepository
         self.archivingDataSource = archivingDataSource
         self.archivingStatusDataSource = archivingStatusDataSource
         self.sessionKeyProvider = sessionKeyProvider
+        self.archiveFileDownloader = archiveFileDownloader
     }
 
+    /// Makes the start/stop control for the given archive kind.
+    ///
+    /// - Parameters:
+    ///   - kind: Whether the control drives the recording or the post-call transcription.
+    ///   - showAlert: Presents the start/stop confirmation dialogs.
     public func makeArchivingButton(
+        kind: ArchiveKind = .recording,
         showAlert: @escaping (AlertItem) -> Void
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
         let viewModel = ArchiveButtonViewModel(
+            kind: kind,
             sessionKeyProvider: sessionKeyProvider,
             startArchivingUseCase: DefaultStartArchivingUseCase(
                 archivingDataSource: archivingDataSource),
@@ -52,6 +64,9 @@ public final class ArchivingFactory {
             archivesRepository: archivesRepository,
             playRecordingUseCase: DefaultPlayRecordingUseCase(
                 onPlay: onPlay
+            ),
+            downloadTranscriptionUseCase: DefaultDownloadTranscriptionUseCase(
+                fileDownloader: archiveFileDownloader
             ))
         return (make(viewModel: viewModel), viewModel)
     }
