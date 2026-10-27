@@ -10,6 +10,7 @@ import VERAArchivingTestHelpers
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Archive button view model tests")
 struct ArchiveButtonViewModelTests {
 
