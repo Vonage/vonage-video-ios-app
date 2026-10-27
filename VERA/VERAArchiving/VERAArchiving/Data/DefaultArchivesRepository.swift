@@ -109,8 +109,9 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
                     publisher.value = archives
 
-                    // Stop polling if all archives are available or if any failed
-                    if Self.shouldStopPolling(archives) {
+                    // Stop polling once no archive or transcript is still being produced.
+                    // A transcript keeps processing after its parent archive is uploaded or available.
+                    if !archives.contains(where: \.isPending) {
                         state.finishPolling(for: sessionKey, generation: generation)
                         return
                     }
@@ -131,17 +132,5 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         }
 
         state.installTask(task, for: sessionKey, generation: generation)
-    }
-
-    private static func shouldStopPolling(_ archives: [Archive]) -> Bool {
-        guard !archives.isEmpty else { return true }
-
-        // Stop if any archive failed (they won't become available)
-        if archives.contains(where: { $0.status == .failed }) {
-            return true
-        }
-
-        // Stop if all archives are available for download
-        return archives.allSatisfy { $0.status == .available }
     }
 }

@@ -7,7 +7,7 @@ import Foundation
 import SwiftUI
 import VERADomain
 
-public struct ActiveSpeakerInfo: Equatable {
+public struct ActiveSpeakerInfo: Equatable, Sendable {
     public let participantId: String?
     /// The audio level of the active speaker (0.0 - 1.0)
     public let audioLevel: Float
@@ -55,13 +55,19 @@ public final class ActiveSpeakerTracker: ObservableObject {
     /// current active participant.
     /// If the updated participant is the current one the audio level is updated
     public func updatedParticipant(_ participant: SpeakerInfo) {
+        guard participant.isMicEnabled else {
+            if activeSpeaker.participantId == participant.id {
+                activeSpeaker = .none
+            }
+            return
+        }
         // We have to update current active participant audio level,
         // otherwise the participant with highest audio level will remain
         if activeSpeaker.participantId == participant.id {
             activeSpeaker = participant.activeSpeakerInfo
             return
         }
-        guard participant.isMicEnabled, participant.audioLevel >= minimumAudioLevelThreshold else { return }
+        guard participant.audioLevel >= minimumAudioLevelThreshold else { return }
 
         if participant.audioLevel > activeSpeaker.audioLevel {
             activeSpeaker = participant.activeSpeakerInfo

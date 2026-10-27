@@ -46,7 +46,7 @@ public struct ParticipantsState: Equatable {
 ///
 /// Represents lifecycle stages of a call from idle to disconnected.
 /// Use it to drive connection-related UI and guard call operations.
-public enum CallState {
+public enum CallState: Sendable {
     /// Initial state, no connection established.
     case idle
     /// The call is connected and active.
@@ -63,7 +63,7 @@ public enum CallState {
 ///
 /// Represents if the current call is being recording or not.
 /// Use it to drive recording related UI display.
-public enum ArchivingState: Equatable {
+public enum ArchivingState: Equatable, Sendable {
     case idle
     case archiving(ArchiveID)
 }
@@ -74,7 +74,7 @@ public typealias ArchiveID = String
 ///
 /// Represents whether the current call has captions enabled or not.
 /// Use it to drive captions-related UI display.
-public enum CaptionsState: Equatable {
+public enum CaptionsState: Equatable, Sendable {
     case enabled(CaptionsID?)
     case disabled
 }
@@ -94,7 +94,7 @@ public typealias CaptionsID = String
 ///
 /// Represents whether the current call has noise suppression enabled or not.
 /// Use it to drive noise suppression-related UI display.
-public enum NoiseSuppressionState: Equatable {
+public enum NoiseSuppressionState: Equatable, Sendable {
     case enabled
     case disabled
     case idle
@@ -148,12 +148,14 @@ public protocol CallStatePublisherProvider: AnyObject {
     var callState: AnyPublisher<CallState, Never> { get }
 }
 
-/// Provides a publisher for the call archiving state.
+/// Provides publishers for the call archiving states.
 ///
-/// Use to drive recording-related UI operations.
+/// Use to drive recording and transcription related UI operations.
 public protocol CallArchivingPublisherProvider: AnyObject {
-    /// A publisher that emits ``ArchivingState`` values, never fails.
+    /// A publisher that emits the recording ``ArchivingState`` values, never fails.
     var archivingState: AnyPublisher<ArchivingState, Never> { get }
+    /// A publisher that emits the post-call transcription ``ArchivingState`` values, never fails.
+    var transcriptionState: AnyPublisher<ArchivingState, Never> { get }
 }
 
 /// Defines the primary connection lifecycle operations for a call.
@@ -172,6 +174,11 @@ public protocol CallConnectable: AnyObject {
     ///   or if the disconnect operation fails.
     /// - Important: Implementations should transition to ``CallState/disconnecting`` and then ``CallState/disconnected``.
     func disconnect() async throws
+}
+
+/// Optional microphone-only control for system mute actions, which must preserve video choices.
+public protocol AudioMuteControllable: AnyObject {
+    func muteLocalAudio(_ isMuted: Bool)
 }
 
 /// Controls local media publishing and mute state.

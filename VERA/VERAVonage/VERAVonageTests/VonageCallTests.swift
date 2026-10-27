@@ -2,6 +2,7 @@
 //  Created by Vonage on 28/7/25.
 //
 
+import Combine
 import Foundation
 import OpenTok
 import Testing
@@ -517,7 +518,101 @@ struct VonageCallTests {
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
     }
 
+    // MARK: - Archiving
+
+    @Test
+    func archiveStartedWithTranscriptionNameUpdatesOnlyTranscriptionState() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+    }
+
+    @Test
+    func archiveStartedWithoutNameIsTreatedAsRecording() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("recording-1", nil)
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+    }
+
+    @Test
+    func stoppingRecordingKeepsTranscriptionRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("recording-1")
+
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func stoppingTranscriptionKeepsRecordingRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("transcription-1")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+    }
+
+    @Test
+    func stoppingAnUntrackedArchiveKeepsRunningArchives() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("unknown-archive")
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func archiveEventsForwardTheArchiveKindToSignalHandlers() async throws {
+        let session = VonageSessionSpy()
+        let plugin = ArchivingSignalHandlerSpy()
+        let sut = makeSUT(session: session)
+        sut.assignPlugins([plugin])
+        sut.setup()
+        try await sut.connect()
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+        session.onArchiveStopped?("transcription-1")
+
+        let payloads = try plugin.signals.map { try #require($0.data) }
+        #expect(payloads.count == 2)
+        #expect(payloads.allSatisfy { $0.contains(#""kind":"transcription""#) })
+        #expect(payloads.first?.contains(#""archivingID":"transcription-1""#) == true)
+    }
+
     // MARK: - Test Helpers
+
+    private func makeConnectedSUT(session: VonageSessionSpy) async throws -> VonageCall {
+        let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
+        return sut
+    }
+
+    private func currentValue(
+        of publisher: AnyPublisher<ArchivingState, Never>
+    ) async -> ArchivingState? {
+        await publisher.values.first { _ in true }
+    }
 
     private func makeSUT(
         credentials: RoomCredentials = makeMockCredentials(),
@@ -553,4 +648,165 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+private final class ArchivingSignalHandlerSpy: VonagePlugin, VonageSignalHandler {
+    private(set) var signals: [VonageSignal] = []
+
+    var pluginIdentifier: String { "ArchivingSignalHandlerSpy" }
+
+    func callDidStart(_ userInfo: [String: Any]) async throws {}
+
+    func callDidEnd() async throws {}
+
+    func handleSignal(_ signal: VonageSignal) {
+        guard signal.type == "archiving" else { return }
+        signals.append(signal)
+    }
+}
+
+@Suite("SystemMediaStateTests", .serialized)
+@MainActor
+struct SystemMediaStateTests {
+    private func makeCall(_ session: VonageSession = SystemMediaStateTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewCallKitUnmutePreservesDisabledCamera() async throws {
+        let call = makeCall()
+        call.publisher.publishVideo = false
+        call.setup()
+        call.muteLocalAudio(true)
+        try await Task.sleep(for: .milliseconds(100))
+        call.muteLocalAudio(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishVideo, "system unmute switches a disabled camera on")
+    }
+
+    @Test func reviewMuteLocalMediaPublishesState() async throws {
+        let call = makeCall()
+        var latest: SessionState = .initial
+        let observation = call.statePublisher.sink { latest = $0 }
+        call.setup()
+        call.muteLocalMedia(true)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(!call.publisher.publishAudio && !call.publisher.publishVideo)
+        #expect(
+            !latest.isPublishingAudio && !latest.isPublishingVideo,
+            "CallKit media changes do not update the UI state publisher")
+        observation.cancel()
+    }
+
+    @Test(arguments: [true, false])
+    func systemMutePreservesVideoAndPublishesState(cameraEnabled: Bool) async throws {
+        let call = makeCall()
+        call.publisher.publishVideo = cameraEnabled
+        var state: SessionState = .initial
+        let observation = call.statePublisher.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        call.muteLocalAudio(true)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishAudio)
+        #expect(call.publisher.publishVideo == cameraEnabled)
+        #expect(!state.isPublishingAudio && state.isPublishingVideo == cameraEnabled)
+        call.muteLocalAudio(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(call.publisher.publishAudio)
+        #expect(call.publisher.publishVideo == cameraEnabled)
+        #expect(state.isPublishingAudio && state.isPublishingVideo == cameraEnabled)
+    }
+
+    @Test(arguments: [true, false])
+    func holdAndResumePublishActualMediaState(audioInitiallyEnabled: Bool) async throws {
+        let call = makeCall()
+        call.publisher.publishAudio = audioInitiallyEnabled
+        call.publisher.publishVideo = false
+        var state: SessionState = .initial
+        let observation = call.statePublisher.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        call.setOnHold(true)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!state.isPublishingAudio && !state.isPublishingVideo)
+        call.muteLocalAudio(audioInitiallyEnabled)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!call.publisher.publishAudio && !call.publisher.publishVideo)
+        call.setOnHold(false)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(state.isPublishingAudio == !audioInitiallyEnabled)
+        #expect(!state.isPublishingVideo)
+    }
+}
+
+private final class SystemMediaStateTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+@Suite("CallObserverLifetimeTests", .serialized)
+@MainActor
+struct CallObserverLifetimeTests {
+    private func makeCall(_ session: VonageSession = CallObserverLifetimeTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewSetupCallReleasesWhenOwnerDropsIt() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call?.setup()
+        try await Task.sleep(for: .milliseconds(100))
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil, "setup observer keeps call alive after its owner releases it")
+    }
+
+    @Test func reviewCallWithoutObserversReleases() async throws {
+        var call: VonageCall? = makeCall()
+        weak var observed = call
+        call = nil
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(observed == nil)
+    }
+
+    @Test func reviewNormalDisconnectReleasesCall() async throws {
+        let session = CallObserverLifetimeTestsSession()
+        var call: VonageCall? = makeCall(session)
+        weak var observed = call
+        call?.setup()
+        try await call?.connect()
+        session.onSessionDidConnect?()
+        try await Task.sleep(for: .milliseconds(100))
+        try await call?.disconnect()
+        call = nil
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(observed == nil)
+    }
+}
+
+private final class CallObserverLifetimeTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
 }

@@ -5,7 +5,7 @@
 import Foundation
 import VERADomain
 
-public struct EnableCaptionsRequest {
+public struct EnableCaptionsRequest: Sendable {
     public let sessionKey: String
 
     public init(sessionKey: String) {

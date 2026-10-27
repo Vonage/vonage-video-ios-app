@@ -9,7 +9,7 @@ extension URL {
     /// Extracts the room identifier from a meeting URL
     /// - Parameter baseURL: The base domain URL
     /// - Returns: The room identifier or nil if not valid
-    public func getRoomIdentifier(from baseURL: URL) -> RoomIdentifier? {
+    public func getRoomIdentifier(from baseURL: URL) -> (any RoomIdentifier)? {
 
         let selfHost = self.host?.lowercased()
         let baseHost = baseURL.host?.lowercased()

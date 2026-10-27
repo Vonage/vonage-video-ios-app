@@ -10,7 +10,7 @@
 /// This is the primary settings type used when joining a room or creating a publisher.
 ///
 /// - SeeAlso: ``PublisherAdvancedSettings``, ``VideoScaleBehavior``
-public struct PublisherSettings: Equatable, Hashable {
+public struct PublisherSettings: Equatable, Hashable, Sendable {
     /// The username to display for this publisher.
     public var username: String
 
