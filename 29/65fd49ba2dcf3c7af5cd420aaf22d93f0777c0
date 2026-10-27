@@ -1,0 +1,19 @@
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_1c0c83113732a4::t_5ec72e4ba440c9 18-19,23-32,51-52,55,59,74-76,79-83,85-86,101,111,116,200-201,211,285
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2965fd49ba2dcf3c7af5cd420aaf22d93f0777c0",
+  "prompts": {},
+  "sessions": {
+    "s_1c0c83113732a4": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_60fd54bc-c90b-412a-8967-b012b45f329d",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
