@@ -5,6 +5,7 @@
 import Foundation
 import VERAChat
 
+@MainActor
 public final class VonageSendChatMessageUseCase: SendChatMessageUseCase {
 
     private let vonageChatPlugin: VonageChatPlugin

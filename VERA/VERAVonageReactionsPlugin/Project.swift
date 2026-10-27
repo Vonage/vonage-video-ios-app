@@ -15,6 +15,7 @@ let project = Project(
             scripts: [.swiftLint(targetName: "VERAVonageReactionsPlugin")],
             dependencies: [
                 .project(target: "VERAReactions", path: "../VERAReactions"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),
             ],
             settings: createBaseBuildSettings()

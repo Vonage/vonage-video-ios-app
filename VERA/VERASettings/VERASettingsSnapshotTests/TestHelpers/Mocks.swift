@@ -8,16 +8,16 @@ import VERASettings
 
 final actor MockStatsSettingsRepository: PublisherSettingsRepository {
 
-    private nonisolated let subject: CurrentValueSubject<PublisherSettingsPreferences, Never>
+    private nonisolated let subject: CurrentValueRelay<PublisherSettingsPreferences, Never>
 
-    nonisolated(unsafe) private(set) var lastSavedPreferences: PublisherSettingsPreferences?
+    private(set) var lastSavedPreferences: PublisherSettingsPreferences?
 
     nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     init(initialPreferences: PublisherSettingsPreferences = .default) {
-        self.subject = CurrentValueSubject(initialPreferences)
+        self.subject = CurrentValueRelay(initialPreferences)
     }
 
     func getPreferences() async -> PublisherSettingsPreferences {
@@ -36,14 +36,14 @@ final actor MockStatsSettingsRepository: PublisherSettingsRepository {
 
 final actor MockStatsDataSource: StatsDataSource {
 
-    private nonisolated let subject: CurrentValueSubject<NetworkMediaStats, Never>
+    private nonisolated let subject: CurrentValueRelay<NetworkMediaStats, Never>
 
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     init(initialStats: NetworkMediaStats = .empty) {
-        self.subject = CurrentValueSubject(initialStats)
+        self.subject = CurrentValueRelay(initialStats)
     }
 
     func updateStats(_ stats: NetworkMediaStats) async {
@@ -53,10 +53,10 @@ final actor MockStatsDataSource: StatsDataSource {
 
 final actor MockStatsOverlayDataSource: StatsDataSource {
 
-    private nonisolated let subject = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
+    private nonisolated let subject = CurrentValueRelay<NetworkMediaStats, Never>(.empty)
 
     nonisolated var statsPublisher: AnyPublisher<NetworkMediaStats, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func updateStats(_ stats: NetworkMediaStats) async {
