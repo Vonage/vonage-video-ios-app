@@ -27,8 +27,7 @@ import VERAVonage
 /// - Warning: CallKit is not supported on the iOS Simulator. When the plugin is
 ///   active on a Simulator target, `OTPublisher` fails to publish with a connection
 ///   timeout. Skip `setup()` or guard with `#if !targetEnvironment(simulator)` when
-///   running on Simulator. The plugin itself skips CallKit transactions on Simulator
-///   (see ``isCallKitSupported``).
+///   running on Simulator.
 public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Errors emitted by the CallKit plugin.
@@ -55,29 +54,8 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Defaults to the type name (e.g., `"VonageCallKitPlugin"`).
     public var pluginIdentifier: String { String(describing: type(of: self)) }
 
-    /// Whether this device can run CallKit transactions.
-    ///
-    /// CallKit is not supported on the iOS Simulator, where start-call requests are rejected
-    /// with `CXErrorCodeRequestTransactionError.unentitled`. When `false`, the lifecycle
-    /// callbacks skip CallKit instead of surfacing that rejection as a call error.
-    let isCallKitSupported: Bool
-
-    /// `false` on the iOS Simulator, `true` on devices.
-    public static var isCallKitSupportedByDefault: Bool {
-        #if targetEnvironment(simulator)
-            false
-        #else
-            true
-        #endif
-    }
-
     /// Creates a new CallKit plugin instance.
-    ///
-    /// - Parameter isCallKitSupported: Whether to drive CallKit. Defaults to
-    ///   ``isCallKitSupportedByDefault``.
-    public init(isCallKitSupported: Bool = VonageCallKitPlugin.isCallKitSupportedByDefault) {
-        self.isCallKitSupported = isCallKitSupported
-    }
+    public init() {}
 
     /// Lifecycle callback invoked when the call starts and the session is connected.
     ///
@@ -90,9 +68,6 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Starts the CallKit call via `VERACallManager`
     /// - Reports connected state and configures hold on `ProviderDelegate`
     ///
-    /// When ``isCallKitSupported`` is `false` (iOS Simulator), the call ID is still validated
-    /// but no CallKit call is started.
-    ///
     /// - Parameters:
     ///   - userInfo: A dictionary with contextual info (room name and call ID).
     /// - Throws: ``VonageCallKitPlugin/Error/invalidCallID`` if `callID` cannot be parsed.
@@ -102,7 +77,6 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
         let callID = userInfo[VonageCallParams.callID.rawValue] as? String ?? ""
 
         if let callUUID = UUID(uuidString: callID) {
-            guard isCallKitSupported else { return }
             currentCallID = callUUID
             try await callManager.startCall(handle: roomName, callID: callUUID)
             providerDelegate?.reportConnected(callUUID: callUUID)
