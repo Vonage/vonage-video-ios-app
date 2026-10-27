@@ -34,9 +34,9 @@ public class MockCall: CallFacade, AudioMuteControllable {
     public var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
 
-    public let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
+    public let _publisherAudioLevel = CurrentValueRelay<Float, Never>(0)
     public lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> =
-        _publisherAudioLevel.eraseToAnyPublisher()
+        _publisherAudioLevel.publisher
 
     public var recordedActions: [CallActions] = []
     public private(set) var recordedAudioMuteStates: [Bool] = []

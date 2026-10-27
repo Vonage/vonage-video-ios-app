@@ -5,8 +5,10 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
+@MainActor
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
@@ -20,12 +22,12 @@ public final class ArchivesViewModel {
     @ObservationIgnored
     private let downloadTranscriptionUseCase: DownloadTranscriptionUseCase
 
-    @MainActor public var archives: [ArchiveUIData] = []
-    @MainActor public var error: AlertItem?
+    public var archives: [ArchiveUIData] = []
+    public var error: AlertItem?
     /// A downloaded transcript waiting to be shared or saved by the user.
-    @MainActor public var sharedTranscript: ArchiveTranscript?
+    public var sharedTranscript: ArchiveTranscript?
     /// Archives whose download is in progress.
-    @MainActor public private(set) var downloadingArchiveIDs: Set<UUID> = []
+    public private(set) var downloadingArchiveIDs: Set<UUID> = []
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
@@ -42,28 +44,20 @@ public final class ArchivesViewModel {
     /// Starts loading the archives of the current session, replacing any earlier load.
     ///
     /// Clears the previous load's error so it is not shown again for a later meeting.
-    @BackgroundActor
     public func loadData() async {
         cancellables.removeAll()
-        await MainActor.run { error = nil }
+        error = nil
 
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
-            .receive(on: DispatchQueue.main)
-            .map { [weak self] archives in
-                self?.mapToUIArchives(archives) ?? []
-            }
-            .sink(
+            .sinkOnMainActor(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        Task { @MainActor [weak self] in
-                            self?.error = AlertItem.goodbyeError(error.localizedDescription)
-                        }
+                        self?.error = AlertItem.goodbyeError(error.localizedDescription)
                     }
                 },
                 receiveValue: { [weak self] archives in
-                    Task { @MainActor [weak self] in
-                        self?.archives = archives
-                    }
+                    guard let self else { return }
+                    self.archives = self.mapToUIArchives(archives)
                 }
             )
             .store(in: &cancellables)

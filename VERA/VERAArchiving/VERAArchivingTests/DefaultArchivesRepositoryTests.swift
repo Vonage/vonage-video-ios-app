@@ -9,6 +9,7 @@ import VERAArchiving
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Default archives repository tests")
 struct DefaultArchivesRepositoryTests {
 
@@ -61,7 +62,8 @@ struct DefaultArchivesRepositoryTests {
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
         // Collect multiple values from the publisher
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         // Should receive 3 updates
         #expect(values.count == 3)
@@ -104,7 +106,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         #expect(values.count == 3)
 
@@ -148,10 +151,10 @@ struct DefaultArchivesRepositoryTests {
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
 
-        // Collect first 2 values (initial empty array + first fetch result)
-        let values = try await publisher.values.first { $0.count == 2 }!
+        // Wait for the first fetched archives after the initial empty replay.
+        let values = try await awaitFirstNonEmptyValue(from: publisher)
 
-        // Second value should have the archives
+        // The fetched value should have both archives
         #expect(values.count == 2)
         #expect(values.contains(where: { $0.status == .available }))
         #expect(values.contains(where: { $0.status == .failed }))
@@ -173,10 +176,10 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        // Collect first 2 values (initial empty array + first fetch result)
-        let values = try await publisher.values.first { $0.count == 1 }!
+        // Wait for the first fetched archives after the initial empty replay.
+        let values = try await awaitFirstNonEmptyValue(from: publisher)
 
-        // Second value should have the archive
+        // The fetched value should have the archive
         #expect(values.count == 1)
         #expect(values[0].status == .available)
 
@@ -208,7 +211,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         #expect(values[0][0].transcription?.status == .started)
         #expect(values[2][0].transcription?.status == .available)
@@ -232,7 +236,7 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         _ = await sut.getArchives(sessionKey: "test-room")
 
-        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 3 }
+        let callCount = await poll(read: { await MainActor.run { mockDataSource.callCount } }) { $0 >= 3 }
         #expect(callCount >= 3)
     }
 
@@ -247,7 +251,7 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         _ = await sut.getArchives(sessionKey: "test-room")
 
-        let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 2 }
+        let callCount = await poll(read: { await MainActor.run { mockDataSource.callCount } }) { $0 >= 2 }
         #expect(callCount >= 2)
     }
 
@@ -316,13 +320,13 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = await sut.getArchives(sessionKey: "test-room")
         let publisher2 = await sut.getArchives(sessionKey: "test-room")
 
-        // Collect first 2 values from first publisher
-        let values1 = try await publisher1.values.first { $0.count == 1 }!
+        // Wait for the first publisher to deliver the fetched archive
+        let values1 = try await awaitFirstNonEmptyValue(from: publisher1)
         #expect(values1.count == 1)
         #expect(values1[0].id == expectedArchive.id)
 
-        // Collect first 2 values from second publisher (should be cached)
-        let values2 = try await publisher2.values.first { $0.count == 1 }!
+        // The second publisher should replay the cached archive
+        let values2 = try await awaitFirstNonEmptyValue(from: publisher2)
         #expect(values2.count == 1)
         #expect(values2[0].id == expectedArchive.id)
 
@@ -341,9 +345,9 @@ struct DefaultArchivesRepositoryTests {
         let publisher1 = await sut.getArchives(sessionKey: "room1")
         let publisher2 = await sut.getArchives(sessionKey: "room2")
 
-        // Collect first 2 values from each publisher
-        let archives1 = try await publisher1.values.first { $0.count == 1 }!
-        let archives2 = try await publisher2.values.first { $0.count == 1 }!
+        // Wait for each publisher to deliver its fetched archives
+        let archives1 = try await awaitFirstNonEmptyValue(from: publisher1)
+        let archives2 = try await awaitFirstNonEmptyValue(from: publisher2)
 
         // Should have made separate calls for each room
         #expect(mockDataSource.callCount == 2)
@@ -354,11 +358,11 @@ struct DefaultArchivesRepositoryTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        archivesDataSource: ArchivesDataSource = MockArchivesDataSource()
+        archivesDataSource: ArchivesDataSource? = nil
     ) -> DefaultArchivesRepository {
         DefaultArchivesRepository(
             pollingIntervalSeconds: 0.1,  // 100ms for faster tests
-            archivesDataSource: archivesDataSource
+            archivesDataSource: archivesDataSource ?? MockArchivesDataSource()
         )
     }
 
@@ -386,122 +390,59 @@ struct DefaultArchivesRepositoryTests {
         )
     }
 
-    private func awaitFirstValue<T>(from publisher: AnyPublisher<T, Error>) async throws -> T {
-        try await withTimeout(seconds: 5.0) {
-            try await withCheckedThrowingContinuation { continuation in
-                var cancellable: AnyCancellable?
-                var hasResumed = false
-
-                cancellable =
-                    publisher
-                    .sink(
-                        receiveCompletion: { completion in
-                            guard !hasResumed else { return }
-                            hasResumed = true
-                            cancellable?.cancel()
-
-                            switch completion {
-                            case .failure(let error):
-                                continuation.resume(throwing: error)
-                            case .finished:
-                                // This shouldn't happen if we're waiting for first value
-                                break
-                            }
-                        },
-                        receiveValue: { value in
-                            guard !hasResumed else { return }
-                            hasResumed = true
-                            cancellable?.cancel()
-                            continuation.resume(returning: value)
-                        }
-                    )
-            }
+    private func awaitFirstValue<T: Sendable>(from publisher: AnyPublisher<T, Error>) async throws -> T {
+        let (stream, subscription) = makeArchivePublisherTestStream(from: publisher)
+        defer { subscription.cancel() }
+        return try await withTimeout(seconds: 5.0) {
+            guard let value = try await stream.first(where: { @Sendable _ in true }) else { throw TimeoutError() }
+            return value
         }
     }
 
     private func awaitFirstNonEmptyValue(from publisher: AnyPublisher<[Archive], Error>) async throws -> [Archive] {
-        try await withTimeout(seconds: 5.0) {
-            try await withCheckedThrowingContinuation { continuation in
-                var cancellable: AnyCancellable?
-                var hasResumed = false
-
-                cancellable =
-                    publisher
-                    .filter { !$0.isEmpty }
-                    .sink(
-                        receiveCompletion: { completion in
-                            guard !hasResumed else { return }
-                            hasResumed = true
-                            cancellable?.cancel()
-
-                            switch completion {
-                            case .failure(let error):
-                                continuation.resume(throwing: error)
-                            case .finished:
-                                // This shouldn't happen if we're waiting for first value
-                                break
-                            }
-                        },
-                        receiveValue: { value in
-                            guard !hasResumed else { return }
-                            hasResumed = true
-                            cancellable?.cancel()
-                            continuation.resume(returning: value)
-                        }
-                    )
+        let (stream, subscription) = makeArchivePublisherTestStream(from: publisher)
+        defer { subscription.cancel() }
+        return try await withTimeout(seconds: 5.0) {
+            guard let value = try await stream.first(where: { @Sendable value in !value.isEmpty }) else {
+                throw TimeoutError()
             }
+            return value
         }
     }
 
-    private func awaitError<T>(from publisher: AnyPublisher<T, Error>) async throws -> Error {
-        try await withTimeout(seconds: 5.0) {
-            try await withCheckedThrowingContinuation { continuation in
-                var cancellable: AnyCancellable?
-                var hasResumed = false
-
-                cancellable =
-                    publisher
-                    .sink(
-                        receiveCompletion: { completion in
-                            guard !hasResumed else { return }
-                            hasResumed = true
-                            cancellable?.cancel()
-
-                            switch completion {
-                            case .failure(let error):
-                                continuation.resume(returning: error)
-                            case .finished:
-                                continuation.resume(throwing: TimeoutError())
-                            }
-                        },
-                        receiveValue: { _ in
-                            // Ignore values, we only want errors
-                        }
-                    )
+    private func awaitError<T: Sendable>(from publisher: AnyPublisher<T, Error>) async throws -> Error {
+        let (stream, subscription) = makeArchivePublisherTestStream(from: publisher)
+        defer { subscription.cancel() }
+        return try await withTimeout(seconds: 5.0) {
+            do {
+                for try await _ in stream {}
+            } catch {
+                return error
             }
+            throw TimeoutError()
         }
     }
 
-    private func collectValues<T>(
+    private func collectValues<T: Sendable>(
         from publisher: AnyPublisher<T, Error>,
         count: Int,
         timeout: TimeInterval
     ) async throws -> [T] {
-        try await withTimeout(seconds: timeout) {
+        let (stream, subscription) = makeArchivePublisherTestStream(from: publisher)
+        defer { subscription.cancel() }
+        return try await withTimeout(seconds: timeout) {
             var values: [T] = []
-            for try await value in publisher.values {
+            for try await value in stream {
                 values.append(value)
-                if values.count >= count {
-                    break
-                }
+                if values.count >= count { break }
             }
             return values
         }
     }
 
-    private func withTimeout<T>(
+    private func withTimeout<T: Sendable>(
         seconds: TimeInterval,
-        operation: @escaping () async throws -> T
+        operation: @escaping @MainActor @Sendable () async throws -> T
     ) async throws -> T {
         try await withThrowingTaskGroup(of: T.self) { group in
             group.addTask {
