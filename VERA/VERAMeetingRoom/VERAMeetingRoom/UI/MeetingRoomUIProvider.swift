@@ -225,7 +225,8 @@ public struct MeetingRoomBottomBarContext {
 /// `bottomBarButtons()` adds host-provided buttons to the SDK bottom bar.
 /// `bottomBarContent(context:)` can replace the full bottom bar when the host
 /// wants to render it.
-public protocol MeetingRoomUIProvider {
+@MainActor
+public protocol MeetingRoomUIProvider: Sendable {
     /// Publishes whenever provider-driven UI should be refreshed.
     var updates: AnyPublisher<Void, Never> { get }
 

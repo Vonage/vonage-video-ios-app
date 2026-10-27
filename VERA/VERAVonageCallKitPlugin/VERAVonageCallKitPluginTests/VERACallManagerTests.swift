@@ -8,6 +8,7 @@ import Testing
 
 @testable import VERAVonageCallKitPlugin
 
+@MainActor
 @Suite("VERA Call Manager tests")
 struct VERACallManagerTests {
 

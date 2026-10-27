@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct VonageCaption {
+public struct VonageCaption: Sendable {
     public let id: String?
     public let name: String?
     public let text: String

@@ -8,6 +8,7 @@ import VERADomain
 
 @testable import VERAVonageSettingsPlugin
 
+@MainActor
 @Suite("Statistics forwarding lifecycle", .timeLimit(.minutes(1)))
 struct StatsForwardingLifecycleTests {
     @Test("Stop waits for a cancellation-ignoring write before clearing")

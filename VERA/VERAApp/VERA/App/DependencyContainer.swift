@@ -40,6 +40,7 @@ import VERAVonageCallKitPlugin
     import VERAOKTA
 #endif
 
+@MainActor
 final class DependencyContainer {
 
     private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
@@ -68,7 +69,8 @@ final class DependencyContainer {
                 )
             #if AUTHENTICATION_ENABLED
                 return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
-                    await MainActor.run { self?.onUnauthorized?() }
+                    guard let self else { return }
+                    await MainActor.run { self.onUnauthorized?() }
                 }
             #else
                 return inner
@@ -193,11 +195,19 @@ final class DependencyContainer {
         return features
     }
 
+    /// Mock calls must not register with native CallKit: simulator telephony can
+    /// terminate them asynchronously and take unrelated UI flows to the goodbye page.
+    func meetingRoomFeatures(isE2EEnabled: Bool) -> Set<MeetingRoomFeature> {
+        let features = meetingRoomEnabledFeatures
+        return isE2EEnabled ? features.subtracting([.callKit]) : features
+    }
+
     // MARK: - Archiving feature (goodbye page)
 
     #if ARCHIVING_ENABLED
         lazy var archivingStatusDataSource = DefaultArchivingStatusDataSource()
 
+        @MainActor
         lazy var archivingFactory = ArchivingFactory(
             archivesRepository: archivesRepository,
             archivingDataSource: archivingDataSource,
@@ -208,6 +218,7 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient)
 
+        @MainActor
         lazy var archivesRepository: ArchivesRepository = {
             DefaultArchivesRepository(archivesDataSource: archivesDataSource)
         }()

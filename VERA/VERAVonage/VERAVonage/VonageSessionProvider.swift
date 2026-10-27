@@ -5,6 +5,7 @@
 import Foundation
 import VERADomain
 
+@MainActor
 public final class VonageSessionProvider<Factory: SessionFactory>: SessionProvider
 where Factory.Session == VonageSession {
 

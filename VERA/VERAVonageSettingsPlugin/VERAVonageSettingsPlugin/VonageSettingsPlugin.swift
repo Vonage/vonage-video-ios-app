@@ -40,6 +40,7 @@ import VERAVonage
 /// ```
 ///
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``StatsWriter``
+@MainActor
 public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     private var cancellables = Set<AnyCancellable>()
@@ -108,12 +109,15 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
         settingsRepository.preferencesPublisher
             .map(\.senderStatsEnabled)
             .removeDuplicates()
-            .sink { [weak self] isEnabled in
-                guard let self else { return }
-                if isEnabled {
-                    self.call?.enableSubscriberExtraStats()
-                } else {
-                    self.call?.disableSubscriberExtraStats()
+            .receive(on: DispatchQueue.main)
+            .sink { @Sendable [weak self] isEnabled in
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    if isEnabled {
+                        self.call?.enableSubscriberExtraStats()
+                    } else {
+                        self.call?.disableSubscriberExtraStats()
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -121,36 +125,47 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
         // Observe settings that require recreating the publisher. Live-updatable
         // fields are intentionally ignored by the duplicate comparison.
         settingsRepository.preferencesPublisher
-            .map { $0.toPublisherAdvancedSettings() }
-            .removeDuplicates(by: { $0.hasEqualRepublishSettings(to: $1) })
+            .map { @Sendable preferences in preferences.toPublisherAdvancedSettings() }
+            .removeDuplicates(by: { @Sendable previous, current in previous.hasEqualRepublishSettings(to: current) })
             .dropFirst()
-            .sink { [weak self] settings in
-                guard let self, let call = self.call else { return }
-                // Cancel any in-flight republish cycle before starting a new one so
-                // the latest settings always win and the overlay can't get stuck.
-                self.applySettingsTask?.cancel()
-                self.applySettingsTask = Task { [weak call] in
-                    try? await call?.applyPublisherAdvancedSettings(settings)
+            .receive(on: DispatchQueue.main)
+            .sink { @Sendable [weak self] settings in
+                MainActor.assumeIsolated {
+                    guard let self, let call = self.call else { return }
+                    // Cancel any in-flight republish cycle before starting a new one so
+                    // the latest settings always win and the overlay can't get stuck.
+                    let predecessor = self.applySettingsTask
+                    predecessor?.cancel()
+                    self.applySettingsTask = Task { [weak call] in
+                        // An active SDK republish must finish its restore phase before the next
+                        // cycle begins; cancellation can only skip a cycle that has not started.
+                        await predecessor?.value
+                        guard !Task.isCancelled else { return }
+                        try? await call?.applyPublisherAdvancedSettings(settings)
+                    }
                 }
             }
             .store(in: &cancellables)
 
         // Apply bitrate and degradation changes directly to the active publisher.
         settingsRepository.preferencesPublisher
-            .map { $0.toPublisherAdvancedSettings() }
-            .removeDuplicates(by: { $0.hasEqualLiveSettings(to: $1) })
+            .map { @Sendable preferences in preferences.toPublisherAdvancedSettings() }
+            .removeDuplicates(by: { @Sendable previous, current in previous.hasEqualLiveSettings(to: current) })
             .dropFirst()
-            .sink { [weak self] settings in
-                guard let self, let call = self.call else { return }
-                self.liveSettingsGeneration += 1
-                let generation = self.liveSettingsGeneration
-                self.updateLiveSettingsTask?.cancel()
-                self.updateLiveSettingsTask = Task { [weak self, weak call] in
-                    guard let self,
-                        !Task.isCancelled,
-                        self.liveSettingsGeneration == generation
-                    else { return }
-                    await call?.updateLivePublisherAdvancedSettings(settings)
+            .receive(on: DispatchQueue.main)
+            .sink { @Sendable [weak self] settings in
+                MainActor.assumeIsolated {
+                    guard let self, let call = self.call else { return }
+                    self.liveSettingsGeneration += 1
+                    let generation = self.liveSettingsGeneration
+                    self.updateLiveSettingsTask?.cancel()
+                    self.updateLiveSettingsTask = Task { [weak self, weak call] in
+                        guard let self,
+                            !Task.isCancelled,
+                            self.liveSettingsGeneration == generation
+                        else { return }
+                        await call?.updateLivePublisherAdvancedSettings(settings)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -163,12 +178,16 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     }
 
     private func cancelObservables() async {
-        applySettingsTask?.cancel()
+        let apply = applySettingsTask
+        apply?.cancel()
         applySettingsTask = nil
         liveSettingsGeneration += 1
-        updateLiveSettingsTask?.cancel()
+        let liveUpdate = updateLiveSettingsTask
+        liveUpdate?.cancel()
         updateLiveSettingsTask = nil
         cancellables.removeAll()
+        await apply?.value
+        await liveUpdate?.value
         let stop = await statsForwarding.stop()
         await stop.value
     }

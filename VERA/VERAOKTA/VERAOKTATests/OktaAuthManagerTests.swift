@@ -149,6 +149,36 @@ struct OktaAuthManagerTests {
         #expect(sut.authState == .notAuthenticated)
     }
 
+    @Test("background callers can read state, request a token and sign out")
+    func backgroundAuthenticationAccess() async throws {
+        let (sut, provider) = makeSUT()
+        provider.currentTokenResult = .success("background-token")
+        provider.signInResult = .success(SignInResult(accessToken: "tok", userName: "Alice"))
+        try await sut.signIn(from: makeAnchor())
+
+        let state = await Task.detached { sut.authState }.value
+        #expect(state == .authenticated(AuthenticatedUser(name: "Alice")))
+        let token = try await Task.detached { try await sut.currentToken() }.value
+        #expect(token == "background-token")
+        try await Task.detached { try await sut.signOut() }.value
+        #expect(sut.authState == .notAuthenticated)
+        #expect(provider.currentTokenCallCount == 1)
+        #expect(provider.removeCredentialCallCount == 1)
+    }
+
+    @Test("failed sign-out preserves the authenticated state")
+    func failedSignOutPreservesState() async throws {
+        let (sut, provider) = makeSUT()
+        provider.signInResult = .success(SignInResult(accessToken: "tok", userName: "Alice"))
+        try await sut.signIn(from: makeAnchor())
+        provider.removeCredentialResult = .failure(OktaAuthError.noCredential)
+
+        await #expect(throws: OktaAuthError.noCredential) {
+            try await Task.detached { try await sut.signOut() }.value
+        }
+        #expect(sut.authState == .authenticated(AuthenticatedUser(name: "Alice")))
+    }
+
     // MARK: - OktaAuthError
 
     @Test("OktaAuthError has localized descriptions")

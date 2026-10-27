@@ -5,12 +5,14 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 /// Drives the start/stop control of a session archive.
 ///
 /// The same view model controls both the recording and the post-call transcription,
 /// which run as separate concurrent archives. ``kind`` selects which one.
+@MainActor
 @Observable
 public final class ArchiveButtonViewModel {
     @ObservationIgnored
@@ -55,8 +57,7 @@ public final class ArchiveButtonViewModel {
         initiated = true
 
         archivingStatusDataSource.archivingState(for: kind)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] status in
+            .sinkOnMainActor { [weak self] status in
                 self?.state = status
             }
             .store(in: &cancellables)

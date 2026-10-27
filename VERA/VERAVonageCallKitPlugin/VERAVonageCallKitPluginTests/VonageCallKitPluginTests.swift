@@ -12,6 +12,7 @@ import VERAVonage
 
 @testable import VERAVonageCallKitPlugin
 
+@MainActor
 @Suite("Vonage Callkit Plugin tests")
 struct VonageCallKitPluginTests {
 

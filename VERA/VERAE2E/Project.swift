@@ -16,6 +16,7 @@ let project = Project(
             dependencies: [
                 .project(target: "VERAArchiving", path: "../VERAArchiving"),
                 .project(target: "VERACore", path: "../VERACore"),
+                .project(target: "VERACommonUI", path: "../VERACommonUI"),
                 .project(target: "VERADomain", path: "../VERADomain"),
                 .project(target: "VERAMeetingRoomSDK", path: "../VERAMeetingRoomSDK"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),

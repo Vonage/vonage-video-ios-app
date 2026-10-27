@@ -17,7 +17,7 @@
 /// let requester: RequestPermissionUseCase = DefaultRequestCameraPermissionUseCase()
 /// let granted = await requester()
 /// ```
-public protocol RequestPermissionUseCase {
+public protocol RequestPermissionUseCase: Sendable {
     /// Requests the permission from the user asynchronously.
     /// - Returns: `true` if the permission was granted, `false` otherwise.
     func callAsFunction() async -> Bool

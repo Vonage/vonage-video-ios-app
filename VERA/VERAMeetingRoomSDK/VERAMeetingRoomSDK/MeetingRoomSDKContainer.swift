@@ -32,6 +32,7 @@ import VERAVonageSettingsPlugin
 /// Created by ``MeetingRoomBuilder`` based on the enabled features.
 /// The container lazily instantiates only the dependencies required
 /// by the features the consumer enabled.
+@MainActor
 final class MeetingRoomSDKContainer {
 
     let baseURL: URL
@@ -52,12 +53,9 @@ final class MeetingRoomSDKContainer {
         publisherSettings: PublisherSettings? = nil,
         appGroupIdentifier: String? = nil,
         broadcastExtensionBundleId: String? = nil,
-        httpClientFactory: any MeetingRoomHTTPClientFactory =
-            DefaultMeetingRoomHTTPClientFactory(),
-        sessionRepositoryFactory: any MeetingRoomSessionRepositoryFactory =
-            DefaultMeetingRoomSessionRepositoryFactory(),
-        archivingDataSourceFactory: any MeetingRoomArchivingDataSourceFactory =
-            DefaultMeetingRoomArchivingDataSourceFactory()
+        httpClientFactory: (any MeetingRoomHTTPClientFactory)? = nil,
+        sessionRepositoryFactory: (any MeetingRoomSessionRepositoryFactory)? = nil,
+        archivingDataSourceFactory: (any MeetingRoomArchivingDataSourceFactory)? = nil
     ) {
         self.baseURL = baseURL
         self.enabledFeatures = enabledFeatures
@@ -65,9 +63,9 @@ final class MeetingRoomSDKContainer {
         self.initialPublisherSettings = publisherSettings
         self.appGroupIdentifier = appGroupIdentifier
         self.broadcastExtensionBundleId = broadcastExtensionBundleId
-        self.httpClientFactory = httpClientFactory
-        self.sessionRepositoryFactory = sessionRepositoryFactory
-        self.archivingDataSourceFactory = archivingDataSourceFactory
+        self.httpClientFactory = httpClientFactory ?? DefaultMeetingRoomHTTPClientFactory()
+        self.sessionRepositoryFactory = sessionRepositoryFactory ?? DefaultMeetingRoomSessionRepositoryFactory()
+        self.archivingDataSourceFactory = archivingDataSourceFactory ?? DefaultMeetingRoomArchivingDataSourceFactory()
     }
 
     // MARK: - Core Dependencies
@@ -234,10 +232,12 @@ final class MeetingRoomSDKContainer {
         httpClient: httpClient,
         jsonDecoder: jsonDecoder)
 
+    @MainActor
     lazy var archivesRepository: any ArchivesRepository = {
         DefaultArchivesRepository(archivesDataSource: archivesDataSource)
     }()
 
+    @MainActor
     lazy var archivingFactory = ArchivingFactory(
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
@@ -360,6 +360,7 @@ final class MeetingRoomSDKContainer {
         statsDataSource: statsRepository
     )
 
+    @MainActor
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
         httpClient: httpClient

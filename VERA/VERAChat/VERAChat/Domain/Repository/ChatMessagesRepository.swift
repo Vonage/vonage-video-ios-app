@@ -5,11 +5,13 @@
 import Combine
 import Foundation
 
+@MainActor
 public protocol ChatMessagesWriter {
     func addMessage(_ message: ChatMessage)
     func clearMessages()
 }
 
+@MainActor
 public protocol ChatMessagesObserver {
     func observeMessages() -> AnyPublisher<[ChatMessage], Never>
 }

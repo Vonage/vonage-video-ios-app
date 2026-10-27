@@ -9,7 +9,7 @@ import Foundation
 ///
 /// Contains the local participant (if any), the list of remote participants,
 /// and the identifier of the current active speaker if one is detected.
-public struct ParticipantsState: Equatable {
+public struct ParticipantsState: Equatable, Sendable {
     /// The local participant if one is currently publishing media; otherwise `nil`.
     public let localParticipant: Participant?
     /// The list of remote participants currently in the session.
@@ -110,7 +110,8 @@ extension NoiseSuppressionState {
 ///
 /// Implementers emit ``ParticipantsState`` values as the call’s participant set
 /// changes (joins, leaves, media toggles, active speaker updates).
-public protocol ParticipantsPublisherProvider: AnyObject {
+@MainActor
+public protocol ParticipantsPublisherProvider: AnyObject, Sendable {
     /// A publisher that emits ``ParticipantsState`` updates, never fails.
     var participantsPublisher: AnyPublisher<ParticipantsState, Never> { get }
 }
@@ -119,7 +120,8 @@ public protocol ParticipantsPublisherProvider: AnyObject {
 ///
 /// Implementers relay the raw audio level from the local ``VonagePublisher`` so that
 /// consumers can detect speaking-while-muted conditions without coupling to the SDK layer.
-public protocol PublisherAudioLevelProvider: AnyObject {
+@MainActor
+public protocol PublisherAudioLevelProvider: AnyObject, Sendable {
     /// A publisher that emits the local publisher's audio level in the range [0.0, 1.0], never fails.
     var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { get }
 }
@@ -127,7 +129,8 @@ public protocol PublisherAudioLevelProvider: AnyObject {
 /// Provides a publisher that emits session-level events and errors.
 ///
 /// Use this publisher to react to errors and notable session events (e.g., signals).
-public protocol EventsPublisherProvider: AnyObject {
+@MainActor
+public protocol EventsPublisherProvider: AnyObject, Sendable {
     /// A publisher that emits ``SessionEvent`` values, never fails.
     var eventsPublisher: AnyPublisher<SessionEvent, Never> { get }
 }
@@ -135,7 +138,8 @@ public protocol EventsPublisherProvider: AnyObject {
 /// Provides a publisher for local media publishing state.
 ///
 /// Emits changes to audio/video publishing toggles suitable for UI binding.
-public protocol SessionStatePublisherProvider: AnyObject {
+@MainActor
+public protocol SessionStatePublisherProvider: AnyObject, Sendable {
     /// A publisher that emits ``SessionState`` values, never fails.
     var statePublisher: AnyPublisher<SessionState, Never> { get }
 }
@@ -143,7 +147,8 @@ public protocol SessionStatePublisherProvider: AnyObject {
 /// Provides a publisher for the call connection state.
 ///
 /// Use to drive connection-related UI and guard operations that require a particular state.
-public protocol CallStatePublisherProvider: AnyObject {
+@MainActor
+public protocol CallStatePublisherProvider: AnyObject, Sendable {
     /// A publisher that emits ``CallState`` values, never fails.
     var callState: AnyPublisher<CallState, Never> { get }
 }
@@ -151,7 +156,8 @@ public protocol CallStatePublisherProvider: AnyObject {
 /// Provides publishers for the call archiving states.
 ///
 /// Use to drive recording and transcription related UI operations.
-public protocol CallArchivingPublisherProvider: AnyObject {
+@MainActor
+public protocol CallArchivingPublisherProvider: AnyObject, Sendable {
     /// A publisher that emits the recording ``ArchivingState`` values, never fails.
     var archivingState: AnyPublisher<ArchivingState, Never> { get }
     /// A publisher that emits the post-call transcription ``ArchivingState`` values, never fails.
@@ -161,7 +167,8 @@ public protocol CallArchivingPublisherProvider: AnyObject {
 /// Defines the primary connection lifecycle operations for a call.
 ///
 /// Conformers manage establishing and tearing down the underlying session connection.
-public protocol CallConnectable: AnyObject {
+@MainActor
+public protocol CallConnectable: AnyObject, Sendable {
     /// Initiates a connection to the session.
     ///
     /// - Throws: An error if the session cannot be created or the connection fails.
@@ -177,6 +184,7 @@ public protocol CallConnectable: AnyObject {
 }
 
 /// Optional microphone-only control for system mute actions, which must preserve video choices.
+@MainActor
 public protocol AudioMuteControllable: AnyObject {
     func muteLocalAudio(_ isMuted: Bool)
 }
@@ -184,7 +192,8 @@ public protocol AudioMuteControllable: AnyObject {
 /// Controls local media publishing and mute state.
 ///
 /// Conformers should reflect changes via their ``SessionStatePublisherProvider/statePublisher``.
-public protocol MediaToggleable: AnyObject {
+@MainActor
+public protocol MediaToggleable: AnyObject, Sendable {
     /// Returns `true` when both local audio and video are disabled.
     var isMuted: Bool { get }
 
@@ -205,7 +214,8 @@ public protocol MediaToggleable: AnyObject {
 ///
 /// When a call is on hold, implementations typically disable local publishing and remote subscriptions
 /// while keeping the session connection active.
-public protocol HoldeableCall: AnyObject {
+@MainActor
+public protocol HoldeableCall: AnyObject, Sendable {
     /// Returns `true` when the call is currently on hold.
     var isOnHold: Bool { get }
 
@@ -218,7 +228,8 @@ public protocol HoldeableCall: AnyObject {
 /// Controls the captions state
 ///
 /// Execute enableCaptions to activate captions or disableCaptions to stop receiving caption updates
-public protocol CaptionsProvider: AnyObject {
+@MainActor
+public protocol CaptionsProvider: AnyObject, Sendable {
     /// Returns `true` when the captions are active
     var areCaptionsEnabled: Bool { get }
 
@@ -242,7 +253,8 @@ public protocol CaptionsProvider: AnyObject {
 /// video transformers, stats delegates) across the republish.
 ///
 /// - SeeAlso: ``PublisherSettings``, ``CallFacade``
-public protocol PublisherSettingsApplicable: AnyObject {
+@MainActor
+public protocol PublisherSettingsApplicable: AnyObject, Sendable {
     /// Applies new publisher settings to the active call.
     ///
     /// Only SDK-level fields (resolution, frame rate, codec, audio bitrate,
@@ -267,7 +279,8 @@ public protocol PublisherSettingsApplicable: AnyObject {
 ///
 /// This is separated from generic network stats collection so the app can keep
 /// publisher stats available while toggling the richer subscriber-only metrics.
-public protocol SubscriberExtraStatsToggleable: AnyObject {
+@MainActor
+public protocol SubscriberExtraStatsToggleable: AnyObject, Sendable {
     /// Starts requesting the extra subscriber-side stats that enrich the UI.
     func enableSubscriberExtraStats()
 
@@ -289,7 +302,8 @@ public protocol SubscriberExtraStatsToggleable: AnyObject {
 /// - ``MediaToggleable``
 /// - ``CallStatePublisherProvider``
 /// - ``HoldeableCall``
-public protocol CallFacade: AnyObject,
+@MainActor
+public protocol CallFacade: AnyObject, Sendable,
     ParticipantsPublisherProvider,
     EventsPublisherProvider,
     SessionStatePublisherProvider,
