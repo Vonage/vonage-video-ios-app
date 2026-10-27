@@ -36,14 +36,19 @@ public final class ArchiveButtonViewModel {
     @ObservationIgnored
     private let showAlert: (AlertItem) -> Void
     @ObservationIgnored
+    private let loadTranscriptionDefaults: () async -> TranscriptionOptions
+    @ObservationIgnored
     private var initiated = false
 
+    /// - Parameter loadTranscriptionDefaults: Loads the options pre-selected each time the
+    ///   transcription start options are shown, e.g. the user's AI summary setting.
     public init(
         kind: ArchiveKind = .recording,
         sessionKeyProvider: SessionKeyProvider,
         startArchivingUseCase: StartArchivingUseCase,
         stopArchivingUseCase: StopArchivingUseCase,
         archivingStatusDataSource: ArchivingStatusDataSource,
+        loadTranscriptionDefaults: @escaping () async -> TranscriptionOptions = { .default },
         showAlert: @escaping (AlertItem) -> Void
     ) {
         self.kind = kind
@@ -51,6 +56,7 @@ public final class ArchiveButtonViewModel {
         self.startArchivingUseCase = startArchivingUseCase
         self.stopArchivingUseCase = stopArchivingUseCase
         self.archivingStatusDataSource = archivingStatusDataSource
+        self.loadTranscriptionDefaults = loadTranscriptionDefaults
         self.showAlert = showAlert
     }
 
@@ -77,7 +83,11 @@ public final class ArchiveButtonViewModel {
                 await self?.startArchiving()
             }
         case (.idle, .transcription):
-            isShowingTranscriptionOptions = true
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                transcriptionOptions = await loadTranscriptionDefaults()
+                isShowingTranscriptionOptions = true
+            }
         }
     }
 
