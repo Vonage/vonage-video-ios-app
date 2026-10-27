@@ -92,12 +92,14 @@ struct CaptionsDemoView: View {
 /// A mock data source that simulates enabling/disabling captions.
 /// When captions are enabled, it starts a timer that feeds demo captions
 /// into the shared repository, creating a self-contained loopback.
-private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSource, @unchecked Sendable {
+@MainActor
+private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSource {
 
     private let statusDataSource: CaptionsStatusDataSource
     private let repository: CaptionsRepository
     private var timer: Timer?
     private var currentIndex = 0
+    private var activeCaptions: [CaptionItem] = []
 
     private let demoMessages: [(speaker: String, text: String)] = [
         ("Alice", "Hello everyone, welcome to today's meeting!"),
@@ -138,40 +140,34 @@ private final class DemoCaptionsActivationDataSource: CaptionsActivationDataSour
 
     private func startFeedingCaptions() {
         currentIndex = 0
-        var activeCaptions: [CaptionItem] = []
-
-        Task { @MainActor in
-            timer?.invalidate()
-            timer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { [weak self] _ in
-                guard let self else { return }
-
-                guard self.currentIndex < self.demoMessages.count else {
-                    self.currentIndex = 0
-                    activeCaptions = []
-                    return
-                }
-
-                let message = self.demoMessages[self.currentIndex]
-                let caption = CaptionItem(
-                    speakerName: message.speaker,
-                    text: message.text
-                )
-
-                activeCaptions.append(caption)
-
-                // Keep only last 5 captions in the buffer
-                if activeCaptions.count > 5 {
-                    activeCaptions.removeFirst()
-                }
-
-                let captionsToSend = activeCaptions
-                Task {
-                    await self.repository.updateCaptions(captionsToSend)
-                }
-
-                self.currentIndex += 1
+        activeCaptions = []
+        timer?.invalidate()
+        // Installed on the main run loop; the callback enters its owning actor synchronously.
+        timer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.feedNextCaption()
             }
         }
+    }
+
+    private func feedNextCaption() {
+        guard currentIndex < demoMessages.count else {
+            currentIndex = 0
+            activeCaptions = []
+            return
+        }
+
+        let message = demoMessages[currentIndex]
+        activeCaptions.append(CaptionItem(speakerName: message.speaker, text: message.text))
+        if activeCaptions.count > 5 {
+            activeCaptions.removeFirst()
+        }
+
+        let captionsToSend = activeCaptions
+        Task {
+            await repository.updateCaptions(captionsToSend)
+        }
+        currentIndex += 1
     }
 
     @MainActor

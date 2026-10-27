@@ -4,7 +4,8 @@
 
 import Foundation
 
-public protocol SessionProvider {
+@MainActor
+public protocol SessionProvider: Sendable {
     associatedtype Session
     func makeSession(for roomName: RoomName) async throws -> Session
 }

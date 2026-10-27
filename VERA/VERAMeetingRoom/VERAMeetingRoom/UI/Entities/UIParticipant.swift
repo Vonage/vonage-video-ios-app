@@ -9,7 +9,7 @@ import VERADomain
 ///
 /// Wraps the domain ``Participant`` and adds UI-only state such as ``isPinned``.
 /// This separation keeps pin state out of the domain layer.
-public struct UIParticipant: Identifiable, Equatable, Hashable {
+public struct UIParticipant: Identifiable, Equatable, Hashable, Sendable {
     /// The underlying domain participant.
     public let participant: Participant
     /// Whether this participant is pinned in the UI.
@@ -19,9 +19,9 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     /// Whether this participant can be pinned or unpinned.
     public var canTogglePinState: Bool { (canBePinned || isPinned) && participant.isRemote }
     /// Toggle the pin state
-    public var onTogglePin: (() -> Void)?
+    public var onTogglePin: (@MainActor @Sendable () -> Void)?
     /// Force-mutes this participant when moderation is available.
-    public var onForceMute: (() -> Void)?
+    public var onForceMute: (@MainActor @Sendable () -> Void)?
 
     /// Whether the participant exposes a force-mute action.
     public var canForceMute: Bool { onForceMute != nil }
@@ -43,6 +43,7 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var name: String { participant.name }
     public var isMicEnabled: Bool { participant.isMicEnabled }
     public var isCameraEnabled: Bool { participant.isCameraEnabled }
+    @MainActor
     public var view: AnyView { participant.view }
     public var videoDimensions: CGSize { participant.videoDimensions }
     public var isRemote: Bool { participant.isRemote }
@@ -52,8 +53,10 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var aspectRatio: Double { participant.aspectRatio }
     public var audioLevel: Float { participant.audioLevel }
     public var isProminent: Bool { participant.isScreenshare || isPinned }
-    public var onAppear: (() -> Void)? { participant.onAppear }
-    public var onDisappear: (() -> Void)? { participant.onDisappear }
+    @MainActor
+    public var onAppear: (@MainActor () -> Void)? { participant.onAppear }
+    @MainActor
+    public var onDisappear: (@MainActor () -> Void)? { participant.onDisappear }
 
     // MARK: - Equatable
 

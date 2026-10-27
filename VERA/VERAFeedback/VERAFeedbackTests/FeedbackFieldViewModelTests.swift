@@ -6,6 +6,19 @@ import Testing
 @Suite("Feedback Field ViewModel Tests")
 struct FeedbackFieldViewModelTests {
 
+    @Test("Field identity remains readable off the UI actor while editable state changes")
+    func stableIdentityCanBeReadFromAnotherExecutor() async {
+        let field = FeedbackFieldViewModel(title: "Title", key: "stable-key", type: .text, value: "before")
+        let originalID = await Task.detached { field.id }.value
+
+        field.value = "after"
+        field.type = .info
+        let updatedID = await Task.detached { field.id }.value
+
+        #expect(originalID == "stable-key")
+        #expect(updatedID == originalID)
+    }
+
     @Test("Required text field empty is invalid and returns message")
     func requiredTextEmptyIsInvalid() {
         let vm = FeedbackFieldViewModel(

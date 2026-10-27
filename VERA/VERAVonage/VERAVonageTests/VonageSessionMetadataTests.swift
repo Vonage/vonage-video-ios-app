@@ -1,6 +1,7 @@
 import Testing
 import VERAVonage
 
+@MainActor
 @Suite("Vonage session metadata tests")
 struct VonageSessionMetadataTests {
 

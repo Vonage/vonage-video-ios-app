@@ -16,7 +16,7 @@ final actor ParticipantsRepository {
         participantStreams[participant.id] = participant
     }
 
-    /// Check and replace in one actor operation so removal cannot interleave with a late update.
+    /// The existence check and replacement are one actor operation: removal cannot interleave.
     func updateExistingParticipant(_ participant: Participant) {
         guard participantStreams[participant.id] != nil else { return }
         participantStreams[participant.id] = participant

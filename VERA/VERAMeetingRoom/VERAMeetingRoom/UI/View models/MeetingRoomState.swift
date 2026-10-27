@@ -5,13 +5,13 @@
 import Foundation
 import VERADomain
 
-public struct MeetingRoomParticipantsState {
+public struct MeetingRoomParticipantsState: Sendable {
     public let participants: [UIParticipant]
     public let layout: MeetingRoomLayout
     public let activeSpeakerId: String?
 }
 
-public struct MeetingRoomState: Equatable {
+public struct MeetingRoomState: Equatable, Sendable {
 
     public let roomName: RoomName
     public let roomURL: URL?

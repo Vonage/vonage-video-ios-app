@@ -24,6 +24,7 @@ import VERADomain
 ///
 /// Generics:
 /// - `Factory`: A `SessionFactory` producing `VonageSession` instances (`Factory.Session == VonageSession`)
+@MainActor
 public final class VonageSessionRepository<Provider: SessionProvider>: SessionRepository
 where Provider.Session == VonageSession {
 

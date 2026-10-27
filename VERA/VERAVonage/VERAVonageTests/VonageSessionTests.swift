@@ -9,10 +9,22 @@ import VERADomain
 
 @testable import VERAVonage
 
+@MainActor
 @Suite("VonageSession tests")
 struct VonageSessionTests {
 
-    @MainActor
+    @Test("The Objective-C delegate witness forwards on the configured UI executor")
+    func sessionDelegateWitnessForwardsOnMainActor() {
+        let sut = makeSUT()
+        let sdkSession = makeOTSession()
+        var didConnect = false
+        sut.onSessionDidConnect = { didConnect = true }
+        // Exercise protocol witness dispatch, including Swift 6's runtime actor boundary.
+        let delegate: any OTSessionDelegate = sut
+        delegate.sessionDidConnect(sdkSession)
+        #expect(didConnect)
+    }
+
     @Test("Wrapping an injected session preserves its configured callback queue")
     func injectedSessionPreservesCallbackQueue() {
         let session = makeOTSession()

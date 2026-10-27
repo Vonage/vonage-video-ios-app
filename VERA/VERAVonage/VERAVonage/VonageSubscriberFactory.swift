@@ -10,6 +10,7 @@ import OpenTok
 /// Subclass and override ``makeVonageSubscriber(_:)`` to vary the subscriber family; see
 /// ``PictureInPictureVonageSubscriberFactory``. The composition root picks the concrete factory, so
 /// the PiP-vs-native choice is made once rather than branched on a flag.
+@MainActor
 class VonageSubscriberFactory {
 
     enum Error: Swift.Error {
@@ -35,6 +36,7 @@ class VonageSubscriberFactory {
 }
 
 /// Creates subscribers that render through the PiP-capable custom renderer.
+@MainActor
 final class PictureInPictureVonageSubscriberFactory: VonageSubscriberFactory {
     override func makeVonageSubscriber(_ subscriber: OTSubscriber) -> VonageSubscriber {
         PictureInPictureVonageSubscriber(subscriber: subscriber)

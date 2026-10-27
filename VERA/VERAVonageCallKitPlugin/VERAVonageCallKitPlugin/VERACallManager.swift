@@ -9,6 +9,7 @@ import Foundation
 ///
 /// Conformers submit `CXTransaction`s to the system to perform call actions
 /// such as start, end, and hold without coupling to the concrete controller.
+@MainActor
 public protocol CallControllerProtocol {
     func request(_ transaction: CXTransaction) async throws
 }
@@ -28,6 +29,7 @@ extension CXCallController: CallControllerProtocol {}
 ///
 /// - SeeAlso: ``ProviderDelegate``
 /// - Note: All actions are video-enabled via `CXStartCallAction.isVideo = true`.
+@MainActor
 open class VERACallManager {
 
     /// String labels used for internal action tracking or logging.

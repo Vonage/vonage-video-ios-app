@@ -7,6 +7,7 @@ import VERADomain
 
 @testable import VERAVonageSettingsPlugin
 
+@MainActor
 @Suite("VonageSettingsPlugin Tests")
 struct VonageSettingsPluginTests {
 
@@ -18,6 +19,7 @@ struct VonageSettingsPluginTests {
         sut.call = mocks.call
 
         try await sut.callDidStart([:])
+        await delay()
 
         // After callDidStart, publisher stats are enabled and subscriber extras
         // follow the current toggle state.
@@ -320,6 +322,60 @@ struct VonageSettingsPluginTests {
 
         // Should have been called but previous tasks should have been cancelled
         #expect(mocks.call.applyPublisherAdvancedSettingsCallCount >= 1)
+    }
+
+    @Test("Republish cycles finish in order and teardown joins the active restore", .timeLimit(.minutes(1)))
+    func republishCyclesAreSerializedAndJoined() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.call = mocks.call
+        let firstEntered = StatsTestGate()
+        let firstCancelled = StatsTestGate()
+        let releaseFirst = StatsTestGate()
+        let secondEntered = StatsTestGate()
+        let secondCancelled = StatsTestGate()
+        let releaseSecond = StatsTestGate()
+        var actions: [String] = []
+        mocks.call.onApplySettings = { _ in
+            let index = mocks.call.applyPublisherAdvancedSettingsCallCount
+            actions.append("begin:\(index)")
+            if index == 1 {
+                await firstEntered.open()
+                await withTaskCancellationHandler {
+                    await releaseFirst.wait()
+                } onCancel: {
+                    Task { await firstCancelled.open() }
+                }
+            } else {
+                await secondEntered.open()
+                await withTaskCancellationHandler {
+                    await releaseSecond.wait()
+                } onCancel: {
+                    Task { await secondCancelled.open() }
+                }
+            }
+            actions.append("restored:\(index)")
+        }
+        try await sut.callDidStart([:])
+        await mocks.repository.updatePreferences { $0.audioBitratePreference = .custom(50_000) }
+        await firstEntered.wait()
+        await mocks.repository.updatePreferences { $0.audioBitratePreference = .custom(60_000) }
+        await firstCancelled.wait()
+        #expect(actions == ["begin:1"])
+        await releaseFirst.open()
+        await secondEntered.wait()
+        #expect(actions == ["begin:1", "restored:1", "begin:2"])
+
+        var didEnd = false
+        let end = Task {
+            try await sut.callDidEnd()
+            didEnd = true
+        }
+        await secondCancelled.wait()
+        #expect(!didEnd)
+        await releaseSecond.open()
+        try await end.value
+        #expect(didEnd)
+        #expect(actions == ["begin:1", "restored:1", "begin:2", "restored:2"])
     }
 
     // MARK: - dropFirst() Tests

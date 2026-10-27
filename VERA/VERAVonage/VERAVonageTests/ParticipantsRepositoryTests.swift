@@ -68,6 +68,31 @@ struct ParticipantsRepositoryTests {
         #expect(await sut.getSubscriber(id: "arthur") == nil)
     }
 
+    @Test("Removing a missing subscriber clears stale speaker state without creating membership")
+    func removingUnknownSubscriberRecalculatesSpeaker() async {
+        let sut = CallStateManager(activeSpeakerTracker: ActiveSpeakerTracker())
+        await sut.updateActiveSpeaker(SpeakerInfo(id: "departed", audioLevel: 0.9, isMicEnabled: true))
+        #expect(await sut.getCurrentState().activeParticipantId == "departed")
+
+        let removal = await sut.removeSubscriber(id: "departed")
+
+        #expect(removal.subscriber == nil)
+        #expect(removal.state.participants.isEmpty)
+        #expect(removal.state.activeParticipantId == nil)
+        #expect(await sut.getCurrentState().activeParticipantId == nil)
+    }
+
+    @Test("Captions can be enabled and disabled before any subscribers join")
+    func captionsWithNoSubscribersPreserveEmptyState() async {
+        let sut = CallStateManager(activeSpeakerTracker: ActiveSpeakerTracker())
+        await sut.enableCaptions()
+        await sut.disableCaptions()
+        #expect(await sut.getAllSubscribers().isEmpty)
+        let state = await sut.getCurrentState()
+        #expect(state.participants.isEmpty)
+        #expect(state.activeParticipantId == nil)
+    }
+
     private func makeParticipant(id: String, name: String) -> Participant {
         Participant(
             id: id,

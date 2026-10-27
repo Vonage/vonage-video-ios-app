@@ -4,7 +4,7 @@
 
 import Foundation
 
-public protocol UserRepository {
+public protocol UserRepository: Sendable {
     func save(_ user: User) async throws
     func get() async throws -> User?
 }

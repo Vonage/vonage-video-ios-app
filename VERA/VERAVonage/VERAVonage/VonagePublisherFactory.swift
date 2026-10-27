@@ -21,6 +21,7 @@ import VERADomain
 /// Subclass and override ``makePublisher(_:transformerFactory:initialDimensions:)`` to vary the
 /// publisher family; see ``PictureInPictureVonagePublisherFactory``. The composition root picks the
 /// concrete factory, so the PiP-vs-native choice is made once rather than branched on a flag.
+@MainActor
 public class VonagePublisherFactory: PublisherFactory {
 
     /// Errors that can occur while creating an Vonage publisher.
@@ -144,6 +145,7 @@ public class VonagePublisherFactory: PublisherFactory {
 }
 
 /// Creates local publishers that render through the PiP-capable custom renderer.
+@MainActor
 public final class PictureInPictureVonagePublisherFactory: VonagePublisherFactory {
     override func makePublisher(
         _ otPublisher: OTPublisher,

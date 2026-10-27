@@ -8,7 +8,7 @@ import Combine
 ///
 /// Implementations track which participants are pinned and expose a reactive
 /// publisher so the ViewModel can merge pin state into ``UIParticipant`` values.
-public protocol PinnedParticipantsDataSource {
+public protocol PinnedParticipantsDataSource: Sendable {
     /// A publisher emitting the current set of pinned participant IDs.
     var pinnedParticipantIds: AnyPublisher<Set<String>, Never> { get }
 
