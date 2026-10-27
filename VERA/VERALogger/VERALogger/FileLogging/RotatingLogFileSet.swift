@@ -206,6 +206,11 @@ public actor RotatingLogFileSet {
                 return nil
             }
             let timestamp = String(name[name.startIndex..<separator.lowerBound])
+            guard timestamp.range(of: #"^[0-9]{8}-[0-9]{6}$"#, options: .regularExpression) != nil,
+                name == "\(timestamp)\(Self.fileNameSeparator)\(index)"
+            else {
+                return nil
+            }
             return ManagedFile(timestamp: timestamp, index: index, url: url)
         }
     }
