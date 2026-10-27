@@ -33,6 +33,7 @@ struct MeetingRoomEnabledFeaturesTests {
             emojis: true,
             feedback: true,
             pictureInPicture: true,
+            postCallTranscription: true,
             screenShare: true,
             settings: true)
 
@@ -85,6 +86,7 @@ struct MeetingRoomEnabledFeaturesTests {
             emojis: true,
             feedback: true,
             pictureInPicture: true,
+            postCallTranscription: true,
             screenShare: true,
             settings: true)
         #expect(all.meetingRoomEnabledFeatures.contains(.callKit))
@@ -129,6 +131,16 @@ struct MeetingRoomEnabledFeaturesTests {
                 .meetingRoomEnabledFeatures.contains(.audioEffects))
     }
 
+    @Test("allowPostCallTranscription maps to .postCallTranscription")
+    func postCallTranscriptionMapping() {
+        #expect(
+            makeContainer(postCallTranscription: true)
+                .meetingRoomEnabledFeatures.contains(.postCallTranscription))
+        #expect(
+            !makeContainer(postCallTranscription: false)
+                .meetingRoomEnabledFeatures.contains(.postCallTranscription))
+    }
+
     @Test("allowBackgroundEffects maps to .backgroundEffects")
     func backgroundEffectsMapping() {
         #expect(
@@ -155,6 +167,7 @@ struct MeetingRoomEnabledFeaturesTests {
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
             pictureInPicture: json.meetingRoomSettings.allowPictureInPicture,
+            postCallTranscription: json.meetingRoomSettings.allowPostCallTranscription,
             screenShare: json.meetingRoomSettings.allowScreenShare,
             settings: json.meetingRoomSettings.allowSettings)
 
@@ -163,6 +176,8 @@ struct MeetingRoomEnabledFeaturesTests {
         // Each feature must be present exactly when its JSON flag is `true`.
         #expect(features.contains(.chat) == json.meetingRoomSettings.allowChat)
         #expect(features.contains(.archiving) == json.meetingRoomSettings.allowArchiving)
+        #expect(
+            features.contains(.postCallTranscription) == json.meetingRoomSettings.allowPostCallTranscription)
         #expect(features.contains(.captions) == json.meetingRoomSettings.allowCaptions)
         #expect(features.contains(.reactions) == json.meetingRoomSettings.allowEmojis)
         #expect(features.contains(.settings) == json.meetingRoomSettings.allowSettings)
@@ -187,6 +202,7 @@ struct MeetingRoomEnabledFeaturesTests {
         var expected: Set<MeetingRoomFeature> = [.callKit]
         if json.meetingRoomSettings.allowChat { expected.insert(.chat) }
         if json.meetingRoomSettings.allowArchiving { expected.insert(.archiving) }
+        if json.meetingRoomSettings.allowPostCallTranscription { expected.insert(.postCallTranscription) }
         if json.meetingRoomSettings.allowCaptions { expected.insert(.captions) }
         if json.meetingRoomSettings.allowEmojis { expected.insert(.reactions) }
         if json.meetingRoomSettings.allowSettings { expected.insert(.settings) }
@@ -207,6 +223,7 @@ struct MeetingRoomEnabledFeaturesTests {
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
             pictureInPicture: json.meetingRoomSettings.allowPictureInPicture,
+            postCallTranscription: json.meetingRoomSettings.allowPostCallTranscription,
             screenShare: json.meetingRoomSettings.allowScreenShare,
             settings: json.meetingRoomSettings.allowSettings)
 
@@ -230,6 +247,7 @@ extension MeetingRoomEnabledFeaturesTests {
         emojis: Bool = false,
         feedback: Bool = false,
         pictureInPicture: Bool = false,
+        postCallTranscription: Bool = false,
         screenShare: Bool = false,
         settings: Bool = false
     ) -> DependencyContainer {
@@ -246,6 +264,7 @@ extension MeetingRoomEnabledFeaturesTests {
                 allowEmojis: emojis,
                 allowFeedback: feedback,
                 allowPictureInPicture: pictureInPicture,
+                allowPostCallTranscription: postCallTranscription,
                 allowScreenShare: screenShare,
                 allowSettings: settings))
 
@@ -259,6 +278,7 @@ extension MeetingRoomEnabledFeaturesTests {
         switch feature {
         case .chat: return makeContainer(chat: true)
         case .archiving: return makeContainer(archiving: true)
+        case .postCallTranscription: return makeContainer(postCallTranscription: true)
         case .captions: return makeContainer(captions: true)
         case .reactions: return makeContainer(emojis: true)
         case .settings: return makeContainer(settings: true)
@@ -313,6 +333,7 @@ struct AppConfigFixture: Decodable {
         let allowEmojis: Bool
         let allowFeedback: Bool
         let allowPictureInPicture: Bool
+        let allowPostCallTranscription: Bool
         let allowScreenShare: Bool
         let allowSettings: Bool
     }
