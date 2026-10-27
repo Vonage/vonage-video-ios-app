@@ -190,6 +190,9 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     /// - SeeAlso: ``assignPlugins(_:)``, `VonageSignalEmitter`, `VonagePluginCallHolder`, `VonageSignalHandler`
     public var plugins: [any VonagePlugin] = []
 
+    @MainActor lazy var connectionRecovery = VideoRecovery()
+
+    @Atomic private var isConnectionFailurePending = false
     @Atomic private var isTerminal = false
     @MainActor private var credentialResolutionTask: Task<VonageSession, Error>?
     @MainActor private var connectionAttemptID: UUID?
@@ -261,11 +264,27 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         session.onStreamDestroyed = { [weak self] stream in
             self?.removeSubscriber(stream)
         }
-        session.onSessionFailure = { [weak self] error in
-            self?.sessionDidFail(error)
+        session.onSessionFailure = { [weak self, weak session] error in
+            guard let self, let session, self.session === session else { return }
+            self.isConnectionFailurePending = true
+            let isInitialConnectionFailure = self._callState.value == .connecting
+            if !isInitialConnectionFailure || !VideoRecoveryPolicy.connection.permits(error) {
+                self.sessionDidFail(error)
+                return
+            }
+            Task { @MainActor [weak self, weak session] in
+                guard let self, let session, self.session === session else { return }
+                if self.scheduleConnectionRecovery(error) { return }
+                self.sessionDidFail(error)
+            }
         }
-        session.onSessionDidDisconnect = { [weak self] in
-            self?.sessionDidDisconnect()
+        session.onSessionDidDisconnect = { [weak self, weak session] in
+            guard let self, let session, self.session === session else { return }
+            let isFailedInitialJoin =
+                self.isConnectionFailurePending && !self.isTerminal
+                && self._callState.value == .connecting
+            if isFailedInitialJoin { return }
+            self.sessionDidDisconnect()
         }
         session.onSessionDidBeginReconnecting = { [weak self] in
             self?.sessionDidBeginReconnecting()
@@ -273,9 +292,12 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         session.onSessionDidReconnect = { [weak self] in
             self?.sessionDidReconnect()
         }
-        session.onSessionDidConnect = { [weak self] in
-            guard let self, !self.isTerminal, self._callState.value == .connecting else { return }
+        session.onSessionDidConnect = { [weak self, weak session] in
+            guard let self, let session, self.session === session, !self.isTerminal, !self.isConnectionFailurePending,
+                self._callState.value == .connecting
+            else { return }
             self.updateCallState(to: .connected)
+            Task { @MainActor [weak self] in self?.connectionRecovery.reset() }
             self.publishToSession()
             Task { [weak self] in
                 await self?.notifyCallDidStartToPlugins()
@@ -506,6 +528,13 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         let attemptID = UUID()
         connectionAttemptID = attemptID
         updateCallState(to: .connecting)
+        try await performConnectionAttempt(attemptID: attemptID)
+    }
+
+    @MainActor
+    private func performConnectionAttempt(attemptID: UUID) async throws {
+        guard !isTerminal, connectionAttemptID == attemptID else { throw CancellationError() }
+        connectionRecovery.beginAttempt()
         let resolution = Task { @MainActor [makeSession, roomName] in try await makeSession(roomName) }
         credentialResolutionTask = resolution
         defer { credentialResolutionTask = nil }
@@ -526,16 +555,47 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
             if connectionAttemptID == attemptID { try? await disconnect() }
             throw CancellationError()
         }
+        isConnectionFailurePending = false
         self.session = session
         setupSessionHandlers(session)
         wirePluginChannels(session)
         do {
             try session.connect()
         } catch {
+            if scheduleConnectionRecovery(error) { return }
             try? await disconnect()
             _eventsPublisher.value = .error(error)
             throw error
         }
+    }
+
+    @MainActor
+    private func scheduleConnectionRecovery(_ error: Error) -> Bool {
+        guard !isTerminal, _callState.value == .connecting, let attemptID = connectionAttemptID else { return false }
+        guard
+            connectionRecovery.schedule(
+                policy: .connection, error: error,
+                operation: { [weak self] in
+                    guard let self, !self.isTerminal, self.connectionAttemptID == attemptID else { return }
+                    do {
+                        try await self.performConnectionAttempt(attemptID: attemptID)
+                    } catch is CancellationError {
+                        return
+                    } catch {
+                        self.sessionDidFail(error)
+                    }
+                })
+        else { return false }
+        let failedSession = session
+        session = nil
+        failedSession?.cleanUp()
+        do {
+            try failedSession?.disconnect()
+        } catch {
+            connectionRecovery.cancel()
+            sessionDidFail(error)
+        }
+        return true
     }
 
     /// Terminates a call, including one still resolving credentials or connecting to the SDK.
@@ -550,6 +610,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         }
         guard _callState.value != .disconnected else { return }
         isTerminal = true
+        connectionRecovery.cancel()
         connectionAttemptID = nil
         credentialResolutionTask?.cancel()
         updateCallState(to: .disconnecting)
