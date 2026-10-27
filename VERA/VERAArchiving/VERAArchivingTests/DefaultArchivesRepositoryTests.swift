@@ -210,7 +210,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         #expect(values[0][0].transcription?.status == .started)
         #expect(values[2][0].transcription?.status == .available)
@@ -232,7 +233,10 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.archivesToReturn = [pendingTranscript]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        _ = await sut.getArchives(sessionKey: "test-room")
+        // Polling runs only while someone observes the archives.
+        let observation = await sut.getArchives(sessionKey: "test-room")
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        defer { observation.cancel() }
 
         let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 3 }
         #expect(callCount >= 3)
@@ -247,7 +251,10 @@ struct DefaultArchivesRepositoryTests {
         mockDataSource.archivesToReturn = [failedArchive, pendingArchive]
 
         let sut = makeSUT(archivesDataSource: mockDataSource)
-        _ = await sut.getArchives(sessionKey: "test-room")
+        // Polling runs only while someone observes the archives.
+        let observation = await sut.getArchives(sessionKey: "test-room")
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        defer { observation.cancel() }
 
         let callCount = await poll(read: { mockDataSource.callCount }) { $0 >= 2 }
         #expect(callCount >= 2)
