@@ -18,4 +18,12 @@ struct E2EArchive {
     var status: String
     let createdAt: TimeInterval
     var url: String?
+    var transcription: E2ETranscription? = nil
+}
+
+/// Transcript of an E2E transcription archive, reported as processing for a few polls before it is ready.
+struct E2ETranscription {
+    var status = "started"
+    var url: String?
+    var pendingPolls = 1
 }

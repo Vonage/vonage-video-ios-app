@@ -15,6 +15,9 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
     let inlineDisplayLayer: AVSampleBufferDisplayLayer
     private nonisolated let frames: FrameState
 
+    /// The PiP window's display layer while this renderer's participant is the PiP target — wired
+    /// and cleared by `PictureInPictureController.attachFeed(to:)`, which guarantees only one
+    /// renderer holds it at a time (two holders would interleave their frames in the PiP window).
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer? {
         didSet { frames.setPiPRenderer(pipBufferDisplayLayer?.sampleBufferRenderer) }
     }
