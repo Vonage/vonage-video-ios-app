@@ -78,7 +78,7 @@ public actor RotatingLogFileSet {
     ) {
         self.directory = directory
         self.maxFileSize = maxFileSize
-        self.maxFileCount = maxFileCount
+        self.maxFileCount = max(1, maxFileCount)
     }
 
     // MARK: - Writing
