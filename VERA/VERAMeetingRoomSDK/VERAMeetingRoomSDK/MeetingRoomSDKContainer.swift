@@ -355,8 +355,17 @@ final class MeetingRoomSDKContainer {
 
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository
+        statsDataSource: statsRepository,
+        showsTranscriptionSummary: enabledFeatures.contains(.postCallTranscription)
     )
+
+    var loadTranscriptionDefaults: () async -> TranscriptionOptions {
+        guard enabledFeatures.contains(.settings) else { return { .default } }
+        let repository = settingsRepository
+        return {
+            TranscriptionOptions(hasSummary: await repository.getPreferences().transcriptionSummaryEnabled)
+        }
+    }
 
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
