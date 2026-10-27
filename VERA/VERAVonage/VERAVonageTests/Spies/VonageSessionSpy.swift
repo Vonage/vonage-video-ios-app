@@ -35,8 +35,7 @@ class VonageSessionSpy: VonageSession {
     public override func connect() throws {
         connectCalled = true
         recordedTokens.append(token)
-        // This spy simulates the connection; dummy credentials must never reach the SDK network stack.
-
+        // Unit callers use synthetic credentials; simulate lifecycle without starting SDK transport.
         // Simulate successful connection by triggering the callback
         onSessionDidConnect?()
     }

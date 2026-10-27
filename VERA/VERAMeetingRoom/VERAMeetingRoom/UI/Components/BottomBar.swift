@@ -74,7 +74,7 @@ public struct BottomBarButton: Identifiable {
     public let presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)?
 
     /// Action executed when the user taps the button.
-    public let action: () -> Void
+    public let action: @MainActor () -> Void
 
     /// Creates a bottom bar button from explicit values.
     ///
@@ -99,7 +99,7 @@ public struct BottomBarButton: Identifiable {
         overflowPresentation: BottomBarOverflowPresentation = .gridItem,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
         presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)? = nil,
-        action: @escaping () -> Void
+        action: @escaping @MainActor () -> Void
     ) {
         self.id = id ?? label
         self.label = label
@@ -127,7 +127,7 @@ public struct BottomBarButton: Identifiable {
         isActive: Bool? = nil,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior? = nil,
         presentationRequest: (@MainActor () -> MeetingRoomPresentationRequest?)? = nil,
-        action: (() -> Void)? = nil
+        action: (@MainActor () -> Void)? = nil
     ) {
         self.init(
             id: presenter.id,
@@ -139,7 +139,7 @@ public struct BottomBarButton: Identifiable {
             overflowPresentation: presenter.overflowPresentation,
             overflowSelectionBehavior: overflowSelectionBehavior ?? presenter.overflowSelectionBehavior,
             presentationRequest: presentationRequest,
-            action: action ?? presenter.performAction
+            action: action ?? { presenter.performAction() }
         )
     }
 }
@@ -147,42 +147,42 @@ public struct BottomBarButton: Identifiable {
 /// Actions exposed by the meeting room for custom UI surfaces.
 public struct MeetingRoomActions {
     /// Shares the current meeting URL or room identifier.
-    public let onShare: (String) -> Void
+    public let onShare: @MainActor (String) -> Void
 
     /// Retries the current meeting room connection flow.
-    public let onRetry: () -> Void
+    public let onRetry: @MainActor () -> Void
 
     /// Toggles the local microphone state.
-    public let onToggleMic: () -> Void
+    public let onToggleMic: @MainActor () -> Void
 
     /// Toggles the local camera state.
-    public let onToggleCamera: () -> Void
+    public let onToggleCamera: @MainActor () -> Void
 
     /// Switches between available local cameras.
-    public let onCameraSwitch: () -> Void
+    public let onCameraSwitch: @MainActor () -> Void
 
     /// Ends the current call.
-    public let onEndCall: () -> Void
+    public let onEndCall: @MainActor () -> Void
 
     /// Toggles the SDK participant list presentation.
-    public let onToggleParticipants: () -> Void
+    public let onToggleParticipants: @MainActor () -> Void
 
     /// Toggles the SDK meeting layout.
-    public let onToggleLayout: () -> Void
+    public let onToggleLayout: @MainActor () -> Void
 
     /// Creates a collection of meeting room actions.
     ///
     /// Parameters default to no-op closures so tests and previews can provide
     /// only the actions they need.
     public init(
-        onShare: @escaping (String) -> Void = { _ in },
-        onRetry: @escaping () -> Void = {},
-        onToggleMic: @escaping () -> Void = {},
-        onToggleCamera: @escaping () -> Void = {},
-        onCameraSwitch: @escaping () -> Void = {},
-        onEndCall: @escaping () -> Void = {},
-        onToggleParticipants: @escaping () -> Void = {},
-        onToggleLayout: @escaping () -> Void = {},
+        onShare: @escaping @MainActor (String) -> Void = { _ in },
+        onRetry: @escaping @MainActor () -> Void = {},
+        onToggleMic: @escaping @MainActor () -> Void = {},
+        onToggleCamera: @escaping @MainActor () -> Void = {},
+        onCameraSwitch: @escaping @MainActor () -> Void = {},
+        onEndCall: @escaping @MainActor () -> Void = {},
+        onToggleParticipants: @escaping @MainActor () -> Void = {},
+        onToggleLayout: @escaping @MainActor () -> Void = {},
     ) {
         self.onShare = onShare
         self.onRetry = onRetry
@@ -210,7 +210,7 @@ struct BottomBar: View {
     private let presentationHandler: MeetingRoomPresentationHandler
     @Binding private var extraButtons: [BottomBarButton]
     @State private var isOverflowPresented = false
-    @State private var pendingOverflowAction: (() -> Void)?
+    @State private var pendingOverflowAction: (@MainActor () -> Void)?
 
     init(
         isMicEnabled: Bool,

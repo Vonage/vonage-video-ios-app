@@ -390,6 +390,17 @@ public final class MeetingRoomBuilder {
             buttonsAssembler.archiveButtonViewModel = archiveVM
         }
 
+        // Post-call transcription
+        if _enabledFeatures.contains(.postCallTranscription) {
+            let (_, transcriptionVM) = container.archivingFactory.makeArchivingButton(
+                kind: .transcription
+            ) { [weak alertPresenter] alertItem in
+                alertPresenter?.present(alertItem)
+            }
+            transcriptionVM.setup()
+            buttonsAssembler.transcriptionButtonViewModel = transcriptionVM
+        }
+
         // Captions
         var captionsButtonViewModel: CaptionsButtonViewModel?
         var captionsViewModel: CaptionsViewModel?
@@ -500,6 +511,7 @@ public final class MeetingRoomBuilder {
 
     // MARK: - Top Trailing Buttons
 
+    @MainActor
     private static var topTrailingButtons: [ViewGenerator] {
         [ViewGenerator.avPicker()]
     }
