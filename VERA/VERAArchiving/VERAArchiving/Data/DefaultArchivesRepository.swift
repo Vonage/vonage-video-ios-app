@@ -120,7 +120,9 @@ public final class DefaultArchivesRepository: ArchivesRepository {
                     let archives = try await archivesDataSource.getArchives(sessionKey: sessionKey)
                     guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
                     publisher.send(archives)
-                    if Self.shouldStopPolling(archives) { return }
+                    // Stop polling once no archive or transcript is still being produced.
+                    // A transcript keeps processing after its parent archive is uploaded or available.
+                    if !archives.contains(where: \.isPending) { return }
                     try await Task.sleep(nanoseconds: UInt64(pollingInterval * 1_000_000_000))
                 } catch {
                     guard !Task.isCancelled, state.isCurrent(id, for: sessionKey) else { return }
@@ -131,11 +133,5 @@ public final class DefaultArchivesRepository: ArchivesRepository {
                 }
             }
         }
-    }
-
-    private static func shouldStopPolling(_ archives: [Archive]) -> Bool {
-        guard !archives.isEmpty else { return true }
-        if archives.contains(where: { $0.status == .failed }) { return true }
-        return archives.allSatisfy { $0.status == .available }
     }
 }

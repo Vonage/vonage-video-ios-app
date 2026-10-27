@@ -9,6 +9,7 @@ import VERADomain
 
 @testable import VERACore
 
+@MainActor
 @Suite("WaitingRoomNavigation tests")
 struct WaitingRoomNavigationTests {
 

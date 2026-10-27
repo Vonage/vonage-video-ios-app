@@ -23,7 +23,7 @@ import VERADomain
 /// - Remote participant subscriptions through `VonageSubscriber`
 /// - Reactive state observation via Combine publishers
 /// - Optional extensibility via the plugin system
-public final class VonageCall: CallFacade {
+public final class VonageCall: CallFacade, AudioMuteControllable {
 
     private var cancellables = Set<AnyCancellable>()
     /// Per-subscriber cancellable sets keyed by subscriber ID.
@@ -73,8 +73,19 @@ public final class VonageCall: CallFacade {
     ///
     /// Emits ArchivingState events whenever the call recording state changes.
     ///
-    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    /// - Returns: ``ArchivingState`` of the recording archive.
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+
+    private var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(.idle)
+
+    /// A publisher for the post-call transcription state, never fails.
+    ///
+    /// Transcription runs as a separate archive, so it is tracked independently
+    /// from the recording and can run at the same time.
+    ///
+    /// - Returns: ``ArchivingState`` of the transcription archive.
+    public lazy var transcriptionState: AnyPublisher<ArchivingState, Never> =
+        _transcriptionState.eraseToAnyPublisher()
 
     private var _captionsEnabled = CurrentValueSubject<Bool, Never>(false)
 
@@ -261,23 +272,48 @@ public final class VonageCall: CallFacade {
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
         }
-        session.onArchiveStarted = { [weak self] archiveID in
-            self?._archivingState.value = .archiving(archiveID)
-
-            do {
-                let signal = try VonageSignal.archivingState(archiveID)
-                self?.handleSignal(signal)
-            } catch {
-            }
+        session.onArchiveStarted = { [weak self] archiveID, name in
+            self?.archiveDidStart(archiveID, kind: ArchiveKind(archiveName: name))
         }
-        session.onArchiveStopped = { [weak self] _ in
-            self?._archivingState.value = .idle
+        session.onArchiveStopped = { [weak self] archiveID in
+            self?.archiveDidStop(archiveID)
+        }
+    }
 
-            do {
-                let signal = try VonageSignal.idleArchivingState()
-                self?.handleSignal(signal)
-            } catch {
-            }
+    // MARK: Archiving
+
+    private func archivingSubject(for kind: ArchiveKind) -> CurrentValueSubject<ArchivingState, Never> {
+        switch kind {
+        case .recording: _archivingState
+        case .transcription: _transcriptionState
+        }
+    }
+
+    private func archiveDidStart(_ archiveID: String, kind: ArchiveKind) {
+        archivingSubject(for: kind).value = .archiving(archiveID)
+
+        do {
+            let signal = try VonageSignal.archivingState(archiveID, kind: kind)
+            handleSignal(signal)
+        } catch {
+        }
+    }
+
+    /// Resets only the archive kind that is tracking the stopped archive,
+    /// so stopping a recording never clears a running transcription and vice versa.
+    private func archiveDidStop(_ archiveID: String) {
+        guard
+            let kind = ArchiveKind.allCases.first(where: {
+                archivingSubject(for: $0).value == .archiving(archiveID)
+            })
+        else { return }
+
+        archivingSubject(for: kind).value = .idle
+
+        do {
+            let signal = try VonageSignal.idleArchivingState(kind: kind)
+            handleSignal(signal)
+        } catch {
         }
     }
 
@@ -312,7 +348,7 @@ public final class VonageCall: CallFacade {
     private func setupActiveSpeakerObservation() {
         activeSpeakerTracker.$activeSpeaker
             .removeDuplicates()
-            .sink { _ in
+            .sink { [weak self] _ in
                 Task { [weak self] in
                     guard let self else { return }
                     let state = await self.callStateManager.getCurrentState()
@@ -397,7 +433,7 @@ public final class VonageCall: CallFacade {
 
     private func setupSubscriberObservation(_ subscriber: VonageSubscriber) {
         subscriber.$participant
-            .sink { participant in
+            .sink { [weak self] participant in
                 Task { [weak self] in
                     guard let self = self else { return }
                     let state = await self.callStateManager.updateParticipant(participant)
@@ -409,9 +445,9 @@ public final class VonageCall: CallFacade {
 
     private func setupAudioLevelObservation(_ subscriber: VonageSubscriber) {
         subscriber.$audioLevel
-            .sink { audioLevel in
-                Task { [weak self] in
-                    guard let self = self else { return }
+            .sink { [weak self, weak subscriber] audioLevel in
+                Task { [weak self, weak subscriber] in
+                    guard let self, let subscriber else { return }
                     let speakerInfo = SpeakerInfo(
                         id: subscriber.participant.id,
                         audioLevel: audioLevel,
@@ -583,9 +619,10 @@ public final class VonageCall: CallFacade {
     /// - Important: On hold, no media is sent or received, but the connection remains active.
     /// - SeeAlso: ``isOnHold``, ``muteLocalMedia(_:)``
     public func setOnHold(_ isOnHold: Bool) {
-        Task { [weak self] in
-            guard let self else { return }
+        Task { @MainActor [weak self] in
+            guard let self, self.publisher.isOnHold != isOnHold else { return }
             self.publisher.setOnHold(isOnHold)
+            self.updateMediaState()
             await self.callStateManager.setOnHold(isOnHold)
         }
     }
@@ -595,10 +632,20 @@ public final class VonageCall: CallFacade {
     /// - Parameter isMuted: When `true`, disables both audio and video; when `false`, enables both.
     /// - Warning: Overrides individual audio/video toggles. Use ``toggleLocalAudio()`` or ``toggleLocalVideo()`` for independent control.
     public func muteLocalMedia(_ isMuted: Bool) {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self.publisher.publishAudio = !isMuted
             self.publisher.publishVideo = !isMuted
+            self.updateMediaState()
+        }
+    }
+
+    /// Handles system microphone mute without changing the user's video choice.
+    public func muteLocalAudio(_ isMuted: Bool) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.publisher.setAudioMuted(isMuted)
+            self.updateMediaState()
         }
     }
 
@@ -790,6 +837,7 @@ public final class VonageCall: CallFacade {
                 videoFrameRate: advancedSettings.videoFrameRate,
                 preferredVideoCodecs: advancedSettings.preferredVideoCodecs,
                 maxAudioBitrate: advancedSettings.maxAudioBitrate,
+                videoBitratePreset: advancedSettings.videoBitratePreset,
                 maxVideoBitrate: advancedSettings.maxVideoBitrate,
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
                 subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,

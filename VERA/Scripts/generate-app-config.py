@@ -55,10 +55,10 @@ def generate_app_config():
 import Foundation
 import VERADomain
 
-public struct AppConfig {{
+public struct AppConfig: Sendable {{
     public static let configVersion: String = "{metadata_version}"
 
-    public struct VideoSettings {{
+    public struct VideoSettings: Sendable {{
         public let allowBackgroundEffects: Bool
         public let allowCameraControl: Bool
         public let allowVideoOnJoin: Bool
@@ -77,7 +77,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AudioSettings {{
+    public struct AudioSettings: Sendable {{
         public let allowAdvancedNoiseSuppression: Bool
         public let allowAudioOnJoin: Bool
         public let allowMicrophoneControl: Bool
@@ -96,7 +96,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct WaitingRoomSettings {{
+    public struct WaitingRoomSettings: Sendable {{
         public let allowDeviceSelection: Bool
         public let allowSettings: Bool
 
@@ -109,7 +109,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct AuthSettings {{
+    public struct AuthSettings: Sendable {{
         public let allowAuthentication: Bool
         public let idProviders: [String]
 
@@ -122,7 +122,7 @@ public struct AppConfig {{
         }}
     }}
 
-    public struct MeetingRoomSettings {{
+    public struct MeetingRoomSettings: Sendable {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
         public let allowChat: Bool
@@ -130,6 +130,7 @@ public struct AppConfig {{
         public let allowEmojis: Bool
         public let allowFeedback: Bool
         public let allowPictureInPicture: Bool
+        public let allowPostCallTranscription: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
@@ -143,6 +144,7 @@ public struct AppConfig {{
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowFeedback: Bool = {bool_str(meeting['allowFeedback'])},
             allowPictureInPicture: Bool = {bool_str(meeting['allowPictureInPicture'])},
+            allowPostCallTranscription: Bool = {bool_str(meeting.get('allowPostCallTranscription', False))},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
             defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
             showParticipantList: Bool = {bool_str(meeting['showParticipantList'])},
@@ -155,6 +157,7 @@ public struct AppConfig {{
             self.allowEmojis = allowEmojis
             self.allowFeedback = allowFeedback
             self.allowPictureInPicture = allowPictureInPicture
+            self.allowPostCallTranscription = allowPostCallTranscription
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList
