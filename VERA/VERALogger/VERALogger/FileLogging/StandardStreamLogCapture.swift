@@ -14,8 +14,9 @@ import Foundation
 /// The original `stdout` is duplicated before the redirection and every captured chunk is
 /// mirrored back to it, so the Xcode console keeps showing the logs while debugging.
 ///
-/// Captured chunks are delivered through an `AsyncStream`, so a single consumer task writes
-/// them to disk in order without any locking.
+/// Captured chunks are delivered through a bounded `AsyncStream`, so a single consumer task writes
+/// them to disk in order without any locking. When the buffer fills, the oldest pending chunks
+/// are dropped to keep memory use bounded.
 public actor StandardStreamLogCapture {
 
     private let fileSet: RotatingLogFileSet
@@ -48,7 +49,7 @@ public actor StandardStreamLogCapture {
         dup2(pipe.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
         dup2(pipe.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
 
-        let stream = AsyncStream<Data> { continuation in
+        let stream = AsyncStream<Data>(bufferingPolicy: .bufferingNewest(64)) { continuation in
             pipe.fileHandleForReading.readabilityHandler = { handle in
                 let data = handle.availableData
                 guard !data.isEmpty else { return }
