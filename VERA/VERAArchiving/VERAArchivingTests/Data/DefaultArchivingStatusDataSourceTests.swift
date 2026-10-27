@@ -17,7 +17,7 @@ struct DefaultArchivingStatusDataSourceTests {
     func initialArchivingStateIsIdle() async throws {
         let sut = makeSUT()
 
-        let status = await sut.archivingState.nextValue()
+        let status = await sut.archivingState(for: .recording).nextValue()
 
         #expect(status == .idle)
     }
@@ -29,9 +29,9 @@ struct DefaultArchivingStatusDataSourceTests {
         let sut = makeSUT()
         let archiveID = "test-archive-123"
 
-        sut.set(archivingState: .archiving(archiveID))
+        sut.set(archivingState: .archiving(archiveID), for: .recording)
 
-        let status = await sut.archivingState.nextValue()
+        let status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .archiving(archiveID))
     }
 
@@ -39,9 +39,9 @@ struct DefaultArchivingStatusDataSourceTests {
     func settingArchivingStateToIdleUpdatesPublisher() async throws {
         let sut = makeSUT()
 
-        sut.set(archivingState: .idle)
+        sut.set(archivingState: .idle, for: .recording)
 
-        let status = await sut.archivingState.nextValue()
+        let status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
     }
 
@@ -52,18 +52,18 @@ struct DefaultArchivingStatusDataSourceTests {
         let archiveID2 = "archive-2"
 
         // Set to archiving
-        sut.set(archivingState: .archiving(archiveID1))
-        var status = await sut.archivingState.nextValue()
+        sut.set(archivingState: .archiving(archiveID1), for: .recording)
+        var status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .archiving(archiveID1))
 
         // Set to idle
-        sut.set(archivingState: .idle)
-        status = await sut.archivingState.nextValue()
+        sut.set(archivingState: .idle, for: .recording)
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
 
         // Set to archiving again with different ID
-        sut.set(archivingState: .archiving(archiveID2))
-        status = await sut.archivingState.nextValue()
+        sut.set(archivingState: .archiving(archiveID2), for: .recording)
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .archiving(archiveID2))
     }
 
@@ -75,13 +75,13 @@ struct DefaultArchivingStatusDataSourceTests {
         let archiveID = "test-archive"
 
         // Set to archiving first
-        sut.set(archivingState: .archiving(archiveID))
-        var status = await sut.archivingState.nextValue()
+        sut.set(archivingState: .archiving(archiveID), for: .recording)
+        var status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .archiving(archiveID))
 
         // Reset
         sut.reset()
-        status = await sut.archivingState.nextValue()
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
     }
 
@@ -90,12 +90,12 @@ struct DefaultArchivingStatusDataSourceTests {
         let sut = makeSUT()
 
         // Initial state is already idle
-        var status = await sut.archivingState.nextValue()
+        var status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
 
         // Reset
         sut.reset()
-        status = await sut.archivingState.nextValue()
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
     }
 
@@ -104,20 +104,65 @@ struct DefaultArchivingStatusDataSourceTests {
         let sut = makeSUT()
         let archiveID = "test-archive"
 
-        sut.set(archivingState: .archiving(archiveID))
+        sut.set(archivingState: .archiving(archiveID), for: .recording)
 
         // Multiple resets
         sut.reset()
-        var status = await sut.archivingState.nextValue()
+        var status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
 
         sut.reset()
-        status = await sut.archivingState.nextValue()
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
 
         sut.reset()
-        status = await sut.archivingState.nextValue()
+        status = await sut.archivingState(for: .recording).nextValue()
         #expect(status == .idle)
+    }
+
+    // MARK: - Archive Kind Tests
+
+    @Test("Initial transcription state is idle")
+    func initialTranscriptionStateIsIdle() async throws {
+        let sut = makeSUT()
+
+        let status = await sut.archivingState(for: .transcription).nextValue()
+
+        #expect(status == .idle)
+    }
+
+    @Test("Setting the transcription state does not change the recording state")
+    func settingTranscriptionStateKeepsRecordingState() async throws {
+        let sut = makeSUT()
+
+        sut.set(archivingState: .archiving("transcription-1"), for: .transcription)
+
+        #expect(await sut.archivingState(for: .transcription).nextValue() == .archiving("transcription-1"))
+        #expect(await sut.archivingState(for: .recording).nextValue() == .idle)
+    }
+
+    @Test("Stopping the recording keeps a running transcription")
+    func stoppingRecordingKeepsTranscription() async throws {
+        let sut = makeSUT()
+        sut.set(archivingState: .archiving("recording-1"), for: .recording)
+        sut.set(archivingState: .archiving("transcription-1"), for: .transcription)
+
+        sut.set(archivingState: .idle, for: .recording)
+
+        #expect(await sut.archivingState(for: .recording).nextValue() == .idle)
+        #expect(await sut.archivingState(for: .transcription).nextValue() == .archiving("transcription-1"))
+    }
+
+    @Test("Reset sets every archive kind to idle")
+    func resetSetsEveryKindToIdle() async throws {
+        let sut = makeSUT()
+        sut.set(archivingState: .archiving("recording-1"), for: .recording)
+        sut.set(archivingState: .archiving("transcription-1"), for: .transcription)
+
+        sut.reset()
+
+        #expect(await sut.archivingState(for: .recording).nextValue() == .idle)
+        #expect(await sut.archivingState(for: .transcription).nextValue() == .idle)
     }
 
     // MARK: - Test Helpers
