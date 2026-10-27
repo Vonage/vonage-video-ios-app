@@ -68,7 +68,7 @@ public class VonageSubscriber: NSObject {
     @Atomic var subscriberDidConnect = false
 
     /// Called when the subscriber encounters an error.
-    var onError: (() -> Void)?
+    var onError: ((Error) -> Void)?
 
     /// Called when a caption is received
     var onCaption: ((VonageCaption) -> Void)?
@@ -295,7 +295,7 @@ extension VonageSubscriber: OTSubscriberDelegate {
     ///
     /// Forwards the error event to ``onError`` for external handling.
     public func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-        onError?()
+        onError?(error)
     }
 }
 

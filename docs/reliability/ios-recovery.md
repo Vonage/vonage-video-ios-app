@@ -36,3 +36,20 @@ Recreation uses the existing serialized settings queue, checks the failed publis
 again after queued work, cancels on hangup, and reinstalls callbacks. Initial advanced settings,
 mute state, camera position and transforms are retained. Runtime camera/transform state is restored
 before publishing replacement media. Only the SDK stream-created callback resets the retry budget.
+
+## Subscription recovery
+
+Depends on the connection and publisher slices for terminal cancellation and shared scheduling.
+Only timeout 1542 in OTSubscriberErrorDomain is retried, as recommended in SDK 2.35.1 OTError.h.
+Every stream owns its own three-attempt budget and generation. A fresh subscriber is created after
+the failed attempt has been cleaned up and unsubscribed. Stream availability is read from the native
+session immediately before each attempt; destroyed streams, replaced generations, and terminal calls
+cancel pending work. Duplicate stream events cannot start duplicate subscriptions. Permanent, missing
+stream, encryption and unknown failures do not retry. Success is confirmed by the subscriber delegate.
+
+SDK reconnect suppresses application subscription attempts; after reconnect, still-available streams
+without an existing workflow may start a new workflow. Normal SDK-managed subscribers retain their
+workflows. Synthetic lifetime tests exercise the scheduling coordinator; live stream negotiation,
+media output and physical network migration are separate acceptance checks.
+
+Reference: https://developer.vonage.com/en/opentok/sdks/ios/reference/constants/otsubscribererrorcode

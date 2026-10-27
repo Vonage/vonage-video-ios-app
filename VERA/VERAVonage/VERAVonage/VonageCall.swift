@@ -192,6 +192,12 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
 
     @MainActor lazy var connectionRecovery = VideoRecovery()
     @MainActor lazy var publisherRecovery = VideoRecovery()
+    @MainActor lazy var subscriptionRecovery: SubscriptionRecovery = {
+        let recovery = SubscriptionRecovery()
+        recovery.onError = { [weak self] error in self?._eventsPublisher.send(.error(error)) }
+        return recovery
+    }()
+    @MainActor private var activeSubscribers: [String: VonageSubscriber] = [:]
     @Atomic private var isSessionReconnecting = false
 
     @Atomic private var isConnectionFailurePending = false
@@ -474,42 +480,92 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     // MARK: Subscriber
 
     private func addSubscriber(_ stream: OTStream) {
-        Task { [weak self] in
-            guard let self else { return }
-            await self.doSubscribe(stream)
+        let streamID = stream.streamId
+        Task { @MainActor [weak self] in
+            guard let self, !self.isTerminal else { return }
+            self.subscriptionRecovery.add(
+                streamID: streamID,
+                isAvailable: { [weak self] in
+                    guard let self else { return false }
+                    return !self.isTerminal && self._callState.value == .connected
+                        && !self.isSessionReconnecting && self.session?.hasStream(streamID) == true
+                },
+                subscribe: { [weak self] generation in
+                    guard let self else { return }
+                    try await self.doSubscribe(stream, generation: generation)
+                })
         }
     }
 
     @MainActor
-    private func doSubscribe(_ stream: OTStream) async {
+    private func doSubscribe(_ stream: OTStream, generation: UUID) async throws {
+        let streamID = stream.streamId
+        guard subscriptionRecovery.isCurrent(streamID: streamID, generation: generation),
+            !isTerminal
+        else { throw CancellationError() }
+        let subscriber = try subscriberFactory.makeSubscriber(stream)
+        activeSubscribers[streamID] = subscriber
+        subscriber.onError = { [weak self, weak subscriber] error in
+            Task { @MainActor [weak self, weak subscriber] in
+                guard let self, let subscriber, self.activeSubscribers[streamID] === subscriber else { return }
+                let cleaned = await self.retireSubscriber(subscriber)
+                self.subscriptionRecovery.failed(
+                    streamID: streamID, generation: generation,
+                    error: cleaned ? error : CancellationError())
+            }
+        }
+        subscriber.onConnected = { [weak self, weak subscriber] in
+            Task { @MainActor [weak self, weak subscriber] in
+                guard let self, let subscriber, self.activeSubscribers[streamID] === subscriber else { return }
+                self.subscriptionRecovery.connected(streamID: streamID, generation: generation)
+            }
+        }
+        subscriber.onCaption = { [weak self] caption in self?.appendCaption(caption) }
+        if isNetworkStatsEnabled {
+            subscriber.otSubscriber.networkStatsDelegate = statsCollector
+            statsCollector.requestRtcStats(from: subscriber.otSubscriber)
+        }
+        setupSubscriberObservation(subscriber)
+        setupAudioLevelObservation(subscriber)
         do {
-            let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
-            vonageSubscriber.onError = { [weak self] in
-                self?.removeSubscriber(stream)
-            }
-            vonageSubscriber.onCaption = { [weak self] caption in
-                self?.appendCaption(caption)
-            }
-
-            // Wire network stats delegate if collection is active
-            if isNetworkStatsEnabled {
-                vonageSubscriber.otSubscriber.networkStatsDelegate = statsCollector
-                statsCollector.requestRtcStats(from: vonageSubscriber.otSubscriber)
-            }
-
-            setupSubscriberObservation(vonageSubscriber)
-            setupAudioLevelObservation(vonageSubscriber)
-
-            try requireSession().subscribe(subscriber: vonageSubscriber)
-
-            let state = await callStateManager.addSubscriber(vonageSubscriber)
-            await updateParticipantsState(state)
-
-            if areCaptionsEnabled {
-                vonageSubscriber.enableCaptions()
-            }
+            try requireSession().subscribe(subscriber: subscriber)
         } catch {
+            let cleaned = await retireSubscriber(subscriber)
+            if !cleaned { throw CancellationError() }
+            throw error
+        }
+        let state = await callStateManager.addSubscriber(subscriber)
+        guard !isTerminal, subscriptionRecovery.isCurrent(streamID: streamID, generation: generation),
+            activeSubscribers[streamID] === subscriber
+        else {
+            _ = await retireSubscriber(subscriber)
+            throw CancellationError()
+        }
+        await updateParticipantsState(state)
+        if areCaptionsEnabled { subscriber.enableCaptions() }
+    }
+
+    @MainActor
+    private func retireSubscriber(_ subscriber: VonageSubscriber) async -> Bool {
+        if activeSubscribers[subscriber.id] === subscriber {
+            activeSubscribers[subscriber.id] = nil
+            subscriberCancellables[subscriber.id] = nil
+        }
+        statsCollector.removeSubscriber(connectionId: subscriber.stream.connection.connectionId)
+        subscriber.cleanUp()
+        if await callStateManager.getSubscriber(id: subscriber.id) === subscriber {
+            let (_, state) = await callStateManager.removeSubscriber(id: subscriber.id)
+            await updateParticipantsState(state)
+        }
+        guard !isTerminal else { return true }
+        do {
+            try session?.unsubscribe(subscriber: subscriber)
+            return true
+        } catch {
+            let nativeError = error as NSError
+            if nativeError.domain == "OTSessionErrorDomain", nativeError.code == 1112 { return true }
             _eventsPublisher.send(.error(error))
+            return false
         }
     }
 
@@ -544,6 +600,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     private func removeSubscriber(_ stream: OTStream) {
         Task { @MainActor [weak self] in
             guard let self = self else { return }
+            self.subscriptionRecovery.remove(streamID: stream.streamId)
+            self.activeSubscribers[stream.streamId] = nil
             // Cancel subscriber sinks before cleanup to prevent $participant
             // from re-adding the participant to the repository.
             self.subscriberCancellables[stream.streamId] = nil
@@ -657,6 +715,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         isTerminal = true
         connectionRecovery.cancel()
         publisherRecovery.cancel()
+        subscriptionRecovery.cancelAll()
+        activeSubscribers.removeAll()
         connectionAttemptID = nil
         credentialResolutionTask?.cancel()
         updateCallState(to: .disconnecting)
@@ -719,6 +779,10 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
 
     private func sessionDidReconnect() {
         isSessionReconnecting = false
+        Task { @MainActor [weak self] in
+            guard let self, !self.isTerminal else { return }
+            for stream in self.session?.availableRemoteStreams ?? [] { self.addSubscriber(stream) }
+        }
         _eventsPublisher.send(.didReconnect)
     }
 
@@ -1223,7 +1287,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     private func subscribeToPublisherCaptions(_ stream: OTStream) {
         do {
             let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
-            vonageSubscriber.onError = { [weak self] in
+            vonageSubscriber.onError = { [weak self] _ in
                 self?.removeSubscriber(stream)
             }
 
