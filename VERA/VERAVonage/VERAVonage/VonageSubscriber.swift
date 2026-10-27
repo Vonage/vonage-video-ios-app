@@ -267,8 +267,11 @@ public class VonageSubscriber: NSObject {
 
     // MARK: Captions
 
+    @Atomic private var captionsTranslationLanguage: String? = nil
+
     func enableCaptions() {
         otSubscriber.subscribeToCaptions = true
+        otSubscriber.captionsTranslationLanguage = captionsTranslationLanguage
     }
 
     func disableCaptions() {
@@ -277,6 +280,7 @@ public class VonageSubscriber: NSObject {
 
     /// Sets the BCP-47 language this subscriber's captions are translated into; `nil` keeps the original.
     func setCaptionsTranslationLanguage(_ languageCode: String?) {
+        captionsTranslationLanguage = languageCode
         otSubscriber.captionsTranslationLanguage = languageCode
     }
 }
