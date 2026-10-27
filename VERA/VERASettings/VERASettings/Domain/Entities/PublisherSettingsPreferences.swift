@@ -45,6 +45,11 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public var opusDtxEnabled: Bool
 
+    /// Whether a post-call transcription includes an AI summary by default.
+    ///
+    /// Pre-selects the option offered when a transcription is started.
+    public var transcriptionSummaryEnabled: Bool
+
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
 
@@ -63,6 +68,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
+    ///   - transcriptionSummaryEnabled: Whether transcriptions include an AI summary by default.
+    ///     Defaults to `true`.
     public init(
         videoResolution: SettingsVideoResolution = .medium,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -75,7 +82,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         senderStatsEnabled: Bool = false,
         statsOverlayEnabled: Bool = true,
         degradationPreference: SettingsDegradationPreference = .notSet,
-        opusDtxEnabled: Bool = true
+        opusDtxEnabled: Bool = true,
+        transcriptionSummaryEnabled: Bool = true
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -89,6 +97,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.transcriptionSummaryEnabled = transcriptionSummaryEnabled
     }
 
     // MARK: - Migration
@@ -129,6 +138,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
+        transcriptionSummaryEnabled =
+            try container.decodeIfPresent(Bool.self, forKey: .transcriptionSummaryEnabled) ?? true
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -154,6 +165,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
+        case transcriptionSummaryEnabled
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -176,6 +188,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encode(transcriptionSummaryEnabled, forKey: .transcriptionSummaryEnabled)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -189,5 +202,6 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
             && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
+            && lhs.transcriptionSummaryEnabled == rhs.transcriptionSummaryEnabled
     }
 }
