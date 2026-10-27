@@ -12,7 +12,7 @@ import VERAMeetingRoom
 @Suite("MeetingRoomFeature tests")
 struct MeetingRoomFeatureTests {
 
-    private let currentNumberOfFeatures = 12
+    private let currentNumberOfFeatures = 13
 
     @Test("All features are available via CaseIterable")
     func allFeaturesAvailable() {
@@ -20,6 +20,7 @@ struct MeetingRoomFeatureTests {
         #expect(allFeatures.count == currentNumberOfFeatures)
         #expect(allFeatures.contains(.chat))
         #expect(allFeatures.contains(.archiving))
+        #expect(allFeatures.contains(.postCallTranscription))
         #expect(allFeatures.contains(.captions))
         #expect(allFeatures.contains(.reactions))
         #expect(allFeatures.contains(.settings))

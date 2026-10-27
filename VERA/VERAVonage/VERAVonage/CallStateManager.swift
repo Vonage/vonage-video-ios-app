@@ -62,16 +62,9 @@ final actor CallStateManager {
     /// - Parameter participant: The participant with updated properties (e.g., mic/camera).
     /// - Returns: The updated ``ParticipantsState`` snapshot.
     func updateParticipant(_ participant: Participant) async -> ParticipantsState {
-        // Guard against a late `$participant` emission from a subscriber that has already been
-        // torn down: `saveParticipant` is a plain `set`, so blindly calling it after
-        // `removeSubscriber` has run would resurrect the participant and leave its (now stale)
-        // tile rendering in the meeting room. New subscribers are added through `addSubscriber`,
-        // which inserts the participant before any subsequent `updateParticipant` runs — so it's
-        // safe to require the participant already exists here.
-        guard await participantsRepository.getParticipant(id: participant.id) != nil else {
-            return await getCurrentState()
-        }
-        await participantsRepository.saveParticipant(participant)
+        // An in-flight subscriber update must not recreate a participant after removal.
+        // The repository checks membership and replaces the value in one actor operation.
+        await participantsRepository.updateExistingParticipant(participant)
         return await getCurrentState()
     }
 

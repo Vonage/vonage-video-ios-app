@@ -6,22 +6,19 @@ import SwiftUI
 import VERACommonUI
 import VERADomain
 
+/// Recording presentation of the archiving state.
+///
+/// - SeeAlso: ``ArchiveKind`` for the presentation of other archive kinds.
 extension ArchivingState {
     public var bottomBarLabel: String {
-        isArchiving
-            ? String(localized: "Stop Recording", bundle: .veraArchiving)
-            : String(localized: "Start Recording", bundle: .veraArchiving)
+        ArchiveKind.recording.bottomBarLabel(for: self)
     }
 
     public var bottomBarAccessibilityIdentifier: String {
-        isArchiving
-            ? ArchivingAccessibilityID.stopRecordingButton
-            : ArchivingAccessibilityID.startRecordingButton
+        ArchiveKind.recording.bottomBarAccessibilityIdentifier(for: self)
     }
 
     public var bottomBarImage: Image {
-        isArchiving
-            ? VERACommonUIAsset.Images.radioChecked2Line.swiftUIImage
-            : VERACommonUIAsset.Images.radioChecked2Solid.swiftUIImage
+        ArchiveKind.recording.bottomBarImage(for: self)
     }
 }

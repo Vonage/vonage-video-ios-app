@@ -17,6 +17,7 @@ import VERACommonUI
     private typealias HostingController<Content: View> = UIHostingController<Content>
 #endif
 
+@MainActor
 @Suite("BottomBar Tests")
 struct BottomBarCalculateMaxExtraButtonsTests {
 
