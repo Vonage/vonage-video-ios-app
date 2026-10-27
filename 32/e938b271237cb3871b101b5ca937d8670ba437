@@ -1,0 +1,19 @@
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_1c0c83113732a4::t_66488c81cc858c 270-271,274,283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "32e938b271237cb3871b101b5ca937d8670ba437",
+  "prompts": {},
+  "sessions": {
+    "s_1c0c83113732a4": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_60fd54bc-c90b-412a-8967-b012b45f329d",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
