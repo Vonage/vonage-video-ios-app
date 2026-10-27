@@ -191,6 +191,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     public var plugins: [any VonagePlugin] = []
 
     @MainActor lazy var connectionRecovery = VideoRecovery()
+    @MainActor lazy var publisherRecovery = VideoRecovery()
+    @Atomic private var isSessionReconnecting = false
 
     @Atomic private var isConnectionFailurePending = false
     @Atomic private var isTerminal = false
@@ -366,10 +368,20 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     // MARK: Publisher
 
     private func publishToSession() {
-        publisher.onError = { [weak self] error in
-            self?._eventsPublisher.send(.error(error))
+        let currentPublisher = publisher
+        publisher.onError = { [weak self, weak currentPublisher] error in
+            guard let self, let currentPublisher, self.publisher === currentPublisher else { return }
+            self.handlePublisherFailure(error, publisher: currentPublisher)
+        }
+        publisher.onStreamCreated = { [weak self, weak currentPublisher] in
+            Task { @MainActor [weak self, weak currentPublisher] in
+                guard let self, let currentPublisher, self.publisher === currentPublisher else { return }
+                self.publisherRecovery.reset()
+                self.publisherRecovery.beginAttempt()
+            }
         }
         guard !publisher.hasSession else { return }
+        Task { @MainActor [weak self] in self?.publisherRecovery.beginAttempt() }
         do {
             try requireSession().publish(publisher: publisher)
             // In PiP mode, read `participant` only after setup(), which swaps in the renderer view.
@@ -378,7 +390,40 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
             publisherParticipant = publisher.participant
             setupPublisherObservation(publisher)
         } catch {
+            handlePublisherFailure(error, publisher: currentPublisher)
+        }
+    }
+
+    private func handlePublisherFailure(_ error: Error, publisher failedPublisher: VonagePublisher) {
+        guard VideoRecoveryPolicy.publisher.permits(error) else {
+            Task { @MainActor [weak self, weak failedPublisher] in
+                guard let self, let failedPublisher, self.publisher === failedPublisher else { return }
+                self.publisherRecovery.cancel()
+            }
             _eventsPublisher.send(.error(error))
+            return
+        }
+        Task { @MainActor [weak self, weak failedPublisher] in
+            guard let self, let failedPublisher, self.publisher === failedPublisher,
+                !self.isTerminal, self._callState.value == .connected
+            else { return }
+            guard !self.isSessionReconnecting, !failedPublisher.isOnHold else {
+                self._eventsPublisher.send(.error(error))
+                return
+            }
+            let scheduled = self.publisherRecovery.schedule(policy: .publisher, error: error) {
+                [weak self, weak failedPublisher] in
+                guard let self, let failedPublisher, self.publisher === failedPublisher,
+                    !self.isTerminal, !self.isSessionReconnecting
+                else { return }
+                do {
+                    try await self.enqueuePublisherReplacement(
+                        failedPublisher.recoverySettings, expectedPublisher: failedPublisher)
+                } catch {
+                    self._eventsPublisher.send(.error(error))
+                }
+            }
+            if !scheduled { self._eventsPublisher.send(.error(error)) }
         }
     }
 
@@ -611,6 +656,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         guard _callState.value != .disconnected else { return }
         isTerminal = true
         connectionRecovery.cancel()
+        publisherRecovery.cancel()
         connectionAttemptID = nil
         credentialResolutionTask?.cancel()
         updateCallState(to: .disconnecting)
@@ -666,10 +712,13 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     }
 
     private func sessionDidBeginReconnecting() {
+        isSessionReconnecting = true
+        Task { @MainActor [weak self] in self?.publisherRecovery.cancel() }
         _eventsPublisher.send(.didBeginReconnecting)
     }
 
     private func sessionDidReconnect() {
+        isSessionReconnecting = false
         _eventsPublisher.send(.didReconnect)
     }
 
@@ -910,6 +959,13 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     /// - Throws: If cancelled before replacement starts, or unpublish/recreation fails.
     @MainActor
     public func applyPublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        try await enqueuePublisherReplacement(advancedSettings, expectedPublisher: nil)
+    }
+
+    @MainActor
+    private func enqueuePublisherReplacement(
+        _ advancedSettings: PublisherAdvancedSettings, expectedPublisher: VonagePublisher?
+    ) async throws {
         try Task.checkCancellation()
         let previous = publisherSettingsOperation
         let operationID = UUID()
@@ -921,6 +977,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
             }
             try Task.checkCancellation()
             guard let self else { return }
+            if let expectedPublisher, self.publisher !== expectedPublisher { return }
             try await self.performPublisherReplacement(advancedSettings)
         }
         publisherSettingsOperation = operation
@@ -944,9 +1001,6 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         guard _callState.value == .connected else { return }
 
         // 1. Capture current runtime state
-        let wasPublishingAudio = publisher.publishAudio
-        let wasPublishingVideo = publisher.publishVideo
-        let cameraPos = publisher.cameraPosition
         let currentTransformers = publisher.videoTransformers
         let wasStatsEnabled = isNetworkStatsEnabled
         let wasCaptionsEnabled = areCaptionsEnabled
@@ -975,6 +1029,11 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         // Once unpublish starts, finish restoring a valid publisher even if the settings task
         // is cancelled. A call that has ended must never create or publish new media.
         guard _callState.value == .connected else { return }
+
+        // Honor mute/camera changes made while replacement was suspended.
+        let wasPublishingAudio = publisher.publishAudio
+        let wasPublishingVideo = publisher.publishVideo
+        let cameraPos = publisher.cameraPosition
 
         // 4. Build merged settings: new SDK fields + preserved runtime state
         let mergedSettings = PublisherSettings(
@@ -1005,7 +1064,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
 
         // 6. Replace the publisher reference and re-publish
         self.publisher = newPublisher
-        publishToSession()
+        newPublisher.recoverySettings = advancedSettings
 
         // 7. Restore camera position
         newPublisher.cameraPosition = cameraPos
@@ -1019,6 +1078,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         if !currentAudioTransformers.isEmpty {
             newPublisher.setAudioTransformers(currentAudioTransformers)
         }
+
+        publishToSession()
 
         // 10. Restore network stats delegate
         if wasStatsEnabled {
@@ -1049,6 +1110,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     @MainActor
     public func updateLivePublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async {
         guard _callState.value == .connected else { return }
+        publisher.recoverySettings = advancedSettings
 
         if let videoBitratePreset = advancedSettings.videoBitratePreset {
             publisher.otPublisher.videoBitratePreset = videoBitratePreset.otBitratePreset

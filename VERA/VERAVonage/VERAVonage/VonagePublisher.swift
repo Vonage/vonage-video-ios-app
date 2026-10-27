@@ -91,6 +91,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     var onStreamDestroyed: (() -> Void)?
     /// Called when the publisher encounters an error.
     var onError: ((Error) -> Void)?
+    var recoverySettings = PublisherAdvancedSettings()
     /// Called when a moderator force-mutes this publisher.
     var onMuteForced: (() -> Void)?
 
