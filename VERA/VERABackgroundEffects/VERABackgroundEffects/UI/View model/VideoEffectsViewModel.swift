@@ -7,6 +7,7 @@ import Foundation
 import OSLog
 import Observation
 import SwiftUI
+import VERACommonUI
 import VERADomain
 
 /// ViewModel for the video effects bottom sheet.
@@ -53,8 +54,7 @@ public final class VideoEffectsViewModel {
 
         selectedEffect = videoEffectRepository.load()
         remainingSlotsPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] remainingSlots in
+            .sinkOnMainActor { [weak self] remainingSlots in
                 self?.remainingSlots = remainingSlots
             }
             .store(in: &cancellables)

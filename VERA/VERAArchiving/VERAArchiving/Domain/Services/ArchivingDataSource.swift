@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 public enum ArchivingDataSourceError: Swift.Error {
     case networkError
@@ -11,19 +12,23 @@ public enum ArchivingDataSourceError: Swift.Error {
 
 public struct StartArchivingDataSourceRequest: Sendable {
     public let sessionKey: String
+    public let kind: ArchiveKind
 
-    public init(sessionKey: String) {
+    public init(sessionKey: String, kind: ArchiveKind = .recording) {
         self.sessionKey = sessionKey
+        self.kind = kind
     }
 }
 
 public struct StopArchivingDataSourceRequest: Sendable {
     public let sessionKey: String
     public let archiveID: String
+    public let kind: ArchiveKind
 
-    public init(sessionKey: String, archiveID: String) {
+    public init(sessionKey: String, archiveID: String, kind: ArchiveKind = .recording) {
         self.sessionKey = sessionKey
         self.archiveID = archiveID
+        self.kind = kind
     }
 }
 
