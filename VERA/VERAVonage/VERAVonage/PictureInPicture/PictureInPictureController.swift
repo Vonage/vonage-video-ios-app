@@ -41,7 +41,7 @@ final class PictureInPictureController: NSObject {
     private weak var currentFeedRenderer: PictureInPictureVideoRenderer?
 
     var isInPictureInPicture: Bool { lifecycle.isInPictureInPicture }
-  
+
     var isConfigured: Bool { pipController != nil }
     var onPictureInPicturePossibleDidChange: (() -> Void)? {
         get { lifecycle.onPossibleDidChange }
