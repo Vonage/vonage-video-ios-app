@@ -211,7 +211,8 @@ struct DefaultArchivesRepositoryTests {
         let sut = makeSUT(archivesDataSource: mockDataSource)
         let publisher = await sut.getArchives(sessionKey: "test-room")
 
-        let values = try await collectValues(from: publisher, count: 3, timeout: 5.0)
+        let values = try await collectValues(
+            from: publisher.filter { !$0.isEmpty }.eraseToAnyPublisher(), count: 3, timeout: 5.0)
 
         #expect(values[0][0].transcription?.status == .started)
         #expect(values[2][0].transcription?.status == .available)
