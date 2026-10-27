@@ -7,23 +7,40 @@ import VERACore
 
 public final class MockUserRepository: UserRepository {
 
-    public enum Action: Equatable {
+    public enum Action: Equatable, Sendable {
         case save(User)
         case get
     }
 
-    public var actions: [Action] = []
-
-    public var user: VERACore.User?
-
-    public func save(_ user: VERACore.User) async throws {
-        actions.append(Action.save(user))
-        self.user = user
+    private struct State: Sendable {
+        var actions: [Action] = []
+        var user: User?
     }
 
-    public func get() async throws -> VERACore.User? {
-        actions.append(Action.get)
-        return user
+    private let state = TestLockedValue(State())
+
+    public var actions: [Action] {
+        get { state.withValue { $0.actions } }
+        set { state.withValue { $0.actions = newValue } }
+    }
+
+    public var user: User? {
+        get { state.withValue { $0.user } }
+        set { state.withValue { $0.user = newValue } }
+    }
+
+    public func save(_ user: User) async throws {
+        state.withValue {
+            $0.actions.append(.save(user))
+            $0.user = user
+        }
+    }
+
+    public func get() async throws -> User? {
+        state.withValue {
+            $0.actions.append(.get)
+            return $0.user
+        }
     }
 }
 

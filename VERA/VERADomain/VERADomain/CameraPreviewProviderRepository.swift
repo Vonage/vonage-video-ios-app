@@ -23,7 +23,8 @@ import Foundation
 ///    - Provides clean separation between preview and meeting publisher lifecycles
 ///    - Reduces username-related bugs by ensuring fresh publisher instances
 ///    - Facilitates proper cleanup and resource management between app states
-public protocol CameraPreviewProviderRepository {
+@MainActor
+public protocol CameraPreviewProviderRepository: Sendable {
     func getPublisher() throws -> VERAPublisher
     func resetPublisher()
 

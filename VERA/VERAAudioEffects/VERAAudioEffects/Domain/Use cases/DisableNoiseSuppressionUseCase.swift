@@ -6,6 +6,7 @@ import Foundation
 import OSLog
 import VERADomain
 
+@MainActor
 public protocol DisableNoiseSuppressionUseCase {
     func callAsFunction(publisher: VERAPublisher)
 }

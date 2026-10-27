@@ -10,6 +10,7 @@ import VERADomain
 import VERATestHelpers
 import XCTest
 
+@MainActor
 final class DefaultPublisherRepositoryTests: XCTestCase {
 
     func test_resetPublisher_doesNotLeakPublishers() async throws {
