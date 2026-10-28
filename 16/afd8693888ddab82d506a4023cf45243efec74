@@ -1,0 +1,20 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/TranscriptionOptionsOverlayModifier.swift
+  s_d32eb98c99ada6::t_47aa5830bbb0d5 29,35-41
+  s_d32eb98c99ada6::t_22267d285e38d1 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "16afd8693888ddab82d506a4023cf45243efec74",
+  "prompts": {},
+  "sessions": {
+    "s_d32eb98c99ada6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe45017f-e342-4e15-8b00-b6dbc28a3e0d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
