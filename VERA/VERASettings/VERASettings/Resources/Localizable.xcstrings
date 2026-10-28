@@ -8211,6 +8211,54 @@
           }
         }
       }
+    },
+    "Include AI Summary in Transcriptions" : {
+      "comment" : "Toggle in Settings › General that sets whether a post-call transcription includes an AI summary by default.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include AI Summary in Transcriptions"
+          }
+        },
+        "en-US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include AI Summary in Transcriptions"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-Zusammenfassung in Transkriptionen einschließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir resumen con IA en las transcripciones"
+          }
+        },
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir resumen con IA en las transcripciones"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Includi riepilogo IA nelle trascrizioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字起こしにAI要約を含める"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

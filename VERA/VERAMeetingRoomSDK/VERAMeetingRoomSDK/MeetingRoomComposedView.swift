@@ -132,6 +132,11 @@ struct MeetingRoomComposedView: View {
                     container: container
                 )
             )
+            .modifier(
+                TranscriptionOptionsOverlayModifier(
+                    viewModel: buttonsAssembler.transcriptionButtonViewModel
+                )
+            )
             .onAppear {
                 buttonsAssembler.onShowChat = { showChat = true }
                 buttonsAssembler.onShowReactions = { showReactions.toggle() }

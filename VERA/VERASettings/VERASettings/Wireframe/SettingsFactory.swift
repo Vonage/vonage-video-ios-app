@@ -30,20 +30,27 @@ public final class SettingsFactory {
     /// Whether settings screens show the Captions section (captions enabled for the deployment).
     public let isCaptionsTranslationAvailable: Bool
 
+    /// Whether the settings offer the AI summary default for post-call transcriptions.
+    private let showsTranscriptionSummary: Bool
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
     ///   - isCaptionsTranslationAvailable: Whether to show the Captions section. Defaults to `false`.
+    ///   - showsTranscriptionSummary: Whether to offer the AI summary default for post-call
+    ///     transcriptions. Pass `true` only when post-call transcription is enabled.
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
-        isCaptionsTranslationAvailable: Bool = false
+        isCaptionsTranslationAvailable: Bool = false,
+        showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
         self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
+        self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
     // MARK: - Settings View
@@ -56,7 +63,9 @@ public final class SettingsFactory {
     /// - Returns: A configured settings view.
     @MainActor
     public func makeSettingsView() -> SettingsView {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            showsTranscriptionSummary: showsTranscriptionSummary)
         return SettingsView(viewModel: viewModel, isCaptionsTranslationAvailable: isCaptionsTranslationAvailable)
     }
 
@@ -112,7 +121,9 @@ public final class SettingsFactory {
     /// - Returns: A tuple of the settings view model and the statistics view model.
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            showsTranscriptionSummary: showsTranscriptionSummary)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository

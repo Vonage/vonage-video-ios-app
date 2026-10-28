@@ -55,8 +55,12 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 3000
 
-# Confirm start transcription alert
-- tapOn: "OK"
+# Start transcription from the options sheet (summary on by default)
+- assertVisible:
+    id: "archiving-transcription-summary-toggle"
+
+- tapOn:
+    id: "archiving-transcription-confirm-start-button"
 
 - waitForAnimationToEnd:
     timeout: 5000

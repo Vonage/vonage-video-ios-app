@@ -270,7 +270,8 @@ final class DependencyContainer {
             repository: settingsRepository,
             statsDataSource: InMemoryStatsRepository(),
             isCaptionsTranslationAvailable: appConfig.meetingRoomSettings.allowCaptions
-                && appConfig.meetingRoomSettings.allowCaptionTranslation)
+                && appConfig.meetingRoomSettings.allowCaptionTranslation,
+            showsTranscriptionSummary: appConfig.meetingRoomSettings.allowPostCallTranscription)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)
