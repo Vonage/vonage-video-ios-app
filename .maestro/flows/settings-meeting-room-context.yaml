@@ -52,6 +52,16 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 2000
 
+# Scroll down in the overflow sheet until the Settings button is visible
+- scrollUntilVisible:
+    element:
+      id: "meeting-room-settings-button"
+    direction: DOWN
+    timeout: 5000
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
 # Now tap the settings button from the overflow menu
 - tapOn:
     id: "meeting-room-settings-button"
@@ -80,10 +90,13 @@ appId: ${APP_ID}
 # Screenshot: Video section with some controls locked
 - takeScreenshot: 01-settings-meeting-room-video-section
 
-# Scroll to reveal audio section locked controls
-- swipe:
-    direction: "UP"
-    duration: 500
+# Scroll to reveal audio section locked controls. A fixed swipe depends on the form height, so
+# center the middle audio row instead: the other three stay on screen around it.
+- scrollUntilVisible:
+    element:
+      id: "settings-opus-dtx-locked"
+    direction: DOWN
+    centerElement: true
 
 - assertVisible:
     id: "settings-audio-bitrate-locked"
@@ -100,10 +113,20 @@ appId: ${APP_ID}
 # Screenshot: Audio section with all controls locked
 - takeScreenshot: 02-settings-meeting-room-audio-section-locked
 
-# Scroll more to reveal General section
-- swipe:
-    direction: "UP"
-    duration: 500
+# Captions Section - stays editable in a call because the language applies immediately
+- scrollUntilVisible:
+    element:
+      id: "settings-captions-language-picker"
+    direction: DOWN
+- assertVisible:
+    id: "settings-captions-language-picker"
+    enabled: true
+
+# Scroll to the General section
+- scrollUntilVisible:
+    element:
+      id: "settings-overlay-stats-toggle"
+    direction: DOWN
 
 # General section - overlay stats toggle is always editable
 - assertVisible:

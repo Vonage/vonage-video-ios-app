@@ -4,6 +4,7 @@
 
 import SwiftUI
 import VERACommonUI
+import VERADomain
 
 /// Layout constants for the archive list view.
 private enum ArchiveListConstants {
@@ -28,14 +29,17 @@ struct ArchiveList: View {
     @Environment(\.meetingRoomTheme) private var theme
 
     let archives: [ArchiveUIData]
+    /// Archives whose download is in progress; their rows show a spinner instead of the button.
+    let downloadingArchiveIDs: Set<UUID>
 
-    init(archives: [ArchiveUIData] = []) {
+    init(archives: [ArchiveUIData] = [], downloadingArchiveIDs: Set<UUID> = []) {
         self.archives = archives
+        self.downloadingArchiveIDs = downloadingArchiveIDs
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Download recording", bundle: .veraArchiving)
+            Text("Download session content", bundle: .veraArchiving)
                 .adaptiveFont(.heading1)
                 .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -45,7 +49,7 @@ struct ArchiveList: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
-                        Text("The meeting hasn't been recorded", bundle: .veraArchiving)
+                        Text("This session has no content to download", bundle: .veraArchiving)
                             .adaptiveFont(.bodyBase)
                             .foregroundStyle(theme.textSecondary)
                     }
@@ -57,7 +61,7 @@ struct ArchiveList: View {
                 List(archives, id: \.id) { archive in
                     HStack {
                         VStack(alignment: .center) {
-                            VERACommonUIAsset.Images.videoActiveLine.swiftUIImage
+                            archive.kind.listIcon
                         }
                         VStack(alignment: .leading) {
                             Text(archive.title)
@@ -69,7 +73,14 @@ struct ArchiveList: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .center) {
-                            if archive.isDownloadable {
+                            switch archive.downloadState {
+                            case .ready where downloadingArchiveIDs.contains(archive.id), .preparing:
+                                ProgressView()
+                                    .frame(
+                                        width: ArchiveListConstants.progressViewSize,
+                                        height: ArchiveListConstants.progressViewSize
+                                    )
+                            case .ready:
                                 Button {
                                     archive.onDownload?()
                                 } label: {
@@ -80,18 +91,21 @@ struct ArchiveList: View {
                                             .adaptiveFont(.bodyBase)
                                             .foregroundStyle(theme.primary)
                                     }
-                                    .accessibilityIdentifier(ArchivingAccessibilityID.downloadButton)
+                                    .accessibilityIdentifier(archive.kind.downloadButtonAccessibilityID)
                                 }
-                            } else {
-                                ProgressView()
+                            case .unavailable:
+                                VERACommonUIAsset.Images.errorLine.swiftUIImage
+                                    .foregroundStyle(theme.error)
                                     .frame(
                                         width: ArchiveListConstants.progressViewSize,
                                         height: ArchiveListConstants.progressViewSize
                                     )
+                                    .accessibilityLabel(
+                                        Text("This file failed or is expired", bundle: .veraArchiving))
                             }
                         }
                     }
-                    .accessibilityIdentifier(ArchivingAccessibilityID.archiveItem)
+                    .accessibilityIdentifier(archive.kind.listItemAccessibilityID)
                     .listRowInsets(
                         EdgeInsets(
                             top: ArchiveListConstants.rowInsetTop,
@@ -118,18 +132,25 @@ struct ArchiveList: View {
     ArchiveList(archives: [
         .init(
             id: .init(),
-            title: "Recording 1",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: true),
+            kind: .transcription,
+            title: "Your transcription is being prepared",
+            subtitle: "Please wait while we prepare your downloads",
+            downloadState: .preparing),
         .init(
             id: .init(),
             title: "Recording 2",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: true),
+            subtitle: "0:30 • 1.0 MB • Created: Mon, Aug 4 12:09 PM",
+            downloadState: .ready),
         .init(
             id: .init(),
-            title: "Recording 3",
-            subtitle: "Started at: Mon, Aug 4 12:09 PM",
-            isDownloadable: false),
+            kind: .transcription,
+            title: "Transcription 1",
+            subtitle: "0:30 • 120.0 KB • Created: Mon, Aug 4 12:09 PM",
+            downloadState: .ready),
+        .init(
+            id: .init(),
+            title: "Recording 1",
+            subtitle: "0:30 • 1.0 MB • Created: Mon, Aug 4 12:09 PM",
+            downloadState: .unavailable),
     ])
 }

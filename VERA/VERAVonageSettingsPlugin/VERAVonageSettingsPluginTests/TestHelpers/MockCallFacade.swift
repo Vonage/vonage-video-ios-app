@@ -22,6 +22,8 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     let _archivingState = CurrentValueSubject<ArchivingState, Never>(.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+    let _transcriptionState = CurrentValueSubject<ArchivingState, Never>(.idle)
+    lazy var transcriptionState: AnyPublisher<ArchivingState, Never> = _transcriptionState.eraseToAnyPublisher()
 
     let _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()
@@ -46,6 +48,7 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     var lastAppliedSettings: PublisherAdvancedSettings?
     var updateLivePublisherAdvancedSettingsCallCount = 0
     var lastLiveSettings: PublisherAdvancedSettings?
+    @MainActor private(set) var captionsTranslationLanguages: [String?] = []
 
     func connect() async throws {}
     func disconnect() async throws {}
@@ -81,5 +84,12 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
     func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {
         updateLivePublisherAdvancedSettingsCallCount += 1
         lastLiveSettings = settings
+    }
+}
+
+/// Records captions translation updates sent by the settings plugin, in order.
+extension MockCallFacade: CaptionsTranslationControllable {
+    @MainActor func setCaptionsTranslationLanguage(_ languageCode: String?) {
+        captionsTranslationLanguages.append(languageCode)
     }
 }

@@ -23,7 +23,7 @@ import VERADomain
 /// - Remote participant subscriptions through `VonageSubscriber`
 /// - Reactive state observation via Combine publishers
 /// - Optional extensibility via the plugin system
-public final class VonageCall: CallFacade, AudioMuteControllable {
+public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTranslationControllable {
 
     private var cancellables = Set<AnyCancellable>()
     /// Per-subscriber cancellable sets keyed by subscriber ID.
@@ -73,8 +73,19 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
     ///
     /// Emits ArchivingState events whenever the call recording state changes.
     ///
-    /// - Returns: ``SessionState`` reflecting `isPublishingAudio` and `isPublishingVideo`.
+    /// - Returns: ``ArchivingState`` of the recording archive.
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+
+    private var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(.idle)
+
+    /// A publisher for the post-call transcription state, never fails.
+    ///
+    /// Transcription runs as a separate archive, so it is tracked independently
+    /// from the recording and can run at the same time.
+    ///
+    /// - Returns: ``ArchivingState`` of the transcription archive.
+    public lazy var transcriptionState: AnyPublisher<ArchivingState, Never> =
+        _transcriptionState.eraseToAnyPublisher()
 
     private var _captionsEnabled = CurrentValueSubject<Bool, Never>(false)
 
@@ -261,23 +272,48 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         session.onSessionSignal = { [weak self] signal in
             self?.handleSignal(signal)
         }
-        session.onArchiveStarted = { [weak self] archiveID in
-            self?._archivingState.value = .archiving(archiveID)
-
-            do {
-                let signal = try VonageSignal.archivingState(archiveID)
-                self?.handleSignal(signal)
-            } catch {
-            }
+        session.onArchiveStarted = { [weak self] archiveID, name in
+            self?.archiveDidStart(archiveID, kind: ArchiveKind(archiveName: name))
         }
-        session.onArchiveStopped = { [weak self] _ in
-            self?._archivingState.value = .idle
+        session.onArchiveStopped = { [weak self] archiveID in
+            self?.archiveDidStop(archiveID)
+        }
+    }
 
-            do {
-                let signal = try VonageSignal.idleArchivingState()
-                self?.handleSignal(signal)
-            } catch {
-            }
+    // MARK: Archiving
+
+    private func archivingSubject(for kind: ArchiveKind) -> CurrentValueSubject<ArchivingState, Never> {
+        switch kind {
+        case .recording: _archivingState
+        case .transcription: _transcriptionState
+        }
+    }
+
+    private func archiveDidStart(_ archiveID: String, kind: ArchiveKind) {
+        archivingSubject(for: kind).value = .archiving(archiveID)
+
+        do {
+            let signal = try VonageSignal.archivingState(archiveID, kind: kind)
+            handleSignal(signal)
+        } catch {
+        }
+    }
+
+    /// Resets only the archive kind that is tracking the stopped archive,
+    /// so stopping a recording never clears a running transcription and vice versa.
+    private func archiveDidStop(_ archiveID: String) {
+        guard
+            let kind = ArchiveKind.allCases.first(where: {
+                archivingSubject(for: $0).value == .archiving(archiveID)
+            })
+        else { return }
+
+        archivingSubject(for: kind).value = .idle
+
+        do {
+            let signal = try VonageSignal.idleArchivingState(kind: kind)
+            handleSignal(signal)
+        } catch {
         }
     }
 
@@ -390,6 +426,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
             if areCaptionsEnabled {
                 vonageSubscriber.enableCaptions()
             }
+            // Late joiners inherit the user's current translation choice.
+            vonageSubscriber.setCaptionsTranslationLanguage(captionsTranslationLanguage)
         } catch {
             _eventsPublisher.send(.error(error))
         }
@@ -801,6 +839,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
                 videoFrameRate: advancedSettings.videoFrameRate,
                 preferredVideoCodecs: advancedSettings.preferredVideoCodecs,
                 maxAudioBitrate: advancedSettings.maxAudioBitrate,
+                videoBitratePreset: advancedSettings.videoBitratePreset,
                 maxVideoBitrate: advancedSettings.maxVideoBitrate,
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
                 subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,
@@ -951,6 +990,24 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
 
     public var areCaptionsEnabled: Bool { _captionsEnabled.value }
 
+    /// BCP-47 language captions are translated into; `nil` keeps the original language.
+    @MainActor public private(set) var captionsTranslationLanguage: String?
+
+    /// Applies the translation language to every remote subscriber, to those that join later, and to
+    /// `publisherCaptions`, the subscriber that delivers the local user's own captions.
+    @MainActor
+    public func setCaptionsTranslationLanguage(_ languageCode: String?) {
+        // Stored synchronously on the main actor, so the latest choice is always the stored one.
+        captionsTranslationLanguage = languageCode
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            // Read after the await so overlapping updates converge on the newest choice.
+            subscribers.forEach { $0.setCaptionsTranslationLanguage(self.captionsTranslationLanguage) }
+            self.publisherCaptions?.setCaptionsTranslationLanguage(self.captionsTranslationLanguage)
+        }
+    }
+
     @MainActor
     public func enableCaptions() async {
         await callStateManager.enableCaptions()
@@ -971,12 +1028,14 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         stopCaptionCleanup()
     }
 
+    @MainActor
     private func subscribeToPublisherCaptions(_ stream: OTStream) {
         do {
             let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
             vonageSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
             }
+            vonageSubscriber.setCaptionsTranslationLanguage(captionsTranslationLanguage)
 
             try requireSession().subscribe(subscriber: vonageSubscriber)
 

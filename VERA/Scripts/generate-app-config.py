@@ -125,11 +125,13 @@ public struct AppConfig: Sendable {{
     public struct MeetingRoomSettings: Sendable {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
+        public let allowCaptionTranslation: Bool
         public let allowChat: Bool
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
         public let allowFeedback: Bool
         public let allowPictureInPicture: Bool
+        public let allowPostCallTranscription: Bool
         public let allowScreenShare: Bool
         public let defaultLayoutMode: MeetingRoomLayout
         public let showParticipantList: Bool
@@ -138,11 +140,13 @@ public struct AppConfig: Sendable {{
         public init(
             allowArchiving: Bool = {bool_str(meeting['allowArchiving'])},
             allowCaptions: Bool = {bool_str(meeting['allowCaptions'])},
+            allowCaptionTranslation: Bool = {bool_str(meeting.get('allowCaptionTranslation', False))},
             allowChat: Bool = {bool_str(meeting['allowChat'])},
             allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
             allowFeedback: Bool = {bool_str(meeting['allowFeedback'])},
             allowPictureInPicture: Bool = {bool_str(meeting['allowPictureInPicture'])},
+            allowPostCallTranscription: Bool = {bool_str(meeting.get('allowPostCallTranscription', False))},
             allowScreenShare: Bool = {bool_str(meeting['allowScreenShare'])},
             defaultLayoutMode: MeetingRoomLayout = {layout_mode(meeting['defaultLayoutMode'])},
             showParticipantList: Bool = {bool_str(meeting['showParticipantList'])},
@@ -150,11 +154,13 @@ public struct AppConfig: Sendable {{
         ) {{
             self.allowArchiving = allowArchiving
             self.allowCaptions = allowCaptions
+            self.allowCaptionTranslation = allowCaptionTranslation
             self.allowChat = allowChat
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis
             self.allowFeedback = allowFeedback
             self.allowPictureInPicture = allowPictureInPicture
+            self.allowPostCallTranscription = allowPostCallTranscription
             self.allowScreenShare = allowScreenShare
             self.defaultLayoutMode = defaultLayoutMode
             self.showParticipantList = showParticipantList
