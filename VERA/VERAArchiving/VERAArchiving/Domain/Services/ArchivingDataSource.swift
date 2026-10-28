@@ -13,10 +13,16 @@ public enum ArchivingDataSourceError: Swift.Error {
 public struct StartArchivingDataSourceRequest: Sendable {
     public let sessionKey: String
     public let kind: ArchiveKind
+    public let transcriptionOptions: TranscriptionOptions?
 
-    public init(sessionKey: String, kind: ArchiveKind = .recording) {
+    public init(
+        sessionKey: String,
+        kind: ArchiveKind = .recording,
+        transcriptionOptions: TranscriptionOptions? = nil
+    ) {
         self.sessionKey = sessionKey
         self.kind = kind
+        self.transcriptionOptions = transcriptionOptions
     }
 }
 

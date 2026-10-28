@@ -263,6 +263,27 @@ struct WaitingRoomViewModelTests {
         #expect(navigateToSettingsAlert, "Should present App Settings")
     }
 
+    @Test("Camera updates emitted off the main thread become UI state")
+    func backgroundCameraUpdatesReachUIState() async {
+        let repository = BackgroundCameraDevicesRepository()
+        let sut = makeSUT(cameraDevicesRepository: repository)
+        sut.loadUI()
+
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while ContinuousClock.now < deadline {
+            if case .content(let state) = sut.state, state.cameras.map(\.id) == ["Back"] { break }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+
+        guard case .content(let state) = sut.state else {
+            Issue.record("Expected camera updates in content state")
+            return
+        }
+        #expect(state.cameras.map(\.id) == ["Back"])
+        #expect(state.cameras.map(\.name) == ["Rear"])
+        #expect(state.cameras.first?.onTap != nil)
+    }
+
     // MARK: - Toolbar Buttons Tests
 
     @Test("Given initial state, toolbarButtons should be initialized as empty array")
@@ -360,5 +381,19 @@ struct WaitingRoomViewModelTests {
             userRepository: userRepository,
             waitingRoomNavigation: MockWaitingRoomNavigation(actionHandler, roomName: roomName)
         )
+    }
+}
+
+private final class BackgroundCameraDevicesRepository: CameraDevicesRepository {
+    private let queue = DispatchQueue(label: "waiting-room-camera-ui-delivery")
+
+    var observeAvailableDevices: AnyPublisher<[CameraDevice], Never> {
+        [[CameraDevice(id: "Front", name: "Front")], [CameraDevice(id: "Back", name: "Rear")]].publisher
+            .subscribe(on: queue)
+            .map { @Sendable devices in
+                #expect(!Thread.isMainThread)
+                return devices
+            }
+            .eraseToAnyPublisher()
     }
 }

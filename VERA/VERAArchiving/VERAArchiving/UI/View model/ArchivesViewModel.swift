@@ -69,10 +69,10 @@ public final class ArchivesViewModel {
             .store(in: &cancellables)
     }
 
-    /// Maps archives newest first, numbering recordings and transcriptions separately.
     public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
-        var nextIndexByKind = Dictionary(grouping: archives, by: \.kind).mapValues(\.count)
-        return archives.reversed().map { archive in
+        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
+        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
+        return newestFirst.map { archive in
             let index = nextIndexByKind[archive.kind, default: 0]
             nextIndexByKind[archive.kind] = index - 1
             return mapToUIArchive(archive, index: index)

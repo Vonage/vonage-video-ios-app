@@ -59,12 +59,35 @@ struct SettingsFactoryTests {
         #expect(viewModel.senderStatsEnabled == true)
     }
 
+    // MARK: - Transcription summary
+
+    @Test("Settings hide the transcription summary default unless requested")
+    func transcriptionSummaryIsHiddenByDefault() {
+        let (viewModel, _) = makeFactory().makeMeetingRoomViewModels()
+
+        #expect(viewModel.showsTranscriptionSummary == false)
+    }
+
+    @Test("Settings offer the transcription summary default when post-call transcription is enabled")
+    func transcriptionSummaryIsShownWhenRequested() {
+        let factory = makeFactory(showsTranscriptionSummary: true)
+
+        let (meetingRoomViewModel, _) = factory.makeMeetingRoomViewModels()
+
+        #expect(meetingRoomViewModel.showsTranscriptionSummary)
+        #expect(factory.makeSettingsView().viewModel.showsTranscriptionSummary)
+    }
+
     // MARK: - Helpers
 
     private func makeFactory(
         repository: MockSettingsRepository = MockSettingsRepository(),
-        statsDataSource: MockStatsDataSource = MockStatsDataSource()
+        statsDataSource: MockStatsDataSource = MockStatsDataSource(),
+        showsTranscriptionSummary: Bool = false
     ) -> SettingsFactory {
-        SettingsFactory(repository: repository, statsDataSource: statsDataSource)
+        SettingsFactory(
+            repository: repository,
+            statsDataSource: statsDataSource,
+            showsTranscriptionSummary: showsTranscriptionSummary)
     }
 }

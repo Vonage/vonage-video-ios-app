@@ -16,7 +16,6 @@ import Foundation
         var onChange: (() -> Void)?
 
         private var current: PublisherAdvancedSettings?
-        private var lastPreferences: PublisherSettingsPreferences?
         private var cancellable: AnyCancellable?
 
         func setup(with preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never>) {
@@ -32,10 +31,11 @@ import Foundation
         }
 
         private func apply(_ preferences: PublisherSettingsPreferences) {
-            let isInitial = lastPreferences == nil
-            let changed = !isInitial && preferences != lastPreferences
-            lastPreferences = preferences
-            current = preferences.toPublisherAdvancedSettings()
+            // Compare the mapped publisher settings: non-publisher preferences (stats overlay,
+            // captions translation) must not reset the camera preview.
+            let settings = preferences.toPublisherAdvancedSettings()
+            let changed = current != nil && settings != current
+            current = settings
             if changed {
                 onChange?()
             }

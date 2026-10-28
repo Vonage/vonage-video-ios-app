@@ -19,6 +19,10 @@ public final class ArchiveButtonViewModel {
 
     public var state: ArchivingState = .idle
 
+    public var isShowingTranscriptionOptions = false
+
+    public var transcriptionOptions: TranscriptionOptions = .default
+
     @ObservationIgnored
     public let kind: ArchiveKind
 
@@ -33,14 +37,19 @@ public final class ArchiveButtonViewModel {
     @ObservationIgnored
     private let showAlert: (AlertItem) -> Void
     @ObservationIgnored
+    private let loadTranscriptionDefaults: () async -> TranscriptionOptions
+    @ObservationIgnored
     private var initiated = false
 
+    /// - Parameter loadTranscriptionDefaults: Loads the options pre-selected each time the
+    ///   transcription start options are shown, e.g. the user's AI summary setting.
     public init(
         kind: ArchiveKind = .recording,
         sessionKeyProvider: SessionKeyProvider,
         startArchivingUseCase: StartArchivingUseCase,
         stopArchivingUseCase: StopArchivingUseCase,
         archivingStatusDataSource: ArchivingStatusDataSource,
+        loadTranscriptionDefaults: @escaping () async -> TranscriptionOptions = { .default },
         showAlert: @escaping (AlertItem) -> Void
     ) {
         self.kind = kind
@@ -48,6 +57,7 @@ public final class ArchiveButtonViewModel {
         self.startArchivingUseCase = startArchivingUseCase
         self.stopArchivingUseCase = stopArchivingUseCase
         self.archivingStatusDataSource = archivingStatusDataSource
+        self.loadTranscriptionDefaults = loadTranscriptionDefaults
         self.showAlert = showAlert
     }
 
@@ -64,35 +74,49 @@ public final class ArchiveButtonViewModel {
     }
 
     public func onTap() {
-        switch state {
-        case .archiving(let archiveID):
-            showStopConfirmation(archiveID: archiveID)
-        case .idle:
-            showStartConfirmation()
+        switch (state, kind) {
+        case (.archiving(let archiveID), _):
+            confirm(title: kind.stopConfirmationTitle, message: kind.stopConfirmationMessage) { [weak self] in
+                await self?.stopArchiving(withID: archiveID)
+            }
+        case (.idle, .recording):
+            confirm(title: kind.startConfirmationTitle, message: kind.startConfirmationMessage) { [weak self] in
+                await self?.startArchiving()
+            }
+        case (.idle, .transcription):
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                transcriptionOptions = await loadTranscriptionDefaults()
+                isShowingTranscriptionOptions = true
+            }
         }
     }
 
-    private func showStartConfirmation() {
-        showAlert(
-            AlertItem(
-                title: kind.startConfirmationTitle,
-                message: kind.startConfirmationMessage
-            ) { [weak self] in
-                Task { @MainActor in
-                    await self?.startArchiving()
-                }
-            }
-        )
+    public func confirmTranscriptionStart() {
+        isShowingTranscriptionOptions = false
+        Task { @MainActor [weak self] in
+            await self?.startArchiving()
+        }
     }
 
-    private func showStopConfirmation(archiveID: String) {
+    public func cancelTranscriptionStart() {
+        isShowingTranscriptionOptions = false
+    }
+
+    private func confirm(
+        title: String,
+        message: String,
+        action: @escaping @MainActor () async -> Void
+    ) {
         showAlert(
             AlertItem(
-                title: kind.stopConfirmationTitle,
-                message: kind.stopConfirmationMessage
-            ) { [weak self] in
+                title: title,
+                message: message,
+                okAction: String(localized: "OK", bundle: .veraArchiving),
+                cancelAction: String(localized: "Cancel", bundle: .veraArchiving)
+            ) {
                 Task { @MainActor in
-                    await self?.stopArchiving(withID: archiveID)
+                    await action()
                 }
             }
         )
@@ -102,7 +126,10 @@ public final class ArchiveButtonViewModel {
     private func startArchiving() async {
         do {
             _ = try await startArchivingUseCase(
-                .init(sessionKey: sessionKeyProvider.sessionKey, kind: kind))
+                .init(
+                    sessionKey: sessionKeyProvider.sessionKey,
+                    kind: kind,
+                    transcriptionOptions: kind == .transcription ? transcriptionOptions : nil))
         } catch {
         }
     }
