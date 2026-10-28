@@ -158,6 +158,40 @@ struct VonageSettingsPluginTests {
         #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == initialCallCount)
     }
 
+    @Test("A saved captions translation language is ignored when the feature is disabled")
+    func captionsTranslationLanguageIsIgnoredWhenDisabled() async throws {
+        let (sut, mocks) = makeSUT(isCaptionsTranslationEnabled: false)
+        sut.call = mocks.call
+        await mocks.repository.updatePreferences { $0.captionsTranslationLanguage = "es-ES" }
+
+        try await sut.callDidStart([:])
+        await delay()
+        await mocks.repository.updatePreferences { $0.captionsTranslationLanguage = "fr-FR" }
+        await delay()
+
+        #expect(await mocks.call.captionsTranslationLanguages.isEmpty)
+    }
+
+    @Test("Captions translation language reaches the call in order without republishing")
+    func captionsTranslationLanguageIsAppliedInOrder() async throws {
+        let (sut, mocks) = makeSUT(isCaptionsTranslationEnabled: true)
+        sut.call = mocks.call
+
+        try await sut.callDidStart([:])
+        await delay()
+        let initialApplyCount = mocks.call.applyPublisherAdvancedSettingsCallCount
+        let initialLiveCount = mocks.call.updateLivePublisherAdvancedSettingsCallCount
+
+        await mocks.repository.updatePreferences { $0.captionsTranslationLanguage = "es-ES" }
+        await mocks.repository.updatePreferences { $0.captionsTranslationLanguage = "fr-FR" }
+        await mocks.repository.updatePreferences { $0.captionsTranslationLanguage = nil }
+        await delay()
+
+        #expect(await mocks.call.captionsTranslationLanguages == [nil, "es-ES", "fr-FR", nil])
+        #expect(mocks.call.applyPublisherAdvancedSettingsCallCount == initialApplyCount)
+        #expect(mocks.call.updateLivePublisherAdvancedSettingsCallCount == initialLiveCount)
+    }
+
     @Test("Initial preferences do not update the live publisher")
     func initialPreferencesDoNotTriggerLiveUpdate() async throws {
         let (sut, mocks) = makeSUT()
@@ -519,14 +553,15 @@ struct VonageSettingsPluginTests {
         let statsWriter: MockStatsWriter
     }
 
-    private func makeSUT() -> (VonageSettingsPlugin, Mocks) {
+    private func makeSUT(isCaptionsTranslationEnabled: Bool = false) -> (VonageSettingsPlugin, Mocks) {
         let repository = MockSettingsRepository()
         let statsWriter = MockStatsWriter()
         let call = MockCallFacade()
 
         let sut = VonageSettingsPlugin(
             settingsRepository: repository,
-            statsWriter: statsWriter
+            statsWriter: statsWriter,
+            isCaptionsTranslationEnabled: isCaptionsTranslationEnabled
         )
 
         let mocks = Mocks(

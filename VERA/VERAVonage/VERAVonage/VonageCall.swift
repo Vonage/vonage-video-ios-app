@@ -23,7 +23,7 @@ import VERADomain
 /// - Remote participant subscriptions through `VonageSubscriber`
 /// - Reactive state observation via Combine publishers
 /// - Optional extensibility via the plugin system
-public final class VonageCall: CallFacade, AudioMuteControllable {
+public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTranslationControllable {
 
     private var cancellables = Set<AnyCancellable>()
     /// Per-subscriber cancellable sets keyed by subscriber ID.
@@ -426,6 +426,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
             if areCaptionsEnabled {
                 vonageSubscriber.enableCaptions()
             }
+            // Late joiners inherit the user's current translation choice.
+            vonageSubscriber.setCaptionsTranslationLanguage(captionsTranslationLanguage)
         } catch {
             _eventsPublisher.send(.error(error))
         }
@@ -1023,6 +1025,24 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
 
     public var areCaptionsEnabled: Bool { _captionsEnabled.value }
 
+    /// BCP-47 language captions are translated into; `nil` keeps the original language.
+    @MainActor public private(set) var captionsTranslationLanguage: String?
+
+    /// Applies the translation language to every remote subscriber, to those that join later, and to
+    /// `publisherCaptions`, the subscriber that delivers the local user's own captions.
+    @MainActor
+    public func setCaptionsTranslationLanguage(_ languageCode: String?) {
+        // Stored synchronously on the main actor, so the latest choice is always the stored one.
+        captionsTranslationLanguage = languageCode
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let subscribers = await self.callStateManager.getAllSubscribers()
+            // Read after the await so overlapping updates converge on the newest choice.
+            subscribers.forEach { $0.setCaptionsTranslationLanguage(self.captionsTranslationLanguage) }
+            self.publisherCaptions?.setCaptionsTranslationLanguage(self.captionsTranslationLanguage)
+        }
+    }
+
     @MainActor
     public func enableCaptions() async {
         await callStateManager.enableCaptions()
@@ -1043,12 +1063,14 @@ public final class VonageCall: CallFacade, AudioMuteControllable {
         stopCaptionCleanup()
     }
 
+    @MainActor
     private func subscribeToPublisherCaptions(_ stream: OTStream) {
         do {
             let vonageSubscriber = try subscriberFactory.makeSubscriber(stream)
             vonageSubscriber.onError = { [weak self] in
                 self?.removeSubscriber(stream)
             }
+            vonageSubscriber.setCaptionsTranslationLanguage(captionsTranslationLanguage)
 
             try requireSession().subscribe(subscriber: vonageSubscriber)
 

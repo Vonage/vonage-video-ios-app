@@ -194,6 +194,15 @@ appId: ${APP_ID}
 
 - takeScreenshot: 02-settings-waiting-room-audio-section
 
+# Captions follows Audio when captions are enabled; it defaults to the original language.
+- scrollUntilVisible:
+    element:
+      id: "settings-captions-language-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-captions-language-picker"
+
 # Statistics is the final section.
 - scrollUntilVisible:
     element:

@@ -60,7 +60,8 @@ struct PublisherPreferencesTransferTests {
             #expect(object["preferredVideoCodec"] == nil)
             #expect(object["maxAudioBitrate"] == nil)
             #expect(object["audioFallbackEnabled"] == nil)
-            #expect(object.count == 21)
+            #expect(object.count == 22)
+            #expect(object["transcriptionSummaryEnabled"] as? Bool == true)
             #expect(try JSONDecoder().decode(PublisherSettingsPreferences.self, from: encoded) == expected)
         }
     }

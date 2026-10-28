@@ -56,9 +56,13 @@ enum SettingsAccessibilityID {
     static let screenShareCustomBitrateSlider = "settings-screen-share-custom-bitrate-slider"
     static let scalableScreenShareToggle = "settings-scalable-screen-share-toggle"
 
+    // MARK: - Captions Section - Always Editable
+    static let captionsLanguagePicker = "settings-captions-language-picker"
+
     // MARK: - General Overlay
 
     static let overlayStatsToggle = "settings-overlay-stats-toggle"
+    static let transcriptionSummaryToggle = "settings-transcription-summary-toggle"
 
     // MARK: - General Section
 

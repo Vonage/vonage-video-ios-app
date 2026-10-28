@@ -29,19 +29,32 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Whether settings screens show the Captions section (captions enabled for the deployment).
+    public let isCaptionsTranslationAvailable: Bool
+
+    /// Whether the settings offer the AI summary default for post-call transcriptions.
+    private let showsTranscriptionSummary: Bool
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - isCaptionsTranslationAvailable: Whether to show the Captions section. Defaults to `false`.
+    ///   - showsTranscriptionSummary: Whether to offer the AI summary default for post-call
+    ///     transcriptions. Pass `true` only when post-call transcription is enabled.
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
-        advancedNoiseSuppressionAvailable: Bool = true
+        advancedNoiseSuppressionAvailable: Bool = true,
+        isCaptionsTranslationAvailable: Bool = false,
+        showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.advancedNoiseSuppressionAvailable = advancedNoiseSuppressionAvailable
         self.statsDataSource = statsDataSource
+        self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
+        self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
     // MARK: - Settings View
@@ -55,8 +68,10 @@ public final class SettingsFactory {
     @MainActor
     public func makeSettingsView() -> SettingsView {
         let viewModel = SettingsViewModel(
-            repository: repository, advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable)
-        return SettingsView(viewModel: viewModel)
+            repository: repository,
+            advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable,
+            showsTranscriptionSummary: showsTranscriptionSummary)
+        return SettingsView(viewModel: viewModel, isCaptionsTranslationAvailable: isCaptionsTranslationAvailable)
     }
 
     // MARK: - Waiting Room Button
@@ -98,7 +113,8 @@ public final class SettingsFactory {
         let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
         return .init(
             viewModel: viewModel,
-            statisticsViewModel: statisticsViewModel
+            statisticsViewModel: statisticsViewModel,
+            isCaptionsTranslationAvailable: isCaptionsTranslationAvailable
         )
     }
 
@@ -111,7 +127,9 @@ public final class SettingsFactory {
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
         let viewModel = SettingsViewModel(
-            repository: repository, advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable)
+            repository: repository,
+            advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable,
+            showsTranscriptionSummary: showsTranscriptionSummary)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository

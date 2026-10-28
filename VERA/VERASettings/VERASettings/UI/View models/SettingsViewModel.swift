@@ -111,6 +111,12 @@ public final class SettingsViewModel {
         settingsPreference.senderStatsEnabled
     }
 
+    /// Whether the default for including an AI summary in post-call transcriptions is offered.
+    ///
+    /// Only `true` when post-call transcription is enabled for the app.
+    @ObservationIgnored
+    public let showsTranscriptionSummary: Bool
+
     // MARK: - Dependencies
 
     /// The repository responsible for persisting and retrieving publisher settings.
@@ -157,16 +163,19 @@ public final class SettingsViewModel {
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
+    ///   - showsTranscriptionSummary: Whether to offer the AI summary default. Defaults to `false`.
     public init(
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
         autoSaveDebounce: TimeInterval = 0.3,
-        advancedNoiseSuppressionAvailable: Bool = true
+        advancedNoiseSuppressionAvailable: Bool = true,
+        showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.advancedNoiseSuppressionAvailable = advancedNoiseSuppressionAvailable
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
+        self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
     // MARK: - Actions

@@ -228,6 +228,16 @@ appId: ${APP_ID}
 
 - takeScreenshot: 02-settings-meeting-room-audio-section
 
+# Captions follows Audio and stays editable in a call because the language applies immediately.
+- scrollUntilVisible:
+    element:
+      id: "settings-captions-language-picker"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "settings-captions-language-picker"
+    enabled: true
+
 # Statistics is the final section.
 - scrollUntilVisible:
     element:

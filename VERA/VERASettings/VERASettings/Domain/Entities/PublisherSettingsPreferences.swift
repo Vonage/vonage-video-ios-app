@@ -63,6 +63,14 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     public var screenShareMaxVideoBitrate: Int32
     public var scalableScreenshareEnabled: Bool
 
+    /// BCP-47 language remote captions are translated into; `nil` keeps the original language.
+    ///
+    /// Not a publisher setting: it is applied to subscribers and never triggers a republish.
+    public var captionsTranslationLanguage: String?
+    /// Whether a post-call transcription includes an AI summary by default.
+    ///
+    /// Pre-selects the option offered when a transcription is started.
+    public var transcriptionSummaryEnabled: Bool
 
     /// The default settings preferences.
     public static let `default` = PublisherSettingsPreferences()
@@ -84,6 +92,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
     ///   - selfViewMirroringEnabled: Front-camera preview mirroring. Defaults to `true`.
     ///   - cameraPosition: Saved camera choice. Defaults to `.front`.
+    ///   - captionsTranslationLanguage: Captions translation language. Defaults to `nil` (original).
+    ///   - transcriptionSummaryEnabled: Whether transcriptions include an AI summary by default.
+    ///     Defaults to `true`.
     public init(
         videoResolution: SettingsVideoResolution = .high,
         videoFrameRate: SettingsVideoFrameRate = .fps30,
@@ -108,7 +119,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         screenShareResolution: SettingsScreenShareResolution? = nil,
         screenShareBitratePreset: SettingsVideoBitratePreset? = nil,
         screenShareMaxVideoBitrate: Int32 = 500_000,
-        scalableScreenshareEnabled: Bool = false
+        scalableScreenshareEnabled: Bool = false,
+        captionsTranslationLanguage: String? = nil,
+        transcriptionSummaryEnabled: Bool = true
     ) {
         self.videoResolution = videoResolution
         self.videoFrameRate = videoFrameRate
@@ -135,6 +148,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         self.screenShareMaxVideoBitrate = screenShareMaxVideoBitrate
         self.scalableScreenshareEnabled = scalableScreenshareEnabled
 
+        self.captionsTranslationLanguage = captionsTranslationLanguage
+        self.transcriptionSummaryEnabled = transcriptionSummaryEnabled
     }
 
     // MARK: - Migration
@@ -199,6 +214,9 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
             try container.decodeIfPresent(Int32.self, forKey: .screenShareMaxVideoBitrate) ?? 500_000
         scalableScreenshareEnabled =
             try container.decodeIfPresent(Bool.self, forKey: .scalableScreenshareEnabled) ?? false
+        captionsTranslationLanguage = try container.decodeIfPresent(String.self, forKey: .captionsTranslationLanguage)
+        transcriptionSummaryEnabled =
+            try container.decodeIfPresent(Bool.self, forKey: .transcriptionSummaryEnabled) ?? true
 
         // Try the new field first; fall back to legacy single-codec field.
         if let pref = try? container.decode(SettingsCodecPreference.self, forKey: .codecPreference) {
@@ -237,6 +255,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         case screenShareMaxVideoBitrate
         case scalableScreenshareEnabled
 
+        case captionsTranslationLanguage
+        case transcriptionSummaryEnabled
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
         /// Old key kept for migration only.
@@ -272,6 +292,8 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         try container.encode(screenShareMaxVideoBitrate, forKey: .screenShareMaxVideoBitrate)
         try container.encode(scalableScreenshareEnabled, forKey: .scalableScreenshareEnabled)
 
+        try container.encodeIfPresent(captionsTranslationLanguage, forKey: .captionsTranslationLanguage)
+        try container.encode(transcriptionSummaryEnabled, forKey: .transcriptionSummaryEnabled)
     }
 
     public static func == (lhs: PublisherSettingsPreferences, rhs: PublisherSettingsPreferences) -> Bool {
@@ -298,5 +320,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
             && lhs.screenShareMaxVideoBitrate == rhs.screenShareMaxVideoBitrate
             && lhs.scalableScreenshareEnabled == rhs.scalableScreenshareEnabled
 
+            && lhs.captionsTranslationLanguage == rhs.captionsTranslationLanguage
+            && lhs.transcriptionSummaryEnabled == rhs.transcriptionSummaryEnabled
     }
 }

@@ -10,7 +10,7 @@ struct SettingsUIStateOwnershipTests {
     @Test("Background repository values update both statistics presentations")
     func backgroundStatsReachUIState() async {
         let repository = MockSettingsRepository(
-            initialPreferences: PublisherSettingsPreferences(senderStatsEnabled: true))
+            initialPreferences: PublisherSettingsPreferences(senderStatsEnabled: true, statsOverlayEnabled: true))
         let source = InMemoryStatsRepository()
         let statistics = StatisticsViewModel(statsDataSource: source, settingsRepository: repository)
         let overlay = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: source)
@@ -26,7 +26,8 @@ struct SettingsUIStateOwnershipTests {
 
     @Test("Removed overlay observers ignore subsequent background stats and settings")
     func stoppedOverlayKeepsItsLastUIState() async throws {
-        let repository = MockSettingsRepository()
+        let repository = MockSettingsRepository(
+            initialPreferences: PublisherSettingsPreferences(statsOverlayEnabled: true))
         let source = InMemoryStatsRepository()
         let overlay = StatsOverlayViewModel(settingsRepository: repository, statsDataSource: source)
         overlay.setup()

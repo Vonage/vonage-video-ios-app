@@ -31,9 +31,11 @@ import Foundation
         }
 
         private func apply(_ preferences: PublisherSettingsPreferences) {
-            let advancedSettings = preferences.toPublisherAdvancedSettings()
-            let changed = current != nil && advancedSettings != current
-            current = advancedSettings
+            // Compare the mapped publisher settings: non-publisher preferences (stats overlay,
+            // captions translation) must not reset the camera preview.
+            let settings = preferences.toPublisherAdvancedSettings()
+            let changed = current != nil && settings != current
+            current = settings
             onPreferencesChange?(preferences)
             if changed {
                 onChange?()
