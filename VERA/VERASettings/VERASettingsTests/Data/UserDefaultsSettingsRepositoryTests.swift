@@ -181,6 +181,33 @@ struct UserDefaultsSettingsRepositoryTests {
         #expect(decodedPreferences.opusDtxEnabled == false)
     }
 
+    @Test("transcriptionSummaryEnabled defaults to true and persists correctly")
+    func transcriptionSummaryDefaultsAndPersists() async throws {
+        let userDefaults = UserDefaults.ephemeral()
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+
+        #expect(await repository.getPreferences().transcriptionSummaryEnabled == true)
+
+        await repository.save(PublisherSettingsPreferences(transcriptionSummaryEnabled: false))
+
+        #expect(await repository.getPreferences().transcriptionSummaryEnabled == false)
+        let storedData = try #require(userDefaults.data(forKey: "com.vonage.vera.publisherSettingsPreferences"))
+        let decoded = try JSONDecoder().decode(PublisherSettingsPreferences.self, from: storedData)
+        #expect(decoded.transcriptionSummaryEnabled == false)
+    }
+
+    @Test("Preferences saved before the transcription summary setting default it to true")
+    func transcriptionSummaryDefaultsToTrueForOlderSavedPreferences() throws {
+        let data = try JSONEncoder().encode(PublisherSettingsPreferences(transcriptionSummaryEnabled: false))
+        var json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json.removeValue(forKey: "transcriptionSummaryEnabled")
+        let olderData = try JSONSerialization.data(withJSONObject: json)
+
+        let decoded = try JSONDecoder().decode(PublisherSettingsPreferences.self, from: olderData)
+
+        #expect(decoded.transcriptionSummaryEnabled == true)
+    }
+
     @Test("save() updates subject and emits through publisher")
     func saveUpdatesSubjectAndEmits() async throws {
         let suiteName = "com.vonage.vera.tests.\(UUID().uuidString)"
