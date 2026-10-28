@@ -183,7 +183,9 @@ struct UserDefaultsSettingsRepositoryTests {
 
     @Test("transcriptionSummaryEnabled defaults to true and persists correctly")
     func transcriptionSummaryDefaultsAndPersists() async throws {
-        let userDefaults = UserDefaults.ephemeral()
+        let suiteName = "com.vonage.vera.tests.\(UUID().uuidString)"
+        defer { UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName) }
+        let userDefaults = UserDefaults(suiteName: suiteName)!
         let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
 
         #expect(await repository.getPreferences().transcriptionSummaryEnabled == true)
