@@ -27,6 +27,9 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Whether settings screens show the Captions section (captions enabled for the deployment).
+    public let isCaptionsTranslationAvailable: Bool
+
     /// Whether the settings offer the AI summary default for post-call transcriptions.
     private let showsTranscriptionSummary: Bool
 
@@ -35,15 +38,18 @@ public final class SettingsFactory {
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - isCaptionsTranslationAvailable: Whether to show the Captions section. Defaults to `false`.
     ///   - showsTranscriptionSummary: Whether to offer the AI summary default for post-call
     ///     transcriptions. Pass `true` only when post-call transcription is enabled.
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
+        isCaptionsTranslationAvailable: Bool = false,
         showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
+        self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
         self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
@@ -60,7 +66,7 @@ public final class SettingsFactory {
         let viewModel = SettingsViewModel(
             repository: repository,
             showsTranscriptionSummary: showsTranscriptionSummary)
-        return SettingsView(viewModel: viewModel)
+        return SettingsView(viewModel: viewModel, isCaptionsTranslationAvailable: isCaptionsTranslationAvailable)
     }
 
     // MARK: - Waiting Room Button
@@ -102,7 +108,8 @@ public final class SettingsFactory {
         let (viewModel, statisticsViewModel) = makeMeetingRoomViewModels()
         return .init(
             viewModel: viewModel,
-            statisticsViewModel: statisticsViewModel
+            statisticsViewModel: statisticsViewModel,
+            isCaptionsTranslationAvailable: isCaptionsTranslationAvailable
         )
     }
 

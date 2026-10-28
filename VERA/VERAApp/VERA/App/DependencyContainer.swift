@@ -175,6 +175,7 @@ final class DependencyContainer {
         if appConfig.meetingRoomSettings.allowArchiving { features.insert(.archiving) }
         if appConfig.meetingRoomSettings.allowPostCallTranscription { features.insert(.postCallTranscription) }
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
+        if appConfig.meetingRoomSettings.allowCaptionTranslation { features.insert(.captionsTranslation) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
         if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
@@ -268,6 +269,8 @@ final class DependencyContainer {
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
             statsDataSource: InMemoryStatsRepository(),
+            isCaptionsTranslationAvailable: appConfig.meetingRoomSettings.allowCaptions
+                && appConfig.meetingRoomSettings.allowCaptionTranslation,
             showsTranscriptionSummary: appConfig.meetingRoomSettings.allowPostCallTranscription)
     #endif
 

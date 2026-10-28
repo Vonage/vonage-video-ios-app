@@ -29,6 +29,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: true,
             archiving: true,
             captions: true,
+            captionTranslation: true,
             chat: true,
             emojis: true,
             feedback: true,
@@ -82,6 +83,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: true,
             archiving: true,
             captions: true,
+            captionTranslation: true,
             chat: true,
             emojis: true,
             feedback: true,
@@ -113,6 +115,16 @@ struct MeetingRoomEnabledFeaturesTests {
     func chatMapping() {
         #expect(makeContainer(chat: true).meetingRoomEnabledFeatures.contains(.chat))
         #expect(!makeContainer(chat: false).meetingRoomEnabledFeatures.contains(.chat))
+    }
+
+    @Test("allowCaptionTranslation maps to .captionsTranslation")
+    func captionTranslationMapsToCaptionsTranslation() {
+        #expect(
+            makeContainer(captionTranslation: true)
+                .meetingRoomEnabledFeatures.contains(.captionsTranslation))
+        #expect(
+            !makeContainer(captionTranslation: false)
+                .meetingRoomEnabledFeatures.contains(.captionsTranslation))
     }
 
     @Test("allowEmojis maps to .reactions")
@@ -163,6 +175,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: json.audioSettings.allowAudioDiagnostics,
             archiving: json.meetingRoomSettings.allowArchiving,
             captions: json.meetingRoomSettings.allowCaptions,
+            captionTranslation: json.meetingRoomSettings.allowCaptionTranslation,
             chat: json.meetingRoomSettings.allowChat,
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
@@ -179,6 +192,7 @@ struct MeetingRoomEnabledFeaturesTests {
         #expect(
             features.contains(.postCallTranscription) == json.meetingRoomSettings.allowPostCallTranscription)
         #expect(features.contains(.captions) == json.meetingRoomSettings.allowCaptions)
+        #expect(features.contains(.captionsTranslation) == json.meetingRoomSettings.allowCaptionTranslation)
         #expect(features.contains(.reactions) == json.meetingRoomSettings.allowEmojis)
         #expect(features.contains(.settings) == json.meetingRoomSettings.allowSettings)
         #expect(features.contains(.feedback) == json.meetingRoomSettings.allowFeedback)
@@ -204,6 +218,7 @@ struct MeetingRoomEnabledFeaturesTests {
         if json.meetingRoomSettings.allowArchiving { expected.insert(.archiving) }
         if json.meetingRoomSettings.allowPostCallTranscription { expected.insert(.postCallTranscription) }
         if json.meetingRoomSettings.allowCaptions { expected.insert(.captions) }
+        if json.meetingRoomSettings.allowCaptionTranslation { expected.insert(.captionsTranslation) }
         if json.meetingRoomSettings.allowEmojis { expected.insert(.reactions) }
         if json.meetingRoomSettings.allowSettings { expected.insert(.settings) }
         if json.meetingRoomSettings.allowFeedback { expected.insert(.feedback) }
@@ -219,6 +234,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: json.audioSettings.allowAudioDiagnostics,
             archiving: json.meetingRoomSettings.allowArchiving,
             captions: json.meetingRoomSettings.allowCaptions,
+            captionTranslation: json.meetingRoomSettings.allowCaptionTranslation,
             chat: json.meetingRoomSettings.allowChat,
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
@@ -243,6 +259,7 @@ extension MeetingRoomEnabledFeaturesTests {
         audioDiagnostics: Bool = false,
         archiving: Bool = false,
         captions: Bool = false,
+        captionTranslation: Bool = false,
         chat: Bool = false,
         emojis: Bool = false,
         feedback: Bool = false,
@@ -260,6 +277,7 @@ extension MeetingRoomEnabledFeaturesTests {
             meetingRoomSettings: AppConfig.MeetingRoomSettings(
                 allowArchiving: archiving,
                 allowCaptions: captions,
+                allowCaptionTranslation: captionTranslation,
                 allowChat: chat,
                 allowEmojis: emojis,
                 allowFeedback: feedback,
@@ -280,6 +298,7 @@ extension MeetingRoomEnabledFeaturesTests {
         case .archiving: return makeContainer(archiving: true)
         case .postCallTranscription: return makeContainer(postCallTranscription: true)
         case .captions: return makeContainer(captions: true)
+        case .captionsTranslation: return makeContainer(captionTranslation: true)
         case .reactions: return makeContainer(emojis: true)
         case .settings: return makeContainer(settings: true)
         case .feedback: return makeContainer(feedback: true)
@@ -329,6 +348,7 @@ struct AppConfigFixture: Decodable {
     struct MeetingRoomSettings: Decodable {
         let allowArchiving: Bool
         let allowCaptions: Bool
+        let allowCaptionTranslation: Bool
         let allowChat: Bool
         let allowEmojis: Bool
         let allowFeedback: Bool

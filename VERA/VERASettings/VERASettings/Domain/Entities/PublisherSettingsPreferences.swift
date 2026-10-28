@@ -45,6 +45,10 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     /// Whether Opus DTX (Discontinuous Transmission) is enabled for audio encoding.
     public var opusDtxEnabled: Bool
 
+    /// BCP-47 language remote captions are translated into; `nil` keeps the original language.
+    ///
+    /// Not a publisher setting: it is applied to subscribers and never triggers a republish.
+    public var captionsTranslationLanguage: String?
     /// Whether a post-call transcription includes an AI summary by default.
     ///
     /// Pre-selects the option offered when a transcription is started.
@@ -68,6 +72,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
     ///   - statsOverlayEnabled: Whether the overlay stats should be visible. Defaults to `true`.
     ///   - degradationPreference: Degradation preference policy. Defaults to `.notSet`.
     ///   - opusDtxEnabled: Whether Opus DTX is enabled. Defaults to `true`.
+    ///   - captionsTranslationLanguage: Captions translation language. Defaults to `nil` (original).
     ///   - transcriptionSummaryEnabled: Whether transcriptions include an AI summary by default.
     ///     Defaults to `true`.
     public init(
@@ -83,6 +88,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         statsOverlayEnabled: Bool = true,
         degradationPreference: SettingsDegradationPreference = .notSet,
         opusDtxEnabled: Bool = true,
+        captionsTranslationLanguage: String? = nil,
         transcriptionSummaryEnabled: Bool = true
     ) {
         self.videoResolution = videoResolution
@@ -97,6 +103,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         self.statsOverlayEnabled = statsOverlayEnabled
         self.degradationPreference = degradationPreference
         self.opusDtxEnabled = opusDtxEnabled
+        self.captionsTranslationLanguage = captionsTranslationLanguage
         self.transcriptionSummaryEnabled = transcriptionSummaryEnabled
     }
 
@@ -138,6 +145,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         degradationPreference =
             try container.decodeIfPresent(SettingsDegradationPreference.self, forKey: .degradationPreference) ?? .notSet
         opusDtxEnabled = try container.decodeIfPresent(Bool.self, forKey: .opusDtxEnabled) ?? true
+        captionsTranslationLanguage = try container.decodeIfPresent(String.self, forKey: .captionsTranslationLanguage)
         transcriptionSummaryEnabled =
             try container.decodeIfPresent(Bool.self, forKey: .transcriptionSummaryEnabled) ?? true
 
@@ -165,6 +173,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         case statsOverlayEnabled
         case degradationPreference
         case opusDtxEnabled
+        case captionsTranslationLanguage
         case transcriptionSummaryEnabled
         /// Old key kept for migration only.
         case legacyAudioFallbackEnabled = "audioFallbackEnabled"
@@ -188,6 +197,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
         try container.encode(statsOverlayEnabled, forKey: .statsOverlayEnabled)
         try container.encode(degradationPreference, forKey: .degradationPreference)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encodeIfPresent(captionsTranslationLanguage, forKey: .captionsTranslationLanguage)
         try container.encode(transcriptionSummaryEnabled, forKey: .transcriptionSummaryEnabled)
     }
 
@@ -202,6 +212,7 @@ public struct PublisherSettingsPreferences: Codable, Equatable, Sendable {
             && lhs.statsOverlayEnabled == rhs.statsOverlayEnabled
             && lhs.degradationPreference == rhs.degradationPreference
             && lhs.opusDtxEnabled == rhs.opusDtxEnabled
+            && lhs.captionsTranslationLanguage == rhs.captionsTranslationLanguage
             && lhs.transcriptionSummaryEnabled == rhs.transcriptionSummaryEnabled
     }
 }
