@@ -12,6 +12,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
     var lastSessionKey: String?
     var lastArchiveID: String?
     var lastStartKind: ArchiveKind?
+    var lastStartTranscriptionOptions: TranscriptionOptions?
     var lastStopKind: ArchiveKind?
 
     var startResponse: VERAArchiving.StartArchivingDataSourceResponse?
@@ -25,6 +26,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         }
         lastSessionKey = request.sessionKey
         lastStartKind = request.kind
+        lastStartTranscriptionOptions = request.transcriptionOptions
 
         return startResponse ?? .init(archiveId: "123")
     }

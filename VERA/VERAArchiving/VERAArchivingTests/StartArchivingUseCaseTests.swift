@@ -79,6 +79,17 @@ struct StartArchivingUseCaseTests {
         #expect(dataSourceMock.lastStartKind == .transcription)
     }
 
+    @Test func startArchivingPassesTheTranscriptionOptions() async throws {
+        let dataSourceMock = MockArchivingDataSource()
+        let sut = makeSUT(archivingDataSource: dataSourceMock)
+        let options = TranscriptionOptions(hasSummary: false)
+
+        _ = try await sut(
+            .init(sessionKey: "heart-of-gold", kind: .transcription, transcriptionOptions: options))
+
+        #expect(dataSourceMock.lastStartTranscriptionOptions == options)
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(

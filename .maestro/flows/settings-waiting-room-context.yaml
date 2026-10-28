@@ -76,6 +76,13 @@ appId: ${APP_ID}
 
 # Screenshot: Audio section with all controls editable
 - takeScreenshot: 02-settings-waiting-room-audio-section
+# Captions Section - shown when captions are enabled; defaults to the original language
+- scrollUntilVisible:
+    element:
+      id: "settings-captions-language-picker"
+    direction: DOWN
+- assertVisible:
+    id: "settings-captions-language-picker"
 
 # Scroll to reveal General Section
 - swipe:
