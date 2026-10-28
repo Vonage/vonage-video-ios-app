@@ -1,0 +1,122 @@
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingDataSource.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 44,48-49,78-98
+VERA/VERAArchiving/VERAArchivingTests/UI/View/TranscriptionStartOptionsScreenTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-31
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 52-55,76-77,92,107,149-150,177,201,216
+  s_bfbd0988902ae0::t_6fc39f8a8757a1 91
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 135-139
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 274
+  s_2c94e3b4b61992::t_2f6360df1ad574 273
+VERA/VERAArchiving/VERAArchivingSnapshotTests/TranscriptionStartOptionsSnapshotTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-73
+VERA/VERAArchiving/VERAArchivingTests/Mocks/MockArchivingDataSource.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 14,28
+VERA/VERASettings/VERASettingsTests/Domain/PublisherPreferencesTransferTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 58-59
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 169-195
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/TranscriptionOptions.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-20
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchivingDataSource.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 16,18-22,25
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 33-35,42-43,48,53,66-68,124-126
+  s_9a8cdc473ab036::t_32ea989ccad5a9 47
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 36,40,51
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 21-24,39-40,43-44,51,59,76-90,94-102,105-109,112-116,118,128-131
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 12,222-257
+  s_9f04847e3b46fe::t_dda51e5df58c3e 258
+VERA/VERAArchiving/VERAArchiving/UI/View/TranscriptionStartOptionsView.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-77
+.maestro/flows/post-call-transcription.yaml
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 58-63
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 11,13-17,20,38-41
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/TranscriptionOptionsOverlayModifier.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-37
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 51
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 61-79,84-85,87-90
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingDataSourceTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 86-148,302-303,305-306
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 396-397
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 41,53,69-79
+  s_9f04847e3b46fe::t_034edf77f73e85 80-82
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 112-117,163,167-168,173
+VERA/VERAArchiving/VERAArchivingTests/StartArchivingUseCaseTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 81-91
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1138-1325
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/TranscriptionOptionsOverlayModifierTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-71
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 367,370-376
+  s_3ddcf6e6d21d58::t_544f8e577c8576 366
+  s_9f04847e3b46fe::t_65e92518b9c436 377
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 8214-8261
+VERA/VERASettings/VERASettingsTests/UI/View/GeneralSectionViewTests.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 1-38
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 16-18
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_9f04847e3b46fe::t_f18fa6ea3d5563 335-336,338,341-345,347-349,352,355-383,386,389-414,417,421-447,490-491,509,520
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "524b04f2e3d46dd8622b1f4a8502cda07bcdb252",
+  "prompts": {},
+  "sessions": {
+    "s_2c94e3b4b61992": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793181721345330000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_3ddcf6e6d21d58": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793181727396297000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_9a8cdc473ab036": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793181734895314000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_9f04847e3b46fe": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793181712268732000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_bfbd0988902ae0": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793181714953472000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
