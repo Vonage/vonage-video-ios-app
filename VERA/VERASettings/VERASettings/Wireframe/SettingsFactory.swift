@@ -27,17 +27,24 @@ public final class SettingsFactory {
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
+    /// Whether the settings offer the AI summary default for post-call transcriptions.
+    private let showsTranscriptionSummary: Bool
+
     /// Creates a new settings factory.
     ///
     /// - Parameters:
     ///   - repository: Repository for persisting and observing publisher settings.
     ///   - statsDataSource: Source of real-time network statistics.
+    ///   - showsTranscriptionSummary: Whether to offer the AI summary default for post-call
+    ///     transcriptions. Pass `true` only when post-call transcription is enabled.
     public init(
         repository: PublisherSettingsRepository,
-        statsDataSource: StatsDataSource
+        statsDataSource: StatsDataSource,
+        showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.statsDataSource = statsDataSource
+        self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
     // MARK: - Settings View
@@ -50,7 +57,9 @@ public final class SettingsFactory {
     /// - Returns: A configured settings view.
     @MainActor
     public func makeSettingsView() -> SettingsView {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            showsTranscriptionSummary: showsTranscriptionSummary)
         return SettingsView(viewModel: viewModel)
     }
 
@@ -105,7 +114,9 @@ public final class SettingsFactory {
     /// - Returns: A tuple of the settings view model and the statistics view model.
     @MainActor
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
-        let viewModel = SettingsViewModel(repository: repository)
+        let viewModel = SettingsViewModel(
+            repository: repository,
+            showsTranscriptionSummary: showsTranscriptionSummary)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
             settingsRepository: repository
