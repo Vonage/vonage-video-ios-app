@@ -341,7 +341,7 @@ struct ArchiveButtonViewModelTests {
         #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
 
         sut.setup()
-        dataSource._archivingState.value = .archiving("recording-1")
+        dataSource._archivingState.send(.archiving("recording-1"))
         _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
