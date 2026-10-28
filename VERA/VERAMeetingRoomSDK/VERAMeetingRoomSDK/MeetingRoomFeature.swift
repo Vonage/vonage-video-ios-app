@@ -28,6 +28,10 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
 
     /// Live captions overlay during the call.
     case captions
+    /// Per-user translation of other participants' live captions.
+    ///
+    /// Only takes effect together with ``captions``.
+    case captionsTranslation
 
     /// Emoji reactions with floating animation overlay.
     case reactions
