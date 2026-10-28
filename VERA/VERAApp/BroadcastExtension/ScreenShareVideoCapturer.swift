@@ -10,211 +10,327 @@ import OpenTok
 import ReplayKit
 import VERAScreenShare
 
-/// Feeds ReplayKit `CMSampleBuffer` frames into the Vonage SDK.
-///
-/// - An owned `CVPixelBuffer` is created in `checkSize` and reused across frames.
-/// - `CIContext.render(_:to:)` writes scaled BGRA pixels directly into the
-///   destination buffer — the layout Vonage reads correctly when told pixelFormat = .ARGB.
-/// - `captureSettings` only sets `pixelFormat`; `bytesPerRow` is populated by
-///   `checkSize` before the first frame, preventing the `NSRangeException`.
-/// - The last frame is retransmitted every ~250 ms during static content so
-///   subscribers always have a fresh frame and the SDK can estimate bandwidth.
-/// - Frames with near-identical timestamps (< 2 ms apart) are dropped to avoid
-///   wasting encoder time on duplicate ReplayKit output.
-final class ScreenShareVideoCapturer: NSObject, OTVideoCapture {
-    var videoContentHint: OTVideoContentHint = .detail
-    var videoCaptureConsumer: OTVideoCaptureConsumer?
-
+/// Feeds borrowed ReplayKit frames synchronously into the SDK using one owned output buffer.
+/// Control callbacks never wait for rendering or hold a lock while invoking SDK consumers.
+/// A busy renderer drops an overlapping frame instead of creating a queue of work.
+// Sendability is confined to this adapter: controlLock protects all control state, and
+// conversionLock owns frame storage. Raw SDK frames, consumers and sample buffers are
+// never enqueued or declared Sendable. The in-flight group joins deliveries after closure.
+final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Sendable {
+    private let controlLock = NSLock()
+    private let conversionLock = NSLock()
+    private let inFlight = DispatchGroup()
+    private let retransmitQueue = DispatchQueue(label: "com.vonage.VERA.screenshare.retransmit")
+    private let retransmitInterval: DispatchTimeInterval
     private let settings: ScreenShareVideoSettings
-    private var lastDeliveryTime: TimeInterval?
+    private let minimumFrameSpacing: DispatchTimeInterval
 
-    init(settings: ScreenShareVideoSettings = .init()) {
+    // Protected by controlLock.
+    private var storedVideoContentHint: OTVideoContentHint = .detail
+    private var storedVideoCaptureConsumer: OTVideoCaptureConsumer?
+    private var capturing = false
+    private var isSessionReady = false
+    private var paused = false
+    private var closed = false
+    private var captureCycle: UInt64 = 0
+    private var timerGeneration: UInt64 = 0
+    private var retransmitTimer: DispatchSourceTimer?
+
+    // Protected by conversionLock. SDK consumer calls happen only while owning this
+    // non-recursive lease; reentrant or overlapping frame callbacks fail try() and drop.
+    fileprivate var videoFrame = OTVideoFrame(format: OTVideoFormat(argbWithWidth: 0, height: 0))
+    fileprivate var pixelBuffer: CVPixelBuffer?
+    fileprivate var lastSampleBuffer: CMSampleBuffer?
+    fileprivate let ciContext = CIContext(options: [.useSoftwareRenderer: false])
+    private var lastOrientation: OTVideoOrientation = .up
+    private var lastFrameTimestamp: CMTime?
+    private var timestampCycle: UInt64 = 0
+    private var lastDeliveryTime: TimeInterval?
+    private var deliveryCycle: UInt64 = 0
+
+    private static let duplicateThresholdSeconds = 0.002
+
+    init(
+        settings: ScreenShareVideoSettings = .init(),
+        retransmitInterval: DispatchTimeInterval = .milliseconds(250)
+    ) {
         self.settings = settings
+        self.retransmitInterval = retransmitInterval
+        minimumFrameSpacing = .milliseconds(Int(ceil(settings.minimumFrameInterval * 1000)))
         super.init()
     }
 
+    deinit {
+        retransmitTimer?.cancel()
+    }
 
-    fileprivate var capturing: Bool = false
-    fileprivate var isSessionReady: Bool = false
+    var videoContentHint: OTVideoContentHint {
+        get { controlLock.withLock { storedVideoContentHint } }
+        set { controlLock.withLock { storedVideoContentHint = newValue } }
+    }
 
-    // Matches the reference: initialised with (0, 0) so checkSize always fires on
-    // the first frame and populates bytesPerRow before consumeFrame is called.
-    fileprivate var videoFrame = OTVideoFrame(format: OTVideoFormat(argbWithWidth: 0, height: 0))
-    fileprivate var pixelBuffer: CVPixelBuffer?  // destination buffer (capped size, BGRA)
-    // Retain the previous CMSampleBuffer so ReplayKit cannot reuse the underlying
-    // CVPixelBuffer while we are still rendering from it (prevents tearing).
-    fileprivate var lastSampleBuffer: CMSampleBuffer?
-    fileprivate let ciContext = CIContext(options: [.useSoftwareRenderer: false])
+    var videoCaptureConsumer: OTVideoCaptureConsumer? {
+        get { controlLock.withLock { storedVideoCaptureConsumer } }
+        set {
+            let previous = controlLock.withLock {
+                let previous = storedVideoCaptureConsumer
+                storedVideoCaptureConsumer = newValue
+                return previous
+            }
+            // Releasing the final SDK reference can itself execute external cleanup.
+            withExtendedLifetime(previous) {}
+        }
+    }
 
-    // Frame retransmission — resend the last frame every ~250ms during static content
-    // so subscribers always have a fresh frame and the SDK can estimate bandwidth.
-    private static let retransmitIntervalMs = 250
-    private let frameLock = NSLock()
-    private let retransmitQueue = DispatchQueue(label: "com.vonage.VERA.screenshare.retransmit")
-    private var retransmitTimer: DispatchSourceTimer?
-    private var lastOrientation: OTVideoOrientation = .up
-    // Duplicate frame detection — skip frames whose timestamp is within this
-    // threshold of the previous, as they carry identical pixel content.
-    private static let duplicateThresholdSeconds: Double = 0.002
-    private var lastFrameTimestamp: CMTime?
+    var isClosed: Bool { controlLock.withLock { closed } }
+    var isPaused: Bool { controlLock.withLock { paused } }
 
-    // MARK: - Session readiness
+    /// Identifies the currently scheduled static-frame delivery. Expired tickets are ignored.
+    var retransmissionGeneration: UInt64 { controlLock.withLock { timerGeneration } }
+
+    func setPaused(_ paused: Bool) {
+        controlLock.withLock {
+            guard !closed else { return }
+            self.paused = paused
+            if paused { invalidateTimerLocked() }
+        }
+    }
+
+    /// Closes admission immediately; an already reserved SDK delivery may still be finishing.
+    func close() {
+        let didClose = controlLock.withLock {
+            guard !closed else { return false }
+            closed = true
+            capturing = false
+            isSessionReady = false
+            invalidateTimerLocked()
+            return true
+        }
+        if didClose {
+            inFlight.notify(queue: retransmitQueue) { [weak self] in
+                self?.releaseFrameStorage()
+            }
+        }
+    }
+
+    /// Runs completion only after existing synchronous consumer calls have returned.
+    /// Notification never blocks the caller, including when invoked reentrantly by the SDK.
+    func close(on queue: DispatchQueue, completion: @escaping @Sendable () -> Void) {
+        close()
+        inFlight.notify(queue: queue, execute: completion)
+    }
+
+    /// Forms UI cleanup on its owner before the nonisolated drain notification retains it.
+    @MainActor
+    func closeOnMainActor(completion: @escaping @MainActor @Sendable () -> Void) {
+        close(on: .main) {
+            MainActor.assumeIsolated { completion() }
+        }
+    }
 
     func sessionDidConnect() {
-        isSessionReady = true
+        controlLock.withLock {
+            guard !closed else { return }
+            isSessionReady = true
+        }
     }
 
     func sessionDidDisconnect() {
-        isSessionReady = false
+        controlLock.withLock {
+            isSessionReady = false
+            captureCycle &+= 1
+            invalidateTimerLocked()
+        }
     }
 
     // MARK: - OTVideoCapture
 
     func initCapture() {}
-    func releaseCapture() {}
+
+    func releaseCapture() {
+        close()
+        videoCaptureConsumer = nil
+    }
 
     func start() -> Int32 {
-        capturing = true
-        return 0
+        controlLock.withLock {
+            guard !closed else { return -1 }
+            if !capturing { captureCycle &+= 1 }
+            capturing = true
+            return 0
+        }
     }
 
     func stop() -> Int32 {
-        capturing = false
-        lastDeliveryTime = nil
-        retransmitTimer?.cancel()
-        retransmitTimer = nil
-        return 0
+        controlLock.withLock {
+            capturing = false
+            captureCycle &+= 1
+            invalidateTimerLocked()
+            return 0
+        }
     }
 
     func isCaptureStarted() -> Bool {
-        capturing
+        controlLock.withLock { capturing }
     }
 
-    // Only pixelFormat is set here — matches the reference exactly.
-    // bytesPerRow is populated by checkSize before the first consumeFrame.
     func captureSettings(_ videoFormat: OTVideoFormat) -> Int32 {
         videoFormat.pixelFormat = .ARGB
         if let fps = settings.frameRate { videoFormat.estimatedFramesPerSecond = Double(fps) }
         return 0
     }
 
-    // MARK: - Frame ingestion
+    // MARK: - Synchronous frame leases
 
-    func consumeVideoSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
-        guard capturing,
-            isSessionReady,
-            let srcBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-        else { return }
-
-        // Skip duplicate frames — ReplayKit can deliver frames with nearly identical
-        // timestamps when the screen content hasn't changed.
-        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        if let lastPTS = lastFrameTimestamp {
-            let delta = CMTimeGetSeconds(CMTimeSubtract(pts, lastPTS))
-            if abs(delta) < Self.duplicateThresholdSeconds {
-                return
-            }
-        }
-        lastFrameTimestamp = pts
-
-        let orientation = sampleOrientation(from: sampleBuffer)
-        let ciImage = CIImage(cvPixelBuffer: srcBuffer)
-        let extent = ciImage.extent
-
-        frameLock.lock()
-        defer { frameLock.unlock() }
-
-        let now = ProcessInfo.processInfo.systemUptime
-        if let last = lastDeliveryTime, now - last < settings.minimumFrameInterval { return }
-        checkSize(width: Int(extent.width), height: Int(extent.height))
-        guard let dstBuffer = pixelBuffer else { return }
-
-        CVPixelBufferLockBaseAddress(dstBuffer, [])
-
-        let dstWidth = CVPixelBufferGetWidth(dstBuffer)
-        let dstHeight = CVPixelBufferGetHeight(dstBuffer)
-
-        // Scale the source image to fit the destination buffer, then render directly.
-        let scaleX = CGFloat(dstWidth) / extent.width
-        let scaleY = CGFloat(dstHeight) / extent.height
-        let scaledImage = ciImage.transformed(by: CGAffineTransform(scaleX: scaleX, y: scaleY))
-        ciContext.render(
-            scaledImage, to: dstBuffer, bounds: scaledImage.extent, colorSpace: CGColorSpaceCreateDeviceRGB())
-
-        // Pass the actual orientation so the receiving side can rotate correctly.
-        videoFrame.timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        videoFrame.format?.estimatedCaptureDelay = 100
-        videoFrame.orientation = orientation.otOrientation
-        lastOrientation = orientation.otOrientation
-        let planes = NSPointerArray(options: .opaqueMemory)
-        planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
-        videoFrame.planes = planes
-        videoCaptureConsumer?.consumeFrame(videoFrame)
-        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
-
-        CVPixelBufferUnlockBaseAddress(dstBuffer, [])
-
-        lastSampleBuffer = sampleBuffer
-        scheduleRetransmission()
+    private struct Delivery {
+        let consumer: OTVideoCaptureConsumer
+        let generation: UInt64
+        let cycle: UInt64
     }
 
-    /// Reads the video orientation from the ReplayKit sample buffer attachment.
-    private func sampleOrientation(
-        from sampleBuffer: CMSampleBuffer
-    ) -> CGImagePropertyOrientation {
+    // Called only while holding conversionLock. Admission and DispatchGroup.enter happen
+    // under the same control lock as close, so finish cannot miss an admitted delivery.
+    private func reserveDelivery(
+        expectedGeneration: UInt64? = nil,
+        timestamp: CMTime? = nil
+    ) -> Delivery? {
+        controlLock.withLock {
+            guard capturing, isSessionReady, !paused, !closed,
+                let consumer = storedVideoCaptureConsumer
+            else { return nil }
+            if let expectedGeneration, expectedGeneration != timerGeneration { return nil }
+            if let timestamp, timestampCycle == captureCycle, let previous = lastFrameTimestamp {
+                let delta = CMTimeGetSeconds(CMTimeSubtract(timestamp, previous))
+                if abs(delta) < Self.duplicateThresholdSeconds { return nil }
+            }
+            invalidateTimerLocked()
+            inFlight.enter()
+            return Delivery(consumer: consumer, generation: timerGeneration, cycle: captureCycle)
+        }
+    }
+
+    private func finishDelivery(_ delivery: Delivery) {
+        if lastSampleBuffer != nil, pixelBuffer != nil {
+            scheduleRetransmission(expectedGeneration: delivery.generation)
+        }
+        conversionLock.unlock()
+        inFlight.leave()
+    }
+
+    func consumeVideoSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        guard conversionLock.try() else { return }
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        guard let delivery = reserveDelivery(timestamp: pts) else {
+            conversionLock.unlock()
+            return
+        }
+        defer { finishDelivery(delivery) }
+        guard !isWithinMinimumFrameInterval(of: delivery) else { return }
+        guard let source = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        lastFrameTimestamp = pts
+        timestampCycle = delivery.cycle
+        let image = CIImage(cvPixelBuffer: source)
+        let extent = image.extent
+        checkSize(width: Int(extent.width), height: Int(extent.height))
+        guard let output = pixelBuffer else { return }
+
+        CVPixelBufferLockBaseAddress(output, [])
+        defer { CVPixelBufferUnlockBaseAddress(output, []) }
+        let width = CVPixelBufferGetWidth(output)
+        let height = CVPixelBufferGetHeight(output)
+        let scaled = image.transformed(
+            by: CGAffineTransform(scaleX: CGFloat(width) / extent.width, y: CGFloat(height) / extent.height))
+        ciContext.render(scaled, to: output, bounds: scaled.extent, colorSpace: CGColorSpaceCreateDeviceRGB())
+
+        lastOrientation = sampleOrientation(from: sampleBuffer).otOrientation
+        videoFrame.timestamp = pts
+        videoFrame.format?.estimatedCaptureDelay = 100
+        videoFrame.orientation = lastOrientation
+        let planes = NSPointerArray(options: .opaqueMemory)
+        planes.addPointer(CVPixelBufferGetBaseAddress(output))
+        videoFrame.planes = planes
+        lastSampleBuffer = sampleBuffer
+
+        // Neither SDK code nor consumer callbacks execute under controlLock. The output
+        // buffer and borrowed input remain alive for this synchronous call.
+        delivery.consumer.consumeFrame(videoFrame)
+        recordDelivery(delivery)
+    }
+
+    // Called only while holding conversionLock. A new capture cycle starts unthrottled.
+    private func isWithinMinimumFrameInterval(of delivery: Delivery) -> Bool {
+        guard deliveryCycle == delivery.cycle, let lastDeliveryTime else { return false }
+        return ProcessInfo.processInfo.systemUptime - lastDeliveryTime < settings.minimumFrameInterval
+    }
+
+    private func recordDelivery(_ delivery: Delivery) {
+        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
+        deliveryCycle = delivery.cycle
+    }
+
+    private func sampleOrientation(from sampleBuffer: CMSampleBuffer) -> CGImagePropertyOrientation {
         guard
             let value = CMGetAttachment(
-                sampleBuffer,
-                key: RPVideoSampleOrientationKey as CFString,
-                attachmentModeOut: nil),
+                sampleBuffer, key: RPVideoSampleOrientationKey as CFString, attachmentModeOut: nil),
             let rawValue = (value as? NSNumber)?.uint32Value
-        else {
-            return .up
-        }
+        else { return .up }
         return CGImagePropertyOrientation(rawValue: rawValue) ?? .up
     }
 
-    // MARK: - Frame retransmission
+    // MARK: - Static-frame retransmission
 
-    /// Schedules a timer to resend the last frame if no new frame arrives within the interval.
-    private func scheduleRetransmission() {
+    // Called only while holding controlLock; no external callbacks run here.
+    private func invalidateTimerLocked() {
+        timerGeneration &+= 1
         retransmitTimer?.cancel()
-
-        let timer = DispatchSource.makeTimerSource(flags: .strict, queue: retransmitQueue)
-        timer.schedule(
-            deadline: .now()
-                + .milliseconds(max(Self.retransmitIntervalMs, Int(ceil(settings.minimumFrameInterval * 1000)))),
-            leeway: .milliseconds(20)
-        )
-        timer.setEventHandler { [weak self] in
-            self?.retransmitLastFrame()
-        }
-        timer.activate()
-        retransmitTimer = timer
+        retransmitTimer = nil
     }
 
-    /// Re-delivers the current destination buffer with an updated timestamp.
-    private func retransmitLastFrame() {
-        frameLock.lock()
-        defer { frameLock.unlock() }
+    private func scheduleRetransmission(expectedGeneration: UInt64) {
+        controlLock.withLock {
+            guard capturing, isSessionReady, !paused, !closed, timerGeneration == expectedGeneration else { return }
+            invalidateTimerLocked()
+            let generation = timerGeneration
+            let timer = DispatchSource.makeTimerSource(flags: .strict, queue: retransmitQueue)
+            // Static frames never repeat faster than the configured frame rate.
+            let now = DispatchTime.now()
+            timer.schedule(
+                deadline: max(now + retransmitInterval, now + minimumFrameSpacing), leeway: .milliseconds(20))
+            timer.setEventHandler { [weak self] in
+                self?.retransmitLastFrame(expectedGeneration: generation)
+            }
+            timer.activate()
+            retransmitTimer = timer
+        }
+    }
 
-        guard capturing, isSessionReady, let dstBuffer = pixelBuffer else { return }
-
-        CVPixelBufferLockBaseAddress(dstBuffer, .readOnly)
-
+    /// A queued timer can outlive cancellation. Its generation must still own the frame.
+    func retransmitLastFrame(expectedGeneration: UInt64) {
+        guard conversionLock.try() else { return }
+        guard let delivery = reserveDelivery(expectedGeneration: expectedGeneration) else {
+            conversionLock.unlock()
+            return
+        }
+        defer { finishDelivery(delivery) }
+        guard let output = pixelBuffer else { return }
+        CVPixelBufferLockBaseAddress(output, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(output, .readOnly) }
         videoFrame.timestamp = CMClockGetTime(CMClockGetHostTimeClock())
         videoFrame.format?.estimatedCaptureDelay = 100
         videoFrame.orientation = lastOrientation
         let planes = NSPointerArray(options: .opaqueMemory)
-        planes.addPointer(CVPixelBufferGetBaseAddress(dstBuffer))
+        planes.addPointer(CVPixelBufferGetBaseAddress(output))
         videoFrame.planes = planes
-        videoCaptureConsumer?.consumeFrame(videoFrame)
-        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
+        delivery.consumer.consumeFrame(videoFrame)
+        recordDelivery(delivery)
+    }
 
-        CVPixelBufferUnlockBaseAddress(dstBuffer, .readOnly)
-
-        // Reschedule for the next interval.
-        scheduleRetransmission()
+    private func releaseFrameStorage() {
+        conversionLock.lock()
+        defer { conversionLock.unlock() }
+        lastSampleBuffer = nil
+        pixelBuffer = nil
     }
 }
 

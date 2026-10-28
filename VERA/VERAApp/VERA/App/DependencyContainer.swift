@@ -205,8 +205,10 @@ final class DependencyContainer {
     lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
     #if AUDIODIAGNOSTICS_ENABLED
+        @MainActor
         lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
 
+        @MainActor
         lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(speakerTestService: speakerTestService)
     #endif
 

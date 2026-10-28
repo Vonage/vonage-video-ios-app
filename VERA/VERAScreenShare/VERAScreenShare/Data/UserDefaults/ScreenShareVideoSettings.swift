@@ -1,7 +1,7 @@
 import Foundation
 
 /// Video policy transferred from the app to the ReplayKit extension at broadcast start.
-public struct ScreenShareVideoSettings: Codable, Equatable {
+public struct ScreenShareVideoSettings: Codable, Equatable, Sendable {
     public var contentHint: Int
     public var preferredCodecs: [Int]?
     public var frameRate: Int?
