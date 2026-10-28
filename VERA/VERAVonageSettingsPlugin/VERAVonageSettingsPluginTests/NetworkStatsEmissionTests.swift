@@ -9,25 +9,29 @@ import VERADomain
 
 /// Exercises the actual collector subject without constructing publisher/subscriber SDK objects.
 @MainActor
-@Suite("Network statistics synchronous delivery")
+@Suite("Network statistics asynchronous delivery")
 struct NetworkStatsEmissionTests {
-    @Test("Initial replay, repeated resets and unknown removal deliver before returning")
-    func preservesSynchronousDelivery() {
+    @Test("Resets and unknown removal deliver on a later main-queue pass")
+    func deliversAfterReturning() async {
         let sut = makeSUT()
         var received: [NetworkMediaStats] = []
         let subscription = sut.statsPublisher.sink { received.append($0) }
         defer { subscription.cancel() }
         #expect(received == [.empty])
         sut.reset()
+        #expect(received == [.empty])
+        await delay()
         #expect(received == [.empty, .empty])
         sut.reset()
+        await delay()
         #expect(received == [.empty, .empty, .empty])
         sut.removeSubscriber(connectionId: "unknown")
+        await delay()
         #expect(received == [.empty, .empty, .empty, .empty])
     }
 
-    @Test("A reset callback can synchronously reenter subscriber removal")
-    func allowsReentrantRemoval() {
+    @Test("A reset callback can reenter subscriber removal")
+    func allowsReentrantRemoval() async {
         let sut = makeSUT()
         var count = 0
         var reenter = false
@@ -41,6 +45,7 @@ struct NetworkStatsEmissionTests {
         defer { subscription.cancel() }
         reenter = true
         sut.reset()
+        await delay()
         #expect(count == 3)
         var replay: NetworkMediaStats?
         let replaySubscription = sut.statsPublisher.sink { replay = $0 }

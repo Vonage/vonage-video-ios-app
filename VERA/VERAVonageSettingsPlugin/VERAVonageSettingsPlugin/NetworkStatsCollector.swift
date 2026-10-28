@@ -100,23 +100,22 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         videoNetworkStatsUpdated stats: [OTPublisherKitVideoNetworkStats]
     ) {
         guard let first = stats.first else { return }
-        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
-            state.updatePublisherName(publisher.name ?? "")
-
-            let layers = mergedVideoLayers(from: stats)
-            let primaryLayer = first.videoLayers.first
-
-            state.updatePublisherVideo(
-                VideoSendStats(
-                    packetsSent: first.videoPacketsSent,
-                    packetsLost: first.videoPacketsLost,
-                    bytesSent: first.videoBytesSent,
-                    timestamp: first.timestamp,
-                    videoCodec: primaryLayer?.codec ?? layers.first?.codec,
-                    videoFrameRate: primaryLayer?.encodedFrameRate ?? layers.first?.encodedFrameRate ?? 0,
-                    startTime: first.startTime,
-                    videoLayers: layers
-                ))
+        let name = publisher.name ?? ""
+        let layers = mergedVideoLayers(from: stats)
+        let primaryLayer = first.videoLayers.first
+        let videoStats = VideoSendStats(
+            packetsSent: first.videoPacketsSent,
+            packetsLost: first.videoPacketsLost,
+            bytesSent: first.videoBytesSent,
+            timestamp: first.timestamp,
+            videoCodec: primaryLayer?.codec ?? layers.first?.codec,
+            videoFrameRate: primaryLayer?.encodedFrameRate ?? layers.first?.encodedFrameRate ?? 0,
+            startTime: first.startTime,
+            videoLayers: layers
+        )
+        storage.update(source: ObjectIdentifier(publisher)) { state, _ in
+            state.updatePublisherName(name)
+            state.updatePublisherVideo(videoStats)
         }
     }
 
@@ -126,17 +125,16 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         audioNetworkStatsUpdated stats: [OTPublisherKitAudioNetworkStats]
     ) {
         guard let first = stats.first else { return }
-        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
-
-            state.updatePublisherAudio(
-                AudioSendStats(
-                    packetsSent: first.audioPacketsSent,
-                    packetsLost: first.audioPacketsLost,
-                    bytesSent: first.audioBytesSent,
-                    timestamp: first.timestamp,
-                    audioCodec: state.publisherAudioCodec,
-                    startTime: first.startTime
-                ))
+        let audioStats = AudioSendStats(
+            packetsSent: first.audioPacketsSent,
+            packetsLost: first.audioPacketsLost,
+            bytesSent: first.audioBytesSent,
+            timestamp: first.timestamp,
+            audioCodec: nil,
+            startTime: first.startTime
+        )
+        storage.update(source: ObjectIdentifier(publisher)) { state, _ in
+            state.updatePublisherAudio(audioStats.withAudioCodec(state.publisherAudioCodec))
         }
     }
 
@@ -148,12 +146,9 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         mediaLinkStatsUpdated mediaLinkStats: [OTPublisherKitMediaLinkStats]
     ) {
         guard let first = mediaLinkStats.first else { return }
-        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
-
-            state.updatePublisherMediaLink(
-                PublisherMediaLinkStats(
-                    transport: mapTransport(first.transport)
-                ))
+        let linkStats = PublisherMediaLinkStats(transport: mapTransport(first.transport))
+        storage.update(source: ObjectIdentifier(publisher)) { state, _ in
+            state.updatePublisherMediaLink(linkStats)
         }
     }
 
@@ -165,10 +160,27 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         videoNetworkStatsUpdated stats: OTSubscriberKitVideoNetworkStats
     ) {
         let connectionId = connectionId(for: subscriber)
+        let name = subscriber.stream?.name ?? ""
+        let sdkCodec = (stats.codec?.isEmpty == false) ? stats.codec : nil
+        let videoStats = VideoReceiveStats(
+            packetsReceived: UInt64(stats.videoPacketsReceived),
+            packetsLost: UInt64(stats.videoPacketsLost),
+            bytesReceived: UInt64(stats.videoBytesReceived),
+            timestamp: stats.timestamp,
+            width: stats.width,
+            height: stats.height,
+            decodedFrameRate: stats.decodedFrameRate,
+            bitrate: stats.bitrate,
+            totalBitrate: stats.totalBitrate,
+            codec: sdkCodec,
+            pauseCount: stats.pauseCount,
+            totalPausesDuration: stats.totalPausesDuration,
+            freezeCount: stats.freezeCount,
+            totalFreezesDuration: stats.totalFreezesDuration
+        )
         storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
-            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
+            state.ensureSubscriber(connectionId, name: name)
 
-            let sdkCodec = (stats.codec?.isEmpty == false) ? stats.codec : nil
             let videoCodec = sdkCodec ?? state.subscriberVideoCodec(connectionId)
 
             // Re-request RTC stats until the video codec is resolved.
@@ -176,23 +188,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
                 retryIDs.insert(connectionId)
             }
 
-            state.updateSubscriberVideo(
-                VideoReceiveStats(
-                    packetsReceived: UInt64(stats.videoPacketsReceived),
-                    packetsLost: UInt64(stats.videoPacketsLost),
-                    bytesReceived: UInt64(stats.videoBytesReceived),
-                    timestamp: stats.timestamp,
-                    width: stats.width,
-                    height: stats.height,
-                    decodedFrameRate: stats.decodedFrameRate,
-                    bitrate: stats.bitrate,
-                    totalBitrate: stats.totalBitrate,
-                    codec: videoCodec,
-                    pauseCount: stats.pauseCount,
-                    totalPausesDuration: stats.totalPausesDuration,
-                    freezeCount: stats.freezeCount,
-                    totalFreezesDuration: stats.totalFreezesDuration
-                ), connectionId: connectionId)
+            state.updateSubscriberVideo(videoStats.withCodec(videoCodec), connectionId: connectionId)
         }
     }
 
@@ -202,8 +198,17 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         audioNetworkStatsUpdated stats: OTSubscriberKitAudioNetworkStats
     ) {
         let connectionId = connectionId(for: subscriber)
+        let name = subscriber.stream?.name ?? ""
+        let audioStats = AudioReceiveStats(
+            packetsReceived: Int64(stats.audioPacketsReceived),
+            packetsLost: Int64(stats.audioPacketsLost),
+            bytesReceived: Int64(stats.audioBytesReceived),
+            timestamp: stats.timestamp,
+            audioCodec: nil,
+            estimatedBandwidth: nil
+        )
         storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
-            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
+            state.ensureSubscriber(connectionId, name: name)
 
             let audioCodec = state.subscriberAudioCodec(connectionId)
 
@@ -212,15 +217,7 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
                 retryIDs.insert(connectionId)
             }
 
-            state.updateSubscriberAudio(
-                AudioReceiveStats(
-                    packetsReceived: Int64(stats.audioPacketsReceived),
-                    packetsLost: Int64(stats.audioPacketsLost),
-                    bytesReceived: Int64(stats.audioBytesReceived),
-                    timestamp: stats.timestamp,
-                    audioCodec: audioCodec,
-                    estimatedBandwidth: nil
-                ), connectionId: connectionId)
+            state.updateSubscriberAudio(audioStats.withAudioCodec(audioCodec), connectionId: connectionId)
         }
     }
 
@@ -232,15 +229,15 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         mediaLinkStatsUpdated mediaLinkStats: OTSubscriberKitMediaLinkStats
     ) {
         let connectionId = connectionId(for: subscriber)
-        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
-            state.ensureSubscriber(connectionId, name: subscriber.stream?.name ?? "")
-
-            state.updateSubscriberMediaLink(
-                SubscriberMediaLinkStats(
-                    transport: mapTransport(mediaLinkStats.transport),
-                    remotePublisherTransport: mapTransport(mediaLinkStats.remotePublisherTransport),
-                    networkDegradationSource: mapDegradationSource(mediaLinkStats.networkDegradationSource)
-                ), connectionId: connectionId)
+        let name = subscriber.stream?.name ?? ""
+        let linkStats = SubscriberMediaLinkStats(
+            transport: mapTransport(mediaLinkStats.transport),
+            remotePublisherTransport: mapTransport(mediaLinkStats.remotePublisherTransport),
+            networkDegradationSource: mapDegradationSource(mediaLinkStats.networkDegradationSource)
+        )
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, _ in
+            state.ensureSubscriber(connectionId, name: name)
+            state.updateSubscriberMediaLink(linkStats, connectionId: connectionId)
         }
     }
 
@@ -248,11 +245,12 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
 
     /// Handles RTC stats report from the publisher to extract audio codec.
     nonisolated public func publisher(_ publisher: OTPublisherKit, rtcStatsReport stats: [OTPublisherRtcStats]) {
-        storage.update(source: ObjectIdentifier(publisher)) { state, retryIDs in
-            for stat in stats {
-                if let codecs = NetworkStatsCodecReport.parse(stat.jsonArrayOfReports, direction: .outbound) {
-                    state.updatePublisherCodecs(codecs)
-                }
+        let reports = stats.compactMap {
+            NetworkStatsCodecReport.parse($0.jsonArrayOfReports, direction: .outbound)
+        }
+        storage.update(source: ObjectIdentifier(publisher)) { state, _ in
+            for codecs in reports {
+                state.updatePublisherCodecs(codecs)
             }
         }
     }
@@ -262,8 +260,9 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
     /// Handles RTC stats report from a subscriber to extract audio and video codecs.
     nonisolated public func subscriber(_ subscriber: OTSubscriberKit, rtcStatsReport jsonArrayString: String) {
         let connectionId = connectionId(for: subscriber)
-        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, retryIDs in
-            if let codecs = NetworkStatsCodecReport.parse(jsonArrayString, direction: .inbound) {
+        let codecs = NetworkStatsCodecReport.parse(jsonArrayString, direction: .inbound)
+        storage.update(source: ObjectIdentifier(subscriber), connectionId: connectionId) { state, _ in
+            if let codecs {
                 state.updateSubscriberCodecs(codecs, connectionId: connectionId)
             }
         }
@@ -371,4 +370,56 @@ public final class NetworkStatsCollector: NSObject, StatsCollector {
         }
     }
 
+}
+
+// MARK: - Codec Resolution
+
+// The codec can depend on stored state, so it is filled in under the storage lock
+// on a value that was already mapped from the SDK object.
+
+extension AudioSendStats {
+    fileprivate func withAudioCodec(_ audioCodec: String?) -> AudioSendStats {
+        AudioSendStats(
+            packetsSent: packetsSent,
+            packetsLost: packetsLost,
+            bytesSent: bytesSent,
+            timestamp: timestamp,
+            audioCodec: audioCodec,
+            startTime: startTime
+        )
+    }
+}
+
+extension AudioReceiveStats {
+    fileprivate func withAudioCodec(_ audioCodec: String?) -> AudioReceiveStats {
+        AudioReceiveStats(
+            packetsReceived: packetsReceived,
+            packetsLost: packetsLost,
+            bytesReceived: bytesReceived,
+            timestamp: timestamp,
+            audioCodec: audioCodec,
+            estimatedBandwidth: estimatedBandwidth
+        )
+    }
+}
+
+extension VideoReceiveStats {
+    fileprivate func withCodec(_ codec: String?) -> VideoReceiveStats {
+        VideoReceiveStats(
+            packetsReceived: packetsReceived,
+            packetsLost: packetsLost,
+            bytesReceived: bytesReceived,
+            timestamp: timestamp,
+            width: width,
+            height: height,
+            decodedFrameRate: decodedFrameRate,
+            bitrate: bitrate,
+            totalBitrate: totalBitrate,
+            codec: codec,
+            pauseCount: pauseCount,
+            totalPausesDuration: totalPausesDuration,
+            freezeCount: freezeCount,
+            totalFreezesDuration: totalFreezesDuration
+        )
+    }
 }
