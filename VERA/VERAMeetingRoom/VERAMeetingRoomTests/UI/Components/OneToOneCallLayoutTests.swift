@@ -88,6 +88,33 @@ struct OneToOneCallLayoutTests {
     }
 
     @Test(
+        "The self-view tile follows the local video aspect ratio in portrait and landscape",
+        arguments: [
+            (CGSize(width: 390, height: 720), CGFloat(3.0 / 4.0)),
+            (CGSize(width: 780, height: 320), CGFloat(16.0 / 9.0)),
+            (CGSize(width: 780, height: 320), CGFloat(4.0 / 3.0)),
+        ])
+    func tileFollowsVideoAspectRatio(container: CGSize, ratio: CGFloat) {
+        let geometry = FloatingSelfViewGeometry(container: container, bottomInset: 64, videoAspectRatio: ratio)
+        #expect(abs(geometry.tileSize.width / geometry.tileSize.height - ratio) < 0.001)
+        #expect(max(geometry.tileSize.width, geometry.tileSize.height) <= 192 + 0.001)
+    }
+
+    @Test("A portrait self-view keeps the existing tile size")
+    func portraitTileUnchanged() {
+        let geometry = FloatingSelfViewGeometry(container: CGSize(width: 390, height: 720), bottomInset: 64)
+        #expect(abs(geometry.tileSize.width - 390 * 0.32) < 0.001)
+        #expect(abs(geometry.tileSize.height - 390 * 0.32 / 0.75) < 0.001)
+    }
+
+    @Test("Unknown or invalid video dimensions fall back to the portrait tile", arguments: [CGFloat(0), -1, .nan])
+    func invalidAspectRatio(ratio: CGFloat) {
+        let size = CGSize(width: 390, height: 720)
+        let geometry = FloatingSelfViewGeometry(container: size, bottomInset: 64, videoAspectRatio: ratio)
+        #expect(geometry.tileSize == FloatingSelfViewGeometry(container: size, bottomInset: 64).tileSize)
+    }
+
+    @Test(
         "The composed one-to-one layout renders at the available portrait and landscape sizes",
         arguments: [CGSize(width: 390, height: 720), CGSize(width: 780, height: 320)])
     func rendersLayout(size: CGSize) throws {

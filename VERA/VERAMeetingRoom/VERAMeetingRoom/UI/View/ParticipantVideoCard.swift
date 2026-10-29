@@ -66,14 +66,22 @@ struct ParticipantVideoCard: View {
     let participant: UIParticipant
     let activeSpeakerId: String?
     let fillsAvailableSpace: Bool
+    /// When set, the card is drawn edge to edge: square corners, aspect-filled video and overlays inset by these values.
+    let fullScreenOverlayInsets: EdgeInsets?
     init(
         participant: UIParticipant,
         activeSpeakerId: String?,
-        fillsAvailableSpace: Bool = false
+        fillsAvailableSpace: Bool = false,
+        fullScreenOverlayInsets: EdgeInsets? = nil
     ) {
         self.participant = participant
         self.activeSpeakerId = activeSpeakerId
         self.fillsAvailableSpace = fillsAvailableSpace
+        self.fullScreenOverlayInsets = fullScreenOverlayInsets
+    }
+
+    private var cornerRadius: CGFloat {
+        fullScreenOverlayInsets == nil ? ParticipantVideoCardConstants.cornerRadius : 0
     }
 
     var body: some View {
@@ -122,9 +130,13 @@ struct ParticipantVideoCard: View {
                                         onTogglePin: participant.onTogglePin,
                                         onForceMute: participant.onForceMute
                                     )
+                                    .padding(fullScreenOverlayInsets ?? EdgeInsets())
                                 } else {
                                     participant.view
-                                        .aspectRatio(participant.aspectRatio, contentMode: .fit)
+                                        .aspectRatio(
+                                            participant.aspectRatio,
+                                            contentMode: fullScreenOverlayInsets == nil ? .fit : .fill
+                                        )
                                         .clipped()
 
                                     ParticipantVideoCardOverlays(
@@ -139,6 +151,7 @@ struct ParticipantVideoCard: View {
                                         onTogglePin: participant.onTogglePin,
                                         onForceMute: participant.onForceMute
                                     )
+                                    .padding(fullScreenOverlayInsets ?? EdgeInsets())
                                 }
                             }
                         )
@@ -173,9 +186,10 @@ struct ParticipantVideoCard: View {
                                 // joined camera-off looked different from one who turned their
                                 // camera off mid-call.
                                 GeometryReader { geometry in
-                                    let diameter =
-                                        geometry.size.height
-                                        * ParticipantVideoCardConstants.avatarHeightFraction
+                                    // A full-screen portrait card is taller than wide, so keep the avatar inside it.
+                                    let diameter = min(
+                                        geometry.size.height * ParticipantVideoCardConstants.avatarHeightFraction,
+                                        geometry.size.width * 0.8)
                                     AvatarInitials(state: .init(userName: participant.name))
                                         .frame(width: diameter, height: diameter)
                                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -193,20 +207,21 @@ struct ParticipantVideoCard: View {
                                     onTogglePin: participant.onTogglePin,
                                     onForceMute: participant.onForceMute
                                 )
+                                .padding(fullScreenOverlayInsets ?? EdgeInsets())
                             }
                         }
                 }
             }
         }
         .overlay(
-            RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(
                     theme.primary,
                     lineWidth: participant.id == activeSpeakerId
                         ? ParticipantVideoCardConstants.activeSpeakerStrokeWidth : 0)
         )
-        .clipShape(RoundedRectangle(cornerRadius: ParticipantVideoCardConstants.cornerRadius))
-        .shadow(radius: ParticipantVideoCardConstants.shadowRadius)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .shadow(radius: fullScreenOverlayInsets == nil ? ParticipantVideoCardConstants.shadowRadius : 0)
         .accessibilityAnchor(MeetingRoomAccessibilityID.participantCard(participant.id))
         .animation(.easeInOut(duration: 0.25), value: participant.aspectRatio)
     }

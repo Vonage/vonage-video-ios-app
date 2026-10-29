@@ -28,7 +28,10 @@ struct FloatingSelfViewGeometry {
     let tileSize: CGSize
     let centers: CGRect
 
-    init(container: CGSize, bottomInset: CGFloat, labelClearance: CGFloat = 48) {
+    /// - Parameter videoAspectRatio: Width over height of the self-view video; the tile takes its shape.
+    init(
+        container: CGSize, bottomInset: CGFloat, labelClearance: CGFloat = 48, videoAspectRatio: CGFloat = 0.75
+    ) {
         let width = max(0, container.width)
         let height = max(0, container.height)
         let horizontalInset = min(12, width / 2)
@@ -36,8 +39,11 @@ struct FloatingSelfViewGeometry {
         // Keep both bottom corners and the drag area above the remote name label.
         let bottomInset = min(max(labelClearance, bottomInset + 12), height - topInset)
         let availableHeight = max(0, height - topInset - bottomInset)
-        let tileWidth = max(0, min(144, width * 0.32, availableHeight * 0.75))
-        tileSize = CGSize(width: tileWidth, height: tileWidth / 0.75)
+        // The long side is 192pt (a 144x192 tile at 3:4), shrunk to fit the container.
+        let ratio = videoAspectRatio.isFinite && videoAspectRatio > 0 ? videoAspectRatio : 0.75
+        let natural = ratio < 1 ? CGSize(width: 192 * ratio, height: 192) : CGSize(width: 192, height: 192 / ratio)
+        let scale = max(0, min(1, width * 0.32 / natural.width, availableHeight / natural.height))
+        tileSize = CGSize(width: natural.width * scale, height: natural.height * scale)
         centers = CGRect(
             x: horizontalInset + tileSize.width / 2,
             y: topInset + tileSize.height / 2,
@@ -81,14 +87,13 @@ struct OneToOneCallLayout: View {
     var body: some View {
         GeometryReader { proxy in
             let geometry = FloatingSelfViewGeometry(
-                container: proxy.size, bottomInset: bottomInset, labelClearance: labelClearance
+                container: proxy.size, bottomInset: bottomInset, labelClearance: labelClearance,
+                videoAspectRatio: selfViewAspectRatio
             )
             let anchor = geometry.center(for: corner)
             let center = geometry.clamped(CGPoint(x: anchor.x + dragOffset.width, y: anchor.y + dragOffset.height))
             ZStack(alignment: .topLeading) {
-                ParticipantVideoCard(participant: participants.remote, activeSpeakerId: nil, fillsAvailableSpace: true)
-                    .frame(width: proxy.size.width, height: proxy.size.height)
-                    .trackingVisibility(of: participants.remote)
+                Color.clear
 
                 ParticipantVideoCard(participant: participants.local, activeSpeakerId: nil, fillsAvailableSpace: true)
                     .frame(width: geometry.tileSize.width, height: geometry.tileSize.height)
@@ -113,9 +118,25 @@ struct OneToOneCallLayout: View {
                             }
                     )
             }
+            .background {
+                // The far end fills the whole screen; its labels stay inside the safe area.
+                ParticipantVideoCard(
+                    participant: participants.remote, activeSpeakerId: nil, fillsAvailableSpace: true,
+                    fullScreenOverlayInsets: proxy.safeAreaInsets
+                )
+                .ignoresSafeArea()
+                .trackingVisibility(of: participants.remote)
+            }
             .onChange(of: proxy.size) { _, _ in dragOffset = .zero }
             .onChange(of: bottomInset) { _, _ in dragOffset = .zero }
         }
+    }
+
+    /// Before the first frame the dimensions are unknown, so the tile keeps its portrait default.
+    private var selfViewAspectRatio: CGFloat {
+        let dimensions = participants.local.videoDimensions
+        guard dimensions.width > 0, dimensions.height > 0 else { return 0.75 }
+        return dimensions.width / dimensions.height
     }
 
     private func move(to destination: FloatingSelfViewCorner) {
