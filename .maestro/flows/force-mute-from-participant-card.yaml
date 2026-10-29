@@ -50,6 +50,9 @@ appId: ${APP_ID}
     timeout: 5000
 
 - assertVisible:
+    id: "meeting-self-view-floating"
+
+- assertVisible:
     id: "participant-card-e2e-local-publisher"
 
 - assertVisible:
