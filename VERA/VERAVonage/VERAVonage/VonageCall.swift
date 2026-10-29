@@ -802,7 +802,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         // 1. Capture current runtime state
         let wasPublishingAudio = publisher.publishAudio
         let wasPublishingVideo = publisher.publishVideo
-        let cameraPos = publisher.cameraPosition
+        let cameraPos = advancedSettings.cameraPosition ?? publisher.cameraPosition
         let currentTransformers = publisher.videoTransformers
         let wasStatsEnabled = isNetworkStatsEnabled
         let wasCaptionsEnabled = areCaptionsEnabled
@@ -844,7 +844,14 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
                 publisherAudioFallbackEnabled: advancedSettings.publisherAudioFallbackEnabled,
                 subscriberAudioFallbackEnabled: advancedSettings.subscriberAudioFallbackEnabled,
                 degradationPreference: advancedSettings.degradationPreference,
-                opusDtxEnabled: advancedSettings.opusDtxEnabled
+                opusDtxEnabled: advancedSettings.opusDtxEnabled,
+                selfViewMirroringEnabled: advancedSettings.selfViewMirroringEnabled
+                    ?? publisher.selfViewMirroringEnabled,
+                cameraPosition: cameraPos,
+                advancedNoiseSuppressionEnabled: advancedSettings.advancedNoiseSuppressionEnabled
+                    ?? currentAudioTransformers.contains { $0.key == "NoiseSuppression" },
+                cameraContentHint: advancedSettings.cameraContentHint
+                    ?? VideoContentHint(rawValue: publisher.otPublisher.videoCapture?.videoContentHint.rawValue ?? 0)
             )
         )
 
@@ -868,8 +875,16 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         }
 
         // 9. Restore audio transformers
-        if !currentAudioTransformers.isEmpty {
-            newPublisher.setAudioTransformers(currentAudioTransformers)
+        var audioTransformersToRestore = currentAudioTransformers
+        if advancedSettings.advancedNoiseSuppressionEnabled != nil {
+            // Keep unrelated effects while using the newly configured noise filter.
+            // Restoring the old filter first would publish a stale toolbar/preference state.
+            audioTransformersToRestore.removeAll { $0.key == "NoiseSuppression" }
+            audioTransformersToRestore.append(
+                contentsOf: newPublisher.audioTransformers.filter { $0.key == "NoiseSuppression" })
+        }
+        if !audioTransformersToRestore.isEmpty {
+            newPublisher.setAudioTransformers(audioTransformersToRestore)
         }
 
         // 10. Restore network stats delegate
@@ -901,6 +916,26 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     @MainActor
     public func updateLivePublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async {
         guard _callState.value == .connected else { return }
+
+        if let cameraPosition = advancedSettings.cameraPosition, publisher.cameraPosition != cameraPosition {
+            publisher.cameraPosition = cameraPosition
+        }
+
+        if let selfViewMirroringEnabled = advancedSettings.selfViewMirroringEnabled {
+            publisher.selfViewMirroringEnabled = selfViewMirroringEnabled
+        }
+
+        if let hint = advancedSettings.cameraContentHint {
+            publisher.otPublisher.videoCapture?.videoContentHint = OTVideoContentHint(rawValue: hint.rawValue) ?? .none
+        }
+        if let enabled = advancedSettings.advancedNoiseSuppressionEnabled {
+            do {
+                try publisher.setAdvancedNoiseSuppression(enabled: enabled)
+            } catch {
+                publisher.onAdvancedNoiseSuppressionChanged?(
+                    publisher.audioTransformers.contains { $0.key == "NoiseSuppression" })
+            }
+        }
 
         if let videoBitratePreset = advancedSettings.videoBitratePreset {
             publisher.otPublisher.videoBitratePreset = videoBitratePreset.otBitratePreset

@@ -10,6 +10,7 @@ public typealias GetPublisher = @MainActor () throws -> VERAPublisher
 
 public final class AudioEffectsFactory {
 
+    private let statusDataSource: NoiseSuppressionStatusDataSource?
     private final let publisherRepository: PublisherRepository
     private final let disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase
     private final let enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
@@ -17,9 +18,11 @@ public final class AudioEffectsFactory {
     public init(
         publisherRepository: PublisherRepository,
         disableNoiseSuppressionUseCase: DisableNoiseSuppressionUseCase,
-        enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase
+        enableNoiseSuppressionUseCase: EnableNoiseSuppressionUseCase,
+        statusDataSource: NoiseSuppressionStatusDataSource? = nil
     ) {
         self.publisherRepository = publisherRepository
+        self.statusDataSource = statusDataSource
         self.enableNoiseSuppressionUseCase = enableNoiseSuppressionUseCase
         self.disableNoiseSuppressionUseCase = disableNoiseSuppressionUseCase
     }
@@ -31,7 +34,8 @@ public final class AudioEffectsFactory {
         let viewModel = WaitingNoiseSuppressionViewModel(
             getCurrentPublisher: getCurrentPublisher,
             disableNoiseSuppressionUseCase: disableNoiseSuppressionUseCase,
-            enableNoiseSuppressionUseCase: enableNoiseSuppressionUseCase
+            enableNoiseSuppressionUseCase: enableNoiseSuppressionUseCase,
+            statusDataSource: statusDataSource
         )
         let view = makeWaitingNoiseSuppressionButton(viewModel: viewModel)
         return (view, viewModel)
@@ -47,7 +51,8 @@ public final class AudioEffectsFactory {
         let viewModel = MeetingNoiseSuppressionViewModel(
             getCurrentPublisher: publisherRepository.getPublisher,
             disableNoiseSuppressionUseCase: disableNoiseSuppressionUseCase,
-            enableNoiseSuppressionUseCase: enableNoiseSuppressionUseCase
+            enableNoiseSuppressionUseCase: enableNoiseSuppressionUseCase,
+            statusDataSource: statusDataSource
         )
         let view = makeMeetingNoiseSuppressionButton(viewModel: viewModel)
         return (view, viewModel)

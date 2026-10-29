@@ -14,10 +14,13 @@ struct SettingsSectionTransferTests {
         let storage = SettingsSectionStorage()
         await storage.update(transferred)
         let received = await storage.sections
-        #expect(received == [.general, .video, .audio, .captions, .stats])
+        #expect(received == [.general, .video, .screenSharing, .audio, .captions, .stats])
         #expect(received.map(\.id) == original)
-        #expect(received.map(\.rawValue) == ["General", "Video", "Audio", "Captions", "Stats"])
-        #expect(received.map(\.iconName) == ["gear", "video", "waveform", "captions.bubble", "chart.bar"])
+        #expect(received.map(\.rawValue) == ["General", "Video", "Screen Sharing", "Audio", "Captions", "Stats"])
+        #expect(
+            received.map(\.iconName) == [
+                "gear", "video", "rectangle.on.rectangle", "waveform", "captions.bubble", "chart.bar",
+            ])
         #expect(received.map(\.displayName) == original.map(\.displayName))
         #expect(Set(received) == Set(original))
     }

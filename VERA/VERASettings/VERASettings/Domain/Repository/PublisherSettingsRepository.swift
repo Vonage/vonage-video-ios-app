@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import VERADomain
 
 /// Read/write access to persisted publisher setting preferences.
 ///
@@ -19,6 +20,29 @@ public protocol PublisherSettingsRepository: Sendable {
     /// Persist updated preferences.
     func save(_ preferences: PublisherSettingsPreferences) async throws
 
+    /// Updates the saved camera while retaining the other current preferences.
+    func saveCameraPosition(_ position: CameraPosition) async throws
+
+    func saveAdvancedNoiseSuppression(_ enabled: Bool) async throws
+
     /// Reset all preferences to their default values.
     func reset() async
+}
+
+extension PublisherSettingsRepository {
+    public func saveCameraPosition(_ position: CameraPosition) async throws {
+        var preferences = await getPreferences()
+        guard preferences.cameraPosition != position else { return }
+        preferences.cameraPosition = position
+        try await save(preferences)
+    }
+}
+
+extension PublisherSettingsRepository {
+    public func saveAdvancedNoiseSuppression(_ enabled: Bool) async throws {
+        var preferences = await getPreferences()
+        guard preferences.advancedNoiseSuppressionEnabled != enabled else { return }
+        preferences.advancedNoiseSuppressionEnabled = enabled
+        try await save(preferences)
+    }
 }

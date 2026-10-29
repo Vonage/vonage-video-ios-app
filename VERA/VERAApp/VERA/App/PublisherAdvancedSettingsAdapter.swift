@@ -11,6 +11,7 @@ import Foundation
 
     final class PublisherAdvancedSettingsAdapter {
 
+        var onPreferencesChange: ((PublisherSettingsPreferences) -> Void)?
         var onChange: (() -> Void)?
 
         private var current: PublisherAdvancedSettings?
@@ -35,6 +36,7 @@ import Foundation
             let settings = preferences.toPublisherAdvancedSettings()
             let changed = current != nil && settings != current
             current = settings
+            onPreferencesChange?(preferences)
             if changed {
                 onChange?()
             }

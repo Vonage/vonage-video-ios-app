@@ -13,8 +13,8 @@ public enum AudioSettingsConstants {
     // OT SDK valid range: 6000 – 510 000 bps.
     static let audioBitrateRange: ClosedRange<Double> = 6_000...510_000
     static let audioBitrateStep: Double = 2_000
-    /// The default custom maximum audio bitrate in bits per second (40 kbps). https://vonage.github.io/video-docs/video-react-native-reference/latest/OTPublisher.html#:~:text=The%20default%20value%20is%2040%2C000.
-    static let defaultAudioBitrate: Int32 = 40_000
+    /// Initial custom value matches VERA web (128 kbps). Automatic mode still defers to the SDK.
+    static let defaultAudioBitrate: Int32 = 128_000
 
 }
 
@@ -33,6 +33,8 @@ public final class SettingsViewModel {
     /// Controls whether the settings view is currently presented.
     /// Set to `false` to dismiss the settings sheet.
     public var isPresented: Bool = true
+
+    public let advancedNoiseSuppressionAvailable: Bool
 
     /// The current publisher settings preferences being edited.
     /// Changes are auto-persisted after a short debounce.
@@ -120,6 +122,7 @@ public final class SettingsViewModel {
     /// The repository responsible for persisting and retrieving publisher settings.
     @ObservationIgnored
     private let repository: PublisherSettingsRepository
+    @ObservationIgnored private var noiseSuppressionCancellable: AnyCancellable?
 
     /// Emits on every `settingsPreference` mutation to drive the debounced auto-save.
     /// Replaces the former `@Published` projected publisher used by the Combine pipeline.
@@ -165,9 +168,11 @@ public final class SettingsViewModel {
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
         autoSaveDebounce: TimeInterval = 0.3,
+        advancedNoiseSuppressionAvailable: Bool = true,
         showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
+        self.advancedNoiseSuppressionAvailable = advancedNoiseSuppressionAvailable
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
         self.showsTranscriptionSummary = showsTranscriptionSummary
@@ -214,6 +219,15 @@ public final class SettingsViewModel {
 
         settingsPreference = await repository.getPreferences()
         startAutoSave()
+        noiseSuppressionCancellable = repository.preferencesPublisher
+            .map(\.advancedNoiseSuppressionEnabled)
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                guard let self, self.settingsPreference.advancedNoiseSuppressionEnabled != enabled else { return }
+                self.settingsPreference.advancedNoiseSuppressionEnabled = enabled
+            }
     }
 
     /// Dismisses the settings view after ensuring all pending changes are saved.

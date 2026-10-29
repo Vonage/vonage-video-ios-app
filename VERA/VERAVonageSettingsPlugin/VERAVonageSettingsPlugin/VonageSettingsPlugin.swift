@@ -203,6 +203,10 @@ extension PublisherAdvancedSettings {
         videoBitratePreset == other.videoBitratePreset
             && maxVideoBitrate == other.maxVideoBitrate
             && degradationPreference == other.degradationPreference
+            && selfViewMirroringEnabled == other.selfViewMirroringEnabled
+            && cameraPosition == other.cameraPosition
+            && advancedNoiseSuppressionEnabled == other.advancedNoiseSuppressionEnabled
+            && cameraContentHint == other.cameraContentHint
     }
 
     fileprivate func hasEqualRepublishSettings(to other: Self) -> Bool {

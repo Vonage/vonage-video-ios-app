@@ -8,6 +8,7 @@ import CoreVideo
 import Foundation
 import OpenTok
 import ReplayKit
+import VERAScreenShare
 
 /// Feeds borrowed ReplayKit frames synchronously into the SDK using one owned output buffer.
 /// Control callbacks never wait for rendering or hold a lock while invoking SDK consumers.
@@ -21,9 +22,11 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
     private let inFlight = DispatchGroup()
     private let retransmitQueue = DispatchQueue(label: "com.vonage.VERA.screenshare.retransmit")
     private let retransmitInterval: DispatchTimeInterval
+    private let settings: ScreenShareVideoSettings
+    private let minimumFrameSpacing: DispatchTimeInterval
 
     // Protected by controlLock.
-    private var storedVideoContentHint: OTVideoContentHint = .text
+    private var storedVideoContentHint: OTVideoContentHint = .detail
     private var storedVideoCaptureConsumer: OTVideoCaptureConsumer?
     private var capturing = false
     private var isSessionReady = false
@@ -42,13 +45,18 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
     private var lastOrientation: OTVideoOrientation = .up
     private var lastFrameTimestamp: CMTime?
     private var timestampCycle: UInt64 = 0
+    private var lastDeliveryTime: TimeInterval?
+    private var deliveryCycle: UInt64 = 0
 
-    let maxEdgeSizeLimit: CGFloat = 1280
-    let edgeDimensionCommonFactor: CGFloat = 16
     private static let duplicateThresholdSeconds = 0.002
 
-    init(retransmitInterval: DispatchTimeInterval = .milliseconds(250)) {
+    init(
+        settings: ScreenShareVideoSettings = .init(),
+        retransmitInterval: DispatchTimeInterval = .milliseconds(250)
+    ) {
+        self.settings = settings
         self.retransmitInterval = retransmitInterval
+        minimumFrameSpacing = .milliseconds(Int(ceil(settings.minimumFrameInterval * 1000)))
         super.init()
     }
 
@@ -168,6 +176,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
 
     func captureSettings(_ videoFormat: OTVideoFormat) -> Int32 {
         videoFormat.pixelFormat = .ARGB
+        if let fps = settings.frameRate { videoFormat.estimatedFramesPerSecond = Double(fps) }
         return 0
     }
 
@@ -216,6 +225,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
             return
         }
         defer { finishDelivery(delivery) }
+        guard !isWithinMinimumFrameInterval(of: delivery) else { return }
         guard let source = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         lastFrameTimestamp = pts
@@ -245,6 +255,18 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
         // Neither SDK code nor consumer callbacks execute under controlLock. The output
         // buffer and borrowed input remain alive for this synchronous call.
         delivery.consumer.consumeFrame(videoFrame)
+        recordDelivery(delivery)
+    }
+
+    // Called only while holding conversionLock. A new capture cycle starts unthrottled.
+    private func isWithinMinimumFrameInterval(of delivery: Delivery) -> Bool {
+        guard deliveryCycle == delivery.cycle, let lastDeliveryTime else { return false }
+        return ProcessInfo.processInfo.systemUptime - lastDeliveryTime < settings.minimumFrameInterval
+    }
+
+    private func recordDelivery(_ delivery: Delivery) {
+        lastDeliveryTime = ProcessInfo.processInfo.systemUptime
+        deliveryCycle = delivery.cycle
     }
 
     private func sampleOrientation(from sampleBuffer: CMSampleBuffer) -> CGImagePropertyOrientation {
@@ -271,7 +293,10 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
             invalidateTimerLocked()
             let generation = timerGeneration
             let timer = DispatchSource.makeTimerSource(flags: .strict, queue: retransmitQueue)
-            timer.schedule(deadline: .now() + retransmitInterval, leeway: .milliseconds(20))
+            // Static frames never repeat faster than the configured frame rate.
+            let now = DispatchTime.now()
+            timer.schedule(
+                deadline: max(now + retransmitInterval, now + minimumFrameSpacing), leeway: .milliseconds(20))
             timer.setEventHandler { [weak self] in
                 self?.retransmitLastFrame(expectedGeneration: generation)
             }
@@ -298,6 +323,7 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
         planes.addPointer(CVPixelBufferGetBaseAddress(output))
         videoFrame.planes = planes
         delivery.consumer.consumeFrame(videoFrame)
+        recordDelivery(delivery)
     }
 
     private func releaseFrameStorage() {
@@ -322,22 +348,9 @@ extension CGImagePropertyOrientation {
 // MARK: - Buffer management
 
 extension ScreenShareVideoCapturer {
-    /// Returns output dimensions capped at `maxEdgeSizeLimit` on the longest edge,
-    /// rounded up to the nearest multiple of `edgeDimensionCommonFactor` for codec alignment.
+    /// Returns output dimensions within the independent screen-sharing bounds.
     fileprivate func outputSize(for inputWidth: Int, _ inputHeight: Int) -> (width: Int, height: Int) {
-        var w = CGFloat(inputWidth)
-        var h = CGFloat(inputHeight)
-        let longest = max(w, h)
-        if longest > maxEdgeSizeLimit {
-            let scale = maxEdgeSizeLimit / longest
-            w = (w * scale).rounded()
-            h = (h * scale).rounded()
-        }
-        let align = { (v: CGFloat) -> Int in
-            let r = v.truncatingRemainder(dividingBy: self.edgeDimensionCommonFactor)
-            return r == 0 ? Int(v) : Int(v + (self.edgeDimensionCommonFactor - r))
-        }
-        return (align(w), align(h))
+        settings.outputDimensions(width: inputWidth, height: inputHeight)
     }
 
     fileprivate func checkSize(width srcWidth: Int, height srcHeight: Int) {
@@ -353,6 +366,7 @@ extension ScreenShareVideoCapturer {
         // Recreate OTVideoFrame with a fresh format — mutating the existing format
         // in-place is unreliable because OTVideoFrame caches internal state at init time.
         let newFormat = OTVideoFormat(argbWithWidth: UInt32(width), height: UInt32(height))
+        if let fps = settings.frameRate { newFormat.estimatedFramesPerSecond = Double(fps) }
         newFormat.bytesPerRow.removeAllObjects()
         newFormat.bytesPerRow.addObjects(from: [width * 4])
         videoFrame = OTVideoFrame(format: newFormat)

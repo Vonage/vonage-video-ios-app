@@ -9,9 +9,8 @@ import VERADomain
 extension VERAPublisher {
     public func setNoiseSuppression(enabled: Bool) throws {
 
-        removeAudioTransformer(NoiseSuppression.key)
-
         if enabled {
+            guard !audioTransformers.contains(where: { $0.key == NoiseSuppression.key }) else { return }
             let params = NoiseSuppression().params()
 
             let vonageTransformer = try transformerFactory.makeAudioTransformer(
@@ -19,6 +18,8 @@ extension VERAPublisher {
                 params: params)
 
             addAudioTransformer(vonageTransformer)
+        } else {
+            removeAudioTransformer(NoiseSuppression.key)
         }
     }
 }
