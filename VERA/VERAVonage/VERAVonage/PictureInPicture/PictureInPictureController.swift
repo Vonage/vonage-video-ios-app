@@ -93,9 +93,9 @@ final class PictureInPictureController: NSObject {
         pipController?.delegate = nil
         pipController = nil
         isInPictureInPicture = false
-        let layer = sampleBufferVideoCallView.sampleBufferDisplayLayer
-        if layer.requiresFlushToResumeDecoding {
-            layer.flush()
+        let renderer = sampleBufferVideoCallView.sampleBufferDisplayLayer.sampleBufferRenderer
+        if renderer.requiresFlushToResumeDecoding {
+            renderer.flush()
         }
     }
 
@@ -118,8 +118,9 @@ extension PictureInPictureController: AVPictureInPictureControllerDelegate {
     func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-        if sampleBufferVideoCallView.sampleBufferDisplayLayer.requiresFlushToResumeDecoding {
-            sampleBufferVideoCallView.sampleBufferDisplayLayer.flush()
+        let renderer = sampleBufferVideoCallView.sampleBufferDisplayLayer.sampleBufferRenderer
+        if renderer.requiresFlushToResumeDecoding {
+            renderer.flush()
         }
     }
 
