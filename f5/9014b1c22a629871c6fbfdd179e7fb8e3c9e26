@@ -1,0 +1,99 @@
+VERA/Tuist/ProjectDescriptionHelpers/BuildSettingsConfig.swift
+  s_1b286860b842d7::t_d2c2f50042d363 53
+VERA/VERASettings/VERASettings/Data/UserDefaultsSettingsRepository.swift
+  s_bcca8dcaf31ee9::t_72d4f8bd4eb423 26,30,40
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_1b286860b842d7::t_9dcd65e2b7a575 46
+  s_1b286860b842d7::t_05c6353807da44 55-56
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_1b286860b842d7::t_096520b23fc96e 180-181,192
+  s_1b286860b842d7::t_c9af9c0a6721d9 112-113,124
+VERA/VERAReactions/VERAReactions/Data/DefaultReactionsRepository.swift
+  s_70dd8e68302613::t_3dd82cd04a0590 7,18,23
+VERA/Project.swift
+  s_1b286860b842d7::t_2eecd627bdf801 504-505
+VERA/VERACaptions/VERACaptions/Data/DefaultCaptionsRepository.swift
+  s_3ac29a9fb27959::t_630d8069c24bf8 17,22
+VERA/Tuist/ProjectDescriptionHelpers/Scripts+SwiftLint.swift
+  s_cc71d9bf976587::t_80a34fe5132c71 6
+VERA/VERADomain/VERADomain/Participant.swift
+  s_481fddeadc3a74::t_6350c184713235 33-37,52,56,69-70,83,95,98-99
+  s_700e8fd489e245::t_a73319f155efce 22
+  s_481fddeadc3a74::t_5d418dbb6ace10 100
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  s_0414761b53d242::t_3f2fe80f14aa09 49-55,160-161,172,229-230,242
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVonagePublisher.swift
+  s_1b286860b842d7::t_ae8be122060d9b 24-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f59014b1c22a629871c6fbfdd179e7fb8e3c9e26",
+  "prompts": {},
+  "sessions": {
+    "s_0414761b53d242": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793221450209292000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_1b286860b842d7": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_5ec152f3-8277-4b7b-8207-0a8f354c1ae4",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_3ac29a9fb27959": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793259075935779000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_481fddeadc3a74": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793221360556210000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_700e8fd489e245": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793221354803100000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_70dd8e68302613": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793262796897102000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_bcca8dcaf31ee9": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793259079654614000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_cc71d9bf976587": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793102448109408000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
