@@ -278,6 +278,13 @@ struct ParticipantVideoCardOverlays: View {
                         isMicEnabled: isMicEnabled
                     )
                     .accessibilityElement(children: .contain)
+                } else if isLocal {
+                    LocalMutedMicIndicator()
+                        .microphoneStateAccessibilityAnchor(
+                            participantID: participantID,
+                            isMicEnabled: isMicEnabled
+                        )
+                        .accessibilityElement(children: .contain)
                 } else {
                     MicIndicator(
                         participantID: participantID,
@@ -394,6 +401,27 @@ struct MicIndicator: View {
             .frame(
                 width: ParticipantVideoCardConstants.indicatorSize,
                 height: ParticipantVideoCardConstants.indicatorSize)
+    }
+}
+
+/// Muted mic indicator for the local tile, sized like `AudioLevelIndicatorView`
+/// so muting and unmuting swaps the indicator without resizing it.
+struct LocalMutedMicIndicator: View {
+    @Environment(\.meetingRoomTheme) private var theme
+
+    var body: some View {
+        VERACommonUIAsset.Images.micMuteLine.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .foregroundColor(theme.error)
+            .padding(ParticipantVideoCardConstants.indicatorPadding)
+            .frame(
+                width: AudioLevelIndicatorConstants.size,
+                height: AudioLevelIndicatorConstants.size
+            )
+            .background(
+                Color.black.opacity(ParticipantVideoCardConstants.indicatorBackgroundOpacity),
+                in: Circle())
     }
 }
 
