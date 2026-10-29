@@ -351,8 +351,8 @@ struct WaitingRoomViewModelTests {
 
     func makeSUT(
         roomName: RoomName = "heart-of-gold",
-        cameraPreviewProviderRepository: CameraPreviewProviderRepository = makeMockCameraPreviewProviderRepository(),
-        cameraDevicesRepository: CameraDevicesRepository = makeMockCameraDevicesRepository(),
+        cameraPreviewProviderRepository: CameraPreviewProviderRepository? = nil,
+        cameraDevicesRepository: CameraDevicesRepository? = nil,
         userRepository: UserRepository = makeMockUserRepository(),
         checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase =
             makeMockCheckMicrophoneAuthorizationStatusUseCase(),
@@ -362,7 +362,10 @@ struct WaitingRoomViewModelTests {
             makeMockCheckCameraAuthorizationStatusUseCase(),
         actionHandler: ActionHandler? = nil
     ) -> WaitingRoomViewModel {
-        WaitingRoomViewModel(
+        let cameraPreviewProviderRepository =
+            cameraPreviewProviderRepository ?? makeMockCameraPreviewProviderRepository()
+        let cameraDevicesRepository = cameraDevicesRepository ?? makeMockCameraDevicesRepository()
+        return WaitingRoomViewModel(
             roomName: roomName,
             cameraPreviewProviderRepository: cameraPreviewProviderRepository,
             cameraDevicesRepository: cameraDevicesRepository,

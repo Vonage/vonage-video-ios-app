@@ -5,7 +5,7 @@
 import SwiftUI
 
 @MainActor
-public protocol BottomItemPresentable {
+public protocol BottomItemPresentable: Sendable {
     var id: String { get }
     var label: String { get }
     var accessibilityIdentifier: String? { get }
