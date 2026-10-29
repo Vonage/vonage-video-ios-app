@@ -27,6 +27,8 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
     @Published public private(set) var canStartPictureInPicture = false
     @Published public private(set) var pipTargetParticipantId: String?
 
+    var isRecording: Bool { pipController.isRecording }
+
     private let participantSelector = PictureInPictureParticipantSelector()
     private let pipController = PictureInPictureController()
 
@@ -104,11 +106,27 @@ public final class PictureInPictureSessionOrchestrator: ObservableObject {
             }
         }
 
+        observeRecordingState(call.archivingState)
+
         call.callState
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard state == .disconnected else { return }
                 self?.tearDown()
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Map to a value before scheduling; only the main actor mutates the PiP surface.
+    func observeRecordingState(_ states: AnyPublisher<ArchivingState, Never>) {
+        states
+            .map(\.isArchiving)
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { @Sendable [weak self] isRecording in
+                MainActor.assumeIsolated {
+                    self?.pipController.isRecording = isRecording
+                }
             }
             .store(in: &cancellables)
     }
