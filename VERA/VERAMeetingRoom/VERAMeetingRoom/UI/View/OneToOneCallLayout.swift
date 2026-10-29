@@ -28,6 +28,11 @@ struct FloatingSelfViewGeometry {
     let tileSize: CGSize
     let centers: CGRect
 
+    /// The voice activity indicator follows the tile, from 16pt up to the standard 32pt.
+    var audioIndicatorSize: CGFloat {
+        min(32, max(16, min(tileSize.width, tileSize.height) * 0.2))
+    }
+
     /// - Parameter videoAspectRatio: Width over height of the self-view video; the tile takes its shape.
     init(
         container: CGSize, bottomInset: CGFloat, labelClearance: CGFloat = 48, videoAspectRatio: CGFloat = 0.75
@@ -95,28 +100,31 @@ struct OneToOneCallLayout: View {
             ZStack(alignment: .topLeading) {
                 Color.clear
 
-                ParticipantVideoCard(participant: participants.local, activeSpeakerId: nil, fillsAvailableSpace: true)
-                    .frame(width: geometry.tileSize.width, height: geometry.tileSize.height)
-                    .contentShape(Rectangle())
-                    .position(center)
-                    .trackingVisibility(of: participants.local)
-                    .accessibilityAnchor("meeting-self-view-floating")
-                    .accessibilityAction(named: Text("Move to top left", bundle: .module)) { move(to: .topLeft) }
-                    .accessibilityAction(named: Text("Move to top right", bundle: .module)) { move(to: .topRight) }
-                    .accessibilityAction(named: Text("Move to bottom left", bundle: .module)) { move(to: .bottomLeft) }
-                    .accessibilityAction(named: Text("Move to bottom right", bundle: .module)) {
-                        move(to: .bottomRight)
-                    }
-                    .gesture(
-                        DragGesture(minimumDistance: 8)
-                            .onChanged { dragOffset = $0.translation }
-                            .onEnded { value in
-                                let destination = CGPoint(
-                                    x: anchor.x + value.translation.width,
-                                    y: anchor.y + value.translation.height)
-                                move(to: geometry.nearestCorner(to: destination))
-                            }
-                    )
+                ParticipantVideoCard(
+                    participant: participants.local, activeSpeakerId: nil, fillsAvailableSpace: true,
+                    audioIndicatorSize: geometry.audioIndicatorSize
+                )
+                .frame(width: geometry.tileSize.width, height: geometry.tileSize.height)
+                .contentShape(Rectangle())
+                .position(center)
+                .trackingVisibility(of: participants.local)
+                .accessibilityAnchor("meeting-self-view-floating")
+                .accessibilityAction(named: Text("Move to top left", bundle: .module)) { move(to: .topLeft) }
+                .accessibilityAction(named: Text("Move to top right", bundle: .module)) { move(to: .topRight) }
+                .accessibilityAction(named: Text("Move to bottom left", bundle: .module)) { move(to: .bottomLeft) }
+                .accessibilityAction(named: Text("Move to bottom right", bundle: .module)) {
+                    move(to: .bottomRight)
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 8)
+                        .onChanged { dragOffset = $0.translation }
+                        .onEnded { value in
+                            let destination = CGPoint(
+                                x: anchor.x + value.translation.width,
+                                y: anchor.y + value.translation.height)
+                            move(to: geometry.nearestCorner(to: destination))
+                        }
+                )
             }
             .background {
                 // The far end fills the whole screen; its labels stay inside the safe area.

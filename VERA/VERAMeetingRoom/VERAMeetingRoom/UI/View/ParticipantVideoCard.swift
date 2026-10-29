@@ -68,16 +68,20 @@ struct ParticipantVideoCard: View {
     let fillsAvailableSpace: Bool
     /// When set, the card is drawn edge to edge: square corners, aspect-filled video and overlays inset by these values.
     let fullScreenOverlayInsets: EdgeInsets?
+    /// Diameter of the local voice activity indicator; `nil` keeps the standard size.
+    let audioIndicatorSize: CGFloat?
     init(
         participant: UIParticipant,
         activeSpeakerId: String?,
         fillsAvailableSpace: Bool = false,
-        fullScreenOverlayInsets: EdgeInsets? = nil
+        fullScreenOverlayInsets: EdgeInsets? = nil,
+        audioIndicatorSize: CGFloat? = nil
     ) {
         self.participant = participant
         self.activeSpeakerId = activeSpeakerId
         self.fillsAvailableSpace = fillsAvailableSpace
         self.fullScreenOverlayInsets = fullScreenOverlayInsets
+        self.audioIndicatorSize = audioIndicatorSize
     }
 
     private var cornerRadius: CGFloat {
@@ -128,7 +132,8 @@ struct ParticipantVideoCard: View {
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
                                         onTogglePin: participant.onTogglePin,
-                                        onForceMute: participant.onForceMute
+                                        onForceMute: participant.onForceMute,
+                                        audioIndicatorSize: audioIndicatorSize
                                     )
                                     .padding(fullScreenOverlayInsets ?? EdgeInsets())
                                 } else {
@@ -149,7 +154,8 @@ struct ParticipantVideoCard: View {
                                         audioLevel: participant.audioLevel,
                                         isLocal: !participant.isRemote,
                                         onTogglePin: participant.onTogglePin,
-                                        onForceMute: participant.onForceMute
+                                        onForceMute: participant.onForceMute,
+                                        audioIndicatorSize: audioIndicatorSize
                                     )
                                     .padding(fullScreenOverlayInsets ?? EdgeInsets())
                                 }
@@ -205,7 +211,8 @@ struct ParticipantVideoCard: View {
                                     audioLevel: participant.audioLevel,
                                     isLocal: !participant.isRemote,
                                     onTogglePin: participant.onTogglePin,
-                                    onForceMute: participant.onForceMute
+                                    onForceMute: participant.onForceMute,
+                                    audioIndicatorSize: audioIndicatorSize
                                 )
                                 .padding(fullScreenOverlayInsets ?? EdgeInsets())
                             }
@@ -239,6 +246,7 @@ struct ParticipantVideoCardOverlays: View {
     let isLocal: Bool
     var onTogglePin: (() -> Void)?
     var onForceMute: (() -> Void)?
+    var audioIndicatorSize: CGFloat?
 
     var body: some View {
         VStack {
@@ -262,7 +270,8 @@ struct ParticipantVideoCardOverlays: View {
                     ZStack {
                         AudioLevelIndicatorView(
                             audioLevel: audioLevel,
-                            isMicEnabled: isMicEnabled)
+                            isMicEnabled: isMicEnabled,
+                            size: audioIndicatorSize ?? AudioLevelIndicatorConstants.size)
                     }
                     .microphoneStateAccessibilityAnchor(
                         participantID: participantID,

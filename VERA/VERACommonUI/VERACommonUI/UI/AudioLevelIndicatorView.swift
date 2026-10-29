@@ -5,9 +5,9 @@
 import SwiftUI
 
 /// Constants for AudioLevelIndicatorView layout and appearance
-enum AudioLevelIndicatorConstants {
+public enum AudioLevelIndicatorConstants {
     /// Size of the circular indicator
-    static let size: CGFloat = 32
+    public static let size: CGFloat = 32
 
     /// Width of each bar
     static let barWidth: CGFloat = 4
@@ -46,11 +46,16 @@ public struct AudioLevelIndicatorView: View {
 
     private let audioLevel: Float
     private let isMicEnabled: Bool
+    private let size: CGFloat
 
-    public init(audioLevel: Float, isMicEnabled: Bool) {
+    /// - Parameter size: Diameter of the indicator; bars and spacing scale with it.
+    public init(audioLevel: Float, isMicEnabled: Bool, size: CGFloat = AudioLevelIndicatorConstants.size) {
         self.audioLevel = audioLevel
         self.isMicEnabled = isMicEnabled
+        self.size = size
     }
+
+    private var scale: CGFloat { size / AudioLevelIndicatorConstants.size }
 
     private var bars: [CGFloat] {
         AudioLevelIndicatorConstants.barMultipliers.map { CGFloat(audioLevel) * $0 }
@@ -58,13 +63,13 @@ public struct AudioLevelIndicatorView: View {
 
     public var body: some View {
         if isMicEnabled {
-            HStack(spacing: AudioLevelIndicatorConstants.barSpacing) {
+            HStack(spacing: AudioLevelIndicatorConstants.barSpacing * scale) {
                 ForEach(0..<bars.count, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: AudioLevelIndicatorConstants.barCornerRadius)
+                    RoundedRectangle(cornerRadius: AudioLevelIndicatorConstants.barCornerRadius * scale)
                         .fill(Color.white)
-                        .frame(width: AudioLevelIndicatorConstants.barWidth)
+                        .frame(width: AudioLevelIndicatorConstants.barWidth * scale)
                         .frame(
-                            height: AudioLevelIndicatorConstants.size
+                            height: size
                                 * min(
                                     max(bars[index], AudioLevelIndicatorConstants.minBarRatio),
                                     AudioLevelIndicatorConstants.maxBarRatio)
@@ -72,10 +77,7 @@ public struct AudioLevelIndicatorView: View {
                         .shadow(radius: AudioLevelIndicatorConstants.barShadowRadius)
                 }
             }
-            .frame(
-                width: AudioLevelIndicatorConstants.size,
-                height: AudioLevelIndicatorConstants.size
-            )
+            .frame(width: size, height: size)
             .background(Circle().fill(theme.primary))
             .animation(.easeInOut(duration: 0.15), value: audioLevel)
         }

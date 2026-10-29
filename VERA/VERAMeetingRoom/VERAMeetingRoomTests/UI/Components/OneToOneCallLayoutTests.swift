@@ -100,6 +100,23 @@ struct OneToOneCallLayoutTests {
         #expect(max(geometry.tileSize.width, geometry.tileSize.height) <= 192 + 0.001)
     }
 
+    @Test(
+        "The voice activity indicator scales with the self-view tile",
+        arguments: [
+            (CGSize(width: 390, height: 720), CGFloat(3.0 / 4.0)),
+            (CGSize(width: 780, height: 320), CGFloat(16.0 / 9.0)),
+            (CGSize(width: 1, height: 1), CGFloat(3.0 / 4.0)),
+        ])
+    func indicatorScalesWithTile(container: CGSize, ratio: CGFloat) {
+        let geometry = FloatingSelfViewGeometry(container: container, bottomInset: 64, videoAspectRatio: ratio)
+        let shortSide = min(geometry.tileSize.width, geometry.tileSize.height)
+        #expect(geometry.audioIndicatorSize <= 32)
+        #expect(geometry.audioIndicatorSize >= 16)
+        if shortSide >= 80 {
+            #expect(abs(geometry.audioIndicatorSize - shortSide * 0.2) < 0.001)
+        }
+    }
+
     @Test("A portrait self-view keeps the existing tile size")
     func portraitTileUnchanged() {
         let geometry = FloatingSelfViewGeometry(container: CGSize(width: 390, height: 720), bottomInset: 64)
