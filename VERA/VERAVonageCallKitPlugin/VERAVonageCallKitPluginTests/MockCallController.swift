@@ -13,6 +13,7 @@ final class MockCallController: CallControllerProtocol {
         case startCall(callID: UUID, handle: String, isVideo: Bool)
         case endCall(callID: UUID)
         case setHeld(callID: UUID, onHold: Bool)
+        case setMuted(callID: UUID, isMuted: Bool)
     }
 
     var recordedActions: [Action] = []
@@ -43,5 +44,15 @@ final class MockCallController: CallControllerProtocol {
         if let error = errorToReturn {
             throw error
         }
+    }
+
+    func request(_ transaction: CXTransaction, completion: @escaping @Sendable (Error?) -> Void) {
+        requestCallCount += 1
+
+        for case let mutedAction as CXSetMutedCallAction in transaction.actions {
+            recordedActions.append(.setMuted(callID: mutedAction.callUUID, isMuted: mutedAction.isMuted))
+        }
+
+        completion(errorToReturn)
     }
 }

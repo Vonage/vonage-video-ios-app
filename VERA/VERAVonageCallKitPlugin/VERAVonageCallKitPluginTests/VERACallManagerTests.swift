@@ -162,4 +162,31 @@ struct VERACallManagerTests {
 
         #expect(recordedHandle == handle)
     }
+
+    // MARK: - Set Muted Tests
+
+    @Test(arguments: [true, false])
+    func setMutedShouldRequestSetMutedTransaction(isMuted: Bool) async {
+        let (sut, mockController) = makeSUT()
+        let callID = UUID()
+
+        let receivedError = await withCheckedContinuation { continuation in
+            sut.setMuted(callID: callID, isMuted: isMuted) { continuation.resume(returning: $0) }
+        }
+
+        #expect(mockController.requestCallCount == 1)
+        #expect(mockController.recordedActions == [.setMuted(callID: callID, isMuted: isMuted)])
+        #expect(receivedError == nil)
+    }
+
+    @Test func setMutedShouldPassErrorToCompletion() async {
+        let (sut, mockController) = makeSUT()
+        mockController.errorToReturn = NSError(domain: "test", code: -1)
+
+        let receivedError = await withCheckedContinuation { continuation in
+            sut.setMuted(callID: UUID(), isMuted: true) { continuation.resume(returning: $0) }
+        }
+
+        #expect(receivedError != nil)
+    }
 }
