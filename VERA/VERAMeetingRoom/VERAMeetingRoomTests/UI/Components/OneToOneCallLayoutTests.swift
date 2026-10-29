@@ -183,7 +183,10 @@ struct OneToOneCallLayoutTests {
             .frame(width: size.width, height: size.height)
             .preferredColorScheme(.dark)
         let image = try #require(ImageRenderer(content: content).cgImage)
-        let geometry = FloatingSelfViewGeometry(container: size, bottomInset: 0)
+        let local = participants[0].videoDimensions
+        let geometry = FloatingSelfViewGeometry(
+            container: size, bottomInset: 0, videoAspectRatio: local.width / local.height
+        )
         let localCenter = geometry.center(for: .bottomRight)
         let localIcon = CGRect(
             x: localCenter.x + geometry.tileSize.width / 2 - 48,
