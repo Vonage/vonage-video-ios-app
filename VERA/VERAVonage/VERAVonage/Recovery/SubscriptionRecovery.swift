@@ -20,7 +20,9 @@ final class SubscriptionRecovery {
 
     private var entries: [String: Entry] = [:]
     var wait: @MainActor (UInt64) async throws -> Void = { try await Task.sleep(nanoseconds: $0) }
-    var onError: @MainActor (Error) -> Void = { _ in }
+    var onError: @MainActor (Error) -> Void = { _ in
+        // No-op until the call assigns a handler. An exhausted subscription then stays local.
+    }
 
     func add(
         streamID: String,
