@@ -84,14 +84,19 @@ appId: ${APP_ID}
 - assertVisible:
     id: "settings-captions-language-picker"
 
-# Scroll to reveal General Section
-- swipe:
-    direction: "UP"
-    duration: 500
+# Scroll to the General section. A single swipe does not always reach the reset button.
+- scrollUntilVisible:
+    element:
+      id: "settings-overlay-stats-toggle"
+    direction: DOWN
 
-# General Section
 - assertVisible:
     id: "settings-overlay-stats-toggle"
+
+- scrollUntilVisible:
+    element:
+      id: "settings-reset-defaults-button"
+    direction: DOWN
 
 - assertVisible:
     id: "settings-reset-defaults-button"
