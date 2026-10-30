@@ -135,16 +135,16 @@ struct RotatingLogFileSetTests {
         defer { cleanup(directory) }
         let sut = makeSUT(directory: directory)
 
-        // Fills files 1 to 5, then wraps back onto file 1.
-        for index in 1...5 {
-            await sut.write(Data("file-\(index)-x".utf8))
+        // Each write fills one file exactly, then the next write wraps onto file 1.
+        for _ in 1...5 {
+            await sut.write(Data("0123456789".utf8))
         }
         await sut.write(Data("wrapped".utf8))
         let urls = await sut.fileURLs()
 
         #expect(urls.count == 5)
         #expect(contents(of: urls[0]) == "wrapped")
-        #expect(contents(of: urls[1]) == "file-2-x")
+        #expect(contents(of: urls[1]) == "0123456789")
     }
 
     @Test("A relaunch keeps appending to the file that was written last")
@@ -199,6 +199,45 @@ struct RotatingLogFileSetTests {
 
         #expect(clearedURLs.isEmpty)
         #expect(FileManager.default.fileExists(atPath: other.path))
+    }
+
+    @Test("Clearing leaves files whose prefix is not a session timestamp")
+    func clearKeepsFilesWithAnInvalidTimestamp() async throws {
+        let directory = makeDirectory()
+        defer { cleanup(directory) }
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let unrelated = directory.appendingPathComponent("readme_log.1")
+        try Data("keep".utf8).write(to: unrelated)
+        let sut = makeSUT(directory: directory)
+
+        await sut.clear()
+
+        #expect(FileManager.default.fileExists(atPath: unrelated.path))
+        #expect(contents(of: unrelated) == "keep")
+    }
+
+    @Test("An empty write and a nonpositive file size create no files")
+    func ignoresEmptyAndUnboundedWrites() async {
+        let directory = makeDirectory()
+        defer { cleanup(directory) }
+        let sut = makeSUT(directory: directory, maxFileSize: 0, maxFileCount: 0)
+
+        await sut.write(Data())
+        await sut.write(Data("hello".utf8))
+        let urls = await sut.fileURLs()
+
+        #expect(urls.isEmpty)
+
+        let clamped = makeSUT(directory: directory, maxFileCount: 0)
+        await clamped.write(Data("one".utf8))
+        let clampedURLs = await clamped.fileURLs()
+        #expect(clampedURLs.count == 1)
+    }
+
+    @Test("The default directory lives under Library/Logs/Vonage")
+    func defaultDirectoryIsTheVonageLogFolder() {
+        let directory = RotatingLogFileSet.defaultDirectory
+        #expect(directory.path.hasSuffix("Logs/Vonage"))
     }
 
     private func timestamp(of url: URL) -> String {

@@ -40,6 +40,7 @@ public enum VERATestSchemes {
             testableTarget("VERADomainTests", in: "VERADomain"),
             testableTarget("VERAConfigurationTests", in: "VERAConfiguration"),
             testableTarget("VERAMeetingRoomTests", in: "VERAMeetingRoom"),
+            testableTarget("VERALoggerTests", in: "VERALogger"),
         ]
         if isOktaEnabled() {
             targets.append(testableTarget("VERAOKTATests", in: "VERAOKTA"))
