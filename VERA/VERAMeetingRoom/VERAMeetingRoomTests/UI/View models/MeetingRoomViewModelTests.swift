@@ -722,6 +722,7 @@ struct MeetingRoomViewModelTests {
     @Test(
         "Given toggling the microphone presents a settings alert, When the user confirms, Then the app navigates to App Settings"
     )
+    @MainActor
     func toogleMicShouldShowSettingsMessageConfirmAndMoveToAppSetting() async {
         let mockCheckMicUseCase = makeMockCheckMicrophoneAuthorizationStatusUseCase(permissionStatus: .denied)
 
@@ -771,6 +772,7 @@ struct MeetingRoomViewModelTests {
     @Test(
         "Given toggling the camera presents the Alert Settings, When the user confirms, Then the app navigates to App Settings"
     )
+    @MainActor
     func toogleCameraShouldShowSettingsMessageUserConfirmsAndNavigatesToAppSetting() async {
         let mockCheckCameraUseCase = makeMockCheckCameraAuthorizationStatusUseCase(permissionStatus: .denied)
 

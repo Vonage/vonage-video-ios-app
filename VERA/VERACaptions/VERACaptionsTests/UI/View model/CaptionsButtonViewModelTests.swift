@@ -9,8 +9,9 @@ import VERADomain
 
 @testable import VERACaptions
 
-@Suite("CaptionsButtonViewModel Tests")
 @MainActor
+@Suite("CaptionsButtonViewModel Tests")
+
 struct CaptionsButtonViewModelTests {
 
     // MARK: - Initial State
@@ -203,6 +204,23 @@ struct CaptionsButtonViewModelTests {
         #expect(mocks.disableUseCase.callCount == 1)
     }
 
+    @Test("Background activation state reaches the UI-owned button")
+    func backgroundActivationStateDelivery() async throws {
+        let (sut, mocks) = makeSUT()
+        sut.setup()
+        let source = mocks.statusDataSource
+        await Task.detached { source.set(captionsState: .enabled("background")) }.value
+
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while sut.state != .enabled("background") && ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(1))
+        }
+
+        MainActor.preconditionIsolated()
+        #expect(sut.state == .enabled("background"))
+        #expect(sut.isActive)
+    }
+
     // MARK: - Helpers
 
     private struct Mocks {
@@ -270,7 +288,8 @@ struct CaptionsButtonViewModelTests {
 
 // MARK: - Test Doubles
 
-private final class MockEnableCaptionsUseCase: EnableCaptionsUseCase, @unchecked Sendable {
+@MainActor
+private final class MockEnableCaptionsUseCase: EnableCaptionsUseCase {
     var callCount = 0
     var lastSessionKey: String?
     var shouldThrow = false

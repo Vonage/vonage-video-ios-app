@@ -10,6 +10,7 @@ import VERAArchivingTestHelpers
 import VERADomain
 import VERATestHelpers
 
+@MainActor
 @Suite("Archive button view model tests")
 struct ArchiveButtonViewModelTests {
 
@@ -331,30 +332,119 @@ struct ArchiveButtonViewModelTests {
         #expect(startUseCase.lastRequest?.kind == .recording)
     }
 
-    @Test func transcriptionTapShowsStartTranscriptionConfirmation() async {
+    @Test func recordingStartAndStopConfirmationsOfferCancel() async {
+        let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
-        let sut = makeSUT(kind: .transcription, showAlert: alertSpy.capture)
+        let sut = makeSUT(archivingStatusDataSource: dataSource, showAlert: alertSpy.capture)
 
         sut.onTap()
+        #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
 
-        #expect(alertSpy.capturedAlert?.title == String(localized: "Start Transcription?"))
+        sut.setup()
+        dataSource._archivingState.value = .archiving("recording-1")
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
+
+        sut.onTap()
+        #expect(alertSpy.capturedAlert?.title == String(localized: "Stop Recording?"))
+        #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
     }
 
-    @Test func transcriptionStartRequestsTranscriptionKind() async {
+    @Test func recordingStartSendsNoTranscriptionOptions() async {
         let startUseCase = SpyStartArchivingUseCase()
         let alertSpy = AlertSpy()
-        let sut = makeSUT(
-            kind: .transcription,
-            startArchivingUseCase: startUseCase,
-            showAlert: alertSpy.capture)
+        let sut = makeSUT(startArchivingUseCase: startUseCase, showAlert: alertSpy.capture)
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
+        #expect(startUseCase.lastRequest?.transcriptionOptions == nil)
+    }
+
+    @Test func transcriptionTapShowsStartOptionsInsteadOfAlert() async {
+        let alertSpy = AlertSpy()
+        let sut = makeSUT(kind: .transcription, showAlert: alertSpy.capture)
+
+        sut.onTap()
+
+        #expect(await poll(read: { sut.isShowingTranscriptionOptions }) { $0 })
+        #expect(alertSpy.capturedAlert == nil)
+    }
+
+    @Test func transcriptionOptionsDefaultToSummaryOn() async {
+        let sut = makeSUT(kind: .transcription)
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+
+        #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: true))
+    }
+
+    @Test func transcriptionStartOptionsUseTheLoadedDefaults() async {
+        let sut = makeSUT(
+            kind: .transcription,
+            loadTranscriptionDefaults: { TranscriptionOptions(hasSummary: false) })
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+
+        #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: false))
+    }
+
+    @Test func transcriptionStartOptionsReloadTheDefaultsEachTime() async {
+        var savedDefault = TranscriptionOptions(hasSummary: true)
+        let sut = makeSUT(kind: .transcription, loadTranscriptionDefaults: { savedDefault })
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+        sut.cancelTranscriptionStart()
+        savedDefault = TranscriptionOptions(hasSummary: false)
+        sut.onTap()
+        _ = await poll(read: { sut.transcriptionOptions }) { $0 == savedDefault }
+
+        #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: false))
+    }
+
+    @Test func confirmingTranscriptionStartSendsDefaultOptions() async {
+        let startUseCase = SpyStartArchivingUseCase()
+        let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+        sut.confirmTranscriptionStart()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(sut.isShowingTranscriptionOptions == false)
         #expect(startUseCase.callCount == 1)
         #expect(startUseCase.lastRequest?.kind == .transcription)
         #expect(startUseCase.lastRequest?.sessionKey == "heart-of-gold")
+        #expect(startUseCase.lastRequest?.transcriptionOptions == .default)
+    }
+
+    @Test func confirmingTranscriptionStartSendsChosenOptions() async {
+        let startUseCase = SpyStartArchivingUseCase()
+        let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+        sut.transcriptionOptions.hasSummary = false
+        sut.confirmTranscriptionStart()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(startUseCase.lastRequest?.transcriptionOptions == TranscriptionOptions(hasSummary: false))
+    }
+
+    @Test func cancellingTranscriptionStartDoesNotStart() async {
+        let startUseCase = SpyStartArchivingUseCase()
+        let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
+
+        sut.onTap()
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
+        sut.cancelTranscriptionStart()
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(sut.isShowingTranscriptionOptions == false)
+        #expect(startUseCase.callCount == 0)
     }
 
     @Test func transcriptionButtonIgnoresRecordingState() async {
@@ -397,6 +487,8 @@ struct ArchiveButtonViewModelTests {
 
         sut.onTap()
         #expect(alertSpy.capturedAlert?.title == String(localized: "Stop Transcription?"))
+        #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
+        #expect(sut.isShowingTranscriptionOptions == false)
 
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
@@ -414,6 +506,7 @@ struct ArchiveButtonViewModelTests {
         startArchivingUseCase: StartArchivingUseCase = SpyStartArchivingUseCase(),
         stopArchivingUseCase: StopArchivingUseCase = SpyStopArchivingUseCase(),
         archivingStatusDataSource: ArchivingStatusDataSource = ArchivingStatusDataSourceSpy(),
+        loadTranscriptionDefaults: @escaping () async -> TranscriptionOptions = { .default },
         showAlert: @escaping (AlertItem) -> Void = { _ in }
     ) -> ArchiveButtonViewModel {
         let holder = DefaultSessionKeyHolder()
@@ -424,6 +517,7 @@ struct ArchiveButtonViewModelTests {
             startArchivingUseCase: startArchivingUseCase,
             stopArchivingUseCase: stopArchivingUseCase,
             archivingStatusDataSource: archivingStatusDataSource,
+            loadTranscriptionDefaults: loadTranscriptionDefaults,
             showAlert: showAlert
         )
     }
