@@ -393,7 +393,8 @@ public final class MeetingRoomBuilder {
         // Post-call transcription
         if _enabledFeatures.contains(.postCallTranscription) {
             let (_, transcriptionVM) = container.archivingFactory.makeArchivingButton(
-                kind: .transcription
+                kind: .transcription,
+                loadTranscriptionDefaults: container.loadTranscriptionDefaults
             ) { [weak alertPresenter] alertItem in
                 alertPresenter?.present(alertItem)
             }
