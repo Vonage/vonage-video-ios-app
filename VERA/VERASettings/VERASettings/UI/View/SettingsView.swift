@@ -43,6 +43,14 @@ public struct SettingsView: View {
     /// Whether the screen is being shown while a call is already active.
     private let callContext: CallContext
 
+    /// Whether the Captions section is shown (captions enabled for the deployment).
+    private let isCaptionsTranslationAvailable: Bool
+
+    /// Sections visible for this deployment, in ``SettingsSection/allCases`` order.
+    private var sections: [SettingsSection] {
+        SettingsSection.allCases.filter { $0 != .captions || isCaptionsTranslationAvailable }
+    }
+
     /// Currently selected section in the sidebar (iPad/Mac only).
     @State private var selectedSection: SettingsSection?
 
@@ -61,14 +69,17 @@ public struct SettingsView: View {
     /// - Parameters:
     ///   - viewModel: The settings view model managing state and actions.
     ///   - selectedSection: The initially selected section for iPad/Mac sidebar. Defaults to `.general`.
+    ///   - isCaptionsTranslationAvailable: Whether to show the Captions section. Defaults to `false`.
     public init(
         viewModel: SettingsViewModel,
         selectedSection: SettingsSection = .general,
-        callContext: CallContext = .waitingRoom
+        callContext: CallContext = .waitingRoom,
+        isCaptionsTranslationAvailable: Bool = false
     ) {
         self.viewModel = viewModel
         self.statisticsViewModel = StatisticsViewModel.placeholder
         self.callContext = callContext
+        self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -82,11 +93,13 @@ public struct SettingsView: View {
         viewModel: SettingsViewModel,
         statisticsViewModel: StatisticsViewModel,
         selectedSection: SettingsSection = .general,
-        callContext: CallContext = .activeCall
+        callContext: CallContext = .activeCall,
+        isCaptionsTranslationAvailable: Bool = false
     ) {
         self.viewModel = viewModel
         self.statisticsViewModel = statisticsViewModel
         self.callContext = callContext
+        self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
         self._selectedSection = State(initialValue: selectedSection)
     }
 
@@ -135,6 +148,15 @@ public struct SettingsView: View {
                         .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
                 }
 
+                if isCaptionsTranslationAvailable {
+                    Section {
+                        CaptionsSectionView(viewModel: viewModel, isCompactLayout: true)
+                    } header: {
+                        Text("Captions".localized)
+                            .foregroundStyle(VERACommonUIAsset.SemanticColors.textPrimary.swiftUIColor)
+                    }
+                }
+
                 StatisticsSectionScreen(
                     viewModel: viewModel,
                     statisticsViewModel: currentStatisticsViewModel,
@@ -180,7 +202,8 @@ public struct SettingsView: View {
         NavigationSplitView {
             sidebar
         } detail: {
-            detailView(for: selectedSection ?? .general)
+            // Fall back when a hidden section (e.g. Captions with captions disabled) was requested.
+            detailView(for: selectedSection.flatMap { sections.contains($0) ? $0 : nil } ?? .general)
         }
         .navigationSplitViewStyle(.balanced)
         .accessibilityIdentifier(SettingsAccessibilityID.screen)
@@ -193,7 +216,7 @@ public struct SettingsView: View {
     /// Displays section icons and names. Selected section drives the detail pane content.
     /// Changes are auto-saved; a Close button dismisses the sheet.
     private var sidebar: some View {
-        List(SettingsSection.allCases, selection: $selectedSection) { section in
+        List(sections, selection: $selectedSection) { section in
             Label(section.displayName, systemImage: section.iconName)
         }
         .navigationTitle("Settings".localized)
@@ -233,6 +256,8 @@ public struct SettingsView: View {
                 VideoSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
             case .audio:
                 AudioSectionView(viewModel: viewModel, isInActiveCall: callContext.isInActiveCall)
+            case .captions:
+                CaptionsSectionView(viewModel: viewModel)
             case .stats:
                 StatisticsSectionScreen(
                     viewModel: viewModel,

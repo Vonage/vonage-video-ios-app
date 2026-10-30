@@ -15,9 +15,20 @@ import VERAConfiguration
 ///
 /// - Note: These tests run on the iOS destination, so `pictureInPicture` (gated by
 ///   `#if !os(macOS)`) and `screenShare` (gated by `!isiOSAppOnMac`) are expected to be
-///   enabled when their flags are `true`.
+///   enabled when their flags are `true`. `callKit` is not driven by a flag: it is active
+///   on a device and inactive on the simulator, see ``callKitFeatures``.
 @Suite("Meeting room enabled features")
 struct MeetingRoomEnabledFeaturesTests {
+
+    /// `callKit` is part of every enabled set except on the iOS Simulator, where
+    /// `DependencyContainer.isCallKitSupported` is `false`.
+    static let callKitFeatures: Set<MeetingRoomFeature> = {
+        #if targetEnvironment(simulator)
+            return []
+        #else
+            return [.callKit]
+        #endif
+    }()
 
     // MARK: - Full configurations
 
@@ -29,6 +40,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: true,
             archiving: true,
             captions: true,
+            captionTranslation: true,
             chat: true,
             emojis: true,
             feedback: true,
@@ -37,14 +49,15 @@ struct MeetingRoomEnabledFeaturesTests {
             screenShare: true,
             settings: true)
 
-        #expect(sut.meetingRoomEnabledFeatures == Set(MeetingRoomFeature.allCases))
+        let flagDriven = Set(MeetingRoomFeature.allCases).subtracting([.callKit])
+        #expect(sut.meetingRoomEnabledFeatures == flagDriven.union(Self.callKitFeatures))
     }
 
-    @Test("All flags disabled leaves only callKit")
+    @Test("All flags disabled leaves only the platform's callKit support")
     func allFlagsDisabledLeavesOnlyCallKit() {
         let sut = makeContainer()
 
-        #expect(sut.meetingRoomEnabledFeatures == [.callKit])
+        #expect(sut.meetingRoomEnabledFeatures == Self.callKitFeatures)
     }
 
     @Test("A realistic mixed configuration activates exactly its features")
@@ -59,22 +72,19 @@ struct MeetingRoomEnabledFeaturesTests {
             screenShare: true)
 
         #expect(
-            sut.meetingRoomEnabledFeatures == [
-                .chat,
-                .captions,
-                .reactions,
-                .screenShare,
-                .backgroundEffects,
-                .callKit,
-            ])
+            sut.meetingRoomEnabledFeatures
+                == Set<MeetingRoomFeature>([.chat, .captions, .reactions, .screenShare, .backgroundEffects])
+                .union(Self.callKitFeatures))
     }
 
-    // MARK: - callKit is always present
+    // MARK: - callKit depends only on platform support
 
-    @Test("callKit is always enabled regardless of configuration")
-    func callKitIsAlwaysEnabled() {
-        #expect(makeContainer().meetingRoomEnabledFeatures.contains(.callKit))
-        #expect(makeContainer(chat: true).meetingRoomEnabledFeatures.contains(.callKit))
+    @Test("callKit follows platform support regardless of configuration")
+    func callKitFollowsPlatformSupport() {
+        let expected = !Self.callKitFeatures.isEmpty
+
+        #expect(makeContainer().meetingRoomEnabledFeatures.contains(.callKit) == expected)
+        #expect(makeContainer(chat: true).meetingRoomEnabledFeatures.contains(.callKit) == expected)
 
         let all = makeContainer(
             backgroundEffects: true,
@@ -82,6 +92,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: true,
             archiving: true,
             captions: true,
+            captionTranslation: true,
             chat: true,
             emojis: true,
             feedback: true,
@@ -89,7 +100,7 @@ struct MeetingRoomEnabledFeaturesTests {
             postCallTranscription: true,
             screenShare: true,
             settings: true)
-        #expect(all.meetingRoomEnabledFeatures.contains(.callKit))
+        #expect(all.meetingRoomEnabledFeatures.contains(.callKit) == expected)
     }
 
     // MARK: - One flag at a time
@@ -99,12 +110,12 @@ struct MeetingRoomEnabledFeaturesTests {
         MeetingRoomFeature.allCases.filter { $0 != .callKit }
 
     @Test(
-        "Enabling a single flag activates exactly that feature plus callKit",
+        "Enabling a single flag activates exactly that feature plus the platform's callKit support",
         arguments: singleFeatureCases)
     func singleFlagActivatesExactlyThatFeature(_ feature: MeetingRoomFeature) {
         let sut = makeContainerEnablingOnly(feature)
 
-        #expect(sut.meetingRoomEnabledFeatures == [feature, .callKit])
+        #expect(sut.meetingRoomEnabledFeatures == Set([feature]).union(Self.callKitFeatures))
     }
 
     // MARK: - Individual flag mapping (explicit, for readability)
@@ -113,6 +124,16 @@ struct MeetingRoomEnabledFeaturesTests {
     func chatMapping() {
         #expect(makeContainer(chat: true).meetingRoomEnabledFeatures.contains(.chat))
         #expect(!makeContainer(chat: false).meetingRoomEnabledFeatures.contains(.chat))
+    }
+
+    @Test("allowCaptionTranslation maps to .captionsTranslation")
+    func captionTranslationMapsToCaptionsTranslation() {
+        #expect(
+            makeContainer(captionTranslation: true)
+                .meetingRoomEnabledFeatures.contains(.captionsTranslation))
+        #expect(
+            !makeContainer(captionTranslation: false)
+                .meetingRoomEnabledFeatures.contains(.captionsTranslation))
     }
 
     @Test("allowEmojis maps to .reactions")
@@ -163,6 +184,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: json.audioSettings.allowAudioDiagnostics,
             archiving: json.meetingRoomSettings.allowArchiving,
             captions: json.meetingRoomSettings.allowCaptions,
+            captionTranslation: json.meetingRoomSettings.allowCaptionTranslation,
             chat: json.meetingRoomSettings.allowChat,
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
@@ -179,6 +201,7 @@ struct MeetingRoomEnabledFeaturesTests {
         #expect(
             features.contains(.postCallTranscription) == json.meetingRoomSettings.allowPostCallTranscription)
         #expect(features.contains(.captions) == json.meetingRoomSettings.allowCaptions)
+        #expect(features.contains(.captionsTranslation) == json.meetingRoomSettings.allowCaptionTranslation)
         #expect(features.contains(.reactions) == json.meetingRoomSettings.allowEmojis)
         #expect(features.contains(.settings) == json.meetingRoomSettings.allowSettings)
         #expect(features.contains(.feedback) == json.meetingRoomSettings.allowFeedback)
@@ -188,8 +211,8 @@ struct MeetingRoomEnabledFeaturesTests {
         #expect(features.contains(.audioEffects) == json.audioSettings.allowAdvancedNoiseSuppression)
         #expect(features.contains(.audioDiagnostics) == json.audioSettings.allowAudioDiagnostics)
 
-        // callKit is always on, independent of the JSON.
-        #expect(features.contains(.callKit))
+        // callKit follows platform support, independent of the JSON.
+        #expect(features.contains(.callKit) == !Self.callKitFeatures.isEmpty)
     }
 
     @Test("Every feature declared enabled in app-config.json is active at runtime")
@@ -199,11 +222,12 @@ struct MeetingRoomEnabledFeaturesTests {
         // on, some off) is reflected 1:1 in the enabled meeting room features.
         let json = try Self.loadAppConfigFixture()
 
-        var expected: Set<MeetingRoomFeature> = [.callKit]
+        var expected: Set<MeetingRoomFeature> = Self.callKitFeatures
         if json.meetingRoomSettings.allowChat { expected.insert(.chat) }
         if json.meetingRoomSettings.allowArchiving { expected.insert(.archiving) }
         if json.meetingRoomSettings.allowPostCallTranscription { expected.insert(.postCallTranscription) }
         if json.meetingRoomSettings.allowCaptions { expected.insert(.captions) }
+        if json.meetingRoomSettings.allowCaptionTranslation { expected.insert(.captionsTranslation) }
         if json.meetingRoomSettings.allowEmojis { expected.insert(.reactions) }
         if json.meetingRoomSettings.allowSettings { expected.insert(.settings) }
         if json.meetingRoomSettings.allowFeedback { expected.insert(.feedback) }
@@ -219,6 +243,7 @@ struct MeetingRoomEnabledFeaturesTests {
             audioDiagnostics: json.audioSettings.allowAudioDiagnostics,
             archiving: json.meetingRoomSettings.allowArchiving,
             captions: json.meetingRoomSettings.allowCaptions,
+            captionTranslation: json.meetingRoomSettings.allowCaptionTranslation,
             chat: json.meetingRoomSettings.allowChat,
             emojis: json.meetingRoomSettings.allowEmojis,
             feedback: json.meetingRoomSettings.allowFeedback,
@@ -243,6 +268,7 @@ extension MeetingRoomEnabledFeaturesTests {
         audioDiagnostics: Bool = false,
         archiving: Bool = false,
         captions: Bool = false,
+        captionTranslation: Bool = false,
         chat: Bool = false,
         emojis: Bool = false,
         feedback: Bool = false,
@@ -260,6 +286,7 @@ extension MeetingRoomEnabledFeaturesTests {
             meetingRoomSettings: AppConfig.MeetingRoomSettings(
                 allowArchiving: archiving,
                 allowCaptions: captions,
+                allowCaptionTranslation: captionTranslation,
                 allowChat: chat,
                 allowEmojis: emojis,
                 allowFeedback: feedback,
@@ -273,13 +300,14 @@ extension MeetingRoomEnabledFeaturesTests {
         return container
     }
 
-    /// Builds a container that enables exactly one feature (plus the always-on `callKit`).
+    /// Builds a container that enables exactly one feature flag (callKit is platform-driven).
     fileprivate func makeContainerEnablingOnly(_ feature: MeetingRoomFeature) -> DependencyContainer {
         switch feature {
         case .chat: return makeContainer(chat: true)
         case .archiving: return makeContainer(archiving: true)
         case .postCallTranscription: return makeContainer(postCallTranscription: true)
         case .captions: return makeContainer(captions: true)
+        case .captionsTranslation: return makeContainer(captionTranslation: true)
         case .reactions: return makeContainer(emojis: true)
         case .settings: return makeContainer(settings: true)
         case .feedback: return makeContainer(feedback: true)
@@ -329,6 +357,7 @@ struct AppConfigFixture: Decodable {
     struct MeetingRoomSettings: Decodable {
         let allowArchiving: Bool
         let allowCaptions: Bool
+        let allowCaptionTranslation: Bool
         let allowChat: Bool
         let allowEmojis: Bool
         let allowFeedback: Bool
