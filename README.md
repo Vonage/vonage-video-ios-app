@@ -2,6 +2,8 @@
 
 <img src="https://developer.nexmo.com/assets/images/Vonage_Nexmo.svg" height="48px" alt="Nexmo is now known as Vonage" />
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Vonage/vonage-video-ios-app)
+
 ## Welcome to Vonage
 
 If you're new to Vonage, you can [sign up for a Vonage API account](https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=vonage-video-ios-app) and get some free credit to get you started.
