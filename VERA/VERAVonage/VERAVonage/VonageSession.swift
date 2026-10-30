@@ -205,6 +205,13 @@ open class VonageSession: NSObject, OTSessionDelegate, VonageSignalChannel {
         onSessionDidBeginReconnecting?()
     }
 
+    open var availableRemoteStreams: [OTStream] {
+        guard let localConnectionID = session.connection?.connectionId else { return [] }
+        return session.streams.values.filter { $0.connection.connectionId != localConnectionID }
+    }
+
+    open func hasStream(_ streamID: String) -> Bool { session.streams[streamID] != nil }
+
     // MARK: Publishing/Subscribing
 
     /// Subscribes the provided subscriber to the session.
