@@ -75,9 +75,7 @@ struct VonageCaptionsPluginTests {
             CaptionItem(speakerName: "Alice", text: "Hello!"),
             CaptionItem(speakerName: "Bob", text: "Hi there"),
         ]
-        mocks.call._captionsPublisher.send(captions)
-
-        try await waitUntil { mocks.repository.lastCaptions?.count == 2 }
+        try await deliver(captions, to: mocks)
 
         #expect(mocks.repository.lastCaptions == captions)
     }
@@ -90,8 +88,7 @@ struct VonageCaptionsPluginTests {
         try await sut.callDidStart([:])
 
         let first = [CaptionItem(speakerName: "Alice", text: "First")]
-        mocks.call._captionsPublisher.send(first)
-        try await waitUntil { mocks.repository.lastCaptions == first }
+        try await deliver(first, to: mocks)
 
         let countAfterFirst = mocks.repository.updateCallCount
 
@@ -99,8 +96,7 @@ struct VonageCaptionsPluginTests {
             CaptionItem(speakerName: "Alice", text: "First"),
             CaptionItem(speakerName: "Bob", text: "Second"),
         ]
-        mocks.call._captionsPublisher.send(second)
-        try await waitUntil { mocks.repository.lastCaptions == second }
+        try await deliver(second, to: mocks)
 
         #expect(mocks.repository.updateCallCount > countAfterFirst)
     }
@@ -135,8 +131,7 @@ struct VonageCaptionsPluginTests {
         try await sut.callDidStart([:])
 
         let captions = [CaptionItem(speakerName: "Alice", text: "Hello")]
-        mocks.call._captionsPublisher.send(captions)
-        try await waitUntil { mocks.repository.lastCaptions == captions }
+        try await deliver(captions, to: mocks)
 
         try await sut.callDidEnd()
         let callCountAfterEnd = mocks.repository.updateCallCount
@@ -180,8 +175,7 @@ struct VonageCaptionsPluginTests {
         try await waitUntil { mocks.call.recordedActions.contains(.enableCaptions) }
 
         let captions = [CaptionItem(speakerName: "Alice", text: "Back!")]
-        mocks.call._captionsPublisher.send(captions)
-        try await waitUntil { mocks.repository.lastCaptions == captions }
+        try await deliver(captions, to: mocks)
     }
 
     @Test("callDidEnd before callDidStart does not throw")
@@ -224,34 +218,29 @@ struct VonageCaptionsPluginTests {
 
     // MARK: - Test Helpers
 
-    /// Waits for a condition to become true by yielding to the main actor's run loop.
+    /// Waits until the captions forwarding task has subscribed, then until it records `captions`.
     ///
-    /// Instead of polling with sleeps, this yields control back to the main actor
-    /// multiple times, allowing pending work (like Combine sink closures) to execute.
-    /// This is deterministic and avoids race conditions under varying system loads.
+    /// `callDidStart` starts that task without awaiting it, and the test publisher is a
+    /// passthrough subject, so a single send before the task subscribes is dropped.
+    private func deliver(_ captions: [CaptionItem], to mocks: Mocks) async throws {
+        try await waitUntil {
+            if mocks.repository.lastCaptions == captions { return true }
+            mocks.call._captionsPublisher.send(captions)
+            return mocks.repository.lastCaptions == captions
+        }
+    }
+
+    /// Polls on the main actor long enough for a newly created forwarding task to run.
     private func waitUntil(
-        timeout: TimeInterval = 0.5,
+        timeout: TimeInterval = 1,
         _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
-        var iterations = 0
-        let maxIterations = 100  // Safety limit
-
-        while iterations < maxIterations {
-            // Check condition on MainActor
-            if await condition() {
-                return
-            }
-
-            guard Date() < deadline else {
-                throw WaitTimeoutError()
-            }
-
-            // Yield to allow MainActor work to process
-            await Task.yield()
-            iterations += 1
+        while Date() < deadline {
+            if await condition() { return }
+            try await Task.sleep(for: .milliseconds(10))
         }
-
+        if await condition() { return }
         throw WaitTimeoutError()
     }
 

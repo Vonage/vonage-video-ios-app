@@ -49,7 +49,11 @@ stream, encryption and unknown failures do not retry. Success is confirmed by th
 
 SDK reconnect suppresses application subscription attempts; after reconnect, still-available streams
 without an existing workflow may start a new workflow. Normal SDK-managed subscribers retain their
-workflows. Synthetic lifetime tests exercise the scheduling coordinator; live stream negotiation,
-media output and physical network migration are separate acceptance checks.
+workflows. A subscriber created for a remote stream inherits the current captions translation.
+Synthetic lifetime tests exercise the scheduling coordinator. Call tests cover the decision to
+subscribe, a rejected subscriber, reconnect, and teardown. The simulator cannot build an `OTSubscriber`
+from a detached `OTStream`, so native subscribe, cleanup, captions, and network-stats wiring stay on
+the live acceptance path. Live stream negotiation, media output, and physical network migration are
+separate acceptance checks.
 
 Reference: https://developer.vonage.com/en/opentok/sdks/ios/reference/constants/otsubscribererrorcode
