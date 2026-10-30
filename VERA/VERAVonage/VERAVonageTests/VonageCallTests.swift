@@ -39,7 +39,7 @@ struct VonageCallTests {
         let sut = makeSUT(session: session)
         sut.setup()
 
-        try await sut.connect()
+        await #expect(throws: ThrowingVonageSession.Error.self) { try await sut.connect() }
 
         let event = await sut.eventsPublisher.values.first { event in
             if case .error = event { return true }
@@ -56,23 +56,23 @@ struct VonageCallTests {
 
     @Test
     func disconnectPublishesErrorWhenSessionThrows() async throws {
-        let session = ThrowingVonageSession()
+        let session = DisconnectFailureSession()
         let sut = makeSUT(session: session)
+        var errors: [Swift.Error] = []
+        var state: CallState = .idle
+        let events = sut.eventsPublisher.sink { if case .error(let error) = $0 { errors.append(error) } }
+        let states = sut.callState.sink { state = $0 }
+        defer {
+            events.cancel()
+            states.cancel()
+        }
         sut.setup()
-
-        try? await sut.disconnect()
-
-        let event = await sut.eventsPublisher.values.first { event in
-            if case .error = event { return true }
-            return false
-        }
-
-        switch event {
-        case .error: break
-        // Should be an error
-        default:
-            Issue.record("Expected error event, got: \(String(describing: event))")
-        }
+        try await sut.connect()
+        session.onSessionDidConnect?()
+        await #expect(throws: ThrowingVonageSession.Error.self) { try await sut.disconnect() }
+        #expect(errors.last is ThrowingVonageSession.Error)
+        #expect(state == .disconnected)
+        #expect(session.onSessionDidConnect == nil)
     }
 
     @Test
@@ -798,6 +798,470 @@ private final class SystemMediaStateTestsSession: VonageSession {
     override func disconnect() throws { disconnectCount += 1 }
     override func publish(publisher: VonagePublisher) throws {}
     override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+@Suite("CallTerminationTests", .serialized)
+@MainActor
+struct CallTerminationTests {
+    private func makeCall(_ session: VonageSession = CallTerminationTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewConnectFailureTerminatesCall() async throws {
+        let call = makeCall(ThrowingVonageSession())
+        var state: CallState = .idle
+        let observation = call.callState.sink { state = $0 }
+        call.setup()
+        await #expect(throws: ThrowingVonageSession.Error.self) { try await call.connect() }
+        #expect(state == .disconnected, "connect failure leaves call stuck connecting")
+        observation.cancel()
+    }
+
+    @Test func reviewCanCancelConnectingCall() async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        call.setup()
+        try await call.connect()
+        do { try await call.disconnect() } catch { Issue.record("Cannot cancel connecting call: \(error)") }
+        #expect(session.disconnectCount == 1)
+    }
+
+    @Test func reviewTerminalSessionFailureCleansUpCall() async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        var state: CallState = .idle
+        let observation = call.callState.sink { state = $0 }
+        call.setup()
+        try await call.connect()
+        session.onSessionFailure?(NSError(domain: "review", code: 1))
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(state == .disconnected, "unrecoverable session error never cleans up call")
+        observation.cancel()
+    }
+
+    @Test func cancellingWhileCredentialsResolveCannotStartTheLateSession() async throws {
+        let session = CallTerminationTestsSession()
+        var pending: CheckedContinuation<VonageSession, Error>?
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in try await withCheckedThrowingContinuation { pending = $0 } },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+        var states: [CallState] = []
+        let observation = call.callState.sink { states.append($0) }
+        defer { observation.cancel() }
+        call.setup()
+        let connecting = Task { @MainActor in try await call.connect() }
+        for _ in 0..<100 where pending == nil { await Task.yield() }
+        let continuation = try #require(pending)
+        do { try await call.disconnect() } catch { Issue.record("Cannot cancel credential resolution: \(error)") }
+        continuation.resume(returning: session)
+        _ = try? await connecting.value
+        #expect(session.connectCount == 0)
+        #expect(session.cleanupCount == 1)
+        #expect(states.last == .disconnected)
+        #expect(states.contains(.disconnecting))
+    }
+
+    @Test func lateConnectionCallbackDoesNotResurrectAnEndedCall() async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        var state: CallState = .idle
+        let observation = call.callState.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        let lateCallback = session.onSessionDidConnect
+        do { try await call.disconnect() } catch { Issue.record("Cannot end connecting call: \(error)") }
+        lateCallback?()
+        #expect(state == .disconnected)
+        #expect(session.publishCount == 0)
+    }
+
+    @Test func repeatedDisconnectRunsCleanupOnlyOnce() async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let first = Task { @MainActor in try await call.disconnect() }
+        let second = Task { @MainActor in try await call.disconnect() }
+        do {
+            try await first.value
+            try await second.value
+            try await call.disconnect()
+        } catch { Issue.record("Repeated disconnect must be safe: \(error)") }
+        #expect(session.disconnectCount == 1)
+        #expect(session.cleanupCount == 1)
+    }
+
+    @Test func unexpectedSessionDisconnectCleansUpResources() async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        var state: CallState = .idle
+        let observation = call.callState.sink { state = $0 }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        session.onSessionDidDisconnect?()
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(state == .disconnected)
+        #expect(session.cleanupCount == 1)
+    }
+    @Test func synchronousConnectionFailureIsRethrownAfterCleanup() async throws {
+        let call = makeCall(ThrowingVonageSession())
+        var capturedError: Swift.Error?
+        call.setup()
+        do { try await call.connect() } catch { capturedError = error }
+        #expect(capturedError is ThrowingVonageSession.Error)
+    }
+
+    @Test(arguments: [true, false])
+    func terminalCallbackImmediatelyRejectsLateConnect(isFailure: Bool) async throws {
+        let session = CallTerminationTestsSession()
+        let call = makeCall(session)
+        call.setup()
+        try await call.connect()
+        let lateConnect = session.onSessionDidConnect
+        if isFailure {
+            session.onSessionFailure?(NSError(domain: "terminal", code: 1))
+        } else {
+            session.onSessionDidDisconnect?()
+        }
+        lateConnect?()
+        #expect(session.publishCount == 0)
+        try await Task.sleep(for: .milliseconds(100))
+    }
+
+    @Test(arguments: [true, false])
+    func credentialProviderReceivesCancellation(cancelCaller: Bool) async throws {
+        var started = false
+        var cancelled = false
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in
+                started = true
+                do { try await Task.sleep(for: .seconds(10)) } catch {
+                    cancelled = Task.isCancelled
+                    throw error
+                }
+                return CallTerminationTestsSession()
+            }, publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+        call.setup()
+        let connecting = Task { @MainActor in try await call.connect() }
+        for _ in 0..<100 where !started { await Task.yield() }
+        #expect(started)
+        if cancelCaller { connecting.cancel() } else { try await call.disconnect() }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(cancelled)
+        connecting.cancel()
+        _ = try? await connecting.value
+    }
+
+}
+
+private final class CallTerminationTestsSession: VonageSession {
+    var disconnectCount = 0
+    var connectCount = 0
+    var cleanupCount = 0
+    var publishCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws { connectCount += 1 }
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws { publishCount += 1 }
+    override func cleanUp() {
+        cleanupCount += 1
+        super.cleanUp()
+    }
+    override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+
+private final class DisconnectFailureSession: ThrowingVonageSession {
+    override func connect() throws {}
+    override func publish(publisher: VonagePublisher) throws {}
+}
+
+@Suite("PublisherErrorForwardingTests", .serialized)
+@MainActor
+struct PublisherErrorForwardingTests {
+    private func makeCall(_ session: VonageSession = PublisherErrorForwardingTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+
+    @Test func publisherDelegateFailureReachesCallEvents() async throws {
+        let session = PublisherErrorForwardingTestsSession()
+        let call = makeCall(session)
+        var errors: [NSError] = []
+        let observation = call.eventsPublisher.sink {
+            if case .error(let error) = $0 { errors.append(error as NSError) }
+        }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let error = OTError(domain: "review.publisher", code: 1, userInfo: nil)
+        call.publisher.publisher(call.publisher.otPublisher, didFailWithError: error)
+        #expect(errors.count == 1)
+        #expect(errors.first === error)
+        try await call.disconnect()
+    }
+
+    @Test func replacementPublisherForwardsErrorsAndOldPublisherStopsForwarding() async throws {
+        let session = PublisherErrorForwardingTestsSession()
+        let repository = MockPublisherRepository()
+        let replacement = VonagePublisherSpy()
+        repository.publisherToReturn = replacement
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: VonagePublisherSpy(),
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        var errors: [NSError] = []
+        let observation = call.eventsPublisher.sink {
+            if case .error(let error) = $0 { errors.append(error as NSError) }
+        }
+        defer { observation.cancel() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let original = call.publisher
+        try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        let error = OTError(domain: "review.publisher", code: 2, userInfo: nil)
+        original.publisher(original.otPublisher, didFailWithError: error)
+        #expect(errors.isEmpty)
+        replacement.publisher(replacement.otPublisher, didFailWithError: error)
+        #expect(errors.count == 1)
+        #expect(errors.first === error)
+        try await call.disconnect()
+    }
+}
+
+private final class PublisherErrorForwardingTestsSession: VonageSession {
+    var disconnectCount = 0
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws {}
+    override func unpublish(publisher: VonagePublisher) throws {}
+}
+
+@Suite("PublisherReplacementCancellationTests", .serialized)
+@MainActor
+struct PublisherReplacementCancellationTests {
+    private func makeCall(_ session: VonageSession = PublisherReplacementCancellationTestsSession()) -> VonageCall {
+        VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: MockPublisherRepository(),
+            statsCollector: MockStatsCollector())
+    }
+
+    @Test func reviewCancelledRepublishDoesNotRecreatePublisher() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        repository.publisherToReturn = VonagePublisherSpy()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName, makeSession: { _ in session },
+            publisher: VonagePublisherSpy(), publisherRepository: repository,
+            statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let task = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        task.cancel()
+        _ = try? await task.value
+        #expect(
+            repository.recreatePublisherCallCount == 0,
+            "cancelled republish still destroys and recreates publisher")
+        try await call.disconnect()
+    }
+
+    @Test func concurrentReplacementsUnpublishEachPublisherInOrder() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        let original = VonagePublisherSpy()
+        let replacement = VonagePublisherSpy()
+        repository.publisherToReturn = replacement
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: original,
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let first = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        let second = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .low))
+        }
+        try await first.value
+        try await second.value
+        #expect(session.unpublished == [ObjectIdentifier(original), ObjectIdentifier(replacement)])
+        #expect(repository.recreatePublisherCallCount == 2)
+        try await call.disconnect()
+    }
+    @Test func cancellationAfterUnpublishFinishesRestoringPublisher() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        let original = VonagePublisherSpy()
+        original.publishAudio = false
+        original.publishVideo = true
+        let replacement = VonagePublisherSpy()
+        repository.publisherToReturn = replacement
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: original,
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        let gate = PublisherReplacementGate()
+        call.publisherReplacementSuspension = { await gate.pause() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+
+        let task = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        await gate.waitUntilPaused()
+        #expect(session.unpublished == [ObjectIdentifier(original)])
+        #expect(repository.recreatePublisherCallCount == 0)
+        task.cancel()
+        gate.resume()
+        try await task.value
+
+        #expect(task.isCancelled)
+        #expect(repository.recreatePublisherCallCount == 1)
+        #expect(repository.recordedSettings.first?.publishAudio == false)
+        #expect(repository.recordedSettings.first?.publishVideo == true)
+        #expect(call.publisher === replacement)
+        #expect(session.published.last == ObjectIdentifier(replacement))
+        try await call.disconnect()
+    }
+
+    @Test func disconnectAfterUnpublishPreventsReplacementAndPublishing() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = MockPublisherRepository()
+        repository.publisherToReturn = VonagePublisherSpy()
+        let original = VonagePublisherSpy()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: original,
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        let gate = PublisherReplacementGate()
+        call.publisherReplacementSuspension = { await gate.pause() }
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+
+        let task = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        await gate.waitUntilPaused()
+        #expect(session.unpublished == [ObjectIdentifier(original)])
+        let publishedBeforeDisconnect = session.published
+        try await call.disconnect()
+        gate.resume()
+        try await task.value
+
+        #expect(repository.recreatePublisherCallCount == 0)
+        #expect(session.published == publishedBeforeDisconnect)
+        #expect(session.disconnectCount == 1)
+        #expect(call.publisher === original)
+    }
+
+    @Test func failedReplacementPreventsQueuedWorkFromUnpublishingDestroyedPublisher() async throws {
+        let session = PublisherReplacementCancellationTestsSession()
+        let repository = FailingReplacementRepository()
+        let call = VonageCall(
+            roomName: makeMockCredentials().roomName,
+            makeSession: { _ in session }, publisher: VonagePublisherSpy(),
+            publisherRepository: repository, statsCollector: MockStatsCollector())
+        call.setup()
+        try await call.connect()
+        session.onSessionDidConnect?()
+        let first = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .high))
+        }
+        let second = Task { @MainActor in
+            try await call.applyPublisherAdvancedSettings(.init(videoResolution: .low))
+        }
+        await #expect(throws: ReplacementFailure.self) { try await first.value }
+        await #expect(throws: ReplacementFailure.self) { try await second.value }
+        #expect(session.unpublished.count == 1)
+        #expect(repository.recreateCount == 1)
+        try await call.disconnect()
+    }
+
+}
+
+private final class PublisherReplacementCancellationTestsSession: VonageSession {
+    var disconnectCount = 0
+    var unpublished: [ObjectIdentifier] = []
+    var published: [ObjectIdentifier] = []
+    init() {
+        super.init(
+            session: OTSession(applicationId: "applicationId", sessionId: "sessionId", delegate: nil)!,
+            credentials: makeMockCredentials())
+    }
+    override func connect() throws {}
+    override func disconnect() throws { disconnectCount += 1 }
+    override func publish(publisher: VonagePublisher) throws { published.append(ObjectIdentifier(publisher)) }
+    override func unpublish(publisher: VonagePublisher) throws { unpublished.append(ObjectIdentifier(publisher)) }
+}
+
+private enum ReplacementFailure: Error { case failed }
+private final class FailingReplacementRepository: PublisherRepository {
+    var recreateCount = 0
+    func recreatePublisher(_ settings: PublisherSettings) throws {
+        recreateCount += 1
+        throw ReplacementFailure.failed
+    }
+    func getPublisher() -> any VERAPublisher { VonagePublisherSpy() }
+    func resetPublisher() {}
+}
+
+@MainActor
+private final class PublisherReplacementGate {
+    private var paused = false
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var waiter: CheckedContinuation<Void, Never>?
+
+    func pause() async {
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+            paused = true
+            waiter?.resume()
+            waiter = nil
+        }
+    }
+
+    func waitUntilPaused() async {
+        if paused { return }
+        await withCheckedContinuation { waiter = $0 }
+    }
+
+    func resume() {
+        continuation?.resume()
+        continuation = nil
+    }
 }
 
 @Suite("CallObserverLifetimeTests", .serialized)

@@ -127,6 +127,7 @@ public class VonagePublisherFactory: PublisherFactory {
             otPublisher,
             transformerFactory: vonageTransformerFactory,
             initialDimensions: initialDimensions)
+        publisher.recoverySettings = settings.advancedSettings ?? .init()
         otPublisher.delegate = publisher
         return publisher
     }
