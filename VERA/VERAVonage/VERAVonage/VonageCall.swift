@@ -574,8 +574,8 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     @MainActor
     private func scheduleConnectionRecovery(_ error: Error) -> Bool {
         guard !isTerminal, _callState.value == .connecting, let attemptID = connectionAttemptID else { return false }
-        guard
-            connectionRecovery.schedule(
+        do {
+            try connectionRecovery.schedule(
                 policy: .connection, error: error,
                 operation: { [weak self] in
                     guard let self, !self.isTerminal, self.connectionAttemptID == attemptID else { return }
@@ -587,7 +587,9 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
                         self.sessionDidFail(error)
                     }
                 })
-        else { return false }
+        } catch {
+            return false
+        }
         let failedSession = session
         session = nil
         failedSession?.cleanUp()

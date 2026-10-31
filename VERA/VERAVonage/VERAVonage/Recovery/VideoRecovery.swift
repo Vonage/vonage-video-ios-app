@@ -1,5 +1,10 @@
 import Foundation
 
+enum VideoRecoveryError: Error, Equatable {
+    /// The policy rejected this error, or the three-attempt budget is spent.
+    case rejected
+}
+
 /// One bounded recovery workflow. The owner resets the budget only after the SDK confirms success.
 @MainActor
 final class VideoRecovery {
@@ -12,10 +17,11 @@ final class VideoRecovery {
         attempts += 1
     }
 
-    @discardableResult
-    func schedule(policy: VideoRecoveryPolicy, error: Error, operation: @escaping @MainActor () async -> Void) -> Bool {
-        guard policy.permits(error), attempts < 3 else { return false }
-        guard pending == nil else { return true }
+    /// Schedules one retry, or returns when one is already waiting.
+    /// - Throws: `VideoRecoveryError.rejected` when the policy refuses `error` or the three-attempt budget is spent.
+    func schedule(policy: VideoRecoveryPolicy, error: Error, operation: @escaping @MainActor () async -> Void) throws {
+        guard policy.permits(error), attempts < 3 else { throw VideoRecoveryError.rejected }
+        guard pending == nil else { return }
         let generation = generation
         let delay = UInt64(max(1, attempts)) * 3_000_000_000
         pending = Task { [weak self, wait] in
@@ -27,7 +33,6 @@ final class VideoRecovery {
             self.pending = nil
             await operation()
         }
-        return true
     }
 
     func cancel() {
