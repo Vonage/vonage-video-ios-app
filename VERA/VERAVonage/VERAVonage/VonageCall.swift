@@ -167,6 +167,9 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     /// The participant representation of the local publisher, set after publishing.
     public var publisherParticipant: Participant?
 
+    @MainActor private var publisherSettingsOperation: Task<Void, Error>?
+    @MainActor private var publisherSettingsOperationID: UUID?
+
     /// Repository used to recreate the publisher with new settings during ``applyPublisherAdvancedSettings(_:)``.
     private let publisherRepository: PublisherRepository
 
@@ -179,10 +182,21 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     /// Test seam used to resolve a participant stream without changing the public initializer.
     var participantStreamResolver: ((String) async -> OTStream?)?
 
+    /// Test seam for pausing the replacement after unpublish; production yields to the run loop.
+    @MainActor var publisherReplacementSuspension: () async -> Void = { await Task.yield() }
+
     /// The collection of plugins extending call functionality (e.g., chat, CallKit, recording).
     ///
     /// - SeeAlso: ``assignPlugins(_:)``, `VonageSignalEmitter`, `VonagePluginCallHolder`, `VonageSignalHandler`
     public var plugins: [any VonagePlugin] = []
+
+    @MainActor lazy var connectionRecovery = VideoRecovery()
+
+    @Atomic private var isConnectionFailurePending = false
+    @Atomic private var isTerminal = false
+    @MainActor private var credentialResolutionTask: Task<VonageSession, Error>?
+    @MainActor private var connectionAttemptID: UUID?
+    @MainActor private var teardownTask: Task<Void, Error>?
 
     private var _callState = CurrentValueSubject<CallState, Never>(CallState.idle)
 
@@ -250,11 +264,27 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         session.onStreamDestroyed = { [weak self] stream in
             self?.removeSubscriber(stream)
         }
-        session.onSessionFailure = { [weak self] error in
-            self?.sessionDidFail(error)
+        session.onSessionFailure = { [weak self, weak session] error in
+            guard let self, let session, self.session === session else { return }
+            self.isConnectionFailurePending = true
+            let isInitialConnectionFailure = self._callState.value == .connecting
+            if !isInitialConnectionFailure || !VideoRecoveryPolicy.connection.permits(error) {
+                self.sessionDidFail(error)
+                return
+            }
+            Task { @MainActor [weak self, weak session] in
+                guard let self, let session, self.session === session else { return }
+                if self.scheduleConnectionRecovery(error) { return }
+                self.sessionDidFail(error)
+            }
         }
-        session.onSessionDidDisconnect = { [weak self] in
-            self?.sessionDidDisconnect()
+        session.onSessionDidDisconnect = { [weak self, weak session] in
+            guard let self, let session, self.session === session else { return }
+            let isFailedInitialJoin =
+                self.isConnectionFailurePending && !self.isTerminal
+                && self._callState.value == .connecting
+            if isFailedInitialJoin { return }
+            self.sessionDidDisconnect()
         }
         session.onSessionDidBeginReconnecting = { [weak self] in
             self?.sessionDidBeginReconnecting()
@@ -262,9 +292,13 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         session.onSessionDidReconnect = { [weak self] in
             self?.sessionDidReconnect()
         }
-        session.onSessionDidConnect = { [weak self] in
-            self?.updateCallState(to: .connected)
-            self?.publishToSession()
+        session.onSessionDidConnect = { [weak self, weak session] in
+            guard let self, let session, self.session === session, !self.isTerminal, !self.isConnectionFailurePending,
+                self._callState.value == .connecting
+            else { return }
+            self.updateCallState(to: .connected)
+            Task { @MainActor [weak self] in self?.connectionRecovery.reset() }
+            self.publishToSession()
             Task { [weak self] in
                 await self?.notifyCallDidStartToPlugins()
             }
@@ -332,6 +366,9 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     // MARK: Publisher
 
     private func publishToSession() {
+        publisher.onError = { [weak self] error in
+            self?._eventsPublisher.send(.error(error))
+        }
         guard !publisher.hasSession else { return }
         do {
             try requireSession().publish(publisher: publisher)
@@ -485,59 +522,133 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     ///
     /// - Throws: Any error creating the session (e.g. authentication) or connecting.
     /// - SeeAlso: ``disconnect()``
+    @MainActor
     public func connect() async throws {
+        // A call instance has one lifecycle. Cancellation must not be undone by a later start.
+        guard !isTerminal, _callState.value == .idle else { return }
+        try Task.checkCancellation()
+        let attemptID = UUID()
+        connectionAttemptID = attemptID
         updateCallState(to: .connecting)
+        try await performConnectionAttempt(attemptID: attemptID)
+    }
+
+    @MainActor
+    private func performConnectionAttempt(attemptID: UUID) async throws {
+        guard !isTerminal, connectionAttemptID == attemptID else { throw CancellationError() }
+        connectionRecovery.beginAttempt()
+        let resolution = Task { @MainActor [makeSession, roomName] in try await makeSession(roomName) }
+        credentialResolutionTask = resolution
+        defer { credentialResolutionTask = nil }
         let session: VonageSession
         do {
-            session = try await makeSession(roomName)
+            session = try await withTaskCancellationHandler {
+                try await resolution.value
+            } onCancel: {
+                resolution.cancel()
+            }
         } catch {
-            updateCallState(to: .disconnected)
+            guard connectionAttemptID == attemptID else { throw CancellationError() }
+            try? await disconnect()
             throw error
         }
+        guard !isTerminal, connectionAttemptID == attemptID, _callState.value == .connecting, !Task.isCancelled else {
+            session.cleanUp()
+            if connectionAttemptID == attemptID { try? await disconnect() }
+            throw CancellationError()
+        }
+        isConnectionFailurePending = false
         self.session = session
         setupSessionHandlers(session)
         wirePluginChannels(session)
         do {
             try session.connect()
         } catch {
+            if scheduleConnectionRecovery(error) { return }
+            try? await disconnect()
             _eventsPublisher.value = .error(error)
+            throw error
         }
     }
 
-    /// Disconnects from the Vonage session and performs complete cleanup.
-    ///
-    /// Gracefully terminates the call, cleaning up subscribers, publisher, plugins,
-    /// and session resources. Updates the call state to ``CallState/disconnected`` upon completion.
-    ///
-    /// - Throws: ``Error/callNotConnected`` if the call is not currently in ``CallState/connected``.
-    /// - Important: Cancels Combine subscriptions and clears plugin assignments as part of teardown.
-    public func disconnect() async throws {
-        guard _callState.value == .connected else {
-            _eventsPublisher.value = .error(CallError.callNotConnected)
-            throw CallError.callNotConnected
-        }
-        _callState.value = .disconnecting
-
+    @MainActor
+    private func scheduleConnectionRecovery(_ error: Error) -> Bool {
+        guard !isTerminal, _callState.value == .connecting, let attemptID = connectionAttemptID else { return false }
         do {
-            await callStateManager.cleanUpParticipants()
-            await notifyCallDidEndToPlugins()
-            unassignPlugins()
-            cancellables.forEach { $0.cancel() }
-            cancellables.removeAll()
-            subscriberCancellables.removeAll()
-            publisherCancellables.removeAll()
-            stopCaptionCleanup()
-            isNetworkStatsEnabled = false
-            statsCollector.reset()
-            try requireSession().disconnect()
+            try connectionRecovery.schedule(
+                policy: .connection, error: error,
+                operation: { [weak self] in
+                    guard let self, !self.isTerminal, self.connectionAttemptID == attemptID else { return }
+                    do {
+                        try await self.performConnectionAttempt(attemptID: attemptID)
+                    } catch is CancellationError {
+                        return
+                    } catch {
+                        self.sessionDidFail(error)
+                    }
+                })
+        } catch {
+            return false
+        }
+        let failedSession = session
+        session = nil
+        failedSession?.cleanUp()
+        do {
+            try failedSession?.disconnect()
+        } catch {
+            connectionRecovery.cancel()
+            sessionDidFail(error)
+        }
+        return true
+    }
+
+    /// Terminates a call, including one still resolving credentials or connecting to the SDK.
+    /// Concurrent and repeated requests share one cleanup operation. Cancels observers and
+    /// clears plugin assignments before releasing SDK resources and publishing `.disconnected`.
+    /// - Throws: A session disconnect error, after cleanup has completed.
+    @MainActor
+    public func disconnect() async throws {
+        if let teardownTask {
+            try await teardownTask.value
+            return
+        }
+        guard _callState.value != .disconnected else { return }
+        isTerminal = true
+        connectionRecovery.cancel()
+        connectionAttemptID = nil
+        credentialResolutionTask?.cancel()
+        updateCallState(to: .disconnecting)
+        let operation = Task { @MainActor [weak self] in
+            guard let self else { return }
+            try await self.finishDisconnection()
+        }
+        teardownTask = operation
+        defer { teardownTask = nil }
+        try await operation.value
+    }
+
+    @MainActor
+    private func finishDisconnection() async throws {
+        await callStateManager.cleanUpParticipants()
+        await notifyCallDidEndToPlugins()
+        unassignPlugins()
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        subscriberCancellables.removeAll()
+        publisherCancellables.removeAll()
+        stopCaptionCleanup()
+        isNetworkStatsEnabled = false
+        statsCollector.reset()
+        defer {
             publisher.cleanUp()
             session?.cleanUp()
             updateCallState(to: .disconnected)
+        }
+        do {
+            // A cancelled credential lookup has not created a session yet.
+            try session?.disconnect()
         } catch {
             _eventsPublisher.value = .error(error)
-            publisher.cleanUp()
-            session?.cleanUp()
-            updateCallState(to: .disconnected)
             throw error
         }
     }
@@ -547,11 +658,15 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     }
 
     private func sessionDidFail(_ error: Swift.Error) {
+        isTerminal = true
         _eventsPublisher.send(.sessionFailure(error))
+        Task { @MainActor [weak self] in try? await self?.disconnect() }
     }
 
     private func sessionDidDisconnect() {
+        isTerminal = true
         _eventsPublisher.send(.disconnected)
+        Task { @MainActor [weak self] in try? await self?.disconnect() }
     }
 
     private func sessionDidBeginReconnecting() {
@@ -794,9 +909,42 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     /// - Parameter advancedSettings: The desired publisher configuration. Only the SDK-level
     ///   fields (resolution, frame rate, codec, audio bitrate, audio fallback) are
     ///   used; audio/video publishing, camera position, and transformers are preserved.
-    /// - Throws: If unpublish, publisher recreation, or re-publish fails.
+    /// Replacements run serially. Cancellation before a replacement starts leaves the current
+    /// publisher intact; after unpublish, replacement finishes unless the call has ended.
+    /// - Throws: If cancelled before replacement starts, or unpublish/recreation fails.
     @MainActor
     public func applyPublisherAdvancedSettings(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        try Task.checkCancellation()
+        let previous = publisherSettingsOperation
+        let operationID = UUID()
+        let operation = Task { @MainActor [weak self] in
+            do {
+                try await previous?.value
+            } catch is CancellationError {
+                // Superseded work cancelled before unpublish leaves a valid publisher.
+            }
+            try Task.checkCancellation()
+            guard let self else { return }
+            try await self.performPublisherReplacement(advancedSettings)
+        }
+        publisherSettingsOperation = operation
+        publisherSettingsOperationID = operationID
+        defer {
+            if publisherSettingsOperationID == operationID {
+                publisherSettingsOperation = nil
+                publisherSettingsOperationID = nil
+            }
+        }
+        try await withTaskCancellationHandler {
+            try await operation.value
+        } onCancel: {
+            operation.cancel()
+        }
+    }
+
+    @MainActor
+    private func performPublisherReplacement(_ advancedSettings: PublisherAdvancedSettings) async throws {
+        try Task.checkCancellation()
         guard _callState.value == .connected else { return }
 
         // 1. Capture current runtime state
@@ -826,7 +974,11 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         publisher.cleanUp()
 
         // Yield so the run loop can process the unpublish event before OTPublisher init.
-        await Task.yield()
+        await publisherReplacementSuspension()
+
+        // Once unpublish starts, finish restoring a valid publisher even if the settings task
+        // is cancelled. A call that has ended must never create or publish new media.
+        guard _callState.value == .connected else { return }
 
         // 4. Build merged settings: new SDK fields + preserved runtime state
         let mergedSettings = PublisherSettings(
