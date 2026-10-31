@@ -6,6 +6,7 @@ import Foundation
 import VERAArchiving
 import VERADomain
 
+@MainActor
 public final class MockArchivingDataSource: ArchivingDataSource {
     var error: Error?
     var lastSessionKey: String?

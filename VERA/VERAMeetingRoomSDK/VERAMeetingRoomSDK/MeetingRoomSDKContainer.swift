@@ -234,10 +234,12 @@ final class MeetingRoomSDKContainer {
         httpClient: httpClient,
         jsonDecoder: jsonDecoder)
 
+    @MainActor
     lazy var archivesRepository: any ArchivesRepository = {
         DefaultArchivesRepository(archivesDataSource: archivesDataSource)
     }()
 
+    @MainActor
     lazy var archivingFactory = ArchivingFactory(
         archivesRepository: archivesRepository,
         archivingDataSource: archivingDataSource,
