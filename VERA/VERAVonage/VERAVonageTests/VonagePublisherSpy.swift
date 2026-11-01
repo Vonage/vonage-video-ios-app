@@ -6,7 +6,7 @@ import Foundation
 import OpenTok
 import VERADomain
 import VERATestHelpers
-import VERAVonage
+@testable import VERAVonage
 
 class VonagePublisherSpy: VonagePublisher {
     var cleanUpCallCount = 0
@@ -24,6 +24,12 @@ class VonagePublisherSpy: VonagePublisher {
     override func cleanUp() {
         cleanUpCallCount += 1
         super.cleanUp()
+    }
+
+    /// Records the mode without opening the cameras.
+    override func apply(localCameraMode mode: LocalCameraMode) {
+        localCameraMode = mode
+        otPublisher.cameraPosition = mode == .front ? .front : .back
     }
 
     override func setVideoTransformers(_ transformers: [any VERATransformer]) {

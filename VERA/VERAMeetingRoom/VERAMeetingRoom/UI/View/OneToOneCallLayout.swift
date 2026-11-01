@@ -17,6 +17,30 @@ struct OneToOneParticipants {
         self.local = local
         self.remote = remote
     }
+
+    /// The tile that floats. The other person floats while the local camera fills the screen.
+    func floating(localCameraFillsScreen: Bool) -> UIParticipant {
+        localCameraFillsScreen ? remote : local
+    }
+
+    /// The picture that fills the screen.
+    func featured(localCameraFillsScreen: Bool) -> UIParticipant {
+        localCameraFillsScreen ? local : remote
+    }
+}
+
+/// Marks the local picture so UI tests can find it whether it floats or fills the screen.
+private struct LocalSelfViewAnchor: ViewModifier {
+    let isLocal: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isLocal {
+            content.accessibilityAnchor("meeting-self-view-floating")
+        } else {
+            content
+        }
+    }
 }
 
 enum FloatingSelfViewCorner: String, CaseIterable, Sendable {
@@ -85,6 +109,8 @@ struct OneToOneCallLayout: View {
     let participants: OneToOneParticipants
     @Binding var corner: FloatingSelfViewCorner
     let bottomInset: CGFloat
+    /// The local camera fills the screen while it is showing the room. The other person floats.
+    var localCameraFillsScreen = false
     @State private var dragOffset = CGSize.zero
     @ScaledMetric(relativeTo: .caption) private var labelClearance: CGFloat = 48
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -93,7 +119,7 @@ struct OneToOneCallLayout: View {
         GeometryReader { proxy in
             let geometry = FloatingSelfViewGeometry(
                 container: proxy.size, bottomInset: bottomInset, labelClearance: labelClearance,
-                videoAspectRatio: selfViewAspectRatio
+                videoAspectRatio: floatingAspectRatio
             )
             let anchor = geometry.center(for: corner)
             let center = geometry.clamped(CGPoint(x: anchor.x + dragOffset.width, y: anchor.y + dragOffset.height))
@@ -101,14 +127,14 @@ struct OneToOneCallLayout: View {
                 Color.clear
 
                 ParticipantVideoCard(
-                    participant: participants.local, activeSpeakerId: nil, fillsAvailableSpace: true,
+                    participant: floatingParticipant, activeSpeakerId: nil, fillsAvailableSpace: true,
                     audioIndicatorSize: geometry.audioIndicatorSize
                 )
                 .frame(width: geometry.tileSize.width, height: geometry.tileSize.height)
                 .contentShape(Rectangle())
                 .position(center)
-                .trackingVisibility(of: participants.local)
-                .accessibilityAnchor("meeting-self-view-floating")
+                .trackingVisibility(of: floatingParticipant)
+                .modifier(LocalSelfViewAnchor(isLocal: !floatingParticipant.isRemote))
                 .accessibilityAction(named: Text("Move to top left", bundle: .module)) { move(to: .topLeft) }
                 .accessibilityAction(named: Text("Move to top right", bundle: .module)) { move(to: .topRight) }
                 .accessibilityAction(named: Text("Move to bottom left", bundle: .module)) { move(to: .bottomLeft) }
@@ -127,22 +153,32 @@ struct OneToOneCallLayout: View {
                 )
             }
             .background {
-                // The far end fills the whole screen; its labels stay inside the safe area.
+                // The featured picture fills the screen; its labels stay inside the safe area.
                 ParticipantVideoCard(
-                    participant: participants.remote, activeSpeakerId: nil, fillsAvailableSpace: true,
+                    participant: featuredParticipant, activeSpeakerId: nil, fillsAvailableSpace: true,
                     fullScreenOverlayInsets: proxy.safeAreaInsets
                 )
                 .ignoresSafeArea()
-                .trackingVisibility(of: participants.remote)
+                .trackingVisibility(of: featuredParticipant)
+                .modifier(LocalSelfViewAnchor(isLocal: !featuredParticipant.isRemote))
             }
             .onChange(of: proxy.size) { _, _ in dragOffset = .zero }
             .onChange(of: bottomInset) { _, _ in dragOffset = .zero }
         }
     }
 
+    /// Your picture is featured while you are showing the room. Otherwise the other person is.
+    private var floatingParticipant: UIParticipant {
+        participants.floating(localCameraFillsScreen: localCameraFillsScreen)
+    }
+
+    private var featuredParticipant: UIParticipant {
+        participants.featured(localCameraFillsScreen: localCameraFillsScreen)
+    }
+
     /// Before the first frame the dimensions are unknown, so the tile keeps its portrait default.
-    private var selfViewAspectRatio: CGFloat {
-        let dimensions = participants.local.videoDimensions
+    private var floatingAspectRatio: CGFloat {
+        let dimensions = floatingParticipant.videoDimensions
         guard dimensions.width > 0, dimensions.height > 0 else { return 0.75 }
         return dimensions.width / dimensions.height
     }

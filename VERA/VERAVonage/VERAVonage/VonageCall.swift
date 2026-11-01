@@ -23,7 +23,9 @@ import VERADomain
 /// - Remote participant subscriptions through `VonageSubscriber`
 /// - Reactive state observation via Combine publishers
 /// - Optional extensibility via the plugin system
-public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTranslationControllable {
+public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTranslationControllable,
+    DualCaptureControllable
+{
 
     private var cancellables = Set<AnyCancellable>()
     /// Per-subscriber cancellable sets keyed by subscriber ID.
@@ -161,6 +163,18 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     /// Replaced during ``applyPublisherAdvancedSettings(_:)`` when SDK-level settings change.
     public private(set) var publisher: VonagePublisher
 
+    /// Whether this device can publish the front and rear cameras together.
+    public let isDualCaptureAvailable: Bool
+
+    private let _localCameraMode = CurrentValueSubject<LocalCameraMode, Never>(.front)
+
+    /// The camera mode currently published. Remote participants see one video tile either way.
+    public var localCameraMode: LocalCameraMode { _localCameraMode.value }
+
+    /// Emits when the local camera mode changes.
+    public lazy var localCameraModePublisher: AnyPublisher<LocalCameraMode, Never> =
+        _localCameraMode.eraseToAnyPublisher()
+
     /// The subscriber for the local participant's captions.
     public var publisherCaptions: VonageSubscriber?
 
@@ -208,18 +222,37 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
     ///   - publisherRepository: Repository for recreating the publisher during settings changes.
     ///   - networkStatsCollector: Collect info of audio, video and rtc data
     /// - Important: Call ``setup()`` before ``connect()`` to configure handlers and observers.
-    public init(
+    public convenience init(
         roomName: RoomName,
         makeSession: @escaping (RoomName) async throws -> VonageSession,
         publisher: VonagePublisher,
         publisherRepository: PublisherRepository,
         statsCollector: StatsCollector
     ) {
+        self.init(
+            roomName: roomName,
+            makeSession: makeSession,
+            publisher: publisher,
+            publisherRepository: publisherRepository,
+            statsCollector: statsCollector,
+            dualCaptureAvailability: DeviceDualCaptureAvailability()
+        )
+    }
+
+    init(
+        roomName: RoomName,
+        makeSession: @escaping (RoomName) async throws -> VonageSession,
+        publisher: VonagePublisher,
+        publisherRepository: PublisherRepository,
+        statsCollector: StatsCollector,
+        dualCaptureAvailability: any DualCaptureAvailabilityChecking
+    ) {
         self.roomName = roomName
         self.makeSession = makeSession
         self.publisher = publisher
         self.publisherRepository = publisherRepository
         self.statsCollector = statsCollector
+        self.isDualCaptureAvailable = dualCaptureAvailability.isAvailable
         self.subscriberFactory =
             publisher is PictureInPictureVonagePublisher
             ? PictureInPictureVonageSubscriberFactory()
@@ -572,13 +605,22 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         !publisher.publishAudio && !publisher.publishVideo
     }
 
-    /// Switches the local camera between front and back positions.
+    /// Switches the local camera between front and rear.
     ///
-    /// Toggles the camera input source. If currently using the front camera,
-    /// it switches to the back camera, and vice versa.
+    /// One tap always changes the single camera. Dual capture is left for the front-camera window control.
     /// - Note: Does not enable video if currently disabled.
     public func toggleLocalCamera() {
-        publisher.cameraPosition = publisher.cameraPosition == .front ? .back : .front
+        changeLocalCameraMode(to: publisher.localCameraMode.flipped())
+    }
+
+    /// Hides or shows the front-camera window while the rear camera is the main picture.
+    public func setFrontCameraHidden(_ hidden: Bool) {
+        changeLocalCameraMode(to: publisher.localCameraMode.hidingFrontCamera(hidden))
+    }
+
+    private func changeLocalCameraMode(to requested: LocalCameraMode) {
+        publisher.apply(localCameraMode: requested)
+        _localCameraMode.value = publisher.localCameraMode
     }
 
     /// Toggles the local video publishing state.
@@ -802,7 +844,7 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         // 1. Capture current runtime state
         let wasPublishingAudio = publisher.publishAudio
         let wasPublishingVideo = publisher.publishVideo
-        let cameraPos = publisher.cameraPosition
+        let cameraMode = publisher.localCameraMode
         let currentTransformers = publisher.videoTransformers
         let wasStatsEnabled = isNetworkStatsEnabled
         let wasCaptionsEnabled = areCaptionsEnabled
@@ -859,8 +901,9 @@ public final class VonageCall: CallFacade, AudioMuteControllable, CaptionsTransl
         self.publisher = newPublisher
         publishToSession()
 
-        // 7. Restore camera position
-        newPublisher.cameraPosition = cameraPos
+        // 7. Restore the camera, including dual capture when it was active.
+        newPublisher.apply(localCameraMode: cameraMode)
+        _localCameraMode.value = newPublisher.localCameraMode
 
         // 8. Restore video transformers
         if !currentTransformers.isEmpty {

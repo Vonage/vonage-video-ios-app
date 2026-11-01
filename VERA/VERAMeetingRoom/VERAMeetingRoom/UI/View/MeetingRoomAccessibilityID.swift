@@ -9,6 +9,8 @@ enum MeetingRoomAccessibilityID {
     static let micDisabled = "meeting-room-mic-disabled"
     static let cameraEnabled = "meeting-room-camera-enabled"
     static let cameraDisabled = "meeting-room-camera-disabled"
+    static let hideFrontCamera = "meeting-room-hide-front-camera"
+    static let showFrontCamera = "meeting-room-show-front-camera"
     static let moreOptionsButton = "meeting-room-more-options-button"
     static let participantsButton = "meeting-room-participants-button"
     static let participantsListScreen = "participants-list-screen"

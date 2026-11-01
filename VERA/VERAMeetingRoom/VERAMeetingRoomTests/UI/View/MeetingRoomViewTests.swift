@@ -96,6 +96,21 @@ struct MeetingRoomViewTests {
         #expect(selectedActions == ["microphone", "camera", "layout", "end-call"])
     }
 
+    @Test("The front-camera control is available only while the rear camera is the main picture")
+    func frontCameraToggleFollowsTheRearCamera() {
+        let idle = makeState()
+        #expect(idle.showsFrontCameraToggle == false)
+
+        let dual = makeState(localCameraMode: .dual, isDualCaptureAvailable: true)
+        #expect(dual.showsFrontCameraToggle == true)
+
+        let rearOnly = makeState(localCameraMode: .back, isDualCaptureAvailable: true)
+        #expect(rearOnly.showsFrontCameraToggle == true)
+
+        let unsupported = makeState(localCameraMode: .back, isDualCaptureAvailable: false)
+        #expect(unsupported.showsFrontCameraToggle == false)
+    }
+
     @Test("Bottom bar controls expose accessibility identifiers")
     @MainActor
     func bottomBarControlsExposeAccessibilityIdentifiers() {
@@ -163,7 +178,9 @@ struct MeetingRoomViewTests {
         layout: MeetingRoomLayout = .activeSpeaker,
         allowMicrophoneControl: Bool = true,
         allowCameraControl: Bool = true,
-        showParticipantList: Bool = true
+        showParticipantList: Bool = true,
+        localCameraMode: LocalCameraMode = .front,
+        isDualCaptureAvailable: Bool = false
     ) -> MeetingRoomState {
         MeetingRoomState(
             roomName: "test-room",
@@ -178,7 +195,9 @@ struct MeetingRoomViewTests {
             showParticipantList: showParticipantList,
             callState: .connected,
             archivingState: .idle,
-            noiseSuppressionState: .idle
+            noiseSuppressionState: .idle,
+            localCameraMode: localCameraMode,
+            isDualCaptureAvailable: isDualCaptureAvailable
         )
     }
 }

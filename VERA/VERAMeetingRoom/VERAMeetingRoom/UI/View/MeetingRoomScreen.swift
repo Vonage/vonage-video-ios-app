@@ -35,6 +35,7 @@ public struct MeetingRoomScreen: View {
                                 onToggleMic: viewModel.onToggleMic,
                                 onToggleCamera: viewModel.onToggleCamera,
                                 onCameraSwitch: viewModel.onCameraSwitch,
+                                onToggleFrontCamera: viewModel.onToggleFrontCamera,
                                 onEndCall: viewModel.endCall,
                                 onToggleParticipants: {},
                                 onToggleLayout: viewModel.onToggleLayout),

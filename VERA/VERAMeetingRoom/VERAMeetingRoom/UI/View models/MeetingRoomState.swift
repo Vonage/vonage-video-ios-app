@@ -27,6 +27,13 @@ public struct MeetingRoomState: Equatable {
     public let archivingState: ArchivingState
     public let transcriptionState: ArchivingState
     public let noiseSuppressionState: NoiseSuppressionState
+    public let localCameraMode: LocalCameraMode
+    public let isDualCaptureAvailable: Bool
+
+    /// The front-camera window control is useful only while the rear camera is the main picture.
+    public var showsFrontCameraToggle: Bool {
+        isDualCaptureAvailable && allowCameraControl && (localCameraMode == .dual || localCameraMode == .back)
+    }
 
     public var participantsCount: Int {
         participants.count { !$0.isScreenshare }
@@ -46,7 +53,9 @@ public struct MeetingRoomState: Equatable {
         callState: CallState,
         archivingState: ArchivingState,
         transcriptionState: ArchivingState = .idle,
-        noiseSuppressionState: NoiseSuppressionState
+        noiseSuppressionState: NoiseSuppressionState,
+        localCameraMode: LocalCameraMode = .front,
+        isDualCaptureAvailable: Bool = false
     ) {
         self.roomName = roomName
         self.roomURL = roomURL
@@ -62,6 +71,8 @@ public struct MeetingRoomState: Equatable {
         self.archivingState = archivingState
         self.transcriptionState = transcriptionState
         self.noiseSuppressionState = noiseSuppressionState
+        self.localCameraMode = localCameraMode
+        self.isDualCaptureAvailable = isDualCaptureAvailable
     }
 
     public static let initial = MeetingRoomState(

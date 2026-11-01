@@ -103,6 +103,8 @@ public final class MeetingRoomViewModel {
     private let transcriptionPublisher = CurrentValueSubject<ArchivingState, Never>(.idle)
     @ObservationIgnored
     private let noiseSuppressionPublisher = CurrentValueSubject<NoiseSuppressionState, Never>(.idle)
+    private let localCameraModePublisher = CurrentValueSubject<LocalCameraMode, Never>(.front)
+    private let dualCaptureAvailablePublisher = CurrentValueSubject<Bool, Never>(false)
 
     @ObservationIgnored
     public weak var currentCall: CallFacade?
@@ -197,6 +199,12 @@ public final class MeetingRoomViewModel {
 
     public func onCameraSwitch() {
         currentCall?.toggleLocalCamera()
+    }
+
+    public func onToggleFrontCamera() {
+        guard let dualCapture = currentCall as? DualCaptureControllable else { return }
+        let hidesFrontCamera = dualCapture.localCameraMode == .dual
+        dualCapture.setFrontCameraHidden(hidesFrontCamera)
     }
 
     public func onToggleLayout() {
@@ -340,7 +348,7 @@ extension MeetingRoomViewModel {
                 activeSpeakerId: participantsState.activeParticipantId)
         }
 
-        Publishers.CombineLatest3(
+        Publishers.CombineLatest4(
             Publishers.CombineLatest4(
                 sortedParticipantsPublisher,
                 sessionStatePublisher,
@@ -348,10 +356,12 @@ extension MeetingRoomViewModel {
                 archivingPublisher
             ),
             transcriptionPublisher,
-            noiseSuppressionPublisher
+            noiseSuppressionPublisher,
+            Publishers.CombineLatest(localCameraModePublisher, dualCaptureAvailablePublisher)
         )
-        .map { [weak self] state, transcriptionState, noiseSuppressionState in
+        .map { [weak self] state, transcriptionState, noiseSuppressionState, camera in
             let (participantsState, sessionState, callState, archivingState) = state
+            let (localCameraMode, isDualCaptureAvailable) = camera
 
             guard let self else { return MeetingRoomState.initial }
             return MeetingRoomState(
@@ -369,7 +379,9 @@ extension MeetingRoomViewModel {
                 callState: callState,
                 archivingState: archivingState,
                 transcriptionState: transcriptionState,
-                noiseSuppressionState: noiseSuppressionState
+                noiseSuppressionState: noiseSuppressionState,
+                localCameraMode: localCameraMode,
+                isDualCaptureAvailable: isDualCaptureAvailable
             )
         }
         .removeDuplicates()
@@ -409,6 +421,15 @@ extension MeetingRoomViewModel {
     }
 
     fileprivate func addObservers(_ call: CallFacade) async {
+        if let dualCapture = call as? DualCaptureControllable {
+            dualCaptureAvailablePublisher.send(dualCapture.isDualCaptureAvailable)
+            dualCapture.localCameraModePublisher
+                .sink { [weak self] mode in
+                    self?.localCameraModePublisher.send(mode)
+                }
+                .store(in: &cancellables)
+        }
+
         observeSessionState(call.participantsPublisher)
 
         call.statePublisher
