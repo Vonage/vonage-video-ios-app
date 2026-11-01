@@ -51,9 +51,14 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
     }
 
     /// Keeps the self-view mirrored for the front camera (selfie-preview convention) and
-    /// un-mirrored for the back camera. Applied to the pixels so the tile and PiP window agree.
+    /// un-mirrored for the back camera and for dual capture. The dual-capture frame already
+    /// mirrors the front window, so the whole frame must not be mirrored again.
+    override func didChangeLocalCameraMode() {
+        updateInlineRendererMirroring()
+    }
+
     private func updateInlineRendererMirroring() {
-        inlineVideoRenderer.isMirrored = otPublisher.cameraPosition == .front
+        inlineVideoRenderer.isMirrored = localCameraMode == .front
     }
 
     /// Attaches the permanent local renderer at publish time. The waiting room uses

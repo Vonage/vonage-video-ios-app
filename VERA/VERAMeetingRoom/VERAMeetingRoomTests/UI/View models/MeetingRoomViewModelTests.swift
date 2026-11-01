@@ -226,6 +226,21 @@ struct MeetingRoomViewModelTests {
 
     @Test
     @MainActor
+    func frontCameraToggleHidesAndShowsTheFrontCamera() {
+        let call = DualCaptureCall()
+        call.localCameraMode = .dual
+        let sut = makeSUT(connectToRoomUseCase: makeMockConnectToRoomUseCase())
+        sut.currentCall = call
+
+        sut.onToggleFrontCamera()
+        #expect(call.localCameraMode == .back)
+
+        sut.onToggleFrontCamera()
+        #expect(call.localCameraMode == .dual)
+    }
+
+    @Test
+    @MainActor
     func forceMuteActionRequestsConfirmationForEligibleRemoteParticipant() async throws {
         let connectToRoomUseCase = makeMockConnectToRoomUseCase()
         let call = MockCall()
@@ -1784,4 +1799,18 @@ extension MeetingRoomViewState {
 
 private enum MockForceMuteError: Swift.Error {
     case requestFailed
+}
+
+private final class DualCaptureCall: MockCall, DualCaptureControllable {
+    var localCameraMode: LocalCameraMode = .front
+    let isDualCaptureAvailable = true
+    private let modeSubject = CurrentValueSubject<LocalCameraMode, Never>(.front)
+    var localCameraModePublisher: AnyPublisher<LocalCameraMode, Never> {
+        modeSubject.eraseToAnyPublisher()
+    }
+
+    func setFrontCameraHidden(_ hidden: Bool) {
+        localCameraMode = localCameraMode.hidingFrontCamera(hidden)
+        modeSubject.send(localCameraMode)
+    }
 }

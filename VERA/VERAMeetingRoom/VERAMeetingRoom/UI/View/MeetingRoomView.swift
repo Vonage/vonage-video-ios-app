@@ -84,7 +84,8 @@ public struct MeetingRoomView: View {
                     participants: state.participants,
                     layout: state.layout,
                     activeSpeakerId: state.activeSpeakerId,
-                    selfViewBottomInset: isBottomBarVisible ? BottomBarConstants.totalHeight : 0
+                    selfViewBottomInset: isBottomBarVisible ? BottomBarConstants.totalHeight : 0,
+                    localCameraMode: state.localCameraMode
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .animation(
@@ -231,6 +232,10 @@ public struct MeetingRoomView: View {
             cameraSwitchButton
         }
 
+        if !isIosAppOnMac && state.showsFrontCameraToggle {
+            frontCameraToggleButton
+        }
+
         ForEach(extraTopTrailingButtons) { button in
             button.content()
         }
@@ -282,6 +287,30 @@ public struct MeetingRoomView: View {
             VERACommonUIAsset.Images.cameraSwitchLine.swiftUIImage
         }
         .disabled(!state.isCameraEnabled)
+    }
+
+    private var frontCameraToggleButton: some View {
+        let hidesFrontCamera = state.localCameraMode == .dual
+        return Button {
+            onBottomBarInteraction()
+            actions.onToggleFrontCamera()
+        } label: {
+            Image(systemName: hidesFrontCamera ? "rectangle.on.rectangle.slash" : "rectangle.on.rectangle")
+        }
+        .disabled(!state.isCameraEnabled)
+        .accessibilityLabel(
+            Text(
+                String(
+                    localized: hidesFrontCamera ? "Hide front camera" : "Show front camera",
+                    bundle: .module
+                )
+            )
+        )
+        .accessibilityIdentifier(
+            hidesFrontCamera
+                ? MeetingRoomAccessibilityID.hideFrontCamera
+                : MeetingRoomAccessibilityID.showFrontCamera
+        )
     }
 
     private func shareButton(url: URL) -> some View {

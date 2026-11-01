@@ -457,6 +457,57 @@ struct VonageCallTests {
     }
 
     @Test
+    func toggleLocalCamera_flipsBetweenFrontAndRearEvenWhenDualCaptureIsAvailable() {
+        let publisher = VonagePublisherSpy()
+        let sut = makeSUT(publisher: publisher, dualCaptureAvailable: true)
+
+        sut.toggleLocalCamera()
+        #expect(publisher.localCameraMode == .back)
+        #expect(sut.localCameraMode == .back)
+
+        sut.setFrontCameraHidden(false)
+        #expect(publisher.localCameraMode == .dual)
+
+        sut.toggleLocalCamera()
+        #expect(publisher.localCameraMode == .front)
+
+        sut.toggleLocalCamera()
+        #expect(publisher.localCameraMode == .back)
+    }
+
+    @Test
+    func toggleLocalCamera_swapsOneCameraWhenDualCaptureIsUnavailable() {
+        let publisher = VonagePublisherSpy()
+        let sut = makeSUT(publisher: publisher, dualCaptureAvailable: false)
+
+        sut.toggleLocalCamera()
+        #expect(publisher.localCameraMode == .back)
+        sut.toggleLocalCamera()
+        #expect(publisher.localCameraMode == .front)
+    }
+
+    @Test
+    func applyPublisherAdvancedSettings_restoresDualCapture() async throws {
+        let publisherSpy = VonagePublisherSpy()
+        publisherSpy.apply(localCameraMode: .dual)
+        let newPublisherSpy = VonagePublisherSpy()
+        let publisherRepository = MockPublisherRepository()
+        publisherRepository.publisherToReturn = newPublisherSpy
+        let sut = makeSUT(
+            publisher: publisherSpy,
+            publisherRepository: publisherRepository,
+            dualCaptureAvailable: true
+        )
+        sut.setup()
+        try await sut.connect()
+
+        try await sut.applyPublisherAdvancedSettings(PublisherAdvancedSettings(videoResolution: .high))
+
+        #expect(newPublisherSpy.localCameraMode == .dual)
+        #expect(sut.localCameraMode == .dual)
+    }
+
+    @Test
     func applyPublisherAdvancedSettings_restoresVideoTransformers() async throws {
         let publisherSpy = VonagePublisherSpy()
         let transformer1 = MockTransformer(key: "blur", transformer: NSObject())
@@ -664,14 +715,16 @@ struct VonageCallTests {
         session: VonageSession = VonageSessionSpy(),
         publisher: VonagePublisher = VonagePublisherSpy(),
         publisherRepository: PublisherRepository = MockPublisherRepository(),
-        statsCollector: StatsCollector = MockStatsCollector()
+        statsCollector: StatsCollector = MockStatsCollector(),
+        dualCaptureAvailable: Bool = false
     ) -> VonageCall {
         VonageCall(
             roomName: credentials.roomName,
             makeSession: { _ in session },
             publisher: publisher,
             publisherRepository: publisherRepository,
-            statsCollector: statsCollector
+            statsCollector: statsCollector,
+            dualCaptureAvailability: StubDualCaptureAvailability(isAvailable: dualCaptureAvailable)
         )
     }
 
@@ -693,6 +746,10 @@ struct VonageCallTests {
 
 private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
+}
+
+private struct StubDualCaptureAvailability: DualCaptureAvailabilityChecking {
+    let isAvailable: Bool
 }
 
 private final class ArchivingSignalHandlerSpy: VonagePlugin, VonageSignalHandler {
