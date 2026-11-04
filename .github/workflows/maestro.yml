@@ -53,7 +53,7 @@ jobs:
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -62,7 +62,7 @@ jobs:
         run: |
           {
             echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
-          } >> $GITHUB_ENV
+          } >> "$GITHUB_ENV"
 
       - name: Generate project with Tuist
         run: |
@@ -87,6 +87,10 @@ jobs:
         run: |
           echo "📱 Available iOS Simulators:"
           xcrun simctl list devices
+
+      - name: Compute unique room name
+        id: room
+        run: echo "name=maestro-${{ github.run_id }}${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}" >> "$GITHUB_OUTPUT"
 
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
