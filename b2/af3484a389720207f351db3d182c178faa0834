@@ -1,0 +1,28 @@
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomState.swift"
+  s_4598f7c801d99b::t_b02fde8902ae86 28,48,63
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_4598f7c801d99b::t_b02fde8902ae86 101-102,341,348,351,369,432-438,494-506
+  s_4598f7c801d99b::t_085ff2f6bab476 507-510
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomView.swift
+  s_4598f7c801d99b::t_b02fde8902ae86 118-120,259-269,544
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomAccessibilityID.swift
+  s_4598f7c801d99b::t_b02fde8902ae86 16
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  s_4598f7c801d99b::t_63a2d02e2d5b51 192-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b2af3484a389720207f351db3d182c178faa0834",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

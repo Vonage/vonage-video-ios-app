@@ -1,0 +1,51 @@
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingDataSource.swift
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 44-47,71,73-75
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_4598f7c801d99b::t_1e83d8399ec75e 36,89,134-143,170,179-180,205,226,250,267,281,336
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_4598f7c801d99b::t_1b80ea5e4c219e 174
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchivingDataSource.swift
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 6,15,17,19,26,28,31
+VERA/Scripts/generate-app-config.py
+  s_4598f7c801d99b::t_528b9a701f7878 133,147,160
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StopArchivingUseCase.swift"
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 6,11,13,16,36-37
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  s_4598f7c801d99b::t_dddb68ecdd5ebb 6,10,12,14,32
+VERA/Config/app-config.json
+  s_4598f7c801d99b::t_528b9a701f7878 39
+docs/ARCHITECTURE.md
+  s_6fcba32ee9a98b::t_34cd0cf7f5a672 24
+docs/TESTING.md
+  s_6fcba32ee9a98b::t_6296311af627a0 84
+  s_6fcba32ee9a98b::t_34cd0cf7f5a672 74
+docs/CONFIGURATION.md
+  s_6fcba32ee9a98b::t_34cd0cf7f5a672 29-30
+.maestro/flows/post-call-transcription.yaml
+  s_6fcba32ee9a98b::t_34cd0cf7f5a672 108
+  s_6fcba32ee9a98b::t_81c06034ca1fde 1-107,109-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7261664142b19c64bb376373d090aa8b8ab373b",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    },
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

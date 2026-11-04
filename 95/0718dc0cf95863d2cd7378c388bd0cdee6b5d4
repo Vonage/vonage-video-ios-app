@@ -1,0 +1,30 @@
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingDataSourceTests.swift
+  s_4598f7c801d99b::t_e02ce8e5665b0b 60-87,170-187,238-239,241-246
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_4598f7c801d99b::t_732a4ab00138d5 295-384,388,398
+VERA/VERAArchiving/VERAArchivingTests/StopArchivingUseCaseTests.swift
+  s_4598f7c801d99b::t_b9414641e53b13 8
+  s_4598f7c801d99b::t_e02ce8e5665b0b 55-62
+  s_4598f7c801d99b::t_e735fe044b24df 63-64
+VERA/VERAArchiving/VERAArchivingTests/Mocks/MockArchivingDataSource.swift
+  s_4598f7c801d99b::t_ae33d8141afd5f 7,13-14,26,39
+VERA/VERAArchiving/VERAArchivingTests/StartArchivingUseCaseTests.swift
+  s_4598f7c801d99b::t_ae33d8141afd5f 8,63-79
+  s_4598f7c801d99b::t_166cc8950fecd9 80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "950718dc0cf95863d2cd7378c388bd0cdee6b5d4",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

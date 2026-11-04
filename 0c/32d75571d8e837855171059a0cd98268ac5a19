@@ -1,0 +1,23 @@
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_8f98b5a19f06be::t_1934d03e022930 69-75
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_8f98b5a19f06be::t_b5ea486ec8ea87 77-97
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_8f98b5a19f06be::t_31c9e4f40d43c2 452-458
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "0c32d75571d8e837855171059a0cd98268ac5a19",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_bc15460a797021::t_e8897590288425 16-18
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_bc15460a797021::t_41901770977388 1164-1168,1176-1180,1182-1185,1229-1230,1232,1235-1238,1240-1244,1246-1250,1258-1259,1266-1268,1299-1303,1305-1309,1317-1321,1323
+  s_bc15460a797021::t_eb9b47e3cbe632 1138-1163,1169-1175,1181,1186-1228,1231,1233-1234,1239,1245,1251-1257,1260-1265,1269-1298,1304,1310-1316,1322,1324-1325
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cffa656ebf8aea807e446a9e8cd249049ee8ae26",
+  "prompts": {},
+  "sessions": {
+    "s_bc15460a797021": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ce961211-c1f6-4b9b-a258-0b4d15575086",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

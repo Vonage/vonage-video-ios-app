@@ -1,0 +1,51 @@
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel+BottomItemPresentable.swift"
+  s_4598f7c801d99b::t_8b3008d9b1e8a3 9,12,16,20
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveScreenButton.swift
+  s_4598f7c801d99b::t_8b3008d9b1e8a3 17
+docs/CONFIGURATION.md
+  s_4598f7c801d99b::t_fee63e19317626 27-28
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveKind+Presentation.swift
+  s_4598f7c801d99b::t_cade8545964664 1-20,22-24,26-84
+  s_4598f7c801d99b::t_5507c6503e1fe5 21,25
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveButtonSnapshotTests.swift
+  s_4598f7c801d99b::t_d59573f3ab878e 1-89
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_4598f7c801d99b::t_63a2d02e2d5b51 128-144,163-179,198-214,233-249,267-283,300-316
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingState+BottomBarPresentation.swift
+  s_4598f7c801d99b::t_95f1d2eb527487 9-11,14,18,22
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveButton.swift
+  s_4598f7c801d99b::t_8b3008d9b1e8a3 10,15,19,27,30,38-39,49-50
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  s_4598f7c801d99b::t_8b3008d9b1e8a3 13,16-18,23,29,33-37,39,43,49,60-64
+  s_4598f7c801d99b::t_b56a927e08885d 65-66
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_4598f7c801d99b::t_a8a7afaccd6ae3 9-10
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_4598f7c801d99b::t_8b3008d9b1e8a3 10-13,21-23,38,45,68,70,74,77-78,87,90-91,103-104,112-113
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Dark.Dark.png
+  s_4598f7c801d99b::t_3aeb8a70a8647a 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Recording_Active.Recording_Active.png
+  s_4598f7c801d99b::t_cddecc800bfd13 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Recording_Idle.Recording_Idle.png
+  s_4598f7c801d99b::t_6090c2f4463817 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Transcription_Active.Transcription_Active.png
+  s_4598f7c801d99b::t_736062bb4aeb9c 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Transcription_Idle.Transcription_Idle.png
+  s_4598f7c801d99b::t_d83ddf677405da 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9b0312428f8b2890c511a5c0b19c295be3e1f55b",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

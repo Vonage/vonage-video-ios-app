@@ -1,0 +1,21 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/FeedbackSessionDebugInfoCurrentCallTests.swift
+  s_8f98b5a19f06be::t_e888eb718014ab 1
+  s_8f98b5a19f06be::t_14fc6fd9514d3b 56-66
+  s_8f98b5a19f06be::t_458177c309b49e 2,4,7,14-34,54-55,67-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "104a6f5b9eb0a894f76f7cc21db127aea2ff4867",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

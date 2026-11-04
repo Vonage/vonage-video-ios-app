@@ -1,0 +1,27 @@
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivesScreen.swift
+  s_6fcba32ee9a98b::t_571f282409e2bd 14
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchivesViewModel.swift"
+  s_6fcba32ee9a98b::t_571f282409e2bd 27-28,91-92,95-96
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveListSnapshotTests.swift
+  s_6fcba32ee9a98b::t_2d601d00d9bb7e 31,49-52
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveList.swift
+  s_6fcba32ee9a98b::t_571f282409e2bd 32-33,35,37,77-82
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  s_6fcba32ee9a98b::t_2d601d00d9bb7e 371-410,548-549,554
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fca41e41b5b6f3ab6c7ae806fabdd828fea4b97e",
+  "prompts": {},
+  "sessions": {
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

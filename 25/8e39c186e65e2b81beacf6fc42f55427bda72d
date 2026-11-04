@@ -1,0 +1,23 @@
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_8f98b5a19f06be::t_ccd86425961657 95-99
+VERA/VERACore/VERACore/Common/Data/Default/DefaultPublisherRepository.swift
+  s_8f98b5a19f06be::t_8077408fcd46f0 33-34
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_8f98b5a19f06be::t_f3159fa8f06fe8 478
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "258e39c186e65e2b81beacf6fc42f55427bda72d",
+  "prompts": {},
+  "sessions": {
+    "s_8f98b5a19f06be": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_be940a8b-9fd8-4831-9f46-56eee1e7dc72",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

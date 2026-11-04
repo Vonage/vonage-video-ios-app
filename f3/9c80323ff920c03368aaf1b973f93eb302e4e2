@@ -1,0 +1,14 @@
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EBackendStore.swift
+  h_4202290f411bdc 204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f39c80323ff920c03368aaf1b973f93eb302e4e2",
+  "prompts": {},
+  "humans": {
+    "h_4202290f411bdc": {
+      "author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  s_6fcba32ee9a98b::t_213581cea3980b 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "76ae852fc5403e2afea642099e53aacb4781e526",
+  "prompts": {},
+  "sessions": {
+    "s_6fcba32ee9a98b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aee794bc-2954-46a0-ba51-21b2435d077c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}

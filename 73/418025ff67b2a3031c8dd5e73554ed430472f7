@@ -1,0 +1,28 @@
+.maestro/flows/settings-meeting-room-context.yaml
+  s_4dc0faffb2a08d::t_36e0d8abe14ca3 125-129
+  s_52cccd338361a5::t_d36e8b2ce89e35 93-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "73418025ff67b2a3031c8dd5e73554ed430472f7",
+  "prompts": {},
+  "sessions": {
+    "s_4dc0faffb2a08d": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792694642030345000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_52cccd338361a5": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792694638840985000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

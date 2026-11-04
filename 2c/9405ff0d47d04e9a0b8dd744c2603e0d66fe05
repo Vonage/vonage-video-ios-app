@@ -1,0 +1,16 @@
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchivesViewModel.swift"
+  h_5ddc9d372ac6a1 73-75
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  h_5ddc9d372ac6a1 58,259,261-263,276-298,491-492,497
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2c9405ff0d47d04e9a0b8dd744c2603e0d66fe05",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,267 @@
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_029338d583cf93::t_c4ffb760f35ef9 79,94,108
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/VonageSettingsPluginTests.swift
+  s_a53bf823f59fb0::t_558ca6c031b817 494,501-502
+  s_343f04f6cb514f::t_2b9b8ac9b23b3b 177
+  s_f822ea042e490f::t_cc91695d427adc 161-174
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_e4345fe285c3d2::t_c446f440b605c6 176,270-271
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_d2fc5e6c41ca88::t_4fa994aaf9fd11 19
+docs/CONFIGURATION.md
+  s_21523c71af125e::t_8138c7e3c2c38f 27-28
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/VonageSettingsPlugin.swift
+  s_a928d505c23724::t_ce4f55ace8e676 168-177,179-180
+  s_6099ec0e07a827::t_3ed8be3e94f4c8 62-64,73-74,77-78,82
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_ba6c6d83dc0744::t_514af74e135ea8 364
+  s_579d3086578568::t_51885b3ad085e6 346-349,352-353
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  s_be42b70bdfb34a::t_808b55024a6c2e 25
+  s_629da03a34d6b4::t_07eecc87750ee0 15
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_6f1a1a0138dd1f::t_ab1c8aa9d03d25 120-134
+VERA/Scripts/generate-app-config.py
+  s_fecc00291aa9a3::t_007c81ae62e175 128,143
+  s_e13b9bb922435e::t_d3f075a4346ed9 157
+VERA/VERAConfiguration/VERAConfigurationTests/AppConfigTransferTests.swift
+  s_85caedcbbdb866::t_c3c1605ff14ddd 103-105
+  s_fabc0c3b59f533::t_701ff72cd652e5 56
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  s_0dfafa93733f98::t_1afe862a0fe4a2 31-34
+VERA/Config/app-config.json
+  s_fecc00291aa9a3::t_007c81ae62e175 34
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_d8805a4f302bb3::t_b9107cdf550126 32,86,178,237
+  s_2c7c7910c604b8::t_d3312f60fa99f9 301
+  s_ec6a55e0578b7a::t_47251b72906329 351
+  s_a01df3d67d326b::t_cb02051155afc2 262
+  s_885faedba395ca::t_58ca99a530a07e 120-129
+  s_087e3eb4ae88a8::t_bc4199a8dda9e8 280
+  s_8d6fcbaa718ab7::t_ebbc95b1cca0f0 195
+  s_7c9d55d18b75af::t_3e267fedf31cc6 221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "7e853cfba12dd7437e62bd4ba5b033ea8cd8345f",
+  "prompts": {},
+  "sessions": {
+    "s_029338d583cf93": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751568777363000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_087e3eb4ae88a8": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751645063404000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_0dfafa93733f98": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751577820188000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_21523c71af125e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792753865140582000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_2c7c7910c604b8": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751646701374000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_343f04f6cb514f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751682434124000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_579d3086578568": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751594098404000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_6099ec0e07a827": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751611417620000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_629da03a34d6b4": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751657765337000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_6f1a1a0138dd1f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751694751663000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_7c9d55d18b75af": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751642194536000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_85caedcbbdb866": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751663691764000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_885faedba395ca": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751650266391000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_8d6fcbaa718ab7": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751640324770000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a01df3d67d326b": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751643787391000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a53bf823f59fb0": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751674917424000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a928d505c23724": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751614612681000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_ba6c6d83dc0744": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751595755189000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_be42b70bdfb34a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751659859415000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_d2fc5e6c41ca88": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792752256664754000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_d8805a4f302bb3": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751638754006000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_e13b9bb922435e": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751560870036000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_e4345fe285c3d2": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751581047320000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_ec6a55e0578b7a": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751648274286000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_f822ea042e490f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751685379675000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_fabc0c3b59f533": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751662111445000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_fecc00291aa9a3": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1792751551283937000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+VERA/VERAApp/VERA/App/Factories/E2EMeetingRoomArchivingDataSourceFactory.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 20
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_4598f7c801d99b::t_6aff488cf94dd4 360-383,388
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingStatusDataSourceTests.swift
+  s_4598f7c801d99b::t_087908e911a755 20,32,34,42,44,55-56,60-61,65-66,78-79,84,93,98,107,111,115,119,123-166
+  s_4598f7c801d99b::t_ecc3d46e67517b 167
+VERA/VERAArchiving/VERAArchivingTestHelpers/ArchivingStatusDataSourceSpy.swift
+  s_4598f7c801d99b::t_657f35253fccfc 11-14,20,25-30,33-34,40-47
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 43
+VERA/VERAE2E/VERAE2E/Data/Archiving/E2EArchivingDataSource.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 15,25,37
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPlugin/VonageArchivingPlugin.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 13,18-19,41-43,59,73,78,81
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingStatusDataSource.swift
+  s_4598f7c801d99b::t_6b6c204f525f8c 10-11,16-21,25-32
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 57
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 222,229
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomArchivingDataSourceFactory.swift
+  s_4598f7c801d99b::t_7f1b7961e3a3c6 17
+VERA/VERAArchiving/VERAArchiving/Domain/Repositories/ArchivingStatusDataSource.swift
+  s_4598f7c801d99b::t_71559160d74e48 9-13,15-19
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPluginTests/VonageArchivingPluginTests.swift
+  s_4598f7c801d99b::t_a66f9d2b842f27 39-44,48-49,66,137-140,144-146,149-152,156-158,163-164,170-171,176-177,183-184,198,200
+  s_4598f7c801d99b::t_f2a2d7f18e9dc1 10
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_4598f7c801d99b::t_4f9916412aaf37 189-190,203
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d56f8d83f98bcac92b83565bc758f47e6c9be82d",
+  "prompts": {},
+  "sessions": {
+    "s_4598f7c801d99b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ed3bc96d-13e1-4872-b61a-987f75ed177b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "aos-svg <artur.osinski@vonage.com>"
+    }
+  }
+}
