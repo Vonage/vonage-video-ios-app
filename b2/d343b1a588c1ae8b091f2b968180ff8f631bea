@@ -1,0 +1,956 @@
+.claude/skills/feature-flag/SKILL.md
+  h_2499cc15b3806e 1-63
+.claude/skills/new-module/SKILL.md
+  h_2499cc15b3806e 1-65
+.claude/skills/record-snapshots/SKILL.md
+  h_2499cc15b3806e 1-63
+.claude/skills/run-tests/SKILL.md
+  h_2499cc15b3806e 1-87
+.claude/skills/setup/SKILL.md
+  h_2499cc15b3806e 1-101
+.github/ISSUE_TEMPLATE/1-bug-report.yml
+  h_2499cc15b3806e 1-85
+.github/ISSUE_TEMPLATE/2-feature-request.yml
+  h_2499cc15b3806e 1-55
+.github/ISSUE_TEMPLATE/config.yml
+  h_2499cc15b3806e 1-8
+.github/copilot-instructions.md
+  h_2499cc15b3806e 325-333
+.github/workflows/ai-shepherd.yml
+  h_2499cc15b3806e 21-22,25-31
+.github/workflows/check-base-branch.yml
+  h_2499cc15b3806e 24-25,28
+.github/workflows/ci.yml
+  h_2499cc15b3806e 28-30
+.kiro/steering/README.md
+  h_2499cc15b3806e 1-43
+.kiro/steering/vera-feature-flags.md
+  h_2499cc15b3806e 1
+.kiro/steering/vera-new-module.md
+  h_2499cc15b3806e 1
+.kiro/steering/vera-setup.md
+  h_2499cc15b3806e 1
+.kiro/steering/vera-snapshot-tests.md
+  h_2499cc15b3806e 1
+.kiro/steering/vera-testing.md
+  h_2499cc15b3806e 1
+.maestro/flows/post-call-transcription.yaml
+  h_2499cc15b3806e 1-133
+.maestro/flows/settings-meeting-room-context.yaml
+  h_2499cc15b3806e 55-64,93-99,116-129
+.maestro/flows/settings-waiting-room-context.yaml
+  h_2499cc15b3806e 79-85
+Package.swift
+  h_2499cc15b3806e 4,7-37,53,57
+README.md
+  h_2499cc15b3806e 66-67,113-127
+VERA/CONFIGURATION_README.md
+  h_2499cc15b3806e 3,9,13,15-16,18,20,106
+VERA/Config/app-config.json
+  h_2499cc15b3806e 34,40
+VERA/Dependencies.json
+  h_2499cc15b3806e 1-11
+VERA/Project.swift
+  h_2499cc15b3806e 497-500,502-503
+VERA/Scripts/generate-app-config.py
+  h_2499cc15b3806e 58,61,80,99,112,125,128,134,143,149,157,163
+VERA/Scripts/generate-app-theme.py
+  h_2499cc15b3806e 286,300
+VERA/Scripts/regenerateSigningConfig.sh
+  h_2499cc15b3806e 18
+VERA/Tuist/ProjectDescriptionHelpers/BuildSettingsConfig.swift
+  h_2499cc15b3806e 23
+VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift
+  h_2499cc15b3806e 1-60
+VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
+  h_2499cc15b3806e 6,26-32,55,66
+VERA/Tuist/ProjectDescriptionHelpers/Package+OKTA.swift
+  h_2499cc15b3806e 6
+VERA/Tuist/ProjectDescriptionHelpers/TestSchemes.swift
+  h_2499cc15b3806e 41,56-58,78,91-96
+VERA/VERAApp/BroadcastExtension/BroadcastSampleHandler.swift
+  h_2499cc15b3806e 12,36-57,59-63,65-138,144-148,150-161,213,232,246,260,263,285-293,295-296,331,343,348,350,353,357,364-367,370,374,378-392
+VERA/VERAApp/BroadcastExtension/ScreenShareVideoCapturer.swift
+  h_2499cc15b3806e 12-34,36-37,39,44-81,83-121,124-127,131-135,141-145,148-153,157-162,166,174,176-180,182-195,197-199,201,203-209,211-219,221-224,226-237,239,241,244-247,250,253,255,259,261-263,265-266,268-279,283-293,298,300-301,303-307
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationMenu.swift
+  h_2499cc15b3806e 35
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  h_2499cc15b3806e 161,164,168-175,184,186,201-203,281-284
+VERA/VERAApp/VERA/App/PublisherAdvancedSettingsAdapter.swift
+  h_2499cc15b3806e 33-37
+VERA/VERAApp/VERA/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 6-50,54-98,102-146,150-194,198-242,246-290,294-338,342-386,390-434,438-482,486-530,533-578,582-626,630-674,678-722,726-770,774-818,822-866,870-914,918-962,966-1010,1014-1058,1062-1106,1110-1154,1158-1202,1206-1250,1254-1298,1312-1342,1345-1346,1360-1390,1393-1394,1398-1442,1446-1490,1494
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  h_2499cc15b3806e 18-19,23-32,43,48,52-53,56,60,75-77,80-84,86-87,95,100,103,113,118,129-138,155-164,187,192,201-202,204,214-215,225,228,230,246,251,271,276,289,294,303,308,310,360,365
+VERA/VERAApp/VERATests/PublisherAdvancedSettingsAdapterTests.swift
+  h_2499cc15b3806e 1-42
+VERA/VERAApp/VERATests/ScreenShareVideoCapturerTests.swift
+  h_2499cc15b3806e 1-344
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivesRepository.swift
+  h_2499cc15b3806e 52-58,97-99,109-110
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingDataSource.swift
+  h_2499cc15b3806e 44-49,73,75-98
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingStatusDataSource.swift
+  h_2499cc15b3806e 10-11,16-21,25-32
+VERA/VERAArchiving/VERAArchiving/Data/URLSessionArchiveFileDownloader.swift
+  h_2499cc15b3806e 1-40
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/ArchiveRecording.swift
+  h_2499cc15b3806e 7
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/ArchiveTranscript.swift
+  h_2499cc15b3806e 1-18
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/TranscriptionOptions.swift
+  h_2499cc15b3806e 1-20
+VERA/VERAArchiving/VERAArchiving/Domain/Repositories/ArchivingStatusDataSource.swift
+  h_2499cc15b3806e 9-13,15-19
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchiveFileDownloader.swift
+  h_2499cc15b3806e 1-16
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchivingDataSource.swift
+  h_2499cc15b3806e 6,13,15-16,18-22,24-25,29,32,34,37,43,51
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/DownloadTranscriptionUseCase.swift"
+  h_2499cc15b3806e 1-34
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/PlayRecordingUseCase.swift"
+  h_2499cc15b3806e 24,26
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  h_2499cc15b3806e 6,8,10-11,13-17,19-20,38-41
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StopArchivingUseCase.swift"
+  h_2499cc15b3806e 6,8,11,13,16,36-37
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 18-47,57,66-95,100,114-143,147-148,153,159-189,208-237,242,256-285,290,302,304-305,308,311-329,332,337-338,343-361,367-379,384-385,391,397-427,432-433,438-456,462-474,479-481,486,492-522,527-528,533-551,557-1322
+VERA/VERAArchiving/VERAArchiving/UI/Components/ShareSheet.swift
+  h_2499cc15b3806e 2,7-27,30
+VERA/VERAArchiving/VERAArchiving/UI/Entities/ArchiveUIData.swift
+  h_2499cc15b3806e 6,9-19,21,24,30,33,36,39
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel+BottomItemPresentable.swift"
+  h_2499cc15b3806e 9,12,16,20
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  h_2499cc15b3806e 10-13,21-27,39-40,43-44,46,51,54,59,67,76-90,94-102,105-109,112-116,118,127-131,139-140
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchivesViewModel.swift"
+  h_2499cc15b3806e 20-21,25-28,34,39,42-44,47-49,53,72-81,90-92,95-96,98-102,104-105,131-139,141-142,144
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveButton.swift
+  h_2499cc15b3806e 10,15,19,27,30,38-39,49-50
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveKind+Presentation.swift
+  h_2499cc15b3806e 1-121
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveList.swift
+  h_2499cc15b3806e 7,32-33,35,37,42,52,64,76-83,94,96-98,103-104,108,135-138,142-143,146-154
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveScreenButton.swift
+  h_2499cc15b3806e 17
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivesScreen.swift
+  h_2499cc15b3806e 10,14,16-19
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  h_2499cc15b3806e 9-10,14-18
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingState+BottomBarPresentation.swift
+  h_2499cc15b3806e 9-11,14,18,22
+VERA/VERAArchiving/VERAArchiving/UI/View/TranscriptionStartOptionsView.swift
+  h_2499cc15b3806e 1-77
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  h_2499cc15b3806e 14,16-17,22-23,29,32-37,39-40,44,51,70-72
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveButtonSnapshotTests.swift
+  h_2499cc15b3806e 1-89
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveListSnapshotTests.swift
+  h_2499cc15b3806e 28-31,43-52,111,117,128,132-188
+VERA/VERAArchiving/VERAArchivingSnapshotTests/TranscriptionStartOptionsSnapshotTests.swift
+  h_2499cc15b3806e 1-73
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Dark.Dark.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Recording_Active.Recording_Active.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Recording_Idle.Recording_Idle.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Transcription_Active.Transcription_Active.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveButtonSnapshotTests/ArchiveButton_Transcription_Idle.Transcription_Idle.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_DownloadInProgress.Content_DownloadInProgress.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_Downloading.Content_Downloading.png
+  h_2499cc15b3806e 2-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_Empty.Content_Empty.png
+  h_2499cc15b3806e 2-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_Populated.Content_Populated.png
+  h_2499cc15b3806e 2-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_TranscriptionPreparing.Content_TranscriptionPreparing.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_Transcriptions.Content_Transcriptions.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Content_Unavailable.Content_Unavailable.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_Dark.Dark.png
+  h_2499cc15b3806e 2-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/ArchiveListSnapshotTests/ArchiveList_iPad.iPad.png
+  h_2499cc15b3806e 2-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_Dark.Dark.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_Default.Default.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_SummaryOff.SummaryOff.png
+  h_2499cc15b3806e 1-3
+VERA/VERAArchiving/VERAArchivingTestHelpers/ArchivingStatusDataSourceSpy.swift
+  h_2499cc15b3806e 11-14,20,25-30,33-34,40-47
+VERA/VERAArchiving/VERAArchivingTests/ArchivingDataSourceTransferTests.swift
+  h_2499cc15b3806e 1-66
+VERA/VERAArchiving/VERAArchivingTests/ArchivingOperationTransferTests.swift
+  h_2499cc15b3806e 1-85
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingDataSourceTests.swift
+  h_2499cc15b3806e 60-150,233-250,301-303,305-311
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingStatusDataSourceTests.swift
+  h_2499cc15b3806e 20,32,34,42,44,55-56,60-61,65-66,78-79,84,93,98,107,111,115,119,123-167
+VERA/VERAArchiving/VERAArchivingTests/Data/URLSessionArchiveFileDownloaderTests.swift
+  h_2499cc15b3806e 1-84
+VERA/VERAArchiving/VERAArchivingTests/DefaultArchivesRepositoryTests.swift
+  h_2499cc15b3806e 10,190-275,288-307,372-374,383-385
+VERA/VERAArchiving/VERAArchivingTests/DownloadTranscriptionUseCaseTests.swift
+  h_2499cc15b3806e 1-101
+VERA/VERAArchiving/VERAArchivingTests/Mocks/MockArchivingDataSource.swift
+  h_2499cc15b3806e 7,13-15,27-28,41
+VERA/VERAArchiving/VERAArchivingTests/PlayRecordingUseCaseTests.swift
+  h_2499cc15b3806e 1-72
+VERA/VERAArchiving/VERAArchivingTests/StartArchivingUseCaseTests.swift
+  h_2499cc15b3806e 8,63-91
+VERA/VERAArchiving/VERAArchivingTests/StopArchivingUseCaseTests.swift
+  h_2499cc15b3806e 8,55-64
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  h_2499cc15b3806e 13,296-500,504,509,515,520
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  h_2499cc15b3806e 58,114-142,161,212,257-447,474-475,482-503,537-538,549,568-587
+VERA/VERAArchiving/VERAArchivingTests/UI/View/TranscriptionStartOptionsScreenTests.swift
+  h_2499cc15b3806e 1-31
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/DefaultSpeakerTestService.swift
+  h_2499cc15b3806e 23-24,47-73,96,100-105,111,142,155,157,241-244,290-296,299-306
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Domain/SpeakerTestService.swift
+  h_2499cc15b3806e 12
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 2-47,52-77,80-95,100-137,140-143,148-167,170-191,196-227,230-239,244-257,260-287,292-329,332-335,341
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/View/AudioDiagnosticsWaitingRoomButton.swift
+  h_2499cc15b3806e 63
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/ViewModels/AudioOutputControlViewModel.swift
+  h_2499cc15b3806e 8,48
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Wireframe/AudioDiagnosticsFactory.swift
+  h_2499cc15b3806e 17,48,57,81
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/TestHelpers/MockSpeakerTestService.swift
+  h_2499cc15b3806e 13-14
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsPerformanceTests.swift
+  h_2499cc15b3806e 170,175,182,188,196-211
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioOutputUIStateDeliveryTests.swift
+  h_2499cc15b3806e 1-45
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/DefaultSpeakerTestServiceTests.swift
+  h_2499cc15b3806e 606-607,609,613-616,619-622,626-646
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/MockSpeakerTestServiceTests.swift
+  h_2499cc15b3806e 13
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockGenerateTonePlayerUseCase.swift
+  h_2499cc15b3806e 11,72-74
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockSpeakerTestService.swift
+  h_2499cc15b3806e 9
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/NullSpeakerTestServiceTests.swift
+  h_2499cc15b3806e 10
+VERA/VERAAudioEffects/VERAAudioEffects/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 6-50,54-98,115-144
+"VERA/VERAAudioEffects/VERAAudioEffects/UI/View models/NoiseSuppressionViewModel.swift"
+  h_2499cc15b3806e 10
+VERA/VERAAudioEffects/VERAAudioEffects/Wireframe/AudioEffectsFactory.swift
+  h_2499cc15b3806e 9,27,40,45,56
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/UI/View models/NoiseSuppressionButtonViewModelTests.swift"
+  h_2499cc15b3806e 284
+VERA/VERABackgroundEffects/VERABackgroundEffects/BackgroundBlur.swift
+  h_2499cc15b3806e 32
+VERA/VERABackgroundEffects/VERABackgroundEffects/Domain/GetBackgroundsUseCase.swift
+  h_2499cc15b3806e 13
+VERA/VERABackgroundEffects/VERABackgroundEffects/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 6-50,54-98,102-146,149-194,198-242,251-286,297-332,345-380,393-428,441-476,481-526,535-570,576
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  h_2499cc15b3806e 10,57
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/BackgroundEffectScreenButton.swift
+  h_2499cc15b3806e 25
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffectsSheet.swift
+  h_2499cc15b3806e 213,223,244
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/BackgroundCatalogTransferTests.swift
+  h_2499cc15b3806e 1-54
+VERA/VERABackgroundEffects/VERABackgroundEffectsTests/BlurValueTransferTests.swift
+  h_2499cc15b3806e 1-58
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/VideoEffectsViewModelTests.swift"
+  h_2499cc15b3806e 148-155,391-392,409
+VERA/VERACaptions/VERACaptions/Data/DefaultCaptionsStatusDataSource.swift
+  h_2499cc15b3806e 9-13,19,23
+VERA/VERACaptions/VERACaptions/Domain/Services/CaptionsActivationDataSource.swift
+  h_2499cc15b3806e 8,16,24
+"VERA/VERACaptions/VERACaptions/Domain/Use cases/EnableCaptionsUseCase.swift"
+  h_2499cc15b3806e 8,16
+VERA/VERACaptions/VERACaptions/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 19-48,58,67-96,115-144,149,163-192
+VERA/VERACaptions/VERACaptions/UI/Entities/CaptionItem+UI.swift
+  h_2499cc15b3806e 24,26
+VERA/VERACaptions/VERACaptions/UI/Entities/UICaptionItem.swift
+  h_2499cc15b3806e 12,63,65
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsButtonViewModel.swift"
+  h_2499cc15b3806e 8,35,95
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsViewModel.swift"
+  h_2499cc15b3806e 8,40,92
+VERA/VERACaptions/VERACaptions/Wireframe/CaptionsFactory.swift
+  h_2499cc15b3806e 27,41,48,54
+VERA/VERACaptions/VERACaptionsApp/VERACaptionsApp.swift
+  h_2499cc15b3806e 95-96,102,143-148,153-172
+VERA/VERACaptions/VERACaptionsTests/CaptionActivationTransferTests.swift
+  h_2499cc15b3806e 1-30
+VERA/VERACaptions/VERACaptionsTests/CaptionPresentationTransferTests.swift
+  h_2499cc15b3806e 1-68
+VERA/VERACaptions/VERACaptionsTests/Domain/CaptionsActivationTransferTests.swift
+  h_2499cc15b3806e 1-49
+VERA/VERACaptions/VERACaptionsTests/Domain/DefaultEnableCaptionsUseCaseTests.swift
+  h_2499cc15b3806e 12,74-75
+"VERA/VERACaptions/VERACaptionsTests/UI/View model/CaptionsButtonViewModelTests.swift"
+  h_2499cc15b3806e 13-14,207-223,291-292
+"VERA/VERACaptions/VERACaptionsTests/UI/View model/CaptionsViewModelTests.swift"
+  h_2499cc15b3806e 7,23,25,303-319,376-385
+VERA/VERACaptions/VERACaptionsTests/Wireframe/CaptionsFactoryTests.swift
+  h_2499cc15b3806e 13-14,80-81
+VERA/VERAChat/VERAChat/Domain/Entities/ChatMessage.swift
+  h_2499cc15b3806e 7
+VERA/VERAChat/VERAChat/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 5,13-48,53,65-95,102
+"VERA/VERAChat/VERAChat/UI/View models/ChatBadgeButtonViewModel.swift"
+  h_2499cc15b3806e 8,10,27
+"VERA/VERAChat/VERAChat/UI/View models/ChatPanelViewModel.swift"
+  h_2499cc15b3806e 8,10,20,25,51,54
+VERA/VERAChat/VERAChat/UI/View/ChatPanel.swift
+  h_2499cc15b3806e 59
+VERA/VERAChat/VERAChat/UI/View/ChatScreen.swift
+  h_2499cc15b3806e 53
+VERA/VERAChat/VERAChat/Wireframe/ChatFactory.swift
+  h_2499cc15b3806e 20
+VERA/VERAChat/VERAChatTests/ChatBadgeButtonViewModelTests.swift
+  h_2499cc15b3806e 12
+VERA/VERAChat/VERAChatTests/ChatMessageTransferTests.swift
+  h_2499cc15b3806e 1-42
+VERA/VERAChat/VERAChatTests/ChatPanelStateTransferTests.swift
+  h_2499cc15b3806e 1-57
+VERA/VERAChat/VERAChatTests/ChatPanelViewModelTests.swift
+  h_2499cc15b3806e 11,76-78
+VERA/VERAChat/VERAChatTests/ChatPublisherDeliveryTests.swift
+  h_2499cc15b3806e 1-58
+VERA/VERACommonUI/VERACommonUI/Extensions/AlertItem+Extensions.swift
+  h_2499cc15b3806e 10
+VERA/VERACommonUI/VERACommonUI/Extensions/Publisher+MainActor.swift
+  h_2499cc15b3806e 1-15
+VERA/VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift
+  h_2499cc15b3806e 85,92-93
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/text-line.imageset/Contents.json
+  h_2499cc15b3806e 1-25
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/text-line.imageset/text-line.svg
+  h_2499cc15b3806e 1
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-line.imageset/Contents.json
+  h_2499cc15b3806e 1-25
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-line.imageset/voicemail-transcript-line.svg
+  h_2499cc15b3806e 1
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-solid.imageset/Contents.json
+  h_2499cc15b3806e 1-25
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-solid.imageset/voicemail-transcript-solid.svg
+  h_2499cc15b3806e 1
+VERA/VERACommonUI/VERACommonUI/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 6-50,66-95,113-142,160-189,207-236,254-283,301-330,336-380
+VERA/VERACommonUI/VERACommonUI/UI/AudioLevelIndicatorView.swift
+  h_2499cc15b3806e 8,10
+VERA/VERACommonUI/VERACommonUI/UI/AvatarGroup.swift
+  h_2499cc15b3806e 135
+VERA/VERACommonUI/VERACommonUI/UI/AvatarInitials.swift
+  h_2499cc15b3806e 7
+VERA/VERACommonUI/VERACommonUI/UI/BottomItemPresentable.swift
+  h_2499cc15b3806e 37,48,68,78,84
+VERA/VERACommonUI/VERACommonUI/UI/ToastView.swift
+  h_2499cc15b3806e 64
+VERA/VERACommonUI/VERACommonUI/UI/TypographyStyle.swift
+  h_2499cc15b3806e 8,22
+VERA/VERACommonUI/VERACommonUITests/BottomBarAccessoryOwnershipTests.swift
+  h_2499cc15b3806e 1-37
+VERA/VERACommonUI/VERACommonUITests/BottomBarActionOwnershipTests.swift
+  h_2499cc15b3806e 1-63
+VERA/VERACommonUI/VERACommonUITests/BottomBarItemTests.swift
+  h_2499cc15b3806e 212,214-215
+VERA/VERACommonUI/VERACommonUITests/PublisherUIStateDeliveryTests.swift
+  h_2499cc15b3806e 1-52
+VERA/VERACommonUI/VERACommonUITests/UI/AvatarValueTransferTests.swift
+  h_2499cc15b3806e 1-66
+VERA/VERACommonUI/VERACommonUITests/UI/TypographyValueTransferTests.swift
+  h_2499cc15b3806e 1-53
+VERA/VERAConfiguration/Project.swift
+  h_2499cc15b3806e 20-40
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  h_2499cc15b3806e 9,12,31,50,63,76,79,85,94,100,108,114
+VERA/VERAConfiguration/VERAConfigurationTests/AppConfigTransferTests.swift
+  h_2499cc15b3806e 1-135
+VERA/VERACore/VERACore/Common/Domain/Entities/CameraDevice.swift
+  h_2499cc15b3806e 7
+VERA/VERACore/VERACore/Common/Domain/Entities/User.swift
+  h_2499cc15b3806e 7
+VERA/VERACore/VERACore/Extensions/URL+GetRoomName.swift
+  h_2499cc15b3806e 12
+"VERA/VERACore/VERACore/GoodBye/UI/View models/GoodByeViewModel.swift"
+  h_2499cc15b3806e 26
+VERA/VERACore/VERACore/GoodBye/Wireframe/GoodByePageFactory.swift
+  h_2499cc15b3806e 15,35
+VERA/VERACore/VERACore/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 5-48,51,65-94,110-950,955-956,962,968,970-971,974,977,980,982-983,986,989-995,998,1003-1004,1010,1016,1019,1022,1024-1025,1028,1031,1034,1036-1037,1040,1043,1046,1051-1052,1058,1064,1066-1067,1070,1073,1076,1078-1079,1082,1085,1088-1094,1099,1105,1111,1113-1114,1117,1120,1122-1123,1125-1126,1128-1129,1132,1134-1141,1146-1147,1153,1159,1161-1162,1165,1168,1171,1173-1174,1177,1180,1183-1189,1194-1195,1201,1207,1209-1210,1213,1216,1219,1221-1222,1225,1228,1231-1237,1242-1243,1249,1255,1257-1258,1261,1264,1267,1269-1270,1273,1276,1279-1285,1290-1291,1297,1303,1305-1306,1309,1312,1315,1317-1318,1321,1324-1330,1333,1340
+VERA/VERACore/VERACore/VeraUI/Components/JoinExistingRoom/VonageTextField.swift
+  h_2499cc15b3806e 206
+"VERA/VERACore/VERACore/Waiting room/Domain/Use cases/JoinRoomUseCase.swift"
+  h_2499cc15b3806e 7
+"VERA/VERACore/VERACore/Waiting room/UI/Navigation/WaitingRoomNavigation.swift"
+  h_2499cc15b3806e 8-9
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  h_2499cc15b3806e 8,163-167,169,174,236-237,247-248,284
+"VERA/VERACore/VERACore/Waiting room/UI/Views/UICameraDevice.swift"
+  h_2499cc15b3806e 7,12
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomUserPreviewView.swift"
+  h_2499cc15b3806e 21,23,32
+VERA/VERACore/VERACoreTests/Common/Data/MockHTTPClientConcurrencyTests.swift
+  h_2499cc15b3806e 1-37
+VERA/VERACore/VERACoreTests/Common/Data/URLSession/URLSessionHTTPClientTests.swift
+  h_2499cc15b3806e 10-12,423-433,435,441,454-457,459,461-466,471,495-501,532-539,542,546
+VERA/VERACore/VERACoreTests/Common/Domain/Entities/CameraDeviceTransferTests.swift
+  h_2499cc15b3806e 1-42
+VERA/VERACore/VERACoreTests/GoodBye/GoodByeViewModelTests.swift
+  h_2499cc15b3806e 1-35
+"VERA/VERACore/VERACoreTests/Waiting room/UI/Navigation/WaitingRoomNavigationTests.swift"
+  h_2499cc15b3806e 12
+"VERA/VERACore/VERACoreTests/Waiting room/UI/UICameraDeviceTests.swift"
+  h_2499cc15b3806e 1-36
+"VERA/VERACore/VERACoreTests/Waiting room/UI/ViewHolderAudioOutputTestButtonTests.swift"
+  h_2499cc15b3806e 10
+"VERA/VERACore/VERACoreTests/Waiting room/UI/ViewHolderOwnershipTests.swift"
+  h_2499cc15b3806e 1-37
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  h_2499cc15b3806e 266-286,383-396
+"VERA/VERACore/VERACoreTests/Waiting room/WaitingRoomValueTransferTests.swift"
+  h_2499cc15b3806e 1-73
+VERA/VERACore/VERATestHelpers/Helpers/TestLockedValue.swift
+  h_2499cc15b3806e 1-20
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  h_2499cc15b3806e 9,30-32,42,57,90-94
+VERA/VERACore/VERATestHelpers/Mocks/MockHTTPClient.swift
+  h_2499cc15b3806e 9-38,40-78,105-121,123-124,126,129
+VERA/VERACore/VERATestHelpers/Mocks/MockRoomCredentialsRepository.swift
+  h_2499cc15b3806e 9,11
+VERA/VERADomain/VERADomain/AlertItem.swift
+  h_2499cc15b3806e 13,18,32,41,45,49,61,72,83,94,98
+VERA/VERADomain/VERADomain/Archive.swift
+  h_2499cc15b3806e 7-9,11,13-20,25-36,44-45,54-56,65-82
+VERA/VERADomain/VERADomain/ArchiveKind.swift
+  h_2499cc15b3806e 1-26
+VERA/VERADomain/VERADomain/Auth/AuthState.swift
+  h_2499cc15b3806e 15
+VERA/VERADomain/VERADomain/Auth/IDProvider.swift
+  h_2499cc15b3806e 8
+VERA/VERADomain/VERADomain/CallFacade.swift
+  h_2499cc15b3806e 49,66,77,97,151,153,155,157-158,179-192
+VERA/VERADomain/VERADomain/CaptionItem.swift
+  h_2499cc15b3806e 8
+VERA/VERADomain/VERADomain/Captions/CaptionsStatusDataSource.swift
+  h_2499cc15b3806e 8
+VERA/VERADomain/VERADomain/Captions/NullCaptionsStatusDataSource.swift
+  h_2499cc15b3806e 9-11
+VERA/VERADomain/VERADomain/HTTPClient.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/MeetingRoomLayout.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/Permissions/PermissionStatus.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/PublisherRelays.swift
+  h_2499cc15b3806e 1-53
+VERA/VERADomain/VERADomain/RoomCredentials.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/RoomCredentialsRepository.swift
+  h_2499cc15b3806e 7,38,51,60,71,79,87
+VERA/VERADomain/VERADomain/RoomIdentifier.swift
+  h_2499cc15b3806e 11,19
+VERA/VERADomain/VERADomain/SessionEvent.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/SessionInfo.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/SessionState.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/Settings/DegradationPreference.swift
+  h_2499cc15b3806e 20
+VERA/VERADomain/VERADomain/Settings/NetworkStats/AudioReceiveStats.swift
+  h_2499cc15b3806e 12
+VERA/VERADomain/VERADomain/Settings/NetworkStats/AudioSendStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/NetworkMediaStats.swift
+  h_2499cc15b3806e 12
+VERA/VERADomain/VERADomain/Settings/NetworkStats/PublisherMediaLinkStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/SenderStats.swift
+  h_2499cc15b3806e 12
+VERA/VERADomain/VERADomain/Settings/NetworkStats/SubscriberMediaLinkStats.swift
+  h_2499cc15b3806e 12
+VERA/VERADomain/VERADomain/Settings/NetworkStats/SubscriberMediaStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/TransportStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/VideoLayerStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/VideoReceiveStats.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/Settings/NetworkStats/VideoSendStats.swift
+  h_2499cc15b3806e 12
+VERA/VERADomain/VERADomain/Settings/NewRoomRequest.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/Settings/PublisherAdvancedSettings.swift
+  h_2499cc15b3806e 13
+VERA/VERADomain/VERADomain/Settings/PublisherSettings.swift
+  h_2499cc15b3806e 13
+VERA/VERADomain/VERADomain/Settings/VideoBitratePreset.swift
+  h_2499cc15b3806e 18
+VERA/VERADomain/VERADomain/Settings/VideoCodecPreference.swift
+  h_2499cc15b3806e 14
+VERA/VERADomain/VERADomain/Settings/VideoCodecType.swift
+  h_2499cc15b3806e 17
+VERA/VERADomain/VERADomain/Settings/VideoFrameRate.swift
+  h_2499cc15b3806e 15
+VERA/VERADomain/VERADomain/Settings/VideoResolution.swift
+  h_2499cc15b3806e 20
+VERA/VERADomain/VERADomain/Settings/VideoScaleBehavior.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/SpeakerInfo.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/TRPCResponse.swift
+  h_2499cc15b3806e 18-21
+VERA/VERADomain/VERADomain/ToastItem.swift
+  h_2499cc15b3806e 7,21
+VERA/VERADomain/VERADomain/VERAPublisher.swift
+  h_2499cc15b3806e 11
+VERA/VERADomain/VERADomain/VideoEffects/BlurLevel.swift
+  h_2499cc15b3806e 7
+VERA/VERADomain/VERADomain/VideoEffects/VideoBackgroundItem.swift
+  h_2499cc15b3806e 10
+VERA/VERADomain/VERADomain/VideoEffects/VideoEffect.swift
+  h_2499cc15b3806e 15
+VERA/VERADomain/VERADomainTests/APIResponseTransferTests.swift
+  h_2499cc15b3806e 1-61
+VERA/VERADomain/VERADomainTests/ArchiveKindTests.swift
+  h_2499cc15b3806e 1-27
+VERA/VERADomain/VERADomainTests/ArchiveTests.swift
+  h_2499cc15b3806e 1-98
+VERA/VERADomain/VERADomainTests/ArchiveTransferTests.swift
+  h_2499cc15b3806e 1-31
+VERA/VERADomain/VERADomainTests/Auth/IDProviderTransferTests.swift
+  h_2499cc15b3806e 1-46
+VERA/VERADomain/VERADomainTests/AuthStateTests.swift
+  h_2499cc15b3806e 40-54
+VERA/VERADomain/VERADomainTests/CallStateTests.swift
+  h_2499cc15b3806e 1-27
+VERA/VERADomain/VERADomainTests/CameraPositionTransferTests.swift
+  h_2499cc15b3806e 1-32
+VERA/VERADomain/VERADomainTests/CaptionTransferTests.swift
+  h_2499cc15b3806e 1-27
+VERA/VERADomain/VERADomainTests/FeatureStatusTransferTests.swift
+  h_2499cc15b3806e 1-37
+VERA/VERADomain/VERADomainTests/MeetingRoomLayoutTransferTests.swift
+  h_2499cc15b3806e 1-32
+VERA/VERADomain/VERADomainTests/PermissionStatusTransferTests.swift
+  h_2499cc15b3806e 1-36
+VERA/VERADomain/VERADomainTests/PublisherConfigurationTransferTests.swift
+  h_2499cc15b3806e 1-83
+VERA/VERADomain/VERADomainTests/PublisherRelayTests.swift
+  h_2499cc15b3806e 1-101
+VERA/VERADomain/VERADomainTests/RoomCredentialsTransferTests.swift
+  h_2499cc15b3806e 1-83
+VERA/VERADomain/VERADomainTests/RoomIdentifierTransferTests.swift
+  h_2499cc15b3806e 1-51
+VERA/VERADomain/VERADomainTests/SessionEventTransferTests.swift
+  h_2499cc15b3806e 1-54
+VERA/VERADomain/VERADomainTests/SessionMediaStateTransferTests.swift
+  h_2499cc15b3806e 1-22
+VERA/VERADomain/VERADomainTests/Settings/AdvancedSettingsTransferTests.swift
+  h_2499cc15b3806e 1-71
+VERA/VERADomain/VERADomainTests/Settings/NetworkMediaStatsConcurrencyTests.swift
+  h_2499cc15b3806e 1-52
+VERA/VERADomain/VERADomainTests/SpeakerInfoTransferTests.swift
+  h_2499cc15b3806e 1-25
+VERA/VERADomain/VERADomainTests/ToastTransferTests.swift
+  h_2499cc15b3806e 1-32
+VERA/VERADomain/VERADomainTests/TokenInjectingHTTPClientTests.swift
+  h_2499cc15b3806e 11,85,88-89,99,123
+VERA/VERADomain/VERADomainTests/VideoBackgroundTransferTests.swift
+  h_2499cc15b3806e 1-48
+VERA/VERAE2E/Project.swift
+  h_2499cc15b3806e 24-41
+VERA/VERAE2E/VERAE2E/Data/Archiving/E2EArchivingDataSource.swift
+  h_2499cc15b3806e 25,28-29,37-41,44
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EBackendStore.swift
+  h_2499cc15b3806e 79-81,84,88-89,159-173,195,197,204-205,208,211-212,221-238
+VERA/VERAE2E/VERAE2E/Domain/Archiving/E2EArchivingEvents.swift
+  h_2499cc15b3806e 6,11
+VERA/VERAE2E/VERAE2E/Domain/Models/E2EModels.swift
+  h_2499cc15b3806e 21-28
+VERA/VERAE2E/VERAE2E/Domain/Session/E2ECallFacade.swift
+  h_2499cc15b3806e 10,28-29,38-40,85-86,95,97,102-103,111-118,122,124-147,186-187,192-194,199-207,262-269
+VERA/VERAE2E/VERAE2ETests/Domain/Session/E2ECallFacadeMediaTests.swift
+  h_2499cc15b3806e 1-98
+VERA/VERAFeedback/VERAFeedback/Domain/Services/FeedbackReportDataSource.swift
+  h_2499cc15b3806e 29
+VERA/VERAFeedback/VERAFeedback/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 5-48,57-897,899-900,902-903,906,909,914-915,921,923-924,927,929-930,933,935-936,939,941-942,945,947-948,951,953-954,957,962-963,969,971-972,975,977-978,981,983-984,987,989-990,993,995-996,999,1001-1002,1005,1010-1011,1017,1019-1020,1023,1025-1026,1029,1031-1032,1035,1037-1050,1053,1059,1067-1102,1107,1113-1149,1163-1198,1204
+"VERA/VERAFeedback/VERAFeedback/UI/View models/FeedbackFieldViewModel.swift"
+  h_2499cc15b3806e 12,17,22,84
+VERA/VERAFeedback/VERAFeedback/UI/View/FeedbackFormView.swift
+  h_2499cc15b3806e 243-245
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackDebugDumpBuilder.swift
+  h_2499cc15b3806e 52-56
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackFormFocusNavigation.swift
+  h_2499cc15b3806e 10
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackDebugDumpTimestampTests.swift
+  h_2499cc15b3806e 1-55
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFieldViewModelTests.swift
+  h_2499cc15b3806e 9-21
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackResultTransferTests.swift
+  h_2499cc15b3806e 1-50
+VERA/VERALogger/VERALogger/Strategies/DefaultLogStrategy.swift
+  h_2499cc15b3806e 14
+VERA/VERALogger/VERALogger/Strategies/FileLogStrategy.swift
+  h_2499cc15b3806e 10,27
+VERA/VERALogger/VERALoggerTests/DefaultLogStrategyTests.swift
+  h_2499cc15b3806e 13-31
+VERA/VERALogger/VERALoggerTests/FileLogStrategyTests.swift
+  h_2499cc15b3806e 108-127
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 13-48,53-98,101-146,157-192,197,205-240,253-288,301-336,341,349-384,389,395-431,445-480,493-528,541-576,589-624,637-672,685-720,733-768,781-910,923-958,971-1006,1019-1054
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  h_2499cc15b3806e 77,102,130,142,150,153,156,159,162,165,168,171,178-185,213,346
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Navigation/MeetingRoomNavigation.swift
+  h_2499cc15b3806e 23,78
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomState.swift"
+  h_2499cc15b3806e 28,48,63
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  h_2499cc15b3806e 92-93,103-104,343,350,353,371,428,435-442,498-519,525,530,543
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomAccessibilityID.swift
+  h_2499cc15b3806e 16
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomView.swift
+  h_2499cc15b3806e 35,37,41,118-120,259-269,544
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  h_2499cc15b3806e 243,254-260,380-400
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantsListView.swift
+  h_2499cc15b3806e 82
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/MeetingRoomViewUITests.swift
+  h_2499cc15b3806e 27-28,39-45,111,128
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/ParticipantVideoCardUITests.swift
+  h_2499cc15b3806e 1-78
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/MeetingRoomViewUITests/MeetingRoomView_State_ArchivingAndTranscribing.State_ArchivingAndTranscribing.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/MeetingRoomViewUITests/MeetingRoomView_State_Transcribing.State_Transcribing.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/ParticipantVideoCardUITests/ParticipantVideoCard_LocalMuted_CameraOff.LocalMuted_CameraOff.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/ParticipantVideoCardUITests/ParticipantVideoCard_LocalMuted_CameraOn.LocalMuted_CameraOn.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/ParticipantVideoCardUITests/ParticipantVideoCard_LocalUnmuted_CameraOn.LocalUnmuted_CameraOn.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/__Snapshots__/ParticipantVideoCardUITests/ParticipantVideoCard_RemoteMuted_CameraOn.RemoteMuted_CameraOn.png
+  h_2499cc15b3806e 1-3
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Helpers/MockMeetingRoomNavigation.swift
+  h_2499cc15b3806e 57
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  h_2499cc15b3806e 20
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/MeetingRoomActionsTests.swift
+  h_2499cc15b3806e 10
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Navigation/MeetingRoomNavigationTests.swift
+  h_2499cc15b3806e 10
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  h_2499cc15b3806e 725,775,1261-1472
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View/ViewGeneratorOwnershipTests.swift
+  h_2499cc15b3806e 1-37
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  h_2499cc15b3806e 51-57,118-121,313-321,389
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  h_2499cc15b3806e 393-404,515
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  h_2499cc15b3806e 135-139
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  h_2499cc15b3806e 24-28,31-34
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKAction.swift
+  h_2499cc15b3806e 27
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  h_2499cc15b3806e 157,208,346-349,352-353,355,358,365-367,370-377
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomUIProviderCombiner.swift
+  h_2499cc15b3806e 10
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/BackgroundEffectsOverlayModifier.swift
+  h_2499cc15b3806e 21
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/ChatSheetModifier.swift
+  h_2499cc15b3806e 29
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/FeedbackFormOverlayModifier.swift
+  h_2499cc15b3806e 28
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/SettingsOverlayModifier.swift
+  h_2499cc15b3806e 25
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/TranscriptionOptionsOverlayModifier.swift
+  h_2499cc15b3806e 1-45
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 13-48,62-97,111-146,151,160-195,208-243,257-292,305-340,353-388,393,401-436,449-484,489,496-532,538,545-581,588
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/ViewGenerator+AVRoutePicker.swift
+  h_2499cc15b3806e 11
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  h_2499cc15b3806e 411-469
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  h_2499cc15b3806e 19
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  h_2499cc15b3806e 15,23,25
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKActionTests.swift
+  h_2499cc15b3806e 33-50
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  h_2499cc15b3806e 12,91-104,121-135,205-258,370
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/TranscriptionOptionsOverlayModifierTests.swift
+  h_2499cc15b3806e 1-71
+VERA/VERAReactions/VERAReactions/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 13-48,66-95,113-142,160-189,207-236,254-283,301-330,348-377,395-424,442-471,489-518,536-565,583-612,625-660,673-708,713,727-756,762
+VERA/VERAReactions/VERAReactions/UI/Entities/UIEmojiReaction.swift
+  h_2499cc15b3806e 23
+VERA/VERAReactions/VERAReactions/UI/Entities/UIFloatingEmoji.swift
+  h_2499cc15b3806e 12
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiButtonContainerViewModel.swift"
+  h_2499cc15b3806e 13
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiPickerContainerViewModel.swift"
+  h_2499cc15b3806e 24
+"VERA/VERAReactions/VERAReactions/UI/View models/FloatingEmojisOverlayViewModel.swift"
+  h_2499cc15b3806e 8,39,59
+VERA/VERAReactions/VERAReactions/UI/View/EmojiPickerViewFactory.swift
+  h_2499cc15b3806e 97
+VERA/VERAReactions/VERAReactions/UI/View/FloatingEmojisOverlayView.swift
+  h_2499cc15b3806e 7,96-98,100-101,104-105,108-122
+VERA/VERAReactions/VERAReactions/Wireframe/ReactionsFactory.swift
+  h_2499cc15b3806e 35,48,65,75,93,111
+VERA/VERAReactions/VERAReactionsTests/EmojiButtonContainerViewModelTests.swift
+  h_2499cc15b3806e 11
+VERA/VERAReactions/VERAReactionsTests/EmojiPickerContainerViewModelTests.swift
+  h_2499cc15b3806e 11
+VERA/VERAReactions/VERAReactionsTests/FloatingEmojisOverlayViewModelTests.swift
+  h_2499cc15b3806e 11,38-50,210,239-252
+VERA/VERAReactions/VERAReactionsTests/UI/ReactionValueTransferTests.swift
+  h_2499cc15b3806e 1-65
+VERA/VERAScreenShare/README.md
+  h_2499cc15b3806e 55
+VERA/VERAScreenShare/VERAScreenShare/Domain/Entities/ScreenShareCredentials.swift
+  h_2499cc15b3806e 11
+VERA/VERAScreenShare/VERAScreenShare/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 13-48,53,59-95,101,107-143,150
+VERA/VERAScreenShare/VERAScreenShare/UI/View/BroadcastPickerRepresentable.swift
+  h_2499cc15b3806e 50-54,57,60-73
+VERA/VERAScreenShare/VERAScreenShareTests/BroadcastPickerSubscriptionTests.swift
+  h_2499cc15b3806e 1-67
+VERA/VERAScreenShare/VERAScreenShareTests/ScreenShareCredentialsTransferTests.swift
+  h_2499cc15b3806e 1-62
+VERA/VERASettings/VERASettings/Data/InMemoryStatsRepository.swift
+  h_2499cc15b3806e 22-23,34-36,38,47,52
+VERA/VERASettings/VERASettings/Data/StatsPublisherRelay.swift
+  h_2499cc15b3806e 1-24
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  h_2499cc15b3806e 11,48-56,75-77,90-92,106-107,148-150,176-177,200-201,215-216
+VERA/VERASettings/VERASettings/Domain/Entities/SettingsAudioBitratePreference.swift
+  h_2499cc15b3806e 8
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  h_2499cc15b3806e 5,8-13,20-25,28-47,56-62,65,67-68,71,73,76-95,100-101,104-109,113,116,119,121,125-143,148-149,152-157,161-167,173-191,196-197,200-205,209,212,215,217,221,223-224,227,229-230,233,235-236,239,244-246,248,251,253-254,257,259-260,263,265,269,271-272,275,277-278,281,283-284,287,292-294,296,299,301-302,305,307-308,311,313,317-6830,6835-7124,7127-7144,7147-7166,7171-7172,7174,7176-7177,7179-7180,7183,7185-7186,7189,7191,7195,7197-7198,7200-7213,7218-7220,7222,7225,7227,7231,7234,7237,7239,7243,7245-7246,7249,7251-7252,7255-7261,7266-7267,7270,7273,7275-7276,7278-7279,7281-7282,7285,7287,7291,7293-7294,7297,7299-7300,7303,7305-7306,7309,7314,7317-7322,7326,7329,7332,7334,7337-7338,7340-7341,7343-7356,7361-7363,7365,7368,7370,7374,7377,7380,7382,7386,7388-7389,7392,7395,7398-7404,7409-7410,7413-7418,7422-7440,7443,7446,7448-7449,7452,7457-7458,7461-7466,7470-7476,7482,7484-7485,7488,7491,7494,7496-7497,7500,7505,7508-7513,7517-7523,7529,7531-7532,7534-7535,7537-7538,7540-7541,7543-7544,7546-7547,7552-7553,7556,7559,7561-7562,7565,7567-7568,7571,7573,7577,7579-7580,7583,7585-7586,7589,7591-7592,7595,7600-7602,7604,7606-7607,7609-7610,7613,7615-7616,7619,7621,7625,7627-7628,7630-7631,7634,7637-7643,7648-7649,7652,7655,7657-7658,7661,7663-7664,7667,7669,7673,7675-7676,7679,7681-7682,7685,7687-7688,7691,7696-7698,7700-7705,7709-7715,7721,7723-7724,7727,7730,7733-7739,7744-7745,7747-7752,7756-7762,7768-7786,7791,7794-7799,7803,7806,7809,7811,7815-7833,7838,7840-7846,7849,7851-7852,7855,7857,7861-7879,7884-7886,7888,7891,7893-7894,7897,7899-7900,7903,7905,7909,7911-7912,7915,7917-7918,7921,7923-7924,7927,7932-7933,7935,7938,7940,7944-7950,7956,7958-7959,7962,7965,7968,7970-7971,7974,7979-7980,7982-7988,7991,7993-7994,7997,7999,8003-8021,8026,8028-8033,8037,8040,8043,8045,8049-8067,8072-8073,8076-8082,8085,8087-8088,8091,8093,8097-8115,8120-8121,8124,8127,8129-8130,8133,8135-8141,8145,8147-8148,8151,8154,8157,8159-8160,8163,8168-8169,8171,8174,8176-8177,8180,8182-8183,8186,8188,8192,8194-8195,8198,8200-8201,8204,8206-8207,8210,8215-8217,8219,8222,8224-8225,8228,8230-8231,8234,8236,8240,8242-8243,8246,8248-8249,8252,8254-8255,8258,8265
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  h_2499cc15b3806e 1-49
+VERA/VERASettings/VERASettings/UI/Entities/SettingsAudioBitrateMode.swift
+  h_2499cc15b3806e 8
+VERA/VERASettings/VERASettings/UI/Entities/SettingsCodecPreference.swift
+  h_2499cc15b3806e 24,62
+VERA/VERASettings/VERASettings/UI/Entities/SettingsDegradationPreference.swift
+  h_2499cc15b3806e 24
+VERA/VERASettings/VERASettings/UI/Entities/SettingsSection.swift
+  h_2499cc15b3806e 11,15,34
+VERA/VERASettings/VERASettings/UI/Entities/SettingsVideoBitratePreset.swift
+  h_2499cc15b3806e 37
+VERA/VERASettings/VERASettings/UI/Entities/SettingsVideoCodec.swift
+  h_2499cc15b3806e 55
+VERA/VERASettings/VERASettings/UI/Entities/SettingsVideoFrameRate.swift
+  h_2499cc15b3806e 34
+VERA/VERASettings/VERASettings/UI/Entities/SettingsVideoResolution.swift
+  h_2499cc15b3806e 34
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  h_2499cc15b3806e 8,28,112-117,163,167-168,173,251
+"VERA/VERASettings/VERASettings/UI/View models/StatisticsViewModel.swift"
+  h_2499cc15b3806e 8,16,75,77,83
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  h_2499cc15b3806e 8,16,96,129
+VERA/VERASettings/VERASettings/UI/View/Sections/CaptionsSectionView.swift
+  h_2499cc15b3806e 1-66
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  h_2499cc15b3806e 41,53,69-82
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  h_2499cc15b3806e 45-47,51
+VERA/VERASettings/VERASettings/UI/View/SettingsSheetContent.swift
+  h_2499cc15b3806e 15,21,25-29
+VERA/VERASettings/VERASettings/UI/View/SettingsToolbarButton.swift
+  h_2499cc15b3806e 60
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  h_2499cc15b3806e 46-53,72,76-77,82,96-97,102,151-159,205-206,219,259-260
+VERA/VERASettings/VERASettings/Utils/SettingsViewModel+Preview.swift
+  h_2499cc15b3806e 14,17
+VERA/VERASettings/VERASettings/Utils/StatsOverlayViewModel+Preview.swift
+  h_2499cc15b3806e 14,17
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  h_2499cc15b3806e 30-35,41-43,46-48,52-53,66-69,111-112,124-126
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  h_2499cc15b3806e 160-197,247-248,267-268,274-278
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_compact-captions.compact-captions.png
+  h_2499cc15b3806e 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_iPad-captions-original.iPad-captions-original.png
+  h_2499cc15b3806e 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_iPad-captions-translated.iPad-captions-translated.png
+  h_2499cc15b3806e 1-3
+VERA/VERASettings/VERASettingsTests/Data/StatsOwnershipLifetimeTests.swift
+  h_2499cc15b3806e 1-169
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  h_2499cc15b3806e 169-195
+VERA/VERASettings/VERASettingsTests/Domain/AudioBitratePreferenceTransferTests.swift
+  h_2499cc15b3806e 1-69
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  h_2499cc15b3806e 1-105
+VERA/VERASettings/VERASettingsTests/Domain/PublisherPreferencesTransferTests.swift
+  h_2499cc15b3806e 1-112
+VERA/VERASettings/VERASettingsTests/TestHelpers/StatsSnapshotRecorder.swift
+  h_2499cc15b3806e 1-15
+VERA/VERASettings/VERASettingsTests/UI/Entities/CodecPreferenceTransferTests.swift
+  h_2499cc15b3806e 1-89
+VERA/VERASettings/VERASettingsTests/UI/Entities/SettingsSectionTransferTests.swift
+  h_2499cc15b3806e 1-36
+VERA/VERASettings/VERASettingsTests/UI/Entities/VideoPreferenceTransferTests.swift
+  h_2499cc15b3806e 1-73
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsUIStateOwnershipTests.swift"
+  h_2499cc15b3806e 1-71
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  h_2499cc15b3806e 12
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatisticsViewModelTests.swift"
+  h_2499cc15b3806e 12
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatsOverlayViewModelTests.swift"
+  h_2499cc15b3806e 15
+VERA/VERASettings/VERASettingsTests/UI/View/GeneralSectionViewTests.swift
+  h_2499cc15b3806e 1-38
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  h_2499cc15b3806e 61-79,84-85,87-90
+VERA/VERAVonage/VERAVonage/ActiveSpeakerTracker.swift
+  h_2499cc15b3806e 10,58-63,70
+VERA/VERAVonage/VERAVonage/CallStateManager.swift
+  h_2499cc15b3806e 65-67
+VERA/VERAVonage/VERAVonage/Extensions/VonageSignal+ArchivingState.swift
+  h_2499cc15b3806e 6,9,12,16,19
+VERA/VERAVonage/VERAVonage/HTTPArchivesDataSource.swift
+  h_2499cc15b3806e 52-55,61-63,68-77,79-85,94,98-113
+VERA/VERAVonage/VERAVonage/LatestValueWorker.swift
+  h_2499cc15b3806e 1-42
+VERA/VERAVonage/VERAVonage/MainActorEventQueue.swift
+  h_2499cc15b3806e 1-100
+VERA/VERAVonage/VERAVonage/ParticipantsRepository.swift
+  h_2499cc15b3806e 19-24
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureController.swift
+  h_2499cc15b3806e 16-17,75-82,91-92
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureParticipantSelector.swift
+  h_2499cc15b3806e 23-25,27-30,49-52,54-57,73-79,96-103
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  h_2499cc15b3806e 38-40,84-87,97,100-106,169-172,221-224
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  h_2499cc15b3806e 21-22
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  h_2499cc15b3806e 26,76,79-89,275-281,283-298,300,302-316,351,429-430,438,450-452,624-625,627,637,641-650,842,993-1010,1031,1038
+VERA/VERAVonage/VERAVonage/VonageOutgoingSignal.swift
+  h_2499cc15b3806e 12
+VERA/VERAVonage/VERAVonage/VonagePublisher.swift
+  h_2499cc15b3806e 235-243
+VERA/VERAVonage/VERAVonage/VonageSession.swift
+  h_2499cc15b3806e 73,75-76,78,86-87,338,344,372-373
+VERA/VERAVonage/VERAVonage/VonageSessionFactory.swift
+  h_2499cc15b3806e 32,44-51,72-73
+VERA/VERAVonage/VERAVonage/VonageSignal.swift
+  h_2499cc15b3806e 7
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  h_2499cc15b3806e 270-271,274,280-285
+VERA/VERAVonage/VERAVonageTests/ActiveSpeakerInfoTransferTests.swift
+  h_2499cc15b3806e 1-31
+VERA/VERAVonage/VERAVonageTests/ActiveSpeakerTrackerTests.swift
+  h_2499cc15b3806e 470-491
+VERA/VERAVonage/VERAVonageTests/HTTPArchivesDataSourceTests.swift
+  h_2499cc15b3806e 1-211
+VERA/VERAVonage/VERAVonageTests/LatestValueWorkerTests.swift
+  h_2499cc15b3806e 1-82
+VERA/VERAVonage/VERAVonageTests/MainActorEventQueueTests.swift
+  h_2499cc15b3806e 1-175
+VERA/VERAVonage/VERAVonageTests/ParticipantsRepositoryTests.swift
+  h_2499cc15b3806e 1-83
+VERA/VERAVonage/VERAVonageTests/PictureInPictureControllerTests.swift
+  h_2499cc15b3806e 65-115
+VERA/VERAVonage/VERAVonageTests/PictureInPictureParticipantSelectorTests.swift
+  h_2499cc15b3806e 89-90,97-132,160-161,168,171-179,219-245
+VERA/VERAVonage/VERAVonageTests/PictureInPictureSessionOrchestratorTests.swift
+  h_2499cc15b3806e 125-181,186-218
+VERA/VERAVonage/VERAVonageTests/SignalValueTransferTests.swift
+  h_2499cc15b3806e 1-56
+VERA/VERAVonage/VERAVonageTests/Spies/VonageSessionSpy.swift
+  h_2499cc15b3806e 38
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  h_2499cc15b3806e 5,521-646,649-661,697-857
+VERA/VERAVonage/VERAVonageTests/VonageSessionFactoryTests.swift
+  h_2499cc15b3806e 1-37
+VERA/VERAVonage/VERAVonageTests/VonageSessionReconnectCleanupTests.swift
+  h_2499cc15b3806e 1-105
+VERA/VERAVonage/VERAVonageTests/VonageSessionTests.swift
+  h_2499cc15b3806e 5,15-35
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPlugin/VonageArchivingPlugin.swift
+  h_2499cc15b3806e 14,18-19,22,41-42,73-74,78,81,99
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPluginTests/VonageArchivingPluginTests.swift
+  h_2499cc15b3806e 10,39-51,66,135-186,202-211
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/VonageCallKitPlugin.swift
+  h_2499cc15b3806e 144-148
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/VonageCallKitPluginTests.swift
+  h_2499cc15b3806e 5,9,135-138,286-306,321-357
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  h_2499cc15b3806e 337-341
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageChatPlugin.swift
+  h_2499cc15b3806e 129
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/ChatPayloadTransferTests.swift
+  h_2499cc15b3806e 1-78
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageReactionsPluginTests.swift
+  h_2499cc15b3806e 545-546
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/NetworkStatsCodecReport.swift
+  h_2499cc15b3806e 1-45
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/NetworkStatsCollector.swift
+  h_2499cc15b3806e 36-37,43,53,84,89-99,110-118,131-134,149,156-172,184,191-199,213-218,248-249,353-354,357,359-360,367
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/NetworkStatsState.swift
+  h_2499cc15b3806e 1-153
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/StatsForwardingLifecycle.swift
+  h_2499cc15b3806e 1-60
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/VonageSettingsPlugin.swift
+  h_2499cc15b3806e 19,37-39,53-54,62-63,73-74,77-78,81-82,93,105-106,113,165-177,179-185,196-197
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/NetworkStatsCodecReportTests.swift
+  h_2499cc15b3806e 1-81
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/NetworkStatsEmissionTests.swift
+  h_2499cc15b3806e 1-51
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/NetworkStatsStateTests.swift
+  h_2499cc15b3806e 1-400
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/StatsForwardingLifecycleTests.swift
+  h_2499cc15b3806e 1-161
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/ControlledStatsWriter.swift
+  h_2499cc15b3806e 1-72
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  h_2499cc15b3806e 25-26,51,89-95
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/VonageSettingsPluginTests.swift
+  h_2499cc15b3806e 161-194,494,501-502
+docs/ARCHITECTURE.md
+  h_2499cc15b3806e 24
+docs/CONFIGURATION.md
+  h_2499cc15b3806e 12-13,22-29,31
+docs/LOCALIZATION.md
+  h_2499cc15b3806e 3,11,14,40-71
+docs/TESTING.md
+  h_2499cc15b3806e 74,84
+scripts/validate-localizations.py
+  h_2499cc15b3806e 1-50
+sonar-project.properties
+  h_2499cc15b3806e 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b2d343b1a588c1ae8b091f2b968180ff8f631bea",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
