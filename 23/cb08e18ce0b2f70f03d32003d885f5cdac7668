@@ -1,0 +1,26 @@
+.github/workflows/maestro.yml
+  h_2499cc15b3806e 65
+  s_493ec5e066b55f::t_47e08a567251fe 91-94
+  s_493ec5e066b55f::t_90ca363c3b3c23 56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "23cb08e18ce0b2f70f03d32003d885f5cdac7668",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_493ec5e066b55f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_0379b3f6-7a9e-4ea4-b398-6c7a5b2b63d9",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
