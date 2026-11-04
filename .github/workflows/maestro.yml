@@ -95,6 +95,7 @@ jobs:
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
         env:
+          ROOM_NAME: ${{ steps.room.outputs.name }}
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
           MARKETING_VERSION: "1.0"
