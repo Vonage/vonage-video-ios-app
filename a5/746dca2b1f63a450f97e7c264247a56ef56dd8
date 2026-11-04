@@ -1,0 +1,21 @@
+VERA/Config/app-config.json
+  s_9a15b65059a924::t_76bbd208ac644b 41
+.github/workflows/validate-config-schemas.yml
+  s_9a15b65059a924::t_2b959e70edaef5 1-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a5746dca2b1f63a450f97e7c264247a56ef56dd8",
+  "prompts": {},
+  "sessions": {
+    "s_9a15b65059a924": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_a7ee5965-1083-4789-88bd-0a3d954a8c08",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
