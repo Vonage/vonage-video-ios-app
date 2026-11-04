@@ -556,6 +556,7 @@ private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
 }
 
+
 @Suite("CallObserverLifetimeTests", .serialized)
 @MainActor
 struct CallObserverLifetimeTests {
