@@ -157,26 +157,73 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Comment PR with Results
-        if: github.event_name == 'pull_request' && always()
+  comment-pr:
+    name: Update PR Comment
+    needs: maestro-tests
+    if: github.event_name == 'pull_request' && always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Update PR Comment with Results
         uses: actions/github-script@v7
         with:
           script: |
-            let comment = '## 🎭 Maestro UI Test Results\n\n';
-            if ('${{ job.status }}' === 'success') {
-              comment += '✅ **All tests passed!**\n\n';
-            } else {
-              comment += '❌ **Some tests failed**\n\n';
-            }
-            comment += `- **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;
-            comment += `- **Commit**: \`${{ github.sha }}\`\n\n`;
-            comment += '📊 **Artifacts:**\n';
-            comment += `  - maestro-test-results-${{ github.run_number }}\n`;
-            comment += `  - maestro-report-${{ github.run_number }}\n\n`;
-            comment += '📸 View the complete test results and screenshots in the artifacts section above.';
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
+            const marker = '<!-- maestro-e2e-results -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const result = ${{ toJson(needs.maestro-tests.result) }};
+            const overallStatus = result === 'success'
+              ? '✅ **All tests passed!**'
+              : '❌ **Some tests failed**';
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const timestamp = new Date().toISOString();
+            const entry = `- ${timestamp} — [Run #${context.runNumber}](${runUrl}) — commit \`${context.sha.substring(0, 7)}\` — ${result === 'success' ? '✅ passed' : '❌ failed'}`;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
             });
+            const previous = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(marker));
+
+            const historyStart = '<!-- history-start -->';
+            const historyEnd = '<!-- history-end -->';
+            let history = [];
+            if (previous) {
+              const s = previous.body.indexOf(historyStart);
+              const e = previous.body.indexOf(historyEnd);
+              if (s !== -1 && e !== -1) {
+                history = previous.body
+                  .substring(s + historyStart.length, e)
+                  .split('\n').map(l => l.trim()).filter(Boolean);
+              }
+            }
+            history.unshift(entry);
+            history = history.slice(0, 10);
+
+            const body = [
+              marker,
+              '## 🎭 Maestro E2E Test Results',
+              '',
+              overallStatus,
+              '',
+              `- **Run**: [#${context.runNumber}](${runUrl})`,
+              `- **Commit**: \`${context.sha}\``,
+              '',
+              `📊 **Artifacts:** maestro-report-${context.runNumber} (see the run above)`,
+              '',
+              '<details>',
+              `<summary>📜 Run history (last ${history.length})</summary>`,
+              '',
+              historyStart,
+              history.join('\n'),
+              historyEnd,
+              '',
+              '</details>',
+            ].join('\n');
+
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
