@@ -10,6 +10,7 @@ import Observation
 /// This ViewModel controls whether the emoji picker popover is shown
 /// and coordinates with the `EmojiPickerContainerViewModel` for sending reactions.
 /// Uses a single source of truth for visibility via `pickerViewModel.isVisible`.
+@MainActor
 @Observable
 public final class EmojiButtonContainerViewModel {
 

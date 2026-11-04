@@ -61,6 +61,7 @@ extension ToastItem {
         }
     }
 
+    @MainActor
     public var view: ToastView {
         ToastView(item: self)
     }

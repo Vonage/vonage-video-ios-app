@@ -27,6 +27,9 @@ public class MockCall: CallFacade, AudioMuteControllable {
 
     public var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     public lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+    public var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    public lazy var transcriptionState: AnyPublisher<ArchivingState, Never> =
+        _transcriptionState.eraseToAnyPublisher()
 
     public var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     public lazy var captionsPublisher: AnyPublisher<[CaptionItem], Never> = _captionsPublisher.eraseToAnyPublisher()

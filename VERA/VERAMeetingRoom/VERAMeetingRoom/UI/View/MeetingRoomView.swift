@@ -32,13 +32,13 @@ private enum MeetingRoomViewConstants {
     static let presentantionContentSpacing: CGFloat = 16
 }
 
-public struct ViewGenerator: Identifiable {
+public struct ViewGenerator: Identifiable, Sendable {
     public let id: String
-    public let content: () -> AnyView
+    public let content: @MainActor @Sendable () -> AnyView
 
     public init<Content: View>(
         id: String = UUID().uuidString,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping @MainActor @Sendable () -> Content
     ) {
         self.id = id
         self.content = { AnyView(content()) }
@@ -114,6 +114,9 @@ public struct MeetingRoomView: View {
                     HStack(spacing: MeetingRoomViewConstants.statusIconSpacing) {
                         if state.archivingState.isArchiving {
                             recordingIndicator
+                        }
+                        if state.transcriptionState.isArchiving {
+                            transcriptionIndicator
                         }
                         if state.noiseSuppressionState.isEnabled {
                             noiseSuppressionIndicator
@@ -251,6 +254,17 @@ public struct MeetingRoomView: View {
                 )
         }
         .accessibilityIdentifier(MeetingRoomAccessibilityID.recordingIndicator)
+    }
+
+    private var transcriptionIndicator: some View {
+        VERACommonUIAsset.Images.textLine.swiftUIImage
+            .resizable()
+            .frame(
+                width: MeetingRoomViewConstants.recordingIconSize,
+                height: MeetingRoomViewConstants.recordingIconSize
+            )
+            .foregroundStyle(theme.error)
+            .accessibilityIdentifier(MeetingRoomAccessibilityID.transcriptionIndicator)
     }
 
     private var noiseSuppressionIndicator: some View {
@@ -527,6 +541,7 @@ public struct MeetingRoomView: View {
             showParticipantList: true,
             callState: .connected,
             archivingState: .archiving(""),
+            transcriptionState: .archiving(""),
             noiseSuppressionState: .disabled
         ),
         actions: .init())

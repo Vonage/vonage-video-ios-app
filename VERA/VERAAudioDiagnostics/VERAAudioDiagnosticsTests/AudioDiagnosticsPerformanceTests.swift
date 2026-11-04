@@ -167,34 +167,25 @@
 
             let startTime = CFAbsoluteTimeGetCurrent()
 
-            // Simulate concurrent usage from multiple contexts
+            // Concurrent callers interleave UI-owned work on MainActor while sleeps suspend.
             await withTaskGroup(of: Void.self) { group in
                 // Simulate multiple waiting room users
                 for _ in 0..<5 {
                     group.addTask {
-                        let viewModel = await factory.makeViewModel()
-                        await viewModel.testSpeaker()
-                        try? await Task.sleep(nanoseconds: 10_000_000)  // 10ms
-                        await viewModel.stopSpeaker()
+                        await Self.exercisePlayback(factory: factory, nanoseconds: 10_000_000)
                     }
                 }
 
                 // Simulate multiple meeting room users
                 for _ in 0..<5 {
                     group.addTask {
-                        let viewModel = await factory.makeViewModel()
-                        await viewModel.testSpeaker()
-                        try? await Task.sleep(nanoseconds: 15_000_000)  // 15ms
-                        await viewModel.stopSpeaker()
+                        await Self.exercisePlayback(factory: factory, nanoseconds: 15_000_000)
                     }
                 }
 
                 // Simulate audio level updates
                 group.addTask {
-                    for i in 0..<50 {
-                        await service.emitAudioLevel(Float(i % 10) / 10.0)
-                        try? await Task.sleep(nanoseconds: 2_000_000)  // 2ms
-                    }
+                    await Self.emitLevels(service: service)
                 }
             }
 
@@ -202,6 +193,22 @@
 
             // Should complete all concurrent operations in reasonable time
             #expect(timeElapsed < 2.0)  // Less than 2 seconds
+            #expect(service.playTestSoundCallCount == 10)
+            #expect(service.stopTestSoundCallCount == 10)
+        }
+
+        private static func exercisePlayback(factory: AudioDiagnosticsFactory, nanoseconds: UInt64) async {
+            let viewModel = factory.makeViewModel()
+            viewModel.testSpeaker()
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            viewModel.stopSpeaker()
+        }
+
+        private static func emitLevels(service: MockSpeakerTestService) async {
+            for i in 0..<50 {
+                service.emitAudioLevel(Float(i % 10) / 10.0)
+                try? await Task.sleep(nanoseconds: 2_000_000)
+            }
         }
 
         // MARK: - Stress Tests

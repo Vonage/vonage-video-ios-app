@@ -9,6 +9,7 @@ import VERAArchiving
 import VERACore
 import VERADomain
 import VERAMeetingRoom
+import VERASettings
 import VERAVonage
 
 @testable import VERAMeetingRoomSDK
@@ -87,6 +88,20 @@ struct MeetingRoomSDKContainerTests {
         #expect(!plugins.contains { $0.pluginIdentifier == "VonageChatPlugin" })
     }
 
+    @Test("Plugin registry includes archiving plugin when only post-call transcription is enabled")
+    func pluginRegistryIncludesArchivingPluginForTranscription() {
+        let container = makeContainer(enabledFeatures: [.postCallTranscription])
+        let plugins = container.pluginRegistry.plugins
+        #expect(plugins.contains { $0.pluginIdentifier == "VonageArchivingPlugin" })
+    }
+
+    @Test("Plugin registry excludes archiving plugin when recording and transcription are disabled")
+    func pluginRegistryExcludesArchivingPluginWhenDisabled() {
+        let container = makeContainer(enabledFeatures: [])
+        let plugins = container.pluginRegistry.plugins
+        #expect(!plugins.contains { $0.pluginIdentifier == "VonageArchivingPlugin" })
+    }
+
     @Test("Plugin registry has no duplicates")
     func pluginRegistryNoDuplicates() {
         let container = makeContainer(enabledFeatures: Set(MeetingRoomFeature.allCases))
@@ -101,6 +116,21 @@ struct MeetingRoomSDKContainerTests {
         let features: Set<MeetingRoomFeature> = [.chat, .archiving, .settings]
         let container = makeContainer(enabledFeatures: features)
         #expect(container.enabledFeatures == features)
+    }
+
+    @Test(
+        "Captions translation needs both captions and captionsTranslation",
+        arguments: [
+            (Set<MeetingRoomFeature>([.captions, .captionsTranslation]), true),
+            (Set<MeetingRoomFeature>([.captions]), false),
+            (Set<MeetingRoomFeature>([.captionsTranslation]), false),
+            (Set<MeetingRoomFeature>(), false),
+        ])
+    func captionsTranslationRequiresCaptions(features: Set<MeetingRoomFeature>, expected: Bool) {
+        let container = makeContainer(enabledFeatures: features)
+
+        #expect(container.isCaptionsTranslationEnabled == expected)
+        #expect(container.settingsFactory.isCaptionsTranslationAvailable == expected)
     }
 
     @Test("Container stores configuration")
@@ -170,6 +200,60 @@ struct MeetingRoomSDKContainerTests {
 
         #expect(container.archivingDataSource is ArchivingDataSourceStub)
         #expect(didReceiveArchivingStatusDataSource)
+    }
+
+    @Test("Archiving data source factory shares the container's status data source")
+    func archivingDataSourceFactorySharesStatusDataSource() throws {
+        var receivedContext: MeetingRoomArchivingDataSourceFactoryContext?
+        let factory = ArchivingDataSourceFactorySpy { context in
+            receivedContext = context
+            return ArchivingDataSourceStub()
+        }
+
+        let container = makeContainer(
+            enabledFeatures: [.postCallTranscription],
+            archivingDataSourceFactory: factory)
+        _ = container.archivingDataSource
+
+        let context = try #require(receivedContext)
+        #expect(context.archivingStatusDataSource as AnyObject === container.archivingStatusDataSource as AnyObject)
+    }
+
+    // MARK: - Transcription summary default
+
+    @Test("Transcription defaults are the built-in defaults when settings are disabled")
+    func transcriptionDefaultsWithoutSettings() async {
+        let container = makeContainer(enabledFeatures: [.postCallTranscription])
+
+        #expect(await container.loadTranscriptionDefaults() == .default)
+    }
+
+    @Test("Transcription defaults follow the saved AI summary setting")
+    func transcriptionDefaultsFollowTheSavedSetting() async throws {
+        let suiteName = "com.vonage.vera.tests.\(UUID().uuidString)"
+        let userDefaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { userDefaults.removePersistentDomain(forName: suiteName) }
+        let repository = UserDefaultsSettingsRepository(userDefaults: userDefaults)
+        await repository.save(PublisherSettingsPreferences(transcriptionSummaryEnabled: false))
+        let container = makeContainer(enabledFeatures: [.postCallTranscription, .settings])
+        container.settingsRepository = repository
+
+        #expect(await container.loadTranscriptionDefaults() == TranscriptionOptions(hasSummary: false))
+    }
+
+    @Test(
+        "Settings offer the AI summary default only with post-call transcription",
+        arguments: [
+            (Set<MeetingRoomFeature>([.settings, .postCallTranscription]), true),
+            (Set<MeetingRoomFeature>([.settings]), false),
+        ])
+    @MainActor
+    func settingsOfferTranscriptionSummary(features: Set<MeetingRoomFeature>, isShown: Bool) {
+        let container = makeContainer(enabledFeatures: features)
+
+        let (viewModel, _) = container.settingsFactory.makeMeetingRoomViewModels()
+
+        #expect(viewModel.showsTranscriptionSummary == isShown)
     }
 
     // MARK: - Helpers
@@ -283,6 +367,7 @@ private final class CallFacadeStub: CallFacade {
     var statePublisher = Just(SessionState(isPublishingAudio: true, isPublishingVideo: true)).eraseToAnyPublisher()
     var callState = Just(CallState.idle).eraseToAnyPublisher()
     var archivingState = Just(ArchivingState.idle).eraseToAnyPublisher()
+    var transcriptionState = Just(ArchivingState.idle).eraseToAnyPublisher()
     var captionsPublisher = Just([CaptionItem]()).eraseToAnyPublisher()
     var networkStatsPublisher = Just(NetworkMediaStats.empty).eraseToAnyPublisher()
 

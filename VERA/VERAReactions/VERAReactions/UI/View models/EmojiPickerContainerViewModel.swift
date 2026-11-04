@@ -21,6 +21,7 @@ import Observation
 /// EmojiPickerViewContainer(viewModel: viewModel)
 ///     .popover(isPresented: $viewModel.isVisible) { ... }
 /// ```
+@MainActor
 @Observable
 public final class EmojiPickerContainerViewModel {
 

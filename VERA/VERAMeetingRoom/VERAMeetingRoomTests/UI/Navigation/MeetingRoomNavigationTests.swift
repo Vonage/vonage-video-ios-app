@@ -7,6 +7,7 @@ import VERACommonUI
 import VERADomain
 import VERAMeetingRoom
 
+@MainActor
 @Suite("MeetingRoomNavigation tests")
 struct MeetingRoomNavigationTests {
 

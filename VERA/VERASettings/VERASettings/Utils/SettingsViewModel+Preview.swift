@@ -11,10 +11,10 @@
 
     final class PreviewSettingsRepository: PublisherSettingsRepository {
 
-        private nonisolated let subject = CurrentValueSubject<PublisherSettingsPreferences, Never>(.default)
+        private nonisolated let subject = CurrentValueRelay<PublisherSettingsPreferences, Never>(.default)
 
         nonisolated var preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never> {
-            subject.eraseToAnyPublisher()
+            subject.publisher
         }
 
         func getPreferences() async -> PublisherSettingsPreferences {

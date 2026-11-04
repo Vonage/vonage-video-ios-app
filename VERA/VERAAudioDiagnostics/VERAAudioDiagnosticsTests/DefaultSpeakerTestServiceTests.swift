@@ -603,18 +603,45 @@ struct DefaultSpeakerTestServiceTests {
 
     @Test("audioPlayerDidFinishPlaying emits zero level through publisher")
     func audioPlayerDidFinishPlayingEmitsZeroLevel() async throws {
-        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
-        let player = try DefaultGenerateTonePlayerUseCase()()
-
+        let useCase = MockGenerateTonePlayerUseCase()
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: useCase)
         sut.playTestSound()
+        let player = try #require(useCase.generatedPlayer)
 
         var receivedLevels: [Float] = []
         let cancellable = sut.audioLevelPublisher.sink { receivedLevels.append($0) }
+        defer {
+            cancellable.cancel()
+            sut.stopTestSound()
+        }
 
         sut.audioPlayerDidFinishPlaying(player, successfully: true)
-        try await Task.sleep(nanoseconds: 50_000_000)
+        // Drain the delegate's main-queue hop instead of assuming a fixed delay is enough.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
 
         #expect(receivedLevels.contains(0.0))
-        cancellable.cancel()
     }
+
+    @Test("Callbacks for an unrelated player do not publish audio levels", arguments: [true, false])
+    func unrelatedPlayerCallbackIsIgnored(finished: Bool) async throws {
+        let sut = DefaultSpeakerTestService(generateTonePlayerUseCase: MockGenerateTonePlayerUseCase())
+        let player = try DefaultGenerateTonePlayerUseCase()()
+        var levels: [Float] = []
+        let cancellable = sut.audioLevelPublisher.sink { levels.append($0) }
+        defer { cancellable.cancel() }
+
+        if finished {
+            sut.audioPlayerDidFinishPlaying(player, successfully: true)
+        } else {
+            sut.audioPlayerDecodeErrorDidOccur(player, error: nil)
+        }
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
+
+        #expect(levels.isEmpty)
+    }
+
 }

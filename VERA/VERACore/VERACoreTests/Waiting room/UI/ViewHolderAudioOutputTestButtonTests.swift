@@ -7,6 +7,7 @@ import Testing
 
 @testable import VERACore
 
+@MainActor
 struct ViewHolderAudioOutputTestButtonTests {
 
     // MARK: - Audio Diagnostics Specific Tests

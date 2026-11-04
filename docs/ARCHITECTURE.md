@@ -21,7 +21,7 @@ The Vonage iOS reference app is built with a modular architecture. The app is or
 - **VERACommonUI**: Shared SwiftUI components, resources, and theme assets.
 - **VERAVonage**: Vonage Video SDK adapter layer and active speaker tracking.
 - **VERAChat**: In-call chat UI, domain, and data layer.
-- **VERAArchiving**: Cloud recording controls and archive list UI.
+- **VERAArchiving**: Cloud recording and post-call transcription controls, and the goodbye page's session content list (recording and transcript downloads).
 - **VERABackgroundEffects**: Background blur and video effect support.
 - **VERACaptions**: Live captions UI and captions state handling.
 - **VERAReactions**: Emoji reaction picker and floating reaction overlay.

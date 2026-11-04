@@ -468,6 +468,7 @@ private final class LegacyCallFacade: CallFacade {
     var statePublisher: AnyPublisher<SessionState, Never> { stub.statePublisher }
     var callState: AnyPublisher<CallState, Never> { stub.callState }
     var archivingState: AnyPublisher<ArchivingState, Never> { stub.archivingState }
+    var transcriptionState: AnyPublisher<ArchivingState, Never> { stub.transcriptionState }
     var captionsPublisher: AnyPublisher<[CaptionItem], Never> { stub.captionsPublisher }
     var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> { stub.networkStatsPublisher }
     var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { stub.publisherAudioLevelPublisher }

@@ -158,10 +158,20 @@ final class DependencyContainer {
     lazy var goodByePageFactory = GoodByePageFactory(userRepository: userRepository)
 
     #if AUDIODIAGNOSTICS_ENABLED
+        @MainActor
         lazy var speakerTestService: SpeakerTestService = DefaultSpeakerTestService()
 
+        @MainActor
         lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(speakerTestService: speakerTestService)
     #endif
+
+    var isCallKitSupported: Bool {
+        #if targetEnvironment(simulator)
+            false
+        #else
+            true
+        #endif
+    }
 
     /// Computes the set of enabled meeting room features from the app configuration.
     ///
@@ -171,7 +181,9 @@ final class DependencyContainer {
         var features: Set<MeetingRoomFeature> = []
         if appConfig.meetingRoomSettings.allowChat { features.insert(.chat) }
         if appConfig.meetingRoomSettings.allowArchiving { features.insert(.archiving) }
+        if appConfig.meetingRoomSettings.allowPostCallTranscription { features.insert(.postCallTranscription) }
         if appConfig.meetingRoomSettings.allowCaptions { features.insert(.captions) }
+        if appConfig.meetingRoomSettings.allowCaptionTranslation { features.insert(.captionsTranslation) }
         if appConfig.meetingRoomSettings.allowEmojis { features.insert(.reactions) }
         if appConfig.meetingRoomSettings.allowSettings { features.insert(.settings) }
         if appConfig.meetingRoomSettings.allowFeedback { features.insert(.feedback) }
@@ -186,7 +198,9 @@ final class DependencyContainer {
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }
         if appConfig.audioSettings.allowAdvancedNoiseSuppression { features.insert(.audioEffects) }
         if appConfig.audioSettings.allowAudioDiagnostics { features.insert(.audioDiagnostics) }
-        features.insert(.callKit)
+        if isCallKitSupported {
+            features.insert(.callKit)
+        }
         return features
     }
 
@@ -264,7 +278,10 @@ final class DependencyContainer {
 
         lazy var settingsFactory = SettingsFactory(
             repository: settingsRepository,
-            statsDataSource: InMemoryStatsRepository())
+            statsDataSource: InMemoryStatsRepository(),
+            isCaptionsTranslationAvailable: appConfig.meetingRoomSettings.allowCaptions
+                && appConfig.meetingRoomSettings.allowCaptionTranslation,
+            showsTranscriptionSummary: appConfig.meetingRoomSettings.allowPostCallTranscription)
     #endif
 
     // MARK: - AudioEffects feature (waiting room)

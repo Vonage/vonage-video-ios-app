@@ -20,9 +20,14 @@ final class PictureInPictureParticipantSelector {
         stickyPipTargetId = nil
     }
 
-    /// Prefers the first joined remote; falls back to any remote with camera when the first has video off.
-    /// When there are no remote participants, falls back to the local participant so PiP works solo.
+    /// Prefers an ongoing screen share, then the first joined remote; falls back to any remote with camera
+    /// when the first has video off. When there are no remote participants, falls back to the local
+    /// participant so PiP works solo.
     func pipTargetId(for state: ParticipantsState) -> String? {
+        if let screenshareId = Self.screenshareTargetId(in: state) {
+            return screenshareId
+        }
+
         let remoteParticipants = sortedRemoteParticipants(in: state)
         guard let firstRemote = remoteParticipants.first else {
             stickyPipTargetId = nil
@@ -41,10 +46,15 @@ final class PictureInPictureParticipantSelector {
         return remoteParticipants.first(where: \.isCameraEnabled)?.id ?? stickyParticipant.id
     }
 
-    /// PiP target while active: follow the active speaker. When nobody is speaking, keep the current
-    /// remote target; but if PiP is on the local participant (solo call), switch to the first remote
-    /// that joins instead of waiting for them to speak.
+    /// PiP target while active: an ongoing screen share wins, mirroring the room layout; otherwise follow
+    /// the active speaker. When nobody is speaking, keep the current remote target; but if PiP is on the
+    /// local participant (solo call), switch to the first remote that joins instead of waiting for them
+    /// to speak.
     func activeSpeakerPipTargetId(for state: ParticipantsState, currentPipTargetId: String?) -> String? {
+        if let screenshareId = Self.screenshareTargetId(in: state) {
+            return screenshareId
+        }
+
         if let activeId = state.activeParticipantId,
             state.participants.contains(where: { $0.id == activeId && !$0.isScreenshare })
         {
@@ -58,6 +68,13 @@ final class PictureInPictureParticipantSelector {
         }
 
         return pipTargetId(for: state)
+    }
+
+    private static func screenshareTargetId(in state: ParticipantsState) -> String? {
+        state.participants
+            .filter(\.isScreenshare)
+            .min { $0.creationTime < $1.creationTime }?
+            .id
     }
 
     private func sortedRemoteParticipants(in state: ParticipantsState) -> [Participant] {
@@ -74,6 +91,14 @@ final class PictureInPictureParticipantSelector {
 
     static func isCameraEnabled(participantId: String?, in state: ParticipantsState) -> Bool {
         participant(withId: participantId, in: state)?.isCameraEnabled == true
+    }
+
+    static func isScreenshare(participantId: String?, in state: ParticipantsState) -> Bool {
+        participant(withId: participantId, in: state)?.isScreenshare == true
+    }
+
+    static func contains(participantId: String?, in state: ParticipantsState) -> Bool {
+        participant(withId: participantId, in: state) != nil
     }
 
     private static func participant(withId participantId: String?, in state: ParticipantsState) -> Participant? {
