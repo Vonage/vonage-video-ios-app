@@ -1,0 +1,30 @@
+scripts/run-maestro-tests.sh
+  s_493ec5e066b55f::t_f402394b03ff14 38,450
+  s_493ec5e066b55f::t_e2a97410ecf8ae 476
+  s_493ec5e066b55f::t_cfa8223be98534 549
+  s_493ec5e066b55f::t_92a116bc2cc459 268
+  h_2499cc15b3806e 119,278,520
+.github/workflows/maestro.yml
+  s_493ec5e066b55f::t_1a4f770f691419 98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c1b539dc3d0a739f87800693ded227b4f1581cc5",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_493ec5e066b55f": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_0379b3f6-7a9e-4ea4-b398-6c7a5b2b63d9",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
