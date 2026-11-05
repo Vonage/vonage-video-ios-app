@@ -27,17 +27,9 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
             : super.view
     }
 
-    public override var cameraPosition: CameraPosition {
-        get { super.cameraPosition }
-        set {
-            super.cameraPosition = newValue
-            updateInlineRendererMirroring()
-        }
-    }
-
-    public override func switchCamera(to cameraDeviceID: String) {
-        super.switchCamera(to: cameraDeviceID)
+    override func updateSelfViewMirroring() {
         updateInlineRendererMirroring()
+        super.updateSelfViewMirroring()
     }
 
     override func setup() {
@@ -53,7 +45,7 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
     /// Keeps the self-view mirrored for the front camera (selfie-preview convention) and
     /// un-mirrored for the back camera. Applied to the pixels so the tile and PiP window agree.
     private func updateInlineRendererMirroring() {
-        inlineVideoRenderer.isMirrored = otPublisher.cameraPosition == .front
+        inlineVideoRenderer.isMirrored = selfViewIsMirrored
     }
 
     /// Attaches the permanent local renderer at publish time. The waiting room uses

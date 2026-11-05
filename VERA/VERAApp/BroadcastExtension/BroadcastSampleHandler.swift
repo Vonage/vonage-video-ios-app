@@ -28,8 +28,8 @@ private var stopBroadcastNotificationName: CFString { "com.vonage.VERA.stopBroad
 ///
 /// ## Memory
 /// The extension process has a hard ~50 MB memory ceiling. The custom capturer
-/// passes frames directly to the SDK without extra copies; keep resolution ≤ 1280 px
-/// on the longest edge when downscaling is needed.
+/// passes frames directly to the SDK without extra copies; the default capture policy caps the longest edge at 1280 px. Higher explicit
+/// output bounds require memory validation on a physical device.
 ///
 /// - SeeAlso: ``ScreenShareVideoCapturer``, ``ScreenShareCredentialsStore``
 final class BroadcastSampleHandler: RPBroadcastSampleHandler {
@@ -37,12 +37,21 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
     private let controlOwner: BroadcastControlOwner
 
     override init() {
-        let capturer = ScreenShareVideoCapturer()
+        let videoSettings = Self.loadVideoSettings()
+        let capturer = ScreenShareVideoCapturer(settings: videoSettings)
         let finisher = ReplayKitFinishBridge()
         videoCapturer = capturer
-        controlOwner = BroadcastControlOwner(capturer: capturer, finisher: finisher)
+        controlOwner = BroadcastControlOwner(capturer: capturer, finisher: finisher, videoSettings: videoSettings)
         super.init()
         finisher.attach(self)
+    }
+
+    /// The extension process lives for one broadcast, so the app's policy is read once here.
+    private static func loadVideoSettings() -> ScreenShareVideoSettings {
+        guard let data = UserDefaults(suiteName: veraAppGroupIdentifier)?.data(forKey: ScreenSharingKeys.videoSettings),
+            let settings = try? JSONDecoder().decode(ScreenShareVideoSettings.self, from: data)
+        else { return ScreenShareVideoSettings() }
+        return settings
     }
 
     deinit {
@@ -112,12 +121,18 @@ private final class ReplayKitFinishBridge: @unchecked Sendable {
 private final class BroadcastControlOwner {
     private let capturer: ScreenShareVideoCapturer
     private let finisher: ReplayKitFinishBridge
-    private lazy var control = BroadcastControl(capturer: capturer, finisher: finisher)
+    private let videoSettings: ScreenShareVideoSettings
+    private lazy var control = BroadcastControl(capturer: capturer, finisher: finisher, videoSettings: videoSettings)
     private var finishScheduled = false
 
-    nonisolated init(capturer: ScreenShareVideoCapturer, finisher: ReplayKitFinishBridge) {
+    nonisolated init(
+        capturer: ScreenShareVideoCapturer,
+        finisher: ReplayKitFinishBridge,
+        videoSettings: ScreenShareVideoSettings
+    ) {
         self.capturer = capturer
         self.finisher = finisher
+        self.videoSettings = videoSettings
     }
 
     func start() { control.startBroadcast() }
@@ -136,14 +151,16 @@ private final class BroadcastControl: NSObject {
         subsystem: "com.vonage.VERA.BroadcastExtension", category: "BroadcastSampleHandler")
     nonisolated private let videoCapturer: ScreenShareVideoCapturer
     private let finisher: ReplayKitFinishBridge
+    private let videoSettings: ScreenShareVideoSettings
     private var session: OTSession?
     private var publisher: OTPublisherKit?
     private var didTearDown = false
     private var store: UserDefaultsScreenShareCredentialsRepository?
 
-    init(capturer: ScreenShareVideoCapturer, finisher: ReplayKitFinishBridge) {
+    init(capturer: ScreenShareVideoCapturer, finisher: ReplayKitFinishBridge, videoSettings: ScreenShareVideoSettings) {
         videoCapturer = capturer
         self.finisher = finisher
+        self.videoSettings = videoSettings
         super.init()
     }
 
@@ -298,11 +315,10 @@ extension BroadcastControl: OTSessionDelegate {
         videoCapturer.sessionDidConnect()
 
         let settings = OTPublisherSettings()
-        settings.scalableScreenshare = true
-        settings.videoCodecPreference = .manual(withCodecs: [
-            NSNumber(value: OTVideoCodecType.H264.rawValue),
-            NSNumber(value: OTVideoCodecType.VP8.rawValue),
-        ])
+        settings.scalableScreenshare = videoSettings.scalableScreenshare
+        if let codecs = videoSettings.preferredCodecs {
+            settings.videoCodecPreference = .manual(withCodecs: codecs.map { NSNumber(value: $0) })
+        }
 
         if let credentials = store?.load(), !credentials.username.isEmpty {
             settings.name = "\(credentials.username)'s screen"
@@ -326,7 +342,14 @@ extension BroadcastControl: OTSessionDelegate {
         }
         otPublisher.videoType = .screen
         otPublisher.videoCapture = videoCapturer
-        otPublisher.videoCapture?.videoContentHint = .text
+        otPublisher.videoCapture?.videoContentHint = OTVideoContentHint(rawValue: videoSettings.contentHint) ?? .detail
+        if let rawPreset = videoSettings.bitratePreset, let preset = OTVideoBitratePreset(rawValue: rawPreset) {
+            if preset == .custom {
+                otPublisher.maxVideoBitrate = max(5_000, min(videoSettings.maxVideoBitrate, 10_000_000))
+            } else {
+                otPublisher.videoBitratePreset = preset
+            }
+        }
         otPublisher.publishAudio = false
         otPublisher.publishVideo = !videoCapturer.isPaused
 

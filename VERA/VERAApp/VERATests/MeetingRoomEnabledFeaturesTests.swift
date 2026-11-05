@@ -5,9 +5,11 @@
 import Foundation
 import Testing
 import VERAConfiguration
+import VERADomain
 
 @testable import VERA
 @testable import VERAMeetingRoomSDK
+@testable import VERAVonage
 
 /// Validates that `DependencyContainer.meetingRoomEnabledFeatures` derives the correct
 /// `Set<MeetingRoomFeature>` from `AppConfig` — i.e. that editing `app-config.json` and
@@ -29,6 +31,30 @@ struct MeetingRoomEnabledFeaturesTests {
             return [.callKit]
         #endif
     }()
+
+    @MainActor
+    @Test("Noise suppression installs once and reports live enable/disable state")
+    func nativeNoiseSuppressionState() throws {
+        let factory = VonagePublisherFactory(
+            checkCameraAuthorizationStatusUseCase: DefaultCheckCameraAuthorizationStatusUseCase(),
+            checkMicrophoneAuthorizationStatusUseCase: DefaultCheckMicrophoneAuthorizationStatusUseCase())
+        var states: [Bool] = []
+        factory.onAdvancedNoiseSuppressionInitialized = { states.append($0) }
+        factory.onAdvancedNoiseSuppressionChanged = { states.append($0) }
+        let publisher = try #require(
+            try factory.make(PublisherSettings(advancedSettings: .init(advancedNoiseSuppressionEnabled: true)))
+                as? VonagePublisher)
+        #expect(publisher.audioTransformers.filter { $0.key == "NoiseSuppression" }.count == 1)
+        #expect(states == [true])
+        try publisher.setAdvancedNoiseSuppression(enabled: true)
+        #expect(states == [true])
+        try publisher.setAdvancedNoiseSuppression(enabled: false)
+        #expect(publisher.audioTransformers.isEmpty)
+        #expect(states == [true, false])
+        publisher.cleanUp()
+        try publisher.setAdvancedNoiseSuppression(enabled: true)
+        #expect(states == [true, false])
+    }
 
     // MARK: - Full configurations
 
