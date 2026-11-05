@@ -54,7 +54,7 @@ public struct MockMeetingRoomNavigation: MeetingRoomDestination {
         message: String,
         confirmTitle: String,
         cancelTitle: String,
-        onConfirm: @escaping () -> Void
+        onConfirm: @escaping @MainActor () -> Void
     ) {
         let alert = AlertItem(
             title: message,

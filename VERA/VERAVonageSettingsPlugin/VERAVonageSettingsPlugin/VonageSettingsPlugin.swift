@@ -59,6 +59,9 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Reactive source of publisher settings preferences (includes `senderStatsEnabled`).
     private let settingsRepository: PublisherSettingsRepository
 
+    /// Whether the persisted captions translation language is applied to the call.
+    private let isCaptionsTranslationEnabled: Bool
+
     /// A stable identifier for this plugin instance.
     public var pluginIdentifier: String { String(describing: type(of: self)) }
 
@@ -67,12 +70,16 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// - Parameters:
     ///   - settingsRepository: Repository providing reactive preferences with the stats toggle.
     ///   - statsWriter: Writer for forwarding network stats to the settings data layer.
+    ///   - isCaptionsTranslationEnabled: Whether the saved captions translation language is applied.
+    ///     When `false` a language saved earlier is ignored, not erased. Defaults to `false`.
     public init(
         settingsRepository: PublisherSettingsRepository,
-        statsWriter: StatsWriter
+        statsWriter: StatsWriter,
+        isCaptionsTranslationEnabled: Bool = false
     ) {
         self.settingsRepository = settingsRepository
         self.statsForwarding = StatsForwardingLifecycle(writer: statsWriter)
+        self.isCaptionsTranslationEnabled = isCaptionsTranslationEnabled
     }
 
     // MARK: - VonagePluginCallLifeCycle
@@ -154,6 +161,23 @@ public final class VonageSettingsPlugin: VonagePlugin, VonagePluginCallHolder {
                 }
             }
             .store(in: &cancellables)
+
+        // Apply the captions translation language to remote subscribers: the current value on
+        // subscription, then every change. It is a subscriber setting, so it never republishes.
+        // Delivering on the serial main queue keeps the choices ordered with no shared task state.
+        if isCaptionsTranslationEnabled {
+            settingsRepository.preferencesPublisher
+                .map(\.captionsTranslationLanguage)
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] languageCode in
+                    MainActor.assumeIsolated {
+                        (self?.call as? any CaptionsTranslationControllable)?
+                            .setCaptionsTranslationLanguage(languageCode)
+                    }
+                }
+                .store(in: &cancellables)
+        }
 
         // Source changes are queued behind any previous forwarding/clear operation.
         if let publisher = call?.networkStatsPublisher {

@@ -8,6 +8,7 @@ import Testing
 
 // MARK: - Tests
 
+@MainActor
 @Suite("EmojiPickerContainerViewModel Tests")
 struct EmojiPickerContainerViewModelTests {
 

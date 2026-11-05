@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import VERACore
 import VERADomain
 
 final actor ParticipantsRepository {
@@ -14,6 +13,12 @@ final actor ParticipantsRepository {
     }
 
     func saveParticipant(_ participant: Participant) async {
+        participantStreams[participant.id] = participant
+    }
+
+    /// Check and replace in one actor operation so removal cannot interleave with a late update.
+    func updateExistingParticipant(_ participant: Participant) {
+        guard participantStreams[participant.id] != nil else { return }
         participantStreams[participant.id] = participant
     }
 

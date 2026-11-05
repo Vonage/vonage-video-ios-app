@@ -94,6 +94,7 @@ extension EmojiPickerConfiguration {
 ///     handleSelection(emoji)
 /// }
 /// ```
+@MainActor
 public enum EmojiPickerViewFactory {
     /// Creates an EmojiPickerView with the specified configuration
     /// - Parameters:

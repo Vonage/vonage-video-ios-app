@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import VERADomain
 
-public typealias GetPublisher = () throws -> VERAPublisher
+public typealias GetPublisher = @MainActor () throws -> VERAPublisher
 
 public final class AudioEffectsFactory {
 
@@ -24,6 +24,7 @@ public final class AudioEffectsFactory {
         self.disableNoiseSuppressionUseCase = disableNoiseSuppressionUseCase
     }
 
+    @MainActor
     public func makeWaitingNoiseSuppressionButton(
         getCurrentPublisher: @escaping GetPublisher
     ) -> (view: some View, viewModel: WaitingNoiseSuppressionViewModel) {
@@ -36,10 +37,12 @@ public final class AudioEffectsFactory {
         return (view, viewModel)
     }
 
+    @MainActor
     public func makeWaitingNoiseSuppressionButton(viewModel: WaitingNoiseSuppressionViewModel) -> some View {
         WaitingNoiseSuppressionButtonContainer(viewModel: viewModel)
     }
 
+    @MainActor
     public func makeMeetingNoiseSuppressionButton() -> (view: some View, viewModel: MeetingNoiseSuppressionViewModel) {
         let viewModel = MeetingNoiseSuppressionViewModel(
             getCurrentPublisher: publisherRepository.getPublisher,
@@ -50,6 +53,7 @@ public final class AudioEffectsFactory {
         return (view, viewModel)
     }
 
+    @MainActor
     public func makeMeetingNoiseSuppressionButton(viewModel: MeetingNoiseSuppressionViewModel) -> some View {
         MeetingNoiseSuppressionButtonContainer(viewModel: viewModel)
     }

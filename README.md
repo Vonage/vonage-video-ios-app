@@ -63,6 +63,8 @@ This application provides features for common conferencing use cases, such as:
 
 - Start, stop and download cloud-based session recording directly from the app.
 
+- Start and stop post-call transcription during a meeting, then download the transcript from the post-call page. Transcription runs as a separate archive, so it can run alongside a recording.
+
 - Apply real-time background effects to the local video stream, including background blur and background replacement.
 
 - <details>

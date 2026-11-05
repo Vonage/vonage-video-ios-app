@@ -17,6 +17,7 @@ public class ChatFactory {
         self.sendChatMessageUseCase = sendChatMessageUseCase
     }
 
+    @MainActor
     public func make(
         onDismiss: @escaping () -> Void
     ) -> (view: some View, viewModel: ChatPanelViewModel) {

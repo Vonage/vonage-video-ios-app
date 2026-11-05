@@ -13,6 +13,7 @@ enum MeetingRoomAccessibilityID {
     static let participantsButton = "meeting-room-participants-button"
     static let participantsListScreen = "participants-list-screen"
     static let recordingIndicator = "archiving-recording-indicator"
+    static let transcriptionIndicator = "archiving-transcription-indicator"
 
     static func participantCard(_ participantID: String) -> String {
         "participant-card-\(participantID)"
