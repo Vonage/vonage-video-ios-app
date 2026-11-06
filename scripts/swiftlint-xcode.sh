@@ -85,18 +85,6 @@ CACHE_DIR="${HOME}/.swiftlint_cache/${WORKSPACE_HASH}"
 mkdir -p "${CACHE_DIR}"
 echo "💾 Cache path   : ${CACHE_DIR}"
 
-# ── Build the concrete list of Swift files to lint ───────────────────────────
-# IMPORTANT: Xcode populates SCRIPT_INPUT_FILE_* verbatim from the build phase's
-# inputPaths and does NOT expand globs. The Tuist helper declares a config path
-# plus "<target>/**/*.swift", so Xcode hands SwiftLint a .yml and a literal
-# "…/**/*.swift" that matches no file. Feeding that straight to
-# --use-script-input-files lints nothing while reporting success.
-#
-# So: accept Xcode's inputs only when they are concrete, existing .swift files
-# with no unexpanded glob; otherwise discover the target's sources with find.
-# Either way we feed a concrete list back through --use-script-input-files, which
-# lints EXACTLY those files (it ignores the config's `included:`, so we don't
-# fall into a whole-tree union scan) while --cache-path skips unchanged files.
 LINT_LIST=$(mktemp)
 
 collect_xcode_inputs() {
