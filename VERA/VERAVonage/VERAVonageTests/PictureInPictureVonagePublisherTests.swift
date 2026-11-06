@@ -68,6 +68,28 @@ struct PictureInPictureVonagePublisherTests {
         #expect(sut.otPublisher.videoRender == nil)
     }
 
+    #if targetEnvironment(simulator)
+        // The simulator capturer only produces frames while `OTPublisher.view` is in a window, so it
+        // must stay mounted under the renderer once the tile switches to the renderer view.
+        @Test("setup keeps the simulator capture view mounted under the renderer")
+        func setupMountsSimulatorCaptureView() throws {
+            let sut = makeSUT()
+            sut.setup()
+            let captureView = try #require(sut.otPublisher.view)
+            #expect(captureView.superview === sut.inlineVideoRenderer)
+            #expect(sut.inlineVideoRenderer.subviews.first === captureView)
+        }
+
+        @Test("cleanUp unmounts the simulator capture view")
+        func cleanUpUnmountsSimulatorCaptureView() {
+            let sut = makeSUT()
+            sut.setup()
+            sut.cleanUp()
+            #expect(sut.otPublisher.view?.superview == nil)
+            #expect(sut.inlineVideoRenderer.subviews.isEmpty)
+        }
+    #endif
+
     @Test("detachInlineRenderer before setup is a no-op")
     func detachBeforeSetupIsNoOp() {
         let sut = makeSUT()
