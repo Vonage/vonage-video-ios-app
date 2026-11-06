@@ -5,6 +5,7 @@
 import Foundation
 import OSLog
 import VERAChat
+import os
 import VERAVonage
 
 /// Enables chat over Vonage signals and bridges to the chat repository.
@@ -37,10 +38,21 @@ public final class VonageChatPlugin: VonagePlugin, @preconcurrency VonageSignalH
         case missingChannel
     }
 
+    private struct WeakChannel {
+        weak var value: (any VERAVonage.VonageSignalChannel)?
+    }
+
+    /// Guards ``channel``: the call façade writes it from its nonisolated `connect()`/`disconnect()`,
+    /// while ``sendMessage(_:)`` reads it on the main actor.
+    private nonisolated let channelLock = OSAllocatedUnfairLock(uncheckedState: WeakChannel())
+
     /// The channel used to emit signals to peers; injected by the call façade.
     ///
-    /// The façade assigns it from its nonisolated `connect()`, so it stays outside the main actor.
-    nonisolated(unsafe) public weak var channel: (any VERAVonage.VonageSignalChannel)?
+    /// Thread-safe: the façade assigns it outside the main actor, so access is serialized by a lock.
+    nonisolated public var channel: (any VERAVonage.VonageSignalChannel)? {
+        get { channelLock.withLockUnchecked { $0.value } }
+        set { channelLock.withLockUnchecked { $0.value = newValue } }
+    }
     /// The current username associated with this call.
     private var username: String = ""
     /// Repository used to persist and observe chat messages.
