@@ -32,6 +32,7 @@ import VERAVonageSettingsPlugin
 /// Created by ``MeetingRoomBuilder`` based on the enabled features.
 /// The container lazily instantiates only the dependencies required
 /// by the features the consumer enabled.
+@MainActor
 final class MeetingRoomSDKContainer {
 
     let baseURL: URL

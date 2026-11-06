@@ -17,6 +17,7 @@ import VERAConfiguration
 ///   `#if !os(macOS)`) and `screenShare` (gated by `!isiOSAppOnMac`) are expected to be
 ///   enabled when their flags are `true`. `callKit` is not driven by a flag: it is active
 ///   on a device and inactive on the simulator, see ``callKitFeatures``.
+@MainActor
 @Suite("Meeting room enabled features")
 struct MeetingRoomEnabledFeaturesTests {
 
