@@ -5,8 +5,10 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
+@MainActor
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
@@ -20,12 +22,12 @@ public final class ArchivesViewModel {
     @ObservationIgnored
     private let downloadTranscriptionUseCase: DownloadTranscriptionUseCase
 
-    @MainActor public var archives: [ArchiveUIData] = []
-    @MainActor public var error: AlertItem?
+    public var archives: [ArchiveUIData] = []
+    public var error: AlertItem?
     /// A downloaded transcript waiting to be shared or saved by the user.
-    @MainActor public var sharedTranscript: ArchiveTranscript?
+    public var sharedTranscript: ArchiveTranscript?
     /// Archives whose download is in progress.
-    @MainActor public private(set) var downloadingArchiveIDs: Set<UUID> = []
+    public private(set) var downloadingArchiveIDs: Set<UUID> = []
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
@@ -42,27 +44,25 @@ public final class ArchivesViewModel {
     /// Starts loading the archives of the current session, replacing any earlier load.
     ///
     /// Clears the previous load's error so it is not shown again for a later meeting.
-    @BackgroundActor
     public func loadData() async {
         cancellables.removeAll()
-        await MainActor.run { error = nil }
+        error = nil
 
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
-            .receive(on: DispatchQueue.main)
-            .map { [weak self] archives in
-                self?.mapToUIArchives(archives) ?? []
-            }
-            .sink(
+            .sinkOnMainActor(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        Task { @MainActor [weak self] in
-                            self?.error = AlertItem.goodbyeError(error.localizedDescription)
-                        }
+                        self?.error = AlertItem.goodbyeError(error.localizedDescription)
                     }
                 },
                 receiveValue: { [weak self] archives in
-                    Task { @MainActor [weak self] in
-                        self?.archives = archives
+                    Task { @MainActor in
+                        // Date and size formatting stays off the UI actor.
+                        let rows = await Task { @BackgroundActor in
+                            ArchivePresentation.rows(archives)
+                        }.value
+                        guard let self else { return }
+                        self.archives = rows.map { self.attachingDownload($0.ui, for: $0.archive) }
                     }
                 }
             )
@@ -70,17 +70,15 @@ public final class ArchivesViewModel {
     }
 
     public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
-        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
-        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
-        return newestFirst.map { archive in
-            let index = nextIndexByKind[archive.kind, default: 0]
-            nextIndexByKind[archive.kind] = index - 1
-            return mapToUIArchive(archive, index: index)
-        }
+        ArchivePresentation.rows(archives).map { attachingDownload($0.ui, for: $0.archive) }
     }
 
     public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {
-        var uiArchive = archive.toUIArchive(with: index)
+        attachingDownload(archive.toUIArchive(with: index), for: archive)
+    }
+
+    private func attachingDownload(_ uiArchive: ArchiveUIData, for archive: Archive) -> ArchiveUIData {
+        var uiArchive = uiArchive
         uiArchive.onDownload = { [weak self] in
             self?.downloadArchive(archive)
         }
@@ -104,6 +102,24 @@ public final class ArchivesViewModel {
             } catch {
                 self.error = AlertItem.downloadError(error.localizedDescription)
             }
+        }
+    }
+}
+
+private struct PreparedArchive: Sendable {
+    let archive: Archive
+    let ui: ArchiveUIData
+}
+
+/// Newest-first archive rows. The formatting is not tied to the main actor.
+private enum ArchivePresentation {
+    static func rows(_ archives: [Archive]) -> [PreparedArchive] {
+        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
+        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
+        return newestFirst.map { archive in
+            let index = nextIndexByKind[archive.kind, default: 0]
+            nextIndexByKind[archive.kind] = index - 1
+            return PreparedArchive(archive: archive, ui: archive.toUIArchive(with: index))
         }
     }
 }
