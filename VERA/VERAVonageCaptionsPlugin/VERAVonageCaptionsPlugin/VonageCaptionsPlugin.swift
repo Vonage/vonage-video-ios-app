@@ -38,6 +38,8 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     private var cancellables = Set<AnyCancellable>()
     /// Tracks the caption-forwarding Task so it can be cancelled on call end.
     private var captionsTask: Task<Void, Never>?
+    /// Finishing this ends the forwarding task. The sink yields into it synchronously.
+    private var captionsFeed: AsyncStream<[CaptionItem]>.Continuation?
 
     /// The active call façade, injected by the plugin coordinator after initialisation.
     ///
@@ -99,7 +101,9 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Tears down all state related to the current call session.
     private func cancelObservables() async throws {
-        captionsTask?.cancel()
+        // Finish the stream first. Cancelling a task blocked on `for await` does not wake it.
+        captionsFeed?.finish()
+        captionsFeed = nil
         await captionsTask?.value
         captionsTask = nil
         captionsStatusDataSource.reset()
@@ -109,6 +113,9 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Creates the two Combine pipelines that power this plugin.
     private func initObservers() {
+        // A repeated start must not stack another sink onto the same call.
+        guard cancellables.isEmpty else { return }
+
         captionsStatusDataSource.captionsState
             .sink { [weak self] state in
                 self?.processNewState(state)
@@ -116,12 +123,17 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
             .store(in: &cancellables)
 
         // Forward captions from the call to the repository.
-        // Uses a stored Task with `for await` so that each write completes
-        // before processing the next value, avoiding fire-and-forget races.
+        // The sink is installed before this method returns, so a caption emitted
+        // immediately after start is buffered until the forwarding task runs.
+        // The task writes one update at a time.
         if let publisher = call?.captionsPublisher {
-            captionsTask?.cancel()
+            let feed = AsyncStream<[CaptionItem]>.makeStream(bufferingPolicy: .bufferingNewest(1))
+            captionsFeed = feed.continuation
+            publisher
+                .sink { snapshot in feed.continuation.yield(snapshot) }
+                .store(in: &cancellables)
             captionsTask = Task { [weak self] in
-                for await captions in publisher.values {
+                for await captions in feed.stream {
                     guard let self else { return }
                     await self.captionsRepository.updateCaptions(captions)
                 }
