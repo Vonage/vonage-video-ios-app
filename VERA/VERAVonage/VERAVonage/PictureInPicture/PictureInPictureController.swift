@@ -15,6 +15,11 @@ final class PictureInPictureController: NSObject {
 
     private weak var currentFeedRenderer: PictureInPictureVideoRenderer?
 
+    var isRecording: Bool {
+        get { sampleBufferVideoCallView.isRecording }
+        set { sampleBufferVideoCallView.isRecording = newValue }
+    }
+
     private(set) var isInPictureInPicture = false
     var isConfigured: Bool { pipController != nil }
     var onPictureInPicturePossibleDidChange: (() -> Void)?
@@ -34,7 +39,9 @@ final class PictureInPictureController: NSObject {
     /// PiP feed must be (re)attached afterwards via ``attachFeed(to:)``. Must not be called while
     /// PiP is active.
     func configure(with sourceView: UIView) {
+        let wasRecording = isRecording
         tearDown()
+        isRecording = wasRecording
 
         let pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
         pipVideoCallViewController.preferredContentSize = CGSize(width: 640, height: 480)
@@ -93,6 +100,7 @@ final class PictureInPictureController: NSObject {
         pipController?.delegate = nil
         pipController = nil
         isInPictureInPicture = false
+        isRecording = false
         let layer = sampleBufferVideoCallView.sampleBufferDisplayLayer
         if layer.requiresFlushToResumeDecoding {
             layer.flush()

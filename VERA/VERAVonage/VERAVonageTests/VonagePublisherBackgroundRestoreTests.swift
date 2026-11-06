@@ -12,6 +12,7 @@ import VERATestHelpers
 @testable import VERAVonage
 
 @Suite("VonagePublisher Background Restore Tests")
+@MainActor
 struct VonagePublisherBackgroundRestoreTests {
 
     @Test("Given transformers are set, when app becomes active, then transformers are re-synced")
