@@ -1,21 +1,22 @@
-scripts/swiftlint-xcode.sh
-  s_2e98a442844bf2::t_9842f0ab6277d1 5-17,19-20,23,91-95,97,99-107,109-114,117-118,139,141-143
 scripts/measure-swiftlint.sh
-  s_2e98a442844bf2::t_9e46da7a3cd039 62-63
-  s_2e98a442844bf2::t_2abcc73e2c0770 1-61,64-93
-.swiftlint.yml
-  s_2e98a442844bf2::t_e79bb0cb06c3a7 91
-  h_2499cc15b3806e 77-78,80-81,96-97
-  s_2e98a442844bf2::t_f037887244cd5a 67
-  s_2e98a442844bf2::t_88e4d734457ab6 3-10
+  s_2e98a442844bf2::t_2abcc73e2c0770 1,4,8-9,11,15,18-19,24,26,28,33-35,81-82,149,160,177
+  s_1bb7853fb37704::t_404b8f4f5e96d3 53-56
+  s_1bb7853fb37704::t_11cb3068b347c1 2-3,5-7,10,12-14,16-17,20-23,25,27,29-32,36-52,57-80,83-94,97-99,102-148,150-159,161-176,178
+  s_1bb7853fb37704::t_8126c96c52e94e 95-96,100-101
+scripts/swiftlint-xcode.sh
+  s_1bb7853fb37704::t_23d73d5b51907a 5-8,10-11,13-17,21,27,40-41,46,68,74-77,81-96,99-100,103-123,126-127,129-131,133,137,139
+  s_2e98a442844bf2::t_9842f0ab6277d1 97-98,101,124
 .github/workflows/ci.yml
   s_2e98a442844bf2::t_727975d0f44284 36-37,40-55
   s_2e98a442844bf2::t_54506204679bc5 68
+.swiftlint.yml
+  s_1bb7853fb37704::t_4cea5fe8bbb867 5-9,17,43,45-52,57-61,65,75-76,78-79,89,93-94,98-99,152
+  s_2e98a442844bf2::t_88e4d734457ab6 3-4
 ---
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.7.5",
-  "base_commit_sha": "c47fcbc17a9de75fa42176d132fd09a9da0da0b3",
+  "base_commit_sha": "ddf05984c7ff5a6e58bcf835f27806f0b79893be",
   "prompts": {},
   "humans": {
     "h_2499cc15b3806e": {
@@ -23,6 +24,14 @@ scripts/measure-swiftlint.sh
     }
   },
   "sessions": {
+    "s_1bb7853fb37704": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_5de2022f-8ca1-4962-8ad5-b9f8a7d970b2",
+        "model": "auto"
+      },
+      "human_author": null
+    },
     "s_2e98a442844bf2": {
       "agent_id": {
         "tool": "kiro",
