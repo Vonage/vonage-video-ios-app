@@ -4,6 +4,7 @@
 
 import Foundation
 
+@MainActor
 public protocol SendChatMessageUseCase {
     func callAsFunction(_ text: String) throws
 }
