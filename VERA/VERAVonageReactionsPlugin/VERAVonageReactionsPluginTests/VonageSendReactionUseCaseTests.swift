@@ -9,6 +9,7 @@ import VERAVonage
 @testable import VERAVonageReactionsPlugin
 
 @Suite("VonageSendReactionUseCase Tests")
+@MainActor
 struct VonageSendReactionUseCaseTests {
 
     @Test("callAsFunction delegates to plugin")
