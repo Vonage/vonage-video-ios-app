@@ -3,6 +3,7 @@ import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("UI participant tests")
 struct UIParticipantTests {
     @Test
