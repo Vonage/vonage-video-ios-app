@@ -5,8 +5,8 @@
 import Foundation
 import OSLog
 import VERAChat
-import os
 import VERAVonage
+import os
 
 /// Enables chat over Vonage signals and bridges to the chat repository.
 ///
