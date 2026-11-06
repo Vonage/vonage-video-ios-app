@@ -1,0 +1,45 @@
+.swiftlint.yml
+  s_1bb7853fb37704::t_e81003859bff2d 73
+  s_1bb7853fb37704::t_4cea5fe8bbb867 14,40,42-49,54,69-70,72,83,91-92,145
+  s_1bb7853fb37704::t_a97ee8104238b1 59
+  s_2e98a442844bf2::t_88e4d734457ab6 3
+  s_1bb7853fb37704::t_fcbb3a70987506 2,4-6
+  s_1bb7853fb37704::t_8b53d7c9358d7a 87
+  s_1bb7853fb37704::t_2817733519b56c 55
+.github/workflows/ci.yml
+  s_2e98a442844bf2::t_727975d0f44284 42-43,46-61
+  s_1bb7853fb37704::t_e3848143dbc9e8 12-14,19-21
+  s_2e98a442844bf2::t_54506204679bc5 74
+scripts/swiftlint-xcode.sh
+  s_1bb7853fb37704::t_23d73d5b51907a 5-8,10-11,13-17,21,27,40-41,46,68,74-77,81-87,101,121,123-132,161,163
+  s_1bb7853fb37704::t_cdbfe06eda7c6d 88-100,102-117,119-120,122,133-134,137-139,143-158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0fe9e82a37973aaf9bdba4d2a77efeb96de2ceea",
+  "prompts": {},
+  "humans": {
+    "h_2499cc15b3806e": {
+      "author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  },
+  "sessions": {
+    "s_1bb7853fb37704": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_5de2022f-8ca1-4962-8ad5-b9f8a7d970b2",
+        "model": "auto"
+      },
+      "human_author": null
+    },
+    "s_2e98a442844bf2": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_5517b77b-2bf9-4d28-9e8d-5628fad84926",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
