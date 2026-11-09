@@ -9,6 +9,7 @@ import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Connect to room use case tests")
+@MainActor
 struct ConnectToRoomUseCaseTests {
 
     @Test
@@ -45,8 +46,8 @@ struct ConnectToRoomUseCaseTests {
     }
 
     private func makeSUT(
-        sessionRepository: SessionRepository = makeMockSessionRepository()
+        sessionRepository: SessionRepository? = nil
     ) -> ConnectToRoomUseCase {
-        DefaultConnectToRoomUseCase(sessionRepository: sessionRepository)
+        DefaultConnectToRoomUseCase(sessionRepository: sessionRepository ?? makeMockSessionRepository())
     }
 }

@@ -35,6 +35,7 @@ MOCK_ONLY_MARKER="# vera-runner: mock-only"
 # openLink with https:// opens Safari on the simulator; the custom vera:// scheme
 # routes directly to the app. The host is preserved so HandleUniversalLink can
 # still match it against baseURL (host-only comparison, scheme-agnostic).
+# shellcheck disable=SC2001 # sed is clearest for this anchored scheme swap
 DEEP_LINK_TEST_URL=$(echo "${BASE_API_URL%/}" | sed 's|^https://|vera://|')
 echo -e "${BLUE}Deep link test URL: $DEEP_LINK_TEST_URL${NC}\n"
 
@@ -115,6 +116,7 @@ echo -e "${GREEN}✓ SwiftLint $(swiftlint --version 2>/dev/null | head -n 1) in
 # Install Maestro and Java 17 (uses shared install script)
 INSTALL_MAESTRO_SCRIPT="$SCRIPT_DIR/install-maestro.sh"
 if [ -f "$INSTALL_MAESTRO_SCRIPT" ]; then
+    # shellcheck source=/dev/null
     source "$INSTALL_MAESTRO_SCRIPT"
 else
     echo -e "${RED}❌ install-maestro.sh not found at $INSTALL_MAESTRO_SCRIPT${NC}"
@@ -263,8 +265,7 @@ else
     # Generate environment constants (always required)
     if [ -f "./Scripts/generateEnvironmentConstants.sh" ]; then
         chmod +x ./Scripts/generateEnvironmentConstants.sh
-        ./Scripts/generateEnvironmentConstants.sh
-        if [ $? -ne 0 ]; then
+        if ! ./Scripts/generateEnvironmentConstants.sh; then
             echo -e "${RED}❌ Failed to generate environment constants${NC}"
             cd ..
             exit 1
@@ -274,8 +275,7 @@ else
     # Generate signing configuration (always required)
     if [ -f "./Scripts/regenerateSigningConfig.sh" ]; then
         chmod +x ./Scripts/regenerateSigningConfig.sh
-        ./Scripts/regenerateSigningConfig.sh
-        if [ $? -ne 0 ]; then
+        if ! ./Scripts/regenerateSigningConfig.sh; then
             echo -e "${RED}❌ Failed to generate signing configuration${NC}"
             cd ..
             exit 1
@@ -447,6 +447,7 @@ echo -e "${GREEN}✓ URL scheme registry primed${NC}\n"
 # openLink with https:// opens Safari on the simulator; the custom vera:// scheme
 # routes directly to the app. The host is preserved so HandleUniversalLink can
 # still match it against baseURL (host-only comparison, scheme-agnostic).
+# shellcheck disable=SC2001 # sed is clearest for this anchored scheme swap
 DEEP_LINK_TEST_URL=$(echo "${BASE_API_URL%/}" | sed 's|^https://|vera://|')
 echo -e "${BLUE}Deep link test URL: $DEEP_LINK_TEST_URL${NC}\n"
 
@@ -472,6 +473,7 @@ run_maestro_flow() {
         --env APP_ID="$APP_ID" \
         --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
         --env DEEP_LINK_TEST_URL="$DEEP_LINK_TEST_URL" \
+        --env ROOM_NAME="${ROOM_NAME:-maestro-local-$$}" \
         "$flow"; then
         return 0
     else
@@ -515,6 +517,7 @@ else
         --env APP_ID="$APP_ID" \
         --env VERA_E2E_MOCKS="$VERA_E2E_MOCKS_VALUE" \
         --env DEEP_LINK_TEST_URL="$DEEP_LINK_TEST_URL" \
+        --env ROOM_NAME="${ROOM_NAME:-maestro-local-$$}" \
         "$FLOW_TARGET"; then
         TEST_RESULT=0
     else
@@ -543,6 +546,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 # ============================================================================
 
 if [ -d "$HOME/.maestro/tests" ]; then
+    # shellcheck disable=SC2012 # test dirs are timestamp-named; ls -t is sufficient and portable here
     LATEST_TEST=$(ls -t "$HOME/.maestro/tests" 2>/dev/null | head -n 1)
     if [ -n "$LATEST_TEST" ]; then
         TEST_DIR="$HOME/.maestro/tests/$LATEST_TEST"
