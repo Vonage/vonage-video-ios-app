@@ -319,9 +319,8 @@ extension BroadcastControl: OTSessionDelegate {
         ])
 
         if let credentials = store?.load(), !credentials.username.isEmpty {
-            settings.name = "\(credentials.username)'s screen"
-        } else {
-            settings.name = "Screenshare"
+            // Plain name, like VERA Web: viewers add the localized "'s screen" suffix.
+            settings.name = credentials.username
         }
 
         settings.publisherAudioFallbackEnabled = false
