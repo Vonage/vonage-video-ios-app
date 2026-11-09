@@ -1,0 +1,32 @@
+VERA/VERAApp/BroadcastExtension/BroadcastSampleHandler.swift
+  s_050835434cc077::t_10706ce0fa57b6 138-145
+  s_d0929166a6b333::t_1856b8dd5b0e49 72-74,76-77,79-83
+VERA/VERAApp/BroadcastExtension/ScreenShareVideoCapturer.swift
+  s_d0929166a6b333::t_3bfd0121b91e1b 115-120
+VERA/VERAApp/VERATests/ScreenShareVideoCapturerTests.swift
+  s_d0929166a6b333::t_57d4922ea801b4 206-234
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "80bbc266bcbe442fc7a17ab6fdfd1cf59dfc1889",
+  "prompts": {},
+  "sessions": {
+    "s_050835434cc077": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1793977291168932000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_d0929166a6b333": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_cb6189ba-3299-47d1-a362-344d497d0c2c",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
