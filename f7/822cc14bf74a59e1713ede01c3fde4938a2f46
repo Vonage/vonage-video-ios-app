@@ -1,0 +1,150 @@
+.maestro/flows/post-call-transcription.yaml
+  h_5ddc9d372ac6a1 58-63
+.maestro/flows/settings-meeting-room-context.yaml
+  h_5ddc9d372ac6a1 93-99,116-129
+.maestro/flows/settings-waiting-room-context.yaml
+  h_5ddc9d372ac6a1 79-85
+VERA/Config/app-config.json
+  h_5ddc9d372ac6a1 34
+VERA/Scripts/generate-app-config.py
+  h_5ddc9d372ac6a1 128,143,157
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  h_5ddc9d372ac6a1 168-175,186,201-203,281-284
+VERA/VERAApp/VERA/App/PublisherAdvancedSettingsAdapter.swift
+  h_5ddc9d372ac6a1 33-37
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  h_5ddc9d372ac6a1 18-19,23-32,43,52-53,56,60,75-77,80-84,86-87,95,103,113,118,129-138,187,204,214-215,225,230,246,271,289,303,310,360
+VERA/VERAApp/VERATests/PublisherAdvancedSettingsAdapterTests.swift
+  h_5ddc9d372ac6a1 1-42
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingDataSource.swift
+  h_5ddc9d372ac6a1 44,48-49,78-98
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/TranscriptionOptions.swift
+  h_5ddc9d372ac6a1 1-20
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchivingDataSource.swift
+  h_5ddc9d372ac6a1 16,18-22,25
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  h_5ddc9d372ac6a1 11,13-17,20,38-41
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  h_5ddc9d372ac6a1 1138-1325
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  h_5ddc9d372ac6a1 21-24,39-40,43-44,51,59,76-90,94-102,105-109,112-116,118,128-131
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  h_5ddc9d372ac6a1 16-18
+VERA/VERAArchiving/VERAArchiving/UI/View/TranscriptionStartOptionsView.swift
+  h_5ddc9d372ac6a1 1-77
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  h_5ddc9d372ac6a1 36,40,51
+VERA/VERAArchiving/VERAArchivingSnapshotTests/TranscriptionStartOptionsSnapshotTests.swift
+  h_5ddc9d372ac6a1 1-73
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_Dark.Dark.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_Default.Default.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERAArchiving/VERAArchivingSnapshotTests/__Snapshots__/TranscriptionStartOptionsSnapshotTests/TranscriptionStartOptions_SummaryOff.SummaryOff.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingDataSourceTests.swift
+  h_5ddc9d372ac6a1 86-148,302-303,305-306
+VERA/VERAArchiving/VERAArchivingTests/Mocks/MockArchivingDataSource.swift
+  h_5ddc9d372ac6a1 14,28
+VERA/VERAArchiving/VERAArchivingTests/StartArchivingUseCaseTests.swift
+  h_5ddc9d372ac6a1 81-91
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  h_5ddc9d372ac6a1 335-336,338,341-345,347-349,352,355-383,386,389-414,417,421-447,490-491,509,520
+VERA/VERAArchiving/VERAArchivingTests/UI/View/TranscriptionStartOptionsScreenTests.swift
+  h_5ddc9d372ac6a1 1-31
+VERA/VERACommonUI/VERACommonUI/UI/BottomItemPresentable.swift
+  h_5ddc9d372ac6a1 37,48,68
+VERA/VERACommonUI/VERACommonUITests/BottomBarActionOwnershipTests.swift
+  h_5ddc9d372ac6a1 1-63
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  h_5ddc9d372ac6a1 79,94,108
+VERA/VERAConfiguration/VERAConfigurationTests/AppConfigTransferTests.swift
+  h_5ddc9d372ac6a1 56,103-105
+VERA/VERADomain/VERADomain/CallFacade.swift
+  h_5ddc9d372ac6a1 184-192
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  h_5ddc9d372ac6a1 396-397
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  h_5ddc9d372ac6a1 135-139
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  h_5ddc9d372ac6a1 31-34
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  h_5ddc9d372ac6a1 346-349,352-353,365-367,370-377
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/TranscriptionOptionsOverlayModifier.swift
+  h_5ddc9d372ac6a1 1-45
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  h_5ddc9d372ac6a1 19
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  h_5ddc9d372ac6a1 15,25
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  h_5ddc9d372ac6a1 12,121-135,222-258
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/TranscriptionOptionsOverlayModifierTests.swift
+  h_5ddc9d372ac6a1 1-71
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  h_5ddc9d372ac6a1 48-56,75-77,90-92,106-107,148-150,176-177,200-201,215-216
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  h_5ddc9d372ac6a1 196-387,8214-8261
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  h_5ddc9d372ac6a1 1-49
+VERA/VERASettings/VERASettings/UI/Entities/SettingsSection.swift
+  h_5ddc9d372ac6a1 15,34
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  h_5ddc9d372ac6a1 112-117,163,167-168,173
+VERA/VERASettings/VERASettings/UI/View/Sections/CaptionsSectionView.swift
+  h_5ddc9d372ac6a1 1-66
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  h_5ddc9d372ac6a1 41,53,69-82
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  h_5ddc9d372ac6a1 45-47,51
+VERA/VERASettings/VERASettings/UI/View/SettingsSheetContent.swift
+  h_5ddc9d372ac6a1 15,21,25-29
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  h_5ddc9d372ac6a1 46-53,72,76-77,82,96-97,102,151-159,205-206,219,259-260
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  h_5ddc9d372ac6a1 30-35,41-43,46-48,52-53,66-69,111-112,124-126
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  h_5ddc9d372ac6a1 160-197,247-248,267-268,274-278
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_compact-captions.compact-captions.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_iPad-captions-original.iPad-captions-original.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERASettings/VERASettingsSnapshotTests/__Snapshots__/SettingsSnapshotTests/SettingsView_iPad-captions-translated.iPad-captions-translated.png
+  h_5ddc9d372ac6a1 1-3
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  h_5ddc9d372ac6a1 169-195
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  h_5ddc9d372ac6a1 1-105
+VERA/VERASettings/VERASettingsTests/Domain/PublisherPreferencesTransferTests.swift
+  h_5ddc9d372ac6a1 58-59
+VERA/VERASettings/VERASettingsTests/UI/Entities/SettingsSectionTransferTests.swift
+  h_5ddc9d372ac6a1 17,19-20
+VERA/VERASettings/VERASettingsTests/UI/View/GeneralSectionViewTests.swift
+  h_5ddc9d372ac6a1 1-38
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  h_5ddc9d372ac6a1 61-79,84-85,87-90
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  h_5ddc9d372ac6a1 26,429-430,993-1010,1031,1038
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  h_5ddc9d372ac6a1 270-271,274,280-285
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  h_5ddc9d372ac6a1 602-646
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/VonageSettingsPlugin.swift
+  h_5ddc9d372ac6a1 62-64,73-74,77-78,82,165-181
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  h_5ddc9d372ac6a1 51,89-95
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/VonageSettingsPluginTests.swift
+  h_5ddc9d372ac6a1 161-194,494,501-502
+docs/CONFIGURATION.md
+  h_5ddc9d372ac6a1 27-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f7822cc14bf74a59e1713ede01c3fde4938a2f46",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
