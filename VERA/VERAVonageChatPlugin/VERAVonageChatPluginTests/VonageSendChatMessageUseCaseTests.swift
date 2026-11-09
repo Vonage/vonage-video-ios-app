@@ -10,6 +10,7 @@ import VERAChatAppTestHelpers
 import VERAVonage
 import VERAVonageChatPlugin
 
+@MainActor
 @Suite("Vonage send chat messages tests")
 struct VonageSendChatMessageUseCaseTests {
 

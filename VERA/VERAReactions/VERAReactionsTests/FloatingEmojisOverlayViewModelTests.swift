@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Testing
+import VERADomain
 
 @testable import VERAReactions
 
@@ -225,11 +226,11 @@ struct FloatingEmojisOverlayViewModelTests {
 
 // MARK: - Mock
 
-private final class MockFloatingReactionsRepository: ReactionsRepository, @unchecked Sendable {
-    private let subject = PassthroughSubject<EmojiReaction, Never>()
+private final class MockFloatingReactionsRepository: ReactionsRepository {
+    private let subject = EventRelay<EmojiReaction, Never>()
 
     var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func addReaction(_ reaction: EmojiReaction) async {

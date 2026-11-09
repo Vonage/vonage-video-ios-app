@@ -6,6 +6,7 @@ import Combine
 import Foundation
 import VERACore
 
+@MainActor
 public func makeMockCameraDevicesRepository() -> MockCameraDevicesRepository {
     return MockCameraDevicesRepository()
 }

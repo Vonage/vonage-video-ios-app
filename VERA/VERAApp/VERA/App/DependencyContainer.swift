@@ -41,6 +41,7 @@ import VERAVonageCallKitPlugin
     import VERAOKTA
 #endif
 
+@MainActor
 final class DependencyContainer {
 
     private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
@@ -69,7 +70,8 @@ final class DependencyContainer {
                 )
             #if AUTHENTICATION_ENABLED
                 return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
-                    await MainActor.run { self?.onUnauthorized?() }
+                    guard let self else { return }
+                    await MainActor.run { self.onUnauthorized?() }
                 }
             #else
                 return inner
@@ -256,6 +258,7 @@ final class DependencyContainer {
     #if ARCHIVING_ENABLED
         lazy var archivingStatusDataSource = DefaultArchivingStatusDataSource()
 
+        @MainActor
         lazy var archivingFactory = ArchivingFactory(
             archivesRepository: archivesRepository,
             archivingDataSource: archivingDataSource,
@@ -266,6 +269,7 @@ final class DependencyContainer {
             baseURL: baseURL,
             httpClient: httpClient)
 
+        @MainActor
         lazy var archivesRepository: ArchivesRepository = {
             DefaultArchivesRepository(archivesDataSource: archivesDataSource)
         }()
