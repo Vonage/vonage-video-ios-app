@@ -1,0 +1,44 @@
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Entities/UIParticipantTests.swift
+  s_d0929166a6b333::t_a3abdf83b1bda1 23-32
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_be3a30ab1fa90f::t_6a8fecf440133a 44-49
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_be3a30ab1fa90f::t_6a8fecf440133a 184
+  s_d0929166a6b333::t_f20985628f916e 113
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  s_d0929166a6b333::t_f4cf766859a67d 196-242
+VERA/VERAApp/BroadcastExtension/BroadcastSampleHandler.swift
+  s_d1f3b8086cfc35::t_02664582ed6f44 322-323
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "0a450ac31d7c564800a9a67200861afadb24752a",
+  "prompts": {},
+  "sessions": {
+    "s_be3a30ab1fa90f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794228849420346000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_d0929166a6b333": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_cb6189ba-3299-47d1-a362-344d497d0c2c",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_d1f3b8086cfc35": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794228849715571000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
