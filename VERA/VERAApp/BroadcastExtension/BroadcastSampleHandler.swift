@@ -73,7 +73,6 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
         // disconnected before then or the stream lingers until the server times it out.
         // Close admission, briefly join an admitted frame, then tear down synchronously.
         videoCapturer.close()
-        // ponytail: fixed 200 ms bound; teardown proceeds even if a frame is still in flight.
         _ = videoCapturer.waitForInFlight(timeout: .now() + .milliseconds(200))
         let owner = controlOwner
         if Thread.isMainThread {
