@@ -1,0 +1,21 @@
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPlugin/VonageCaptionsPlugin.swift
+  s_be3a30ab1fa90f::t_6a8fecf440133a 39-40,103,105-108,110,112,116,118-121,125-148,156-159
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  s_be3a30ab1fa90f::t_6a8fecf440133a 227,229-231,233,236-239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "fff011f179ad9baa41feef71100071c7645e58b7",
+  "prompts": {},
+  "sessions": {
+    "s_be3a30ab1fa90f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794228849420346000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
