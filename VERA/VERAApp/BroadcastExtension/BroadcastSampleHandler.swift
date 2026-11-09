@@ -69,11 +69,18 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
     }
 
     override func broadcastFinished() {
-        // Close admission on the ReplayKit callback queue. Its main-owner cleanup
-        // then joins admitted consumer calls without retaining or transferring this handler.
+        // ReplayKit terminates the extension soon after this returns, so the session must be
+        // disconnected before then or the stream lingers until the server times it out.
+        // Close admission, briefly join an admitted frame, then tear down synchronously.
         videoCapturer.close()
+        // ponytail: fixed 200 ms bound; teardown proceeds even if a frame is still in flight.
+        _ = videoCapturer.waitForInFlight(timeout: .now() + .milliseconds(200))
         let owner = controlOwner
-        DispatchQueue.main.async { owner.finish() }
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { owner.finishNow() }
+        } else {
+            DispatchQueue.main.sync { MainActor.assumeIsolated { owner.finishNow() } }
+        }
     }
 
     override func processSampleBuffer(
@@ -127,6 +134,14 @@ private final class BroadcastControlOwner {
         guard !finishScheduled else { return }
         finishScheduled = true
         capturer.closeOnMainActor { [self] in control.tearDown() }
+    }
+
+    /// Synchronous teardown for `broadcastFinished()`, which must disconnect before returning.
+    /// The caller has already closed the capturer and joined in-flight frames with a time bound.
+    func finishNow() {
+        guard !finishScheduled else { return }
+        finishScheduled = true
+        control.tearDown()
     }
 }
 
