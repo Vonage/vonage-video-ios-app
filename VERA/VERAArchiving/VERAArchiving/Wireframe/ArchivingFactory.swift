@@ -33,9 +33,11 @@ public final class ArchivingFactory {
     ///
     /// - Parameters:
     ///   - kind: Whether the control drives the recording or the post-call transcription.
+    ///   - loadTranscriptionDefaults: Loads the options pre-selected when a transcription is started.
     ///   - showAlert: Presents the start/stop confirmation dialogs.
     public func makeArchivingButton(
         kind: ArchiveKind = .recording,
+        loadTranscriptionDefaults: @escaping () async -> TranscriptionOptions = { .default },
         showAlert: @escaping (AlertItem) -> Void
     ) -> (view: some View, viewModel: ArchiveButtonViewModel) {
         let viewModel = ArchiveButtonViewModel(
@@ -46,6 +48,7 @@ public final class ArchivingFactory {
             stopArchivingUseCase: DefaultStopArchivingUseCase(
                 archivingDataSource: archivingDataSource),
             archivingStatusDataSource: archivingStatusDataSource,
+            loadTranscriptionDefaults: loadTranscriptionDefaults,
             showAlert: showAlert)
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }

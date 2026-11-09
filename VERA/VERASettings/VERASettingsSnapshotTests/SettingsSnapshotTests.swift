@@ -157,6 +157,44 @@ struct SettingsSnapshotTests {
         )
     }
 
+    // MARK: - Captions Section Tests
+
+    @Test(
+        "SettingsView - Captions section",
+        arguments: [
+            ("iPad-captions-original", PublisherSettingsPreferences.default),
+            ("iPad-captions-translated", PublisherSettingsPreferences(captionsTranslationLanguage: "es-ES")),
+        ])
+    func iPadCaptionsSection(snapshotName: String, preferences: PublisherSettingsPreferences) throws {
+        let sut = makeSUT(
+            preferences: preferences,
+            selectedSection: .captions,
+            horizontalSizeClass: .regular,
+            isCaptionsTranslationAvailable: true
+        )
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .device(config: .iPadPro12_9)),
+            named: snapshotName,
+            record: isRecording,
+            testName: "\(snapshotPrefix)_\(snapshotName)"
+        )
+    }
+
+    @Test("SettingsView - Compact layout with captions section")
+    func compactWithCaptionsSection() throws {
+        let sut = makeSUT(horizontalSizeClass: .compact, isCaptionsTranslationAvailable: true)
+
+        assertSnapshot(
+            of: sut,
+            as: .image(precision: 0.99, layout: .fixed(width: 390, height: 1800)),
+            named: "compact-captions",
+            record: isRecording,
+            testName: "\(snapshotPrefix)_compact-captions"
+        )
+    }
+
     // MARK: - Statistics Section Tests
 
     @Test("Stats section - Publisher and subscribers list (collapsed)")
@@ -206,7 +244,8 @@ struct SettingsSnapshotTests {
         withStatistics: Bool = false,
         preferences: PublisherSettingsPreferences = .default,
         selectedSection: SettingsSection = .general,
-        horizontalSizeClass: UserInterfaceSizeClass = .compact
+        horizontalSizeClass: UserInterfaceSizeClass = .compact,
+        isCaptionsTranslationAvailable: Bool = false
     ) -> AnyView {
         var finalPreferences = preferences
 
@@ -225,14 +264,18 @@ struct SettingsSnapshotTests {
             )
             return AnyView(
                 SettingsView(
-                    viewModel: viewModel, statisticsViewModel: statsViewModel, selectedSection: selectedSection
+                    viewModel: viewModel, statisticsViewModel: statsViewModel, selectedSection: selectedSection,
+                    isCaptionsTranslationAvailable: isCaptionsTranslationAvailable
                 )
                 .environment(\.horizontalSizeClass, horizontalSizeClass)
             )
         } else {
             return AnyView(
-                SettingsView(viewModel: viewModel, selectedSection: selectedSection)
-                    .environment(\.horizontalSizeClass, horizontalSizeClass)
+                SettingsView(
+                    viewModel: viewModel, selectedSection: selectedSection,
+                    isCaptionsTranslationAvailable: isCaptionsTranslationAvailable
+                )
+                .environment(\.horizontalSizeClass, horizontalSizeClass)
             )
         }
     }

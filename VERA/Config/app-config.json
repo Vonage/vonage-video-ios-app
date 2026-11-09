@@ -31,6 +31,7 @@
   "meetingRoomSettings": {
     "allowArchiving": true,
     "allowCaptions": true,
+    "allowCaptionTranslation": true,
     "allowChat": true,
     "allowDeviceSelection": true,
     "allowEmojis": true,
