@@ -3,6 +3,7 @@
 //
 
 import CallKit
+import Combine
 import Foundation
 import OpenTok
 import VERADomain
@@ -48,6 +49,10 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     var providerDelegate: ProviderDelegate?
     /// The current CallKit call identifier associated with the session.
     var currentCallID: UUID?
+    /// Keeps CallKit's mute state in step with the app and filters CallKit's echoes.
+    let muteSynchronizer = CallKitMuteSynchronizer()
+    /// Observes the call's media state to report app-side mute changes to CallKit.
+    var muteStateCancellable: AnyCancellable?
 
     /// A stable identifier for this plugin instance.
     ///
@@ -81,6 +86,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
             try await callManager.startCall(handle: roomName, callID: callUUID)
             providerDelegate?.reportConnected(callUUID: callUUID)
             providerDelegate?.setupHold(to: callUUID)
+            observeMuteState(callUUID: callUUID)
         } else {
             throw Error.invalidCallID
         }
@@ -94,6 +100,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
     ///
     /// - Throws: An error if `VERACallManager` fails to end the call.
     public func callDidEnd() async throws {
+        muteStateCancellable = nil
         guard let currentCallID = currentCallID else { return }
         self.currentCallID = nil
         try await callManager.end(callID: currentCallID)
@@ -141,6 +148,7 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
             self?.call?.setOnHold(isOnHold)
         }
         providerDelegate?.onMute = { [weak self] isMuted in
+            if self?.muteSynchronizer.consumeEcho(isMuted: isMuted) == true { return }
             if let audioControl = self?.call as? any AudioMuteControllable {
                 audioControl.muteLocalAudio(isMuted)
             } else {
@@ -148,5 +156,28 @@ public final class VonageCallKitPlugin: VonagePlugin, VonagePluginCallHolder {
             }
         }
 
+    }
+
+    /// Reports app-side microphone changes, such as the in-call mute button, to CallKit
+    /// so the system call UI shows the same mute state as the app.
+    ///
+    /// Changes while the call is on hold are not reported: hold stops publishing without
+    /// the user muting, and resuming restores the previous state.
+    ///
+    /// - Parameter callUUID: The CallKit identifier of the started call.
+    func observeMuteState(callUUID: UUID) {
+        muteSynchronizer.reset()
+        guard let call, let callManager else { return }
+        let muteSynchronizer = muteSynchronizer
+        muteStateCancellable = call.statePublisher
+            .map { !$0.isPublishingAudio }
+            .sink { [weak call] isMuted in
+                guard call?.isOnHold != true, muteSynchronizer.shouldReport(isMuted: isMuted) else { return }
+                callManager.setMuted(callID: callUUID, isMuted: isMuted) { error in
+                    if error != nil {
+                        muteSynchronizer.reportFailed(isMuted: isMuted)
+                    }
+                }
+            }
     }
 }
