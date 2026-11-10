@@ -36,7 +36,8 @@ import VERAVonage
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallHolder``, ``CaptionsStatusDataSource``
 public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     private var cancellables = Set<AnyCancellable>()
-    /// Tracks the caption-forwarding Task so it can be cancelled on call end.
+    /// Ordered consumers of the two subscriptions, cancelled or drained on call end.
+    private var stateTask: Task<Void, Never>?
     private var captionsTask: Task<Void, Never>?
 
     /// The active call façade, injected by the plugin coordinator after initialisation.
@@ -99,32 +100,52 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
 
     /// Tears down all state related to the current call session.
     private func cancelObservables() async throws {
+        // Pending caption snapshots are obsolete once the call ends; a write already running finishes.
         captionsTask?.cancel()
-        await captionsTask?.value
-        captionsTask = nil
         captionsStatusDataSource.reset()
-        await captionsRepository.updateCaptions([])
+        // Cancelling the subscriptions finishes both streams, so the state task applies
+        // the `.disabled` emitted by `reset()` and then ends.
         cancellables.removeAll()
+        await captionsTask?.value
+        await stateTask?.value
+        captionsTask = nil
+        stateTask = nil
+        await captionsRepository.updateCaptions([])
     }
 
-    /// Creates the two Combine pipelines that power this plugin.
+    /// Creates the two pipelines that power this plugin.
     private func initObservers() {
-        captionsStatusDataSource.captionsState
-            .sink { [weak self] state in
-                self?.processNewState(state)
-            }
-            .store(in: &cancellables)
+        stateTask?.cancel()
+        stateTask = forwardLatest(captionsStatusDataSource.captionsState) { [weak self] state in
+            await self?.processNewState(state)
+        }
 
-        // Forward captions from the call to the repository.
-        // Uses a stored Task with `for await` so that each write completes
-        // before processing the next value, avoiding fire-and-forget races.
         if let publisher = call?.captionsPublisher {
             captionsTask?.cancel()
-            captionsTask = Task { [weak self] in
-                for await captions in publisher.values {
-                    guard let self else { return }
-                    await self.captionsRepository.updateCaptions(captions)
-                }
+            captionsTask = forwardLatest(publisher) { [weak self] captions in
+                await self?.captionsRepository.updateCaptions(captions)
+            }
+        }
+    }
+
+    /// Subscribes before returning, so no value sent afterwards is missed, and handles
+    /// values one at a time in order. Both publishers emit full snapshots, so only the
+    /// newest pending value is kept while `handle` runs.
+    private func forwardLatest<Value: Sendable>(
+        _ publisher: AnyPublisher<Value, Never>,
+        _ handle: @escaping (Value) async -> Void
+    ) -> Task<Void, Never> {
+        let (stream, continuation) = AsyncStream.makeStream(of: Value.self, bufferingPolicy: .bufferingNewest(1))
+        publisher
+            .handleEvents(receiveCancel: { continuation.finish() })
+            .sink(
+                receiveCompletion: { _ in continuation.finish() },
+                receiveValue: { continuation.yield($0) }
+            )
+            .store(in: &cancellables)
+        return Task {
+            for await value in stream {
+                await handle(value)
             }
         }
     }
@@ -132,12 +153,10 @@ public final class VonageCaptionsPlugin: VonagePlugin, VonagePluginCallHolder {
     /// Reacts to a captions state change by enabling or disabling captions on the call.
     ///
     /// - Parameter state: The new captions activation state.
-    private func processNewState(_ state: CaptionsState) {
-        Task {
-            switch state {
-            case .enabled: await call?.enableCaptions()
-            case .disabled: await call?.disableCaptions()
-            }
+    private func processNewState(_ state: CaptionsState) async {
+        switch state {
+        case .enabled: await call?.enableCaptions()
+        case .disabled: await call?.disableCaptions()
         }
     }
 }
