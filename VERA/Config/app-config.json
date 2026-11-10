@@ -40,7 +40,7 @@
     "allowPostCallTranscription": true,
     "allowScreenShare": true,
     "allowSettings": true,
-    "defaultLayoutMode": "activeSpeaker",
+    "defaultLayoutMode": "invalidMode",
     "showParticipantList": true
   }
 }
