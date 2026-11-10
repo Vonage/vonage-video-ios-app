@@ -3,14 +3,17 @@
 //
 
 import Foundation
+import VERADomain
 
 public struct StopArchivingRequest: Sendable {
     public let sessionKey: String
     public let archiveID: String
+    public let kind: ArchiveKind
 
-    public init(sessionKey: String, archiveID: String) {
+    public init(sessionKey: String, archiveID: String, kind: ArchiveKind = .recording) {
         self.sessionKey = sessionKey
         self.archiveID = archiveID
+        self.kind = kind
     }
 }
 
@@ -30,7 +33,8 @@ public final class DefaultStopArchivingUseCase: StopArchivingUseCase {
     ) async throws {
         let newRequest = StopArchivingDataSourceRequest(
             sessionKey: request.sessionKey,
-            archiveID: request.archiveID)
+            archiveID: request.archiveID,
+            kind: request.kind)
         _ = try await archivingDataSource.stopArchiving(newRequest)
     }
 }

@@ -4,12 +4,16 @@
 
 import Foundation
 import VERAArchiving
+import VERADomain
 
 @MainActor
 public final class MockArchivingDataSource: ArchivingDataSource {
     var error: Error?
     var lastSessionKey: String?
     var lastArchiveID: String?
+    var lastStartKind: ArchiveKind?
+    var lastStartTranscriptionOptions: TranscriptionOptions?
+    var lastStopKind: ArchiveKind?
 
     var startResponse: VERAArchiving.StartArchivingDataSourceResponse?
     var stopResponse: VERAArchiving.StopArchivingDataSourceResponse?
@@ -21,6 +25,8 @@ public final class MockArchivingDataSource: ArchivingDataSource {
             throw error
         }
         lastSessionKey = request.sessionKey
+        lastStartKind = request.kind
+        lastStartTranscriptionOptions = request.transcriptionOptions
 
         return startResponse ?? .init(archiveId: "123")
     }
@@ -33,6 +39,7 @@ public final class MockArchivingDataSource: ArchivingDataSource {
         }
         lastSessionKey = request.sessionKey
         lastArchiveID = request.archiveID
+        lastStopKind = request.kind
 
         return stopResponse ?? .init(archiveId: "123")
     }

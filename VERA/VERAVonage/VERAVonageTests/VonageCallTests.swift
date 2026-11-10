@@ -518,7 +518,146 @@ struct VonageCallTests {
         #expect(newPublisherSpy.audioTransformers.first?.key == "NoiseSuppression")
     }
 
+    // MARK: - Archiving
+
+    @Test
+    func archiveStartedWithTranscriptionNameUpdatesOnlyTranscriptionState() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+    }
+
+    @Test
+    func archiveStartedWithoutNameIsTreatedAsRecording() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+
+        session.onArchiveStarted?("recording-1", nil)
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+    }
+
+    @Test
+    func stoppingRecordingKeepsTranscriptionRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("recording-1")
+
+        #expect(await currentValue(of: sut.archivingState) == .idle)
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func stoppingTranscriptionKeepsRecordingRunning() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("transcription-1")
+
+        #expect(await currentValue(of: sut.transcriptionState) == .idle)
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+    }
+
+    @Test
+    func stoppingAnUntrackedArchiveKeepsRunningArchives() async throws {
+        let session = VonageSessionSpy()
+        let sut = try await makeConnectedSUT(session: session)
+        session.onArchiveStarted?("recording-1", "recording")
+        session.onArchiveStarted?("transcription-1", "transcription")
+
+        session.onArchiveStopped?("unknown-archive")
+
+        #expect(await currentValue(of: sut.archivingState) == .archiving("recording-1"))
+        #expect(await currentValue(of: sut.transcriptionState) == .archiving("transcription-1"))
+    }
+
+    @Test
+    func archiveEventsForwardTheArchiveKindToSignalHandlers() async throws {
+        let session = VonageSessionSpy()
+        let plugin = ArchivingSignalHandlerSpy()
+        let sut = makeSUT(session: session)
+        sut.assignPlugins([plugin])
+        sut.setup()
+        try await sut.connect()
+
+        session.onArchiveStarted?("transcription-1", "transcription")
+        session.onArchiveStopped?("transcription-1")
+
+        let payloads = try plugin.signals.map { try #require($0.data) }
+        #expect(payloads.count == 2)
+        #expect(payloads.allSatisfy { $0.contains(#""kind":"transcription""#) })
+        #expect(payloads.first?.contains(#""archivingID":"transcription-1""#) == true)
+    }
+
+    // MARK: - Captions translation
+
+    @Test("Captions translation language is kept for late joiners and nil restores the original")
+    func captionsTranslationLanguageIsStoredAndReset() {
+        let sut = makeSUT()
+
+        sut.setCaptionsTranslationLanguage("es-ES")
+        #expect(sut.captionsTranslationLanguage == "es-ES")
+
+        sut.setCaptionsTranslationLanguage(nil)
+        #expect(sut.captionsTranslationLanguage == nil)
+    }
+
+    @Test("Own captions follow the translation language too")
+    func ownCaptionsFollowTheTranslationLanguage() async throws {
+        let sut = makeSUT()
+        guard let ownCaptions = try? VonageSubscriberFactory().makeSubscriber(OTStream()) else { return }
+        sut.publisherCaptions = ownCaptions
+
+        sut.setCaptionsTranslationLanguage("es-ES")
+        try await waitUntil { ownCaptions.otSubscriber.captionsTranslationLanguage == "es-ES" }
+
+        sut.setCaptionsTranslationLanguage(nil)
+        try await waitUntil { ownCaptions.otSubscriber.captionsTranslationLanguage == nil }
+    }
+
+    /// Waits for the main-actor task that applies the language to subscribers.
+    private func waitUntil(_ condition: () -> Bool) async throws {
+        for _ in 0..<100 where !condition() {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(condition())
+    }
+
+    @Test("Subscribers forward the translation language to the SDK subscriber")
+    func subscriberForwardsTranslationLanguageToSDK() throws {
+        guard let subscriber = try? VonageSubscriberFactory().makeSubscriber(OTStream()) else { return }
+
+        subscriber.setCaptionsTranslationLanguage("fr-FR")
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == "fr-FR")
+
+        subscriber.setCaptionsTranslationLanguage(nil)
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == nil)
+    }
+
     // MARK: - Test Helpers
+
+    private func makeConnectedSUT(session: VonageSessionSpy) async throws -> VonageCall {
+        let sut = makeSUT(session: session)
+        sut.setup()
+        try await sut.connect()
+        return sut
+    }
+
+    private func currentValue(
+        of publisher: AnyPublisher<ArchivingState, Never>
+    ) async -> ArchivingState? {
+        await publisher.values.first { _ in true }
+    }
 
     private func makeSUT(
         credentials: RoomCredentials = makeMockCredentials(),
@@ -556,6 +695,20 @@ private enum ForceMuteTestError: Swift.Error, Equatable {
     case requestFailed
 }
 
+private final class ArchivingSignalHandlerSpy: VonagePlugin, VonageSignalHandler {
+    private(set) var signals: [VonageSignal] = []
+
+    var pluginIdentifier: String { "ArchivingSignalHandlerSpy" }
+
+    func callDidStart(_ userInfo: [String: Any]) async throws {}
+
+    func callDidEnd() async throws {}
+
+    func handleSignal(_ signal: VonageSignal) {
+        guard signal.type == "archiving" else { return }
+        signals.append(signal)
+    }
+}
 
 @Suite("SystemMediaStateTests", .serialized)
 @MainActor

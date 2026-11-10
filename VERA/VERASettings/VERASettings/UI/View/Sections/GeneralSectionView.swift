@@ -38,6 +38,7 @@ struct GeneralSectionView: View {
         VStack(alignment: .leading, spacing: 12) {
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
+            transcriptionSummaryToggle
             if !isInActiveCall {
                 SettingsDivider()
                 content
@@ -49,6 +50,7 @@ struct GeneralSectionView: View {
         Section {
             Toggle("Show Overlay Stats".localized, isOn: $statsOverlayEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.overlayStatsToggle)
+            transcriptionSummaryToggle
             if !isInActiveCall {
                 content
             }
@@ -61,6 +63,20 @@ struct GeneralSectionView: View {
                     Text("Restores all settings to their default values.".localized)
                 }
             }
+        }
+    }
+
+    /// Default for including an AI summary when a transcription is started.
+    ///
+    /// Editable during a call: it only affects transcriptions started afterwards.
+    @ViewBuilder
+    private var transcriptionSummaryToggle: some View {
+        if viewModel.showsTranscriptionSummary {
+            Toggle(
+                "Include AI Summary in Transcriptions".localized,
+                isOn: Bindable(viewModel).settingsPreference.transcriptionSummaryEnabled
+            )
+            .accessibilityIdentifier(SettingsAccessibilityID.transcriptionSummaryToggle)
         }
     }
 

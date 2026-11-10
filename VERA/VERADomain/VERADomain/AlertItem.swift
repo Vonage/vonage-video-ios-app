@@ -95,7 +95,7 @@ public struct AlertItem: Identifiable, Equatable {
     ) -> AlertItem {
         AlertItem(
             title: "Error",
-            message: "Failed to download recording: \(errorMessage)",
+            message: "Failed to download file: \(errorMessage)",
             onConfirm: onConfirm
         )
     }

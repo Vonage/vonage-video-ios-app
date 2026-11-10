@@ -368,6 +368,11 @@ private final class MockCallFacade: CallFacade, @unchecked Sendable {
         _archivingState.eraseToAnyPublisher()
     }
 
+    nonisolated(unsafe) var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    nonisolated var transcriptionState: AnyPublisher<ArchivingState, Never> {
+        _transcriptionState.eraseToAnyPublisher()
+    }
+
     nonisolated(unsafe) var _captionsPublisher = PassthroughSubject<[CaptionItem], Never>()
     let captionSubscriptions = SubscriptionCounter()
 

@@ -542,6 +542,8 @@ final class MockCallFacade: CallFacade, @unchecked Sendable {
 
     var _archivingState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
     lazy var archivingState: AnyPublisher<ArchivingState, Never> = _archivingState.eraseToAnyPublisher()
+    var _transcriptionState = CurrentValueSubject<ArchivingState, Never>(ArchivingState.idle)
+    lazy var transcriptionState: AnyPublisher<ArchivingState, Never> = _transcriptionState.eraseToAnyPublisher()
 
     let _publisherAudioLevel = CurrentValueSubject<Float, Never>(0)
     lazy var publisherAudioLevelPublisher: AnyPublisher<Float, Never> = _publisherAudioLevel.eraseToAnyPublisher()

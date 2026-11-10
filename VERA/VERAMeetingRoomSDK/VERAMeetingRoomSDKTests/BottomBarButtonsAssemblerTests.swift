@@ -408,6 +408,65 @@ struct BottomBarButtonsAssemblerTests {
         #expect(button?.isActive == true)
     }
 
+    @Test("Transcription button requires pre-created view model")
+    @MainActor
+    func transcriptionButtonRequiresViewModel() {
+        let features: Set<MeetingRoomFeature> = [.postCallTranscription]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+
+        #expect(assembler.buildButtons().isEmpty)
+    }
+
+    @Test("Transcription button uses presenter metadata in idle and transcribing states")
+    @MainActor
+    func transcriptionButtonUsesPresenterMetadata() {
+        let features: Set<MeetingRoomFeature> = [.postCallTranscription]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        let (_, viewModel) = container.archivingFactory.makeArchivingButton(kind: .transcription) { _ in }
+        assembler.transcriptionButtonViewModel = viewModel
+
+        let idleButton = assembler.buildButtons().first
+        #expect(idleButton?.id == "transcription-button")
+        #expect(idleButton?.label == String(localized: "Start Transcription"))
+        #expect(idleButton?.accessibilityIdentifier == "archiving-start-transcription-button")
+        #expect(idleButton?.isActive == false)
+        #expect(idleButton?.overflowSelectionBehavior == .dismissBeforeAction)
+
+        viewModel.state = .archiving("transcription-123")
+
+        let activeButton = assembler.buildButtons().first
+        #expect(activeButton?.label == String(localized: "Stop Transcription"))
+        #expect(activeButton?.accessibilityIdentifier == "archiving-stop-transcription-button")
+        #expect(activeButton?.isActive == true)
+    }
+
+    @Test("Transcription button is placed right after the record button")
+    @MainActor
+    func transcriptionButtonFollowsArchiveButton() {
+        let features: Set<MeetingRoomFeature> = [.archiving, .postCallTranscription, .captions]
+        let container = makeContainer(enabledFeatures: features)
+        let assembler = BottomBarButtonsAssembler(
+            container: container,
+            enabledFeatures: features
+        )
+        assembler.archiveButtonViewModel = container.archivingFactory.makeArchivingButton { _ in }.viewModel
+        assembler.transcriptionButtonViewModel =
+            container.archivingFactory.makeArchivingButton(kind: .transcription) { _ in }.viewModel
+        assembler.captionsButtonViewModel = container.captionsFactory.makeCaptionsButton().viewModel
+
+        let ids = assembler.buildButtons().map(\.id)
+
+        #expect(ids == ["archive-button", "transcription-button", "captions-button"])
+    }
+
     @Test("Archive button uses presenter metadata in idle state")
     @MainActor
     func archiveButtonUsesPresenterMetadataInIdleState() {

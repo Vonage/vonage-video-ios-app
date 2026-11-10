@@ -38,6 +38,8 @@ final class PictureInPictureController: NSObject {
     private var pipController: AVPictureInPictureController?
     private let sampleBufferVideoCallView = PictureInPictureSampleBufferView()
 
+    private weak var currentFeedRenderer: PictureInPictureVideoRenderer?
+
     var isInPictureInPicture: Bool { lifecycle.isInPictureInPicture }
     var isConfigured: Bool { pipController != nil }
     var onPictureInPicturePossibleDidChange: (() -> Void)? {
@@ -109,6 +111,14 @@ final class PictureInPictureController: NSObject {
     /// PiP target changes between renderers while PiP stays active — e.g. publisher ↔ remote).
     func attachFeed(to videoRenderer: PictureInPictureVideoRenderer) {
         guard isConfigured else { return }
+        routeFeed(to: videoRenderer)
+    }
+
+    func routeFeed(to videoRenderer: PictureInPictureVideoRenderer) {
+        if currentFeedRenderer !== videoRenderer {
+            currentFeedRenderer?.pipBufferDisplayLayer = nil
+        }
+        currentFeedRenderer = videoRenderer
         videoRenderer.pipBufferDisplayLayer = sampleBufferVideoCallView.sampleBufferDisplayLayer
     }
 
@@ -118,6 +128,8 @@ final class PictureInPictureController: NSObject {
 
     func tearDown() {
         callbacks.invalidate()
+        currentFeedRenderer?.pipBufferDisplayLayer = nil
+        currentFeedRenderer = nil
         pipController?.delegate = nil
         pipController = nil
         lifecycle.activate(controllerID: nil)
