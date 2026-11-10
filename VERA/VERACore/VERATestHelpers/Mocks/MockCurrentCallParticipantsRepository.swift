@@ -19,6 +19,7 @@ public class MockCurrentCallParticipantsRepository: CurrentCallParticipantsRepos
     }
 }
 
+@MainActor
 public func makeMockCurrentCallParticipantsRepository() -> MockCurrentCallParticipantsRepository {
     .init()
 }

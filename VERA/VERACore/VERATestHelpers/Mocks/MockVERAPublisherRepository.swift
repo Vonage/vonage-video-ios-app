@@ -27,6 +27,7 @@ public final class MockVERAPublisherRepository: PublisherRepository {
     }
 }
 
+@MainActor
 public func makeMockVERAPublisherRepository(
     publisher: MockVERAPublisher? = nil
 ) -> MockVERAPublisherRepository {

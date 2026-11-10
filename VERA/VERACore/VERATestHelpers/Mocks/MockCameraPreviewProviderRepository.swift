@@ -38,6 +38,7 @@ public final class MockCameraPreviewProviderRepository: CameraPreviewProviderRep
     }
 }
 
+@MainActor
 public func makeMockCameraPreviewProviderRepository(
     publisher: MockVERAPublisher? = nil
 ) -> MockCameraPreviewProviderRepository {

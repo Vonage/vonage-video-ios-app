@@ -14,6 +14,7 @@ import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
+@MainActor
 @Suite("MeetingRoomSDKContainer tests")
 struct MeetingRoomSDKContainerTests {
 

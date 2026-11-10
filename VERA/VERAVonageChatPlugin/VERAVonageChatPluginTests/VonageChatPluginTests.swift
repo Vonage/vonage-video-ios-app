@@ -10,6 +10,7 @@ import VERAChatAppTestHelpers
 import VERAVonage
 import VERAVonageChatPlugin
 
+@MainActor
 @Suite("Vonage Chat Plugin tests")
 struct VonageChatPluginTests {
 
@@ -93,17 +94,54 @@ struct VonageChatPluginTests {
         withExtendedLifetime((firstSubscription, secondSubscription)) {}
     }
 
+    @Test("A channel assigned off the main actor is used when sending")
+    func channelAssignedOffMainActorIsUsedWhenSending() async throws {
+        let sut = makeSUT()
+        let channelSpy = SpyVonageSignalChannel()
+        nonisolated(unsafe) let channel = channelSpy
+
+        await Task.detached { sut.channel = channel }.value
+        try sut.sendMessage("hello")
+
+        #expect(channelSpy.recordedSignals.map(\.type) == [VonageChatPlugin.SignalType.chat.rawValue])
+    }
+
+    @Test("A channel cleared off the main actor stops sending")
+    func channelClearedOffMainActorStopsSending() async {
+        let sut = makeSUT()
+        let channelSpy = SpyVonageSignalChannel()
+        sut.channel = channelSpy
+
+        await Task.detached { sut.channel = nil }.value
+
+        #expect(throws: VonageChatPlugin.Error.missingChannel) { try sut.sendMessage("hello") }
+        #expect(channelSpy.recordedSignals.isEmpty)
+    }
+
+    @Test("The channel is held weakly")
+    func channelIsHeldWeakly() {
+        let sut = makeSUT()
+        var channelSpy: SpyVonageSignalChannel? = SpyVonageSignalChannel()
+        sut.channel = channelSpy
+
+        channelSpy = nil
+
+        #expect(sut.channel == nil)
+    }
+
     // MARK: SUT
 
     func makeSUT(
-        repository: ChatMessagesRepository = SpyChatMessagesRepository()
+        repository: ChatMessagesRepository? = nil
     ) -> VonageChatPlugin {
-        VonageChatPlugin(repository: repository)
+        VonageChatPlugin(repository: repository ?? SpyChatMessagesRepository())
     }
 }
 
 extension AnyPublisher where Failure == Never {
+    @MainActor
     func nextValue() async -> Output {
-        await values.first { _ in true }!
+        for await value in values { return value }
+        preconditionFailure("Expected a value before publisher completion")
     }
 }
