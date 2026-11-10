@@ -1,0 +1,228 @@
+VERA/VERACommonUI/VERACommonUI/UI/BottomItemPresentable.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationProvider.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 68
+"VERA/VERACore/VERACore/Waiting room/Domain/Repository/UserRepository.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 7
+VERA/VERAApp/VERA/App/PublisherAdvancedSettingsAdapter.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9,13,24
+VERA/VERACore/VERATestHelpers/Mocks/MockParticipant.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageSendReactionUseCaseTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12
+.maestro/flows/goodbye-view-landing-page.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+.maestro/flows/recording.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 21
+VERA/VERAAudioEffects/VERAAudioEffectsTests/TestHelpers/Mocks.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9,12,14,17-23,33-36
+  s_2e281e3d9d5cbd::t_e4d3604af539fb 8
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/VERACallManagerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 165-191
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Use cases/DisconnectRoomUseCaseTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12,34,37
+.github/workflows/ci.yml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12-14,19-21,42-43,46-61,74
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantArrayFilteringTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERACore/VERATestHelpers/Mocks/MockRequestMicrophonePermissionUseCase.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9,16
+VERA/VERACore/VERATestHelpers/Mocks/PublisherRepositorySpy.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 36,41
+.github/workflows/maestro.yml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 56,65,91-94,98,160-169,173-226,228
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantDisplayPriorityTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERACore/VERATestHelpers/Mocks/MockVERAPublisherRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 30
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageSendChatMessageUseCase.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8
+VERA/Scripts/builder.sh
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 24-26,47,146-148,154,266-274,806-840,847
+  s_2e281e3d9d5cbd::t_aa7d95afe12dd4 841-846
+  s_2e281e3d9d5cbd::t_a8a4f9f14e0f03 848-850
+"VERA/VERAAudioEffects/VERAAudioEffects/Domain/Use cases/EnableNoiseSuppressionUseCase.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+VERA/VERAReactions/VERAReactionsTests/FloatingEmojisOverlayViewModelTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8,229-230,233
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageChatPlugin.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9,24-25,41-48,50-55,61
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/Mocks/WaitingRoomMockData.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10
+.maestro/flows/settings-meeting-room-context.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Entities/ParticipantTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 17
+VERA/VERAVonage/VERAVonageTests/ActiveSpeakerTrackerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERAApp/VERATests/AppDependencyProvidersTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 15
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 43,72-73
+.maestro/flows/waiting-room-controls-disabled.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 22
+"VERA/VERACommonUI/VERACommonUI/Preview data/PreviewData.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Entities/UIParticipantTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 6
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/CallKitMuteSynchronizerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 1-79
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/VonageCallKitPluginTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 307-425,435-456
+scripts/swiftlint-xcode.sh
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 5-8,10-11,13-17,21,27,40-41,46,68,74-77,81-105,107-122,125-127,131-146,149,151
+.swiftlint.yml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 2-6,14,40,42-49,54-55,59,69-70,72-73,83,87,91-92,145
+VERA/VERAChat/VERAChatTests/DefaultChatMessagesRepositoryTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10,17,38,60,66,73-79
+  s_2e281e3d9d5cbd::t_cc4dd4e4444698 80
+VERA/VERACore/VERACoreTests/Common/Data/Default/DefaultPublisherRepositoryTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/CallKitMuteSynchronizer.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 1-74
+"VERA/VERACore/VERACoreTests/Landing page/Domain/Use cases/JoinRoomUseCaseTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11,69,74-75
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/MockCallController.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 16,48-56
+  s_2e281e3d9d5cbd::t_82fb6b748a7c84 57
+"VERA/VERAChat/VERAChat/Domain/Use cases/SendChatMessageUseCase.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 7
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/Domain/Use cases/DefaultDisableNoiseSuppressionUseCaseTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Data/Default/DefaultCurrentCallParticipantsRepositoryTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantArraySortingTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERAChat/VERAChat/Domain/Repository/ChatMessagesRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8,14
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Use cases/ConnectToRoomUseCaseTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12,49,51
+VERA/VERACore/VERACoreTests/Helpers/XCTestCase+MemoryLeakTracking.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 35
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/VonageChatPluginTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13,97-131,135,137,142,144-145
+VERA/VERACore/VERATestHelpers/Mocks/MockCameraPreviewProviderRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 41
+"VERA/VERAAudioEffects/VERAAudioEffects/Domain/Use cases/DisableNoiseSuppressionUseCase.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+"VERA/VERACore/VERACore/Waiting room/Domain/Use cases/JoinRoomUseCase.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 17
+.maestro/flows/captions.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 21
+VERA/VERACore/VERACore/Common/Data/UserDefaults/UserDefaultsUserRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 7-8
+VERA/VERASettings/VERASettingsTests/TestHelpers/MockSettingsRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 6,16,18-21,24,27,31-35,59
+VERA/VERACore/VERACoreSnapshotTests/SnapshotTestHelpers.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 12
+VERA/VERASettings/VERASettingsTests/TestHelpers/MockStatsDataSource.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10,12,14-15,18,22
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 37,39
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 838
+VERA/VERACore/VERATestHelpers/Mocks/MockUserRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10,15-20,22-30,32-36,39-43
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 354-355,365-368
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11-12
+VERA/VERACommonUI/VERACommonUITests/NavBarAuthButtonViewModelTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 181-182,185,189
+VERA/VERAChat/VERAChatTests/ChatPanelViewModelTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 85,89
+VERA/VERAReactions/VERAReactionsTests/EmojiHorizontalPickerTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8,314-315,318
+.maestro/flows/goodbye-reenter-room.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+VERA/VERAReactions/VERAReactionsTests/EmojiPickerContainerViewModelTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 119,122
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+VERA/VERACore/VERACoreTests/Data/UserDefaultsUserRepositoryOwnershipTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 1-23
+VERA/VERACore/VERATestHelpers/Mocks/MockCameraDevicesRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9
+.maestro/flows/settings-waiting-room-context.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 15,1668,1684-1685
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/FeedbackSessionDebugInfoCurrentCallTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/VonageSendChatMessageUseCaseTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 13
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/VERACallManager.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 14,98-113
+  s_2e281e3d9d5cbd::t_a5f0dcc377f46a 114-115
+.maestro/flows/speaking-while-muted.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+.maestro/flows/deep-link-plain-room.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 17,31
+VERA/VERAChat/VERAChat/Wireframe/ChatFactory.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 7
+VERA/VERACore/VERATestHelpers/Mocks/MockCurrentCallParticipantsRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 22
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 82,91,100-101,117-120,136-137,151-152,166-167,181,198,226-228,246-247,260,268,278,285,310,320,335,342-344,704-705,720-721
+VERA/VERACommonUI/VERACommonUITests/PublisherMainActorTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 1-40
+"VERA/VERACore/VERACore/Waiting room/Domain/Repository/CameraDevicesRepository.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8-9
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 202,212
+scripts/run-maestro-tests.sh
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 38,119,268,278,450,476,520,549
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomView.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 51
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/VonageCallKitPlugin.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 6,52-55,89,103,151,160-181
+  s_2e281e3d9d5cbd::t_7453594989fb74 182
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/UI/View models/NoiseSuppressionButtonViewModelTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 285-286,290-291
+VERA/VERAApp/VERA/App/Navigation/AppRoute.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 8
+VERA/VERACore/VERATestHelpers/Mocks/MockPreviewData.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomStateTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 10
+VERA/PREBUILTS_README.md
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 17-19,34,67-70,131
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/Domain/Use cases/DefaultEnableNoiseSuppressionUseCaseTests.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11
+VERA/VERACore/VERATestHelpers/Mocks/MockRequestCameraPermissionUseCase.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 9,16
+"VERA/VERAReactions/VERAReactions/Domain/Use cases/SendReactionUseCase.swift"
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/ActiveSpeakerLayoutViewTests.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11,17,81
+VERA/VERACore/VERATestHelpers/Mocks/MockSessionRepository.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 34
+.maestro/flows/waiting-room-controls-enabled.yaml
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 20
+VERA/VERASettings/VERASettingsSnapshotTests/TestHelpers/Mocks.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 11,13,16,20,39,42,46,56,59
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_2e281e3d9d5cbd::t_db07136f32b2c2 335-337
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "8f48965930d14581f085ad1d8d283249bae9d595",
+  "prompts": {},
+  "sessions": {
+    "s_2e281e3d9d5cbd": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794291980710433000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
