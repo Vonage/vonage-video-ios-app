@@ -1,4 +1,5 @@
 name: Validate Config Schemas
+# test: workflow triggered with valid JSONs
 
 permissions:
   contents: read
