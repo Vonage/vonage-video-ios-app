@@ -14,7 +14,7 @@ appId: ${APP_ID}
     id: "landing-screen"
 
 # Open deep link — routes directly to waiting room, bypassing landing page interaction
-- openLink: "${DEEP_LINK_TEST_URL}/room/testroom"
+- openLink: "${DEEP_LINK_TEST_URL}/room/${ROOM_NAME}"
 
 # Handle system dialog "Open in VERA?" if it appears
 - runFlow: helpers/dismiss_deeplink_dialog.yaml
@@ -28,7 +28,7 @@ appId: ${APP_ID}
 
 # Verify the room name extracted from the deep link is displayed
 - assertVisible:
-    text: "testroom"
+    text: "${ROOM_NAME}"
 
 - takeScreenshot: 01-waiting-room-from-deep-link
 

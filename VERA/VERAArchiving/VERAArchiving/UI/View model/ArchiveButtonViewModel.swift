@@ -11,6 +11,7 @@ import VERADomain
 ///
 /// The same view model controls both the recording and the post-call transcription,
 /// which run as separate concurrent archives. ``kind`` selects which one.
+@MainActor
 @Observable
 public final class ArchiveButtonViewModel {
     @ObservationIgnored
