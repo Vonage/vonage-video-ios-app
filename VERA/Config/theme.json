@@ -7,7 +7,7 @@
   },
   "colors": {
     "light": {
-      "primary": "#9941FF",
+      "primary": "not-a-valid-color",
       "text-primary": "#9941FF",
       "on-primary": "#FFFFFF",
       "primary-hover": "#871EFF",
