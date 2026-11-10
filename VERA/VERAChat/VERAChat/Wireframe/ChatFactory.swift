@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@MainActor
 public class ChatFactory {
 
     private let chatMessagesRepository: any ChatMessagesRepository

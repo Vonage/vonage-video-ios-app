@@ -110,7 +110,7 @@ struct ParticipantVideoCard: View {
                                     ParticipantVideoCardOverlays(
                                         participantID: participant.id,
                                         isMicEnabled: participant.isMicEnabled,
-                                        name: participant.name,
+                                        name: participant.displayName,
                                         isPinned: participant.isPinned,
                                         canTogglePinState: participant.canTogglePinState,
                                         isRemote: participant.isRemote,
@@ -181,7 +181,7 @@ struct ParticipantVideoCard: View {
                                 ParticipantVideoCardOverlays(
                                     participantID: participant.id,
                                     isMicEnabled: participant.isMicEnabled,
-                                    name: participant.name,
+                                    name: participant.displayName,
                                     isPinned: participant.isPinned,
                                     canTogglePinState: participant.canTogglePinState,
                                     isRemote: participant.isRemote,
