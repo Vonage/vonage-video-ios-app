@@ -25,7 +25,7 @@ struct PublisherSettingsRepositoryDefaultUpdateTests {
         let expectedSaveCount = preferences.cameraPosition == position ? 0 : 1
         preferences.cameraPosition = position
         #expect(await repository.getPreferences() == preferences)
-        #expect(repository.saveCallCount == expectedSaveCount)
+        #expect(await repository.saveCallCount == expectedSaveCount)
     }
 
     @Test("Noise updates preserve camera and content preferences", arguments: [false, true])
@@ -41,33 +41,33 @@ struct PublisherSettingsRepositoryDefaultUpdateTests {
         let expectedSaveCount = preferences.advancedNoiseSuppressionEnabled == enabled ? 0 : 1
         preferences.advancedNoiseSuppressionEnabled = enabled
         #expect(await repository.getPreferences() == preferences)
-        #expect(repository.saveCallCount == expectedSaveCount)
+        #expect(await repository.saveCallCount == expectedSaveCount)
     }
 
     @Test("Failed camera persistence propagates the error and retains saved preferences")
     func cameraSaveFailure() async {
         let repository = MockSettingsRepository()
-        repository.shouldThrowOnSave = true
+        await repository.setShouldThrowOnSave(true)
 
         await #expect(throws: MockSettingsRepositoryError.self) {
             try await repository.saveCameraPosition(.back)
         }
 
         #expect(await repository.getPreferences() == .default)
-        #expect(repository.saveCallCount == 1)
+        #expect(await repository.saveCallCount == 1)
     }
 
     @Test("Failed noise persistence propagates the error and retains saved preferences")
     func noiseSaveFailure() async {
         let repository = MockSettingsRepository()
-        repository.shouldThrowOnSave = true
+        await repository.setShouldThrowOnSave(true)
 
         await #expect(throws: MockSettingsRepositoryError.self) {
             try await repository.saveAdvancedNoiseSuppression(true)
         }
 
         #expect(await repository.getPreferences() == .default)
-        #expect(repository.saveCallCount == 1)
+        #expect(await repository.saveCallCount == 1)
     }
 }
 

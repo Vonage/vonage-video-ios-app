@@ -81,8 +81,8 @@ struct SettingsViewModelTests {
         }
         #expect(viewModel.settingsPreference.advancedNoiseSuppressionEnabled)
         #expect(viewModel.settingsPreference.videoResolution == .low)
-        #expect(repository.lastSavedPreferences?.advancedNoiseSuppressionEnabled == true)
-        #expect(repository.lastSavedPreferences?.videoResolution == .low)
+        #expect(await repository.lastSavedPreferences?.advancedNoiseSuppressionEnabled == true)
+        #expect(await repository.lastSavedPreferences?.videoResolution == .low)
     }
 
     // MARK: - Auto-Save Tests

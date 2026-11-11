@@ -105,8 +105,10 @@ struct ScreenSharingSectionView: View {
             Toggle("Scalable screen sharing".localized, isOn: preferences.scalableScreenshareEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.scalableScreenShareToggle)
             Text(
-                "Sends multiple quality layers so each viewer gets the best their connection allows. Applies the next time you start sharing."
-                    .localized
+                """
+                Sends multiple quality layers so each viewer gets the best their connection allows. \
+                Applies the next time you start sharing.
+                """.localized
             )
             .font(.caption).foregroundStyle(.secondary)
         }
