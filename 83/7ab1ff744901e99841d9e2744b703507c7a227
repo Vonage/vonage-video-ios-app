@@ -1,0 +1,63 @@
+VERA/VERAFeedback/VERAFeedback/Domain/Services/FeedbackReportDataSource.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 41
+"VERA/VERAFeedback/VERAFeedback/Domain/Use cases/FeedbackReportUseCase.swift"
+  s_85c8ad6e15e230::t_17cbf35d110dd3 31
+VERA/VERAApp/BroadcastExtension/BroadcastSampleHandler.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 72-74,76,78-82,137-144,322-323
+VERA/VERAFeedback/VERAFeedback/Wireframe/FeedbackFactory.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 8,26
+.github/workflows/validate-config-schemas.yml
+  s_85c8ad6e15e230::t_17cbf35d110dd3 1-63
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackImageBackgroundEncodingTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 1-75
+VERA/VERAFeedback/VERAFeedback/Data/DefaultFeedbackReportDataSource.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 43,49
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackImageEncoder.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 25-47
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  s_85c8ad6e15e230::t_17cbf35d110dd3 196-242
+VERA/Config/app-config.json
+  s_85c8ad6e15e230::t_17cbf35d110dd3 43
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 44-49
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackDebugDumpTimestampTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 39
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Entities/UIParticipantTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 23-32
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 379
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPlugin/VonageCaptionsPlugin.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 39-40,103-108,110,112,116,118-121,123-126,128-129,131-148,156-159
+VERA/VERAApp/BroadcastExtension/ScreenShareVideoCapturer.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 115-120
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 113,184
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 227,229-231,233,236-239
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackDebugDumpBuilder.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 16,28
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/NetworkStatsStorage.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 1-144
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/NetworkStatsStorageTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 1-203
+VERA/VERAApp/VERATests/ScreenShareVideoCapturerTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 206-234
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackReportUseCaseTests.swift
+  s_85c8ad6e15e230::t_17cbf35d110dd3 10,77,79-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "837ab1ff744901e99841d9e2744b703507c7a227",
+  "prompts": {},
+  "sessions": {
+    "s_85c8ad6e15e230": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794406759115833000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
