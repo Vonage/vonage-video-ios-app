@@ -112,6 +112,12 @@ final class ScreenShareVideoCapturer: NSObject, OTVideoCapture, @unchecked Senda
         inFlight.notify(queue: queue, execute: completion)
     }
 
+    /// Bounded blocking join of deliveries admitted before `close()`.
+    /// Never call from a consumer callback or while holding SDK locks.
+    func waitForInFlight(timeout: DispatchTime) -> DispatchTimeoutResult {
+        inFlight.wait(timeout: timeout)
+    }
+
     /// Forms UI cleanup on its owner before the nonisolated drain notification retains it.
     @MainActor
     func closeOnMainActor(completion: @escaping @MainActor @Sendable () -> Void) {

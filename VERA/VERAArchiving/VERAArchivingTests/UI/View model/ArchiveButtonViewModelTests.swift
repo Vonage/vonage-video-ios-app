@@ -37,7 +37,7 @@ struct ArchiveButtonViewModelTests {
     @Test func setupChangesStateToArchivingWhenDataSourceReturnsArchiving() async {
         let dataSource = ArchivingStatusDataSourceSpy()
         let archiveID = "test-archive-id"
-        dataSource._archivingState.value = .archiving(archiveID)
+        dataSource._archivingState.send(.archiving(archiveID))
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -49,7 +49,7 @@ struct ArchiveButtonViewModelTests {
 
     @Test func setupChangesStateToIdleWhenDataSourceReturnsFalse() async {
         let dataSource = ArchivingStatusDataSourceSpy()
-        dataSource._archivingState.value = .idle
+        dataSource._archivingState.send(.idle)
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
@@ -133,7 +133,7 @@ struct ArchiveButtonViewModelTests {
         let stopUseCase = SpyStopArchivingUseCase()
         let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
-        dataSource._archivingState.value = .archiving("archive-123")
+        dataSource._archivingState.send(.archiving("archive-123"))
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
@@ -164,7 +164,7 @@ struct ArchiveButtonViewModelTests {
         let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
         let archiveID = "test-archive"
-        dataSource._archivingState.value = .archiving(archiveID)
+        dataSource._archivingState.send(.archiving(archiveID))
         let sut = makeSUT(
             stopArchivingUseCase: stopUseCase,
             archivingStatusDataSource: dataSource,
@@ -199,14 +199,14 @@ struct ArchiveButtonViewModelTests {
             showAlert: alertSpy.capture
         )
 
-        dataSource._archivingState.value = .idle
+        dataSource._archivingState.send(.idle)
         sut.setup()
 
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
-        dataSource._archivingState.value = .archiving("new-archive-456")
+        dataSource._archivingState.send(.archiving("new-archive-456"))
         _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
 
         sut.onTap()
@@ -232,20 +232,20 @@ struct ArchiveButtonViewModelTests {
         sut.setup()
 
         // Start archiving
-        dataSource._archivingState.value = .idle
+        dataSource._archivingState.send(.idle)
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Stop archiving
-        dataSource._archivingState.value = .archiving("archive-789")
+        dataSource._archivingState.send(.archiving("archive-789"))
         _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
         try? await Task.sleep(for: .milliseconds(100))
 
         // Try to start again
-        dataSource._archivingState.value = .idle
+        dataSource._archivingState.send(.idle)
         _ = await poll(read: { await MainActor.run { sut.state } }, until: { !$0.isArchiving })
         sut.onTap()
         alertSpy.capturedAlert?.onConfirm?()
@@ -275,7 +275,7 @@ struct ArchiveButtonViewModelTests {
         stopUseCase.shouldThrowError = true
         let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
-        dataSource._archivingState.value = .archiving("archive-error")
+        dataSource._archivingState.send(.archiving("archive-error"))
         let sut = makeSUT(
             startArchivingUseCase: startUseCase,
             stopArchivingUseCase: stopUseCase,
@@ -341,9 +341,8 @@ struct ArchiveButtonViewModelTests {
         #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
 
         sut.setup()
-        dataSource._archivingState.value = .archiving("recording-1")
-        _ = await poll(read: { await MainActor.run { sut.state } }) { $0.isArchiving }
-
+        dataSource._archivingState.send(.archiving("recording-1"))
+        _ = await poll(read: { await MainActor.run { sut.state } }, until: { $0.isArchiving })
         sut.onTap()
         #expect(alertSpy.capturedAlert?.title == String(localized: "Stop Recording?"))
         #expect(alertSpy.capturedAlert?.cancelAction == String(localized: "Cancel"))
@@ -367,7 +366,7 @@ struct ArchiveButtonViewModelTests {
 
         sut.onTap()
 
-        #expect(await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 })
+        #expect(await poll(read: { sut.isShowingTranscriptionOptions }) { $0 })
         #expect(alertSpy.capturedAlert == nil)
     }
 
@@ -375,7 +374,7 @@ struct ArchiveButtonViewModelTests {
         let sut = makeSUT(kind: .transcription)
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
 
         #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: true))
     }
@@ -386,7 +385,7 @@ struct ArchiveButtonViewModelTests {
             loadTranscriptionDefaults: { TranscriptionOptions(hasSummary: false) })
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
 
         #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: false))
     }
@@ -396,11 +395,11 @@ struct ArchiveButtonViewModelTests {
         let sut = makeSUT(kind: .transcription, loadTranscriptionDefaults: { savedDefault })
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
         sut.cancelTranscriptionStart()
         savedDefault = TranscriptionOptions(hasSummary: false)
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.transcriptionOptions } }) { $0 == savedDefault }
+        _ = await poll(read: { sut.transcriptionOptions }) { $0 == savedDefault }
 
         #expect(sut.transcriptionOptions == TranscriptionOptions(hasSummary: false))
     }
@@ -410,7 +409,7 @@ struct ArchiveButtonViewModelTests {
         let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
         sut.confirmTranscriptionStart()
         try? await Task.sleep(for: .milliseconds(100))
 
@@ -426,7 +425,7 @@ struct ArchiveButtonViewModelTests {
         let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
         sut.transcriptionOptions.hasSummary = false
         sut.confirmTranscriptionStart()
         try? await Task.sleep(for: .milliseconds(100))
@@ -439,7 +438,7 @@ struct ArchiveButtonViewModelTests {
         let sut = makeSUT(kind: .transcription, startArchivingUseCase: startUseCase)
 
         sut.onTap()
-        _ = await poll(read: { await MainActor.run { sut.isShowingTranscriptionOptions } }) { $0 }
+        _ = await poll(read: { sut.isShowingTranscriptionOptions }) { $0 }
         sut.cancelTranscriptionStart()
         try? await Task.sleep(for: .milliseconds(100))
 
@@ -449,24 +448,24 @@ struct ArchiveButtonViewModelTests {
 
     @Test func transcriptionButtonIgnoresRecordingState() async {
         let dataSource = ArchivingStatusDataSourceSpy()
-        dataSource._archivingState.value = .archiving("recording-1")
+        dataSource._archivingState.send(.archiving("recording-1"))
         let sut = makeSUT(kind: .transcription, archivingStatusDataSource: dataSource)
 
         sut.setup()
-        dataSource._transcriptionState.value = .archiving("transcription-1")
-        let state = await poll(read: { await MainActor.run { sut.state } }) { $0.isArchiving }
+        dataSource._transcriptionState.send(.archiving("transcription-1"))
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
 
         #expect(state == .archiving("transcription-1"))
     }
 
     @Test func recordingButtonIgnoresTranscriptionState() async {
         let dataSource = ArchivingStatusDataSourceSpy()
-        dataSource._transcriptionState.value = .archiving("transcription-1")
+        dataSource._transcriptionState.send(.archiving("transcription-1"))
         let sut = makeSUT(archivingStatusDataSource: dataSource)
 
         sut.setup()
-        dataSource._archivingState.value = .archiving("recording-1")
-        let state = await poll(read: { await MainActor.run { sut.state } }) { $0.isArchiving }
+        dataSource._archivingState.send(.archiving("recording-1"))
+        let state = await poll(read: { sut.state }) { $0.isArchiving }
 
         #expect(state == .archiving("recording-1"))
     }
@@ -475,7 +474,7 @@ struct ArchiveButtonViewModelTests {
         let stopUseCase = SpyStopArchivingUseCase()
         let dataSource = ArchivingStatusDataSourceSpy()
         let alertSpy = AlertSpy()
-        dataSource._transcriptionState.value = .archiving("transcription-123")
+        dataSource._transcriptionState.send(.archiving("transcription-123"))
         let sut = makeSUT(
             kind: .transcription,
             stopArchivingUseCase: stopUseCase,
@@ -483,7 +482,7 @@ struct ArchiveButtonViewModelTests {
             showAlert: alertSpy.capture)
 
         sut.setup()
-        _ = await poll(read: { await MainActor.run { sut.state } }) { $0.isArchiving }
+        _ = await poll(read: { sut.state }) { $0.isArchiving }
 
         sut.onTap()
         #expect(alertSpy.capturedAlert?.title == String(localized: "Stop Transcription?"))
