@@ -7,25 +7,25 @@ import Foundation
 import VERADomain
 
 public final class DefaultArchivingStatusDataSource: ArchivingStatusDataSource {
-    private let recordingState = CurrentValueSubject<ArchivingState, Never>(.idle)
-    private let transcriptionState = CurrentValueSubject<ArchivingState, Never>(.idle)
+    private let recordingState = CurrentValueRelay<ArchivingState, Never>(.idle)
+    private let transcriptionState = CurrentValueRelay<ArchivingState, Never>(.idle)
 
     public init() {
     }
 
     public func archivingState(for kind: ArchiveKind) -> AnyPublisher<ArchivingState, Never> {
-        subject(for: kind).eraseToAnyPublisher()
+        relay(for: kind).publisher
     }
 
     public func set(archivingState: ArchivingState, for kind: ArchiveKind) {
-        subject(for: kind).value = archivingState
+        relay(for: kind).send(archivingState)
     }
 
     public func reset() {
-        ArchiveKind.allCases.forEach { subject(for: $0).value = .idle }
+        ArchiveKind.allCases.forEach { relay(for: $0).send(.idle) }
     }
 
-    private func subject(for kind: ArchiveKind) -> CurrentValueSubject<ArchivingState, Never> {
+    private func relay(for kind: ArchiveKind) -> CurrentValueRelay<ArchivingState, Never> {
         switch kind {
         case .recording: recordingState
         case .transcription: transcriptionState

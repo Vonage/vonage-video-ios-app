@@ -11,7 +11,7 @@ import VERADomain
 /// Recording and post-call transcription are separate, concurrent archives, so the
 /// state is keyed by ``ArchiveKind``. A single instance serves every kind, which makes
 /// it impossible to wire the recording state where the transcription state is expected.
-public protocol ArchivingStatusDataSource {
+public protocol ArchivingStatusDataSource: Sendable {
     /// Emits the state of the archive of the given kind.
     func archivingState(for kind: ArchiveKind) -> AnyPublisher<ArchivingState, Never>
     /// Updates the state of the archive of the given kind.
