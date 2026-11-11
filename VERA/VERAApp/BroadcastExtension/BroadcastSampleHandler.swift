@@ -78,11 +78,17 @@ final class BroadcastSampleHandler: RPBroadcastSampleHandler {
     }
 
     override func broadcastFinished() {
-        // Close admission on the ReplayKit callback queue. Its main-owner cleanup
-        // then joins admitted consumer calls without retaining or transferring this handler.
+        // ReplayKit terminates the extension soon after this returns, so the session must be
+        // disconnected before then or the stream lingers until the server times it out.
+        // Close admission, briefly join an admitted frame, then tear down synchronously.
         videoCapturer.close()
+        _ = videoCapturer.waitForInFlight(timeout: .now() + .milliseconds(200))
         let owner = controlOwner
-        DispatchQueue.main.async { owner.finish() }
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { owner.finishNow() }
+        } else {
+            DispatchQueue.main.sync { MainActor.assumeIsolated { owner.finishNow() } }
+        }
     }
 
     override func processSampleBuffer(
@@ -142,6 +148,14 @@ private final class BroadcastControlOwner {
         guard !finishScheduled else { return }
         finishScheduled = true
         capturer.closeOnMainActor { [self] in control.tearDown() }
+    }
+
+    /// Synchronous teardown for `broadcastFinished()`, which must disconnect before returning.
+    /// The caller has already closed the capturer and joined in-flight frames with a time bound.
+    func finishNow() {
+        guard !finishScheduled else { return }
+        finishScheduled = true
+        control.tearDown()
     }
 }
 
@@ -321,9 +335,8 @@ extension BroadcastControl: OTSessionDelegate {
         }
 
         if let credentials = store?.load(), !credentials.username.isEmpty {
-            settings.name = "\(credentials.username)'s screen"
-        } else {
-            settings.name = "Screenshare"
+            // Plain name, like VERA Web: viewers add the localized "'s screen" suffix.
+            settings.name = credentials.username
         }
 
         settings.publisherAudioFallbackEnabled = false

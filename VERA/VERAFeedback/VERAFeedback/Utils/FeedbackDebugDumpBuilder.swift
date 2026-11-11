@@ -13,6 +13,7 @@ import Foundation
 enum FeedbackDebugDumpBuilder {
 
     /// Builds a diagnostic dump similar to the Android feedback implementation.
+    @MainActor
     static func debugDump(session: FeedbackSessionDebugInfo = .empty) -> String {
         """
         \n
@@ -24,6 +25,7 @@ enum FeedbackDebugDumpBuilder {
         """
     }
 
+    @MainActor
     private static func platformDebugInfo() -> String {
         #if canImport(UIKit)
             """

@@ -41,6 +41,12 @@ public struct UIParticipant: Identifiable, Equatable, Hashable {
     public var id: String { participant.id }
     public var connectionId: String? { participant.connectionId }
     public var name: String { participant.name }
+    /// Tile label. Screen-share streams carry the sharer's plain name, so the suffix is
+    /// added here, matching VERA Web's `participants.screen`.
+    public var displayName: String {
+        guard isScreenshare else { return name }
+        return String(format: String(localized: "%@'s screen", bundle: .module), name)
+    }
     public var isMicEnabled: Bool { participant.isMicEnabled }
     public var isCameraEnabled: Bool { participant.isCameraEnabled }
     public var view: AnyView { participant.view }

@@ -431,6 +431,7 @@ final class MeetingRoomSDKContainer {
         }
     }
 
+    @MainActor
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
         httpClient: httpClient
