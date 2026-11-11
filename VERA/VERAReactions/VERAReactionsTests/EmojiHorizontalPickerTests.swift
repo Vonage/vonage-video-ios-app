@@ -5,6 +5,7 @@
 import Combine
 import SwiftUI
 import Testing
+import VERADomain
 
 @testable import VERAReactions
 
@@ -310,11 +311,11 @@ struct EmojiHorizontalPickerTests {
     }
 }
 
-private final class ReactionsRepositorySpy: ReactionsRepository, @unchecked Sendable {
-    private let subject = PassthroughSubject<EmojiReaction, Never>()
+private final class ReactionsRepositorySpy: ReactionsRepository {
+    private let subject = EventRelay<EmojiReaction, Never>()
 
     var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func addReaction(_ reaction: EmojiReaction) async {

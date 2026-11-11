@@ -9,10 +9,16 @@ on:
     branches: [ main, develop ]
     paths:
       - 'VERA/**'
+      - '.swiftlint.yml'
+      - 'scripts/**'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'VERA/**'
+      - '.swiftlint.yml'
+      - 'scripts/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
   format-check:
@@ -33,9 +39,26 @@ jobs:
           chmod +x scripts/format.sh
           ./scripts/format.sh --check
 
-  spm-build:
+  swiftlint:
+    name: SwiftLint
     runs-on: macos-26
     needs: [format-check]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install SwiftLint
+        run: |
+          brew install swiftlint
+          swiftlint version
+      - name: Run SwiftLint
+        run: |
+          swiftlint lint \
+            --config .swiftlint.yml \
+            --reporter github-actions-logging \
+            --quiet
+
+  spm-build:
+    runs-on: macos-26
+    needs: [format-check, swiftlint]
     steps:
       - uses: actions/checkout@v6
 
@@ -48,7 +71,7 @@ jobs:
   tests:
     name: tests (${{ matrix.name }})
     runs-on: macos-26
-    needs: [format-check]
+    needs: [format-check, swiftlint]
     defaults:
       run:
         shell: bash
