@@ -7,8 +7,9 @@ import VERADomain
 
 @testable import VERASettings
 
-@Suite("SettingsFactory Tests")
 @MainActor
+@Suite("SettingsFactory Tests")
+
 struct SettingsFactoryTests {
 
     // MARK: - makeWaitingRoomButton

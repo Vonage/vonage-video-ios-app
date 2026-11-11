@@ -38,6 +38,7 @@ public struct FeedbackReportDataSourceResponse: Sendable {
     }
 }
 
+@MainActor
 public protocol FeedbackReportDataSource {
     func sendReport(
         _ request: FeedbackReportDataSourceRequest

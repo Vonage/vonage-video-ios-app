@@ -21,6 +21,9 @@ set -euo pipefail
 #   ./Scripts/builder.sh --update   Fast path: regenerate JSON-driven files
 #                                   (AppConfig.swift + theme assets) and the workspace.
 #                                   No prerequisite checks, no Xcode launch.
+#   ./Scripts/builder.sh --clean-and-update
+#                                   Like --update, but runs `tuist clean` first to
+#                                   wipe a stale/corrupted workspace, then regenerates.
 #
 # Code generation lives HERE (not in Project.swift): editing Config/app-config.json or
 # Config/theme.json requires running this script (a plain `tuist generate` won't
@@ -41,7 +44,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$VERA_DIR/.." && pwd)"
 
-# Mode: setup (default) or update
+# Mode: setup (default), update, or clean-and-update
 MODE="setup"
 
 # Phase tracking (set TOTAL_PHASES per mode before the first `phase` call)
@@ -140,12 +143,15 @@ for arg in "$@"; do
         --update)
             MODE="update"
             ;;
+        --clean-and-update)
+            MODE="clean-and-update"
+            ;;
         -h|--help)
             grep '^#' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
             exit 0
             ;;
         *)
-            error_exit "Unknown option: $arg (use --update, or no flag for full setup)"
+            error_exit "Unknown option: $arg (use --update, --clean-and-update, or no flag for full setup)"
             ;;
     esac
 done
@@ -254,6 +260,15 @@ apply_root_overrides() {
 
     if [ "$applied" -eq 0 ]; then
         ok "No root-level overrides found; using Config/ defaults"
+    fi
+}
+
+run_tuist_clean() {
+    step "tuist clean (wiping stale workspace and derived data)"
+    if tuist clean; then
+        ok "Workspace cleaned"
+    else
+        error_exit "tuist clean failed. Check the error above and re-run."
     fi
 }
 
@@ -777,6 +792,52 @@ if [ "$MODE" = "update" ]; then
     offer_launch
 
     print_done "Update complete"
+    echo -e "  ${DIM}If Xcode is already open, let it reload the project and Build"
+    echo -e "  (Clean Build Folder if you toggled a feature flag).${NC}"
+    echo ""
+
+    if confirm_menu "Open VERA.xcworkspace in Xcode now?"; then
+        open_xcode
+    fi
+    echo ""
+    exit 0
+fi
+
+# ============================================================================
+# CLEAN-AND-UPDATE mode: wipe the stale workspace, then run the --update flow
+# ============================================================================
+if [ "$MODE" = "clean-and-update" ]; then
+    TOTAL_PHASES=6
+
+    phase "Clean workspace"
+    run_tuist_clean
+
+    phase "Validate configuration"
+    apply_root_overrides
+    if [ ! -f "./Config/app-config.json" ]; then
+        error_exit "Configuration file not found at ./Config/app-config.json"
+    fi
+    ok "app-config.json found"
+
+    phase "Regenerate code from config and theme"
+    warn_unsaved_config
+    run_config_codegen
+    # A valid baseApiUrl in app-config.json is required and always overrides
+    # EnvironmentConstants, so this flow picks up URL changes too.
+    resolve_and_generate_env_constants
+
+    phase "Configure code signing"
+    ensure_signing_config
+
+    phase "Generate workspace"
+    run_tuist_generate
+
+    phase "Generate SPM assets"
+    run_spm_assets_codegen
+
+    offer_launch
+
+    print_done "Clean and update complete"
     echo -e "  ${DIM}If Xcode is already open, let it reload the project and Build"
     echo -e "  (Clean Build Folder if you toggled a feature flag).${NC}"
     echo ""

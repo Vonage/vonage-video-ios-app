@@ -1,0 +1,63 @@
+name: Validate Config Schemas
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'VERA/Config/app-config.json'
+      - 'VERA/Config/theme.json'
+      - '.github/workflows/validate-config-schemas.yml'
+
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'VERA/Config/app-config.json'
+      - 'VERA/Config/theme.json'
+      - '.github/workflows/validate-config-schemas.yml'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_CONFIG_SCHEMA_URL: https://raw.githubusercontent.com/Vonage/vonage-video-react-app/develop/specs/app-config.schema.json
+  THEME_SCHEMA_URL: https://raw.githubusercontent.com/Vonage/vonage-video-react-app/develop/specs/theme.schema.json
+
+jobs:
+  validate-schemas:
+    name: Validate app-config.json and theme.json
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ajv-cli
+        run: npm install --no-save ajv-cli@5
+
+      - name: Fetch shared schemas
+        run: |
+          curl -fsSL "$APP_CONFIG_SCHEMA_URL" -o app-config.schema.json
+          curl -fsSL "$THEME_SCHEMA_URL" -o theme.schema.json
+
+      # --strict=false is required because the shared schemas declare a
+      # top-level "version" metadata field, which AJV's strict mode
+      # (correctly) does not recognize as a JSON Schema keyword.
+      # This does not relax validation of the config files themselves.
+      - name: Validate VERA/Config/app-config.json
+        run: npx ajv-cli validate --spec=draft2020 --strict=false -s app-config.schema.json -d VERA/Config/app-config.json
+
+      - name: Validate VERA/Config/theme.json
+        run: npx ajv-cli validate --spec=draft2020 --strict=false -s theme.schema.json -d VERA/Config/theme.json

@@ -3,6 +3,7 @@ import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("UI participant tests")
 struct UIParticipantTests {
     @Test
@@ -18,5 +19,15 @@ struct UIParticipantTests {
         sut.onForceMute = {}
 
         #expect(sut.canForceMute)
+    }
+
+    @Test
+    @MainActor
+    func displayNameAddsScreenSuffixOnlyForScreenShares() {
+        let camera = UIParticipant(participant: makeMockParticipant(name: "Alice"))
+        let screen = UIParticipant(participant: makeMockParticipant(name: "Alice", isScreenshare: true))
+
+        #expect(camera.displayName == "Alice")
+        #expect(screen.displayName == "Alice's screen")
     }
 }

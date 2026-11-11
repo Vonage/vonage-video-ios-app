@@ -12,6 +12,7 @@ import VERAVonage
 @testable import VERA
 @testable import VERAMeetingRoomSDK
 
+@MainActor
 @Suite("App dependency provider tests")
 struct AppDependencyProvidersTests {
 

@@ -11,6 +11,7 @@ import Foundation
 /// such as start, end, and hold without coupling to the concrete controller.
 public protocol CallControllerProtocol {
     func request(_ transaction: CXTransaction) async throws
+    func request(_ transaction: CXTransaction, completion: @escaping @Sendable (Error?) -> Void)
 }
 
 extension CXCallController: CallControllerProtocol {}
@@ -92,6 +93,24 @@ open class VERACallManager {
         transaction.addAction(setHeldCallAction)
 
         try await requestTransaction(transaction, action: Call.hold.rawValue)
+    }
+
+    /// Sets the microphone mute state for the specified call.
+    ///
+    /// Uses the completion-based request so it can be called from synchronous
+    /// contexts, such as a Combine sink, without an unstructured `Task` that
+    /// captures this non-`Sendable` manager.
+    ///
+    /// - Parameters:
+    ///   - callID: The CallKit call identifier to update.
+    ///   - isMuted: `true` to show the call as muted; `false` to show it as unmuted.
+    ///   - completion: Called with `nil` on success, or the error CallKit returned.
+    open func setMuted(callID: UUID, isMuted: Bool, completion: @escaping @Sendable (Error?) -> Void) {
+        let setMutedCallAction = CXSetMutedCallAction(call: callID, muted: isMuted)
+        let transaction = CXTransaction()
+        transaction.addAction(setMutedCallAction)
+
+        callController.request(transaction, completion: completion)
     }
 
     /// Requests the transaction from the underlying controller.

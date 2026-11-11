@@ -835,6 +835,7 @@ struct BottomBarButtonsAssemblerTests {
         }
     }
 
+    @MainActor
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>
     ) -> MeetingRoomSDKContainer {
