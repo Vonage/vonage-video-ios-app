@@ -1,0 +1,29 @@
+VERA/Scripts/regenerateSigningConfig.sh
+  s_cfb2fbbc046658::t_3c7b48c0c613fe 18
+sonar-project.properties
+  s_6d33d7973ebb81::t_6c3d249b8dd03c 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "da74fc6678a7e627e71919a1f99bb265ea749dc8",
+  "prompts": {},
+  "sessions": {
+    "s_6d33d7973ebb81": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794481587616710000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_cfb2fbbc046658": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794481587186334000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
