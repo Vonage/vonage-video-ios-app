@@ -12,7 +12,7 @@ import Foundation
 /// Only one effect is active at a time — applying a new one replaces the previous.
 ///
 /// - SeeAlso: ``BlurLevel``
-public enum VideoEffect: Equatable, Hashable, Codable {
+public enum VideoEffect: Equatable, Hashable, Codable, Sendable {
     /// No effect — raw camera feed is published.
     case none
 

@@ -283,7 +283,7 @@ def generate_typography(typography, output_path):
 //
 import SwiftUI
 
-public struct TypographyConfig {{
+public struct TypographyConfig: Sendable {{
     public let fontSize: CGFloat
     public let lineHeight: CGFloat
     public let weight: Font.Weight
@@ -297,7 +297,7 @@ public struct TypographyConfig {{
     }}
 }}
 
-public enum TypographyStyle {{
+public enum TypographyStyle: Sendable {{
 {cases}
 
     public var mobileConfig: TypographyConfig {{

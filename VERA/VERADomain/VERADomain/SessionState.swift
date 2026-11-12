@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct SessionState {
+public struct SessionState: Sendable {
     public let isPublishingAudio: Bool
     public let isPublishingVideo: Bool
 

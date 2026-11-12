@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Populated from `OTPublisherKitAudioNetworkStats` via the SDK's
 /// `networkStatsDelegate` callback.
-public struct AudioSendStats: Equatable {
+public struct AudioSendStats: Equatable, Sendable {
     /// Total audio packets sent since the stream started.
     public let packetsSent: Int64
     /// Total audio packets lost as reported by the remote endpoint.

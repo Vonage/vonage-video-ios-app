@@ -8,7 +8,7 @@ import Foundation
 ///
 /// These values are written by the main app into a shared App Group and read
 /// by the Broadcast Upload Extension to connect and publish the screen share stream.
-public struct ScreenShareCredentials: Equatable {
+public struct ScreenShareCredentials: Equatable, Sendable {
     /// The Vonage application (API) key.
     public let applicationId: String
     /// The Vonage session identifier.

@@ -14,6 +14,9 @@ cd VERA
 
 # After editing Config/app-config.json or Config/theme.json
 ./Scripts/builder.sh --update
+
+# When --update fails because the workspace is stale/corrupted
+./Scripts/builder.sh --clean-and-update
 ```
 
 ## Prerequisites
@@ -28,7 +31,7 @@ cd VERA
 
 `./Scripts/builder.sh` (setup mode) checks for these and offers to install Homebrew, Python 3 and Tuist if missing.
 
-## The two modes of `builder.sh`
+## The three modes of `builder.sh`
 
 ### `./Scripts/builder.sh` — full setup (default)
 
@@ -60,6 +63,10 @@ Use this after editing `Config/app-config.json` or `Config/theme.json`. It:
 Then it [launches the app](#launching-the-app), prints the completion banner, and finally asks whether to open Xcode.
 
 It **skips** only the prerequisite checks (those matter just for first-time setup).
+
+### `./Scripts/builder.sh --clean-and-update` — recover from a stale workspace
+
+Use this when `--update` fails because the generated workspace is stale or corrupted. It runs `tuist clean` first to wipe the stale workspace and derived data; if the clean fails the script stops immediately with a descriptive error before touching anything else. After a successful clean it runs the exact same steps as `--update` (validate config → regenerate code → configure signing → generate workspace → generate SPM assets), then launches the app and asks whether to open Xcode.
 
 ## Before codegen: save your config edits
 
@@ -121,7 +128,7 @@ See [`CONFIGURATION_README.md`](CONFIGURATION_README.md) for the full feature-fl
 | Problem | Fix |
 |---|---|
 | Changes to `app-config.json` not reflected | Run `./Scripts/builder.sh --update` (a plain `tuist generate` won't regenerate) |
-| Stale workspace | `tuist clean` then `./Scripts/builder.sh --update` |
+| Stale workspace | `./Scripts/builder.sh --clean-and-update` (runs `tuist clean` then regenerates in one step) |
 | `builder.sh` fails on codegen | Run the failing script directly to see the error, e.g. `python3 Scripts/generate-app-config.py` |
 | SPM build fails on a missing asset (e.g. `SemanticColors.accent`) | `SPMAssets+VERACommonUI.swift` drifted from the catalog. Run `tuist generate` then `python3 Scripts/generate-spm-assets.py` (or `./Scripts/builder.sh --update`). Do not edit the file by hand. |
 | Signing / entitlements issues | Confirm `DEVELOPMENT_TEAM` is set in `Config/Signing.xcconfig` and that you're signed in to that team in Xcode → Settings → Accounts (see [Code signing](#code-signing)) |

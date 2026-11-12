@@ -17,7 +17,7 @@
 /// - `balanced` (3): Balance between resolution and frame rate reduction
 ///
 /// - SeeAlso: ``PublisherAdvancedSettings``
-public enum DegradationPreference: Int {
+public enum DegradationPreference: Int, Sendable {
     /// Default value — the video engine decides the optimal degradation preference.
     case notSet = -1
 

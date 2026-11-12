@@ -5,7 +5,7 @@
 import Foundation
 
 /// Represents a single caption from a speaker in a video call
-public struct CaptionItem: Identifiable, Equatable {
+public struct CaptionItem: Identifiable, Equatable, Sendable {
     /// Unique identifier for the caption
     public let id: String
 

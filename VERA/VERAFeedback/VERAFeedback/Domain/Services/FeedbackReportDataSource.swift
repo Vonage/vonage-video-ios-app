@@ -26,7 +26,7 @@ public struct FeedbackReportDataSourceRequest {
     }
 }
 
-public struct FeedbackReportDataSourceResponse {
+public struct FeedbackReportDataSourceResponse: Sendable {
     public let message: String
     public let ticketUrl: String
     public let screenshotIncluded: Bool?
@@ -38,6 +38,7 @@ public struct FeedbackReportDataSourceResponse {
     }
 }
 
+@MainActor
 public protocol FeedbackReportDataSource {
     func sendReport(
         _ request: FeedbackReportDataSourceRequest

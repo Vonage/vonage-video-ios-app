@@ -8,7 +8,7 @@
 /// when the video dimensions don't match the view dimensions.
 ///
 /// - SeeAlso: ``PublisherSettings``
-public enum VideoScaleBehavior: String, Equatable {
+public enum VideoScaleBehavior: String, Equatable, Sendable {
     /// Fill the entire view, potentially cropping video to maintain aspect ratio.
     /// The video will be scaled to fill the view completely, which may result in
     /// some portions being cropped if the aspect ratios don't match.

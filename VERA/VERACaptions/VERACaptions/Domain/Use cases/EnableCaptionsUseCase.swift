@@ -5,7 +5,7 @@
 import Foundation
 import VERADomain
 
-public struct EnableCaptionsRequest {
+public struct EnableCaptionsRequest: Sendable {
     public let sessionKey: String
 
     public init(sessionKey: String) {
@@ -13,7 +13,7 @@ public struct EnableCaptionsRequest {
     }
 }
 
-public protocol EnableCaptionsUseCase {
+public protocol EnableCaptionsUseCase: Sendable {
     func callAsFunction(_ request: EnableCaptionsRequest) async throws
 }
 

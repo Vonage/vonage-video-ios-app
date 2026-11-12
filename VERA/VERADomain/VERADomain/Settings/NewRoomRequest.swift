@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct NewRoomRequest: Equatable, Hashable {
+public struct NewRoomRequest: Equatable, Hashable, Sendable {
     public let roomName: RoomName
     public let publisherSettings: PublisherSettings
 

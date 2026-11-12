@@ -9,7 +9,7 @@ import Foundation
 /// Populated from `OTSubscriberKitAudioNetworkStats` via the SDK's
 /// `networkStatsDelegate` callback, and from the WebRTC RTC stats report
 /// via `OTSubscriberKitRtcStatsReportDelegate`.
-public struct AudioReceiveStats: Equatable {
+public struct AudioReceiveStats: Equatable, Sendable {
     /// Total audio packets received since the stream started.
     public let packetsReceived: Int64
     /// Total audio packets lost in the receive direction.

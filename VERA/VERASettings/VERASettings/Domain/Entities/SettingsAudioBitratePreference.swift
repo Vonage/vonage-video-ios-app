@@ -5,7 +5,7 @@
 import Foundation
 
 /// User preference for the maximum audio bitrate.
-public enum SettingsAudioBitratePreference: Codable, Equatable {
+public enum SettingsAudioBitratePreference: Codable, Equatable, Sendable {
     /// Let the SDK choose the audio bitrate.
     case `default`
 

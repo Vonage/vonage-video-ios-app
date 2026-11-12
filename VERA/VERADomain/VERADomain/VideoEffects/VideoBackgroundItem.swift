@@ -7,7 +7,7 @@ import Foundation
 /// A background image available for virtual background replacement.
 ///
 /// Represents either a built-in stock image or a user-uploaded photo.
-public struct VideoBackgroundItem: Identifiable, Equatable, Hashable {
+public struct VideoBackgroundItem: Identifiable, Equatable, Hashable, Sendable {
     /// Unique identifier for this background.
     public let id: String
 

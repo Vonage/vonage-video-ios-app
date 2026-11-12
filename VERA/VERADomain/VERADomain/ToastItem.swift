@@ -4,7 +4,7 @@
 
 import Foundation
 
-public enum ToastMode {
+public enum ToastMode: Sendable {
     case warning, info, failure, success
 
     /// A stable string used for accessibility identifiers.
@@ -18,7 +18,7 @@ public enum ToastMode {
     }
 }
 
-public struct ToastItem: Equatable {
+public struct ToastItem: Equatable, Sendable {
     public let message: String
     public let mode: ToastMode
 

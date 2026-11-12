@@ -8,7 +8,7 @@ import Foundation
 ///
 /// `RoomCredentials` bundles the identifiers and token needed to establish a call,
 /// plus metadata like the room name and optional captions stream identifier.
-public struct RoomCredentials: CustomStringConvertible {
+public struct RoomCredentials: CustomStringConvertible, Sendable {
     /// The Vonage application (API) key associated with the session.
     public let applicationId: String
     /// The Vonage session identifier.

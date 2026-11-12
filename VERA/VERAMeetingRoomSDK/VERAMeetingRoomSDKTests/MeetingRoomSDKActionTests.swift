@@ -30,4 +30,22 @@ struct MeetingRoomSDKActionTests {
             Issue.record("Expected goBack action")
         }
     }
+
+    @Test("Navigation actions can be returned from detached tasks")
+    func actionsAcrossTasks() async {
+        let ended = await Task.detached { MeetingRoomSDKAction.callDidEnd }.value
+        let back = await Task.detached { MeetingRoomSDKAction.goBack("test-room") }.value
+
+        if case .callDidEnd = ended {
+            // pass
+        } else {
+            Issue.record("Expected callDidEnd after transfer")
+        }
+
+        if case .goBack(let name) = back {
+            #expect(name == "test-room")
+        } else {
+            Issue.record("Expected goBack after transfer")
+        }
+    }
 }

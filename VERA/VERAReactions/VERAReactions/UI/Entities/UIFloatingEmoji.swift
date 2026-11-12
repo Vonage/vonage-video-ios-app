@@ -9,7 +9,7 @@ import Foundation
 ///
 /// Contains the emoji string, a unique identity for `ForEach`,
 /// and a random horizontal position for visual variety.
-public struct UIFloatingEmoji: Identifiable {
+public struct UIFloatingEmoji: Identifiable, Sendable {
     /// Unique identifier for SwiftUI diffing.
     public let id: UUID
 

@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-public struct ParticipantCircleState {
+public struct ParticipantCircleState: Sendable {
     public let userName: String
 
     public init(userName: String) {

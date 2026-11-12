@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct SessionInfo {
+public struct SessionInfo: Sendable {
     public let apiKey: String
     public let sessionId: String
     public let token: String

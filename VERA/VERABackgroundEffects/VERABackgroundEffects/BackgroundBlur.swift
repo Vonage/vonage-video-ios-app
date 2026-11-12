@@ -29,7 +29,7 @@ public struct BackgroundBlur {
     }
 }
 
-public struct Radius: Codable {
+public struct Radius: Codable, Sendable {
     public let radius: BlurLevel
 
     public init(radius: BlurLevel) {

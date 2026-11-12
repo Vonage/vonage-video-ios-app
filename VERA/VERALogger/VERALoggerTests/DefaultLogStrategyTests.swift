@@ -10,6 +10,25 @@ import Testing
 @Suite("DefaultLogStrategy Tests")
 struct DefaultLogStrategyTests {
 
+    @Test("Concurrent callers share a formatter without changing formatted values")
+    func concurrentFormatting() async {
+        let strategy = DefaultLogStrategy()
+        let event = LogEvent(
+            level: .info, tag: "Concurrent", message: "same event",
+            timestamp: Date(timeIntervalSince1970: 1_000_000_000), thread: "test")
+        let expected = strategy.formatEvent(event)
+        let formatted = await withTaskGroup(of: String.self, returning: [String].self) { group in
+            for _ in 0..<256 {
+                group.addTask { strategy.formatEvent(event) }
+            }
+            var results: [String] = []
+            for await line in group { results.append(line) }
+            return results
+        }
+        #expect(formatted.count == 256)
+        #expect(formatted.allSatisfy { $0 == expected })
+    }
+
     @Test("Format event without error includes level, thread, tag, and message")
     func formatEventWithoutError() {
         let strategy = DefaultLogStrategy()

@@ -9,7 +9,7 @@ import Foundation
 /// Populated from `OTSenderStats` on `OTSubscriberKitVideoNetworkStats`
 /// and `OTSubscriberKitAudioNetworkStats` when the publisher has enabled
 /// sender-side statistics (`senderStatsTrack = true`).
-public struct SenderStats: Equatable {
+public struct SenderStats: Equatable, Sendable {
     /// Maximum bitrate estimated for the sender connection (bps).
     public let connectionMaxAllocatedBitrate: Int64
     /// Current estimated bandwidth for the sender connection (bps).

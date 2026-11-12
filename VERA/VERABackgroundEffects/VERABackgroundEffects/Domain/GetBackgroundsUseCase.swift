@@ -10,7 +10,7 @@ public protocol GetBackgroundsUseCase {
     func callAsFunction() throws -> GetBackgroundsUseCaseResult
 }
 
-public struct GetBackgroundsUseCaseResult {
+public struct GetBackgroundsUseCaseResult: Sendable {
     public let backgrounds: [VideoBackgroundItem]
 
     public init(backgrounds: [VideoBackgroundItem]) {

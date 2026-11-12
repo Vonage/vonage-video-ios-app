@@ -322,6 +322,15 @@ This creates a new VERA feature module with the standard layer structure, `Proje
 ### Theming
 `VERA/Theme/semantics.json` defines design tokens (colors, typography, border radius) for the Vonage theme with light/dark variants. Running `generate-app-theme.py` converts these into Xcode color assets used by `VERACommonUI`.
 
+### Dependency versions
+`VERA/Dependencies.json` is the single source of truth for external dependency
+versions. Both the root `Package.swift` and
+`VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift` read it at
+manifest-evaluation time. Never inline a version literal in `Package.swift` or
+any `Package+*.swift`; edit the JSON. It has two groups: `vonage` (the Vonage
+Client SDKs `videoSDK` and `videoTransformersSDK`, which **must** always share
+the same version) and `thirdParty` (everything else).
+
 ## Branching
 - All new work branches off `develop`; PRs target `develop`
 - Branch naming (internal): `DEVELOPERNAME/TICKETNUMBER-SHORTDESCRIPTION`

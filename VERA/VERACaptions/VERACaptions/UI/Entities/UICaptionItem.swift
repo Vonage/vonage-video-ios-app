@@ -9,7 +9,7 @@ import SwiftUI
 ///
 /// This is a pure UI model with no domain-layer dependencies.
 /// Use ``CaptionItem/toUICaptionItem()`` to convert from the domain model.
-public struct UICaptionItem: Identifiable, Equatable {
+public struct UICaptionItem: Identifiable, Equatable, Sendable {
     /// Unique identifier for the caption.
     public let id: String
 
@@ -60,9 +60,9 @@ public struct UICaptionItem: Identifiable, Equatable {
 
         private static func makePreview(speaker: String, text: String, offset: TimeInterval = 0) -> UICaptionItem {
             var boldPart = AttributedString(speaker + ": ")
-            boldPart.font = .system(.footnote, design: .default).bold()
+            boldPart[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default).bold()
             var regularPart = AttributedString(text)
-            regularPart.font = .system(.footnote, design: .default)
+            regularPart[AttributeScopes.SwiftUIAttributes.FontAttribute.self] = .system(.footnote, design: .default)
             return UICaptionItem(
                 id: UUID().uuidString,
                 text: boldPart + regularPart,

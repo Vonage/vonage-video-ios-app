@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct ChatMessage {
+public struct ChatMessage: Sendable {
     public let username: String
     public let message: String
     public let date: Date

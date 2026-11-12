@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Groups audio receive stats, video receive stats, and media link stats
 /// for one subscriber, identified by their connection ID.
-public struct SubscriberMediaStats: Equatable, Identifiable {
+public struct SubscriberMediaStats: Equatable, Sendable, Identifiable {
     /// Unique identifier for the subscriber (connection ID).
     public var id: String { subscriberID }
 

@@ -4,33 +4,36 @@
 
 import Foundation
 
-public enum ArchiveStatus: String {
-    case stopped, available, failed
+/// Status of an archive, or of the transcription attached to it, as reported by `searchArchives`.
+public enum ArchiveStatus: String, Sendable, CaseIterable {
+    case requested, started, paused, stopped, uploaded, available, expired, failed, deleted
 
-    public init?(rawValue: String) {
-        switch rawValue {
-        case "stopped":
-            self = .stopped
-        case "available":
-            self = .available
-        default:
-            return nil
-        }
+    /// Maps a raw status to its case. Unknown statuses are treated as `.failed`.
+    public init(value: String) {
+        self = ArchiveStatus(rawValue: value) ?? .failed
     }
 
-    public init(value: String) {
-        switch value {
-        case "stopped":
-            self = .stopped
-        case "available":
-            self = .available
-        default:
-            self = .failed
+    /// Whether the file is still being produced and may become available later.
+    public var isPending: Bool {
+        switch self {
+        case .requested, .started, .paused, .stopped: true
+        case .uploaded, .available, .expired, .failed, .deleted: false
         }
     }
 }
 
-public struct Archive: Equatable {
+/// The post-call transcript produced from a transcription archive.
+public struct ArchiveTranscription: Equatable, Sendable {
+    public let status: ArchiveStatus
+    public let url: URL?
+
+    public init(status: ArchiveStatus, url: URL?) {
+        self.status = status
+        self.url = url
+    }
+}
+
+public struct Archive: Equatable, Sendable {
     public let id: UUID
     public let name: String
     public let createdAt: Date
@@ -38,6 +41,8 @@ public struct Archive: Equatable {
     public let url: URL?
     public let size: Int
     public let duration: Int
+    public let kind: ArchiveKind
+    public let transcription: ArchiveTranscription?
 
     public init(
         id: UUID,
@@ -46,7 +51,9 @@ public struct Archive: Equatable {
         status: ArchiveStatus,
         url: URL?,
         size: Int,
-        duration: Int
+        duration: Int,
+        kind: ArchiveKind = .recording,
+        transcription: ArchiveTranscription? = nil
     ) {
         self.id = id
         self.name = name
@@ -55,5 +62,23 @@ public struct Archive: Equatable {
         self.url = url
         self.size = size
         self.duration = duration
+        self.kind = kind
+        self.transcription = transcription
+    }
+
+    /// URL of the file the user downloads once it is available:
+    /// the transcript zip for transcriptions, the media otherwise.
+    public var downloadURL: URL? {
+        switch kind {
+        case .recording: status == .available ? url : nil
+        case .transcription: transcription?.status == .available ? transcription?.url : nil
+        }
+    }
+
+    /// Whether the archive or its transcript is still being produced.
+    ///
+    /// A transcription keeps processing after its parent archive is uploaded or available.
+    public var isPending: Bool {
+        status.isPending || (transcription?.status.isPending ?? false)
     }
 }

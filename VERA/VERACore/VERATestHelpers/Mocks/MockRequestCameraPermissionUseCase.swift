@@ -6,12 +6,14 @@ import Foundation
 import VERACore
 import VERADomain
 
+@MainActor
 public func makeMockRequestCameraPermissionUseCase(
     isAuthorized: Bool = true
 ) -> MockRequestCameraPermissionUseCase {
     MockRequestCameraPermissionUseCase(isAuthorized: isAuthorized)
 }
 
+@MainActor
 public final class MockRequestCameraPermissionUseCase: RequestCameraPermissionUseCase {
     public var isAuthorized: Bool = true
 

@@ -7,7 +7,7 @@ import Foundation
 import VERADomain
 import VERAVonage
 
-public final class E2ECallFacade: CallFacade {
+public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     public lazy var _publisherAudioLevelPublisher = CurrentValueSubject<Float, Never>(0.0)
     public lazy var publisherAudioLevelPublisher = _publisherAudioLevelPublisher.eraseToAnyPublisher()
 
@@ -25,6 +25,8 @@ public final class E2ECallFacade: CallFacade {
     public lazy var participantsPublisher = participantsSubject.eraseToAnyPublisher()
 
     private let stateSubject: CurrentValueSubject<SessionState, Never>
+    private var mediaBeforeHold: SessionState?
+    private var wantsSpeakingWhileMutedSimulation = false
     public lazy var statePublisher = stateSubject.eraseToAnyPublisher()
 
     private let callStateSubject = CurrentValueSubject<CallState, Never>(.idle)
@@ -32,6 +34,9 @@ public final class E2ECallFacade: CallFacade {
 
     private let archivingStateSubject = CurrentValueSubject<ArchivingState, Never>(.idle)
     public lazy var archivingState = archivingStateSubject.eraseToAnyPublisher()
+
+    private let transcriptionStateSubject = CurrentValueSubject<ArchivingState, Never>(.idle)
+    public lazy var transcriptionState = transcriptionStateSubject.eraseToAnyPublisher()
 
     private let captionsSubject = CurrentValueSubject<[CaptionItem], Never>([])
     public lazy var captionsPublisher = captionsSubject.eraseToAnyPublisher()
@@ -77,8 +82,8 @@ public final class E2ECallFacade: CallFacade {
     }
 
     public func toggleLocalVideo() {
-        let current = stateSubject.value
-        stateSubject.send(
+        let current = mediaBeforeHold ?? stateSubject.value
+        updateDesiredMedia(
             .init(
                 isPublishingAudio: current.isPublishingAudio,
                 isPublishingVideo: !current.isPublishingVideo))
@@ -87,14 +92,15 @@ public final class E2ECallFacade: CallFacade {
     public func toggleLocalCamera() {}
 
     public func toggleLocalAudio() {
-        let current = stateSubject.value
+        let current = mediaBeforeHold ?? stateSubject.value
         let newIsPublishingAudio = !current.isPublishingAudio
-        stateSubject.send(
+        updateDesiredMedia(
             .init(
                 isPublishingAudio: newIsPublishingAudio,
                 isPublishingVideo: current.isPublishingVideo))
 
-        if !newIsPublishingAudio {
+        wantsSpeakingWhileMutedSimulation = !newIsPublishingAudio
+        if wantsSpeakingWhileMutedSimulation && !isOnHold {
             simulateSpeakingWhileMuted()
         } else {
             stopSpeakingWhileMutedSimulation()
@@ -102,15 +108,43 @@ public final class E2ECallFacade: CallFacade {
     }
 
     public func muteLocalMedia(_ isMuted: Bool) {
-        self.isMuted = isMuted
-        stateSubject.send(
-            .init(
-                isPublishingAudio: !isMuted,
-                isPublishingVideo: !isMuted))
+        updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: !isMuted))
+        stopSpeakingWhileMutedSimulationIfUnmuted(isMuted)
+    }
+
+    public func muteLocalAudio(_ isMuted: Bool) {
+        let current = mediaBeforeHold ?? stateSubject.value
+        updateDesiredMedia(.init(isPublishingAudio: !isMuted, isPublishingVideo: current.isPublishingVideo))
+        stopSpeakingWhileMutedSimulationIfUnmuted(isMuted)
     }
 
     public func setOnHold(_ isOnHold: Bool) {
+        guard self.isOnHold != isOnHold else { return }
         self.isOnHold = isOnHold
+        if isOnHold {
+            mediaBeforeHold = stateSubject.value
+            stopSpeakingWhileMutedSimulation()
+            publishMedia(.init(isPublishingAudio: false, isPublishingVideo: false))
+        } else if let savedMedia = mediaBeforeHold {
+            mediaBeforeHold = nil
+            publishMedia(savedMedia)
+            if wantsSpeakingWhileMutedSimulation && !savedMedia.isPublishingAudio {
+                simulateSpeakingWhileMuted()
+            }
+        }
+    }
+
+    private func updateDesiredMedia(_ state: SessionState) {
+        if isOnHold {
+            mediaBeforeHold = state
+        } else {
+            publishMedia(state)
+        }
+    }
+
+    private func publishMedia(_ state: SessionState) {
+        isMuted = !state.isPublishingAudio && !state.isPublishingVideo
+        stateSubject.send(state)
     }
 
     public func enableCaptions() async {
@@ -149,16 +183,26 @@ public final class E2ECallFacade: CallFacade {
     private func observeArchivingEvents() {
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStart)
             .sink { [weak self] notification in
-                guard let archiveId = notification.object as? String else { return }
-                self?.archivingStateSubject.send(.archiving(archiveId))
+                guard let self, let archiveId = notification.object as? String else { return }
+                self.archivingSubject(for: notification).send(.archiving(archiveId))
             }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStop)
-            .sink { [weak self] _ in
-                self?.archivingStateSubject.send(.idle)
+            .sink { [weak self] notification in
+                guard let self else { return }
+                self.archivingSubject(for: notification).send(.idle)
             }
             .store(in: &cancellables)
+    }
+
+    private func archivingSubject(
+        for notification: Notification
+    ) -> CurrentValueSubject<ArchivingState, Never> {
+        switch notification.userInfo?[E2EArchivingEvents.kindKey] as? ArchiveKind {
+        case .transcription: transcriptionStateSubject
+        case .recording, nil: archivingStateSubject
+        }
     }
 
     public func forceMuteParticipant(id: String) async throws {
@@ -214,5 +258,13 @@ public final class E2ECallFacade: CallFacade {
         speakingWhileMutedTimer?.invalidate()
         speakingWhileMutedTimer = nil
         _publisherAudioLevelPublisher.send(0.0)
+    }
+
+    /// System unmutes must end a simulation started by `toggleLocalAudio()`,
+    /// otherwise loud samples keep flowing while audio is published.
+    private func stopSpeakingWhileMutedSimulationIfUnmuted(_ isMuted: Bool) {
+        guard !isMuted, wantsSpeakingWhileMutedSimulation else { return }
+        wantsSpeakingWhileMutedSimulation = false
+        stopSpeakingWhileMutedSimulation()
     }
 }

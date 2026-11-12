@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Populated from `OTPublisherKitMediaLinkStats` via the SDK's
 /// `OTPublisherKitMediaLinkStatsDelegate` callback.
-public struct PublisherMediaLinkStats: Equatable {
+public struct PublisherMediaLinkStats: Equatable, Sendable {
     /// Transport statistics for the publisher's uplink connection.
     public let transport: TransportStats
 

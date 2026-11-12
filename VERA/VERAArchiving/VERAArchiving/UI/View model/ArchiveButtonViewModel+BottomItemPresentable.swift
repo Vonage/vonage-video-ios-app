@@ -6,18 +6,18 @@ import SwiftUI
 import VERACommonUI
 
 extension ArchiveButtonViewModel: BottomItemPresentable {
-    public var id: String { "archive-button" }
+    public var id: String { kind.bottomBarItemID }
 
     public var label: String {
-        state.bottomBarLabel
+        kind.bottomBarLabel(for: state)
     }
 
     public var accessibilityIdentifier: String? {
-        state.bottomBarAccessibilityIdentifier
+        kind.bottomBarAccessibilityIdentifier(for: state)
     }
 
     public var image: Image {
-        state.bottomBarImage
+        kind.bottomBarImage(for: state)
     }
 
     public var isActive: Bool {

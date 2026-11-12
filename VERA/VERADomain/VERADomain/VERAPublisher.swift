@@ -8,7 +8,7 @@ import SwiftUI
 /// The available camera positions for a publisher.
 ///
 /// Use to control which physical camera is used for local video.
-public enum CameraPosition {
+public enum CameraPosition: Sendable {
     /// The device’s front-facing camera.
     case front
     /// The device’s back-facing camera.

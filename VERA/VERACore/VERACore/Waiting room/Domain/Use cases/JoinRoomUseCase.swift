@@ -4,7 +4,7 @@
 
 import VERADomain
 
-public struct JoinRoomRequest {
+public struct JoinRoomRequest: Sendable {
     public let roomName: String
     public let userName: String
 
@@ -14,6 +14,7 @@ public struct JoinRoomRequest {
     }
 }
 
+@MainActor
 public final class JoinRoomUseCase {
 
     private let userRepository: UserRepository

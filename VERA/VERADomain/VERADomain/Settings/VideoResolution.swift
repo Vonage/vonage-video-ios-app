@@ -17,7 +17,7 @@ import CoreGraphics
 /// - `high1080p` (3): 1920x1080 resolution (1080p)
 ///
 /// - SeeAlso: ``PublisherAdvancedSettings``
-public enum VideoResolution: Int {
+public enum VideoResolution: Int, Sendable {
     /// Low resolution (352x288).
     case low = 0
 

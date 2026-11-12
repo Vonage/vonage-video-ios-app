@@ -132,7 +132,7 @@ struct OverflowCountAvatar: View {
     }
 }
 
-public struct AvatarGroupUser: Identifiable {
+public struct AvatarGroupUser: Identifiable, Sendable {
     public let id: String
     public let name: String
     public let backgroundColor: Color

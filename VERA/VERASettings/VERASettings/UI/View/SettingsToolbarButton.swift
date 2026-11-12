@@ -57,7 +57,7 @@ public struct SettingsToolbarButton: View {
         .sheet(isPresented: $showSettings) {
             makeSettingsView?()
                 .presentationDetents([.large])
-                .opaquePresentationBackground(theme.background)
+                .presentationBackground(theme.background)
         }
     }
 }

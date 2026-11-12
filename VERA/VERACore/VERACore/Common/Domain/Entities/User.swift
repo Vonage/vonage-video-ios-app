@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct User: Equatable {
+public struct User: Equatable, Sendable {
     public let name: String
 
     public init(name: String) {

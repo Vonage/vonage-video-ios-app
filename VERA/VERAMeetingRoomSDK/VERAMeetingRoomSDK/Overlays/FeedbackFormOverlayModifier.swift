@@ -25,7 +25,7 @@ struct FeedbackFormOverlayModifier: ViewModifier {
                         }
                     )
                     .presentationDetents([.large])
-                    .opaquePresentationBackground(theme.background)
+                    .presentationBackground(theme.background)
                 }
         } else {
             content

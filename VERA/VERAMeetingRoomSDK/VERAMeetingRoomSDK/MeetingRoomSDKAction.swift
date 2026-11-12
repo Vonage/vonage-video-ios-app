@@ -24,7 +24,7 @@ import VERADomain
 ///         }
 ///     }
 /// ```
-public enum MeetingRoomSDKAction {
+public enum MeetingRoomSDKAction: Sendable {
     /// The call ended and the host app should navigate to the goodbye screen.
     case callDidEnd
 

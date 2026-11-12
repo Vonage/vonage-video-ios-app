@@ -11,15 +11,15 @@ import VERAVonage
 ///
 /// This plugin listens to archiving signals from the Vonage session and updates
 /// the archiving status data source, allowing the application to react to when
-/// call recording starts or stops.
+/// call recording or post-call transcription starts or stops.
 ///
 /// ## Responsibilities
 /// - Receives archiving signals from Vonage session
-/// - Updates `ArchivingStatusDataSource` with current archiving state
-/// - Resets archiving status when the call ends
+/// - Updates `ArchivingStatusDataSource` with the state of the signalled archive kind
+/// - Resets every archive kind when the call ends
 ///
 /// - Important: The plugin automatically handles archiving signals of type "archiving"
-///   with data values "start" or "stop".
+///   with data values "start" or "stop". Signals without a kind are treated as recordings.
 /// - SeeAlso: ``VonagePlugin``, ``VonagePluginCallLifeCycle``,  ``VonageSignalHandler``
 public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
@@ -38,7 +38,8 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
 
     /// Creates a new archiving plugin instance.
     ///
-    /// - Parameter archivingStatusDataSource: The data source that will be updated with archiving status changes.
+    /// - Parameter archivingStatusDataSource: The data source updated with recording and
+    ///   post-call transcription status changes.
     public init(archivingStatusDataSource: ArchivingStatusDataSource) {
         self.archivingStatusDataSource = archivingStatusDataSource
     }
@@ -69,13 +70,15 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
             return
         }
 
+        let kind = ArchiveKind(archiveName: payload.kind)
+
         switch payload.action {
         case "start":
             if let archivingID = payload.archivingID {
-                archivingStatusDataSource.set(archivingState: .archiving(archivingID))
+                archivingStatusDataSource.set(archivingState: .archiving(archivingID), for: kind)
             }
         case "stop":
-            archivingStatusDataSource.set(archivingState: .idle)
+            archivingStatusDataSource.set(archivingState: .idle, for: kind)
         default:
             break
         }
@@ -93,5 +96,6 @@ public final class VonageArchivingPlugin: VonagePlugin, VonageSignalHandler {
     private struct ArchivingPayload: Decodable {
         let action: String
         let archivingID: String?
+        let kind: String?
     }
 }

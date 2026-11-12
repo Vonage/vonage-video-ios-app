@@ -8,7 +8,7 @@ import Foundation
 ///
 /// Populated from `OTSubscriberKitVideoNetworkStats` via the SDK's
 /// `networkStatsDelegate` callback.
-public struct VideoReceiveStats: Equatable {
+public struct VideoReceiveStats: Equatable, Sendable {
     /// Total video packets received since the stream started.
     public let packetsReceived: UInt64
     /// Total video packets lost in the receive direction.

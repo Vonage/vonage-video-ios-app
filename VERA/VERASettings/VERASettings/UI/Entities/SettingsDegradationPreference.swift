@@ -21,7 +21,7 @@ import Foundation
 /// and `Equatable` for comparison in tests and SwiftUI diffing.
 ///
 /// - SeeAlso: ``DegradationPreference``
-public enum SettingsDegradationPreference: Int, Codable, Equatable, Identifiable, CaseIterable {
+public enum SettingsDegradationPreference: Int, Codable, Equatable, Identifiable, CaseIterable, Sendable {
 
     /// Default value — the video engine decides the optimal degradation preference.
     /// Maps to `DegradationPreference.notSet`.

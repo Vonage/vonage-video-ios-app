@@ -7,7 +7,7 @@ import Foundation
 /// A logging strategy that writes log events to a file with automatic rotation.
 ///
 ///
-/// Thread-safe: uses `NSLock` to serialize file I/O.
+/// Thread-safe per instance: uses `NSLock` to serialize file I/O. Use one instance per file.
 ///
 /// ```swift
 /// let fileStrategy = FileLogStrategy(
@@ -24,6 +24,7 @@ public final class FileLogStrategy: LoggerStrategy, @unchecked Sendable {
 
     private let fileURL: URL
     private let maxFileSize: UInt64
+    // Configured only in init; DateFormatter is thread-safe on supported iOS versions.
     private let dateFormatter: DateFormatter
     private let lock = NSLock()
 

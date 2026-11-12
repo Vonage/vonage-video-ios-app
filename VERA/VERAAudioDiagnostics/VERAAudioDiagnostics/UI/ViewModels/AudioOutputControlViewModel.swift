@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 
 /// ViewModel dedicated to the audio output control panel.
 ///
@@ -44,8 +45,7 @@ public final class AudioOutputControlViewModel {
     private func setupAudioLevelSubscription() {
         guard audioLevelCancellable == nil else { return }
         audioLevelCancellable = speakerTestService.audioLevelPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] level in
+            .sinkOnMainActor { [weak self] level in
                 self?.currentAudioLevel = level
             }
     }

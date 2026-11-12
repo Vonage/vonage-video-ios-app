@@ -12,7 +12,7 @@
 /// The values represent frames per second.
 ///
 /// - SeeAlso: ``PublisherAdvancedSettings``
-public enum VideoFrameRate: Int {
+public enum VideoFrameRate: Int, Sendable {
     /// 30 frames per second - standard video quality.
     case rate30FPS = 30
 

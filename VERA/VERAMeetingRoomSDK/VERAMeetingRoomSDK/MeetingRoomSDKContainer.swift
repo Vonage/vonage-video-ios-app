@@ -32,6 +32,7 @@ import VERAVonageSettingsPlugin
 /// Created by ``MeetingRoomBuilder`` based on the enabled features.
 /// The container lazily instantiates only the dependencies required
 /// by the features the consumer enabled.
+@MainActor
 final class MeetingRoomSDKContainer {
 
     let baseURL: URL
@@ -154,7 +155,7 @@ final class MeetingRoomSDKContainer {
         if enabledFeatures.contains(.chat) {
             registry.registerPlugin(plugin: vonageChatPlugin)
         }
-        if enabledFeatures.contains(.archiving) {
+        if enabledFeatures.contains(.archiving) || enabledFeatures.contains(.postCallTranscription) {
             registry.registerPlugin(plugin: vonageArchivingPlugin)
         }
         if enabledFeatures.contains(.captions) {
@@ -205,6 +206,7 @@ final class MeetingRoomSDKContainer {
     lazy var sendChatMessageUseCase: SendChatMessageUseCase =
         VonageSendChatMessageUseCase(vonageChatPlugin: vonageChatPlugin)
 
+    @MainActor
     lazy var chatBadgeButtonViewModel = ChatBadgeButtonViewModel(
         chatMessagesObserver: chatMessagesRepository)
 
@@ -342,21 +344,39 @@ final class MeetingRoomSDKContainer {
 
     lazy var statsRepository: any StatsRepository = InMemoryStatsRepository()
 
+    var isCaptionsTranslationEnabled: Bool {
+        enabledFeatures.contains(.captions) && enabledFeatures.contains(.captionsTranslation)
+    }
+
     lazy var vonageSettingsPlugin = VonageSettingsPlugin(
         settingsRepository: settingsRepository,
-        statsWriter: statsRepository)
+        statsWriter: statsRepository,
+        isCaptionsTranslationEnabled: isCaptionsTranslationEnabled)
 
+    @MainActor
     lazy var defaultSpeakerTestService = DefaultSpeakerTestService()
 
+    @MainActor
     lazy var audioDiagnosticsFactory = AudioDiagnosticsFactory(
         speakerTestService: defaultSpeakerTestService
     )
 
     lazy var settingsFactory = SettingsFactory(
         repository: settingsRepository,
-        statsDataSource: statsRepository
+        statsDataSource: statsRepository,
+        isCaptionsTranslationAvailable: isCaptionsTranslationEnabled,
+        showsTranscriptionSummary: enabledFeatures.contains(.postCallTranscription)
     )
 
+    var loadTranscriptionDefaults: () async -> TranscriptionOptions {
+        guard enabledFeatures.contains(.settings) else { return { .default } }
+        let repository = settingsRepository
+        return {
+            TranscriptionOptions(hasSummary: await repository.getPreferences().transcriptionSummaryEnabled)
+        }
+    }
+
+    @MainActor
     lazy var feedbackFactory = FeedbackFactory(
         baseURL: baseURL,
         httpClient: httpClient

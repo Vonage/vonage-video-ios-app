@@ -17,6 +17,27 @@ let project = Project(
                 .project(target: "VERADomain", path: "../VERADomain")
             ],
             settings: createBaseBuildSettings()
+        ),
+        .target(
+            name: "VERAConfigurationTests",
+            destinations: [.iPhone, .iPad, .mac],
+            product: .unitTests,
+            bundleId: "com.vonage.VERAConfigurationTests",
+            deploymentTargets: multiplatformDeploymentTarget,
+            sources: ["VERAConfigurationTests/**"],
+            dependencies: [
+                .target(name: "VERAConfiguration")
+            ],
+            settings: createBaseBuildSettings()
+        ),
+    ],
+    schemes: [
+        .scheme(
+            name: "VERAConfigurationTests",
+            shared: true,
+            buildAction: .buildAction(targets: ["VERAConfigurationTests"]),
+            testAction: .targets(["VERAConfigurationTests"], configuration: .debug),
+            runAction: .runAction(configuration: .debug)
         )
     ]
 )

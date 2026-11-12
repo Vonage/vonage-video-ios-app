@@ -56,7 +56,7 @@ struct ChatPanelInput: View {
             TextField(
                 "Type a message...",
                 text: $messageText,
-                prompt: Text("Type a message...").secondaryForeground(color: theme.textTertiary),
+                prompt: Text("Type a message...").foregroundStyle(theme.textTertiary),
                 axis: .vertical
             )
             .lineLimit(1...3)
@@ -81,16 +81,6 @@ struct ChatPanelInput: View {
 
         onSendMessage(trimmedMessage)
         messageText = ""
-    }
-}
-
-extension Text {
-    func secondaryForeground(color: Color) -> Text {
-        if #available(iOS 17.0, *) {
-            return self.foregroundStyle(color)
-        } else {
-            return self.foregroundColor(color)
-        }
     }
 }
 

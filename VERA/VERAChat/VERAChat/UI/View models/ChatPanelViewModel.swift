@@ -5,8 +5,9 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 
-public struct ChatPanelState: Equatable {
+public struct ChatPanelState: Equatable, Sendable {
     public let messages: [UIChatMessage]
 
     public static let initial = ChatPanelState(messages: [])
@@ -16,11 +17,12 @@ public struct ChatPanelState: Equatable {
     }
 }
 
-public enum ChatPanelViewState: Equatable {
+public enum ChatPanelViewState: Equatable, Sendable {
     case content(ChatPanelState)
     case loading
 }
 
+@MainActor
 @Observable
 public final class ChatPanelViewModel {
     @ObservationIgnored
@@ -46,11 +48,10 @@ public final class ChatPanelViewModel {
         isInitialised = true
 
         chatMessagesRepository.observeMessages()
-            .map { messages in
+            .map { @Sendable messages in
                 messages.map { $0.toUIChatMessage }
             }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] messages in
+            .sinkOnMainActor { [weak self] messages in
                 guard let self else { return }
                 self.state = .content(.init(messages: messages))
             }

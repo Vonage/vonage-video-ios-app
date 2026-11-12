@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
 /// Shows a floating stats overlay when the user has enabled the overlay toggle.
@@ -12,6 +13,7 @@ import VERADomain
 /// Observes ``PublisherSettingsRepository/preferencesPublisher`` to toggle visibility,
 /// and ``StatsDataSource/statsPublisher`` to display real-time network metrics.
 @Observable
+@MainActor
 public final class StatsOverlayViewModel {
 
     // MARK: - Observable state
@@ -91,8 +93,7 @@ public final class StatsOverlayViewModel {
     private func observeSettings() {
         settingsRepository.preferencesPublisher
             .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] preferences in
+            .sinkOnMainActor { [weak self] preferences in
                 guard let self else { return }
 
                 self.maxAudioBitrate = preferences.audioBitratePreference.customValue
@@ -125,7 +126,7 @@ public final class StatsOverlayViewModel {
         }
 
         throttledPublisher
-            .sink { [weak self] stats in
+            .sinkOnMainActor { [weak self] stats in
                 guard let self, self.isActive else { return }
 
                 self.statsText = self.formatStats(stats, maxAudioBitrate: self.maxAudioBitrate)

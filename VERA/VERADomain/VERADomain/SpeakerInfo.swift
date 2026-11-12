@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct SpeakerInfo {
+public struct SpeakerInfo: Sendable {
     public let id: String
     public let audioLevel: Float
     public let isMicEnabled: Bool

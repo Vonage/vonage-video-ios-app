@@ -15,7 +15,7 @@
 /// - `customBitrate` (3): User-defined maximum bitrate
 ///
 /// - SeeAlso: ``PublisherAdvancedSettings``
-public enum VideoBitratePreset: Int {
+public enum VideoBitratePreset: Int, Sendable {
     /// Default adaptive bitrate - the SDK optimizes quality automatically.
     case `default` = 0
 

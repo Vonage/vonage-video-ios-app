@@ -5,7 +5,7 @@
 import Foundation
 
 /// Represents an identity provider available for sign-in.
-public struct IDProvider: Identifiable, Equatable {
+public struct IDProvider: Identifiable, Equatable, Sendable {
     public let id: String
     public let displayName: String
 
