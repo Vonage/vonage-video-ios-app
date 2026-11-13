@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 
-public protocol CameraDevicesRepository {
+@MainActor
+public protocol CameraDevicesRepository: Sendable {
     var observeAvailableDevices: AnyPublisher<[CameraDevice], Never> { get }
 }

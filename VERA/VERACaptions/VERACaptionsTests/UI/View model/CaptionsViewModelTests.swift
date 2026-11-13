@@ -360,11 +360,11 @@ struct CaptionsViewModelTests {
 // MARK: - Test Doubles
 
 /// Mock observer that publishes captions for deterministic testing.
-private final class MockCaptionsObserver: CaptionsObserver, @unchecked Sendable {
-    nonisolated(unsafe) private let subject = CurrentValueSubject<[CaptionItem], Never>([])
+private final class MockCaptionsObserver: CaptionsObserver {
+    private let subject = CurrentValueRelay<[CaptionItem], Never>([])
 
     nonisolated var captionsReceived: AnyPublisher<[CaptionItem], Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func send(_ captions: [CaptionItem]) {

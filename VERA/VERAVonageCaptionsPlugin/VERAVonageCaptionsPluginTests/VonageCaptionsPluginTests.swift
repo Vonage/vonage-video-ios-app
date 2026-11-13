@@ -224,35 +224,20 @@ struct VonageCaptionsPluginTests {
 
     // MARK: - Test Helpers
 
-    /// Waits for a condition to become true by yielding to the main actor's run loop.
+    /// Polls a condition until it holds or the deadline passes.
     ///
-    /// Instead of polling with sleeps, this yields control back to the main actor
-    /// multiple times, allowing pending work (like Combine sink closures) to execute.
-    /// This is deterministic and avoids race conditions under varying system loads.
+    /// The plugin forwards values on tasks outside the main actor, so the wait is bounded
+    /// by time rather than by a number of main-actor yields, which a loaded CI runner can
+    /// exhaust before those tasks are scheduled.
     private func waitUntil(
-        timeout: TimeInterval = 0.5,
+        timeout: Duration = .seconds(2),
         _ condition: @escaping @Sendable @MainActor () -> Bool
     ) async throws {
-        let deadline = Date().addingTimeInterval(timeout)
-        var iterations = 0
-        let maxIterations = 100  // Safety limit
-
-        while iterations < maxIterations {
-            // Check condition on MainActor
-            if await condition() {
-                return
-            }
-
-            guard Date() < deadline else {
-                throw WaitTimeoutError()
-            }
-
-            // Yield to allow MainActor work to process
-            await Task.yield()
-            iterations += 1
+        let deadline = ContinuousClock.now + timeout
+        while !condition() {
+            guard ContinuousClock.now < deadline else { throw WaitTimeoutError() }
+            try await Task.sleep(for: .milliseconds(1))
         }
-
-        throw WaitTimeoutError()
     }
 
     private struct WaitTimeoutError: Error, CustomStringConvertible {

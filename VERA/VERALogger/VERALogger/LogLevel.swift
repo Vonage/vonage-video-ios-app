@@ -7,7 +7,7 @@ import Foundation
 /// Severity levels for log events, ordered from least to most severe.
 ///
 /// Conforms to `Comparable` so strategies can filter by minimum level.
-public enum LogLevel: Int, Sendable, Comparable, CaseIterable, CustomStringConvertible {
+public enum LogLevel: Int, Codable, Sendable, Comparable, CaseIterable, CustomStringConvertible {
     case verbose = 0
     case debug = 1
     case info = 2

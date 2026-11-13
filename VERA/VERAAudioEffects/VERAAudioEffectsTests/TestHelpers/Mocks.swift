@@ -5,16 +5,22 @@
 import Combine
 import SwiftUI
 import VERADomain
-import VERATestHelpers
+
+@testable import VERATestHelpers
 
 final class NoiseSuppressionStatusDataSourceSpy: NoiseSuppressionStatusDataSource {
-    private let _noiseSuppressionState = PassthroughSubject<NoiseSuppressionState, Never>()
+    private let _noiseSuppressionState = EventRelay<NoiseSuppressionState, Never>()
     var noiseSuppressionState: AnyPublisher<NoiseSuppressionState, Never> {
-        _noiseSuppressionState.eraseToAnyPublisher()
+        _noiseSuppressionState.publisher
     }
 
-    var setState_callCount = 0
-    var setState_lastValue: NoiseSuppressionState?
+    private struct Observations: Sendable {
+        var count = 0
+        var lastValue: NoiseSuppressionState?
+    }
+    private let observations = TestLockedValue(Observations())
+    var setState_callCount: Int { observations.withValue { $0.count } }
+    var setState_lastValue: NoiseSuppressionState? { observations.withValue { $0.lastValue } }
     private let shouldThrowError: Bool
 
     public init(shouldThrowError: Bool = false) {
@@ -24,8 +30,10 @@ final class NoiseSuppressionStatusDataSourceSpy: NoiseSuppressionStatusDataSourc
     func set(state: NoiseSuppressionState) {
         guard !shouldThrowError else { return }
 
-        setState_callCount += 1
-        setState_lastValue = state
+        observations.withValue {
+            $0.count += 1
+            $0.lastValue = state
+        }
         _noiseSuppressionState.send(state)
     }
 }
