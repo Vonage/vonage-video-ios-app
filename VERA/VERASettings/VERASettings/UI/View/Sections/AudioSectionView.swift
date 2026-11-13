@@ -39,6 +39,10 @@ struct AudioSectionView: View {
     private var compactBody: some View {
         VStack(alignment: .leading, spacing: 16) {
             audioBitrateContent
+            if viewModel.advancedNoiseSuppressionAvailable {
+                SettingsDivider()
+                advancedNoiseSuppressionContent
+            }
             SettingsDivider()
             if isInActiveCall {
                 ActiveCallWarningText()
@@ -64,8 +68,6 @@ struct AudioSectionView: View {
     private var regularBody: some View {
         Section {
             audioBitrateContent
-        } header: {
-            Text("Audio Bitrate".localized)
         } footer: {
             VStack(alignment: .leading, spacing: 8) {
                 Text(
@@ -77,10 +79,14 @@ struct AudioSectionView: View {
             }
         }
 
+        if viewModel.advancedNoiseSuppressionAvailable {
+            Section {
+                advancedNoiseSuppressionContent
+            }
+        }
+
         Section {
             opusDtxContent
-        } header: {
-            Text("Discontinuous Transmission".localized)
         } footer: {
             ActiveCallFooter(
                 isInActiveCall: isInActiveCall,
@@ -91,8 +97,6 @@ struct AudioSectionView: View {
 
         Section {
             publisherFallbackContent
-        } header: {
-            Text("Publisher Fallback".localized)
         } footer: {
             ActiveCallFooter(
                 isInActiveCall: isInActiveCall,
@@ -103,8 +107,6 @@ struct AudioSectionView: View {
 
         Section {
             subscriberFallbackContent
-        } header: {
-            Text("Subscriber Fallback".localized)
         } footer: {
             ActiveCallFooter(
                 isInActiveCall: isInActiveCall,
@@ -163,16 +165,23 @@ struct AudioSectionView: View {
         }
     }
 
+    private var advancedNoiseSuppressionContent: some View {
+        Toggle(
+            "Advanced Noise Suppression".localized, isOn: $viewModel.settingsPreference.advancedNoiseSuppressionEnabled
+        )
+        .accessibilityIdentifier(SettingsAccessibilityID.advancedNoiseSuppressionToggle)
+    }
+
     @ViewBuilder
     private var opusDtxContent: some View {
         if isInActiveCall {
             LockedToggleRow(
-                title: "Enable Opus Dtx".localized,
+                title: "Enable Opus DTX".localized,
                 value: viewModel.settingsPreference.opusDtxEnabled
             )
             .accessibilityIdentifier(SettingsAccessibilityID.opusDtxLocked)
         } else {
-            Toggle("Enable Opus Dtx".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
+            Toggle("Enable Opus DTX".localized, isOn: $viewModel.settingsPreference.opusDtxEnabled)
                 .accessibilityIdentifier(SettingsAccessibilityID.opusDtxToggle)
         }
     }

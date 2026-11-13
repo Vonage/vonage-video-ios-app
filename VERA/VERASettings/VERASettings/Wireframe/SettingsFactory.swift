@@ -24,6 +24,8 @@ public final class SettingsFactory {
     /// Shared repository for reading and writing publisher settings.
     private let repository: PublisherSettingsRepository
 
+    private let advancedNoiseSuppressionAvailable: Bool
+
     /// Shared data source for real-time network statistics.
     private let statsDataSource: StatsDataSource
 
@@ -44,10 +46,12 @@ public final class SettingsFactory {
     public init(
         repository: PublisherSettingsRepository,
         statsDataSource: StatsDataSource,
+        advancedNoiseSuppressionAvailable: Bool = true,
         isCaptionsTranslationAvailable: Bool = false,
         showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
+        self.advancedNoiseSuppressionAvailable = advancedNoiseSuppressionAvailable
         self.statsDataSource = statsDataSource
         self.isCaptionsTranslationAvailable = isCaptionsTranslationAvailable
         self.showsTranscriptionSummary = showsTranscriptionSummary
@@ -65,6 +69,7 @@ public final class SettingsFactory {
     public func makeSettingsView() -> SettingsView {
         let viewModel = SettingsViewModel(
             repository: repository,
+            advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable,
             showsTranscriptionSummary: showsTranscriptionSummary)
         return SettingsView(viewModel: viewModel, isCaptionsTranslationAvailable: isCaptionsTranslationAvailable)
     }
@@ -123,6 +128,7 @@ public final class SettingsFactory {
     public func makeMeetingRoomViewModels() -> (SettingsViewModel, StatisticsViewModel) {
         let viewModel = SettingsViewModel(
             repository: repository,
+            advancedNoiseSuppressionAvailable: advancedNoiseSuppressionAvailable,
             showsTranscriptionSummary: showsTranscriptionSummary)
         let statisticsViewModel = StatisticsViewModel(
             statsDataSource: statsDataSource,
