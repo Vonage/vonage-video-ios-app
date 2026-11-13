@@ -23,7 +23,8 @@ public struct ArchiveUIData: Identifiable, Sendable {
     public let subtitle: String
     public let downloadState: DownloadState
 
-    public var onDownload: (@Sendable () -> Void)?
+    /// Invoked by the recording list on the UI actor.
+    public var onDownload: (@MainActor @Sendable () -> Void)?
 
     public init(
         id: UUID,

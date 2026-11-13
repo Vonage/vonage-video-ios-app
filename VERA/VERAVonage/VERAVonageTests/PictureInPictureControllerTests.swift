@@ -15,7 +15,7 @@ struct PictureInPictureControllerTests {
 
     private struct StubError: Swift.Error {}
 
-    private func makeAVController() -> AVPictureInPictureController {
+    private func makeAVController() -> AVPictureInPictureController? {
         let contentViewController = AVPictureInPictureVideoCallViewController()
         let source = AVPictureInPictureController.ContentSource(
             activeVideoCallSourceView: UIView(),
@@ -140,42 +140,23 @@ struct PictureInPictureControllerTests {
         _ = sut.canStartPictureInPicture
     }
 
-    @Test("Delegate callbacks update state and fire the closures")
-    func delegateCallbacks() {
+    @Test(
+        "Callbacks from an unrelated controller cannot start or stop this lifetime",
+        .enabled(if: AVPictureInPictureController.isPictureInPictureSupported())
+    )
+    func unrelatedControllerCallbacksAreIgnored() throws {
         let sut = PictureInPictureController()
-        sut.configure(with: UIView())
-        let controller = makeAVController()
-
-        var started = false
-        var stopped = false
-        var possibleChanged = false
-        var failed = false
-        sut.onPictureInPictureStateDidStart = { started = true }
-        sut.onPictureInPictureStateDidStop = { stopped = true }
-        sut.onPictureInPicturePossibleDidChange = { possibleChanged = true }
-        sut.onPictureInPictureFailed = { _ in failed = true }
+        let controller = try #require(makeAVController())
+        var callbacks = 0
+        sut.onPictureInPictureStateDidStart = { callbacks += 1 }
+        sut.onPictureInPictureStateDidStop = { callbacks += 1 }
+        sut.onPictureInPictureFailed = { _ in callbacks += 1 }
 
         sut.pictureInPictureControllerWillStartPictureInPicture(controller)
-        #expect(sut.isInPictureInPicture == true)
-        #expect(started)
-
-        sut.pictureInPictureControllerDidStartPictureInPicture(controller)
-
         sut.pictureInPictureControllerDidStopPictureInPicture(controller)
-        #expect(sut.isInPictureInPicture == false)
-        #expect(stopped)
-
-        sut.pictureInPictureControllerIsPictureInPicturePossibleDidChange(controller)
-        #expect(possibleChanged)
-
-        var restored = false
-        sut.pictureInPictureController(
-            controller,
-            restoreUserInterfaceForPictureInPictureStopWithCompletionHandler: { restored = $0 })
-        #expect(restored)
-
         sut.pictureInPictureController(controller, failedToStartPictureInPictureWithError: StubError())
-        #expect(failed)
-        #expect(sut.isInPictureInPicture == false)
+
+        #expect(!sut.isInPictureInPicture)
+        #expect(callbacks == 0)
     }
 }
