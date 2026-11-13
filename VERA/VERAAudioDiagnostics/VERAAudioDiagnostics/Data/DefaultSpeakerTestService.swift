@@ -4,6 +4,7 @@
 
 import AVFoundation
 import Combine
+import os
 import os.log
 
 /// Default implementation of ``SpeakerTestService`` that plays a short tone
@@ -28,8 +29,11 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
 
     private var player: AVAudioPlayer?
     private var levelTimer: Timer?
-    private var isPlaying: Bool = false
+    private var wantsPlayback: Bool = false
+    /// Lock-protected so the nonisolated route handler can tag a callback with the run it belongs to.
+    private nonisolated let routeRestartGeneration = OSAllocatedUnfairLock(initialState: UUID())
     private var isObservingAudioRoutes: Bool = false
+    private let notificationCenter: NotificationCenter
     private let generateTonePlayerUseCase: GenerateTonePlayerUseCase
 
     private let audioLevelSubject = PassthroughSubject<Float, Never>()
@@ -38,8 +42,10 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     }
 
     public init(
-        generateTonePlayerUseCase: GenerateTonePlayerUseCase = DefaultGenerateTonePlayerUseCase()
+        generateTonePlayerUseCase: GenerateTonePlayerUseCase = DefaultGenerateTonePlayerUseCase(),
+        notificationCenter: NotificationCenter = .default
     ) {
+        self.notificationCenter = notificationCenter
         self.generateTonePlayerUseCase = generateTonePlayerUseCase
         super.init()
     }
@@ -50,7 +56,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
             player?.stop()
             #if os(iOS)
                 if isObservingAudioRoutes {
-                    NotificationCenter.default.removeObserver(
+                    notificationCenter.removeObserver(
                         self,
                         name: AVAudioSession.routeChangeNotification,
                         object: nil
@@ -62,7 +68,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
         deinit {
             #if os(iOS)
                 if isObservingAudioRoutes {
-                    NotificationCenter.default.removeObserver(
+                    notificationCenter.removeObserver(
                         self,
                         name: AVAudioSession.routeChangeNotification,
                         object: nil
@@ -80,7 +86,7 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     public func startObservingAudioRoutes() {
         #if os(iOS)
             if !isObservingAudioRoutes {
-                NotificationCenter.default.addObserver(
+                notificationCenter.addObserver(
                     self,
                     selector: #selector(handleRouteChange),
                     name: AVAudioSession.routeChangeNotification,
@@ -96,9 +102,10 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     /// Removes the observer before a later playback can register it again.
     /// On macOS this method has no effect.
     public func stopObservingAudioRoutes() {
+        routeRestartGeneration.withLock { $0 = UUID() }
         #if os(iOS)
             guard isObservingAudioRoutes else { return }
-            NotificationCenter.default.removeObserver(
+            notificationCenter.removeObserver(
                 self,
                 name: AVAudioSession.routeChangeNotification,
                 object: nil
@@ -120,11 +127,13 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
             // Restart playback for relevant route changes
             switch reason {
             case .newDeviceAvailable, .oldDeviceUnavailable, .override, .categoryChange:
-                // Restart playback on the new route
+                // A route callback belongs to the playback run that was active when it arrived.
+                let generation = routeRestartGeneration.withLock { $0 }
                 DispatchQueue.main.asyncAfter(
                     deadline: .now() + AudioDiagnosticsConstants.RouteChange.restartDelay
                 ) { [weak self] in
-                    self?.restartPlayback()
+                    guard let self, self.routeRestartGeneration.withLock({ $0 }) == generation else { return }
+                    self.restartPlayback()
                 }
             default:
                 break
@@ -133,20 +142,21 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     #endif
 
     public func playTestSound() {
-        isPlaying = true
+        routeRestartGeneration.withLock { $0 = UUID() }
+        wantsPlayback = true
         startObservingAudioRoutes()
         startAudioAndMonitoring()
     }
 
     public func stopTestSound() {
-        isPlaying = false
+        wantsPlayback = false
         stopObservingAudioRoutes()
         stopMonitoring()
         player?.stop()
     }
 
     private func restartPlayback() {
-        guard isPlaying else { return }
+        guard wantsPlayback else { return }
 
         startAudioAndMonitoring()
     }
@@ -154,7 +164,6 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     private func startAudioAndMonitoring() {
         // Stop any existing playback without losing the new playback request.
         stopMonitoring()
-        isPlaying = true
         player?.stop()
 
         configureAudioSession()
@@ -167,10 +176,10 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
                 newPlayer.numberOfLoops = AudioDiagnosticsConstants.AudioPlayback.infiniteLoops
                 newPlayer.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
                 newPlayer.prepareToPlay()
-                newPlayer.play()
                 player = newPlayer
             } catch {
                 logger.error("Failed to generate tone player: \(error.localizedDescription)")
+                wantsPlayback = false
                 stopMonitoring()
                 return
             }
@@ -178,10 +187,13 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
             // Reuse existing player - restart playback
             player?.currentTime = 0
             player?.volume = AudioDiagnosticsConstants.AudioPlayback.maxVolume
-            player?.play()
         }
 
-        // Start monitoring levels
+        guard let player, player.play() else {
+            wantsPlayback = false
+            stopMonitoring()
+            return
+        }
         startMonitoring()
     }
 
@@ -246,7 +258,6 @@ public final class DefaultSpeakerTestService: NSObject, SpeakerTestService {
     }
 
     private func stopMonitoring() {
-        isPlaying = false
         levelTimer?.invalidate()
         levelTimer = nil
         audioLevelSubject.send(AudioDiagnosticsConstants.AudioPlayback.silentAudioLevel)
@@ -292,7 +303,7 @@ extension DefaultSpeakerTestService: AVAudioPlayerDelegate {
         let playerID = ObjectIdentifier(player)
         DispatchQueue.main.async { [weak self] in
             guard let self, self.player.map(ObjectIdentifier.init) == playerID else { return }
-            self.stopMonitoring()
+            self.stopTestSound()
         }
     }
 
@@ -302,7 +313,7 @@ extension DefaultSpeakerTestService: AVAudioPlayerDelegate {
         DispatchQueue.main.async { [weak self] in
             guard let self, self.player.map(ObjectIdentifier.init) == playerID else { return }
             self.logger.error("Audio player decode error: \(message)")
-            self.stopMonitoring()
+            self.stopTestSound()
         }
     }
 }
