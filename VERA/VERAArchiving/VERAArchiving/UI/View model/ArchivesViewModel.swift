@@ -10,7 +10,9 @@ import VERADomain
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
-    private var cancellables = Set<AnyCancellable>()
+    @MainActor private var archiveObservation: AnyCancellable?
+    @ObservationIgnored
+    @MainActor private var loadRequestID: UUID?
     @ObservationIgnored
     private let sessionKeyProvider: SessionKeyProvider
     @ObservationIgnored
@@ -42,12 +44,17 @@ public final class ArchivesViewModel {
     /// Starts loading the archives of the current session, replacing any earlier load.
     ///
     /// Clears the previous load's error so it is not shown again for a later meeting.
-    @BackgroundActor
+    @MainActor
     public func loadData() async {
-        cancellables.removeAll()
-        await MainActor.run { error = nil }
-
-        await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
+        archiveObservation?.cancel()
+        archiveObservation = nil
+        let requestID = UUID()
+        loadRequestID = requestID
+        error = nil
+        let publisher = await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
+        guard loadRequestID == requestID else { return }
+        archiveObservation =
+            publisher
             .receive(on: DispatchQueue.main)
             .map { [weak self] archives in
                 self?.mapToUIArchives(archives) ?? []
@@ -56,17 +63,18 @@ public final class ArchivesViewModel {
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
                         Task { @MainActor [weak self] in
+                            guard self?.loadRequestID == requestID else { return }
                             self?.error = AlertItem.goodbyeError(error.localizedDescription)
                         }
                     }
                 },
                 receiveValue: { [weak self] archives in
                     Task { @MainActor [weak self] in
+                        guard self?.loadRequestID == requestID else { return }
                         self?.archives = archives
                     }
                 }
             )
-            .store(in: &cancellables)
     }
 
     public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
