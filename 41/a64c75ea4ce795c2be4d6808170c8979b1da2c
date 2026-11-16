@@ -1,0 +1,21 @@
+VERA/Dependencies.json
+  s_78c68e2fb7ed65::t_4716647c3dfa45 3-4
+VERA/Tuist/Package.swift
+  s_78c68e2fb7ed65::t_f9e2243ca97d58 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "41a64c75ea4ce795c2be4d6808170c8979b1da2c",
+  "prompts": {},
+  "sessions": {
+    "s_78c68e2fb7ed65": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_cf5efe7c-377a-4ca2-971a-a7813893eeea",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
