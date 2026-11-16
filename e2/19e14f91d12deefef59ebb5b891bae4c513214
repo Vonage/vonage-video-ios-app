@@ -1,0 +1,21 @@
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  s_78c68e2fb7ed65::t_b74c22777cea36 11-12
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  s_78c68e2fb7ed65::t_2ba423846bc02e 86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "e219e14f91d12deefef59ebb5b891bae4c513214",
+  "prompts": {},
+  "sessions": {
+    "s_78c68e2fb7ed65": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_cf5efe7c-377a-4ca2-971a-a7813893eeea",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
