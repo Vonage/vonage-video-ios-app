@@ -1,7 +1,9 @@
 VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
   h_5ddc9d372ac6a1 11-12
+  s_78c68e2fb7ed65::t_b74c22777cea36 11-12
 VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
   h_5ddc9d372ac6a1 86
+  s_78c68e2fb7ed65::t_2ba423846bc02e 86
 ---
 {
   "schema_version": "authorship/3.0.0",
@@ -11,6 +13,16 @@ VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.sw
   "humans": {
     "h_5ddc9d372ac6a1": {
       "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_78c68e2fb7ed65": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_cf5efe7c-377a-4ca2-971a-a7813893eeea",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
     }
   }
 }
