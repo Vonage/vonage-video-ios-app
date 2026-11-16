@@ -1,0 +1,16 @@
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  h_5ddc9d372ac6a1 11-12
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  h_5ddc9d372ac6a1 86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "bfdfb47c4f2a54204d656b8a3471feb48390aed2",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
