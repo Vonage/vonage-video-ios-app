@@ -65,7 +65,7 @@ struct MeetingRoomCustomizationButtonPresenter: BottomItemPresentable {
 
 @MainActor
 @Observable
-final class MeetingRoomCustomizationProvider: MeetingRoomUIProvider {
+final class MeetingRoomCustomizationProvider: @preconcurrency MeetingRoomUIProvider {
     private(set) var items: [MeetingRoomCustomizationButtonItem] = []
     private(set) var isCustomBottomBarEnabled = false
 

@@ -26,11 +26,19 @@ private struct TranscriptionOptionsSheet: ViewModifier {
 
     @Bindable var viewModel: ArchiveButtonViewModel
 
+    @State private var contentHeight: CGFloat = 280
+
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $viewModel.isShowingTranscriptionOptions) {
                 TranscriptionStartOptionsScreen(viewModel: viewModel)
-                    .presentationDetents([.medium])
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { height in
+                        contentHeight = height
+                    }
+                    .presentationDetents([.height(contentHeight)])
                     .presentationBackground(theme.background)
             }
     }
