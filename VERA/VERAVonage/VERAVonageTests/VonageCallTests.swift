@@ -599,6 +599,51 @@ struct VonageCallTests {
         #expect(payloads.first?.contains(#""archivingID":"transcription-1""#) == true)
     }
 
+    // MARK: - Captions translation
+
+    @Test("Captions translation language is kept for late joiners and nil restores the original")
+    func captionsTranslationLanguageIsStoredAndReset() {
+        let sut = makeSUT()
+
+        sut.setCaptionsTranslationLanguage("es-ES")
+        #expect(sut.captionsTranslationLanguage == "es-ES")
+
+        sut.setCaptionsTranslationLanguage(nil)
+        #expect(sut.captionsTranslationLanguage == nil)
+    }
+
+    @Test("Own captions follow the translation language too")
+    func ownCaptionsFollowTheTranslationLanguage() async throws {
+        let sut = makeSUT()
+        guard let ownCaptions = try? VonageSubscriberFactory().makeSubscriber(OTStream()) else { return }
+        sut.publisherCaptions = ownCaptions
+
+        sut.setCaptionsTranslationLanguage("es-ES")
+        try await waitUntil { ownCaptions.otSubscriber.captionsTranslationLanguage == "es-ES" }
+
+        sut.setCaptionsTranslationLanguage(nil)
+        try await waitUntil { ownCaptions.otSubscriber.captionsTranslationLanguage == nil }
+    }
+
+    /// Waits for the main-actor task that applies the language to subscribers.
+    private func waitUntil(_ condition: () -> Bool) async throws {
+        for _ in 0..<100 where !condition() {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(condition())
+    }
+
+    @Test("Subscribers forward the translation language to the SDK subscriber")
+    func subscriberForwardsTranslationLanguageToSDK() throws {
+        guard let subscriber = try? VonageSubscriberFactory().makeSubscriber(OTStream()) else { return }
+
+        subscriber.setCaptionsTranslationLanguage("fr-FR")
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == "fr-FR")
+
+        subscriber.setCaptionsTranslationLanguage(nil)
+        #expect(subscriber.otSubscriber.captionsTranslationLanguage == nil)
+    }
+
     // MARK: - Test Helpers
 
     private func makeConnectedSUT(session: VonageSessionSpy) async throws -> VonageCall {

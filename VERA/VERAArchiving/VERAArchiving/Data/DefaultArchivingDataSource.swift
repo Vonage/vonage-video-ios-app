@@ -41,10 +41,12 @@ public struct DefaultArchivingDataSource: ArchivingDataSource {
             .appendingPathComponent("v2")
             .appendingPathComponent("startArchive")
 
+        let isTranscription = request.kind == .transcription
         let body = try jsonEncoder.encode(
             StartArchiveBody(
                 sessionKey: request.sessionKey,
-                withTranscription: request.kind == .transcription ? true : nil))
+                withTranscription: isTranscription ? true : nil,
+                archiveOptions: isTranscription ? request.transcriptionOptions.map(ArchiveOptionsBody.init) : nil))
         let data = try await httpClient.post(url, data: body)
         let response = try jsonDecoder.decode(TRPCResponse<StartArchiveResponse>.self, from: data)
 
@@ -73,6 +75,27 @@ private struct StartArchiveBody: Encodable {
     /// Asks the backend for a post-call transcription archive instead of a recording.
     /// Omitted for recordings so the request matches backends without transcription support.
     let withTranscription: Bool?
+    /// Replaces the backend's default transcription archive options. Omitted when none were chosen.
+    let archiveOptions: ArchiveOptionsBody?
+}
+
+/// The complete options of a transcription archive.
+private struct ArchiveOptionsBody: Encodable {
+    let name = ArchiveKind.transcription.rawValue
+    let multiArchiveTag = ArchiveKind.transcription.rawValue
+    let outputMode = "individual"
+    let hasAudio = true
+    let hasVideo = false
+    let hasTranscription = true
+    let transcriptionProperties: TranscriptionPropertiesBody
+
+    init(_ options: TranscriptionOptions) {
+        transcriptionProperties = TranscriptionPropertiesBody(hasSummary: options.hasSummary)
+    }
+}
+
+private struct TranscriptionPropertiesBody: Encodable {
+    let hasSummary: Bool
 }
 
 private struct StopArchiveBody: Encodable {
