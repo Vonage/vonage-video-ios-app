@@ -1,0 +1,25 @@
+VERA/VERAMeetingRoomSDK/README.md
+  s_ac25e04566bb64::t_c627dc2554b89e 13-14
+.claude/skills/setup/SKILL.md
+  s_ac25e04566bb64::t_acb6458a34af07 20
+README.md
+  s_ac25e04566bb64::t_2f4fae03795a91 101-102
+VERA/PREBUILTS_README.md
+  s_ac25e04566bb64::t_3552e46d4ca9f3 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "55876198f5ff2bc8247acf7dde7752da2e77e7d7",
+  "prompts": {},
+  "sessions": {
+    "s_ac25e04566bb64": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_0b65ea83-1990-4a2a-8755-fb7483e6bd0f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
