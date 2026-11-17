@@ -48,6 +48,7 @@ public struct WaitingRoomState: Equatable {
         self.publisher = publisher
     }
 
+    @MainActor
     public static let initial = WaitingRoomState(
         roomName: "",
         isMicrophoneEnabled: false,

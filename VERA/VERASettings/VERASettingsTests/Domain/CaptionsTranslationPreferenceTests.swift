@@ -83,7 +83,7 @@ struct CaptionsTranslationPreferenceTests {
                 == "Italiano (Italia)")
     }
 
-    @Test("Languages Amazon Translate cannot target, or the system cannot name, are not offered")
+    @Test("Languages the translation service cannot target, or the system cannot name, are not offered")
     func excludedLanguagesAreNotOffered() {
         let excluded = ["eu-ES", "gl-ES", "zu-ZA", "en-AB", "en-WL"]
 

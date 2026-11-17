@@ -17,7 +17,7 @@ appId: ${APP_ID}
 - tapOn:
     id: "room-name-input"
 
-- inputText: "testroom"
+- inputText: "${ROOM_NAME}"
 
 - tapOn:
     id: "join-waiting-room-button"
