@@ -26,7 +26,23 @@ struct OneToOneCallLayoutTests {
             let pair = try #require(content.oneToOneParticipants)
             #expect(pair.local.id == "self")
             #expect(pair.remote.id == "remote")
+            #expect(pair.floating(localCameraFillsScreen: false).id == "self")
+            #expect(pair.featured(localCameraFillsScreen: false).id == "remote")
         }
+    }
+
+    @Test("Showing the room fills the screen with the local camera and floats the other person")
+    func showingTheRoomFeaturesTheLocalCamera() throws {
+        let pair = try #require(OneToOneParticipants(participants: [local(), remote()]))
+        #expect(pair.featured(localCameraFillsScreen: true).id == "self")
+        #expect(pair.floating(localCameraFillsScreen: true).id == "remote")
+        let content = MeetingRoomContent(
+            participants: [local(), remote()],
+            layout: .activeSpeaker,
+            activeSpeakerId: nil,
+            localCameraMode: .dual
+        )
+        #expect(content.localCameraMode.isShowingTheRoom)
     }
 
     @Test("Screen sharing restores the existing layout and removing it restores the one-to-one layout")

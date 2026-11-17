@@ -161,6 +161,9 @@ public struct MeetingRoomActions {
     /// Switches between available local cameras.
     public let onCameraSwitch: @MainActor () -> Void
 
+    /// Hides or shows the front camera while the rear camera stays in the published frame.
+    public let onToggleFrontCamera: @MainActor () -> Void
+
     /// Ends the current call.
     public let onEndCall: @MainActor () -> Void
 
@@ -180,6 +183,7 @@ public struct MeetingRoomActions {
         onToggleMic: @escaping @MainActor () -> Void = {},
         onToggleCamera: @escaping @MainActor () -> Void = {},
         onCameraSwitch: @escaping @MainActor () -> Void = {},
+        onToggleFrontCamera: @escaping @MainActor () -> Void = {},
         onEndCall: @escaping @MainActor () -> Void = {},
         onToggleParticipants: @escaping @MainActor () -> Void = {},
         onToggleLayout: @escaping @MainActor () -> Void = {},
@@ -189,6 +193,7 @@ public struct MeetingRoomActions {
         self.onToggleMic = onToggleMic
         self.onToggleCamera = onToggleCamera
         self.onCameraSwitch = onCameraSwitch
+        self.onToggleFrontCamera = onToggleFrontCamera
         self.onEndCall = onEndCall
         self.onToggleParticipants = onToggleParticipants
         self.onToggleLayout = onToggleLayout

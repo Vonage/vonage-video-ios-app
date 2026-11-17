@@ -9,6 +9,7 @@ import VERADomain
 struct MeetingRoomContent: View {
     @State private var selfViewCorner = FloatingSelfViewCorner.bottomRight
     let selfViewBottomInset: CGFloat
+    let localCameraMode: LocalCameraMode
 
     var oneToOneParticipants: OneToOneParticipants? { OneToOneParticipants(participants: participants) }
 
@@ -20,9 +21,11 @@ struct MeetingRoomContent: View {
         participants: [UIParticipant],
         layout: MeetingRoomLayout,
         activeSpeakerId: String?,
-        selfViewBottomInset: CGFloat = 0
+        selfViewBottomInset: CGFloat = 0,
+        localCameraMode: LocalCameraMode = .front
     ) {
         self.selfViewBottomInset = selfViewBottomInset
+        self.localCameraMode = localCameraMode
         self.participants = participants
         self.layout = layout
         self.activeSpeakerId = activeSpeakerId
@@ -33,7 +36,8 @@ struct MeetingRoomContent: View {
             OneToOneCallLayout(
                 participants: pair,
                 corner: $selfViewCorner,
-                bottomInset: selfViewBottomInset
+                bottomInset: selfViewBottomInset,
+                localCameraFillsScreen: localCameraMode.isShowingTheRoom
             )
         } else if layout == .grid {
             AdaptiveGridLayout(

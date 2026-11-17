@@ -6,7 +6,7 @@ import Combine
 import Foundation
 import VERADomain
 
-public class MockCall: CallFacade, AudioMuteControllable {
+open class MockCall: CallFacade, AudioMuteControllable {
 
     public let _networkStatsPublisher = CurrentValueSubject<NetworkMediaStats, Never>(.empty)
     public lazy var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> =

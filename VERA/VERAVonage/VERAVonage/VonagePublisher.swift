@@ -110,26 +110,80 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
         set { otPublisher.publishVideo = newValue }
     }
 
+    /// Front, rear, or both cameras composed into the published frame.
+    ///
+    /// The setter is internal so tests can record a mode without opening the cameras.
+    public internal(set) var localCameraMode: LocalCameraMode = .front
+
+    private var dualCapturer: (any OTVideoCapture)?
+
     /// Current camera position (front/back).
     ///
-    /// Maps Vonage’s camera position to the app’s `CameraPosition` abstraction.
+    /// Dual capture reports `.back` because the rear camera fills the frame and the
+    /// published image must not be mirrored again.
     public var cameraPosition: CameraPosition {
-        get { otPublisher.cameraPosition == .front ? .front : .back }
-        set { otPublisher.cameraPosition = newValue == .front ? .front : .back }
+        get { localCameraMode == .front ? .front : .back }
+        set { apply(localCameraMode: newValue == .front ? .front : .back) }
     }
 
     /// Switches camera to a specific device by ID.
     ///
     /// - Parameter cameraDeviceID: One of the known `VonageCameraDevice` raw values.
+    ///   Selecting one camera leaves dual capture.
     public func switchCamera(to cameraDeviceID: String) {
         switch cameraDeviceID {
         case VonageCameraDevice.front.rawValue:
-            otPublisher.cameraPosition = .front
+            apply(localCameraMode: .front)
         case VonageCameraDevice.back.rawValue:
-            otPublisher.cameraPosition = .back
+            apply(localCameraMode: .back)
         default:
             break
         }
+    }
+
+    /// Publishes the requested camera mode on the current publisher.
+    ///
+    /// Dual capture replaces the SDK camera with one composed frame. A failure to open
+    /// both cameras falls back to the rear camera.
+    open func apply(localCameraMode mode: LocalCameraMode) {
+        switch mode {
+        case .front, .back:
+            tearDownDualCapture()
+            otPublisher.cameraPosition = mode == .front ? .front : .back
+            localCameraMode = mode
+        case .dual:
+            if localCameraMode == .dual, dualCapturer != nil {
+                break
+            }
+            startDualCapture()
+        }
+        didChangeLocalCameraMode()
+    }
+
+    /// Hook for renderers that mirror the front camera themselves.
+    open func didChangeLocalCameraMode() {}
+
+    private func startDualCapture() {
+        tearDownDualCapture()
+        let capturer = DualCaptureVideoCapturer()
+        otPublisher.cameraPosition = .back
+        otPublisher.videoCapture = capturer
+        dualCapturer = capturer
+        localCameraMode = .dual
+        guard !otPublisher.publishVideo || capturer.start() == 0 else {
+            tearDownDualCapture()
+            otPublisher.cameraPosition = .back
+            localCameraMode = .back
+            return
+        }
+    }
+
+    private func tearDownDualCapture() {
+        guard let capturer = dualCapturer else { return }
+        capturer.stop()
+        dualCapturer = nil
+        otPublisher.videoCapture = nil
+        capturer.releaseCapture()
     }
 
     /// Current scale behaviour.
@@ -264,6 +318,7 @@ open class VonagePublisher: NSObject, VERAPublisher, OTPublisherKitDelegate {
     ///
     /// Also replaces the participant’s `view` with an empty placeholder to release UI resources.
     open func cleanUp() {
+        tearDownDualCapture()
         participant = participant.withEmptyView
 
         cancellables.removeAll()
