@@ -6,6 +6,7 @@ let project = Project(
     options: defaultProjectOptions(),
     // Transformers SDK comes from Tuist/Package.swift via `.external` below.
     packages: [],
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERAMeetingRoomSDK",

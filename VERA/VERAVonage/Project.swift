@@ -7,6 +7,7 @@ let project = Project(
     packages: [
         .vonageVideoSDK
     ],
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERAVonage",
