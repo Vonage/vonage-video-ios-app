@@ -6,18 +6,20 @@ import Combine
 import Foundation
 import VERADomain
 
-public final class DefaultCaptionsStatusDataSource: CaptionsStatusDataSource, @unchecked Sendable {
-    private var _captionsState = CurrentValueSubject<CaptionsState, Never>(.disabled)
-    public lazy var captionsState: AnyPublisher<CaptionsState, Never> = _captionsState.eraseToAnyPublisher()
+public final class DefaultCaptionsStatusDataSource: CaptionsStatusDataSource {
+    private let _captionsState = CurrentValueRelay<CaptionsState, Never>(.disabled)
+    public var captionsState: AnyPublisher<CaptionsState, Never> {
+        _captionsState.publisher
+    }
 
     public init() {
     }
 
     public func set(captionsState: CaptionsState) {
-        _captionsState.value = captionsState
+        _captionsState.send(captionsState)
     }
 
     public func reset() {
-        _captionsState.value = .disabled
+        _captionsState.send(.disabled)
     }
 }

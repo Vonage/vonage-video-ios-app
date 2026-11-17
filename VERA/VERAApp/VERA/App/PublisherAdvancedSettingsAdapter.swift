@@ -6,22 +6,22 @@ import Combine
 import Foundation
 
 #if SETTINGS_ENABLED
+    import VERACommonUI
     import VERADomain
     import VERASettings
 
+    @MainActor
     final class PublisherAdvancedSettingsAdapter {
 
         var onChange: (() -> Void)?
 
         private var current: PublisherAdvancedSettings?
-        private var lastPreferences: PublisherSettingsPreferences?
         private var cancellable: AnyCancellable?
 
         func setup(with preferencesPublisher: AnyPublisher<PublisherSettingsPreferences, Never>) {
             cancellable =
                 preferencesPublisher
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] preferences in
+                .sinkOnMainActor { [weak self] preferences in
                     self?.apply(preferences)
                 }
         }
@@ -31,10 +31,11 @@ import Foundation
         }
 
         private func apply(_ preferences: PublisherSettingsPreferences) {
-            let isInitial = lastPreferences == nil
-            let changed = !isInitial && preferences != lastPreferences
-            lastPreferences = preferences
-            current = preferences.toPublisherAdvancedSettings()
+            // Compare the mapped publisher settings: non-publisher preferences (stats overlay,
+            // captions translation) must not reset the camera preview.
+            let settings = preferences.toPublisherAdvancedSettings()
+            let changed = current != nil && settings != current
+            current = settings
             if changed {
                 onChange?()
             }

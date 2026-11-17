@@ -5,9 +5,9 @@
 import SwiftUI
 
 /// Constants for AudioLevelIndicatorView layout and appearance
-enum AudioLevelIndicatorConstants {
+public enum AudioLevelIndicatorConstants {
     /// Size of the circular indicator
-    static let size: CGFloat = 32
+    public static let size: CGFloat = 32
 
     /// Width of each bar
     static let barWidth: CGFloat = 4

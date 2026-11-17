@@ -9,15 +9,17 @@ enum FeedbackFieldType {
     case text, info, image
 }
 
+@MainActor
 protocol FieldValidatable {
     var isValid: Bool { get }
     var validationMessage: String? { get }
 }
+@MainActor
 @Observable
 class FeedbackFieldViewModel: FieldValidatable {
     let maxChars: Int?
     let title: String
-    let key: String
+    nonisolated let key: String
     var value: String
     var attachedImage: PlatformImage?
     var type: FeedbackFieldType
@@ -79,5 +81,5 @@ class FeedbackFieldViewModel: FieldValidatable {
 }
 
 extension FeedbackFieldViewModel: Identifiable {
-    var id: String { key }
+    nonisolated var id: String { key }
 }

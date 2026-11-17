@@ -199,6 +199,7 @@ struct MeetingRoomComposedViewTests {
         await delay()
     }
 
+    @MainActor
     private func makeContainer(
         enabledFeatures: Set<MeetingRoomFeature>
     ) -> MeetingRoomSDKContainer {
@@ -208,6 +209,7 @@ struct MeetingRoomComposedViewTests {
         )
     }
 
+    @MainActor
     private func makeMeetingRoomFactory() -> MeetingRoomFactory {
         MeetingRoomFactory(
             baseURL: Self.testBaseURL,
