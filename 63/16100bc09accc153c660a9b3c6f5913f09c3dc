@@ -1,0 +1,21 @@
+VERA/Dependencies.json
+  s_212203089598f2::t_adbe576bbed53c 3-4
+VERA/Tuist/Package.swift
+  s_212203089598f2::t_adbe576bbed53c 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "6316100bc09accc153c660a9b3c6f5913f09c3dc",
+  "prompts": {},
+  "sessions": {
+    "s_212203089598f2": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794933996967240000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
