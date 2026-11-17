@@ -10,8 +10,8 @@ Features (chat, captions, reactions, archiving, screen share, etc.) are enabled 
 
 ## Requirements
 
-- iOS 17.0+
-- Xcode 26
+- iOS 17.0+ (iOS 27 supported)
+- Xcode 27
 - Swift 5.9
 
 ## Installation
