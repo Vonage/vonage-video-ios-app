@@ -7,6 +7,7 @@ import Testing
 import VERAAudioEffects
 import VERADomain
 
+@MainActor
 @Suite("DefaultDisableNoiseSuppressionUseCase tests")
 struct DefaultDisableNoiseSuppressionUseCaseTests {
 

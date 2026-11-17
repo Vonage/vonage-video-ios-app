@@ -9,6 +9,7 @@ import VERAMeetingRoom
 import VERATestHelpers
 
 @Suite("Disconnect room use case tests")
+@MainActor
 struct DisconnectRoomUseCaseTests {
 
     @Test
@@ -30,9 +31,9 @@ struct DisconnectRoomUseCaseTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        sessionRepository: SessionRepository = makeMockSessionRepository()
+        sessionRepository: SessionRepository? = nil
     ) -> DisconnectRoomUseCase {
         DefaultDisconnectRoomUseCase(
-            sessionRepository: sessionRepository)
+            sessionRepository: sessionRepository ?? makeMockSessionRepository())
     }
 }

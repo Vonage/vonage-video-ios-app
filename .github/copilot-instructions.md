@@ -4,7 +4,7 @@
 
 | Category | Technologies |
 |---|---|
-| **Core** | Xcode 26 · Swift 5.9 · Minimum iOS 17.0 · macOS 14.6 (test targets) |
+| **Core** | Xcode 27 · Swift 5.9 · Minimum iOS 17.0 · macOS 14.6 (test targets) |
 | **UI** | SwiftUI · Combine (reactive streams) · async/await preferred over callbacks |
 | **Architecture** | MVVM · Clean Architecture · Dependency Injection via composition root |
 | **Build System** | [Tuist](https://tuist.dev) for dynamic project generation · Swift Package Manager (SPM) |

@@ -98,8 +98,8 @@ This application provides features for common conferencing use cases, such as:
 
 | Requirement | Version |
 |---|---|
-| iOS deployment target | 17.0+ |
-| Xcode | 26 |
+| iOS deployment target | 17.0+ (iOS 27 supported) |
+| Xcode | 27 |
 | Tuist | latest |
 | SwiftLint | latest |
 | SwiftFormat (swift-format) | latest |
