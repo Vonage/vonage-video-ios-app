@@ -8,8 +8,8 @@ import Foundation
 ///
 /// The iOS SDK takes a plain BCP-47 string and exposes no list, so this mirrors the Web VERA list to keep
 /// both apps identical: the Live Captions codes (`CaptionsLanguageCode` in `@vonage/client-sdk-video`
-/// 2.35.1) whose language Amazon Translate can target. Excluded from the 54 SDK codes:
-/// - `eu-ES`, `gl-ES` and `zu-ZA`: Amazon Translate cannot translate into them.
+/// 2.35.1) whose language the translation service can target. Excluded from the 54 SDK codes:
+/// - `eu-ES`, `gl-ES` and `zu-ZA`: the translation service cannot translate into them.
 /// - `en-AB` and `en-WL` (Scottish and Welsh English): they are transcription dialects of English, not
 ///   distinct translation targets, and the system locale cannot name them.
 public enum CaptionsTranslationLanguage {

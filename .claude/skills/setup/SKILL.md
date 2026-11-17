@@ -17,7 +17,7 @@ All generation commands run **from `VERA/`**, not the repo root. The scripts use
 Check each of these and collect the results before fixing anything:
 
 ```bash
-# Tools (docs pin nothing — "latest" is the policy; Xcode 26 is required)
+# Tools (docs pin nothing — "latest" is the policy; Xcode 27 is required)
 xcodebuild -version
 tuist version
 swiftlint version
