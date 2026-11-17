@@ -3,19 +3,20 @@
 //
 
 import Foundation
+import VERADomain
 
 extension VonageSignal {
-    static func archivingState(_ archivingID: String) throws -> VonageSignal {
+    static func archivingState(_ archivingID: String, kind: ArchiveKind) throws -> VonageSignal {
         try createSignal(
             type: "archiving",
-            payload: ["action": "start", "archivingID": archivingID]
+            payload: ["action": "start", "archivingID": archivingID, "kind": kind.rawValue]
         )
     }
 
-    static func idleArchivingState() throws -> VonageSignal {
+    static func idleArchivingState(kind: ArchiveKind) throws -> VonageSignal {
         try createSignal(
             type: "archiving",
-            payload: ["action": "stop"]
+            payload: ["action": "stop", "kind": kind.rawValue]
         )
     }
 

@@ -29,6 +29,7 @@ public final class VonageSessionFactory: SessionFactory {
     /// This method configures `OTSessionSettings` to:
     /// - Enable `singlePeerConnection`: reduces WebRTC complexity in rooms with many participants.
     /// - Enable `sessionMigration`: supports seamless reconnection/migration scenarios.
+    /// - Deliver native delegate callbacks on the main queue before installing the delegate.
     ///
     /// It then creates an `OTSession` with the given `applicationId` and `sessionId`,
     /// wraps it into an `VonageSession`, and assigns the wrapper as the `OTSession` delegate.
@@ -40,6 +41,14 @@ public final class VonageSessionFactory: SessionFactory {
     /// - Important: This does not connect the session; call `connect()` on the returned `VonageSession`.
     /// - SeeAlso: ``RoomCredentials``, ``VonageSession``
     public func make(_ sessionCredentials: RoomCredentials) throws -> VonageSession {
+        let otSession = try makeOTSession(sessionCredentials)
+        let session = VonageSession(session: otSession, credentials: sessionCredentials)
+        otSession.delegate = session
+        return session
+    }
+
+    /// Configures the native session before installing a delegate or connecting it.
+    func makeOTSession(_ sessionCredentials: RoomCredentials) throws -> OTSession {
         let settings = OTSessionSettings()
 
         // Setting singlePeerConnection to true prevents complex workarounds and issues
@@ -60,8 +69,7 @@ public final class VonageSessionFactory: SessionFactory {
             throw Error.failedSessionInitialization
         }
 
-        let session = VonageSession(session: unwrappedSession, credentials: sessionCredentials)
-        unwrappedSession.delegate = session
-        return session
+        unwrappedSession.apiQueue = .main
+        return unwrappedSession
     }
 }

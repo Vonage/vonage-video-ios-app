@@ -21,8 +21,9 @@ public final class DefaultPlayRecordingUseCase: PlayRecordingUseCase {
         self.onPlay = onPlay
     }
 
+    /// Opens the archive's file: the recording, or the transcript zip for transcriptions.
     public func callAsFunction(_ archive: Archive) async throws {
-        guard let url = archive.url else {
+        guard let url = archive.downloadURL else {
             throw Error.missingURL
         }
         onPlay(ArchiveRecording(url: url))

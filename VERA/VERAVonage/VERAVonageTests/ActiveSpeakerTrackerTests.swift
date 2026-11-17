@@ -10,6 +10,7 @@ import VERAMeetingRoom
 import VERATestHelpers
 import VERAVonage
 
+@MainActor
 @Suite("ActiveSpeakerTracker tests")
 struct ActiveSpeakerTrackerTests {
 
@@ -465,6 +466,28 @@ struct ActiveSpeakerTrackerTests {
         speaker1 = SpeakerInfo(id: "speaker1", audioLevel: 0.9, isMicEnabled: true)
         sut.updatedParticipant(speaker1)
         #expect(sut.activeSpeaker.participantId == "speaker1")
+    }
+
+    @Test func reviewMutedCurrentSpeakerStopsBlockingOthers() {
+        let sut = makeSUT()
+        sut.updatedParticipant(.init(id: "alice", audioLevel: 0.9, isMicEnabled: true))
+        sut.updatedParticipant(.init(id: "alice", audioLevel: 0.9, isMicEnabled: false))
+        sut.updatedParticipant(.init(id: "bob", audioLevel: 0.5, isMicEnabled: true))
+        #expect(sut.activeSpeaker.participantId == "bob")
+    }
+
+    @Test func mutingCurrentSpeakerClearsSelection() {
+        let sut = makeSUT()
+        sut.updatedParticipant(.init(id: "alice", audioLevel: 0.9, isMicEnabled: true))
+        sut.updatedParticipant(.init(id: "alice", audioLevel: 0.9, isMicEnabled: false))
+        #expect(sut.activeSpeaker == .none)
+    }
+
+    @Test func mutedOtherParticipantDoesNotClearCurrentSpeaker() {
+        let sut = makeSUT()
+        sut.updatedParticipant(.init(id: "alice", audioLevel: 0.5, isMicEnabled: true))
+        sut.updatedParticipant(.init(id: "bob", audioLevel: 0.9, isMicEnabled: false))
+        #expect(sut.activeSpeaker.participantId == "alice")
     }
 
     // MARK: - Test Helpers

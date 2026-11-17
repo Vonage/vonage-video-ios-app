@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@MainActor
 public class ChatFactory {
 
     private let chatMessagesRepository: any ChatMessagesRepository
@@ -17,6 +18,7 @@ public class ChatFactory {
         self.sendChatMessageUseCase = sendChatMessageUseCase
     }
 
+    @MainActor
     public func make(
         onDismiss: @escaping () -> Void
     ) -> (view: some View, viewModel: ChatPanelViewModel) {

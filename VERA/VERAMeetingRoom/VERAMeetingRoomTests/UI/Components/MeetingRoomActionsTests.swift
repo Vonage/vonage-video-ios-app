@@ -7,6 +7,7 @@ import Testing
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("MeetingRoomActions Constructor Tests")
 struct MeetingRoomActionsTests {
 

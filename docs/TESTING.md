@@ -71,6 +71,7 @@ Use the provided install script (runs from the repo root). It installs Maestro C
     ├── config.yaml
     └── flows/
         ├── captions.yaml
+        ├── post-call-transcription.yaml
         ├── recording.yaml
         └── ...
 
@@ -80,7 +81,7 @@ Flows live in `.maestro/flows` and are named by feature or behavior (e.g., `reco
 
 The app can run Maestro flows in two modes:
 
-- **Offline mocked mode** — deterministic E2E mocks are enabled with `VERA_E2E_MOCKS=1`. `VERAE2E` provides `E2EHTTPClient`, `E2ESessionRepository`, `E2ECallFacade`, and `E2EArchivingDataSource` to mock all network and SDK calls.
+- **Offline mocked mode** — deterministic E2E mocks are enabled with `VERA_E2E_MOCKS=1`. `VERAE2E` provides `E2EHTTPClient`, `E2ESessionRepository`, `E2ECallFacade`, and `E2EArchivingDataSource` to mock all network and SDK calls. Mocked transcription archives report their transcript as `started` on the first `searchArchives` poll and `available` on the next, so flows exercise the goodbye page's loading state; the transcript is served as a local `file://` zip so it downloads offline.
 - **Online mode** — mocks are disabled with `VERA_E2E_MOCKS=0`; flows use real backend and SDK services.
 
 `VERAApp` decides whether E2E is active and injects the E2E dependencies. `VERAMeetingRoomSDK` remains independent of `VERAE2E`.

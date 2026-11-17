@@ -5,7 +5,7 @@
 import SwiftUI
 
 @MainActor
-public protocol BottomItemPresentable {
+public protocol BottomItemPresentable: Sendable {
     var id: String { get }
     var label: String { get }
     var accessibilityIdentifier: String? { get }
@@ -34,7 +34,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
     public let overflowPresentation: BottomBarOverflowPresentation
     public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
 
-    private let action: () -> Void
+    private let action: @MainActor () -> Void
 
     public init(
         id: String? = nil,
@@ -45,7 +45,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
         accessory: BottomBarButtonAccessory? = nil,
         overflowPresentation: BottomBarOverflowPresentation = .gridItem,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
-        action: @escaping () -> Void
+        action: @escaping @MainActor () -> Void
     ) {
         self.id = id ?? label
         self.label = label
@@ -65,7 +65,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
 
 public enum BottomBarOverflowPresentation {
     case gridItem
-    case headerContent(() -> AnyView)
+    case headerContent(@MainActor () -> AnyView)
 }
 
 public enum BottomBarOverflowSelectionBehavior: Equatable {
@@ -75,13 +75,13 @@ public enum BottomBarOverflowSelectionBehavior: Equatable {
 
 public struct BottomBarButtonAccessory {
     public let placement: BottomBarButtonAccessoryPlacement
-    public let content: () -> AnyView
+    public let content: @MainActor @Sendable () -> AnyView
     public let allowsHitTesting: Bool
 
     public init<Content: View>(
         placement: BottomBarButtonAccessoryPlacement,
         allowsHitTesting: Bool = false,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: @escaping @MainActor @Sendable () -> Content
     ) {
         self.placement = placement
         self.content = { AnyView(content()) }

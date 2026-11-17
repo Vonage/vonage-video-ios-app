@@ -5,7 +5,7 @@
 import Foundation
 import VERADomain
 
-public enum AppRoute: Hashable {
+public enum AppRoute: Hashable, Sendable {
     case landing
     case waitingRoom(String)
     case meetingRoom(NewRoomRequest)

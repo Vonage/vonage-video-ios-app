@@ -18,7 +18,8 @@ final class PictureInPictureVideoRenderer: UIView, OTVideoRender {
         return layer
     }()
     /// The PiP window's display layer while this renderer's participant is the PiP target — wired
-    /// by `PictureInPictureController.attachFeed(to:)`, cleared by the orchestrator on retarget.
+    /// and cleared by `PictureInPictureController.attachFeed(to:)`, which guarantees only one
+    /// renderer holds it at a time (two holders would interleave their frames in the PiP window).
     /// Written on the main actor, read on OpenTok's video thread — guarded by `frameLock`.
     var pipBufferDisplayLayer: AVSampleBufferDisplayLayer? {
         get { withFrameLock { _pipBufferDisplayLayer } }

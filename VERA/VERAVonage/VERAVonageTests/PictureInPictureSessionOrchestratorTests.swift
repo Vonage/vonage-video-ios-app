@@ -122,10 +122,100 @@ struct PictureInPictureOrchestratorTests {
 
         #expect(sut.isInPictureInPicture == false)
     }
+
+    // MARK: - Participant updates
+
+    @Test("In a solo call PiP follows the local participant")
+    func soloCallTargetsLocalParticipant() async throws {
+        let sut = PictureInPictureSessionOrchestrator()
+        let publisher = makePiPPublisher()
+        let call = makePiPCall(publisher: publisher)
+
+        sut.bind(to: call)
+        try await call.connect()
+
+        try await waitUntil { sut.pipTargetParticipantId == publisher.id }
+        sut.tearDown()
+    }
+
+    @Test("Updates already received are handled after the call connects")
+    func bindAfterConnectTargetsLocalParticipant() async throws {
+        let sut = PictureInPictureSessionOrchestrator()
+        let publisher = makePiPPublisher()
+        let call = makePiPCall(publisher: publisher)
+        try await call.connect()
+
+        sut.bind(to: call)
+
+        try await waitUntil { sut.pipTargetParticipantId == publisher.id }
+        sut.tearDown()
+    }
+
+    @Test("tearDown clears the target and stops handling updates")
+    func tearDownStopsHandlingUpdates() async throws {
+        let sut = PictureInPictureSessionOrchestrator()
+        let publisher = makePiPPublisher()
+        let call = makePiPCall(publisher: publisher)
+        sut.bind(to: call)
+        try await call.connect()
+        try await waitUntil { sut.pipTargetParticipantId == publisher.id }
+
+        sut.tearDown()
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(sut.pipTargetParticipantId == nil)
+    }
+
+    @Test("tearDown right after bind drops the pending update")
+    func tearDownBeforeFirstUpdate() async throws {
+        let sut = PictureInPictureSessionOrchestrator()
+        let publisher = makePiPPublisher()
+        let call = makePiPCall(publisher: publisher)
+        try await call.connect()
+
+        sut.bind(to: call)
+        sut.tearDown()
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(sut.pipTargetParticipantId == nil)
+    }
 }
 
 // MARK: - Helpers
 
+@MainActor
+private func waitUntil(timeout: TimeInterval = 2, _ condition: () -> Bool) async throws {
+    let deadline = Date().addingTimeInterval(timeout)
+    while !condition() {
+        guard Date() < deadline else { throw WaitTimeoutError() }
+        try await Task.sleep(for: .milliseconds(10))
+    }
+}
+
+private struct WaitTimeoutError: Error, CustomStringConvertible {
+    var description: String { "waitUntil timed out" }
+}
+
+@MainActor
+private func makePiPPublisher() -> PictureInPictureVonagePublisher {
+    PictureInPictureVonagePublisher(
+        publisher: OTPublisher(delegate: nil)!,
+        transformerFactory: VonageTransformerFactory(),
+        initialDimensions: .zero)
+}
+
+@MainActor
+private func makePiPCall(publisher: PictureInPictureVonagePublisher) -> VonageCall {
+    let call = VonageCall(
+        roomName: "roomName",
+        makeSession: { _ in VonageSessionSpy() },
+        publisher: publisher,
+        publisherRepository: MockPublisherRepository(),
+        statsCollector: MockStatsCollector()
+    )
+    call.setup()
+    return call
+}
 
 @MainActor
 private func makeSUT() -> VonageCall {

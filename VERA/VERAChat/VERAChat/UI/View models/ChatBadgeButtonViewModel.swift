@@ -5,7 +5,9 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 
+@MainActor
 @Observable
 public final class ChatBadgeButtonViewModel {
 
@@ -22,8 +24,7 @@ public final class ChatBadgeButtonViewModel {
 
     public init(chatMessagesObserver: ChatMessagesObserver) {
         chatMessagesObserver.observeMessages()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] messages in
+            .sinkOnMainActor { [weak self] messages in
                 guard let self else { return }
                 self.totalMessageCount = messages.count
                 if self.isChatVisible {

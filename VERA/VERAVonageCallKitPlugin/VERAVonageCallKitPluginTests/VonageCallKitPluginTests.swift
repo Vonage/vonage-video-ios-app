@@ -2,9 +2,11 @@
 //  Created by Vonage on 13/10/25.
 //
 
+import Combine
 import Foundation
 import Testing
 import VERACore
+import VERADomain
 import VERATestHelpers
 import VERAVonage
 
@@ -130,8 +132,10 @@ struct VonageCallKitPluginTests {
 
         sut.providerDelegate?.onMute?(isMuted)
 
-        #expect(call.isMuted == isMuted)
-        #expect(call.recordedActions.contains(.muteLocalMedia))
+        #expect(call.recordedAudioMuteStates == [isMuted])
+        #expect(!call.isMuted)
+        #expect(call.recordedActions.contains(.muteLocalAudio))
+        #expect(!call.recordedActions.contains(.muteLocalMedia))
     }
 
     @Test func whenProviderDelegateResetsProviderShouldDisconnect() async {
@@ -279,6 +283,146 @@ struct VonageCallKitPluginTests {
         #expect(sut.pluginIdentifier == "VonageCallKitPlugin")
     }
 
+    @Test(arguments: [true, false])
+    func audioMuteMockDoesNotChangeFullMediaMuteState(fullMediaMuted: Bool) {
+        let call = MockCall()
+        call.isMuted = fullMediaMuted
+        call.muteLocalAudio(!fullMediaMuted)
+        #expect(call.isMuted == fullMediaMuted)
+        #expect(call.recordedAudioMuteStates == [!fullMediaMuted])
+    }
+
+    @Test(arguments: [true, false])
+    func systemMuteUsesBulkFallbackForLegacyFacade(isMuted: Bool) {
+        let sut = makeSUT()
+        let call = LegacyCallFacade()
+        sut.call = call
+        sut.setup()
+        sut.providerDelegate?.onMute?(isMuted)
+        #expect(call.stub.isMuted == isMuted)
+        #expect(call.stub.recordedActions.contains(.muteLocalMedia))
+        #expect(!call.stub.recordedActions.contains(.muteLocalAudio))
+    }
+
+    // MARK: App mute reported to CallKit
+
+    @Test func appMuteAndUnmuteAreReportedToCallKit() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        let uuid = try await startCall(sut)
+
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+        call._statePublisher.value = SessionState(isPublishingAudio: true, isPublishingVideo: true)
+
+        #expect(
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "a-room-name", isVideo: true),
+                .setMuted(callID: uuid, isMuted: true),
+                .setMuted(callID: uuid, isMuted: false),
+            ])
+    }
+
+    @Test func joiningWithMicrophoneOffReportsMuteToCallKit() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: false)
+        let uuid = try await startCall(sut)
+
+        #expect(mockController.recordedActions.last == .setMuted(callID: uuid, isMuted: true))
+        #expect(sut.call === call)
+    }
+
+    @Test func unchangedMicrophoneStateIsNotReportedAgain() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        _ = try await startCall(sut)
+
+        call._statePublisher.value = SessionState(isPublishingAudio: true, isPublishingVideo: false)
+
+        #expect(mockController.recordedActions.count == 1)
+    }
+
+    @Test func callKitEchoOfAppMuteIsNotAppliedToCall() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        _ = try await startCall(sut)
+
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+        call._statePublisher.value = SessionState(isPublishingAudio: true, isPublishingVideo: true)
+        sut.providerDelegate?.onMute?(true)
+        sut.providerDelegate?.onMute?(false)
+
+        #expect(call.recordedAudioMuteStates.isEmpty)
+    }
+
+    @Test func systemMuteIsAppliedToCallAndNotReportedBack() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        _ = try await startCall(sut)
+
+        sut.providerDelegate?.onMute?(true)
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+
+        #expect(call.recordedAudioMuteStates == [true])
+        #expect(mockController.recordedActions.count == 1)
+    }
+
+    @Test func holdIsNotReportedAsMute() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        _ = try await startCall(sut)
+
+        call.isOnHold = true
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: false)
+        call.isOnHold = false
+        call._statePublisher.value = SessionState(isPublishingAudio: true, isPublishingVideo: true)
+
+        #expect(mockController.recordedActions.count == 1)
+    }
+
+    @Test func rejectedMuteReportIsRetriedOnNextChange() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        let uuid = try await startCall(sut)
+
+        mockController.errorToReturn = NSError(domain: "test", code: -1)
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+        mockController.errorToReturn = nil
+        call._statePublisher.value = SessionState(isPublishingAudio: true, isPublishingVideo: true)
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+        sut.providerDelegate?.onMute?(true)
+
+        #expect(
+            mockController.recordedActions == [
+                .startCall(callID: uuid, handle: "a-room-name", isVideo: true),
+                .setMuted(callID: uuid, isMuted: true),
+                .setMuted(callID: uuid, isMuted: true),
+            ])
+        #expect(call.recordedAudioMuteStates.isEmpty)
+    }
+
+    @Test func muteChangesAfterCallEndAreNotReported() async throws {
+        let mockController = MockCallController()
+        let (sut, call) = makeStartableSUT(callController: mockController, isPublishingAudio: true)
+        let uuid = try await startCall(sut)
+
+        try await sut.callDidEnd()
+        call._statePublisher.value = SessionState(isPublishingAudio: false, isPublishingVideo: true)
+
+        #expect(mockController.recordedActions.last == .endCall(callID: uuid))
+        #expect(sut.muteStateCancellable == nil)
+    }
+
+    @Test func callStartWithoutCallFacadeDoesNotObserveMuteState() async throws {
+        let mockController = MockCallController()
+        let sut = makeSUT()
+        sut.setup()
+        sut.callManager = VERACallManager(callController: mockController)
+
+        _ = try await startCall(sut)
+
+        #expect(sut.muteStateCancellable == nil)
+    }
+
     // MARK: SUT
 
     func makeSUT(callController: MockCallController? = nil) -> VonageCallKitPlugin {
@@ -288,8 +432,67 @@ struct VonageCallKitPluginTests {
         }
         return plugin
     }
+
+    func makeStartableSUT(
+        callController: MockCallController,
+        isPublishingAudio: Bool
+    ) -> (VonageCallKitPlugin, MockCall) {
+        let sut = makeSUT()
+        let call = MockCall()
+        call._statePublisher.value = SessionState(isPublishingAudio: isPublishingAudio, isPublishingVideo: true)
+        sut.call = call
+        sut.setup()
+        sut.callManager = VERACallManager(callController: callController)
+        return (sut, call)
+    }
+
+    func startCall(_ sut: VonageCallKitPlugin) async throws -> UUID {
+        let uuid = UUID()
+        try await sut.callDidStart([
+            VonageCallParams.roomName.rawValue: "a-room-name",
+            VonageCallParams.callID.rawValue: uuid.uuidString,
+        ])
+        return uuid
+    }
 }
 
 private func delay() async {
     try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
+}
+
+// Composition deliberately leaves this custom facade without the optional audio-only capability.
+private final class LegacyCallFacade: CallFacade {
+    let stub = MockCall()
+    var participantsPublisher: AnyPublisher<ParticipantsState, Never> { stub.participantsPublisher }
+    var eventsPublisher: AnyPublisher<SessionEvent, Never> { stub.eventsPublisher }
+    var statePublisher: AnyPublisher<SessionState, Never> { stub.statePublisher }
+    var callState: AnyPublisher<CallState, Never> { stub.callState }
+    var archivingState: AnyPublisher<ArchivingState, Never> { stub.archivingState }
+    var transcriptionState: AnyPublisher<ArchivingState, Never> { stub.transcriptionState }
+    var captionsPublisher: AnyPublisher<[CaptionItem], Never> { stub.captionsPublisher }
+    var networkStatsPublisher: AnyPublisher<NetworkMediaStats, Never> { stub.networkStatsPublisher }
+    var publisherAudioLevelPublisher: AnyPublisher<Float, Never> { stub.publisherAudioLevelPublisher }
+    var isMuted: Bool { stub.isMuted }
+    var isOnHold: Bool { stub.isOnHold }
+    var areCaptionsEnabled: Bool { stub.areCaptionsEnabled }
+    func connect() async throws { try await stub.connect() }
+    func disconnect() async throws { try await stub.disconnect() }
+    func toggleLocalVideo() { stub.toggleLocalVideo() }
+    func toggleLocalCamera() { stub.toggleLocalCamera() }
+    func toggleLocalAudio() { stub.toggleLocalAudio() }
+    func muteLocalMedia(_ muted: Bool) { stub.muteLocalMedia(muted) }
+    func setOnHold(_ held: Bool) { stub.setOnHold(held) }
+    func enableCaptions() async { await stub.enableCaptions() }
+    func disableCaptions() async { await stub.disableCaptions() }
+    func enableNetworkStats() { stub.enableNetworkStats() }
+    func disableNetworkStats() { stub.disableNetworkStats() }
+    func enableSubscriberExtraStats() { stub.enableSubscriberExtraStats() }
+    func disableSubscriberExtraStats() { stub.disableSubscriberExtraStats() }
+    func applyPublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async throws {
+        try await stub.applyPublisherAdvancedSettings(settings)
+    }
+    func updateLivePublisherAdvancedSettings(_ settings: PublisherAdvancedSettings) async {
+        await stub.updateLivePublisherAdvancedSettings(settings)
+    }
+    func forceMuteParticipant(id: String) async throws { try await stub.forceMuteParticipant(id: id) }
 }

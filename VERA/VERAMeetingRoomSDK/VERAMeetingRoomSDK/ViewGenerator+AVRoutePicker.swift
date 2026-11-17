@@ -8,6 +8,7 @@ import VERACommonUI
 import VERAMeetingRoom
 
 extension ViewGenerator {
+    @MainActor
     static func avPicker() -> ViewGenerator {
         .init(
             id: AudioRoutePickerView.viewID,
