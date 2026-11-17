@@ -19,7 +19,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/Vonage/vonage-client-sdk-video-transformers",
-            .upToNextMinor(from: "2.36.0")
+            .upToNextMinor(from: "2.35.1")
         )
     ]
 )
