@@ -1,0 +1,19 @@
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  s_cd3bf66ea1c6ef::t_be5b430d1aac58 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "c350993620d2c9eb1cfdefea146681db33880b08",
+  "prompts": {},
+  "sessions": {
+    "s_cd3bf66ea1c6ef": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794934302920345000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
