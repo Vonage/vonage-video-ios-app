@@ -53,6 +53,7 @@ struct AppConfigTransferTests {
         let meeting = AppConfig.MeetingRoomSettings(
             allowArchiving: enabled,
             allowCaptions: !enabled,
+            allowCaptionTranslation: enabled,
             allowChat: enabled,
             allowDeviceSelection: !enabled,
             allowEmojis: enabled,
@@ -99,6 +100,9 @@ struct AppConfigTransferTests {
         #expect(received.waitingRoomSettings.allowSettings == expected.waitingRoomSettings.allowSettings)
         #expect(received.meetingRoomSettings.allowArchiving == expected.meetingRoomSettings.allowArchiving)
         #expect(received.meetingRoomSettings.allowCaptions == expected.meetingRoomSettings.allowCaptions)
+        #expect(
+            received.meetingRoomSettings.allowCaptionTranslation
+                == expected.meetingRoomSettings.allowCaptionTranslation)
         #expect(received.meetingRoomSettings.allowChat == expected.meetingRoomSettings.allowChat)
         #expect(received.meetingRoomSettings.allowDeviceSelection == expected.meetingRoomSettings.allowDeviceSelection)
         #expect(received.meetingRoomSettings.allowEmojis == expected.meetingRoomSettings.allowEmojis)

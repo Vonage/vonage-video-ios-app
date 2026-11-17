@@ -13,7 +13,7 @@ public struct EnableCaptionsRequest: Sendable {
     }
 }
 
-public protocol EnableCaptionsUseCase {
+public protocol EnableCaptionsUseCase: Sendable {
     func callAsFunction(_ request: EnableCaptionsRequest) async throws
 }
 

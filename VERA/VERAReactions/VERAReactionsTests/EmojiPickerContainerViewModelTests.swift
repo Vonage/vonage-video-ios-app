@@ -116,10 +116,10 @@ struct EmojiPickerContainerViewModelTests {
     // MARK: - Test Helpers
 
     private func makeSUT(
-        _ usecase: SendReactionUseCase = MockSendReactionUseCase(shouldThrow: false),
+        _ usecase: SendReactionUseCase? = nil,
         configuration: EmojiPickerConfiguration = .default
     ) -> EmojiPickerContainerViewModel {
-        return .init(configuration: configuration, sendReactionUseCase: usecase)
+        return .init(configuration: configuration, sendReactionUseCase: usecase ?? MockSendReactionUseCase())
     }
 }
 

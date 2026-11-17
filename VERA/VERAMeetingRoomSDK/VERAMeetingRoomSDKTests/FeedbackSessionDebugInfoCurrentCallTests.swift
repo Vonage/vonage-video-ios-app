@@ -8,6 +8,7 @@ import VERAVonage
 
 @testable import VERAMeetingRoomSDK
 
+@MainActor
 @Suite("Feedback session debug info tests")
 struct FeedbackSessionDebugInfoCurrentCallTests {
 

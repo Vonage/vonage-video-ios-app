@@ -125,6 +125,7 @@ public struct AppConfig: Sendable {{
     public struct MeetingRoomSettings: Sendable {{
         public let allowArchiving: Bool
         public let allowCaptions: Bool
+        public let allowCaptionTranslation: Bool
         public let allowChat: Bool
         public let allowDeviceSelection: Bool
         public let allowEmojis: Bool
@@ -139,6 +140,7 @@ public struct AppConfig: Sendable {{
         public init(
             allowArchiving: Bool = {bool_str(meeting['allowArchiving'])},
             allowCaptions: Bool = {bool_str(meeting['allowCaptions'])},
+            allowCaptionTranslation: Bool = {bool_str(meeting.get('allowCaptionTranslation', False))},
             allowChat: Bool = {bool_str(meeting['allowChat'])},
             allowDeviceSelection: Bool = {bool_str(meeting['allowDeviceSelection'])},
             allowEmojis: Bool = {bool_str(meeting['allowEmojis'])},
@@ -152,6 +154,7 @@ public struct AppConfig: Sendable {{
         ) {{
             self.allowArchiving = allowArchiving
             self.allowCaptions = allowCaptions
+            self.allowCaptionTranslation = allowCaptionTranslation
             self.allowChat = allowChat
             self.allowDeviceSelection = allowDeviceSelection
             self.allowEmojis = allowEmojis

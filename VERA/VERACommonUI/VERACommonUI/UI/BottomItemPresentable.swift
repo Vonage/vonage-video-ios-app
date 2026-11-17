@@ -5,7 +5,7 @@
 import SwiftUI
 
 @MainActor
-public protocol BottomItemPresentable {
+public protocol BottomItemPresentable: Sendable {
     var id: String { get }
     var label: String { get }
     var accessibilityIdentifier: String? { get }
@@ -34,7 +34,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
     public let overflowPresentation: BottomBarOverflowPresentation
     public let overflowSelectionBehavior: BottomBarOverflowSelectionBehavior
 
-    private let action: () -> Void
+    private let action: @MainActor () -> Void
 
     public init(
         id: String? = nil,
@@ -45,7 +45,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
         accessory: BottomBarButtonAccessory? = nil,
         overflowPresentation: BottomBarOverflowPresentation = .gridItem,
         overflowSelectionBehavior: BottomBarOverflowSelectionBehavior = .performActionBeforeDismiss,
-        action: @escaping () -> Void
+        action: @escaping @MainActor () -> Void
     ) {
         self.id = id ?? label
         self.label = label
@@ -65,7 +65,7 @@ public struct BottomBarActionItem: BottomItemPresentable {
 
 public enum BottomBarOverflowPresentation {
     case gridItem
-    case headerContent(() -> AnyView)
+    case headerContent(@MainActor () -> AnyView)
 }
 
 public enum BottomBarOverflowSelectionBehavior: Equatable {

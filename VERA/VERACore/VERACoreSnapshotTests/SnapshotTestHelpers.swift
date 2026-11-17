@@ -9,6 +9,7 @@ import Testing
 // MARK: - iOS Snapshot Testing Helpers
 
 /// Helper for testing SwiftUI views
+@MainActor
 enum SnapshotTestHelper {
 
     /// Test a SwiftUI view with size that fits
