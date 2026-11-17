@@ -7,6 +7,7 @@ import VERATestHelpers
 
 @testable import VERACore
 
+@MainActor
 @Suite("WaitingRoomState equality tests")
 struct WaitingRoomStateTests {
 

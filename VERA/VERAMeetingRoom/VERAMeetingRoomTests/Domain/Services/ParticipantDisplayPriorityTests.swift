@@ -10,6 +10,7 @@ import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("Participant display priority tests")
 struct ParticipantDisplayPriorityTests {
 

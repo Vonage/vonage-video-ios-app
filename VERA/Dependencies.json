@@ -1,7 +1,7 @@
 {
   "vonage": {
-    "videoSDK": "2.35.1",
-    "videoTransformersSDK": "2.35.1"
+    "videoSDK": "2.36.0",
+    "videoTransformersSDK": "2.36.0"
   },
   "thirdParty": {
     "swiftSnapshotTesting": "1.18.4",

@@ -6,12 +6,14 @@ import Foundation
 import VERACore
 import VERADomain
 
+@MainActor
 public func makeMockRequestMicrophonePermissionUseCase(
     isAuthorized: Bool = true
 ) -> MockRequestMicrophonePermissionUseCase {
     MockRequestMicrophonePermissionUseCase(isAuthorized: isAuthorized)
 }
 
+@MainActor
 public final class MockRequestMicrophonePermissionUseCase: RequestMicrophonePermissionUseCase {
     public var isAuthorized: Bool = true
 

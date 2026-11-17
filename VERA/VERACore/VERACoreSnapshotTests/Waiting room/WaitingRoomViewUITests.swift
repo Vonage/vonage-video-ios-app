@@ -25,11 +25,6 @@ class WaitingRoomViewUITests {
         publisher = MockVERAPublisher()
     }
 
-    @MainActor
-    deinit {
-        publisher = nil
-    }
-
     // MARK: - Core UI Tests
 
     @Test("Waiting room View - Basic Layout")

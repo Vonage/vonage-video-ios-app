@@ -53,7 +53,7 @@ jobs:
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -62,7 +62,7 @@ jobs:
         run: |
           {
             echo 'XCODE_COMMON_FLAGS=COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO RUN_SWIFTLINT=NO'
-          } >> $GITHUB_ENV
+          } >> "$GITHUB_ENV"
 
       - name: Generate project with Tuist
         run: |
@@ -88,9 +88,14 @@ jobs:
           echo "📱 Available iOS Simulators:"
           xcrun simctl list devices
 
+      - name: Compute unique room name
+        id: room
+        run: echo "name=maestro-${{ github.run_id }}${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}" >> "$GITHUB_OUTPUT"
+
       - name: Run Maestro Tests
         run: ./scripts/run-maestro-tests.sh
         env:
+          ROOM_NAME: ${{ steps.room.outputs.name }}
           BASE_API_URL: ${{ secrets.BASE_API_URL }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
           MARKETING_VERSION: "1.0"
@@ -152,26 +157,73 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Comment PR with Results
-        if: github.event_name == 'pull_request' && always()
+  comment-pr:
+    name: Update PR Comment
+    needs: maestro-tests
+    if: github.event_name == 'pull_request' && always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Update PR Comment with Results
         uses: actions/github-script@v7
         with:
           script: |
-            let comment = '## 🎭 Maestro UI Test Results\n\n';
-            if ('${{ job.status }}' === 'success') {
-              comment += '✅ **All tests passed!**\n\n';
-            } else {
-              comment += '❌ **Some tests failed**\n\n';
-            }
-            comment += `- **Run**: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`;
-            comment += `- **Commit**: \`${{ github.sha }}\`\n\n`;
-            comment += '📊 **Artifacts:**\n';
-            comment += `  - maestro-test-results-${{ github.run_number }}\n`;
-            comment += `  - maestro-report-${{ github.run_number }}\n\n`;
-            comment += '📸 View the complete test results and screenshots in the artifacts section above.';
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
+            const marker = '<!-- maestro-e2e-results -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const result = ${{ toJson(needs.maestro-tests.result) }};
+            const overallStatus = result === 'success'
+              ? '✅ **All tests passed!**'
+              : '❌ **Some tests failed**';
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const timestamp = new Date().toISOString();
+            const entry = `- ${timestamp} — [Run #${context.runNumber}](${runUrl}) — commit \`${context.sha.substring(0, 7)}\` — ${result === 'success' ? '✅ passed' : '❌ failed'}`;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
             });
+            const previous = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(marker));
+
+            const historyStart = '<!-- history-start -->';
+            const historyEnd = '<!-- history-end -->';
+            let history = [];
+            if (previous) {
+              const s = previous.body.indexOf(historyStart);
+              const e = previous.body.indexOf(historyEnd);
+              if (s !== -1 && e !== -1) {
+                history = previous.body
+                  .substring(s + historyStart.length, e)
+                  .split('\n').map(l => l.trim()).filter(Boolean);
+              }
+            }
+            history.unshift(entry);
+            history = history.slice(0, 10);
+
+            const body = [
+              marker,
+              '## 🎭 Maestro E2E Test Results',
+              '',
+              overallStatus,
+              '',
+              `- **Run**: [#${context.runNumber}](${runUrl})`,
+              `- **Commit**: \`${context.sha}\``,
+              '',
+              `📊 **Artifacts:** maestro-report-${context.runNumber} (see the run above)`,
+              '',
+              '<details>',
+              `<summary>📜 Run history (last ${history.length})</summary>`,
+              '',
+              historyStart,
+              history.join('\n'),
+              historyEnd,
+              '',
+              '</details>',
+            ].join('\n');
+
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
