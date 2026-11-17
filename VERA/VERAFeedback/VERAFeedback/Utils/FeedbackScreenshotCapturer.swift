@@ -57,7 +57,9 @@ enum FeedbackScreenshotCapturer {
         @MainActor
         private static func render(_ view: UIView) -> UIImage {
             let format = UIGraphicsImageRendererFormat()
-            format.scale = view.window?.screen.scale ?? UIScreen.main.scale
+            // UIScreen.main is deprecated on iOS 16+ and unavailable on iOS 26/27 SDK.
+            // Prefer the scale of the view's own window; fall back to 1.0 (neutral).
+            format.scale = view.window?.screen.scale ?? 1.0
             format.opaque = true
 
             let renderer = UIGraphicsImageRenderer(bounds: view.bounds, format: format)
