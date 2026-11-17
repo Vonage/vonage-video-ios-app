@@ -1,0 +1,22 @@
+.claude/skills/setup/SKILL.md
+  h_5ddc9d372ac6a1 20
+.github/copilot-instructions.md
+  h_5ddc9d372ac6a1 7
+README.md
+  h_5ddc9d372ac6a1 101-102
+VERA/PREBUILTS_README.md
+  h_5ddc9d372ac6a1 26
+VERA/VERAMeetingRoomSDK/README.md
+  h_5ddc9d372ac6a1 13-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "de4a685b129338b1acd911ef8b17ff58a7329328",
+  "prompts": {},
+  "humans": {
+    "h_5ddc9d372ac6a1": {
+      "author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
