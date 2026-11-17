@@ -7,13 +7,14 @@ import Foundation
 import Testing
 import VERAChat
 
+@MainActor
 @Suite("Default Chat Messages Repository tests")
 struct DefaultChatMessagesRepositoryTests {
 
     @Test func initialStateContainsZeroMessages() async throws {
         let sut = makeSUT()
 
-        let value = await sut.observeMessages().values.first { _ in true }
+        let value = currentMessages(from: sut.observeMessages())
 
         #expect(value == [])
     }
@@ -34,7 +35,7 @@ struct DefaultChatMessagesRepositoryTests {
         sut.addMessage(firstMessage)
         sut.addMessage(secondMessage)
 
-        let value = await sut.observeMessages().values.first { _ in true }
+        let value = currentMessages(from: sut.observeMessages())
 
         #expect(value == [firstMessage, secondMessage])
     }
@@ -56,18 +57,26 @@ struct DefaultChatMessagesRepositoryTests {
         sut.addMessage(secondMessage)
 
         let publisher = sut.observeMessages()
-        var value = await publisher.values.first { _ in true }
+        var value = currentMessages(from: publisher)
 
         #expect(value == [firstMessage, secondMessage])
 
         sut.clearMessages()
 
-        value = await publisher.values.first { _ in true }
+        value = currentMessages(from: publisher)
 
         #expect(value == [])
     }
 
     // MARK: SUT
+
+    /// These UI-owned repositories synchronously replay their current message snapshot.
+    private func currentMessages(from publisher: AnyPublisher<[ChatMessage], Never>) -> [ChatMessage]? {
+        var messages: [ChatMessage]?
+        let subscription = publisher.first().sink { messages = $0 }
+        defer { subscription.cancel() }
+        return messages
+    }
 
     func makeSUT(
         messages: [ChatMessage] = []

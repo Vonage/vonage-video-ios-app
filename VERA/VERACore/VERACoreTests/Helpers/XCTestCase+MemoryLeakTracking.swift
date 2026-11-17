@@ -6,6 +6,7 @@ import Foundation
 import XCTest
 
 extension XCTestCase {
+    @MainActor
     public func trackForMemoryLeaks(
         _ instance: AnyObject,
         file: StaticString = #filePath,

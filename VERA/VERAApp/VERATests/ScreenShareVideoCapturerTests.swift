@@ -203,6 +203,35 @@ struct ScreenShareVideoCapturerTests {
         #expect(consumer.frameCount == 1)
     }
 
+    @Test("Bounded in-flight wait times out on a stuck delivery and succeeds once it returns")
+    func waitForInFlightIsBoundedAndJoinsDelivery() async throws {
+        let capturer = ScreenShareVideoCapturer(retransmitInterval: .seconds(60))
+        let releaseConsumer = DispatchSemaphore(value: 0)
+        defer { releaseConsumer.signal() }
+        let consumer = FrameConsumerSpy(onRelease: {}) { count in
+            if count == 1 {
+                _ = releaseConsumer.wait(timeout: .now() + 5)
+            }
+        }
+        capturer.videoCaptureConsumer = consumer
+        capturer.sessionDidConnect()
+        #expect(capturer.start() == 0)
+        let delivery = Task.detached {
+            let sample = try makeSampleBuffer(timestamp: 1_000)
+            capturer.consumeVideoSampleBuffer(sample)
+        }
+        let entered = await waitFor(consumer.deliveries) { $0 == 1 }
+        #expect(entered)
+
+        capturer.close()
+        #expect(capturer.waitForInFlight(timeout: .now() + .milliseconds(50)) == .timedOut)
+
+        releaseConsumer.signal()
+        try await delivery.value
+        #expect(capturer.waitForInFlight(timeout: .now() + .seconds(2)) == .success)
+        #expect(consumer.frameCount == 1)
+    }
+
     @Test("Overlapping lifecycle callbacks cannot reopen a finished capture")
     func overlappingControlEventsRespectFinish() async {
         let capturer = ScreenShareVideoCapturer()
