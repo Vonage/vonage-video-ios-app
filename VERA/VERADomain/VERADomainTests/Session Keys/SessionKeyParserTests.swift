@@ -127,11 +127,11 @@ struct SessionKeyParserTests {
         #expect(SessionKeyParser.isExpired(jwt, now: Date()) == true)
     }
 
-    @Test("Returns false when exp equals now")
-    func notExpiredWhenExpEqualsNow() {
+    @Test("Returns true when exp equals now")
+    func expiredWhenExpEqualsNow() {
         let now = Date()
         let jwt = makeJWT(payload: ["exp": now.timeIntervalSince1970, "roomName": "heart-of-gold"])
-        #expect(SessionKeyParser.isExpired(jwt, now: now) == false)
+        #expect(SessionKeyParser.isExpired(jwt, now: now) == true)
     }
 
     // MARK: - Helpers

@@ -56,10 +56,12 @@ public enum SessionKeyParser {
         return Date(timeIntervalSince1970: exp)
     }
 
-    /// `true` if the JWT has an `exp` claim earlier than `now`. A JWT without `exp` is never expired.
+    /// `true` if the JWT has an `exp` claim at or earlier than `now`. Per RFC 7519 §4.1.4, `exp` is an
+    /// exclusive boundary: the token must not be accepted on or after that time. A JWT without `exp`
+    /// is never expired.
     public static func isExpired(_ sessionKey: String, now: Date = Date()) -> Bool {
         guard let expiration = extractExpiration(from: sessionKey) else { return false }
-        return expiration < now
+        return expiration <= now
     }
 
     // MARK: - Private
