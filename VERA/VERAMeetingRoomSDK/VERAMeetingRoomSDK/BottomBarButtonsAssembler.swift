@@ -297,7 +297,10 @@ final class BottomBarButtonsAssembler {
 
         observeChanges(
             viewModel,
-            while: { [weak self] in self?.meetingNoiseSuppressionButtonViewModel === viewModel }
+            while: { [weak self, weak viewModel] in
+                guard let viewModel else { return false }
+                return self?.meetingNoiseSuppressionButtonViewModel === viewModel
+            }
         ) { $0.state }
     }
 
@@ -306,7 +309,10 @@ final class BottomBarButtonsAssembler {
 
         observeChanges(
             viewModel,
-            while: { [weak self] in self?.archiveButtonViewModel === viewModel }
+            while: { [weak self, weak viewModel] in
+                guard let viewModel else { return false }
+                return self?.archiveButtonViewModel === viewModel
+            }
         ) { $0.state }
     }
 
@@ -324,7 +330,10 @@ final class BottomBarButtonsAssembler {
 
         observeChanges(
             viewModel,
-            while: { [weak self] in self?.captionsButtonViewModel === viewModel }
+            while: { [weak self, weak viewModel] in
+                guard let viewModel else { return false }
+                return self?.captionsButtonViewModel === viewModel
+            }
         ) { $0.state }
     }
 
@@ -333,7 +342,10 @@ final class BottomBarButtonsAssembler {
 
         observeChanges(
             viewModel,
-            while: { [weak self] in self?.videoEffectsViewModel === viewModel }
+            while: { [weak self, weak viewModel] in
+                guard let viewModel else { return false }
+                return self?.videoEffectsViewModel === viewModel
+            }
         ) { $0.selectedEffect }
     }
 
