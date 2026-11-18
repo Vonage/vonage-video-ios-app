@@ -454,6 +454,7 @@ let project = Project(
     options: defaultProjectOptions(),
     // Transformers SDK is resolved via Tuist/Package.swift and reaches the app transitively.
     packages: [],
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERA",
