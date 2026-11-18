@@ -21,8 +21,17 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
     /// Session recording (archiving) with start/stop controls.
     case archiving
 
+    /// Post-call transcription with start/stop controls.
+    ///
+    /// Runs as a separate archive, so it can be used together with ``archiving``.
+    case postCallTranscription
+
     /// Live captions overlay during the call.
     case captions
+    /// Per-user translation of other participants' live captions.
+    ///
+    /// Only takes effect together with ``captions``.
+    case captionsTranslation
 
     /// Emoji reactions with floating animation overlay.
     case reactions

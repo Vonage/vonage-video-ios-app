@@ -86,15 +86,50 @@ struct PictureInPictureParticipantSelectorTests {
         #expect(sut.pipTargetId(for: state) == "a")
     }
 
-    @Test("Screenshares are never targeted")
-    func screensharesExcluded() {
+    @Test("A screenshare is targeted over the local participant")
+    func screenshareBeatsLocal() {
         let sut = PictureInPictureParticipantSelector()
         let state = makeState(
             local: makeParticipant(id: "local", isRemote: false),
             remotes: [makeParticipant(id: "share", isScreenshare: true, joinedAt: 1)]
         )
 
-        #expect(sut.pipTargetId(for: state) == "local")
+        #expect(sut.pipTargetId(for: state) == "share")
+    }
+
+    @Test("A screenshare is targeted over camera remotes")
+    func screenshareBeatsRemotes() {
+        let sut = PictureInPictureParticipantSelector()
+        let state = makeState(remotes: [
+            makeParticipant(id: "a", joinedAt: 1),
+            makeParticipant(id: "share", isScreenshare: true, joinedAt: 2),
+        ])
+
+        #expect(sut.pipTargetId(for: state) == "share")
+    }
+
+    @Test("With several screenshares the earliest started wins")
+    func earliestScreenshareWins() {
+        let sut = PictureInPictureParticipantSelector()
+        let state = makeState(remotes: [
+            makeParticipant(id: "later-share", isScreenshare: true, joinedAt: 5),
+            makeParticipant(id: "first-share", isScreenshare: true, joinedAt: 3),
+        ])
+
+        #expect(sut.pipTargetId(for: state) == "first-share")
+    }
+
+    @Test("Sticky target is restored when the screenshare ends")
+    func stickyRestoredAfterScreenshare() {
+        let sut = PictureInPictureParticipantSelector()
+        let first = makeParticipant(id: "first", joinedAt: 1)
+        let second = makeParticipant(id: "second", joinedAt: 2)
+        #expect(sut.pipTargetId(for: makeState(remotes: [first, second])) == "first")
+
+        let share = makeParticipant(id: "share", isScreenshare: true, joinedAt: 3)
+        #expect(sut.pipTargetId(for: makeState(remotes: [second, first, share])) == "share")
+
+        #expect(sut.pipTargetId(for: makeState(remotes: [second, first])) == "first")
     }
 
     @Test("reset forgets the sticky target")
@@ -122,18 +157,26 @@ struct PictureInPictureParticipantSelectorTests {
         #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "a") == "b")
     }
 
-    @Test("A screenshare active speaker is ignored")
-    func screenshareActiveSpeakerIgnored() {
+    @Test("In PiP a screenshare wins over the active speaker")
+    func screenshareBeatsActiveSpeaker() {
         let sut = PictureInPictureParticipantSelector()
         let state = makeState(
             remotes: [
                 makeParticipant(id: "a", joinedAt: 1),
                 makeParticipant(id: "share", isScreenshare: true, joinedAt: 2),
             ],
-            activeSpeakerId: "share"
+            activeSpeakerId: "a"
         )
 
-        #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "a") == "a")
+        #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "a") == "share")
+    }
+
+    @Test("In PiP an ended screenshare falls back to camera selection")
+    func endedScreenshareFallsBackInPip() {
+        let sut = PictureInPictureParticipantSelector()
+        let state = makeState(remotes: [makeParticipant(id: "a", joinedAt: 1)])
+
+        #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "share") == "a")
     }
 
     @Test("No active speaker keeps the current target")
@@ -171,6 +214,33 @@ struct PictureInPictureParticipantSelectorTests {
         let state = makeState(local: local, remotes: [])
 
         #expect(sut.activeSpeakerPipTargetId(for: state, currentPipTargetId: "local") == "local")
+    }
+
+    // MARK: - Participant lookups
+
+    @Test("isScreenshare reports only screenshare participants")
+    func isScreenshareLookup() {
+        let state = makeState(remotes: [
+            makeParticipant(id: "a", joinedAt: 1),
+            makeParticipant(id: "share", isScreenshare: true, joinedAt: 2),
+        ])
+
+        #expect(PictureInPictureParticipantSelector.isScreenshare(participantId: "share", in: state))
+        #expect(!PictureInPictureParticipantSelector.isScreenshare(participantId: "a", in: state))
+        #expect(!PictureInPictureParticipantSelector.isScreenshare(participantId: nil, in: state))
+    }
+
+    @Test("contains finds local and remote participants only")
+    func containsLookup() {
+        let state = makeState(
+            local: makeParticipant(id: "local", isRemote: false),
+            remotes: [makeParticipant(id: "a", joinedAt: 1)]
+        )
+
+        #expect(PictureInPictureParticipantSelector.contains(participantId: "local", in: state))
+        #expect(PictureInPictureParticipantSelector.contains(participantId: "a", in: state))
+        #expect(!PictureInPictureParticipantSelector.contains(participantId: "gone", in: state))
+        #expect(!PictureInPictureParticipantSelector.contains(participantId: nil, in: state))
     }
 
     // MARK: - ParticipantSignature

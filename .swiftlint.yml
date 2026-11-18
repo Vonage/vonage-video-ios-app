@@ -1,5 +1,9 @@
 # SwiftLint Configuration for VERA iOS App
-# This configuration enforces Swift best practices and coding standards
+# Enforces Swift best practices and coding standards.
+#
+# Opt-in rules marked [SLOW] are the more expensive ones to evaluate; keep them
+# active but disable these first if lint time needs tuning. analyzer_rules only
+# run via `swiftlint analyze` (not `lint`), so they don't affect build time.
 
 # Paths to include in linting
 included:
@@ -7,56 +11,52 @@ included:
 
 # Paths to exclude from linting
 excluded:
-  # Xcode project files (all variations)
+  # Xcode project files
   - "**/*.xcodeproj"
   - "**/*.xcworkspace"
   - "**/project.xcworkspace"
   - "**/xcuserdata"
   - "**/project.pbxproj"
-  
   # Build and derived data
   - "**/DerivedData"
   - "**/Derived/Sources"
   - "**/.build"
   - "**/build"
   - "**/Build"
-  
   # Dependencies
   - "**/Pods"
   - "**/Carthage"
   - "**/vendor"
   - "**/Package.swift"
-  
   # Test artifacts
   - "**/__Snapshots__"
   - "**/VERACoreSnapshotTests"
   - "**/*SnapshotTests"
-  
   # Other exclusions
   - "**/.DS_Store"
   - "**/*.plist"
   - "**/Project.swift"
 
-# Rules explicitly disabled (handled by swift-format or problematic)
+# Rules explicitly disabled (handled by swift-format or not applicable)
 disabled_rules:
-  - trailing_whitespace      # Handled by swift-format
-  - trailing_comma          # Handled by swift-format - allow trailing commas
-  - static_over_final_class # Interferes with XCTestCase overrides
-  - type_body_length        # Allow longer test classes for comprehensive testing
-  - file_length            # Some test files can be longer
-  - function_body_length    # Some test functions can be longer
-  - large_tuple            # Allow tuples with more than 2 elements in tests
-  - implicitly_unwrapped_optional # Sometimes needed in tests
+  - trailing_whitespace              # Handled by swift-format
+  - trailing_comma                   # Handled by swift-format — allow trailing commas
+  - static_over_final_class          # Interferes with XCTestCase overrides
+  - type_body_length                 # Allow longer test classes for comprehensive testing
+  - file_length                      # Some test files can be longer
+  - function_body_length             # Some test functions can be longer
+  - large_tuple                      # Allow tuples with more than 2 elements in tests
+  - implicitly_unwrapped_optional    # Sometimes needed in tests
   - identifier_name
   - conditional_returns_on_newline
   - opening_brace
   - unused_closure_parameter
-  
-# Rules to enable (opt-in rules)
+
+# Opt-in rules ([SLOW] = disable first if lint time needs tuning)
 opt_in_rules:
   - array_init
   - closure_spacing
-  - collection_alignment
+  - collection_alignment             # [SLOW]
   - contains_over_filter_count
   - contains_over_filter_is_empty
   - contains_over_first_not_nil
@@ -66,11 +66,11 @@ opt_in_rules:
   - joined_default_parameter
   - last_where
   - literal_expression_end_indentation
-  - multiline_arguments
-  - multiline_function_chains
+  - multiline_arguments              # [SLOW]
+  - multiline_function_chains        # [SLOW]
   - multiline_literal_brackets
-  - multiline_parameters
-  - operator_usage_whitespace
+  - multiline_parameters             # [SLOW]
+  - operator_usage_whitespace        # [SLOW]
   - overridden_super_call
   - prefer_self_type_over_type_of_self
   - redundant_nil_coalescing
@@ -80,15 +80,16 @@ opt_in_rules:
   - toggle_bool
   - trailing_closure
   - unneeded_parentheses_in_closure_argument
-  - vertical_parameter_alignment_on_call
+  - vertical_parameter_alignment_on_call  # [SLOW]
   - yoda_condition
   - force_cast
 
-# Rules to enable for analyzer
+# Analyzer rules — only run via `swiftlint analyze`, not `lint`.
 analyzer_rules:
   - unused_import
 
-# Configuration for specific rules
+# ── Rule configuration ────────────────────────────────────────────────────────
+
 line_length:
   warning: 120
   error: 140
@@ -136,11 +137,7 @@ custom_rules:
     message: "Use proper logging instead of print statements"
     severity: warning
 
-# Reporter type (for CLI)
 reporter: "xcode"
-
-# Configuration specifically for Xcode plugin
-# This ensures consistent behavior across environments
 
 force_unwrapping:
   excluded:

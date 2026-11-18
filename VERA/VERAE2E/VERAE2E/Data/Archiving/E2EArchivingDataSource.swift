@@ -22,10 +22,11 @@ public final class E2EArchivingDataSource: ArchivingDataSource {
         _ request: StartArchivingDataSourceRequest
     ) async throws -> StartArchivingDataSourceResponse {
         let response = try await decorated.startArchiving(request)
-        archivingStatusDataSource.set(archivingState: .archiving(response.archiveId))
+        archivingStatusDataSource.set(archivingState: .archiving(response.archiveId), for: request.kind)
         NotificationCenter.default.post(
             name: E2EArchivingEvents.didStart,
-            object: response.archiveId)
+            object: response.archiveId,
+            userInfo: [E2EArchivingEvents.kindKey: request.kind])
         return response
     }
 
@@ -33,8 +34,12 @@ public final class E2EArchivingDataSource: ArchivingDataSource {
         _ request: StopArchivingDataSourceRequest
     ) async throws -> StopArchivingDataSourceResponse {
         let response = try await decorated.stopArchiving(request)
-        archivingStatusDataSource.set(archivingState: .idle)
-        NotificationCenter.default.post(name: E2EArchivingEvents.didStop, object: nil)
+        archivingStatusDataSource.set(archivingState: .idle, for: request.kind)
+        NotificationCenter.default.post(
+            name: E2EArchivingEvents.didStop,
+            object: nil,
+            userInfo: [E2EArchivingEvents.kindKey: request.kind])
         return response
     }
+
 }

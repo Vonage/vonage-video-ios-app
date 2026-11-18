@@ -31,14 +31,16 @@
   "meetingRoomSettings": {
     "allowArchiving": true,
     "allowCaptions": true,
+    "allowCaptionTranslation": true,
     "allowChat": true,
     "allowDeviceSelection": true,
     "allowEmojis": true,
     "allowFeedback": true,
     "allowPictureInPicture": true,
+    "allowPostCallTranscription": true,
     "allowScreenShare": true,
     "allowSettings": true,
-    "defaultLayoutMode": "activespeaker",
+    "defaultLayoutMode": "activeSpeaker",
     "showParticipantList": true
   }
 }

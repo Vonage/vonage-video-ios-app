@@ -5,6 +5,7 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import os.log
 
 /// Constants used throughout the settings system.
@@ -24,6 +25,7 @@ public enum AudioSettingsConstants {
 /// react immediately via ``PublisherSettingsRepository/preferencesPublisher``.
 ///
 @Observable
+@MainActor
 public final class SettingsViewModel {
 
     // MARK: - Observable state
@@ -107,6 +109,12 @@ public final class SettingsViewModel {
         settingsPreference.senderStatsEnabled
     }
 
+    /// Whether the default for including an AI summary in post-call transcriptions is offered.
+    ///
+    /// Only `true` when post-call transcription is enabled for the app.
+    @ObservationIgnored
+    public let showsTranscriptionSummary: Bool
+
     // MARK: - Dependencies
 
     /// The repository responsible for persisting and retrieving publisher settings.
@@ -152,14 +160,17 @@ public final class SettingsViewModel {
     ///   - repository: The repository to use for persisting and retrieving settings.
     ///   - settingsPreference: The initial settings preferences. Defaults to `.default`.
     ///   - autoSaveDebounce: Debounce interval for auto-save in seconds. Defaults to `0.3`.
+    ///   - showsTranscriptionSummary: Whether to offer the AI summary default. Defaults to `false`.
     public init(
         repository: PublisherSettingsRepository,
         settingsPreference: PublisherSettingsPreferences = .default,
-        autoSaveDebounce: TimeInterval = 0.3
+        autoSaveDebounce: TimeInterval = 0.3,
+        showsTranscriptionSummary: Bool = false
     ) {
         self.repository = repository
         self.settingsPreference = settingsPreference
         self.autoSaveDebounce = autoSaveDebounce
+        self.showsTranscriptionSummary = showsTranscriptionSummary
     }
 
     // MARK: - Actions
@@ -237,7 +248,7 @@ public final class SettingsViewModel {
             settingsPreferenceSubject
             .removeDuplicates()
             .debounce(for: .seconds(autoSaveDebounce), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
+            .sinkOnMainActor { [weak self] _ in
                 self?.autoSaveTask?.cancel()
                 self?.autoSaveTask = Task {
                     await self?.persistCurrentState()

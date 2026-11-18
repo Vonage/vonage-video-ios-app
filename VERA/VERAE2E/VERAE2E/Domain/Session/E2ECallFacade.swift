@@ -35,6 +35,9 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     private let archivingStateSubject = CurrentValueSubject<ArchivingState, Never>(.idle)
     public lazy var archivingState = archivingStateSubject.eraseToAnyPublisher()
 
+    private let transcriptionStateSubject = CurrentValueSubject<ArchivingState, Never>(.idle)
+    public lazy var transcriptionState = transcriptionStateSubject.eraseToAnyPublisher()
+
     private let captionsSubject = CurrentValueSubject<[CaptionItem], Never>([])
     public lazy var captionsPublisher = captionsSubject.eraseToAnyPublisher()
 
@@ -180,16 +183,26 @@ public final class E2ECallFacade: CallFacade, AudioMuteControllable {
     private func observeArchivingEvents() {
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStart)
             .sink { [weak self] notification in
-                guard let archiveId = notification.object as? String else { return }
-                self?.archivingStateSubject.send(.archiving(archiveId))
+                guard let self, let archiveId = notification.object as? String else { return }
+                self.archivingSubject(for: notification).send(.archiving(archiveId))
             }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: E2EArchivingEvents.didStop)
-            .sink { [weak self] _ in
-                self?.archivingStateSubject.send(.idle)
+            .sink { [weak self] notification in
+                guard let self else { return }
+                self.archivingSubject(for: notification).send(.idle)
             }
             .store(in: &cancellables)
+    }
+
+    private func archivingSubject(
+        for notification: Notification
+    ) -> CurrentValueSubject<ArchivingState, Never> {
+        switch notification.userInfo?[E2EArchivingEvents.kindKey] as? ArchiveKind {
+        case .transcription: transcriptionStateSubject
+        case .recording, nil: archivingStateSubject
+        }
     }
 
     public func forceMuteParticipant(id: String) async throws {

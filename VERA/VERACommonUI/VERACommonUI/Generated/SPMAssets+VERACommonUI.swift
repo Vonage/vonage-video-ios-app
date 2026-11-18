@@ -82,12 +82,15 @@ public enum VERACommonUIAsset: Sendable {
     public static let removeLine = VERACommonUIImages(name: "remove-line")
     public static let screenShareSolid = VERACommonUIImages(name: "screen-share-solid")
     public static let shareLine = VERACommonUIImages(name: "share-line")
+    public static let textLine = VERACommonUIImages(name: "text-line")
     public static let userSolid = VERACommonUIImages(name: "user-solid")
     public static let videoActiveLine = VERACommonUIImages(name: "video-active-line")
     public static let videoLine = VERACommonUIImages(name: "video-line")
     public static let videoOffLine = VERACommonUIImages(name: "video-off-line")
     public static let videoOffSolid = VERACommonUIImages(name: "video-off-solid")
     public static let videoSolid = VERACommonUIImages(name: "video-solid")
+    public static let voicemailTranscriptLine = VERACommonUIImages(name: "voicemail-transcript-line")
+    public static let voicemailTranscriptSolid = VERACommonUIImages(name: "voicemail-transcript-solid")
     public static let warningLine = VERACommonUIImages(name: "warning-line")
   }
   public enum SemanticColors {

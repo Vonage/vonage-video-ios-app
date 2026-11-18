@@ -5,9 +5,11 @@
 import Combine
 import Foundation
 import Testing
+import VERADomain
 
 @testable import VERAReactions
 
+@MainActor
 @Suite("FloatingEmojisOverlayViewModel Tests")
 struct FloatingEmojisOverlayViewModelTests {
 
@@ -32,6 +34,19 @@ struct FloatingEmojisOverlayViewModelTests {
         try await waitUntil { sut.viewModel.floatingEmojis.count == 1 }
 
         #expect(sut.viewModel.floatingEmojis.first?.emoji == "🎉")
+    }
+
+    @Test("Background reactions update UI-owned floating emoji state")
+    func backgroundReactionUpdatesUIState() async throws {
+        let reaction = EmojiReaction(participantName: "Background", emoji: "🎉")
+        let viewModel = FloatingEmojisOverlayViewModel(
+            reactionsRepository: BackgroundReactionsObserver(reaction: reaction)
+        )
+
+        try await waitUntil { viewModel.floatingEmojis.count == 1 }
+
+        #expect(viewModel.floatingEmojis.first?.id == reaction.id)
+        #expect(viewModel.floatingEmojis.first?.participantName == "Background")
     }
 
     @Test("Adds multiple floating emojis for multiple reactions")
@@ -193,7 +208,7 @@ struct FloatingEmojisOverlayViewModelTests {
     /// within `timeout` seconds.
     private func waitUntil(
         timeout: TimeInterval = 0.5,
-        _ condition: @escaping @Sendable () -> Bool
+        _ condition: @escaping @MainActor @Sendable () -> Bool
     ) async throws {
         let deadline = Date().addingTimeInterval(timeout)
         while !condition() {
@@ -211,14 +226,28 @@ struct FloatingEmojisOverlayViewModelTests {
 
 // MARK: - Mock
 
-private final class MockFloatingReactionsRepository: ReactionsRepository, @unchecked Sendable {
-    private let subject = PassthroughSubject<EmojiReaction, Never>()
+private final class MockFloatingReactionsRepository: ReactionsRepository {
+    private let subject = EventRelay<EmojiReaction, Never>()
 
     var reactionReceived: AnyPublisher<EmojiReaction, Never> {
-        subject.eraseToAnyPublisher()
+        subject.publisher
     }
 
     func addReaction(_ reaction: EmojiReaction) async {
         subject.send(reaction)
+    }
+}
+
+private struct BackgroundReactionsObserver: ReactionsObserver {
+    let reaction: EmojiReaction
+
+    var reactionReceived: AnyPublisher<EmojiReaction, Never> {
+        Just(reaction)
+            .subscribe(on: DispatchQueue(label: "FloatingEmojisOverlayViewModelTests.background"))
+            .map { @Sendable reaction in
+                #expect(!Thread.isMainThread)
+                return reaction
+            }
+            .eraseToAnyPublisher()
     }
 }

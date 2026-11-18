@@ -84,6 +84,6 @@ public struct RoomCredentialsRequest: Sendable {
     }
 }
 
-public protocol RoomCredentialsRepository {
+public protocol RoomCredentialsRepository: Sendable {
     func getRoomCredentials(_ request: RoomCredentialsRequest) async throws -> RoomCredentialsResponse
 }

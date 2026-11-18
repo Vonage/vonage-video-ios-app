@@ -33,11 +33,12 @@ public class PublisherRepositorySpy: PublisherRepository {
     }
 }
 
+@MainActor
 public func makePublisherRepositorySpy() -> PublisherRepositorySpy {
     .init()
 }
 
-public class MockPublisherAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
+public final class MockPublisherAdvancedSettingsUseCase: PublisherAdvancedSettingsUseCase {
 
     public init() {}
 

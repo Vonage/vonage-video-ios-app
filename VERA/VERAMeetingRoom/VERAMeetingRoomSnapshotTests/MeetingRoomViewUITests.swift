@@ -24,6 +24,8 @@ struct MeetingRoomViewUITests {
         "MeetingRoomView - State Variants",
         arguments: [
             "Archiving",
+            "Transcribing",
+            "ArchivingAndTranscribing",
             "NoiseSuppression",
             "CameraDisabled",
             "AllIndicators",
@@ -34,6 +36,13 @@ struct MeetingRoomViewUITests {
         switch variantName {
         case "Archiving":
             sut = makeSUT(archivingState: .archiving("archive-1"))
+        case "Transcribing":
+            sut = makeSUT(transcriptionState: .archiving("transcription-1"))
+        case "ArchivingAndTranscribing":
+            sut = makeSUT(
+                archivingState: .archiving("archive-1"),
+                transcriptionState: .archiving("transcription-1")
+            )
         case "NoiseSuppression":
             sut = makeSUT(noiseSuppressionState: .enabled)
         case "CameraDisabled":
@@ -99,6 +108,7 @@ struct MeetingRoomViewUITests {
         isMicEnabled: Bool = true,
         isCameraEnabled: Bool = true,
         archivingState: ArchivingState = .idle,
+        transcriptionState: ArchivingState = .idle,
         noiseSuppressionState: NoiseSuppressionState = .disabled
     ) -> MeetingRoomView {
         MeetingRoomView(
@@ -115,6 +125,7 @@ struct MeetingRoomViewUITests {
                 showParticipantList: true,
                 callState: .connected,
                 archivingState: archivingState,
+                transcriptionState: transcriptionState,
                 noiseSuppressionState: noiseSuppressionState
             ),
             actions: MeetingRoomActions()

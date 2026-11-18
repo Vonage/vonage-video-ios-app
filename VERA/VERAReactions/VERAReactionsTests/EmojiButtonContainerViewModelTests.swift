@@ -8,6 +8,7 @@ import Testing
 @testable import VERAReactions
 
 /// Tests for `EmojiButtonContainerViewModel`.
+@MainActor
 @Suite("EmojiButtonContainerViewModel Tests")
 struct EmojiButtonContainerViewModelTests {
 

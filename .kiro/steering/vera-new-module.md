@@ -1,0 +1,1 @@
+../../.claude/skills/new-module/SKILL.md

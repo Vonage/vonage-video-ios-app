@@ -8,6 +8,7 @@ import AVFoundation
 
 class MockGenerateTonePlayerUseCase: GenerateTonePlayerUseCase, @unchecked Sendable {
     private(set) var callCount = 0
+    private(set) var generatedPlayer: AVAudioPlayer?
     private let shouldReturnNil: Bool
     var shouldFailOnGenerate = false
     var simulateError = false
@@ -68,7 +69,9 @@ class MockGenerateTonePlayerUseCase: GenerateTonePlayerUseCase, @unchecked Senda
 
         // Create a real AVAudioPlayer with minimal valid data
         do {
-            return try AVAudioPlayer(data: validAudioData)
+            let player = try AVAudioPlayer(data: validAudioData)
+            generatedPlayer = player
+            return player
         } catch {
             throw TonePlayerGenerationError.playerInitializationFailed(underlyingError: error.localizedDescription)
         }

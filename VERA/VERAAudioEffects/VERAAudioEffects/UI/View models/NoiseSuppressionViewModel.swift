@@ -7,6 +7,7 @@ import OSLog
 import Observation
 import VERADomain
 
+@MainActor
 @Observable
 public final class NoiseSuppressionViewModel {
 

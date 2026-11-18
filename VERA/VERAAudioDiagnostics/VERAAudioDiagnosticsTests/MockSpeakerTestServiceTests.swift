@@ -10,6 +10,7 @@ import Testing
 
 @testable import VERAAudioDiagnostics
 
+@MainActor
 @Suite("MockSpeakerTestService tests")
 struct MockSpeakerTestServiceTests {
 

@@ -10,6 +10,7 @@ import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("Participant array filtering tests")
 struct ParticipantArrayFilteringTests {
 

@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import VERADomain
 
+@MainActor
 public func makeMockParticipant(
     id: String = "anId",
     connectionId: String? = nil,

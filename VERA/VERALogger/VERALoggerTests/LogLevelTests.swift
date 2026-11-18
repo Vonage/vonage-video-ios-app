@@ -2,6 +2,7 @@
 //  Created by Vonage on 8/4/26.
 //
 
+import Foundation
 import Testing
 
 @testable import VERALogger
@@ -35,5 +36,12 @@ struct LogLevelTests {
     @Test("All cases count is 5")
     func allCases() {
         #expect(LogLevel.allCases.count == 5)
+    }
+
+    @Test("A level round-trips through JSON")
+    func codableRoundTrip() throws {
+        let data = try JSONEncoder().encode(LogLevel.warn)
+        let decoded = try JSONDecoder().decode(LogLevel.self, from: data)
+        #expect(decoded == .warn)
     }
 }

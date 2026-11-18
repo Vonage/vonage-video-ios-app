@@ -7,6 +7,7 @@ import SwiftUI
 import VERADomain
 
 extension AlertItem {
+    @MainActor
     public var view: Alert {
         if let cancelAction {
             Alert(
