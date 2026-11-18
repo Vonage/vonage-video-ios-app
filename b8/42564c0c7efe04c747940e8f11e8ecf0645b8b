@@ -1,0 +1,28 @@
+VERA/VERADomain/VERADomain/RoomCredentialsError.swift
+  s_da22c2247cdee9::t_d9a64fdbe3e670 1-11
+VERA/VERAVonage/VERAVonageTests/DefaultRoomCredentialsRepositoryTests.swift
+  s_da22c2247cdee9::t_b3aa6f7a037cab 160-205
+  s_da22c2247cdee9::t_7f69aae35f1d26 243-274
+VERA/VERAVonage/VERAVonage/DefaultRoomCredentialsRepository.swift
+  s_da22c2247cdee9::t_f6693d39b4e851 52-58,69
+"VERA/VERADomain/VERADomain/Session Keys/SessionKeyParser.swift"
+  s_da22c2247cdee9::t_dc4ccbfd26f947 52-74
+"VERA/VERADomain/VERADomainTests/Session Keys/SessionKeyParserTests.swift"
+  s_da22c2247cdee9::t_a36b3fe07e9795 90-136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b842564c0c7efe04c747940e8f11e8ecf0645b8b",
+  "prompts": {},
+  "sessions": {
+    "s_da22c2247cdee9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_de6ec77d-5693-4bfc-ac04-3afb5bd0333f",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
