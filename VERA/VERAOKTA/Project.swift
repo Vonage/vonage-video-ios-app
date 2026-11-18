@@ -7,6 +7,7 @@ let project = Project(
     packages: [
         .oktaMobileSwift
     ],
+    settings: defaultProjectSettings(),
     targets: [
         // MARK: - Framework Target
         .target(
