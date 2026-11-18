@@ -13,7 +13,6 @@ public final class DefaultArchivesRepository: ArchivesRepository {
     private let pollingInterval: TimeInterval
     private var cache: [String: CurrentValueSubject<[Archive], Error>] = [:]
     private var pollingTasks: [String: Task<Void, Never>] = [:]
-    private var pollingGenerations: [String: UUID] = [:]
 
     public init(
         pollingIntervalSeconds: TimeInterval = 5.0,
@@ -43,8 +42,6 @@ public final class DefaultArchivesRepository: ArchivesRepository {
 
     private func startPolling(for sessionKey: String) {
         pollingTasks[sessionKey]?.cancel()
-        let generation = UUID()
-        pollingGenerations[sessionKey] = generation
         let pollingInterval = pollingInterval
         let dataSource = archivesDataSource
 
@@ -57,7 +54,7 @@ public final class DefaultArchivesRepository: ArchivesRepository {
                 } catch {
                     result = .failure(error)
                 }
-                guard self?.receive(result, sessionKey: sessionKey, generation: generation) == true else { return }
+                guard self?.receive(result, sessionKey: sessionKey) == true else { return }
                 do {
                     try await Task.sleep(nanoseconds: UInt64(pollingInterval * 1_000_000_000))
                 } catch {
@@ -67,29 +64,24 @@ public final class DefaultArchivesRepository: ArchivesRepository {
         }
     }
 
-    private func receive(_ result: Result<[Archive], Error>, sessionKey: String, generation: UUID) -> Bool {
-        guard !Task.isCancelled, pollingGenerations[sessionKey] == generation else { return false }
+    /// Runs on the polling task; `startPolling` cancels a replaced task before starting the next.
+    private func receive(_ result: Result<[Archive], Error>, sessionKey: String) -> Bool {
+        guard !Task.isCancelled else { return false }
         switch result {
         case .success(let archives):
             cache[sessionKey]?.send(archives)
             // Stop polling once no archive or transcript is still being produced.
             // A transcript keeps processing after its parent archive is uploaded or available.
             if !archives.contains(where: \.isPending) {
-                finishPolling(sessionKey: sessionKey, generation: generation)
+                pollingTasks.removeValue(forKey: sessionKey)
                 return false
             }
             return true
         case .failure(let error):
             // A failed publisher cannot emit again, so the next request starts a fresh one.
             cache.removeValue(forKey: sessionKey)?.send(completion: .failure(error))
-            finishPolling(sessionKey: sessionKey, generation: generation)
+            pollingTasks.removeValue(forKey: sessionKey)
             return false
         }
-    }
-
-    private func finishPolling(sessionKey: String, generation: UUID) {
-        guard pollingGenerations[sessionKey] == generation else { return }
-        pollingTasks.removeValue(forKey: sessionKey)
-        pollingGenerations.removeValue(forKey: sessionKey)
     }
 }

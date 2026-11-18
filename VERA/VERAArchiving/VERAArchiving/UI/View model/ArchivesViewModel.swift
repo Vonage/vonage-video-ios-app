@@ -21,6 +21,8 @@ public final class ArchivesViewModel {
     private let playRecordingUseCase: PlayRecordingUseCase
     @ObservationIgnored
     private let downloadTranscriptionUseCase: DownloadTranscriptionUseCase
+    @ObservationIgnored
+    private var formattingTask: Task<Void, Never>?
 
     public var archives: [ArchiveUIData] = []
     public var error: AlertItem?
@@ -46,6 +48,7 @@ public final class ArchivesViewModel {
     /// Clears the previous load's error so it is not shown again for a later meeting.
     public func loadData() async {
         cancellables.removeAll()
+        formattingTask?.cancel()
         error = nil
 
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
@@ -56,25 +59,21 @@ public final class ArchivesViewModel {
                     }
                 },
                 receiveValue: { [weak self] archives in
-                    Task { @MainActor in
-                        // Date and size formatting stays off the UI actor.
-                        let rows = await Task { @BackgroundActor in
-                            ArchivePresentation.rows(archives)
-                        }.value
-                        guard let self else { return }
-                        self.archives = rows.map { self.attachingDownload($0.ui, for: $0.archive) }
-                    }
+                    self?.showRows(for: archives)
                 }
             )
             .store(in: &cancellables)
     }
 
-    public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
-        ArchivePresentation.rows(archives).map { attachingDownload($0.ui, for: $0.archive) }
-    }
-
-    public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {
-        attachingDownload(archive.toUIArchive(with: index), for: archive)
+    /// Formats `archives` off the UI actor. A newer emission or load cancels this one,
+    /// so rows from an older poll or meeting never overwrite newer ones.
+    private func showRows(for archives: [Archive]) {
+        formattingTask?.cancel()
+        formattingTask = Task { [weak self] in
+            let rows = await ArchivePresentation.rows(archives)
+            guard !Task.isCancelled, let self else { return }
+            self.archives = rows.map { self.attachingDownload($0.ui, for: $0.archive) }
+        }
     }
 
     private func attachingDownload(_ uiArchive: ArchiveUIData, for archive: Archive) -> ArchiveUIData {
@@ -106,13 +105,14 @@ public final class ArchivesViewModel {
     }
 }
 
-private struct PreparedArchive: Sendable {
+struct PreparedArchive: Sendable {
     let archive: Archive
     let ui: ArchiveUIData
 }
 
-/// Newest-first archive rows. The formatting is not tied to the main actor.
-private enum ArchivePresentation {
+/// Newest-first archive rows, formatted off the main actor.
+enum ArchivePresentation {
+    @BackgroundActor
     static func rows(_ archives: [Archive]) -> [PreparedArchive] {
         let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
         var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)

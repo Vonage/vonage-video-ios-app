@@ -5,9 +5,10 @@
 import Combine
 import Foundation
 import Testing
-import VERAArchiving
 import VERADomain
 import VERATestHelpers
+
+@testable import VERAArchiving
 
 @MainActor
 @Suite("Archives view model tests")
@@ -141,7 +142,7 @@ struct ArchivesViewModelTests {
         #expect(await MainActor.run { sut.archives }.isEmpty)
     }
 
-    @Test func mapToUIArchiveCreatesCorrectUIData() {
+    @Test func toUIArchiveCreatesCorrectUIData() {
         let archive = Archive(
             id: UUID(),
             name: "test-archive",
@@ -151,9 +152,7 @@ struct ArchivesViewModelTests {
             size: 3_355_443,  // ~3.2 MB
             duration: 6  // 6 seconds
         )
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 5)
+        let uiArchive = archive.toUIArchive(with: 5)
 
         #expect(uiArchive.id == archive.id)
         #expect(uiArchive.title.contains("5"))
@@ -162,7 +161,7 @@ struct ArchivesViewModelTests {
         #expect(uiArchive.downloadState == .ready)
     }
 
-    @Test func mapToUIArchiveFormatsSmallSizeInKB() {
+    @Test func toUIArchiveFormatsSmallSizeInKB() {
         let archive = Archive(
             id: UUID(),
             name: "test-archive",
@@ -172,14 +171,12 @@ struct ArchivesViewModelTests {
             size: 51_200,  // 50 KB
             duration: 10
         )
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.subtitle.contains("50.0 KB"))
     }
 
-    @Test func mapToUIArchiveFormatsLargeSizeInMB() {
+    @Test func toUIArchiveFormatsLargeSizeInMB() {
         let archive = Archive(
             id: UUID(),
             name: "test-archive",
@@ -189,14 +186,12 @@ struct ArchivesViewModelTests {
             size: 15_728_640,  // 15 MB
             duration: 10
         )
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.subtitle.contains("15 MB"))
     }
 
-    @Test func mapToUIArchiveSetIsDownloadableFalseForNonAvailableArchives() {
+    @Test func toUIArchiveSetIsDownloadableFalseForNonAvailableArchives() {
         let archive = Archive(
             id: UUID(),
             name: "test-archive",
@@ -206,9 +201,7 @@ struct ArchivesViewModelTests {
             size: 0,
             duration: 0
         )
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.downloadState == .preparing)
     }
@@ -274,89 +267,90 @@ struct ArchivesViewModelTests {
         #expect(uiArchives.map(\.kind) == [.recording, .transcription, .recording])
     }
 
-    @Test func mapToUIArchivesListsNewestFirstAndNumbersOldestAsOne() {
+    @Test func loadDataShowsTheLatestEmissionWhenEmissionsArriveTogether() async {
+        let repository = SpyArchivesRepository()
+        let older = makeArchive(kind: .recording, createdAt: Date(timeIntervalSince1970: 100))
+        let newer = makeArchive(kind: .recording, createdAt: Date(timeIntervalSince1970: 200))
+        let sut = makeSUT(archivesRepository: repository)
+
+        await sut.loadData()
+        repository.subject.send([older])
+        repository.subject.send([newer, older])
+        _ = await poll(read: { await MainActor.run { sut.archives.count } }, until: { $0 == 2 })
+        try? await Task.sleep(for: .milliseconds(100))
+
+        #expect(sut.archives.map(\.id) == [newer.id, older.id])
+    }
+
+    @Test func archiveRowsListsNewestFirstAndNumbersOldestAsOne() async {
         let first = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 100))
         let second = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 200))
-        let sut = makeSUT()
-
-        let uiArchives = sut.mapToUIArchives([second, first])
+        let uiArchives = await ArchivePresentation.rows([second, first]).map(\.ui)
 
         #expect(uiArchives.map(\.id) == [second.id, first.id])
         #expect(uiArchives.map(\.title) == ["Transcription 2", "Transcription 1"])
     }
 
-    @Test func mapToUIArchivesDoesNotDependOnResponseOrder() {
+    @Test func archiveRowsDoesNotDependOnResponseOrder() async {
         let first = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 100))
         let second = makeArchive(kind: .transcription, createdAt: Date(timeIntervalSince1970: 200))
-        let sut = makeSUT()
-
-        let newestFirst = sut.mapToUIArchives([second, first])
-        let oldestFirst = sut.mapToUIArchives([first, second])
+        let newestFirst = await ArchivePresentation.rows([second, first]).map(\.ui)
+        let oldestFirst = await ArchivePresentation.rows([first, second]).map(\.ui)
 
         #expect(newestFirst.map(\.id) == oldestFirst.map(\.id))
         #expect(newestFirst.map(\.title) == oldestFirst.map(\.title))
     }
 
-    @Test func mapToUIArchiveShowsTranscriptionReadyWhenTranscriptIsAvailable() {
+    @Test func toUIArchiveShowsTranscriptionReadyWhenTranscriptIsAvailable() {
         let archive = makeArchive(
             kind: .transcription,
             status: .uploaded,
             url: nil,
             transcription: ArchiveTranscription(
                 status: .available, url: URL(string: "https://example.com/transcript.zip")))
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 3)
+        let uiArchive = archive.toUIArchive(with: 3)
 
         #expect(uiArchive.kind == .transcription)
         #expect(uiArchive.title == "Transcription 3")
         #expect(uiArchive.downloadState == .ready)
     }
 
-    @Test func mapToUIArchiveShowsTranscriptionPreparingWhileTranscriptIsPending() {
+    @Test func toUIArchiveShowsTranscriptionPreparingWhileTranscriptIsPending() {
         let archive = makeArchive(
             kind: .transcription,
             status: .uploaded,
             transcription: ArchiveTranscription(status: .started, url: nil))
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.downloadState == .preparing)
         #expect(uiArchive.title == "Your transcription is being prepared")
         #expect(uiArchive.subtitle == "Please wait while we prepare your downloads")
     }
 
-    @Test func mapToUIArchiveShowsRecordingPreparingWhileArchiveIsPending() {
+    @Test func toUIArchiveShowsRecordingPreparingWhileArchiveIsPending() {
         let archive = makeArchive(kind: .recording, status: .stopped, url: nil)
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.downloadState == .preparing)
         #expect(uiArchive.title == "Your recording is being prepared")
     }
 
     @Test(arguments: [ArchiveStatus.failed, .expired, .deleted, .uploaded])
-    func mapToUIArchiveShowsRecordingUnavailableForFinishedNonDownloadableStatuses(status: ArchiveStatus) {
+    func toUIArchiveShowsRecordingUnavailableForFinishedNonDownloadableStatuses(status: ArchiveStatus) {
         let archive = makeArchive(kind: .recording, status: status, url: nil)
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.downloadState == .unavailable)
         #expect(uiArchive.title == "Recording 1")
     }
 
-    @Test func mapToUIArchiveShowsTranscriptionUnavailableWhenTranscriptFailed() {
+    @Test func toUIArchiveShowsTranscriptionUnavailableWhenTranscriptFailed() {
         let archive = makeArchive(
             kind: .transcription,
             status: .available,
             url: URL(string: "https://example.com/audio.zip"),
             transcription: ArchiveTranscription(status: .failed, url: nil))
-        let sut = makeSUT()
-
-        let uiArchive = sut.mapToUIArchive(archive, index: 1)
+        let uiArchive = archive.toUIArchive(with: 1)
 
         #expect(uiArchive.downloadState == .unavailable)
     }

@@ -5,6 +5,7 @@
 import SwiftUI
 import VERADomain
 
+@MainActor
 public final class ArchivingFactory {
 
     private let archivesRepository: ArchivesRepository
@@ -35,7 +36,6 @@ public final class ArchivingFactory {
     ///   - kind: Whether the control drives the recording or the post-call transcription.
     ///   - loadTranscriptionDefaults: Loads the options pre-selected when a transcription is started.
     ///   - showAlert: Presents the start/stop confirmation dialogs.
-    @MainActor
     public func makeArchivingButton(
         kind: ArchiveKind = .recording,
         loadTranscriptionDefaults: @escaping () async -> TranscriptionOptions = { .default },
@@ -54,14 +54,12 @@ public final class ArchivingFactory {
         return (makeArchivingButton(viewModel: viewModel), viewModel)
     }
 
-    @MainActor
     public func makeArchivingButton(
         viewModel: ArchiveButtonViewModel
     ) -> some View {
         ArchiveScreenButton(viewModel: viewModel)
     }
 
-    @MainActor
     public func make(
         onPlay: @escaping (ArchiveRecording) -> Void
     ) -> (view: some View, viewModel: ArchivesViewModel) {
@@ -77,7 +75,6 @@ public final class ArchivingFactory {
         return (make(viewModel: viewModel), viewModel)
     }
 
-    @MainActor
     public func make(
         viewModel: ArchivesViewModel
     ) -> some View {
