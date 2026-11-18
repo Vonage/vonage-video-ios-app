@@ -1,0 +1,797 @@
+VERA/VERACore/VERATestHelpers/Mocks/MockCall.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 30-32,37,39
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Entities/UIParticipantTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,23-31
+  s_b350cfa8b51c7f::t_29ab3180f972ad 32
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsUIStateOwnershipTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-71
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureController.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 16-17,75-82,91-92
+VERA/VERASettings/VERASettings/Utils/SettingsViewModel+Preview.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,17
+VERA/Dependencies.json
+  s_b350cfa8b51c7f::t_966f2d0742f21b 3-4
+.maestro/flows/goodbye-view-landing-page.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+"VERA/VERACore/VERACore/Waiting room/UI/Navigation/WaitingRoomNavigation.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8-9
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/text-line.imageset/text-line.svg
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1
+VERA/VERACore/VERATestHelpers/Mocks/MockSessionRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 34
+VERA/VERAVonage/VERAVonageTests/VonageCallTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 521-646,649-661,698-711
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveListSnapshotTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 28-31,43-52,111,117,128,132-188
+VERA/VERAScreenShare/VERAScreenShareTests/BroadcastPickerSubscriptionTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-67
+VERA/VERACommonUI/VERACommonUI/UI/BottomItemPresentable.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,37,48,68,78,84
+VERA/VERASettings/VERASettings/UI/Entities/CaptionsTranslationLanguage.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-49
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureSessionOrchestrator.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 38-40,84-87,97,100-106,169-172,221-224
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/NetworkStatsStorageTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-203
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivesScreen.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,14,16-19
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 35,37,41,118-120,259-269,544
+VERA/VERAVonage/VERAVonage/CallStateManager.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 65-67
+VERA/VERAApp/VERA/App/DependencyContainer.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 43,72-73,163,166,170-177,186,188,203-205,214,225,285-288
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/ParticipantVideoCardUITests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-78
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackDebugDumpBuilder.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 16,28,54-58
+VERA/VERAReactions/VERAReactions/UI/View/FloatingEmojisOverlayView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,96-98,100-101,104-105,108-122
+VERA/VERAScreenShare/VERAScreenShare/UI/View/BroadcastPickerRepresentable.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 50-54,57,60-73
+VERA/VERAVonage/VERAVonageTests/LatestValueWorkerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-82
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPluginTests/VonageArchivingPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,39-51,66,135-186,202-211
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiButtonContainerViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAArchiving/VERAArchiving/Domain/Repositories/ArchivingStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-19
+VERA/VERAVonage/VERAVonageTests/ParticipantsRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-83
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Navigation/MeetingRoomNavigationTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+.maestro/flows/settings-waiting-room-context.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20,79-85
+.maestro/flows/speaking-while-muted.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel+BottomItemPresentable.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,12,16,20
+VERA/VERACommonUI/VERACommonUITests/PublisherUIStateDeliveryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-52
+VERA/VERADomain/VERADomain/ArchiveKind.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-26
+VERA/VERAArchiving/VERAArchivingTests/Data/URLSessionArchiveFileDownloaderTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-84
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Helpers/MockMeetingRoomNavigation.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 57
+VERA/VERAReactions/VERAReactionsTests/EmojiButtonContainerViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveKind+Presentation.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-121
+VERA/VERAArchiving/VERAArchiving/Wireframe/ArchivingFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,16-17,22-23,29,32-38,40-41,45,52,57,72-74
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveButton.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,15,19,27,30,38-39,49-50
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/MockSpeakerTestServiceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERACore/VERATestHelpers/Helpers/TestLockedValue.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-20
+VERA/VERAMeetingRoomSDK/README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13-14
+VERA/VERAReactions/VERAReactionsTests/FloatingEmojisOverlayViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,12,39-51,211,229-230,233,240-252
+  s_b350cfa8b51c7f::t_f8a69076e1197c 253
+VERA/VERASettings/VERASettings/UI/Entities/SettingsSection.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15,34
+VERA/VERASettings/VERASettings/UI/View/Sections/GeneralSectionView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 41,53,69-79
+  s_b350cfa8b51c7f::t_ee54af83b5a3e9 80-82
+VERA/VERAApp/VERATests/AppDependencyProvidersTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Data/DefaultSpeakerTestService.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 23-24,47-73,96,100-105,111,142,155,157,241-244,290-296,299-306
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/ActiveSpeakerLayoutViewTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,17,81
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/VonageSendChatMessageUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/NetworkStatsStorage.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-144
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/VonageSettingsPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 161-194,494,501-502
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-solid.imageset/Contents.json
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-25
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomFeatureTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15,23,25
+VERA/VERAArchiving/VERAArchivingTestHelpers/ArchivingStatusDataSourceSpy.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11-27,30-36,40-65
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Entities/ParticipantTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11
+VERA/VERASettings/VERASettingsTests/Domain/PublisherPreferencesTransferTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 58-59
+VERA/VERADomain/VERADomain/RoomCredentialsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 87
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPluginTests/VonageCaptionsPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 227,229-231,233,236-239,322-324
+  s_b350cfa8b51c7f::t_1ad6ba2d40f3f7 325-326
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 44-49,73,75-98
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchiveFileDownloader.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-16
+VERA/VERAArchiving/VERAArchivingSnapshotTests/TranscriptionStartOptionsSnapshotTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-73
+VERA/Project.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 497-500,502-503
+VERA/VERACaptions/VERACaptions/UI/Entities/CaptionItem+UI.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24,26
+"VERA/VERACaptions/VERACaptionsTests/UI/View model/CaptionsButtonViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13-14,207-223,291-292
+.claude/skills/new-module/SKILL.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-65
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-solid.imageset/voicemail-transcript-solid.svg
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1
+VERA/VERACore/VERACoreTests/GoodBye/GoodByeViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-35
+VERA/VERACore/VERATestHelpers/Mocks/MockCurrentCallParticipantsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 22
+VERA/VERAFeedback/VERAFeedback/Data/DefaultFeedbackReportDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 43,49
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View models/MeetingRoomViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15,726,776,1262-1473,1668,1684-1685
+VERA/VERACore/VERATestHelpers/Mocks/MockParticipant.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchivesViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 58,114-142,161,212,257-447,474-475,482-503,537-538,549,568-586
+  s_b350cfa8b51c7f::t_405fe9fe2e7b73 587
+VERA/VERALogger/VERALoggerTests/StandardStreamLogCaptureTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-57
+VERA/VERADomain/VERADomainTests/ArchiveKindTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-27
+VERA/VERACore/VERATestHelpers/Mocks/MockUserRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,15-20,22-30,32-36,39-43
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioDiagnosticsPerformanceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 170,175,182,188,196-211
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivesRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 52-58,97-99,109-110
+"VERA/VERACaptions/VERACaptions/Domain/Use cases/EnableCaptionsUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 16
+"VERA/VERAFeedback/VERAFeedback/Domain/Use cases/FeedbackReportUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 31
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/BottomBarButtonsAssemblerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 411-469,933
+VERA/VERAApp/VERATests/MeetingRoomEnabledFeaturesTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 18-20,24-33,44,49,53-54,57,61,76-78,81-85,87-88,96,101,104,114,119,130-139,156-165,188,193,202-203,205,215-216,226,229,231,247,252,272,277,290,295,304,309,311,361,366
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockSpeakerTestService.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+VERA/VERAAudioEffects/VERAAudioEffectsTests/TestHelpers/Mocks.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,12,14,17-23,33-36
+  s_b350cfa8b51c7f::t_175f77a5518883 8
+VERA/VERAArchiving/VERAArchivingTests/StopArchivingUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,55-62
+  s_b350cfa8b51c7f::t_4ecad05b9878ac 63-64
+VERA/VERACommonUI/VERACommonUI/Extensions/Publisher+MainActor.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-32
+VERA/VERACore/VERATestHelpers/Mocks/MockNoiseSuppressionStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,16-18,21
+VERA/VERADomain/VERADomain/HTTPClient.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7
+VERA/VERADomain/VERADomain/AudioEffects/NoiseSuppressionStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8
+VERA/VERAChat/VERAChatTests/ChatBadgeButtonViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+"VERA/VERACore/VERACoreTests/Waiting room/UI/ViewHolderAudioOutputTestButtonTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+"VERA/VERASettings/VERASettings/UI/View models/StatisticsViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,16,75,77,83
+VERA/VERAApp/BroadcastExtension/BroadcastSampleHandler.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,36-83,85-145,147-152,158-162,164-175,227,246,260,274,277,299,301-310,322-323,344,356,361,363,366,370,377-380,383,387,391-405
+VERA/VERACore/VERATestHelpers/Mocks/MockRequestMicrophonePermissionUseCase.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,16
+VERA/VERASettings/VERASettings/UI/View/Sections/CaptionsSectionView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-66
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/VonageCallKitPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 307-425,435-456,471
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackFormFocusNavigation.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERAE2E/VERAE2E/Domain/Session/E2ECallFacade.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 38-40,186-187,192-194,199-205
+  s_b350cfa8b51c7f::t_ac295a540157d0 206-207
+VERA/VERASettings/VERASettings/Data/UserDefaultsSettingsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 26,30,40
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/MeetingRoomActionsTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+.maestro/flows/captions.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 21
+VERA/VERAAudioEffects/VERAAudioEffects/Data/DefaultNoiseSuppressionStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,10-13,18
+VERA/VERACore/VERACore/Common/Data/UserDefaults/UserDefaultsUserRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7-8
+.github/workflows/validate-config-schemas.yml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-63
+VERA/PREBUILTS_README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17-19,26,34,67-70,131
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/TranscriptionOptions.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-20
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/UI/ViewModels/AudioOutputControlViewModel.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,48
+.maestro/flows/settings-meeting-room-context.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20,55-64,93-99,116-129
+VERA/VERADomain/VERADomain/AlertItem.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13,18,32,41,45,49,61,72,83,94,98
+VERA/VERAScreenShare/README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 55
+"VERA/VERACore/VERACoreTests/Waiting room/UI/ViewHolderOwnershipTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-37
+VERA/VERADomain/VERADomain/AudioEffects/NullNoiseSuppressionStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-11
+VERA/VERAReactions/VERAReactions/Wireframe/ReactionsFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 35,48,65,75,93,111
+VERA/VERADomain/VERADomainTests/ArchiveTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-98
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackImageEncoder.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 25-47
+VERA/VERAConfiguration/VERAConfigurationTests/AppConfigTransferTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 56,103-105
+VERA/VERACore/VERATestHelpers/Mocks/MockCameraDevicesRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+VERA/VERACaptions/VERACaptions/Domain/Services/CaptionsActivationDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/ParticipantVideoCard.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 113,184,243,254-260,380-397
+  s_b350cfa8b51c7f::t_9da1132f140201 398-400
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomBuilder.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 393-404,515
+VERA/VERAApp/VERA/App/Customization/MeetingRoomCustomizationProvider.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 68
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingAccessibilityID.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-10,14-18
+.kiro/steering/README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-43
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 92-93,103-104,343,350,353,371,428,435-442,498-519,525,530,543
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/Mocks/MockGenerateTonePlayerUseCase.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,72-74
+VERA/VERAVonage/VERAVonageTests/PictureInPictureParticipantSelectorTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 89-90,97-132,160-161,168,171-179,219-244
+  s_b350cfa8b51c7f::t_c695ddd649659b 245
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EBackendStore.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 79-81,84,88-89,159-173,195,197,204-205,208,211-212,221-238
+.github/workflows/maestro.yml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 56,65,91-94,98,160-169,173-226,228
+VERA/VERAArchiving/VERAArchiving/Data/URLSessionArchiveFileDownloader.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-40
+"VERA/VERAChat/VERAChat/Domain/Use cases/SendChatMessageUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7
+VERA/VERACaptions/VERACaptions/Data/DefaultCaptionsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17,22
+VERA/VERACommonUI/VERACommonUI/Generated/SPMAssets+VERACommonUI.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 85,92-93
+"VERA/VERABackgroundEffects/VERABackgroundEffectsTests/UI/View model/VideoEffectsViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 148-155,391-392,409
+"VERA/VERACore/VERACoreTests/Landing page/Domain/Use cases/JoinRoomUseCaseTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,69,74-75
+VERA/VERAVonage/VERAVonage/VonageSessionFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 32,44-51,72-73
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/VERACallManagerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 165-191
+VERA/VERAVonage/VERAVonageTests/PictureInPictureControllerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 65-115
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageSendReactionUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+VERA/VERAVonage/VERAVonage/VonageCall.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 26,76,79-89,275-281,283-288,290,292-316,335-337,432-433,845,996-1013,1034,1041
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/ViewGenerator+AVRoutePicker.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11
+VERA/VERAArchiving/VERAArchiving/UI/Components/ShareSheet.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-30
+VERA/VERAApp/VERATests/PublisherAdvancedSettingsAdapterTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-42
+VERA/VERAE2E/VERAE2E/Domain/Models/E2EModels.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 21-28
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Components/BottomBar.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 77,102,130,142,150,153,156,159,162,165,168,171,178-185,213
+VERA/VERACore/VERACoreTests/Common/Data/MockHTTPClientConcurrencyTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-37
+.claude/skills/feature-flag/SKILL.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-63
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureVideoRenderer.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 21-22
+VERA/VERAVonage/VERAVonage/VonageSession.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 73,75-76,78,86-87,338,344
+VERA/VERADomain/VERADomainTests/PublisherRelayTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-101
+VERA/VERAVonage/VERAVonageTests/ActiveSpeakerTrackerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/CallKitMuteSynchronizer.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-74
+.maestro/flows/recording.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 21
+VERA/VERASettings/VERASettings/Wireframe/SettingsFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 30-35,41-43,46-48,52-53,66-69,111-112,124-126
+VERA/Config/app-config.json
+  s_b350cfa8b51c7f::t_966f2d0742f21b 34,40,43
+"VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View model/VideoEffectsViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,57
+"VERA/VERACore/VERACore/Waiting room/Domain/Repository/CameraDevicesRepository.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8-9
+VERA/VERAVonage/VERAVonageTests/PictureInPictureSessionOrchestratorTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 125-181,186-218
+VERA/VERAChat/VERAChatTests/ChatPublisherDeliveryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-58
+VERA/VERASettings/VERASettings/Domain/Entities/PublisherSettingsPreferences.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 48-56,75-77,90-92,106-107,148-150,176-177,200-201,215-216
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/VonageCallKitPlugin.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,52-55,89,103,151,160-181
+  s_b350cfa8b51c7f::t_87de9293cc6e08 182
+VERA/VERAArchiving/VERAArchiving/UI/Entities/ArchiveUIData.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,9-19,21,24,30,33,36,39
+VERA/VERAE2E/VERAE2E/Domain/Archiving/E2EArchivingEvents.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,11
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomFeature.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24-28,31-34
+VERA/VERACommonUI/VERACommonUITests/BottomBarAccessoryOwnershipTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-37
+docs/TESTING.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 74,84
+sonar-project.properties
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingDataSourceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 60-150,233-250,301-303,305-311
+"VERA/VERACore/VERACore/Waiting room/UI/Views/UICameraDevice.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,12
+VERA/VERACaptions/VERACaptionsTests/Wireframe/CaptionsFactoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13-14,80-81
+VERA/VERAFeedback/VERAFeedback/Wireframe/FeedbackFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,26
+.claude/skills/run-tests/SKILL.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-87
+VERA/VERAArchiving/VERAArchivingTests/PlayRecordingUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-72
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomSDKContainer.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 35,158,209,347-350,353-354,356,359,366-368,371-379
+VERA/VERACaptions/VERACaptions/Data/DefaultCaptionsStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-13,19,23
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/View/ViewGeneratorOwnershipTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-37
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/BottomBarButtonsAssembler.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 51-57,118-121,319-327,401
+VERA/VERASettings/VERASettings/Resources/Localizable.xcstrings
+  s_b350cfa8b51c7f::t_966f2d0742f21b 2-11,14-17,20-23,26-29,32-35,38-41,44-47,52-59,62-65,68-71,74-77,80-83,86-89,92-95,100-107,110-113,116-119,122-125,128-131,134-137,140-143,148-155,158-161,164-167,170-173,176-179,182-185,188-191,196-203,206-209,212-215,218-221,224-227,230-233,236-239,244-251,254-257,260-263,266-269,272-275,278-281,284-287,292-299,302-305,308-311,314-317,320-323,326-329,332-335,340-347,350-353,356-359,362-365,368-371,374-377,380-383,388-395,398-401,404-407,410-413,416-419,422-425,428-431,436-442,445-448,451-454,457-460,463-466,469-472,475-478,483-490,493-496,499-502,505-508,511-514,517-520,523-526,531-538,541-544,547-550,553-556,559-562,565-568,571-574,579-585,588-591,594-597,600-603,606-609,612-615,618-621,626-632,635-638,641-644,647-650,653-656,659-662,665-668,673-679,682-685,688-691,694-697,700-703,706-709,712-715,720-727,730-733,736-739,742-745,748-751,754-757,760-763,768-775,778-781,784-787,790-793,796-799,802-805,808-811,816-823,826-829,832-835,838-841,844-847,850-853,856-859,864-871,874-877,880-883,886-889,892-895,898-901,904-907,912-918,921-924,927-930,933-936,939-942,945-948,951-954,959-966,969-972,975-978,981-984,987-990,993-996,999-1002,1005-1195,1197-1204,1207-1210,1213-1216,1219-1222,1225-1228,1231-1234,1237-1240,1245-1252,1255-1258,1261-1264,1267-1270,1273-1276,1279-1282,1285-1288,1293-1300,1303-1306,1309-1312,1315-1318,1321-1324,1327-1330,1333-1336,1339,1341-1348,1351-1354,1357-1360,1363-1366,1369-1372,1375-1378,1381-1384,1389-1395,1398-1401,1404-1407,1410-1413,1416-1419,1422-1425,1428-1431,1436-1441,1444-1447,1450-1453,1456-1459,1462-1465,1468-1471,1474-1477,1482-1489,1492-1495,1498-1501,1504-1507,1510-1513,1516-1519,1522-1525,1530-1537,1540-1543,1546-1549,1552-1555,1558-1561,1564-1567,1570-1573,1578-1585,1588-1591,1594-1597,1600-1603,1606-1609,1612-1615,1618-1621,1626-1631,1634-1637,1640-1643,1646-1649,1652-1655,1658-1661,1664-1667,1672-1678,1681-1684,1687-1690,1693-1696,1699-1702,1705-1708,1711-1714,1719-1725,1728-1731,1734-1737,1740-1743,1746-1749,1752-1755,1758-1761,1766-1773,1776-1779,1782-1785,1788-1791,1794-1797,1800-1803,1806-1809,1814-1820,1823-1826,1829-1832,1835-1838,1841-1844,1847-1850,1853-1856,1859,1861-1868,1871-1874,1877-1880,1883-1886,1889-1892,1895-1898,1901-1904,1909-1915,1918-1921,1924-1927,1930-1933,1936-1939,1942-1945,1948-1951,1956-1963,1966-1969,1972-1975,1978-1981,1984-1987,1990-1993,1996-1999,2004-2011,2014-2017,2020-2023,2026-2029,2032-2035,2038-2041,2044-2047,2052-2060,2063-2066,2069-2072,2075-2078,2081-2084,2087-2090,2093-2096,2099,2101-2107,2110-2113,2116-2119,2122-2125,2128-2131,2134-2137,2140-2143,2146,2148-2155,2158-2161,2164-2167,2170-2173,2176-2179,2182-2185,2188-2191,2196-2202,2205-2208,2211-2214,2217-2220,2223-2226,2229-2232,2235-2238,2243-2250,2253-2256,2259-2262,2265-2268,2271-2274,2277-2280,2283-2286,2291-2298,2301-2304,2307-2310,2313-2316,2319-2322,2325-2328,2331-2334,2339-2346,2349-2352,2355-2358,2361-2364,2367-2370,2373-2376,2379-2382,2387-2394,2397-2400,2403-2406,2409-2412,2415-2418,2421-2424,2427-2430,2433,2435-2442,2445-2448,2451-2454,2457-2460,2463-2466,2469-2472,2475-2478,2483-2488,2491-2494,2497-2500,2503-2506,2509-2512,2515-2518,2521-2524,2529-2534,2537-2540,2543-2546,2549-2552,2555-2558,2561-2564,2567-2570,2575-2582,2585-2588,2591-2594,2597-2600,2603-2606,2609-2612,2615-2618,2621,2623-2630,2633-2636,2639-2642,2645-2648,2651-2654,2657-2660,2663-2666,2671-2678,2681-2684,2687-2690,2693-2696,2699-2702,2705-2708,2711-2714,2719-2725,2728-2731,2734-2737,2740-2743,2746-2749,2752-2755,2758-2761,2766-2773,2776-2779,2782-2785,2788-2791,2794-2797,2800-2803,2806-2809,2814-2820,2823-2826,2829-2832,2835-2838,2841-2844,2847-2850,2853-2856,2861-2867,2870-2873,2876-2879,2882-2885,2888-2891,2894-2897,2900-2903,2908-2914,2917-2920,2923-2926,2929-2932,2935-2938,2941-2944,2947-2950,2953,2955-2961,2964-2967,2970-2973,2976-2979,2982-2985,2988-2991,2994-2997,3002-3008,3011-3014,3017-3020,3023-3026,3029-3032,3035-3038,3041-3044,3049-3055,3058-3061,3064-3067,3070-3073,3076-3079,3082-3085,3088-3091,3096-3102,3105-3108,3111-3114,3117-3120,3123-3126,3129-3132,3135-3138,3143-3150,3153-3156,3159-3162,3165-3168,3171-3174,3177-3180,3183-3186,3191-3197,3200-3203,3206-3209,3212-3215,3218-3221,3224-3227,3230-3233,3238-3244,3247-3250,3253-3256,3259-3262,3265-3268,3271-3274,3277-3280,3285-3291,3294-3297,3300-3303,3306-3309,3312-3315,3318-3321,3324-3327,3332-3338,3341-3344,3347-3350,3353-3356,3359-3362,3365-3368,3371-3374,3377,3379-3386,3389-3392,3395-3398,3401-3404,3407-3410,3413-3416,3419-3422,3427-3434,3437-3440,3443-3446,3449-3452,3455-3458,3461-3464,3467-3470,3475-3480,3483-3486,3489-3492,3495-3498,3501-3504,3507-3510,3513-3516,3521-3528,3531-3534,3537-3540,3543-3546,3549-3552,3555-3558,3561-3564,3569-3574,3577-3580,3583-3586,3589-3592,3595-3598,3601-3604,3607-3610,3615-3622,3625-3628,3631-3634,3637-3640,3643-3646,3649-3652,3655-3658,3663-3670,3673-3676,3679-3682,3685-3688,3691-3694,3697-3700,3703-3706,3711-3717,3720-3723,3726-3729,3732-3735,3738-3741,3744-3747,3750-3753,3756,3758-3764,3767-3770,3773-3776,3779-3782,3785-3788,3791-3794,3797-3800,3805-3811,3814-3817,3820-3823,3826-3829,3832-3835,3838-3841,3844-3847,3852-3858,3861-3864,3867-3870,3873-3876,3879-3882,3885-3888,3891-3894,3899-3906,3909-3912,3915-3918,3921-3924,3927-3930,3933-3936,3939-3942,3947-3952,3955-3958,3961-3964,3967-3970,3973-3976,3979-3982,3985-3988,3993-3999,4002-4005,4008-4011,4014-4017,4020-4023,4026-4029,4032-4035,4040-4046,4049-4052,4055-4058,4061-4064,4067-4070,4073-4076,4079-4082,4087-4092,4095-4098,4101-4104,4107-4110,4113-4116,4119-4122,4125-4128,4133-4139,4142-4145,4148-4151,4154-4157,4160-4163,4166-4169,4172-4175,4180-4185,4188-4191,4194-4197,4200-4203,4206-4209,4212-4215,4218-4221,4226-4233,4236-4239,4242-4245,4248-4251,4254-4257,4260-4263,4266-4269,4274-4279,4282-4285,4288-4291,4294-4297,4300-4303,4306-4309,4312-4315,4320-4327,4330-4333,4336-4339,4342-4345,4348-4351,4354-4357,4360-4363,4368-4374,4377-4380,4383-4386,4389-4392,4395-4398,4401-4404,4407-4410,4415-4420,4423-4426,4429-4432,4435-4438,4441-4444,4447-4450,4453-4456,4459,4461-4467,4470-4473,4476-4479,4482-4485,4488-4491,4494-4497,4500-4503,4508-4514,4517-4520,4523-4526,4529-4532,4535-4538,4541-4544,4547-4550,4555-4561,4564-4567,4570-4573,4576-4579,4582-4585,4588-4591,4594-4597,4602-4609,4612-4615,4618-4621,4624-4627,4630-4633,4636-4639,4642-4645,4650-4657,4660-4663,4666-4669,4672-4675,4678-4681,4684-4687,4690-4693,4698-4706,4709-4712,4715-4718,4721-4724,4727-4730,4733-4736,4739-4742,4747-4753,4756-4759,4762-4765,4768-4771,4774-4777,4780-4783,4786-4789,4794-4800,4803-4806,4809-4812,4815-4818,4821-4824,4827-4830,4833-4836,4841-4849,4852-4855,4858-4861,4864-4867,4870-4873,4876-4879,4882-4885,4890-4897,4900-4903,4906-4909,4912-4915,4918-4921,4924-4927,4930-4933,4938-4944,4947-4950,4953-4956,4959-4962,4965-4968,4971-4974,4977-4980,4985-4990,4993-4996,4999-5002,5005-5008,5011-5014,5017-5020,5023-5026,5031-5038,5041-5044,5047-5050,5053-5056,5059-5062,5065-5068,5071-5074,5077,5079-5085,5088-5091,5094-5097,5100-5103,5106-5109,5112-5115,5118-5121,5124,5126-5133,5136-5139,5142-5145,5148-5151,5154-5157,5160-5163,5166-5169,5174-5180,5183-5186,5189-5192,5195-5198,5201-5204,5207-5210,5213-5216,5221-5228,5231-5234,5237-5240,5243-5246,5249-5252,5255-5258,5261-5264,5269-5276,5279-5282,5285-5288,5291-5294,5297-5300,5303-5306,5309-5312,5317-5323,5326-5329,5332-5335,5338-5341,5344-5347,5350-5353,5356-5359,5364-5369,5372-5375,5378-5381,5384-5387,5390-5393,5396-5399,5402-5405,5410-5416,5419-5422,5425-5428,5431-5434,5437-5440,5443-5446,5449-5452,5457-5463,5466-5469,5472-5475,5478-5481,5484-5487,5490-5493,5496-5499,5504-5511,5514-5517,5520-5523,5526-5529,5532-5535,5538-5541,5544-5547,5552-5558,5561-5564,5567-5570,5573-5576,5579-5582,5585-5588,5591-5594,5599-5606,5609-5612,5615-5618,5621-5624,5627-5630,5633-5636,5639-5642,5647-5654,5657-5660,5663-5666,5669-5672,5675-5678,5681-5684,5687-5690,5695-5702,5705-5708,5711-5714,5717-5720,5723-5726,5729-5732,5735-5738,5741,5743-5749,5752-5755,5758-5761,5764-5767,5770-5773,5776-5779,5782-5785,5790-5796,5799-5802,5805-5808,5811-5814,5817-5820,5823-5826,5829-5832,5837-5843,5846-5849,5852-5855,5858-5861,5864-5867,5870-5873,5876-5879,5884-5891,5894-5897,5900-5903,5906-5909,5912-5915,5918-5921,5924-5927,5930,5932-5938,5941-5944,5947-5950,5953-5956,5959-5962,5965-5968,5971-5974,5979-5985,5988-5991,5994-5997,6000-6003,6006-6009,6012-6015,6018-6021,6026-6033,6036-6039,6042-6045,6048-6051,6054-6057,6060-6063,6066-6069,6074-6080,6083-6086,6089-6092,6095-6098,6101-6104,6107-6110,6113-6116,6121-6128,6131-6134,6137-6140,6143-6146,6149-6152,6155-6158,6161-6164,6169-6176,6179-6182,6185-6188,6191-6194,6197-6200,6203-6206,6209-6212,6217-6223,6226-6229,6232-6235,6238-6241,6244-6247,6250-6253,6256-6259,6264-6271,6274-6277,6280-6283,6286-6289,6292-6295,6298-6301,6304-6307,6312-6318,6321-6324,6327-6330,6333-6336,6339-6342,6345-6348,6351-6354,6359-6365,6368-6371,6374-6377,6380-6383,6386-6389,6392-6395,6398-6401,6406-6412,6415-6418,6421-6424,6427-6430,6433-6436,6439-6442,6445-6448,6453-6458,6461-6464,6467-6470,6473-6476,6479-6482,6485-6488,6491-6494,6499-6506,6509-6512,6515-6518,6521-6524,6527-6530,6533-6536,6539-6542,6545,6547-6554,6557-6560,6563-6566,6569-6572,6575-6578,6581-6584,6587-6590,6595-6601,6604-6607,6610-6613,6616-6619,6622-6625,6628-6631,6634-6637,6642-6649,6652-6655,6658-6661,6664-6667,6670-6673,6676-6679,6682-6685,6690-6697,6700-6703,6706-6709,6712-6715,6718-6721,6724-6727,6730-6733,6738-6745,6748-6751,6754-6757,6760-6763,6766-6769,6772-6775,6778-6781,6786-6794,6797-6800,6803-6806,6809-6812,6815-6818,6821-6824,6827-6830,6833,6835-6842,6845-6848,6851-6854,6857-6860,6863-6866,6869-6872,6875-6878,6881,6883-6890,6893-6896,6899-6902,6905-6908,6911-6914,6917-6920,6923-6926,6931-6938,6941-6944,6947-6950,6953-6956,6959-6962,6965-6968,6971-6974,6979-6986,6989-6992,6995-6998,7001-7004,7007-7010,7013-7016,7019-7022,7027-7034,7037-7040,7043-7046,7049-7052,7055-7058,7061-7064,7067-7070,7075-7082,7085-7088,7091-7094,7097-7100,7103-7106,7109-7112,7115-7118,7123-7130,7133-7136,7139-7142,7145-7148,7151-7154,7157-7160,7163-7166,7171-7177,7180-7183,7186-7189,7192-7195,7198-7201,7204-7207,7210-7213,7218-7225,7228-7231,7234-7237,7240-7243,7246-7249,7252-7255,7258-7261,7264,7266-7273,7276-7279,7282-7285,7288-7291,7294-7297,7300-7303,7306-7309,7312,7314-7320,7323-7326,7329-7332,7335-7338,7341-7344,7347-7350,7353-7356,7361-7368,7371-7374,7377-7380,7383-7386,7389-7392,7395-7398,7401-7404,7409-7416,7419-7422,7425-7428,7431-7434,7437-7440,7443-7446,7449-7452,7457-7464,7467-7470,7473-7476,7479-7482,7485-7488,7491-7494,7497-7500,7503,7505-7511,7514-7517,7520-7523,7526-7529,7532-7535,7538-7541,7544-7547,7552-7559,7562-7565,7568-7571,7574-7577,7580-7583,7586-7589,7592-7595,7600-7607,7610-7613,7616-7619,7622-7625,7628-7631,7634-7637,7640-7643,7648-7655,7658-7661,7664-7667,7670-7673,7676-7679,7682-7685,7688-7691,7696-7703,7706-7709,7712-7715,7718-7721,7724-7727,7730-7733,7736-7739,7744-7750,7753-7756,7759-7762,7765-7768,7771-7774,7777-7780,7783-7786,7791-7797,7800-7803,7806-7809,7812-7815,7818-7821,7824-7827,7830-7833,7838-7843,7846-7849,7852-7855,7858-7861,7864-7867,7870-7873,7876-7879,7884-7891,7894-7897,7900-7903,7906-7909,7912-7915,7918-7921,7924-7927,7932-7938,7941-7944,7947-7950,7953-7956,7959-7962,7965-7968,7971-7974,7979-7985,7988-7991,7994-7997,8000-8003,8006-8009,8012-8015,8018-8021,8024-8070,8072-8079,8082-8085,8088-8091,8094-8097,8100-8103,8106-8109,8112-8115,8120-8127,8130-8133,8136-8139,8142-8145,8148-8151,8154-8157,8160-8163,8168-8174,8177-8180,8183-8186,8189-8192,8195-8198,8201-8204,8207-8210,8215-8222,8225-8228,8231-8234,8237-8240,8243-8246,8249-8252,8255-8258,8264-8265
+.maestro/flows/join-with-camera-mic-allowed.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 22
+VERA/VERAArchiving/VERAArchiving/Resources/Localizable.xcstrings
+  s_b350cfa8b51c7f::t_966f2d0742f21b 147-148,153,159,165,170-171,176-177,182-183,188-189,337-383,432-478,527-573,622-668,716-762,810-858,863,869,875,881,887,893-1316,1322
+.maestro/flows/waiting-room-controls-enabled.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+VERA/VERAArchiving/VERAArchivingSnapshotTests/ArchiveButtonSnapshotTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-89
+VERA/VERASettings/VERASettingsTests/TestHelpers/MockSettingsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,16,18-21,24,27,31-35,59
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/Domain/Use cases/DefaultDisableNoiseSuppressionUseCaseTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERAArchiving/VERAArchiving/Data/DefaultArchivingStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10-11,16-21,25-32
+VERA/VERAReactions/VERAReactions/Data/DefaultReactionsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,18,23
+VERA/VERAReactions/VERAReactionsTests/EmojiHorizontalPickerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,314-315,318
+VERA/VERAArchiving/VERAArchivingTests/DownloadTranscriptionUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-101
+VERA/VERADomain/VERADomainTests/FeatureStatusTransferTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 5,30-40
+  s_b350cfa8b51c7f::t_4b177eaf37514e 41-42
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPluginTests/TestHelpers/MockCallFacade.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 25-26,51,89-93
+  s_b350cfa8b51c7f::t_71ab59f07ff250 94-95
+"VERA/VERACore/VERACore/GoodBye/UI/View models/GoodByeViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 26
+.claude/skills/record-snapshots/SKILL.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-63
+VERA/VERACore/VERACore/GoodBye/Wireframe/GoodByePageFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15,35
+VERA/VERASettings/VERASettingsTests/Domain/CaptionsTranslationPreferenceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-105
+VERA/VERACore/VERATestHelpers/Mocks/MockVERAPublisherRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 30,32,34
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchivesViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20-21,25-28,34,39,42-44,47-49,53,72-81,90-92,95-96,98-102,104-105,131-139,141-142,144
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-line.imageset/Contents.json
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-25
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackImageBackgroundEncodingTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-75
+VERA/VERAArchiving/VERAArchivingTests/DefaultArchivesRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,190-275,288-307,372-374,383-385
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Use cases/DisconnectRoomUseCaseTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,34,37
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackFieldViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-21
+VERA/VERAChat/VERAChatTests/ChatPanelViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,76-78,85,89
+VERA/VERACommonUI/VERACommonUITests/PublisherMainActorTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-40
+"VERA/VERAAudioEffects/VERAAudioEffects/UI/View models/NoiseSuppressionViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/TranscriptionOptionsOverlayModifierTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-71
+VERA/VERAVonage/VERAVonageTests/HTTPArchivesDataSourceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-211
+VERA/VERAVonage/VERAVonage/ParticipantsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 19-21
+  s_b350cfa8b51c7f::t_3e8535998f60d9 22-24
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/UI/Components/BottomBarTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+.maestro/flows/waiting-room-controls-disabled.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+VERA/Scripts/generate-app-config.py
+  s_b350cfa8b51c7f::t_966f2d0742f21b 128,134,143,149,157,163
+VERA/VERABackgroundEffects/VERABackgroundEffects/UI/View/VideoEffectsSheet.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 213,223,244
+VERA/VERAE2E/VERAE2E/Data/Archiving/E2EArchivingDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 25,28-29,37-41,44
+VERA/VERAReactions/VERAReactions/UI/View/EmojiPickerViewFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 97
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveList.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,32-33,35,37,42,52,64,76-83,94,96-98,103-104,108,135-138,142-143,146-154
+VERA/VERADomain/VERADomain/PublisherRelays.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-53
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Navigation/MeetingRoomNavigation.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 23,78
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/voicemail-transcript-line.imageset/voicemail-transcript-line.svg
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1
+VERA/VERACore/VERATestHelpers/Mocks/MockCameraPreviewProviderRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 41,43,45
+VERA/VERAVonageChatPlugin/VERAVonageChatPluginTests/VonageChatPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13,69-131,135,137,142,144-145
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StopArchivingUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,11,13,16,36-37
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/Domain/Use cases/DefaultEnableNoiseSuppressionUseCaseTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View/MeetingRoomAccessibilityID.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 16
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsButtonViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,35,95
+VERA/VERAFeedback/VERAFeedback/Domain/Services/FeedbackReportDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 41
+.maestro/flows/deep-link-plain-room.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17,31
+VERA/VERAArchiving/VERAArchivingTests/Mocks/MockArchivingDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,13-15,27-28,41
+.github/workflows/check-pull-request-size.yml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-28
+VERA/VERAArchiving/VERAArchiving/UI/View/TranscriptionStartOptionsView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-77
+VERA/VERAAudioEffects/VERAAudioEffects/Wireframe/AudioEffectsFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,27,40,45,56
+VERA/VERACommonUI/VERACommonUITests/NavBarAuthButtonViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 181-182,185,189
+VERA/VERAArchiving/VERAArchivingTests/StartArchivingUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,63-90
+  s_b350cfa8b51c7f::t_2064315a5f65e9 91
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/AudioOutputUIStateDeliveryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-45
+VERA/VERAConfiguration/VERAConfiguration/AppConfig.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 79,85,94,100,108,114
+VERA/VERACore/VERATestHelpers/Mocks/MockHTTPClient.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-38,40-78,105-121,123-124,126,129
+"VERA/VERACore/VERACoreSnapshotTests/Waiting room/Mocks/WaitingRoomMockData.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERACore/VERACoreTests/Common/Data/Default/DefaultPublisherRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/FeedbackSessionDebugInfoCurrentCallTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatsOverlayViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15
+docs/CONFIGURATION.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12-13,22-29,31
+VERA/VERASettings/VERASettingsTests/UI/View/GeneralSectionViewTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-38
+VERA/VERALogger/VERALoggerTests/RotatingLogFileSetTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-250
+VERA/Tuist/ProjectDescriptionHelpers/TestSchemes.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 43,57-59,92-97
+"VERA/VERAAudioEffects/VERAAudioEffects/Domain/Use cases/DisableNoiseSuppressionUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomView.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 51
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Data/Default/DefaultCurrentCallParticipantsRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+VERA/VERASettings/VERASettings/UI/View/SettingsAccessibilityID.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 45-47,51
+"VERA/VERACommonUI/VERACommonUI/Preview data/PreviewData.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantArrayFilteringTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAArchiving/VERAArchiving/Domain/Entities/ArchiveTranscript.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-18
+VERA/VERALogger/VERALogger/FileLogging/RotatingLogFileSet.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-245
+VERA/VERAVonage/VERAVonage/PictureInPicture/PictureInPictureParticipantSelector.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 23-25,27-30,49-52,54-57,73-79,96-102
+  s_b350cfa8b51c7f::t_03f2e7b0b9103b 103
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomBuilderTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 19
+VERA/CONFIGURATION_README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 3,9,13,15-16,18,20,106
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackReportUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,77,79-81
+VERA/VERACommonUI/VERACommonUI/UI/ToastView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 64
+VERA/VERAVonage/VERAVonage/Extensions/VonageSignal+ArchivingState.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,9,12,16,19
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageSendChatMessageUseCase.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8
+VERA/VERAVonage/VERAVonageTests/VonageSessionTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 5,15-34
+  s_b350cfa8b51c7f::t_9d70a6433f671a 35
+VERA/VERAVonage/VERAVonage/LatestValueWorker.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-42
+VERA/VERASettings/VERASettingsSnapshotTests/TestHelpers/Mocks.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,13,16,20,39,42,46,56,59
+VERA/VERAArchiving/VERAArchivingTests/UI/View/TranscriptionStartOptionsScreenTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-31
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPlugin/VERACallManager.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,98-113
+  s_b350cfa8b51c7f::t_0803363cc2a1ed 114-115
+"VERA/VERAChat/VERAChat/UI/View models/ChatBadgeButtonViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,10,27
+"VERA/VERAMeetingRoom/VERAMeetingRoom/UI/View models/MeetingRoomState.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 28,48,63
+VERA/VERAMeetingRoom/VERAMeetingRoom/UI/Entities/UIParticipant.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 44-49
+"VERA/VERAReactions/VERAReactions/Domain/Use cases/SendReactionUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+"VERA/VERAReactions/VERAReactions/UI/View models/FloatingEmojisOverlayViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,39,59
+"VERA/VERAArchiving/VERAArchiving/UI/View model/ArchiveButtonViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10-14,22-28,40-41,44-45,47,52,55,60,68,77-91,95-103,106-110,113-117,119,128-132,140-141
+.swiftlint.yml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 2-6,14,40,42-49,54-55,59,69-70,72-73,83,87,91-92,145
+VERA/VERACommonUI/VERACommonUI/UI/AudioLevelIndicatorView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,10
+VERA/VERACore/VERATestHelpers/Mocks/MockRequestCameraPermissionUseCase.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,16
+VERA/VERACore/VERATestHelpers/Mocks/MockPreviewData.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERACore/VERACoreTests/Data/UserDefaultsUserRepositoryOwnershipTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-23
+VERA/VERAApp/VERA/App/PublisherAdvancedSettingsAdapter.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,13,24,34-38
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 266-286,354-355,365-368,386-398
+  s_b350cfa8b51c7f::t_56fba59152c9ab 399
+VERA/VERASettings/VERASettingsSnapshotTests/SettingsSnapshotTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 160-197,247-248,267-268,274-278
+"VERA/VERACore/VERACore/Waiting room/Domain/Use cases/JoinRoomUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomSDKContainerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,17,92-105,122-136,206-259,371
+VERA/VERASettings/VERASettingsTests/Data/UserDefaultsSettingsRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15-17,22-24,33-35,56,67-69,74,83-85,103-105,114,130-133,155-158,184-212,215-217,250-251,254,263,273-275,308-311,329-331,364-365,368,374,384-386,422-424,452-454,485-488,505-507
+"VERA/VERACore/VERACore/Waiting room/UI/View models/WaitingRoomViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,163-167,169,174,236-237,247-248,284
+scripts/run-maestro-tests.sh
+  s_b350cfa8b51c7f::t_966f2d0742f21b 38,119,268,278,450,476,520,549
+VERA/Tuist/Package.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 22
+.maestro/flows/goodbye-reenter-room.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20
+VERA/VERACaptions/VERACaptions/Wireframe/CaptionsFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 27,41,48,54
+"VERA/VERACaptions/VERACaptions/UI/View model/CaptionsViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,40,92
+VERA/VERACaptions/VERACaptionsApp/VERACaptionsApp.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 95-96,102,143-148,153-170
+  s_b350cfa8b51c7f::t_c20963fa51e8e5 171-172
+VERA/VERAChat/VERAChat/Wireframe/ChatFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,21
+VERA/VERASettings/VERASettingsTests/Wireframe/SettingsFactoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11-12,62-80,85-86,88-91
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/DefaultSpeakerTestServiceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 606-607,609,613-616,619-622,626-646
+docs/ARCHITECTURE.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24
+"VERA/VERACaptions/VERACaptionsTests/UI/View model/CaptionsViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7,23,25,303-319,363-364,367,376-385
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Domain/SpeakerTestService.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/DownloadTranscriptionUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-34
+VERA/Scripts/regenerateSigningConfig.sh
+  s_b350cfa8b51c7f::t_966f2d0742f21b 18
+VERA/VERAAudioDiagnostics/VERAAudioDiagnostics/Wireframe/AudioDiagnosticsFactory.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17
+VERA/VERADomain/VERADomain/Archive.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7-9,11,13-20,25-35,44-45,54-56,65-82
+VERA/VERALogger/VERALoggerTests/LogLevelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 5,40-45
+  s_b350cfa8b51c7f::t_f020e538de9d4b 46
+"VERA/VERACore/VERACoreTests/Waiting room/UI/WaitingRoomStateTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+.claude/skills/setup/SKILL.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-101
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/CallKitMuteSynchronizerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-79
+VERA/VERAApp/VERA/App/Navigation/AppRoute.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8
+VERA/VERAVonage/VERAVonage/VonageSubscriber.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 270-271,274,280-284
+  s_b350cfa8b51c7f::t_35269e3f1a08c1 285
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantArraySortingTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAMeetingRoom/VERAMeetingRoomSnapshotTests/MeetingRoomViewUITests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 27-28,39-45,111,128
+VERA/VERASettings/VERASettings/Utils/StatsOverlayViewModel+Preview.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,17
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/MeetingRoomComposedView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 135-139
+VERA/VERACore/VERATestHelpers/Mocks/PublisherRepositorySpy.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 36,41
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsTests/NullSpeakerTestServiceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/PlayRecordingUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24,26
+VERA/VERAMeetingRoom/VERAMeetingRoom/Resources/Localizable.xcstrings
+  s_b350cfa8b51c7f::t_966f2d0742f21b 196-242,867-960
+VERA/VERAVonageChatPlugin/VERAVonageChatPlugin/VonageChatPlugin.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,24-25,41-48,50-55,61,66-70
+"VERA/VERACore/VERACore/Waiting room/Domain/Repository/UserRepository.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7
+.github/copilot-instructions.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 7
+VERA/VERAChat/VERAChatTests/DefaultChatMessagesRepositoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,17,38,60,66,73-79
+  s_b350cfa8b51c7f::t_cce8a377d8cc6a 80
+VERA/VERAArchiving/VERAArchiving/Domain/Services/ArchivingDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,15-16,18-22,24-25,32,34,37
+VERA/VERADomain/VERADomainTests/TokenInjectingHTTPClientTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,85,88-89,99,123
+VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Services/ParticipantDisplayPriorityTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13
+VERA/VERAVonageSettingsPlugin/VERAVonageSettingsPlugin/VonageSettingsPlugin.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 62-64,73-74,77-78,82,165-180
+  s_b350cfa8b51c7f::t_d2bce1ae9509f0 181
+VERA/VERAVonageCallKitPlugin/VERAVonageCallKitPluginTests/MockCallController.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 16,48-56
+  s_b350cfa8b51c7f::t_67d0a18b116dc2 57
+VERA/VERAAudioDiagnostics/VERAAudioDiagnosticsSnapshotTests/TestHelpers/MockSpeakerTestService.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13-14
+"VERA/VERASettings/VERASettings/UI/View models/StatsOverlayViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,16,96,129
+"VERA/VERASettings/VERASettings/UI/View models/SettingsViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,28,112-117,163,167-168,173,251
+.maestro/flows/post-call-transcription.yaml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-133
+"VERA/VERASettings/VERASettingsTests/UI/View Models/StatisticsViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+VERA/VERACommonUI/VERACommonUI/Resources/Images.xcassets/text-line.imageset/Contents.json
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-25
+"VERA/VERAAudioEffects/VERAAudioEffectsTests/UI/View models/NoiseSuppressionButtonViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 284-286,290-291
+VERA/VERALogger/VERALogger/LogLevel.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+"VERA/VERACore/VERACoreTests/Waiting room/UI/Navigation/WaitingRoomNavigationTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+VERA/VERAVonageReactionsPlugin/VERAVonageReactionsPluginTests/VonageReactionsPluginTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 545-546
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDKTests/MeetingRoomComposedViewTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 202,212
+VERA/VERACore/VERACoreTests/Common/Data/URLSession/URLSessionHTTPClientTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10-12,423-433,435,441,454-457,459,461-466,471,495-501,532-539,542,546
+"VERA/VERAChat/VERAChat/UI/View models/ChatPanelViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,25,51,54
+scripts/swiftlint-xcode.sh
+  s_b350cfa8b51c7f::t_966f2d0742f21b 5-8,10-11,13-17,21,27,40-41,46,68,74-77,81-105,107-122,125-127,131-146,149,151
+README.md
+  s_b350cfa8b51c7f::t_966f2d0742f21b 66-67,101-102
+VERA/VERASettings/VERASettings/UI/View/SettingsSheetContent.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 15,21,25-29
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 13,31,40,45,52,57,136,145,167,175,202,209-210,235,241-242,248-249,278,286-483,488-491,496-497,503,505-506,508,514,516-517,519,535,554
+VERA/VERADomain/VERADomain/Captions/NullCaptionsStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-11
+VERA/VERAVonage/VERAVonageTests/Spies/VonageSessionSpy.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 38
+"VERA/VERAReactions/VERAReactions/UI/View models/EmojiPickerContainerViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24
+"VERA/VERACore/VERACore/Waiting room/UI/Views/WaitingRoomUserPreviewView.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 21,23,32
+"VERA/VERACore/VERACoreTests/Waiting room/UI/UICameraDeviceTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-36
+VERA/VERACommonUI/VERACommonUI/Extensions/AlertItem+Extensions.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10
+VERA/VERAVonage/VERAVonageTests/VonageSessionFactoryTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-37
+VERA/VERAApp/BroadcastExtension/ScreenShareVideoCapturer.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12-34,36-37,39,44-57,59-127,130-133,137-141,147-151,154-159,163-168,172,180,182-186,188-201,203-205,207,209-215,217-225,227-230,232-243,245,247,250-253,256,259,261,265,267-269,271-272,274-285,289-299,304,306-307,309-313
+VERA/VERAVonage/VERAVonage/HTTPArchivesDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 52-55,61-63,68-77,79-85,94,98-113
+.github/workflows/ci.yml
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12-14,19-21,42-43,46-61,74
+VERA/VERAVonageCaptionsPlugin/VERAVonageCaptionsPlugin/VonageCaptionsPlugin.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 39-40,103,105-108,110,112,116,118-121,125-148,156-159
+VERA/VERAReactions/VERAReactionsTests/EmojiPickerContainerViewModelTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 11,119,122
+VERA/VERAVonage/VERAVonage/MainActorEventQueue.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-100
+"VERA/VERAMeetingRoom/VERAMeetingRoomTests/Domain/Use cases/ConnectToRoomUseCaseTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,49,51
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchivingState+BottomBarPresentation.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9-11,14,18,22
+VERA/VERACommonUI/VERACommonUITests/BottomBarActionOwnershipTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-63
+VERA/VERAVonageArchivingPlugin/VERAVonageArchivingPlugin/VonageArchivingPlugin.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 14,18-19,22,41-42,73-74,78,81,99
+VERA/VERAVonage/VERAVonageTests/MainActorEventQueueTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-175
+VERA/VERACore/VERACoreTests/Helpers/XCTestCase+MemoryLeakTracking.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+"VERA/VERAFeedback/VERAFeedback/UI/View models/FeedbackFieldViewModel.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,17,22,84
+VERA/VERASettings/VERASettingsTests/TestHelpers/MockStatsDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 10,12,14-15,18,22
+VERA/VERAArchiving/VERAArchiving/UI/View/ArchiveScreenButton.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17
+VERA/VERADomain/VERADomain/CallFacade.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 151,153,155,157-158,184-190
+  s_b350cfa8b51c7f::t_791ee07c72ba9e 191-192
+"VERA/VERASettings/VERASettingsTests/UI/View Models/SettingsViewModelTests.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,82,91,100-101,117-120,136-137,151-152,166-167,181,198,226-228,246-247,260,268,278,285,310,320,335,342-344,704-705,720-721
+VERA/VERAChat/VERAChat/Domain/Repository/ChatMessagesRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8,14
+VERA/VERACore/VERACoreSnapshotTests/SnapshotTestHelpers.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12
+"VERA/VERAAudioEffects/VERAAudioEffects/Domain/Use cases/EnableNoiseSuppressionUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9
+VERA/VERALogger/VERALogger/FileLogging/StandardStreamLogCapture.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-73
+VERA/VERAArchiving/VERAArchivingTests/Data/DefaultArchivingStatusDataSourceTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 20,32,34,42,44,55-56,60-61,65-66,78-79,84,93,98,107,111,115,119,123-167,176,178-179
+VERA/VERACore/VERATestHelpers/Mocks/MockRoomCredentialsRepository.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 9,11
+VERA/VERASettings/VERASettings/UI/View/SettingsView.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 46-53,72,76-77,82,96-97,102,151-159,205-206,219,259-260
+VERA/VERAFeedback/VERAFeedbackTests/FeedbackDebugDumpTimestampTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 39
+VERA/Scripts/builder.sh
+  s_b350cfa8b51c7f::t_966f2d0742f21b 24-26,47,146-148,154,266-274,806-840,847
+  s_b350cfa8b51c7f::t_a7b461304d19ad 841-846
+  s_b350cfa8b51c7f::t_bf8d9042a8c77b 848-850
+VERA/VERACaptions/VERACaptionsTests/Domain/DefaultEnableCaptionsUseCaseTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 12,74-75
+VERA/VERADomain/VERADomain/Captions/CaptionsStatusDataSource.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 8
+"VERA/VERAArchiving/VERAArchiving/Domain/Use cases/StartArchivingUseCase.swift"
+  s_b350cfa8b51c7f::t_966f2d0742f21b 6,10-11,13-17,19-20,38-41
+VERA/VERAApp/VERATests/ScreenShareVideoCapturerTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-373
+VERA/VERAMeetingRoomSDK/VERAMeetingRoomSDK/Overlays/TranscriptionOptionsOverlayModifier.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 1-45
+VERA/VERASettings/VERASettingsTests/UI/Entities/SettingsSectionTransferTests.swift
+  s_b350cfa8b51c7f::t_966f2d0742f21b 17,19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "74e76ec26919fb118428505d0c5e60116b41d04d",
+  "prompts": {},
+  "sessions": {
+    "s_b350cfa8b51c7f": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1795005894126229000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
