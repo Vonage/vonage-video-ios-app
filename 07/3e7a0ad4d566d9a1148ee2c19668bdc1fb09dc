@@ -1,0 +1,89 @@
+VERA/VERAMeetingRoomSDK/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 9
+VERA/VERACocoaLumberjackLogger/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 8
+  s_836bea7e067eff::t_0b04fc83294bd0 22-23
+VERA/VERAAudioEffects/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERABackgroundEffects/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 9
+VERA/VERADomain/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERALogger/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAMeetingRoom/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAScreenShare/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAVonageArchivingPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAVonageCaptionsPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAVonageChatPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAFeedback/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 9
+VERA/VERACommonUI/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAVonageReactionsPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAVonage/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERASettings/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/Tuist/ProjectDescriptionHelpers/BuildSettingsConfig.swift
+  s_836bea7e067eff::t_20cc75bc5da8ab 66-75
+  s_836bea7e067eff::t_cf779173165136 53-59
+VERA/VERAVonageSettingsPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAVonageScreenSharePlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAConfiguration/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERACore/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERACaptions/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAE2E/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAVonageCallKitPlugin/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 457
+VERA/VERAChat/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAApp/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 7
+VERA/VERAAudioDiagnostics/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAReactions/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAArchiving/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+VERA/VERAOKTA/Project.swift
+  s_a9a8cc249cf0ec::t_b22a314074034c 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "073e7a0ad4d566d9a1148ee2c19668bdc1fb09dc",
+  "prompts": {},
+  "sessions": {
+    "s_836bea7e067eff": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_e43c426e-ebeb-4e16-a5e4-461bd60572d3",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_a9a8cc249cf0ec": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1794952663080685000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+"VERA/VERAArchiving/VERAArchivingTests/UI/View model/ArchiveButtonViewModelTests.swift"
+  s_a762200f2e8a1c::t_fd19ea50483959 345,370,378,389,399,402,404,414,430,443
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "a4c4356d2b810c0b036ad3bbc243642dfbb8723d",
+  "prompts": {},
+  "sessions": {
+    "s_a762200f2e8a1c": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1795012533648439000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
