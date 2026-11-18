@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+      VERA_E2E_SCENARIO: "expiredSessionKey"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "landing-screen"
+- tapOn:
+    id: "room-name-input"
+- inputText: "${ROOM_NAME}"
+- tapOn:
+    id: "join-waiting-room-button"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible:
+    id: "waiting-room-screen"
+- tapOn:
+    id: "username-input"
+- inputText: "Test User"
+- hideKeyboard
+- tapOn:
+    id: "join-meeting-button"
+- waitForAnimationToEnd:
+    timeout: 10000
+- assertNotVisible:
+    id: "meeting-room-screen"
+- assertVisible:
+    id: "waiting-room-screen"
+- takeScreenshot: session-key-expired-join
