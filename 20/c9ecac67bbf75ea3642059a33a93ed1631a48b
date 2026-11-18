@@ -1,0 +1,20 @@
+.maestro/flows/session-key-expired-join.yaml
+  s_2d968baa3df5a9::t_dee48d604abfe9 30-31,33-36,41
+  s_2d968baa3df5a9::t_b64a58c1d1d2cb 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "20c9ecac67bbf75ea3642059a33a93ed1631a48b",
+  "prompts": {},
+  "sessions": {
+    "s_2d968baa3df5a9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_f1bdb587-96b2-4671-ac7b-cbd81c5aae3d",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
