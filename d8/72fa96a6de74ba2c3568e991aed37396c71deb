@@ -1,0 +1,30 @@
+.maestro/flows/session-key-expired-join.yaml
+  s_2d968baa3df5a9::t_673110b630bf7e 1-35
+VERA/VERAE2E/VERAE2E/Data/HTTP/E2EBackendStore.swift
+  s_2d968baa3df5a9::t_4452fc4b47971c 53
+  s_2d968baa3df5a9::t_d5758f2a5a8471 246-275
+VERA/VERAE2E/VERAE2E/Domain/Scenarios/ExpiredSessionKeyE2EScenarios.swift
+  s_2d968baa3df5a9::t_8fad7b773a224a 1-16
+VERA/VERAE2E/VERAE2E/Domain/Scenarios/Fixtures/ExpiredSessionKeyE2EFixture.swift
+  s_2d968baa3df5a9::t_b315ec17e06f0e 1-7
+VERA/VERAE2E/VERAE2E/Domain/Scenarios/Fixtures/E2ESessionKeyScenarioFixture.swift
+  s_2d968baa3df5a9::t_db4d938d5f3706 1-7
+VERA/VERAE2E/VERAE2E/Domain/Scenarios/E2ETestScenarioRegistry.swift
+  s_2d968baa3df5a9::t_7b7496c16777d7 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d872fa96a6de74ba2c3568e991aed37396c71deb",
+  "prompts": {},
+  "sessions": {
+    "s_2d968baa3df5a9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_f1bdb587-96b2-4671-ac7b-cbd81c5aae3d",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
