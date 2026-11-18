@@ -35,13 +35,13 @@ public final class MockVERAPublisher: VERAPublisher {
         publishAudio: Bool = true,
         publishVideo: Bool = true,
         cameraPosition: CameraPosition = .front,
-        transformerFactory: any VERATransformerFactory = MockTransformerFactory()
+        transformerFactory: (any VERATransformerFactory)? = nil
     ) {
         self.view = view
         self.publishAudio = publishAudio
         self.publishVideo = publishVideo
         self.cameraPosition = cameraPosition
-        self.transformerFactory = transformerFactory
+        self.transformerFactory = transformerFactory ?? MockTransformerFactory()
     }
 
     public func switchCamera(to cameraDeviceID: String) {

@@ -61,6 +61,7 @@ public final class ArchivingFactory {
         ArchiveScreenButton(viewModel: viewModel)
     }
 
+    @MainActor
     public func make(
         onPlay: @escaping (ArchiveRecording) -> Void
     ) -> (view: some View, viewModel: ArchivesViewModel) {
@@ -76,6 +77,7 @@ public final class ArchivingFactory {
         return (make(viewModel: viewModel), viewModel)
     }
 
+    @MainActor
     public func make(
         viewModel: ArchivesViewModel
     ) -> some View {

@@ -10,13 +10,18 @@ private enum MeetingRoomScreenConstants {
     static let overlaysPaddingFromBottom: CGFloat = 64
 }
 
+@MainActor
 public struct MeetingRoomScreen: View {
     @Bindable var viewModel: MeetingRoomViewModel
     private let uiProvider: any MeetingRoomUIProvider
 
+    public init(viewModel: MeetingRoomViewModel) {
+        self.init(viewModel: viewModel, uiProvider: DefaultMeetingRoomUIProvider())
+    }
+
     public init(
         viewModel: MeetingRoomViewModel,
-        uiProvider: any MeetingRoomUIProvider = DefaultMeetingRoomUIProvider()
+        uiProvider: any MeetingRoomUIProvider
     ) {
         self.viewModel = viewModel
         self.uiProvider = uiProvider
