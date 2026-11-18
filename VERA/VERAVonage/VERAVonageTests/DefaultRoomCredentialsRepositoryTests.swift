@@ -182,7 +182,12 @@ struct DefaultRoomCredentialsRepositoryTests {
 
     @Test("Does not throw when sessionKey has no exp claim")
     func doesNotThrowWhenKeyHasNoExpClaim() async throws {
-        let sut = makeSUT(httpClient: try makeHTTPClientWithResponses())
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(sessionKey: makeSessionKeyWithoutExp()),
+            try makeJoinSessionJSONResponse(),
+        ]
+        let sut = makeSUT(httpClient: httpClient)
 
         await #expect(throws: Never.self) {
             _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
@@ -255,21 +260,7 @@ struct DefaultRoomCredentialsRepositoryTests {
         ])
     }
 
-    private func makeJWT(payload: [String: Any]) -> String {
-        let header = base64URLEncode(
-            (try? JSONSerialization.data(
-                withJSONObject: ["alg": "HS256", "typ": "JWT"])) ?? Data())
-        let payloadData = base64URLEncode(
-            (try? JSONSerialization.data(
-                withJSONObject: payload)) ?? Data())
-        let signature = base64URLEncode(Data("fake-signature-bytes".utf8))
-        return "\(header).\(payloadData).\(signature)"
-    }
-
-    private func base64URLEncode(_ data: Data) -> String {
-        data.base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
+    private func makeSessionKeyWithoutExp() -> String {
+        makeJWT(payload: ["roomName": "heart-of-gold", "sessionId": "sid-123"])
     }
 }
