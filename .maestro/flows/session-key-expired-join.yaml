@@ -1,3 +1,4 @@
+# vera-runner: mock-only
 appId: ${APP_ID}
 ---
 - launchApp:
@@ -26,10 +27,15 @@ appId: ${APP_ID}
 - hideKeyboard
 - tapOn:
     id: "join-meeting-button"
-- waitForAnimationToEnd:
+- extendedWaitUntil:
+    visible: "Error"
     timeout: 10000
+- takeScreenshot: 01-session-key-expired-error
+- tapOn: "OK"
+- waitForAnimationToEnd:
+    timeout: 3000
 - assertNotVisible:
     id: "meeting-room-screen"
 - assertVisible:
     id: "waiting-room-screen"
-- takeScreenshot: session-key-expired-join
+- takeScreenshot: 02-session-key-expired-join
