@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 import VERADomain
 
+@MainActor
 public struct PreviewData {
     // MARK: - Individual Participants
     public static let arthurDent = Participant(

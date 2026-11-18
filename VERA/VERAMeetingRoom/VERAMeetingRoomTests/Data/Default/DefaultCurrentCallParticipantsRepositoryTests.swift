@@ -9,6 +9,7 @@ import VERADomain
 import VERAMeetingRoom
 import VERATestHelpers
 
+@MainActor
 @Suite("DefaultCurrentCallParticipantsRepository tests")
 struct DefaultCurrentCallParticipantsRepositoryTests {
 

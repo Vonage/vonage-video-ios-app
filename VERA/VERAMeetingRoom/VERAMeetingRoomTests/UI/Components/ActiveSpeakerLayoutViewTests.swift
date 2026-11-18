@@ -8,11 +8,13 @@ import VERATestHelpers
 
 @testable import VERAMeetingRoom
 
+@MainActor
 @Suite("ActiveSpeakerLayout - mainAreaParticipants screen share prominence")
 struct ActiveSpeakerLayoutViewTests {
 
     // MARK: - HorizontalActiveSpeakerLayoutView
 
+    @MainActor
     @Suite("HorizontalActiveSpeakerLayoutView")
     struct HorizontalLayoutTests {
 
@@ -76,6 +78,7 @@ struct ActiveSpeakerLayoutViewTests {
 
     // MARK: - VerticalActiveSpeakerLayoutView
 
+    @MainActor
     @Suite("VerticalActiveSpeakerLayoutView")
     struct VerticalLayoutTests {
 

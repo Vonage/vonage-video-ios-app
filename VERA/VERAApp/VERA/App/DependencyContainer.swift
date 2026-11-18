@@ -40,6 +40,7 @@ import VERAVonageCallKitPlugin
     import VERAOKTA
 #endif
 
+@MainActor
 final class DependencyContainer {
 
     private lazy var baseHttpClient: HTTPClient = AppHTTPClientProvider(
@@ -68,7 +69,8 @@ final class DependencyContainer {
                 )
             #if AUTHENTICATION_ENABLED
                 return UnauthorizedHandlingHTTPClient(wrapped: inner) { [weak self] in
-                    await MainActor.run { self?.onUnauthorized?() }
+                    guard let self else { return }
+                    await MainActor.run { self.onUnauthorized?() }
                 }
             #else
                 return inner

@@ -50,9 +50,26 @@ public func baseBuildSettings() -> [String: SettingValue] {
         "SWIFT_ENABLE_EXPLICIT_MODULES": "YES",
         "SWIFT_USE_INTEGRATED_DRIVER": "YES",
         "SWIFT_EMIT_LOC_STRINGS": "YES",
+        "STRING_CATALOG_GENERATE_SYMBOLS": "YES",
+        "ENABLE_MODULE_VERIFIER": "YES",
+        "MODULE_VERIFIER_SUPPORTED_LANGUAGES": "objective-c objective-c++",
+        "MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS": "gnu11 gnu++14",
+        // ponytail: SwiftLint/SPM-assets scripts read undeclared files (globbed inputs,
+        // external scripts). Switch to .xcfilelist inputs before enabling sandboxing.
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
     ]
 }
 
 public func createBaseBuildSettings() -> Settings {
     .settings(base: baseBuildSettings())
+}
+
+/// Project-level settings shared by every module's `Project.swift`.
+///
+/// Xcode's "recommended settings" check reads these at project level, not per target.
+public func defaultProjectSettings() -> Settings {
+    .settings(base: [
+        "STRING_CATALOG_GENERATE_SYMBOLS": "YES",
+        "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+    ])
 }

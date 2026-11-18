@@ -31,6 +31,7 @@ public class MockSessionRepository: SessionRepository {
     }
 }
 
+@MainActor
 public func makeMockSessionRepository() -> MockSessionRepository {
     return .init()
 }

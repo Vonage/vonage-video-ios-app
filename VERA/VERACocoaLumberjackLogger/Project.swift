@@ -5,6 +5,7 @@ let project = Project(
     name: "VERACocoaLumberjackLogger",
     options: defaultProjectOptions(),
     packages: [.cocoaLumberjack],
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERACocoaLumberjackLogger",
@@ -18,7 +19,8 @@ let project = Project(
                 .cocoaLumberjackSwift,
                 .project(target: "VERALogger", path: "../VERALogger"),
             ],
-            settings: createBaseBuildSettings()
+            // The generated -Swift.h imports CocoaLumberjack (SPM), which the module verifier can't resolve.
+            settings: .settings(base: baseBuildSettings().merging(["ENABLE_MODULE_VERIFIER": "NO"]) { $1 })
         ),
         .target(
             name: "VERACocoaLumberjackLoggerTests",
