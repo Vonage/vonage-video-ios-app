@@ -1,0 +1,24 @@
+"VERA/VERADomain/VERADomain/Session Keys/SessionKeyParser.swift"
+  s_da22c2247cdee9::t_98359ccecad9fb 52,59
+VERA/VERACore/VERATestHelpers/Helpers/JWTFixture.swift
+  s_da22c2247cdee9::t_18b8e8fce0e53d 1-22
+VERA/VERAVonage/VERAVonageTests/DefaultRoomCredentialsRepositoryTests.swift
+  s_da22c2247cdee9::t_4545c7c6871397 185-190
+  s_da22c2247cdee9::t_8cc7e1995ab43d 263-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "95a43ca00ab2070111e1bc2d4ebdaf47a45f66c2",
+  "prompts": {},
+  "sessions": {
+    "s_da22c2247cdee9": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_de6ec77d-5693-4bfc-ac04-3afb5bd0333f",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
