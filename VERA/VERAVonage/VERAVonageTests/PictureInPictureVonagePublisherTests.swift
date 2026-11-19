@@ -40,8 +40,8 @@ struct PictureInPictureVonagePublisherTests {
         #expect(sut.otPublisher.videoRender === sut.inlineVideoRenderer)
     }
 
-    // The camera position doesn't stick without a real camera (simulator), so these exercise the
-    // camera-change → mirroring-update paths for coverage; the renderer stays attached throughout.
+    // Simulator runs exercise the selected-camera policy with the SDK demo video.
+    // Physical camera orientation still requires device validation.
     @Test("Changing the camera position keeps the renderer attached")
     func cameraPositionChangeKeepsRendererAttached() {
         let sut = makeSUT()
@@ -58,6 +58,36 @@ struct PictureInPictureVonagePublisherTests {
         sut.switchCamera(to: VonageCameraDevice.front.rawValue)
         sut.switchCamera(to: VonageCameraDevice.back.rawValue)
         #expect(sut.otPublisher.videoRender === sut.inlineVideoRenderer)
+    }
+
+    @Test("Mirror preference updates local rendering without changing capture or publisher media")
+    func mirrorPreferenceKeepsPublisherAndCaptureAttached() {
+        let sut = makeSUT()
+        sut.setup()
+        let capture = sut.otPublisher.videoCapture
+        let publishAudio = sut.publishAudio
+        let publishVideo = sut.publishVideo
+
+        sut.selfViewMirroringEnabled = false
+        #expect(!sut.inlineVideoRenderer.isMirrored)
+        sut.selfViewMirroringEnabled = true
+        #expect(sut.inlineVideoRenderer.isMirrored == (sut.cameraPosition == .front))
+        #expect(sut.otPublisher.videoCapture === capture)
+        #expect(sut.otPublisher.videoRender === sut.inlineVideoRenderer)
+        #expect(sut.publishAudio == publishAudio)
+        #expect(sut.publishVideo == publishVideo)
+    }
+
+    @Test("Rear-camera preview remains unmirrored and switching to front restores the saved mirror setting")
+    func cameraAndMirrorSelectionStayConsistent() {
+        let sut = makeSUT()
+        sut.setup()
+        sut.cameraPosition = .back
+        #expect(!sut.inlineVideoRenderer.isMirrored)
+        sut.cameraPosition = .front
+        #expect(sut.inlineVideoRenderer.isMirrored == (sut.cameraPosition == .front))
+        sut.selfViewMirroringEnabled = false
+        #expect(!sut.inlineVideoRenderer.isMirrored)
     }
 
     @Test("cleanUp detaches the renderer")

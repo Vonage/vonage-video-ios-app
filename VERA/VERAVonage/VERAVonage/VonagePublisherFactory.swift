@@ -32,6 +32,11 @@ public class VonagePublisherFactory: PublisherFactory {
     private let checkCameraAuthorizationStatusUseCase: CheckCameraAuthorizationStatusUseCase
     private let checkMicrophoneAuthorizationStatusUseCase: CheckMicrophoneAuthorizationStatusUseCase
 
+    public var onAdvancedNoiseSuppressionInitialized: ((Bool) -> Void)?
+    public var onAdvancedNoiseSuppressionChanged: ((Bool) -> Void)?
+    public var advancedNoiseSuppressionAvailable = true
+    public var onCameraPositionChanged: ((CameraPosition) -> Void)?
+
     /// This factory returns the specific Vonage audio or video transformers
     lazy var vonageTransformerFactory = VonageTransformerFactory()
 
@@ -127,6 +132,26 @@ public class VonagePublisherFactory: PublisherFactory {
             otPublisher,
             transformerFactory: vonageTransformerFactory,
             initialDimensions: initialDimensions)
+        publisher.selfViewMirroringEnabled = settings.advancedSettings?.selfViewMirroringEnabled ?? true
+        if let cameraPosition = settings.advancedSettings?.cameraPosition {
+            publisher.cameraPosition = cameraPosition
+        }
+        publisher.onCameraPositionChanged = onCameraPositionChanged
+        publisher.advancedNoiseSuppressionAvailable = advancedNoiseSuppressionAvailable
+        if let hint = settings.advancedSettings?.cameraContentHint {
+            otPublisher.videoCapture?.videoContentHint = OTVideoContentHint(rawValue: hint.rawValue) ?? .none
+        }
+        // A device without media-processor support must still be able to join a call.
+        try? publisher.setAdvancedNoiseSuppression(
+            enabled: settings.advancedSettings?.advancedNoiseSuppressionEnabled ?? false)
+        publisher.onAdvancedNoiseSuppressionChanged = onAdvancedNoiseSuppressionChanged
+        if settings.advancedSettings?.advancedNoiseSuppressionEnabled != nil {
+            let actual = publisher.audioTransformers.contains { $0.key == "NoiseSuppression" }
+            onAdvancedNoiseSuppressionInitialized?(actual)
+            if actual != settings.advancedSettings?.advancedNoiseSuppressionEnabled {
+                onAdvancedNoiseSuppressionChanged?(actual)
+            }
+        }
         otPublisher.delegate = publisher
         return publisher
     }

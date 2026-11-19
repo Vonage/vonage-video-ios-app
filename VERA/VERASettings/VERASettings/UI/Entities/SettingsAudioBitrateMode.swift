@@ -21,7 +21,7 @@ extension SettingsAudioBitrateMode {
     /// Human-readable label shown in the Settings UI.
     public var displayName: String {
         return switch self {
-        case .default: "Default".localized
+        case .default: "Automatic".localized
         case .custom: "Custom".localized
         }
     }
