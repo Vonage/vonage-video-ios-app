@@ -5,8 +5,10 @@
 import Combine
 import Foundation
 import Observation
+import VERACommonUI
 import VERADomain
 
+@MainActor
 @Observable
 public final class ArchivesViewModel {
     @ObservationIgnored
@@ -19,13 +21,15 @@ public final class ArchivesViewModel {
     private let playRecordingUseCase: PlayRecordingUseCase
     @ObservationIgnored
     private let downloadTranscriptionUseCase: DownloadTranscriptionUseCase
+    @ObservationIgnored
+    private var formattingTask: Task<Void, Never>?
 
-    @MainActor public var archives: [ArchiveUIData] = []
-    @MainActor public var error: AlertItem?
+    public var archives: [ArchiveUIData] = []
+    public var error: AlertItem?
     /// A downloaded transcript waiting to be shared or saved by the user.
-    @MainActor public var sharedTranscript: ArchiveTranscript?
+    public var sharedTranscript: ArchiveTranscript?
     /// Archives whose download is in progress.
-    @MainActor public private(set) var downloadingArchiveIDs: Set<UUID> = []
+    public private(set) var downloadingArchiveIDs: Set<UUID> = []
 
     public init(
         sessionKeyProvider: SessionKeyProvider,
@@ -42,45 +46,38 @@ public final class ArchivesViewModel {
     /// Starts loading the archives of the current session, replacing any earlier load.
     ///
     /// Clears the previous load's error so it is not shown again for a later meeting.
-    @BackgroundActor
     public func loadData() async {
         cancellables.removeAll()
-        await MainActor.run { error = nil }
+        formattingTask?.cancel()
+        error = nil
 
         await archivesRepository.getArchives(sessionKey: sessionKeyProvider.sessionKey)
-            .receive(on: DispatchQueue.main)
-            .map { [weak self] archives in
-                self?.mapToUIArchives(archives) ?? []
-            }
-            .sink(
+            .sinkOnMainActor(
                 receiveCompletion: { [weak self] completion in
                     if case .failure(let error) = completion {
-                        Task { @MainActor [weak self] in
-                            self?.error = AlertItem.goodbyeError(error.localizedDescription)
-                        }
+                        self?.error = AlertItem.goodbyeError(error.localizedDescription)
                     }
                 },
                 receiveValue: { [weak self] archives in
-                    Task { @MainActor [weak self] in
-                        self?.archives = archives
-                    }
+                    self?.showRows(for: archives)
                 }
             )
             .store(in: &cancellables)
     }
 
-    public func mapToUIArchives(_ archives: [Archive]) -> [ArchiveUIData] {
-        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
-        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
-        return newestFirst.map { archive in
-            let index = nextIndexByKind[archive.kind, default: 0]
-            nextIndexByKind[archive.kind] = index - 1
-            return mapToUIArchive(archive, index: index)
+    /// Formats `archives` off the UI actor. A newer emission or load cancels this one,
+    /// so rows from an older poll or meeting never overwrite newer ones.
+    private func showRows(for archives: [Archive]) {
+        formattingTask?.cancel()
+        formattingTask = Task { [weak self] in
+            let rows = await ArchivePresentation.rows(archives)
+            guard !Task.isCancelled, let self else { return }
+            self.archives = rows.map { self.attachingDownload($0.ui, for: $0.archive) }
         }
     }
 
-    public func mapToUIArchive(_ archive: Archive, index: Int) -> ArchiveUIData {
-        var uiArchive = archive.toUIArchive(with: index)
+    private func attachingDownload(_ uiArchive: ArchiveUIData, for archive: Archive) -> ArchiveUIData {
+        var uiArchive = uiArchive
         uiArchive.onDownload = { [weak self] in
             self?.downloadArchive(archive)
         }
@@ -104,6 +101,25 @@ public final class ArchivesViewModel {
             } catch {
                 self.error = AlertItem.downloadError(error.localizedDescription)
             }
+        }
+    }
+}
+
+struct PreparedArchive: Sendable {
+    let archive: Archive
+    let ui: ArchiveUIData
+}
+
+/// Newest-first archive rows, formatted off the main actor.
+enum ArchivePresentation {
+    @BackgroundActor
+    static func rows(_ archives: [Archive]) -> [PreparedArchive] {
+        let newestFirst = archives.sorted { $0.createdAt > $1.createdAt }
+        var nextIndexByKind = Dictionary(grouping: newestFirst, by: \.kind).mapValues(\.count)
+        return newestFirst.map { archive in
+            let index = nextIndexByKind[archive.kind, default: 0]
+            nextIndexByKind[archive.kind] = index - 1
+            return PreparedArchive(archive: archive, ui: archive.toUIArchive(with: index))
         }
     }
 }
