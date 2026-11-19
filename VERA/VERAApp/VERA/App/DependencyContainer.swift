@@ -11,6 +11,7 @@ import VERADomain
 import VERAE2E
 import VERAMeetingRoom
 import VERAMeetingRoomSDK
+import VERAScreenShare
 import VERAVonage
 import VERAVonageCallKitPlugin
 
@@ -194,7 +195,10 @@ final class DependencyContainer {
                 features.insert(.pictureInPicture)
             }
         #endif
-        if appConfig.meetingRoomSettings.allowScreenShare && !ProcessInfo.processInfo.isiOSAppOnMac {
+        let screenShareAvailable = ScreenShareAvailability.isFeatureAvailable(
+            usesSystemContentPicker: ScreenShareAvailability.usesSystemContentPicker,
+            isiOSAppOnMac: ProcessInfo.processInfo.isiOSAppOnMac)
+        if appConfig.meetingRoomSettings.allowScreenShare && screenShareAvailable {
             features.insert(.screenShare)
         }
         if appConfig.videoSettings.allowBackgroundEffects { features.insert(.backgroundEffects) }

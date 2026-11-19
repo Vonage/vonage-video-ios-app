@@ -5,9 +5,12 @@
 import Foundation
 import VERAScreenShare
 import VERAVonage
+import os
 
 /// Darwin notification name used to signal the broadcast extension to stop.
-private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as CFString
+private func stopBroadcastNotificationName() -> CFString {
+    "com.vonage.VERA.stopBroadcast" as CFString
+}
 
 /// Vonage plugin that bridges an active call session to the Broadcast Upload Extension.
 ///
@@ -27,6 +30,8 @@ private let stopBroadcastNotificationName = "com.vonage.VERA.stopBroadcast" as C
 public final class VonageScreenSharePlugin: VonagePlugin {
 
     private let credentialsRepository: ScreenShareCredentialsRepository
+    private let captureController: (any ScreenCaptureControlling)?
+    private let publisherLock = OSAllocatedUnfairLock<InProcessScreenSharePublisher?>(initialState: nil)
 
     /// A stable identifier for this plugin instance.
     public var pluginIdentifier: String { String(describing: type(of: self)) }
@@ -39,6 +44,7 @@ public final class VonageScreenSharePlugin: VonagePlugin {
         credentialsRepository: ScreenShareCredentialsRepository
     ) {
         self.credentialsRepository = credentialsRepository
+        self.captureController = ScreenCaptureControllerFactory.make()
     }
 
     /// Stores the active session credentials in the shared App Group so the
@@ -61,21 +67,42 @@ public final class VonageScreenSharePlugin: VonagePlugin {
             username: username)
 
         credentialsRepository.save(credentials)
+        await startInProcessCapture(credentials)
     }
 
     /// Clears the stored credentials from the shared App Group and signals
     /// the broadcast extension to stop via a Darwin notification.
     public func callDidEnd() async throws {
         credentialsRepository.clear()
-
         postStopBroadcastNotification()
+        captureController?.deactivate()
+        publisherLock.withLock { $0 = nil }
+        await MainActor.run {
+            ScreenShareUIBridge.shared.presentSystemPicker = nil
+        }
+    }
+
+    /// On iOS 27 the picker and a second Vonage session publish the share in-process.
+    /// Earlier systems keep the broadcast extension and only need the saved credentials.
+    private func startInProcessCapture(_ credentials: ScreenShareCredentials) async {
+        guard let captureController else { return }
+        publisherLock.withLock { $0 }?.captureDidStop()
+        let publisher = InProcessScreenSharePublisher(credentials: credentials)
+        publisherLock.withLock { $0 = publisher }
+        captureController.setFrameConsumer(publisher)
+        captureController.activate()
+        await MainActor.run {
+            ScreenShareUIBridge.shared.presentSystemPicker = { [captureController] in
+                captureController.presentPicker()
+            }
+        }
     }
 
     /// Post Darwin notification to signal the broadcast extension to stop
     private func postStopBroadcastNotification() {
         CFNotificationCenterPostNotification(
             CFNotificationCenterGetDarwinNotifyCenter(),
-            CFNotificationName(stopBroadcastNotificationName),
+            CFNotificationName(stopBroadcastNotificationName()),
             nil,
             nil,
             true

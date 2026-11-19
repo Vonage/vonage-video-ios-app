@@ -64,7 +64,9 @@ let project = Project(
                         "VERAMeetingRoomSDKApp needs access to your camera to share your video during video calls.",
                     "NSMicrophoneUsageDescription":
                         "VERAMeetingRoomSDKApp needs access to your microphone to share your audio during video calls.",
-                    "UIBackgroundModes": .array(["audio", "voip"]),
+                    "NSScreenCaptureUsageDescription":
+                        "This app needs access to capture your screen when you share it during a meeting.",
+                    "UIBackgroundModes": .array(["audio", "voip", "screen-capture"]),
                 ].merging(combinedPlistValues()) { _, new in new }),
             sources: ["VERAMeetingRoomSDKApp/**"],
             entitlements: "VERAMeetingRoomSDKApp/VERAMeetingRoomSDKApp.entitlements",
@@ -87,6 +89,7 @@ let project = Project(
             sources: ["VERAMeetingRoomSDKTests/**"],
             dependencies: [
                 .target(name: "VERAMeetingRoomSDK"),
+                .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
                 .project(target: "VERATestHelpers", path: "../VERACore"),
                 .project(target: "VERAFeedback", path: "../VERAFeedback"),
             ],

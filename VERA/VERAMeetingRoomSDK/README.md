@@ -119,7 +119,7 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
     case captions         // Live captions overlay
     case reactions        // Emoji reactions with floating animation
     case settings         // In-call settings panel (resolution, codecs, stats)
-    case screenShare      // Screen sharing via ReplayKit
+    case screenShare      // Screen sharing (system picker on iOS 27, ReplayKit before that)
     case backgroundEffects // Background blur / virtual backgrounds
     case audioEffects     // Advanced noise suppression
     case callKit          // CallKit integration

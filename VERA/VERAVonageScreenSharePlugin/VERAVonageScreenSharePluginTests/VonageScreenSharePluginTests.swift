@@ -56,6 +56,27 @@ struct VonageScreenSharePluginTests {
         #expect(repository.saved == nil)
     }
 
+    @Test("callDidStart installs the system picker hook only when capture is available")
+    func callDidStartPickerHookMatchesAvailability() async throws {
+        await MainActor.run { ScreenShareUIBridge.shared.presentSystemPicker = nil }
+        let repository = InMemoryScreenShareCredentialsRepository()
+        let plugin = makeSUT(repository: repository)
+
+        try await plugin.callDidStart([
+            "applicationId": "app-123",
+            "sessionId": "session-abc",
+            "token": "token-xyz",
+            "username": "a-username",
+        ])
+
+        let installed = await MainActor.run { ScreenShareUIBridge.shared.presentSystemPicker != nil }
+        #expect(installed == ScreenShareAvailability.usesSystemContentPicker)
+
+        try await plugin.callDidEnd()
+        let cleared = await MainActor.run { ScreenShareUIBridge.shared.presentSystemPicker == nil }
+        #expect(cleared)
+    }
+
     // MARK: - Helpers
 
     private func makeSUT(

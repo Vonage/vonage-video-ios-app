@@ -5,6 +5,7 @@
 import Testing
 import VERACommonUI
 import VERAReactions
+import VERAScreenShare
 
 @testable import VERAMeetingRoomSDK
 
@@ -98,14 +99,18 @@ struct BottomItemPresentersTests {
         #expect(sut.accessibilityIdentifier == nil)
         #expect(sut.isActive == false)
         #expect(sut.overflowSelectionBehavior == .performActionBeforeDismiss)
-        #expect(sut.accessory?.placement == .hiddenInteractionLayer)
+        if ScreenShareAvailability.usesSystemContentPicker {
+            #expect(sut.accessory == nil)
+        } else {
+            #expect(sut.accessory?.placement == .hiddenInteractionLayer)
+            _ = sut.accessory?.content()
+        }
         if case .gridItem = sut.overflowPresentation {
             #expect(true)
         } else {
             #expect(false)
         }
 
-        _ = sut.accessory?.content()
         sut.performAction()
     }
 }
