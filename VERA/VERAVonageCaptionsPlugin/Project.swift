@@ -4,6 +4,7 @@ import ProjectDescriptionHelpers
 let project = Project(
     name: "VERAVonageCaptionsPlugin",
     options: defaultProjectOptions(),
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERAVonageCaptionsPlugin",
