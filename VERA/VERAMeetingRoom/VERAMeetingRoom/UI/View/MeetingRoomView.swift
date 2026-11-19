@@ -83,7 +83,8 @@ public struct MeetingRoomView: View {
                 MeetingRoomContent(
                     participants: state.participants,
                     layout: state.layout,
-                    activeSpeakerId: state.activeSpeakerId
+                    activeSpeakerId: state.activeSpeakerId,
+                    selfViewBottomInset: isBottomBarVisible ? BottomBarConstants.totalHeight : 0
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .animation(
