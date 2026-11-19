@@ -1,0 +1,19 @@
+VERA/VERAFeedback/VERAFeedback/Utils/FeedbackScreenshotCapturer.swift
+  s_3e60b2b0ca72bc::t_d2a790c8f2c2fe 59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ecb1c46b951c88c2ce641a06d4af0d4f8f4d9a37",
+  "prompts": {},
+  "sessions": {
+    "s_3e60b2b0ca72bc": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_c761b184-65a6-4bf2-9cdb-4997bda6bb48",
+        "model": "auto"
+      },
+      "human_author": "jorgesanmartin-vng <jorge.sanmartin@vonage.com>"
+    }
+  }
+}
