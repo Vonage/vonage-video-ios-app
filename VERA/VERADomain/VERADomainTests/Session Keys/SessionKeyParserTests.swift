@@ -87,6 +87,53 @@ struct SessionKeyParserTests {
         #expect(SessionKeyParser.extractSessionId(from: "not-a-jwt") == nil)
     }
 
+    // MARK: - extractExpiration
+
+    @Test("Extracts expiration date from JWT with exp claim")
+    func extractsExpirationFromJWT() {
+        let exp: TimeInterval = 1_800_000_000
+        let jwt = makeJWT(payload: ["exp": exp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == Date(timeIntervalSince1970: exp))
+    }
+
+    @Test("Returns nil when JWT has no exp claim")
+    func returnsNilWhenNoExpClaim() {
+        #expect(SessionKeyParser.extractExpiration(from: makeValidSessionKey()) == nil)
+    }
+
+    @Test("Returns nil for invalid JWT")
+    func returnsNilExpirationForInvalidJWT() {
+        #expect(SessionKeyParser.extractExpiration(from: "not-a-jwt") == nil)
+    }
+
+    // MARK: - isExpired
+
+    @Test("Returns false when no exp claim")
+    func notExpiredWhenNoExpClaim() {
+        #expect(SessionKeyParser.isExpired(makeValidSessionKey()) == false)
+    }
+
+    @Test("Returns false for a future exp claim")
+    func notExpiredForFutureDate() {
+        let futureExp = Date().addingTimeInterval(3600).timeIntervalSince1970
+        let jwt = makeJWT(payload: ["exp": futureExp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: Date()) == false)
+    }
+
+    @Test("Returns true for a past exp claim")
+    func expiredForPastDate() {
+        let pastExp = Date().addingTimeInterval(-3600).timeIntervalSince1970
+        let jwt = makeJWT(payload: ["exp": pastExp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: Date()) == true)
+    }
+
+    @Test("Returns true when exp equals now")
+    func expiredWhenExpEqualsNow() {
+        let now = Date()
+        let jwt = makeJWT(payload: ["exp": now.timeIntervalSince1970, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: now) == true)
+    }
+
     // MARK: - Helpers
 
     private func makeValidSessionKey(

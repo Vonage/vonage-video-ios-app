@@ -50,7 +50,7 @@ public actor E2EBackendStore {
         let session = E2ESession(
             roomName: roomName,
             sessionId: "e2e-session-\(E2EIdentifier.stableIdentifier(from: roomName))",
-            sessionKey: "e2e-session-key-\(UUID().uuidString.lowercased())",
+            sessionKey: sessionKey(forRoomName: roomName),
             applicationId: "e2e-application-id"
         )
         sessionsByKey[session.sessionKey] = session
@@ -241,6 +241,36 @@ public actor E2EBackendStore {
     private func sessionKey(from requestBody: Data?) throws -> String {
         let body = try E2EHTTPRequestBodyDecoder.decode(requestBody)
         return body["sessionKey"] as? String ?? "e2e-session-key"
+    }
+
+    private var sessionKeyIsExpired: Bool {
+        (scenario.fixture as? any E2ESessionKeyScenarioFixture)?.sessionKeyExpired ?? false
+    }
+
+    private func sessionKey(forRoomName roomName: String) -> String {
+        guard sessionKeyIsExpired else {
+            return "e2e-session-key-\(UUID().uuidString.lowercased())"
+        }
+        let expiredTimestamp = Date().addingTimeInterval(-3600).timeIntervalSince1970
+        return Self.makeJWT(payload: [
+            "exp": expiredTimestamp,
+            "roomName": roomName,
+            "sessionId": "e2e-session-expired",
+        ])
+    }
+
+    private static func makeJWT(payload: [String: Any]) -> String {
+        let header = #"{"alg":"HS256","typ":"JWT"}"#
+        func base64URL(_ string: String) -> String {
+            Data(string.utf8).base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+                .trimmingCharacters(in: CharacterSet(charactersIn: "="))
+        }
+        let body =
+            (try? JSONSerialization.data(withJSONObject: payload))
+            .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        return "\(base64URL(header)).\(base64URL(body)).e2esig"
     }
 
     private func fallbackSession(sessionKey: String) -> E2ESession {

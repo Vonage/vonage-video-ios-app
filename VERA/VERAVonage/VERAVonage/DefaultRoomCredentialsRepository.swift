@@ -49,8 +49,13 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
         let createResponse = try jsonDecoder.decode(
             TRPCResponse<CreateSessionResponse>.self, from: createData)
 
-        let joinBody = try jsonEncoder.encode(
-            JoinSessionRequestBody(sessionKey: createResponse.result.data.sessionKey))
+        let sessionKey = createResponse.result.data.sessionKey
+
+        if SessionKeyParser.isExpired(sessionKey) {
+            throw RoomCredentialsError.sessionKeyExpired
+        }
+
+        let joinBody = try jsonEncoder.encode(JoinSessionRequestBody(sessionKey: sessionKey))
         let joinData = try await httpClient.post(
             baseURL.appendingPathComponent("v2").appendingPathComponent("joinSession"),
             data: joinBody)
@@ -61,7 +66,7 @@ public final actor DefaultRoomCredentialsRepository: RoomCredentialsRepository {
             sessionId: createResponse.result.data.sessionId,
             token: joinResponse.result.data.token,
             apiKey: createResponse.result.data.applicationId,
-            sessionKey: createResponse.result.data.sessionKey)
+            sessionKey: sessionKey)
 
         return credentials
     }
