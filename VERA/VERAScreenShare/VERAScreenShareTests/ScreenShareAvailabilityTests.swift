@@ -40,9 +40,10 @@ struct ScreenShareAvailabilityTests {
 struct ScreenShareFrameSizeTests {
     @Test("The content pixel size is kept and both edges align to 16")
     func keepsContentSizeAndAligns() {
+        // 1080 is 8 past a multiple of 16, so that edge rounds up to 1088.
         let landscape = ScreenShareFrameSize.outputSize(inputWidth: 1920, inputHeight: 1080)
         #expect(landscape.width == 1920)
-        #expect(landscape.height == 1080)
+        #expect(landscape.height == 1088)
 
         let portrait = ScreenShareFrameSize.outputSize(inputWidth: 1080, inputHeight: 1920)
         #expect(portrait.width == 1088)
@@ -70,6 +71,6 @@ struct ScreenShareFrameSizeTests {
             contentRect: CGRect(x: 0, y: 0, width: 960, height: 540),
             pointPixelScale: 2)
         #expect(size.width == 1920)
-        #expect(size.height == 1080)
+        #expect(size.height == 1088)
     }
 }
