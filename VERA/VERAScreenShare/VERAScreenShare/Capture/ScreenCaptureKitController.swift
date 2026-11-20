@@ -111,7 +111,9 @@
                 if let stream {
                     ignoredStopCount += 1
                     self.stream = nil
-                    stream.stopCapture { _ in }
+                    stream.stopCapture { _ in
+                        // The replacement stream is already installed. This stop must not end the share.
+                    }
                 }
             #endif
 
@@ -183,7 +185,9 @@
             dispatchPrecondition(condition: .onQueue(.main))
             guard let stream else { return }
             self.stream = nil
-            stream.stopCapture { _ in }
+            stream.stopCapture { _ in
+                // Stopping is already recorded. The completion callback has nothing further to do.
+            }
         }
 
         private func isExpectedStop(domain: String, code: Int) -> Bool {
@@ -212,14 +216,16 @@
     @available(iOS 27, macOS 14.6, *)
     extension ScreenCaptureKitController: SCContentSharingPickerObserver {
         func contentSharingPicker(
-            _ picker: SCContentSharingPicker,
-            didCancelFor stream: SCStream?
-        ) {}
+            _: SCContentSharingPicker,
+            didCancelFor _: SCStream?
+        ) {
+            // Cancel closes the sheet without a new choice. An active share keeps running.
+        }
 
         func contentSharingPicker(
-            _ picker: SCContentSharingPicker,
+            _: SCContentSharingPicker,
             didUpdateWith filter: SCContentFilter,
-            for stream: SCStream?
+            for _: SCStream?
         ) {
             let boxed = UncheckedSendableBox(filter)
             DispatchQueue.main.async { [weak self] in
@@ -240,7 +246,7 @@
 
     @available(iOS 27, macOS 14.6, *)
     extension ScreenCaptureKitController: SCStreamDelegate {
-        func stream(_ stream: SCStream, didStopWithError error: Error) {
+        func stream(_: SCStream, didStopWithError error: Error) {
             let nsError = error as NSError
             let message = nsError.localizedDescription
             let domain = nsError.domain
@@ -259,7 +265,7 @@
     @available(iOS 27, macOS 14.6, *)
     extension ScreenCaptureKitController: SCStreamOutput {
         func stream(
-            _ stream: SCStream,
+            _: SCStream,
             didOutputSampleBuffer sampleBuffer: CMSampleBuffer,
             of type: SCStreamOutputType
         ) {

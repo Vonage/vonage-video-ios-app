@@ -130,17 +130,17 @@ final class InProcessScreenSharePublisher: NSObject, ScreenShareFrameConsuming, 
 }
 
 extension InProcessScreenSharePublisher: OTSessionDelegate {
-    func sessionDidConnect(_ session: OTSession) {
+    func sessionDidConnect(_: OTSession) {
         performOnMainSync { [self] in
             publishOnMain()
         }
     }
 
-    func sessionDidDisconnect(_ session: OTSession) {
+    func sessionDidDisconnect(_: OTSession) {
         capturer.sessionDidDisconnect()
     }
 
-    func session(_ session: OTSession, didFailWithError error: OTError) {
+    func session(_: OTSession, didFailWithError error: OTError) {
         let message = error.localizedDescription
         DispatchQueue.main.async { [self] in
             self.logger.error("Screen share session failed: \(message, privacy: .public)")
@@ -148,13 +148,17 @@ extension InProcessScreenSharePublisher: OTSessionDelegate {
         }
     }
 
-    func session(_ session: OTSession, streamCreated stream: OTStream) {}
+    func session(_: OTSession, streamCreated _: OTStream) {
+        // This session only publishes the screen. It does not subscribe to other streams.
+    }
 
-    func session(_ session: OTSession, streamDestroyed stream: OTStream) {}
+    func session(_: OTSession, streamDestroyed _: OTStream) {
+        // This session only publishes the screen. A remote stream ending does not stop the share.
+    }
 }
 
 extension InProcessScreenSharePublisher: OTPublisherDelegate {
-    func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
+    func publisher(_: OTPublisherKit, didFailWithError error: OTError) {
         let message = error.localizedDescription
         DispatchQueue.main.async { [self] in
             self.logger.error("Screen share publisher failed: \(message, privacy: .public)")
@@ -162,11 +166,11 @@ extension InProcessScreenSharePublisher: OTPublisherDelegate {
         }
     }
 
-    func publisher(_ publisher: OTPublisherKit, streamCreated stream: OTStream) {
+    func publisher(_: OTPublisherKit, streamCreated _: OTStream) {
         logger.debug("Screen share stream created")
     }
 
-    func publisher(_ publisher: OTPublisherKit, streamDestroyed stream: OTStream) {
+    func publisher(_: OTPublisherKit, streamDestroyed _: OTStream) {
         logger.debug("Screen share stream destroyed")
     }
 }

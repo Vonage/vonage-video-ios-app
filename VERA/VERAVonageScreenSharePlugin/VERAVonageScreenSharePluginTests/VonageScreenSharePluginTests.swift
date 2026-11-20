@@ -4,10 +4,11 @@
 
 import Testing
 import VERAScreenShare
+import os
 
 @testable import VERAVonageScreenSharePlugin
 
-@Suite("VonageScreenSharePlugin Tests")
+@Suite("VonageScreenSharePlugin Tests", .serialized)
 struct VonageScreenSharePluginTests {
 
     @Test("callDidStart saves credentials from userInfo")
@@ -77,6 +78,36 @@ struct VonageScreenSharePluginTests {
         #expect(cleared)
     }
 
+    @Test("callDidStart activates an injected capturer and the button presents it")
+    func callDidStartActivatesInjectedCapturer() async throws {
+        await MainActor.run { ScreenShareUIBridge.shared.presentSystemPicker = nil }
+        let controller = CaptureControllerSpy()
+        let plugin = VonageScreenSharePlugin(
+            credentialsRepository: InMemoryScreenShareCredentialsRepository(),
+            captureController: controller)
+        let userInfo: [String: Any] = [
+            "applicationId": "app-123",
+            "sessionId": "session-abc",
+            "token": "token-xyz",
+            "username": "a-username",
+        ]
+
+        try await plugin.callDidStart(userInfo)
+        #expect(controller.activated == 1)
+        #expect(controller.consumer != nil)
+
+        await MainActor.run { ScreenShareUIBridge.shared.present() }
+        #expect(controller.presented == 1)
+
+        try await plugin.callDidStart(userInfo)
+        #expect(controller.activated == 2)
+
+        try await plugin.callDidEnd()
+        #expect(controller.deactivated == 1)
+        let cleared = await MainActor.run { ScreenShareUIBridge.shared.presentSystemPicker == nil }
+        #expect(cleared)
+    }
+
     // MARK: - Helpers
 
     private func makeSUT(
@@ -97,5 +128,25 @@ private final class InMemoryScreenShareCredentialsRepository: ScreenShareCredent
 
     func clear() {
         saved = nil
+    }
+}
+
+private final class CaptureControllerSpy: ScreenCaptureControlling, @unchecked Sendable {
+    private let lock = OSAllocatedUnfairLock(
+        initialState: (activated: 0, deactivated: 0, presented: 0))
+    private let consumerLock = OSAllocatedUnfairLock<
+        (any ScreenShareFrameConsuming & Sendable)?
+    >(initialState: nil)
+
+    var activated: Int { lock.withLock { $0.activated } }
+    var deactivated: Int { lock.withLock { $0.deactivated } }
+    var presented: Int { lock.withLock { $0.presented } }
+    var consumer: (any ScreenShareFrameConsuming & Sendable)? { consumerLock.withLock { $0 } }
+
+    func activate() { lock.withLock { $0.activated += 1 } }
+    func deactivate() { lock.withLock { $0.deactivated += 1 } }
+    func presentPicker() { lock.withLock { $0.presented += 1 } }
+    func setFrameConsumer(_ consumer: (any ScreenShareFrameConsuming & Sendable)?) {
+        consumerLock.withLock { $0 = consumer }
     }
 }

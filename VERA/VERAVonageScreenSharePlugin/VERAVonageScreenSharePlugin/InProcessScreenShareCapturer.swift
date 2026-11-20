@@ -96,7 +96,9 @@ final class InProcessScreenShareCapturer: NSObject, OTVideoCapture, @unchecked S
         }
     }
 
-    func initCapture() {}
+    func initCapture() {
+        // ScreenCaptureKit owns the frames. The SDK calls this hook and there is nothing to allocate.
+    }
 
     func releaseCapture() {
         close()
