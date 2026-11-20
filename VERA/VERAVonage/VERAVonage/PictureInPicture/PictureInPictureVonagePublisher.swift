@@ -84,11 +84,6 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
         updateParticipant()
     }
 
-    /// On the simulator the SDK's capturer (`OTVideoCaptureIOSSIM`) *is* `OTPublisher.view`: it
-    /// renders a synthetic feed into a Metal view and only produces frames while that view is in a
-    /// window. Swapping the tile to the renderer view would otherwise stop all local video (nothing
-    /// is encoded or published), so keep the capture view mounted underneath the renderer's display
-    /// layer. Real devices capture through AVFoundation, independent of any view.
     private func mountSimulatorCaptureView() {
         #if targetEnvironment(simulator)
             guard let captureView = otPublisher.view else { return }
