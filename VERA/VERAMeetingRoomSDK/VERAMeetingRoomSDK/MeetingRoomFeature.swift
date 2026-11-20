@@ -39,7 +39,7 @@ public enum MeetingRoomFeature: String, Hashable, Sendable, CaseIterable {
     /// In-call settings panel (resolution, codecs, stats).
     case settings
 
-    /// Screen sharing via ReplayKit broadcast extension.
+    /// Screen sharing. iOS 27 uses the system content picker; earlier iOS uses ReplayKit.
     case screenShare
 
     /// Background blur / virtual background effects.
