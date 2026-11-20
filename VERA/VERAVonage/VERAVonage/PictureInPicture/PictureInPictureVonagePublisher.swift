@@ -64,6 +64,7 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
         isInlineRendererAttached = true
         updateInlineRendererMirroring()
         otPublisher.videoRender = inlineVideoRenderer
+        mountSimulatorCaptureView()
         // The SDK pauses its capture pipeline on resign-active by default, which would blank PiP;
         // during a call the local video must keep flowing in the background.
         NotificationCenter.default.removeObserver(
@@ -79,6 +80,24 @@ final class PictureInPictureVonagePublisher: VonagePublisher {
         guard isInlineRendererAttached else { return }
         isInlineRendererAttached = false
         otPublisher.videoRender = nil
+        unmountSimulatorCaptureView()
         updateParticipant()
+    }
+
+    private func mountSimulatorCaptureView() {
+        #if targetEnvironment(simulator)
+            guard let captureView = otPublisher.view else { return }
+            captureView.frame = inlineVideoRenderer.bounds
+            captureView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            inlineVideoRenderer.insertSubview(captureView, at: 0)
+        #endif
+    }
+
+    private func unmountSimulatorCaptureView() {
+        #if targetEnvironment(simulator)
+            if otPublisher.view?.superview === inlineVideoRenderer {
+                otPublisher.view?.removeFromSuperview()
+            }
+        #endif
     }
 }
