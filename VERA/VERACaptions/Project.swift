@@ -7,6 +7,7 @@ let project = Project(
     packages: [
         .swiftSnapshotTesting
     ],
+    settings: defaultProjectSettings(),
     targets: [
         .target(
             name: "VERACaptions",

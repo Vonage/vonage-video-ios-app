@@ -6,6 +6,7 @@ let project = Project(
     packages: [
         .swiftSnapshotTesting
     ],
+    settings: defaultProjectSettings(),
     targets: [
         // MARK: - Framework Target
         .target(
