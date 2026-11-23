@@ -8,3 +8,14 @@ import Foundation
 public enum RoomCredentialsError: Error, Equatable {
     case sessionKeyExpired
 }
+
+extension RoomCredentialsError: LocalizedError {
+    /// Matches ``AlertItem/expiredLinkMessage`` so the user sees the same wording whether the expired
+    /// session key was caught from an incoming deep link or from joining the meeting.
+    public var errorDescription: String? {
+        switch self {
+        case .sessionKeyExpired:
+            return AlertItem.expiredLinkMessage
+        }
+    }
+}

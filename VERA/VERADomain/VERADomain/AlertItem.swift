@@ -89,10 +89,16 @@ public struct AlertItem: Identifiable, Equatable {
         )
     }
 
+    /// Shared with ``RoomCredentialsError/errorDescription`` so the user sees the same wording whether the
+    /// expired session key was caught from an incoming deep link or from joining the meeting.
+    public static var expiredLinkMessage: String {
+        String(localized: "This meeting link has expired.", bundle: .veraDomain)
+    }
+
     public static func expiredLinkError(onConfirm: (@MainActor () -> Void)? = nil) -> AlertItem {
         AlertItem(
             title: String(localized: "Link Expired", bundle: .veraDomain),
-            message: String(localized: "This meeting link has expired.", bundle: .veraDomain),
+            message: expiredLinkMessage,
             onConfirm: onConfirm
         )
     }
