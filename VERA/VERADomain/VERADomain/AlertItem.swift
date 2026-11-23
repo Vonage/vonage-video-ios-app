@@ -91,8 +91,8 @@ public struct AlertItem: Identifiable, Equatable {
 
     public static func expiredLinkError(onConfirm: (@MainActor () -> Void)? = nil) -> AlertItem {
         AlertItem(
-            title: "Link Expired",
-            message: "This meeting link has expired.",
+            title: String(localized: "Link Expired", bundle: .veraDomain),
+            message: String(localized: "This meeting link has expired.", bundle: .veraDomain),
             onConfirm: onConfirm
         )
     }
