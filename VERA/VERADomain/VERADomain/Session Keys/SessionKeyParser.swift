@@ -49,11 +49,20 @@ public enum SessionKeyParser {
         return payload["sessionId"] as? String
     }
 
-    /// Extracts the `exp` claim from a session key JWT payload, if present.
+    /// Extracts the expiration from a session key JWT payload, if present.
+    ///
+    /// Checks the `exp` claim (seconds since epoch) first, then falls back to
+    /// `schedule.endsAtMs` (milliseconds since epoch) for scheduled meeting session keys.
     public static func extractExpiration(from sessionKey: String) -> Date? {
         guard let payload = decodePayload(sessionKey) else { return nil }
-        guard let exp = payload["exp"] as? TimeInterval else { return nil }
-        return Date(timeIntervalSince1970: exp)
+        if let exp = payload["exp"] as? TimeInterval {
+            return Date(timeIntervalSince1970: exp)
+        }
+        if let schedule = payload["schedule"] as? [String: Any],
+            let endsAtMs = schedule["endsAtMs"] as? TimeInterval {
+            return Date(timeIntervalSince1970: endsAtMs / 1000)
+        }
+        return nil
     }
 
     /// `true` if the JWT has an `exp` claim at or earlier than `now`. Per RFC 7519 §4.1.4, `exp` is an

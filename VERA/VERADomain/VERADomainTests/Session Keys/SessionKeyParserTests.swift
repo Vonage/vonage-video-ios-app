@@ -106,6 +106,22 @@ struct SessionKeyParserTests {
         #expect(SessionKeyParser.extractExpiration(from: "not-a-jwt") == nil)
     }
 
+    @Test("Extracts expiration from schedule.endsAtMs")
+    func extractsExpirationFromSchedule() {
+        let endsAtMs: TimeInterval = 1_795_437_000_000
+        let jwt = makeJWT(payload: [
+            "roomName": "dazzling-gull",
+            "schedule": ["startsAtMs": 1_795_433_400_000, "endsAtMs": endsAtMs],
+        ])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == Date(timeIntervalSince1970: endsAtMs / 1000))
+    }
+
+    @Test("Returns nil when no exp and no schedule")
+    func returnsNilWhenNoExpAndNoSchedule() {
+        let jwt = makeJWT(payload: ["roomName": "solutions", "sessionId": "sid-123"])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == nil)
+    }
+
     // MARK: - isExpired
 
     @Test("Returns false when no exp claim")
@@ -132,6 +148,20 @@ struct SessionKeyParserTests {
         let now = Date()
         let jwt = makeJWT(payload: ["exp": now.timeIntervalSince1970, "roomName": "heart-of-gold"])
         #expect(SessionKeyParser.isExpired(jwt, now: now) == true)
+    }
+
+    @Test("Returns true for expired schedule")
+    func expiredForPastSchedule() {
+        let pastMs = Date().addingTimeInterval(-3600).timeIntervalSince1970 * 1000
+        let jwt = makeJWT(payload: ["schedule": ["startsAtMs": pastMs - 7_200_000, "endsAtMs": pastMs]])
+        #expect(SessionKeyParser.isExpired(jwt) == true)
+    }
+
+    @Test("Returns false for active schedule")
+    func notExpiredForActiveSchedule() {
+        let futureMs = Date().addingTimeInterval(3600).timeIntervalSince1970 * 1000
+        let jwt = makeJWT(payload: ["schedule": ["startsAtMs": futureMs - 3_600_000, "endsAtMs": futureMs]])
+        #expect(SessionKeyParser.isExpired(jwt) == false)
     }
 
     // MARK: - Helpers
