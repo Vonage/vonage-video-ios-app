@@ -81,16 +81,48 @@ struct HandleUniversalLinkTests {
         #expect(spy.navigationRoutes == [expectedRoute])
     }
 
+    @MainActor
+    @Test("Expired session key JWT in URL does not navigate")
+    func expiredSessionKeyDeepLinkDoesNotNavigate() {
+        let pastExp = Date().addingTimeInterval(-3600).timeIntervalSince1970
+        let sessionKey = makeTestSessionKey(extraClaims: ["exp": pastExp])
+        let targetURL = URL(string: "https://video.vonage.com/waiting-room/\(sessionKey)")!
+        let spy = NavigationCoordinatorSpy()
+
+        let sut = makeSUT(navigator: spy)
+        sut(targetURL)
+
+        #expect(spy.navigationRoutes == [])
+    }
+
+    @MainActor
+    @Test("Expired scheduled session key (schedule.endsAtMs) in URL does not navigate")
+    func expiredScheduledSessionKeyDeepLinkDoesNotNavigate() {
+        let pastEndsAtMs = Date().addingTimeInterval(-3600).timeIntervalSince1970 * 1000
+        let sessionKey = makeTestSessionKey(
+            extraClaims: ["schedule": ["startsAtMs": pastEndsAtMs - 3_600_000, "endsAtMs": pastEndsAtMs]])
+        let targetURL = URL(string: "https://video.vonage.com/waiting-room/\(sessionKey)")!
+        let spy = NavigationCoordinatorSpy()
+
+        let sut = makeSUT(navigator: spy)
+        sut(targetURL)
+
+        #expect(spy.navigationRoutes == [])
+    }
+
     // MARK: - SUT Factory
 
     func makeSUT(navigator: Navigator) -> HandleUniversalLink {
         HandleUniversalLink(baseURL: baseURL, navigator: navigator)
     }
 
-    private func makeTestSessionKey() -> String {
+    private func makeTestSessionKey(extraClaims: [String: Any] = [:]) -> String {
+        var payloadClaims: [String: Any] = ["sessionId": "1_MX4x", "roomName": "heart-of-gold", "iat": 1_776_844_771]
+        payloadClaims.merge(extraClaims) { _, new in new }
+
         let header = Data("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".utf8).base64URLEncoded
-        let payload = Data("{\"sessionId\":\"1_MX4x\",\"roomName\":\"heart-of-gold\",\"iat\":1776844771}".utf8)
-            .base64URLEncoded
+        let payloadData = (try? JSONSerialization.data(withJSONObject: payloadClaims)) ?? Data()
+        let payload = payloadData.base64URLEncoded
         let signature = Data("test-signature".utf8).base64URLEncoded
         return "\(header).\(payload).\(signature)"
     }
