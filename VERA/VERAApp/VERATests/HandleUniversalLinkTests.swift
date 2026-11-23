@@ -5,6 +5,7 @@
 import Foundation
 import Testing
 import VERACore
+import VERADomain
 
 @testable import VERA
 
@@ -82,7 +83,7 @@ struct HandleUniversalLinkTests {
     }
 
     @MainActor
-    @Test("Expired session key JWT in URL does not navigate")
+    @Test("Expired session key JWT in URL does not navigate and shows an alert")
     func expiredSessionKeyDeepLinkDoesNotNavigate() {
         let pastExp = Date().addingTimeInterval(-3600).timeIntervalSince1970
         let sessionKey = makeTestSessionKey(extraClaims: ["exp": pastExp])
@@ -93,10 +94,11 @@ struct HandleUniversalLinkTests {
         sut(targetURL)
 
         #expect(spy.navigationRoutes == [])
+        #expect(spy.alerts.map(\.title) == ["Link Expired"])
     }
 
     @MainActor
-    @Test("Expired scheduled session key (schedule.endsAtMs) in URL does not navigate")
+    @Test("Expired scheduled session key (schedule.endsAtMs) in URL does not navigate and shows an alert")
     func expiredScheduledSessionKeyDeepLinkDoesNotNavigate() {
         let pastEndsAtMs = Date().addingTimeInterval(-3600).timeIntervalSince1970 * 1000
         let sessionKey = makeTestSessionKey(
@@ -108,6 +110,7 @@ struct HandleUniversalLinkTests {
         sut(targetURL)
 
         #expect(spy.navigationRoutes == [])
+        #expect(spy.alerts.map(\.title) == ["Link Expired"])
     }
 
     // MARK: - SUT Factory

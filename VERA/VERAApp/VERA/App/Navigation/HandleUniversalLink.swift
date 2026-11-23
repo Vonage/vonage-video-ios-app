@@ -22,6 +22,7 @@ public final class HandleUniversalLink {
 
         if let sessionKeyIdentifier = roomIdentifier as? SessionKeyRoomIdentifier,
             SessionKeyParser.isExpired(sessionKeyIdentifier.sessionKey) {
+            navigator.showAlert(.expiredLinkError())
             return
         }
 

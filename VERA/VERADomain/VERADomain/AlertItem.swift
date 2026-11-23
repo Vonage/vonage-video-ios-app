@@ -89,6 +89,14 @@ public struct AlertItem: Identifiable, Equatable {
         )
     }
 
+    public static func expiredLinkError(onConfirm: (@MainActor () -> Void)? = nil) -> AlertItem {
+        AlertItem(
+            title: "Link Expired",
+            message: "This meeting link has expired.",
+            onConfirm: onConfirm
+        )
+    }
+
     public static func downloadError(
         _ errorMessage: String,
         onConfirm: (@MainActor () -> Void)? = nil
