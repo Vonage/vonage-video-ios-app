@@ -1,0 +1,49 @@
+appId: ${APP_ID}
+---
+# JWT encodes: { "sessionId": "1_MX4x", "roomName": "heart-of-gold", "exp": 1 }
+# "exp": 1 is 1970-01-01T00:00:01Z, guaranteed to be in the past.
+# Mirrors HandleUniversalLinkTests.expiredSessionKeyDeepLinkDoesNotNavigate.
+- launchApp:
+    permissions:
+      camera: allow
+      microphone: allow
+    arguments:
+      VERA_E2E_MOCKS: "${VERA_E2E_MOCKS}"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "landing-screen"
+
+# Open deep link with an expired session-key JWT
+- openLink: "${DEEP_LINK_TEST_URL}/waiting-room/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiIxX01YNHgiLCJyb29tTmFtZSI6ImhlYXJ0LW9mLWdvbGQiLCJleHAiOjF9.dGVzdC1zaWduYXR1cmU"
+
+# Handle system dialog "Open in VERA?" if it appears
+- runFlow: helpers/dismiss_deeplink_dialog.yaml
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Expired link must not open the waiting room, it must stay on the landing page
+# and surface the "Link Expired" alert instead
+- assertVisible:
+    text: "Link Expired"
+
+- assertVisible:
+    text: "This meeting link has expired."
+
+- takeScreenshot: 01-deep-link-expired-session-key-alert
+
+- tapOn: "OK"
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    id: "landing-screen"
+
+- assertNotVisible:
+    id: "waiting-room-screen"
+
+- takeScreenshot: 02-deep-link-expired-session-key-landing
