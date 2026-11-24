@@ -5,7 +5,8 @@
 import Foundation
 
 /// Polls an asynchronously-read value until `predicate` holds or `timeout` elapses,
-/// returning the last value read.
+/// returning the last value read. Values and closures cross the polling task boundary
+/// safely; actor-owned reads must explicitly hop to that actor.
 ///
 /// Replaces the per-test `@Published.values` async sequences that were removed in the
 /// `@Observable` migration. `read` is an `async` closure so callers can hop to the main
@@ -18,11 +19,11 @@ import Foundation
 ///   - predicate: Returns `true` once the awaited condition is met.
 /// - Returns: The value that satisfied `predicate`, or the last value read at timeout.
 @discardableResult
-public func poll<Value>(
+public func poll<Value: Sendable>(
     timeout: Duration = .seconds(2),
     pollInterval: UInt64 = 10_000_000,
-    read: @escaping () async -> Value,
-    until predicate: @escaping (Value) -> Bool
+    read: @escaping @Sendable () async -> Value,
+    until predicate: @escaping @Sendable (Value) -> Bool
 ) async -> Value {
     let deadline = ContinuousClock.now.advanced(by: timeout)
     var value = await read()
