@@ -85,9 +85,10 @@ appId: ${APP_ID}
     id: "settings-captions-language-picker"
 
 # Scroll to reveal General Section
-- swipe:
-    direction: "UP"
-    duration: 500
+- scrollUntilVisible:
+    element:
+      id: "settings-reset-defaults-button"
+    direction: DOWN
 
 # General Section
 - assertVisible:
