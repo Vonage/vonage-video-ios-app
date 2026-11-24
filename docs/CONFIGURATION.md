@@ -1,6 +1,8 @@
 # Configuration
 
-The app is configured through two primary mechanisms: **feature flags** in `app-config.json` and **theme tokens** in `semantics.json`. Both are source files that drive code generation; the generated outputs (for example `AppConfig.swift` and `SemanticColors.xcassets`) are committed where applicable and must be regenerated whenever the JSON changes.
+The app is configured through two primary mechanisms: **feature flags** in `app-config.json` and **theme tokens** in `theme.json`. Both are source files that drive code generation; the generated outputs (for example `AppConfig.swift` and `SemanticColors.xcassets`) are committed where applicable and must be regenerated whenever the JSON changes.
+
+Regenerating after any config or theme change is a single command from the `VERA/` directory: `./Scripts/builder.sh --update`. It covers both sections below plus the environment constants.
 
 ## Feature Flags (`app-config.json`)
 
@@ -35,20 +37,24 @@ When the meeting ends, the goodbye page lists the transcript under **Download se
 After editing `app-config.json`, run from the `VERA/` directory:
 
 ```bash
-python3 ./Scripts/generate-app-config.py
+./Scripts/builder.sh --update
 ```
 
-This regenerates `VERAConfiguration/VERAConfiguration/AppConfig.swift`. Then re-run `tuist generate` to rebuild the workspace with the updated module graph.
+This regenerates `VERAConfiguration/VERAConfiguration/AppConfig.swift` and rebuilds the workspace with the updated module graph.
 
-## Theme (`semantics.json`)
+> **Debugging fallback:** to run just the config codegen step and see its output directly, use `python3 ./Scripts/generate-app-config.py`, then re-run `tuist generate` to rebuild the workspace.
 
-`VERA/Theme/semantics.json` defines design tokens — colors, typography, and border radii — for the Vonage theme with separate light and dark variants. Running the theme generation script converts these tokens into Xcode color assets:
+## Theme (`theme.json`)
+
+`VERA/Config/theme.json` defines design tokens — colors, typography, and border radii — for the Vonage theme with separate light and dark variants. Running from the `VERA/` directory converts these tokens into Xcode color assets:
 
 ```bash
-python3 ./Scripts/generate-app-theme.py
+./Scripts/builder.sh --update
 ```
 
 This regenerates `VERACommonUI/VERACommonUI/Resources/SemanticColors.xcassets`. The generated asset catalog is committed and used by all `VERACommonUI` consumers.
+
+> **Debugging fallback:** to run just the theme codegen step and see its output directly, use `python3 ./Scripts/generate-app-theme.py`.
 
 ## Signing Configuration
 
@@ -66,17 +72,21 @@ See [Getting Started](GETTING_STARTED.md) for the full list of required environm
 The `BASE_API_URL` and other environment values are written into a generated Swift file:
 
 ```bash
-./Scripts/generateEnvironmentConstants.sh
+./Scripts/builder.sh --update
 ```
+
+`./Scripts/builder.sh --update` always resolves the API base URL from `baseApiUrl` in `Config/app-config.json` — a valid, absolute `http`/`https` URL is required there, and it always overrides any `BASE_API_URL` already exported in your shell. To base the URL on an environment variable instead of a literal, set `baseApiUrl` to a `${VAR}` placeholder (for example `"${BASE_API_URL}"`); the script expands it from the environment before validating and injecting it.
 
 This produces `VERAApp/VERA/App/Generated/EnvironmentConstants.swift`.
 
-## Vonage Video SDK Version
+> **Debugging fallback:** to run just this codegen step and see its output directly, export `BASE_API_URL` yourself and use `./Scripts/generateEnvironmentConstants.sh` — unlike `builder.sh --update`, it reads `BASE_API_URL` directly from the environment and does not consult `app-config.json`.
 
-The SDK version is declared in:
+## Updating a Dependency Version
 
-```
-VERA/Tuist/ProjectDescriptionHelpers/Package+Dependencies.swift
-```
+All external dependency versions live in one file: `VERA/Dependencies.json`. Both the root `Package.swift` and the Tuist helper `VERA/Tuist/ProjectDescriptionHelpers/DependencyVersions.swift` read it directly — never inline a version literal in `Package.swift` or any `Package+*.swift`.
 
-Adjust the version there and re-run `tuist generate`. This app has been tested with **Vonage Video SDK 2.32** and **2.33**; use the latest available version where possible.
+1. Edit the version in `VERA/Dependencies.json`.
+2. Vonage SDKs live under the `vonage` key (`videoSDK`, `videoTransformersSDK`). If you change `videoSDK`, also change `videoTransformersSDK` to the same version — the Client SDK team requires the two to always match. Other dependencies live under `thirdParty`.
+3. Run `tuist generate` from `VERA/` and verify the project builds and tests pass. If Xcode/SPM keeps resolving the old version, reset the package cache (File ▸ Packages ▸ Reset Package Caches), since manifest caching only tracks `Package.swift` itself.
+
+This app has been tested with **Vonage Video SDK 2.32** and **2.33**; use the latest available version where possible.

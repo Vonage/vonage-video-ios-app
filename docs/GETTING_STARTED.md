@@ -1,5 +1,7 @@
 # Getting Started
 
+> **Using the Starter Kit?** `./Scripts/builder.sh` automates most of the steps below in one command — it checks for Xcode, Homebrew, Python 3, and Tuist, then runs code generation, signing, and workspace generation. It does not install SwiftLint, swift-format, or Git LFS, run `git lfs pull`, or set up the backend — do those first. See the [README](../README.md) for that path. This guide is for contributors who want to run each step manually.
+
 This guide walks you through the prerequisites, environment setup, and first run of the Vonage Video iOS Reference App.
 
 ## Prerequisites
