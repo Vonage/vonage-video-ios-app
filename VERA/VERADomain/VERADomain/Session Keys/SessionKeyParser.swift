@@ -59,7 +59,8 @@ public enum SessionKeyParser {
             return Date(timeIntervalSince1970: exp)
         }
         if let schedule = payload["schedule"] as? [String: Any],
-            let endsAtMs = schedule["endsAtMs"] as? TimeInterval {
+            let endsAtMs = schedule["endsAtMs"] as? TimeInterval
+        {
             return Date(timeIntervalSince1970: endsAtMs / 1000)
         }
         return nil
