@@ -4,6 +4,6 @@
 
 import Foundation
 
-public protocol ArchivesDataSource {
+public protocol ArchivesDataSource: Sendable {
     func getArchives(sessionKey: String) async throws -> [Archive]
 }
