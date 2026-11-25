@@ -45,6 +45,31 @@ struct InProcessScreenSharePublisherTests {
         await flushMain()
     }
 
+    @Test("Sharing again after a stop opens a new session with a capturer that can start")
+    func shareAgainAfterStop() async throws {
+        let publisher = makePublisher(username: "Ada")
+        publisher.captureWillStart()
+        let firstSession = try #require(publisher.session)
+        let firstCapturer = publisher.capturer
+        publisher.captureDidStop()
+        #expect(firstCapturer.start() == -1)
+
+        publisher.captureWillStart()
+        let secondSession = try #require(publisher.session)
+        #expect(secondSession !== firstSession)
+        #expect(publisher.capturer !== firstCapturer)
+        #expect(publisher.capturer.start() == 0)
+
+        // A late failure from the first share's session must not stop the second share.
+        let error = OTError(domain: OT_SESSION_ERROR_DOMAIN, code: 1006, userInfo: nil)
+        publisher.session(firstSession, didFailWithError: error)
+        await flushMain()
+        #expect(publisher.session === secondSession)
+
+        publisher.captureDidStop()
+        #expect(publisher.session == nil)
+    }
+
     private func makePublisher(username: String) -> InProcessScreenSharePublisher {
         InProcessScreenSharePublisher(
             credentials: ScreenShareCredentials(

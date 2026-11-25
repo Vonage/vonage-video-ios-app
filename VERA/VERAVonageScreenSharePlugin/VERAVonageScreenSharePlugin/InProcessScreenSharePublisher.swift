@@ -14,16 +14,21 @@ import VERAScreenShare
 final class InProcessScreenSharePublisher: NSObject, ScreenShareFrameConsuming, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.vonage.vera", category: "ScreenShare")
     private let credentials: ScreenShareCredentials
-    private let capturer = InProcessScreenShareCapturer()
+    /// A closed capturer cannot start again, so each share gets a fresh one.
+    private let capturerLock = OSAllocatedUnfairLock(initialState: InProcessScreenShareCapturer())
 
     /// Session and publisher are used on the main queue.
-    nonisolated(unsafe) private var session: OTSession?
+    nonisolated(unsafe) private(set) var session: OTSession?
     nonisolated(unsafe) private var publisher: OTPublisherKit?
     nonisolated(unsafe) private var didStop = false
 
     init(credentials: ScreenShareCredentials) {
         self.credentials = credentials
         super.init()
+    }
+
+    var capturer: InProcessScreenShareCapturer {
+        capturerLock.withLock { $0 }
     }
 
     func consume(sampleBuffer: CMSampleBuffer) {
@@ -52,7 +57,11 @@ final class InProcessScreenSharePublisher: NSObject, ScreenShareFrameConsuming, 
 
     private func startOnMain() {
         dispatchPrecondition(condition: .onQueue(.main))
-        guard session == nil, !didStop else { return }
+        guard session == nil else { return }
+        if didStop {
+            capturerLock.withLock { $0 = InProcessScreenShareCapturer() }
+            didStop = false
+        }
 
         let settings = OTSessionSettings()
         settings.singlePeerConnection = true
@@ -81,6 +90,7 @@ final class InProcessScreenSharePublisher: NSObject, ScreenShareFrameConsuming, 
     private func publishOnMain() {
         dispatchPrecondition(condition: .onQueue(.main))
         guard !didStop, let session else { return }
+        let capturer = self.capturer
         capturer.sessionDidConnect()
 
         let settings = OTPublisherSettings()
@@ -130,19 +140,26 @@ final class InProcessScreenSharePublisher: NSObject, ScreenShareFrameConsuming, 
 }
 
 extension InProcessScreenSharePublisher: OTSessionDelegate {
-    func sessionDidConnect(_: OTSession) {
+    // Callbacks from a previous share's session or publisher must not touch the current share.
+
+    func sessionDidConnect(_ otSession: OTSession) {
         performOnMainSync { [self] in
+            guard otSession === session else { return }
             publishOnMain()
         }
     }
 
-    func sessionDidDisconnect(_: OTSession) {
-        capturer.sessionDidDisconnect()
+    func sessionDidDisconnect(_ otSession: OTSession) {
+        performOnMainSync { [self] in
+            guard otSession === session else { return }
+            capturer.sessionDidDisconnect()
+        }
     }
 
-    func session(_: OTSession, didFailWithError error: OTError) {
+    func session(_ otSession: OTSession, didFailWithError error: OTError) {
         let message = error.localizedDescription
         DispatchQueue.main.async { [self] in
+            guard otSession === self.session else { return }
             self.logger.error("Screen share session failed: \(message, privacy: .public)")
             self.stopOnMain()
         }
@@ -158,9 +175,10 @@ extension InProcessScreenSharePublisher: OTSessionDelegate {
 }
 
 extension InProcessScreenSharePublisher: OTPublisherDelegate {
-    func publisher(_: OTPublisherKit, didFailWithError error: OTError) {
+    func publisher(_ otPublisher: OTPublisherKit, didFailWithError error: OTError) {
         let message = error.localizedDescription
         DispatchQueue.main.async { [self] in
+            guard otPublisher === self.publisher else { return }
             self.logger.error("Screen share publisher failed: \(message, privacy: .public)")
             self.stopOnMain()
         }
