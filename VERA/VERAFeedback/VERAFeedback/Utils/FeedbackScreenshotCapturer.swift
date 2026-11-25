@@ -56,8 +56,7 @@ enum FeedbackScreenshotCapturer {
 
         @MainActor
         private static func render(_ view: UIView) -> UIImage {
-            let format = UIGraphicsImageRendererFormat()
-            format.scale = view.window?.screen.scale ?? UIScreen.main.scale
+            let format = UIGraphicsImageRendererFormat(for: view.traitCollection)
             format.opaque = true
 
             let renderer = UIGraphicsImageRenderer(bounds: view.bounds, format: format)
