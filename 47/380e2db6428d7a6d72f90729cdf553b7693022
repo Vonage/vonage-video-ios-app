@@ -1,0 +1,29 @@
+VERA/VERAVonageScreenSharePlugin/VERAVonageScreenSharePlugin/InProcessScreenSharePublisher.swift
+  s_2aac428415f6ac::t_e3a0da01880b0a 17-18,21,30-33,60-64,93,143-145,147,152-156,159,162,178,181
+VERA/VERAVonageScreenSharePlugin/VERAVonageScreenSharePluginTests/InProcessScreenSharePublisherTests.swift
+  s_92ed4949ddb6e4::t_27ccc606b738df 48-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "47380e2db6428d7a6d72f90729cdf553b7693022",
+  "prompts": {},
+  "sessions": {
+    "s_2aac428415f6ac": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1795644151651268000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_92ed4949ddb6e4": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1795644166095739000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
