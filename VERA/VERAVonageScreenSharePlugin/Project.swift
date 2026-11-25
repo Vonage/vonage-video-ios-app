@@ -17,7 +17,7 @@ let project = Project(
             deploymentTargets: iOSDeploymentTarget,
             sources: ["VERAVonageScreenSharePlugin/**"],
             scripts: [.swiftLint(targetName: "VERAVonageScreenSharePlugin")],
-            dependencies: TargetDependency.vonageVideoSDKDependencies + [
+            dependencies: [
                 .project(target: "VERAScreenShare", path: "../VERAScreenShare"),
                 .project(target: "VERAVonage", path: "../VERAVonage"),
             ],
