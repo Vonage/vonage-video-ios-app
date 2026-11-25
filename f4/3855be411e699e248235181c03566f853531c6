@@ -1,0 +1,32 @@
+VERA/VERAScreenShare/VERAScreenShare/Domain/ScreenShareFrameSize.swift
+  s_2c2564853a166b::t_3b163c2d92c2ee 10-13,16,20-28
+VERA/VERAScreenShare/VERAScreenShareTests/ScreenShareAvailabilityTests.swift
+  s_1bb0263a19d042::t_2c756f0aae570a 44-46
+  s_2c2564853a166b::t_4ee5077ebcdfa1 41-42,57-71
+  s_2c2564853a166b::t_bcfdd33f3b53ee 81,84-89,92-93
+  s_2c2564853a166b::t_a7e1dd8390cae2 72-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "f43855be411e699e248235181c03566f853531c6",
+  "prompts": {},
+  "sessions": {
+    "s_1bb0263a19d042": {
+      "agent_id": {
+        "tool": "mock_ai",
+        "id": "ai-thread-1795645432387521000",
+        "model": "unknown"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    },
+    "s_2c2564853a166b": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_11958121-4e45-4801-891f-985808626b6f",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
