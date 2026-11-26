@@ -19,7 +19,7 @@ Meeting-room features (chat, captions, reactions, screen share) are **not** in t
 |---|---|---|
 | `meetingRoomSettings.allowArchiving` | `ARCHIVING_ENABLED` | VERAArchiving + VERAVonageArchivingPlugin |
 | `videoSettings.allowBackgroundEffects` | `BACKGROUND_EFFECTS_ENABLED` | VERABackgroundEffects |
-| `meetingRoomSettings.allowSettings` | `SETTINGS_ENABLED` | VERASettings + VERAVonageSettingsPlugin |
+| `waitingRoomSettings.allowSettings` | `SETTINGS_ENABLED` | VERASettings + VERAVonageSettingsPlugin |
 | `audioSettings.allowAdvancedNoiseSuppression` | `AUDIOEFFECTS_ENABLED` | VERAAudioEffects |
 | `audioSettings.allowAudioDiagnostics` | `AUDIODIAGNOSTICS_ENABLED` | VERAAudioDiagnostics |
 | `meetingRoomSettings.allowFeedback` | `FEEDBACK_ENABLED` | VERAFeedback |
@@ -32,6 +32,25 @@ Code guarded by `#if ARCHIVING_ENABLED … #endif` is only compiled when that fl
 
 When the meeting ends, the goodbye page lists the transcript under **Download session content** as a "Transcription N" row next to any "Recording N" rows. Transcription archives are the individual-stream archives with `hasTranscription` set; their download comes from the nested `transcription` object returned by `searchArchives`, not from the archive's own `url`. The list keeps polling until every archive and transcript has left the `requested`/`started`/`paused`/`stopped` statuses, so a transcript still processing after its parent archive is `uploaded` or `available` keeps the row in its loading state. Tapping **Download** on a transcription saves the zip to a temporary file and opens the share sheet, instead of opening the recording URL.
 
+### Accessing Configuration in Code
+
+The generated `AppConfig` type exposes each setting as a static property:
+
+```swift
+let chatEnabled = AppConfig.MeetingRoomSettings.allowChat
+let videoOnJoin = AppConfig.VideoSettings.allowVideoOnJoin
+let defaultLayout = AppConfig.MeetingRoomSettings.defaultLayoutMode
+```
+
+All properties are static; there is no instance to construct.
+
+### Adding a New Feature Flag
+
+1. Add the key to `app-config.json`.
+2. Update `Scripts/generate-app-config.py` to read it and emit the matching `AppConfig` property.
+3. If it needs a compile-time module dependency, add it to the flag mapping in `Project.swift` (see [Flag Mapping](#flag-mapping) above) and guard the code with `#if YOUR_FLAG_ENABLED`.
+4. Run `./Scripts/builder.sh --update` and confirm the flag appears under **Swift Compiler - Custom Flags → Active Compilation Conditions** in the target's build settings.
+
 ### Regenerating AppConfig.swift
 
 After editing `app-config.json`, run from the `VERA/` directory:
@@ -42,7 +61,7 @@ After editing `app-config.json`, run from the `VERA/` directory:
 
 This regenerates `VERAConfiguration/VERAConfiguration/AppConfig.swift` and rebuilds the workspace with the updated module graph.
 
-> **Debugging fallback:** to run just the config codegen step and see its output directly, use `python3 ./Scripts/generate-app-config.py`, then re-run `tuist generate` to rebuild the workspace.
+> **Debugging fallback:** to run just the config codegen step and see its output directly, use `python3 ./Scripts/generate-app-config.py`, then re-run `tuist generate` to rebuild the workspace. If a flag still doesn't seem to apply, confirm `app-config.json` is valid JSON, check that the generation script's output confirms the flag's value, and try `tuist clean && tuist generate`.
 
 ## Theme (`theme.json`)
 
@@ -62,8 +81,14 @@ Signing is controlled by `VERA/Config/Signing.xcconfig` (generated, not committe
 
 ```bash
 export DEVELOPMENT_TEAM=AB0C12DE34
+export MARKETING_VERSION=1.0
+export CURRENT_PROJECT_VERSION=1
 ./Scripts/regenerateSigningConfig.sh
 ```
+
+**Where to find your Team ID:** sign in at [developer.apple.com/account](https://developer.apple.com/account) → **Membership details** → **Team ID** (a 10-character string like `A1B2C3D4E5`). This is your **Apple Developer** team, not your Vonage account.
+
+To install on a physical device you also need to be signed in to that team in **Xcode → Settings → Accounts**. The Simulator needs neither a team nor sign-in.
 
 See [Getting Started](GETTING_STARTED.md) for the full list of required environment variables.
 
