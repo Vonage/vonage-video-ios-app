@@ -8,6 +8,52 @@ This reference app requires the user to deploy a backend and then use the backen
 
 The backend communicates with the Vonage Video platform using the Vonage Server SDK and is responsible for generating the session IDs and tokens used to connect to video rooms through the Vonage Client SDK.
 
+```mermaid
+graph TB
+    subgraph iOS App
+        App["VERAApp<br/>(composition root)"]
+        Core["VERACore<br/>Landing / Waiting Room / Goodbye"]
+        MeetingRoom["VERAMeetingRoom /<br/>VERAMeetingRoomSDK"]
+        Features["Feature modules<br/>Chat · Archiving · Captions ·<br/>Reactions · Settings · ScreenShare · AudioEffects"]
+        SDKContainer["MeetingRoomSDKContainer"]
+        CallKitPlugin["VERAVonageCallKitPlugin<br/>(VonagePlugin)"]
+        Domain["VERADomain<br/>(protocols, entities)"]
+        Vonage["VERAVonage<br/>Client SDK adapter +<br/>VonagePluginRegistry"]
+    end
+
+    App --> Core
+    App --> MeetingRoom
+    App --> Features
+    App --> SDKContainer
+    SDKContainer --> CallKitPlugin
+    Core --> Domain
+    MeetingRoom --> Domain
+    Features --> Domain
+    MeetingRoom --> Vonage
+    Features -- "registerPlugin()" --> Vonage
+    CallKitPlugin -- "registerPlugin()<br/>callDidStart / callDidEnd" --> Vonage
+    CallKitPlugin -- "CXProvider /<br/>CXCallController" --> CallKitFW["iOS CallKit framework<br/>(system call UI, lock screen)"]
+
+    App -- "HTTPClient<br/>(REST: session id, token)" --> Backend["Backend<br/>vonage-video-react-app"]
+    Vonage --> ClientSDK["Vonage Video<br/>Client SDK"]
+
+    Backend -- "Vonage Server SDK" --> Platform["Vonage Video Platform<br/>(media servers)"]
+    ClientSDK --> Platform
+```
+
+The iOS app never talks to the Vonage Video platform directly for session setup: it asks the backend for a session ID and token over REST, then uses the Vonage Video Client SDK (wrapped by `VERAVonage`) to connect to the platform's media servers with those credentials. The backend is the only component that holds Vonage Server SDK credentials.
+
+### What CallKit does in VERA
+
+[CallKit](https://developer.apple.com/documentation/callkit) is Apple's framework for apps that place or receive calls, so the system can treat them like phone calls instead of generic background activity. In VERA, `VERAVonageCallKitPlugin` uses it to:
+
+- **Show the call on the lock screen and in Recents**, with native hold/mute/end controls, instead of only inside the app's own UI.
+- **Put the audio session into "Calling Services" mode** (`OTAudioSessionManager`), the same category Phone/FaceTime use, so routing, interruptions, and Bluetooth behave like a real call.
+- **Coordinate with other calls on the device** — if a phone call comes in during a Vonage session, iOS (not VERA) decides how to handle the conflict, because the app registered itself as a real call.
+- **Keep mute state in sync both ways**: muting from the in-app button updates the system call UI, and muting from the lock screen or a connected headset updates the app's call state (`CallKitMuteSynchronizer` filters out the echo of VERA's own updates so the two don't fight each other).
+
+`VERAVonageCallKitPlugin` is wired exactly like every other feature plugin — `MeetingRoomSDKContainer` (built via `MeetingRoomBuilder`) registers it on the same `VonagePluginRegistry` inside `VERAVonage`, and it receives the same `callDidStart(_:)` / `callDidEnd()` lifecycle callbacks. What makes it different is the other side: instead of only talking to Vonage, it also bridges to the native **CallKit** framework (`CXProvider` / `CXCallController`) to drive the system call UI, lock-screen controls, and mute synchronization. `DependencyContainer.isCallKitSupported` is hardcoded `false` on the Simulator and `true` on device, so the plugin is never registered when running on Simulator — see `VonageCallKitPlugin.setup()`'s own warning that `OTPublisher` fails to connect if CallKit is active there.
+
 ## Module Overview
 
 The Vonage iOS reference app is built with a modular architecture. The app is organized into the following frameworks:
