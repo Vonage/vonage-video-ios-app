@@ -10,16 +10,6 @@
     import ScreenCaptureKit
     import os
 
-    /// In-process screen capture for iOS 27.
-    ///
-    /// The meeting-room button presents `SCContentSharingPicker`. This type uses the
-    /// ScreenCaptureKit surface that also exists on macOS 14.6, so the multiplatform
-    /// test target can typecheck it. `ScreenCaptureControllerFactory` instantiates it
-    /// on iOS 27 only.
-    ///
-    /// iOS 27 can set the output size and start a new stream from `present()`. It cannot
-    /// update a running stream or present the picker for an existing one. Those calls stay
-    /// on the macOS slice.
     @available(iOS 27, macOS 14.6, *)
     final class ScreenCaptureKitController: NSObject, ScreenCaptureControlling, @unchecked Sendable {
         private let logger = Logger(subsystem: "com.vonage.vera", category: "ScreenCapture")
