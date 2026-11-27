@@ -3,8 +3,10 @@
 //
 
 import Foundation
+import VERADomain
 
 @MainActor
 public protocol Navigator {
     func go(to route: AppRoute)
+    func showAlert(_ alert: AlertItem)
 }

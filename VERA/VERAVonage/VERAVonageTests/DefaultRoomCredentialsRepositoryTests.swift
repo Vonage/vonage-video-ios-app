@@ -157,6 +157,57 @@ struct DefaultRoomCredentialsRepositoryTests {
         }
     }
 
+    // MARK: - Session key expiration
+
+    @Test("Throws sessionKeyExpired when createSession returns an expired sessionKey")
+    func throwsSessionKeyExpiredWhenKeyIsExpired() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.data = try makeCreateSessionJSONResponse(sessionKey: makeExpiredSessionKey())
+        let sut = makeSUT(httpClient: httpClient)
+
+        await #expect(throws: RoomCredentialsError.sessionKeyExpired) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
+    }
+
+    @Test("Does not call joinSession when sessionKey is expired")
+    func doesNotCallJoinSessionWhenKeyIsExpired() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.data = try makeCreateSessionJSONResponse(sessionKey: makeExpiredSessionKey())
+        let sut = makeSUT(httpClient: httpClient)
+
+        _ = try? await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        #expect(httpClient.callCount == 1)
+    }
+
+    @Test("Does not throw when sessionKey has no exp claim")
+    func doesNotThrowWhenKeyHasNoExpClaim() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(sessionKey: makeSessionKeyWithoutExp()),
+            try makeJoinSessionJSONResponse(),
+        ]
+        let sut = makeSUT(httpClient: httpClient)
+
+        await #expect(throws: Never.self) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
+    }
+
+    @Test("Does not throw when sessionKey has a future exp claim")
+    func doesNotThrowWhenKeyHasFutureExp() async throws {
+        let httpClient = MockHTTPClient()
+        httpClient.dataSequence = [
+            try makeCreateSessionJSONResponse(sessionKey: makeFutureSessionKey()),
+            try makeJoinSessionJSONResponse(),
+        ]
+        let sut = makeSUT(httpClient: httpClient)
+
+        await #expect(throws: Never.self) {
+            _ = try await sut.getRoomCredentials(makeRoomCredentialsRequest())
+        }
+    }
+
     // MARK: - Test Helpers
 
     private func makeSUT(
@@ -193,5 +244,23 @@ struct DefaultRoomCredentialsRepositoryTests {
                 applicationId: applicationId),
         ]
         return httpClient
+    }
+
+    private func makeExpiredSessionKey() -> String {
+        makeJWT(payload: [
+            "exp": Date().addingTimeInterval(-3600).timeIntervalSince1970,
+            "roomName": "heart-of-gold", "sessionId": "sid-123",
+        ])
+    }
+
+    private func makeFutureSessionKey() -> String {
+        makeJWT(payload: [
+            "exp": Date().addingTimeInterval(3600).timeIntervalSince1970,
+            "roomName": "heart-of-gold", "sessionId": "sid-123",
+        ])
+    }
+
+    private func makeSessionKeyWithoutExp() -> String {
+        makeJWT(payload: ["roomName": "heart-of-gold", "sessionId": "sid-123"])
     }
 }

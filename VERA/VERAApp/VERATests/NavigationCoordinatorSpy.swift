@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import VERADomain
 
 @testable import VERA
 
@@ -10,6 +11,7 @@ import Foundation
 class NavigationCoordinatorSpy: Navigator {
 
     var navigationRoutes: [AppRoute] = []
+    var alerts: [AlertItem] = []
 
     @MainActor
     init() {
@@ -17,5 +19,9 @@ class NavigationCoordinatorSpy: Navigator {
 
     func go(to route: AppRoute) {
         navigationRoutes.append(route)
+    }
+
+    func showAlert(_ alert: AlertItem) {
+        alerts.append(alert)
     }
 }

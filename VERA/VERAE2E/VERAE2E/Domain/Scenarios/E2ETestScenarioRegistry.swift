@@ -10,6 +10,7 @@ public enum E2ETestScenarioRegistry {
         CaptionsE2EScenarios.all,
         ForceMuteE2EScenarios.all,
         RecordingE2EScenarios.all,
+        ExpiredSessionKeyE2EScenarios.all,
     ]
 
     public static func scenario(named name: String?) -> any E2ETestScenario {

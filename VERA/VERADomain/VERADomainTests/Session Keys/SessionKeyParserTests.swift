@@ -87,6 +87,83 @@ struct SessionKeyParserTests {
         #expect(SessionKeyParser.extractSessionId(from: "not-a-jwt") == nil)
     }
 
+    // MARK: - extractExpiration
+
+    @Test("Extracts expiration date from JWT with exp claim")
+    func extractsExpirationFromJWT() {
+        let exp: TimeInterval = 1_800_000_000
+        let jwt = makeJWT(payload: ["exp": exp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == Date(timeIntervalSince1970: exp))
+    }
+
+    @Test("Returns nil when JWT has no exp claim")
+    func returnsNilWhenNoExpClaim() {
+        #expect(SessionKeyParser.extractExpiration(from: makeValidSessionKey()) == nil)
+    }
+
+    @Test("Returns nil for invalid JWT")
+    func returnsNilExpirationForInvalidJWT() {
+        #expect(SessionKeyParser.extractExpiration(from: "not-a-jwt") == nil)
+    }
+
+    @Test("Extracts expiration from schedule.endsAtMs")
+    func extractsExpirationFromSchedule() {
+        let endsAtMs: TimeInterval = 1_795_437_000_000
+        let jwt = makeJWT(payload: [
+            "roomName": "dazzling-gull",
+            "schedule": ["startsAtMs": 1_795_433_400_000, "endsAtMs": endsAtMs],
+        ])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == Date(timeIntervalSince1970: endsAtMs / 1000))
+    }
+
+    @Test("Returns nil when no exp and no schedule")
+    func returnsNilWhenNoExpAndNoSchedule() {
+        let jwt = makeJWT(payload: ["roomName": "solutions", "sessionId": "sid-123"])
+        #expect(SessionKeyParser.extractExpiration(from: jwt) == nil)
+    }
+
+    // MARK: - isExpired
+
+    @Test("Returns false when no exp claim")
+    func notExpiredWhenNoExpClaim() {
+        #expect(SessionKeyParser.isExpired(makeValidSessionKey()) == false)
+    }
+
+    @Test("Returns false for a future exp claim")
+    func notExpiredForFutureDate() {
+        let futureExp = Date().addingTimeInterval(3600).timeIntervalSince1970
+        let jwt = makeJWT(payload: ["exp": futureExp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: Date()) == false)
+    }
+
+    @Test("Returns true for a past exp claim")
+    func expiredForPastDate() {
+        let pastExp = Date().addingTimeInterval(-3600).timeIntervalSince1970
+        let jwt = makeJWT(payload: ["exp": pastExp, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: Date()) == true)
+    }
+
+    @Test("Returns true when exp equals now")
+    func expiredWhenExpEqualsNow() {
+        let now = Date()
+        let jwt = makeJWT(payload: ["exp": now.timeIntervalSince1970, "roomName": "heart-of-gold"])
+        #expect(SessionKeyParser.isExpired(jwt, now: now) == true)
+    }
+
+    @Test("Returns true for expired schedule")
+    func expiredForPastSchedule() {
+        let pastMs = Date().addingTimeInterval(-3600).timeIntervalSince1970 * 1000
+        let jwt = makeJWT(payload: ["schedule": ["startsAtMs": pastMs - 7_200_000, "endsAtMs": pastMs]])
+        #expect(SessionKeyParser.isExpired(jwt) == true)
+    }
+
+    @Test("Returns false for active schedule")
+    func notExpiredForActiveSchedule() {
+        let futureMs = Date().addingTimeInterval(3600).timeIntervalSince1970 * 1000
+        let jwt = makeJWT(payload: ["schedule": ["startsAtMs": futureMs - 3_600_000, "endsAtMs": futureMs]])
+        #expect(SessionKeyParser.isExpired(jwt) == false)
+    }
+
     // MARK: - Helpers
 
     private func makeValidSessionKey(

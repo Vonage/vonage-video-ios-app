@@ -61,7 +61,7 @@ open class NavigationCoordinator: Navigator {
         var waitingNoiseSuppressionViewModel: WaitingNoiseSuppressionViewModel?
     #endif
 
-    func showAlert(_ alert: AlertItem) {
+    public func showAlert(_ alert: AlertItem) {
         alertItem = alert
     }
 

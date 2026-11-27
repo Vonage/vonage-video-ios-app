@@ -4,6 +4,7 @@
 
 import Foundation
 import VERACore
+import VERADomain
 
 public final class HandleUniversalLink {
 
@@ -18,6 +19,14 @@ public final class HandleUniversalLink {
     @MainActor
     public func callAsFunction(_ url: URL) {
         guard let roomIdentifier = url.getRoomIdentifier(from: baseURL) else { return }
+
+        if let sessionKeyIdentifier = roomIdentifier as? SessionKeyRoomIdentifier,
+            SessionKeyParser.isExpired(sessionKeyIdentifier.sessionKey)
+        {
+            navigator.showAlert(.expiredLinkError())
+            return
+        }
+
         navigator.go(to: .waitingRoom(roomIdentifier.roomName))
     }
 }

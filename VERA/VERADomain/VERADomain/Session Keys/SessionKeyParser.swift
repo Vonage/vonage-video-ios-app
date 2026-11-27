@@ -49,6 +49,31 @@ public enum SessionKeyParser {
         return payload["sessionId"] as? String
     }
 
+    /// Extracts the expiration from a session key JWT payload, if present.
+    ///
+    /// Checks the `exp` claim (seconds since epoch) first, then falls back to
+    /// `schedule.endsAtMs` (milliseconds since epoch) for scheduled meeting session keys.
+    public static func extractExpiration(from sessionKey: String) -> Date? {
+        guard let payload = decodePayload(sessionKey) else { return nil }
+        if let exp = payload["exp"] as? TimeInterval {
+            return Date(timeIntervalSince1970: exp)
+        }
+        if let schedule = payload["schedule"] as? [String: Any],
+            let endsAtMs = schedule["endsAtMs"] as? TimeInterval
+        {
+            return Date(timeIntervalSince1970: endsAtMs / 1000)
+        }
+        return nil
+    }
+
+    /// `true` if the JWT has an `exp` claim at or earlier than `now`. Per RFC 7519 §4.1.4, `exp` is an
+    /// exclusive boundary: the token must not be accepted on or after that time. A JWT without `exp`
+    /// is never expired.
+    public static func isExpired(_ sessionKey: String, now: Date = Date()) -> Bool {
+        guard let expiration = extractExpiration(from: sessionKey) else { return false }
+        return expiration <= now
+    }
+
     // MARK: - Private
 
     private static func decodePayload(_ jwt: String) -> [String: Any]? {
