@@ -1,0 +1,36 @@
+scripts/vera-verify
+  s_432f7f90a8ce0c::t_4eb83720a6d0c4 1-302,307-803
+  s_432f7f90a8ce0c::t_ce7446d9bdcb4e 303-306
+  s_432f7f90a8ce0c::t_9c2db6ac17477c 804-806
+.claude/skills/verify/SKILL.md
+  s_432f7f90a8ce0c::t_2131781ef0369c 23-24
+  s_432f7f90a8ce0c::t_2a7ce3aa605cad 20-22
+  s_432f7f90a8ce0c::t_0a9a9ab64f5c9d 25-27
+.kiro/steering/README.md
+  s_432f7f90a8ce0c::t_f67ae272fe5343 16
+.claude/skills/verify/features/moderation-force-mute.md
+  s_432f7f90a8ce0c::t_728e95cdf7cbb2 38
+  s_432f7f90a8ce0c::t_44cd993dc97410 35-37
+.gitignore
+  s_432f7f90a8ce0c::t_13ffb0f83eab86 9
+scripts/vera-verify-test.sh
+  s_432f7f90a8ce0c::t_030ec1966ed53c 74-79
+  s_432f7f90a8ce0c::t_d69c56e80fc1de 1-73,84-127
+  s_432f7f90a8ce0c::t_94bf53452ae1cf 80-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2d11967ef29b501f5ab0c8695e05a39b55346caa",
+  "prompts": {},
+  "sessions": {
+    "s_432f7f90a8ce0c": {
+      "agent_id": {
+        "tool": "kiro",
+        "id": "sess_d36a9d2e-d5ee-4541-9b2e-e3515c054990",
+        "model": "auto"
+      },
+      "human_author": "Ivan <210490533+VZaphod@users.noreply.github.com>"
+    }
+  }
+}
