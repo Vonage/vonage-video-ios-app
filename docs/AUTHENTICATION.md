@@ -196,8 +196,7 @@ After changing the values, regenerate the app config and workspace:
 
 ```bash
 cd VERA
-python3 ./Scripts/generate-app-config.py
-tuist generate
+./Scripts/builder.sh --update
 ```
 
 ## Extending with Additional Providers

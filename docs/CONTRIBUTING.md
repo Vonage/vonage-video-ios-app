@@ -15,7 +15,7 @@ Contributions are declined or returned when they arrive as large undiscussed dif
 
 ## Getting Started
 Before you begin, please review the following:
-- Read our [Code of Conduct](../CODE_OF_CONDUCT.md) to understand our community standards.
+- Read our [Code of Conduct](CODE_OF_CONDUCT.md) to understand our community standards.
 - Check the [README.md](../README.md) for an overview of the project and setup instructions.
 - Browse the [open issues](https://github.com/Vonage/vonage-video-ios-app/issues) to see what needs attention.
 

@@ -40,7 +40,7 @@ After editing `Config/app-config.json` or `Config/theme.json`:
 ./Scripts/builder.sh --update   # regenerates AppConfig.swift + theme assets, then tuist generate
 ```
 
-> A plain `tuist generate` does **not** regenerate the JSON-driven files. Use `builder.sh --update`. See `VERA/PREBUILTS_README.md`.
+> A plain `tuist generate` does **not** regenerate the JSON-driven files. Use `builder.sh --update`. See `README.md`.
 
 ### Regenerate workspace after Project.swift changes
 ```bash
